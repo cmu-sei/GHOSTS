@@ -1,0 +1,49 @@
+<div class="main-content">
+  <div class="content-wrapper">
+      
+      <!--Statistics cards Starts-->
+      <div class="row">
+          <div class="col-xl-12 col-lg-12">
+              <p *ngIf="!machines"><em>Loading...</em></p>
+
+              <table datatable class="table table-sm striped table-hover row-border hover" *ngIf="machines">
+                  <thead>
+                      <tr>
+                          <th width="20">&nbsp;</th>
+                          <th>Machine</th>
+                          <th>IP</th>
+                          <th>Current User</th>
+                          <th>Status</th>
+                          <th class="text-right">Last</th>
+                          <th>&nbsp;</th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                      <tr *ngFor="let machine of machines">
+                          <td title="{{machine.statusUp}} - Last reported on {{machine.lastReportedUtc | amFromUtc | amLocal | amDateFormat:'MMMM Do YYYY, h:mm:ss A'}}">
+                            <i class="fa fa-desktop {{machine.statusUp}}"></i>
+                          </td>
+                          <td title="{{ machine.id }}">
+                              <a [routerLink]="['/machines/', machine.id]" class="{{machine.statusUp}}">
+                                  {{ machine.name }} [{{ machine.fqdn }}]
+                              </a>
+                          </td>
+                          <td>{{ machine.ipAddress }} [host:{{ machine.hostIp }}]</td>
+                          <td>{{ machine.currentUsername }}</td>
+                          <td>{{ machine.statusMessage }}</td>
+                          <td class="text-right" title="{{ machine.lastReportedUtc | amFromUtc | amLocal | amDateFormat:'MMMM Do YYYY, h:mm:ss A' }}">
+                              {{ machine.lastReportedUtc | amFromUtc | amLocal | amDateFormat | amTimeAgo }}
+                            </td>
+                            <td class="text-right">
+                                <button type="button" 
+                                    class="btn btn-danger btn-sm delete" 
+                                    (click)="deleteMachine(machine.id)" title="Delete Machine"><i class="fa fa-trash"></i></button> 
+                            </td>
+                      </tr>
+                  </tbody>
+              </table>
+
+          </div>
+      </div>
+  </div>
+</div>

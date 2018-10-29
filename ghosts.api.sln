@@ -1,0 +1,44 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2010
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{02289109-E536-4BB0-8789-F41BF29B1ADD}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		LICENSE.md = LICENSE.md
+		README.md = README.md
+		compose-api.yml = compose-api.yml
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ghosts.domain", "Ghosts.Domain\ghosts.domain.csproj", "{3BCAE63E-7914-4BD3-A751-BF69820FF1BE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ghosts.api", "Ghosts.Api\ghosts.api.csproj", "{D016B25C-5638-4668-BB54-4C5F179426DF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3BCAE63E-7914-4BD3-A751-BF69820FF1BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3BCAE63E-7914-4BD3-A751-BF69820FF1BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3BCAE63E-7914-4BD3-A751-BF69820FF1BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3BCAE63E-7914-4BD3-A751-BF69820FF1BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D016B25C-5638-4668-BB54-4C5F179426DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D016B25C-5638-4668-BB54-4C5F179426DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D016B25C-5638-4668-BB54-4C5F179426DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D016B25C-5638-4668-BB54-4C5F179426DF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4FAC7631-EC66-4A65-95A7-3A7D834FABA1}
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		version = 2.2.0.0
+	EndGlobalSection
+EndGlobal

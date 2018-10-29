@@ -1,0 +1,31 @@
+{
+  "Status": "Run",
+  "TimeLineHandlers": [
+    {
+      "HandlerType": "Curl",
+      "Initial": "",
+      "UtcTimeOn": "00:00:00",
+      "UtcTimeOff": "24:00:00",
+      "Loop": "True",
+      "TimeLineEvents": [
+        {
+          "Command": "http://localhost:8888/first",
+          "CommandArgs": [
+            "-v \"http://localhost:8888/api/users/v1/login\" -H \"Pragma: no-cache\" -H \"Origin: http://localhost:8888\" -H \"Accept-Encoding: gzip, deflate, br\" -H \"Accept-Language: de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7\" -A \"User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36\" -H \"content-type: application/json\" -H \"Accept: */*\" -H \"Cache-Control: no-cache\" -H \"Referer: http://localhost:8888/login\" -H \"Connection: keep-alive\" --data-binary \"{\"Email\":\"foobar@domain.tld\",\"Password\":\"xxx\"}\"",
+            "-H \"User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.89 Safari/537.36\" http://localhost:8888/questions/28760694/how-to-use-curl-to-get-a-get-request-exactly-same-as-using-chrome",
+            "http://localhost:8888/second --data v=1 --data k=Key --data a=send;",
+            "http://localhost:8888/third -X PUT --data this=isaput",
+            "http://localhost:8888/fourth -X DELETE --header \"Cache-Control: no-cache\""
+
+          ],
+          "DelayAfter": 9000,
+          "DelayBefore": 0
+        }
+      ]
+    }
+  ]
+} 
+
+
+
+

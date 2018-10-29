@@ -1,0 +1,33 @@
+<!-- main menu-->
+<div data-active-color="white" data-background-color="king-yna" class="app-sidebar">
+  <app-navmenu></app-navmenu>
+</div>
+<!-- / main menu-->
+<div class="main-panel">
+  <!-- Navbar (Header) Starts-->
+  <nav class="navbar navbar-expand-lg navbar-light bg-faded">
+      <div class="container-fluid">
+          <div class="navbar-header">
+              <button type="button" data-toggle="collapse" class="navbar-toggle d-lg-none float-left"><span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></button>
+          </div>
+      </div>
+  </nav>
+  <!-- Navbar (Header) Ends -->
+
+  <router-outlet></router-outlet>
+
+  <footer class="footer footer-static footer-light">
+      <div style="margin: 10px 0 50px 0;">
+          <p class="pull-right" style="margin-top: 20px">
+              <small class="align-text-bottom" style="color: grey">
+                  CERT &copy; 2012 - {{date | date:'yyyy'}}. All rights reserved.
+              </small>
+          </p>
+          <div style="border-top: 1px solid rgba(0, 0, 0, 0.1); padding-top: 15px;">
+              <img src="assets/img/Software_Engineering_Institute_Unitmark_Gray.png" class="footer-img" />
+          </div>
+      </div>
+  </footer>
+</div>
+
+
