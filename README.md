@@ -9,8 +9,6 @@ Formally, GHOSTS is an acronym representing a framework for thinking about fully
 ### (G)ENERAL HOSTS
 The system handles a great deal of variable activity. E.g. an actor could be friendly, entirely neutral, or openly hostile - the system makes provisions for the existence of all types of actors.
 
-------------------
-
 ## PLATFORM ELEMENTS
 
 ### Ghosts.Domain
@@ -28,6 +26,6 @@ Uses postgres on the backend because there is not much that postgres can't do.
 ### Ghosts.App
 The Angular C2 app. Calls the above API.
 
-------------------
+## Legal
 
 [DISTRIBUTION STATEMENT A] This material has been approved for public release and unlimited distribution.
