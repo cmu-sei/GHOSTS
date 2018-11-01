@@ -8,6 +8,12 @@ GHOSTS is a framework for cyber-exercise NPC automation. It essentially realisti
 
 As a result of the system checks required in order for NPCs to be situationally aware, GHOSTS also does health reporting for all configured clients on a given instance.
 
+## Key Links
+
+[Installation and configuration information is maintained on our wiki](https://github.com/cmu-sei/GHOSTS/wiki)
+
+[Don't hesitate to submit issues and feature requests here](https://github.com/cmu-sei/GHOSTS/issues)
+
 ## Key Elements
 
 ### Ghosts.Client (Windows)
