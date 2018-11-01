@@ -14,10 +14,13 @@ As a result of the system checks required in order for NPCs to be situationally 
 
 [Don't hesitate to submit issues and feature requests here](https://github.com/cmu-sei/GHOSTS/issues)
 
-## Key Elements
+## Platform Components
 
 ### Ghosts.Client (Windows)
 .NET Console app (but built as forms app so that it is hidden) - requires .NET framework v4.6.1 or higher. Client works on both Windows 7 and Windows 10.
+
+### Ghosts.Client (Linux)
+dotnetcore app built to run silently. Client tested on centos, alpine and kali distributions. We typically use this for red teaming and "outside" traffic generation or administration simulation.
 
 ### Ghosts.Api
 .NET Core 2.0 MVC Code-First containing both the api calls for the client (and corresponding api calls the ui needs) in one. 
