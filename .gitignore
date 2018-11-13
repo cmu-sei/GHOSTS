@@ -31,7 +31,7 @@ bld/
 #wwwroot/
 
 # third party libs that require licensing
-/[Ll]ib
+*/[Ll]ib
 
 # MSTest test Results
 [Tt]est[Rr]esult*/
