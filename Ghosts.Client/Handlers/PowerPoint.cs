@@ -9,6 +9,7 @@ using Ghosts.Domain.Code;
 using NetOffice.OfficeApi.Enums;
 using NetOffice.PowerPointApi.Enums;
 using NLog;
+using Exception = System.Exception;
 using PowerPoint = NetOffice.PowerPointApi;
 using PpSlideLayout = NetOffice.PowerPointApi.Enums.PpSlideLayout;
 
@@ -44,6 +45,9 @@ namespace Ghosts.Client.Handlers
             catch (Exception e)
             {
                 _log.Error(e);
+            }
+            finally
+            {
                 KillApp();
             }
         }
@@ -110,8 +114,21 @@ namespace Ghosts.Client.Handlers
                     this.Report(handler.HandlerType.ToString(), timelineEvent.Command, timelineEvent.CommandArgs[0]);
 
                     // close power point and dispose reference
-                    powerApplication.Quit();
-                    powerApplication.Dispose();
+                    try
+                    {
+                        powerApplication.Quit();
+                    }
+                    catch (Exception e)
+                    {
+                    }
+
+                    try
+                    {
+                        powerApplication.Dispose();
+                    }
+                    catch (Exception e)
+                    {
+                    }
 
                     try
                     {
@@ -125,19 +142,31 @@ namespace Ghosts.Client.Handlers
                     presentation = null;
                     GC.Collect();
 
-                    KillApp();
-
-                    FileListing.FlushList();
+                    if (timelineEvent.DelayAfter > 0)
+                        Thread.Sleep(timelineEvent.DelayAfter);
                 }
             }
             catch (Exception e)
             {
                 _log.Debug(e);
             }
-            finally
+
+            try
             {
                 KillApp();
+            }
+            catch (Exception e)
+            {
+                _log.Error(e);
+            }
+
+            try
+            {
                 FileListing.FlushList();
+            }
+            catch (Exception e)
+            {
+                _log.Error(e);
             }
         }
     }

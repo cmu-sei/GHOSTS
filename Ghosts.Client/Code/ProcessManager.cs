@@ -17,14 +17,50 @@ namespace Ghosts.Client.Code
         {
             try
             {
-                foreach (var pid in GetPids(procName))
+                var originalProcs = Process.GetProcessesByName(procName).ToList();
+
+                try
                 {
-                    KillProcessAndChildrenByPid(pid);
+                    foreach (var pid in GetPids(procName))
+                    {
+                        KillProcessAndChildrenByPid(pid);
+                    }
                 }
+                catch (Exception e)
+                {
+                    _log.Trace($"Killing {procName} threw exception - {e}");
+                }
+
+                //somehow when a handle to an office doc fails, the zombie procs
+                //left behind don't always get killed with the above
+                try
+                {
+                    foreach (var process in originalProcs)
+                    {
+                        process.Kill();
+                        process.WaitForExit();
+                    }
+                }
+                catch (Exception e)
+                {
+                    _log.Trace($"Killing {procName} threw exception - {e}");
+                }
+
+                var postProcs = Process.GetProcessesByName(procName).ToList();
+
+                var killed = originalProcs.Except(postProcs).ToList();
+                var notKilled = postProcs.Where(o => originalProcs.Contains(o)).ToList();
+
+                foreach (var o in killed)
+                    _log.Trace($"Process successfully killed: {o.ProcessName} ({o.Id})");
+
+                foreach (var o in notKilled)
+                    _log.Trace($"Process NOT killed: {o.ProcessName} ({o.Id})");
+
             }
             catch (Exception e)
             {
-                _log.Trace($"Killing {procName} failed - {e}");
+                _log.Trace(e);
             }
         }
 

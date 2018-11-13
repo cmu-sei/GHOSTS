@@ -44,6 +44,9 @@ namespace Ghosts.Client.Handlers
             catch (Exception e)
             {
                 _log.Error(e);
+            }
+            finally
+            {
                 KillApp();
             }
         }
@@ -134,8 +137,21 @@ namespace Ghosts.Client.Handlers
                     this.Report(handler.HandlerType.ToString(), timelineEvent.Command, timelineEvent.CommandArgs[0]);
 
                     // close excel and dispose reference
-                    excelApplication.Quit();
-                    excelApplication.Dispose();
+                    try
+                    {
+                        excelApplication.Quit();
+                    }
+                    catch (Exception e)
+                    {
+                    }
+
+                    try
+                    {
+                        excelApplication.Dispose();
+                    }
+                    catch (Exception e)
+                    {
+                    }
 
                     try
                     {
@@ -152,19 +168,31 @@ namespace Ghosts.Client.Handlers
 
                     GC.Collect();
 
-                    KillApp();
-                    FileListing.FlushList();
+                    if (timelineEvent.DelayAfter > 0)
+                        Thread.Sleep(timelineEvent.DelayAfter);
                 }
             }
             catch (Exception e)
             {
                 _log.Error(e);
-
             }
-            finally
+
+            try
             {
                 KillApp();
+            }
+            catch (Exception e)
+            {
+                _log.Error(e);
+            }
+
+            try
+            {
                 FileListing.FlushList();
+            }
+            catch (Exception e)
+            {
+                _log.Error(e);
             }
         }
     }

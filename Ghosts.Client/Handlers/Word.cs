@@ -42,6 +42,9 @@ namespace Ghosts.Client.Handlers
             catch (Exception e)
             {
                 _log.Error(e);
+            }
+            finally
+            {
                 KillApp();
             }
         }
@@ -116,9 +119,22 @@ namespace Ghosts.Client.Handlers
                     this.Report(handler.HandlerType.ToString(), timelineEvent.Command, timelineEvent.CommandArgs[0]);
 
                     FileListing.Add(path);
-                    
-                    wordApplication.Quit();
-                    wordApplication.Dispose();
+
+                    try
+                    {
+                        wordApplication.Quit();
+                    }
+                    catch (Exception e)
+                    {
+                    }
+
+                    try
+                    {
+                        wordApplication.Dispose();
+                    }
+                    catch (Exception e)
+                    {
+                    }
 
                     if (wordApplication != null)
                     {
@@ -142,19 +158,31 @@ namespace Ghosts.Client.Handlers
                     wordApplication = null;
                     GC.Collect();
 
-                    KillApp();
-
-                    FileListing.FlushList();
+                    if (timelineEvent.DelayAfter > 0)
+                        Thread.Sleep(timelineEvent.DelayAfter);
                 }
             }
             catch (Exception e)
             {
                 _log.Error(e);
             }
-            finally
+
+            try
             {
                 KillApp();
+            }
+            catch (Exception e)
+            {
+                _log.Error(e);
+            }
+
+            try
+            {
                 FileListing.FlushList();
+            }
+            catch (Exception e)
+            {
+                _log.Error(e);
             }
         }
     }

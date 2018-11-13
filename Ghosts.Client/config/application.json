@@ -1,15 +1,15 @@
 ﻿{
     "IdEnabled": true,
-    "IdUrl": "http://localhost:59460/api/clientid",
+    "IdUrl": "http://telemetry.exercise.mil/api/clientid",
     "ClientResults": {
         "IsEnabled": true,
         "IsSecure": false,
-        "PostUrl": "http://localhost:52385/api/clientresults",
+        "PostUrl": "http://telemetry.exercise.mil/api/clientresults",
         "CycleSleep": 90
     },
     "ClientUpdates": {
         "IsEnabled": true,
-        "PostUrl": "http://localhost:52385/api/clientupdates",
+        "PostUrl": "http://telemetry.exercise.mil/api/clientupdates",
         "CycleSleep": 90
     },
     "Survey": {
@@ -18,7 +18,7 @@
         "Frequency": "once",
         "CycleSleepMinutes": 720,
         "OutputFormat": "indent",
-        "PostUrl": "http://localhost:52385/api/clientsurvey"
+        "PostUrl": "http://telemetry.exercise.mil/api/clientsurvey"
     },
     "HealthIsEnabled": true,
     "HandlersIsEnabled": true,
