@@ -59,7 +59,7 @@ namespace Ghosts.Client.Handlers
                             {
                                 try
                                 {
-                                    var url = timelineEvent.CommandArgs[new Random().Next(0, timelineEvent.CommandArgs.Count)];
+                                    var url = timelineEvent.CommandArgs[new Random().Next(0, timelineEvent.CommandArgs.Count)].ToString();
 
                                     if (Driver == null)
                                         this.Driver = new IE(url);
@@ -75,7 +75,7 @@ namespace Ghosts.Client.Handlers
                                 Thread.Sleep(timelineEvent.DelayAfter);
                             }
                         case "browse":
-                            Driver.GoTo(timelineEvent.CommandArgs[0]);
+                            Driver.GoTo(timelineEvent.CommandArgs[0].ToString());
                             this.Report(handler.HandlerType.ToString(), timelineEvent.Command, string.Join(",", timelineEvent.CommandArgs), timelineEvent.TrackableId);
                             break;
                         //case "download":

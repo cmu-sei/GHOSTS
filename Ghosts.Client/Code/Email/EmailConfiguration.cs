@@ -50,7 +50,7 @@ namespace Ghosts.Client.Code.Email
         public List<string> Attachments { get; private set; }
         public EmailBodyType BodyType { get; private set; }
 
-        public EmailConfiguration(List<string> args)
+        public EmailConfiguration(List<object> args)
         {
             this.settings = Program.Configuration.Email;
             var emailConfigArray = args;
@@ -66,27 +66,27 @@ namespace Ghosts.Client.Code.Email
             this.Bcc = new List<string>();
             this.Attachments = new List<string>();
 
-            this.From = emailConfigArray[0];
+            this.From = emailConfigArray[0].ToString();
             //TODO: from just going to be the first account we find already registered in outlook
             //if (this.From.Equals("CurrentUser", StringComparison.CurrentCultureIgnoreCase))
             //{
             //    this.From = $"{Environment.UserName}@{System.Net.NetworkInformation.IPGlobalProperties.GetIPGlobalProperties().DomainName}";
             //}
 
-            this.To = ParseEmail(emailConfigArray[1], settings.RecipientsToMin, settings.RecipientsToMax);
-            this.Cc = ParseEmail(emailConfigArray[2], settings.RecipientsCcMin, settings.RecipientsCcMax);
-            this.Bcc = ParseEmail(emailConfigArray[3], settings.RecipientsBccMin, settings.RecipientsBccMax);
+            this.To = ParseEmail(emailConfigArray[1].ToString(), settings.RecipientsToMin, settings.RecipientsToMax);
+            this.Cc = ParseEmail(emailConfigArray[2].ToString(), settings.RecipientsCcMin, settings.RecipientsCcMax);
+            this.Bcc = ParseEmail(emailConfigArray[3].ToString(), settings.RecipientsBccMin, settings.RecipientsBccMax);
             
             var emailContent = new EmailContentManager();
 
-            this.Subject = emailConfigArray[4];
+            this.Subject = emailConfigArray[4].ToString();
 
             if (this.Subject.Equals("random", StringComparison.InvariantCultureIgnoreCase))
             {
                 this.Subject = emailContent.Subject;
             }
 
-            this.Body = emailConfigArray[5];
+            this.Body = emailConfigArray[5].ToString();
             if (this.Body.Equals("random", StringComparison.InvariantCultureIgnoreCase))
             {
                 this.Body = emailContent.Body;
@@ -98,18 +98,18 @@ namespace Ghosts.Client.Code.Email
             this.BodyType = EmailBodyType.PlainText;
 
 
-            if (!string.IsNullOrEmpty(emailConfigArray[6]))
+            if (!string.IsNullOrEmpty(emailConfigArray[6].ToString()))
             {
-                emailConfigArray[6] = emailConfigArray[6].Trim();
-                if (emailConfigArray[6].Equals("HTML", StringComparison.InvariantCultureIgnoreCase))
+                emailConfigArray[6] = emailConfigArray[6].ToString().Trim();
+                if (emailConfigArray[6].ToString().Equals("HTML", StringComparison.InvariantCultureIgnoreCase))
                     this.BodyType = EmailBodyType.HTML;
-                else if (emailConfigArray[6].Equals("RTF", StringComparison.InvariantCultureIgnoreCase))
+                else if (emailConfigArray[6].ToString().Equals("RTF", StringComparison.InvariantCultureIgnoreCase))
                     this.BodyType = EmailBodyType.RTF;
             }
 
-            if (!string.IsNullOrEmpty(emailConfigArray[7]))
+            if (!string.IsNullOrEmpty(emailConfigArray[7].ToString()))
             {
-                var a = emailConfigArray[7].Split(Convert.ToChar(","));
+                var a = emailConfigArray[7].ToString().Split(Convert.ToChar(","));
                 foreach (var o in a)
                 {
                     if (File.Exists(o))

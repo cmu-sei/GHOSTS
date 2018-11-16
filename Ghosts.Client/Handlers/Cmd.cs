@@ -65,9 +65,9 @@ namespace Ghosts.Client.Handlers
                         while (true)
                         {
                             var cmd = timelineEvent.CommandArgs[new Random().Next(0, timelineEvent.CommandArgs.Count)];
-                            if (!string.IsNullOrEmpty(cmd))
+                            if (!string.IsNullOrEmpty(cmd.ToString()))
                             {
-                                this.Command(handler, timelineEvent, cmd);
+                                this.Command(handler, timelineEvent, cmd.ToString());
                             }
                             Thread.Sleep(timelineEvent.DelayAfter);
                         }
@@ -75,8 +75,8 @@ namespace Ghosts.Client.Handlers
                         this.Command(handler, timelineEvent, timelineEvent.Command);
 
                         foreach (var cmd in timelineEvent.CommandArgs)
-                            if (!string.IsNullOrEmpty(cmd))
-                                this.Command(handler, timelineEvent, cmd);
+                            if (!string.IsNullOrEmpty(cmd.ToString()))
+                                this.Command(handler, timelineEvent, cmd.ToString());
                         break;
                 }
 

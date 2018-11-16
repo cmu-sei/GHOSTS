@@ -6,6 +6,7 @@ using NLog;
 using System;
 using System.IO;
 using System.Threading;
+using System.Windows.Forms;
 
 namespace Ghosts.Client.Handlers
 {
@@ -60,7 +61,7 @@ namespace Ghosts.Client.Handlers
                     //    }
                     //File
                     default:
-                        FileWatcher w = new FileWatcher(handler, timelineEvent, timelineEvent.Command);
+                        var w = new FileWatcher(handler, timelineEvent, timelineEvent.Command);
                         break;
                 }
 
@@ -87,9 +88,15 @@ namespace Ghosts.Client.Handlers
             _timelineEvent = timelineEvent;
             _command = command;
 
-            _filePath = timelineEvent.CommandArgs[0];
+            _filePath = timelineEvent.CommandArgs[0].ToString();
             var sleepTime = Convert.ToInt32(timelineEvent.CommandArgs[1]);
 
+            if (timelineEvent.CommandArgs[2] != null)
+            {
+                var webhookPayload = timelineEvent.CommandArgs[2].ToString();
+                this.WebhookCreate(webhookPayload);
+            }
+            
             if (string.IsNullOrEmpty(_filePath))
             {
                 _log.Trace("file path null or empty");
@@ -129,11 +136,9 @@ namespace Ghosts.Client.Handlers
 
             // Begin watching.
             watcher.EnableRaisingEvents = true;
-            
-            while (true)
-            {
-                Thread.Sleep(sleepTime);
-            }
+
+            //keep thread alive forever
+            Application.Run();
         }
 
         // Define the event handlers.

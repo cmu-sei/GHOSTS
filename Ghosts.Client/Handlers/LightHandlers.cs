@@ -26,7 +26,7 @@ namespace Ghosts.Client.Handlers
 
             var rand = RandomFilename.Generate();
 
-            var dir = timelineEvent.CommandArgs[0];
+            var dir = timelineEvent.CommandArgs[0].ToString();
             if (dir.Contains("%"))
                 dir = Environment.ExpandEnvironmentVariables(dir);
             if (Directory.Exists(dir))
@@ -106,7 +106,7 @@ namespace Ghosts.Client.Handlers
 
                         FileListing.Add(path);
                         this.Report(handler.HandlerType.ToString(), timelineEvent.Command,
-                            timelineEvent.CommandArgs[0]);
+                            timelineEvent.CommandArgs[0].ToString());
 
                         FileListing.FlushList();
                     }
@@ -168,7 +168,7 @@ namespace Ghosts.Client.Handlers
 
                         FileListing.Add(path);
                         this.Report(handler.HandlerType.ToString(), timelineEvent.Command,
-                            timelineEvent.CommandArgs[0]);
+                            timelineEvent.CommandArgs[0].ToString());
 
                         FileListing.FlushList();
                     }

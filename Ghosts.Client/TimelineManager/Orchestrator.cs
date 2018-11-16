@@ -23,6 +23,7 @@ namespace Ghosts.Client.TimelineManager
         private List<Thread> _threads { get; set; }
         private List<ThreadJob> _threadJobs { get; set; }
         private Thread MonitorThread { get; set; }
+        private Timeline _timeline;
 
         private bool _isWordInstalled { get; set; }
         private bool _isExcelInstalled { get; set; }
@@ -31,7 +32,7 @@ namespace Ghosts.Client.TimelineManager
 
         public void Run()
         {
-            Timeline timeline = TimelineBuilder.GetLocalTimeline();
+            this._timeline = TimelineBuilder.GetLocalTimeline();
 
             // now watch that file for changes
             FileSystemWatcher timelineWatcher = new FileSystemWatcher(TimelineBuilder.TimelineFilePath().DirectoryName)
@@ -48,9 +49,9 @@ namespace Ghosts.Client.TimelineManager
             //load into an managing object
             //which passes the timeline commands to handlers
             //and creates a thread to execute instructions over that timeline
-            if (timeline.Status == Timeline.TimelineStatus.Run)
+            if (this._timeline.Status == Timeline.TimelineStatus.Run)
             {
-                RunEx(timeline);
+                RunEx(this._timeline);
             }
             else
             {
@@ -64,7 +65,7 @@ namespace Ghosts.Client.TimelineManager
 
         public void Shutdown()
         {
-            foreach (Thread thread in _threads)
+            foreach (var thread in _threads)
             {
                 thread.Abort(null);
             }
@@ -78,7 +79,7 @@ namespace Ghosts.Client.TimelineManager
 
             foreach (TimelineHandler handler in timeline.TimeLineHandlers)
             {
-                ThreadLaunch(handler);
+                ThreadLaunch(timeline, handler);
             }
 
             MonitorThread = new Thread(ThreadMonitor)
@@ -91,7 +92,7 @@ namespace Ghosts.Client.TimelineManager
         public void RunCommand(TimelineHandler handler)
         {
             WhatsInstalled();
-            ThreadLaunch(handler);
+            ThreadLaunch(null, handler);
         }
 
         private void WhatsInstalled()
@@ -137,8 +138,9 @@ namespace Ghosts.Client.TimelineManager
             }
         }
 
-        private void ThreadLaunch(TimelineHandler handler)
+        private void ThreadLaunch(Timeline timeline, TimelineHandler handler)
         {
+
             try
             {
                 _log.Trace($"Attempting new thread for: {handler.HandlerType}");
@@ -176,7 +178,7 @@ namespace Ghosts.Client.TimelineManager
                         {
                             t = new Thread(() =>
                             {
-                                WordHandler o = new WordHandler(handler);
+                                WordHandler o = new WordHandler(timeline, handler);
                             })
                             {
                                 IsBackground = true,
@@ -193,7 +195,7 @@ namespace Ghosts.Client.TimelineManager
                         {
                             t = new Thread(() =>
                             {
-                                ExcelHandler o = new ExcelHandler(handler);
+                                ExcelHandler o = new ExcelHandler(timeline, handler);
                             })
                             {
                                 IsBackground = true,
@@ -234,7 +236,7 @@ namespace Ghosts.Client.TimelineManager
                         {
                             t = new Thread(() =>
                             {
-                                PowerPointHandler o = new PowerPointHandler(handler);
+                                PowerPointHandler o = new PowerPointHandler(timeline, handler);
                             })
                             {
                                 IsBackground = true,
@@ -351,30 +353,25 @@ namespace Ghosts.Client.TimelineManager
 
         private void ThreadMonitor()
         {
-            //this should be the original list only
+            ////Add office docs override
+            //if (_threadJobs.All(o => o.ProcessName != ProcessManager.ProcessNames.Word))
+            //{
+            //    _threadJobs.Add(new ThreadJob { ProcessName = ProcessManager.ProcessNames.Word, Handler = new TimelineHandler { HandlerType = HandlerType.Word, Loop = false } });
+            //}
+            //if (_threadJobs.All(o => o.ProcessName != ProcessManager.ProcessNames.Excel))
+            //{
+            //    _threadJobs.Add(new ThreadJob { ProcessName = ProcessManager.ProcessNames.Excel, Handler = new TimelineHandler { HandlerType = HandlerType.Excel, Loop = false } });
+            //}
+            //if (_threadJobs.All(o => o.ProcessName != ProcessManager.ProcessNames.PowerPoint))
+            //{
+            //    _threadJobs.Add(new ThreadJob { ProcessName = ProcessManager.ProcessNames.PowerPoint, Handler = new TimelineHandler { HandlerType = HandlerType.PowerPoint, Loop = false } });
+            //}
+            //if (_threadJobs.All(o => o.ProcessName != ProcessManager.ProcessNames.Outlook))
+            //{
+            //    _threadJobs.Add(new ThreadJob { ProcessName = ProcessManager.ProcessNames.Outlook, Handler = new TimelineHandler { HandlerType = HandlerType.Outlook, Loop = false } });
+            //}
 
-            //Add office docs override
-            if (true == true)
-            {
-                if (_threadJobs.All(o => o.ProcessName != ProcessManager.ProcessNames.Word))
-                {
-                    _threadJobs.Add(new ThreadJob { ProcessName = ProcessManager.ProcessNames.Word, Handler = new TimelineHandler { HandlerType = HandlerType.Word, Loop = false } });
-                }
-                if (_threadJobs.All(o => o.ProcessName != ProcessManager.ProcessNames.Excel))
-                {
-                    _threadJobs.Add(new ThreadJob { ProcessName = ProcessManager.ProcessNames.Excel, Handler = new TimelineHandler { HandlerType = HandlerType.Excel, Loop = false } });
-                }
-                if (_threadJobs.All(o => o.ProcessName != ProcessManager.ProcessNames.PowerPoint))
-                {
-                    _threadJobs.Add(new ThreadJob { ProcessName = ProcessManager.ProcessNames.PowerPoint, Handler = new TimelineHandler { HandlerType = HandlerType.PowerPoint, Loop = false } });
-                }
-                if (_threadJobs.All(o => o.ProcessName != ProcessManager.ProcessNames.Outlook))
-                {
-                    _threadJobs.Add(new ThreadJob { ProcessName = ProcessManager.ProcessNames.Outlook, Handler = new TimelineHandler { HandlerType = HandlerType.Outlook, Loop = false } });
-                }
-            }
-
-            ThreadJob[] jobs = _threadJobs.ToArray();
+            var jobs = _threadJobs.ToArray();
             while (true)
             {
                 Thread.Sleep(30000);
@@ -392,7 +389,7 @@ namespace Ghosts.Client.TimelineManager
 
                             //refire handler job
                             _log.Trace($"Threadlaunching job: {job.Handler.HandlerType}");
-                            ThreadLaunch(job.Handler);
+                            ThreadLaunch(this._timeline, job.Handler);
                         }
                     }
 

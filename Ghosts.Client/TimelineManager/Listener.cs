@@ -54,11 +54,16 @@ namespace Ghosts.Client.TimelineManager
             catch (Exception e)
             {
                 _log.Trace(e);
+                Console.WriteLine($"Listener could not be started on {Program.Configuration.Listener.Port}");
             }
         }
 
         private string Handle(Message message)
         {
+            var tempMsg = $"Received raw {message.TcpClient.Client.RemoteEndPoint}: {message.MessageString}";
+            Console.WriteLine(tempMsg);
+            _log.Trace(tempMsg);
+
             var command = message.MessageString;
             var index = command.LastIndexOf("}", StringComparison.InvariantCultureIgnoreCase);
             if (index > 0)
