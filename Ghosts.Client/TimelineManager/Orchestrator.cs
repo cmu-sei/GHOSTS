@@ -176,6 +176,10 @@ namespace Ghosts.Client.TimelineManager
                         _log.Trace("Launching thread for word");
                         if (_isWordInstalled)
                         {
+                            var pids = ProcessManager.GetPids(ProcessManager.ProcessNames.Word).ToList();
+                            if (pids.Count > timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.Word))
+                                return;
+
                             t = new Thread(() =>
                             {
                                 WordHandler o = new WordHandler(timeline, handler);
@@ -193,6 +197,10 @@ namespace Ghosts.Client.TimelineManager
                         _log.Trace("Launching thread for excel");
                         if (_isExcelInstalled)
                         {
+                            var pids = ProcessManager.GetPids(ProcessManager.ProcessNames.Excel).ToList();
+                            if (pids.Count > timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.Excel))
+                                return;
+
                             t = new Thread(() =>
                             {
                                 ExcelHandler o = new ExcelHandler(timeline, handler);
@@ -234,6 +242,10 @@ namespace Ghosts.Client.TimelineManager
                         _log.Trace("Launching thread for powerpoint");
                         if (_isPowerPointInstalled)
                         {
+                            var pids = ProcessManager.GetPids(ProcessManager.ProcessNames.PowerPoint).ToList();
+                            if (pids.Count > timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.PowerPoint))
+                                return;
+
                             t = new Thread(() =>
                             {
                                 PowerPointHandler o = new PowerPointHandler(timeline, handler);

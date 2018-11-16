@@ -72,7 +72,7 @@ namespace Ghosts.Api.Controllers
         {
             var id = request.Headers["id"];
 
-            log.Trace($"Request by {id}");
+            //log.Trace($"Request by {id}");
 
             var m = new Machine
             {

@@ -3,6 +3,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using ghosts.api.ViewModels;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
@@ -27,6 +28,21 @@ namespace Ghosts.Api.Models
             this.CreatedUtc = DateTime.UtcNow;
             this.Status = StatusType.Active;
             this.PostbackMethod = WebhookMethod.GET;
+        }
+
+        public Webhook(WebhookViewModel model)
+        {
+            var id = Guid.NewGuid();
+            if(Guid.TryParse(model.Id, out id))
+                this.Id = id;
+            this.Status = model.Status;
+            this.Description = model.Description;
+            this.PostbackUrl = model.PostbackUrl;
+            this.PostbackMethod = model.PostbackMethod;
+            this.PostbackFormat = model.PostbackFormat.ToString();
+            this.CreatedUtc = model.CreatedUtc;
+            if (Guid.TryParse(model.ApplicationUserId, out id))
+                this.ApplicationUserId = id;
         }
 
         public enum WebhookMethod

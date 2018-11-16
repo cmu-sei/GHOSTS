@@ -12,6 +12,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using ghosts.api.ViewModels;
 using Ghosts.Api.Code;
 using Ghosts.Api.Data;
 using Ghosts.Api.Models;
@@ -251,17 +252,20 @@ namespace Ghosts.Api.Services
                     // Do the actual request and await the response
                     var httpResponse = await httpClient.PostAsync(webhook.PostbackUrl, httpContent);
 
+                    log.Trace($"Webhook response {webhook.PostbackUrl} {webhook.PostbackMethod} {httpResponse.StatusCode}");
+
                     // If the response contains content we want to read it!
                     if (httpResponse.Content != null)
                     {
                         var responseContent = await httpResponse.Content.ReadAsStringAsync();
+                        log.Trace($"Webhook notification sent with {responseContent}");
                         // From here on you could deserialize the ResponseContent back again to a concrete C# type using Json.Net
                     }
                 }
             }
             catch (Exception e)
             {
-                log.Error(e);
+                log.Trace($"Webhook failed response {webhook.PostbackUrl} {webhook.PostbackMethod} - {e}");
             }
         }
 
@@ -429,12 +433,13 @@ namespace Ghosts.Api.Services
                                         CreatedUtc = time
                                     });
                                     break;
-                                case "CREATEWEBHOOK":
+                                case "WEBHOOKCREATE":
                                     try
                                     {
                                         log.Info($"processing webhookcreate...");
-                                        var hook = JsonConvert.DeserializeObject<Webhook>(data);
-                                        webhooks.Add(hook);
+                                        var hook = JsonConvert.DeserializeObject<WebhookViewModel>(data.ToString());
+                                        var h = new Webhook(hook);
+                                        webhooks.Add(h);
                                     }
                                     catch (Exception e)
                                     {
