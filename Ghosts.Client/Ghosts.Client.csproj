@@ -14,6 +14,7 @@
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
     <IsWebBootstrapper>false</IsWebBootstrapper>
+    <ReleaseVersion>2.2.0.0</ReleaseVersion>
     <PublishUrl>C:\Projects\ghosts\Ghosts.Client\Publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -29,7 +30,6 @@
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <ReleaseVersion>2.2.0.0</ReleaseVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -426,7 +426,6 @@
     <None Include="App.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Invoke-Userprep.ps1" />
     <None Include="packages.config" />
     <Content Include="config\timeline.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
