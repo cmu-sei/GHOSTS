@@ -32,6 +32,8 @@ namespace Ghosts.Client.TimelineManager
 
         public void Run()
         {
+            this.StartSafetyNet();
+
             this._timeline = TimelineBuilder.GetLocalTimeline();
 
             // now watch that file for changes
@@ -93,6 +95,54 @@ namespace Ghosts.Client.TimelineManager
         {
             WhatsInstalled();
             ThreadLaunch(null, handler);
+        }
+
+        ///here lies technical debt
+        //TODO clean up
+        private void StartSafetyNet()
+        {
+            var t = new Thread(SafetyNet)
+            {
+                IsBackground = true,
+                Name = "ghosts safetynet"
+            };
+            t.Start();
+        }
+
+        ///here lies technical debt
+        //TODO clean up
+        // if supposed to be one excel running, and there is more than 2, then kill race condition
+        private static void SafetyNet()
+        {
+            while (true)
+            {
+                var timeline = TimelineBuilder.GetLocalTimeline();
+
+                var handlerCount = timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.Excel);
+                var pids = ProcessManager.GetPids(ProcessManager.ProcessNames.Excel).ToList();
+                if (pids.Count > handlerCount + 1)
+                {
+                    _log.Trace($"excel handlers: {handlerCount} pids: {pids.Count} - killing");
+                    ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.Excel);
+                }
+
+                handlerCount = timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.PowerPoint);
+                pids = ProcessManager.GetPids(ProcessManager.ProcessNames.PowerPoint).ToList();
+                if (pids.Count > handlerCount + 1)
+                {
+                    _log.Trace($"powerpoint handlers: {handlerCount} pids: {pids.Count} - killing");
+                    ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.PowerPoint);
+                }
+
+                handlerCount = timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.Word);
+                pids = ProcessManager.GetPids(ProcessManager.ProcessNames.Word).ToList();
+                if (pids.Count > handlerCount + 1)
+                {
+                    _log.Trace($"word handlers: {handlerCount} pids: {pids.Count} - killing");
+                    ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.Word);
+                }
+                Thread.Sleep(15000); //every 15 seconds clean up
+            }
         }
 
         private void WhatsInstalled()

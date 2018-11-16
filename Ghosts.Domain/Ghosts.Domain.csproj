@@ -3,8 +3,8 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>Ghosts.Domain</RootNamespace>
-    <AssemblyVersion>2.3.7.1</AssemblyVersion>
-    <FileVersion>2.3.7.1</FileVersion>
+    <AssemblyVersion>2.3.7.2</AssemblyVersion>
+    <FileVersion>2.3.7.2</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
