@@ -92,7 +92,7 @@ namespace Ghosts.Domain
         /// </summary>
         public string TrackableId { get; set; }
         public string Command { get; set; }
-        public List<string> CommandArgs { get; set; }
+        public List<object> CommandArgs { get; set; }
         /// <summary>
         /// Milliseconds
         /// </summary>
@@ -104,7 +104,7 @@ namespace Ghosts.Domain
 
         public TimelineEvent()
         {
-            this.CommandArgs = new List<string>();
+            this.CommandArgs = new List<object>();
         }
     }
 

@@ -1,14 +1,15 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
-using System;
-using System.IO;
-using System.Threading;
 using Ghosts.Client.Code;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using NetOffice.OfficeApi.Enums;
 using NetOffice.PowerPointApi.Enums;
 using NLog;
+using System;
+using System.IO;
+using System.Linq;
+using System.Threading;
 using PowerPoint = NetOffice.PowerPointApi;
 using PpSlideLayout = NetOffice.PowerPointApi.Enums.PpSlideLayout;
 
@@ -18,7 +19,7 @@ namespace Ghosts.Client.Handlers
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
 
-        public PowerPointHandler(TimelineHandler handler)
+        public PowerPointHandler(Timeline timeline, TimelineHandler handler)
         {
             _log.Trace("Launching PowerPoint handler");
             try
@@ -28,16 +29,24 @@ namespace Ghosts.Client.Handlers
                     _log.Trace("PowerPoint loop");
                     while (true)
                     {
-                        KillApp();
-                        ExecuteEvents(handler);
-                        KillApp();
+                        if (timeline != null)
+                        {
+                            var pids = ProcessManager.GetPids(ProcessManager.ProcessNames.PowerPoint).ToList();
+                            if (pids.Count > timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.PowerPoint))
+                            {
+                                continue;
+                            }
+                        }
+
+                        ExecuteEvents(timeline, handler);
+                        Thread.Sleep(300000);
                     }
                 }
                 else
                 {
                     _log.Trace("PowerPoint single run");
                     KillApp();
-                    ExecuteEvents(handler);
+                    ExecuteEvents(timeline, handler);
                     KillApp();
                 }
             }
@@ -53,81 +62,124 @@ namespace Ghosts.Client.Handlers
             ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.PowerPoint);
         }
 
-        private void ExecuteEvents(TimelineHandler handler)
+        private void ExecuteEvents(Timeline timeline, TimelineHandler handler)
         {
             try
             {
-                foreach (var timelineEvent in handler.TimeLineEvents)
+                foreach (TimelineEvent timelineEvent in handler.TimeLineEvents)
                 {
-                    _log.Trace($"PowerPoint event - {timelineEvent}");
-                    WorkingHours.Is(handler);
-
-                    if (timelineEvent.DelayBefore > 0)
-                        Thread.Sleep(timelineEvent.DelayBefore);
-
-                    var powerApplication = new PowerPoint.Application();
-                    powerApplication.DisplayAlerts = PpAlertLevel.ppAlertsNone;
-                    powerApplication.Visible = MsoTriState.msoTrue;
-
-                    // add a new presentation with one new slide
-                    var presentation = powerApplication.Presentations.Add(MsoTriState.msoTrue);
-                    presentation.Slides.Add(1, PpSlideLayout.ppLayoutClipArtAndVerticalText);
-
-                    Thread.Sleep(180000); //wait 3 minutes
-
-                    // save the document 
-                    var rand = RandomFilename.Generate();
-
-                    var dir = timelineEvent.CommandArgs[0];
-                    if (dir.Contains("%"))
-                        dir = Environment.ExpandEnvironmentVariables(dir);
-                    if (Directory.Exists(dir))
-                        Directory.CreateDirectory(dir);
-
-                    var path = $"{dir}\\{rand}.pptx";
-
-                    //if directory does not exist, create!
-                    _log.Trace($"Checking directory at {path}");
-                    var f = new FileInfo(path).Directory;
-                    if (f == null)
-                    {
-                        _log.Trace($"Directory does not exist, creating directory at {f.FullName}");
-                        Directory.CreateDirectory(f.FullName);
-                    }
-
                     try
                     {
-                        if (File.Exists(path))
-                            File.Delete(path);
+                        _log.Trace($"PowerPoint event - {timelineEvent}");
+                        WorkingHours.Is(handler);
+
+                        if (timelineEvent.DelayBefore > 0)
+                        {
+                            Thread.Sleep(timelineEvent.DelayBefore);
+                        }
+
+                        if (timeline != null)
+                        {
+                            var pids = ProcessManager.GetPids(ProcessManager.ProcessNames.PowerPoint).ToList();
+                            if (pids.Count > timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.PowerPoint))
+                            {
+                                return;
+                            }
+                        }
+
+                        PowerPoint.Application powerApplication = new PowerPoint.Application
+                        {
+                            DisplayAlerts = PpAlertLevel.ppAlertsNone,
+                            Visible = MsoTriState.msoTrue
+                        };
+
+                        try
+                        {
+                            powerApplication.WindowState = PpWindowState.ppWindowMinimized;
+                        }
+                        catch (Exception e)
+                        {
+                            _log.Trace($"Could not minimize: {e}");
+                        }
+
+                        // add a new presentation with one new slide
+                        PowerPoint.Presentation presentation = powerApplication.Presentations.Add(MsoTriState.msoTrue);
+                        presentation.Slides.Add(1, PpSlideLayout.ppLayoutClipArtAndVerticalText);
+
+                        Thread.Sleep(180000); //wait 3 minutes
+
+                        // save the document 
+                        string rand = RandomFilename.Generate();
+
+                        string dir = timelineEvent.CommandArgs[0].ToString();
+                        if (dir.Contains("%"))
+                        {
+                            dir = Environment.ExpandEnvironmentVariables(dir);
+                        }
+
+                        if (Directory.Exists(dir))
+                        {
+                            Directory.CreateDirectory(dir);
+                        }
+
+                        string path = $"{dir}\\{rand}.pptx";
+
+                        //if directory does not exist, create!
+                        _log.Trace($"Checking directory at {path}");
+                        DirectoryInfo f = new FileInfo(path).Directory;
+                        if (f == null)
+                        {
+                            _log.Trace($"Directory does not exist, creating directory at {f.FullName}");
+                            Directory.CreateDirectory(f.FullName);
+                        }
+
+                        try
+                        {
+                            if (File.Exists(path))
+                            {
+                                File.Delete(path);
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            _log.Debug(e);
+                        }
+
+                        presentation.SaveAs(path);
+                        FileListing.Add(path);
+                        Report(handler.HandlerType.ToString(), timelineEvent.Command,
+                            timelineEvent.CommandArgs[0].ToString());
+
+                        // close power point and dispose reference
+                        powerApplication.Quit();
+                        powerApplication.Dispose();
+
+                        try
+                        {
+                            if (powerApplication != null)
+                            {
+                                System.Runtime.InteropServices.Marshal.ReleaseComObject(powerApplication);
+                            }
+                        }
+                        catch
+                        {
+                        }
+
+                        powerApplication = null;
+                        presentation = null;
+                        GC.Collect();
                     }
                     catch (Exception e)
                     {
                         _log.Debug(e);
                     }
-
-                    presentation.SaveAs(path);
-                    FileListing.Add(path);
-                    this.Report(handler.HandlerType.ToString(), timelineEvent.Command, timelineEvent.CommandArgs[0]);
-
-                    // close power point and dispose reference
-                    powerApplication.Quit();
-                    powerApplication.Dispose();
-
-                    try
+                    finally
                     {
-                        if (powerApplication != null)
-                            System.Runtime.InteropServices.Marshal.ReleaseComObject(powerApplication);
+                        if (timelineEvent.DelayAfter > 0)
+                        {
+                            Thread.Sleep(timelineEvent.DelayAfter);
+                        }
                     }
-                    catch
-                    {
-                    }
-                    powerApplication = null;
-                    presentation = null;
-                    GC.Collect();
-
-                    KillApp();
-
-                    FileListing.FlushList();
                 }
             }
             catch (Exception e)

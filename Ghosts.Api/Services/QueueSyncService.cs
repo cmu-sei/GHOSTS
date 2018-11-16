@@ -158,7 +158,8 @@ namespace Ghosts.Api.Services
         {
             public enum NotificationType
             {
-                Timeline = 0
+                Timeline = 0,
+                WebhookCreate = 1
             }
 
             public NotificationType Type { get; set; }
@@ -276,6 +277,9 @@ namespace Ghosts.Api.Services
             var health = new List<HistoryHealth>();
             var trackables = new List<HistoryTrackable>();
 
+            //clients can send up a "create webhook" payload
+            var webhooks = new List<Webhook>();
+
             log.Trace("Beginning item processing...");
 
             log.Trace($"Attempting find for {item.Machine.Id}");
@@ -358,6 +362,8 @@ namespace Ghosts.Api.Services
                             data = JsonConvert.DeserializeObject(array[1]);
                         }
 
+                        log.Trace($"Processing {type} with {data}");
+
                         if (isReady)
                         {
                             switch (type)
@@ -423,6 +429,18 @@ namespace Ghosts.Api.Services
                                         CreatedUtc = time
                                     });
                                     break;
+                                case "CREATEWEBHOOK":
+                                    try
+                                    {
+                                        log.Info($"processing webhookcreate...");
+                                        var hook = JsonConvert.DeserializeObject<Webhook>(data);
+                                        webhooks.Add(hook);
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        log.Info($"serializing hook failed: {data} : {e})");
+                                    }
+                                    break;
                             }
                         }
                     }
@@ -442,7 +460,7 @@ namespace Ghosts.Api.Services
                     var i = context.SaveChanges();
                     if (i > 0)
                         log.Info(
-                            $"Queue: {i} (machines: {machines.Count}");
+                            $"Queue: {i} (machines: {machines.Count()}");
                 }
                 catch (Exception e)
                 {
@@ -457,7 +475,7 @@ namespace Ghosts.Api.Services
                     var i = context.SaveChanges();
                     if (i > 0)
                         log.Info(
-                            $"Queue: {i} (Trackables: {trackables.Count})");
+                            $"Queue: {i} (Trackables: {trackables.Count()})");
                 }
                 catch (Exception e)
                 {
@@ -472,7 +490,7 @@ namespace Ghosts.Api.Services
                     var i = context.SaveChanges();
                     if (i > 0)
                         log.Info(
-                            $"Queue: {i} (Health: {health.Count})");
+                            $"Queue: {i} (Health: {health.Count()})");
                 }
                 catch (Exception e)
                 {
@@ -487,7 +505,7 @@ namespace Ghosts.Api.Services
                     var i = context.SaveChanges();
                     if (i > 0)
                         log.Info(
-                            $"Queue: {i} (Timeline: {timelines.Count})");
+                            $"Queue: {i} (Timeline: {timelines.Count()})");
                 }
                 catch (Exception e)
                 {
@@ -502,7 +520,23 @@ namespace Ghosts.Api.Services
                     var i = context.SaveChanges();
                     if (i > 0)
                         log.Info(
-                            $"Queue: {i} (History: {histories.Count}");
+                            $"Queue: {i} (History: {histories.Count()}");
+                }
+                catch (Exception e)
+                {
+                    log.Error(e);
+                }
+            }
+
+            if (webhooks.Count > 0)
+            {
+                context.Webhooks.AddRange(webhooks);
+                try
+                {
+                    var i = context.SaveChanges();
+                    if (i > 0)
+                        log.Info(
+                            $"Queue: {i} (Webhooks: {webhooks.Count()}");
                 }
                 catch (Exception e)
                 {

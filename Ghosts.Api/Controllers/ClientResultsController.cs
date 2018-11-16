@@ -95,18 +95,23 @@ namespace Ghosts.Api.Controllers
                     return StatusCode(StatusCodes.Status401Unauthorized, "Invalid machine request");
             }
 
-            this._service.Enqueue(
-                new QueueEntry
-                {
-                    Payload =
-                        new QueueSyncService.MachineQueueEntry
-                        {
-                            Machine = m,
-                            LogDump = value,
-                            HistoryType = Machine.MachineHistoryItem.HistoryType.PostedResults
-                        },
-                    Type = QueueEntry.Types.Machine
-                });
+            if (!string.IsNullOrEmpty(value.Log))
+            {
+                log.Trace($"payload received: {value.Log}");
+
+                this._service.Enqueue(
+                    new QueueEntry
+                    {
+                        Payload =
+                            new QueueSyncService.MachineQueueEntry
+                            {
+                                Machine = m,
+                                LogDump = value,
+                                HistoryType = Machine.MachineHistoryItem.HistoryType.PostedResults
+                            },
+                        Type = QueueEntry.Types.Machine
+                    });
+            }
 
             return NoContent();
         }
