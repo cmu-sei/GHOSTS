@@ -101,12 +101,19 @@ namespace Ghosts.Client.TimelineManager
         //TODO clean up
         private void StartSafetyNet()
         {
-            var t = new Thread(SafetyNet)
+            try
             {
-                IsBackground = true,
-                Name = "ghosts safetynet"
-            };
-            t.Start();
+                var t = new Thread(SafetyNet)
+                {
+                    IsBackground = true,
+                    Name = "ghosts-safetynet"
+                };
+                t.Start();
+            }
+            catch (Exception e)
+            {
+                _log.Error($"SafetyNet thread launch exception: {e}");
+            }
         }
 
         ///here lies technical debt
@@ -116,32 +123,42 @@ namespace Ghosts.Client.TimelineManager
         {
             while (true)
             {
-                var timeline = TimelineBuilder.GetLocalTimeline();
-
-                var handlerCount = timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.Excel);
-                var pids = ProcessManager.GetPids(ProcessManager.ProcessNames.Excel).ToList();
-                if (pids.Count > handlerCount + 1)
+                try
                 {
-                    _log.Trace($"excel handlers: {handlerCount} pids: {pids.Count} - killing");
-                    ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.Excel);
-                }
+                    var timeline = TimelineBuilder.GetLocalTimeline();
 
-                handlerCount = timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.PowerPoint);
-                pids = ProcessManager.GetPids(ProcessManager.ProcessNames.PowerPoint).ToList();
-                if (pids.Count > handlerCount + 1)
-                {
-                    _log.Trace($"powerpoint handlers: {handlerCount} pids: {pids.Count} - killing");
-                    ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.PowerPoint);
-                }
+                    var handlerCount = timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.Excel);
+                    var pids = ProcessManager.GetPids(ProcessManager.ProcessNames.Excel).ToList();
+                    if (pids.Count > handlerCount + 1)
+                    {
+                        _log.Trace($"excel handlers: {handlerCount} pids: {pids.Count} - killing");
+                        ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.Excel);
+                    }
 
-                handlerCount = timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.Word);
-                pids = ProcessManager.GetPids(ProcessManager.ProcessNames.Word).ToList();
-                if (pids.Count > handlerCount + 1)
-                {
-                    _log.Trace($"word handlers: {handlerCount} pids: {pids.Count} - killing");
-                    ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.Word);
+                    handlerCount = timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.PowerPoint);
+                    pids = ProcessManager.GetPids(ProcessManager.ProcessNames.PowerPoint).ToList();
+                    if (pids.Count > handlerCount + 1)
+                    {
+                        _log.Trace($"powerpoint handlers: {handlerCount} pids: {pids.Count} - killing");
+                        ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.PowerPoint);
+                    }
+
+                    handlerCount = timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.Word);
+                    pids = ProcessManager.GetPids(ProcessManager.ProcessNames.Word).ToList();
+                    if (pids.Count > handlerCount + 1)
+                    {
+                        _log.Trace($"word handlers: {handlerCount} pids: {pids.Count} - killing");
+                        ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.Word);
+                    }
                 }
-                Thread.Sleep(15000); //every 15 seconds clean up
+                catch (Exception e)
+                {
+                    _log.Trace($"SafetyNet exception: {e}");
+                }
+                finally
+                {
+                    Thread.Sleep(60000); //every 60 seconds clean up
+                }
             }
         }
 
@@ -466,7 +483,7 @@ namespace Ghosts.Client.TimelineManager
                     }
 
                     int pidCount = pids.Count();
-                    _log.Trace($"PID count for {job.ProcessName} was {pidCount} (limit {limit}");
+                    _log.Trace($"PID count for {job.ProcessName} was {pidCount} (limit {limit})");
                     if (pidCount > limit)
                     {
                         for (int i = 0; i < pids.Count() - 1; i++)
