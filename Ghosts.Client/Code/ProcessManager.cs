@@ -15,13 +15,19 @@ namespace Ghosts.Client.Code
 
         public static void KillProcessAndChildrenByName(string procName)
         {
-
             try
             {
-                foreach (Process process in Process.GetProcessesByName(procName))
+                var procs = Process.GetProcessesByName(procName).ToList();
+                procs.Sort((x1, x2) => x1.StartTime.CompareTo(x2.StartTime));
+
+                var i = 0;
+                foreach (var process in procs)
                 {
                     try
                     {
+                        if (i == 0)
+                            continue;
+
                         process.Kill();
                         process.WaitForExit();
                         _log.Trace($"Successfully killed {procName}");
