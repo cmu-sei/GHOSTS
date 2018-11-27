@@ -12,6 +12,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 using ghosts.api.ViewModels;
 using Ghosts.Api.Code;
 using Ghosts.Api.Data;
@@ -217,6 +218,7 @@ namespace Ghosts.Api.Services
             
             var formattedResponse = webhook.PostbackFormat;
 
+            var isValid = false;
             var reg = new Regex(@"\[(.*?)\]");
             foreach (Match match in reg.Matches(formattedResponse))
             {
@@ -227,19 +229,31 @@ namespace Ghosts.Api.Services
                         formattedResponse = formattedResponse.Replace(match.Value, historyTimeline.MachineId.ToString());
                         break;
                     case "[datetime.utcnow]":
-                        formattedResponse = formattedResponse.Replace(match.Value, historyTimeline.CreatedUtc.ToString(CultureInfo.InvariantCulture));
-                        break;
-                    case "[messagepayload]":
-                        if(payload.Payload["Result"] != null && !string.IsNullOrEmpty(payload.Payload["Result"].ToString()))
-                            formattedResponse = formattedResponse.Replace(match.Value, payload.Payload["Result"].ToString());
+                        //json formatted date!
+                        formattedResponse = formattedResponse.Replace(match.Value, historyTimeline.CreatedUtc.ToString("s"));
                         break;
                     case "[messagetype]":
                         formattedResponse = formattedResponse.Replace(match.Value, "Binary");
                         break;
+                    case "[messagepayload]":
+                        if (payload.Payload["Result"] != null && !string.IsNullOrEmpty(payload.Payload["Result"].ToString()))
+                        {
+                            var p = payload.Payload["Result"].ToString().Trim().Trim('"').Trim().Trim('"');
+                            
+                            p = $"\"{HttpUtility.JavaScriptStringEncode(p)}\"";
+                            
+                            formattedResponse = formattedResponse.Replace(match.Value, p);
+                            isValid = true;
+                        }
+                        break;
+                    
                 }
+            }
 
-                Console.WriteLine(match.Value);
-                //TODO replace
+            if (!isValid)
+            {
+                log.Trace($"Webhook has no payload, exiting");
+                return;
             }
 
             try
