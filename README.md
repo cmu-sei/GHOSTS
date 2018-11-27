@@ -4,7 +4,7 @@ Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md f
 
 # GHOSTS NPC AUTOMATION
 
-GHOSTS is a framework for cyber-exercise NPC automation. It essentially realistically mimics the behavior of the different types of people you might encounter on any array of different typical office or enterprise networks. The system makes it possible for cybersecurity experts to test their skills and realistically train to defend real networks with real NPC players operating on those networks doing the things we might expect them to do: Create documents, access systems, browse the web, click, run commands, and so on.
+GHOSTS is a framework for highly-complex, realistic non-player character (NPC) orchestration. It essentially realistically mimics the behavior of the different types of people you might encounter on any array of different typical office or enterprise networks. The system makes it possible for cybersecurity experts to test their skills and realistically train to defend real networks with real NPC players operating on those networks doing the things we might expect them to do: Create documents, access systems, browse the web, click, run commands, and so on.
 
 As a result of the system checks required in order for NPCs to be situationally aware, GHOSTS also does health reporting for all configured clients on a given instance.
 
