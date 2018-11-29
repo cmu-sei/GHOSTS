@@ -75,10 +75,14 @@ namespace Ghosts.Client.TimelineManager
 
         public void Shutdown()
         {
-            foreach (var thread in _threads)
+            try
             {
-                thread.Abort(null);
+                foreach (var thread in _threads)
+                {
+                    thread.Abort(null);
+                }
             }
+            catch { }
         }
 
         private void RunEx(Timeline timeline)
