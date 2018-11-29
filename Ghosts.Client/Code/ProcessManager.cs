@@ -13,6 +13,12 @@ namespace Ghosts.Client.Code
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
 
+        public static int GetThisProcessPid()
+        {
+            var currentProcess = Process.GetCurrentProcess();
+            return currentProcess.Id;
+        }
+
         public static void KillProcessAndChildrenByName(string procName)
         {
             try
@@ -20,12 +26,13 @@ namespace Ghosts.Client.Code
                 var procs = Process.GetProcessesByName(procName).ToList();
                 procs.Sort((x1, x2) => x1.StartTime.CompareTo(x2.StartTime));
 
-                var i = 0;
+                var thisPid = GetThisProcessPid();
+                
                 foreach (var process in procs)
                 {
                     try
                     {
-                        if (i == 0)
+                        if (process.Id == thisPid) //don't kill thyself
                             continue;
 
                         process.Kill();
@@ -48,20 +55,22 @@ namespace Ghosts.Client.Code
         {
             try
             {
-                // Cannot close 'system idle process'.
-                if (pid == 0)
-                {
+                
+                if (pid == 0) // Cannot close 'system idle process'.
                     return;
-                }
-                ManagementObjectSearcher searcher = new ManagementObjectSearcher($"Select * From Win32_Process Where ParentProcessID={pid}");
-                ManagementObjectCollection moc = searcher.Get();
-                foreach (ManagementBaseObject mo in moc)
+
+                if (pid == GetThisProcessPid()) //don't kill thyself
+                    return;
+
+                var searcher = new ManagementObjectSearcher($"Select * From Win32_Process Where ParentProcessID={pid}");
+                var moc = searcher.Get();
+                foreach (var mo in moc)
                 {
                     KillProcessAndChildrenByPid(Convert.ToInt32(mo["ProcessID"]));
                 }
                 try
                 {
-                    Process proc = Process.GetProcessById(pid);
+                    var proc = Process.GetProcessById(pid);
                     proc.Kill();
                 }
                 catch (Exception e)

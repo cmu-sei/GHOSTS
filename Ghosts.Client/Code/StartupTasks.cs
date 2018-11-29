@@ -88,7 +88,7 @@ namespace Ghosts.Client.Code
             }
             catch (Exception e)
             {
-                _log.Debug($"Could not set registery key for startup: {e}");
+                _log.Debug($"Could not set registry key for startup: {e}");
             }
         }
     }

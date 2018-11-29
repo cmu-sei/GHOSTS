@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 
 namespace Ghosts.Client.TimelineManager
@@ -32,36 +33,43 @@ namespace Ghosts.Client.TimelineManager
 
         public void Run()
         {
-            this.StartSafetyNet();
-
-            this._timeline = TimelineBuilder.GetLocalTimeline();
-
-            // now watch that file for changes
-            FileSystemWatcher timelineWatcher = new FileSystemWatcher(TimelineBuilder.TimelineFilePath().DirectoryName)
+            try
             {
-                Filter = Path.GetFileName(TimelineBuilder.TimelineFilePath().Name)
-            };
-            _log.Trace($"watching {timelineWatcher.Path}");
-            timelineWatcher.NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.FileName | NotifyFilters.Size | NotifyFilters.CreationTime | NotifyFilters.LastWrite;
-            timelineWatcher.EnableRaisingEvents = true;
-            timelineWatcher.Changed += new FileSystemEventHandler(OnChanged);
+                this.StartSafetyNet();
 
-            _threadJobs = new List<ThreadJob>();
+                this._timeline = TimelineBuilder.GetLocalTimeline();
 
-            //load into an managing object
-            //which passes the timeline commands to handlers
-            //and creates a thread to execute instructions over that timeline
-            if (this._timeline.Status == Timeline.TimelineStatus.Run)
-            {
-                RunEx(this._timeline);
-            }
-            else
-            {
-                if (MonitorThread != null)
+                // now watch that file for changes
+                FileSystemWatcher timelineWatcher = new FileSystemWatcher(TimelineBuilder.TimelineFilePath().DirectoryName)
                 {
-                    MonitorThread.Abort();
-                    MonitorThread = null;
+                    Filter = Path.GetFileName(TimelineBuilder.TimelineFilePath().Name)
+                };
+                _log.Trace($"watching {timelineWatcher.Path}");
+                timelineWatcher.NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.FileName | NotifyFilters.Size | NotifyFilters.CreationTime | NotifyFilters.LastWrite;
+                timelineWatcher.EnableRaisingEvents = true;
+                timelineWatcher.Changed += new FileSystemEventHandler(OnChanged);
+
+                _threadJobs = new List<ThreadJob>();
+
+                //load into an managing object
+                //which passes the timeline commands to handlers
+                //and creates a thread to execute instructions over that timeline
+                if (this._timeline.Status == Timeline.TimelineStatus.Run)
+                {
+                    RunEx(this._timeline);
                 }
+                else
+                {
+                    if (MonitorThread != null)
+                    {
+                        MonitorThread.Abort();
+                        MonitorThread = null;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                _log.Error($"Orchestrator.Run exception: {e}");
             }
         }
 
@@ -499,18 +507,33 @@ namespace Ghosts.Client.TimelineManager
 
         private void OnChanged(object source, FileSystemEventArgs e)
         {
-            // filewatcher throws two events, we only need 1
-            DateTime lastWriteTime = File.GetLastWriteTime(e.FullPath);
-            if (lastWriteTime > _lastRead.AddSeconds(1))
+            try
             {
-                _lastRead = lastWriteTime;
-                _log.Trace("File: " + e.FullPath + " " + e.ChangeType);
-                _log.Trace($"Reloading {System.Reflection.MethodBase.GetCurrentMethod().DeclaringType}");
+                // filewatcher throws two events, we only need 1
+                DateTime lastWriteTime = File.GetLastWriteTime(e.FullPath);
+                if (lastWriteTime > _lastRead.AddSeconds(1))
+                {
+                    _lastRead = lastWriteTime;
+                    _log.Trace("File: " + e.FullPath + " " + e.ChangeType);
+                    _log.Trace($"Reloading {MethodBase.GetCurrentMethod().DeclaringType}");
 
-                // now terminate existing tasks and rerun
-                Shutdown();
-                StartupTasks.CleanupProcesses();
-                Run();
+                    // now terminate existing tasks and rerun
+                    Shutdown();
+                    StartupTasks.CleanupProcesses();
+                    Run();
+                }
+            }
+            catch (Exception exc)
+            {
+                _log.Trace(exc);
+
+                try
+                {
+                    Shutdown();
+                    StartupTasks.CleanupProcesses();
+                    Run();
+                }
+                catch { }
             }
         }
     }
