@@ -38,9 +38,14 @@ namespace Ghosts.Client
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Fatal exception in GHOSTS {ApplicationDetails.Version}: {e}");
+                var s = $"Fatal exception in GHOSTS {ApplicationDetails.Version}: {e}";
+                _log.Fatal(s);
+
+                var handle = GetConsoleWindow();
+                ShowWindow(handle, SwShow);
+
+                Console.WriteLine(s);
                 Console.ReadLine();
-                return;
             }
         }
 
@@ -76,8 +81,7 @@ namespace Ghosts.Client
                 Console.WriteLine($"{ApplicationDetails.ConfigurationFiles.EmailsOutside} == {File.Exists(ApplicationDetails.ConfigurationFiles.EmailsOutside)}");
                 Console.WriteLine($"{ApplicationDetails.ConfigurationFiles.Health} == {File.Exists(ApplicationDetails.ConfigurationFiles.Health)}");
                 Console.WriteLine($"{ApplicationDetails.ConfigurationFiles.Timeline} == {File.Exists(ApplicationDetails.ConfigurationFiles.Timeline)}");
-
-
+                
                 Console.WriteLine($"{ApplicationDetails.InstanceFiles.Id} == {File.Exists(ApplicationDetails.InstanceFiles.Id)}");
                 Console.WriteLine($"{ApplicationDetails.InstanceFiles.FilesCreated} == {File.Exists(ApplicationDetails.InstanceFiles.FilesCreated)}");
                 Console.WriteLine($"{ApplicationDetails.InstanceFiles.SurveyResults} == {File.Exists(ApplicationDetails.InstanceFiles.SurveyResults)}");

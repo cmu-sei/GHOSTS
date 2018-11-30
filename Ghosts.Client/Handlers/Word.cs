@@ -162,6 +162,8 @@ namespace Ghosts.Client.Handlers
 
                         FileListing.Add(path);
 
+                        Thread.Sleep(20000);
+
                         wordApplication.Quit();
                         wordApplication.Dispose();
 

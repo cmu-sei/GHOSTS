@@ -53,7 +53,7 @@ namespace Ghosts.Client.Handlers
             }
             catch (Exception e)
             {
-                _log.Error(e);
+                _log.Error($"Excel launch handler exception: {e}");
                 KillApp();
             }
         }
@@ -170,13 +170,15 @@ namespace Ghosts.Client.Handlers
                         }
                         catch (Exception e)
                         {
-                            _log.Debug(e);
+                            _log.Error($"Excel file delete exception: {e}");
                         }
 
                         _log.Trace($"Excel saving to path - {path}");
                         workBook.SaveAs(path);
                         FileListing.Add(path);
                         Report(handler.HandlerType.ToString(), timelineEvent.Command, timelineEvent.CommandArgs[0].ToString());
+
+                        Thread.Sleep(20000);
 
                         // close excel and dispose reference
                         excelApplication.Quit();
@@ -189,8 +191,9 @@ namespace Ghosts.Client.Handlers
                                 System.Runtime.InteropServices.Marshal.ReleaseComObject(excelApplication);
                             }
                         }
-                        catch
+                        catch(Exception e)
                         {
+                            _log.Error($"Excel com release exception: {e}");
                         }
 
                         excelApplication = null;
@@ -201,12 +204,13 @@ namespace Ghosts.Client.Handlers
                     }
                     catch (Exception e)
                     {
-                        _log.Debug(e);
+                        _log.Error($"Excel handler exception: {e}");
                     }
                     finally
                     {
                         if (timelineEvent.DelayAfter > 0)
                         {
+                            _log.Trace($"Excel sleep after for {timelineEvent.DelayAfter}");
                             Thread.Sleep(timelineEvent.DelayAfter);
                         }
                     }
@@ -214,13 +218,14 @@ namespace Ghosts.Client.Handlers
             }
             catch (Exception e)
             {
-                _log.Error(e);
+                _log.Error($"Excel execute events exception: {e}");
 
             }
             finally
             {
                 KillApp();
                 FileListing.FlushList();
+                _log.Trace($"Excel closing after successfully kill and flush");
             }
         }
     }

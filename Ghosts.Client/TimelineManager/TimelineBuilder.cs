@@ -33,7 +33,7 @@ namespace Ghosts.Client.TimelineManager
             var raw = File.ReadAllText(TimelineFile);
             var timeline = JsonConvert.DeserializeObject<Timeline>(raw);
 
-            _log.Debug("Timeline config loaded successfully");
+            _log.Trace("Timeline config loaded successfully");
             
             return timeline;
         }

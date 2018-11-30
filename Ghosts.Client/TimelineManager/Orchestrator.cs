@@ -95,12 +95,6 @@ namespace Ghosts.Client.TimelineManager
             {
                 ThreadLaunch(timeline, handler);
             }
-
-            MonitorThread = new Thread(ThreadMonitor)
-            {
-                IsBackground = true
-            };
-            MonitorThread.Start();
         }
 
         public void RunCommand(TimelineHandler handler)
@@ -137,13 +131,14 @@ namespace Ghosts.Client.TimelineManager
             {
                 try
                 {
+                    _log.Trace("SafetyNet loop beginning");
                     var timeline = TimelineBuilder.GetLocalTimeline();
 
                     var handlerCount = timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.Excel);
                     var pids = ProcessManager.GetPids(ProcessManager.ProcessNames.Excel).ToList();
                     if (pids.Count > handlerCount + 1)
                     {
-                        _log.Trace($"excel handlers: {handlerCount} pids: {pids.Count} - killing");
+                        _log.Trace($"SafetyNet excel handlers: {handlerCount} pids: {pids.Count} - killing");
                         ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.Excel);
                     }
 
@@ -151,7 +146,7 @@ namespace Ghosts.Client.TimelineManager
                     pids = ProcessManager.GetPids(ProcessManager.ProcessNames.PowerPoint).ToList();
                     if (pids.Count > handlerCount + 1)
                     {
-                        _log.Trace($"powerpoint handlers: {handlerCount} pids: {pids.Count} - killing");
+                        _log.Trace($"SafetyNet powerpoint handlers: {handlerCount} pids: {pids.Count} - killing");
                         ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.PowerPoint);
                     }
 
@@ -159,9 +154,10 @@ namespace Ghosts.Client.TimelineManager
                     pids = ProcessManager.GetPids(ProcessManager.ProcessNames.Word).ToList();
                     if (pids.Count > handlerCount + 1)
                     {
-                        _log.Trace($"word handlers: {handlerCount} pids: {pids.Count} - killing");
+                        _log.Trace($"SafetyNet word handlers: {handlerCount} pids: {pids.Count} - killing");
                         ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.Word);
                     }
+                    _log.Trace("SafetyNet loop ending");
                 }
                 catch (Exception e)
                 {
@@ -441,74 +437,7 @@ namespace Ghosts.Client.TimelineManager
                 _log.Error(e);
             }
         }
-
-        private void ThreadMonitor()
-        {
-            ////Add office docs override
-            //if (_threadJobs.All(o => o.ProcessName != ProcessManager.ProcessNames.Word))
-            //{
-            //    _threadJobs.Add(new ThreadJob { ProcessName = ProcessManager.ProcessNames.Word, Handler = new TimelineHandler { HandlerType = HandlerType.Word, Loop = false } });
-            //}
-            //if (_threadJobs.All(o => o.ProcessName != ProcessManager.ProcessNames.Excel))
-            //{
-            //    _threadJobs.Add(new ThreadJob { ProcessName = ProcessManager.ProcessNames.Excel, Handler = new TimelineHandler { HandlerType = HandlerType.Excel, Loop = false } });
-            //}
-            //if (_threadJobs.All(o => o.ProcessName != ProcessManager.ProcessNames.PowerPoint))
-            //{
-            //    _threadJobs.Add(new ThreadJob { ProcessName = ProcessManager.ProcessNames.PowerPoint, Handler = new TimelineHandler { HandlerType = HandlerType.PowerPoint, Loop = false } });
-            //}
-            //if (_threadJobs.All(o => o.ProcessName != ProcessManager.ProcessNames.Outlook))
-            //{
-            //    _threadJobs.Add(new ThreadJob { ProcessName = ProcessManager.ProcessNames.Outlook, Handler = new TimelineHandler { HandlerType = HandlerType.Outlook, Loop = false } });
-            //}
-
-            var jobs = _threadJobs.ToArray();
-            while (true)
-            {
-                Thread.Sleep(30000);
-                //first, get all jobs and if not running, run a new one
-                foreach (ThreadJob job in jobs)
-                {
-                    int procCount = ProcessManager.GetPids(job.ProcessName).Count();
-                    _log.Trace($"PID count for {job.ProcessName} is {procCount}");
-                    if (procCount < 1)
-                    {
-                        if (job.Handler.Loop)
-                        {
-                            _log.Trace($"Redundant killing process and children: {job.ProcessName}");
-                            ProcessManager.KillProcessAndChildrenByName(job.ProcessName);
-
-                            //refire handler job
-                            _log.Trace($"Threadlaunching job: {job.Handler.HandlerType}");
-                            ThreadLaunch(this._timeline, job.Handler);
-                        }
-                    }
-
-                    Thread.Sleep(30000);
-                    //if multiple instances of something are running, kill all but one
-                    List<int> pids = ProcessManager.GetPids(job.ProcessName).ToList();
-
-                    int limit = 1;
-                    if (job.Handler.HandlerType == HandlerType.BrowserChrome || job.Handler.HandlerType == HandlerType.BrowserFirefox)
-                    {
-                        limit = 7;
-                    }
-
-                    int pidCount = pids.Count();
-                    _log.Trace($"PID count for {job.ProcessName} was {pidCount} (limit {limit})");
-                    if (pidCount > limit)
-                    {
-                        for (int i = 0; i < pids.Count() - 1; i++)
-                        {
-                            _log.Trace($"Killing PID for {job.ProcessName}: {pids[i]}");
-                            ProcessManager.KillProcessAndChildrenByPid(pids[i]);
-
-                        }
-                    }
-                }
-            }
-        }
-
+        
         private void OnChanged(object source, FileSystemEventArgs e)
         {
             try

@@ -150,6 +150,8 @@ namespace Ghosts.Client.Handlers
                         Report(handler.HandlerType.ToString(), timelineEvent.Command,
                             timelineEvent.CommandArgs[0].ToString());
 
+                        Thread.Sleep(20000);
+
                         // close power point and dispose reference
                         powerApplication.Quit();
                         powerApplication.Dispose();
