@@ -115,7 +115,7 @@ namespace Ghosts.Client.Handlers
                         // add a new workbook
                         Excel.Workbook workBook = excelApplication.Workbooks.Add();
                         _log.Trace("Excel adding worksheet");
-                        Excel.Worksheet workSheet = (Excel.Worksheet)workBook.Worksheets[1];
+                        Excel.Worksheet workSheet = (Excel.Worksheet) workBook.Worksheets[1];
 
                         // draw back color and perform the BorderAround method
                         workSheet.Range("$B2:$B5").Interior.Color = utils.Color.ToDouble(Color.DarkGreen);
@@ -124,11 +124,14 @@ namespace Ghosts.Client.Handlers
 
                         // draw back color and border the range explicitly
                         workSheet.Range("$D2:$D5").Interior.Color = utils.Color.ToDouble(Color.DarkGreen);
-                        workSheet.Range("$D2:$D5").Borders[(Excel.Enums.XlBordersIndex)XlBordersIndex.xlInsideHorizontal]
+                        workSheet.Range("$D2:$D5")
+                            .Borders[(Excel.Enums.XlBordersIndex) XlBordersIndex.xlInsideHorizontal]
                             .LineStyle = XlLineStyle.xlDouble;
-                        workSheet.Range("$D2:$D5").Borders[(Excel.Enums.XlBordersIndex)XlBordersIndex.xlInsideHorizontal]
+                        workSheet.Range("$D2:$D5")
+                            .Borders[(Excel.Enums.XlBordersIndex) XlBordersIndex.xlInsideHorizontal]
                             .Weight = 4;
-                        workSheet.Range("$D2:$D5").Borders[(Excel.Enums.XlBordersIndex)XlBordersIndex.xlInsideHorizontal]
+                        workSheet.Range("$D2:$D5")
+                            .Borders[(Excel.Enums.XlBordersIndex) XlBordersIndex.xlInsideHorizontal]
                             .Color = utils.Color.ToDouble(Color.Black);
 
                         Thread.Sleep(180000); //wait 3 minutes
@@ -176,9 +179,15 @@ namespace Ghosts.Client.Handlers
                         _log.Trace($"Excel saving to path - {path}");
                         workBook.SaveAs(path);
                         FileListing.Add(path);
-                        Report(handler.HandlerType.ToString(), timelineEvent.Command, timelineEvent.CommandArgs[0].ToString());
+                        Report(handler.HandlerType.ToString(), timelineEvent.Command,
+                            timelineEvent.CommandArgs[0].ToString());
 
-                        Thread.Sleep(20000);
+                        if (timelineEvent.DelayAfter > 0)
+                        {
+                            //sleep and leave the app open
+                            _log.Trace($"Sleep after for {timelineEvent.DelayAfter}");
+                            Thread.Sleep(timelineEvent.DelayAfter);
+                        }
 
                         // close excel and dispose reference
                         excelApplication.Quit();
@@ -191,7 +200,7 @@ namespace Ghosts.Client.Handlers
                                 System.Runtime.InteropServices.Marshal.ReleaseComObject(excelApplication);
                             }
                         }
-                        catch(Exception e)
+                        catch (Exception e)
                         {
                             _log.Error($"Excel com release exception: {e}");
                         }
@@ -208,11 +217,7 @@ namespace Ghosts.Client.Handlers
                     }
                     finally
                     {
-                        if (timelineEvent.DelayAfter > 0)
-                        {
-                            _log.Trace($"Excel sleep after for {timelineEvent.DelayAfter}");
-                            Thread.Sleep(timelineEvent.DelayAfter);
-                        }
+                        Thread.Sleep(3000);
                     }
                 }
             }

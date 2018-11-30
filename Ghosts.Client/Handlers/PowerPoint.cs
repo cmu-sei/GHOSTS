@@ -150,8 +150,13 @@ namespace Ghosts.Client.Handlers
                         Report(handler.HandlerType.ToString(), timelineEvent.Command,
                             timelineEvent.CommandArgs[0].ToString());
 
-                        Thread.Sleep(20000);
-
+                        if (timelineEvent.DelayAfter > 0)
+                        {
+                            //sleep and leave the app open
+                            _log.Trace($"Sleep after for {timelineEvent.DelayAfter}");
+                            Thread.Sleep(timelineEvent.DelayAfter);
+                        }
+                        
                         // close power point and dispose reference
                         powerApplication.Quit();
                         powerApplication.Dispose();
@@ -177,10 +182,7 @@ namespace Ghosts.Client.Handlers
                     }
                     finally
                     {
-                        if (timelineEvent.DelayAfter > 0)
-                        {
-                            Thread.Sleep(timelineEvent.DelayAfter);
-                        }
+                        Thread.Sleep(3000);
                     }
                 }
             }
