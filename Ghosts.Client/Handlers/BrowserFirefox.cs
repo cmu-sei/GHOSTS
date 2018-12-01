@@ -1,9 +1,5 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
-using System;
-using System.Diagnostics;
-using System.IO;
-using System.Threading;
 using Ghosts.Client.Code;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
@@ -11,6 +7,10 @@ using NLog;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Firefox;
 using OpenQA.Selenium.Interactions;
+using System;
+using System.Diagnostics;
+using System.IO;
+using System.Threading;
 
 namespace Ghosts.Client.Handlers
 {
@@ -22,27 +22,31 @@ namespace Ghosts.Client.Handlers
 
         private string GetFirefoxInstallLocation()
         {
-            var path = @"C:\Program Files\Mozilla Firefox\firefox.exe";
+            string path = @"C:\Program Files\Mozilla Firefox\firefox.exe";
             if (File.Exists(path))
+            {
                 return path;
+            }
 
             path = @"C:\Program Files (x86)\Mozilla Firefox\firefox.exe";
             if (File.Exists(path))
+            {
                 return path;
+            }
 
             return Program.Configuration.FirefoxInstallLocation;
         }
 
         private int GetFirefoxVersion(string path)
         {
-            var versionInfo = FileVersionInfo.GetVersionInfo(path);
+            FileVersionInfo versionInfo = FileVersionInfo.GetVersionInfo(path);
             return versionInfo.FileMajorPart;
         }
 
         private bool IsSufficientVersion(string path)
         {
-            var currentVersion = GetFirefoxVersion(path);
-            var minimumVersion = Program.Configuration.FirefoxMajorVersionMinimum;
+            int currentVersion = GetFirefoxVersion(path);
+            int minimumVersion = Program.Configuration.FirefoxMajorVersionMinimum;
             if (currentVersion < minimumVersion)
             {
                 _log.Debug($"Firefox version ({currentVersion}) is incompatible - requires at least {minimumVersion}");
@@ -53,28 +57,43 @@ namespace Ghosts.Client.Handlers
 
         public BrowserFirefox(TimelineHandler handler)
         {
+            bool hasRunSuccessfully = false;
+            while (!hasRunSuccessfully)
+            {
+                FirefoxEx(handler);
+            }
+        }
+
+        private bool FirefoxEx(TimelineHandler handler)
+        {
             try
             {
-                var path = GetFirefoxInstallLocation();
-                
+                string path = GetFirefoxInstallLocation();
+
                 if (!IsSufficientVersion(path))
                 {
-                    return;
+                    _log.Warn("Firefox version is not sufficient. Exiting");
+                    return true;
                 }
 
-                var options = new FirefoxOptions();
+                FirefoxOptions options = new FirefoxOptions();
                 options.AddArguments("--disable-infobars");
                 options.BrowserExecutableLocation = path;
                 options.Profile = new FirefoxProfile();
 
-                this.Driver = new FirefoxDriver(options);
-                
+                Driver = new FirefoxDriver(options);
+
                 Driver.Navigate().GoToUrl(handler.Initial);
 
                 if (handler.Loop)
                 {
                     while (true)
                     {
+                        if (Driver.CurrentWindowHandle == null)
+                        {
+                            throw new Exception("Firefox window handle not available");
+                        }
+
                         ExecuteEvents(handler);
                     }
                 }
@@ -86,64 +105,76 @@ namespace Ghosts.Client.Handlers
             catch (Exception e)
             {
                 _log.Debug(e);
+                return false;
             }
             finally
             {
                 ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.Firefox);
                 ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.GeckoDriver);
             }
+
+            return true;
         }
 
         private void ExecuteEvents(TimelineHandler handler)
         {
             try
             {
-                foreach (var timelineEvent in handler.TimeLineEvents)
+                foreach (TimelineEvent timelineEvent in handler.TimeLineEvents)
                 {
                     WorkingHours.Is(handler);
 
                     if (timelineEvent.DelayBefore > 0)
+                    {
                         Thread.Sleep(timelineEvent.DelayBefore);
+                    }
 
                     switch (timelineEvent.Command)
                     {
                         case "random":
                             while (true)
                             {
-                                var url = timelineEvent.CommandArgs[new Random().Next(0, timelineEvent.CommandArgs.Count)].ToString();
+                                if (Driver.CurrentWindowHandle == null)
+                                {
+                                    throw new Exception("Firefox window handle not available");
+                                }
+
+                                string url = timelineEvent.CommandArgs[new Random().Next(0, timelineEvent.CommandArgs.Count)].ToString();
                                 Driver.Navigate()
                                     .GoToUrl(url);
-                                this.Report(handler.HandlerType.ToString(), timelineEvent.Command, url, timelineEvent.TrackableId);
+                                Report(handler.HandlerType.ToString(), timelineEvent.Command, url, timelineEvent.TrackableId);
                                 Thread.Sleep(timelineEvent.DelayAfter);
                             }
                         case "browse":
                             Driver.Navigate().GoToUrl(timelineEvent.CommandArgs[0].ToString());
-                            this.Report(handler.HandlerType.ToString(), timelineEvent.Command, string.Join(",", timelineEvent.CommandArgs), timelineEvent.TrackableId);
+                            Report(handler.HandlerType.ToString(), timelineEvent.Command, string.Join(",", timelineEvent.CommandArgs), timelineEvent.TrackableId);
                             break;
                         case "download":
                             if (timelineEvent.CommandArgs.Count > 0)
                             {
-                                var x = this.Driver.FindElement(By.XPath(timelineEvent.CommandArgs[0].ToString()));
+                                IWebElement x = Driver.FindElement(By.XPath(timelineEvent.CommandArgs[0].ToString()));
                                 x.Click();
-                                this.Report(handler.HandlerType.ToString(), timelineEvent.Command, string.Join(",", timelineEvent.CommandArgs), timelineEvent.TrackableId);
+                                Report(handler.HandlerType.ToString(), timelineEvent.Command, string.Join(",", timelineEvent.CommandArgs), timelineEvent.TrackableId);
                                 Thread.Sleep(1000);
                             }
                             break;
                         case "type":
-                            var e = Driver.FindElement(By.Name(timelineEvent.CommandArgs[0].ToString()));
+                            IWebElement e = Driver.FindElement(By.Name(timelineEvent.CommandArgs[0].ToString()));
                             e.SendKeys(timelineEvent.CommandArgs[1].ToString());
                             //this.Report(timelineEvent);
                             break;
                         case "click":
-                            var element = Driver.FindElement(By.Name(timelineEvent.CommandArgs[0].ToString()));
-                            var actions = new Actions(Driver);
+                            IWebElement element = Driver.FindElement(By.Name(timelineEvent.CommandArgs[0].ToString()));
+                            Actions actions = new Actions(Driver);
                             actions.MoveToElement(element).Click().Perform();
                             //this.Report(timelineEvent);
                             break;
                     }
 
                     if (timelineEvent.DelayAfter > 0)
+                    {
                         Thread.Sleep(timelineEvent.DelayAfter);
+                    }
                 }
             }
             catch (Exception e)
@@ -157,14 +188,14 @@ namespace Ghosts.Client.Handlers
         /// </summary>
         public void Close()
         {
-            this.Report(HandlerType.BrowserChrome.ToString(), "Close", string.Empty);
-            this.Driver.Close();
+            Report(HandlerType.BrowserChrome.ToString(), "Close", string.Empty);
+            Driver.Close();
         }
 
         public void Stop()
         {
-            this.Report(HandlerType.BrowserChrome.ToString(), "Stop", string.Empty);
-            this.Close();
+            Report(HandlerType.BrowserChrome.ToString(), "Stop", string.Empty);
+            Close();
         }
     }
 }

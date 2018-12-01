@@ -39,7 +39,6 @@ namespace Ghosts.Client.Handlers
                         }
 
                         ExecuteEvents(timeline, handler);
-                        Thread.Sleep(300000);
                     }
                 }
                 else
@@ -106,7 +105,8 @@ namespace Ghosts.Client.Handlers
                         PowerPoint.Presentation presentation = powerApplication.Presentations.Add(MsoTriState.msoTrue);
                         presentation.Slides.Add(1, PpSlideLayout.ppLayoutClipArtAndVerticalText);
 
-                        Thread.Sleep(180000); //wait 3 minutes
+                        var writeSleep = ProcessManager.Jitter(100);
+                        Thread.Sleep(writeSleep);
 
                         // save the document 
                         string rand = RandomFilename.Generate();
@@ -154,7 +154,7 @@ namespace Ghosts.Client.Handlers
                         {
                             //sleep and leave the app open
                             _log.Trace($"Sleep after for {timelineEvent.DelayAfter}");
-                            Thread.Sleep(timelineEvent.DelayAfter);
+                            Thread.Sleep(timelineEvent.DelayAfter - writeSleep);
                         }
                         
                         // close power point and dispose reference
@@ -182,7 +182,7 @@ namespace Ghosts.Client.Handlers
                     }
                     finally
                     {
-                        Thread.Sleep(3000);
+                        Thread.Sleep(5000);
                     }
                 }
             }

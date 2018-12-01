@@ -38,7 +38,6 @@ namespace Ghosts.Client.Handlers
                         }
 
                         ExecuteEvents(timeline, handler);
-                        Thread.Sleep(300000);
                     }
                 }
                 else
@@ -114,7 +113,8 @@ namespace Ghosts.Client.Handlers
                         rt.AddContentParagraphs(1, 1, 1, 10, 50);
                         wordApplication.Selection.TypeText(rt.Content);
 
-                        Thread.Sleep(180000); //wait 3 minutes
+                        var writeSleep = ProcessManager.Jitter(100);
+                        Thread.Sleep(writeSleep);
 
                         wordApplication.Selection.HomeKey(WdUnits.wdLine, WdMovementType.wdExtend);
                         wordApplication.Selection.Font.Color = WdColor.wdColorSeaGreen;
@@ -166,7 +166,7 @@ namespace Ghosts.Client.Handlers
                         {
                             //sleep and leave the app open
                             _log.Trace($"Sleep after for {timelineEvent.DelayAfter}");
-                            Thread.Sleep(timelineEvent.DelayAfter);
+                            Thread.Sleep(timelineEvent.DelayAfter - writeSleep);
                         }
 
                         wordApplication.Quit();
@@ -200,7 +200,7 @@ namespace Ghosts.Client.Handlers
                     }
                     finally
                     {
-                        Thread.Sleep(3000);
+                        Thread.Sleep(5000);
                     }
                 }
             }

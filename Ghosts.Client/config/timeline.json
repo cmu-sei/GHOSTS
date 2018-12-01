@@ -550,7 +550,7 @@
                         "http://usgs.gov",
                         "http://usda.gov"
                     ],
-                    "DelayAfter": 300000,
+                    "DelayAfter": 6000,
                     "DelayBefore": 0
                 }
             ]

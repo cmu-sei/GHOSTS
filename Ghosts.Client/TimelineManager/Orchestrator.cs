@@ -450,23 +450,39 @@ namespace Ghosts.Client.TimelineManager
                     _log.Trace("File: " + e.FullPath + " " + e.ChangeType);
                     _log.Trace($"Reloading {MethodBase.GetCurrentMethod().DeclaringType}");
 
-                    // now terminate existing tasks and rerun
-                    Shutdown();
-                    StartupTasks.CleanupProcesses();
-                    Run();
+                    _log.Trace("terminate existing tasks and rerun orchestrator");
+                    
+                    try
+                    {
+                        Shutdown();
+                    }
+                    catch (Exception exception)
+                    {
+                        _log.Trace(exception);
+                    }
+
+                    try
+                    {
+                        StartupTasks.CleanupProcesses();
+                    }
+                    catch (Exception exception)
+                    {
+                        _log.Trace(exception);
+                    }
+
+                    try
+                    {
+                        Run();
+                    }
+                    catch (Exception exception)
+                    {
+                        _log.Trace(exception);
+                    }
                 }
             }
             catch (Exception exc)
             {
                 _log.Trace(exc);
-
-                try
-                {
-                    Shutdown();
-                    StartupTasks.CleanupProcesses();
-                    Run();
-                }
-                catch { }
             }
         }
     }

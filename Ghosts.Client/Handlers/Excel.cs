@@ -40,7 +40,6 @@ namespace Ghosts.Client.Handlers
                         }
 
                         ExecuteEvents(timeline, handler);
-                        Thread.Sleep(300000);
                     }
                 }
                 else
@@ -134,11 +133,10 @@ namespace Ghosts.Client.Handlers
                             .Borders[(Excel.Enums.XlBordersIndex) XlBordersIndex.xlInsideHorizontal]
                             .Color = utils.Color.ToDouble(Color.Black);
 
-                        Thread.Sleep(180000); //wait 3 minutes
+                        var writeSleep = ProcessManager.Jitter(100);
+                        Thread.Sleep(writeSleep);
 
                         workSheet.Cells[1, 1].Value = "We have 2 simple shapes created.";
-
-                        Thread.Sleep(3000);
 
                         string rand = RandomFilename.Generate();
 
@@ -186,7 +184,7 @@ namespace Ghosts.Client.Handlers
                         {
                             //sleep and leave the app open
                             _log.Trace($"Sleep after for {timelineEvent.DelayAfter}");
-                            Thread.Sleep(timelineEvent.DelayAfter);
+                            Thread.Sleep(timelineEvent.DelayAfter - writeSleep);
                         }
 
                         // close excel and dispose reference
@@ -217,7 +215,7 @@ namespace Ghosts.Client.Handlers
                     }
                     finally
                     {
-                        Thread.Sleep(3000);
+                        Thread.Sleep(5000);
                     }
                 }
             }
