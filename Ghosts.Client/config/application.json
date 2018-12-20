@@ -42,7 +42,7 @@
         "EmailDomainSearchString": "Get-ADUser -filter * -searchbase \"CN=USERS,DC=JRSS,DC=GOV\" -properties UserPrincipalName | select -expand UserPrincipalName"
     },
     "Listener": {
-        "Port": 8443
+        "Port": -1
     },
     "EmailContent": {
         "conflict_1_capital": "",

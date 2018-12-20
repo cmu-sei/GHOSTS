@@ -35,7 +35,8 @@ namespace Ghosts.Client.TimelineManager
         {
             try
             {
-                this.StartSafetyNet();
+                this.StartSafetyNet(); //watch instance numbers
+                TempFiles.StartTempFileWatcher(); //watch temp directory on a diff schedule
 
                 this._timeline = TimelineBuilder.GetLocalTimeline();
 

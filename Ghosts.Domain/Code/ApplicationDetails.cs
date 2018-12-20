@@ -68,10 +68,15 @@ namespace Ghosts.Domain.Code
         public static class InstanceFiles
         {
             public static string Path => InstalledPath + $"{System.IO.Path.DirectorySeparatorChar}instance{System.IO.Path.DirectorySeparatorChar}";
-
             public static string Id => Clean(Path + "id.json");
             public static string SurveyResults => Clean(Path + "survey-results.json");
             public static string FilesCreated => Clean(Path + "files-created.log");
+        }
+
+        public static class InstanceDirectories
+        {
+            public static string Path => InstanceFiles.Path;
+            public static string Timeline => Clean(Path + $"timeline{System.IO.Path.DirectorySeparatorChar}");
         }
 
         /// <summary>

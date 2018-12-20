@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using Ghosts.Domain.Code;
 using NLog;
+using Exception = System.Exception;
 
 namespace Ghosts.Client.Code
 {

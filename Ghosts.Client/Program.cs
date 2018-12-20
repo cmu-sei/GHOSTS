@@ -126,7 +126,7 @@ namespace Ghosts.Client
             //add ghosts to startup
             StartupTasks.SetStartup();
 
-            //add listener on a port to handle ad hoc commands
+            //add listener on a port or ephemeral file watch to handle ad hoc commands
             ListenerManager.Run();
 
             //do we have client id? or is this first run?
