@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Windows.Forms;
+using Ghosts.Client.Code.Email;
 using NLog;
 using Microsoft.Win32;
 
@@ -18,6 +19,24 @@ namespace Ghosts.Client.Code
     public static class StartupTasks
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
+
+        public static void CheckConfigs()
+        {
+            var emailContentManager = new EmailContentManager();
+            emailContentManager.LoadEmailFile();
+            if (emailContentManager.Content.Count < 1)
+            {
+                var msg = $"Email content could not be loaded. Emails will not be sent";
+                _log.Error(msg);
+                Console.WriteLine(msg);
+            }
+            else
+            {
+                var msg = $"Email content loaded successfully with {emailContentManager.Content.Count} records found";
+                _log.Info(msg);
+                Console.WriteLine(msg);
+            }
+        }
 
         public static void CleanupProcesses()
         {

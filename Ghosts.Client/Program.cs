@@ -113,6 +113,8 @@ namespace Ghosts.Client
                 return;
             }
 
+            StartupTasks.CheckConfigs();
+
             Thread.Sleep(500);
             //show window if debugging or if --debug flag passed in
             var handle = GetConsoleWindow();

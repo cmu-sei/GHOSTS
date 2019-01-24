@@ -15,22 +15,41 @@ namespace Ghosts.Client.Code.Email
     {
         public string Subject { private set; get; }
         public string Body { private set; get; }
-        public ClientConfiguration Configuration { get; private set; }
+        public ClientConfiguration Configuration { private set; get; }
+
+        internal IList<EmailContent> Content { private set; get; }
+
+        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
 
         public EmailContentManager()
         {
-            var engine = new FileHelperEngine<EmailContent>();
+            LoadEmailFile();
 
-            // To Read Use:
-            var list = engine.ReadFile(ApplicationDetails.ConfigurationFiles.EmailContent);
-            var total = list.Count();
+            var total = this.Content.Count();
 
-            Random r = new Random();
-            var o = list[r.Next(0, total)];
-            this.Configuration = Program.Configuration;
+            if (total > 0)
+            {
+                var r = new Random();
+                var o = this.Content[r.Next(0, total)];
+                this.Configuration = Program.Configuration;
 
-            this.Subject = ReplaceTokens(o.Subject);
-            this.Body = Parse(o.Body);
+                this.Subject = ReplaceTokens(o.Subject);
+                this.Body = Parse(o.Body);
+            }
+        }
+
+        public void LoadEmailFile()
+        {
+            try
+            {
+                var engine = new FileHelperEngine<EmailContent>();
+                this.Content = engine.ReadFile(ApplicationDetails.ConfigurationFiles.EmailContent).ToList();
+            }
+            catch (Exception e)
+            {
+                _log.Error($"email content file could not be loaded: {e}");
+                this.Content = new List<EmailContent>();
+            }
         }
 
         private string ReplaceTokens(string s)
