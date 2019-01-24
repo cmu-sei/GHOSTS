@@ -22,20 +22,15 @@ namespace Ghosts.Client.Code
 
         public static void CheckConfigs()
         {
-            var emailContentManager = new EmailContentManager();
-            emailContentManager.LoadEmailFile();
-            if (emailContentManager.Content.Count < 1)
-            {
-                var msg = $"Email content could not be loaded. Emails will not be sent";
-                _log.Error(msg);
-                Console.WriteLine(msg);
-            }
-            else
-            {
-                var msg = $"Email content loaded successfully with {emailContentManager.Content.Count} records found";
-                _log.Info(msg);
-                Console.WriteLine(msg);
-            }
+            EmailContentManager.Check();
+
+            //logs
+            Console.WriteLine($"Logs - debug enabled: {_log.IsDebugEnabled}");
+            Console.WriteLine($"Logs - error enabled: {_log.IsErrorEnabled}");
+            Console.WriteLine($"Logs - fatal enabled: {_log.IsFatalEnabled}");
+            Console.WriteLine($"Logs - info enabled: {_log.IsInfoEnabled}");
+            Console.WriteLine($"Logs - trace enabled: {_log.IsTraceEnabled}");
+            Console.WriteLine($"Logs - warn enabled: {_log.IsWarnEnabled}");
         }
 
         public static void CleanupProcesses()

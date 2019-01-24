@@ -21,6 +21,24 @@ namespace Ghosts.Client.Code.Email
 
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
 
+        public static void Check()
+        {
+            var emailContentManager = new EmailContentManager();
+            emailContentManager.LoadEmailFile();
+            if (emailContentManager.Content.Count < 1)
+            {
+                var msg = $"Email content could not be loaded. Emails will not be sent";
+                _log.Error(msg);
+                Console.WriteLine(msg);
+            }
+            else
+            {
+                var msg = $"Email content loaded successfully with {emailContentManager.Content.Count} records found";
+                _log.Info(msg);
+                Console.WriteLine(msg);
+            }
+        }
+
         public EmailContentManager()
         {
             LoadEmailFile();
