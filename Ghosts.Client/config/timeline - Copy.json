@@ -2,6 +2,51 @@
     "Status": "Run",
     "TimeLineHandlers": [
         {
+            "HandlerType": "Word",
+            "Initial": "",
+            "UtcTimeOn": "00:00:00",
+            "UtcTimeOff": "24:00:00",
+            "Loop": "True",
+            "TimeLineEvents": [
+                {
+                    "Command": "create",
+                    "CommandArgs": [ "%homedrive%%homepath%\\Documents" ],
+                    "DelayAfter": 900000,
+                    "DelayBefore": 0
+                }
+            ]
+        },
+        {
+            "HandlerType": "Excel",
+            "Initial": "",
+            "UtcTimeOn": "00:00:00",
+            "UtcTimeOff": "24:00:00",
+            "Loop": "True",
+            "TimeLineEvents": [
+                {
+                    "Command": "create",
+                    "CommandArgs": [ "%homedrive%%homepath%\\Documents" ],
+                    "DelayAfter": 900000,
+                    "DelayBefore": 0
+                }
+            ]
+        },
+        {
+            "HandlerType": "PowerPoint",
+            "Initial": "",
+            "UtcTimeOn": "00:00:00",
+            "UtcTimeOff": "24:00:00",
+            "Loop": "True",
+            "TimeLineEvents": [
+                {
+                    "Command": "create",
+                    "CommandArgs": [ "%homedrive%%homepath%\\Documents" ],
+                    "DelayAfter": 900000,
+                    "DelayBefore": 0
+                }
+            ]
+        },
+        {
             "HandlerType": "BrowserFirefox",
             "Initial": "about:external",
             "UtcTimeOn": "00:00:00",

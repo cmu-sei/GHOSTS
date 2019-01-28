@@ -56,8 +56,8 @@ namespace ghosts.client.linux.handlers
                         this.Command(timelineEvent.Command);
 
                         foreach (var cmd in timelineEvent.CommandArgs)
-                            if (!string.IsNullOrEmpty(cmd))
-                                this.Command(cmd);
+                            if (!string.IsNullOrEmpty(cmd.ToString()))
+                                this.Command(cmd.ToString());
                         break;
                 }
 

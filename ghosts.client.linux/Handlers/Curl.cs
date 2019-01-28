@@ -53,8 +53,8 @@ namespace ghosts.client.linux.handlers
                         this.Command(timelineEvent.Command);
 
                         foreach (var cmd in timelineEvent.CommandArgs)
-                            if (!string.IsNullOrEmpty(cmd))
-                                this.Command(cmd);
+                            if (!string.IsNullOrEmpty(cmd.ToString()))
+                                this.Command(cmd.ToString());
                         break;
                 }
 
@@ -89,6 +89,8 @@ namespace ghosts.client.linux.handlers
                 }
 
                 this.Report(HandlerType.Curl.ToString(), escapedArgs, this.Result);
+                
+                Console.WriteLine(this.Result);
             }
             catch(Exception exc)
             {

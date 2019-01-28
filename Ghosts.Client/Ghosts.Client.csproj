@@ -412,6 +412,9 @@
     <None Include="config\email-reply.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Content Include="config\timeline - Copy.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Include="Sample Timelines\command.json" />
     <None Include="Sample Timelines\Full sample.timeline.json" />
     <Compile Include="Survey\SurveyManager.cs" />
