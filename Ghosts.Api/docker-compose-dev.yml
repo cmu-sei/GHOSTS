@@ -13,7 +13,7 @@ services:
       POSTGRES_USER: ghosts
       POSTGRES_PASSWORD: scotty@1
     volumes:
-      - ./data:/var/lib/postgresql/data/ghosts
+      - ./data:/Users/dustin/Projects/ghosts/Ghosts.Api/junk/postgresql/data/ghosts
     logging:
       options:
         max-size: "100m"
@@ -29,7 +29,7 @@ services:
     depends_on:
       - "postgres"
     ports: 
-      - "80:5000"
+      - "5000:5000"
     networks:
       - ghosts-network
 
