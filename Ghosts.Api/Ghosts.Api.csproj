@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <AssemblyName>ghosts.api</AssemblyName>
-    <ReleaseVersion>2.2.0.0</ReleaseVersion>
+    <ReleaseVersion>2.4.0.0</ReleaseVersion>
     <SynchReleaseVersion>false</SynchReleaseVersion>
   </PropertyGroup>
 

@@ -1,5 +1,6 @@
-# docker-compose -f compose-api.yml up
-
+# docker-compose -f compose-api.yml up -d
+ 
+ 
 version: '3.2'
 networks:
   ghosts-network:
@@ -13,32 +14,32 @@ services:
       POSTGRES_USER: ghosts
       POSTGRES_PASSWORD: scotty@1
     volumes:
-      - ./data:/var/lib/postgresql/data/ghosts
+      - ./data:/var/lib/postgresql/data
     logging:
       options:
         max-size: "100m"
         max-file: "5"
     ports:
-      - "5101:5432"
+      - "5432:5432"
     networks:
       - ghosts-network
-      
+       
   ghosts-api:
-    image: dockreg.cwd.local/ghosts/api
+    image: dustinupdyke/ghosts
     container_name: ghosts-api
     depends_on:
       - "postgres"
-    ports: 
-      - "80:5000"
+    ports:
+      - "5000:5000"
     networks:
       - ghosts-network
-
+ 
   grafana:
     image: grafana/grafana
     container_name: ghosts-grafana
     depends_on:
       - "postgres"
-    ports: 
+    ports:
       - "3000:3000"
     networks:
       - ghosts-network
