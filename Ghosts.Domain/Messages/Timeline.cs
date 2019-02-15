@@ -47,6 +47,9 @@ namespace Ghosts.Domain
 
         public TimeSpan UtcTimeOn { get; set; }
         public TimeSpan UtcTimeOff { get; set; }
+
+        //not required currently (2.4)
+        public Dictionary<string, string> HandlerArgs { get; set; }
         
         public bool Loop { get; set; }
 
@@ -55,6 +58,7 @@ namespace Ghosts.Domain
         public TimelineHandler()
         {
             this.TimeLineEvents = new List<TimelineEvent>();
+            this.HandlerArgs = new Dictionary<string, string>();
         }
     }
 

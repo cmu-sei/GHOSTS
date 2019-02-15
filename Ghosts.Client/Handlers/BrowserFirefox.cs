@@ -22,7 +22,7 @@ namespace Ghosts.Client.Handlers
 
         private string GetFirefoxInstallLocation()
         {
-            var path = @"C:\Program Files\Mozilla Firefox\firefox.exe";
+            string path = @"C:\Program Files\Mozilla Firefox\firefox.exe";
             if (File.Exists(path))
             {
                 return path;
@@ -39,14 +39,14 @@ namespace Ghosts.Client.Handlers
 
         private int GetFirefoxVersion(string path)
         {
-            var versionInfo = FileVersionInfo.GetVersionInfo(path);
+            FileVersionInfo versionInfo = FileVersionInfo.GetVersionInfo(path);
             return versionInfo.FileMajorPart;
         }
 
         private bool IsSufficientVersion(string path)
         {
-            var currentVersion = GetFirefoxVersion(path);
-            var minimumVersion = Program.Configuration.FirefoxMajorVersionMinimum;
+            int currentVersion = GetFirefoxVersion(path);
+            int minimumVersion = Program.Configuration.FirefoxMajorVersionMinimum;
             if (currentVersion < minimumVersion)
             {
                 _log.Debug($"Firefox version ({currentVersion}) is incompatible - requires at least {minimumVersion}");
@@ -57,7 +57,7 @@ namespace Ghosts.Client.Handlers
 
         public BrowserFirefox(TimelineHandler handler)
         {
-            var hasRunSuccessfully = false;
+            bool hasRunSuccessfully = false;
             while (!hasRunSuccessfully)
             {
                 hasRunSuccessfully = FirefoxEx(handler);
@@ -68,7 +68,7 @@ namespace Ghosts.Client.Handlers
         {
             try
             {
-                var path = GetFirefoxInstallLocation();
+                string path = GetFirefoxInstallLocation();
 
                 if (!IsSufficientVersion(path))
                 {
@@ -76,8 +76,14 @@ namespace Ghosts.Client.Handlers
                     return true;
                 }
 
-                var options = new FirefoxOptions();
+                FirefoxOptions options = new FirefoxOptions();
                 options.AddArguments("--disable-infobars");
+                if (handler.HandlerArgs != null &&
+                    handler.HandlerArgs.ContainsKey("isheadless") && 
+                    handler.HandlerArgs["isheadless"] == "true")
+                {
+                    options.AddArguments("--headless");
+                }
                 options.BrowserExecutableLocation = path;
                 options.Profile = new FirefoxProfile();
 

@@ -14,7 +14,7 @@
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
     <IsWebBootstrapper>false</IsWebBootstrapper>
-    <ReleaseVersion>2.2.0.0</ReleaseVersion>
+    <ReleaseVersion>2.4.0.0</ReleaseVersion>
     <PublishUrl>C:\Projects\ghosts\Ghosts.Client\Publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -415,6 +415,7 @@
     <Content Include="config\timeline - Copy.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <None Include="kill ghosts.bat" />
     <None Include="Sample Timelines\command.json" />
     <None Include="Sample Timelines\Full sample.timeline.json" />
     <Compile Include="Survey\SurveyManager.cs" />

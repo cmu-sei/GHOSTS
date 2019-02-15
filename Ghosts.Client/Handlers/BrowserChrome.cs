@@ -26,6 +26,14 @@ namespace Ghosts.Client.Handlers
                 options.AddArguments("disable-infobars");
                 options.AddArguments("disable-logging");
                 options.AddArguments("--disable-logging");
+                options.AddArgument("--log-level=3");
+                options.AddArgument("--silent");
+                if (handler.HandlerArgs != null && 
+                    handler.HandlerArgs.ContainsKey("isheadless") &&
+                    handler.HandlerArgs["isheadless"] == "true")
+                {
+                    options.AddArguments("headless");
+                }
 
                 var chromeOptions = new ChromeOptions();
                 chromeOptions.AddUserProfilePreference("download.default_directory", @"%homedrive%%homepath%\\Downloads");

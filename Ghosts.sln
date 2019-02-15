@@ -20,13 +20,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ghosts.tools.addmachines", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ghosts.tools.emailgenerator", "ghosts.tools.emailgenerator\ghosts.tools.emailgenerator.csproj", "{A9ACCC75-C7BF-4DEE-9E60-19FE9F29CDDA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ghosts.tools.loadtester", "ghosts.tools.loadtester\ghosts.tools.loadtester.csproj", "{862BC7C2-6A37-4D2C-B1E9-13839234E893}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ghosts.client.linux", "ghosts.client.linux\ghosts.client.linux.csproj", "{63555F6A-0753-4C1F-88DA-D868796EDAEF}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{055F8DB4-0672-4609-A714-495481F55843}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ghosts.tools.apitester", "ghosts.tools.apitester\ghosts.tools.apitester.csproj", "{48D217C2-A5D8-4551-9879-09C983AA6536}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ghosts.tools.loadtestercore", "ghosts.tools.loadtestercore\ghosts.tools.loadtestercore.csproj", "{8E828332-DC53-4661-8566-85202BCEB31E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -54,10 +54,6 @@ Global
 		{A9ACCC75-C7BF-4DEE-9E60-19FE9F29CDDA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A9ACCC75-C7BF-4DEE-9E60-19FE9F29CDDA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A9ACCC75-C7BF-4DEE-9E60-19FE9F29CDDA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{862BC7C2-6A37-4D2C-B1E9-13839234E893}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{862BC7C2-6A37-4D2C-B1E9-13839234E893}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{862BC7C2-6A37-4D2C-B1E9-13839234E893}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{862BC7C2-6A37-4D2C-B1E9-13839234E893}.Release|Any CPU.Build.0 = Release|Any CPU
 		{63555F6A-0753-4C1F-88DA-D868796EDAEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{63555F6A-0753-4C1F-88DA-D868796EDAEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{63555F6A-0753-4C1F-88DA-D868796EDAEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -66,6 +62,10 @@ Global
 		{48D217C2-A5D8-4551-9879-09C983AA6536}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{48D217C2-A5D8-4551-9879-09C983AA6536}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{48D217C2-A5D8-4551-9879-09C983AA6536}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E828332-DC53-4661-8566-85202BCEB31E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E828332-DC53-4661-8566-85202BCEB31E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E828332-DC53-4661-8566-85202BCEB31E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E828332-DC53-4661-8566-85202BCEB31E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -73,8 +73,8 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{264C95F2-1006-45A0-92E3-D069C3B99C20} = {055F8DB4-0672-4609-A714-495481F55843}
 		{A9ACCC75-C7BF-4DEE-9E60-19FE9F29CDDA} = {055F8DB4-0672-4609-A714-495481F55843}
-		{862BC7C2-6A37-4D2C-B1E9-13839234E893} = {055F8DB4-0672-4609-A714-495481F55843}
 		{48D217C2-A5D8-4551-9879-09C983AA6536} = {055F8DB4-0672-4609-A714-495481F55843}
+		{8E828332-DC53-4661-8566-85202BCEB31E} = {055F8DB4-0672-4609-A714-495481F55843}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4FAC7631-EC66-4A65-95A7-3A7D834FABA1}
