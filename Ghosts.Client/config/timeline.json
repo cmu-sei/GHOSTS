@@ -2,6 +2,30 @@
     "Status": "Run",
     "TimeLineHandlers": [
         {
+            "HandlerType": "Outlook",
+            "Initial": "",
+            "UtcTimeOn": "00:00:00",
+            "UtcTimeOff": "24:00:00",
+            "Loop": "True",
+            "TimeLineEvents": [
+                {
+                    "Command": "create",
+                    "CommandArgs": [
+                        "CurrentUser",
+                        "random",
+                        "random",
+                        "random",
+                        "Random",
+                        "Random",
+                        "PlainText",
+                        ""
+                    ],
+                    "DelayAfter": 900000,
+                    "DelayBefore": 0
+                }
+            ]
+        },
+        {
             "HandlerType": "Word",
             "Initial": "",
             "UtcTimeOn": "00:00:00",
@@ -47,47 +71,10 @@
             ]
         },
         {
-            "HandlerType": "Outlook",
-            "Initial": "",
-            "UtcTimeOn": "00:00:00",
-            "UtcTimeOff": "24:00:00",
-            "Loop": "True",
-            "TimeLineEvents": [
-                {
-                    "Command": "create",
-                    "CommandArgs": [
-                        "CurrentUser",
-                        "random",
-                        "random",
-                        "random",
-                        "Random",
-                        "Random",
-                        "PlainText",
-                        ""
-                    ],
-                    "DelayAfter": 900000,
-                    "DelayBefore": 0
-                },
-                {
-                    "Command": "reply",
-                    "CommandArgs": [
-                        "CurrentUser",
-                        "All",
-                        "All",
-                        "All",
-                        "Parent",
-                        "Parent+Random",
-                        "Parent",
-                        ""
-                    ],
-                    "DelayAfter": 900000,
-                    "DelayBefore": 0
-                }
-            ]
-        },
-        {
             "HandlerType": "BrowserFirefox",
-            "HandlerArgs": { "isheadless": "true" },
+            "HandlerArgs": {
+                "isheadless": "true"
+            },
             "Initial": "about:external",
             "UtcTimeOn": "00:00:00",
             "UtcTimeOff": "24:00:00",
@@ -588,9 +575,32 @@
                         "http://cdc.gov",
                         "http://ssa.gov",
                         "http://usgs.gov",
-                        "http://usda.gov"
+                        "http://usda.gov",
+                        "http://www.1040.com",
+                        "http://www.adexa.com",
+                        "http://www.adbeat.com",
+                        "http://www.cargosphere.com",
+                        "http://www.careerjournal.com",
+                        "http://www.japantimes.co.jp",
+                        "http://www.jacksonhewitt.com",
+                        "http://www.ithound.com",
+                        "http://factcheck.org",
+                        "http://philosophynow.org",
+                        "http://mobile.thehill.com",
+                        "http://modeling.about.com",
+                        "http://modeltrains.about.com",
+                        "http://money.cnn.com",
+                        "http://moneymediakit.com",
+                        "http://ccleaner.com",
+                        "http://audacityteam.org",
+                        "http://qbittorrent.org",
+                        "http://7-zip.org",
+                        "http://gimp.org",
+                        "http://wireshark.org",
+                        "http://spotify.com",
+                        "http://twitch.com"
                     ],
-                    "DelayAfter": 6000,
+                    "DelayAfter": 300000,
                     "DelayBefore": 0
                 }
             ]
