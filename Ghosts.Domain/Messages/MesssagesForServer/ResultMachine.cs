@@ -38,6 +38,11 @@ namespace Ghosts.Domain
             return $"Name:{this.Name}|FQDN:{this.FQDN}|HostIP:{this.ClientIp}|IP:{this.IpAddress}|User:{this.CurrentUsername}";
         }
 
+        public void SetName(string name)
+        {
+            this.Name = name;
+        }
+
         private static string GetLocalIPAddress()
         {
             if (System.Net.NetworkInformation.NetworkInterface.GetIsNetworkAvailable())

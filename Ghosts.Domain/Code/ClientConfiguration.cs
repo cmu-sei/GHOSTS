@@ -21,6 +21,23 @@ namespace Ghosts.Domain.Code
         public string IdUrl { get; set; }
 
         /// <summary>
+        /// guest|guestinfo
+        /// </summary>
+        public string IdFormat { get; set; }
+
+        /// <summary>
+        /// if using guestinfo, the key to query for the value to use as hostname
+        /// </summary>
+        public string IdFormatKey { get; set; }
+
+        public string IdFormatValue { get; set; }
+
+        /// <summary>
+        /// Where is vmtools?
+        /// </summary>
+        public string VMWareToolsLocation { get; set; }
+
+        /// <summary>
         /// Are client health checks enabled?
         /// </summary>
         public bool HealthIsEnabled { get; set; }

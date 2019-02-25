@@ -1,16 +1,20 @@
 ﻿{
     "IdEnabled": true,
     "IdUrl": "http://telemetry.exercise.mil/api/clientid",
+    "IdFormat": "guestinfo",
+    "IdFormatKey": "guestinfo.id",
+    "IdFormatValue": "$formatkeyvalue$-$machinename$",
+    "VMWareToolsLocation": "C:\\progra~1\\VMware\\VMware Tools\\vmtoolsd.exe",
     "ClientResults": {
         "IsEnabled": true,
         "IsSecure": false,
         "PostUrl": "http://telemetry.exercise.mil/api/clientresults",
-        "CycleSleep": 90
+        "CycleSleep": 900000
     },
     "ClientUpdates": {
         "IsEnabled": true,
         "PostUrl": "http://telemetry.exercise.mil/api/clientupdates",
-        "CycleSleep": 90
+        "CycleSleep": 900000
     },
     "Survey": {
         "IsEnabled": true,
