@@ -1,0 +1,38 @@
+{
+    "Status": "Run",
+    "TimeLineHandlers": [
+        {
+            "HandlerType": "Command",
+            "Initial": "",
+            "UtcTimeOn": "00:00:00",
+            "UtcTimeOff": "24:00:00",
+            "Loop": true,
+            "TimeLineEvents": [
+                {
+                    "Command": "net view",
+                    "CommandArgs": [ "arp -a" ],
+                    "DelayAfter": 10,
+                    "DelayBefore": 0
+                }
+            ]
+        },
+        {
+            "HandlerType": "Command",
+            "Initial": "",
+            "UtcTimeOn": "00:00:00",
+            "UtcTimeOff": "24:00:00",
+            "Loop": "True",
+            "TimeLineEvents": [
+                {
+                    "Command": "once",
+                    "CommandArgs": [
+                        "powershell -command $randUser = (Get-Random -InputObject (Get-Content C:\\step\\ghosts\\config\\emails-domain.json)).Trim().split('@')[0].Substring(1); dsquery user -samid $randUser",
+                        ""
+                    ],
+                    "DelayAfter": 30,
+                    "DelayBefore": 0
+                }
+            ]
+        }
+    ]
+}
