@@ -29,6 +29,7 @@ services:
       retries: 10
     networks:
       - ghosts-network
+    restart: always
         
   ghosts-api:
     image: dustinupdyke/ghosts
@@ -39,6 +40,7 @@ services:
       - "5000:5000"
     networks:
       - ghosts-network
+    restart: always
   
   grafana:
     image: grafana/grafana
@@ -49,3 +51,6 @@ services:
       - "3000:3000"
     networks:
       - ghosts-network
+    restart: always
+    volumes:
+      - ./g_data:/var/lib/grafana
