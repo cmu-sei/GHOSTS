@@ -1,7 +1,7 @@
 ﻿{
     "IdEnabled": true,
     "IdUrl": "http://telemetry.exercise.mil/api/clientid",
-    "IdFormat": "guestinfo",
+    "IdFormat": "guestlocal",
     "IdFormatKey": "guestinfo.id",
     "IdFormatValue": "$formatkeyvalue$-$machinename$",
     "VMWareToolsLocation": "C:\\progra~1\\VMware\\VMware Tools\\vmtoolsd.exe",

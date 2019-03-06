@@ -48,8 +48,14 @@ namespace Ghosts.Domain.Code
             public static string EmailsDomain => Clean(Path + "emails-domain.json");
             public static string EmailsOutside => Clean(Path + "emails-outside.json");
             public static string Dictionary => Clean(Path + "dictionary.json");
+            public static string FileNames => Clean(Path + "filenames.txt");
         }
 
+        public static class UserAgents
+        {
+            public static string Path => InstalledPath + $"{System.IO.Path.DirectorySeparatorChar}config{System.IO.Path.DirectorySeparatorChar}user-agents{System.IO.Path.DirectorySeparatorChar}";
+        }
+   
         private static string Clean(string x)
         {
             if (x.Contains("file:"))

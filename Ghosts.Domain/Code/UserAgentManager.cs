@@ -30,9 +30,7 @@ namespace Ghosts.Domain.Code
             var files = new List<FileInfo>();
             try
             {
-                var dirPath = ApplicationDetails.InstalledPath + $"{Path.DirectorySeparatorChar}App_Data{Path.DirectorySeparatorChar}user-agents";
-                dirPath = dirPath.Replace("file:/", "/");
-                foreach (var file in new DirectoryInfo(dirPath).EnumerateFiles("*.txt", SearchOption.TopDirectoryOnly))
+                foreach (var file in new DirectoryInfo(ApplicationDetails.UserAgents.Path).EnumerateFiles("*.txt", SearchOption.TopDirectoryOnly))
                 {
                     files.Add(file);
                 }
@@ -45,7 +43,7 @@ namespace Ghosts.Domain.Code
             return files.ToArray();
         }
 
-        private static string[] GetEntries(string filePath)
+        private static IEnumerable<string> GetEntries(string filePath)
         {
             var raw = File.ReadAllText(filePath);
             var textLines = Regex.Split(raw, "\r\n|\r|\n");

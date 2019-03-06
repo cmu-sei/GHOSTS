@@ -1,6 +1,11 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using Ghosts.Domain.Code;
+using NLog;
 
 namespace Ghosts.Client.Code
 {
@@ -9,59 +14,74 @@ namespace Ghosts.Client.Code
     /// </summary>
     public static class RandomFilename
     {
+        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
+
         public static string Generate()
         {
-            var list = new[] {
-                "report",
-                "receipts",
-                "Results",
-                "Final",
-                "draft",
-                "netcom",
-                "army",
-                "FY18-report",
-                "intel",
-                "Beluka",
-                "report-intel",
-                "Jalton-AR",
-                "inter_office_report",
-                "working_draft",
-                "report for tom",
-                "cpt wilson report",
-                "sgt farr sitrep",
-                "file_name",
-                "todo list",
-                "dont forget to do ths",
-                "RiskManagement",
-                "RPODirectory",
-                "Agenda",
-                "OfficeProceduresV01",
-                "OfficeProceduresV02",
-                "OfficeProceduresV03",
-                "OfficeProceduresV04",
-                "OfficeProceduresV05",
-                "OfficeProceduresV06",
-                "OfficeProceduresV07"
-            };
+            // load config file otherwise use hardcoded list for older clients
+            var list = new List<string>();
 
-            var rand = new Random().Next(0, list.GetUpperBound(0) - 1);
-            var filename = list[rand];
-
-            rand = new Random().Next(0, 4);
-            switch(rand)
+            try
             {
-                case 0:
-                    filename += $"-{new Random().Next(0, 12)}";
-                    break;
-                case 1:
-                    filename += $"-{DateTime.Now.Month}";
-                    break;
-                case 2:
-                    filename += $"-{new Random().Next(0, 30)}";
-                    break;
+                if(File.Exists(ApplicationDetails.ConfigurationFiles.FileNames))
+                    list = File.ReadAllLines(ApplicationDetails.ConfigurationFiles.FileNames).ToList();
             }
-            
-            return filename;
+            catch (Exception exc)
+            {
+                _log.Debug($"./config/filename.txt could not be loaded: {exc}");
+            }
+
+            if (list.Count < 1)
+            {
+                list = new List<string> {
+                    "report",
+                    "receipts",
+                    "Results",
+                    "Final $x$",
+                    "draft",
+                    "netcom",
+                    "army",
+                    "FY18-report",
+                    "intel-$x$",
+                    "Beluka",
+                    "report-intel",
+                    "Jalton-AR",
+                    "inter_office_report",
+                    "working_draft",
+                    "report for tom",
+                    "cpt wilson report",
+                    "sgt farr sitrep",
+                    "file_name",
+                    "todo list",
+                    "dont forget to do ths - $x$",
+                    "RiskManagement",
+                    "RPODirectory",
+                    "Agenda",
+                    "OfficeProcedures-$x$"
+                };
+            }
+
+            var fileName = list.PickRandom();
+
+            // add variables?
+            if (fileName.Contains("$x$"))
+            {
+                var rand = new Random().Next(0, 4);
+                switch (rand)
+                {
+                    case 0:
+                        fileName = fileName.Replace("$x$", new Random().Next(0, 12).ToString());
+                        break;
+                    case 1:
+                        fileName = fileName.Replace("$x$", DateTime.Now.Month.ToString());
+                        break;
+                    case 2:
+                        fileName = fileName.Replace("$x$", new Random().Next(0, 30).ToString());
+                        break;
+                }
+            }
+
+            return fileName;
         }
     }
 }
