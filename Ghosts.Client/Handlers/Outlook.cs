@@ -1,16 +1,16 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
-using System;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Threading;
 using Ghosts.Client.Code.Email;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Microsoft.Office.Interop.Outlook;
 using NLog;
 using Redemption;
+using System;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Threading;
 using Exception = System.Exception;
 using MAPIFolder = Microsoft.Office.Interop.Outlook.MAPIFolder;
 
@@ -21,8 +21,10 @@ namespace Ghosts.Client.Handlers
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
         private RDOSession _session;
         private Microsoft.Office.Interop.Outlook.Application _app;
-        private NameSpace _olNamespace;
-        private MAPIFolder _inboxFolder;
+        private NameSpace _oMapiNamespace;
+        private MAPIFolder _folderInbox;
+        private MAPIFolder _folderOutbox;
+        private MAPIFolder _folderSent;
 
         public Outlook(TimelineHandler handler)
         {
@@ -33,7 +35,7 @@ namespace Ghosts.Client.Handlers
                 //by default, they are assumed to be in the same folder as the current assembly and be named
                 //Redemption.dll and Redemption64.dll.
                 //In that case, you do not need to set the two properties below
-                var currentDir = new FileInfo(this.GetType().Assembly.Location).Directory;
+                DirectoryInfo currentDir = new FileInfo(GetType().Assembly.Location).Directory;
                 RedemptionLoader.DllLocation64Bit = Path.GetFullPath(currentDir + @"\lib\redemption64.dll");
                 RedemptionLoader.DllLocation32Bit = Path.GetFullPath(currentDir + @"\lib\redemption.dll");
                 //Create a Redemption object and use it
@@ -49,11 +51,13 @@ namespace Ghosts.Client.Handlers
 
             try
             {
-                this._app = new Microsoft.Office.Interop.Outlook.Application();
-                this._olNamespace = this._app.GetNamespace("MAPI");
-                this._inboxFolder = _olNamespace.GetDefaultFolder(OlDefaultFolders.olFolderInbox);
+                _app = new Microsoft.Office.Interop.Outlook.Application();
+                _oMapiNamespace = _app.GetNamespace("MAPI");
+                _folderInbox = _oMapiNamespace.GetDefaultFolder(OlDefaultFolders.olFolderInbox);
+                _folderOutbox = _oMapiNamespace.GetDefaultFolder(OlDefaultFolders.olFolderOutbox);
+                _folderSent = _oMapiNamespace.GetDefaultFolder(OlDefaultFolders.olFolderSentMail);
                 _log.Trace("Launching Outlook");
-                this._inboxFolder.Display();
+                _folderInbox.Display();
 
                 if (handler.Loop)
                 {
@@ -77,22 +81,24 @@ namespace Ghosts.Client.Handlers
         {
             try
             {
-                foreach (var timelineEvent in handler.TimeLineEvents)
+                foreach (TimelineEvent timelineEvent in handler.TimeLineEvents)
                 {
                     WorkingHours.Is(handler);
 
                     if (timelineEvent.DelayBefore > 0)
+                    {
                         Thread.Sleep(timelineEvent.DelayBefore);
+                    }
 
                     switch (timelineEvent.Command.ToUpper())
                     {
                         default:
                             try
                             {
-                                var emailConfig = new EmailConfiguration(timelineEvent.CommandArgs);
+                                EmailConfiguration emailConfig = new EmailConfiguration(timelineEvent.CommandArgs);
                                 if (SendEmailViaOutlook(emailConfig))
                                 {
-                                    this.Report(handler.HandlerType.ToString(), timelineEvent.Command, emailConfig.ToString());
+                                    Report(handler.HandlerType.ToString(), timelineEvent.Command, emailConfig.ToString());
                                 }
                             }
                             catch (Exception e)
@@ -104,10 +110,10 @@ namespace Ghosts.Client.Handlers
                         case "REPLY":
                             try
                             {
-                                var emailConfig = new EmailConfiguration(timelineEvent.CommandArgs);
+                                EmailConfiguration emailConfig = new EmailConfiguration(timelineEvent.CommandArgs);
                                 if (ReplyViaOutlook(emailConfig))
                                 {
-                                    this.Report(handler.HandlerType.ToString(), timelineEvent.Command, emailConfig.ToString());
+                                    Report(handler.HandlerType.ToString(), timelineEvent.Command, emailConfig.ToString());
                                 }
                             }
                             catch (Exception e)
@@ -118,7 +124,9 @@ namespace Ghosts.Client.Handlers
                     }
 
                     if (timelineEvent.DelayAfter > 0)
+                    {
                         Thread.Sleep(timelineEvent.DelayAfter);
+                    }
                 }
             }
             catch (Exception e)
@@ -129,30 +137,43 @@ namespace Ghosts.Client.Handlers
 
         private bool ReplyViaOutlook(EmailConfiguration emailConfig)
         {
+            ClientConfiguration.EmailSettings config = Program.Configuration.Email;
+
             try
             {
-                var inboxItems = this._inboxFolder.Items;
+                Items folderItems = _folderSent.Items;
 
-                foreach (MailItem inboxItem in inboxItems)
+                foreach (MailItem folderItem in folderItems)
                 {
-                    if (inboxItem.UnRead)
+                    if (folderItem.UnRead)
                     {
-                        var emailReply = new EmailReplyManager();
+                        EmailReplyManager emailReply = new EmailReplyManager();
 
-                        //todo: use emailConfig!
 
-                        inboxItem.HTMLBody = $"{emailReply.Reply} {Environment.NewLine}{Environment.NewLine}ORIGINAL MESSAGE --- {Environment.NewLine}{Environment.NewLine}{inboxItem.Body}"; ;
-                        inboxItem.Subject = $"RE: {inboxItem.Subject}";
+                        folderItem.HTMLBody =
+                            $"{emailReply.Reply} {Environment.NewLine}{Environment.NewLine}ORIGINAL MESSAGE --- {Environment.NewLine}{Environment.NewLine}{folderItem.Body}";
+                        folderItem.Subject = $"RE: {folderItem.Subject}";
 
-                        var replyMail = inboxItem.Reply();
-
-                        //send it
-                        //replyMail.Send();
-                        //now using redemption
-
-                        var rdoMail = new Redemption.SafeMailItem();
-                        rdoMail.Item = replyMail;
+                        MailItem replyMail = folderItem.Reply();
+                        replyMail.Move(_folderSent);
+                        
+                        SafeMailItem rdoMail = new Redemption.SafeMailItem
+                        {
+                            Item = replyMail
+                        };
+                        
+                        rdoMail.Recipients.ResolveAll();
                         rdoMail.Send();
+
+                        var mapiUtils = new Redemption.MAPIUtils();
+                        mapiUtils.DeliverNow(0, 0);
+
+                        if (config.SetForcedSendReceive)
+                        {
+                            _log.Trace("Forcing mapi - send and receive");
+                            _oMapiNamespace.SendAndReceive(false);
+                            Thread.Sleep(3000);
+                        }
 
                         return true;
                     }
@@ -167,18 +188,21 @@ namespace Ghosts.Client.Handlers
 
         private bool SendEmailViaOutlook(EmailConfiguration emailConfig)
         {
-            var config = Program.Configuration.Email;
-            var wasSuccessful = false;
+            ClientConfiguration.EmailSettings config = Program.Configuration.Email;
+            bool wasSuccessful = false;
 
             try
             {
                 //now create mail object (but we'll not send it via outlook)
                 _log.Trace("Creating outlook mail item");
-                var mailItem = _app.CreateItem(OlItemType.olMailItem);
+                dynamic mailItem = _app.CreateItem(OlItemType.olMailItem);
 
                 //Add subject
                 if (!string.IsNullOrWhiteSpace(emailConfig.Subject))
+                {
                     mailItem.Subject = emailConfig.Subject;
+                }
+
                 _log.Trace($"Setting message subject to: {mailItem.Subject}");
 
                 //Set message body according to type of message
@@ -204,7 +228,7 @@ namespace Ghosts.Client.Handlers
                 if (emailConfig.Attachments.Count > 0)
                 {
                     //Add attachments
-                    foreach (var path in emailConfig.Attachments)
+                    foreach (string path in emailConfig.Attachments)
                     {
                         mailItem.Attachments.Add(path);
                         _log.Trace($"Adding attachment from: {path}");
@@ -213,7 +237,7 @@ namespace Ghosts.Client.Handlers
 
                 if (config.SetAccountFromConfig || config.SetAccountFromLocal)
                 {
-                    var accounts = _app.Session.Accounts;
+                    Accounts accounts = _app.Session.Accounts;
                     Account acc = null;
 
                     if (config.SetAccountFromConfig)
@@ -248,73 +272,95 @@ namespace Ghosts.Client.Handlers
                         mailItem.SendUsingAccount = acc;
                     }
                 }
-
-                /*
-                send prep! typically we would use:
-                ((_MailItem)mailItem).Send();
-                now using redemption
                 
-                python example
-                new_email = win32com.client.Dispatch('Redemption.SafeMailItem')
-                new_email.Item = outlook_mail_item
-                new_email.Recipients.Add(self._config['destination'])
-                new_email.Recipients.ResolveAll()
-                new_email.Send() 
-                 */
-
                 if (config.SaveToOutbox)
                 {
                     _log.Trace("Saving mailItem to outbox...");
-                    mailItem.Move(this._olNamespace.GetDefaultFolder(OlDefaultFolders.olFolderOutbox));
+                    mailItem.Move(_folderOutbox);
                     mailItem.Save();
                 }
-
+                
                 _log.Trace("Attempting new Redemtion SafeMailItem...");
-                var rdoMail = new Redemption.SafeMailItem();
-                rdoMail.Item = mailItem;
+                SafeMailItem rdoMail = new Redemption.SafeMailItem
+                {
+                    Item = mailItem
+                };
                 //Parse To
                 if (emailConfig.To.Count > 0)
                 {
-                    var list = emailConfig.To.Distinct();
-                    foreach (var a in list)
+                    System.Collections.Generic.IEnumerable<string> list = emailConfig.To.Distinct();
+                    foreach (string a in list)
                     {
-                        var r = rdoMail.Recipients.AddEx(a.Trim());
+                        SafeRecipient r = rdoMail.Recipients.AddEx(a.Trim());
                         r.Resolve();
                         _log.Trace($"RdoMail TO {a.Trim()}");
                     }
                 }
                 else
+                {
                     throw new Exception("Must specify to-address");
+                }
 
                 //Parse Cc
                 if (emailConfig.Cc.Count > 0)
                 {
-                    var list = emailConfig.Cc.Distinct();
-                    foreach (var a in list)
+                    System.Collections.Generic.IEnumerable<string> list = emailConfig.Cc.Distinct();
+                    foreach (string a in list)
                     {
-                        var r = rdoMail.Recipients.AddEx(a.Trim());
+                        SafeRecipient r = rdoMail.Recipients.AddEx(a.Trim());
                         r.Resolve();
                         if (r.Resolved)
+                        {
                             r.Type = 2; //CC
+                        }
+
                         _log.Trace($"RdoMail CC {a.Trim()}");
                     }
                 }
 
                 if (emailConfig.Bcc.Count > 0)
                 {
-                    var list = emailConfig.Bcc.Distinct();
-                    foreach (var a in list)
+                    System.Collections.Generic.IEnumerable<string> list = emailConfig.Bcc.Distinct();
+                    foreach (string a in list)
                     {
-                        var r = rdoMail.Recipients.AddEx(a.Trim());
+                        SafeRecipient r = rdoMail.Recipients.AddEx(a.Trim());
                         r.Resolve();
                         if (r.Resolved)
+                        {
                             r.Type = 3; //BCC
+                        }
+
                         _log.Trace($"RdoMail BCC {a.Trim()}");
                     }
                 }
 
+                /*
+                    outlook_mail_item = self._outlook.outlook_application.CreateItem(win32com.client.constants.olMailItem)
+                    outlook_mail_item = outlook_mail_item.Move(outbox)
+
+                    outlook_mail_item.Subject = subject
+                    outlook_mail_item.Body = body
+                    outlook_mail_item.Save()
+
+                    for file_ in self._config['attachments']:
+                        outlook_mail_item.Attachments.Add(file_)
+
+                    # Need to use Redemption to actually get it to send correctly.
+                    new_email = win32com.client.Dispatch('Redemption.SafeMailItem')
+                    new_email.Item = outlook_mail_item
+                    new_email.Recipients.Add(self._config['destination'])
+                    new_email.Recipients.ResolveAll()
+                    new_email.Send()
+                 */
+
+
+                rdoMail.Recipients.ResolveAll();
+
                 _log.Trace("Attempting to send Redemtion SafeMailItem...");
                 rdoMail.Send();
+
+                var mapiUtils = new Redemption.MAPIUtils();
+                mapiUtils.DeliverNow();
 
                 //Done
                 wasSuccessful = true;
@@ -324,7 +370,8 @@ namespace Ghosts.Client.Handlers
                 if (config.SetForcedSendReceive)
                 {
                     _log.Trace("Forcing mapi - send and receive");
-                    this._olNamespace.SendAndReceive(false);
+                    _oMapiNamespace.SendAndReceive(false);
+                    Thread.Sleep(3000);
                 }
             }
             catch (Exception ex)

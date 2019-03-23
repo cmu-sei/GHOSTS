@@ -41,7 +41,7 @@
         "RecipientsOutsideMax": 1,
         "SetAccountFromConfig": false,
         "SetAccountFromLocal": false,
-        "SetForcedSendReceive": false,
+        "SetForcedSendReceive": true,
         "SaveToOutbox": false,
         "EmailDomainSearchString": "Get-ADUser -filter * -searchbase \"CN=USERS,DC=JRSS,DC=GOV\" -properties UserPrincipalName | select -expand UserPrincipalName"
     },
