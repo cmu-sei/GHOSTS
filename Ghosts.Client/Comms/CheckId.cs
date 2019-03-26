@@ -52,7 +52,10 @@ namespace Ghosts.Client.Comms
         /// <returns></returns>
         private static string Run()
         {
-            string s = string.Empty;
+            // ignore all certs
+            ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
+
+            var s = string.Empty;
 
             if (!Program.Configuration.IdEnabled)
             {

@@ -45,6 +45,9 @@ namespace Ghosts.Client.Comms
             if (!Program.Configuration.ClientUpdates.IsEnabled)
                 return;
 
+            // ignore all certs
+            ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
+
             var machine = new ResultMachine();
 
             Thread.Sleep(ProcessManager.Jitter(Program.Configuration.ClientUpdates.CycleSleep));
@@ -114,6 +117,9 @@ namespace Ghosts.Client.Comms
             if (!Program.Configuration.ClientResults.IsEnabled)
                 return;
 
+            // ignore all certs
+            ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
+
             var fileName = ApplicationDetails.LogFiles.ClientUpdates;
             var posturl = Program.Configuration.ClientResults.PostUrl;
 
@@ -170,6 +176,9 @@ namespace Ghosts.Client.Comms
 
         internal static void PostSurvey()
         {
+            // ignore all certs
+            ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
+
             var posturl = string.Empty;
 
             try
