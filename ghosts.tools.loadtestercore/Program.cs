@@ -40,39 +40,38 @@ namespace ghosts.tools.loadtestercore
                 o = client.Execute(request);
                 id = o.Content.Replace("\"", "");
 
-                id = "141b6982-1f35-4f6a-9907-8260e10d8a82";
-
+                Console.WriteLine($"Id response was: {id}");
+                
                 Thread.Sleep(50);
 
-                client = new RestClient("http://localhost:5000/api/clientresults");
-                request = new RestRequest(Method.POST);
-                request.AddHeader("Cache-Control", "no-cache");
-                request.AddHeader("Content-Type", "application/json");
-                request.AddHeader("user", "bobby.tables");
-                request.AddHeader("ip", $"1127.9.8.{i}");
-                request.AddHeader("fqdn", $"flag02.hq.win10.user-test-vpn-{i}");
-                request.AddHeader("name", $"flag02.hq.win10.user-test-vpn-{i}");
-                request.AddHeader("id", id);
-                request.AddParameter("undefined", "{\r\n\t\"Log\": \"TIMELINE|"+ DateTime.Now.ToString("MM/dd/yy H:mm:ss tt") +" PM|{\\\"Handler\\\":\\\""+ commands.PickRandom() +"\\\",\\\"Command\\\":\\\"random\\\",\\\"CommandArg\\\":\\\"https:\\/\\/nec-hr.region.army.mil\\\"}\\r\\nHEALTH|"+ DateTime.Now.ToString("MM/dd/yy H:mm:ss tt") +"|{\\\"Internet\\\":true,\\\"Permissions\\\":false,\\\"ExecutionTime\\\":101,\\\"Errors\\\":[],\\\"LoggedOnUsers\\\":[\\\"Dustin\\\"]}\\r\\nTIMELINE|"+ DateTime.Now.ToString() +"|{\\\"Handler\\\":\\\""+ commands.PickRandom() +"\\\",\\\"Command\\\":\\\"random\\\",\\\"CommandArg\\\":\\\"http:\\/\\/www.dma.mil\\\"}\"\r\n}", ParameterType.RequestBody);
-                o = client.Execute(request);
-
-                Console.WriteLine($"Response was: {o.ResponseStatus}");
-                Thread.Sleep(50);
-
-                client = new RestClient("http://localhost:5000/api/clientresults");
-                request = new RestRequest(Method.POST);
-                request.AddHeader("Cache-Control", "no-cache");
-                request.AddHeader("Content-Type", "application/json");
-                request.AddHeader("user", "bobby.tables");
-                request.AddHeader("ip", $"1127.9.8.{i}");
-                request.AddHeader("fqdn", $"flag02.hq.win10.user-test-vpn-{i}");
-                request.AddHeader("name", $"flag02.hq.win10.user-test-vpn-{i}");
-                request.AddHeader("id", id);
-                request.AddParameter("undefined", "{\r\n\t\"Log\": \"TIMELINE|" + DateTime.Now.ToString("MM/dd/yy H:mm:ss tt") + "|{\\\"Handler\\\":\\\""+ commands.PickRandom() +"\\\",\\\"Command\\\":\\\"random\\\",\\\"CommandArg\\\":\\\"https:\\/\\/nec-hr.region.army.mil\\\"}\\r\\nHEALTH|" + DateTime.Now.ToString("MM/dd/yy H:mm:ss tt") + "|{\\\"Internet\\\":true,\\\"Permissions\\\":false,\\\"ExecutionTime\\\":101,\\\"Errors\\\":[],\\\"LoggedOnUsers\\\":[\\\"Dustin\\\"]}\\r\\nTIMELINE|" + DateTime.Now.ToString() + "|{\\\"Handler\\\":\\\""+ commands.PickRandom() +"\\\",\\\"Command\\\":\\\"random\\\",\\\"CommandArg\\\":\\\"http:\\/\\/www.dma.mil\\\"}\"\r\n}", ParameterType.RequestBody);
-                o = client.Execute(request);
-
-                Console.WriteLine($"Response was: {o.ResponseStatus}");
-                Thread.Sleep(50);
+                var i2 = 30;
+                Console.Write($"Results ");
+                while (i2 > 0)
+                {
+                    client = new RestClient("http://localhost:5000/api/clientresults");
+                    request = new RestRequest(Method.POST);
+                    request.AddHeader("Cache-Control", "no-cache");
+                    request.AddHeader("Content-Type", "application/json");
+                    request.AddHeader("user", "bobby.tables");
+                    request.AddHeader("ip", $"1127.9.8.{i}");
+                    request.AddHeader("fqdn", $"flag02.hq.win10.user-test-vpn-{i}");
+                    request.AddHeader("name", $"flag02.hq.win10.user-test-vpn-{i}");
+                    request.AddHeader("id", id);
+                    request.AddParameter("undefined",
+                        "{\r\n\t\"Log\": \"TIMELINE|" + DateTime.UtcNow.ToString("MM/dd/yy H:mm:ss tt") + "|{\\\"Handler\\\":\\\"" +
+                        commands.PickRandom() +
+                        "\\\",\\\"Command\\\":\\\"random\\\",\\\"CommandArg\\\":\\\"https:\\/\\/nec-hr.region.army.mil\\\"}\\r\\nHEALTH|" +
+                        DateTime.Now.ToString("MM/dd/yy H:mm:ss tt") +
+                        "|{\\\"Internet\\\":true,\\\"Permissions\\\":false,\\\"ExecutionTime\\\":101,\\\"Errors\\\":[],\\\"LoggedOnUsers\\\":[\\\"Dustin\\\"]}\\r\\nTIMELINE|" +
+                        DateTime.Now.ToString() + "|{\\\"Handler\\\":\\\"" + commands.PickRandom() +
+                        "\\\",\\\"Command\\\":\\\"random\\\",\\\"CommandArg\\\":\\\"http:\\/\\/www.dma.mil\\\"}\"\r\n}", ParameterType.RequestBody);
+                    o = client.Execute(request);
+                    
+                    Console.Write($"{i2}, ");
+                    i2--;
+                    
+                    Thread.Sleep(50);
+                }
 
                 client = new RestClient("http://localhost:5000/api/clientresults");
                 request = new RestRequest(Method.POST);
@@ -83,9 +82,10 @@ namespace ghosts.tools.loadtestercore
                 request.AddHeader("user", "bobby.tables");
                 request.AddHeader("Cache-Control", "no-cache");
                 request.AddHeader("Content-Type", "application/json");
-                request.AddParameter("undefined", "{\"Log\":\"HEALTH|2/6/2019 9:08:30 PM|{\\\"Internet\\\":true,\\\"Permissions\\\":false,\\\"ExecutionTime\\\":946,\\\"Errors\\\":[],\\\"LoggedOnUsers\\\":[\\\"Dustin\\\"],\\\"Stats\\\":{\\\"Memory\\\":0.907363832,\\\"Cpu\\\":97.98127,\\\"DiskSpace\\\":0.479912162}}\"}", ParameterType.RequestBody);
+                request.AddParameter("undefined", "{\"Log\":\"HEALTH|" + DateTime.UtcNow.ToString("MM/dd/yy H:mm:ss tt") + "|{\\\"Internet\\\":true,\\\"Permissions\\\":false,\\\"ExecutionTime\\\":946,\\\"Errors\\\":[],\\\"LoggedOnUsers\\\":[\\\"Dustin\\\"],\\\"Stats\\\":{\\\"Memory\\\":0.907363832,\\\"Cpu\\\":97.98127,\\\"DiskSpace\\\":0.479912162}}\"}", ParameterType.RequestBody);
                 o = client.Execute(request);
                 
+                Console.WriteLine($"Health response was: {o.ResponseStatus}");
                 Thread.Sleep(50);
 
                 client = new RestClient("http://localhost:5000/api/clientupdates");
@@ -100,7 +100,7 @@ namespace ghosts.tools.loadtestercore
                 request.AddParameter("undefined", "{\"Log\":\"\"}", ParameterType.RequestBody);
                 o = client.Execute(request);
                 
-                Console.WriteLine($"Response was: {o.ResponseStatus}");
+                Console.WriteLine($"Updates response was: {o.ResponseStatus}");
                 Thread.Sleep(500);
                 i++;
             }
