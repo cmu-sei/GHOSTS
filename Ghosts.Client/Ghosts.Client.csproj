@@ -351,6 +351,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Code\GuestInfoVars.cs" />
     <Compile Include="Code\TempFiles.cs" />
     <Compile Include="Handlers\Clicks.cs" />
     <Compile Include="Handlers\LightHandlers.cs" />

@@ -3,9 +3,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Ghosts.Api.Code;
 using Ghosts.Api.Data;
 using Ghosts.Api.Models;
 using Ghosts.Domain;
@@ -200,7 +200,7 @@ namespace Ghosts.Api.Services
 
         public void AddToGroups(Machine model, CancellationToken ct)
         {
-            var groups = GetGroupNames(model.Name);
+            var groups = GroupNames.GetGroupNames(model);
 
             foreach (var group in groups)
             {
@@ -224,30 +224,6 @@ namespace Ghosts.Api.Services
                     this._context.SaveChanges();
                 }
             }
-        }
-
-        private static IEnumerable<string> GetGroupNames(string machineName)
-        {
-            var delim = Convert.ToChar("-");
-            var list = new List<string>();
-
-            if (string.IsNullOrEmpty(machineName))
-                return list;
-
-            var nameParts = machineName.Split(delim);
-            for (var i = nameParts.GetUpperBound(0); i > 0; i--)
-            {
-                var g = new StringBuilder();
-                for (var j = 0; j < i; j++)
-                    g.Append(nameParts[j]).Append(delim);
-
-                list.Add(g.Append("*").ToString().TrimEnd(Convert.ToChar(delim)));
-
-                if (i > 3) //groups deeper than 3 become a performance dogggg
-                    break;
-            }
-
-            return list;
         }
 
         public async Task<TimelineHandler> SendCommand(Guid id, string command, CancellationToken ct)

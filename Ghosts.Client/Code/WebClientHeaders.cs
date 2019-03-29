@@ -32,6 +32,8 @@ namespace Ghosts.Client.Code
             }
             client.Headers.Add("name", machine.Name);
             client.Headers.Add("fqdn", machine.FQDN);
+            client.Headers.Add("host", machine.Host);
+            client.Headers.Add("resolvedhost", machine.ResolvedHost);
             client.Headers.Add("ip", machine.ClientIp);
             client.Headers.Add("user", machine.CurrentUsername);
             client.Headers.Add("version", ApplicationDetails.Version);

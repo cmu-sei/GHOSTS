@@ -49,6 +49,7 @@ namespace Ghosts.Client.Comms
             ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
 
             var machine = new ResultMachine();
+            GuestInfoVars.Load(machine);
 
             Thread.Sleep(ProcessManager.Jitter(Program.Configuration.ClientUpdates.CycleSleep));
 
@@ -124,6 +125,7 @@ namespace Ghosts.Client.Comms
             var posturl = Program.Configuration.ClientResults.PostUrl;
 
             var machine = new ResultMachine();
+            GuestInfoVars.Load(machine);
 
             Thread.Sleep(ProcessManager.Jitter(Program.Configuration.ClientResults.CycleSleep));
 
@@ -205,6 +207,7 @@ namespace Ghosts.Client.Comms
                 var payload = JsonConvert.SerializeObject(survey);
 
                 var machine = new ResultMachine();
+                GuestInfoVars.Load(machine);
 
                 if (Program.Configuration.Survey.IsSecure)
                 {

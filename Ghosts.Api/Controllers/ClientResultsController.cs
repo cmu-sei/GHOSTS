@@ -78,6 +78,9 @@ namespace Ghosts.Api.Controllers
             {
                 Name = request.Headers["name"],
                 FQDN = request.Headers["fqdn"],
+                Host = Request.Headers["host"],
+                Domain = Request.Headers["domain"],
+                ResolvedHost = Request.Headers["resolvedhost"],
                 HostIp = request.Headers["ip"],
                 CurrentUsername = request.Headers["user"],
                 ClientVersion = request.Headers["version"],

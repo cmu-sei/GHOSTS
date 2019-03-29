@@ -1,5 +1,6 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using Microsoft.Extensions.Configuration;
@@ -54,6 +55,22 @@ namespace Ghosts.Api.Code
             public int QueueSyncDelayInSeconds { get; set; }
             public int NotificationsQueueSyncDelayInSeconds { get; set; }
             public int ListenerPort { get; set; }
+
+            public GroupingOptions Grouping { get; set; }
+
+            public class GroupingOptions
+            {
+                public int GroupDepth { get; set; }
+                public string GroupName { get; set; }
+                public List<char> GroupDelimiters { get; set; }
+                public List<GroupingDefinitionOption> GroupingDefinition { get; set; }
+                public class GroupingDefinitionOption
+                {
+                    public string Value { get; set; }
+                    public Dictionary<string, string> Replacements { get; set; }
+                    public string Direction { get; set; }
+                }
+            }
         }
 
         public class InitOptions

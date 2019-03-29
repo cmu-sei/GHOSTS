@@ -10,6 +10,10 @@ namespace ghosts.tools.loadtestercore
     {
         static void Main(string[] args)
         {
+            var host = "http://localhost:5000";
+            if (args != null && args.Length > 0 && !string.IsNullOrEmpty(args[0]))
+                host = args[0].TrimEnd(Convert.ToChar("/"));
+
             RestClient client;
             IRestResponse o;
             string id;
@@ -29,33 +33,41 @@ namespace ghosts.tools.loadtestercore
             var i = 0;
             while (true)
             {
-                client = new RestClient("http://localhost:5000/api/clientid");
+                client = new RestClient($"{host}/api/clientid");
                 request = new RestRequest(Method.GET);
                 request.AddHeader("Cache-Control", "no-cache");
                 request.AddHeader("Content-Type", "application/json");
                 request.AddHeader("user", "bobby.tables");
                 request.AddHeader("ip", $"1127.9.8.{i}");
+                request.AddHeader("domain", $"domain-{i}");
+                request.AddHeader("host", $"host-{i}");
+                request.AddHeader("resolvedhost", $"resolvedHost.{i}");
                 request.AddHeader("fqdn", $"flag02.hq.win10.user-test-vpn-{i}");
                 request.AddHeader("name", $"flag02.hq.win10.user-test-vpn-{i}");
+                request.AddHeader("version", "2.4.7.0");
                 o = client.Execute(request);
                 id = o.Content.Replace("\"", "");
 
                 Console.WriteLine($"Id response was: {id}");
-                
+
                 Thread.Sleep(50);
 
                 var i2 = 30;
                 Console.Write($"Results ");
                 while (i2 > 0)
                 {
-                    client = new RestClient("http://localhost:5000/api/clientresults");
+                    client = new RestClient($"{host}/api/clientresults");
                     request = new RestRequest(Method.POST);
                     request.AddHeader("Cache-Control", "no-cache");
                     request.AddHeader("Content-Type", "application/json");
                     request.AddHeader("user", "bobby.tables");
                     request.AddHeader("ip", $"1127.9.8.{i}");
+                    request.AddHeader("domain", $"domain-{i}");
+                    request.AddHeader("host", $"host-{i}");
+                    request.AddHeader("resolvedhost", $"resolvedHost.{i}");
                     request.AddHeader("fqdn", $"flag02.hq.win10.user-test-vpn-{i}");
                     request.AddHeader("name", $"flag02.hq.win10.user-test-vpn-{i}");
+                    request.AddHeader("version", "2.4.7.0");
                     request.AddHeader("id", id);
                     request.AddParameter("undefined",
                         "{\r\n\t\"Log\": \"TIMELINE|" + DateTime.UtcNow.ToString("MM/dd/yy H:mm:ss tt") + "|{\\\"Handler\\\":\\\"" +
@@ -66,47 +78,58 @@ namespace ghosts.tools.loadtestercore
                         DateTime.Now.ToString() + "|{\\\"Handler\\\":\\\"" + commands.PickRandom() +
                         "\\\",\\\"Command\\\":\\\"random\\\",\\\"CommandArg\\\":\\\"http:\\/\\/www.dma.mil\\\"}\"\r\n}", ParameterType.RequestBody);
                     o = client.Execute(request);
-                    
+
                     Console.Write($"{i2}, ");
                     i2--;
-                    
+
                     Thread.Sleep(50);
                 }
 
-                client = new RestClient("http://localhost:5000/api/clientresults");
+                client = new RestClient($"{host}/api/clientresults");
                 request = new RestRequest(Method.POST);
                 request.AddHeader("cache-control", "no-cache");
                 request.AddHeader("name", "flag02.hq.win10.user-test-vpn-001");
                 request.AddHeader("fqdn", "flag02.hq.win10.user-test-vpn-001");
                 request.AddHeader("ip", "127.0.0.1");
+                request.AddHeader("domain", "domain");
+                request.AddHeader("host", "host");
+                request.AddHeader("resolvedhost", "resolvedHost");
                 request.AddHeader("user", "bobby.tables");
+                request.AddHeader("version", "2.4.7.0");
                 request.AddHeader("Cache-Control", "no-cache");
                 request.AddHeader("Content-Type", "application/json");
-                request.AddParameter("undefined", "{\"Log\":\"HEALTH|" + DateTime.UtcNow.ToString("MM/dd/yy H:mm:ss tt") + "|{\\\"Internet\\\":true,\\\"Permissions\\\":false,\\\"ExecutionTime\\\":946,\\\"Errors\\\":[],\\\"LoggedOnUsers\\\":[\\\"Dustin\\\"],\\\"Stats\\\":{\\\"Memory\\\":0.907363832,\\\"Cpu\\\":97.98127,\\\"DiskSpace\\\":0.479912162}}\"}", ParameterType.RequestBody);
+                request.AddParameter("undefined",
+                    "{\"Log\":\"HEALTH|" + DateTime.UtcNow.ToString("MM/dd/yy H:mm:ss tt") +
+                    "|{\\\"Internet\\\":true,\\\"Permissions\\\":false,\\\"ExecutionTime\\\":946,\\\"Errors\\\":[],\\\"LoggedOnUsers\\\":[\\\"Dustin\\\"],\\\"Stats\\\":{\\\"Memory\\\":0.907363832,\\\"Cpu\\\":97.98127,\\\"DiskSpace\\\":0.479912162}}\"}",
+                    ParameterType.RequestBody);
                 o = client.Execute(request);
-                
+
                 Console.WriteLine($"Health response was: {o.ResponseStatus}");
                 Thread.Sleep(50);
 
-                client = new RestClient("http://localhost:5000/api/clientupdates");
+                client = new RestClient($"{host}/api/clientupdates");
                 request = new RestRequest(Method.GET);
                 request.AddHeader("Cache-Control", "no-cache");
                 request.AddHeader("Content-Type", "application/json");
                 request.AddHeader("user", "bobby.tables");
                 request.AddHeader("ip", $"1127.9.8.{i}");
+                request.AddHeader("domain", $"domain-{i}");
+                request.AddHeader("host", $"host-{i}");
+                request.AddHeader("resolvedhost", $"resolvedHost.{i}");
                 request.AddHeader("fqdn", $"flag02.hq.win10.user-test-vpn-{i}");
                 request.AddHeader("name", $"flag02.hq.win10.user-test-vpn-{i}");
                 request.AddHeader("id", id);
+                request.AddHeader("version", "2.4.7.0");
                 request.AddParameter("undefined", "{\"Log\":\"\"}", ParameterType.RequestBody);
                 o = client.Execute(request);
-                
+
                 Console.WriteLine($"Updates response was: {o.ResponseStatus}");
                 Thread.Sleep(500);
                 i++;
             }
         }
     }
-    
+
     public static class EnumerableExtension
     {
         public static T PickRandom<T>(this IEnumerable<T> source)

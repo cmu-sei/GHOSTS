@@ -48,7 +48,10 @@ namespace Ghosts.Api.Controllers
             {
                 Name = Request.Headers["name"],
                 FQDN = Request.Headers["fqdn"],
+                Host = Request.Headers["host"],
+                ResolvedHost = Request.Headers["resolvedhost"],
                 HostIp = Request.Headers["ip"],
+                Domain = Request.Headers["domain"],
                 CurrentUsername = Request.Headers["user"],
                 ClientVersion = Request.Headers["version"],
                 IPAddress = HttpContext.Connection.RemoteIpAddress.ToString(),

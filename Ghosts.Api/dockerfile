@@ -11,7 +11,7 @@
 
 #RUN dotnet restore
 #RUN dotnet build
-#RUN dotnet publish -c Release -o /app/dist
+#RUN dotnet publish -c Release -o bin/publish
 
 #CMD ["dotnet", "run"]
 

@@ -28,24 +28,36 @@ namespace Ghosts.Api.Data
             {
                 Name = "test1",
                 FQDN = "test1.fqdn.variable.tld",
+                Host = "test1",
+                ResolvedHost = "test1.resolved.host",
+                Domain = "domain",
                 HostIp = "0.0.0.0",
                 IPAddress = "192.168.0.11",
-                CurrentUsername = "testuser1"
+                CurrentUsername = "testuser1",
+                ClientVersion = "2.4.7.0"
             };
 
             var m2 = new Machine
             {
                 Name = "test2",
                 FQDN = "test2.fqdn.variable.tld",
+                Host = "test2",
+                ResolvedHost = "test2.resolved.host",
+                Domain = "domain",
                 HostIp = "1.1.1.1",
                 IPAddress = "192.168.0.12",
-                CurrentUsername = "testuser2"
+                CurrentUsername = "testuser2",
+                ClientVersion = "2.4.7.0"
             };
 
             var m3 = new Machine
             {
                 Name = "test3",
                 FQDN = "test3.fqdn.variable.tld",
+                Host = "test3",
+                ResolvedHost = "test3.resolved.host",
+                Domain = "domain",
+                ClientVersion = "2.4.7.0",
                 HostIp = "2.2.2.2",
                 IPAddress = "192.168.0.13",
                 CurrentUsername = "testuser3"
