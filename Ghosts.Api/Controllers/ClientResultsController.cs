@@ -76,14 +76,14 @@ namespace Ghosts.Api.Controllers
 
             var m = new Machine
             {
-                Name = request.Headers["name"],
-                FQDN = request.Headers["fqdn"],
-                Host = Request.Headers["host"],
-                Domain = Request.Headers["domain"],
-                ResolvedHost = Request.Headers["resolvedhost"],
-                HostIp = request.Headers["ip"],
-                CurrentUsername = request.Headers["user"],
-                ClientVersion = request.Headers["version"],
+                Name = Request.Headers["ghosts-name"],
+                FQDN = Request.Headers["ghosts-fqdn"],
+                Host = Request.Headers["ghosts-host"],
+                Domain = Request.Headers["ghosts-domain"],
+                ResolvedHost = Request.Headers["ghosts-resolvedhost"],
+                HostIp = Request.Headers["ghosts-ip"],
+                CurrentUsername = Request.Headers["ghosts-user"],
+                ClientVersion = Request.Headers["ghosts-version"],
                 IPAddress = context.Connection.RemoteIpAddress.ToString(),
                 StatusUp = Machine.UpDownStatus.Up
             };

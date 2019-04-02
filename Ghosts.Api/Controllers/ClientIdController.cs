@@ -49,16 +49,16 @@ namespace Ghosts.Api.Controllers
             {
                 m = new Machine
                 {
-                    Name = Request.Headers["name"],
-                    FQDN = Request.Headers["fqdn"],
-                    Host = Request.Headers["host"],
-                    Domain = Request.Headers["domain"],
-                    ResolvedHost = Request.Headers["resolvedhost"],
-                    HostIp = Request.Headers["ip"],
-                    CurrentUsername = Request.Headers["user"],
+                    Name = Request.Headers["ghosts-name"],
+                    FQDN = Request.Headers["ghosts-fqdn"],
+                    Host = Request.Headers["ghosts-host"],
+                    Domain = Request.Headers["ghosts-domain"],
+                    ResolvedHost = Request.Headers["ghosts-resolvedhost"],
+                    HostIp = Request.Headers["ghosts-ip"],
+                    CurrentUsername = Request.Headers["ghosts-user"],
+                    ClientVersion = Request.Headers["ghosts-version"],
                     IPAddress = HttpContext.Connection.RemoteIpAddress.ToString(),
-                    StatusUp = Machine.UpDownStatus.Up,
-                    ClientVersion = Request.Headers["version"]
+                    StatusUp = Machine.UpDownStatus.Up
                 };
 
                 m.History.Add(new Machine.MachineHistoryItem { Type = Machine.MachineHistoryItem.HistoryType.Created });
