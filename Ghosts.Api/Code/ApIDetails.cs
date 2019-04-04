@@ -50,7 +50,7 @@ namespace Ghosts.Api.Code
         {
             public int OfflineAfterMinutes { get; set; }
             public int LookbackRecords { get; set; }
-            public bool IsMatchingIdByName { get; set; }
+            public string MatchMachinesBy { get; set; }
             public int CacheTime { get; set; }
             public int QueueSyncDelayInSeconds { get; set; }
             public int NotificationsQueueSyncDelayInSeconds { get; set; }

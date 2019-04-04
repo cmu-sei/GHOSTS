@@ -38,7 +38,7 @@ namespace ghosts.api.Controllers
 
             try
             {
-                var key = Request.Headers["name"].ToString();
+                var key = Request.Headers["ghosts-name"].ToString();
                 //decrypt - the headers must be the same as encrypted with the client
                 transmission.Payload = Crypto.Base64Decode(transmission.Payload);
                 raw = Crypto.DecryptStringAes(transmission.Payload, key);
@@ -69,7 +69,7 @@ namespace ghosts.api.Controllers
 
         private IActionResult Process(HttpContext context, HttpRequest request, Survey value, CancellationToken ct)
         {
-            var id = request.Headers["id"];
+            var id = request.Headers["ghosts-id"];
 
             _log.Trace($"Request by {id}");
 

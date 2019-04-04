@@ -31,7 +31,7 @@ namespace Ghosts.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> Index(CancellationToken ct)
         {
-            var id = Request.Headers["id"];
+            var id = Request.Headers["ghosts-id"];
             log.Trace($"Request by {id}");
 
             var m = new Machine();
@@ -40,9 +40,9 @@ namespace Ghosts.Api.Controllers
                 m = await this._service.GetByIdAsync(new Guid(id), ct);
             }
             
-            if (Program.ClientConfig.IsMatchingIdByName && (m == null || !m.IsValid()))
+            if (m == null || !m.IsValid())
             {
-                m = await this._service.FindByName(Request.Headers["name"], ct);
+                m = await this._service.FindByValue(Request.Headers, ct);
             }
             
             if (m == null || !m.IsValid())

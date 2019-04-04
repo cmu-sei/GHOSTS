@@ -28,7 +28,7 @@ namespace Ghosts.Client.Code
             client.Headers.Add(HttpRequestHeader.UserAgent, "Ghosts Client");
             if (hasId)
             {
-                client.Headers.Add("id", CheckId.Id);
+                client.Headers.Add("ghosts-id", CheckId.Id);
             }
             client.Headers.Add("ghosts-name", machine.Name);
             client.Headers.Add("ghosts-fqdn", machine.FQDN);

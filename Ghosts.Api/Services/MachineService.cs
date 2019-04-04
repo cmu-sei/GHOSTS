@@ -9,6 +9,8 @@ using Ghosts.Api.Code;
 using Ghosts.Api.Data;
 using Ghosts.Api.Models;
 using Ghosts.Domain;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Server.Kestrel.Transport.Libuv.Internal.Networking;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using NLog;
@@ -20,7 +22,7 @@ namespace Ghosts.Api.Services
     {
         Task<List<Machine>> GetAsync(string q, CancellationToken ct);
         Task<Machine> GetByIdAsync(Guid id, CancellationToken ct);
-        Task<Machine> FindByName(string name, CancellationToken ct);
+        Task<Machine> FindByValue(IHeaderDictionary headers, CancellationToken ct);
         Task<List<MachineListItem>> GetListAsync(CancellationToken ct);
         Task<Guid> CreateAsync(Machine model, CancellationToken ct);
         Task<Machine> UpdateAsync(Machine model, CancellationToken ct);
@@ -55,9 +57,19 @@ namespace Ghosts.Api.Services
             return list;
         }
 
-        public async Task<Machine> FindByName(string name, CancellationToken ct)
+        public async Task<Machine> FindByValue(IHeaderDictionary headers, CancellationToken ct)
         {
-            return _context.Machines.FirstOrDefault(o => o.Name.ToUpper().Contains(name.ToUpper()));
+            switch (Program.ClientConfig.MatchMachinesBy.ToLower())
+            {
+                case "fqdn":
+                    return _context.Machines.FirstOrDefault(o => o.FQDN.ToUpper().Contains(headers["ghosts-fqdn"].ToString().ToUpper()));
+                case "host":
+                    return _context.Machines.FirstOrDefault(o => o.Host.ToUpper().Contains(headers["ghosts-host"].ToString().ToUpper()));
+                case "resolvedhost":
+                    return _context.Machines.FirstOrDefault(o => o.ResolvedHost.ToUpper().Contains(headers["ghosts-resolvedhost"].ToString().ToUpper()));
+                default: 
+                    return _context.Machines.FirstOrDefault(o => o.Name.ToUpper().Contains(headers["ghosts-name"].ToString().ToUpper()));
+            }
         }
 
         public async Task<List<MachineListItem>> GetListAsync(CancellationToken ct)

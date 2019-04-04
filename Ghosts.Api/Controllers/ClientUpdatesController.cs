@@ -40,7 +40,7 @@ namespace Ghosts.Api.Controllers
         [ProducesResponseType(404)]
         public async Task<IActionResult> Index(CancellationToken ct)
         {
-            var id = Request.Headers["id"];
+            var id = Request.Headers["ghosts-id"];
 
             log.Trace($"Request by {id}");
 
