@@ -22,9 +22,9 @@ namespace Ghosts.Domain
         public ResultMachine()
         {
             Name = Environment.MachineName;
-            FQDN = Dns.GetHostName();
+            FQDN = GetHost();
             Domain = GetDomain();
-            Host = GetHost();
+            Host = Dns.GetHostName();
             ResolvedHost = GetResolvedHost();
             ClientIp = GetLocalIPAddress();
             //this.IpAddress would be only set by API server picking up the request
