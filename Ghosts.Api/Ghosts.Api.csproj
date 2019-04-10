@@ -3,8 +3,17 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <AssemblyName>ghosts.api</AssemblyName>
-    <ReleaseVersion>2.4.9.0</ReleaseVersion>
+    <ReleaseVersion>2.5.0.1</ReleaseVersion>
     <SynchReleaseVersion>false</SynchReleaseVersion>
+    <Version>2.5.0.1</Version>
+    <AssemblyVersion>2.5.0.1</AssemblyVersion>
+    <FileVersion>2.5.0.1</FileVersion>
+    
+    <Authors>Dustin Updyke for Carnegie Mellon University</Authors>
+    <Company>Carnegie Mellon University</Company>
+    <Product>GHOSTS</Product>
+    <Description>GHOSTS NPC Orchestration Platform - please email ddupdyke@sei.cmu.edu with bugs/requests/other</Description>
+    <Copyright>Carnegie Mellon University 2017</Copyright>
   </PropertyGroup>
 
   <ItemGroup>

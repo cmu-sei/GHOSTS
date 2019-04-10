@@ -24,66 +24,6 @@ namespace Ghosts.Api.Data
             }
 
             await CreateDefaultUserAndRoleForApplication(userManager, roleManager, logger);
-            var m1 = new Machine
-            {
-                Name = "test1",
-                FQDN = "test1.fqdn.variable.tld",
-                Host = "test1",
-                ResolvedHost = "test1.resolved.host",
-                Domain = "domain",
-                HostIp = "0.0.0.0",
-                IPAddress = "192.168.0.11",
-                CurrentUsername = "testuser1",
-                ClientVersion = "2.4.7.0"
-            };
-
-            var m2 = new Machine
-            {
-                Name = "test2",
-                FQDN = "test2.fqdn.variable.tld",
-                Host = "test2",
-                ResolvedHost = "test2.resolved.host",
-                Domain = "domain",
-                HostIp = "1.1.1.1",
-                IPAddress = "192.168.0.12",
-                CurrentUsername = "testuser2",
-                ClientVersion = "2.4.7.0"
-            };
-
-            var m3 = new Machine
-            {
-                Name = "test3",
-                FQDN = "test3.fqdn.variable.tld",
-                Host = "test3",
-                ResolvedHost = "test3.resolved.host",
-                Domain = "domain",
-                ClientVersion = "2.4.7.0",
-                HostIp = "2.2.2.2",
-                IPAddress = "192.168.0.13",
-                CurrentUsername = "testuser3"
-            };
-
-            context.Machines.Add(m1);
-            context.Machines.Add(m2);
-            context.Machines.Add(m3);
-            context.SaveChanges();
-
-            var mg1 = new Group();
-            mg1.Name = "Test Group Carnegie";
-
-            mg1.GroupMachines.Add(new GroupMachine{MachineId = m1.Id});
-            mg1.GroupMachines.Add(new GroupMachine { MachineId = m2.Id });
-
-            context.Groups.Add(mg1);
-
-            var mg2 = new Group();
-            mg2.Name = "Test Group Mellon";
-            mg2.Machines.Add(m3);
-
-            mg2.GroupMachines.Add(new GroupMachine { MachineId = m3.Id });
-
-            context.Groups.Add(mg2);
-            context.SaveChanges();
 
             foreach (var role in Enum.GetValues(typeof(ApiDetails.Roles)))
             {
