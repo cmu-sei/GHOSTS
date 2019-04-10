@@ -3,6 +3,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Ghosts.Api.Code;
 using Ghosts.Api.Models;
 using Ghosts.Api.Services;
 using Ghosts.Domain;
@@ -44,19 +45,7 @@ namespace Ghosts.Api.Controllers
 
             log.Trace($"Request by {id}");
 
-            var m = new Machine
-            {
-                Name = Request.Headers["ghosts-name"],
-                FQDN = Request.Headers["ghosts-fqdn"],
-                Host = Request.Headers["ghosts-host"],
-                Domain = Request.Headers["ghosts-domain"],
-                ResolvedHost = Request.Headers["ghosts-resolvedhost"],
-                HostIp = Request.Headers["ghosts-ip"],
-                CurrentUsername = Request.Headers["ghosts-user"],
-                ClientVersion = Request.Headers["ghosts-version"],
-                IPAddress = HttpContext.Connection.RemoteIpAddress.ToString(),
-                StatusUp = Machine.UpDownStatus.Up
-            };
+            var m = WebRequestReader.GetMachine(HttpContext);
 
             if (!string.IsNullOrEmpty(id))
             {

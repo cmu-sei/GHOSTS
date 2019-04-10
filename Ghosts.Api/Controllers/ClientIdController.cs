@@ -47,19 +47,7 @@ namespace Ghosts.Api.Controllers
             
             if (m == null || !m.IsValid())
             {
-                m = new Machine
-                {
-                    Name = Request.Headers["ghosts-name"],
-                    FQDN = Request.Headers["ghosts-fqdn"],
-                    Host = Request.Headers["ghosts-host"],
-                    Domain = Request.Headers["ghosts-domain"],
-                    ResolvedHost = Request.Headers["ghosts-resolvedhost"],
-                    HostIp = Request.Headers["ghosts-ip"],
-                    CurrentUsername = Request.Headers["ghosts-user"],
-                    ClientVersion = Request.Headers["ghosts-version"],
-                    IPAddress = HttpContext.Connection.RemoteIpAddress.ToString(),
-                    StatusUp = Machine.UpDownStatus.Up
-                };
+                m = WebRequestReader.GetMachine(HttpContext);
 
                 m.History.Add(new Machine.MachineHistoryItem { Type = Machine.MachineHistoryItem.HistoryType.Created });
                 await this._service.CreateAsync(m, ct);
