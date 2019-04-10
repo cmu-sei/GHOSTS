@@ -42,7 +42,7 @@ namespace Ghosts.Api.Controllers
             
             if (m == null || !m.IsValid())
             {
-                m = await this._service.FindByValue(Request.Headers, ct);
+                m = await this._service.FindByValue(WebRequestReader.GetMachine(HttpContext), ct);
             }
             
             if (m == null || !m.IsValid())

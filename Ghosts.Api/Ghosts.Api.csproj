@@ -3,11 +3,11 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <AssemblyName>ghosts.api</AssemblyName>
-    <ReleaseVersion>2.5.0.1</ReleaseVersion>
+    <ReleaseVersion>2.5.0.2</ReleaseVersion>
     <SynchReleaseVersion>false</SynchReleaseVersion>
-    <Version>2.5.0.1</Version>
-    <AssemblyVersion>2.5.0.1</AssemblyVersion>
-    <FileVersion>2.5.0.1</FileVersion>
+    <Version>2.5.0.2</Version>
+    <AssemblyVersion>2.5.0.2</AssemblyVersion>
+    <FileVersion>2.5.0.2</FileVersion>
     
     <Authors>Dustin Updyke for Carnegie Mellon University</Authors>
     <Company>Carnegie Mellon University</Company>
