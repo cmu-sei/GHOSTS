@@ -33,6 +33,7 @@ namespace Ghosts.Client.Code
             client.Headers.Add("ghosts-name", machine.Name);
             client.Headers.Add("ghosts-fqdn", machine.FQDN);
             client.Headers.Add("ghosts-host", machine.Host);
+            client.Headers.Add("ghosts-domain", machine.Domain);
             client.Headers.Add("ghosts-resolvedhost", machine.ResolvedHost);
             client.Headers.Add("ghosts-ip", machine.ClientIp);
             client.Headers.Add("ghosts-user", machine.CurrentUsername);

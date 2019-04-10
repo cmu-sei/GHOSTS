@@ -21,10 +21,10 @@ namespace Ghosts.Domain
 
         public ResultMachine()
         {
-            Name = Environment.MachineName;
+            Name = Environment.MachineName.ToLower();
             FQDN = GetHost();
             Domain = GetDomain();
-            Host = Dns.GetHostName();
+            Host = Dns.GetHostName().ToLower();
             ResolvedHost = GetResolvedHost();
             ClientIp = GetLocalIPAddress();
             //this.IpAddress would be only set by API server picking up the request
@@ -33,11 +33,11 @@ namespace Ghosts.Domain
 
         public ResultMachine(string name, string fqdn, string domain, string host, string resolvedHost, string clientIp, string incomingIp, string username)
         {
-            Name = name;
-            FQDN = fqdn;
+            Name = name.ToLower();
+            FQDN = fqdn.ToLower();
             Domain = domain;
-            Host = host;
-            ResolvedHost = resolvedHost;
+            Host = host.ToLower();
+            ResolvedHost = resolvedHost.ToLower();
             ClientIp = clientIp;
             IpAddress = incomingIp;
             CurrentUsername = username;
@@ -50,6 +50,9 @@ namespace Ghosts.Domain
 
         public void SetName(string name)
         {
+            if(!string.IsNullOrEmpty(name))
+                name = name.ToLower();
+
             Name = name;
         }
 
@@ -57,7 +60,7 @@ namespace Ghosts.Domain
         {
             try
             {
-                return Dns.GetHostEntry("localhost").HostName;
+                return Dns.GetHostEntry("localhost").HostName.ToLower();
             }
             catch
             {
@@ -69,7 +72,7 @@ namespace Ghosts.Domain
         {
             try
             {
-                return Dns.GetHostEntry("localhost").HostName;
+                return Dns.GetHostEntry("localhost").HostName.ToLower();
             }
             catch
             {
