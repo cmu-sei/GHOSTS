@@ -25,16 +25,18 @@ namespace Ghosts.Client.Code
         private static WebClient BuildEx(ResultMachine machine, bool hasId = true)
         {
             var client = new WebClient();
-            client.Headers.Add(HttpRequestHeader.UserAgent, "Ghosts Client");
             if (hasId)
             {
-                client.Headers.Add("id", CheckId.Id);
+                client.Headers.Add("ghosts-id", CheckId.Id);
             }
-            client.Headers.Add("name", machine.Name);
-            client.Headers.Add("fqdn", machine.FQDN);
-            client.Headers.Add("ip", machine.ClientIp);
-            client.Headers.Add("user", machine.CurrentUsername);
-            client.Headers.Add("version", ApplicationDetails.Version);
+            client.Headers.Add("ghosts-name", machine.Name);
+            client.Headers.Add("ghosts-fqdn", machine.FQDN);
+            client.Headers.Add("ghosts-host", machine.Host);
+            client.Headers.Add("ghosts-domain", machine.Domain);
+            client.Headers.Add("ghosts-resolvedhost", machine.ResolvedHost);
+            client.Headers.Add("ghosts-ip", machine.ClientIp);
+            client.Headers.Add("ghosts-user", machine.CurrentUsername);
+            client.Headers.Add("ghosts-version", ApplicationDetails.Version);
             return client;
         }
 
