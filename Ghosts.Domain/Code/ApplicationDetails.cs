@@ -82,7 +82,8 @@ namespace Ghosts.Domain.Code
         public static class InstanceDirectories
         {
             public static string Path => InstanceFiles.Path;
-            public static string Timeline => Clean(Path + $"timeline{System.IO.Path.DirectorySeparatorChar}");
+            public static string TimelineIn => Clean(Path + $"timeline{System.IO.Path.DirectorySeparatorChar}in{System.IO.Path.DirectorySeparatorChar}");
+            public static string TimelineOut => Clean(Path + $"timeline{System.IO.Path.DirectorySeparatorChar}out{System.IO.Path.DirectorySeparatorChar}");
         }
 
         /// <summary>

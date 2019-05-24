@@ -14,7 +14,8 @@ namespace Ghosts.Client.TimelineManager
     public static class ListenerManager
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        internal static string In = ApplicationDetails.InstanceDirectories.Timeline;
+        internal static string In = ApplicationDetails.InstanceDirectories.TimelineIn;
+        internal static string Out = ApplicationDetails.InstanceDirectories.TimelineOut;
 
         public static void Run()
         {
@@ -45,6 +46,12 @@ namespace Ghosts.Client.TimelineManager
                         _log.Trace($"DirectoryListener created DirIn: {In})");
                     }
 
+                    if (!Directory.Exists(Out))
+                    {
+                        Directory.CreateDirectory(Out);
+                        _log.Trace($"DirectoryListener created DirIn: {Out})");
+                    }
+
                     var t = new Thread(() => { new DirectoryListener(); })
                     {
                         IsBackground = true,
@@ -71,6 +78,7 @@ namespace Ghosts.Client.TimelineManager
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
         private static string _in = ListenerManager.In;
+        private static string _out = ListenerManager.Out;
         private static string _currentlyProcessing = string.Empty;
 
         public DirectoryListener()
@@ -89,6 +97,8 @@ namespace Ghosts.Client.TimelineManager
         {
             // filewatcher throws multiple events, we only need 1
             if (!string.IsNullOrEmpty(_currentlyProcessing) && _currentlyProcessing == e.FullPath) return;
+            if (!File.Exists(e.FullPath)) return;
+
             _currentlyProcessing = e.FullPath;
             
             _log.Trace("DirectoryListener found file: " + e.FullPath + " " + e.ChangeType);
@@ -115,14 +125,20 @@ namespace Ghosts.Client.TimelineManager
                     orchestrator.RunCommand(timelineHandler);
                 }
 
-                File.Move(e.FullPath, e.FullPath.Replace(".json", $"-{Guid.NewGuid().ToString()}.processed"));
+                var outfile = e.FullPath.Replace(_in, _out);
+                outfile = outfile.Replace(e.Name, $"{DateTime.Now.ToString("G").Replace("/", "-").Replace(" ", "").Replace(":", "")}-{e.Name}");
+
+                File.Move(e.FullPath, outfile);
             }
             catch (Exception exc)
             {
                 _log.Debug(exc);
             }
-
-            _currentlyProcessing = string.Empty;
+            finally
+            {
+                Thread.Sleep(1000);
+                _currentlyProcessing = string.Empty;
+            }
         }
     }
 
