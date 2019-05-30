@@ -10,7 +10,7 @@ namespace ghosts.tools.loadtestercore
     {
         static void Main(string[] args)
         {
-            var host = "http://localhost:52000";
+            var host = "http://localhost:5000";
             if (args != null && args.Length > 0 && !string.IsNullOrEmpty(args[0]))
                 host = args[0].TrimEnd(Convert.ToChar("/"));
 

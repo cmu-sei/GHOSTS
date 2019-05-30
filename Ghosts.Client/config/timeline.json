@@ -2,6 +2,23 @@
     "Status": "Run",
     "TimeLineHandlers": [
         {
+            "HandlerType": "Command",
+            "Initial": "",
+            "UtcTimeOn": "00:00:00",
+            "UtcTimeOff": "24:00:00",
+            "Loop": "True",
+            "TimeLineEvents": [
+                {
+                    "Command": "start microsoft-edge:http://mypay.dfas.com",
+                    "CommandArgs": [
+                        "exit"
+                    ],
+                    "DelayAfter": 900000,
+                    "DelayBefore": 0
+                }
+            ]
+        },
+        {
             "HandlerType": "Outlook",
             "Initial": "",
             "UtcTimeOn": "00:00:00",

@@ -443,12 +443,14 @@ namespace Ghosts.Client.TimelineManager
         {
             try
             {
+                _log.Trace($"FileWatcher event raised: {e.FullPath} {e.Name} {e.ChangeType}");
+
                 // filewatcher throws two events, we only need 1
                 DateTime lastWriteTime = File.GetLastWriteTime(e.FullPath);
                 if (lastWriteTime > _lastRead.AddSeconds(1))
                 {
                     _lastRead = lastWriteTime;
-                    _log.Trace("File: " + e.FullPath + " " + e.ChangeType);
+                    _log.Trace("FileWatcher Processing: " + e.FullPath + " " + e.ChangeType);
                     _log.Trace($"Reloading {MethodBase.GetCurrentMethod().DeclaringType}");
 
                     _log.Trace("terminate existing tasks and rerun orchestrator");
@@ -459,7 +461,7 @@ namespace Ghosts.Client.TimelineManager
                     }
                     catch (Exception exception)
                     {
-                        _log.Trace(exception);
+                        _log.Info(exception);
                     }
 
                     try
@@ -468,7 +470,7 @@ namespace Ghosts.Client.TimelineManager
                     }
                     catch (Exception exception)
                     {
-                        _log.Trace(exception);
+                        _log.Info(exception);
                     }
 
                     try
@@ -477,14 +479,15 @@ namespace Ghosts.Client.TimelineManager
                     }
                     catch (Exception exception)
                     {
-                        _log.Trace(exception);
+                        _log.Info(exception);
                     }
                 }
             }
             catch (Exception exc)
             {
-                _log.Trace(exc);
+                _log.Info(exc);
             }
+
         }
     }
 
