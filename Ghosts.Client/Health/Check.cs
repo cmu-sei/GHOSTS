@@ -16,6 +16,7 @@ namespace Ghosts.Client.Health
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
         private static readonly Logger _healthLog = LogManager.GetLogger("HEALTH");
+        private static FileSystemWatcher watcher = new FileSystemWatcher();
 
         private static DateTime _lastRead = DateTime.MinValue;
         private List<Thread> _threads { get; set; }
@@ -28,7 +29,7 @@ namespace Ghosts.Client.Health
         public void Run()
         {
             // now watch that file for changes
-            var watcher = new FileSystemWatcher(ApplicationDetails.ConfigurationFiles.Path);
+            watcher = new FileSystemWatcher(ApplicationDetails.ConfigurationFiles.Path);
             watcher.Filter = Path.GetFileName(ApplicationDetails.ConfigurationFiles.Health);
             _log.Trace($"watching {watcher.Path}");
             watcher.NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.FileName | NotifyFilters.Size;

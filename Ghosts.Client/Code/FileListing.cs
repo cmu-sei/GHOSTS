@@ -7,6 +7,7 @@ using System.Linq;
 using Ghosts.Domain.Code;
 using NLog;
 using Exception = System.Exception;
+using System.Threading;
 
 namespace Ghosts.Client.Code
 {
@@ -17,6 +18,8 @@ namespace Ghosts.Client.Code
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
         private static readonly string _fileName = ApplicationDetails.InstanceFiles.FilesCreated;
+        private static Object _locked = new Object();
+        private static Object _safetyLocked = new Object();
 
         public static void Add(string path)
         {
@@ -25,9 +28,19 @@ namespace Ghosts.Client.Code
                 if (!File.Exists(_fileName))
                     File.Create(_fileName);
 
-                using (var writetext = new StreamWriter(_fileName, true))
+                if (!Monitor.IsEntered(_safetyLocked)) //checking if safetynet is currently flushing cache
                 {
-                    writetext.WriteLine(path);
+                    lock (_locked) //if a thread has entered, the others will wait
+                    {
+                        var writetext = new StreamWriter(_fileName, true);
+                        writetext.WriteLine(path);
+                        writetext.Flush();
+                        writetext.Close();
+                    }
+                }
+                else //sleep if safetynet is being safe
+                {
+                    Thread.Sleep(5000);
                 }
             }
             catch (Exception e)
@@ -45,50 +58,55 @@ namespace Ghosts.Client.Code
             if (Program.Configuration.OfficeDocsMaxAgeInHours == -1)
                 return;
 
-            _log.Trace("Flushing list...");
-            try
+            //locking thread to make sure files can't wirte to the log
+            lock (_safetyLocked)
             {
-                var deletedFiles = new List<string>();
-
-                using (var reader = new StreamReader(_fileName))
+                _log.Trace("Flushing list...");
+                try
                 {
-                    string line;
-                    while ((line = reader.ReadLine()) != null)
+                    var deletedFiles = new List<string>();
+
+                    using (var reader = new StreamReader(_fileName))
                     {
-                        var file = new FileInfo(line);
-                        _log.Trace($"file is {file.FullName} {file.CreationTime}");
-                        if (file.Exists && file.CreationTime < DateTime.UtcNow.AddHours(-Program.Configuration.OfficeDocsMaxAgeInHours)) //clean up and delete files older than x hours
+                        string line;
+                        while ((line = reader.ReadLine()) != null)
                         {
-                            try
+                            var file = new FileInfo(line);
+                            var creationTime = file.CreationTime.Hour;
+                            _log.Trace($"file is {file.FullName} {file.CreationTime}");
+                            if (file.Exists && (creationTime > Program.Configuration.OfficeDocsMaxAgeInHours)) //clean up and delete files older than x hours
                             {
-                                _log.Trace($"deleting: {file.FullName}");
-                                file.Delete();
-                                deletedFiles.Add(file.FullName);
-                            }
-                            catch (Exception e)
-                            {
-                                _log.Debug($"Could not delete file {e}");
+                                try
+                                {
+                                    _log.Trace($"deleting: {file.FullName}");
+                                    file.Delete();
+                                    deletedFiles.Add(file.FullName);
+                                }
+                                catch (Exception e)
+                                {
+                                    _log.Debug($"Could not delete file {e}");
+                                }
                             }
                         }
                     }
-                }
 
-                if (deletedFiles.Count > 0)
-                {
-                    var lines = File.ReadAllLines(_fileName).ToList();
-                    foreach (var line in lines.ToArray())
+                    if (deletedFiles.Count >= 0)
                     {
-                        if (deletedFiles.Contains(line))
+                        var lines = File.ReadAllLines(_fileName).ToList();
+                        foreach (var line in lines.ToArray())
                         {
-                            lines.Remove(line);
+                            if (deletedFiles.Contains(line))
+                            {
+                                lines.Remove(line);
+                            }
                         }
+                        File.WriteAllLines(_fileName, lines);
                     }
-                    File.WriteAllLines(_fileName, lines);
                 }
-            }
-            catch (Exception e)
-            {
-                _log.Error($"Error flushing list {e}");
+                catch (Exception e)
+                {
+                    _log.Error($"Error flushing list {e}");
+                }
             }
         }
     }

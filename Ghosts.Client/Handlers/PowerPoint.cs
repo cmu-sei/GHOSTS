@@ -89,7 +89,7 @@ namespace Ghosts.Client.Handlers
                         PowerPoint.Application powerApplication = new PowerPoint.Application
                         {
                             DisplayAlerts = PpAlertLevel.ppAlertsNone,
-                            Visible = MsoTriState.msoTrue
+                            //Visible = MsoTriState.msoTrue
                         };
 
                         try
@@ -145,6 +145,7 @@ namespace Ghosts.Client.Handlers
                             _log.Debug(e);
                         }
 
+                        Thread.Sleep(5000);
                         presentation.SaveAs(path);
                         FileListing.Add(path);
                         Report(handler.HandlerType.ToString(), timelineEvent.Command,
@@ -193,7 +194,7 @@ namespace Ghosts.Client.Handlers
             finally
             {
                 KillApp();
-                FileListing.FlushList();
+                //FileListing.FlushList();
             }
         }
     }

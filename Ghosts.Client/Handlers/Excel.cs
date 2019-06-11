@@ -91,7 +91,7 @@ namespace Ghosts.Client.Handlers
                         Excel.Application excelApplication = new Excel.Application
                         {
                             DisplayAlerts = false,
-                            Visible = true
+                            //Visible = false
                         };
 
                         try
@@ -227,7 +227,7 @@ namespace Ghosts.Client.Handlers
             finally
             {
                 KillApp();
-                FileListing.FlushList();
+                //FileListing.FlushList();
                 _log.Trace($"Excel closing after successfully kill and flush");
             }
         }
