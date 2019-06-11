@@ -88,7 +88,7 @@ namespace Ghosts.Client.Handlers
                         Word.Application wordApplication = new Word.Application
                         {
                             DisplayAlerts = WdAlertLevel.wdAlertsNone,
-                            Visible = true
+                            //Visible = false
                         };
 
                         // add a new document
@@ -157,6 +157,7 @@ namespace Ghosts.Client.Handlers
                             _log.Debug(e);
                         }
 
+                        newDocument.Saved = true;
                         newDocument.SaveAs(path);
                         Report(handler.HandlerType.ToString(), timelineEvent.Command, timelineEvent.CommandArgs[0].ToString());
 
@@ -211,7 +212,7 @@ namespace Ghosts.Client.Handlers
             finally
             {
                 KillApp();
-                FileListing.FlushList();
+                //FileListing.FlushList();
             }
         }
     }

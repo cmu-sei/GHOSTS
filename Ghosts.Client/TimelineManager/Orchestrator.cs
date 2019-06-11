@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using System.Security.Permissions;
 
 namespace Ghosts.Client.TimelineManager
 {
@@ -25,30 +26,47 @@ namespace Ghosts.Client.TimelineManager
         private List<ThreadJob> _threadJobs { get; set; }
         private Thread MonitorThread { get; set; }
         private Timeline _timeline;
+        private FileSystemWatcher timelineWatcher;
+        private bool _isSafetyNetRunning = false;
+        private bool _isTempCleanerRunning = false;
 
         private bool _isWordInstalled { get; set; }
         private bool _isExcelInstalled { get; set; }
         private bool _isPowerPointInstalled { get; set; }
         private bool _isOutlookInstalled { get; set; }
 
+        [PermissionSet(SecurityAction.Demand, Name ="FullTrust")]
         public void Run()
         {
             try
             {
-                this.StartSafetyNet(); //watch instance numbers
-                TempFiles.StartTempFileWatcher(); //watch temp directory on a diff schedule
+                if (_isSafetyNetRunning != true) //checking if safetynet has already been started
+                {
+                    this.StartSafetyNet(); //watch instance numbers
+                    _isSafetyNetRunning = true;
+                }
+
+                if (_isTempCleanerRunning != true) //checking if tempcleaner has been started
+                {
+                    TempFiles.StartTempFileWatcher(); //watch temp directory on a diff schedule
+                    _isTempCleanerRunning = true;
+                }
 
                 this._timeline = TimelineBuilder.GetLocalTimeline();
 
                 // now watch that file for changes
-                FileSystemWatcher timelineWatcher = new FileSystemWatcher(TimelineBuilder.TimelineFilePath().DirectoryName)
+                if(timelineWatcher == null) //you can change this to a bool if you want but checks if the object has been created
                 {
-                    Filter = Path.GetFileName(TimelineBuilder.TimelineFilePath().Name)
-                };
-                _log.Trace($"watching {timelineWatcher.Path}");
-                timelineWatcher.NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.FileName | NotifyFilters.Size | NotifyFilters.CreationTime | NotifyFilters.LastWrite;
-                timelineWatcher.EnableRaisingEvents = true;
-                timelineWatcher.Changed += new FileSystemEventHandler(OnChanged);
+                    Console.Write("STARTING TIMELINE STARTING AND IS NULL");
+                    timelineWatcher = new FileSystemWatcher(TimelineBuilder.TimelineFilePath().DirectoryName)
+                    {
+                        Filter = Path.GetFileName(TimelineBuilder.TimelineFilePath().Name)
+                    };
+                    _log.Trace($"watching {Path.GetFileName(TimelineBuilder.TimelineFilePath().Name)}");
+                    timelineWatcher.NotifyFilter = NotifyFilters.LastWrite;
+                    timelineWatcher.EnableRaisingEvents = true;
+                    timelineWatcher.Changed += OnChanged;
+                }
 
                 _threadJobs = new List<ThreadJob>();
 
@@ -133,6 +151,9 @@ namespace Ghosts.Client.TimelineManager
                 try
                 {
                     _log.Trace("SafetyNet loop beginning");
+
+                    FileListing.FlushList(); //Added 6/10 by AMV to clear clogged while loop.
+
                     var timeline = TimelineBuilder.GetLocalTimeline();
 
                     var handlerCount = timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.Excel);
@@ -443,11 +464,12 @@ namespace Ghosts.Client.TimelineManager
         {
             try
             {
+                Console.WriteLine($"File: {e.FullPath} {e.ChangeType}");
                 _log.Trace($"FileWatcher event raised: {e.FullPath} {e.Name} {e.ChangeType}");
 
                 // filewatcher throws two events, we only need 1
                 DateTime lastWriteTime = File.GetLastWriteTime(e.FullPath);
-                if (lastWriteTime > _lastRead.AddSeconds(1))
+                if (lastWriteTime != _lastRead)
                 {
                     _lastRead = lastWriteTime;
                     _log.Trace("FileWatcher Processing: " + e.FullPath + " " + e.ChangeType);
