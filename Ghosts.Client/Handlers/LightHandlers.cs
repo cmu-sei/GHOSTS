@@ -107,8 +107,6 @@ namespace Ghosts.Client.Handlers
                         FileListing.Add(path);
                         this.Report(handler.HandlerType.ToString(), timelineEvent.Command,
                             timelineEvent.CommandArgs[0].ToString());
-
-                        FileListing.FlushList();
                     }
                 }
                 catch (Exception e)
@@ -169,8 +167,6 @@ namespace Ghosts.Client.Handlers
                         FileListing.Add(path);
                         this.Report(handler.HandlerType.ToString(), timelineEvent.Command,
                             timelineEvent.CommandArgs[0].ToString());
-
-                        FileListing.FlushList();
                     }
                 }
                 catch (Exception e)

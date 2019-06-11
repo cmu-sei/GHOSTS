@@ -10,6 +10,7 @@ using System;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 using Excel = NetOffice.ExcelApi;
 using XlWindowState = NetOffice.ExcelApi.Enums.XlWindowState;
@@ -91,7 +92,7 @@ namespace Ghosts.Client.Handlers
                         Excel.Application excelApplication = new Excel.Application
                         {
                             DisplayAlerts = false,
-                            //Visible = false
+                            Visible = true
                         };
 
                         try
@@ -190,22 +191,22 @@ namespace Ghosts.Client.Handlers
                         // close excel and dispose reference
                         excelApplication.Quit();
                         excelApplication.Dispose();
+                        excelApplication = null;
+
+                        workBook = null;
+                        workSheet = null;
 
                         try
                         {
-                            if (excelApplication != null)
-                            {
-                                System.Runtime.InteropServices.Marshal.ReleaseComObject(excelApplication);
-                            }
+                            Marshal.ReleaseComObject(excelApplication);
                         }
-                        catch (Exception e)
-                        {
-                            _log.Error($"Excel com release exception: {e}");
-                        }
+                        catch { }
 
-                        excelApplication = null;
-                        workBook = null;
-                        workSheet = null;
+                        try
+                        {
+                            Marshal.FinalReleaseComObject(excelApplication);
+                        }
+                        catch { }
 
                         GC.Collect();
                     }
@@ -221,14 +222,12 @@ namespace Ghosts.Client.Handlers
             }
             catch (Exception e)
             {
-                _log.Error($"Excel execute events exception: {e}");
-
+                _log.Error(e);
             }
             finally
             {
                 KillApp();
-                //FileListing.FlushList();
-                _log.Trace($"Excel closing after successfully kill and flush");
+                _log.Trace($"Excel closing...");
             }
         }
     }

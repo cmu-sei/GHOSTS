@@ -9,6 +9,7 @@ using NLog;
 using System;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 using PowerPoint = NetOffice.PowerPointApi;
 using PpSlideLayout = NetOffice.PowerPointApi.Enums.PpSlideLayout;
@@ -89,7 +90,7 @@ namespace Ghosts.Client.Handlers
                         PowerPoint.Application powerApplication = new PowerPoint.Application
                         {
                             DisplayAlerts = PpAlertLevel.ppAlertsNone,
-                            //Visible = MsoTriState.msoTrue
+                            Visible = MsoTriState.msoTrue
                         };
 
                         try
@@ -161,20 +162,21 @@ namespace Ghosts.Client.Handlers
                         // close power point and dispose reference
                         powerApplication.Quit();
                         powerApplication.Dispose();
+                        powerApplication = null;
+                        presentation = null;
 
                         try
                         {
-                            if (powerApplication != null)
-                            {
-                                System.Runtime.InteropServices.Marshal.ReleaseComObject(powerApplication);
-                            }
+                            Marshal.ReleaseComObject(powerApplication);
                         }
-                        catch
-                        {
-                        }
+                        catch { }
 
-                        powerApplication = null;
-                        presentation = null;
+                        try
+                        {
+                            Marshal.FinalReleaseComObject(powerApplication);
+                        }
+                        catch { }
+
                         GC.Collect();
                     }
                     catch (Exception e)
@@ -194,7 +196,7 @@ namespace Ghosts.Client.Handlers
             finally
             {
                 KillApp();
-                //FileListing.FlushList();
+                _log.Trace($"PowerPoint closing...");
             }
         }
     }

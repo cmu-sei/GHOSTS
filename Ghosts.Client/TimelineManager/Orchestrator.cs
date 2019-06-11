@@ -57,7 +57,7 @@ namespace Ghosts.Client.TimelineManager
                 // now watch that file for changes
                 if(timelineWatcher == null) //you can change this to a bool if you want but checks if the object has been created
                 {
-                    Console.Write("STARTING TIMELINE STARTING AND IS NULL");
+                    _log.Trace("Timeline watcher starting and is null...");
                     timelineWatcher = new FileSystemWatcher(TimelineBuilder.TimelineFilePath().DirectoryName)
                     {
                         Filter = Path.GetFileName(TimelineBuilder.TimelineFilePath().Name)
@@ -464,7 +464,6 @@ namespace Ghosts.Client.TimelineManager
         {
             try
             {
-                Console.WriteLine($"File: {e.FullPath} {e.ChangeType}");
                 _log.Trace($"FileWatcher event raised: {e.FullPath} {e.Name} {e.ChangeType}");
 
                 // filewatcher throws two events, we only need 1
@@ -494,6 +493,8 @@ namespace Ghosts.Client.TimelineManager
                     {
                         _log.Info(exception);
                     }
+
+                    Thread.Sleep(7500);
 
                     try
                     {

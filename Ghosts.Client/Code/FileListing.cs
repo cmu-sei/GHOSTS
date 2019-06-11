@@ -58,7 +58,7 @@ namespace Ghosts.Client.Code
             if (Program.Configuration.OfficeDocsMaxAgeInHours == -1)
                 return;
 
-            //locking thread to make sure files can't wirte to the log
+            //locking thread to make sure files can't write to the log
             lock (_safetyLocked)
             {
                 _log.Trace("Flushing list...");

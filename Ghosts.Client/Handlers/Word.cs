@@ -30,7 +30,7 @@ namespace Ghosts.Client.Handlers
                     {
                         if (timeline != null)
                         {
-                            var pids = ProcessManager.GetPids(ProcessManager.ProcessNames.Word).ToList();
+                            System.Collections.Generic.List<int> pids = ProcessManager.GetPids(ProcessManager.ProcessNames.Word).ToList();
                             if (pids.Count > timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.Word))
                             {
                                 continue;
@@ -68,6 +68,7 @@ namespace Ghosts.Client.Handlers
                 {
                     try
                     {
+                        _log.Trace($"Word event - {timelineEvent}");
                         WorkingHours.Is(handler);
 
                         if (timelineEvent.DelayBefore > 0)
@@ -77,7 +78,7 @@ namespace Ghosts.Client.Handlers
 
                         if (timeline != null)
                         {
-                            var pids = ProcessManager.GetPids(ProcessManager.ProcessNames.Word).ToList();
+                            System.Collections.Generic.List<int> pids = ProcessManager.GetPids(ProcessManager.ProcessNames.Word).ToList();
                             if (pids.Count > timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.Word))
                             {
                                 return;
@@ -88,7 +89,7 @@ namespace Ghosts.Client.Handlers
                         Word.Application wordApplication = new Word.Application
                         {
                             DisplayAlerts = WdAlertLevel.wdAlertsNone,
-                            //Visible = false
+                            Visible = true
                         };
 
                         // add a new document
@@ -113,7 +114,7 @@ namespace Ghosts.Client.Handlers
                         rt.AddContentParagraphs(1, 1, 1, 10, 50);
                         wordApplication.Selection.TypeText(rt.Content);
 
-                        var writeSleep = ProcessManager.Jitter(100);
+                        int writeSleep = ProcessManager.Jitter(100);
                         Thread.Sleep(writeSleep);
 
                         wordApplication.Selection.HomeKey(WdUnits.wdLine, WdMovementType.wdExtend);
@@ -172,27 +173,20 @@ namespace Ghosts.Client.Handlers
 
                         wordApplication.Quit();
                         wordApplication.Dispose();
-
-                        if (wordApplication != null)
-                        {
-                            try
-                            {
-                                Marshal.ReleaseComObject(wordApplication);
-                            }
-                            catch
-                            {
-                            }
-
-                            try
-                            {
-                                Marshal.FinalReleaseComObject(wordApplication);
-                            }
-                            catch
-                            {
-                            }
-                        }
-
                         wordApplication = null;
+
+                        try
+                        {
+                            Marshal.ReleaseComObject(wordApplication);
+                        }
+                        catch { }
+
+                        try
+                        {
+                            Marshal.FinalReleaseComObject(wordApplication);
+                        }
+                        catch { }
+
                         GC.Collect();
                     }
                     catch (Exception e)
@@ -212,7 +206,7 @@ namespace Ghosts.Client.Handlers
             finally
             {
                 KillApp();
-                //FileListing.FlushList();
+                _log.Trace($"Word closing...");
             }
         }
     }
