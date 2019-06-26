@@ -1,11 +1,7 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
-//TODO: this file is a mess!
-
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -14,72 +10,18 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using ghosts.api.ViewModels;
-using Ghosts.Api.Code;
 using Ghosts.Api.Data;
 using Ghosts.Api.Models;
-using Ghosts.Domain;
-using Ghosts.Domain.Code;
 using Ghosts.Domain.Messages.MesssagesForServer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NLog;
 
 namespace Ghosts.Api.Services
 {
-    public class QueueEntry
-    {
-        public enum Types
-        {
-            Notification,
-            Machine,
-            Survey
-        }
-
-        public object Payload { get; set; }
-        public Types Type { get; set; }
-    }
-
-    public interface IBackgroundQueue
-    {
-        void Enqueue(QueueEntry item);
-        Task<QueueEntry> DequeueAsync(CancellationToken cancellationToken);
-        ConcurrentQueue<QueueEntry> Getall();
-    }
-
-    public class BackgroundQueue : IBackgroundQueue
-    {
-        private ConcurrentQueue<QueueEntry> _items = new ConcurrentQueue<QueueEntry>();
-        private SemaphoreSlim _semaphone = new SemaphoreSlim(0);
-
-        public void Enqueue(QueueEntry item)
-        {
-            if (item == null)
-            {
-                throw new ArgumentNullException(nameof(item));
-            }
-
-            this._items.Enqueue(item);
-            this._semaphone.Release();
-        }
-
-        public async Task<QueueEntry> DequeueAsync(CancellationToken cancellationToken)
-        {
-            await _semaphone.WaitAsync(cancellationToken);
-            _items.TryDequeue(out var item);
-
-            return item;
-        }
-
-        public ConcurrentQueue<QueueEntry> Getall()
-        {
-            return this._items;
-        }
-    }
-
     public class QueueSyncService : IHostedService
     {
         private IBackgroundQueue Queue { get; set; }
@@ -111,7 +53,7 @@ namespace Ghosts.Api.Services
 
                 try
                 {
-                    await Sync();
+                    Sync();
                 }
                 catch (Exception ex)
                 {
@@ -124,13 +66,13 @@ namespace Ghosts.Api.Services
             }
         }
 
-        private async Task Sync()
+        private void Sync()
         {
             using (var scope = this._scopeFactory.CreateScope())
             {
                 using (var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>())
                 {
-                    foreach (var item in this.Queue.Getall())
+                    foreach (var item in this.Queue.GetAll())
                     {
                         switch (item.Type)
                         {
@@ -143,31 +85,14 @@ namespace Ghosts.Api.Services
                             case QueueEntry.Types.Survey:
                                 ProcessSurvey(scope, context, (Survey)item.Payload);
                                 break;
+                            default:
+                                throw new ArgumentOutOfRangeException();
                         }
                     }
                 }
             }
         }
-
-        public class MachineQueueEntry
-        {
-            public Machine Machine { get; set; }
-            public TransferLogDump LogDump { get; set; }
-            public Machine.MachineHistoryItem.HistoryType HistoryType { get; set; }
-        }
-
-        public class NotificationQueueEntry
-        {
-            public enum NotificationType
-            {
-                Timeline = 0,
-                WebhookCreate = 1
-            }
-
-            public NotificationType Type { get; set; }
-            public JObject Payload { get; set; }
-        }
-
+        
         private void ProcessSurvey(IServiceScope scope, ApplicationDbContext context, Survey item)
         {
             try
@@ -469,7 +394,7 @@ namespace Ghosts.Api.Services
                     }
                 }
             } //endif posted results
-            var x2 = this.Queue.DequeueAsync(new CancellationToken()).Result;
+            var _ = this.Queue.DequeueAsync(new CancellationToken()).Result;
 
             if (machines.Count > 0)
             {

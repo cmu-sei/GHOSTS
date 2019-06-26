@@ -1,5 +1,6 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
+using System.Net;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Ghosts.Api.Code;

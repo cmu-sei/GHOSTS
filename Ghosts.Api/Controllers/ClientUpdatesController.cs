@@ -61,7 +61,7 @@ namespace Ghosts.Api.Controllers
                 new QueueEntry
                 {
                     Payload =
-                    new QueueSyncService.MachineQueueEntry
+                    new MachineQueueEntry
                     {
                         Machine = m,
                         LogDump = null,

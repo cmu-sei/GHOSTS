@@ -3,12 +3,12 @@
 using System;
 using System.Net;
 using System.Text;
-using AutoMapper;
 using Ghosts.Api.Code;
 using Ghosts.Api.Code.Auth;
 using Ghosts.Api.Data;
 using Ghosts.Api.Models;
 using Ghosts.Api.Services;
+using Ghosts.Domain.Code;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
@@ -54,11 +54,11 @@ namespace Ghosts.Api
             // Register the Swagger generator, defining 1 or more Swagger documents
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new Info
+                c.SwaggerDoc($"v{ApplicationDetails.Version}", new Info
                 {
-                    Version = "v1",
+                    Version = $"v{ApplicationDetails.Version}",
                     Title = "GHOSTS API",
-                    Description = "The GHOSTS Web API",
+                    Description = "GHOSTS API",
                     Contact = new Contact
                     {
                         Name = "Dustin Updyke",
@@ -140,7 +140,6 @@ namespace Ghosts.Api
             services.AddSingleton<IHostedService, QueueSyncService>();
 
             services.AddCors(options => options.UseConfiguredCors(Configuration.GetSection("CorsPolicy")));
-            services.AddAutoMapper();
             services.AddMvc().AddJsonOptions(options =>
             {
                 options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
@@ -185,7 +184,7 @@ namespace Ghosts.Api
             // specifying the Swagger JSON endpoint.
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "GHOSTS API V1");
+                c.SwaggerEndpoint($"/swagger/v{ApplicationDetails.Version}/swagger.json", $"GHOSTS API v{ApplicationDetails.Version}");
             });
 
             app.UseCors("default");

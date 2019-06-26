@@ -132,8 +132,8 @@ namespace ghosts.api.Controllers
 
             var timeline = new HistoryTimeline();
 
-            var payload = new QueueSyncService.NotificationQueueEntry();
-            payload.Type = QueueSyncService.NotificationQueueEntry.NotificationType.Timeline;
+            var payload = new NotificationQueueEntry();
+            payload.Type = NotificationQueueEntry.NotificationType.Timeline;
             payload.Payload = (JObject) JToken.FromObject(timeline);
 
             QueueSyncService.HandleWebhook(webhook, payload);
@@ -162,9 +162,9 @@ namespace ghosts.api.Controllers
             {
                 Type = QueueEntry.Types.Notification,
                 Payload =
-                    new QueueSyncService.NotificationQueueEntry
+                    new NotificationQueueEntry
                     {
-                        Type = QueueSyncService.NotificationQueueEntry.NotificationType.Timeline,
+                        Type = NotificationQueueEntry.NotificationType.Timeline,
                         Payload = (JObject) JToken.FromObject(timeline)
                     }
             });
