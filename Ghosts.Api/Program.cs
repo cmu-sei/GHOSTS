@@ -22,7 +22,7 @@ namespace Ghosts.Api
 
         public static void Main(string[] args)
         {
-            log.Warn("Ghosts API coming online...");
+            log.Warn("GHOSTS API coming online...");
 
             ApiDetails.LoadConfiguration();
 
@@ -41,7 +41,7 @@ namespace Ghosts.Api
                 }
                 catch (Exception ex)
                 {
-                    log.Fatal(ex, "An error occurred while seeding the database");
+                    log.Fatal(ex, "An error occurred while seeding the GHOSTS database");
                 }
             }
 
