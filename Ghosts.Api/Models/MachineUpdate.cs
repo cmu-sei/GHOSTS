@@ -2,6 +2,7 @@
 
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.IO;
 
 namespace Ghosts.Api.Models
 {
@@ -10,30 +11,16 @@ namespace Ghosts.Api.Models
     {
         public int Id { get; set; }
 
-        [ForeignKey("MachineId")]
+        [ForeignKey("MachineId")] 
         public Guid MachineId { get; set; }
 
         public Domain.UpdateClientConfig.UpdateType Type { get; set; }
-        
-        /// <summary>
-        /// This is the path to the local update file 
-        /// ala /app_data/updates/key/type.json
-        /// </summary>
-        public Guid Key { get; set; }
 
         public DateTime ActiveUtc { get; set; }
         public DateTime CreatedUtc { get; set; }
 
         public StatusType Status { get; set; }
 
-        [NotMapped]
-        public object Update { get; set; }
-
-        public string GetPath()
-        {
-            var path = $"updates/{this.Key}/{this.Type.ToString().ToLower()}.json";
-
-            return path;
-        }
+        public string Update { get; set; }
     }
 }

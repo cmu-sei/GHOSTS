@@ -86,20 +86,54 @@ namespace Ghosts.Client.Comms
                     {
                         var update = JsonConvert.DeserializeObject<UpdateClientConfig>(s);
 
-                        if (update.Type == UpdateClientConfig.UpdateType.Timeline)
+                        switch (update.Type)
                         {
-                            TimelineBuilder.SetLocalTimeline(update.Update.ToString());
-                        }
-                        else if (update.Type == UpdateClientConfig.UpdateType.Health)
-                        {
-                            var newTimeline = JsonConvert.DeserializeObject<Domain.ResultHealth>(update.Update.ToString());
-                            //save to local disk
-                            using (var file = File.CreateText(ApplicationDetails.ConfigurationFiles.Health))
+                            case UpdateClientConfig.UpdateType.Timeline:
+                                TimelineBuilder.SetLocalTimeline(update.Update.ToString());
+                                break;
+                            case UpdateClientConfig.UpdateType.TimelinePartial:
+                                try
+                                {
+                                    var timeline = JsonConvert.DeserializeObject<Timeline>(update.Update.ToString());
+
+                                    foreach (var timelineHandler in timeline.TimeLineHandlers)
+                                    {
+                                        _log.Trace($"PartialTimeline found: {timelineHandler.HandlerType}");
+
+                                        foreach (var timelineEvent in timelineHandler.TimeLineEvents)
+                                        {
+                                            if (string.IsNullOrEmpty(timelineEvent.TrackableId))
+                                            {
+                                                timelineEvent.TrackableId = Guid.NewGuid().ToString();
+                                            }
+                                        }
+
+                                        var orchestrator = new Orchestrator();
+                                        orchestrator.RunCommand(timelineHandler);
+                                    }
+                                }
+                                catch (Exception exc)
+                                {
+                                    _log.Debug(exc);
+                                }
+
+                                break;
+                            case UpdateClientConfig.UpdateType.Health:
                             {
-                                var serializer = new JsonSerializer();
-                                serializer.Formatting = Formatting.Indented;
-                                serializer.Serialize(file, newTimeline);
+                                var newTimeline = JsonConvert.DeserializeObject<Domain.ResultHealth>(update.Update.ToString());
+                                //save to local disk
+                                using (var file = File.CreateText(ApplicationDetails.ConfigurationFiles.Health))
+                                {
+                                    var serializer = new JsonSerializer();
+                                    serializer.Formatting = Formatting.Indented;
+                                    serializer.Serialize(file, newTimeline);
+                                }
+
+                                break;
                             }
+                            default:
+                                _log.Debug($"Update {update.Type} has no handler, ignoring...");
+                                break;
                         }
                     }
                 }

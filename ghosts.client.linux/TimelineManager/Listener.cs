@@ -14,7 +14,7 @@ namespace ghosts.client.linux.timelineManager
     public static class ListenerManager
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        internal static string In = ApplicationDetails.InstanceDirectories.Timeline;
+        internal static string In = ApplicationDetails.InstanceDirectories.TimelineIn;
 
         public static void Run()
         {

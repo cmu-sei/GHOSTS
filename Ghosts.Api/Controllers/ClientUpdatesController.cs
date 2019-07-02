@@ -33,7 +33,7 @@ namespace Ghosts.Api.Controllers
         /// <param name="ct">Cancellation Token</param>
         /// <returns>404 if no update, or a json payload of a particular update</returns>
         /// <response code="200">Returns json payload of a particular update</response>
-        /// <response code="401">Unauthorized or malformatted machine request</response>
+        /// <response code="401">Unauthorized or incorrectly formatted machine request</response>
         /// <response code="404">No Update</response>
         [HttpGet]
         [ProducesResponseType(200)]
@@ -82,7 +82,6 @@ namespace Ghosts.Api.Controllers
 
             var update = new UpdateClientConfig();
             update.Type = u.Type;
-            update.Key = u.Key;
             update.Update = u.Update;
 
             await this._updateService.DeleteAsync(u.Id, ct);

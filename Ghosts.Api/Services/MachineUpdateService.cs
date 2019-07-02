@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Ghosts.Api.Data;
 using Ghosts.Api.Models;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using NLog;
 
 namespace Ghosts.Api.Services
@@ -35,29 +36,6 @@ namespace Ghosts.Api.Services
             var update = await _context.MachineUpdates
                 .FirstOrDefaultAsync(m => m.MachineId == machineId && m.ActiveUtc < DateTime.UtcNow && m.Status == StatusType.Active, ct);
 
-            if (update == null)
-                return null;
-
-            var raw = new StringBuilder();
-
-            var path = update.GetPath();
-
-            if (File.Exists(path))
-            {
-                try
-                {
-                    foreach (var line in File.ReadAllLines(path))
-                        raw.Append(line);
-                }
-                catch (Exception e)
-                {
-                    log.Error(e);
-                    throw;
-                }
-
-                update.Update = raw.ToString();
-            }
-            
             return update;
         }
 

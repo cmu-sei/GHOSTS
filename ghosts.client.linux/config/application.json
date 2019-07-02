@@ -1,24 +1,24 @@
 ﻿{
     "IdEnabled": true,
-    "IdUrl": "http://localhost:8080/api/clientid",
+    "IdUrl": "http://localhost:52388/api/clientid",
     "ClientResults": {
         "IsEnabled": true,
-        "IsSecure": true,
-      "PostUrl": "http://localhost:8080/api/clientresults/secure",
-        "CycleSleep": 90
+        "IsSecure": false,
+      "PostUrl": "http://localhost:52388/api/clientresults",
+        "CycleSleep": 9000
     },
     "ClientUpdates": {
         "IsEnabled": true,
-      "PostUrl": "http://localhost:8080/api/clientupdates",
-        "CycleSleep": 90
+      "PostUrl": "http://localhost:52388/api/clientupdates",
+        "CycleSleep": 9000
     },
     "Survey": {
         "IsEnabled": true,
-        "IsSecure": true,
+        "IsSecure": false,
         "Frequency": "once",
         "CycleSleepMinutes": 720,
         "OutputFormat": "indent",
-      "PostUrl": "http://localhost:8080/api/clientsurvey/secure"
+      "PostUrl": "http://localhost:52388/api/clientsurvey"
     },
     "HealthIsEnabled": true,
     "HandlersIsEnabled": true,

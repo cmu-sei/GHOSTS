@@ -53,7 +53,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="NLog" Version="4.5.7" />
+    <PackageReference Include="NLog" Version="4.6.5" />
     <PackageReference Include="SimpleTCP" Version="1.0.24" />
     <PackageReference Include="System.Diagnostics.Process" Version="4.3.0" />
   </ItemGroup>

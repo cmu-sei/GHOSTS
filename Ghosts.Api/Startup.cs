@@ -54,11 +54,11 @@ namespace Ghosts.Api
             // Register the Swagger generator, defining 1 or more Swagger documents
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc($"v{ApplicationDetails.Version}", new Info
+                c.SwaggerDoc($"v1", new Info
                 {
-                    Version = $"v{ApplicationDetails.Version}",
+                    Version = $"v1",
                     Title = "GHOSTS API",
-                    Description = "GHOSTS API",
+                    Description = $"GHOSTS API v1 - Assembly: {ApplicationDetails.Version}",
                     Contact = new Contact
                     {
                         Name = "Dustin Updyke",
@@ -135,6 +135,7 @@ namespace Ghosts.Api
             services.AddScoped<IMachineGroupService, MachineGroupService>();
             services.AddScoped<IMachineUpdateService, MachineUpdateService>();
             services.AddScoped<IReportService, ReportService>();
+            services.AddScoped<ITimelineService, TimelineService>();
 
             services.AddSingleton<IBackgroundQueue, BackgroundQueue>();
             services.AddSingleton<IHostedService, QueueSyncService>();
@@ -184,7 +185,7 @@ namespace Ghosts.Api
             // specifying the Swagger JSON endpoint.
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint($"/swagger/v{ApplicationDetails.Version}/swagger.json", $"GHOSTS API v{ApplicationDetails.Version}");
+                c.SwaggerEndpoint($"/swagger/v1/swagger.json", $"GHOSTS API v1");
             });
 
             app.UseCors("default");
