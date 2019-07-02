@@ -2,6 +2,7 @@
 
 using System;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace Ghosts.Domain
 {
@@ -11,10 +12,12 @@ namespace Ghosts.Domain
     /// </summary>
     public class UpdateClientConfig
     {
+        [JsonConverter(typeof(StringEnumConverter))]
         public enum UpdateType
         {
             Timeline = 0,
-            Health = 1
+            Health = 1,
+            TimelinePartial = 10
         }
 
         public UpdateType Type { get; set; }
