@@ -12,6 +12,7 @@ namespace Ghosts.Domain
     /// </summary>
     public class Timeline
     {
+        [JsonConverter(typeof(StringEnumConverter))]
         public enum TimelineStatus
         {
             Run,
