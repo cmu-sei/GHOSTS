@@ -1,10 +1,17 @@
-﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
+// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Ghosts.Api.Data;
 using Ghosts.Api.ViewModels;
+using System;
+using System.IO;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using Ghosts.Api.Data;
+using Ghosts.Api.Models;
 using Microsoft.EntityFrameworkCore;
 using NLog;
 
@@ -17,10 +24,6 @@ namespace Ghosts.Api.Services
     }
 
     public class TimelineService : ITimelineService
-    {
-        private static Logger log = LogManager.GetCurrentClassLogger();
-        private readonly ApplicationDbContext _context;
-
         public TimelineService(ApplicationDbContext context)
         {
             _context = context;
@@ -53,3 +56,4 @@ namespace Ghosts.Api.Services
         }
     }
 }
+
