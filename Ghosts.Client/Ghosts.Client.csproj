@@ -66,6 +66,9 @@
     <SignManifests>false</SignManifests>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="CommandLine, Version=2.5.0.0, Culture=neutral, PublicKeyToken=5a870481e358d379, processorArchitecture=MSIL">
+      <HintPath>..\packages\CommandLineParser.2.5.0\lib\net461\CommandLine.dll</HintPath>
+    </Reference>
     <Reference Include="ExcelApi, Version=1.7.4.0, Culture=neutral, PublicKeyToken=26cf6d85ba68fa54, processorArchitecture=MSIL">
       <HintPath>..\packages\NetOffice.Excel.Net45.1.7.4-pre-jun-28-2015\lib\net45\ExcelApi.dll</HintPath>
       <EmbedInteropTypes>False</EmbedInteropTypes>
@@ -351,27 +354,28 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Code\GuestInfoVars.cs" />
-    <Compile Include="Code\TempFiles.cs" />
+    <Compile Include="Infrastructure\GuestInfoVars.cs" />
+    <Compile Include="Infrastructure\CommandLineFlagManager.cs" />
+    <Compile Include="Infrastructure\TempFiles.cs" />
     <Compile Include="Handlers\Clicks.cs" />
     <Compile Include="Handlers\LightHandlers.cs" />
     <Compile Include="Handlers\Watcher.cs" />
     <Compile Include="Handlers\NpcSystem.cs" />
     <Compile Include="Handlers\Reboot.cs" />
     <Compile Include="Health\MachineHealth.cs" />
-    <Compile Include="Code\StartupTasks.cs" />
-    <Compile Include="Code\Email\EmailConfiguration.cs" />
-    <Compile Include="Code\Email\EmailAddresses.cs" />
-    <Compile Include="Code\Email\EmailContent.cs" />
-    <Compile Include="Code\Email\RedemptionLoader.cs" />
-    <Compile Include="Code\Email\Registrar.cs" />
-    <Compile Include="Code\FileListing.cs" />
-    <Compile Include="Code\ProcessManager.cs" />
-    <Compile Include="Code\PowerShellCommands.cs" />
-    <Compile Include="Code\RandomFilename.cs" />
-    <Compile Include="Code\RandomText.cs" />
-    <Compile Include="Code\Reporter.cs" />
-    <Compile Include="Code\WebClientHeaders.cs" />
+    <Compile Include="Infrastructure\StartupTasks.cs" />
+    <Compile Include="Infrastructure\Email\EmailConfiguration.cs" />
+    <Compile Include="Infrastructure\Email\EmailAddresses.cs" />
+    <Compile Include="Infrastructure\Email\EmailContent.cs" />
+    <Compile Include="Infrastructure\Email\RedemptionLoader.cs" />
+    <Compile Include="Infrastructure\Email\Registrar.cs" />
+    <Compile Include="Infrastructure\FileListing.cs" />
+    <Compile Include="Infrastructure\ProcessManager.cs" />
+    <Compile Include="Infrastructure\PowerShellCommands.cs" />
+    <Compile Include="Infrastructure\RandomFilename.cs" />
+    <Compile Include="Infrastructure\RandomText.cs" />
+    <Compile Include="Infrastructure\Reporter.cs" />
+    <Compile Include="Infrastructure\WebClientHeaders.cs" />
     <Compile Include="Comms\CheckId.cs" />
     <Compile Include="Comms\Updates.cs" />
     <Compile Include="Handlers\BrowserChrome.cs" />

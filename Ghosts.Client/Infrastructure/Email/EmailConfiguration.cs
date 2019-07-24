@@ -7,7 +7,7 @@ using System.Linq;
 using Ghosts.Domain.Code;
 using NLog;
 
-namespace Ghosts.Client.Code.Email
+namespace Ghosts.Client.Infrastructure.Email
 {
     /// <summary>
     /// "CurrentUser|Other:string FromEmailAddress",

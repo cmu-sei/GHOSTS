@@ -7,7 +7,7 @@ using System.Linq;
 using Ghosts.Domain.Code;
 using NLog;
 
-namespace Ghosts.Client.Code
+namespace Ghosts.Client.Infrastructure
 {
     /// <summary>
     /// Filename generator for those files created for office

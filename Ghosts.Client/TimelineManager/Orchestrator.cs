@@ -1,6 +1,6 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
-using Ghosts.Client.Code;
+using Ghosts.Client.Infrastructure;
 using Ghosts.Client.Handlers;
 using Ghosts.Domain;
 using Microsoft.Win32;

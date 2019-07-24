@@ -7,7 +7,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Management;
 
-namespace Ghosts.Client.Code
+namespace Ghosts.Client.Infrastructure
 {
     public static class ProcessManager
     {

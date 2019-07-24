@@ -8,7 +8,7 @@ using Ghosts.Domain.Code;
 using Newtonsoft.Json;
 using NLog;
 
-namespace Ghosts.Client.Code.Email
+namespace Ghosts.Client.Infrastructure.Email
 {
     public class EmailAddresses
     {

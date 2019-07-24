@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 using NLog;
 using Redemption;
 
-namespace Ghosts.Client.Code.Email
+namespace Ghosts.Client.Infrastructure.Email
 {
     public static class RedemptionLoader
     {

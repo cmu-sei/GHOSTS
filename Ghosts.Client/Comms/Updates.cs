@@ -5,7 +5,7 @@ using System.IO;
 using System.Net;
 using System.Text;
 using System.Threading;
-using Ghosts.Client.Code;
+using Ghosts.Client.Infrastructure;
 using Ghosts.Client.TimelineManager;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;

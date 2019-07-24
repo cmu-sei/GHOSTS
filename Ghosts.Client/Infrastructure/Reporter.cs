@@ -4,7 +4,7 @@ using System.Net;
 using Ghosts.Domain;
 using Newtonsoft.Json;
 
-namespace Ghosts.Client.Code
+namespace Ghosts.Client.Infrastructure
 {
     public class Reporter
     {

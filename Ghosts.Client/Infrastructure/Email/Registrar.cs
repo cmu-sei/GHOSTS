@@ -4,7 +4,7 @@ using System;
 using System.Diagnostics;
 using NLog;
 
-namespace Ghosts.Client.Code.Email
+namespace Ghosts.Client.Infrastructure.Email
 {
     public static class Registrar
     {

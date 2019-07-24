@@ -6,7 +6,7 @@ using System.Management.Automation;
 using System.Threading;
 using NLog;
 
-namespace Ghosts.Client.Code
+namespace Ghosts.Client.Infrastructure
 {
     /// <summary>
     /// Stub for class that executes and collects PowerShell commands

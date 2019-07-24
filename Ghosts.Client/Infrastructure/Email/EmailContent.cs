@@ -9,7 +9,7 @@ using FileHelpers;
 using Ghosts.Domain.Code;
 using NLog;
 
-namespace Ghosts.Client.Code.Email
+namespace Ghosts.Client.Infrastructure.Email
 {
     public class EmailContentManager
     {

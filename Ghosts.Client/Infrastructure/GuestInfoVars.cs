@@ -3,7 +3,7 @@ using System.Diagnostics;
 using Ghosts.Domain;
 using NLog;
 
-namespace Ghosts.Client.Code
+namespace Ghosts.Client.Infrastructure
 {
     public static class GuestInfoVars
     {

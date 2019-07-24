@@ -2,12 +2,12 @@
 
 using System;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
-using Ghosts.Client.Code;
+using CommandLine;
+using Ghosts.Client.Infrastructure;
 using Ghosts.Client.TimelineManager;
 using Ghosts.Domain.Code;
 using NLog;
@@ -28,7 +28,23 @@ namespace Ghosts.Client
         private const int SwShow = 5;
 
         internal static ClientConfiguration Configuration { get; set; }
+        internal static Options OptionFlags;
         internal static bool IsDebug;
+        
+        internal class Options
+        {
+            [Option('d', "debug", Default = false, HelpText = "Launch GHOSTS in debug mode")]
+            public bool Debug { get; set; }
+
+            [Option('h', "help", Default = false, HelpText = "Display this help screen")]
+            public bool Help { get; set; }
+
+            [Option('r', "randomize", Default = false, HelpText = "Create a randomized timeline")]
+            public bool Randomize { get; set; }
+
+            [Option('v', "version", Default = false, HelpText = "GHOSTS client version")]
+            public bool Version { get; set; }
+        }
 
         [STAThread]
         static void Main(string[] args)
@@ -52,60 +68,22 @@ namespace Ghosts.Client
 
         private static void Run(string[] args)
         {
-            //handle flags
-            if (args.ToList().Contains("--version"))
-            {
-                //handle version flag and return ghosts and referenced assemblies information
-                Console.WriteLine($"{ApplicationDetails.Name}:{ApplicationDetails.Version}");
-                foreach (var assemblyName in Assembly.GetExecutingAssembly().GetReferencedAssemblies())
-                {
-                    Console.WriteLine($"{assemblyName.Name}: {assemblyName.Version}");
-                }
-                return;
-            }
-
-#if DEBUG
-            Program.IsDebug = true;        
-#endif
-
-            if (args.ToList().Contains("--debug") || Program.IsDebug)
-            {
-                Program.IsDebug = true;
-                
-                Console.WriteLine($"GHOSTS ({ApplicationDetails.Name}:{ApplicationDetails.Version}) running in debug mode. Installed path: {ApplicationDetails.InstalledPath}");
-
-                Console.WriteLine($"{ApplicationDetails.ConfigurationFiles.Application} == {File.Exists(ApplicationDetails.ConfigurationFiles.Application)}");
-                Console.WriteLine($"{ApplicationDetails.ConfigurationFiles.Dictionary} == {File.Exists(ApplicationDetails.ConfigurationFiles.Dictionary)}");
-                Console.WriteLine($"{ApplicationDetails.ConfigurationFiles.EmailContent} == {File.Exists(ApplicationDetails.ConfigurationFiles.EmailContent)}");
-                Console.WriteLine($"{ApplicationDetails.ConfigurationFiles.EmailReply} == {File.Exists(ApplicationDetails.ConfigurationFiles.EmailReply)}");
-                Console.WriteLine($"{ApplicationDetails.ConfigurationFiles.EmailsDomain} == {File.Exists(ApplicationDetails.ConfigurationFiles.EmailsDomain)}");
-                Console.WriteLine($"{ApplicationDetails.ConfigurationFiles.EmailsOutside} == {File.Exists(ApplicationDetails.ConfigurationFiles.EmailsOutside)}");
-                Console.WriteLine($"{ApplicationDetails.ConfigurationFiles.Health} == {File.Exists(ApplicationDetails.ConfigurationFiles.Health)}");
-                Console.WriteLine($"{ApplicationDetails.ConfigurationFiles.Timeline} == {File.Exists(ApplicationDetails.ConfigurationFiles.Timeline)}");
-                
-                Console.WriteLine($"{ApplicationDetails.InstanceFiles.Id} == {File.Exists(ApplicationDetails.InstanceFiles.Id)}");
-                Console.WriteLine($"{ApplicationDetails.InstanceFiles.FilesCreated} == {File.Exists(ApplicationDetails.InstanceFiles.FilesCreated)}");
-                Console.WriteLine($"{ApplicationDetails.InstanceFiles.SurveyResults} == {File.Exists(ApplicationDetails.InstanceFiles.SurveyResults)}");
-
-                Console.WriteLine($"{ApplicationDetails.LogFiles.ClientUpdates} == {File.Exists(ApplicationDetails.LogFiles.ClientUpdates)}");
-            }
-            else
-            {
-                Console.WriteLine($"GHOSTS ({ApplicationDetails.Name}:{ApplicationDetails.Version}) running in production mode. Installed path: {ApplicationDetails.InstalledPath}");
-            }
-
             // ignore all certs
             ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
 
+            // parse program flags
+            if (!CommandLineFlagManager.Parse(args))
+                return;
+            
             //attach handler for shutdown tasks
-            AppDomain.CurrentDomain.ProcessExit += new EventHandler(CurrentDomain_ProcessExit);
+            AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
 
             _log.Trace($"Initiating Ghosts startup - Local time: {DateTime.Now.TimeOfDay} UTC: {DateTime.UtcNow.TimeOfDay}");
 
             //load configuration
             try
             {
-                Program.Configuration = ClientConfigurationLoader.Config;
+                Configuration = ClientConfigurationLoader.Config;
             }
             catch (Exception e)
             {
@@ -120,9 +98,10 @@ namespace Ghosts.Client
             StartupTasks.CheckConfigs();
 
             Thread.Sleep(500);
+            
             //show window if debugging or if --debug flag passed in
             var handle = GetConsoleWindow();
-            if (!Program.IsDebug)
+            if (!IsDebug)
             {
                 ShowWindow(handle, SwHide);
                 //add hook to manage processes running in order to never tip a machine over

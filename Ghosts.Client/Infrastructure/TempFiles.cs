@@ -5,7 +5,7 @@ using System.IO;
 using System.Threading;
 using NLog;
 
-namespace Ghosts.Client.Code
+namespace Ghosts.Client.Infrastructure
 {
     public class TempFiles
     {

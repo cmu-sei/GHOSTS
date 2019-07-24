@@ -5,11 +5,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Windows.Forms;
-using Ghosts.Client.Code.Email;
+using Ghosts.Client.Infrastructure.Email;
 using NLog;
 using Microsoft.Win32;
 
-namespace Ghosts.Client.Code
+namespace Ghosts.Client.Infrastructure
 {
     /// <summary>
     /// Some apps (word, excel, etc.) like to hang around and leech memory on client machines

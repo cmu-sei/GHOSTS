@@ -9,7 +9,7 @@ using NLog;
 using Exception = System.Exception;
 using System.Threading;
 
-namespace Ghosts.Client.Code
+namespace Ghosts.Client.Infrastructure
 {
     /// <summary>
     /// Lists and deletes files that were created by ghosts client, so as to avoid high disk usage

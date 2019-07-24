@@ -7,7 +7,7 @@ using System.Text;
 using Ghosts.Domain.Code;
 using Newtonsoft.Json;
 
-namespace Ghosts.Client.Code
+namespace Ghosts.Client.Infrastructure
 {
     /// <summary>
     /// Creates random text for emails - uses dictionary.json in the config folder
