@@ -6,7 +6,7 @@ using System.Diagnostics;
 using System.Threading;
 using NLog;
 
-namespace Ghosts.Client.Code
+namespace ghosts.client.linux.Infrastructure
 {
     /// <summary>
     /// Some apps (word, excel, etc.) like to hang around and leech memory on client machines

@@ -5,7 +5,7 @@ using ghosts.client.linux.Comms;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 
-namespace Ghosts.Client.Code
+namespace ghosts.client.linux.Infrastructure
 {
     /// <summary>
     /// Sets web request headers for updates/post of results
