@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
-using Ghosts.Client.Code;
+using ghosts.client.linux.Infrastructure;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Newtonsoft.Json;

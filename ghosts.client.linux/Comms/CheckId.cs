@@ -3,7 +3,7 @@
 using System;
 using System.IO;
 using System.Net;
-using Ghosts.Client.Code;
+using ghosts.client.linux.Infrastructure;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using NLog;

@@ -4,22 +4,18 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <RuntimeIdentifiers>win7-x64;ubuntu.16.10-x64;osx.10.12-x64</RuntimeIdentifiers>
-    
-    
-    <AssemblyVersion>2.5.0.2</AssemblyVersion>
-    <FileVersion>2.5.0.2</FileVersion>
-    <ReleaseVersion>2.5.0.2</ReleaseVersion>
+
+    <Version>2.5.2.0</Version>
+    <AssemblyVersion>2.5.2.0</AssemblyVersion>
+    <FileVersion>2.5.2.0</FileVersion>
+    <ReleaseVersion>2.5.2.0</ReleaseVersion>
     <SynchReleaseVersion>false</SynchReleaseVersion>
-    <Version>2.5.0.2</Version>
-    
+        
     <Authors>Dustin Updyke for Carnegie Mellon University</Authors>
     <Company>Carnegie Mellon University</Company>
     <Product>GHOSTS</Product>
     <Description>GHOSTS NPC Orchestration Platform - please email ddupdyke@sei.cmu.edu with bugs/requests/other</Description>
     <Copyright>Carnegie Mellon University 2017</Copyright>
-    
-    
-    
   </PropertyGroup>
 
   <ItemGroup>
@@ -53,6 +49,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="CommandLineParser" Version="2.5.0" />
     <PackageReference Include="NLog" Version="4.6.5" />
     <PackageReference Include="SimpleTCP" Version="1.0.24" />
     <PackageReference Include="System.Diagnostics.Process" Version="4.3.0" />

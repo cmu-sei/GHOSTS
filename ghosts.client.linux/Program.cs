@@ -1,12 +1,14 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
+using System.Drawing;
 using System.IO;
-using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Threading;
+using CommandLine;
+using ghosts.client.linux.Infrastructure;
 using ghosts.client.linux.timelineManager;
-using Ghosts.Client.Code;
 using Ghosts.Domain.Code;
 using NLog;
 
@@ -15,8 +17,24 @@ namespace ghosts.client.linux
     class Program
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        private static bool IsDebug = false;
         internal static ClientConfiguration Configuration { get; set; }
+        internal static Options OptionFlags;
+        internal static bool IsDebug;
+        
+        internal class Options
+        {
+            [Option('d', "debug", Default = false, HelpText = "Launch GHOSTS in debug mode")]
+            public bool Debug { get; set; }
+
+            [Option('h', "help", Default = false, HelpText = "Display this help screen")]
+            public bool Help { get; set; }
+
+            [Option('r', "randomize", Default = false, HelpText = "Create a randomized timeline")]
+            public bool Randomize { get; set; }
+
+            [Option('v', "version", Default = false, HelpText = "GHOSTS client version")]
+            public bool Version { get; set; }
+        }
 
         static void Main(string[] args)
         {
@@ -34,44 +52,14 @@ namespace ghosts.client.linux
 
         private static void Run(string[] args)
         {
-            if (args.ToList().Contains("--version"))
-            {
-                Console.WriteLine(ApplicationDetails.Version);
+            // ignore all certs
+            ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
+
+            // parse program flags
+            if (!CommandLineFlagManager.Parse(args))
                 return;
-            }
 
-#if DEBUG
-            IsDebug = true;
-#endif
-
-            if (args.ToList().Contains("--debug"))
-            {
-                Program.IsDebug = true;
-
-                Console.WriteLine($"GHOSTS running in debug mode. Installed path: {ApplicationDetails.InstalledPath}");
-
-                Console.WriteLine($"{ApplicationDetails.ConfigurationFiles.Application} == {File.Exists(ApplicationDetails.ConfigurationFiles.Application)}");
-                Console.WriteLine($"{ApplicationDetails.ConfigurationFiles.Dictionary} == {File.Exists(ApplicationDetails.ConfigurationFiles.Dictionary)}");
-                Console.WriteLine($"{ApplicationDetails.ConfigurationFiles.EmailContent} == {File.Exists(ApplicationDetails.ConfigurationFiles.EmailContent)}");
-                Console.WriteLine($"{ApplicationDetails.ConfigurationFiles.EmailReply} == {File.Exists(ApplicationDetails.ConfigurationFiles.EmailReply)}");
-                Console.WriteLine($"{ApplicationDetails.ConfigurationFiles.EmailsDomain} == {File.Exists(ApplicationDetails.ConfigurationFiles.EmailsDomain)}");
-                Console.WriteLine($"{ApplicationDetails.ConfigurationFiles.EmailsOutside} == {File.Exists(ApplicationDetails.ConfigurationFiles.EmailsOutside)}");
-                Console.WriteLine($"{ApplicationDetails.ConfigurationFiles.Health} == {File.Exists(ApplicationDetails.ConfigurationFiles.Health)}");
-                Console.WriteLine($"{ApplicationDetails.ConfigurationFiles.Timeline} == {File.Exists(ApplicationDetails.ConfigurationFiles.Timeline)}");
-
-
-                Console.WriteLine($"{ApplicationDetails.InstanceFiles.Id} == {File.Exists(ApplicationDetails.InstanceFiles.Id)}");
-                Console.WriteLine($"{ApplicationDetails.InstanceFiles.FilesCreated} == {File.Exists(ApplicationDetails.InstanceFiles.FilesCreated)}");
-                Console.WriteLine($"{ApplicationDetails.InstanceFiles.SurveyResults} == {File.Exists(ApplicationDetails.InstanceFiles.SurveyResults)}");
-
-                Console.WriteLine($"{ApplicationDetails.LogFiles.ClientUpdates} == {File.Exists(ApplicationDetails.LogFiles.ClientUpdates)}");
-            }
-            else
-            {
-                Console.WriteLine($"GHOSTS running in production mode. Installed path: {ApplicationDetails.InstalledPath}");
-            }
-
-            AppDomain.CurrentDomain.ProcessExit += new EventHandler(CurrentDomain_ProcessExit);
+            AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
 
             _log.Trace($"Initiating Ghosts startup - Local time: {DateTime.Now.TimeOfDay} UTC: {DateTime.UtcNow.TimeOfDay}");
 
@@ -85,7 +73,7 @@ namespace ghosts.client.linux
                 var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
                 var o = $"Exec path: {path} - configuration 404: {ApplicationDetails.ConfigurationFiles.Application} - exiting. Exception: {e}";
                 _log.Fatal(o);
-                Console.WriteLine(o);
+                Console.WriteLine(o, Color.Red);
                 Console.ReadLine();
                 return;
             }
