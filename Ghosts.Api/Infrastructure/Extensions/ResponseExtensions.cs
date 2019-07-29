@@ -2,7 +2,7 @@
 
 using Microsoft.AspNetCore.Http;
 
-namespace Ghosts.Api.Code
+namespace Ghosts.Api.Infrastructure.Extensions
 {
     public static class ResponseExtensions
     {

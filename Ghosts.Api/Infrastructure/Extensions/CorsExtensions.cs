@@ -3,7 +3,7 @@
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.Extensions.Configuration;
 
-namespace Ghosts.Api.Code
+namespace Ghosts.Api.Infrastructure
 {
     public static class CorsPolicyExtensions
     {

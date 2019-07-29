@@ -3,7 +3,7 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Ghosts.Api.Code;
+using Ghosts.Api.Infrastructure;
 using Ghosts.Api.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
