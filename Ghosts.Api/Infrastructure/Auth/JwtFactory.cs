@@ -7,7 +7,7 @@ using System.Security.Principal;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 
-namespace Ghosts.Api.Code.Auth
+namespace Ghosts.Api.Infrastructure.Auth
 {
     public interface IJwtFactory
     {

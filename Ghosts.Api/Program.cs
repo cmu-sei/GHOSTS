@@ -1,8 +1,8 @@
 // Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
-using Ghosts.Api.Code;
-using Ghosts.Api.Data;
+using Ghosts.Api.Infrastructure;
+using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Api.Models;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;

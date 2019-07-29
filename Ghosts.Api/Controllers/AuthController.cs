@@ -1,10 +1,9 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
-using System.Net;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Ghosts.Api.Code;
-using Ghosts.Api.Code.Auth;
+using Ghosts.Api.Infrastructure;
+using Ghosts.Api.Infrastructure.Auth;
 using Ghosts.Api.Models;
 using Ghosts.Api.ViewModels;
 using Microsoft.AspNetCore.Identity;
@@ -56,7 +55,7 @@ namespace Ghosts.Api.Controllers
             if (string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(password))
                 return await Task.FromResult<ClaimsIdentity>(null);
 
-            // get the user to verifty
+            // get the user to verify
             var userToVerify = await _userManager.FindByNameAsync(userName);
 
             if (userToVerify == null) return await Task.FromResult<ClaimsIdentity>(null);

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Ghosts.Api.Models;
 using Ghosts.Domain.Messages.MesssagesForServer;
 
-namespace Ghosts.Api.Data
+namespace Ghosts.Api.Infrastructure.Data
 {
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {

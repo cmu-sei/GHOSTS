@@ -74,7 +74,7 @@ namespace Ghosts.Api.Controllers
 
             var id = await this._service.CreateAsync(machine, ct);
 
-            return CreatedAtAction("GetMachine", new { id = id }, machine);
+            return CreatedAtAction("GetMachine", new { id }, machine);
         }
 
         // DELETE: api/Machines/5

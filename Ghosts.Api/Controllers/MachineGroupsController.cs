@@ -23,7 +23,7 @@ namespace Ghosts.Api.Controllers
     {
         private readonly IMachineGroupService _service;
         private readonly IMachineService _serviceMachine;
-        private static Logger _log = LogManager.GetCurrentClassLogger();
+        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
 
         public MachineGroupsController(IMachineGroupService service, IMachineService machineService)
         {
@@ -69,7 +69,7 @@ namespace Ghosts.Api.Controllers
 
             var id = await this._service.CreateAsync(model, ct);
 
-            return CreatedAtAction("GetMachineGroup", new { id = id }, model);
+            return CreatedAtAction("GetMachineGroup", new { id }, model);
         }
 
         // DELETE: api/MachineGroups/5
@@ -114,8 +114,7 @@ namespace Ghosts.Api.Controllers
             }
             catch (Exception e)
             {
-                var response = new HttpResponseMessage(HttpStatusCode.InternalServerError);
-                response.Content = new StringContent(e.Message);
+                var response = new HttpResponseMessage(HttpStatusCode.InternalServerError) {Content = new StringContent(e.Message)};
                 return BadRequest(response);
             }
         }

@@ -3,11 +3,11 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <AssemblyName>ghosts.api</AssemblyName>
-    <ReleaseVersion>2.5.0.2</ReleaseVersion>
+    <ReleaseVersion>2.5.3.0</ReleaseVersion>
+    <Version>2.5.3.0</Version>
+    <AssemblyVersion>2.5.3.0</AssemblyVersion>
+    <FileVersion>2.5.3.0</FileVersion>
     <SynchReleaseVersion>false</SynchReleaseVersion>
-    <Version>2.5.1.0</Version>
-    <AssemblyVersion>2.5.1.0</AssemblyVersion>
-    <FileVersion>2.5.1.0</FileVersion>
     
     <Authors>Dustin Updyke for Carnegie Mellon University</Authors>
     <Company>Carnegie Mellon University</Company>
@@ -21,6 +21,14 @@
     <Content Remove="bin\publish\**" />
     <EmbeddedResource Remove="bin\publish\**" />
     <None Remove="bin\publish\**" />
+    <Compile Remove="db_data\**" />
+    <EmbeddedResource Remove="db_data\**" />
+    <None Remove="db_data\**" />
+    <Content Remove="db_data\**" />
+    <Compile Remove="g_data\**" />
+    <EmbeddedResource Remove="g_data\**" />
+    <None Remove="g_data\**" />
+    <Content Remove="g_data\**" />
   </ItemGroup>
 
   <ItemGroup>

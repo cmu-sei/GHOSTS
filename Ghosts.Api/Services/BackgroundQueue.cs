@@ -19,7 +19,7 @@ namespace Ghosts.Api.Services
     public class BackgroundQueue : IBackgroundQueue
     {
         private readonly ConcurrentQueue<QueueEntry> _items = new ConcurrentQueue<QueueEntry>();
-        private readonly SemaphoreSlim _semaphone = new SemaphoreSlim(0);
+        private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(0);
 
         public void Enqueue(QueueEntry item)
         {
@@ -29,12 +29,12 @@ namespace Ghosts.Api.Services
             }
 
             this._items.Enqueue(item);
-            this._semaphone.Release();
+            this._semaphore.Release();
         }
 
         public async Task<QueueEntry> DequeueAsync(CancellationToken cancellationToken)
         {
-            await _semaphone.WaitAsync(cancellationToken);
+            await _semaphore.WaitAsync(cancellationToken);
             _items.TryDequeue(out var item);
 
             return item;

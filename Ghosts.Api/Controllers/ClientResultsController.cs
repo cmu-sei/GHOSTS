@@ -2,7 +2,7 @@
 
 using System;
 using System.Threading;
-using Ghosts.Api.Code;
+using Ghosts.Api.Infrastructure;
 using Ghosts.Api.Models;
 using Ghosts.Api.Services;
 using Ghosts.Domain;
@@ -19,7 +19,7 @@ namespace Ghosts.Api.Controllers
     [Route("api/[controller]")]
     public class ClientResultsController : Controller
     {
-        private static Logger log = LogManager.GetCurrentClassLogger();
+        private static readonly Logger log = LogManager.GetCurrentClassLogger();
         private readonly IBackgroundQueue _service;
 
         public ClientResultsController(IBackgroundQueue service)
@@ -69,6 +69,7 @@ namespace Ghosts.Api.Controllers
             return Process(HttpContext, Request, value, ct);
         }
 
+        // ReSharper disable once UnusedParameter.Local
         private IActionResult Process(HttpContext context, HttpRequest request, TransferLogDump value, CancellationToken ct)
         {
             var id = request.Headers["ghosts-id"];

@@ -5,7 +5,7 @@ using System.IO;
 using System.Reflection;
 using Microsoft.Extensions.Configuration;
 
-namespace Ghosts.Api.Code
+namespace Ghosts.Api.Infrastructure
 {
     public static class ApiDetails
     {

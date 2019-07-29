@@ -3,10 +3,10 @@
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Ghosts.Api.Code.Auth;
+using Ghosts.Api.Infrastructure.Auth;
 using Newtonsoft.Json;
 
-namespace Ghosts.Api.Code
+namespace Ghosts.Api.Infrastructure
 {
     public class Tokens
     {

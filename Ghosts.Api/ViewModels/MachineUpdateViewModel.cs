@@ -1,8 +1,9 @@
+// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
+
 using System;
 using Ghosts.Api.Models;
 using Ghosts.Domain;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 
 namespace Ghosts.Api.ViewModels
 {

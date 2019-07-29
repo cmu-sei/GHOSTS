@@ -1,14 +1,11 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
-using System.IO;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Ghosts.Api.Data;
+using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Api.Models;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 using NLog;
 
 namespace Ghosts.Api.Services

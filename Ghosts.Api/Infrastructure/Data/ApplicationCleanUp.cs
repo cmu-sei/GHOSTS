@@ -3,7 +3,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Ghosts.Api.Data
+namespace Ghosts.Api.Infrastructure.Data
 {
     public static class ApplicationCleanUp
     {

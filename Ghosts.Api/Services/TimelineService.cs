@@ -3,7 +3,7 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Ghosts.Api.Data;
+using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Api.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using NLog;

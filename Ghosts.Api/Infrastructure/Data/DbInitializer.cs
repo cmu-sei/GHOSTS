@@ -8,7 +8,7 @@ using Ghosts.Api.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 
-namespace Ghosts.Api.Data
+namespace Ghosts.Api.Infrastructure.Data
 {
     public class DbInitializer
     {

@@ -7,7 +7,7 @@ using Ghosts.Api.Models;
 using System.Linq;
 using NLog;
 
-namespace Ghosts.Api.Code
+namespace Ghosts.Api.Infrastructure
 {
     public static class GroupNames
     {

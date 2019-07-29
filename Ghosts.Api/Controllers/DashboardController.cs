@@ -1,5 +1,6 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Ghosts.Api.Services;
@@ -9,6 +10,7 @@ using NLog;
 
 namespace Ghosts.Api.Controllers
 {
+    [Obsolete("Use Grafana for analytics. This endpoint will be removed in v3")]
     [Authorize(Policy = "ApiUser")]
     [Produces("application/json")]
     [Route("api/Dashboard")]
@@ -16,7 +18,7 @@ namespace Ghosts.Api.Controllers
     public class DashboardController : Controller
     {
         private readonly IReportService _service;
-        private static Logger log = LogManager.GetCurrentClassLogger();
+        private static readonly Logger log = LogManager.GetCurrentClassLogger();
 
         public DashboardController(IReportService service)
         {

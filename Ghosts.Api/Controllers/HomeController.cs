@@ -2,8 +2,8 @@
 
 using System;
 using System.Linq;
-using Ghosts.Api.Code;
-using Ghosts.Api.Data;
+using Ghosts.Api.Infrastructure;
+using Ghosts.Api.Infrastructure.Data;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ghosts.Api.Controllers

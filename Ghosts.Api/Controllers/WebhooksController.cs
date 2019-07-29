@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Ghosts.Api.Data;
+using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Api.Models;
 using Ghosts.Api.Services;
 using Newtonsoft.Json.Linq;
@@ -143,18 +143,6 @@ namespace ghosts.api.Controllers
         [HttpGet("{webhookid}/test/{historytimelineid}")]
         public async Task<IActionResult> TestByID([FromRoute] Guid webhookid, int historytimelineid)
         {
-            //Webhook w = new Webhook();
-            //w.PostbackFormat =
-            //    "{ \"MessageInteraction\": {\"SimulationID\": \"\",\"Sender\": \"[MachineName]\",\"TimeStamp\": \"[DateTime.UtcNow]\",\"MessageType\": \"[MessageType]\",\"MessageBody\": {\"[MessagePayload]\"}} }";
-            //w.ApplicationUserId = Guid.Empty;
-            //w.CreatedUtc = DateTime.UtcNow;
-            //w.Description = "Rotem";
-            //w.PostbackMethod = Webhook.WebhookMethod.POST;
-            //w.PostbackUrl = "http://localhost:8888";
-
-            //_context.Webhooks.Add(w);
-            //_context.SaveChanges();
-
             var timeline = await _context.HistoryTimeline.FirstOrDefaultAsync(o => o.Id == historytimelineid);
 
             this._service.Enqueue(

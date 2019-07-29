@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Ghosts.Api.Services;
 using Ghosts.Api.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using NLog;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace ghosts.api.Controllers
@@ -16,7 +15,6 @@ namespace ghosts.api.Controllers
     /// </summary>
     public class TimelineController : Controller
     {
-        private static Logger log = LogManager.GetCurrentClassLogger();
         private readonly ITimelineService _timelineService;
         
         public TimelineController(ITimelineService timelineService, IBackgroundQueue queue)

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Ghosts.Api.Data;
+using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Api.Models;
 using Microsoft.EntityFrameworkCore;
 using NLog;
@@ -24,7 +24,7 @@ namespace Ghosts.Api.Services
 
     public class MachineGroupService : IMachineGroupService
     {
-        private static Logger _log = LogManager.GetCurrentClassLogger();
+        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
         private readonly ApplicationDbContext _context;
 
         public MachineGroupService(ApplicationDbContext context)
@@ -37,20 +37,21 @@ namespace Ghosts.Api.Services
             var list = await this._context.Groups.Include(o => o.GroupMachines).ToListAsync(ct);
             foreach (var group in list)
             {
-                foreach (var machinemapping in group.GroupMachines)
+                foreach (var machineMapping in group.GroupMachines)
                 {
-                    var machine = await _context.Machines.FirstOrDefaultAsync(m => m.Id == machinemapping.MachineId && m.Status==StatusType.Active, ct);
+                    var machine = await _context.Machines.FirstOrDefaultAsync(m => m.Id == machineMapping.MachineId && m.Status == StatusType.Active, ct);
                     if (machine == null)
                         continue;
                     group.Machines.Add(machine);
                 }
             }
+
             return list;
         }
 
         public async Task<Group> GetAsync(int id, CancellationToken ct)
         {
-            return await _context.Groups.Include(o=>o.GroupMachines).FirstOrDefaultAsync(o => o.Id == id, ct);
+            return await _context.Groups.Include(o => o.GroupMachines).FirstOrDefaultAsync(o => o.Id == id, ct);
         }
 
         public async Task<int> CreateAsync(Group model, CancellationToken ct)
@@ -72,6 +73,7 @@ namespace Ghosts.Api.Services
             {
                 _log.Error("Machine group update exception", ex);
             }
+
             return model;
         }
 

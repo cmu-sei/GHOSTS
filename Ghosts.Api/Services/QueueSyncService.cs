@@ -10,7 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using ghosts.api.ViewModels;
-using Ghosts.Api.Data;
+using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Api.Models;
 using Ghosts.Domain.Messages.MesssagesForServer;
 using Microsoft.EntityFrameworkCore;

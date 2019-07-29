@@ -4,7 +4,7 @@ using System;
 using Ghosts.Api.Models;
 using Microsoft.AspNetCore.Http;
 
-namespace Ghosts.Api.Code
+namespace Ghosts.Api.Infrastructure
 {
     public static class WebRequestReader
     {

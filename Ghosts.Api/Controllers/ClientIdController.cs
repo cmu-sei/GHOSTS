@@ -3,7 +3,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Ghosts.Api.Code;
+using Ghosts.Api.Infrastructure;
 using Ghosts.Api.Models;
 using Ghosts.Api.Services;
 using Microsoft.AspNetCore.Http;
@@ -16,7 +16,7 @@ namespace Ghosts.Api.Controllers
     [Route("api/[controller]")]
     public class ClientIdController : Controller
     {
-        private static Logger log = LogManager.GetCurrentClassLogger();
+        private static readonly Logger log = LogManager.GetCurrentClassLogger();
         private readonly IMachineService _service;
 
         public ClientIdController(IMachineService service)
@@ -27,7 +27,7 @@ namespace Ghosts.Api.Controllers
         /// <summary>
         /// Clients post to this endpoint to get their unique GHOSTS system ID
         /// </summary>
-        /// <returns>A client's particular unique GHOSTS system ID</returns>
+        /// <returns>A client's particular unique GHOSTS system ID (GUID)</returns>
         [HttpGet]
         public async Task<IActionResult> Index(CancellationToken ct)
         {

@@ -5,12 +5,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Ghosts.Api.Code;
-using Ghosts.Api.Data;
+using Ghosts.Api.Infrastructure;
+using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Api.Models;
 using Ghosts.Domain;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Server.Kestrel.Transport.Libuv.Internal.Networking;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using NLog;
@@ -35,8 +33,8 @@ namespace Ghosts.Api.Services
 
     public class MachineService : IMachineService
     {
-        private static Logger _log = LogManager.GetCurrentClassLogger();
-        private int _lookback = Program.ClientConfig.LookbackRecords;
+        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
+        private readonly int _lookBack = Program.ClientConfig.LookbackRecords;
         private readonly ApplicationDbContext _context;
 
         public MachineService(ApplicationDbContext context)
@@ -46,7 +44,7 @@ namespace Ghosts.Api.Services
 
         public async Task<List<Machine>> GetAsync(string q, CancellationToken ct)
         {
-            var list = this._context.Machines.Where(o => o.Status == StatusType.Active).OrderByDescending(o => o.LastReportedUtc).ToList();
+            var list = await this._context.Machines.Where(o => o.Status == StatusType.Active).OrderByDescending(o => o.LastReportedUtc).ToListAsync(ct);
             foreach (var item in list)
             {
                 item.HistoryHealth = null;
@@ -62,13 +60,13 @@ namespace Ghosts.Api.Services
             switch (Program.ClientConfig.MatchMachinesBy.ToLower())
             {
                 case "fqdn":
-                    return _context.Machines.FirstOrDefault(o => o.FQDN.Contains(machine.FQDN));
+                    return await _context.Machines.FirstOrDefaultAsync(o => o.FQDN.Contains(machine.FQDN), ct);
                 case "host":
-                    return _context.Machines.FirstOrDefault(o => o.Host.Contains(machine.Host));
+                    return await _context.Machines.FirstOrDefaultAsync(o => o.Host.Contains(machine.Host), ct);
                 case "resolvedhost":
-                    return _context.Machines.FirstOrDefault(o => o.ResolvedHost.Contains(machine.ResolvedHost));
+                    return await _context.Machines.FirstOrDefaultAsync(o => o.ResolvedHost.Contains(machine.ResolvedHost), ct);
                 default: 
-                    return _context.Machines.FirstOrDefault(o => o.Name.Contains(machine.Name));
+                    return await _context.Machines.FirstOrDefaultAsync(o => o.Name.Contains(machine.Name), ct);
             }
         }
 
@@ -78,8 +76,7 @@ namespace Ghosts.Api.Services
             var q = from r in this._context.Machines
                     select new
                     {
-                        Id = r.Id,
-                        Name = r.Name
+                        r.Id, r.Name
                     };
             foreach (var item in q)
                 items.Add(new MachineListItem
@@ -98,11 +95,11 @@ namespace Ghosts.Api.Services
                 return null;
 
             machine.AddHistoryMachine(await this._context.HistoryMachine.Where(o => o.MachineId == machine.Id)
-                .OrderByDescending(o => o.CreatedUtc).Take(_lookback).ToListAsync(ct));
+                .OrderByDescending(o => o.CreatedUtc).Take(_lookBack).ToListAsync(ct));
             machine.AddHistoryHealth(await this._context.HistoryHealth.Where(o => o.MachineId == machine.Id)
-                .OrderByDescending(o => o.CreatedUtc).Take(_lookback).ToListAsync(ct));
+                .OrderByDescending(o => o.CreatedUtc).Take(_lookBack).ToListAsync(ct));
             machine.AddHistoryTimeline(await this._context.HistoryTimeline.Where(o => o.MachineId == machine.Id)
-                .OrderByDescending(o => o.CreatedUtc).Take(_lookback).ToListAsync(ct));
+                .OrderByDescending(o => o.CreatedUtc).Take(_lookBack).ToListAsync(ct));
 
             return machine;
         }
@@ -139,7 +136,7 @@ namespace Ghosts.Api.Services
             var ex = await _context.Machines.FirstOrDefaultAsync(o => o.Id == model.Id, ct);
             if (ex == null)
             {
-                _log.Error($"Machine not found: {ex}");
+                _log.Error("Machine not found");
                 throw new InvalidOperationException("Machine not found");
             }
 
@@ -240,7 +237,7 @@ namespace Ghosts.Api.Services
 
         public async Task<TimelineHandler> SendCommand(Guid id, string command, CancellationToken ct)
         {
-            TimelineHandler handler = null;
+            TimelineHandler handler;
 
             var machine = await _context.Machines.FirstOrDefaultAsync(o => o.Id == id, ct);
             if (machine == null)

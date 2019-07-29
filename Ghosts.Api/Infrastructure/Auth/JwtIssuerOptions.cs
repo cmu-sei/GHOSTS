@@ -4,7 +4,7 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Ghosts.Api.Code.Auth
+namespace Ghosts.Api.Infrastructure.Auth
 {
     public class JwtIssuerOptions
     {

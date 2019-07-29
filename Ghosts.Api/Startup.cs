@@ -3,9 +3,10 @@
 using System;
 using System.Net;
 using System.Text;
-using Ghosts.Api.Code;
-using Ghosts.Api.Code.Auth;
-using Ghosts.Api.Data;
+using Ghosts.Api.Infrastructure;
+using Ghosts.Api.Infrastructure.Auth;
+using Ghosts.Api.Infrastructure.Data;
+using Ghosts.Api.Infrastructure.Extensions;
 using Ghosts.Api.Models;
 using Ghosts.Api.Services;
 using Ghosts.Domain.Code;

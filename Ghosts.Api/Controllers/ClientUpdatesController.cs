@@ -3,7 +3,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Ghosts.Api.Code;
+using Ghosts.Api.Infrastructure;
 using Ghosts.Api.Models;
 using Ghosts.Api.Services;
 using Ghosts.Domain;
@@ -17,7 +17,7 @@ namespace Ghosts.Api.Controllers
     [Route("api/[controller]")]
     public class ClientUpdatesController : Controller
     {
-        private static Logger log = LogManager.GetCurrentClassLogger();
+        private static readonly Logger log = LogManager.GetCurrentClassLogger();
         private readonly IMachineUpdateService _updateService;
         private readonly IBackgroundQueue _queue;
 
@@ -80,9 +80,7 @@ namespace Ghosts.Api.Controllers
                 return NotFound();
             }
 
-            var update = new UpdateClientConfig();
-            update.Type = u.Type;
-            update.Update = u.Update;
+            var update = new UpdateClientConfig {Type = u.Type, Update = u.Update};
 
             await this._updateService.DeleteAsync(u.Id, ct);
 

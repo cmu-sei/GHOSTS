@@ -2,7 +2,7 @@
 using System.IO;
 using System.Text;
 using System.Threading;
-using Ghosts.Api.Code;
+using Ghosts.Api.Infrastructure;
 using Ghosts.Api.Models;
 using Ghosts.Api.Services;
 using Ghosts.Domain.Code;
@@ -18,7 +18,7 @@ namespace ghosts.api.Controllers
     [Route("api/[controller]")]
     public class ClientSurveyController : Controller
     {
-        private static Logger _log = LogManager.GetCurrentClassLogger();
+        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
         private readonly IBackgroundQueue _service;
 
         public ClientSurveyController(IBackgroundQueue service)
