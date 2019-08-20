@@ -51,6 +51,11 @@ namespace Ghosts.Domain.Code
             var regex = new Regex("[ ]{2,}", RegexOptions.None);
             return regex.Replace(input, " ");
         }
+
+        public static string ToFormValueString<TKey, TValue>(this IDictionary<TKey, TValue> dictionary)
+        {
+            return string.Join("&", dictionary.Select(x => x.Key + "=" + x.Value).ToArray());
+        }
     }
 
     public static class EnumerableExtensions
