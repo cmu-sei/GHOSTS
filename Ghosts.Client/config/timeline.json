@@ -588,7 +588,35 @@
                         "http://www.majuredata.com",
                         "http://www.makeup.com",
                         "http://www.lyricsworld.com",
-                        "http://www.lpaonline.org"
+                        "http://www.lpaonline.org",
+                        {
+                            "Uri": "http://httpbin.org/post",
+                            "Category": "cat1",
+                            "Method": "POST",
+                            "Headers": {
+                                "1": "a",
+                                "2": "b"
+                            },
+                            "FormValues": {
+                                "1": "a",
+                                "2": "b"
+                            }
+                        },
+                        {
+                            "Uri": "http://httpbin.org/put",
+                            "Category": "cat1",
+                            "Method": "PUT",
+                            "Headers": {
+                                "1": "a",
+                                "2": "b"
+                            },
+                            "Body": "body"
+                        },
+                        {
+                            "Uri": "http://httpbin.org/delete",
+                            "Category": "cat1",
+                            "Method": "DELETE"
+                        }
                     ],
                     "DelayAfter": 300000,
                     "DelayBefore": 0

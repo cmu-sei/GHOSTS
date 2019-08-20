@@ -12,6 +12,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
+using NetOffice.ExcelApi.Tools;
 using Excel = NetOffice.ExcelApi;
 using XlWindowState = NetOffice.ExcelApi.Enums.XlWindowState;
 

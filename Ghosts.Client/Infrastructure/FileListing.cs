@@ -58,6 +58,9 @@ namespace Ghosts.Client.Infrastructure
             if (Program.Configuration.OfficeDocsMaxAgeInHours == -1)
                 return;
 
+            if(!File.Exists(_fileName))
+                return;
+
             //locking thread to make sure files can't write to the log
             lock (_safetyLocked)
             {
