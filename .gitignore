@@ -302,8 +302,8 @@ __pycache__/
 *.xsd.cs
 ghosts.tools.emailgenerator/config/email-content.csv
 ghosts.tools.emailgenerator/config/email-content - Copy.csv
-Ghosts.Client/config/email-reply.csv
-Ghosts.Client/config/email-content.csv
+# Ghosts.Client/config/email-reply.csv
+# Ghosts.Client/config/email-content.csv
 vtunnel.exe
 
 db_data/
