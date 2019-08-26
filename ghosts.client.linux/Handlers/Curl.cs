@@ -90,7 +90,7 @@ namespace ghosts.client.linux.handlers
 
                 this.Report(HandlerType.Curl.ToString(), escapedArgs, this.Result);
                 
-                Console.WriteLine(this.Result);
+                //Console.WriteLine(this.Result);
             }
             catch(Exception exc)
             {

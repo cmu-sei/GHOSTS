@@ -144,7 +144,14 @@ namespace ghosts.client.linux.timelineManager
                 {
                     var obj = Handle(message);
                     message.ReplyLine($"{obj}{Environment.NewLine}");
+                    Console.WriteLine(obj);
                 };
+
+//                while (true)
+//                {
+//                    Console.WriteLine("...");
+//                    Thread.Sleep(10000);
+//                }
             }
             catch (Exception e)
             {

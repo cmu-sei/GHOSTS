@@ -27,10 +27,8 @@ namespace ghosts.client.linux.handlers
                         Ex(handler);
                     }
                 }
-                else
-                {
-                    Ex(handler);
-                }
+                
+                Ex(handler);
             }
             catch (Exception e)
             {
