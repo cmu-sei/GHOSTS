@@ -7,10 +7,22 @@
 FROM microsoft/dotnet:2.2-aspnetcore-runtime-alpine
 
 RUN apk add nmap
+RUN apk add busybox-extras
+RUN apk add nikto
+
+RUN apk add python
+RUN wget 'https://github.com/sqlmapproject/sqlmap/tarball/master' --output-document=sqlmap.tar.gz
+RUN mkdir sqlmap
+RUN tar -xvf sqlmap.tar.gz -C sqlmap
+RUN cd sqlmap/
+# RUN python sqlmap.py --version
+
 
 WORKDIR /root/  
 COPY  bin/publish .
 ENV ASPNETCORE_URLS=http://+:5000
 EXPOSE 5000/tcp
+
 CMD ["dotnet", "./ghosts.client.linux.dll"]
- 
+
+# CMD [ "/usr/local/bin/start.sh" ] 

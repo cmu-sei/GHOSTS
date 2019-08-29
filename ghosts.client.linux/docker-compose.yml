@@ -7,15 +7,15 @@ services:
       - 7000:5000
     volumes:
       - ./_config/0:/app/config
-  staypuft-1:
-    image: ghosts/staypuft
-    ports:
-      - 7001:5000
-    volumes:
-      - ./_config/1:/app/config
-  staypuft-2:
-    image: ghosts/staypuft
-    ports:
-      - 7002:5000
-    volumes:
-      - ./_config/2:/app/config
+#  staypuft-1:
+        ##    image: ghosts/staypuft
+        ##    ports:
+        ##      - 7001:5000
+        ##    volumes:
+        ##      - ./_config/1:/app/config
+        ##  staypuft-2:
+        ##    image: ghosts/staypuft
+        ##    ports:
+        ##      - 7002:5000
+      ##    volumes:
+      ##      - ./_config/2:/app/config
