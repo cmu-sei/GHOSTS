@@ -94,7 +94,7 @@ namespace ghosts.client.linux.handlers
             }
             catch(Exception exc)
             {
-                _log.Debug(exc);
+                 _log.Debug(exc);
             }
         }
     }

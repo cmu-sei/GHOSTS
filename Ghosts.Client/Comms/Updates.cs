@@ -202,8 +202,13 @@ namespace Ghosts.Client.Comms
                 }
                 catch (Exception e)
                 {
-                    _log.Debug($"Problem posting logs from { fileName } to server { posturl }");
+                    _log.Debug($"Problem posting logs from {fileName} to server {posturl}");
                     _log.Error(e);
+                }
+                finally
+                {
+                    GC.Collect();
+                    GC.WaitForPendingFinalizers();
                 }
 
                 Thread.Sleep(ProcessManager.Jitter(Program.Configuration.ClientResults.CycleSleep));

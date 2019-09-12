@@ -6,16 +6,18 @@
 
 FROM microsoft/dotnet:2.2-aspnetcore-runtime-alpine
 
-RUN apk add nmap
-RUN apk add busybox-extras
-RUN apk add nikto
-
-RUN apk add python
-RUN wget 'https://github.com/sqlmapproject/sqlmap/tarball/master' --output-document=sqlmap.tar.gz
-RUN mkdir sqlmap
-RUN tar -xvf sqlmap.tar.gz -C sqlmap
-RUN cd sqlmap/
-# RUN python sqlmap.py --version
+RUN apk add curl && \
+    apk add nmap && \
+    apk add busybox-extras && \
+    apk add nikto && \
+    apk add openssh-client && \
+    apk add openssh-keygen && \
+    apk add python && \
+    wget 'https://github.com/sqlmapproject/sqlmap/tarball/master' --output-document=sqlmap.tar.gz && \
+    mkdir sqlmap && \
+    tar -xvf sqlmap.tar.gz -C sqlmap && \
+    cd sqlmap/
+    # python sqlmap.py --version
 
 
 WORKDIR /root/  

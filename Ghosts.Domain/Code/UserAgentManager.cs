@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using NLog;
 
@@ -19,6 +20,8 @@ namespace Ghosts.Domain.Code
         public static string Get()
         {
             var files = GetFiles();
+            if (!files.Any())
+                return string.Empty;
             var file = files.PickRandom();
             var entries = GetEntries(file.FullName);
 
@@ -30,6 +33,7 @@ namespace Ghosts.Domain.Code
             var files = new List<FileInfo>();
             try
             {
+                _log.Trace("user agents path", ApplicationDetails.UserAgents.Path);
                 foreach (var file in new DirectoryInfo(ApplicationDetails.UserAgents.Path).EnumerateFiles("*.txt", SearchOption.TopDirectoryOnly))
                 {
                     files.Add(file);
@@ -45,6 +49,7 @@ namespace Ghosts.Domain.Code
 
         private static IEnumerable<string> GetEntries(string filePath)
         {
+            _log.Trace(filePath);
             var raw = File.ReadAllText(filePath);
             var textLines = Regex.Split(raw, "\r\n|\r|\n");
             return textLines;

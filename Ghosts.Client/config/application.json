@@ -1,6 +1,6 @@
 ﻿{
     "IdEnabled": true,
-    "IdUrl": "http://telemetry.exercise.mil/api/clientid",
+    "IdUrl": "http://localhost/api/clientid",
     "IdFormat": "guestlocal",
     "IdFormatKey": "guestinfo.id",
     "IdFormatValue": "$formatkeyvalue$-$machinename$",
@@ -8,21 +8,21 @@
     "ClientResults": {
         "IsEnabled": true,
         "IsSecure": false,
-        "PostUrl": "http://telemetry.exercise.mil/api/clientresults",
-        "CycleSleep": 900000
+        "PostUrl": "http://localhost/api/clientresults",
+        "CycleSleep": 9000
     },
     "ClientUpdates": {
         "IsEnabled": true,
-        "PostUrl": "http://telemetry.exercise.mil/api/clientupdates",
-        "CycleSleep": 900000
+        "PostUrl": "http://localhost/api/clientupdates",
+        "CycleSleep": 9000
     },
     "Survey": {
         "IsEnabled": true,
         "IsSecure": false,
         "Frequency": "once",
-        "CycleSleepMinutes": 720,
+        "CycleSleepMinutes": 5,
         "OutputFormat": "indent",
-        "PostUrl": "http://telemetry.exercise.mil/api/clientsurvey"
+        "PostUrl": "http://localhost/api/clientsurvey"
     },
     "HealthIsEnabled": true,
     "HandlersIsEnabled": true,

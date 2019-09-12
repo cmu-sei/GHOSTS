@@ -2,11 +2,16 @@
 
 using System;
 using System.Reflection;
+using NLog;
+using NLog.Fluent;
+using NPOI.OpenXmlFormats.Dml.Chart;
 
 namespace Ghosts.Domain.Code
 {
     public static class ApplicationDetails
     {
+        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
+        
         /// <summary>
         /// Returns current GHOSTS exe name
         /// </summary>
@@ -25,7 +30,9 @@ namespace Ghosts.Domain.Code
             {
                 try
                 {
-                    return System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().CodeBase).Replace("file:\\", "");
+                    var x = Clean(System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().CodeBase));
+                    _log.Trace(x);
+                    return x;
                 }
                 catch
                 {
@@ -39,7 +46,18 @@ namespace Ghosts.Domain.Code
         /// </summary>
         public static class ConfigurationFiles
         {
-            public static string Path => InstalledPath + $"{System.IO.Path.DirectorySeparatorChar}config{System.IO.Path.DirectorySeparatorChar}";
+            //public static string Path => InstalledPath + $"{System.IO.Path.DirectorySeparatorChar}config{System.IO.Path.DirectorySeparatorChar}";
+            
+            public static string Path
+            {
+                get
+                {
+                    var x = InstalledPath + $"{System.IO.Path.DirectorySeparatorChar}config{System.IO.Path.DirectorySeparatorChar}";
+                    _log.Trace(x);
+                    return x;
+                }
+            }
+            
             public static string Application => Clean(Path + "application.json");
             public static string Health => Clean(Path + "health.json");
             public static string Timeline => Clean(Path + "timeline.json");
