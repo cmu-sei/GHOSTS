@@ -4,7 +4,9 @@ using System.IO;
 using System.Reflection;
 using CommandLine;
 using CommandLine.Text;
+using Ghosts.Domain;
 using Ghosts.Domain.Code;
+using Newtonsoft.Json;
 
 namespace ghosts.client.linux.Infrastructure
 {
@@ -38,6 +40,12 @@ namespace ghosts.client.linux.Infrastructure
             if (options.Version)
             {
                 Version();
+                return false;
+            }
+
+            if (options.Information)
+            {
+                Console.WriteLine(JsonConvert.SerializeObject(new ResultMachine(), Formatting.Indented));
                 return false;
             }
             // end handling flags that result in program exit
