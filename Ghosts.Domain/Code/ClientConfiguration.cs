@@ -1,7 +1,9 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
+using ICSharpCode.SharpZipLib.Zip;
 using Newtonsoft.Json;
 using NLog;
 
@@ -183,6 +185,32 @@ namespace Ghosts.Domain.Code
                 }
                 return _conf;
             }
+        }
+        
+        public static void UpdateConfigurationWithEnvVars()
+        {
+            var baseurl = Environment.GetEnvironmentVariable("BASE_URL");
+            if (string.IsNullOrEmpty(baseurl)) return;
+            
+            var filePath = ApplicationDetails.ConfigurationFiles.Application;
+            var raw = File.ReadAllText(filePath);
+            var conf = JsonConvert.DeserializeObject<ClientConfiguration>(raw);
+                
+            var uri = new Uri(Config.IdUrl);
+            conf.IdUrl = $"{baseurl}{uri.AbsolutePath}";
+                
+            uri = new Uri(Config.ClientResults.PostUrl);
+            conf.ClientResults.PostUrl = $"{baseurl}{uri.AbsolutePath}";
+                
+            uri = new Uri(Config.Survey.PostUrl);
+            conf.Survey.PostUrl = $"{baseurl}{uri.AbsolutePath}";
+                
+            uri = new Uri(Config.ClientUpdates.PostUrl);
+            conf.ClientUpdates.PostUrl = $"{baseurl}{uri.AbsolutePath}";
+                
+            File.WriteAllText(filePath, JsonConvert.SerializeObject(conf, Formatting.Indented));
+            
+            Console.WriteLine($"Updating base configuration... BASE_URL is: {baseurl}");
         }
     }
 }

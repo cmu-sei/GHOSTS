@@ -7,6 +7,7 @@ using System.Net;
 using System.Reflection;
 using System.Threading;
 using CommandLine;
+using ghosts.client.linux.Comms;
 using ghosts.client.linux.Infrastructure;
 using ghosts.client.linux.timelineManager;
 using Ghosts.Domain.Code;
@@ -20,7 +21,10 @@ namespace ghosts.client.linux
         internal static ClientConfiguration Configuration { get; set; }
         internal static Options OptionFlags;
         internal static bool IsDebug;
-        
+
+        /// <summary>
+        /// Defines the flags you can send to the client
+        /// </summary>
         internal class Options
         {
             [Option('d', "debug", Default = false, HelpText = "Launch GHOSTS in debug mode")]
@@ -34,13 +38,22 @@ namespace ghosts.client.linux
 
             [Option('v', "version", Default = false, HelpText = "GHOSTS client version")]
             public bool Version { get; set; }
-            
+
             [Option('i', "information", Default = false, HelpText = "GHOSTS client id information")]
             public bool Information { get; set; }
         }
 
         static void Main(string[] args)
         {
+            try
+            {
+                ClientConfigurationLoader.UpdateConfigurationWithEnvVars();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            
             try
             {
                 Run(args);

@@ -68,6 +68,9 @@ namespace Ghosts.Client
 
             [Option('v', "version", Default = false, HelpText = "GHOSTS client version")]
             public bool Version { get; set; }
+
+            [Option('i', "information", Default = false, HelpText = "GHOSTS client id information")]
+            public bool Information { get; set; }
         }
 
         [STAThread]
