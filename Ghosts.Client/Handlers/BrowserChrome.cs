@@ -37,6 +37,7 @@ namespace Ghosts.Client.Handlers
                 }
 
                 this.Driver = new ChromeDriver(options);
+                base.Driver = this.Driver;
 
                 Driver.Navigate().GoToUrl(handler.Initial);
 

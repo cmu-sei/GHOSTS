@@ -86,6 +86,7 @@ namespace Ghosts.Client.Handlers
                 options.Profile = new FirefoxProfile();
 
                 Driver = new FirefoxDriver(options);
+                base.Driver = this.Driver;
 
                 Driver.Navigate().GoToUrl(handler.Initial);
 

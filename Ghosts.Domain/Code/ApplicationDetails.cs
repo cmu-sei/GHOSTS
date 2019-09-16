@@ -2,6 +2,7 @@
 
 using System;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using NLog;
 using NLog.Fluent;
 using NPOI.OpenXmlFormats.Dml.Chart;
@@ -11,7 +12,12 @@ namespace Ghosts.Domain.Code
     public static class ApplicationDetails
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        
+
+        public static bool IsLinux()
+        {
+            return RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+        }
+
         /// <summary>
         /// Returns current GHOSTS exe name
         /// </summary>
@@ -76,8 +82,19 @@ namespace Ghosts.Domain.Code
    
         private static string Clean(string x)
         {
-            if (x.Contains("file:"))
-                x = x.Substring(x.IndexOf("file:", StringComparison.InvariantCultureIgnoreCase) + "file:".Length);
+            //linux path is file:/users
+            //windows path is file:/z:
+            //ugh
+            var fileFormat = "file:\\";
+            if (IsLinux())
+            {
+                fileFormat = "file:";
+            }
+
+            if (x.Contains(fileFormat))
+            {
+                x = x.Substring(x.IndexOf(fileFormat, StringComparison.InvariantCultureIgnoreCase) + fileFormat.Length);
+            }
 
             x = x.Replace(Convert.ToChar(@"\"), System.IO.Path.DirectorySeparatorChar);
             x = x.Replace(Convert.ToChar(@"/"), System.IO.Path.DirectorySeparatorChar);

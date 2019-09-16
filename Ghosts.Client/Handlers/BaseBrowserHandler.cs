@@ -31,6 +31,10 @@ namespace Ghosts.Client.Handlers
                     }
 
                     RequestConfiguration config;
+
+                    IWebElement element;
+                    Actions actions;
+
                     switch (timelineEvent.Command)
                     {
                         case "random":
@@ -60,20 +64,24 @@ namespace Ghosts.Client.Handlers
                         case "download":
                             if (timelineEvent.CommandArgs.Count > 0)
                             {
-                                IWebElement x = Driver.FindElement(By.XPath(timelineEvent.CommandArgs[0].ToString()));
-                                x.Click();
+                                element = Driver.FindElement(By.XPath(timelineEvent.CommandArgs[0].ToString()));
+                                element.Click();
                                 Report(handler.HandlerType.ToString(), timelineEvent.Command, string.Join(",", timelineEvent.CommandArgs), timelineEvent.TrackableId);
                                 Thread.Sleep(1000);
                             }
                             break;
                         case "type":
-                            IWebElement e = Driver.FindElement(By.Name(timelineEvent.CommandArgs[0].ToString()));
-                            e.SendKeys(timelineEvent.CommandArgs[1].ToString());
-                            //this.Report(timelineEvent);
+                            //IWebElement e = Driver.FindElement(By.Name(timelineEvent.CommandArgs[0].ToString()));
+                            //e.SendKeys(timelineEvent.CommandArgs[1].ToString());
+                            ////this.Report(timelineEvent);
+
+                            element = Driver.FindElement(By.Name(timelineEvent.CommandArgs[0].ToString()));
+                            actions = new Actions(Driver);
+                            actions.SendKeys(element, timelineEvent.CommandArgs[1].ToString()).Build().Perform();
                             break;
                         case "click":
-                            IWebElement element = Driver.FindElement(By.Name(timelineEvent.CommandArgs[0].ToString()));
-                            Actions actions = new Actions(Driver);
+                            element = Driver.FindElement(By.Name(timelineEvent.CommandArgs[0].ToString()));
+                            actions = new Actions(Driver);
                             actions.MoveToElement(element).Click().Perform();
                             //this.Report(timelineEvent);
                             break;
