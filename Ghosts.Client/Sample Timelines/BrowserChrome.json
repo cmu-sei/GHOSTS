@@ -8,10 +8,26 @@
             "Loop": "True",
             "TimeLineEvents": [
                 {
-                    "Command": "random",
+                    "Command": "browse",
                     "CommandArgs": [
-                        "http://site1.edu",
-                        "https://site2.com"
+                        "httpw://www.google.com"
+                    ],
+                    "DelayAfter": 900000,
+                    "DelayBefore": 0
+                },
+                {
+                    "Command": "type",
+                    "CommandArgs": [
+                        "q",
+                        "test search string"
+                    ],
+                    "DelayAfter": 900000,
+                    "DelayBefore": 0
+                },
+                {
+                    "Command": "click",
+                    "CommandArgs": [
+                        "btnK"
                     ],
                     "DelayAfter": 900000,
                     "DelayBefore": 0
