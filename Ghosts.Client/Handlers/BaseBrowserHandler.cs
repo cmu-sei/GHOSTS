@@ -71,11 +71,12 @@ namespace Ghosts.Client.Handlers
                             }
                             break;
                         case "type":
-                            //IWebElement e = Driver.FindElement(By.Name(timelineEvent.CommandArgs[0].ToString()));
-                            //e.SendKeys(timelineEvent.CommandArgs[1].ToString());
-                            ////this.Report(timelineEvent);
-
                             element = Driver.FindElement(By.Name(timelineEvent.CommandArgs[0].ToString()));
+                            actions = new Actions(Driver);
+                            actions.SendKeys(element, timelineEvent.CommandArgs[1].ToString()).Build().Perform();
+                            break;
+                        case "typebyid":
+                            element = Driver.FindElement(By.Id(timelineEvent.CommandArgs[0].ToString()));
                             actions = new Actions(Driver);
                             actions.SendKeys(element, timelineEvent.CommandArgs[1].ToString()).Build().Perform();
                             break;
@@ -83,7 +84,11 @@ namespace Ghosts.Client.Handlers
                             element = Driver.FindElement(By.Name(timelineEvent.CommandArgs[0].ToString()));
                             actions = new Actions(Driver);
                             actions.MoveToElement(element).Click().Perform();
-                            //this.Report(timelineEvent);
+                            break;
+                        case "clickbyid":
+                            element = Driver.FindElement(By.Id(timelineEvent.CommandArgs[0].ToString()));
+                            actions = new Actions(Driver);
+                            actions.MoveToElement(element).Click().Perform();
                             break;
                     }
 
