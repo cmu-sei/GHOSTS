@@ -7,7 +7,6 @@ using System.Net;
 using System.Reflection;
 using System.Threading;
 using CommandLine;
-using ghosts.client.linux.Comms;
 using ghosts.client.linux.Infrastructure;
 using ghosts.client.linux.timelineManager;
 using Ghosts.Domain.Code;
@@ -51,7 +50,7 @@ namespace ghosts.client.linux
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                Console.WriteLine($"Exception updating config with env vars: {e}");
             }
             
             try
@@ -60,9 +59,8 @@ namespace ghosts.client.linux
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Fatal exception in GHOSTS {ApplicationDetails.Version}: {e}");
+                Console.WriteLine($"Fatal exception in {ApplicationDetails.Name} {ApplicationDetails.Version}: {e}");
                 Console.ReadLine();
-                return;
             }
         }
 
@@ -77,7 +75,7 @@ namespace ghosts.client.linux
 
             AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
 
-            _log.Trace($"Initiating Ghosts startup - Local time: {DateTime.Now.TimeOfDay} UTC: {DateTime.UtcNow.TimeOfDay}");
+            _log.Trace($"Initiating {ApplicationDetails.Name} startup - Local: {DateTime.Now.TimeOfDay} UTC: {DateTime.UtcNow.TimeOfDay}");
 
             //load configuration
             try
@@ -152,7 +150,7 @@ namespace ghosts.client.linux
 
         private static void CurrentDomain_ProcessExit(object sender, EventArgs e)
         {
-            _log.Debug($"Initiating Ghosts shutdown - Local time: {DateTime.Now.TimeOfDay} UTC: {DateTime.UtcNow.TimeOfDay}");
+            _log.Debug($"Initiating {ApplicationDetails.Name} shutdown - Local: {DateTime.Now.TimeOfDay} UTC: {DateTime.UtcNow.TimeOfDay}");
             //StartupTasks.CleanupProcesses();
         }
     }
