@@ -20,6 +20,7 @@ namespace ghosts.client.linux
         internal static ClientConfiguration Configuration { get; set; }
         internal static Options OptionFlags;
         internal static bool IsDebug;
+        private static ListenerManager _listenerManager { get; set; }
 
         /// <summary>
         /// Defines the flags you can send to the client
@@ -98,7 +99,7 @@ namespace ghosts.client.linux
             //make sure ghosts starts when machine starts
             StartupTasks.SetStartup();
 
-            ListenerManager.Run();
+            _listenerManager = new ListenerManager();
 
             //check id
             _log.Trace(Comms.CheckId.Id);

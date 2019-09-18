@@ -11,12 +11,13 @@ using SimpleTCP;
 
 namespace ghosts.client.linux.timelineManager
 {
-    public static class ListenerManager
+    public class ListenerManager
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        internal static string In = ApplicationDetails.InstanceDirectories.TimelineIn;
+        private string In = ApplicationDetails.InstanceDirectories.TimelineIn;
+        private string Out = ApplicationDetails.InstanceDirectories.TimelineOut;
 
-        public static void Run()
+        public ListenerManager()
         {
             try
             {
@@ -37,12 +38,18 @@ namespace ghosts.client.linux.timelineManager
 
             try
             {
-                if (!string.IsNullOrEmpty(In))
+                if (!string.IsNullOrEmpty(In) && !string.IsNullOrEmpty(Out))
                 {
                     if (!Directory.Exists(In))
                     {
                         Directory.CreateDirectory(In);
                         _log.Trace($"DirectoryListener created DirIn: {In})");
+                    }
+
+                    if (!Directory.Exists(Out))
+                    {
+                        Directory.CreateDirectory(Out);
+                        _log.Trace($"DirectoryListener created DirIn: {Out})");
                     }
 
                     var t = new Thread(() => { new DirectoryListener(); })
@@ -51,6 +58,8 @@ namespace ghosts.client.linux.timelineManager
                         Name = "ghosts-directorylistener"
                     };
                     t.Start();
+                    
+                    EnsureWatch();
                 }
                 else
                 {
@@ -62,6 +71,11 @@ namespace ghosts.client.linux.timelineManager
                 _log.Debug(e);
             }
         }
+
+        private void EnsureWatch()
+        {
+            File.WriteAllText(In + "init.json", JsonConvert.SerializeObject(new Timeline(), Formatting.None));
+        }
     }
 
     /// <summary>
@@ -70,19 +84,22 @@ namespace ghosts.client.linux.timelineManager
     public class DirectoryListener
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        private static string _in = ListenerManager.In;
-        private static string _currentlyProcessing = string.Empty;
+        private string _in = ApplicationDetails.InstanceDirectories.TimelineIn;
+        private string _out = ApplicationDetails.InstanceDirectories.TimelineOut;
+        private string _currentlyProcessing = string.Empty;
 
         public DirectoryListener()
         {
             var watcher = new FileSystemWatcher
             {
                 Path = _in,
-                NotifyFilter = NotifyFilters.LastWrite,
+                NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName,
                 Filter = "*.json"
             };
-            watcher.Changed += new FileSystemEventHandler(OnChanged);
+            watcher.Changed += OnChanged;
+            watcher.Created += OnChanged;
             watcher.EnableRaisingEvents = true;
+            Console.ReadLine();
         }
 
         private void OnChanged(object source, FileSystemEventArgs e)
@@ -93,6 +110,9 @@ namespace ghosts.client.linux.timelineManager
 
             _log.Trace("DirectoryListener found file: " + e.FullPath + " " + e.ChangeType);
 
+            if (!File.Exists(e.FullPath))
+                return;
+            
             try
             {
                 var raw = File.ReadAllText(e.FullPath);
@@ -115,7 +135,10 @@ namespace ghosts.client.linux.timelineManager
                     orchestrator.RunCommand(timelineHandler);
                 }
 
-                File.Move(e.FullPath, e.FullPath.Replace(".json", $"-{Guid.NewGuid().ToString()}.processed"));
+                var outfile = e.FullPath.Replace(_in, _out);
+                outfile = outfile.Replace(e.Name, $"{DateTime.Now.ToString("G").Replace("/", "-").Replace(" ", "").Replace(":", "")}-{e.Name}");
+
+                File.Move(e.FullPath, outfile);
             }
             catch (Exception exc)
             {

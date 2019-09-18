@@ -17,6 +17,11 @@ namespace Ghosts.Domain.Code
         {
             return RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
         }
+        
+        public static bool IsOSX()
+        {
+            return RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+        }
 
         /// <summary>
         /// Returns current GHOSTS exe name
@@ -86,7 +91,7 @@ namespace Ghosts.Domain.Code
             //windows path is file:/z:
             //ugh
             var fileFormat = "file:\\";
-            if (IsLinux())
+            if (IsLinux() || IsOSX())
             {
                 fileFormat = "file:";
             }
