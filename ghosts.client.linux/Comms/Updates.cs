@@ -162,47 +162,82 @@ namespace ghosts.client.linux.Comms
             {
                 try
                 {
-                    var sb = new StringBuilder();
-                    var data = File.ReadLines(fileName);
-                    foreach (var d in data)
+                    if(File.Exists(fileName))
                     {
-                        sb.AppendLine(d);
+                        PostResults(fileName, machine, posturl);
                     }
-
-                    var r = new TransferLogDump();
-                    r.Log = sb.ToString();
-
-                    var payload = JsonConvert.SerializeObject(r);
-
-                    if (Program.Configuration.ClientResults.IsSecure)
+                    else
                     {
-                        payload = Crypto.EncryptStringAes(payload, machine.Name);
-                        payload = Crypto.Base64Encode(payload);
-
-                        var p = new EncryptedPayload();
-                        p.Payload = payload;
-
-                        payload = JsonConvert.SerializeObject(p);
+                        _log.Trace($"{DateTime.Now} - {fileName} not found - sleeping...");
                     }
-
-                    using (var client = WebClientBuilder.Build(machine))
-                    {
-                        client.Headers[HttpRequestHeader.ContentType] = "application/json";
-                        client.UploadString(posturl, payload);
-                    }
-
-                    File.WriteAllText(fileName, string.Empty);
-
-                    _log.Trace($"{DateTime.Now} - {fileName} posted to server successfully");
                 }
                 catch (Exception e)
                 {
-                    _log.Trace("Problem posting logs to server");
-                    _log.Error(e);
+                    _log.Error($"Problem posting logs to server {e}");
+                }
+
+                // look for other result files that have not been posted
+                try
+                {
+                    foreach(var file in Directory.GetFiles(Path.GetDirectoryName(fileName)))
+                    {
+                        if (!file.EndsWith("app.log") && file != fileName)
+                        {
+                            PostResults(file, machine, posturl, true);
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    throw;
                 }
 
                 Thread.Sleep(cyclesleep);
             }
+        }
+
+        private static void PostResults(string fileName, ResultMachine machine, string postUrl, bool isDeletable = false)
+        {
+            var sb = new StringBuilder();
+            var data = File.ReadLines(fileName);
+            foreach (var d in data)
+            {
+                sb.AppendLine(d);
+            }
+
+            var r = new TransferLogDump();
+            r.Log = sb.ToString();
+
+            var payload = JsonConvert.SerializeObject(r);
+
+            if (Program.Configuration.ClientResults.IsSecure)
+            {
+                payload = Crypto.EncryptStringAes(payload, machine.Name);
+                payload = Crypto.Base64Encode(payload);
+
+                var p = new EncryptedPayload();
+                p.Payload = payload;
+
+                payload = JsonConvert.SerializeObject(p);
+            }
+
+            using (var client = WebClientBuilder.Build(machine))
+            {
+                client.Headers[HttpRequestHeader.ContentType] = "application/json";
+                client.UploadString(postUrl, payload);
+            }
+
+            if (isDeletable)
+            {
+                File.Delete(fileName);
+            }
+            else
+            {
+                File.WriteAllText(fileName, string.Empty);
+            }
+
+            _log.Trace($"{DateTime.Now} - {fileName} posted to server successfully");
         }
 
         internal static void PostSurvey()
