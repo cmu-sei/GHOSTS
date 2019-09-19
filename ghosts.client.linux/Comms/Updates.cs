@@ -189,8 +189,7 @@ namespace ghosts.client.linux.Comms
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e);
-                    throw;
+                    _log.Debug($"Problem posting overflow logs from {fileName} to server {posturl}: {e}");
                 }
 
                 Thread.Sleep(cyclesleep);
