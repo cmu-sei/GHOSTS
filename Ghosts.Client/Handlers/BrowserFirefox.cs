@@ -66,7 +66,7 @@ namespace Ghosts.Client.Handlers
         {
             try
             {
-                string path = GetFirefoxInstallLocation();
+                var path = GetFirefoxInstallLocation();
 
                 if (!IsSufficientVersion(path))
                 {
@@ -74,27 +74,61 @@ namespace Ghosts.Client.Handlers
                     return true;
                 }
 
-                FirefoxOptions options = new FirefoxOptions();
+                var options = new FirefoxOptions();
                 options.AddArguments("--disable-infobars");
-                if (handler.HandlerArgs != null &&
-                    handler.HandlerArgs.ContainsKey("isheadless") && 
-                    handler.HandlerArgs["isheadless"] == "true")
-                {
-                    options.AddArguments("--headless");
-                }
+                options.AddArguments("--disable-extensions");
+                options.AddArguments("--disable-notifications");
+
                 options.BrowserExecutableLocation = path;
                 options.Profile = new FirefoxProfile();
 
-                Driver = new FirefoxDriver(options);
+                if (handler.HandlerArgs != null)
+                {
+                    if (handler.HandlerArgs.ContainsKey("isheadless") && handler.HandlerArgs["isheadless"] == "true")
+                    {
+                        options.AddArguments("--headless");
+                    }
+                    if (handler.HandlerArgs.ContainsKey("blockstyles") && handler.HandlerArgs["blockstyles"] == "true")
+                    {
+                        options.Profile.SetPreference("permissions.default.stylesheet", 2);
+                    }
+                    if (handler.HandlerArgs.ContainsKey("blockimages") && handler.HandlerArgs["blockimages"] == "true")
+                    {
+                        options.Profile.SetPreference("permissions.default.image", 2);
+                    }
+                    if (handler.HandlerArgs.ContainsKey("blockflash") && handler.HandlerArgs["blockflash"] == "true")
+                    {
+                        options.Profile.SetPreference("dom.ipc.plugins.enabled.libflashplayer.so", false);
+                    }
+                    if (handler.HandlerArgs.ContainsKey("blockscripts") && handler.HandlerArgs["blockscripts"] == "true")
+                    {
+                        options.Profile.SetPreference("permissions.default.script", 2);
+                    }
+                }
+
+                options.Profile.SetPreference("permissions.default.cookies", 2);
+                options.Profile.SetPreference("permissions.default.popups", 2);
+                options.Profile.SetPreference("permissions.default.geolocation", 2);
+                options.Profile.SetPreference("permissions.default.media_stream", 2);
+
+                this.Driver = new FirefoxDriver(options);
                 base.Driver = this.Driver;
 
-                Driver.Navigate().GoToUrl(handler.Initial);
+                //hack: bad urls used in the past...
+                if (handler.Initial.Equals("") ||
+                    handler.Initial.Equals("about:internal", StringComparison.InvariantCultureIgnoreCase) ||
+                    handler.Initial.Equals("about:external", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    handler.Initial = "about:blank";
+                }
+                
+                this.Driver.Navigate().GoToUrl(handler.Initial);
 
                 if (handler.Loop)
                 {
                     while (true)
                     {
-                        if (Driver.CurrentWindowHandle == null)
+                        if (this.Driver.CurrentWindowHandle == null)
                         {
                             throw new Exception("Firefox window handle not available");
                         }

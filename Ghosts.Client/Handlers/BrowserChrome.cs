@@ -20,17 +20,41 @@ namespace Ghosts.Client.Handlers
                 options.AddArguments("--disable-logging");
                 options.AddArgument("--log-level=3");
                 options.AddArgument("--silent");
-                if (handler.HandlerArgs != null && 
-                    handler.HandlerArgs.ContainsKey("isheadless") &&
-                    handler.HandlerArgs["isheadless"] == "true")
-                {
-                    options.AddArguments("headless");
-                }
+                
+                options.AddUserProfilePreference("download.default_directory", @"%homedrive%%homepath%\\Downloads");
+                options.AddUserProfilePreference("disable-popup-blocking", "true");
 
-                var chromeOptions = new ChromeOptions();
-                chromeOptions.AddUserProfilePreference("download.default_directory", @"%homedrive%%homepath%\\Downloads");
-                chromeOptions.AddUserProfilePreference("disable-popup-blocking", "true");
-                    
+                if (handler.HandlerArgs != null)
+                {
+                    if (handler.HandlerArgs.ContainsKey("isheadless") && handler.HandlerArgs["isheadless"] == "true")
+                    {
+                        options.AddArguments("headless");
+                    }
+                    if (handler.HandlerArgs.ContainsKey("blockstyles") && handler.HandlerArgs["blockstyles"] == "true")
+                    {
+                        options.AddUserProfilePreference("profile.managed_default_content_settings.stylesheets", 2);
+                    }
+                    if (handler.HandlerArgs.ContainsKey("blockimages") && handler.HandlerArgs["blockimages"] == "true")
+                    {
+                        options.AddUserProfilePreference("profile.managed_default_content_settings.images", 2);
+                    }
+                    if (handler.HandlerArgs.ContainsKey("blockflash") && handler.HandlerArgs["blockflash"] == "true")
+                    {
+                        // ?
+                    }
+                    if (handler.HandlerArgs.ContainsKey("blockscripts") && handler.HandlerArgs["blockscripts"] == "true")
+                    {
+                        options.AddUserProfilePreference("profile.managed_default_content_settings.javascript", 1);
+                    }
+                }
+                
+                options.AddUserProfilePreference("profile.default_content_setting_values.notifications", 2);
+                options.AddUserProfilePreference("profile.managed_default_content_settings.cookies", 2);
+                options.AddUserProfilePreference("profile.managed_default_content_settings.plugins", 2);
+                options.AddUserProfilePreference("profile.managed_default_content_settings.popups", 2);
+                options.AddUserProfilePreference("profile.managed_default_content_settings.geolocation", 2);
+                options.AddUserProfilePreference("profile.managed_default_content_settings.media_stream", 2);
+
                 if (!string.IsNullOrEmpty(Program.Configuration.ChromeExtensions))
                 {
                     options.AddArguments($"--load-extension={ Program.Configuration.ChromeExtensions }");
