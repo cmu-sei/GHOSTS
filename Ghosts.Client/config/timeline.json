@@ -78,8 +78,9 @@
                 {
                     "Command": "navigate",
                     "CommandArgs": [
-                        "Outbox",
-                        "Drafts"
+                        "Outbox|5",
+                        "Drafts|5",
+                        "Inbox"
                     ],
                     "DelayAfter": 900000,
                     "DelayBefore": 0

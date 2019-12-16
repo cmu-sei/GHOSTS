@@ -160,38 +160,44 @@ namespace Ghosts.Client.Handlers
                 {
                     try
                     {
-                        var folderName = GetFolder(configuredFolder.ToString().Trim());
-                        f = this._app.Session.GetDefaultFolder(folderName); //OlDefaultFolders.olFolderOutbox
+                        var fname = configuredFolder.ToString();
+                        var sleepTime = 5000;
+
+                        var configArray = fname.Split(Convert.ToChar("|"));
+                        if (configArray.GetUpperBound(0) > 0)
+                        {
+                            try
+                            {
+                                fname = configArray[0].Trim();
+                                sleepTime = Convert.ToInt32(configArray[1].Trim()) * 1000;
+                            }
+                            catch { }
+                        }
+
+                        var folderName = GetFolder(fname);
+                        f = this._app.Session.GetDefaultFolder(folderName);
                         f.Display();
                         _log.Trace($"Folder displayed: {folderName}");
-                        Thread.Sleep(5000);
+                        Thread.Sleep(sleepTime);
                     }
                     catch (Exception e)
                     {
-                        _log.Trace($"Could not navigate to folder: {configuredFolder}");
+                        _log.Trace($"Could not navigate to folder: {configuredFolder}: {e}");
                     }
                     this.CloseExplorers();
                 }
-
-                f = this._app.Session.GetDefaultFolder(OlDefaultFolders.olFolderInbox);
-                f.Display();
-                _log.Trace($"Folder displayed: outbox");
-                Thread.Sleep(5000);
-
-                this.CloseExplorers();
             }
             catch (Exception exc)
             {
                 _log.Debug(exc);
                 hasErrors = false;
             }
-
-
             return hasErrors;
         }
 
         private OlDefaultFolders GetFolder(string folder)
         {
+            _log.Trace(folder.ToUpper());
             switch (folder.ToUpper())
             {
                 default:
