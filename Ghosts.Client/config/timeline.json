@@ -74,6 +74,15 @@
                     ],
                     "DelayAfter": 900000,
                     "DelayBefore": 0
+                },
+                {
+                    "Command": "navigate",
+                    "CommandArgs": [
+                        "Outbox",
+                        "Drafts"
+                    ],
+                    "DelayAfter": 900000,
+                    "DelayBefore": 0
                 }
             ]
         },

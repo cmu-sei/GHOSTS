@@ -7,6 +7,7 @@ using Microsoft.Office.Interop.Outlook;
 using NLog;
 using Redemption;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -121,6 +122,19 @@ namespace Ghosts.Client.Handlers
                                 _log.Error(e);
                             }
                             break;
+                        case "NAVIGATE":
+                            try
+                            {
+                                if (Navigate(timelineEvent.CommandArgs))
+                                {
+                                    Report(handler.HandlerType.ToString(), timelineEvent.Command, string.Join(",", timelineEvent.CommandArgs));
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                _log.Error(e);
+                            }
+                            break;
                     }
 
                     if (timelineEvent.DelayAfter > 0)
@@ -132,6 +146,83 @@ namespace Ghosts.Client.Handlers
             catch (Exception e)
             {
                 _log.Debug(e);
+            }
+        }
+
+        private bool Navigate(IEnumerable<object> config)
+        {
+            var hasErrors = true;
+
+            try
+            {
+                MAPIFolder f;
+                foreach (var configuredFolder in config)
+                {
+                    try
+                    {
+                        var folderName = GetFolder(configuredFolder.ToString().Trim());
+                        f = this._app.Session.GetDefaultFolder(folderName); //OlDefaultFolders.olFolderOutbox
+                        f.Display();
+                        _log.Trace($"Folder displayed: {folderName}");
+                        Thread.Sleep(5000);
+                    }
+                    catch (Exception e)
+                    {
+                        _log.Trace($"Could not navigate to folder: {configuredFolder}");
+                    }
+                    this.CloseExplorers();
+                }
+
+                f = this._app.Session.GetDefaultFolder(OlDefaultFolders.olFolderInbox);
+                f.Display();
+                _log.Trace($"Folder displayed: outbox");
+                Thread.Sleep(5000);
+
+                this.CloseExplorers();
+            }
+            catch (Exception exc)
+            {
+                _log.Debug(exc);
+                hasErrors = false;
+            }
+
+
+            return hasErrors;
+        }
+
+        private OlDefaultFolders GetFolder(string folder)
+        {
+            switch (folder.ToUpper())
+            {
+                default:
+                    return OlDefaultFolders.olFolderInbox;
+                case "OUTBOX":
+                    return OlDefaultFolders.olFolderOutbox;
+                case "DRAFTS":
+                    return OlDefaultFolders.olFolderDrafts;
+                case "DELETED":
+                case "DELETEDITEMS":
+                    return OlDefaultFolders.olFolderDeletedItems;
+                case "JUNK":
+                    return OlDefaultFolders.olFolderJunk;
+            }
+        }
+
+        private void CloseExplorers()
+        {
+            var explorerCount = this._app.Explorers.Count;
+            _log.Trace($"Explorer count: {explorerCount}");
+            if (explorerCount > 0)
+            {
+                //# MS Program APIs are 1-indexed.
+                for (var i = 1; i < explorerCount + 1; i++)
+                {
+                    try
+                    {
+                        this._app.Explorers[i].Close();
+                    }
+                    catch { }
+                }
             }
         }
 
