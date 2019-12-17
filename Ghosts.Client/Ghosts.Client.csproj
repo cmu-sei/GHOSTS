@@ -545,6 +545,7 @@
     <None Include="Sample Timelines\BrowserChrome.json" />
     <None Include="Sample Timelines\BrowserFirefox.json" />
     <None Include="Sample Timelines\BrowserIE.json" />
+    <None Include="Sample Timelines\Notepad.json" />
     <None Include="Sample Timelines\Clicks.json" />
     <None Include="Sample Timelines\command.json" />
     <None Include="Sample Timelines\Excel.json" />
