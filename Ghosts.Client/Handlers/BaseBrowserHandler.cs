@@ -53,6 +53,62 @@ namespace Ghosts.Client.Handlers
                                 }
                                 Thread.Sleep(timelineEvent.DelayAfter);
                             }
+                        case "random-extended":
+                            while (true)
+                            {
+                                if (Driver.CurrentWindowHandle == null)
+                                {
+                                    throw new Exception("Browser window handle not available");
+                                }
+
+                                var extendedConfig = ExtendedConfiguration.Load(timelineEvent.CommandArgs[0]);
+
+                                config = RequestConfiguration.Load(extendedConfig.Sites[new Random().Next(0, extendedConfig.Sites.Length)]);
+                                if (config.Uri.IsWellFormedOriginalString())
+                                {
+                                    MakeRequest(config);
+                                    Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId);
+                                }
+
+                                var random = new Random();
+                                
+                                //now some percentage of the time should stay on this site
+                                if (random.Next(100) < extendedConfig.Stickiness)
+                                {
+                                    var loops = random.Next(extendedConfig.DepthMin, extendedConfig.DepthMax);
+                                    for (var loopNumber = 0; loopNumber < loops; loopNumber++)
+                                    {
+                                        try
+                                        {
+                                            //get all links
+                                            var links = Driver.FindElements(By.TagName("a"));
+
+                                            var linkSelected = random.Next(links.Count);
+                                            var href = links[linkSelected].GetAttribute("href");
+                                            while (!href.StartsWith("http"))
+                                            {
+                                                foreach (var l in links)
+                                                {
+                                                    href = l.GetAttribute("href");
+                                                }
+                                            }
+
+                                            config.Method = "GET";
+                                            config.Uri = new Uri(href);
+
+                                            MakeRequest(config);
+                                            Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(),
+                                                timelineEvent.TrackableId);
+                                        }
+                                        catch (Exception e)
+                                        {
+                                            _log.Error(e);
+                                        }
+                                    }
+                                }
+
+                                Thread.Sleep(timelineEvent.DelayAfter);
+                            }
                         case "browse":
                             config = RequestConfiguration.Load(timelineEvent.CommandArgs[0]);
                             if (config.Uri.IsWellFormedOriginalString())
@@ -114,27 +170,6 @@ namespace Ghosts.Client.Handlers
                 case "POST":
                 case "PUT":
                 case "DELETE":
-                    //var form = "window.onload=function(){";
-                    //form += "var form=document.createElement('form');";
-                    //form += "var element1=document.createElement('input');";
-                    //form += "var element2=document.createElement('input');";
-
-                    //form += $"form.method='{config.Method}';";
-                    //form += $"form.action='{config.Uri}';";
-
-                    //form += "element1.value='value';";
-                    //form += "element1.name='un';";
-                    //form += "form.appendChild(element1);";
-
-                    //form += "element2.value='value';";
-                    //form += "element2.name='pw';";
-                    //form += "form.appendChild(element2);";
-
-                    //form += "document.body.appendChild(form);";
-
-                    //form += "form.submit();";
-                    //form += "};";
-
                     Driver.Navigate().GoToUrl("about:blank");
                     var script = "var xhr = new XMLHttpRequest();";
                     script += $"xhr.open('{config.Method.ToUpper()}', '{config.Uri}', true);";
