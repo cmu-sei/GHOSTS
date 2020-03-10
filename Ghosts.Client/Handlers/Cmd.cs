@@ -25,11 +25,11 @@ namespace Ghosts.Client.Handlers
 
         public Cmd(TimelineHandler handler)
         {
-            _log.Trace("Spawning cmd.exe...");
-            this.Process = Process.Start("cmd.exe");
-
             try
             {
+                _log.Trace("Spawning cmd.exe...");
+                this.Process = Process.Start("cmd.exe");
+            
                 if (handler.Loop)
                 {
                     while (true)
