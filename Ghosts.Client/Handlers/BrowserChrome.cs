@@ -79,7 +79,7 @@ namespace Ghosts.Client.Handlers
             }
             catch (Exception e)
             {
-                _log.Debug(e);
+                _log.Error(e);
             }
             finally
             {

@@ -38,6 +38,23 @@ namespace Ghosts.Client.Handlers
                     switch (timelineEvent.Command)
                     {
                         case "random":
+
+                            var stickiness = 0;
+                            var depthMin = 1;
+                            var depthMax = 10;
+                            if (handler.HandlerArgs.ContainsKey("stickiness"))
+                            {
+                                int.TryParse(handler.HandlerArgs["stickiness"], out stickiness);
+                            }
+                            if (handler.HandlerArgs.ContainsKey("stickiness-depth-min"))
+                            {
+                                int.TryParse(handler.HandlerArgs["stickiness-depth-min"], out depthMin);
+                            }
+                            if (handler.HandlerArgs.ContainsKey("stickiness-depth-max"))
+                            {
+                                int.TryParse(handler.HandlerArgs["stickiness-depth-max"], out depthMax);
+                            }
+
                             while (true)
                             {
                                 if (Driver.CurrentWindowHandle == null)
@@ -50,63 +67,55 @@ namespace Ghosts.Client.Handlers
                                 {
                                     MakeRequest(config);
                                     Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId);
-                                }
-                                Thread.Sleep(timelineEvent.DelayAfter);
-                            }
-                        case "random-extended":
-                            while (true)
-                            {
-                                if (Driver.CurrentWindowHandle == null)
-                                {
-                                    throw new Exception("Browser window handle not available");
-                                }
 
-                                var extendedConfig = ExtendedConfiguration.Load(timelineEvent.CommandArgs[0]);
-
-                                config = RequestConfiguration.Load(extendedConfig.Sites[new Random().Next(0, extendedConfig.Sites.Length)]);
-                                if (config.Uri.IsWellFormedOriginalString())
-                                {
-                                    MakeRequest(config);
-                                    Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId);
-                                }
-
-                                var random = new Random();
-                                
-                                //now some percentage of the time should stay on this site
-                                if (random.Next(100) < extendedConfig.Stickiness)
-                                {
-                                    var loops = random.Next(extendedConfig.DepthMin, extendedConfig.DepthMax);
-                                    for (var loopNumber = 0; loopNumber < loops; loopNumber++)
+                                    if (stickiness > 0)
                                     {
-                                        try
+                                        var random = new Random();
+                                        //now some percentage of the time should stay on this site
+                                        if (random.Next(100) < stickiness)
                                         {
-                                            //get all links
-                                            var links = Driver.FindElements(By.TagName("a"));
-
-                                            var linkSelected = random.Next(links.Count);
-                                            var href = links[linkSelected].GetAttribute("href");
-                                            while (!href.StartsWith("http"))
+                                            var loops = random.Next(depthMin, depthMax);
+                                            for (var loopNumber = 0; loopNumber < loops; loopNumber++)
                                             {
-                                                foreach (var l in links)
+                                                try
                                                 {
-                                                    href = l.GetAttribute("href");
+                                                    //get all links
+                                                    var links = Driver.FindElements(By.TagName("a"));
+                                                    if (links.Count > 0)
+                                                    {
+                                                        var linkSelected = random.Next(links.Count);
+                                                        var href = links[linkSelected].GetAttribute("href");
+                                                        while (!href.StartsWith("http"))
+                                                        {
+                                                            foreach (var l in links)
+                                                            {
+                                                                href = l.GetAttribute("href");
+                                                            }
+                                                        }
+
+                                                        if (!string.IsNullOrEmpty(href))
+                                                        {
+                                                            if (!href.StartsWith("http"))
+                                                            {
+                                                                href = $"http://{href}";
+                                                            }
+                                                            config.Method = "GET";
+                                                            config.Uri = new Uri(href);
+
+                                                            MakeRequest(config);
+                                                            Report(handler.HandlerType.ToString(), timelineEvent.Command,config.ToString(), timelineEvent.TrackableId);
+                                                        }
+                                                    }
                                                 }
+                                                catch (Exception e)
+                                                {
+                                                    _log.Error(e);
+                                                }
+                                                Thread.Sleep(timelineEvent.DelayAfter);
                                             }
-
-                                            config.Method = "GET";
-                                            config.Uri = new Uri(href);
-
-                                            MakeRequest(config);
-                                            Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(),
-                                                timelineEvent.TrackableId);
-                                        }
-                                        catch (Exception e)
-                                        {
-                                            _log.Error(e);
                                         }
                                     }
                                 }
-
                                 Thread.Sleep(timelineEvent.DelayAfter);
                             }
                         case "browse":

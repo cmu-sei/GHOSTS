@@ -139,7 +139,10 @@
                 "blockimages": "true",
                 "blockstyles": "true",
                 "blockflash": "true",
-                "blockscripts": "true"
+                "blockscripts": "true",
+                "stickiness": 80,
+                "stickiness-depth-min": 1,
+                "stickiness-depth-max": 10
             },
             "Initial": "about:blank",
             "UtcTimeOn": "00:00:00",
