@@ -50,6 +50,7 @@
 
   <ItemGroup>
     <PackageReference Include="CommandLineParser" Version="2.5.0" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.22" />
     <PackageReference Include="NLog" Version="4.6.5" />
     <PackageReference Include="SimpleTCP" Version="1.0.24" />
     <PackageReference Include="System.Diagnostics.Process" Version="4.3.0" />

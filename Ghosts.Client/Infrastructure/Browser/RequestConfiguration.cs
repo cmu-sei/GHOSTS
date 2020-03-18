@@ -8,6 +8,11 @@ namespace Ghosts.Client.Infrastructure.Browser
 {
     public class RequestConfiguration
     {
+        public string GetHost()
+        {
+            return $"{this.Uri.Scheme}://{this.Uri.Host}";
+        }
+
         /// <summary>
         /// URL to browse
         /// </summary>

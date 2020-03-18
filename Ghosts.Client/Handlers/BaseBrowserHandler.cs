@@ -16,6 +16,9 @@ namespace Ghosts.Client.Handlers
         public static readonly Logger _log = LogManager.GetCurrentClassLogger();
         public IWebDriver Driver { get; set; }
         public HandlerType BrowserType { get; set; }
+        private int _stickiness = 0;
+        private int _depthMin = 1;
+        private int _depthMax = 10;
 
         public void ExecuteEvents(TimelineHandler handler)
         {
@@ -39,20 +42,18 @@ namespace Ghosts.Client.Handlers
                     {
                         case "random":
 
-                            var stickiness = 0;
-                            var depthMin = 1;
-                            var depthMax = 10;
+                            // setup
                             if (handler.HandlerArgs.ContainsKey("stickiness"))
                             {
-                                int.TryParse(handler.HandlerArgs["stickiness"], out stickiness);
+                                int.TryParse(handler.HandlerArgs["stickiness"], out _stickiness);
                             }
                             if (handler.HandlerArgs.ContainsKey("stickiness-depth-min"))
                             {
-                                int.TryParse(handler.HandlerArgs["stickiness-depth-min"], out depthMin);
+                                int.TryParse(handler.HandlerArgs["stickiness-depth-min"], out _depthMin);
                             }
                             if (handler.HandlerArgs.ContainsKey("stickiness-depth-max"))
                             {
-                                int.TryParse(handler.HandlerArgs["stickiness-depth-max"], out depthMax);
+                                int.TryParse(handler.HandlerArgs["stickiness-depth-max"], out _depthMax);
                             }
 
                             while (true)
@@ -68,49 +69,59 @@ namespace Ghosts.Client.Handlers
                                     MakeRequest(config);
                                     Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId);
 
-                                    if (stickiness > 0)
+                                    if (this._stickiness > 0)
                                     {
                                         var random = new Random();
                                         //now some percentage of the time should stay on this site
-                                        if (random.Next(100) < stickiness)
+                                        if (random.Next(100) < this._stickiness)
                                         {
-                                            var loops = random.Next(depthMin, depthMax);
+                                            var loops = random.Next(this._depthMin, this._depthMax);
                                             for (var loopNumber = 0; loopNumber < loops; loopNumber++)
                                             {
                                                 try
                                                 {
+                                                    var linkManager = new LinkManager(config.GetHost());
+
+
                                                     //get all links
                                                     var links = Driver.FindElements(By.TagName("a"));
-                                                    if (links.Count > 0)
+                                                    foreach (var l in links)
                                                     {
-                                                        var linkSelected = random.Next(links.Count);
-                                                        var href = links[linkSelected].GetAttribute("href");
-                                                        while (!href.StartsWith("http"))
+                                                        var node = l.GetAttribute("href");
+                                                        if (string.IsNullOrEmpty(node) ||
+                                                            node.ToLower().StartsWith("//"))
                                                         {
-                                                            foreach (var l in links)
-                                                            {
-                                                                href = l.GetAttribute("href");
-                                                            }
+                                                            //skip, these seem ugly
                                                         }
-
-                                                        if (!string.IsNullOrEmpty(href))
+                                                        // http|s links
+                                                        else if (node.ToLower().StartsWith("http"))
                                                         {
-                                                            if (!href.StartsWith("http"))
-                                                            {
-                                                                href = $"http://{href}";
-                                                            }
-                                                            config.Method = "GET";
-                                                            config.Uri = new Uri(href);
-
-                                                            MakeRequest(config);
-                                                            Report(handler.HandlerType.ToString(), timelineEvent.Command,config.ToString(), timelineEvent.TrackableId);
+                                                            linkManager.AddLink(node.ToLower());
+                                                        }
+                                                        // relative links - prefix the scheme and host 
+                                                        else
+                                                        {
+                                                            linkManager.AddLink($"{config.GetHost()}{node.ToLower()}");
                                                         }
                                                     }
+
+                                                    var link = linkManager.Choose();
+                                                    if (link == null)
+                                                    {
+                                                        return;
+                                                    }
+
+                                                    config.Method = "GET";
+                                                    config.Uri = link.Url;
+
+                                                    MakeRequest(config);
+                                                    Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId);
                                                 }
                                                 catch (Exception e)
                                                 {
                                                     _log.Error(e);
                                                 }
+
                                                 Thread.Sleep(timelineEvent.DelayAfter);
                                             }
                                         }

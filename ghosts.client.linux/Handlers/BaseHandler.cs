@@ -24,7 +24,9 @@ namespace ghosts.client.linux.handlers
             result.CommandArg = arg;
 
             if (!string.IsNullOrEmpty(trackable))
+            {
                 result.TrackableId = trackable;
+            }
 
             var o = JsonConvert.SerializeObject(result,
                 Formatting.None,
