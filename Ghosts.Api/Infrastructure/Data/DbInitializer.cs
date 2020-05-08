@@ -3,7 +3,6 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Ghosts.Api.Infrastructure;
 using Ghosts.Api.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
@@ -18,26 +17,25 @@ namespace Ghosts.Api.Infrastructure.Data
             context.Database.EnsureCreated();
 
             // Look for any users.
-            if (context.Users.Any())
-            {
-                return; // DB has been seeded
-            }
+            if (context.Users.Any()) return; // DB has been seeded
 
             await CreateDefaultUserAndRoleForApplication(userManager, roleManager, logger);
 
             foreach (var role in Enum.GetValues(typeof(ApiDetails.Roles)))
-            {
                 if (!roleManager.RoleExistsAsync(role.ToString()).Result)
                     await roleManager.CreateAsync(new IdentityRole(role.ToString()));
-            }
-            
-            var adminUser = new ApplicationUser { UserName = Program.InitConfig.AdminUsername, Email = Program.InitConfig.AdminUsername,
-                Created = DateTime.UtcNow, Id = Guid.NewGuid().ToString() };
+
+            var adminUser = new ApplicationUser
+            {
+                UserName = Program.InitConfig.AdminUsername, Email = Program.InitConfig.AdminUsername,
+                Created = DateTime.UtcNow, Id = Guid.NewGuid().ToString()
+            };
             await userManager.CreateAsync(adminUser, Program.InitConfig.AdminPassword);
             await userManager.AddToRoleAsync(adminUser, ApiDetails.Roles.Admin.ToString());
         }
 
-        private static async Task CreateDefaultUserAndRoleForApplication(UserManager<ApplicationUser> um, RoleManager<IdentityRole> rm, ILogger<DbInitializer> logger)
+        private static async Task CreateDefaultUserAndRoleForApplication(UserManager<ApplicationUser> um, RoleManager<IdentityRole> rm,
+            ILogger<DbInitializer> logger)
         {
             var administratorRole = ApiDetails.Roles.Admin.ToString();
             var email = Program.InitConfig.AdminUsername;
@@ -48,7 +46,8 @@ namespace Ghosts.Api.Infrastructure.Data
             await AddDefaultRoleToDefaultUser(um, logger, email, administratorRole, user);
         }
 
-        private static async Task CreateDefaultAdministratorRole(RoleManager<IdentityRole> rm, ILogger<DbInitializer> logger, string administratorRole)
+        private static async Task CreateDefaultAdministratorRole(RoleManager<IdentityRole> rm, ILogger<DbInitializer> logger,
+            string administratorRole)
         {
             logger.LogInformation($"Create the role `{administratorRole}` for application");
             var ir = await rm.CreateAsync(new IdentityRole(administratorRole));
@@ -85,7 +84,8 @@ namespace Ghosts.Api.Infrastructure.Data
             return createdUser;
         }
 
-        private static async Task SetPasswordForDefaultUser(UserManager<ApplicationUser> um, ILogger<DbInitializer> logger, string email, ApplicationUser user)
+        private static async Task SetPasswordForDefaultUser(UserManager<ApplicationUser> um, ILogger<DbInitializer> logger, string email,
+            ApplicationUser user)
         {
             logger.LogInformation($"Set password for default user `{email}`");
             var password = Program.InitConfig.AdminPassword;
@@ -102,7 +102,8 @@ namespace Ghosts.Api.Infrastructure.Data
             }
         }
 
-        private static async Task AddDefaultRoleToDefaultUser(UserManager<ApplicationUser> um, ILogger<DbInitializer> logger, string email, string administratorRole, ApplicationUser user)
+        private static async Task AddDefaultRoleToDefaultUser(UserManager<ApplicationUser> um, ILogger<DbInitializer> logger, string email,
+            string administratorRole, ApplicationUser user)
         {
             logger.LogInformation($"Add default user `{email}` to role '{administratorRole}'");
             var ir = await um.AddToRoleAsync(user, administratorRole);
@@ -126,6 +127,7 @@ namespace Ghosts.Api.Infrastructure.Data
                 errors += identityError.Description;
                 errors += ", ";
             }
+
             return errors;
         }
     }

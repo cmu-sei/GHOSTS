@@ -15,8 +15,8 @@ namespace Ghosts.Domain.Code
         private static readonly byte[] _salt = Encoding.ASCII.GetBytes("Gh0$t$NpCFram@w0r|<!");
 
         /// <summary>
-        /// Encrypt the given string using AES.  The string can be decrypted using 
-        /// DecryptStringAES().  The sharedSecret parameters must match.
+        ///     Encrypt the given string using AES.  The string can be decrypted using
+        ///     DecryptStringAES().  The sharedSecret parameters must match.
         /// </summary>
         /// <param name="plainText">The text to encrypt.</param>
         /// <param name="sharedSecret">A password used to generate a key for encryption.</param>
@@ -27,8 +27,8 @@ namespace Ghosts.Domain.Code
             if (string.IsNullOrEmpty(sharedSecret))
                 throw new ArgumentNullException(nameof(sharedSecret));
 
-            string outStr;                  // Encrypted string to return
-            RijndaelManaged aesAlg = null;  // RijndaelManaged object used to encrypt the data.
+            string outStr; // Encrypted string to return
+            RijndaelManaged aesAlg = null; // RijndaelManaged object used to encrypt the data.
 
             try
             {
@@ -56,6 +56,7 @@ namespace Ghosts.Domain.Code
                             swEncrypt.Write(plainText);
                         }
                     }
+
                     outStr = Convert.ToBase64String(msEncrypt.ToArray());
                 }
             }
@@ -70,8 +71,8 @@ namespace Ghosts.Domain.Code
         }
 
         /// <summary>
-        /// Decrypt the given string.  Assumes the string was encrypted using 
-        /// EncryptStringAES(), using an identical sharedSecret.
+        ///     Decrypt the given string.  Assumes the string was encrypted using
+        ///     EncryptStringAES(), using an identical sharedSecret.
         /// </summary>
         /// <param name="cipherText">The text to decrypt.</param>
         /// <param name="sharedSecret">A password used to generate a key for decryption.</param>
@@ -106,14 +107,16 @@ namespace Ghosts.Domain.Code
                     // Get the initialization vector from the encrypted stream
                     aesAlg.IV = ReadByteArray(msDecrypt);
                     // Create a decrytor to perform the stream transform.
-                    ICryptoTransform decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
+                    var decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
                     using (var csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
                     {
                         using (var srDecrypt = new StreamReader(csDecrypt))
 
                             // Read the decrypted bytes from the decrypting stream
                             // and place them in a string.
+                        {
                             plaintext = srDecrypt.ReadToEnd();
+                        }
                     }
                 }
             }
@@ -130,15 +133,10 @@ namespace Ghosts.Domain.Code
         {
             var rawLength = new byte[sizeof(int)];
             if (s.Read(rawLength, 0, rawLength.Length) != rawLength.Length)
-            {
                 throw new SystemException("Stream did not contain properly formatted byte array");
-            }
 
             var buffer = new byte[BitConverter.ToInt32(rawLength, 0)];
-            if (s.Read(buffer, 0, buffer.Length) != buffer.Length)
-            {
-                throw new SystemException("Did not read byte array properly");
-            }
+            if (s.Read(buffer, 0, buffer.Length) != buffer.Length) throw new SystemException("Did not read byte array properly");
 
             return buffer;
         }
@@ -148,7 +146,7 @@ namespace Ghosts.Domain.Code
             var plainTextBytes = Encoding.UTF8.GetBytes(plainText);
             return Convert.ToBase64String(plainTextBytes);
         }
-        
+
         public static string Base64Decode(string base64EncodedData)
         {
             var base64EncodedBytes = Convert.FromBase64String(base64EncodedData);

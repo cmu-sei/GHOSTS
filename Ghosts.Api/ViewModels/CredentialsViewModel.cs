@@ -9,6 +9,7 @@ namespace Ghosts.Api.ViewModels
         [JsonProperty("username")]
         [JsonRequired]
         public string UserName { get; set; }
+
         [JsonProperty("password")]
         [JsonRequired]
         public string Password { get; set; }

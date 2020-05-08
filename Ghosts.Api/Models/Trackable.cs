@@ -9,10 +9,10 @@ namespace Ghosts.Api.Models
     [Table("trackables")]
     public class Trackable
     {
-        [Key]
-        public Guid Id { get; set; }
-        [ForeignKey("MachineId")]
-        public Guid MachineId { get; set; }
+        [Key] public Guid Id { get; set; }
+
+        [ForeignKey("MachineId")] public Guid MachineId { get; set; }
+
         public string Name { get; set; }
     }
 }

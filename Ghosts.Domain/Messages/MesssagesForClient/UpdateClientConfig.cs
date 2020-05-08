@@ -7,8 +7,8 @@ using Newtonsoft.Json.Converters;
 namespace Ghosts.Domain
 {
     /// <summary>
-    /// Server passes this object to client as new timeline|health configuration - 
-    /// when client saves this, client restarts and begins to use new config
+    ///     Server passes this object to client as new timeline|health configuration -
+    ///     when client saves this, client restarts and begins to use new config
     /// </summary>
     public class UpdateClientConfig
     {
@@ -23,8 +23,7 @@ namespace Ghosts.Domain
         public UpdateType Type { get; set; }
         public object Update { get; set; }
 
-        [JsonIgnore]
-        public Guid Key { get; set; }
+        [JsonIgnore] public Guid Key { get; set; }
     }
 
     public class TransferLogDump

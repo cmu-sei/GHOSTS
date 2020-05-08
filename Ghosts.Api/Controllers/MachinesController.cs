@@ -27,7 +27,7 @@ namespace Ghosts.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> GetMachines(string q, CancellationToken ct)
         {
-            var list = await this._service.GetAsync(q, ct);
+            var list = await _service.GetAsync(q, ct);
             if (list == null) return NotFound();
             return Ok(list);
         }
@@ -36,7 +36,7 @@ namespace Ghosts.Api.Controllers
         [Route("list")]
         public IActionResult GetList(CancellationToken ct)
         {
-            return Ok(this._service.GetListAsync(ct));
+            return Ok(_service.GetListAsync(ct));
         }
 
         // GET: api/Machines/5
@@ -45,12 +45,9 @@ namespace Ghosts.Api.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var machine = await this._service.GetByIdAsync(id, ct);
-            
-            if (machine.Id == Guid.Empty)
-            {
-                return NotFound();
-            }
+            var machine = await _service.GetByIdAsync(id, ct);
+
+            if (machine.Id == Guid.Empty) return NotFound();
 
             return Ok(machine);
         }
@@ -62,7 +59,7 @@ namespace Ghosts.Api.Controllers
             if (!ModelState.IsValid) return BadRequest(ModelState);
             if (machine.Id == Guid.Empty) return BadRequest();
 
-            await this._service.UpdateAsync(machine, ct);
+            await _service.UpdateAsync(machine, ct);
             return NoContent();
         }
 
@@ -72,9 +69,9 @@ namespace Ghosts.Api.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var id = await this._service.CreateAsync(machine, ct);
+            var id = await _service.CreateAsync(machine, ct);
 
-            return CreatedAtAction("GetMachine", new { id }, machine);
+            return CreatedAtAction("GetMachine", new {id}, machine);
         }
 
         // DELETE: api/Machines/5
@@ -84,7 +81,7 @@ namespace Ghosts.Api.Controllers
         {
             if (!ModelState.IsValid || id == Guid.Empty) return BadRequest(ModelState);
 
-            await this._service.DeleteAsync(id, ct);
+            await _service.DeleteAsync(id, ct);
             return NoContent();
         }
 
@@ -96,10 +93,10 @@ namespace Ghosts.Api.Controllers
 
             try
             {
-                var response = this._service.SendCommand(id, command, ct).Result;
+                var response = _service.SendCommand(id, command, ct).Result;
                 return Ok(response);
             }
-            catch(Exception exc)
+            catch (Exception exc)
             {
                 return Json(exc);
             }
@@ -113,7 +110,7 @@ namespace Ghosts.Api.Controllers
 
             try
             {
-                var response = await this._service.GetActivity(id, ct);
+                var response = await _service.GetActivity(id, ct);
                 return Ok(response);
             }
             catch (Exception exc)

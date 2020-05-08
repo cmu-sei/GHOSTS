@@ -15,7 +15,7 @@ namespace Ghosts.Api
 {
     public class Program
     {
-        private static Logger log = LogManager.GetCurrentClassLogger();
+        private static readonly Logger log = LogManager.GetCurrentClassLogger();
 
         public static ApiDetails.ClientOptions ClientConfig { get; set; }
         public static ApiDetails.InitOptions InitConfig { get; set; }
@@ -26,7 +26,10 @@ namespace Ghosts.Api
 
             ApiDetails.LoadConfiguration();
 
-            var host = BuildWebHost(args);
+            var host = WebHost.CreateDefaultBuilder(args)
+                .UseStartup<Startup>()
+                .Build();
+            
             using (var scope = host.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
@@ -47,10 +50,5 @@ namespace Ghosts.Api
 
             host.Run();
         }
-
-        public static IWebHost BuildWebHost(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
-                .UseStartup<Startup>()
-                .Build();
     }
 }

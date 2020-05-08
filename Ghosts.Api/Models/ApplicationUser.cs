@@ -8,19 +8,17 @@ namespace Ghosts.Api.Models
 {
     public class ApplicationUser : IdentityUser
     {
-        public ApplicationUser() : base()
+        public ApplicationUser()
         {
-            this.Created = DateTime.UtcNow;
+            Created = DateTime.UtcNow;
         }
 
         public ApplicationUser(string email) : base(email)
         {
             base.Email = email;
-            this.Created = DateTime.UtcNow;
+            Created = DateTime.UtcNow;
         }
-        
-        [Required]
-        [DataType(DataType.Date)]
-        public DateTime Created { get; set; }
+
+        [Required] [DataType(DataType.Date)] public DateTime Created { get; set; }
     }
 }

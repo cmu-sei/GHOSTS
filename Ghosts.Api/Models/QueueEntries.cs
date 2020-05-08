@@ -17,7 +17,7 @@ namespace Ghosts.Api.Models
         public object Payload { get; set; }
         public Types Type { get; set; }
     }
-    
+
     public class MachineQueueEntry
     {
         public Machine Machine { get; set; }

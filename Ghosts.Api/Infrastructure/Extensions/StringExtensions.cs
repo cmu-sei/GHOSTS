@@ -8,7 +8,7 @@ namespace Ghosts.Api.Infrastructure.Extensions
     {
         public static string ToCondensedLowerCase(this string input)
         {
-            if (string.IsNullOrEmpty(input)) { return input; }
+            if (string.IsNullOrEmpty(input)) return input;
 
             var startUnderscores = Regex.Match(input, @"^+");
             return startUnderscores + Regex.Replace(input, @"([a-z0-9])([A-Z])", "$1$2").ToLower();

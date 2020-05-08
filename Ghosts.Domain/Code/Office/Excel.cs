@@ -10,7 +10,6 @@ namespace Ghosts.Domain.Code.Office
 {
     public class Excel
     {
-
         public static void Write(string filePath, string content)
         {
             using (var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write))

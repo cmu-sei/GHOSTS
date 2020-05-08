@@ -9,9 +9,9 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
-using ghosts.api.ViewModels;
 using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Api.Models;
+using ghosts.api.ViewModels;
 using Ghosts.Domain.Messages.MesssagesForServer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,15 +24,16 @@ namespace Ghosts.Api.Services
 {
     public class QueueSyncService : IHostedService
     {
-        private IBackgroundQueue Queue { get; set; }
-        private static Logger log = LogManager.GetCurrentClassLogger();
+        private static readonly Logger log = LogManager.GetCurrentClassLogger();
         private readonly IServiceScopeFactory _scopeFactory;
 
         public QueueSyncService(IServiceScopeFactory scopeFactory, IBackgroundQueue queue)
         {
-            this._scopeFactory = scopeFactory;
-            this.Queue = queue;
+            _scopeFactory = scopeFactory;
+            Queue = queue;
         }
+
+        private IBackgroundQueue Queue { get; }
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
@@ -68,31 +69,29 @@ namespace Ghosts.Api.Services
 
         private void Sync()
         {
-            using (var scope = this._scopeFactory.CreateScope())
+            using (var scope = _scopeFactory.CreateScope())
             {
                 using (var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>())
                 {
-                    foreach (var item in this.Queue.GetAll())
-                    {
+                    foreach (var item in Queue.GetAll())
                         switch (item.Type)
                         {
                             case QueueEntry.Types.Machine:
-                                ProcessMachine(scope, context, (MachineQueueEntry)item.Payload);
+                                ProcessMachine(scope, context, (MachineQueueEntry) item.Payload);
                                 break;
                             case QueueEntry.Types.Notification:
-                                ProcessNotification(scope, context, (NotificationQueueEntry)item.Payload);
+                                ProcessNotification(scope, context, (NotificationQueueEntry) item.Payload);
                                 break;
                             case QueueEntry.Types.Survey:
-                                ProcessSurvey(scope, context, (Survey)item.Payload);
+                                ProcessSurvey(scope, context, (Survey) item.Payload);
                                 break;
                             default:
                                 throw new ArgumentOutOfRangeException();
                         }
-                    }
                 }
             }
         }
-        
+
         private void ProcessSurvey(IServiceScope scope, ApplicationDbContext context, Survey item)
         {
             try
@@ -101,7 +100,7 @@ namespace Ghosts.Api.Services
                 context.Surveys.Add(survey);
                 context.Entry(survey).State = EntityState.Added;
                 context.SaveChanges();
-                var x = this.Queue.DequeueAsync(new CancellationToken()).Result;
+                var x = Queue.DequeueAsync(new CancellationToken()).Result;
             }
             catch (Exception e)
             {
@@ -119,16 +118,13 @@ namespace Ghosts.Api.Services
 
                 foreach (var webhook in webhooks)
                 {
-                    var t = new Thread(() =>
-                    {
-                        HandleWebhook(webhook, item);
-                    });
+                    var t = new Thread(() => { HandleWebhook(webhook, item); });
                     t.IsBackground = true;
                     t.Start();
                 }
 
                 //if no webhooks setup, the queue simply gets flushed
-                var x = this.Queue.DequeueAsync(new CancellationToken()).Result;
+                var x = Queue.DequeueAsync(new CancellationToken()).Result;
             }
             catch (Exception e)
             {
@@ -140,14 +136,12 @@ namespace Ghosts.Api.Services
         {
             var historyTimeline = JsonConvert.DeserializeObject<HistoryTimeline>(payload.Payload.ToString());
             // Serialize our concrete class into a JSON String
-            
+
             var formattedResponse = webhook.PostbackFormat;
 
             var isValid = false;
             var reg = new Regex(@"\[(.*?)\]");
             foreach (Match match in reg.Matches(formattedResponse))
-            {
-                
                 switch (match.Value.ToLower())
                 {
                     case "[machinename]":
@@ -164,20 +158,19 @@ namespace Ghosts.Api.Services
                         if (payload.Payload["Result"] != null && !string.IsNullOrEmpty(payload.Payload["Result"].ToString()))
                         {
                             var p = payload.Payload["Result"].ToString().Trim().Trim('"').Trim().Trim('"');
-                            
+
                             p = $"\"{HttpUtility.JavaScriptStringEncode(p)}\"";
-                            
+
                             formattedResponse = formattedResponse.Replace(match.Value, p);
                             isValid = true;
                         }
+
                         break;
-                    
                 }
-            }
 
             if (!isValid)
             {
-                log.Trace($"Webhook has no payload, exiting");
+                log.Trace("Webhook has no payload, exiting");
                 return;
             }
 
@@ -185,7 +178,7 @@ namespace Ghosts.Api.Services
             {
                 // Wrap our JSON inside a StringContent which then can be used by the HttpClient class
                 var httpContent = new StringContent(formattedResponse, Encoding.UTF8, "application/json");
-                
+
                 using (var httpClient = new HttpClient())
                 {
                     // Do the actual request and await the response
@@ -242,7 +235,7 @@ namespace Ghosts.Api.Services
 
                 if (machine == null)
                 {
-                    log.Trace($"Machine is still null, so attempting another create");
+                    log.Trace("Machine is still null, so attempting another create");
                     if (item.Machine.Id == Guid.Empty)
                         item.Machine.Id = Guid.NewGuid();
                     item.Machine.LastReportedUtc = DateTime.UtcNow;
@@ -274,9 +267,8 @@ namespace Ghosts.Api.Services
                 if (item.LogDump.Log.Length > 0)
                     log.Trace(item.LogDump.Log);
 
-                var lines = item.LogDump.Log.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+                var lines = item.LogDump.Log.Split(new[] {Environment.NewLine}, StringSplitOptions.None);
                 foreach (var line in lines)
-                {
                     try
                     {
                         var array = line.Split(Convert.ToChar("|"));
@@ -308,7 +300,6 @@ namespace Ghosts.Api.Services
                         log.Trace($"Processing {type} with {data}");
 
                         if (isReady)
-                        {
                             switch (type)
                             {
                                 case "TIMELINE":
@@ -327,7 +318,7 @@ namespace Ghosts.Api.Services
                                     timelines.Add(timeline);
 
                                     //add notification
-                                    this.Queue.Enqueue(
+                                    Queue.Enqueue(
                                         new QueueEntry
                                         {
                                             Type = QueueEntry.Types.Notification,
@@ -335,7 +326,7 @@ namespace Ghosts.Api.Services
                                                 new NotificationQueueEntry
                                                 {
                                                     Type = NotificationQueueEntry.NotificationType.Timeline,
-                                                    Payload = (JObject)JToken.FromObject(timeline)
+                                                    Payload = (JObject) JToken.FromObject(timeline)
                                                 }
                                         });
 
@@ -350,12 +341,13 @@ namespace Ghosts.Api.Services
                                             CommandArg = data.CommandArg,
                                             CreatedUtc = time
                                         };
-                                        
+
                                         if (data.Result != null)
                                             trackable.Result = data.Result;
 
                                         trackables.Add(trackable);
                                     }
+
                                     break;
                                 case "HEALTH":
                                     var users = string.Join(",", data.LoggedOnUsers);
@@ -375,7 +367,7 @@ namespace Ghosts.Api.Services
                                 case "WEBHOOKCREATE":
                                     try
                                     {
-                                        log.Info($"processing webhookcreate...");
+                                        log.Info("processing webhookcreate...");
                                         var hook = JsonConvert.DeserializeObject<WebhookViewModel>(data.ToString());
                                         var h = new Webhook(hook);
                                         webhooks.Add(h);
@@ -384,17 +376,17 @@ namespace Ghosts.Api.Services
                                     {
                                         log.Info($"serializing hook failed: {data} : {e})");
                                     }
+
                                     break;
                             }
-                        }
                     }
                     catch (Exception e)
                     {
                         log.Trace($"Bad line: {e} - {line}");
                     }
-                }
             } //endif posted results
-            var _ = this.Queue.DequeueAsync(new CancellationToken()).Result;
+
+            var _ = Queue.DequeueAsync(new CancellationToken()).Result;
 
             if (machines.Count > 0)
             {
@@ -411,6 +403,7 @@ namespace Ghosts.Api.Services
                     log.Error(e);
                 }
             }
+
             if (trackables.Count > 0)
             {
                 context.HistoryTrackables.AddRange(trackables);
@@ -426,6 +419,7 @@ namespace Ghosts.Api.Services
                     log.Error(e);
                 }
             }
+
             if (health.Count > 0)
             {
                 context.HistoryHealth.AddRange(health);
@@ -441,6 +435,7 @@ namespace Ghosts.Api.Services
                     log.Error(e);
                 }
             }
+
             if (timelines.Count > 0)
             {
                 context.HistoryTimeline.AddRange(timelines);
@@ -456,6 +451,7 @@ namespace Ghosts.Api.Services
                     log.Error(e);
                 }
             }
+
             if (histories.Count > 0)
             {
                 context.HistoryMachine.AddRange(histories);

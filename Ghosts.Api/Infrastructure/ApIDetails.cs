@@ -9,20 +9,12 @@ namespace Ghosts.Api.Infrastructure
 {
     public static class ApiDetails
     {
-        public static string Version => Assembly.GetExecutingAssembly().GetName().Version.ToString();
-
-        public static class Jwt
+        public enum Roles
         {
-            public static class JwtClaimIdentifiers
-            {
-                public const string Rol = "rol", Id = "id";
-            }
-
-            public static class JwtClaims
-            {
-                public const string ApiAccess = "api_access";
-            }
+            Admin = 0
         }
+
+        public static string Version => Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
         public static void LoadConfiguration()
         {
@@ -39,11 +31,6 @@ namespace Ghosts.Api.Infrastructure
 
             Program.ClientConfig = appConfig;
             Program.InitConfig = initConfig;
-        }
-
-        public enum Roles
-        {
-            Admin = 0
         }
 
         public class ClientOptions
@@ -64,6 +51,7 @@ namespace Ghosts.Api.Infrastructure
                 public string GroupName { get; set; }
                 public List<char> GroupDelimiters { get; set; }
                 public List<GroupingDefinitionOption> GroupingDefinition { get; set; }
+
                 public class GroupingDefinitionOption
                 {
                     public string Value { get; set; }

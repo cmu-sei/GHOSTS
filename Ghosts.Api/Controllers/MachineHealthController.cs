@@ -25,13 +25,10 @@ namespace Ghosts.Api.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> Index([FromRoute] Guid id, CancellationToken ct)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var list = await this._service.GetMachineHistoryHealth(id, ct);
-            
+            var list = await _service.GetMachineHistoryHealth(id, ct);
+
             return Ok(list);
         }
     }

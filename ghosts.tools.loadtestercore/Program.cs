@@ -10,7 +10,7 @@ namespace ghosts.tools.loadtestercore
     {
         static void Main(string[] args)
         {
-            var host = "http://localhost:5000";
+            var host = "http://localhost:52388";
             if (args != null && args.Length > 0 && !string.IsNullOrEmpty(args[0]))
                 host = args[0].TrimEnd(Convert.ToChar("/"));
 
@@ -37,14 +37,14 @@ namespace ghosts.tools.loadtestercore
                 request = new RestRequest(Method.GET);
                 request.AddHeader("Cache-Control", "no-cache");
                 request.AddHeader("Content-Type", "application/json");
-                request.AddHeader("ghosts-user", "bobby.tables");
-                request.AddHeader("ghosts-ip", $"1127.9.8.{i}");
+                request.AddHeader("ghosts-user", "clubber.lang");
+                request.AddHeader("ghosts-ip", $"127.1.1.{i}");
                 request.AddHeader("ghosts-domain", $"domain-{i}");
                 request.AddHeader("ghosts-host", $"host-{i}");
                 request.AddHeader("ghosts-resolvedhost", $"resolvedHost.{i}");
-                request.AddHeader("ghosts-fqdn", $"flag02.hq.win10.user-test-vpn-{i}");
-                request.AddHeader("ghosts-name", $"flag02.hq.win10.user-test-vpn-{i}");
-                request.AddHeader("ghosts-version", "2.4.7.0");
+                request.AddHeader("ghosts-fqdn", $"flag01.hq.win10.user-test-vpn-{i}");
+                request.AddHeader("ghosts-name", $"flag01.hq.win10.user-test-vpn-{i}");
+                request.AddHeader("ghosts-version", "2.6.0.0");
                 o = client.Execute(request);
                 id = o.Content.Replace("\"", "");
 
@@ -60,14 +60,14 @@ namespace ghosts.tools.loadtestercore
                     request = new RestRequest(Method.POST);
                     request.AddHeader("Cache-Control", "no-cache");
                     request.AddHeader("Content-Type", "application/json");
-                    request.AddHeader("ghosts-user", "bobby.tables");
-                    request.AddHeader("ghosts-ip", $"1127.9.8.{i}");
+                    request.AddHeader("ghosts-user", "clubber.lang");
+                    request.AddHeader("ghosts-ip", $"127.1.1.{i}");
                     request.AddHeader("ghosts-domain", $"domain-{i}");
                     request.AddHeader("ghosts-host", $"host-{i}");
                     request.AddHeader("ghosts-resolvedhost", $"resolvedHost.{i}");
-                    request.AddHeader("ghosts-fqdn", $"flag02.hq.win10.user-test-vpn-{i}");
-                    request.AddHeader("ghosts-name", $"flag02.hq.win10.user-test-vpn-{i}");
-                    request.AddHeader("ghosts-version", "2.4.7.0");
+                    request.AddHeader("ghosts-fqdn", $"flag01.hq.win10.user-test-vpn-{i}");
+                    request.AddHeader("ghosts-name", $"flag01.hq.win10.user-test-vpn-{i}");
+                    request.AddHeader("ghosts-version", "2.6.0.0");
                     request.AddHeader("ghosts-id", id);
                     request.AddParameter("undefined",
                         "{\r\n\t\"Log\": \"TIMELINE|" + DateTime.UtcNow.ToString("MM/dd/yy H:mm:ss tt") + "|{\\\"Handler\\\":\\\"" +
@@ -88,15 +88,14 @@ namespace ghosts.tools.loadtestercore
                 client = new RestClient($"{host}/api/clientresults");
                 request = new RestRequest(Method.POST);
                 request.AddHeader("cache-control", "no-cache");
-                request.AddHeader("ghosts-name", "flag02.hq.win10.user-test-vpn-001");
-                request.AddHeader("ghosts-fqdn", "flag02.hq.win10.user-test-vpn-001");
-                request.AddHeader("ghosts-ip", "127.0.0.1");
-                request.AddHeader("ghosts-domain", "domain");
-                request.AddHeader("ghosts-host", "host");
-                request.AddHeader("ghosts-resolvedhost", "resolvedHost");
-                request.AddHeader("ghosts-user", "bobby.tables");
-                request.AddHeader("ghosts-version", "2.4.7.0");
-                request.AddHeader("Cache-Control", "no-cache");
+                request.AddHeader("ghosts-user", "clubber.lang");
+                request.AddHeader("ghosts-ip", $"127.1.1.{i}");
+                request.AddHeader("ghosts-domain", $"domain-{i}");
+                request.AddHeader("ghosts-host", $"host-{i}");
+                request.AddHeader("ghosts-resolvedhost", $"resolvedHost.{i}");
+                request.AddHeader("ghosts-fqdn", $"flag01.hq.win10.user-test-vpn-{i}");
+                request.AddHeader("ghosts-name", $"flag01.hq.win10.user-test-vpn-{i}");
+                request.AddHeader("ghosts-version", "2.6.0.0");
                 request.AddHeader("Content-Type", "application/json");
                 request.AddParameter("undefined",
                     "{\"Log\":\"HEALTH|" + DateTime.UtcNow.ToString("MM/dd/yy H:mm:ss tt") +
@@ -111,15 +110,15 @@ namespace ghosts.tools.loadtestercore
                 request = new RestRequest(Method.GET);
                 request.AddHeader("Cache-Control", "no-cache");
                 request.AddHeader("Content-Type", "application/json");
-                request.AddHeader("ghosts-user", "bobby.tables");
-                request.AddHeader("ghosts-ip", $"1127.9.8.{i}");
+                request.AddHeader("ghosts-user", "clubber.lang");
+                request.AddHeader("ghosts-ip", $"127.1.1.{i}");
                 request.AddHeader("ghosts-domain", $"domain-{i}");
                 request.AddHeader("ghosts-host", $"host-{i}");
                 request.AddHeader("ghosts-resolvedhost", $"resolvedHost.{i}");
-                request.AddHeader("ghosts-fqdn", $"flag02.hq.win10.user-test-vpn-{i}");
-                request.AddHeader("ghosts-name", $"flag02.hq.win10.user-test-vpn-{i}");
+                request.AddHeader("ghosts-fqdn", $"flag01.hq.win10.user-test-vpn-{i}");
+                request.AddHeader("ghosts-name", $"flag01.hq.win10.user-test-vpn-{i}");
+                request.AddHeader("ghosts-version", "2.6.0.0");
                 request.AddHeader("ghosts-id", id);
-                request.AddHeader("ghosts-version", "2.4.7.0");
                 request.AddParameter("undefined", "{\"Log\":\"\"}", ParameterType.RequestBody);
                 o = client.Execute(request);
 

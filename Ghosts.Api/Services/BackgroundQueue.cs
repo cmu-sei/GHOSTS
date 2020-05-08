@@ -23,13 +23,10 @@ namespace Ghosts.Api.Services
 
         public void Enqueue(QueueEntry item)
         {
-            if (item == null)
-            {
-                throw new ArgumentNullException(nameof(item));
-            }
+            if (item == null) throw new ArgumentNullException(nameof(item));
 
-            this._items.Enqueue(item);
-            this._semaphore.Release();
+            _items.Enqueue(item);
+            _semaphore.Release();
         }
 
         public async Task<QueueEntry> DequeueAsync(CancellationToken cancellationToken)
@@ -42,7 +39,7 @@ namespace Ghosts.Api.Services
 
         public IEnumerable<QueueEntry> GetAll()
         {
-            return this._items;
+            return _items;
         }
     }
 }

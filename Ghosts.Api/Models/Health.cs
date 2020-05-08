@@ -8,9 +8,15 @@ namespace Ghosts.Api.Models
     [Table("historyhealth")]
     public class HistoryHealth
     {
+        public HistoryHealth()
+        {
+            CreatedUtc = DateTime.UtcNow;
+        }
+
         public int Id { get; set; }
-        [ForeignKey("MachineId")]
-        public Guid MachineId { get; set; }
+
+        [ForeignKey("MachineId")] public Guid MachineId { get; set; }
+
         public DateTime CreatedUtc { get; set; }
 
         public bool? Internet { get; set; }
@@ -19,50 +25,47 @@ namespace Ghosts.Api.Models
         public string Errors { get; set; }
         public string LoggedOnUsers { get; set; }
         public string Stats { get; set; }
-
-        public HistoryHealth()
-        {
-            this.CreatedUtc = DateTime.UtcNow;
-        }
     }
 
     [Table("historytimeline")]
     public class HistoryTimeline
     {
+        public HistoryTimeline()
+        {
+            CreatedUtc = DateTime.UtcNow;
+        }
+
         public int Id { get; set; }
-        [ForeignKey("MachineId")]
-        public Guid MachineId { get; set; }
+
+        [ForeignKey("MachineId")] public Guid MachineId { get; set; }
+
         public DateTime CreatedUtc { get; set; }
 
         public string Handler { get; set; }
         public string Command { get; set; }
         public string CommandArg { get; set; }
         public string Result { get; set; }
-
-        public HistoryTimeline()
-        {
-            this.CreatedUtc = DateTime.UtcNow;
-        }
     }
 
     [Table("historytrackables")]
     public class HistoryTrackable
     {
+        public HistoryTrackable()
+        {
+            CreatedUtc = DateTime.UtcNow;
+        }
+
         public int Id { get; set; }
-        [ForeignKey("MachineId")]
-        public Guid MachineId { get; set; }
-        [ForeignKey("TrackableId")]
-        public Guid TrackableId { get; set; }
+
+        [ForeignKey("MachineId")] public Guid MachineId { get; set; }
+
+        [ForeignKey("TrackableId")] public Guid TrackableId { get; set; }
+
         public DateTime CreatedUtc { get; set; }
 
         public string Handler { get; set; }
         public string Command { get; set; }
         public string CommandArg { get; set; }
         public string Result { get; set; }
-
-        public HistoryTrackable()
-        {
-            this.CreatedUtc = DateTime.UtcNow;
-        }
     }
 }

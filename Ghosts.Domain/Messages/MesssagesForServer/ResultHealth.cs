@@ -5,10 +5,17 @@ using System.Collections.Generic;
 namespace Ghosts.Domain
 {
     /// <summary>
-    /// the client results of running a health check
+    ///     the client results of running a health check
     /// </summary>
     public class ResultHealth
     {
+        public ResultHealth()
+        {
+            Errors = new List<string>();
+            LoggedOnUsers = new List<string>();
+            Stats = new MachineStats();
+        }
+
         public bool Internet { get; set; }
         public bool Permissions { get; set; }
         public long ExecutionTime { get; set; }
@@ -16,13 +23,6 @@ namespace Ghosts.Domain
         public List<string> Errors { get; set; }
         public List<string> LoggedOnUsers { get; set; }
         public MachineStats Stats { get; set; }
-
-        public ResultHealth()
-        {
-            this.Errors = new List<string>();
-            this.LoggedOnUsers = new List<string>();
-            this.Stats = new MachineStats();
-        }
 
         public class MachineStats
         {

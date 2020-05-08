@@ -1,6 +1,4 @@
 ﻿using System;
-using System.IO;
-using System.Text;
 using System.Threading;
 using Ghosts.Api.Infrastructure;
 using Ghosts.Api.Models;
@@ -27,7 +25,7 @@ namespace ghosts.api.Controllers
         }
 
         /// <summary>
-        /// Clients post an encrypted survey result to this endpoint
+        ///     Clients post an encrypted survey result to this endpoint
         /// </summary>
         /// <param name="transmission">The encrypted survey result</param>
         /// <param name="ct">Cancellation Token</param>
@@ -57,7 +55,7 @@ namespace ghosts.api.Controllers
         }
 
         /// <summary>
-        /// Clients post survey result to this endpoint
+        ///     Clients post survey result to this endpoint
         /// </summary>
         /// <param name="value">The client survey result</param>
         /// <param name="ct">Cancellation Token</param>
@@ -90,7 +88,7 @@ namespace ghosts.api.Controllers
             if (value.Created == DateTime.MinValue)
                 value.Created = DateTime.UtcNow;
 
-            this._service.Enqueue(new QueueEntry { Type = QueueEntry.Types.Survey, Payload = value });
+            _service.Enqueue(new QueueEntry {Type = QueueEntry.Types.Survey, Payload = value});
 
             return NoContent();
         }

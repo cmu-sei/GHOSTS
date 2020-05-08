@@ -25,7 +25,7 @@ namespace Ghosts.Api.Controllers
         }
 
         /// <summary>
-        /// Clients post to this endpoint to get their unique GHOSTS system ID
+        ///     Clients post to this endpoint to get their unique GHOSTS system ID
         /// </summary>
         /// <returns>A client's particular unique GHOSTS system ID (GUID)</returns>
         [HttpGet]
@@ -35,31 +35,22 @@ namespace Ghosts.Api.Controllers
             log.Trace($"Request by {id}");
 
             var m = new Machine();
-            if (!string.IsNullOrEmpty(id))
-            {
-                m = await this._service.GetByIdAsync(new Guid(id), ct);
-            }
-            
-            if (m == null || !m.IsValid())
-            {
-                m = await this._service.FindByValue(WebRequestReader.GetMachine(HttpContext), ct);
-            }
-            
+            if (!string.IsNullOrEmpty(id)) m = await _service.GetByIdAsync(new Guid(id), ct);
+
+            if (m == null || !m.IsValid()) m = await _service.FindByValue(WebRequestReader.GetMachine(HttpContext), ct);
+
             if (m == null || !m.IsValid())
             {
                 m = WebRequestReader.GetMachine(HttpContext);
 
-                m.History.Add(new Machine.MachineHistoryItem { Type = Machine.MachineHistoryItem.HistoryType.Created });
-                await this._service.CreateAsync(m, ct);
+                m.History.Add(new Machine.MachineHistoryItem {Type = Machine.MachineHistoryItem.HistoryType.Created});
+                await _service.CreateAsync(m, ct);
             }
 
-            if (!m.IsValid())
-            {
-                return StatusCode(StatusCodes.Status401Unauthorized, "Invalid machine request");
-            }
+            if (!m.IsValid()) return StatusCode(StatusCodes.Status401Unauthorized, "Invalid machine request");
 
-            m.History.Add(new Machine.MachineHistoryItem { Type = Machine.MachineHistoryItem.HistoryType.RequestedId });
-            await this._service.UpdateAsync(m, ct);
+            m.History.Add(new Machine.MachineHistoryItem {Type = Machine.MachineHistoryItem.HistoryType.RequestedId});
+            await _service.UpdateAsync(m, ct);
 
             //client saves this for future calls
             return Json(m.Id);

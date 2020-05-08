@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -10,20 +11,20 @@ namespace Ghosts.Domain.Code
     public static class Helpers
     {
         /// <summary>
-        /// Get name value of an Enum
+        ///     Get name value of an Enum
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="value"></param>
         /// <returns></returns>
         public static T ParseEnum<T>(string value)
         {
-            return (T)Enum.Parse(typeof(T), value, true);
+            return (T) Enum.Parse(typeof(T), value, true);
         }
 
         public static bool IsOlderThanHours(string filename, int hours)
         {
             var threshold = DateTime.Now.AddHours(-hours);
-            return System.IO.File.GetCreationTime(filename) <= threshold;
+            return File.GetCreationTime(filename) <= threshold;
         }
     }
 
@@ -61,7 +62,7 @@ namespace Ghosts.Domain.Code
     public static class EnumerableExtensions
     {
         /// <summary>
-        /// Picks 1 random object from a list T
+        ///     Picks 1 random object from a list T
         /// </summary>
         public static T PickRandom<T>(this IEnumerable<T> source)
         {
@@ -69,7 +70,7 @@ namespace Ghosts.Domain.Code
         }
 
         /// <summary>
-        /// Picks n random objects from a list T
+        ///     Picks n random objects from a list T
         /// </summary>
         public static IEnumerable<T> PickRandom<T>(this IEnumerable<T> source, int count)
         {
@@ -77,7 +78,7 @@ namespace Ghosts.Domain.Code
         }
 
         /// <summary>
-        /// Randomize a list of T objects in list
+        ///     Randomize a list of T objects in list
         /// </summary>
         public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> source)
         {

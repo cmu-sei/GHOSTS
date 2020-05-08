@@ -33,12 +33,9 @@ namespace Ghosts.Api.Controllers
 
             var list = new List<Machine.MachineHistoryItem>();
 
-            var group = await this._service.GetAsync(id, ct);
+            var group = await _service.GetAsync(id, ct);
 
-            foreach (var machine in group.GroupMachines)
-            {
-                list.AddRange(await this._serviceMachine.GetMachineHistory(machine.MachineId, ct));
-            }
+            foreach (var machine in group.GroupMachines) list.AddRange(await _serviceMachine.GetMachineHistory(machine.MachineId, ct));
 
             return Ok(list.OrderByDescending(o => o.CreatedUtc));
         }

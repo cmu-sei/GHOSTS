@@ -10,8 +10,18 @@ namespace Ghosts.Domain.Messages.MesssagesForServer
     [Table("Surveys")]
     public class Survey
     {
-        [Key]
-        public int Id { get; set; }
+        public Survey()
+        {
+            Interfaces = new List<Interface>();
+            LocalUsers = new List<LocalUser>();
+            Drives = new List<DriveInfo>();
+            Processes = new List<LocalProcess>();
+            EventLogs = new List<EventLog>();
+            Ports = new List<Port>();
+        }
+
+        [Key] public int Id { get; set; }
+
         public Guid MachineId { get; set; }
         public DateTime Created { get; set; }
 
@@ -24,38 +34,28 @@ namespace Ghosts.Domain.Messages.MesssagesForServer
         public IList<EventLog> EventLogs { get; set; }
         public IList<Port> Ports { get; set; }
 
-        public Survey()
-        {
-            this.Interfaces = new List<Interface>();
-            this.LocalUsers = new List<LocalUser>();
-            this.Drives = new List<DriveInfo>();
-            this.Processes = new List<LocalProcess>();
-            this.EventLogs = new List<EventLog>();
-            this.Ports = new List<Port>();
-        }
-
         [Table("SurveyInterfaces")]
         public class Interface
         {
-            [Key]
-            public int Id { get; set; }
-            [ForeignKey("SurveyId")]
-            public int SurveyId { get; set; }
-            public string Name { get; set; }
-            public IList<InterfaceBinding> Bindings { get; set; }
-
             public Interface()
             {
-                this.Bindings = new List<InterfaceBinding>();
+                Bindings = new List<InterfaceBinding>();
             }
+
+            [Key] public int Id { get; set; }
+
+            [ForeignKey("SurveyId")] public int SurveyId { get; set; }
+
+            public string Name { get; set; }
+            public IList<InterfaceBinding> Bindings { get; set; }
 
             [Table("SurveyInterfaceBindings")]
             public class InterfaceBinding
             {
-                [Key]
-                public int Id { get; set; }
-                [ForeignKey("InterfaceId")]
-                public int InterfaceId { get; set; }
+                [Key] public int Id { get; set; }
+
+                [ForeignKey("InterfaceId")] public int InterfaceId { get; set; }
+
                 public string InternetAddress { get; set; }
                 public string PhysicalAddress { get; set; }
                 public string Type { get; set; }
@@ -65,25 +65,25 @@ namespace Ghosts.Domain.Messages.MesssagesForServer
         [Table("SurveyEventLogs")]
         public class EventLog
         {
-            [Key]
-            public int Id { get; set; }
-            [ForeignKey("SurveyId")]
-            public int SurveyId { get; set; }
-            public string Name { get; set; }
-            public IList<EventLogEntry> Entries { get; set; }
-
             public EventLog()
             {
-                this.Entries = new List<EventLogEntry>();
+                Entries = new List<EventLogEntry>();
             }
+
+            [Key] public int Id { get; set; }
+
+            [ForeignKey("SurveyId")] public int SurveyId { get; set; }
+
+            public string Name { get; set; }
+            public IList<EventLogEntry> Entries { get; set; }
 
             [Table("SurveyEventLogEntries")]
             public class EventLogEntry
             {
-                [Key]
-                public int Id { get; set; }
-                [ForeignKey("EventLogId")]
-                public int EventLogId { get; set; }
+                [Key] public int Id { get; set; }
+
+                [ForeignKey("EventLogId")] public int EventLogId { get; set; }
+
                 public DateTime Created { get; set; }
                 public string EntryType { get; set; }
                 public string Source { get; set; }
@@ -94,10 +94,10 @@ namespace Ghosts.Domain.Messages.MesssagesForServer
         [Table("SurveyUsers")]
         public class LocalUser
         {
-            [Key]
-            public int Id { get; set; }
-            [ForeignKey("SurveyId")]
-            public int SurveyId { get; set; }
+            [Key] public int Id { get; set; }
+
+            [ForeignKey("SurveyId")] public int SurveyId { get; set; }
+
             public string Username { get; set; }
             public string Domain { get; set; }
         }
@@ -105,10 +105,10 @@ namespace Ghosts.Domain.Messages.MesssagesForServer
         [Table("SurveyLocalProcesses")]
         public class LocalProcess
         {
-            [Key]
-            public int Id { get; set; }
-            [ForeignKey("SurveyId")]
-            public int SurveyId { get; set; }
+            [Key] public int Id { get; set; }
+
+            [ForeignKey("SurveyId")] public int SurveyId { get; set; }
+
             public string MainWindowTitle { get; set; }
             public string ProcessName { get; set; }
             public DateTime? StartTime { get; set; }
@@ -121,10 +121,10 @@ namespace Ghosts.Domain.Messages.MesssagesForServer
         [Table("SurveyDrives")]
         public class DriveInfo
         {
-            [Key]
-            public int Id { get; set; }
-            [ForeignKey("SurveyId")]
-            public int SurveyId { get; set; }
+            [Key] public int Id { get; set; }
+
+            [ForeignKey("SurveyId")] public int SurveyId { get; set; }
+
             public long AvailableFreeSpace { get; set; }
             public string DriveFormat { get; set; }
             public string DriveType { get; set; }
@@ -139,10 +139,10 @@ namespace Ghosts.Domain.Messages.MesssagesForServer
         [Table("SurveyPorts")]
         public class Port
         {
-            [Key]
-            public int Id { get; set; }
-            [ForeignKey("SurveyId")]
-            public int SurveyId { get; set; }
+            [Key] public int Id { get; set; }
+
+            [ForeignKey("SurveyId")] public int SurveyId { get; set; }
+
             public string LocalPort { get; set; }
             public string LocalAddress { get; set; }
             public string ForeignAddress { get; set; }
@@ -153,6 +153,7 @@ namespace Ghosts.Domain.Messages.MesssagesForServer
             public string State { get; set; }
         }
     }
+
     /*
     public class ResultSurvey
     {

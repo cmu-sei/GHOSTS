@@ -2,7 +2,7 @@
 
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.IO;
+using Ghosts.Domain;
 
 namespace Ghosts.Api.Models
 {
@@ -11,10 +11,9 @@ namespace Ghosts.Api.Models
     {
         public int Id { get; set; }
 
-        [ForeignKey("MachineId")] 
-        public Guid MachineId { get; set; }
+        [ForeignKey("MachineId")] public Guid MachineId { get; set; }
 
-        public Domain.UpdateClientConfig.UpdateType Type { get; set; }
+        public UpdateClientConfig.UpdateType Type { get; set; }
 
         public DateTime ActiveUtc { get; set; }
         public DateTime CreatedUtc { get; set; }

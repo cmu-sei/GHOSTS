@@ -9,16 +9,6 @@ namespace Ghosts.Domain
 {
     public class ResultMachine
     {
-        public string Id { get; set; }
-        public string Name { get; private set; }
-        public string FQDN { get; private set; }
-        public string Domain { get; private set; }
-        public string Host { get; private set; }
-        public string ResolvedHost { get; private set; }
-        public string ClientIp { get; private set; }
-        public string IpAddress { get; private set; }
-        public string CurrentUsername { get; private set; }
-
         public ResultMachine()
         {
             Name = Environment.MachineName.ToLower();
@@ -31,7 +21,8 @@ namespace Ghosts.Domain
             CurrentUsername = Environment.UserName;
         }
 
-        public ResultMachine(string name, string fqdn, string domain, string host, string resolvedHost, string clientIp, string incomingIp, string username)
+        public ResultMachine(string name, string fqdn, string domain, string host, string resolvedHost, string clientIp, string incomingIp,
+            string username)
         {
             Name = name.ToLower();
             FQDN = fqdn.ToLower();
@@ -43,14 +34,25 @@ namespace Ghosts.Domain
             CurrentUsername = username;
         }
 
+        public string Id { get; set; }
+        public string Name { get; private set; }
+        public string FQDN { get; }
+        public string Domain { get; }
+        public string Host { get; }
+        public string ResolvedHost { get; }
+        public string ClientIp { get; }
+        public string IpAddress { get; }
+        public string CurrentUsername { get; }
+
         public override string ToString()
         {
-            return $"Name:{Name}|FQDN:{FQDN}|Domain:{Domain}|Host:{Host}|ResolvedHost:{ResolvedHost}|HostIP:{ClientIp}|IP:{IpAddress}|User:{CurrentUsername}";
+            return
+                $"Name:{Name}|FQDN:{FQDN}|Domain:{Domain}|Host:{Host}|ResolvedHost:{ResolvedHost}|HostIP:{ClientIp}|IP:{IpAddress}|User:{CurrentUsername}";
         }
 
         public void SetName(string name)
         {
-            if(!string.IsNullOrEmpty(name))
+            if (!string.IsNullOrEmpty(name))
                 name = name.ToLower();
 
             Name = name;
@@ -98,13 +100,10 @@ namespace Ghosts.Domain
             {
                 var host = Dns.GetHostEntry(Dns.GetHostName());
                 foreach (var ip in host.AddressList)
-                {
                     if (ip.AddressFamily == AddressFamily.InterNetwork)
-                    {
                         return ip.ToString();
-                    }
-                }
             }
+
             return "-9";
         }
     }

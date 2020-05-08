@@ -34,16 +34,14 @@ namespace Ghosts.Api.Services
 
         public async Task<List<Group>> GetAsync(string q, CancellationToken ct)
         {
-            var list = await this._context.Groups.Include(o => o.GroupMachines).ToListAsync(ct);
+            var list = await _context.Groups.Include(o => o.GroupMachines).ToListAsync(ct);
             foreach (var group in list)
+            foreach (var machineMapping in @group.GroupMachines)
             {
-                foreach (var machineMapping in group.GroupMachines)
-                {
-                    var machine = await _context.Machines.FirstOrDefaultAsync(m => m.Id == machineMapping.MachineId && m.Status == StatusType.Active, ct);
-                    if (machine == null)
-                        continue;
-                    group.Machines.Add(machine);
-                }
+                var machine = await _context.Machines.FirstOrDefaultAsync(m => m.Id == machineMapping.MachineId && m.Status == StatusType.Active, ct);
+                if (machine == null)
+                    continue;
+                @group.Machines.Add(machine);
             }
 
             return list;
@@ -56,7 +54,7 @@ namespace Ghosts.Api.Services
 
         public async Task<int> CreateAsync(Group model, CancellationToken ct)
         {
-            this._context.Groups.Add(model);
+            _context.Groups.Add(model);
             await _context.SaveChangesAsync(ct);
             return model.Id;
         }
@@ -79,7 +77,7 @@ namespace Ghosts.Api.Services
 
         public async Task<int> DeleteAsync(int id, CancellationToken ct)
         {
-            var machineGroup = await this._context.Groups.FirstOrDefaultAsync(o => o.Id == id, ct);
+            var machineGroup = await _context.Groups.FirstOrDefaultAsync(o => o.Id == id, ct);
             _context.Groups.Remove(machineGroup);
             await _context.SaveChangesAsync(ct);
             return id;

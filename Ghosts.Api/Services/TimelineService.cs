@@ -38,11 +38,11 @@ namespace Ghosts.Api.Services
         {
             var machineUpdate = machineUpdateViewModel.ToMachineUpdate();
 
-            var group = this._context.Groups.Include(o => o.GroupMachines).FirstOrDefault(x => x.Id == groupId);
+            var group = _context.Groups.Include(o => o.GroupMachines).FirstOrDefault(x => x.Id == groupId);
 
             if (group == null)
                 return;
-            
+
             foreach (var machineMapping in group.GroupMachines)
             {
                 machineUpdate.MachineId = machineMapping.MachineId;

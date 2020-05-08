@@ -1,5 +1,4 @@
-﻿
-namespace Ghosts.Domain.Messages.MesssagesForServer
+﻿namespace Ghosts.Domain.Messages.MesssagesForServer
 {
     public class EncryptedPayload
     {

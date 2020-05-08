@@ -7,24 +7,24 @@ using Newtonsoft.Json;
 namespace Ghosts.Domain
 {
     /// <summary>
-    /// a client's specific health configuration
+    ///     a client's specific health configuration
     /// </summary>
     public class ConfigHealth
     {
+        public string HealthConfigFile;
+
+        public ConfigHealth(string healthConfig)
+        {
+            HealthConfigFile = healthConfig;
+            CheckUrls = new List<string>();
+        }
+
         public List<string> CheckUrls { get; set; }
         public int Sleep { get; set; }
-
-        public string HealthConfigFile;
 
         public FileInfo FilePath()
         {
             return new FileInfo(HealthConfigFile);
-        }
-
-        public ConfigHealth(string healthConfig)
-        {
-            this.HealthConfigFile = healthConfig;
-            this.CheckUrls = new List<string>();
         }
 
         public ConfigHealth Load()

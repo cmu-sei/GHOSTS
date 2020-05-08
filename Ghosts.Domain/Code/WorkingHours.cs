@@ -7,7 +7,7 @@ using NLog;
 namespace Ghosts.Domain.Code
 {
     /// <summary>
-    /// In and out of office hour management with 30 min of fuzz built in
+    ///     In and out of office hour management with 30 min of fuzz built in
     /// </summary>
     public static class WorkingHours
     {
@@ -35,10 +35,10 @@ namespace Ghosts.Domain.Code
 
                 var isOvernight = timeOff < timeOn;
 
-                _log.Debug($"For {handler.HandlerType}: Local time: {DateTime.Now.TimeOfDay} UTC: {DateTime.UtcNow.TimeOfDay} On: {timeOn} Off: {timeOff} Overnight? {isOvernight}");
+                _log.Debug(
+                    $"For {handler.HandlerType}: Local time: {DateTime.Now.TimeOfDay} UTC: {DateTime.UtcNow.TimeOfDay} On: {timeOn} Off: {timeOff} Overnight? {isOvernight}");
 
                 if (isOvernight)
-                {
                     while (DateTime.UtcNow.TimeOfDay < timeOn)
                     {
                         var sleep = Math.Abs((timeOn - DateTime.UtcNow.TimeOfDay).TotalMilliseconds);
@@ -47,16 +47,13 @@ namespace Ghosts.Domain.Code
                         _log.Trace($"Sleeping for {sleep}");
                         Thread.Sleep(Convert.ToInt32(sleep));
                     }
-                }
                 else
-                {
                     while (DateTime.UtcNow.TimeOfDay < timeOn ||
                            DateTime.UtcNow.TimeOfDay > timeOff)
                     {
-                        _log.Trace($"Sleeping for 60000");
+                        _log.Trace("Sleeping for 60000");
                         Thread.Sleep(60000);
                     }
-                }
             }
         }
     }

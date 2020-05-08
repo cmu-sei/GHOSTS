@@ -26,7 +26,6 @@ namespace Ghosts.Api.Infrastructure
                     StatusUp = Machine.UpDownStatus.Up
                 };
 
-                // alex loves consistency
                 m.Name = m.Name.ToLower();
                 m.FQDN = m.FQDN.ToLower();
                 m.Host = m.Host.ToLower();

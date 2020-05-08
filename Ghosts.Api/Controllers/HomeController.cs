@@ -21,7 +21,7 @@ namespace Ghosts.Api.Controllers
         }
 
         /// <summary>
-        /// API Home
+        ///     API Home
         /// </summary>
         /// <returns>Basic check information including version number, and a simple database connection counting machines and groups</returns>
         [HttpGet]
@@ -32,8 +32,8 @@ namespace Ghosts.Api.Controllers
 
             try
             {
-                s.Machines = this._context.Machines.Count();
-                s.Groups = this._context.Groups.Count();
+                s.Machines = _context.Machines.Count();
+                s.Groups = _context.Groups.Count();
             }
             catch (Exception e)
             {
@@ -42,20 +42,6 @@ namespace Ghosts.Api.Controllers
             }
 
             return Json(s);
-        }
-
-        //[HttpGet("reset")]
-        //public IActionResult Reset([FromQuery(Name = "n")] int n)
-        //{
-        //    ApplicationCleanUp.Run(_context, n);
-        //    return Ok($"Reset complete, retaining {n}");
-        //}
-
-
-        [HttpGet("error")]
-        public IActionResult Error()
-        {
-            throw new NotImplementedException("Error controller is not complete");
         }
 
         public class Status

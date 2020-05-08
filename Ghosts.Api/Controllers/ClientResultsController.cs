@@ -28,7 +28,7 @@ namespace Ghosts.Api.Controllers
         }
 
         /// <summary>
-        /// Clients post an encrypted timeline or health payload to this endpoint
+        ///     Clients post an encrypted timeline or health payload to this endpoint
         /// </summary>
         /// <param name="transmission">The encrypted timeline or health log payload</param>
         /// <param name="ct">Cancellation Token</param>
@@ -45,7 +45,7 @@ namespace Ghosts.Api.Controllers
                 transmission.Payload = Crypto.Base64Decode(transmission.Payload);
                 raw = Crypto.DecryptStringAes(transmission.Payload, key);
             }
-            catch(Exception exc)
+            catch (Exception exc)
             {
                 log.Trace(exc);
                 throw new Exception("Malformed data");
@@ -58,7 +58,7 @@ namespace Ghosts.Api.Controllers
         }
 
         /// <summary>
-        /// Clients post a timeline or health payload to this endpoint
+        ///     Clients post a timeline or health payload to this endpoint
         /// </summary>
         /// <param name="value">Timeline or health log payload</param>
         /// <param name="ct">Cancellation Token</param>
@@ -77,7 +77,7 @@ namespace Ghosts.Api.Controllers
             //log.Trace($"Request by {id}");
 
             var m = WebRequestReader.GetMachine(HttpContext);
-            
+
             if (!string.IsNullOrEmpty(id))
             {
                 m.Id = new Guid(id);
@@ -92,7 +92,7 @@ namespace Ghosts.Api.Controllers
             {
                 log.Trace($"payload received: {value.Log}");
 
-                this._service.Enqueue(
+                _service.Enqueue(
                     new QueueEntry
                     {
                         Payload =

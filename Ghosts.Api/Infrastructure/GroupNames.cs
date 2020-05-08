@@ -2,30 +2,24 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Ghosts.Api.Models;
-using System.Linq;
 using NLog;
 
 namespace Ghosts.Api.Infrastructure
 {
     public static class GroupNames
     {
-        private static Logger log = LogManager.GetCurrentClassLogger();
+        private static readonly Logger log = LogManager.GetCurrentClassLogger();
 
         private static string FormatToken(List<char> delimeters, ApiDetails.ClientOptions.GroupingOptions.GroupingDefinitionOption d, string o)
         {
             // replace
-            foreach (var r in d.Replacements)
-            {
-                o = o.Replace(r.Key, r.Value);
-            }
+            foreach (var r in d.Replacements) o = o.Replace(r.Key, r.Value);
 
             // reverse?
-            if (d.Direction.Equals("RightToLeft"))
-            {
-                o = o.Split(delimeters.ToArray()).Reverse().ToString();
-            }
+            if (d.Direction.Equals("RightToLeft")) o = o.Split(delimeters.ToArray()).Reverse().ToString();
 
             return o;
         }
@@ -46,7 +40,6 @@ namespace Ghosts.Api.Infrastructure
                 var name = machine.Name;
 
                 foreach (var d in Program.ClientConfig.Grouping.GroupingDefinition)
-                {
                     switch (d.Value)
                     {
                         case "host":
@@ -65,7 +58,6 @@ namespace Ghosts.Api.Infrastructure
                             fqdn = FormatToken(delimeters, d, fqdn);
                             break;
                     }
-                }
 
                 groupNameFormat = groupNameFormat.Replace("{host}", host);
                 groupNameFormat = groupNameFormat.Replace("{domain}", domain);
@@ -83,8 +75,11 @@ namespace Ghosts.Api.Infrastructure
 
                     list.Add(g.Append("*").ToString().TrimEnd(Convert.ToChar(delimeters[0])));
 
-                    if (list.Count > Program.ClientConfig.Grouping.GroupDepth) // groups deeper than 3 become a performance issue
+                    if (list.Count > Program.ClientConfig.Grouping.GroupDepth)
+                    {
+                        // groups deeper than 3 become a performance issue
                         break;
+                    }
                 }
             }
             catch (Exception e)

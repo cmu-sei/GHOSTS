@@ -9,20 +9,19 @@ namespace Ghosts.Api.ViewModels
 {
     public class UpViewModel
     {
-        [JsonConverter(typeof(StringEnumConverter))]
-        public Machine.UpDownStatus Status { get; private set; }
-        public IList<HistoryHealth> Records { get; private set; }
-
         public UpViewModel(IList<HistoryHealth> records)
         {
-            this.Status = Machine.UpDownStatus.Unknown;
-            this.Records = records;
+            Status = Machine.UpDownStatus.Unknown;
+            Records = records;
 
-            if (this.Records.Count < 1)
-            {
+            if (Records.Count < 1)
                 //TODO: need to query if it is actually still up
-                this.Status = Machine.UpDownStatus.Up;
-            }
+                Status = Machine.UpDownStatus.Up;
         }
+
+        [JsonConverter(typeof(StringEnumConverter))]
+        public Machine.UpDownStatus Status { get; }
+
+        public IList<HistoryHealth> Records { get; }
     }
 }

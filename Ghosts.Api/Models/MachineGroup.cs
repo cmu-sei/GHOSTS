@@ -12,33 +12,31 @@ namespace Ghosts.Api.Models
     [Table("groups")]
     public class Group
     {
-        [Key]
-        public int Id { get; set; }
-        [Required]
-        public string Name { get; set; }
+        public Group()
+        {
+            GroupMachines = new List<GroupMachine>();
+            Machines = new List<Machine>();
+        }
+
+        [Key] public int Id { get; set; }
+
+        [Required] public string Name { get; set; }
 
         public IList<GroupMachine> GroupMachines { get; set; }
 
         [JsonConverter(typeof(StringEnumConverter))]
         public StatusType Status { get; set; }
 
-        [NotMapped]
-        public IList<Machine> Machines { get; set; }
-
-        public Group()
-        {
-            this.GroupMachines = new List<GroupMachine>();
-            this.Machines = new List<Machine>();
-        }
+        [NotMapped] public IList<Machine> Machines { get; set; }
     }
 
     [Table("groupmachines")]
     public class GroupMachine
     {
         public int Id { get; set; }
-        [ForeignKey("GroupId")]
-        public int GroupId { get; set; }
-        [ForeignKey("MachineId")]
-        public Guid MachineId { get; set; }
+
+        [ForeignKey("GroupId")] public int GroupId { get; set; }
+
+        [ForeignKey("MachineId")] public Guid MachineId { get; set; }
     }
 }

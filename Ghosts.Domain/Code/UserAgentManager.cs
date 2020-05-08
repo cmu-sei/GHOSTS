@@ -10,8 +10,8 @@ using NLog;
 namespace Ghosts.Domain.Code
 {
     /// <summary>
-    /// This class generates a random user agent from obtainable list files of common user agents 
-    /// for all major browsers and "bad" UA strings as well
+    ///     This class generates a random user agent from obtainable list files of common user agents
+    ///     for all major browsers and "bad" UA strings as well
     /// </summary>
     public static class UserAgentManager
     {
@@ -35,9 +35,7 @@ namespace Ghosts.Domain.Code
             {
                 _log.Trace("user agents path", ApplicationDetails.UserAgents.Path);
                 foreach (var file in new DirectoryInfo(ApplicationDetails.UserAgents.Path).EnumerateFiles("*.txt", SearchOption.TopDirectoryOnly))
-                {
                     files.Add(file);
-                }
             }
             catch (Exception exc)
             {

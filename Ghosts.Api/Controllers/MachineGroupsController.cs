@@ -6,11 +6,11 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
 using Ghosts.Api.Models;
 using Ghosts.Api.Services;
 using Ghosts.Domain;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using NLog;
 
 namespace Ghosts.Api.Controllers
@@ -21,9 +21,9 @@ namespace Ghosts.Api.Controllers
     [ResponseCache(Duration = 5)]
     public class MachineGroupsController : Controller
     {
+        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
         private readonly IMachineGroupService _service;
         private readonly IMachineService _serviceMachine;
-        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
 
         public MachineGroupsController(IMachineGroupService service, IMachineService machineService)
         {
@@ -35,7 +35,7 @@ namespace Ghosts.Api.Controllers
         [HttpGet]
         public async Task<IEnumerable<Group>> GetMachineGroup(string q, CancellationToken ct)
         {
-            return await this._service.GetAsync(q, ct);
+            return await _service.GetAsync(q, ct);
         }
 
         // GET: api/MachineGroups/5
@@ -44,7 +44,7 @@ namespace Ghosts.Api.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var machineGroup = await this._service.GetAsync(id, ct);
+            var machineGroup = await _service.GetAsync(id, ct);
 
             if (machineGroup == null) return NotFound();
             return Ok(machineGroup);
@@ -56,7 +56,7 @@ namespace Ghosts.Api.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            await this._service.UpdateAsync(model, ct);
+            await _service.UpdateAsync(model, ct);
 
             return Ok(model);
         }
@@ -67,9 +67,9 @@ namespace Ghosts.Api.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var id = await this._service.CreateAsync(model, ct);
+            var id = await _service.CreateAsync(model, ct);
 
-            return CreatedAtAction("GetMachineGroup", new { id }, model);
+            return CreatedAtAction("GetMachineGroup", new {id}, model);
         }
 
         // DELETE: api/MachineGroups/5
@@ -79,7 +79,7 @@ namespace Ghosts.Api.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            await this._service.DeleteAsync(id, ct);
+            await _service.DeleteAsync(id, ct);
 
             return NoContent();
         }
@@ -99,17 +99,16 @@ namespace Ghosts.Api.Controllers
             try
             {
                 foreach (var machine in machines.GroupMachines)
-                {
                     try
                     {
-                        var response = await this._serviceMachine.SendCommand(machine.MachineId, command, ct);
+                        var response = await _serviceMachine.SendCommand(machine.MachineId, command, ct);
                         handlers.Add(response);
                     }
                     catch (Exception e)
                     {
                         _log.Trace(e);
                     }
-                }
+
                 return Ok(handlers);
             }
             catch (Exception e)
@@ -125,7 +124,7 @@ namespace Ghosts.Api.Controllers
         {
             try
             {
-                var response = await this._service.GetActivity(id, ct);
+                var response = await _service.GetActivity(id, ct);
                 return Ok(response);
             }
             catch (Exception exc)

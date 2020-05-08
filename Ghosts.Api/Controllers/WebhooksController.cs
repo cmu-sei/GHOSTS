@@ -4,11 +4,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Api.Models;
 using Ghosts.Api.Services;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
 
 namespace ghosts.api.Controllers
@@ -37,17 +37,11 @@ namespace ghosts.api.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetWebhook([FromRoute] Guid id)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
             var webhook = await _context.Webhooks.SingleOrDefaultAsync(m => m.Id == id);
 
-            if (webhook == null)
-            {
-                return NotFound();
-            }
+            if (webhook == null) return NotFound();
 
             return Ok(webhook);
         }
@@ -56,15 +50,9 @@ namespace ghosts.api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutWebhook([FromRoute] Guid id, [FromBody] Webhook webhook)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            if (id != webhook.Id)
-            {
-                return BadRequest();
-            }
+            if (id != webhook.Id) return BadRequest();
 
             _context.Entry(webhook).State = EntityState.Modified;
 
@@ -75,13 +63,8 @@ namespace ghosts.api.Controllers
             catch (DbUpdateConcurrencyException)
             {
                 if (!WebhookExists(id))
-                {
                     return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                throw;
             }
 
             return NoContent();
@@ -91,32 +74,23 @@ namespace ghosts.api.Controllers
         [HttpPost]
         public async Task<IActionResult> PostWebhook([FromBody] Webhook webhook)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            if (!ModelState.IsValid) return BadRequest(ModelState);
             if (webhook.Id == Guid.Empty)
                 webhook.Id = Guid.NewGuid();
             _context.Webhooks.Add(webhook);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetWebhook", new { id = webhook.Id }, webhook);
+            return CreatedAtAction("GetWebhook", new {id = webhook.Id}, webhook);
         }
 
         // DELETE: api/Webhooks/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteWebhook([FromRoute] Guid id)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
             var webhook = await _context.Webhooks.SingleOrDefaultAsync(m => m.Id == id);
-            if (webhook == null)
-            {
-                return NotFound();
-            }
+            if (webhook == null) return NotFound();
 
             _context.Webhooks.Remove(webhook);
             await _context.SaveChangesAsync();
@@ -145,17 +119,17 @@ namespace ghosts.api.Controllers
         {
             var timeline = await _context.HistoryTimeline.FirstOrDefaultAsync(o => o.Id == historytimelineid);
 
-            this._service.Enqueue(
-            new QueueEntry
-            {
-                Type = QueueEntry.Types.Notification,
-                Payload =
-                    new NotificationQueueEntry
-                    {
-                        Type = NotificationQueueEntry.NotificationType.Timeline,
-                        Payload = (JObject) JToken.FromObject(timeline)
-                    }
-            });
+            _service.Enqueue(
+                new QueueEntry
+                {
+                    Type = QueueEntry.Types.Notification,
+                    Payload =
+                        new NotificationQueueEntry
+                        {
+                            Type = NotificationQueueEntry.NotificationType.Timeline,
+                            Payload = (JObject) JToken.FromObject(timeline)
+                        }
+                });
 
             return NoContent();
         }

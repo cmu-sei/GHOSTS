@@ -6,6 +6,12 @@ namespace Ghosts.Api.ViewModels
 {
     public class DashboardViewModel
     {
+        public DashboardViewModel()
+        {
+            ChartLabels = new List<string>();
+            ChartItems = new List<ChartItem>();
+        }
+
         public double MachinesTracked { get; set; }
         public double ClientOperations { get; set; }
         public double HoursManaged { get; set; }
@@ -13,21 +19,15 @@ namespace Ghosts.Api.ViewModels
         public IList<string> ChartLabels { get; set; }
         public IList<ChartItem> ChartItems { get; set; }
 
-        public DashboardViewModel()
-        {
-            this.ChartLabels = new List<string>();
-            this.ChartItems = new List<ChartItem>();
-        }
-        
         public class ChartItem
         {
-            public string Label { get; set; }
-            public IList<int> Data { get; set; }
-
             public ChartItem()
             {
-                this.Data = new List<int>();
+                Data = new List<int>();
             }
+
+            public string Label { get; set; }
+            public IList<int> Data { get; set; }
         }
     }
 }

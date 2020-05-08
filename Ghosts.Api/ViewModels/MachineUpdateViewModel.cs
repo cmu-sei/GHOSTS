@@ -12,9 +12,9 @@ namespace Ghosts.Api.ViewModels
         public Guid MachineId { get; set; }
 
         public UpdateClientConfig.UpdateType Type { get; set; }
-        
+
         public DateTime ActiveUtc { get; set; }
-        
+
         public StatusType Status { get; set; }
 
         public Timeline Update { get; set; }
@@ -24,13 +24,13 @@ namespace Ghosts.Api.ViewModels
             var machineUpdate = new MachineUpdate
             {
                 CreatedUtc = DateTime.UtcNow,
-                Status = this.Status,
-                Update = JsonConvert.SerializeObject(this.Update),
-                MachineId = this.MachineId,
-                Type = this.Type,
-                ActiveUtc = this.ActiveUtc
+                Status = Status,
+                Update = JsonConvert.SerializeObject(Update),
+                MachineId = MachineId,
+                Type = Type,
+                ActiveUtc = ActiveUtc
             };
-            return machineUpdate;           
+            return machineUpdate;
         }
     }
 }

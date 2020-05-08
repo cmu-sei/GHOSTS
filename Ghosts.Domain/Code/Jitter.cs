@@ -5,8 +5,8 @@ using System;
 namespace Ghosts.Domain.Code
 {
     /// <summary>
-    /// Jitter is slight randomization of a sleep or cycle time
-    /// e.g. 5 minutes becomes ~5 minutes so that each client isn't acting on exactly the same timeline
+    ///     Jitter is slight randomization of a sleep or cycle time
+    ///     e.g. 5 minutes becomes ~5 minutes so that each client isn't acting on exactly the same timeline
     /// </summary>
     public static class Jitter
     {

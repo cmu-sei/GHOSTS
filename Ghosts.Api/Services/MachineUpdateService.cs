@@ -13,6 +13,7 @@ namespace Ghosts.Api.Services
     public interface IMachineUpdateService
     {
         Task<MachineUpdate> GetAsync(Guid id, CancellationToken ct);
+
         //Task<Guid> CreateAsync(Machine model, CancellationToken ct);
         //Task<Machine> UpdateAsync(Machine model, CancellationToken ct);
         Task<int> DeleteAsync(int model, CancellationToken ct);
@@ -20,7 +21,7 @@ namespace Ghosts.Api.Services
 
     public class MachineUpdateService : IMachineUpdateService
     {
-        private static Logger log = LogManager.GetCurrentClassLogger();
+        private static readonly Logger log = LogManager.GetCurrentClassLogger();
         private readonly ApplicationDbContext _context;
 
         public MachineUpdateService(ApplicationDbContext context)
@@ -46,13 +47,14 @@ namespace Ghosts.Api.Services
             }
 
             model.Status = StatusType.Deleted;
-            
+
             var operation = await _context.SaveChangesAsync(ct);
             if (operation < 1)
             {
                 log.Error($"Could not delete machine update: {operation}");
                 throw new InvalidOperationException("Could not delete Machine Update");
             }
+
             return id;
         }
     }

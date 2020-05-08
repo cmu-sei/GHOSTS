@@ -12,12 +12,13 @@ namespace Ghosts.Api.Infrastructure.Extensions
             IConfiguration section
         )
         {
-            CorsPolicyOptions policy = new CorsPolicyOptions();
-            ConfigurationBinder.Bind(section, policy);
+            var policy = new CorsPolicyOptions();
+            section.Bind(policy);
             builder.AddPolicy("default", policy.Build());
             return builder;
         }
     }
+
     public class CorsPolicyOptions
     {
         public string[] Origins { get; set; }
@@ -31,22 +32,22 @@ namespace Ghosts.Api.Infrastructure.Extensions
         public CorsPolicy Build()
         {
             var policy = new CorsPolicyBuilder();
-            if (this.AllowAnyOrigin)
+            if (AllowAnyOrigin)
                 policy.AllowAnyOrigin();
             else
-                policy.WithOrigins(this.Origins);
+                policy.WithOrigins(Origins);
 
-            if (this.AllowAnyHeader)
+            if (AllowAnyHeader)
                 policy.AllowAnyHeader();
             else
-                policy.WithHeaders(this.Headers);
+                policy.WithHeaders(Headers);
 
-            if (this.AllowAnyMethod)
+            if (AllowAnyMethod)
                 policy.AllowAnyMethod();
             else
-                policy.WithMethods(this.Methods);
+                policy.WithMethods(Methods);
 
-            if (this.SupportsCredentials)
+            if (SupportsCredentials)
                 policy.AllowCredentials();
             else
                 policy.DisallowCredentials();

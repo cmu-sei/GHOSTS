@@ -8,72 +8,70 @@ namespace Ghosts.Domain.Code
 {
     public class Link
     {
-        public Uri Url { get; set; }
-        public int Priority { get; set; }
-        
         public Link()
         {
             Priority = 0;
         }
+
+        public Uri Url { get; set; }
+        public int Priority { get; set; }
     }
 
     public class LinkManager
     {
-        public List<Link> Links { private set; get; }
-        private readonly Random _random = new Random();
         private readonly string _baseUrl;
+        private readonly Random _random = new Random();
 
         public LinkManager(string baseUrl)
         {
             Links = new List<Link>();
-            this._baseUrl = baseUrl;
+            _baseUrl = baseUrl;
         }
 
+        public List<Link> Links { private set; get; }
+
         /// <summary>
-        /// Adds proper links — invalid links get quickly discarded
+        ///     Adds proper links — invalid links get quickly discarded
         /// </summary>
         /// <param name="url">http|s://some.link/path/etc</param>
         public void AddLink(string url)
         {
             try
             {
-                this.Links.Add(new Link {Url = new Uri(url)});
+                Links.Add(new Link {Url = new Uri(url)});
             }
-            catch { }
+            catch
+            {
+            }
         }
 
         public Link Choose()
         {
-            var baseUri = new Uri(this._baseUrl);
-            foreach(var link in this.Links)
-            {
+            var baseUri = new Uri(_baseUrl);
+            foreach (var link in Links)
                 try
                 {
-                    if (!link.Url.Host.Replace("www.","").Contains(baseUri.Host.Replace("www.","")))
+                    if (!link.Url.Host.Replace("www.", "").Contains(baseUri.Host.Replace("www.", "")))
                         link.Priority += 10;
                 }
                 catch (Exception e)
                 {
                     Console.WriteLine($"{link.Url} : {e}");
                 }
-            }
-            
-            this.Links = this.Links.OrderByDescending(o=>o.Priority).ToList();
 
-            if (this.Links.Count < 1)
+            Links = Links.OrderByDescending(o => o.Priority).ToList();
+
+            if (Links.Count < 1)
                 return null;
-            
-            var totalWeight = Convert.ToInt32(this.Links.Sum(o => o.Priority));
-            
+
+            var totalWeight = Convert.ToInt32(Links.Sum(o => o.Priority));
+
             // totalWeight is the sum of all weights
             var r = _random.Next(0, totalWeight);
 
-            foreach (var link in this.Links)
+            foreach (var link in Links)
             {
-                if (r < link.Priority)
-                {
-                    return link;
-                }
+                if (r < link.Priority) return link;
 
                 r -= link.Priority;
             }

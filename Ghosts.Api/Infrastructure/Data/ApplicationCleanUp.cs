@@ -14,7 +14,7 @@ namespace Ghosts.Api.Infrastructure.Data
                 //put top 5 in list
                 var ids = new List<int>();
 
-                foreach(var o in context.HistoryHealth.Where(x => x.MachineId == machine.Id)
+                foreach (var o in context.HistoryHealth.Where(x => x.MachineId == machine.Id)
                     .OrderByDescending(x => x.CreatedUtc).Take(retain))
                     ids.Add(o.Id);
 

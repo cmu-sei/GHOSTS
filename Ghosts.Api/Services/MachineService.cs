@@ -34,8 +34,8 @@ namespace Ghosts.Api.Services
     public class MachineService : IMachineService
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        private readonly int _lookBack = Program.ClientConfig.LookbackRecords;
         private readonly ApplicationDbContext _context;
+        private readonly int _lookBack = Program.ClientConfig.LookbackRecords;
 
         public MachineService(ApplicationDbContext context)
         {
@@ -44,7 +44,7 @@ namespace Ghosts.Api.Services
 
         public async Task<List<Machine>> GetAsync(string q, CancellationToken ct)
         {
-            var list = await this._context.Machines.Where(o => o.Status == StatusType.Active).OrderByDescending(o => o.LastReportedUtc).ToListAsync(ct);
+            var list = await _context.Machines.Where(o => o.Status == StatusType.Active).OrderByDescending(o => o.LastReportedUtc).ToListAsync(ct);
             foreach (var item in list)
             {
                 item.HistoryHealth = null;
@@ -52,6 +52,7 @@ namespace Ghosts.Api.Services
                 item.HistoryTrackables = null;
                 item.History = null;
             }
+
             return list;
         }
 
@@ -65,7 +66,7 @@ namespace Ghosts.Api.Services
                     return await _context.Machines.FirstOrDefaultAsync(o => o.Host.Contains(machine.Host), ct);
                 case "resolvedhost":
                     return await _context.Machines.FirstOrDefaultAsync(o => o.ResolvedHost.Contains(machine.ResolvedHost), ct);
-                default: 
+                default:
                     return await _context.Machines.FirstOrDefaultAsync(o => o.Name.Contains(machine.Name), ct);
             }
         }
@@ -73,11 +74,11 @@ namespace Ghosts.Api.Services
         public async Task<List<MachineListItem>> GetListAsync(CancellationToken ct)
         {
             var items = new List<MachineListItem>();
-            var q = from r in this._context.Machines
-                    select new
-                    {
-                        r.Id, r.Name
-                    };
+            var q = from r in _context.Machines
+                select new
+                {
+                    r.Id, r.Name
+                };
             foreach (var item in q)
                 items.Add(new MachineListItem
                 {
@@ -94,11 +95,11 @@ namespace Ghosts.Api.Services
             if (machine == null)
                 return null;
 
-            machine.AddHistoryMachine(await this._context.HistoryMachine.Where(o => o.MachineId == machine.Id)
+            machine.AddHistoryMachine(await _context.HistoryMachine.Where(o => o.MachineId == machine.Id)
                 .OrderByDescending(o => o.CreatedUtc).Take(_lookBack).ToListAsync(ct));
-            machine.AddHistoryHealth(await this._context.HistoryHealth.Where(o => o.MachineId == machine.Id)
+            machine.AddHistoryHealth(await _context.HistoryHealth.Where(o => o.MachineId == machine.Id)
                 .OrderByDescending(o => o.CreatedUtc).Take(_lookBack).ToListAsync(ct));
-            machine.AddHistoryTimeline(await this._context.HistoryTimeline.Where(o => o.MachineId == machine.Id)
+            machine.AddHistoryTimeline(await _context.HistoryTimeline.Where(o => o.MachineId == machine.Id)
                 .OrderByDescending(o => o.CreatedUtc).Take(_lookBack).ToListAsync(ct));
 
             return machine;
@@ -190,6 +191,7 @@ namespace Ghosts.Api.Services
                 _log.Error($"Could not delete machine: {operation}");
                 throw new InvalidOperationException("Could not delete Machine");
             }
+
             return id;
         }
 
@@ -204,35 +206,6 @@ namespace Ghosts.Api.Services
         public async Task<List<Machine.MachineHistoryItem>> GetMachineHistory(Guid id, CancellationToken ct)
         {
             return await _context.HistoryMachine.Where(o => o.MachineId == id).ToListAsync(ct);
-        }
-
-
-        public void AddToGroups(Machine model, CancellationToken ct)
-        {
-            var groups = GroupNames.GetGroupNames(model);
-
-            foreach (var group in groups)
-            {
-                var existingGroup = this._context.Groups.Include(o => o.GroupMachines).FirstOrDefaultAsync(o => o.Name.Equals(group), ct).Result;
-
-                if (existingGroup != null && existingGroup.Name == group)
-                {
-                    if (!existingGroup.GroupMachines.Any(o => o.MachineId.Equals(model.Id)))
-                    {
-                        existingGroup.GroupMachines.Add(new GroupMachine { GroupId = existingGroup.Id, MachineId = model.Id });
-                        this._context.SaveChanges();
-                    }
-                }
-                else
-                {
-                    var newGroup = new Group();
-                    newGroup.Name = group;
-                    newGroup.Status = StatusType.Active;
-                    newGroup.GroupMachines.Add(new GroupMachine { GroupId = newGroup.Id, MachineId = model.Id });
-                    this._context.Groups.Add(newGroup);
-                    this._context.SaveChanges();
-                }
-            }
         }
 
         public async Task<TimelineHandler> SendCommand(Guid id, string command, CancellationToken ct)
@@ -281,12 +254,41 @@ namespace Ghosts.Api.Services
 
             try
             {
-                return this._context.HistoryTimeline.Where(o => o.MachineId == id).OrderByDescending(o=>o.CreatedUtc).Take(50).ToList();
+                return _context.HistoryTimeline.Where(o => o.MachineId == id).OrderByDescending(o => o.CreatedUtc).Take(50).ToList();
             }
             catch (Exception e)
             {
                 _log.Debug(e);
                 throw;
+            }
+        }
+
+
+        public void AddToGroups(Machine model, CancellationToken ct)
+        {
+            var groups = GroupNames.GetGroupNames(model);
+
+            foreach (var group in groups)
+            {
+                var existingGroup = _context.Groups.Include(o => o.GroupMachines).FirstOrDefaultAsync(o => o.Name.Equals(group), ct).Result;
+
+                if (existingGroup != null && existingGroup.Name == group)
+                {
+                    if (!existingGroup.GroupMachines.Any(o => o.MachineId.Equals(model.Id)))
+                    {
+                        existingGroup.GroupMachines.Add(new GroupMachine {GroupId = existingGroup.Id, MachineId = model.Id});
+                        _context.SaveChanges();
+                    }
+                }
+                else
+                {
+                    var newGroup = new Group();
+                    newGroup.Name = group;
+                    newGroup.Status = StatusType.Active;
+                    newGroup.GroupMachines.Add(new GroupMachine {GroupId = newGroup.Id, MachineId = model.Id});
+                    _context.Groups.Add(newGroup);
+                    _context.SaveChanges();
+                }
             }
         }
     }

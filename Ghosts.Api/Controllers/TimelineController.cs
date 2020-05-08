@@ -6,37 +6,37 @@ using System.Threading.Tasks;
 using Ghosts.Api.Services;
 using Ghosts.Api.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.AspNetCore.SwaggerGen;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace ghosts.api.Controllers
 {
     /// <summary>
-    /// for updating a machine(s) timeline via the API
+    ///     for updating a machine(s) timeline via the API
     /// </summary>
     public class TimelineController : Controller
     {
         private readonly ITimelineService _timelineService;
-        
+
         public TimelineController(ITimelineService timelineService, IBackgroundQueue queue)
         {
             _timelineService = timelineService;
         }
 
         [HttpPost("Timeline")]
-        [ProducesResponseType(typeof(Task<IActionResult>), (int)HttpStatusCode.NoContent)]
-        [SwaggerOperation(operationId: "createTimeline")]
+        [ProducesResponseType(typeof(Task<IActionResult>), (int) HttpStatusCode.NoContent)]
+        [SwaggerOperation(OperationId = "createTimeline")]
         public async Task<IActionResult> Timeline([FromBody] MachineUpdateViewModel machineUpdate, CancellationToken ct)
         {
-            await this._timelineService.UpdateAsync(machineUpdate, ct);
+            await _timelineService.UpdateAsync(machineUpdate, ct);
             return NoContent();
         }
-        
+
         [HttpPost("Timeline/ByGroup/{groupId}")]
-        [ProducesResponseType(typeof(Task<IActionResult>), (int)HttpStatusCode.NoContent)]
-        [SwaggerOperation(operationId: "createTimelineForGroup")]
+        [ProducesResponseType(typeof(Task<IActionResult>), (int) HttpStatusCode.NoContent)]
+        [SwaggerOperation(OperationId = "createTimelineForGroup")]
         public async Task<IActionResult> GroupTimeline([FromRoute] int groupId, [FromBody] MachineUpdateViewModel machineUpdate, CancellationToken ct)
         {
-            await this._timelineService.UpdateGroupAsync(groupId, machineUpdate, ct);
+            await _timelineService.UpdateGroupAsync(groupId, machineUpdate, ct);
             return NoContent();
         }
     }

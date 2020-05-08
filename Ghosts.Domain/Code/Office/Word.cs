@@ -31,7 +31,6 @@ namespace Ghosts.Domain.Code.Office
 
                 doc.Write(fs);
             }
-            
         }
     }
 }
