@@ -442,6 +442,18 @@ namespace Ghosts.Client.TimelineManager
                         //threadJob.ProcessName = ProcessManager.ProcessNames.Watcher;
 
                         break;
+                    case HandlerType.Print:
+                        t = new Thread(() =>
+                        {
+                            var p = new Print(handler);
+                        })
+                        {
+                            IsBackground = true,
+                            Name = threadJob.Id
+                        };
+                        t.Start();
+
+                        break;
                 }
 
                 if (threadJob.ProcessName != null)

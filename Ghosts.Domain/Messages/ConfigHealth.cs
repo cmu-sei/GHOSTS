@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 namespace Ghosts.Domain
 {
     /// <summary>
-    ///     a client's specific health configuration
+    /// a client's specific health configuration
     /// </summary>
     public class ConfigHealth
     {

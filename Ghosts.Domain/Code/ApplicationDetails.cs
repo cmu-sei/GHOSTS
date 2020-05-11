@@ -12,6 +12,17 @@ namespace Ghosts.Domain.Code
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
 
+        public static string Header => 
+@"             ('-. .-.               .-')    .-') _     .-')    
+            ( OO )  /              ( OO ). (  OO) )   ( OO ).  
+  ,----.    ,--. ,--. .-'),-----. (_)---\_)/     '._ (_)---\_) 
+ '  .-./-') |  | |  |( OO'  .-.  '/    _ | |'--...__)/    _ |  
+ |  |_( O- )|   .|  |/   |  | |  |\  :` `. '--.  .--'\  :` `.  
+ |  | .--, \|       |\_) |  |\|  | '..`''.)   |  |    '..`''.) 
+(|  | '. (_/|  .-.  |  \ |  | |  |.-._)   \   |  |   .-._)   \ 
+ |  '--'  | |  | |  |   `'  '-'  '\       /   |  |   \       / 
+  `------'  `--' `--'     `-----'  `-----'    `--'    `-----'  ";
+
         /// <summary>
         ///     Returns current GHOSTS exe name
         /// </summary>

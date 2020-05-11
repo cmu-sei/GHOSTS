@@ -15,6 +15,7 @@ namespace Ghosts.Client.Infrastructure
     {
         internal static bool Parse(string[] args)
         {
+            Console.WriteLine(ApplicationDetails.Header);
             var options = new Program.Options();
             var parser = new Parser(with =>
             {

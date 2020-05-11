@@ -22,6 +22,16 @@ namespace Ghosts.Api
 
         public static void Main(string[] args)
         {
+            var header = @"             ('-. .-.               .-')    .-') _     .-')    
+            ( OO )  /              ( OO ). (  OO) )   ( OO ).  
+  ,----.    ,--. ,--. .-'),-----. (_)---\_)/     '._ (_)---\_) 
+ '  .-./-') |  | |  |( OO'  .-.  '/    _ | |'--...__)/    _ |  
+ |  |_( O- )|   .|  |/   |  | |  |\  :` `. '--.  .--'\  :` `.  
+ |  | .--, \|       |\_) |  |\|  | '..`''.)   |  |    '..`''.) 
+(|  | '. (_/|  .-.  |  \ |  | |  |.-._)   \   |  |   .-._)   \ 
+ |  '--'  | |  | |  |   `'  '-'  '\       /   |  |   \       / 
+  `------'  `--' `--'     `-----'  `-----'    `--'    `-----'  ";
+            Console.Write(header + Environment.NewLine);
             log.Warn("GHOSTS API coming online...");
 
             ApiDetails.LoadConfiguration();

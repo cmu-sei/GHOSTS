@@ -85,7 +85,8 @@ namespace Ghosts.Domain
         LightWord = 31,
         LightExcel = 32,
         LightPowerPoint = 33,
-        Bash = 40
+        Bash = 40,
+        Print = 45
     }
 
     /// <summary>
