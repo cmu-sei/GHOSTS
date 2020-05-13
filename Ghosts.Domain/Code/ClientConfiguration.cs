@@ -190,28 +190,35 @@ namespace Ghosts.Domain.Code
 
         public static void UpdateConfigurationWithEnvVars()
         {
-            var baseurl = Environment.GetEnvironmentVariable("BASE_URL");
-            if (string.IsNullOrEmpty(baseurl)) return;
+            try
+            {
+                var baseurl = Environment.GetEnvironmentVariable("BASE_URL");
+                if (string.IsNullOrEmpty(baseurl)) return;
 
-            var filePath = ApplicationDetails.ConfigurationFiles.Application;
-            var raw = File.ReadAllText(filePath);
-            var conf = JsonConvert.DeserializeObject<ClientConfiguration>(raw);
+                var filePath = ApplicationDetails.ConfigurationFiles.Application;
+                var raw = File.ReadAllText(filePath);
+                var conf = JsonConvert.DeserializeObject<ClientConfiguration>(raw);
 
-            var uri = new Uri(Config.IdUrl);
-            conf.IdUrl = $"{baseurl}{uri.AbsolutePath}";
+                var uri = new Uri(Config.IdUrl);
+                conf.IdUrl = $"{baseurl}{uri.AbsolutePath}";
 
-            uri = new Uri(Config.ClientResults.PostUrl);
-            conf.ClientResults.PostUrl = $"{baseurl}{uri.AbsolutePath}";
+                uri = new Uri(Config.ClientResults.PostUrl);
+                conf.ClientResults.PostUrl = $"{baseurl}{uri.AbsolutePath}";
 
-            uri = new Uri(Config.Survey.PostUrl);
-            conf.Survey.PostUrl = $"{baseurl}{uri.AbsolutePath}";
+                uri = new Uri(Config.Survey.PostUrl);
+                conf.Survey.PostUrl = $"{baseurl}{uri.AbsolutePath}";
 
-            uri = new Uri(Config.ClientUpdates.PostUrl);
-            conf.ClientUpdates.PostUrl = $"{baseurl}{uri.AbsolutePath}";
+                uri = new Uri(Config.ClientUpdates.PostUrl);
+                conf.ClientUpdates.PostUrl = $"{baseurl}{uri.AbsolutePath}";
 
-            File.WriteAllText(filePath, JsonConvert.SerializeObject(conf, Formatting.Indented));
+                File.WriteAllText(filePath, JsonConvert.SerializeObject(conf, Formatting.Indented));
 
-            Console.WriteLine($"Updating base configuration... BASE_URL is: {baseurl}");
+                Console.WriteLine($"Updating base configuration... BASE_URL is: {baseurl}");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Exception updating config with env vars: {e}");
+            }   
         }
     }
 }

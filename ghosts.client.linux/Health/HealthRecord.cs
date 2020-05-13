@@ -13,7 +13,7 @@ namespace ghosts.client.linux.Health
         {
             var r = new ResultHealth();
 
-            //connectivity (internet)
+            //check connectivity (internet)
             foreach (var url in config.CheckUrls)
             {
                 var request = WebRequest.Create(url);
@@ -28,7 +28,6 @@ namespace ghosts.client.linux.Health
                 {
                     using (var response = (HttpWebResponse)request.GetResponse())
                     {
-                        //log.Debug(response.StatusCode);
                         using (var stream = response.GetResponseStream())
                         {
                             using (var reader = new StreamReader(stream))
@@ -52,15 +51,7 @@ namespace ghosts.client.linux.Health
                 r.ExecutionTime = watch.ElapsedMilliseconds;
                 r.Internet = (r.Errors.Count == 0);
                 r.Stats = MachineHealth.Run();
-
-                //log.Debug(r.ExecutionTime);
-                //log.Debug(html);
             }
-
-
-
-            // permissions
-            // can run x
 
             return r;
         }

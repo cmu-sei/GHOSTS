@@ -4,6 +4,7 @@ using System;
 using Ghosts.Api.Infrastructure;
 using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Api.Models;
+using Ghosts.Domain.Code;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -22,16 +23,7 @@ namespace Ghosts.Api
 
         public static void Main(string[] args)
         {
-            var header = @"             ('-. .-.               .-')    .-') _     .-')    
-            ( OO )  /              ( OO ). (  OO) )   ( OO ).  
-  ,----.    ,--. ,--. .-'),-----. (_)---\_)/     '._ (_)---\_) 
- '  .-./-') |  | |  |( OO'  .-.  '/    _ | |'--...__)/    _ |  
- |  |_( O- )|   .|  |/   |  | |  |\  :` `. '--.  .--'\  :` `.  
- |  | .--, \|       |\_) |  |\|  | '..`''.)   |  |    '..`''.) 
-(|  | '. (_/|  .-.  |  \ |  | |  |.-._)   \   |  |   .-._)   \ 
- |  '--'  | |  | |  |   `'  '-'  '\       /   |  |   \       / 
-  `------'  `--' `--'     `-----'  `-----'    `--'    `-----'  ";
-            Console.Write(header + Environment.NewLine);
+            Console.WriteLine(ApplicationDetails.Header);
             log.Warn("GHOSTS API coming online...");
 
             ApiDetails.LoadConfiguration();

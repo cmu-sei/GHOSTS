@@ -6,7 +6,6 @@ using System.IO;
 using System.Net;
 using System.Reflection;
 using System.Threading;
-using CommandLine;
 using ghosts.client.linux.Infrastructure;
 using ghosts.client.linux.timelineManager;
 using Ghosts.Domain.Code;
@@ -16,43 +15,17 @@ namespace ghosts.client.linux
 {
     class Program
     {
+        
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
         internal static ClientConfiguration Configuration { get; set; }
         internal static Options OptionFlags;
         internal static bool IsDebug;
         private static ListenerManager _listenerManager { get; set; }
 
-        /// <summary>
-        /// Defines the flags you can send to the client
-        /// </summary>
-        internal class Options
-        {
-            [Option('d', "debug", Default = false, HelpText = "Launch GHOSTS in debug mode")]
-            public bool Debug { get; set; }
-
-            [Option('h', "help", Default = false, HelpText = "Display this help screen")]
-            public bool Help { get; set; }
-
-            [Option('r', "randomize", Default = false, HelpText = "Create a randomized timeline")]
-            public bool Randomize { get; set; }
-
-            [Option('v', "version", Default = false, HelpText = "GHOSTS client version")]
-            public bool Version { get; set; }
-
-            [Option('i', "information", Default = false, HelpText = "GHOSTS client id information")]
-            public bool Information { get; set; }
-        }
-
         static void Main(string[] args)
         {
-            try
-            {
-                ClientConfigurationLoader.UpdateConfigurationWithEnvVars();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"Exception updating config with env vars: {e}");
-            }
+            ClientConfigurationLoader.UpdateConfigurationWithEnvVars();
+            
             
             try
             {
@@ -60,7 +33,8 @@ namespace ghosts.client.linux
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Fatal exception in {ApplicationDetails.Name} {ApplicationDetails.Version}: {e}");
+                Console.WriteLine($"Fatal exception in {ApplicationDetails.Name} {ApplicationDetails.Version}: {e}", Color.Red);
+                _log.Fatal(e);
                 Console.ReadLine();
             }
         }
@@ -72,7 +46,9 @@ namespace ghosts.client.linux
 
             // parse program flags
             if (!CommandLineFlagManager.Parse(args))
+            {
                 return;
+            }
 
             AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
 
@@ -93,10 +69,8 @@ namespace ghosts.client.linux
                 return;
             }
 
-            //catch any stray processes running and avoid duplication of jobs running
-            //StartupTasks.CleanupProcesses();
+            //linux clients do not catch stray processes or check for job duplication
 
-            //make sure ghosts starts when machine starts
             StartupTasks.SetStartup();
 
             _listenerManager = new ListenerManager();
@@ -104,46 +78,21 @@ namespace ghosts.client.linux
             //check id
             _log.Trace(Comms.CheckId.Id);
 
-            ////connect to command server for updates and sending logs
+            //connect to command server for updates and sending logs
             Comms.Updates.Run();
 
-            //TODO? should these clients do a local survey?
-            //if (Configuration.Survey.IsEnabled)
-            //{
-            //    try
-            //    {
-            //        Survey.SurveyManager.Run();
-            //    }
-            //    catch (Exception exc)
-            //    {
-            //        _log.Error(exc);
-            //    }
-            //}
+            //linux clients do not perform local survey
 
             if (Configuration.HealthIsEnabled)
             {
-                try
-                {
-                    var h = new Health.Check();
-                    h.Run();
-                }
-                catch (Exception exc)
-                {
-                    _log.Error(exc);
-                }
+                var h = new Health.Check();
+                h.Run();
             }
 
             if (Configuration.HandlersIsEnabled)
             {
-                try
-                {
-                    var o = new Orchestrator();
-                    o.Run();
-                }
-                catch (Exception exc)
-                {
-                    _log.Error(exc);
-                }
+                var o = new Orchestrator();
+                o.Run();
             }
 
             new ManualResetEvent(false).WaitOne();
@@ -152,7 +101,6 @@ namespace ghosts.client.linux
         private static void CurrentDomain_ProcessExit(object sender, EventArgs e)
         {
             _log.Debug($"Initiating {ApplicationDetails.Name} shutdown - Local: {DateTime.Now.TimeOfDay} UTC: {DateTime.UtcNow.TimeOfDay}");
-            //StartupTasks.CleanupProcesses();
         }
     }
 }

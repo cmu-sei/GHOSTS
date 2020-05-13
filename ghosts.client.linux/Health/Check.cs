@@ -27,28 +27,35 @@ namespace ghosts.client.linux.Health
 
         public void Run()
         {
-            // now watch that file for changes
-            var watcher = new FileSystemWatcher(ApplicationDetails.ConfigurationFiles.Path);
-            watcher.Filter = Path.GetFileName(ApplicationDetails.ConfigurationFiles.Health);
-            _log.Trace($"watching {watcher.Path}");
-            watcher.NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.FileName | NotifyFilters.Size;
-            watcher.EnableRaisingEvents = true;
-            watcher.Changed += new FileSystemEventHandler(OnChanged);
-
-            Thread t = null;
-            new Thread(() =>
+            try
             {
-                Thread.CurrentThread.IsBackground = true;
-                t = Thread.CurrentThread;
-                t.Name = Guid.NewGuid().ToString();
-                this.RunEx();
+                // now watch that file for changes
+                var watcher = new FileSystemWatcher(ApplicationDetails.ConfigurationFiles.Path);
+                watcher.Filter = Path.GetFileName(ApplicationDetails.ConfigurationFiles.Health);
+                _log.Trace($"watching {watcher.Path}");
+                watcher.NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.FileName | NotifyFilters.Size;
+                watcher.EnableRaisingEvents = true;
+                watcher.Changed += new FileSystemEventHandler(OnChanged);
 
-            }).Start();
+                Thread t = null;
+                new Thread(() =>
+                {
+                    Thread.CurrentThread.IsBackground = true;
+                    t = Thread.CurrentThread;
+                    t.Name = Guid.NewGuid().ToString();
+                    this.RunEx();
 
-            if (t != null)
+                }).Start();
+
+                if (t != null)
+                {
+                    _log.Trace($"HEALTH THREAD: {t.Name}");
+                    this._threads.Add(t);
+                }
+            }
+            catch (Exception exc)
             {
-                _log.Trace($"HEALTH THREAD: {t.Name}");
-                this._threads.Add(t);
+                _log.Error(exc);
             }
         }
 

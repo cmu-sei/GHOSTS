@@ -27,7 +27,7 @@ namespace ghosts.client.linux.handlers
                         Ex(handler);
                     }
                 }
-                
+
                 Ex(handler);
             }
             catch (Exception e)
@@ -85,17 +85,18 @@ namespace ghosts.client.linux.handlers
             {
                 this.Result += p.StandardOutput.ReadToEnd();
             }
+
             p.WaitForExit();
 
             this.Report(HandlerType.Command.ToString(), escapedArgs, this.Result);
         }
-        
-        void OutputHandler(object sendingProcess, DataReceivedEventArgs outLine) 
+
+        void OutputHandler(object sendingProcess, DataReceivedEventArgs outLine)
         {
             this.Result += outLine.Data;
         }
-        
-        void ErrorHandler(object sendingProcess, DataReceivedEventArgs outLine) 
+
+        void ErrorHandler(object sendingProcess, DataReceivedEventArgs outLine)
         {
             //* Do your stuff with the output (write to console/log/StringBuilder)
             Console.WriteLine(outLine.Data);

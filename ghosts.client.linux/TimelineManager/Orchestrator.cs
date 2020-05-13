@@ -23,32 +23,39 @@ namespace ghosts.client.linux.timelineManager
 
         public void Run()
         {
-            var timeline = TimelineBuilder.GetLocalTimeline();
+            try
+            {
+                var timeline = TimelineBuilder.GetLocalTimeline();
             
-            // now watch that file for changes
-            var timelineWatcher = new FileSystemWatcher(TimelineBuilder.TimelineFilePath().DirectoryName);
-            timelineWatcher.Filter = Path.GetFileName(TimelineBuilder.TimelineFilePath().Name);
-            _log.Trace($"watching {timelineWatcher.Path}");
-            timelineWatcher.NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.FileName | NotifyFilters.Size | NotifyFilters.CreationTime | NotifyFilters.LastWrite;
-            timelineWatcher.EnableRaisingEvents = true;
-            timelineWatcher.Changed += new FileSystemEventHandler(OnChanged);
+                // now watch that file for changes
+                var timelineWatcher = new FileSystemWatcher(TimelineBuilder.TimelineFilePath().DirectoryName);
+                timelineWatcher.Filter = Path.GetFileName(TimelineBuilder.TimelineFilePath().Name);
+                _log.Trace($"watching {timelineWatcher.Path}");
+                timelineWatcher.NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.FileName | NotifyFilters.Size | NotifyFilters.CreationTime | NotifyFilters.LastWrite;
+                timelineWatcher.EnableRaisingEvents = true;
+                timelineWatcher.Changed += new FileSystemEventHandler(OnChanged);
 
-            this._threadJobs = new List<ThreadJob>();
+                this._threadJobs = new List<ThreadJob>();
 
-            //load into an managing object
-            //which passes the timeline commands to handlers
-            //and creates a thread to execute instructions over that timeline
-            if (timeline.Status == Timeline.TimelineStatus.Run)
-            {
-                this.RunEx(timeline);
-            }
-            else
-            {
-                if (this.MonitorThread != null)
+                //load into an managing object
+                //which passes the timeline commands to handlers
+                //and creates a thread to execute instructions over that timeline
+                if (timeline.Status == Timeline.TimelineStatus.Run)
                 {
-                    this.MonitorThread.Abort();
-                    this.MonitorThread = null;
+                    this.RunEx(timeline);
                 }
+                else
+                {
+                    if (this.MonitorThread != null)
+                    {
+                        this.MonitorThread.Abort();
+                        this.MonitorThread = null;
+                    }
+                }
+            }
+            catch (Exception exc)
+            {
+                _log.Error(exc);
             }
         }
 

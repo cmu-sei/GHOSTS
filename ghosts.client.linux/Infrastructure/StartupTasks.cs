@@ -65,12 +65,17 @@ namespace ghosts.client.linux.Infrastructure
             }
         }
 
+        /// <summary>
+        /// make sure ghosts starts when machine starts
+        /// </summary>
         public static void SetStartup()
         {
+            return;
+            /*
             try
             {
                 throw new NotImplementedException();
-                /*
+                
                 [Unit]
                 Description=GHOSTS NPC Orchestration
                 After=multi-user.target
@@ -81,14 +86,15 @@ namespace ghosts.client.linux.Infrastructure
 
                 [Install]
                 WantedBy=multi-user.target
-                */
+              
 
-                _log.Trace("Startup set successfully");
+                //_log.Trace("Startup set successfully");
             }
             catch (Exception e)
             {
-                _log.Debug($"Could not set startup: {e}");
+                //_log.Debug($"Set startup: {e}");
             }
+            */
         }
     }
 }

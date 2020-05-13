@@ -1,7 +1,9 @@
 using System;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Runtime.Versioning;
 using CommandLine;
 using CommandLine.Text;
 using Ghosts.Domain;
@@ -14,7 +16,9 @@ namespace ghosts.client.linux.Infrastructure
     {
         internal static bool Parse(string[] args)
         {
-            var options = new Program.Options();
+            Console.WriteLine(ApplicationDetails.Header);
+            
+            var options = new Options();
             var parser = new Parser(with =>
             {
                 with.EnableDashDash = true;
@@ -25,7 +29,7 @@ namespace ghosts.client.linux.Infrastructure
                 with.HelpWriter = null;
             });
             var parserResults = parser
-                .ParseArguments<Program.Options>(args)
+                .ParseArguments<Options>(args)
                 .WithParsed(o => options = o);
 
             Program.OptionFlags = options;
@@ -54,17 +58,6 @@ namespace ghosts.client.linux.Infrastructure
             Program.IsDebug = true;
 #endif
 
-            var header = @"             ('-. .-.               .-')    .-') _     .-')    
-            ( OO )  /              ( OO ). (  OO) )   ( OO ).  
-  ,----.    ,--. ,--. .-'),-----. (_)---\_)/     '._ (_)---\_) 
- '  .-./-') |  | |  |( OO'  .-.  '/    _ | |'--...__)/    _ |  
- |  |_( O- )|   .|  |/   |  | |  |\  :` `. '--.  .--'\  :` `.  
- |  | .--, \|       |\_) |  |\|  | '..`''.)   |  |    '..`''.) 
-(|  | '. (_/|  .-.  |  \ |  | |  |.-._)   \   |  |   .-._)   \ 
- |  '--'  | |  | |  |   `'  '-'  '\       /   |  |   \       / 
-  `------'  `--' `--'     `-----'  `-----'    `--'    `-----'  ";
-            Console.Write(header + Environment.NewLine);
-            
             if (options.Debug || Program.IsDebug)
             {
                 Program.IsDebug = true;
@@ -113,7 +106,7 @@ namespace ghosts.client.linux.Infrastructure
             Console.WriteLine($"{ApplicationDetails.LogFiles.ClientUpdates} == {File.Exists(ApplicationDetails.LogFiles.ClientUpdates)}");
         }
 
-        private static void Help(ParserResult<Program.Options> parserResults)
+        private static void Help(ParserResult<Options> parserResults)
         {
             Console.WriteLine($"Hello, and welcome to {ApplicationDetails.Name.ToUpper()}...");
             Console.WriteLine(
@@ -135,6 +128,8 @@ namespace ghosts.client.linux.Infrastructure
             {
                 Console.WriteLine($"{assemblyName.Name}: {assemblyName.Version}");
             }
+            Console.WriteLine($"Running on {System.Runtime.InteropServices.RuntimeInformation.OSDescription}");
+            Console.WriteLine($"Compiled with: {Assembly.GetEntryAssembly()?.GetCustomAttribute<TargetFrameworkAttribute>()?.FrameworkName}");
         }
     }
 }

@@ -27,6 +27,7 @@ namespace ghosts.client.linux.Health
             {
                 _log.Debug($"Health tasks failing: {ex}");
             }
+
             return stats;
         }
 
@@ -37,6 +38,7 @@ namespace ghosts.client.linux.Health
             {
                 totalMemory += process.PrivateMemorySize64;
             }
+
             return totalMemory;
         }
 
@@ -46,8 +48,9 @@ namespace ghosts.client.linux.Health
             var cpu = proc.TotalProcessorTime;
             foreach (var process in Process.GetProcesses())
             {
-                    //Console.WriteLine("Proc {0,30}  CPU {1,-20:n} msec", process.ProcessName, cpu.TotalMilliseconds);
+                //Console.WriteLine("Proc {0,30}  CPU {1,-20:n} msec", process.ProcessName, cpu.TotalMilliseconds);
             }
+
             return cpu.Ticks;
         }
 
@@ -60,6 +63,7 @@ namespace ghosts.client.linux.Health
                     return 1 - Convert.ToSingle(drive.AvailableFreeSpace) / Convert.ToSingle(drive.TotalSize);
                 }
             }
+
             return -1;
         }
     }

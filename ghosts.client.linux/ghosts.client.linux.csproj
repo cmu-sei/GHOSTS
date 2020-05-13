@@ -2,13 +2,13 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <RuntimeIdentifiers>win7-x64;ubuntu.16.10-x64;osx.10.12-x64</RuntimeIdentifiers>
 
-    <Version>2.6.0.0</Version>
-    <AssemblyVersion>2.6.0.0</AssemblyVersion>
-    <FileVersion>2.6.0.0</FileVersion>
-    <ReleaseVersion>2.6.0.0</ReleaseVersion>
+    <Version>3.0.0.0</Version>
+    <AssemblyVersion>3.0.0.0</AssemblyVersion>
+    <FileVersion>3.0.0.0</FileVersion>
+    <ReleaseVersion>3.0.0.0</ReleaseVersion>
     <SynchReleaseVersion>false</SynchReleaseVersion>
         
     <Authors>Dustin Updyke for Carnegie Mellon University</Authors>
@@ -16,21 +16,31 @@
     <Product>GHOSTS</Product>
     <Description>GHOSTS NPC Orchestration Platform - please email ddupdyke@sei.cmu.edu with bugs/requests/other</Description>
     <Copyright>Carnegie Mellon University 2017</Copyright>
+    <NoWarn>NU1701</NoWarn>
   </PropertyGroup>
-
+  
   <ItemGroup>
-    <None Remove="config\application.json" />
-    <None Remove="config\emails-domain.json" />
-    <None Remove="config\emails-outside.json" />
-    <None Remove="config\health.json" />
-    <None Remove="config\timeline.json" />
-    <None Remove="nlog.config" />
+    <PackageReference Include="CommandLineParser" Version="2.8.0" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.23" />
+    <PackageReference Include="NLog" Version="4.7.0" />
+    <PackageReference Include="SimpleTCP" Version="1.0.24" />
+    <PackageReference Include="System.Diagnostics.Process" Version="4.3.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Ghosts.Domain\Ghosts.Domain.csproj" />
+  </ItemGroup>
+  
   <ItemGroup>
     <Content Include="config\application.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <None Update="config\dictionary.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="config\email-content.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <Content Include="config\emails-domain.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -47,27 +57,5 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="CommandLineParser" Version="2.5.0" />
-    <PackageReference Include="HtmlAgilityPack" Version="1.11.22" />
-    <PackageReference Include="NLog" Version="4.6.5" />
-    <PackageReference Include="SimpleTCP" Version="1.0.24" />
-    <PackageReference Include="System.Diagnostics.Process" Version="4.3.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="config\dictionary.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="config\email-content.csv">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Ghosts.Domain\Ghosts.Domain.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Remove="EmptyClass.cs" />
-  </ItemGroup>
+  
 </Project>
