@@ -1,2 +1,5 @@
 bin\
 obj\
+dockerfile
+out\
+docker-compose.yml
