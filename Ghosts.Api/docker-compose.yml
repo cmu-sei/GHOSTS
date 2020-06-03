@@ -1,29 +1,26 @@
 # docker-compose up -d
 # -f compose-api.yml (if you want a custom file)
 
-version: '3.2'
+version: "3.2"
 networks:
   ghosts-network:
     driver: bridge
 services:
   postgres:
-    image: postgres
+    image: postgres:12-alpine
     container_name: ghosts-postgres
     environment:
-      POSTGRES_DB: ghosts
+      POSTGRES_DB: ghostsss
       POSTGRES_USER: ghosts
       POSTGRES_PASSWORD: scotty@1
-    volumes:
-      - /Users/dustin/data/ghosts/db_data:/var/lib/postgresql/data
-      - /Users/dustin/data/ghosts/spectre_data:/tmp
     logging:
       options:
-        max-size: '100m'
-        max-file: '5'
+        max-size: "100m"
+        max-file: "5"
     ports:
-      - '5432:5432'
+      - "5432:5432"
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U ghosts']
+      test: ["CMD-SHELL", "pg_isready -U ghosts"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -32,12 +29,16 @@ services:
     restart: always
 
   ghosts-api:
-    image: dustinupdyke/ghosts
+    build:
+      context: ..
+      dockerfile: Ghosts.Api/dockerfile
     container_name: ghosts-api
     depends_on:
       - postgres
+    environment:
+      - ConnectionStrings:DefaultConnection=Host=ghosts-postgres;Port=5432;Database=ghostsss;User Id=ghosts;Password=scotty@1;
     ports:
-      - '5000:5000'
+      - "5000:5000"
     networks:
       - ghosts-network
     restart: always
@@ -48,7 +49,7 @@ services:
     depends_on:
       - postgres
     ports:
-      - '3000:3000'
+      - "3000:3000"
     networks:
       - ghosts-network
     restart: always
