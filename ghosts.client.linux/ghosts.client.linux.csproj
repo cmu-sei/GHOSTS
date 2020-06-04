@@ -28,7 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Ghosts.Domain\Ghosts.Domain.csproj" />
+    <ProjectReference Include="..\Ghosts.Domain\ghosts.domain.csproj" />
   </ItemGroup>
   
   <ItemGroup>
