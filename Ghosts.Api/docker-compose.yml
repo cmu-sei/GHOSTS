@@ -10,7 +10,7 @@ services:
     image: postgres:12-alpine
     container_name: ghosts-postgres
     environment:
-      POSTGRES_DB: ghostsss
+      POSTGRES_DB: ghosts
       POSTGRES_USER: ghosts
       POSTGRES_PASSWORD: scotty@1
     logging:
@@ -36,7 +36,7 @@ services:
     depends_on:
       - postgres
     environment:
-      - ConnectionStrings:DefaultConnection=Host=ghosts-postgres;Port=5432;Database=ghostsss;User Id=ghosts;Password=scotty@1;
+      - ConnectionStrings:DefaultConnection=Host=ghosts-postgres;Port=5432;Database=ghosts;User Id=ghosts;Password=scotty@1;
     ports:
       - "5000:5000"
     networks:
@@ -53,5 +53,3 @@ services:
     networks:
       - ghosts-network
     restart: always
-    volumes:
-      - /Users/dustin/data/ghosts/g_data:/var/lib/grafana
