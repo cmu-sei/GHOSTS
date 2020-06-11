@@ -1,0 +1,31 @@
+{
+  "Status": "Run",
+  "TimeLineHandlers": [
+    {
+      "HandlerType": "Curl",
+      "HandlerArgs": {
+        "stickiness": 75,
+        "stickiness-depth-min": 5,
+        "stickiness-depth-max": 100
+      },
+      "Initial": "",
+      "UtcTimeOn": "00:00:00",
+      "UtcTimeOff": "24:00:00",
+      "Loop": "True",
+      "TimeLineEvents": [
+        {
+          "Command": "https://www.google.com/search?q=artek",
+          "CommandArgs": [
+            
+          ],
+          "DelayAfter": 9000,
+          "DelayBefore": 0
+        }
+      ]
+    }
+  ]
+} 
+
+
+
+

@@ -1,0 +1,968 @@
+Opera/9.80 (X11; Linux i686; Ubuntu/14.10) Presto/2.12.388 Version/12.16
+Opera/9.80 (Windows NT 6.0) Presto/2.12.388 Version/12.14
+Mozilla/5.0 (Windows NT 6.0; rv:2.0) Gecko/20100101 Firefox/4.0 Opera 12.14
+Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.0) Opera 12.14
+Opera/12.80 (Windows NT 5.1; U; en) Presto/2.10.289 Version/12.02
+Opera/9.80 (Windows NT 6.1; U; es-ES) Presto/2.9.181 Version/12.00
+Opera/9.80 (Windows NT 5.1; U; zh-sg) Presto/2.9.181 Version/12.00
+Opera/12.0(Windows NT 5.2;U;en)Presto/22.9.168 Version/12.00
+Opera/12.0(Windows NT 5.1;U;en)Presto/22.9.168 Version/12.00
+Mozilla/5.0 (Windows NT 5.1) Gecko/20100101 Firefox/14.0 Opera/12.0
+Opera/9.80 (Windows NT 6.1; WOW64; U; pt) Presto/2.10.229 Version/11.62
+Opera/9.80 (Windows NT 6.0; U; pl) Presto/2.10.229 Version/11.62
+Opera/9.80 (Macintosh; Intel Mac OS X 10.6.8; U; fr) Presto/2.9.168 Version/11.52
+Opera/9.80 (Macintosh; Intel Mac OS X 10.6.8; U; de) Presto/2.9.168 Version/11.52
+Opera/9.80 (Windows NT 5.1; U; en) Presto/2.9.168 Version/11.51
+Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; de) Opera 11.51
+Opera/9.80 (X11; Linux x86_64; U; fr) Presto/2.9.168 Version/11.50
+Opera/9.80 (X11; Linux i686; U; hu) Presto/2.9.168 Version/11.50
+Opera/9.80 (X11; Linux i686; U; ru) Presto/2.8.131 Version/11.11
+Opera/9.80 (X11; Linux i686; U; es-ES) Presto/2.8.131 Version/11.11
+Mozilla/5.0 (Windows NT 5.1; U; en; rv:1.8.1) Gecko/20061208 Firefox/5.0 Opera 11.11
+Opera/9.80 (X11; Linux x86_64; U; bg) Presto/2.8.131 Version/11.10
+Opera/9.80 (Windows NT 6.0; U; en) Presto/2.8.99 Version/11.10
+Opera/9.80 (Windows NT 5.1; U; zh-tw) Presto/2.8.131 Version/11.10
+Opera/9.80 (Windows NT 6.1; Opera Tablet/15165; U; en) Presto/2.8.149 Version/11.1
+Opera/9.80 (X11; Linux x86_64; U; Ubuntu/10.10 (maverick); pl) Presto/2.7.62 Version/11.01
+Opera/9.80 (X11; Linux i686; U; ja) Presto/2.7.62 Version/11.01
+Opera/9.80 (X11; Linux i686; U; fr) Presto/2.7.62 Version/11.01
+Opera/9.80 (Windows NT 6.1; U; zh-tw) Presto/2.7.62 Version/11.01
+Opera/9.80 (Windows NT 6.1; U; zh-cn) Presto/2.7.62 Version/11.01
+Opera/9.80 (Windows NT 6.1; U; sv) Presto/2.7.62 Version/11.01
+Opera/9.80 (Windows NT 6.1; U; en-US) Presto/2.7.62 Version/11.01
+Opera/9.80 (Windows NT 6.1; U; cs) Presto/2.7.62 Version/11.01
+Opera/9.80 (Windows NT 6.0; U; pl) Presto/2.7.62 Version/11.01
+Opera/9.80 (Windows NT 5.2; U; ru) Presto/2.7.62 Version/11.01
+Opera/9.80 (Windows NT 5.1; U;) Presto/2.7.62 Version/11.01
+Opera/9.80 (Windows NT 5.1; U; cs) Presto/2.7.62 Version/11.01
+Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.2.13) Gecko/20101213 Opera/9.80 (Windows NT 6.1; U; zh-tw) Presto/2.7.62 Version/11.01
+Mozilla/5.0 (Windows NT 6.1; U; nl; rv:1.9.1.6) Gecko/20091201 Firefox/3.5.6 Opera 11.01
+Mozilla/5.0 (Windows NT 6.1; U; de; rv:1.9.1.6) Gecko/20091201 Firefox/3.5.6 Opera 11.01
+Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; de) Opera 11.01
+Opera/9.80 (X11; Linux x86_64; U; pl) Presto/2.7.62 Version/11.00
+Opera/9.80 (X11; Linux i686; U; it) Presto/2.7.62 Version/11.00
+Opera/9.80 (Windows NT 6.1; U; zh-cn) Presto/2.6.37 Version/11.00
+Opera/9.80 (Windows NT 6.1; U; pl) Presto/2.7.62 Version/11.00
+Opera/9.80 (Windows NT 6.1; U; ko) Presto/2.7.62 Version/11.00
+Opera/9.80 (Windows NT 6.1; U; fi) Presto/2.7.62 Version/11.00
+Opera/9.80 (Windows NT 6.1; U; en-GB) Presto/2.7.62 Version/11.00
+Opera/9.80 (Windows NT 6.1 x64; U; en) Presto/2.7.62 Version/11.00
+Opera/9.80 (Windows NT 6.0; U; en) Presto/2.7.39 Version/11.00
+Opera/9.80 (Windows NT 5.1; U; ru) Presto/2.7.39 Version/11.00
+Opera/9.80 (Windows NT 5.1; U; MRA 5.5 (build 02842); ru) Presto/2.7.62 Version/11.00
+Opera/9.80 (Windows NT 5.1; U; it) Presto/2.7.62 Version/11.00
+Mozilla/5.0 (Windows NT 6.0; U; ja; rv:1.9.1.6) Gecko/20091201 Firefox/3.5.6 Opera 11.00
+Mozilla/5.0 (Windows NT 5.1; U; pl; rv:1.9.1.6) Gecko/20091201 Firefox/3.5.6 Opera 11.00
+Mozilla/5.0 (Windows NT 5.1; U; de; rv:1.9.1.6) Gecko/20091201 Firefox/3.5.6 Opera 11.00
+Mozilla/4.0 (compatible; MSIE 8.0; X11; Linux x86_64; pl) Opera 11.00
+Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; fr) Opera 11.00
+Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.0; ja) Opera 11.00
+Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.0; en) Opera 11.00
+Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; pl) Opera 11.00
+Opera/9.80 (Windows NT 6.1; U; pl) Presto/2.6.31 Version/10.70
+Mozilla/5.0 (Windows NT 5.2; U; ru; rv:1.9.1.6) Gecko/20091201 Firefox/3.5.6 Opera 10.70
+Mozilla/5.0 (Windows NT 5.1; U; zh-cn; rv:1.9.1.6) Gecko/20091201 Firefox/3.5.6 Opera 10.70
+Opera/9.80 (Windows NT 5.2; U; zh-cn) Presto/2.6.30 Version/10.63
+Opera/9.80 (Windows NT 5.2; U; en) Presto/2.6.30 Version/10.63
+Opera/9.80 (Windows NT 5.1; U; MRA 5.6 (build 03278); ru) Presto/2.6.30 Version/10.63
+Opera/9.80 (Windows NT 5.1; U; pl) Presto/2.6.30 Version/10.62
+Mozilla/5.0 (X11; Linux x86_64; U; de; rv:1.9.1.6) Gecko/20091201 Firefox/3.5.6 Opera 10.62
+Mozilla/4.0 (compatible; MSIE 8.0; X11; Linux x86_64; de) Opera 10.62
+Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; en) Opera 10.62
+Opera/9.80 (X11; Linux i686; U; pl) Presto/2.6.30 Version/10.61
+Opera/9.80 (X11; Linux i686; U; es-ES) Presto/2.6.30 Version/10.61
+Opera/9.80 (Windows NT 6.1; U; zh-cn) Presto/2.6.30 Version/10.61
+Opera/9.80 (Windows NT 6.1; U; en) Presto/2.6.30 Version/10.61
+Opera/9.80 (Windows NT 6.0; U; it) Presto/2.6.30 Version/10.61
+Opera/9.80 (Windows NT 5.2; U; ru) Presto/2.6.30 Version/10.61
+Opera/9.80 (Windows 98; U; de) Presto/2.6.30 Version/10.61
+Opera/9.80 (Macintosh; Intel Mac OS X; U; nl) Presto/2.6.30 Version/10.61
+Opera/9.80 (X11; Linux i686; U; en) Presto/2.5.27 Version/10.60
+Opera/9.80 (Windows NT 6.0; U; nl) Presto/2.6.30 Version/10.60
+Opera/10.60 (Windows NT 5.1; U; zh-cn) Presto/2.6.30 Version/10.60
+Opera/10.60 (Windows NT 5.1; U; en-US) Presto/2.6.30 Version/10.60
+Opera/9.80 (X11; Linux i686; U; it) Presto/2.5.24 Version/10.54
+Opera/9.80 (X11; Linux i686; U; en-GB) Presto/2.5.24 Version/10.53
+Mozilla/5.0 (Windows NT 5.1; U; zh-cn; rv:1.9.1.6) Gecko/20091201 Firefox/3.5.6 Opera 10.53
+Mozilla/5.0 (Windows NT 5.1; U; Firefox/5.0; en; rv:1.9.1.6) Gecko/20091201 Firefox/3.5.6 Opera 10.53
+Mozilla/5.0 (Windows NT 5.1; U; Firefox/4.5; en; rv:1.9.1.6) Gecko/20091201 Firefox/3.5.6 Opera 10.53
+Mozilla/5.0 (Windows NT 5.1; U; Firefox/3.5; en; rv:1.9.1.6) Gecko/20091201 Firefox/3.5.6 Opera 10.53
+Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; ko) Opera 10.53
+Opera/9.80 (Windows NT 6.1; U; fr) Presto/2.5.24 Version/10.52
+Opera/9.80 (Windows NT 6.1; U; en) Presto/2.5.22 Version/10.51
+Opera/9.80 (Windows NT 6.0; U; cs) Presto/2.5.22 Version/10.51
+Opera/9.80 (Windows NT 5.2; U; ru) Presto/2.5.22 Version/10.51
+Opera/9.80 (Linux i686; U; en) Presto/2.5.22 Version/10.51
+Mozilla/5.0 (Windows NT 6.1; U; en-GB; rv:1.9.1.6) Gecko/20091201 Firefox/3.5.6 Opera 10.51
+Mozilla/5.0 (Linux i686; U; en; rv:1.9.1.6) Gecko/20091201 Firefox/3.5.6 Opera 10.51
+Mozilla/4.0 (compatible; MSIE 8.0; Linux i686; en) Opera 10.51
+Opera/9.80 (Windows NT 6.1; U; zh-tw) Presto/2.5.22 Version/10.50
+Opera/9.80 (Windows NT 6.1; U; zh-cn) Presto/2.5.22 Version/10.50
+Opera/9.80 (Windows NT 6.1; U; sk) Presto/2.6.22 Version/10.50
+Opera/9.80 (Windows NT 6.1; U; ja) Presto/2.5.22 Version/10.50
+Opera/9.80 (Windows NT 6.0; U; zh-cn) Presto/2.5.22 Version/10.50
+Opera/9.80 (Windows NT 5.1; U; sk) Presto/2.5.22 Version/10.50
+Opera/9.80 (Windows NT 5.1; U; ru) Presto/2.5.22 Version/10.50
+Opera/10.50 (Windows NT 6.1; U; en-GB) Presto/2.2.2
+Opera/9.80 (S60; SymbOS; Opera Tablet/9174; U; en) Presto/2.7.81 Version/10.5
+Opera/9.80 (X11; U; Linux i686; en-US; rv:1.9.2.3) Presto/2.2.15 Version/10.10
+Opera/9.80 (X11; Linux x86_64; U; it) Presto/2.2.15 Version/10.10
+Opera/9.80 (Windows NT 6.1; U; de) Presto/2.2.15 Version/10.10
+Opera/9.80 (Windows NT 6.0; U; Gecko/20100115; pl) Presto/2.2.15 Version/10.10
+Opera/9.80 (Windows NT 6.0; U; en) Presto/2.2.15 Version/10.10
+Opera/9.80 (Windows NT 5.1; U; de) Presto/2.2.15 Version/10.10
+Opera/9.80 (Windows NT 5.1; U; cs) Presto/2.2.15 Version/10.10
+Mozilla/5.0 (Windows NT 6.0; U; tr; rv:1.8.1) Gecko/20061208 Firefox/2.0.0 Opera 10.10
+Mozilla/4.0 (compatible; MSIE 6.0; X11; Linux i686; de) Opera 10.10
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 6.0; tr) Opera 10.10
+Opera/9.80 (X11; Linux x86_64; U; en-GB) Presto/2.2.15 Version/10.01
+Opera/9.80 (X11; Linux x86_64; U; en) Presto/2.2.15 Version/10.00
+Opera/9.80 (X11; Linux x86_64; U; de) Presto/2.2.15 Version/10.00
+Opera/9.80 (X11; Linux i686; U; ru) Presto/2.2.15 Version/10.00
+Opera/9.80 (X11; Linux i686; U; pt-BR) Presto/2.2.15 Version/10.00
+Opera/9.80 (X11; Linux i686; U; pl) Presto/2.2.15 Version/10.00
+Opera/9.80 (X11; Linux i686; U; nb) Presto/2.2.15 Version/10.00
+Opera/9.80 (X11; Linux i686; U; en-GB) Presto/2.2.15 Version/10.00
+Opera/9.80 (X11; Linux i686; U; en) Presto/2.2.15 Version/10.00
+Opera/9.80 (X11; Linux i686; U; Debian; pl) Presto/2.2.15 Version/10.00
+Opera/9.80 (X11; Linux i686; U; de) Presto/2.2.15 Version/10.00
+Opera/9.80 (Windows NT 6.1; U; zh-cn) Presto/2.2.15 Version/10.00
+Opera/9.80 (Windows NT 6.1; U; fi) Presto/2.2.15 Version/10.00
+Opera/9.80 (Windows NT 6.1; U; en) Presto/2.2.15 Version/10.00
+Opera/9.80 (Windows NT 6.1; U; de) Presto/2.2.15 Version/10.00
+Opera/9.80 (Windows NT 6.1; U; cs) Presto/2.2.15 Version/10.00
+Opera/9.80 (Windows NT 6.0; U; en) Presto/2.2.15 Version/10.00
+Opera/9.80 (Windows NT 6.0; U; de) Presto/2.2.15 Version/10.00
+Opera/9.80 (Windows NT 5.2; U; en) Presto/2.2.15 Version/10.00
+Opera/9.80 (Windows NT 5.1; U; zh-cn) Presto/2.2.15 Version/10.00
+Opera/9.80 (Windows NT 5.1; U; ru) Presto/2.2.15 Version/10.00
+Opera/9.99 (X11; U; sk)
+Opera/9.99 (Windows NT 5.1; U; pl) Presto/9.9.9
+Opera/9.80 (J2ME/MIDP; Opera Mini/5.0 (Windows; U; Windows NT 5.1; en) AppleWebKit/886; U; en) Presto/2.4.15
+Opera/9.70 (Linux ppc64 ; U; en) Presto/2.2.1
+Opera/9.70 (Linux i686 ; U; zh-cn) Presto/2.2.0
+Opera/9.70 (Linux i686 ; U; en-us) Presto/2.2.0
+Opera/9.70 (Linux i686 ; U; en) Presto/2.2.1
+Opera/9.70 (Linux i686 ; U; en) Presto/2.2.0
+Opera/9.70 (Linux i686 ; U; ; en) Presto/2.2.1
+Opera/9.70 (Linux i686 ; U;  ; en) Presto/2.2.1
+Mozilla/5.0 (Linux i686 ; U; en; rv:1.8.1) Gecko/20061208 Firefox/2.0.0 Opera 9.70
+Mozilla/4.0 (compatible; MSIE 6.0; Linux i686 ; en) Opera 9.70
+HTC_HD2_T8585 Opera/9.70 (Windows NT 5.1; U; de)
+Opera 9.7 (Windows NT 5.2; U; en)
+Opera/9.64(Windows NT 5.1; U; en) Presto/2.1.1
+Opera/9.64 (X11; Linux x86_64; U; pl) Presto/2.1.1
+Opera/9.64 (X11; Linux x86_64; U; hr) Presto/2.1.1
+Opera/9.64 (X11; Linux x86_64; U; en-GB) Presto/2.1.1
+Opera/9.64 (X11; Linux x86_64; U; en) Presto/2.1.1
+Opera/9.64 (X11; Linux x86_64; U; de) Presto/2.1.1
+Opera/9.64 (X11; Linux x86_64; U; cs) Presto/2.1.1
+Opera/9.64 (X11; Linux i686; U; tr) Presto/2.1.1
+Opera/9.64 (X11; Linux i686; U; sv) Presto/2.1.1
+Opera/9.64 (X11; Linux i686; U; pl) Presto/2.1.1
+Opera/9.64 (X11; Linux i686; U; nb) Presto/2.1.1
+Opera/9.64 (X11; Linux i686; U; Linux Mint; nb) Presto/2.1.1
+Opera/9.64 (X11; Linux i686; U; Linux Mint; it) Presto/2.1.1
+Opera/9.64 (X11; Linux i686; U; en) Presto/2.1.1
+Opera/9.64 (X11; Linux i686; U; de) Presto/2.1.1
+Opera/9.64 (X11; Linux i686; U; da) Presto/2.1.1
+Opera/9.64 (Windows NT 6.1; U; MRA 5.5 (build 02842); ru) Presto/2.1.1
+Opera/9.64 (Windows NT 6.1; U; de) Presto/2.1.1
+Opera/9.64 (Windows NT 6.0; U; zh-cn) Presto/2.1.1
+Opera/9.64 (Windows NT 6.0; U; pl) Presto/2.1.1
+Opera/9.63 (X11; Linux x86_64; U; ru) Presto/2.1.1
+Opera/9.63 (X11; Linux x86_64; U; cs) Presto/2.1.1
+Opera/9.63 (X11; Linux i686; U; ru) Presto/2.1.1
+Opera/9.63 (X11; Linux i686; U; ru)
+Opera/9.63 (X11; Linux i686; U; nb) Presto/2.1.1
+Opera/9.63 (X11; Linux i686; U; en)
+Opera/9.63 (X11; Linux i686; U; de) Presto/2.1.1
+Opera/9.63 (X11; Linux i686)
+Opera/9.63 (X11; FreeBSD 7.1-RELEASE i386; U; en) Presto/2.1.1
+Opera/9.63 (Windows NT 6.1; U; hu) Presto/2.1.1
+Opera/9.63 (Windows NT 6.1; U; en) Presto/2.1.1
+Opera/9.63 (Windows NT 6.1; U; de) Presto/2.1.1
+Opera/9.63 (Windows NT 6.0; U; pl) Presto/2.1.1
+Opera/9.63 (Windows NT 6.0; U; nb) Presto/2.1.1
+Opera/9.63 (Windows NT 6.0; U; fr) Presto/2.1.1
+Opera/9.63 (Windows NT 6.0; U; en) Presto/2.1.1
+Opera/9.63 (Windows NT 6.0; U; cs) Presto/2.1.1
+Opera/9.63 (Windows NT 5.2; U; en) Presto/2.1.1
+Opera/9.63 (Windows NT 5.2; U; de) Presto/2.1.1
+Opera/9.63 (Windows NT 5.1; U; pt-BR) Presto/2.1.1
+Opera/9.62 (X11; Linux x86_64; U; ru) Presto/2.1.1
+Opera/9.62 (X11; Linux x86_64; U; en_GB, en_US) Presto/2.1.1
+Opera/9.62 (X11; Linux i686; U; pt-BR) Presto/2.1.1
+Opera/9.62 (X11; Linux i686; U; Linux Mint; en) Presto/2.1.1
+Opera/9.62 (X11; Linux i686; U; it) Presto/2.1.1
+Opera/9.62 (X11; Linux i686; U; fi) Presto/2.1.1
+Opera/9.62 (X11; Linux i686; U; en) Presto/2.1.1
+Opera/9.62 (Windows NT 6.1; U; en) Presto/2.1.1
+Opera/9.62 (Windows NT 6.1; U; de) Presto/2.1.1
+Opera/9.62 (Windows NT 6.0; U; pl) Presto/2.1.1
+Opera/9.62 (Windows NT 6.0; U; nb) Presto/2.1.1
+Opera/9.62 (Windows NT 6.0; U; en-GB) Presto/2.1.1
+Opera/9.62 (Windows NT 6.0; U; en) Presto/2.1.1
+Opera/9.62 (Windows NT 6.0; U; de) Presto/2.1.1
+Opera/9.62 (Windows NT 5.2; U; en) Presto/2.1.1
+Opera/9.62 (Windows NT 5.1; U; zh-tw) Presto/2.1.1
+Opera/9.62 (Windows NT 5.1; U; zh-cn) Presto/2.1.1
+Opera/9.62 (Windows NT 5.1; U; tr) Presto/2.1.1
+Opera/9.62 (Windows NT 5.1; U; ru) Presto/2.1.1
+Opera/9.62 (Windows NT 5.1; U; pt-BR) Presto/2.1.1
+Opera/9.61 (X11; Linux x86_64; U; fr) Presto/2.1.1
+Opera/9.61 (X11; Linux i686; U; ru) Presto/2.1.1
+Opera/9.61 (X11; Linux i686; U; pl) Presto/2.1.1
+Opera/9.61 (X11; Linux i686; U; en) Presto/2.1.1
+Opera/9.61 (X11; Linux i686; U; de) Presto/2.1.1
+Opera/9.61 (Windows NT 6.0; U; ru) Presto/2.1.1
+Opera/9.61 (Windows NT 6.0; U; pt-BR) Presto/2.1.1
+Opera/9.61 (Windows NT 6.0; U; http://lucideer.com; en-GB) Presto/2.1.1
+Opera/9.61 (Windows NT 6.0; U; en) Presto/2.1.1
+Opera/9.61 (Windows NT 5.2; U; en) Presto/2.1.1
+Opera/9.61 (Windows NT 5.1; U; zh-tw) Presto/2.1.1
+Opera/9.61 (Windows NT 5.1; U; zh-cn) Presto/2.1.1
+Opera/9.61 (Windows NT 5.1; U; ru) Presto/2.1.1
+Opera/9.61 (Windows NT 5.1; U; fr) Presto/2.1.1
+Opera/9.61 (Windows NT 5.1; U; en-GB) Presto/2.1.1
+Opera/9.61 (Windows NT 5.1; U; en) Presto/2.1.1
+Opera/9.61 (Windows NT 5.1; U; de) Presto/2.1.1
+Opera/9.61 (Windows NT 5.1; U; cs) Presto/2.1.1
+Opera/9.61 (Macintosh; Intel Mac OS X; U; de) Presto/2.1.1
+Mozilla/5.0 (Windows NT 5.1; U; en-GB; rv:1.8.1) Gecko/20061208 Firefox/2.0.0 Opera 9.61
+Opera/9.60 (X11; Linux x86_64; U)
+Opera/9.60 (X11; Linux i686; U; ru) Presto/2.1.1
+Opera/9.60 (X11; Linux i686; U; en-GB) Presto/2.1.1
+Opera/9.60 (Windows NT 6.0; U; uk) Presto/2.1.1
+Opera/9.60 (Windows NT 6.0; U; ru) Presto/2.1.1
+Opera/9.60 (Windows NT 6.0; U; pl) Presto/2.1.1
+Opera/9.60 (Windows NT 6.0; U; de) Presto/2.1.1
+Opera/9.60 (Windows NT 6.0; U; bg) Presto/2.1.1
+Opera/9.60 (Windows NT 5.1; U; tr) Presto/2.1.1
+Opera/9.60 (Windows NT 5.1; U; sv) Presto/2.1.1
+Opera/9.60 (Windows NT 5.1; U; es-ES) Presto/2.1.1
+Opera/9.60 (Windows NT 5.1; U; en-GB) Presto/2.1.1
+Opera/9.60 (Windows NT 5.0; U; en) Presto/2.1.1
+Mozilla/5.0 (X11; Linux x86_64; U; en; rv:1.8.1) Gecko/20061208 Firefox/2.0.0 Opera 9.60
+Mozilla/4.0 (compatible; MSIE 6.0; X11; Linux x86_64; en) Opera 9.60
+Opera/9.52 (X11; Linux x86_64; U; ru)
+Opera/9.52 (X11; Linux x86_64; U; en)
+Opera/9.52 (X11; Linux x86_64; U)
+Opera/9.52 (X11; Linux ppc; U; de)
+Opera/9.52 (X11; Linux i686; U; fr)
+Opera/9.52 (X11; Linux i686; U; en)
+Opera/9.52 (X11; Linux i686; U; cs)
+Opera/9.52 (Windows NT 6.0; U; Opera/9.52 (X11; Linux x86_64; U); en)
+Opera/9.52 (Windows NT 6.0; U; fr)
+Opera/9.52 (Windows NT 6.0; U; en)
+Opera/9.52 (Windows NT 6.0; U; de)
+Opera/9.52 (Windows NT 5.2; U; ru)
+Opera/9.52 (Windows NT 5.0; U; en)
+Opera/9.52 (Macintosh; PPC Mac OS X; U; ja)
+Opera/9.52 (Macintosh; PPC Mac OS X; U; fr)
+Opera/9.52 (Macintosh; Intel Mac OS X; U; pt-BR)
+Opera/9.52 (Macintosh; Intel Mac OS X; U; pt)
+Mozilla/5.0 (Windows NT 5.1; U; de; rv:1.8.1) Gecko/20061208 Firefox/2.0.0 Opera 9.52
+Mozilla/5.0 (Windows NT 5.1; U;  ; rv:1.8.1) Gecko/20061208 Firefox/2.0.0 Opera 9.52
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; ru) Opera 9.52
+Opera/9.51 (X11; Linux i686; U; Linux Mint; en)
+Opera/9.51 (X11; Linux i686; U; fr)
+Opera/9.51 (X11; Linux i686; U; de)
+Opera/9.51 (Windows NT 6.0; U; sv)
+Opera/9.51 (Windows NT 6.0; U; es)
+Opera/9.51 (Windows NT 6.0; U; en)
+Opera/9.51 (Windows NT 5.2; U; en)
+Opera/9.51 (Windows NT 5.1; U; nn)
+Opera/9.51 (Windows NT 5.1; U; fr)
+Opera/9.51 (Windows NT 5.1; U; es-LA)
+Opera/9.51 (Windows NT 5.1; U; es-AR)
+Opera/9.51 (Windows NT 5.1; U; en-GB)
+Opera/9.51 (Windows NT 5.1; U; en)
+Opera/9.51 (Windows NT 5.1; U; da)
+Opera/9.51 (Macintosh; Intel Mac OS X; U; en)
+Mozilla/5.0 (X11; Linux i686; U; en; rv:1.8.1) Gecko/20061208 Firefox/2.0.0 Opera 9.51
+Mozilla/5.0 (Windows NT 6.0; U; en; rv:1.8.1) Gecko/20061208 Firefox/2.0.0 Opera 9.51
+Mozilla/5.0 (Windows NT 5.1; U; en; rv:1.8.1) Gecko/20061208 Firefox/2.0.0 Opera 9.51
+Mozilla/5.0 (Windows NT 5.1; U; en-GB; rv:1.8.1) Gecko/20061208 Firefox/2.0.0 Opera 9.51
+Mozilla/5.0 (Windows NT 5.1; U; de; rv:1.8.1) Gecko/20061208 Firefox/2.0.0 Opera 9.51
+Opera/9.50 (X11; Linux x86_64; U; pl)
+Opera/9.50 (X11; Linux x86_64; U; nb)
+Opera/9.50 (X11; Linux ppc; U; en)
+Opera/9.50 (X11; Linux i686; U; es-ES)
+Opera/9.50 (Windows NT 5.2; U; it)
+Opera/9.50 (Windows NT 5.1; U; ru)
+Opera/9.50 (Windows NT 5.1; U; nn)
+Opera/9.50 (Windows NT 5.1; U; nl)
+Opera/9.50 (Windows NT 5.1; U; it)
+Opera/9.50 (Windows NT 5.1; U; es-ES)
+Opera/9.50 (Macintosh; Intel Mac OS X; U; en)
+Opera/9.50 (Macintosh; Intel Mac OS X; U; de)
+Mozilla/5.0 (Windows NT 5.1; U; zh-cn; rv:1.8.1) Gecko/20061208 Firefox/2.0.0 Opera 9.50
+Mozilla/4.0 (compatible; MSIE 6.0; X11; Linux x86_64; en) Opera 9.50
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 6.0; en) Opera 9.50
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; en) Opera 9.50
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; de) Opera 9.50
+Opera/9.5 (Windows NT 6.0; U; en)
+Opera/9.5 (Windows NT 5.1; U; fr)
+Mozilla/5.0 (Windows; U; Windows NT 5.1; de; rv:1.9b3) Gecko/2008020514 Opera 9.5
+Opera 9.4 (Windows NT 6.1; U; en)
+Opera 9.4 (Windows NT 5.3; U; en)
+Opera/9.30 (Nintendo Wii; U; ; 2071; Wii Shop Channel/1.0; en)
+Opera/9.30 (Nintendo Wii; U; ; 2047-7;pt-br)
+Opera/9.30 (Nintendo Wii; U; ; 2047-7;es)
+Opera/9.30 (Nintendo Wii; U; ; 2047-7;en)
+Opera/9.30 (Nintendo Wii; U; ; 2047-7; fr)
+Opera/9.30 (Nintendo Wii; U; ; 2047-7; de)
+Opera/9.27 (X11; Linux i686; U; fr)
+Opera/9.27 (X11; Linux i686; U; en)
+Opera/9.27 (Windows NT 5.2; U; en)
+Opera/9.27 (Windows NT 5.1; U; ja)
+Opera/9.27 (Macintosh; Intel Mac OS X; U; sv)
+Mozilla/5.0 (Windows NT 5.2; U; en; rv:1.8.0) Gecko/20060728 Firefox/1.5.0 Opera 9.27
+Mozilla/5.0 (Windows NT 5.1; U; es-la; rv:1.8.0) Gecko/20060728 Firefox/1.5.0 Opera 9.27
+Mozilla/5.0 (Macintosh; Intel Mac OS X; U; en; rv:1.8.0) Gecko/20060728 Firefox/1.5.0 Opera 9.27
+Mozilla/4.0 (compatible; MSIE 6.0; X11; Linux i686; en) Opera 9.27
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; en) Opera 9.27
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; es-la) Opera 9.27
+Opera/9.26 (Windows; U; pl)
+Opera/9.26 (Windows NT 5.1; U; zh-cn)
+Opera/9.26 (Windows NT 5.1; U; pl)
+Opera/9.26 (Windows NT 5.1; U; nl)
+Opera/9.26 (Windows NT 5.1; U; MEGAUPLOAD 2.0; en)
+Opera/9.26 (Windows NT 5.1; U; de)
+Opera/9.26 (Macintosh; PPC Mac OS X; U; en)
+Mozilla/5.0 (Windows NT 5.1; U; en; rv:1.8.0) Gecko/20060728 Firefox/1.5.0 Opera 9.26
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 6.0; en) Opera 9.26
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; en) Opera 9.26
+Opera/9.25 (X11; Linux i686; U; fr-ca)
+Opera/9.25 (X11; Linux i686; U; fr)
+Opera/9.25 (X11; Linux i686; U; en)
+Opera/9.25 (Windows NT 6.0; U; SV1; MEGAUPLOAD 2.0; ru)
+Opera/9.25 (Windows NT 6.0; U; sv)
+Opera/9.25 (Windows NT 6.0; U; ru)
+Opera/9.25 (Windows NT 6.0; U; MEGAUPLOAD 1.0; ru)
+Opera/9.25 (Windows NT 6.0; U; en-US)
+Opera/9.25 (Windows NT 5.2; U; en)
+Opera/9.25 (Windows NT 5.1; U; zh-cn)
+Opera/9.25 (Windows NT 5.1; U; ru)
+Opera/9.25 (Windows NT 5.1; U; MEGAUPLOAD 1.0; pt-br)
+Opera/9.25 (Windows NT 5.1; U; lt)
+Opera/9.25 (Windows NT 5.1; U; de)
+Opera/9.25 (Windows NT 5.0; U; en)
+Opera/9.25 (Windows NT 5.0; U; cs)
+Opera/9.25 (Windows NT 4.0; U; en)
+Opera/9.25 (OpenSolaris; U; en)
+Opera/9.25 (Macintosh; PPC Mac OS X; U; en)
+Opera/9.25 (Macintosh; Intel Mac OS X; U; en)
+Opera/9.24 (X11; SunOS i86pc; U; en)
+Opera/9.24 (X11; Linux i686; U; de)
+Opera/9.24 (Windows NT 5.1; U; tr)
+Opera/9.24 (Windows NT 5.1; U; ru)
+Opera/9.24 (Windows NT 5.0; U; ru)
+Opera/9.24 (Macintosh; PPC Mac OS X; U; en)
+Mozilla/5.0 (Windows NT 5.1; U; en; rv:1.8.0) Gecko/20060728 Firefox/1.5.0 Opera 9.24
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; en) Opera 9.24
+Mozilla/4.0 (compatible; MSIE 6.0; Mac_PowerPC; en) Opera 9.24
+Opera/9.23 (X11; Linux x86_64; U; en)
+Opera/9.23 (X11; Linux i686; U; es-es)
+Opera/9.23 (X11; Linux i686; U; en)
+Opera/9.23 (Windows NT 6.0; U; de)
+Opera/9.23 (Windows NT 5.1; U; zh-cn)
+Opera/9.23 (Windows NT 5.1; U; SV1; MEGAUPLOAD 1.0; ru)
+Opera/9.23 (Windows NT 5.1; U; pt)
+Opera/9.23 (Windows NT 5.1; U; ja)
+Opera/9.23 (Windows NT 5.1; U; it)
+Opera/9.23 (Windows NT 5.1; U; fi)
+Opera/9.23 (Windows NT 5.1; U; en)
+Opera/9.23 (Windows NT 5.1; U; de)
+Opera/9.23 (Windows NT 5.1; U; da)
+Opera/9.23 (Windows NT 5.0; U; en)
+Opera/9.23 (Windows NT 5.0; U; de)
+Opera/9.23 (Nintendo Wii; U; ; 1038-58; Wii Internet Channel/1.0; en)
+Opera/9.23 (Macintosh; Intel Mac OS X; U; ja)
+Opera/9.23 (Mac OS X; ru)
+Opera/9.23 (Mac OS X; fr)
+Mozilla/5.0 (X11; Linux i686; U; en; rv:1.8.0) Gecko/20060728 Firefox/1.5.0 Opera 9.23
+Opera/9.22 (X11; OpenBSD i386; U; en)
+Opera/9.22 (X11; Linux i686; U; en)
+Opera/9.22 (X11; Linux i686; U; de)
+Opera/9.22 (Windows NT 6.0; U; ru)
+Opera/9.22 (Windows NT 6.0; U; en)
+Opera/9.22 (Windows NT 5.1; U; SV1; MEGAUPLOAD 2.0; ru)
+Opera/9.22 (Windows NT 5.1; U; SV1; MEGAUPLOAD 1.0; ru)
+Opera/9.22 (Windows NT 5.1; U; pl)
+Opera/9.22 (Windows NT 5.1; U; fr)
+Opera/9.22 (Windows NT 5.1; U; en)
+Mozilla/5.0 (Windows NT 5.1; U; en; rv:1.8.0) Gecko/20060728 Firefox/1.5.0 Opera 9.22
+Mozilla/4.0 (compatible; MSIE 6.0; X11; Linux i686; en) Opera 9.22
+Opera/9.21 (X11; Linux x86_64; U; en)
+Opera/9.21 (X11; Linux i686; U; es-es)
+Opera/9.21 (X11; Linux i686; U; en)
+Opera/9.21 (X11; Linux i686; U; de)
+Opera/9.21 (Windows NT 6.0; U; nb)
+Opera/9.21 (Windows NT 6.0; U; en)
+Opera/9.21 (Windows NT 5.2; U; en)
+Opera/9.21 (Windows NT 5.1; U; SV1; MEGAUPLOAD 1.0; ru)
+Opera/9.21 (Windows NT 5.1; U; ru)
+Opera/9.21 (Windows NT 5.1; U; pt-br)
+Opera/9.21 (Windows NT 5.1; U; pl)
+Opera/9.21 (Windows NT 5.1; U; nl)
+Opera/9.21 (Windows NT 5.1; U; MEGAUPLOAD 1.0; en)
+Opera/9.21 (Windows NT 5.1; U; fr)
+Opera/9.21 (Windows NT 5.1; U; en)
+Opera/9.21 (Windows NT 5.1; U; de)
+Opera/9.21 (Windows NT 5.0; U; de)
+Opera/9.21 (Windows 98; U; en)
+Opera/9.21 (Macintosh; PPC Mac OS X; U; en)
+Opera/9.21 (Macintosh; Intel Mac OS X; U; en)
+Opera/9.20(Windows NT 5.1; U; en)
+Opera/9.20 (X11; Linux x86_64; U; en)
+Opera/9.20 (X11; Linux ppc; U; en)
+Opera/9.20 (X11; Linux i686; U; tr)
+Opera/9.20 (X11; Linux i686; U; ru)
+Opera/9.20 (X11; Linux i686; U; pl)
+Opera/9.20 (X11; Linux i686; U; es-es)
+Opera/9.20 (X11; Linux i686; U; en)
+Opera/9.20 (X11; Linux i586; U; en)
+Opera/9.20 (Windows NT 6.0; U; es-es)
+Opera/9.20 (Windows NT 6.0; U; en)
+Opera/9.20 (Windows NT 6.0; U; de)
+Opera/9.20 (Windows NT 5.2; U; en)
+Opera/9.20 (Windows NT 5.1; U; zh-tw)
+Opera/9.20 (Windows NT 5.1; U; nb)
+Opera/9.20 (Windows NT 5.1; U; MEGAUPLOAD=1.0; es-es)
+Opera/9.20 (Windows NT 5.1; U; it)
+Opera/9.20 (Windows NT 5.1; U; es-es)
+Opera/9.20 (Windows NT 5.1; U; es-AR)
+Opera/9.20 (Windows NT 5.1; U; en)
+Opera/9.12 (X11; Linux i686; U; en) (Ubuntu)
+Opera/9.12 (Windows NT 5.0; U; ru)
+Opera/9.12 (Windows NT 5.0; U)
+Opera/9.10 (X11; Linux; U; en)
+Opera/9.10 (X11; Linux x86_64; U; en)
+Opera/9.10 (X11; Linux i686; U; pl)
+Opera/9.10 (X11; Linux i686; U; kubuntu;pl)
+Opera/9.10 (X11; Linux i686; U; en)
+Opera/9.10 (X11; Linux i386; U; en)
+Opera/9.10 (Windows NT 6.0; U; it-IT)
+Opera/9.10 (Windows NT 6.0; U; en)
+Opera/9.10 (Windows NT 5.2; U; en)
+Opera/9.10 (Windows NT 5.2; U; de)
+Opera/9.10 (Windows NT 5.1; U; zh-tw)
+Opera/9.10 (Windows NT 5.1; U; sv)
+Opera/9.10 (Windows NT 5.1; U; pt)
+Opera/9.10 (Windows NT 5.1; U; pl)
+Opera/9.10 (Windows NT 5.1; U; nl)
+Opera/9.10 (Windows NT 5.1; U; MEGAUPLOAD 1.0; pl)
+Opera/9.10 (Windows NT 5.1; U; it)
+Opera/9.10 (Windows NT 5.1; U; hu)
+Opera/9.10 (Windows NT 5.1; U; fi)
+Opera/9.10 (Windows NT 5.1; U; es-es)
+Opera/9.02 (X11; Linux i686; U; pl)
+Opera/9.02 (X11; Linux i686; U; hu)
+Opera/9.02 (X11; Linux i686; U; en)
+Opera/9.02 (X11; Linux i686; U; de)
+Opera/9.02 (Windows; U; nl)
+Opera/9.02 (Windows XP; U; ru)
+Opera/9.02 (Windows NT 5.2; U; en)
+Opera/9.02 (Windows NT 5.2; U; de)
+Opera/9.02 (Windows NT 5.1; U; zh-cn)
+Opera/9.02 (Windows NT 5.1; U; ru)
+Opera/9.02 (Windows NT 5.1; U; pt-br)
+Opera/9.02 (Windows NT 5.1; U; pl)
+Opera/9.02 (Windows NT 5.1; U; nb)
+Opera/9.02 (Windows NT 5.1; U; ja)
+Opera/9.02 (Windows NT 5.1; U; fi)
+Opera/9.02 (Windows NT 5.1; U; en)
+Opera/9.02 (Windows NT 5.1; U; de)
+Opera/9.02 (Windows NT 5.0; U; sv)
+Opera/9.02 (Windows NT 5.0; U; pl)
+Opera/9.02 (Windows NT 5.0; U; en)
+Opera/9.01 (X11; OpenBSD i386; U; en)
+Opera/9.01 (X11; Linux i686; U; en)
+Opera/9.01 (X11; FreeBSD 6 i386; U;pl)
+Opera/9.01 (X11; FreeBSD 6 i386; U; en)
+Opera/9.01 (Windows NT 5.2; U; ru)
+Opera/9.01 (Windows NT 5.2; U; en)
+Opera/9.01 (Windows NT 5.1; U; ru)
+Opera/9.01 (Windows NT 5.1; U; pl)
+Opera/9.01 (Windows NT 5.1; U; ja)
+Opera/9.01 (Windows NT 5.1; U; es-es)
+Opera/9.01 (Windows NT 5.1; U; en)
+Opera/9.01 (Windows NT 5.1; U; de)
+Opera/9.01 (Windows NT 5.1; U; da)
+Opera/9.01 (Windows NT 5.1; U; cs)
+Opera/9.01 (Windows NT 5.1; U; bg)
+Opera/9.01 (Windows NT 5.1)
+Opera/9.01 (Windows NT 5.0; U; en)
+Opera/9.01 (Windows NT 5.0; U; de)
+Opera/9.01 (Macintosh; PPC Mac OS X; U; it)
+Opera/9.01 (Macintosh; PPC Mac OS X; U; en)
+Opera/9.00 (X11; Linux i686; U; pl)
+Opera/9.00 (X11; Linux i686; U; en)
+Opera/9.00 (X11; Linux i686; U; de)
+Opera/9.00 (Windows; U)
+Opera/9.00 (Windows NT 5.2; U; ru)
+Opera/9.00 (Windows NT 5.2; U; pl)
+Opera/9.00 (Windows NT 5.2; U; en)
+Opera/9.00 (Windows NT 5.1; U; ru)
+Opera/9.00 (Windows NT 5.1; U; pl)
+Opera/9.00 (Windows NT 5.1; U; nl)
+Opera/9.00 (Windows NT 5.1; U; ja)
+Opera/9.00 (Windows NT 5.1; U; it)
+Opera/9.00 (Windows NT 5.1; U; fr)
+Opera/9.00 (Windows NT 5.1; U; fi)
+Opera/9.00 (Windows NT 5.1; U; es-es)
+Opera/9.00 (Windows NT 5.1; U; en)
+Opera/9.00 (Windows NT 5.1; U; de)
+Opera/9.00 (Windows NT 5.0; U; en)
+Opera/9.00 (Nintendo Wii; U; ; 1038-58; Wii Internet Channel/1.0; en)
+Opera/9.00 (Macintosh; PPC Mac OS X; U; es)
+Mozilla/5.0 (compatible; MSIE 6.0; Windows NT 5.1; zh-cn) Opera 8.65
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; zh-cn) Opera 8.65
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1) Opera 8.65 [en]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows CE; Sprint:PPC-6700) Opera 8.65 [en]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows CE; PPC; 320x320)Opera 8.65 [en]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows CE; PPC; 320x320) Opera 8.65 [en]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows CE; PPC; 240x320) Opera 8.65 [zh-cn]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows CE; PPC; 240x320) Opera 8.65 [nl]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows CE; PPC; 240x320) Opera 8.65 [de]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows CE; PPC; 240x240) Opera 8.65 [en]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows CE; PPC) Opera 8.65 [en]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1) Opera 8.60 [en]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows CE; PPC; 240x320) Opera 8.60 [en]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows CE; PPC; 240x240) Opera 8.60 [en]
+Opera/8.54 (X11; Linux i686; U; pl)
+Opera/8.54 (X11; Linux i686; U; de)
+Opera/8.54 (Windows NT 5.1; U; ru)
+Opera/8.54 (Windows NT 5.1; U; pl)
+Opera/8.54 (Windows NT 5.1; U; en)
+Opera/8.54 (Windows NT 5.0; U; en)
+Opera/8.54 (Windows NT 5.0; U; de)
+Opera/8.54 (Windows NT 4.0; U; zh-cn)
+Opera/8.54 (Windows 98; U; en)
+Mozilla/5.0 (Windows NT 5.1; U; pl) Opera 8.54
+Mozilla/5.0 (Windows 98; U; en) Opera 8.54
+Mozilla/4.0 (compatible; MSIE 6.0; X11; Linux i686; en) Opera 8.54
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; ru) Opera 8.54
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; pl) Opera 8.54
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; fr) Opera 8.54
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; en) Opera 8.54
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; de) Opera 8.54
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; da) Opera 8.54
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0; pl) Opera 8.54
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0; en) Opera 8.54
+Opera/8.53 (Windows NT 5.2; U; en)
+Opera/8.53 (Windows NT 5.1; U; pt)
+Opera/8.53 (Windows NT 5.1; U; en)
+Opera/8.53 (Windows NT 5.1; U; de)
+Opera/8.53 (Windows NT 5.0; U; en)
+Opera/8.53 (Windows 98; U; en)
+Mozilla/5.0 (Windows NT 5.1; U; en) Opera 8.53
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; sv) Opera 8.53
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; ru) Opera 8.53
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; en) Opera 8.53
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0; en) Opera 8.53
+Mozilla/4.0 (compatible; MSIE 6.0; Windows 98; en) Opera 8.53
+Opera/8.52 (X11; Linux x86_64; U; en)
+Opera/8.52 (X11; Linux i686; U; en)
+Opera/8.52 (Windows NT 5.1; U; ru)
+Opera/8.52 (Windows NT 5.1; U; en)
+Opera/8.52 (Windows NT 5.0; U; en)
+Opera/8.52 (Windows ME; U; en)
+Mozilla/5.0 (X11; Linux i686; U; en) Opera 8.52
+Mozilla/5.0 (Windows NT 5.1; U; en) Opera 8.52
+Mozilla/5.0 (Windows NT 5.1; U; de) Opera 8.52
+Mozilla/4.0 (compatible; MSIE 6.0; X11; Linux i686; en) Opera 8.52
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; pl) Opera 8.52
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; en) Opera 8.52
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; de) Opera 8.52
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0; en) Opera 8.52
+Mozilla/4.0 (compatible; MSIE 6.0; Windows 98; en) Opera 8.52
+Opera/8.51 (X11; U; Linux i686; en-US; rv:1.8)
+Opera/8.51 (X11; Linux x86_64; U; en)
+Opera/8.51 (X11; Linux i686; U; en)
+Opera/8.51 (Windows NT 5.1; U; pl)
+Opera/8.51 (Windows NT 5.1; U; nb)
+Opera/8.51 (Windows NT 5.1; U; fr)
+Opera/8.51 (Windows NT 5.1; U; en)
+Opera/8.51 (Windows NT 5.1; U; de)
+Opera/8.51 (Windows NT 5.0; U; en)
+Opera/8.51 (Windows 98; U; en)
+Opera/8.51 (Macintosh; PPC Mac OS X; U; de)
+Opera/8.51 (FreeBSD 5.1; U; en)
+Mozilla/5.0 (Windows NT 5.1; U; ru) Opera 8.51
+Mozilla/5.0 (Windows NT 5.1; U; fr) Opera 8.51
+Mozilla/5.0 (Windows NT 5.1; U; en) Opera 8.51
+Mozilla/5.0 (Windows ME; U; en) Opera 8.51
+Mozilla/5.0 (Macintosh; PPC Mac OS X; U; en) Opera 8.51
+Mozilla/4.0 (compatible; MSIE 6.0; X11; Linux i686; ru) Opera 8.51
+Mozilla/4.0 (compatible; MSIE 6.0; X11; Linux i686; en) Opera 8.51
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; sv) Opera 8.51
+Opera/8.50 (Windows NT 5.1; U; ru)
+Opera/8.50 (Windows NT 5.1; U; pl)
+Opera/8.50 (Windows NT 5.1; U; fr)
+Opera/8.50 (Windows NT 5.1; U; es-ES)
+Opera/8.50 (Windows NT 5.1; U; en)
+Opera/8.50 (Windows NT 5.1; U; de)
+Opera/8.50 (Windows NT 5.0; U; fr)
+Opera/8.50 (Windows NT 5.0; U; en)
+Opera/8.50 (Windows NT 5.0; U; de)
+Opera/8.50 (Windows NT 4.0; U; zh-cn)
+Opera/8.50 (Windows ME; U; en)
+Opera/8.50 (Windows 98; U; ru)
+Opera/8.50 (Windows 98; U; en)
+Mozilla/5.0 (Windows NT 5.1; U; en) Opera 8.50
+Mozilla/5.0 (Windows NT 5.1; U; de) Opera 8.50
+Mozilla/5.0 (Windows NT 5.0; U; de) Opera 8.50
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; ru) Opera 8.50
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; en) Opera 8.50
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; tr) Opera 8.50
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; sv) Opera 8.50
+Opera/8.10 (Windows NT 5.1; U; en)
+Opera/8.02 (Windows NT 5.1; U; ru)
+Opera/8.02 (Windows NT 5.1; U; en)
+Opera/8.02 (Windows NT 5.1; U; de)
+Mozilla/5.0 (Windows NT 5.1; U; en) Opera 8.02
+Mozilla/4.0 (compatible; MSIE 6.0; X11; Linux i686; en) Opera 8.02
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; en) Opera 8.02
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; de) Opera 8.02
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0; en) Opera 8.02
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0; de) Opera 8.02
+Mozilla/4.0 (compatible; MSIE 6.0; Windows ME; pl) Opera 8.02
+Mozilla/4.0 (compatible; MSIE 6.0; Windows 98; de) Opera 8.02
+Opera/8.01 (Windows NT 5.1; U; pl)
+Opera/8.01 (Windows NT 5.1; U; fr)
+Opera/8.01 (Windows NT 5.1; U; en)
+Opera/8.01 (Windows NT 5.1; U; de)
+Opera/8.01 (Windows NT 5.0; U; de)
+Opera/8.01 (Macintosh; U; PPC Mac OS; en)
+Opera/8.01 (Macintosh; PPC Mac OS X; U; en)
+Mozilla/5.0 (Windows NT 5.1; U; en) Opera 8.01
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; ru) Opera 8.01
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; en) Opera 8.01
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; de) Opera 8.01
+Opera/8.00 (Windows NT 5.1; U; en)
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; en) Opera 8.00
+Opera/8.0 (X11; Linux i686; U; cs)
+Opera/8.0 (Windows NT 5.1; U; en)
+Mozilla/5.0 (Windows NT 5.1; U; en) Opera 8.0
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; ru) Opera 8.0
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; IT) Opera 8.0
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; en) Opera 8.0
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; de) Opera 8.0
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0; en) Opera 8.0
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0; de) Opera 8.0
+Mozilla/4.0 (compatible; MSIE 6.0; Windows CE) Opera 8.0  [en]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows 98; en) Opera 8.0
+Mozilla/5.0 (X11; Linux i386; U) Opera 7.60  [en-GB]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; en) Opera 7.60
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1) Opera 7.54u1  [en]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows 98) Opera 7.54u1  [en]
+Opera/7.54 (X11; Linux i686; U)  [en]
+Opera/7.54 (Windows NT 5.1; U) [en]
+Opera/7.54 (Windows NT 5.1; U)  [it]
+Opera/7.54 (Windows NT 5.1; U)  [en]
+Opera/7.54 (Windows NT 5.1; U)  [de]
+Opera/7.54 (Windows NT 5.0; U)  [en]
+Opera/7.54 (Windows NT 5.0; U)  [de]
+Opera/7.54 (Windows 98; U)  [de]
+Mozilla/5.0 (X11; Linux i686; U) Opera 7.54 [en]
+Mozilla/5.0 (X11; Linux i686; U) Opera 7.54  [en]
+Mozilla/5.0 (Windows NT 5.1; U) Opera 7.54  [de]
+Mozilla/5.0 (Windows NT 5.0; U) Opera 7.54  [en]
+Mozilla/4.78 (Windows NT 5.1; U) Opera 7.54  [de]
+Mozilla/4.0 (compatible; MSIE 6.0; X11; Linux i686) Opera 7.54  [en]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1) Opera 7.54 [en]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1) Opera 7.54  [en]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1) Opera 7.54  [de]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0) Opera 7.54  [pl]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0) Opera 7.54  [de]
+Mozilla/4.0 (compatible; MSIE 5.23; Mac_PowerPC) Opera 7.54  [en]
+Opera/7.53 (X11; Linux i686; U) [en_US]
+Opera/7.53 (Windows NT 5.1; U)  [en]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1) Opera 7.53  [en]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows ME) Opera 7.53  [en]
+Opera/7.52 (Windows NT 5.1; U) [en]
+Opera/7.52 (Windows NT 5.1; U)  [en]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1) Opera 7.52 [en]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1) Opera 7.52  [en]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0) Opera 7.52  [en]
+Opera/7.51 (X11; SunOS sun4u; U) [de]
+Opera/7.51 (Windows NT 5.1; U) [en]
+Opera/7.51 (Linux) [en]
+Mozilla/4.78 (Windows NT 5.1; U) Opera 7.51  [en]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1) Opera 7.51  [ru]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1) Opera 7.51  [en]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0) Opera 7.51  [en]
+Opera/7.50 (Windows XP; U)
+Opera/7.50 (Windows NT 5.1; U)  [en]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1) Opera 7.50  [ru]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1) Opera 7.50  [en]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0) Opera 7.50  [ru]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0) Opera 7.50  [en]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows 98) Opera 7.50  [en]
+Mozilla/4.0 (compatible; MSIE 6.0; ; Linux x86_64) Opera 7.50 [en]
+Mozilla/4.0 (compatible; MSIE 6.0; ; Linux i686) Opera 7.50 [en]
+Opera/7.23 (Windows NT 6.0; U)  [zh-cn]
+Opera/7.23 (Windows NT 5.1; U; sv)
+Opera/7.23 (Windows NT 5.0; U) [en]
+Opera/7.23 (Windows NT 5.0; U)  [fr]
+Opera/7.23 (Windows NT 5.0; U)  [en]
+Opera/7.23 (Windows 98; U) [en]
+Mozilla/4.0 (compatible; MSIE 6.0; X11; Linux i686) Opera 7.23  [fi]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1) Opera 7.23 [ru]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1) Opera 7.23  [ru]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1) Opera 7.23  [en]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1) Opera 7.23  [en-GB]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1) Opera 7.23  [de]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0) Opera 7.23  [en]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0) Opera 7.23  [de]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0) Opera 7.23  [ca]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 4.0) Opera 7.23  [de]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows 98) Opera 7.23  [en]
+Opera/7.22 (Windows NT 5.1; U)  [de]
+Opera/7.21 (Windows NT 5.1; U)  [en]
+Mozilla/5.0 (Windows NT 5.0; U) Opera 7.21  [en]
+Opera/7.20 (Windows NT 5.1; U)  [en]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1) Opera 7.20  [de]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0) Opera 7.20  [de]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows 98) Opera 7.20  [en]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows 98) Opera 7.20  [de]
+Opera/7.11 (Windows NT 5.1; U)  [pl]
+Opera/7.11 (Windows NT 5.1; U)  [en]
+Opera/7.11 (Windows NT 5.1; U)  [de]
+Opera/7.11 (Windows NT 5.0; U)  [en]
+Opera/7.11 (Windows NT 5.0; U)  [de]
+Opera/7.11 (Windows 98; U)  [en]
+Opera/7.11 (Windows 98; U)  [de]
+Opera/7.11 (Linux 2.6.0-test4 i686; U)  [en]
+Mozilla/5.0 (Windows NT 5.1; U) Opera 7.11  [en]
+Mozilla/5.0 (Windows NT 5.0; U) Opera 7.11  [en]
+Mozilla/5.0 (Linux 2.4.21-0.13mdk i686; U) Opera 7.11  [en]
+Mozilla/4.78 (Windows NT 5.0; U) Opera 7.11  [en]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1) Opera 7.11  [ru]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1) Opera 7.11  [en]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1) Opera 7.11  [de]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0) Opera 7.11  [fr]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0) Opera 7.11  [en]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0) Opera 7.11  [de]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 4.0) Opera 7.11  [de]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows ME) Opera 7.11  [en]
+Opera/7.10 (Windows NT 5.1; U)  [en]
+Opera/7.10 (Windows NT 5.0; U)  [en]
+Opera/7.10 (Windows NT 4.0; U)  [de]
+Opera/7.10 (Linux Debian;en-US)
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1) Opera 7.10  [fr]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1) Opera 7.10  [en]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0) Opera 7.10  [en]
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 4.0) Opera 7.10  [de]
+Mozilla/3.0 (Windows NT 5.0; U) Opera 7.10  [de]
+Opera/7.03 (Windows NT 5.1; U)  [en]
+Opera/7.03 (Windows NT 5.1; U)  [de]
+Opera/7.03 (Windows NT 5.0; U)  [en]
+Opera/7.03 (Windows NT 5.0; U)  [de]
+Opera/7.03 (Windows NT 4.0; U)  [en]
+Opera/7.03 (Windows 98; U)  [en]
+Opera/7.03 (Windows 98; U)  [de]
+Mozilla/5.0 (X11; U; Linux x86_64; de; rv:1.9.0.6) Gecko/2009020911 Ubuntu/8.10 (intrepid) Mozilla/4.0 (compatible; MSIE 6.0; MSIE 5.5; Windows NT 5.1) Opera 7.03 [de]
+Mozilla/5.0 (Windows NT 5.1; U) Opera 7.03  [de]
+Mozilla/4.0 (compatible; MSIE 6.0; MSIE 5.5; Windows NT 5.1) Opera 7.03  [en]
+Mozilla/4.0 (compatible; MSIE 6.0; MSIE 5.5; Windows NT 5.1) Opera 7.03  [de]
+Mozilla/4.0 (compatible; MSIE 6.0; MSIE 5.5; Windows NT 5.0) Opera 7.03  [en]
+Mozilla/4.0 (compatible; MSIE 6.0; MSIE 5.5; Windows NT 5.0) Opera 7.03  [de]
+Mozilla/4.0 (compatible; MSIE 6.0; MSIE 5.5; Windows ME) Opera 7.03  [de]
+Mozilla/4.0 (compatible; MSIE 6.0; MSIE 5.5; Windows 98) Opera 7.03  [en]
+Mozilla/4.0 (compatible; MSIE 6.0; MSIE 5.5; Windows 98) Opera 7.03  [de]
+Mozilla/4.0 (compatible; MSIE 6.0; MSIE 5.5; Windows 95) Opera 7.03  [de]
+Opera/7.02 (Windows NT 5.1; U)  [fr]
+Opera/7.02 (Windows 98; U)  [en]
+Mozilla/4.0 (compatible; MSIE 6.0; MSIE 5.5; Windows NT 5.1) Opera 7.02  [en]
+Mozilla/4.0 (compatible; MSIE 6.0; MSIE 5.5; Windows NT 5.1) Opera 7.02  [de]
+Mozilla/4.0 (compatible; MSIE 6.0; MSIE 5.5; Windows NT 4.0) Opera 7.02  [de]
+Mozilla/4.0 (compatible; MSIE 6.0; MSIE 5.5; Windows ME) Opera 7.02  [en]
+Mozilla/4.0 (compatible; MSIE 6.0; MSIE 5.5; Windows 98) Opera 7.02  [en]
+Opera/7.01 (Windows NT 5.1; U)  [en]
+Opera/7.01 (Windows NT 5.0; U)  [en]
+Opera/7.01 (Windows 98; U)  [fr]
+Opera/7.01 (Windows 98; U)  [en]
+Mozilla/5.0 (Windows NT 5.0; U) Opera 7.01  [en]
+Mozilla/4.78 (Windows NT 5.0; U) Opera 7.01  [en]
+Mozilla/4.0 (compatible; MSIE 6.0; MSIE 5.5; Windows NT 5.1) Opera 7.01  [en]
+Mozilla/4.0 (compatible; MSIE 6.0; MSIE 5.5; Windows NT 5.1) Opera 7.01  [de]
+Mozilla/4.0 (compatible; MSIE 6.0; MSIE 5.5; Windows NT 5.0) Opera 7.01  [en]
+Mozilla/4.0 (compatible; MSIE 6.0; MSIE 5.5; Windows 98) Opera 7.01  [en]
+Mozilla/3.0 (Windows NT 5.0; U) Opera 7.01  [en]
+Opera/7.0 (Windows NT 5.1; U)  [en]
+Opera/7.0 (Windows NT 4.0; U)  [en]
+Opera/7.0 (Windows NT 4.0; U)  [de]
+Opera/7.0 (Windows 98; U)  [en]
+Opera/7.0 (Windows 2000; U)  [en]
+Opera/7.0 (Windows 2000; U)  [de]
+Mozilla/5.0 (Windows 2000; U) Opera 7.0  [en]
+Mozilla/4.0 (compatible; MSIE 6.0; MSIE 5.5; Windows XP) Opera 7.0  [en]
+Mozilla/4.0 (compatible; MSIE 6.0; MSIE 5.5; Windows NT 5.1) Opera 7.0  [en]
+Mozilla/4.0 (compatible; MSIE 6.0; MSIE 5.5; Windows NT 5.0) Opera 7.0  [en]
+Mozilla/4.0 (compatible; MSIE 6.0; MSIE 5.5; Windows NT 5.0) Opera 7.0  [de]
+Mozilla/4.0 (compatible; MSIE 6.0; MSIE 5.5; Windows NT 4.0) Opera 7.0  [en]
+Mozilla/4.0 (compatible; MSIE 6.0; MSIE 5.5; Windows ME) Opera 7.0  [en]
+Mozilla/4.0 (compatible; MSIE 6.0; MSIE 5.5; Windows 98) Opera 7.0  [en]
+Mozilla/4.0 (compatible; MSIE 6.0; MSIE 5.5; Windows 2000) Opera 7.0  [en]
+Opera/6.12 (Linux 2.4.20-4GB i686; U)  [en]
+Opera/6.12 (Linux 2.4.18-14cpq i686; U)  [en]
+Mozilla/4.0 (compatible; MSIE 5.0; UNIX) Opera 6.12  [en]
+Mozilla/4.0 (compatible; MSIE 5.0; Linux 2.4.20-4GB i686) Opera 6.12  [de]
+Opera/6.11 (Linux 2.4.18-bf2.4 i686; U)  [en]
+Opera/6.11 (Linux 2.4.18-4GB i686; U)  [en]
+Opera/6.11 (Linux 2.4.10-4GB i686; U)  [en]
+Opera/6.11 (FreeBSD 4.7-RELEASE i386; U)  [en]
+Mozilla/5.0 (Linux 2.4.19-16mdk i686; U) Opera 6.11  [en]
+Mozilla/4.0 (compatible; MSIE 5.0; UNIX) Opera 6.11  [fr]
+Mozilla/4.0 (compatible; MSIE 5.0; UNIX) Opera 6.11  [en]
+Mozilla/4.0 (compatible; MSIE 5.0; Linux 2.4.4 i686) Opera 6.11  [en]
+Mozilla/4.0 (compatible; MSIE 5.0; Linux 2.4.20-13.7 i686) Opera 6.11  [de]
+Mozilla/4.0 (compatible; MSIE 5.0; Linux 2.4.19-4GB i686) Opera 6.11  [en]
+Mozilla/4.0 (compatible; MSIE 5.0; Linux 2.4.19-16mdk i686) Opera 6.11  [en]
+Mozilla/4.0 (compatible; MSIE 5.0; Linux 2.4.18 i686) Opera 6.11  [de]
+Mozilla/4.0 (compatible; MSIE 5.0; Linux 2.4.10-4GB i686) Opera 6.11  [en]
+Mozilla/5.0 (Linux 2.4.18-ltsp-1 i686; U) Opera 6.1  [en]
+Mozilla/4.0 (compatible; MSIE 5.0; Linux 2.4.19 i686) Opera 6.1  [en]
+Mozilla/4.0 (compatible; MSIE 5.0; Linux 2.4.18-4GB i686) Opera 6.1  [de]
+Mozilla/5.0 (Windows XP; U) Opera 6.06  [en]
+Mozilla/4.0 (compatible; MSIE 5.0; Windows XP) Opera 6.06  [fr]
+Mozilla/4.0 (compatible; MSIE 5.0; Windows XP) Opera 6.06  [de]
+Opera/6.05 (Windows XP; U) [en]
+Opera/6.05 (Windows XP; U)  [en]
+Opera/6.05 (Windows XP; U)  [de]
+Opera/6.05 (Windows NT 4.0; U)  [ro]
+Opera/6.05 (Windows NT 4.0; U)  [fr]
+Opera/6.05 (Windows NT 4.0; U)  [de]
+Opera/6.05 (Windows ME; U)  [fr]
+Opera/6.05 (Windows ME; U)  [de]
+Opera/6.05 (Windows 98; U)  [fr]
+Opera/6.05 (Windows 98; U)  [en]
+Opera/6.05 (Windows 98; U)  [de]
+Opera/6.05 (Windows 2000; U)  [oc]
+Opera/6.05 (Windows 2000; U)  [ja]
+Opera/6.05 (Windows 2000; U)  [it]
+Opera/6.05 (Windows 2000; U)  [fr]
+Opera/6.05 (Windows 2000; U)  [en]
+Opera/6.05 (Windows 2000; U)  [de]
+Mozilla/5.0 (Windows XP; U) Opera 6.05  [de]
+Mozilla/5.0 (Windows NT 4.0; U) Opera 6.05  [en]
+Mozilla/5.0 (Windows ME; U) Opera 6.05  [de]
+Opera/6.04 (Windows XP; U)  [en]
+Opera/6.04 (Windows XP; U)  [de]
+Opera/6.04 (Windows NT 4.0; U)  [en]
+Opera/6.04 (Windows NT 4.0; U)  [de]
+Opera/6.04 (Windows 98; U)  [en-GB]
+Opera/6.04 (Windows 2000; U)  [en]
+Opera/6.04 (Windows 2000; U)  [de]
+Mozilla/5.0 (Windows 2000; U) Opera 6.04  [en]
+Mozilla/4.78 (Windows 2000; U) Opera 6.04  [de]
+Mozilla/4.0 (compatible; MSIE 5.0; Windows XP) Opera 6.04  [fr]
+Mozilla/4.0 (compatible; MSIE 5.0; Windows XP) Opera 6.04  [en]
+Mozilla/4.0 (compatible; MSIE 5.0; Windows XP) Opera 6.04  [de]
+Mozilla/4.0 (compatible; MSIE 5.0; Windows NT 4.0) Opera 6.04  [en]
+Mozilla/4.0 (compatible; MSIE 5.0; Windows 98) Opera 6.04  [pl]
+Mozilla/4.0 (compatible; MSIE 5.0; Windows 98) Opera 6.04  [en]
+Mozilla/4.0 (compatible; MSIE 5.0; Windows 2000) Opera 6.04  [en]
+Mozilla/4.0 (compatible; MSIE 5.0; Windows 2000) Opera 6.04  [de]
+ Opera/6.04 (Windows XP; U)  [de]
+ Opera/6.04 (Windows 2000; U)  [en]
+ Mozilla/4.0 (compatible; MSIE 5.0; Windows XP) Opera 6.04  [en]
+Opera/6.03 (Windows NT 4.0; U)  [en]
+Opera/6.03 (Windows 98; U) [en]
+Opera/6.03 (Windows 2000; U)  [en]
+Opera/6.03 (Linux 2.4.18-18.7.x i686; U)  [en]
+Mozilla/5.0 (Windows 2000; U) Opera 6.03  [en]
+Mozilla/5.0 (Linux 2.4.18-18.7.x i686; U) Opera 6.03  [en]
+Mozilla/4.0 (compatible; MSIE 5.0; Windows 98) Opera 6.03  [en]
+Mozilla/4.0 (compatible; MSIE 5.0; Windows 2000) Opera 6.03  [en]
+Mozilla/4.0 (compatible; MSIE 5.0; Linux 2.4.20-4GB i686) Opera 6.03  [en]
+Mozilla/4.0 (compatible; MSIE 5.0; Linux 2.4.19-4GB i686) Opera 6.03  [en]
+Mozilla/4.0 (compatible; MSIE 5.0; Linux 2.4.18-4GB i686) Opera 6.03  [en]
+Mozilla/4.0 (compatible; MSIE 5.0; Linux 2.4.0-64GB-SMP i686) Opera 6.03  [en]
+Opera/6.02 (Windows NT 4.0; U)  [de]
+Mozilla/5.0 (Windows 2000; U) Opera 6.02  [en]
+Mozilla/5.0 (Linux; U) Opera 6.02  [en]
+Mozilla/4.0 (compatible; MSIE 5.0; Windows NT 4.0) Opera 6.02  [en]
+Mozilla/4.0 (compatible; MSIE 5.0; Windows 95) Opera 6.02  [en]
+Mozilla/4.0 (compatible; MSIE 5.0; Windows 95) Opera 6.02  [de]
+Mozilla/4.0 (compatible; MSIE 5.0; Windows 2000) Opera 6.02  [en]
+Mozilla/4.0 (compatible; MSIE 5.0; Linux 2.4.20-686 i686) Opera 6.02  [en]
+Mozilla/4.0 (compatible; MSIE 5.0; Linux 2.4.18-4GB i686) Opera 6.02  [en]
+ Opera/6.02 (Windows NT 4.0; U)  [de]
+Opera/6.01 (X11; U; nn)
+Opera/6.01 (Windows XP; U)  [de]
+Opera/6.01 (Windows 98; U)  [en]
+Opera/6.01 (Windows 98; U)  [de]
+Opera/6.01 (Windows 2000; U)  [en]
+Opera/6.01 (Windows 2000; U)  [de]
+Mozilla/5.0 (Windows 2000; U) Opera 6.01  [en]
+Mozilla/5.0 (Windows 2000; U) Opera 6.01  [de]
+Mozilla/4.78 (Windows 2000; U) Opera 6.01  [en]
+Mozilla/4.0 (compatible; MSIE 5.0; Windows XP) Opera 6.01  [it]
+Mozilla/4.0 (compatible; MSIE 5.0; Windows XP) Opera 6.01  [et]
+Mozilla/4.0 (compatible; MSIE 5.0; Windows XP) Opera 6.01  [de]
+Mozilla/4.0 (compatible; MSIE 5.0; Windows NT 4.0) Opera 6.01  [en]
+Mozilla/4.0 (compatible; MSIE 5.0; Windows NT 4.0) Opera 6.01  [de]
+Mozilla/4.0 (compatible; MSIE 5.0; Windows ME) Opera 6.01  [en]
+Mozilla/4.0 (compatible; MSIE 5.0; Windows ME) Opera 6.01  [de]
+Mozilla/4.0 (compatible; MSIE 5.0; Windows 98) Opera 6.01  [it]
+Mozilla/4.0 (compatible; MSIE 5.0; Windows 98) Opera 6.01  [fr]
+Mozilla/4.0 (compatible; MSIE 5.0; Windows 98) Opera 6.01  [en]
+Mozilla/4.0 (compatible; MSIE 5.0; Windows 98) Opera 6.01  [de]
+Opera/6.0 (Windows XP; U)  [de]
+Opera/6.0 (Windows ME; U)  [de]
+Opera/6.0 (Windows 2000; U)  [fr]
+Opera/6.0 (Windows 2000; U)  [de]
+Opera/6.0 (Macintosh; PPC Mac OS X; U)
+Mozilla/4.76 (Windows NT 4.0; U) Opera 6.0  [de]
+Mozilla/4.0 (compatible; MSIE 5.0; Windows XP) Opera 6.0  [en]
+Mozilla/4.0 (compatible; MSIE 5.0; Windows XP) Opera 6.0  [de]
+Mozilla/4.0 (compatible; MSIE 5.0; Windows NT 4.0) Opera 6.0  [en]
+Mozilla/4.0 (compatible; MSIE 5.0; Windows NT 4.0) Opera 6.0  [de]
+Mozilla/4.0 (compatible; MSIE 5.0; Windows ME) Opera 6.0  [de]
+Mozilla/4.0 (compatible; MSIE 5.0; Windows 98) Opera 6.0 [en]
+Mozilla/4.0 (compatible; MSIE 5.0; Windows 98) Opera 6.0  [fr]
+Mozilla/4.0 (compatible; MSIE 5.0; Windows 98) Opera 6.0  [en]
+Mozilla/4.0 (compatible; MSIE 5.0; Windows 98) Opera 6.0  [de]
+Mozilla/4.0 (compatible; MSIE 5.0; Windows 2000) Opera 6.0 [en]
+Mozilla/4.0 (compatible; MSIE 5.0; Windows 2000) Opera 6.0  [en]
+Mozilla/4.0 (compatible; MSIE 5.0; Windows 2000) Opera 6.0  [de]
+Mozilla/4.0 (compatible; MSIE 5.0; Mac_PowerPC) Opera 6.0  [en]
+Mozilla/4.0 (compatible; MSIE 5.0; Mac_PowerPC) Opera 6.0  [de]
+Opera/5.12 (Windows NT 5.1; U)  [de]
+Opera/5.12 (Windows 98; U)  [en]
+Mozilla/5.0 (Windows 98; U) Opera 5.12  [de]
+Mozilla/4.76 (Windows NT 4.0; U) Opera 5.12  [en]
+Mozilla/4.0 (compatible; MSIE 5.0; Windows NT 4.0) Opera 5.12  [de]
+Mozilla/4.0 (compatible; MSIE 5.0; Windows ME) Opera 5.12  [it]
+Mozilla/4.0 (compatible; MSIE 5.0; Windows ME) Opera 5.12  [de]
+Mozilla/4.0 (compatible; MSIE 5.0; Windows 98) Opera 5.12  [it]
+Mozilla/4.0 (compatible; MSIE 5.0; Windows 98) Opera 5.12  [en]
+Mozilla/4.0 (compatible; MSIE 5.0; Windows 98) Opera 5.12  [de]
+Mozilla/4.0 (compatible; MSIE 5.0; Mac_PowerPC) Opera 5.12  [en]
+ Opera/5.12 (Windows NT 5.1; U)  [de]
+Opera/5.11 (Windows 98; U)  [en]
+Mozilla/4.0 (compatible; MSIE 5.0; Windows NT 4.0) Opera 5.11  [de]
+Mozilla/4.0 (compatible; MSIE 5.0; Windows ME) Opera 5.11 [en]
+Opera/5.02 (Windows 98; U)  [en]
+Opera/5.02 (Macintosh; U; id)
+Mozilla/4.0 (compatible; MSIE 5.0; Windows NT 5.1) Opera 5.02  [en]
+Mozilla/4.0 (compatible; MSIE 5.0; Windows NT 4.0) Opera 5.02  [en]
+Mozilla/4.0 (compatible; MSIE 5.0; Windows 98) Opera 5.02  [en]
+ Opera/5.02 (Windows NT 5.0; U) [en]
+Opera/5.0 (Ubuntu; U; Windows NT 6.1; es; rv:1.9.2.13) Gecko/20101203 Firefox/3.6.13
+Opera/5.0 (SunOS 5.8 sun4u; U)  [en]
+Mozilla/5.0 (SunOS 5.8 sun4u; U) Opera 5.0 [en]
+Mozilla/4.0 (compatible; MSIE 5.0; SunOS 5.8 sun4u) Opera 5.0  [en]
+Mozilla/4.0 (compatible; MSIE 5.0; Mac_PowerPC) Opera 5.0  [en]
+Mozilla/4.0 (compatible; MSIE 5.0; Linux) Opera 5.0  [en]
+Mozilla/4.0 (compatible; MSIE 5.0; Linux 2.4.4-4GB i686) Opera 5.0  [en]
+Mozilla/4.0 (compatible; MSIE 5.0; Linux 2.4.0-4GB i686) Opera 5.0  [en]
+Opera/4.02 (Windows 98; U) [en]
+Mozilla/5.0 (Macintosh; ; Intel Mac OS X; fr; rv:1.8.1.1) Gecko/20061204 Opera
+Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; en) Opera
+Mozilla/4.0 (compatible; MSIE 6.0; Windows CE) Opera

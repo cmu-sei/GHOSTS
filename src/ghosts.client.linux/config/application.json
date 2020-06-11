@@ -1,0 +1,82 @@
+﻿{
+    "IdEnabled": true,
+    "IdUrl": "http://ghosts-api:5000/api/clientid",
+    "ClientResults": {
+        "IsEnabled": true,
+        "IsSecure": false,
+        "PostUrl": "http://ghosts-api:5000/api/clientresults",
+        "CycleSleep": 9000
+    },
+    "ClientUpdates": {
+        "IsEnabled": true,
+        "PostUrl": "http://ghosts-api:5000/api/clientupdates",
+        "CycleSleep": 9000
+    },
+    "Survey": {
+        "IsEnabled": true,
+        "IsSecure": false,
+        "Frequency": "once",
+        "CycleSleepMinutes": 720,
+        "OutputFormat": "indent",
+        "PostUrl": "http://ghosts-api:5000/api/clientsurvey"
+    },
+    "HealthIsEnabled": true,
+    "HandlersIsEnabled": true,
+    "ChromeExtensions": "",
+    "FirefoxInstallLocation": "",
+    "FirefoxMajorVersionMinimum": 48,
+    "OfficeDocsMaxAgeInHours": 6,
+    "Email": {
+        "RecipientsToMin": 1,
+        "RecipientsToMax": 3,
+        "RecipientsCcMin": 0,
+        "RecipientsCcMax": 2,
+        "RecipientsBccMin": 2,
+        "RecipientsBccMax": 2,
+        "RecipientsOutsideMin": 0,
+        "RecipientsOutsideMax": 1,
+        "SetAccountFromConfig": false,
+        "SetAccountFromLocal": false,
+        "SetForcedSendReceive": false,
+        "SaveToOutbox": false,
+        "EmailDomainSearchString": "Get-ADUser -filter * -searchbase \"CN=USERS,DC=JRSS,DC=GOV\" -properties UserPrincipalName | select -expand UserPrincipalName"
+    },
+    "Listener": {
+        "Port": 8443
+    },
+    "EmailContent": {
+        "conflict_1_capital": "",
+        "conflict_1_name": "",
+        "conflict_1_peoples": "",
+        "conflict_1_president": "",
+        "localized_flashpoint_locale": "",
+        "friendly_nation_leader_lastname": "",
+        "friendly_nation_leader_name": "",
+        "friendly_nation_name": "",
+        "friendly_nation_peoples": "",
+        "commander_title": "",
+        "commander_name": "",
+        "commander_initials": "",
+        "commander_lastname": "",
+        "commander_email": "",
+        "commander_sub1": "",
+        "commander_sub2": "",
+        "us_president": "",
+        "iraq": "",
+        "iraqi": "",
+        "iran": "",
+        "iranian": "",
+        "china": "",
+        "chinese": "",
+        "russia": "",
+        "azerbaijan": "",
+        "turkish": "",
+        "turkey": "",
+        "pakistani": "",
+        "pakistan": "",
+        "palestinian": "",
+        "palestine": "",
+        "gaza": "",
+        "korea": ""
+    }
+}

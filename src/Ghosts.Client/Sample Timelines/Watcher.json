@@ -1,0 +1,19 @@
+﻿{
+    "TimeLineHandlers": [
+        {
+            "HandlerType": "Watcher",
+            "Initial": "",
+            "UtcTimeOn": "00:00:00",
+            "UtcTimeOff": "24:00:00",
+            "Loop": true,
+            "TimeLineEvents": [
+                {
+                    "Command": "file",
+                    "CommandArgs": ["C:\\Temp\\test.txt", "300000"],
+                    "DelayAfter": 0,
+                    "DelayBefore": 0
+                }
+            ]
+        }
+    ]
+}
