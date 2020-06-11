@@ -29,6 +29,7 @@ namespace Ghosts.Api.Controllers
         {
             var s = new Status();
             s.Version = ApiDetails.Version;
+            s.Created = DateTime.UtcNow;
 
             try
             {
@@ -49,6 +50,7 @@ namespace Ghosts.Api.Controllers
             public string Version { get; set; }
             public int Machines { get; set; }
             public int Groups { get; set; }
+            public DateTime Created { get; set; }
         }
     }
 }
