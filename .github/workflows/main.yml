@@ -25,4 +25,4 @@ jobs:
         tag_with_ref: true
         push: ${{ startsWith(github.ref, 'refs/tags/') }}
         build_args: "commit=${{ github.sha }}"
-        dockerfile: Ghosts.Api/dockerfile
+        dockerfile: Ghosts.Api/Dockerfile
