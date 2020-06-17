@@ -24,7 +24,8 @@ jobs:
           repository: dustinupdyke/ghosts
           tag_with_ref: true
           push: ${{ startsWith(github.ref, 'refs/tags/') }}
-          dockerfile: src/Dockerfile-api
+          path: src
+          dockerfile: Dockerfile-api
   buildcmusei:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
@@ -40,4 +41,5 @@ jobs:
           repository: cmusei/ghosts
           tag_with_ref: true
           push: ${{ startsWith(github.ref, 'refs/tags/') }}
-          dockerfile: src/Dockerfile-api
+          path: src
+          dockerfile: Dockerfile-api
