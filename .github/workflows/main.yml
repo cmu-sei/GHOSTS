@@ -25,3 +25,19 @@ jobs:
           tag_with_ref: true
           push: ${{ startsWith(github.ref, 'refs/tags/') }}
           dockerfile: src/Dockerfile-api
+  buildcmusei:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+      - name: Build and push Docker images
+        uses: docker/build-push-action@v1.1.0
+        with:
+          username: ${{ secrets.BOT_USERNAME }}
+          password: ${{ secrets.BOT_PASSWORD }}
+          repository: cmusei/ghosts
+          tag_with_ref: true
+          push: ${{ startsWith(github.ref, 'refs/tags/') }}
+          dockerfile: src/Dockerfile-api
