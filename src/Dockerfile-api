@@ -13,7 +13,7 @@ ENV ASPNETCORE_URLS=http://*:5000 \
 COPY . /app
 
 WORKDIR /app
-RUN dotnet publish Ghosts.Api -c Release -o /app/dist
+RUN dotnet publish Ghosts.Api/ghosts.api.csproj -c Release -o /app/dist
 CMD ["dotnet", "run"]
 
 #
