@@ -10,10 +10,11 @@ FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS dev
 ENV ASPNETCORE_URLS=http://*:5000 \
     ASPNETCORE_ENVIRONMENT=DEVELOPMENT
 
-COPY . /app
+COPY Ghosts.Api/. /app/Ghosts.Api
+COPY Ghosts.Domain/. /app/Ghosts.Domain
 
-WORKDIR /app
-RUN dotnet publish Ghosts.Api/ghosts.api.csproj -c Release -o /app/dist
+WORKDIR /app/Ghosts.Api
+RUN dotnet publish -c Release -o /app/dist
 CMD ["dotnet", "run"]
 
 #
