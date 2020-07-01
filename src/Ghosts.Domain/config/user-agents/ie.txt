@@ -30,6 +30,7 @@ Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0) chromeframe/10.0
 Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/4.0; GTB7.4; InfoPath.1; SV1; .NET CLR 2.8.52393; WOW64; en-US)
 Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.0; Trident/5.0; chromeframe/11.0.696.57)
 Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.0; Trident/4.0; GTB7.4; InfoPath.3; SV1; .NET CLR 3.1.76908; WOW64; en-US)
+More Internet Explorer 9.0 user agents strings -->>
 Mozilla/5.0 (compatible; MSIE 8.0; Windows NT 6.1; Trident/4.0; GTB7.4; InfoPath.2; SV1; .NET CLR 3.3.69573; WOW64; en-US)
 Mozilla/5.0 (compatible; MSIE 8.0; Windows NT 6.0; Trident/4.0; WOW64; Trident/4.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; .NET CLR 1.0.3705; .NET CLR 1.1.4322)
 Mozilla/5.0 (compatible; MSIE 8.0; Windows NT 6.0; Trident/4.0; InfoPath.1; SV1; .NET CLR 3.8.36217; WOW64; en-US)
@@ -50,6 +51,7 @@ Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; WOW64; Trident/4.0; SLCC2; .N
 Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; WOW64; Trident/4.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0; Zune 3.0)
 Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; WOW64; Trident/4.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0; msn OptimizedIE8;ZHCN)
 Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; WOW64; Trident/4.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0; MS-RTC LM 8; InfoPath.3; .NET4.0C; .NET4.0E) chromeframe/8.0.552.224
+More Internet Explorer 8.0 user agents strings -->>
 Mozilla/4.0(compatible; MSIE 7.0b; Windows NT 6.0)
 Mozilla/4.0 (compatible; MSIE 7.0b; Windows NT 6.0)
 Mozilla/4.0 (compatible; MSIE 7.0b; Windows NT 5.2; .NET CLR 1.1.4322; .NET CLR 2.0.50727; InfoPath.2; .NET CLR 3.0.04506.30)
@@ -83,6 +85,7 @@ Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.1; WOW64; SLCC2; .NET CLR 2.0.50
 Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.1; WOW64; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0; MS-RTC LM 8; .NET4.0C; .NET4.0E; InfoPath.3)
 Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.1; Trident/6.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; .NET4.0C; .NET4.0E)
 Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.1; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0; .NET4.0C; chromeframe/12.0.742.100)
+More Internet Explorer 7.0 user agents strings -->>
 Mozilla/4.0 (compatible; MSIE 6.1; Windows XP; .NET CLR 1.1.4322; .NET CLR 2.0.50727)
 Mozilla/4.0 (compatible; MSIE 6.1; Windows XP)
 Mozilla/4.0 (compatible; MSIE 6.01; Windows NT 6.0)
@@ -121,6 +124,7 @@ Mozilla/4.0 (compatible; U; MSIE 6.0; Windows NT 5.1) (Compatible;  ;  ; Trident
 Mozilla/4.0 (compatible; U; MSIE 6.0; Windows NT 5.1)
 Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; Trident/4.0; Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1) ; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0; .NET4.0C; InfoPath.3; Tablet PC 2.0)
 Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; Trident/4.0; GTB6.5; QQDownload 534; Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1) ; SLCC2; .NET CLR 2.0.50727; Media Center PC 6.0; .NET CLR 3.5.30729; .NET CLR 3.0.30729)
+More Internet Explorer 6.0 user agents strings -->>
 Mozilla/4.0 (compatible; MSIE 5.5b1; Mac_PowerPC)
 Mozilla/4.0 (compatible; MSIE 5.50; Windows NT; SiteKiosk 4.9; SiteCoach 1.0)
 Mozilla/4.0 (compatible; MSIE 5.50; Windows NT; SiteKiosk 4.8; SiteCoach 1.0)
@@ -142,6 +146,7 @@ Mozilla/4.0 (compatible; MSIE 5.5; Windows NT 5.2; .NET CLR 1.1.4322) (Compatibl
 Mozilla/4.0 (compatible; MSIE 5.5; Windows NT 5.2; .NET CLR 1.1.4322)
 Mozilla/4.0 (compatible; MSIE 5.5; Windows NT 5.1; Trident/4.0; .NET CLR 1.1.4322; .NET CLR 2.0.50727; .NET CLR 3.0.04506.30; .NET CLR 3.0.4506.2152; .NET CLR 3.5.30729)
 Mozilla/4.0 (compatible; MSIE 5.5; Windows NT 5.1; SV1; .NET CLR 1.1.4322; .NET CLR 2.0.50727; .NET CLR 3.0.4506.2152; .NET CLR 3.5.30729)
+More Internet Explorer 5.5 user agents strings -->>
 Mozilla/4.0 (compatible; MSIE 5.23; Mac_PowerPC)
 Mozilla/4.0 (compatible; MSIE 5.22; Mac_PowerPC)
 Mozilla/4.0 (compatible; MSIE 5.21; Mac_PowerPC)
@@ -180,6 +185,7 @@ Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0; SV1)
 Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0; Q312461; T312461)
 Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0; Q312461)
 Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0; MSIECrawler)
+More Internet Explorer 5.01 user agents strings -->>
 Mozilla/4.0 (compatible; MSIE 5.0b1; Mac_PowerPC)
 Mozilla/4.0 (compatible; MSIE 5.00; Windows 98)
 Mozilla/4.0(compatible; MSIE 5.0; Windows 98; DigExt)
@@ -201,6 +207,7 @@ Mozilla/4.0 (compatible; MSIE 5.0; Windows 98; YComp 5.0.2.4)
 Mozilla/4.0 (compatible; MSIE 5.0; Windows 98; Hotbar 3.0)
 Mozilla/4.0 (compatible; MSIE 5.0; Windows 98; DigExt; YComp 5.0.2.6; yplus 1.0)
 Mozilla/4.0 (compatible; MSIE 5.0; Windows 98; DigExt; YComp 5.0.2.6)
+More Internet Explorer 5.0 user agents strings -->>
 Mozilla/4.0 (compatible; MSIE 4.5; Windows NT 5.1; .NET CLR 2.0.40607)
 Mozilla/4.0 (compatible; MSIE 4.5; Windows 98; )
 Mozilla/4.0 (compatible; MSIE 4.5; Mac_PowerPC)
@@ -225,6 +232,7 @@ Mozilla/4.0 (compatible; MSIE 4.01; Windows 98; DigExt)
 Mozilla/4.0 (compatible; MSIE 4.01; Windows 98)
 Mozilla/4.0 (compatible; MSIE 4.01; Windows 95)
 Mozilla/4.0 (compatible; MSIE 4.01; Mac_PowerPC)
+More Internet Explorer 4.01 user agents strings -->>
 Mozilla/4.0 WebTV/2.6 (compatible; MSIE 4.0)
 Mozilla/4.0 (compatible; MSIE 4.0; Windows NT)
 Mozilla/4.0 (compatible; MSIE 4.0; Windows 98 )

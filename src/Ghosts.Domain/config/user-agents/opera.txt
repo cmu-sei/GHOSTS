@@ -1,4 +1,6 @@
+Opera/9.80 (X11; Linux i686; Ubuntu/14.10) Presto/2.12.388 Version/12.16.2
 Opera/9.80 (X11; Linux i686; Ubuntu/14.10) Presto/2.12.388 Version/12.16
+Opera/9.80 (Macintosh; Intel Mac OS X 10.14.1) Presto/2.12.388 Version/12.16
 Opera/9.80 (Windows NT 6.0) Presto/2.12.388 Version/12.14
 Mozilla/5.0 (Windows NT 6.0; rv:2.0) Gecko/20100101 Firefox/4.0 Opera 12.14
 Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.0) Opera 12.14
@@ -136,6 +138,7 @@ Opera/9.80 (Windows NT 6.0; U; de) Presto/2.2.15 Version/10.00
 Opera/9.80 (Windows NT 5.2; U; en) Presto/2.2.15 Version/10.00
 Opera/9.80 (Windows NT 5.1; U; zh-cn) Presto/2.2.15 Version/10.00
 Opera/9.80 (Windows NT 5.1; U; ru) Presto/2.2.15 Version/10.00
+More Opera 10.00 user agents strings -->>
 Opera/9.99 (X11; U; sk)
 Opera/9.99 (Windows NT 5.1; U; pl) Presto/9.9.9
 Opera/9.80 (J2ME/MIDP; Opera Mini/5.0 (Windows; U; Windows NT 5.1; en) AppleWebKit/886; U; en) Presto/2.4.15
@@ -170,6 +173,7 @@ Opera/9.64 (Windows NT 6.1; U; MRA 5.5 (build 02842); ru) Presto/2.1.1
 Opera/9.64 (Windows NT 6.1; U; de) Presto/2.1.1
 Opera/9.64 (Windows NT 6.0; U; zh-cn) Presto/2.1.1
 Opera/9.64 (Windows NT 6.0; U; pl) Presto/2.1.1
+More Opera 9.64 user agents strings -->>
 Opera/9.63 (X11; Linux x86_64; U; ru) Presto/2.1.1
 Opera/9.63 (X11; Linux x86_64; U; cs) Presto/2.1.1
 Opera/9.63 (X11; Linux i686; U; ru) Presto/2.1.1
@@ -190,6 +194,7 @@ Opera/9.63 (Windows NT 6.0; U; cs) Presto/2.1.1
 Opera/9.63 (Windows NT 5.2; U; en) Presto/2.1.1
 Opera/9.63 (Windows NT 5.2; U; de) Presto/2.1.1
 Opera/9.63 (Windows NT 5.1; U; pt-BR) Presto/2.1.1
+More Opera 9.63 user agents strings -->>
 Opera/9.62 (X11; Linux x86_64; U; ru) Presto/2.1.1
 Opera/9.62 (X11; Linux x86_64; U; en_GB, en_US) Presto/2.1.1
 Opera/9.62 (X11; Linux i686; U; pt-BR) Presto/2.1.1
@@ -210,6 +215,7 @@ Opera/9.62 (Windows NT 5.1; U; zh-cn) Presto/2.1.1
 Opera/9.62 (Windows NT 5.1; U; tr) Presto/2.1.1
 Opera/9.62 (Windows NT 5.1; U; ru) Presto/2.1.1
 Opera/9.62 (Windows NT 5.1; U; pt-BR) Presto/2.1.1
+More Opera 9.62 user agents strings -->>
 Opera/9.61 (X11; Linux x86_64; U; fr) Presto/2.1.1
 Opera/9.61 (X11; Linux i686; U; ru) Presto/2.1.1
 Opera/9.61 (X11; Linux i686; U; pl) Presto/2.1.1
@@ -285,6 +291,7 @@ Mozilla/5.0 (Windows NT 6.0; U; en; rv:1.8.1) Gecko/20061208 Firefox/2.0.0 Opera
 Mozilla/5.0 (Windows NT 5.1; U; en; rv:1.8.1) Gecko/20061208 Firefox/2.0.0 Opera 9.51
 Mozilla/5.0 (Windows NT 5.1; U; en-GB; rv:1.8.1) Gecko/20061208 Firefox/2.0.0 Opera 9.51
 Mozilla/5.0 (Windows NT 5.1; U; de; rv:1.8.1) Gecko/20061208 Firefox/2.0.0 Opera 9.51
+More Opera 9.51 user agents strings -->>
 Opera/9.50 (X11; Linux x86_64; U; pl)
 Opera/9.50 (X11; Linux x86_64; U; nb)
 Opera/9.50 (X11; Linux ppc; U; en)
@@ -354,6 +361,7 @@ Opera/9.25 (Windows NT 4.0; U; en)
 Opera/9.25 (OpenSolaris; U; en)
 Opera/9.25 (Macintosh; PPC Mac OS X; U; en)
 Opera/9.25 (Macintosh; Intel Mac OS X; U; en)
+More Opera 9.25 user agents strings -->>
 Opera/9.24 (X11; SunOS i86pc; U; en)
 Opera/9.24 (X11; Linux i686; U; de)
 Opera/9.24 (Windows NT 5.1; U; tr)
@@ -383,6 +391,7 @@ Opera/9.23 (Macintosh; Intel Mac OS X; U; ja)
 Opera/9.23 (Mac OS X; ru)
 Opera/9.23 (Mac OS X; fr)
 Mozilla/5.0 (X11; Linux i686; U; en; rv:1.8.0) Gecko/20060728 Firefox/1.5.0 Opera 9.23
+More Opera 9.23 user agents strings -->>
 Opera/9.22 (X11; OpenBSD i386; U; en)
 Opera/9.22 (X11; Linux i686; U; en)
 Opera/9.22 (X11; Linux i686; U; de)
@@ -415,6 +424,7 @@ Opera/9.21 (Windows NT 5.0; U; de)
 Opera/9.21 (Windows 98; U; en)
 Opera/9.21 (Macintosh; PPC Mac OS X; U; en)
 Opera/9.21 (Macintosh; Intel Mac OS X; U; en)
+More Opera 9.21 user agents strings -->>
 Opera/9.20(Windows NT 5.1; U; en)
 Opera/9.20 (X11; Linux x86_64; U; en)
 Opera/9.20 (X11; Linux ppc; U; en)
@@ -435,6 +445,7 @@ Opera/9.20 (Windows NT 5.1; U; it)
 Opera/9.20 (Windows NT 5.1; U; es-es)
 Opera/9.20 (Windows NT 5.1; U; es-AR)
 Opera/9.20 (Windows NT 5.1; U; en)
+More Opera 9.20 user agents strings -->>
 Opera/9.12 (X11; Linux i686; U; en) (Ubuntu)
 Opera/9.12 (Windows NT 5.0; U; ru)
 Opera/9.12 (Windows NT 5.0; U)
@@ -458,6 +469,7 @@ Opera/9.10 (Windows NT 5.1; U; it)
 Opera/9.10 (Windows NT 5.1; U; hu)
 Opera/9.10 (Windows NT 5.1; U; fi)
 Opera/9.10 (Windows NT 5.1; U; es-es)
+More Opera 9.10 user agents strings -->>
 Opera/9.02 (X11; Linux i686; U; pl)
 Opera/9.02 (X11; Linux i686; U; hu)
 Opera/9.02 (X11; Linux i686; U; en)
@@ -478,6 +490,7 @@ Opera/9.02 (Windows NT 5.1; U; de)
 Opera/9.02 (Windows NT 5.0; U; sv)
 Opera/9.02 (Windows NT 5.0; U; pl)
 Opera/9.02 (Windows NT 5.0; U; en)
+More Opera 9.02 user agents strings -->>
 Opera/9.01 (X11; OpenBSD i386; U; en)
 Opera/9.01 (X11; Linux i686; U; en)
 Opera/9.01 (X11; FreeBSD 6 i386; U;pl)
@@ -498,6 +511,7 @@ Opera/9.01 (Windows NT 5.0; U; en)
 Opera/9.01 (Windows NT 5.0; U; de)
 Opera/9.01 (Macintosh; PPC Mac OS X; U; it)
 Opera/9.01 (Macintosh; PPC Mac OS X; U; en)
+More Opera 9.01 user agents strings -->>
 Opera/9.00 (X11; Linux i686; U; pl)
 Opera/9.00 (X11; Linux i686; U; en)
 Opera/9.00 (X11; Linux i686; U; de)
@@ -518,6 +532,7 @@ Opera/9.00 (Windows NT 5.1; U; de)
 Opera/9.00 (Windows NT 5.0; U; en)
 Opera/9.00 (Nintendo Wii; U; ; 1038-58; Wii Internet Channel/1.0; en)
 Opera/9.00 (Macintosh; PPC Mac OS X; U; es)
+More Opera 9.00 user agents strings -->>
 Mozilla/5.0 (compatible; MSIE 6.0; Windows NT 5.1; zh-cn) Opera 8.65
 Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; zh-cn) Opera 8.65
 Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1) Opera 8.65 [en]
@@ -552,6 +567,7 @@ Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; de) Opera 8.54
 Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; da) Opera 8.54
 Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0; pl) Opera 8.54
 Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0; en) Opera 8.54
+More Opera 8.54 user agents strings -->>
 Opera/8.53 (Windows NT 5.2; U; en)
 Opera/8.53 (Windows NT 5.1; U; pt)
 Opera/8.53 (Windows NT 5.1; U; en)
@@ -599,6 +615,7 @@ Mozilla/5.0 (Macintosh; PPC Mac OS X; U; en) Opera 8.51
 Mozilla/4.0 (compatible; MSIE 6.0; X11; Linux i686; ru) Opera 8.51
 Mozilla/4.0 (compatible; MSIE 6.0; X11; Linux i686; en) Opera 8.51
 Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; sv) Opera 8.51
+More Opera 8.51 user agents strings -->>
 Opera/8.50 (Windows NT 5.1; U; ru)
 Opera/8.50 (Windows NT 5.1; U; pl)
 Opera/8.50 (Windows NT 5.1; U; fr)
@@ -619,6 +636,7 @@ Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; ru) Opera 8.50
 Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; en) Opera 8.50
 Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; tr) Opera 8.50
 Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; sv) Opera 8.50
+More Opera 8.50 user agents strings -->>
 Opera/8.10 (Windows NT 5.1; U; en)
 Opera/8.02 (Windows NT 5.1; U; ru)
 Opera/8.02 (Windows NT 5.1; U; en)
@@ -679,6 +697,7 @@ Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1) Opera 7.54  [de]
 Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0) Opera 7.54  [pl]
 Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0) Opera 7.54  [de]
 Mozilla/4.0 (compatible; MSIE 5.23; Mac_PowerPC) Opera 7.54  [en]
+More Opera 7.54 user agents strings -->>
 Opera/7.53 (X11; Linux i686; U) [en_US]
 Opera/7.53 (Windows NT 5.1; U)  [en]
 Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1) Opera 7.53  [en]
@@ -749,6 +768,7 @@ Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0) Opera 7.11  [en]
 Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0) Opera 7.11  [de]
 Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 4.0) Opera 7.11  [de]
 Mozilla/4.0 (compatible; MSIE 6.0; Windows ME) Opera 7.11  [en]
+More Opera 7.11 user agents strings -->>
 Opera/7.10 (Windows NT 5.1; U)  [en]
 Opera/7.10 (Windows NT 5.0; U)  [en]
 Opera/7.10 (Windows NT 4.0; U)  [de]
@@ -851,6 +871,7 @@ Opera/6.05 (Windows 2000; U)  [de]
 Mozilla/5.0 (Windows XP; U) Opera 6.05  [de]
 Mozilla/5.0 (Windows NT 4.0; U) Opera 6.05  [en]
 Mozilla/5.0 (Windows ME; U) Opera 6.05  [de]
+More Opera 6.05 user agents strings -->>
 Opera/6.04 (Windows XP; U)  [en]
 Opera/6.04 (Windows XP; U)  [de]
 Opera/6.04 (Windows NT 4.0; U)  [en]
@@ -871,6 +892,7 @@ Mozilla/4.0 (compatible; MSIE 5.0; Windows 2000) Opera 6.04  [de]
  Opera/6.04 (Windows XP; U)  [de]
  Opera/6.04 (Windows 2000; U)  [en]
  Mozilla/4.0 (compatible; MSIE 5.0; Windows XP) Opera 6.04  [en]
+More Opera 6.04 user agents strings -->>
 Opera/6.03 (Windows NT 4.0; U)  [en]
 Opera/6.03 (Windows 98; U) [en]
 Opera/6.03 (Windows 2000; U)  [en]
@@ -913,6 +935,7 @@ Mozilla/4.0 (compatible; MSIE 5.0; Windows 98) Opera 6.01  [it]
 Mozilla/4.0 (compatible; MSIE 5.0; Windows 98) Opera 6.01  [fr]
 Mozilla/4.0 (compatible; MSIE 5.0; Windows 98) Opera 6.01  [en]
 Mozilla/4.0 (compatible; MSIE 5.0; Windows 98) Opera 6.01  [de]
+More Opera 6.01 user agents strings -->>
 Opera/6.0 (Windows XP; U)  [de]
 Opera/6.0 (Windows ME; U)  [de]
 Opera/6.0 (Windows 2000; U)  [fr]
@@ -933,6 +956,7 @@ Mozilla/4.0 (compatible; MSIE 5.0; Windows 2000) Opera 6.0  [en]
 Mozilla/4.0 (compatible; MSIE 5.0; Windows 2000) Opera 6.0  [de]
 Mozilla/4.0 (compatible; MSIE 5.0; Mac_PowerPC) Opera 6.0  [en]
 Mozilla/4.0 (compatible; MSIE 5.0; Mac_PowerPC) Opera 6.0  [de]
+More Opera 6.0 user agents strings -->>
 Opera/5.12 (Windows NT 5.1; U)  [de]
 Opera/5.12 (Windows 98; U)  [en]
 Mozilla/5.0 (Windows 98; U) Opera 5.12  [de]
