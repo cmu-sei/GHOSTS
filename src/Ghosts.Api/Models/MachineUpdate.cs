@@ -3,16 +3,19 @@
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using Ghosts.Domain;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace Ghosts.Api.Models
 {
-    [Table("machineupdates")]
+    [Table("machine_updates")]
     public class MachineUpdate
     {
         public int Id { get; set; }
 
         [ForeignKey("MachineId")] public Guid MachineId { get; set; }
 
+        [JsonConverter(typeof(StringEnumConverter))]
         public UpdateClientConfig.UpdateType Type { get; set; }
 
         public DateTime ActiveUtc { get; set; }

@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
+
+using System;
 using System.Threading;
 using Ghosts.Api.Infrastructure;
 using Ghosts.Api.Models;
@@ -12,6 +14,10 @@ using NLog;
 
 namespace ghosts.api.Controllers
 {
+    /// <summary>
+    /// GHOSTS CLIENT CONTROLLER
+    /// These endpoints are typically only used by GHOSTS Clients installed and configured to use the GHOSTS C2
+    /// </summary>
     [Produces("application/json")]
     [Route("api/[controller]")]
     public class ClientSurveyController : Controller
@@ -25,7 +31,7 @@ namespace ghosts.api.Controllers
         }
 
         /// <summary>
-        ///     Clients post an encrypted survey result to this endpoint
+        /// Clients post an encrypted survey results to this endpoint
         /// </summary>
         /// <param name="transmission">The encrypted survey result</param>
         /// <param name="ct">Cancellation Token</param>
@@ -39,7 +45,7 @@ namespace ghosts.api.Controllers
             {
                 var key = Request.Headers["ghosts-name"].ToString();
                 //decrypt - the headers must be the same as encrypted with the client
-                transmission.Payload = Crypto.Base64Decode(transmission.Payload);
+                transmission.Payload = Base64Encoder.Base64Decode(transmission.Payload);
                 raw = Crypto.DecryptStringAes(transmission.Payload, key);
             }
             catch (Exception exc)
@@ -55,7 +61,7 @@ namespace ghosts.api.Controllers
         }
 
         /// <summary>
-        ///     Clients post survey result to this endpoint
+        /// Clients post survey results to this endpoint
         /// </summary>
         /// <param name="value">The client survey result</param>
         /// <param name="ct">Cancellation Token</param>

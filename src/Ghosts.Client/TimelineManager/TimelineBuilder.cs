@@ -1,5 +1,6 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
+using System;
 using System.IO;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
@@ -28,10 +29,21 @@ namespace Ghosts.Client.TimelineManager
         /// <returns>The local timeline to be executed</returns>
         public static Timeline GetLocalTimeline()
         {
+            Timeline timeline;
             _log.Trace($"Loading timeline config {TimelineFile }");
 
-            var raw = File.ReadAllText(TimelineFile);
-            var timeline = JsonConvert.DeserializeObject<Timeline>(raw);
+            try
+            {
+                var raw = File.ReadAllText(TimelineFile);
+                timeline = JsonConvert.DeserializeObject<Timeline>(raw);
+            }
+            catch (Exception e)
+            {
+                var err = $"ERROR: Could not deserialize timeline json file! {e.Message} {e.StackTrace}";
+                Console.WriteLine(err);
+                _log.Error(err);
+                throw;
+            }
 
             _log.Trace("Timeline config loaded successfully");
             

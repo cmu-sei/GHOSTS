@@ -182,7 +182,7 @@ namespace Ghosts.Api.Models
                 StatusUp = isUp ? UpDownStatus.Up : UpDownStatus.Down;
         }
 
-        [Table("historymachine")]
+        [Table("history_machine")]
         public class MachineHistoryItem
         {
             public enum HistoryType

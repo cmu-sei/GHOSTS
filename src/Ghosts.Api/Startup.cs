@@ -1,6 +1,8 @@
 // Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
+using System.IO;
+using System.Reflection;
 using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Api.Infrastructure.Extensions;
 using Ghosts.Api.Models;
@@ -9,7 +11,6 @@ using Ghosts.Domain.Code;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -33,18 +34,15 @@ namespace Ghosts.Api
             //services.AddDbContext<ApplicationDbContext>(opt => opt.UseInMemoryDatabase("ghosts"));
             services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
 
-            services.AddIdentity<ApplicationUser, IdentityRole>()
-                .AddDefaultTokenProviders();
-
             services.TryAddTransient<IHttpContextAccessor, HttpContextAccessor>();
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v2", new OpenApiInfo
+                c.SwaggerDoc("v4", new OpenApiInfo
                 {
-                    Version = "v2",
+                    Version = "v4",
                     Title = "GHOSTS API",
-                    Description = $"GHOSTS API v2 - Assembly: {ApplicationDetails.Version}",
+                    Description = $"GHOSTS API v4 - Assembly: {ApplicationDetails.Version}",
                     Contact = new OpenApiContact
                     {
                         Name = "Dustin Updyke",
@@ -56,6 +54,11 @@ namespace Ghosts.Api
                         Name = "Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms"
                     }
                 });
+                
+                // Set the comments path for the Swagger JSON and UI.
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                c.IncludeXmlComments(xmlPath);
             });
 
             // Add application services.
@@ -63,11 +66,13 @@ namespace Ghosts.Api
             services.AddScoped<IMachineGroupService, MachineGroupService>();
             services.AddScoped<IMachineUpdateService, MachineUpdateService>();
             services.AddScoped<ITimelineService, TimelineService>();
+            services.AddScoped<IMachineTimelineService, MachineTimelineService>();
 
             services.AddSingleton<IBackgroundQueue, BackgroundQueue>();
             services.AddSingleton<IHostedService, QueueSyncService>();
 
             services.AddCors(options => options.UseConfiguredCors(Configuration.GetSection("CorsPolicy")));
+            services.AddRouting(options => options.LowercaseUrls = true);
             services.AddMvc();
         }
 
@@ -80,7 +85,11 @@ namespace Ghosts.Api
             app.UseCors("default");
 
             app.UseSwagger();
-            app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v2/swagger.json", "GHOSTS API v2"); });
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v4/swagger.json", "GHOSTS API v4");
+                c.RoutePrefix = string.Empty;
+            });
         }
     }
 }

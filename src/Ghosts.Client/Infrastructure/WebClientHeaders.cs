@@ -36,10 +36,14 @@ namespace Ghosts.Client.Infrastructure
             client.Headers.Add("ghosts-domain", machine.Domain);
             client.Headers.Add("ghosts-resolvedhost", machine.ResolvedHost);
             client.Headers.Add("ghosts-ip", machine.ClientIp);
-            client.Headers.Add("ghosts-user", machine.CurrentUsername);
+
+            var username = machine.CurrentUsername;
+            if (Program.Configuration.EncodeHeaders)
+                username = Base64Encoder.Base64Encode(username);
+
+            client.Headers.Add("ghosts-user", username);
             client.Headers.Add("ghosts-version", ApplicationDetails.Version);
             return client;
         }
-
     }
 }

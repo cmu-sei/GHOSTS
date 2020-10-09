@@ -12,6 +12,10 @@ using NLog;
 
 namespace Ghosts.Api.Controllers
 {
+    /// <summary>
+    /// GHOSTS CLIENT CONTROLLER
+    /// These endpoints are typically only used by GHOSTS Clients installed and configured to use the GHOSTS C2
+    /// </summary>
     [Produces("application/json")]
     [Route("api/[controller]")]
     public class ClientIdController : Controller
@@ -25,8 +29,9 @@ namespace Ghosts.Api.Controllers
         }
 
         /// <summary>
-        ///     Clients post to this endpoint to get their unique GHOSTS system ID
+        /// Clients use this endpoint to get their unique GHOSTS system ID
         /// </summary>
+        /// <param name="ct">Cancellation Token</param>
         /// <returns>A client's particular unique GHOSTS system ID (GUID)</returns>
         [HttpGet]
         public async Task<IActionResult> Index(CancellationToken ct)

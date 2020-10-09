@@ -4,12 +4,10 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Ghosts.Api.Services;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ghosts.Api.Controllers
 {
-    [Authorize(Policy = "ApiUser")]
     [Produces("application/json")]
     [Route("api/machine-health")]
     [ResponseCache(Duration = 5)]
@@ -22,6 +20,12 @@ namespace Ghosts.Api.Controllers
             _service = service;
         }
 
+        /// <summary>
+        /// Gets the health for a particular machine
+        /// </summary>
+        /// <param name="id">Machine Guid</param>
+        /// <param name="ct">Cancellation Token</param>
+        /// <returns>Health records for the machine</returns>
         [HttpGet("{id}")]
         public async Task<IActionResult> Index([FromRoute] Guid id, CancellationToken ct)
         {

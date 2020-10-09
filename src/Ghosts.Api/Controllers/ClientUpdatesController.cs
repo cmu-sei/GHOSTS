@@ -13,6 +13,10 @@ using NLog;
 
 namespace Ghosts.Api.Controllers
 {
+    /// <summary>
+    /// GHOSTS CLIENT CONTROLLER
+    /// These endpoints are typically only used by GHOSTS Clients installed and configured to use the GHOSTS C2
+    /// </summary>
     [Produces("application/json")]
     [Route("api/[controller]")]
     public class ClientUpdatesController : Controller
@@ -28,7 +32,7 @@ namespace Ghosts.Api.Controllers
         }
 
         /// <summary>
-        ///     Clients check for updates to download here
+        /// Clients use this endpoint to check for updates for them to download
         /// </summary>
         /// <param name="ct">Cancellation Token</param>
         /// <returns>404 if no update, or a json payload of a particular update</returns>

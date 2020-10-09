@@ -26,7 +26,7 @@ namespace Ghosts.Client.Infrastructure.Email
 
         public static List<string> GetDomainList()
         {
-            var fileName = ApplicationDetails.ConfigurationFiles.EmailsDomain;
+            var fileName = ClientConfigurationResolver.EmailDomain;
 
             if (!File.Exists(fileName))
             {
@@ -52,7 +52,7 @@ namespace Ghosts.Client.Infrastructure.Email
         
         public static List<string> GetOutsideList()
         {
-            var fileName = ApplicationDetails.ConfigurationFiles.EmailsOutside;
+            var fileName = ClientConfigurationResolver.EmailOutside;
 
             if (!File.Exists(fileName))
                 throw new FileNotFoundException($"Email outside list not found at {fileName}");

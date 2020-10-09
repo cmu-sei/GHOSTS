@@ -50,7 +50,7 @@ namespace Ghosts.Client.Infrastructure.Email
         public List<string> Attachments { get; private set; }
         public EmailBodyType BodyType { get; private set; }
 
-        public EmailConfiguration(List<object> args)
+        public EmailConfiguration(IList<object> args)
         {
             this.settings = Program.Configuration.Email;
             var emailConfigArray = args;

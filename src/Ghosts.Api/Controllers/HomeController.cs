@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Ghosts.Api.Controllers
 {
     [Produces("application/json")]
-    [Route("api/Home")]
+    [Route("api/home")]
     [ResponseCache(Duration = 60)]
     public class HomeController : Controller
     {
@@ -21,9 +21,12 @@ namespace Ghosts.Api.Controllers
         }
 
         /// <summary>
-        ///     API Home
+        /// API Home, often used to verify API is working correctly
         /// </summary>
-        /// <returns>Basic check information including version number, and a simple database connection counting machines and groups</returns>
+        /// <returns>
+        /// Basic check information including version number,
+        /// and a simple database connection counting machines and groups
+        /// </returns>
         [HttpGet]
         public IActionResult Index()
         {

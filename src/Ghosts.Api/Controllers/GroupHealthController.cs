@@ -6,12 +6,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using Ghosts.Api.Models;
 using Ghosts.Api.Services;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ghosts.Api.Controllers
 {
-    [Authorize(Policy = "ApiUser")]
     [Produces("application/json")]
     [Route("api/group-health")]
     [ResponseCache(Duration = 5)]
@@ -26,6 +24,12 @@ namespace Ghosts.Api.Controllers
             _serviceMachine = serviceMachine;
         }
 
+        /// <summary>
+        /// Endpoint returns health records for all of the machines in a group
+        /// </summary>
+        /// <param name="id">Group Id</param>
+        /// <param name="ct">Cancellation Token</param>
+        /// <returns>Health records for machines in the group</returns>
         [HttpGet("{id}")]
         public async Task<IActionResult> Index([FromRoute] int id, CancellationToken ct)
         {
