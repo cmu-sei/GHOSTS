@@ -14,7 +14,7 @@ using Newtonsoft.Json.Linq;
 namespace ghosts.api.Controllers
 {
     [Produces("application/json")]
-    [Route("api/Webhooks")]
+    [Route("api/webhooks")]
     public class WebhooksController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -26,14 +26,21 @@ namespace ghosts.api.Controllers
             _service = service;
         }
 
-        // GET: api/Webhooks
+        /// <summary>
+        /// Gets all of the webhooks currently active on the system
+        /// </summary>
+        /// <returns>A list of all webhooks</returns>
         [HttpGet]
         public IEnumerable<Webhook> GetWebhooks()
         {
             return _context.Webhooks;
         }
 
-        // GET: api/Webhooks/5
+        /// <summary>
+        /// Gets a specific webhook by its Id
+        /// </summary>
+        /// <param name="id">The webhook to retrieve</param>
+        /// <returns>The webhook</returns>
         [HttpGet("{id}")]
         public async Task<IActionResult> GetWebhook([FromRoute] Guid id)
         {
@@ -46,7 +53,12 @@ namespace ghosts.api.Controllers
             return Ok(webhook);
         }
 
-        // PUT: api/Webhooks/5
+        /// <summary>
+        /// Updates a specific webhook
+        /// </summary>
+        /// <param name="id">The specific webhook to update</param>
+        /// <param name="webhook">The update to make</param>
+        /// <returns>The updated webhook</returns>
         [HttpPut("{id}")]
         public async Task<IActionResult> PutWebhook([FromRoute] Guid id, [FromBody] Webhook webhook)
         {
@@ -70,7 +82,11 @@ namespace ghosts.api.Controllers
             return NoContent();
         }
 
-        // POST: api/Webhooks
+        /// <summary>
+        /// Create a new webhook
+        /// </summary>
+        /// <param name="webhook">The webhook to create</param>
+        /// <returns>The saved webhook</returns>
         [HttpPost]
         public async Task<IActionResult> PostWebhook([FromBody] Webhook webhook)
         {
@@ -83,7 +99,11 @@ namespace ghosts.api.Controllers
             return CreatedAtAction("GetWebhook", new {id = webhook.Id}, webhook);
         }
 
-        // DELETE: api/Webhooks/5
+        /// <summary>
+        /// Delete a specfic webhook by its Id
+        /// </summary>
+        /// <param name="id">The Id of the webhook to delete</param>
+        /// <returns>204 No Content</returns>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteWebhook([FromRoute] Guid id)
         {
@@ -95,10 +115,14 @@ namespace ghosts.api.Controllers
             _context.Webhooks.Remove(webhook);
             await _context.SaveChangesAsync();
 
-            return Ok(webhook);
+            return NoContent();
         }
 
-        // GET: api/Webhooks/5
+        /// <summary>
+        /// For webhook testing
+        /// </summary>
+        /// <param name="id">The Id to test</param>
+        /// <returns>204 No Content</returns>
         [HttpGet("{id}/test")]
         public async Task<IActionResult> Test([FromRoute] Guid id)
         {
@@ -114,6 +138,12 @@ namespace ghosts.api.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Gets a test instance of a webhook
+        /// </summary>
+        /// <param name="webhookid">The Id of the webhook</param>
+        /// <param name="historytimelineid">The timeline item to hook</param>
+        /// <returns>204 No Content</returns>
         [HttpGet("{webhookid}/test/{historytimelineid}")]
         public async Task<IActionResult> TestByID([FromRoute] Guid webhookid, int historytimelineid)
         {

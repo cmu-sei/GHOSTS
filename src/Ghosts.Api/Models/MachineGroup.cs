@@ -30,7 +30,7 @@ namespace Ghosts.Api.Models
         [NotMapped] public IList<Machine> Machines { get; set; }
     }
 
-    [Table("groupmachines")]
+    [Table("group_machines")]
     public class GroupMachine
     {
         public int Id { get; set; }

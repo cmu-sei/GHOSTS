@@ -88,6 +88,9 @@ namespace Ghosts.Client.Comms
 
                         switch (update.Type)
                         {
+                            case UpdateClientConfig.UpdateType.RequestForTimeline:
+                                PostCurrentTimeline();
+                                break;
                             case UpdateClientConfig.UpdateType.Timeline:
                                 TimelineBuilder.SetLocalTimeline(update.Update.ToString());
                                 break;
@@ -144,6 +147,45 @@ namespace Ghosts.Client.Comms
                 }
 
                 Thread.Sleep(ProcessManager.Jitter(Program.Configuration.ClientUpdates.CycleSleep));
+            }
+        }
+
+        private static void PostCurrentTimeline()
+        {
+            ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
+
+            var posturl = string.Empty;
+
+            try
+            {
+                posturl = Program.Configuration.IdUrl.Replace("clientid", "clienttimeline");
+            }
+            catch (Exception exc)
+            {
+                _log.Error("Can't get timeline posturl!");
+                return;
+            }
+
+            try
+            {
+                _log.Trace("posting timeline");
+
+                var payload = File.ReadAllText(ApplicationDetails.ConfigurationFiles.Timeline);
+                var machine = new ResultMachine();
+                GuestInfoVars.Load(machine);
+
+                using (var client = WebClientBuilder.Build(machine))
+                {
+                    client.Headers[HttpRequestHeader.ContentType] = "application/json";
+                    client.UploadString(posturl, JsonConvert.SerializeObject(payload));
+                }
+
+                _log.Trace($"{DateTime.Now} - timeline posted to server successfully");
+            }
+            catch (Exception e)
+            {
+                _log.Debug($"Problem posting timeline to server from { ApplicationDetails.ConfigurationFiles.Timeline } to { posturl }");
+                _log.Error(e);
             }
         }
 
@@ -228,7 +270,7 @@ namespace Ghosts.Client.Comms
             if (Program.Configuration.ClientResults.IsSecure)
             {
                 payload = Crypto.EncryptStringAes(payload, machine.Name);
-                payload = Crypto.Base64Encode(payload);
+                payload = Base64Encoder.Base64Encode(payload);
 
                 var p = new EncryptedPayload();
                 p.Payload = payload;
@@ -290,7 +332,7 @@ namespace Ghosts.Client.Comms
                 if (Program.Configuration.Survey.IsSecure)
                 {
                     payload = Crypto.EncryptStringAes(payload, machine.Name);
-                    payload = Crypto.Base64Encode(payload);
+                    payload = Base64Encoder.Base64Encode(payload);
 
                     var p = new EncryptedPayload();
                     p.Payload = payload;

@@ -3,11 +3,9 @@
 using System;
 using Ghosts.Api.Infrastructure;
 using Ghosts.Api.Infrastructure.Data;
-using Ghosts.Api.Models;
 using Ghosts.Domain.Code;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NLog;
@@ -23,8 +21,10 @@ namespace Ghosts.Api
 
         public static void Main(string[] args)
         {
+            var msg = $"GHOSTS API {ApplicationDetails.Version} coming online...";
             Console.WriteLine(ApplicationDetails.Header);
-            log.Warn("GHOSTS API coming online...");
+            Console.WriteLine(msg);
+            log.Warn(msg);
 
             ApiDetails.LoadConfiguration();
 
@@ -38,11 +38,9 @@ namespace Ghosts.Api
                 try
                 {
                     var context = services.GetRequiredService<ApplicationDbContext>();
-                    var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
-                    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
                     var dbInitializerLogger = services.GetRequiredService<ILogger<DbInitializer>>();
 
-                    DbInitializer.Initialize(context, userManager, roleManager, dbInitializerLogger).Wait();
+                    DbInitializer.Initialize(context, dbInitializerLogger).Wait();
                 }
                 catch (Exception ex)
                 {

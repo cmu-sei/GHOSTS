@@ -15,6 +15,10 @@ using NLog;
 
 namespace Ghosts.Api.Controllers
 {
+    /// <summary>
+    /// GHOSTS CLIENT CONTROLLER
+    /// These endpoints are typically only used by GHOSTS Clients installed and configured to use the GHOSTS C2
+    /// </summary>
     [Produces("application/json")]
     [Route("api/[controller]")]
     public class ClientResultsController : Controller
@@ -28,7 +32,7 @@ namespace Ghosts.Api.Controllers
         }
 
         /// <summary>
-        ///     Clients post an encrypted timeline or health payload to this endpoint
+        /// Clients post an encrypted timeline or health payload to this endpoint
         /// </summary>
         /// <param name="transmission">The encrypted timeline or health log payload</param>
         /// <param name="ct">Cancellation Token</param>
@@ -42,7 +46,7 @@ namespace Ghosts.Api.Controllers
             {
                 var key = Request.Headers["ghosts-name"].ToString();
                 //decrypt
-                transmission.Payload = Crypto.Base64Decode(transmission.Payload);
+                transmission.Payload = Base64Encoder.Base64Decode(transmission.Payload);
                 raw = Crypto.DecryptStringAes(transmission.Payload, key);
             }
             catch (Exception exc)
@@ -58,7 +62,7 @@ namespace Ghosts.Api.Controllers
         }
 
         /// <summary>
-        ///     Clients post a timeline or health payload to this endpoint
+        /// Clients post a timeline or health payload to this endpoint
         /// </summary>
         /// <param name="value">Timeline or health log payload</param>
         /// <param name="ct">Cancellation Token</param>
@@ -73,8 +77,6 @@ namespace Ghosts.Api.Controllers
         private IActionResult Process(HttpContext context, HttpRequest request, TransferLogDump value, CancellationToken ct)
         {
             var id = request.Headers["ghosts-id"];
-
-            //log.Trace($"Request by {id}");
 
             var m = WebRequestReader.GetMachine(HttpContext);
 

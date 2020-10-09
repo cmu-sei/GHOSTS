@@ -5,12 +5,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using Ghosts.Api.Models;
 using Ghosts.Api.Services;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ghosts.Api.Controllers
 {
-    //[Authorize(Policy = "ApiUser")]
     [Produces("application/json")]
     [Route("api/[controller]")]
     [ResponseCache(Duration = 5)]
@@ -23,7 +21,12 @@ namespace Ghosts.Api.Controllers
             _service = service;
         }
 
-        // GET: api/Machines
+        /// <summary>
+        /// Gets machines matching the provided query value
+        /// </summary>
+        /// <param name="q">Query</param>
+        /// <param name="ct">Cancellation Token</param>
+        /// <returns>Machine information</returns>
         [HttpGet]
         public async Task<IActionResult> GetMachines(string q, CancellationToken ct)
         {
@@ -32,6 +35,12 @@ namespace Ghosts.Api.Controllers
             return Ok(list);
         }
 
+        /// <summary>
+        /// Gets all machines in the system
+        /// (warning: this may be a large amount of data based on the size of your range)
+        /// </summary>
+        /// <param name="ct">Cancellation Token</param>
+        /// <returns>All machine records</returns>
         [HttpGet]
         [Route("list")]
         public IActionResult GetList(CancellationToken ct)
@@ -39,7 +48,12 @@ namespace Ghosts.Api.Controllers
             return Ok(_service.GetListAsync(ct));
         }
 
-        // GET: api/Machines/5
+        /// <summary>
+        /// Gets a specific machine by its Guid
+        /// </summary>
+        /// <param name="id">Machine Guid</param>
+        /// <param name="ct">Cancellation Token</param>
+        /// <returns>Machine record</returns>
         [HttpGet("{id}")]
         public async Task<IActionResult> GetMachine([FromRoute] Guid id, CancellationToken ct)
         {
@@ -52,7 +66,12 @@ namespace Ghosts.Api.Controllers
             return Ok(machine);
         }
 
-        // PUT: api/Machines/5
+        /// <summary>
+        /// Updates a machine's information
+        /// </summary>
+        /// <param name="machine">The machine record to update</param>
+        /// <param name="ct">Cancellation Token</param>
+        /// <returns>The updated machine record</returns>
         [HttpPut("{id}")]
         public async Task<IActionResult> PutMachine([FromBody] Machine machine, CancellationToken ct)
         {
@@ -63,7 +82,13 @@ namespace Ghosts.Api.Controllers
             return NoContent();
         }
 
-        // POST: api/Machines
+        /// <summary>
+        /// Create a machine on the range
+        /// (warning: GHOSTS cannot control this machine unless its client later checks in with the same information created here) 
+        /// </summary>
+        /// <param name="machine">The machine to create</param>
+        /// <param name="ct">Cancellation Token</param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<IActionResult> PostMachine([FromBody] Machine machine, CancellationToken ct)
         {
@@ -74,7 +99,12 @@ namespace Ghosts.Api.Controllers
             return CreatedAtAction("GetMachine", new {id}, machine);
         }
 
-        // DELETE: api/Machines/5
+        /// <summary>
+        /// Deletes a machine (warning: If the machine later checks in, the record will be re-created)
+        /// </summary>
+        /// <param name="id">The Id of the machine to delete</param>
+        /// <param name="ct">Cancellation Token</param>
+        /// <returns>204 No Content</returns>
         [HttpDelete("{id}")]
         [ResponseCache(Duration = 0)]
         public async Task<IActionResult> DeleteMachine([FromRoute] Guid id, CancellationToken ct)
@@ -85,7 +115,13 @@ namespace Ghosts.Api.Controllers
             return NoContent();
         }
 
-        [AllowAnonymous]
+        /// <summary>
+        /// Runs a command on a specific machine
+        /// </summary>
+        /// <param name="id">The machine to run the command upon</param>
+        /// <param name="command">The command to run</param>
+        /// <param name="ct">Cancellation Token</param>
+        /// <returns>The machine response</returns>
         [HttpPost("{id}/command")]
         public async Task<IActionResult> Command([FromRoute] Guid id, string command, CancellationToken ct)
         {
@@ -102,7 +138,12 @@ namespace Ghosts.Api.Controllers
             }
         }
 
-        [AllowAnonymous]
+        /// <summary>
+        /// Lists the activity for a given machine
+        /// </summary>
+        /// <param name="id">The machine to get activity for</param>
+        /// <param name="ct">Cancellation Token</param>
+        /// <returns>The activity history for the requested machine</returns>
         [HttpGet("{id}/activity")]
         public async Task<IActionResult> Activity([FromRoute] Guid id, CancellationToken ct)
         {

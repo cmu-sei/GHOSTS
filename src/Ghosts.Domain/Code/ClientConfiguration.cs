@@ -70,8 +70,8 @@ namespace Ghosts.Domain.Code
 
         public ClientResultSettings ClientResults { get; set; }
         public ClientUpdateSettings ClientUpdates { get; set; }
-
         public EmailSettings Email { get; set; }
+        public ContentSettings Content { get; set; }
 
         /// <summary>
         ///     Settable install location for non-standard "c:\program files\" or "c:\program files (x86)\" installs
@@ -82,8 +82,18 @@ namespace Ghosts.Domain.Code
         ///     Geckodriver depends on at least this version of FF to be used
         /// </summary>
         public int FirefoxMajorVersionMinimum { get; set; }
-
+        public bool EncodeHeaders { get; set; }
         public ListenerSettings Listener { get; set; }
+
+        public class ContentSettings
+        {
+            public string EmailContent { get; set; }
+            public string EmailReply { get; set; }
+            public string EmailDomain { get; set; }
+            public string EmailOutside { get; set; }
+            public string FileNames { get; set; }
+            public string Dictionary { get; set; }
+        }
 
         public class ClientResultSettings
         {

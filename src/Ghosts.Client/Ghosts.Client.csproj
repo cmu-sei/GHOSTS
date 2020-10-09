@@ -529,8 +529,10 @@
     <Compile Include="Handlers\Print.cs" />
     <Compile Include="Infrastructure\Browser\ExtendedConfiguration.cs" />
     <Compile Include="Infrastructure\Browser\RequestConfiguration.cs" />
+    <Compile Include="Infrastructure\DebugManager.cs" />
     <Compile Include="Infrastructure\GuestInfoVars.cs" />
     <Compile Include="Infrastructure\CommandLineFlagManager.cs" />
+    <Compile Include="Infrastructure\ClientConfigurationResolver.cs" />
     <Compile Include="Infrastructure\TempFiles.cs" />
     <Compile Include="Handlers\Clicks.cs" />
     <Compile Include="Handlers\LightHandlers.cs" />

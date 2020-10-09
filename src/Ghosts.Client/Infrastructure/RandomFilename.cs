@@ -23,8 +23,8 @@ namespace Ghosts.Client.Infrastructure
 
             try
             {
-                if(File.Exists(ApplicationDetails.ConfigurationFiles.FileNames))
-                    list = File.ReadAllLines(ApplicationDetails.ConfigurationFiles.FileNames).ToList();
+                if(File.Exists(ClientConfigurationResolver.FileNames))
+                    list = File.ReadAllLines(ClientConfigurationResolver.FileNames).ToList();
             }
             catch (Exception exc)
             {

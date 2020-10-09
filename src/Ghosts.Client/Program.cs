@@ -125,6 +125,8 @@ namespace Ghosts.Client
                 return;
             }
 
+            DebugManager.Evaluate();
+
             StartupTasks.CheckConfigs();
 
             Thread.Sleep(500);

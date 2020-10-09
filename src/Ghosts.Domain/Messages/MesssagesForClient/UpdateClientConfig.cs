@@ -17,7 +17,8 @@ namespace Ghosts.Domain
         {
             Timeline = 0,
             Health = 1,
-            TimelinePartial = 10
+            TimelinePartial = 10,
+            RequestForTimeline = 20
         }
 
         public UpdateType Type { get; set; }

@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Ghosts.Api.Models
 {
-    [Table("historyhealth")]
+    [Table("history_health")]
     public class HistoryHealth
     {
         public HistoryHealth()
@@ -27,7 +27,7 @@ namespace Ghosts.Api.Models
         public string Stats { get; set; }
     }
 
-    [Table("historytimeline")]
+    [Table("history_timeline")]
     public class HistoryTimeline
     {
         public HistoryTimeline()
@@ -47,7 +47,7 @@ namespace Ghosts.Api.Models
         public string Result { get; set; }
     }
 
-    [Table("historytrackables")]
+    [Table("history_trackables")]
     public class HistoryTrackable
     {
         public HistoryTrackable()
