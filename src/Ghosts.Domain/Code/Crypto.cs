@@ -7,6 +7,21 @@ using System.Text;
 
 namespace Ghosts.Domain.Code
 {
+    public class Base64Encoder
+    {
+        public static string Base64Encode(string plainText)
+        {
+            var plainTextBytes = Encoding.UTF8.GetBytes(plainText);
+            return Convert.ToBase64String(plainTextBytes);
+        }
+
+        public static string Base64Decode(string base64EncodedData)
+        {
+            var base64EncodedBytes = Convert.FromBase64String(base64EncodedData);
+            return Encoding.UTF8.GetString(base64EncodedBytes);
+        }
+    }
+
     public class Crypto
     {
         //While an app specific salt is not the best practice for
@@ -139,18 +154,6 @@ namespace Ghosts.Domain.Code
             if (s.Read(buffer, 0, buffer.Length) != buffer.Length) throw new SystemException("Did not read byte array properly");
 
             return buffer;
-        }
-
-        public static string Base64Encode(string plainText)
-        {
-            var plainTextBytes = Encoding.UTF8.GetBytes(plainText);
-            return Convert.ToBase64String(plainTextBytes);
-        }
-
-        public static string Base64Decode(string base64EncodedData)
-        {
-            var base64EncodedBytes = Convert.FromBase64String(base64EncodedData);
-            return Encoding.UTF8.GetString(base64EncodedBytes);
         }
     }
 }

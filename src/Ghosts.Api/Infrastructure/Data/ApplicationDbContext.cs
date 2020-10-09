@@ -3,12 +3,11 @@
 using Ghosts.Api.Infrastructure.Extensions;
 using Ghosts.Api.Models;
 using Ghosts.Domain.Messages.MesssagesForServer;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Ghosts.Api.Infrastructure.Data
 {
-    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
+    public class ApplicationDbContext : DbContext
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
@@ -22,7 +21,7 @@ namespace Ghosts.Api.Infrastructure.Data
         public DbSet<HistoryHealth> HistoryHealth { get; set; }
         public DbSet<HistoryTimeline> HistoryTimeline { get; set; }
         public DbSet<HistoryTrackable> HistoryTrackables { get; set; }
-
+        public DbSet<MachineTimeline> MachineTimelines { get; set; }
         public DbSet<MachineUpdate> MachineUpdates { get; set; }
         public DbSet<Trackable> Trackables { get; set; }
         public DbSet<Webhook> Webhooks { get; set; }

@@ -61,7 +61,7 @@ namespace Ghosts.Client.Infrastructure.Email
             try
             {
                 var engine = new FileHelperEngine<EmailContent>();
-                this.Content = engine.ReadFile(ApplicationDetails.ConfigurationFiles.EmailContent).ToList();
+                this.Content = engine.ReadFile(ClientConfigurationResolver.EmailContent).ToList();
             }
             catch (Exception e)
             {
@@ -150,11 +150,11 @@ namespace Ghosts.Client.Infrastructure.Email
                 var engine = new FileHelperEngine<EmailReply>();
 
                 //does file exist
-                if(!File.Exists(ApplicationDetails.ConfigurationFiles.EmailReply))
-                    throw new FileNotFoundException($"Email reply file not found at {ApplicationDetails.ConfigurationFiles.EmailReply}");
+                if(!File.Exists(ClientConfigurationResolver.EmailReply))
+                    throw new FileNotFoundException($"Email reply file not found at {ClientConfigurationResolver.EmailReply}");
 
                 // To Read Use:
-                    var list = engine.ReadFile(ApplicationDetails.ConfigurationFiles.EmailReply);
+                var list = engine.ReadFile(ClientConfigurationResolver.EmailReply);
                 var total = list.Count();
 
                 Random r = new Random();

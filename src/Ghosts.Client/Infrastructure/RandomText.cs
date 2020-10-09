@@ -64,7 +64,7 @@ namespace Ghosts.Client.Infrastructure
         {
             public static List<string> GetDictionaryList()
             {
-                var list = JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(ApplicationDetails.ConfigurationFiles.Dictionary));
+                var list = JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(ClientConfigurationResolver.Dictionary));
                 return list;
             }
         }

@@ -99,12 +99,18 @@ namespace Ghosts.Domain.Code
             public static string Application => Clean(Path + "application.json");
             public static string Health => Clean(Path + "health.json");
             public static string Timeline => Clean(Path + "timeline.json");
-            public static string EmailContent => Clean(Path + "email-content.csv");
-            public static string EmailReply => Clean(Path + "email-reply.csv");
-            public static string EmailsDomain => Clean(Path + "emails-domain.json");
-            public static string EmailsOutside => Clean(Path + "emails-outside.json");
-            public static string Dictionary => Clean(Path + "dictionary.json");
-            public static string FileNames => Clean(Path + "filenames.txt");
+
+            public static string EmailContent(string raw) => Determine(raw, "email-content.csv");
+            public static string EmailReply(string raw) => Determine(raw, "email-reply.csv");
+            public static string EmailDomain(string raw) => Determine(raw, "emails-domain.json");
+            public static string EmailOutside(string raw) => Determine(raw, "emails-outside.json");
+            public static string Dictionary(string raw) => Determine(raw, "dictionary.json");
+            public static string FileNames(string raw) => Determine(raw, "filenames.txt");
+
+            private static string Determine(string raw, string defaultValue)
+            {
+                return !string.IsNullOrEmpty(raw) ? raw : Clean(Path + defaultValue);
+            }
         }
 
         public static class UserAgents
