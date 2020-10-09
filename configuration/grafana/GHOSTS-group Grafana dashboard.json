@@ -23,11 +23,7 @@
       "cacheTimeout": null,
       "colorBackground": true,
       "colorValue": false,
-      "colors": [
-        "#0a50a1",
-        "#594f4f",
-        "#d44a3a"
-      ],
+      "colors": ["#0a50a1", "#594f4f", "#d44a3a"],
       "datasource": "ghosts",
       "format": "none",
       "gauge": {
@@ -86,14 +82,12 @@
           "hide": false,
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(*) FROM machines m, groups g, groupmachines gm WHERE m.id = gm.machineid and gm.groupid = g.id and g.id = $group_id;",
+          "rawSql": "SELECT COUNT(*) FROM machines m, groups g, group_machines gm WHERE m.id = gm.machineid and gm.groupid = g.id and g.id = $group_id;",
           "refId": "A",
           "select": [
             [
               {
-                "params": [
-                  "value"
-                ],
+                "params": ["value"],
                 "type": "column"
               }
             ]
@@ -125,11 +119,7 @@
       "cacheTimeout": null,
       "colorBackground": true,
       "colorValue": false,
-      "colors": [
-        "#299c46",
-        "#629e51",
-        "#d44a3a"
-      ],
+      "colors": ["#299c46", "#629e51", "#d44a3a"],
       "datasource": "ghosts",
       "decimals": null,
       "format": "short",
@@ -189,14 +179,12 @@
           "hide": false,
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(*) FROM historytimeline h, machines m, groupmachines gm, groups g WHERE h.machineid = m.id and m.id = gm.machineid and gm.groupid = g.id and g.id = $group_id;",
+          "rawSql": "SELECT COUNT(*) FROM history_timeline h, machines m, group_machines gm, groups g WHERE h.machineid = m.id and m.id = gm.machineid and gm.groupid = g.id and g.id = $group_id;",
           "refId": "A",
           "select": [
             [
               {
-                "params": [
-                  "value"
-                ],
+                "params": ["value"],
                 "type": "column"
               }
             ]
@@ -228,11 +216,7 @@
       "cacheTimeout": null,
       "colorBackground": true,
       "colorValue": false,
-      "colors": [
-        "#299c46",
-        "#5195ce",
-        "#d44a3a"
-      ],
+      "colors": ["#299c46", "#5195ce", "#d44a3a"],
       "datasource": "ghosts",
       "format": "short",
       "gauge": {
@@ -290,14 +274,12 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(*) FROM historymachine h, machines m, groupmachines gm, groups g WHERE h.machineid = m.id and m.id = gm.machineid and gm.groupid = g.id and g.id = $group_id;",
+          "rawSql": "SELECT COUNT(*) FROM history_machine h, machines m, group_machines gm, groups g WHERE h.machineid = m.id and m.id = gm.machineid and gm.groupid = g.id and g.id = $group_id;",
           "refId": "A",
           "select": [
             [
               {
-                "params": [
-                  "value"
-                ],
+                "params": ["value"],
                 "type": "column"
               }
             ]
@@ -329,11 +311,7 @@
       "cacheTimeout": null,
       "colorBackground": true,
       "colorValue": false,
-      "colors": [
-        "#299c46",
-        "#e24d42",
-        "#d44a3a"
-      ],
+      "colors": ["#299c46", "#e24d42", "#d44a3a"],
       "datasource": "ghosts",
       "format": "short",
       "gauge": {
@@ -391,14 +369,12 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(*) FROM historyhealth h, machines m, groupmachines gm, groups g WHERE h.machineid = m.id and m.id = gm.machineid and gm.groupid = g.id and g.id = $group_id;",
+          "rawSql": "SELECT COUNT(*) FROM history_health h, machines m, group_machines gm, groups g WHERE h.machineid = m.id and m.id = gm.machineid and gm.groupid = g.id and g.id = $group_id;",
           "refId": "A",
           "select": [
             [
               {
-                "params": [
-                  "value"
-                ],
+                "params": ["value"],
                 "type": "column"
               }
             ]
@@ -476,14 +452,12 @@
           "hide": false,
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT\n  $__timeGroup(h.createdutc, '5m', 0),\n  count(h.*) as \"Timeline\"\nFROM\n  historytimeline h, machines m, groupmachines gm, groups g\nWHERE \n  h.machineid = m.id and m.id = gm.machineid and gm.groupid = g.id and g.id = $group_id and $__timeFilter(h.createdutc)\nGROUP BY \n  time\nORDER BY \n  time\n",
+          "rawSql": "SELECT\n  $__timeGroup(h.createdutc, '5m', 0),\n  count(h.*) as \"Timeline\"\nFROM\n  history_timeline h, machines m, group_machines gm, groups g\nWHERE \n  h.machineid = m.id and m.id = gm.machineid and gm.groupid = g.id and g.id = $group_id and $__timeFilter(h.createdutc)\nGROUP BY \n  time\nORDER BY \n  time\n",
           "refId": "A",
           "select": [
             [
               {
-                "params": [
-                  "value"
-                ],
+                "params": ["value"],
                 "type": "column"
               }
             ]
@@ -504,14 +478,12 @@
           "hide": false,
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT\n  $__timeGroup(h.createdutc, '5m', 0),\n  count(h.*) as \"Health\"\nFROM\n  historyhealth h, machines m, groupmachines gm, groups g\nWHERE \n  h.machineid = m.id and m.id = gm.machineid and gm.groupid = g.id and g.id = $group_id and $__timeFilter(h.createdutc)\nGROUP BY \n  time\nORDER BY \n  time\n",
+          "rawSql": "SELECT\n  $__timeGroup(h.createdutc, '5m', 0),\n  count(h.*) as \"Health\"\nFROM\n  history_health h, machines m, group_machines gm, groups g\nWHERE \n  h.machineid = m.id and m.id = gm.machineid and gm.groupid = g.id and g.id = $group_id and $__timeFilter(h.createdutc)\nGROUP BY \n  time\nORDER BY \n  time\n",
           "refId": "B",
           "select": [
             [
               {
-                "params": [
-                  "value"
-                ],
+                "params": ["value"],
                 "type": "column"
               }
             ]
@@ -532,14 +504,12 @@
           "hide": false,
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT\n  $__timeGroup(h.createdutc, '5m', 0),\n  count(h.*) as \"Polls\"\nFROM\n  historymachine h, machines m, groupmachines gm, groups g\nWHERE \n  h.machineid = m.id and m.id = gm.machineid and gm.groupid = g.id and g.id = $group_id and $__timeFilter(h.createdutc)\nGROUP BY \n  time\nORDER BY \n  time\n",
+          "rawSql": "SELECT\n  $__timeGroup(h.createdutc, '5m', 0),\n  count(h.*) as \"Polls\"\nFROM\n  history_machine h, machines m, group_machines gm, groups g\nWHERE \n  h.machineid = m.id and m.id = gm.machineid and gm.groupid = g.id and g.id = $group_id and $__timeFilter(h.createdutc)\nGROUP BY \n  time\nORDER BY \n  time\n",
           "refId": "C",
           "select": [
             [
               {
-                "params": [
-                  "value"
-                ],
+                "params": ["value"],
                 "type": "column"
               }
             ]
@@ -644,14 +614,12 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT\n  handler as \"Handler\",\n  count(*) as \"Executions\",\n  date_trunc('minute', h.createdutc) as \"time\"\nFROM\n  historytimeline h, machines m, groupmachines gm, groups g\nWHERE \n  h.machineid = m.id and m.id = gm.machineid and gm.groupid = g.id and g.id = $group_id and $__timeFilter(h.createdutc)\ngroup by h.handler, date_trunc('minute', h.createdutc) \norder by date_trunc('minute', h.createdutc)  DESC\n",
+          "rawSql": "SELECT\n  handler as \"Handler\",\n  count(*) as \"Executions\",\n  date_trunc('minute', h.createdutc) as \"time\"\nFROM\n  history_timeline h, machines m, group_machines gm, groups g\nWHERE \n  h.machineid = m.id and m.id = gm.machineid and gm.groupid = g.id and g.id = $group_id and $__timeFilter(h.createdutc)\ngroup by h.handler, date_trunc('minute', h.createdutc) \norder by date_trunc('minute', h.createdutc)  DESC\n",
           "refId": "A",
           "select": [
             [
               {
-                "params": [
-                  "value"
-                ],
+                "params": ["value"],
                 "type": "column"
               }
             ]
@@ -736,11 +704,7 @@
         {
           "alias": "",
           "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
+          "colors": ["rgba(245, 54, 54, 0.9)", "rgba(237, 129, 40, 0.89)", "rgba(50, 172, 45, 0.97)"],
           "decimals": 2,
           "pattern": "/.*/",
           "thresholds": [],
@@ -755,14 +719,12 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT h.handler as \"Handler\", count(h.*) as \"Executions\" from historytimeline h, machines m, groupmachines gm, groups g\nWHERE \n  h.machineid = m.id and m.id = gm.machineid and gm.groupid = g.id and g.id = $group_id group by handler;",
+          "rawSql": "SELECT h.handler as \"Handler\", count(h.*) as \"Executions\" from history_timeline h, machines m, group_machines gm, groups g\nWHERE \n  h.machineid = m.id and m.id = gm.machineid and gm.groupid = g.id and g.id = $group_id group by handler;",
           "refId": "A",
           "select": [
             [
               {
-                "params": [
-                  "value"
-                ],
+                "params": ["value"],
                 "type": "column"
               }
             ]
@@ -810,11 +772,7 @@
         {
           "alias": "",
           "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
+          "colors": ["rgba(245, 54, 54, 0.9)", "rgba(237, 129, 40, 0.89)", "rgba(50, 172, 45, 0.97)"],
           "decimals": 2,
           "pattern": "/.*/",
           "thresholds": [],
@@ -830,14 +788,12 @@
           "hide": false,
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT m.name as \"Machine\", 'Up' as \"Status\", m.lastreportedutc as \"Time\" from machines m, groupmachines gm, groups g\nWHERE \n  m.id = gm.machineid and gm.groupid = g.id and g.id = $group_id\norder by m.lastreportedutc desc limit 8;",
+          "rawSql": "SELECT m.name as \"Machine\", 'Up' as \"Status\", m.lastreportedutc as \"Time\" from machines m, group_machines gm, groups g\nWHERE \n  m.id = gm.machineid and gm.groupid = g.id and g.id = $group_id\norder by m.lastreportedutc desc limit 8;",
           "refId": "A",
           "select": [
             [
               {
-                "params": [
-                  "value"
-                ],
+                "params": ["value"],
                 "type": "column"
               }
             ]
@@ -889,29 +845,8 @@
     "to": "2018-09-18T14:16:01.130Z"
   },
   "timepicker": {
-    "refresh_intervals": [
-      "5s",
-      "10s",
-      "30s",
-      "1m",
-      "5m",
-      "15m",
-      "30m",
-      "1h",
-      "2h",
-      "1d"
-    ],
-    "time_options": [
-      "5m",
-      "15m",
-      "1h",
-      "6h",
-      "12h",
-      "24h",
-      "2d",
-      "7d",
-      "30d"
-    ]
+    "refresh_intervals": ["5s", "10s", "30s", "1m", "5m", "15m", "30m", "1h", "2h", "1d"],
+    "time_options": ["5m", "15m", "1h", "6h", "12h", "24h", "2d", "7d", "30d"]
   },
   "timezone": "utc",
   "title": "GHOSTS GROUP",
