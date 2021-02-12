@@ -182,26 +182,35 @@ namespace Ghosts.Client.Handlers
 
         private void MakeRequest(RequestConfiguration config)
         {
-            switch (config.Method.ToUpper())
+            // Added try here because some versions of FF (v56) throw an exception for an unresolved site,
+            // but in other versions it seems to fail gracefully. We want to always fail gracefully
+            try
             {
-                case "GET":
-                    Driver.Navigate().GoToUrl(config.Uri);
-                    break;
-                case "POST":
-                case "PUT":
-                case "DELETE":
-                    Driver.Navigate().GoToUrl("about:blank");
-                    var script = "var xhr = new XMLHttpRequest();";
-                    script += $"xhr.open('{config.Method.ToUpper()}', '{config.Uri}', true);";
-                    script += "xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');";
-                    script += "xhr.onload = function() {";
-                    script += "document.write(this.responseText);";
-                    script += "};";
-                    script += $"xhr.send('{config.FormValues.ToFormValueString()}');";
+                switch (config.Method.ToUpper())
+                {
+                    case "GET":
+                        Driver.Navigate().GoToUrl(config.Uri);
+                        break;
+                    case "POST":
+                    case "PUT":
+                    case "DELETE":
+                        Driver.Navigate().GoToUrl("about:blank");
+                        var script = "var xhr = new XMLHttpRequest();";
+                        script += $"xhr.open('{config.Method.ToUpper()}', '{config.Uri}', true);";
+                        script += "xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');";
+                        script += "xhr.onload = function() {";
+                        script += "document.write(this.responseText);";
+                        script += "};";
+                        script += $"xhr.send('{config.FormValues.ToFormValueString()}');";
 
-                    var javaScriptExecutor = (IJavaScriptExecutor)Driver;
-                    javaScriptExecutor.ExecuteScript(script);
-                    break;
+                        var javaScriptExecutor = (IJavaScriptExecutor)Driver;
+                        javaScriptExecutor.ExecuteScript(script);
+                        break;
+                }
+            }
+            catch (Exception e)
+            {
+                _log.Trace(e.Message);
             }
         }
 
