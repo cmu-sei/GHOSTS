@@ -1,6 +1,6 @@
 # Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
-# $ docker build -f Dockerfile-api  . -t ghosts/api
+# $ docker build -f Dockerfile  . -t ghosts/api
 
 #
 #multi-stage target: dev

@@ -45,6 +45,7 @@ services:
   grafana:
     image: grafana/grafana
     container_name: ghosts-grafana
+    user: root
     depends_on:
       - postgres
     ports:
