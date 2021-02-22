@@ -56,13 +56,10 @@ namespace Ghosts.Api.Services
             model.Status = StatusType.Deleted;
 
             var operation = await _context.SaveChangesAsync(ct);
-            if (operation < 1)
-            {
-                log.Error($"Could not delete machine update: {operation}");
-                throw new InvalidOperationException("Could not delete Machine Update");
-            }
-
-            return id;
+            if (operation >= 1) return id;
+            
+            log.Error($"Could not delete machine update: {operation}");
+            throw new InvalidOperationException("Could not delete Machine Update");
         }
     }
 }

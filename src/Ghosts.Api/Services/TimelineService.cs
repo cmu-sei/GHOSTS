@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Api.ViewModels;
 using Microsoft.EntityFrameworkCore;
-using NLog;
 
 namespace Ghosts.Api.Services
 {
@@ -18,7 +17,6 @@ namespace Ghosts.Api.Services
 
     public class TimelineService : ITimelineService
     {
-        private static Logger log = LogManager.GetCurrentClassLogger();
         private readonly ApplicationDbContext _context;
 
         public TimelineService(ApplicationDbContext context)
@@ -30,7 +28,7 @@ namespace Ghosts.Api.Services
         {
             var machineUpdate = machineUpdateViewModel.ToMachineUpdate();
 
-            _context.MachineUpdates.Add(machineUpdate);
+            await _context.MachineUpdates.AddAsync(machineUpdate, ct);
             await _context.SaveChangesAsync(ct);
         }
 
@@ -46,7 +44,7 @@ namespace Ghosts.Api.Services
             foreach (var machineMapping in group.GroupMachines)
             {
                 machineUpdate.MachineId = machineMapping.MachineId;
-                _context.MachineUpdates.Add(machineUpdate);
+                await _context.MachineUpdates.AddAsync(machineUpdate, ct);
             }
 
             await _context.SaveChangesAsync(ct);

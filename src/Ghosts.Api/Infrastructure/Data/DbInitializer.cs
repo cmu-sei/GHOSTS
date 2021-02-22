@@ -9,7 +9,7 @@ namespace Ghosts.Api.Infrastructure.Data
     {
         public static async Task Initialize(ApplicationDbContext context, ILogger<DbInitializer> logger)
         {
-            context.Database.EnsureCreated();
+            await context.Database.EnsureCreatedAsync();
 
             // Could do additional seeding here in the future
             //if (context.Machines.Any()) return; // DB has been seeded

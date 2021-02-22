@@ -1,18 +1,14 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Ghosts.Api.Infrastructure;
 using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Api.Models;
 using Ghosts.Domain;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using NLog;
-using SimpleTCP;
 
 namespace Ghosts.Api.Services
 {
@@ -35,7 +31,7 @@ namespace Ghosts.Api.Services
 
         public async Task<MachineTimeline> GetByMachineIdAsync(Guid id, CancellationToken ct)
         {
-            return await _context.MachineTimelines.FirstOrDefaultAsync(x => x.MachineId == id);
+            return await _context.MachineTimelines.FirstOrDefaultAsync(x => x.MachineId == id, cancellationToken: ct);
         }
 
         public async Task<MachineTimeline> CreateAsync(Machine model, Timeline timeline, CancellationToken ct)

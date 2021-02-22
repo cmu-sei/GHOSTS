@@ -54,7 +54,7 @@ namespace Ghosts.Api.Services
 
                 try
                 {
-                    Sync();
+                    await Sync();
                 }
                 catch (Exception ex)
                 {
@@ -67,40 +67,37 @@ namespace Ghosts.Api.Services
             }
         }
 
-        private void Sync()
+        private async Task Sync()
         {
-            using (var scope = _scopeFactory.CreateScope())
-            {
-                using (var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>())
+            using var scope = _scopeFactory.CreateScope();
+            await using var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            
+            foreach (var item in Queue.GetAll())
+                switch (item.Type)
                 {
-                    foreach (var item in Queue.GetAll())
-                        switch (item.Type)
-                        {
-                            case QueueEntry.Types.Machine:
-                                ProcessMachine(scope, context, (MachineQueueEntry) item.Payload);
-                                break;
-                            case QueueEntry.Types.Notification:
-                                ProcessNotification(scope, context, (NotificationQueueEntry) item.Payload);
-                                break;
-                            case QueueEntry.Types.Survey:
-                                ProcessSurvey(scope, context, (Survey) item.Payload);
-                                break;
-                            default:
-                                throw new ArgumentOutOfRangeException();
-                        }
+                    case QueueEntry.Types.Machine:
+                        await ProcessMachine(scope, context, (MachineQueueEntry) item.Payload);
+                        break;
+                    case QueueEntry.Types.Notification:
+                        await ProcessNotification(context, (NotificationQueueEntry) item.Payload);
+                        break;
+                    case QueueEntry.Types.Survey:
+                        await ProcessSurvey(context, (Survey) item.Payload);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
-            }
         }
 
-        private void ProcessSurvey(IServiceScope scope, ApplicationDbContext context, Survey item)
+        private async Task ProcessSurvey(ApplicationDbContext context, Survey item)
         {
             try
             {
                 var survey = item;
-                context.Surveys.Add(survey);
+                await context.Surveys.AddAsync(survey);
                 context.Entry(survey).State = EntityState.Added;
-                context.SaveChanges();
-                var x = Queue.DequeueAsync(new CancellationToken()).Result;
+                await context.SaveChangesAsync();
+                await Queue.DequeueAsync(new CancellationToken());
             }
             catch (Exception e)
             {
@@ -108,7 +105,7 @@ namespace Ghosts.Api.Services
             }
         }
 
-        private void ProcessNotification(IServiceScope scope, ApplicationDbContext context, NotificationQueueEntry item)
+        private async Task ProcessNotification(ApplicationDbContext context, NotificationQueueEntry item)
         {
             var webhooks = context.Webhooks.Where(o => o.Status == StatusType.Active);
 
@@ -118,13 +115,12 @@ namespace Ghosts.Api.Services
 
                 foreach (var webhook in webhooks)
                 {
-                    var t = new Thread(() => { HandleWebhook(webhook, item); });
-                    t.IsBackground = true;
+                    var t = new Thread(() => { HandleWebhook(webhook, item); }) {IsBackground = true};
                     t.Start();
                 }
 
                 //if no webhooks setup, the queue simply gets flushed
-                var x = Queue.DequeueAsync(new CancellationToken()).Result;
+                await Queue.DequeueAsync(new CancellationToken());
             }
             catch (Exception e)
             {
@@ -179,20 +175,18 @@ namespace Ghosts.Api.Services
                 // Wrap our JSON inside a StringContent which then can be used by the HttpClient class
                 var httpContent = new StringContent(formattedResponse, Encoding.UTF8, "application/json");
 
-                using (var httpClient = new HttpClient())
+                using var httpClient = new HttpClient();
+                // Do the actual request and await the response
+                var httpResponse = await httpClient.PostAsync(webhook.PostbackUrl, httpContent);
+
+                log.Trace($"Webhook response {webhook.PostbackUrl} {webhook.PostbackMethod} {httpResponse.StatusCode}");
+
+                // If the response contains content we want to read it!
+                if (httpResponse.Content != null)
                 {
-                    // Do the actual request and await the response
-                    var httpResponse = await httpClient.PostAsync(webhook.PostbackUrl, httpContent);
-
-                    log.Trace($"Webhook response {webhook.PostbackUrl} {webhook.PostbackMethod} {httpResponse.StatusCode}");
-
-                    // If the response contains content we want to read it!
-                    if (httpResponse.Content != null)
-                    {
-                        var responseContent = await httpResponse.Content.ReadAsStringAsync();
-                        log.Trace($"Webhook notification sent with {responseContent}");
-                        // From here on you could deserialize the ResponseContent back again to a concrete C# type using Json.Net
-                    }
+                    var responseContent = await httpResponse.Content.ReadAsStringAsync();
+                    log.Trace($"Webhook notification sent with {responseContent}");
+                    // From here on you could deserialize the ResponseContent back again to a concrete C# type using Json.Net
                 }
             }
             catch (Exception e)
@@ -201,7 +195,7 @@ namespace Ghosts.Api.Services
             }
         }
 
-        private void ProcessMachine(IServiceScope scope, ApplicationDbContext context, MachineQueueEntry item)
+        private async Task ProcessMachine(IServiceScope scope, ApplicationDbContext context, MachineQueueEntry item)
         {
             var service = scope.ServiceProvider.GetRequiredService<IMachineService>();
 
@@ -244,7 +238,7 @@ namespace Ghosts.Api.Services
                     {
                         Type = Machine.MachineHistoryItem.HistoryType.Created
                     });
-                    var x = service.CreateAsync(item.Machine, new CancellationToken()).Result;
+                    await service.CreateAsync(item.Machine, new CancellationToken());
                     machine = item.Machine;
                 }
             }
@@ -393,7 +387,7 @@ namespace Ghosts.Api.Services
                 context.Machines.UpdateRange(machines);
                 try
                 {
-                    var i = context.SaveChanges();
+                    var i = await context.SaveChangesAsync();
                     if (i > 0)
                         log.Info(
                             $"Queue: {i} (machines: {machines.Count()}");
@@ -406,10 +400,10 @@ namespace Ghosts.Api.Services
 
             if (trackables.Count > 0)
             {
-                context.HistoryTrackables.AddRange(trackables);
+                await context.HistoryTrackables.AddRangeAsync(trackables);
                 try
                 {
-                    var i = context.SaveChanges();
+                    var i = await context.SaveChangesAsync();
                     if (i > 0)
                         log.Info(
                             $"Queue: {i} (Trackables: {trackables.Count()})");
@@ -422,10 +416,10 @@ namespace Ghosts.Api.Services
 
             if (health.Count > 0)
             {
-                context.HistoryHealth.AddRange(health);
+                await context.HistoryHealth.AddRangeAsync(health);
                 try
                 {
-                    var i = context.SaveChanges();
+                    var i = await context.SaveChangesAsync();
                     if (i > 0)
                         log.Info(
                             $"Queue: {i} (Health: {health.Count()})");
@@ -438,10 +432,10 @@ namespace Ghosts.Api.Services
 
             if (timelines.Count > 0)
             {
-                context.HistoryTimeline.AddRange(timelines);
+                await context.HistoryTimeline.AddRangeAsync(timelines);
                 try
                 {
-                    var i = context.SaveChanges();
+                    var i = await context.SaveChangesAsync();
                     if (i > 0)
                         log.Info(
                             $"Queue: {i} (Timeline: {timelines.Count()})");
@@ -454,10 +448,10 @@ namespace Ghosts.Api.Services
 
             if (histories.Count > 0)
             {
-                context.HistoryMachine.AddRange(histories);
+                await context.HistoryMachine.AddRangeAsync(histories);
                 try
                 {
-                    var i = context.SaveChanges();
+                    var i = await context.SaveChangesAsync();
                     if (i > 0)
                         log.Info(
                             $"Queue: {i} (History: {histories.Count()}");
@@ -470,10 +464,10 @@ namespace Ghosts.Api.Services
 
             if (webhooks.Count > 0)
             {
-                context.Webhooks.AddRange(webhooks);
+                await context.Webhooks.AddRangeAsync(webhooks);
                 try
                 {
-                    var i = context.SaveChanges();
+                    var i = await context.SaveChangesAsync();
                     if (i > 0)
                         log.Info(
                             $"Queue: {i} (Webhooks: {webhooks.Count()}");

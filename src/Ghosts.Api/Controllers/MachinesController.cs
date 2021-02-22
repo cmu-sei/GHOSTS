@@ -45,7 +45,7 @@ namespace Ghosts.Api.Controllers
         [Route("list")]
         public IActionResult GetList(CancellationToken ct)
         {
-            return Ok(_service.GetListAsync(ct));
+            return Ok(_service.GetList());
         }
 
         /// <summary>
@@ -123,7 +123,7 @@ namespace Ghosts.Api.Controllers
         /// <param name="ct">Cancellation Token</param>
         /// <returns>The machine response</returns>
         [HttpPost("{id}/command")]
-        public async Task<IActionResult> Command([FromRoute] Guid id, string command, CancellationToken ct)
+        public IActionResult Command([FromRoute] Guid id, string command, CancellationToken ct)
         {
             if (!ModelState.IsValid || id == Guid.Empty) return BadRequest(ModelState);
 

@@ -5,7 +5,6 @@ using System.IO;
 using System.Reflection;
 using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Api.Infrastructure.Extensions;
-using Ghosts.Api.Models;
 using Ghosts.Api.Services;
 using Ghosts.Domain.Code;
 using Microsoft.AspNetCore.Builder;
@@ -22,6 +21,8 @@ namespace Ghosts.Api
 {
     public class Startup
     {
+        public const int apiVersion = 5; 
+        
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -38,11 +39,11 @@ namespace Ghosts.Api
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v4", new OpenApiInfo
+                c.SwaggerDoc($"v{apiVersion}", new OpenApiInfo
                 {
-                    Version = "v4",
+                    Version = $"v{apiVersion}",
                     Title = "GHOSTS API",
-                    Description = $"GHOSTS API v4 - Assembly: {ApplicationDetails.Version}",
+                    Description = $"GHOSTS API v{apiVersion} - Assembly: {ApplicationDetails.Version}",
                     Contact = new OpenApiContact
                     {
                         Name = "Dustin Updyke",
@@ -87,7 +88,7 @@ namespace Ghosts.Api
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v4/swagger.json", "GHOSTS API v4");
+                c.SwaggerEndpoint($"/swagger/v{apiVersion}/swagger.json", $"GHOSTS API v{apiVersion}");
                 c.RoutePrefix = string.Empty;
             });
         }

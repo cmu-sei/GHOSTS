@@ -16,7 +16,7 @@ namespace Ghosts.Api.Infrastructure
         private static string FormatToken(List<char> delimeters, ApiDetails.ClientOptions.GroupingOptions.GroupingDefinitionOption d, string o)
         {
             // replace
-            foreach (var r in d.Replacements) o = o.Replace(r.Key, r.Value);
+            foreach (var (key, value) in d.Replacements) o = o.Replace(key, value);
 
             // reverse?
             if (d.Direction.Equals("RightToLeft")) o = o.Split(delimeters.ToArray()).Reverse().ToString();

@@ -82,7 +82,7 @@ namespace Ghosts.Api.Infrastructure.Data
                 foreach (var key in entity.GetForeignKeys())
                     key.SetConstraintName(key.GetConstraintName().ToCondensedLowerCase());
                 foreach (var index in entity.GetIndexes())
-                    index.SetName(index.GetName().ToCondensedLowerCase());
+                    index.SetDatabaseName(index.GetDatabaseName().ToCondensedLowerCase());
             }
         }
     }

@@ -36,12 +36,12 @@ namespace Ghosts.Api.Services
         {
             var list = await _context.Groups.Include(o => o.GroupMachines).ToListAsync(ct);
             foreach (var group in list)
-            foreach (var machineMapping in @group.GroupMachines)
+            foreach (var machineMapping in group.GroupMachines)
             {
                 var machine = await _context.Machines.FirstOrDefaultAsync(m => m.Id == machineMapping.MachineId && m.Status == StatusType.Active, ct);
                 if (machine == null)
                     continue;
-                @group.Machines.Add(machine);
+                group.Machines.Add(machine);
             }
 
             return list;
@@ -54,7 +54,7 @@ namespace Ghosts.Api.Services
 
         public async Task<int> CreateAsync(Group model, CancellationToken ct)
         {
-            _context.Groups.Add(model);
+            await _context.Groups.AddAsync(model, ct);
             await _context.SaveChangesAsync(ct);
             return model.Id;
         }

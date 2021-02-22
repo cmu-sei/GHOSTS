@@ -5,7 +5,7 @@
 #
 #multi-stage target: dev
 #
-FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS dev
+FROM mcr.microsoft.com/dotnet/sdk:5.0-alpine AS dev
 
 ENV ASPNETCORE_URLS=http://*:5000 \
     ASPNETCORE_ENVIRONMENT=DEVELOPMENT
@@ -20,14 +20,14 @@ CMD ["dotnet", "run"]
 #
 #multi-stage target: prod
 #
-FROM mcr.microsoft.com/dotnet/core/aspnet:3.1 AS prod
+FROM mcr.microsoft.com/dotnet/aspnet:5.0-alpine AS prod
 ARG commit
 ENV COMMIT=$commit
 COPY --from=dev /app/dist /app
 WORKDIR /app
 
-ENV GHOSTS_VERSION=3.0.0.0
-ENV GHOSTS_API_VERSION=v2
+ENV GHOSTS_VERSION=5.0.0.0
+ENV GHOSTS_API_VERSION=v5
 ENV ASPNETCORE_URLS=http://*:5000
 
 EXPOSE 5000

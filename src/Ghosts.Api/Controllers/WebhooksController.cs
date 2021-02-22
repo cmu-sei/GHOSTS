@@ -93,7 +93,7 @@ namespace ghosts.api.Controllers
             if (!ModelState.IsValid) return BadRequest(ModelState);
             if (webhook.Id == Guid.Empty)
                 webhook.Id = Guid.NewGuid();
-            _context.Webhooks.Add(webhook);
+            await _context.Webhooks.AddAsync(webhook);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetWebhook", new {id = webhook.Id}, webhook);
