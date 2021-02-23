@@ -27,7 +27,7 @@ namespace Ghosts.Client.Infrastructure.Email
             emailContentManager.LoadEmailFile();
             if (emailContentManager.Content.Count < 1)
             {
-                var msg = $"Email content could not be loaded. Emails will not be sent";
+                const string msg = "Email content could not be loaded. Emails will not be sent";
                 _log.Error(msg);
                 Console.WriteLine(msg);
             }
@@ -43,17 +43,16 @@ namespace Ghosts.Client.Infrastructure.Email
         {
             LoadEmailFile();
 
-            var total = this.Content.Count();
+            var total = this.Content.Count;
 
-            if (total > 0)
-            {
-                var r = new Random();
-                var o = this.Content[r.Next(0, total)];
-                this.Configuration = Program.Configuration;
+            if (total <= 0) return;
 
-                this.Subject = ReplaceTokens(o.Subject);
-                this.Body = Parse(o.Body);
-            }
+            var r = new Random();
+            var o = this.Content[r.Next(0, total)];
+            this.Configuration = Program.Configuration;
+
+            this.Subject = ReplaceTokens(o.Subject);
+            this.Body = Parse(o.Body);
         }
 
         public void LoadEmailFile()
@@ -73,10 +72,10 @@ namespace Ghosts.Client.Infrastructure.Email
         private string ReplaceTokens(string s)
         {
             var tokens = Configuration.EmailContent;
-            foreach (KeyValuePair<string, string> token in tokens)
+            foreach (var token in tokens)
             {
                 var t = $"<{token.Key}/>";
-                s.Replace(t, token.Value);
+                s = s.Replace(t, token.Value);
             }
             return s;
         }

@@ -19,41 +19,36 @@ namespace Ghosts.Client.Handlers
 
         public BrowserFirefox(TimelineHandler handler)
         {
-            this.BrowserType = HandlerType.BrowserFirefox;
-            var hasRunSuccessfully = false;
+            BrowserType = HandlerType.BrowserFirefox;
+            bool hasRunSuccessfully = false;
             while (!hasRunSuccessfully)
             {
                 hasRunSuccessfully = FirefoxEx(handler);
             }
         }
 
-        private string GetFirefoxInstallLocation()
+        private string GetInstallLocation()
         {
-            string path = @"C:\Program Files\Mozilla Firefox\firefox.exe";
+            var path = @"C:\Program Files\Mozilla Firefox\firefox.exe";
             if (File.Exists(path))
             {
                 return path;
             }
 
             path = @"C:\Program Files (x86)\Mozilla Firefox\firefox.exe";
-            if (File.Exists(path))
-            {
-                return path;
-            }
-
-            return Program.Configuration.FirefoxInstallLocation;
+            return File.Exists(path) ? path : Program.Configuration.FirefoxInstallLocation;
         }
 
         private int GetFirefoxVersion(string path)
         {
-            FileVersionInfo versionInfo = FileVersionInfo.GetVersionInfo(path);
+            var versionInfo = FileVersionInfo.GetVersionInfo(path);
             return versionInfo.FileMajorPart;
         }
 
         private bool IsSufficientVersion(string path)
         {
-            var currentVersion = GetFirefoxVersion(path);
-            var minimumVersion = Program.Configuration.FirefoxMajorVersionMinimum;
+            int currentVersion = GetFirefoxVersion(path);
+            int minimumVersion = Program.Configuration.FirefoxMajorVersionMinimum;
             if (currentVersion < minimumVersion)
             {
                 _log.Debug($"Firefox version ({currentVersion}) is incompatible - requires at least {minimumVersion}");
@@ -61,12 +56,12 @@ namespace Ghosts.Client.Handlers
             }
             return true;
         }
-        
+
         private bool FirefoxEx(TimelineHandler handler)
         {
             try
             {
-                var path = GetFirefoxInstallLocation();
+                var path = GetInstallLocation();
 
                 if (!IsSufficientVersion(path))
                 {
@@ -74,7 +69,7 @@ namespace Ghosts.Client.Handlers
                     return true;
                 }
 
-                var options = new FirefoxOptions();
+                FirefoxOptions options = new FirefoxOptions();
                 options.AddArguments("--disable-infobars");
                 options.AddArguments("--disable-extensions");
                 options.AddArguments("--disable-notifications");
@@ -87,6 +82,10 @@ namespace Ghosts.Client.Handlers
                     if (handler.HandlerArgs.ContainsKey("isheadless") && handler.HandlerArgs["isheadless"] == "true")
                     {
                         options.AddArguments("--headless");
+                    }
+                    if (handler.HandlerArgs.ContainsKey("incognito") && handler.HandlerArgs["incognito"] == "true")
+                    {
+                        options.AddArguments("--incognito");
                     }
                     if (handler.HandlerArgs.ContainsKey("blockstyles") && handler.HandlerArgs["blockstyles"] == "true")
                     {
@@ -111,8 +110,8 @@ namespace Ghosts.Client.Handlers
                 options.Profile.SetPreference("permissions.default.geolocation", 2);
                 options.Profile.SetPreference("permissions.default.media_stream", 2);
 
-                this.Driver = new FirefoxDriver(options);
-                base.Driver = this.Driver;
+                Driver = new FirefoxDriver(options);
+                base.Driver = Driver;
 
                 //hack: bad urls used in the past...
                 if (handler.Initial.Equals("") ||
@@ -121,14 +120,14 @@ namespace Ghosts.Client.Handlers
                 {
                     handler.Initial = "about:blank";
                 }
-                
-                this.Driver.Navigate().GoToUrl(handler.Initial);
+
+                Driver.Navigate().GoToUrl(handler.Initial);
 
                 if (handler.Loop)
                 {
                     while (true)
                     {
-                        if (this.Driver.CurrentWindowHandle == null)
+                        if (Driver.CurrentWindowHandle == null)
                         {
                             throw new Exception("Firefox window handle not available");
                         }

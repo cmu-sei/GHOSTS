@@ -142,7 +142,8 @@
                 "blockscripts": "true",
                 "stickiness": 75,
                 "stickiness-depth-min": 5,
-                "stickiness-depth-max": 10000
+                "stickiness-depth-max": 10000,
+                "incognito": "true"
             },
             "Initial": "about:blank",
             "UtcTimeOn": "00:00:00",

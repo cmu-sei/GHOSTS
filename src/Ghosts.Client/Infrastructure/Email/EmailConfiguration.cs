@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using Ghosts.Domain.Code;
 using NLog;
+// ReSharper disable InconsistentNaming
 
 namespace Ghosts.Client.Infrastructure.Email
 {
@@ -17,7 +18,7 @@ namespace Ghosts.Client.Infrastructure.Email
     /// "Random|Other:string Subject",
     /// "Random|Other:string Body",
     /// "PlainText|RTF|HTML enum BodyType",
-    // "string Attachments - comma separate multiples"
+    /// "string Attachments - comma separate multiples"
     /// </summary>
     public class EmailConfiguration
     {
@@ -28,31 +29,30 @@ namespace Ghosts.Client.Infrastructure.Email
             HTML
         }
 
-        private static Logger log = LogManager.GetCurrentClassLogger();
-        private ClientConfiguration.EmailSettings settings;
+        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
 
-        public Guid Id { get; private set; }
+        public Guid Id { get; }
         /// <summary>
         /// email address sending from (ex: "me@somewhere.com") -- this account must exist in Outlook. Only one email address is allowed!
         /// </summary>
-        public string From { get; private set; }
+        public string From { get; }
         /// <summary>
         /// email address sending to. Can be multiple. In that case separate with commas (ex: "recipient@gmail.com", or "recipient1@mail.mil,recipient2@mail.mil")
         /// </summary>
-        public List<string> To { get; private set; }
-        public List<string> Cc { get; private set; }
-        public List<string> Bcc { get; private set; }
-        public string Subject { get; private set; }
-        public string Body { get; private set; }
+        public List<string> To { get; }
+        public List<string> Cc { get; }
+        public List<string> Bcc { get; }
+        public string Subject { get; }
+        public string Body { get; }
         /// <summary>
         /// if not null, must be a list of absolute file paths to attach to the email
         /// </summary>
-        public List<string> Attachments { get; private set; }
-        public EmailBodyType BodyType { get; private set; }
+        public List<string> Attachments { get; }
+        public EmailBodyType BodyType { get; }
 
         public EmailConfiguration(IList<object> args)
         {
-            this.settings = Program.Configuration.Email;
+            var settings = Program.Configuration.Email;
             var emailConfigArray = args;
             if (emailConfigArray.Count != 8)
             {
@@ -67,7 +67,8 @@ namespace Ghosts.Client.Infrastructure.Email
             this.Attachments = new List<string>();
 
             this.From = emailConfigArray[0].ToString();
-            //TODO: from just going to be the first account we find already registered in outlook
+            
+            // just use the first account we find already registered in outlook
             //if (this.From.Equals("CurrentUser", StringComparison.CurrentCultureIgnoreCase))
             //{
             //    this.From = $"{Environment.UserName}@{System.Net.NetworkInformation.IPGlobalProperties.GetIPGlobalProperties().DomainName}";
@@ -115,7 +116,7 @@ namespace Ghosts.Client.Infrastructure.Email
                     if (File.Exists(o))
                         this.Attachments.Add(o);
                     else
-                        log.Debug($"Can't add attachment {o} - file was not found");
+                        _log.Debug($"Can't add attachment {o} - file was not found");
                 }
             }
         }
@@ -128,49 +129,47 @@ namespace Ghosts.Client.Infrastructure.Email
         private static List<string> ParseEmail(string raw, int min, int max)
         {
             var list = new List<string>();
-            if (!string.IsNullOrEmpty(raw))
+            if (string.IsNullOrEmpty(raw)) return list;
+
+            var rnd = new Random();
+            var numberOfRecipients = rnd.Next(min, max);
+
+            if (numberOfRecipients < 1)
+                return list;
+
+            if (raw.StartsWith("random", StringComparison.InvariantCultureIgnoreCase))
             {
-                var rnd = new Random();
-                var numberOfRecipients = rnd.Next(min, max);
+                var o = raw.Split(Convert.ToChar(":"));
 
-                if (numberOfRecipients < 1)
-                    return list;
-
-                if (raw.StartsWith("random", StringComparison.InvariantCultureIgnoreCase))
+                if (o.GetUpperBound(0) > 1) //supplied list
                 {
-                    var o = raw.Split(Convert.ToChar(":"));
+                    var l = o[1];
+                    var emails = l.Split(Convert.ToChar(","));
 
-                    if (o.GetUpperBound(0) > 1) //supplied list
-                    {
-                        var l = o[1];
-                        var emails = l.Split(Convert.ToChar(","));
-
-                        for (var i = 0; i < numberOfRecipients; i++)
-                            list.Add(emails.PickRandom());
-                    }
-                    else //build list
-                    {
-                        //add domain
-                        var emails = EmailListManager.GetDomainList();
-
-                        for (var i = 0; i < numberOfRecipients; i++)
-                            list.Add(emails.PickRandom());
-
-                        //add outside
-                        var x = rnd.Next(Program.Configuration.Email.RecipientsOutsideMin, Program.Configuration.Email.RecipientsOutsideMax);
-                        if (x < 1)
-                        {
-                            var outsideEmails = EmailListManager.GetOutsideList();
-                            for (var i = 0; i < x; i++)
-                                list.Add(outsideEmails.PickRandom());
-                        }
-                    }
+                    for (var i = 0; i < numberOfRecipients; i++)
+                        list.Add(emails.PickRandom());
                 }
-                else
+                else //build list
                 {
-                    var a = raw.Split(Convert.ToChar(","));
-                    list.AddRange(a.Where(IsValidEmail));
+                    //add domain
+                    var emails = EmailListManager.GetDomainList();
+
+                    for (var i = 0; i < numberOfRecipients; i++)
+                        list.Add(emails.PickRandom());
+
+                    //add outside
+                    var x = rnd.Next(Program.Configuration.Email.RecipientsOutsideMin, Program.Configuration.Email.RecipientsOutsideMax);
+                    if (x >= 1) return list;
+                    
+                    var outsideEmails = EmailListManager.GetOutsideList();
+                    for (var i = 0; i < x; i++)
+                        list.Add(outsideEmails.PickRandom());
                 }
+            }
+            else
+            {
+                var a = raw.Split(Convert.ToChar(","));
+                list.AddRange(a.Where(IsValidEmail));
             }
             return list;
         }
@@ -179,8 +178,8 @@ namespace Ghosts.Client.Infrastructure.Email
         {
             try
             {
-                var addr = new System.Net.Mail.MailAddress(email);
-                return addr.Address == email;
+                var address = new System.Net.Mail.MailAddress(email);
+                return address.Address == email;
             }
             catch
             {

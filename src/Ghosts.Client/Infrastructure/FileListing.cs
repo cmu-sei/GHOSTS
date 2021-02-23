@@ -18,8 +18,8 @@ namespace Ghosts.Client.Infrastructure
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
         private static readonly string _fileName = ApplicationDetails.InstanceFiles.FilesCreated;
-        private static Object _locked = new Object();
-        private static Object _safetyLocked = new Object();
+        private static readonly object _locked = new object();
+        private static readonly object _safetyLocked = new object();
 
         public static void Add(string path)
         {
@@ -32,10 +32,10 @@ namespace Ghosts.Client.Infrastructure
                 {
                     lock (_locked) //if a thread has entered, the others will wait
                     {
-                        var writetext = new StreamWriter(_fileName, true);
-                        writetext.WriteLine(path);
-                        writetext.Flush();
-                        writetext.Close();
+                        var writer = new StreamWriter(_fileName, true);
+                        writer.WriteLine(path);
+                        writer.Flush();
+                        writer.Close();
                     }
                 }
                 else //sleep if safetynet is being safe

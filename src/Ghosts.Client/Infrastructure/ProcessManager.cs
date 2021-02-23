@@ -34,12 +34,12 @@ namespace Ghosts.Client.Infrastructure
         {
             try
             {
-                var procs = Process.GetProcessesByName(procName).ToList();
-                procs.Sort((x1, x2) => x1.StartTime.CompareTo(x2.StartTime));
+                var processes = Process.GetProcessesByName(procName).ToList();
+                processes.Sort((x1, x2) => x1.StartTime.CompareTo(x2.StartTime));
 
                 var thisPid = GetThisProcessPid();
                 
-                foreach (var process in procs)
+                foreach (var process in processes)
                 {
                     try
                     {
@@ -99,9 +99,9 @@ namespace Ghosts.Client.Infrastructure
         {
             try
             {
-                Process[] procs = Process.GetProcessesByName(processName);
+                var processes = Process.GetProcessesByName(processName);
 
-                return procs.Select(proc => proc.Id).ToArray();
+                return processes.Select(proc => proc.Id).ToArray();
             }
             catch (Exception e)
             {

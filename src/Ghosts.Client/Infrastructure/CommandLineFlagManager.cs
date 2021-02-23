@@ -4,7 +4,6 @@ using CommandLine;
 using CommandLine.Text;
 using Ghosts.Domain.Code;
 using System;
-using System.IO;
 using System.Reflection;
 using Ghosts.Domain;
 using Newtonsoft.Json;

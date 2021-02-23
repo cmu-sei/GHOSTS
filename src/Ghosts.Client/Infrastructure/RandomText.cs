@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using Ghosts.Domain.Code;
 using Newtonsoft.Json;
 
 namespace Ghosts.Client.Infrastructure
@@ -14,9 +13,9 @@ namespace Ghosts.Client.Infrastructure
     /// </summary>
     public class RandomText
     {
-        private static Random _random = new Random();
-        private StringBuilder _builder;
-        private string[] _words;
+        private static readonly Random _random = new Random();
+        private readonly StringBuilder _builder;
+        private readonly string[] _words;
 
         public RandomText(string[] words)
         {

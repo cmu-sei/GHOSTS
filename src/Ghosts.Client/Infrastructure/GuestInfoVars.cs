@@ -13,7 +13,7 @@ namespace Ghosts.Client.Infrastructure
 
         public static void Load(ResultMachine machine)
         {
-            //if confgigured, try to set machine.name based on some vmtools.exe value
+            //if configured, try to set machine.name based on some vmtools.exe value
             try
             {
                 if (Program.Configuration.IdFormat.Equals("guestinfo", StringComparison.InvariantCultureIgnoreCase))

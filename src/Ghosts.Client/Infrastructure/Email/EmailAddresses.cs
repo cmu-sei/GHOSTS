@@ -1,29 +1,14 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Ghosts.Domain.Code;
 using Newtonsoft.Json;
-using NLog;
 
 namespace Ghosts.Client.Infrastructure.Email
 {
-    public class EmailAddresses
-    {
-        public List<string> Emails { get; set; }
-
-        public EmailAddresses()
-        {
-            this.Emails = new List<string>();
-        }
-    }
-
     public static class EmailListManager
     {
-        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-
         public static List<string> GetDomainList()
         {
             var fileName = ClientConfigurationResolver.EmailDomain;
@@ -39,8 +24,7 @@ namespace Ghosts.Client.Infrastructure.Email
                 //save to local disk
                 using (var file = File.CreateText(fileName))
                 {
-                    var serializer = new JsonSerializer();
-                    serializer.Formatting = Formatting.Indented;
+                    var serializer = new JsonSerializer {Formatting = Formatting.Indented};
                     serializer.Serialize(file, emails);
                     return emails;
                 }
