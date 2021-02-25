@@ -82,7 +82,7 @@ namespace Ghosts.Client.Handlers
         {
             try
             {
-                foreach (TimelineEvent timelineEvent in handler.TimeLineEvents)
+                foreach (var timelineEvent in handler.TimeLineEvents)
                 {
                     WorkingHours.Is(handler);
 
@@ -96,7 +96,7 @@ namespace Ghosts.Client.Handlers
                         default:
                             try
                             {
-                                EmailConfiguration emailConfig = new EmailConfiguration(timelineEvent.CommandArgs);
+                                var emailConfig = new EmailConfiguration(timelineEvent.CommandArgs);
                                 if (SendEmailViaOutlook(emailConfig))
                                 {
                                     Report(handler.HandlerType.ToString(), timelineEvent.Command, emailConfig.ToString());

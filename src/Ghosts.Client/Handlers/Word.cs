@@ -30,8 +30,8 @@ namespace Ghosts.Client.Handlers
                     {
                         if (timeline != null)
                         {
-                            System.Collections.Generic.List<int> pids = ProcessManager.GetPids(ProcessManager.ProcessNames.Word).ToList();
-                            if (pids.Count > timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.Word))
+                            System.Collections.Generic.List<int> processIds = ProcessManager.GetPids(ProcessManager.ProcessNames.Word).ToList();
+                            if (processIds.Count > timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.Word))
                             {
                                 continue;
                             }
@@ -64,7 +64,7 @@ namespace Ghosts.Client.Handlers
         {
             try
             {
-                foreach (TimelineEvent timelineEvent in handler.TimeLineEvents)
+                foreach (var timelineEvent in handler.TimeLineEvents)
                 {
                     try
                     {
@@ -78,27 +78,27 @@ namespace Ghosts.Client.Handlers
 
                         if (timeline != null)
                         {
-                            System.Collections.Generic.List<int> pids = ProcessManager.GetPids(ProcessManager.ProcessNames.Word).ToList();
-                            if (pids.Count > timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.Word))
+                            var processIds = ProcessManager.GetPids(ProcessManager.ProcessNames.Word).ToList();
+                            if (processIds.Count > timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.Word))
                             {
                                 return;
                             }
                         }
 
                         // start word and turn off msg boxes
-                        Word.Application wordApplication = new Word.Application
+                        var wordApplication = new Word.Application
                         {
                             DisplayAlerts = WdAlertLevel.wdAlertsNone,
                             Visible = true
                         };
 
                         // add a new document
-                        Word.Document newDocument = wordApplication.Documents.Add();
+                        var newDocument = wordApplication.Documents.Add();
 
                         try
                         {
                             wordApplication.WindowState = WdWindowState.wdWindowStateMinimize;
-                            foreach (Word.Document item in wordApplication.Documents)
+                            foreach (var item in wordApplication.Documents)
                             {
                                 item.Windows[1].WindowState = WdWindowState.wdWindowStateMinimize;
                             }
@@ -109,12 +109,12 @@ namespace Ghosts.Client.Handlers
                         }
 
                         // insert some text
-                        System.Collections.Generic.List<string> list = RandomText.GetDictionary.GetDictionaryList();
-                        RandomText rt = new RandomText(list.ToArray());
+                        var list = RandomText.GetDictionary.GetDictionaryList();
+                        var rt = new RandomText(list.ToArray());
                         rt.AddContentParagraphs(1, 1, 1, 10, 50);
                         wordApplication.Selection.TypeText(rt.Content);
 
-                        int writeSleep = ProcessManager.Jitter(100);
+                        var writeSleep = ProcessManager.Jitter(100);
                         Thread.Sleep(writeSleep);
 
                         wordApplication.Selection.HomeKey(WdUnits.wdLine, WdMovementType.wdExtend);
@@ -122,9 +122,9 @@ namespace Ghosts.Client.Handlers
                         wordApplication.Selection.Font.Bold = 1;
                         wordApplication.Selection.Font.Size = 18;
 
-                        string rand = RandomFilename.Generate();
+                        var rand = RandomFilename.Generate();
 
-                        string dir = timelineEvent.CommandArgs[0].ToString();
+                        var dir = timelineEvent.CommandArgs[0].ToString();
                         if (dir.Contains("%"))
                         {
                             dir = Environment.ExpandEnvironmentVariables(dir);
@@ -135,11 +135,11 @@ namespace Ghosts.Client.Handlers
                             Directory.CreateDirectory(dir);
                         }
 
-                        string path = $"{dir}\\{rand}.docx";
+                        var path = $"{dir}\\{rand}.docx";
 
                         //if directory does not exist, create!
                         _log.Trace($"Checking directory at {path}");
-                        DirectoryInfo f = new FileInfo(path).Directory;
+                        var f = new FileInfo(path).Directory;
                         if (f == null)
                         {
                             _log.Trace($"Directory does not exist, creating directory at {f.FullName}");
@@ -206,7 +206,7 @@ namespace Ghosts.Client.Handlers
             finally
             {
                 KillApp();
-                _log.Trace($"Word closing...");
+                _log.Trace("Word closing...");
             }
         }
     }

@@ -1,6 +1,5 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -28,7 +27,7 @@ namespace Ghosts.Client.Infrastructure
                 if (!File.Exists(_fileName))
                     File.Create(_fileName);
 
-                if (!Monitor.IsEntered(_safetyLocked)) //checking if safetynet is currently flushing cache
+                if (!Monitor.IsEntered(_safetyLocked)) //checking if safety net is currently flushing cache
                 {
                     lock (_locked) //if a thread has entered, the others will wait
                     {
@@ -38,7 +37,7 @@ namespace Ghosts.Client.Infrastructure
                         writer.Close();
                     }
                 }
-                else //sleep if safetynet is being safe
+                else //sleep if safety net is being safe
                 {
                     Thread.Sleep(5000);
                 }
@@ -76,39 +75,39 @@ namespace Ghosts.Client.Infrastructure
                         {
                             var file = new FileInfo(line);
                             var creationTime = file.CreationTime.Hour;
-                            _log.Trace($"file is {file.FullName} {file.CreationTime}");
-                            if (file.Exists && (creationTime > Program.Configuration.OfficeDocsMaxAgeInHours)) //clean up and delete files older than x hours
+                            _log.Trace($"Delete evaluation for {file.FullName} {file.CreationTime}");
+
+                            if (!file.Exists || (creationTime <= Program.Configuration.OfficeDocsMaxAgeInHours))
+                                continue;
+
+                            try
                             {
-                                try
-                                {
-                                    _log.Trace($"deleting: {file.FullName}");
-                                    file.Delete();
-                                    deletedFiles.Add(file.FullName);
-                                }
-                                catch (Exception e)
-                                {
-                                    _log.Debug($"Could not delete file {e}");
-                                }
+                                _log.Trace($"Deleting: {file.FullName}");
+                                file.Delete();
+                                deletedFiles.Add(file.FullName);
+                            }
+                            catch (Exception e)
+                            {
+                                _log.Debug($"Could not delete file {_fileName}: {e}");
                             }
                         }
                     }
 
-                    if (deletedFiles.Count >= 0)
+                    if (deletedFiles.Count < 0) return;
+                    
+                    var lines = File.ReadAllLines(_fileName).ToList();
+                    foreach (var line in lines.ToArray())
                     {
-                        var lines = File.ReadAllLines(_fileName).ToList();
-                        foreach (var line in lines.ToArray())
+                        if (deletedFiles.Contains(line))
                         {
-                            if (deletedFiles.Contains(line))
-                            {
-                                lines.Remove(line);
-                            }
+                            lines.Remove(line);
                         }
-                        File.WriteAllLines(_fileName, lines);
                     }
+                    File.WriteAllLines(_fileName, lines);
                 }
                 catch (Exception e)
                 {
-                    _log.Error($"Error flushing list {e}");
+                    _log.Error($"Error flushing {_fileName}: {e}");
                 }
             }
         }

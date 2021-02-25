@@ -32,8 +32,8 @@ namespace Ghosts.Client.Handlers
                     {
                         if (timeline != null)
                         {
-                            var pids = ProcessManager.GetPids(ProcessManager.ProcessNames.PowerPoint).ToList();
-                            if (pids.Count > timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.PowerPoint))
+                            var processIds = ProcessManager.GetPids(ProcessManager.ProcessNames.PowerPoint).ToList();
+                            if (processIds.Count > timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.PowerPoint))
                             {
                                 continue;
                             }
@@ -66,7 +66,7 @@ namespace Ghosts.Client.Handlers
         {
             try
             {
-                foreach (TimelineEvent timelineEvent in handler.TimeLineEvents)
+                foreach (var timelineEvent in handler.TimeLineEvents)
                 {
                     try
                     {
@@ -80,14 +80,14 @@ namespace Ghosts.Client.Handlers
 
                         if (timeline != null)
                         {
-                            var pids = ProcessManager.GetPids(ProcessManager.ProcessNames.PowerPoint).ToList();
-                            if (pids.Count > timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.PowerPoint))
+                            var processIds = ProcessManager.GetPids(ProcessManager.ProcessNames.PowerPoint).ToList();
+                            if (processIds.Count > timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.PowerPoint))
                             {
                                 return;
                             }
                         }
 
-                        PowerPoint.Application powerApplication = new PowerPoint.Application
+                        var powerApplication = new PowerPoint.Application
                         {
                             DisplayAlerts = PpAlertLevel.ppAlertsNone,
                             Visible = MsoTriState.msoTrue
@@ -103,16 +103,16 @@ namespace Ghosts.Client.Handlers
                         }
 
                         // add a new presentation with one new slide
-                        PowerPoint.Presentation presentation = powerApplication.Presentations.Add(MsoTriState.msoTrue);
+                        var presentation = powerApplication.Presentations.Add(MsoTriState.msoTrue);
                         presentation.Slides.Add(1, PpSlideLayout.ppLayoutClipArtAndVerticalText);
 
                         var writeSleep = ProcessManager.Jitter(100);
                         Thread.Sleep(writeSleep);
 
                         // save the document 
-                        string rand = RandomFilename.Generate();
+                        var rand = RandomFilename.Generate();
 
-                        string dir = timelineEvent.CommandArgs[0].ToString();
+                        var dir = timelineEvent.CommandArgs[0].ToString();
                         if (dir.Contains("%"))
                         {
                             dir = Environment.ExpandEnvironmentVariables(dir);
@@ -123,15 +123,15 @@ namespace Ghosts.Client.Handlers
                             Directory.CreateDirectory(dir);
                         }
 
-                        string path = $"{dir}\\{rand}.pptx";
+                        var path = $"{dir}\\{rand}.pptx";
 
                         //if directory does not exist, create!
                         _log.Trace($"Checking directory at {path}");
-                        DirectoryInfo f = new FileInfo(path).Directory;
+                        var f = new FileInfo(path).Directory;
                         if (f == null)
                         {
-                            _log.Trace($"Directory does not exist, creating directory at {f.FullName}");
-                            Directory.CreateDirectory(f.FullName);
+                            _log.Trace($"Directory does not exist, creating directory at {path}");
+                            Directory.CreateDirectory(path);
                         }
 
                         try
@@ -196,7 +196,7 @@ namespace Ghosts.Client.Handlers
             finally
             {
                 KillApp();
-                _log.Trace($"PowerPoint closing...");
+                _log.Trace("PowerPoint closing...");
             }
         }
     }

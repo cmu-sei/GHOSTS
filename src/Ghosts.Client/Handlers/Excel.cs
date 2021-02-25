@@ -4,7 +4,6 @@ using Ghosts.Client.Infrastructure;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Microsoft.Office.Interop.Excel;
-using NetOffice.OfficeApi.Tools.Utils;
 using NLog;
 using System;
 using System.Drawing;
@@ -34,8 +33,8 @@ namespace Ghosts.Client.Handlers
                     {
                         if (timeline != null)
                         {
-                            var pids = ProcessManager.GetPids(ProcessManager.ProcessNames.Excel).ToList();
-                            if (pids.Count > timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.Excel))
+                            var processIds = ProcessManager.GetPids(ProcessManager.ProcessNames.Excel).ToList();
+                            if (processIds.Count > timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.Excel))
                             {
                                 continue;
                             }
@@ -68,7 +67,7 @@ namespace Ghosts.Client.Handlers
         {
             try
             {
-                foreach (TimelineEvent timelineEvent in handler.TimeLineEvents)
+                foreach (var timelineEvent in handler.TimeLineEvents)
                 {
                     try
                     {
@@ -82,15 +81,15 @@ namespace Ghosts.Client.Handlers
 
                         if (timeline != null)
                         {
-                            var pids = ProcessManager.GetPids(ProcessManager.ProcessNames.Excel).ToList();
-                            if (pids.Count > timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.Excel))
+                            var processIds = ProcessManager.GetPids(ProcessManager.ProcessNames.Excel).ToList();
+                            if (processIds.Count > timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.Excel))
                             {
                                 return;
                             }
                         }
 
                         // start excel and turn off msg boxes
-                        Excel.Application excelApplication = new Excel.Application
+                        var excelApplication = new Excel.Application
                         {
                             DisplayAlerts = false,
                             Visible = true
@@ -99,7 +98,7 @@ namespace Ghosts.Client.Handlers
                         try
                         {
                             excelApplication.WindowState = XlWindowState.xlMinimized;
-                            foreach (Excel.Workbook item in excelApplication.Workbooks)
+                            foreach (var item in excelApplication.Workbooks)
                             {
                                 item.Windows[1].WindowState = XlWindowState.xlMinimized;
                             }
@@ -110,13 +109,13 @@ namespace Ghosts.Client.Handlers
                         }
 
                         // create a utils instance, not need for but helpful to keep the lines of code low
-                        CommonUtils utils = new CommonUtils(excelApplication);
+                        var utils = new CommonUtils(excelApplication);
 
                         _log.Trace("Excel adding workbook");
                         // add a new workbook
-                        Excel.Workbook workBook = excelApplication.Workbooks.Add();
+                        var workBook = excelApplication.Workbooks.Add();
                         _log.Trace("Excel adding worksheet");
-                        Excel.Worksheet workSheet = (Excel.Worksheet) workBook.Worksheets[1];
+                        var workSheet = (Excel.Worksheet) workBook.Worksheets[1];
 
                         // draw back color and perform the BorderAround method
                         workSheet.Range("$B2:$B5").Interior.Color = utils.Color.ToDouble(Color.DarkGreen);
@@ -140,9 +139,9 @@ namespace Ghosts.Client.Handlers
 
                         workSheet.Cells[1, 1].Value = "We have 2 simple shapes created.";
 
-                        string rand = RandomFilename.Generate();
+                        var rand = RandomFilename.Generate();
 
-                        string dir = timelineEvent.CommandArgs[0].ToString();
+                        var dir = timelineEvent.CommandArgs[0].ToString();
                         if (dir.Contains("%"))
                         {
                             dir = Environment.ExpandEnvironmentVariables(dir);
@@ -153,11 +152,11 @@ namespace Ghosts.Client.Handlers
                             Directory.CreateDirectory(dir);
                         }
 
-                        string path = $"{dir}\\{rand}.xlsx";
+                        var path = $"{dir}\\{rand}.xlsx";
 
                         //if directory does not exist, create!
                         _log.Trace($"Checking directory at {path}");
-                        DirectoryInfo f = new FileInfo(path).Directory;
+                        var f = new FileInfo(path).Directory;
                         if (f == null)
                         {
                             _log.Trace($"Directory does not exist, creating directory at {f.FullName}");
@@ -228,7 +227,7 @@ namespace Ghosts.Client.Handlers
             finally
             {
                 KillApp();
-                _log.Trace($"Excel closing...");
+                _log.Trace("Excel closing...");
             }
         }
     }
