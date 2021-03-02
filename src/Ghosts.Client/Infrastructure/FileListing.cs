@@ -73,7 +73,20 @@ namespace Ghosts.Client.Infrastructure
                         string line;
                         while ((line = reader.ReadLine()) != null)
                         {
-                            var file = new FileInfo(line);
+
+                            FileInfo file;
+
+                            try
+                            {
+                                file = new FileInfo(line);
+                            }
+                            catch (Exception e)
+                            {
+                                _log.Trace($"Error with file in deleted list {line}: {e}");
+                                deletedFiles.Add(line);
+                                continue;
+                            }
+
                             var creationTime = file.CreationTime.Hour;
                             _log.Trace($"Delete evaluation for {file.FullName} {file.CreationTime}");
 
