@@ -213,7 +213,7 @@ namespace ghosts.client.linux.Comms
             if (Program.Configuration.ClientResults.IsSecure)
             {
                 payload = Crypto.EncryptStringAes(payload, machine.Name);
-                payload = Crypto.Base64Encode(payload);
+                payload = Base64Encoder.Base64Encode(payload);
 
                 var p = new EncryptedPayload();
                 p.Payload = payload;
@@ -259,7 +259,7 @@ namespace ghosts.client.linux.Comms
                 if (Program.Configuration.Survey.IsSecure)
                 {
                     payload = Crypto.EncryptStringAes(payload, machine.Name);
-                    payload = Crypto.Base64Encode(payload);
+                    payload = Base64Encoder.Base64Encode(payload);
 
                     var p = new EncryptedPayload();
                     p.Payload = payload;
