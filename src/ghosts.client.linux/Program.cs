@@ -26,7 +26,6 @@ namespace ghosts.client.linux
         {
             ClientConfigurationLoader.UpdateConfigurationWithEnvVars();
             
-            
             try
             {
                 Run(args);
