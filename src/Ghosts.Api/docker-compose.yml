@@ -1,5 +1,6 @@
 # docker-compose up -d
 # -f compose-api.yml (if you want a custom file)
+# The Grafana volume mounts assume the directory structure matches the git repository
 
 version: '3.2'
 networks:
@@ -14,8 +15,8 @@ services:
       POSTGRES_USER: ghosts
       POSTGRES_PASSWORD: scotty@1
     volumes:
-      - /Users/dustin/data/ghosts/db_data:/var/lib/postgresql/data
-      - /Users/dustin/data/ghosts/spectre_data:/tmp
+      - ./db_data:/var/lib/postgresql/data
+      - ./spectre_data:/tmp
     logging:
       options:
         max-size: '100m'
@@ -54,4 +55,6 @@ services:
       - ghosts-network
     restart: always
     volumes:
-      - /Users/dustin/data/ghosts/g_data:/var/lib/grafana
+      - ./g_data:/var/lib/grafana
+      - ../../configuration/grafana/datasources:/etc/grafana/provisioning/datasources
+      - ../../configuration/grafana/dashboards:/etc/grafana/provisioning/dashboards
