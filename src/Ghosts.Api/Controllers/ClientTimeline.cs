@@ -32,7 +32,7 @@ namespace ghosts.api.Controllers
         }
 
         /// <summary>
-        /// Clients pot their timelines here, so that the C2 knows what a particular agent is doing
+        /// Clients post their timelines here, so that the C2 knows what a particular agent is doing
         /// </summary>
         /// <param name="timeline">The client's current timeline</param>
         /// <param name="ct">Cancellation Token</param>

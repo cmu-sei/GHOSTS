@@ -306,6 +306,9 @@ namespace Ghosts.Api.Services
                                         CreatedUtc = time
                                     };
 
+                                    if (data.Tags != null)
+                                        timeline.Tags = data.Tags; 
+
                                     if (data.Result != null)
                                         timeline.Result = data.Result;
 

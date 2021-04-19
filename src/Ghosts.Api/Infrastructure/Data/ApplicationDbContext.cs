@@ -50,6 +50,7 @@ namespace Ghosts.Api.Infrastructure.Data
             modelBuilder.Entity<HistoryHealth>().HasIndex(o => new {o.CreatedUtc});
 
             modelBuilder.Entity<HistoryTimeline>().HasIndex(o => new {o.CreatedUtc});
+            modelBuilder.Entity<HistoryTimeline>().HasIndex(o => new {o.Tags});
 
             modelBuilder.Entity<MachineUpdate>().HasIndex(o => new {o.CreatedUtc});
             modelBuilder.Entity<MachineUpdate>().HasIndex(o => new {o.ActiveUtc});

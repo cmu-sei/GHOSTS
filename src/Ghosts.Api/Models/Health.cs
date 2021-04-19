@@ -1,6 +1,7 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Ghosts.Api.Models
@@ -45,6 +46,19 @@ namespace Ghosts.Api.Models
         public string Command { get; set; }
         public string CommandArg { get; set; }
         public string Result { get; set; }
+        
+        public string Tags { get; set; }
+        
+        public IEnumerable<string> GetTags()
+        {
+            if (string.IsNullOrEmpty(this.Tags)) return new List<string>();
+            return this.Tags.ToLower().Split(",");
+        }
+
+        public void SetTags(string value)
+        {
+            if(value != null) this.Tags = string.Join(",", value.ToLower());
+        }
     }
 
     [Table("history_trackables")]
