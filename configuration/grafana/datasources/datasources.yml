@@ -1,0 +1,18 @@
+# # config file version
+apiVersion: 1
+
+# # list of datasources that should be deleted from the database
+deleteDatasources:
+
+# # datasources to create
+datasources:
+- name: ghosts
+  type: postgres
+  url: ghosts-postgres:5432
+  database: ghosts
+  user: ghosts
+  secureJsonData:
+    password: scotty@1
+  isDefault: true
+  jsonData:
+    sslmode: disable
