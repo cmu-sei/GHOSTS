@@ -134,6 +134,19 @@ namespace ghosts.client.linux.timelineManager
 
                         //threadJob.ProcessName = ProcessManager.ProcessNames.Command;
                         break;
+                    case HandlerType.BrowserFirefox:
+                        BrowserFirefox o = new BrowserFirefox(handler);
+                        // t = new Thread(() =>
+                        // {
+                        //     BrowserFirefox o = new BrowserFirefox(handler);
+                        // })
+                        // {
+                        //     IsBackground = true,
+                        //     Name = threadJob.Id
+                        // };
+                        // t.Start();
+
+                        break;
                 }
 
                 if (threadJob.ProcessName != null)
