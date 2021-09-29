@@ -8,6 +8,7 @@ using Ghosts.Api.Models;
 using Ghosts.Api.Services;
 using Ghosts.Api.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace ghosts.api.Controllers
@@ -47,7 +48,7 @@ namespace ghosts.api.Controllers
         /// <param name="ct">Cancellation token</param>
         /// <returns>204 No content</returns>
         [HttpPost("timeline")]
-        [ProducesResponseType(typeof(Task<IActionResult>), (int) HttpStatusCode.NoContent)]
+        // [ProducesResponseType(typeof(Task<IActionResult>), (int) HttpStatusCode.NoContent)] Swagger hates this https://stackoverflow.com/questions/35605427/swagger-ui-freezes-after-api-fetch-and-browser-crashes
         [SwaggerOperation(OperationId = "createTimeline")]
         public async Task<IActionResult> Timeline([FromBody] MachineUpdateViewModel machineUpdate, CancellationToken ct)
         {
@@ -63,7 +64,7 @@ namespace ghosts.api.Controllers
         /// <param name="ct">Cancellation token</param>
         /// <returns>204 No content</returns>
         [HttpPost("timeline/bygroup/{groupId}")]
-        [ProducesResponseType(typeof(Task<IActionResult>), (int) HttpStatusCode.NoContent)]
+        // [ProducesResponseType(typeof(Task<IActionResult>), (int) HttpStatusCode.NoContent)] Swagger hates this
         [SwaggerOperation(OperationId = "createTimelineForGroup")]
         public async Task<IActionResult> GroupTimeline([FromRoute] int groupId, [FromBody] MachineUpdateViewModel machineUpdate, CancellationToken ct)
         {

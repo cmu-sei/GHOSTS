@@ -74,7 +74,7 @@ namespace Ghosts.Api
 
             services.AddCors(options => options.UseConfiguredCors(Configuration.GetSection("CorsPolicy")));
             services.AddRouting(options => options.LowercaseUrls = true);
-            services.AddMvc();
+            services.AddMvc().AddNewtonsoftJson();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
