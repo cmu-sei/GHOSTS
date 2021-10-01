@@ -8,6 +8,12 @@
         "hide": true,
         "iconColor": "rgba(0, 211, 255, 1)",
         "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
         "type": "dashboard"
       }
     ]
@@ -15,7 +21,6 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 4,
   "links": [],
   "panels": [
     {
@@ -26,14 +31,15 @@
           "color": {
             "mode": "thresholds"
           },
-          "custom": {},
           "mappings": [
             {
-              "id": 0,
-              "op": "=",
-              "text": "N/A",
-              "type": 1,
-              "value": "null"
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "N/A"
+                }
+              },
+              "type": "special"
             }
           ],
           "thresholds": {
@@ -78,7 +84,7 @@
         "text": {},
         "textMode": "auto"
       },
-      "pluginVersion": "7.4.0",
+      "pluginVersion": "8.1.5",
       "targets": [
         {
           "alias": "",
@@ -120,14 +126,15 @@
           "color": {
             "mode": "thresholds"
           },
-          "custom": {},
           "mappings": [
             {
-              "id": 0,
-              "op": "=",
-              "text": "N/A",
-              "type": 1,
-              "value": "null"
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "N/A"
+                }
+              },
+              "type": "special"
             }
           ],
           "thresholds": {
@@ -172,7 +179,7 @@
         "text": {},
         "textMode": "auto"
       },
-      "pluginVersion": "7.4.0",
+      "pluginVersion": "8.1.5",
       "targets": [
         {
           "alias": "",
@@ -214,14 +221,15 @@
           "color": {
             "mode": "thresholds"
           },
-          "custom": {},
           "mappings": [
             {
-              "id": 0,
-              "op": "=",
-              "text": "N/A",
-              "type": 1,
-              "value": "null"
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "N/A"
+                }
+              },
+              "type": "special"
             }
           ],
           "thresholds": {
@@ -266,7 +274,7 @@
         "text": {},
         "textMode": "auto"
       },
-      "pluginVersion": "7.4.0",
+      "pluginVersion": "8.1.5",
       "targets": [
         {
           "alias": "",
@@ -307,14 +315,15 @@
           "color": {
             "mode": "thresholds"
           },
-          "custom": {},
           "mappings": [
             {
-              "id": 0,
-              "op": "=",
-              "text": "N/A",
-              "type": 1,
-              "value": "null"
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "N/A"
+                }
+              },
+              "type": "special"
             }
           ],
           "thresholds": {
@@ -359,7 +368,7 @@
         "text": {},
         "textMode": "auto"
       },
-      "pluginVersion": "7.4.0",
+      "pluginVersion": "8.1.5",
       "targets": [
         {
           "alias": "",
@@ -401,12 +410,6 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": null,
-      "fieldConfig": {
-        "defaults": {
-          "custom": {}
-        },
-        "overrides": []
-      },
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
@@ -438,7 +441,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.4.0",
+      "pluginVersion": "8.1.5",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -584,12 +587,6 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": null,
-      "fieldConfig": {
-        "defaults": {
-          "custom": {}
-        },
-        "overrides": []
-      },
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
@@ -619,7 +616,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.4.0",
+      "pluginVersion": "8.1.5",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -634,7 +631,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT\n  handler as \"Handler\",\n  count(*) as \"Executions\",\n  date_trunc('minute', createdutc) as \"time\"\nFROM\n  history_timeline\ngroup by handler, date_trunc('minute', createdutc) \norder by date_trunc('minute', createdutc)  DESC\n",
+          "rawSql": "SELECT\n  handler as \"Handler\",\n  count(*) as \"Executions\",\n  date_trunc('minute', createdutc) as \"time\"\nFROM\n  history_timeline\ngroup by handler, date_trunc('minute', createdutc) \norder by date_trunc('minute', createdutc) ASC\n",
           "refId": "A",
           "select": [
             [
@@ -706,6 +703,7 @@
           },
           "custom": {
             "align": null,
+            "displayMode": "auto",
             "filterable": false
           },
           "decimals": 2,
@@ -760,7 +758,7 @@
       "options": {
         "showHeader": true
       },
-      "pluginVersion": "7.4.0",
+      "pluginVersion": "8.1.5",
       "targets": [
         {
           "alias": "",
@@ -810,6 +808,7 @@
           },
           "custom": {
             "align": null,
+            "displayMode": "auto",
             "filterable": false
           },
           "decimals": 2,
@@ -864,7 +863,7 @@
       "options": {
         "showHeader": true
       },
-      "pluginVersion": "7.4.0",
+      "pluginVersion": "8.1.5",
       "targets": [
         {
           "alias": "",
@@ -907,16 +906,16 @@
       "type": "table"
     }
   ],
-  "refresh": false,
-  "schemaVersion": 27,
+  "refresh": "",
+  "schemaVersion": 30,
   "style": "dark",
   "tags": [],
   "templating": {
     "list": []
   },
   "time": {
-    "from": "now-6M",
-    "to": "now"
+    "from": "2021-10-01T12:17:30.079Z",
+    "to": "2021-10-01T12:56:45.763Z"
   },
   "timepicker": {
     "refresh_intervals": [
@@ -946,5 +945,5 @@
   "timezone": "utc",
   "title": "GHOSTS 5",
   "uid": "WdD_zPV7z",
-  "version": 1
+  "version": 2
 }
