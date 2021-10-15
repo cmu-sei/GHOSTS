@@ -15,6 +15,7 @@ namespace Ghosts.Client.Handlers
     {
         public static readonly Logger _log = LogManager.GetCurrentClassLogger();
         public IWebDriver Driver { get; set; }
+        public IJavaScriptExecutor JS { get; set; }
         public HandlerType BrowserType { get; set; }
         private int _stickiness = 0;
         private int _depthMin = 1;
@@ -157,14 +158,32 @@ namespace Ghosts.Client.Handlers
                             actions.SendKeys(element, timelineEvent.CommandArgs[1].ToString()).Build().Perform();
                             break;
                         case "click":
+                        case "click.by.name":
                             element = Driver.FindElement(By.Name(timelineEvent.CommandArgs[0].ToString()));
                             actions = new Actions(Driver);
                             actions.MoveToElement(element).Click().Perform();
                             break;
                         case "clickbyid":
+                        case "click.by.id":
                             element = Driver.FindElement(By.Id(timelineEvent.CommandArgs[0].ToString()));
                             actions = new Actions(Driver);
                             actions.MoveToElement(element).Click().Perform();
+                            break;
+                        case "click.by.linktext":
+                            element = Driver.FindElement(By.LinkText(timelineEvent.CommandArgs[0].ToString()));
+                            actions = new Actions(Driver);
+                            actions.MoveToElement(element).Click().Perform();
+                            break;
+                        case "click.by.cssselector":
+                            element = Driver.FindElement(By.CssSelector(timelineEvent.CommandArgs[0].ToString()));
+                            actions = new Actions(Driver);
+                            actions.MoveToElement(element).Click().Perform();
+                            break;
+                        case "js.executescript":
+                            JS.ExecuteScript(timelineEvent.CommandArgs[0].ToString());
+                            break;
+                        case "manage.window.size":
+                            Driver.Manage().Window.Size = new System.Drawing.Size(Convert.ToInt32(timelineEvent.CommandArgs[0]), Convert.ToInt32(timelineEvent.CommandArgs[1]));
                             break;
                     }
 

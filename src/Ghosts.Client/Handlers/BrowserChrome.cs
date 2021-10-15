@@ -5,11 +5,14 @@ using Ghosts.Domain;
 using OpenQA.Selenium.Chrome;
 using System;
 using System.IO;
+using OpenQA.Selenium;
 
 namespace Ghosts.Client.Handlers
 {
     public class BrowserChrome : BaseBrowserHandler
     {
+        public new IJavaScriptExecutor JS { get; private set; }
+
         private string GetInstallLocation()
         {
             var path = @"C:\Program Files\Google\Chrome\Application\chrome.exe";
@@ -92,6 +95,9 @@ namespace Ghosts.Client.Handlers
 
                 Driver = new ChromeDriver(options);
                 base.Driver = Driver;
+
+                JS = (IJavaScriptExecutor)Driver;
+                base.JS = JS;
 
                 Driver.Navigate().GoToUrl(handler.Initial);
 

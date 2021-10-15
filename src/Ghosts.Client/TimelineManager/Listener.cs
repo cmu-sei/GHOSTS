@@ -6,6 +6,7 @@ using NLog;
 using SimpleTCP;
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using Ghosts.Domain.Code;
 
@@ -87,7 +88,7 @@ namespace Ghosts.Client.TimelineManager
             {
                 Path = _in,
                 NotifyFilter = NotifyFilters.LastWrite,
-                Filter = "*.json"
+                Filter = "*.*"
             };
             watcher.Changed += new FileSystemEventHandler(OnChanged);
             watcher.EnableRaisingEvents = true;
@@ -97,48 +98,73 @@ namespace Ghosts.Client.TimelineManager
         {
             // filewatcher throws multiple events, we only need 1
             if (!string.IsNullOrEmpty(_currentlyProcessing) && _currentlyProcessing == e.FullPath) return;
-            if (!File.Exists(e.FullPath)) return;
-
             _currentlyProcessing = e.FullPath;
-            
+
             _log.Trace("DirectoryListener found file: " + e.FullPath + " " + e.ChangeType);
+
+            if (!File.Exists(e.FullPath))
+                return;
+
+            if (e.FullPath.EndsWith(".json"))
+            {
+                try
+                {
+                    var raw = File.ReadAllText(e.FullPath);
+
+                    var timeline = JsonConvert.DeserializeObject<Timeline>(raw);
+
+                    foreach (var timelineHandler in timeline.TimeLineHandlers)
+                    {
+                        _log.Trace($"DirectoryListener command found: {timelineHandler.HandlerType}");
+
+                        foreach (var timelineEvent in timelineHandler.TimeLineEvents)
+                        {
+                            if (string.IsNullOrEmpty(timelineEvent.TrackableId))
+                            {
+                                timelineEvent.TrackableId = Guid.NewGuid().ToString();
+                            }
+                        }
+
+                        var orchestrator = new Orchestrator();
+                        orchestrator.RunCommand(timelineHandler);
+                    }
+                }
+                catch (Exception exc)
+                {
+                    _log.Debug(exc);
+                }
+            }
+            else if (e.FullPath.EndsWith(".cs"))
+            {
+                try
+                {
+                    var commands = File.ReadAllText(e.FullPath).Split(Convert.ToChar("\n")).ToList();
+                    if (commands.Count > 0)
+                    {
+                        var constructedTimelineHandler = TimelineTranslator.FromBrowserUnitTests(commands);
+                        var orchestrator = new Orchestrator();
+                        orchestrator.RunCommand(constructedTimelineHandler);
+                    }
+                }
+                catch (Exception exc)
+                {
+                    _log.Debug(exc);
+                }
+            }
 
             try
             {
-                var raw = File.ReadAllText(e.FullPath);
-
-                var timeline = JsonConvert.DeserializeObject<Timeline>(raw);
-
-                foreach (var timelineHandler in timeline.TimeLineHandlers)
-                {
-                    _log.Trace($"DirectoryListener command found: {timelineHandler.HandlerType}");
-
-                    foreach (var timelineEvent in timelineHandler.TimeLineEvents)
-                    {
-                        if (string.IsNullOrEmpty(timelineEvent.TrackableId))
-                        {
-                            timelineEvent.TrackableId = Guid.NewGuid().ToString();
-                        }
-                    }
-
-                    var orchestrator = new Orchestrator();
-                    orchestrator.RunCommand(timelineHandler);
-                }
-
                 var outfile = e.FullPath.Replace(_in, _out);
                 outfile = outfile.Replace(e.Name, $"{DateTime.Now.ToString("G").Replace("/", "-").Replace(" ", "").Replace(":", "")}-{e.Name}");
 
                 File.Move(e.FullPath, outfile);
             }
-            catch (Exception exc)
+            catch (Exception exception)
             {
-                _log.Debug(exc);
+                _log.Debug(exception);
             }
-            finally
-            {
-                Thread.Sleep(1000);
-                _currentlyProcessing = string.Empty;
-            }
+
+            _currentlyProcessing = string.Empty;
         }
     }
 
