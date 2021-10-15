@@ -173,11 +173,18 @@ namespace ghosts.client.linux.timelineManager
                     _log.Debug(exc);
                 }
             }
-            
-            var outfile = e.FullPath.Replace(_in, _out);
-            outfile = outfile.Replace(e.Name, $"{DateTime.Now.ToString("G").Replace("/", "-").Replace(" ", "").Replace(":", "")}-{e.Name}");
 
-            File.Move(e.FullPath, outfile);
+            try
+            {
+                var outfile = e.FullPath.Replace(_in, _out);
+                outfile = outfile.Replace(e.Name, $"{DateTime.Now.ToString("G").Replace("/", "-").Replace(" ", "").Replace(":", "")}-{e.Name}");
+
+                File.Move(e.FullPath, outfile);
+            }
+            catch (Exception exception)
+            {
+                _log.Debug(exception);
+            }
 
             _currentlyProcessing = string.Empty;
         }

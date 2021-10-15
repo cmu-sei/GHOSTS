@@ -12,10 +12,10 @@ namespace ghosts.client.linux.handlers
 {
     public class BrowserFirefox : BaseBrowserHandler
     {
-        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
+        private new static readonly Logger _log = LogManager.GetCurrentClassLogger();
 
-        public IWebDriver Driver { get; private set; }
-        public IJavaScriptExecutor JS { get; private set; }
+        public new IWebDriver Driver { get; private set; }
+        public new IJavaScriptExecutor JS { get; private set; }
 
         public BrowserFirefox(TimelineHandler handler)
         {

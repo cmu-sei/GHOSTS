@@ -30,6 +30,11 @@ namespace Ghosts.Domain.Code
 
     public static class StringExtensions
     {
+        public static IEnumerable<string> Split(this string o, string splitString)
+        {
+            return o.Split(new [] { splitString }, StringSplitOptions.None);
+        }
+        
         public static string GetTextBetweenQuotes(this string o)
         {
             var result = Regex.Match(o, "\"([^\"]*)\"").ToString();
