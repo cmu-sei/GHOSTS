@@ -15,6 +15,7 @@ namespace ghosts.client.linux.handlers
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
 
         public IWebDriver Driver { get; private set; }
+        public IJavaScriptExecutor JS { get; private set; }
 
         public BrowserFirefox(TimelineHandler handler)
         {
@@ -89,6 +90,9 @@ namespace ghosts.client.linux.handlers
                 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
                 Driver = new FirefoxDriver(options);
                 base.Driver = Driver;
+                
+                JS = (IJavaScriptExecutor)Driver;
+                base.JS = JS;
 
                 //hack: bad urls used in the past...
                 if (handler.Initial.Equals("") ||

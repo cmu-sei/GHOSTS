@@ -30,6 +30,14 @@ namespace Ghosts.Domain.Code
 
     public static class StringExtensions
     {
+        public static string GetTextBetweenQuotes(this string o)
+        {
+            var result = Regex.Match(o, "\"([^\"]*)\"").ToString();
+            if(!string.IsNullOrEmpty(result))
+                result = result.TrimStart('"').TrimEnd('"');
+            return result;
+        }
+        
         public static string ReplaceCaseInsensitive(this string input, string search, string replacement)
         {
             var result = Regex.Replace(input, Regex.Escape(search), replacement.Replace("$", "$$"), RegexOptions.IgnoreCase);

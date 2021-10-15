@@ -1,8 +1,10 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using ghosts.client.linux.handlers;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Newtonsoft.Json;
@@ -94,7 +96,7 @@ namespace ghosts.client.linux.timelineManager
             {
                 Path = _in,
                 NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName,
-                Filter = "*.json"
+                Filter = "*.*"
             };
             watcher.Changed += OnChanged;
             watcher.Created += OnChanged;
@@ -112,38 +114,70 @@ namespace ghosts.client.linux.timelineManager
 
             if (!File.Exists(e.FullPath))
                 return;
-            
-            try
+
+            if (e.FullPath.EndsWith(".json"))
             {
-                var raw = File.ReadAllText(e.FullPath);
-
-                var timeline = JsonConvert.DeserializeObject<Timeline>(raw);
-
-                foreach (var timelineHandler in timeline.TimeLineHandlers)
+                try
                 {
-                    _log.Trace($"DirectoryListener command found: {timelineHandler.HandlerType}");
+                    var raw = File.ReadAllText(e.FullPath);
 
-                    foreach (var timelineEvent in timelineHandler.TimeLineEvents)
+                    var timeline = JsonConvert.DeserializeObject<Timeline>(raw);
+
+                    foreach (var timelineHandler in timeline.TimeLineHandlers)
                     {
-                        if (string.IsNullOrEmpty(timelineEvent.TrackableId))
+                        _log.Trace($"DirectoryListener command found: {timelineHandler.HandlerType}");
+
+                        foreach (var timelineEvent in timelineHandler.TimeLineEvents)
                         {
-                            timelineEvent.TrackableId = Guid.NewGuid().ToString();
+                            if (string.IsNullOrEmpty(timelineEvent.TrackableId))
+                            {
+                                timelineEvent.TrackableId = Guid.NewGuid().ToString();
+                            }
+                        }
+
+                        var orchestrator = new Orchestrator();
+                        orchestrator.RunCommand(timelineHandler);
+                    }
+                }
+                catch (Exception exc)
+                {
+                    _log.Debug(exc);
+                }
+            }
+            else if (e.FullPath.EndsWith(".cs"))
+            {
+                try
+                {
+                    var commands = new List<string>();
+                    var raw = File.ReadAllText(e.FullPath);
+                
+                    var lines = raw.Split(Convert.ToChar("\n"));
+                    foreach (var line in lines)
+                    {
+                        var l = line.Trim();
+                        if ((l.StartsWith("driver.") || l.StartsWith("js.")) && !l.StartsWith("driver.Quit"))
+                        {
+                            commands.Add(l);
                         }
                     }
 
-                    var orchestrator = new Orchestrator();
-                    orchestrator.RunCommand(timelineHandler);
+                    if (commands.Count > 0)
+                    {
+                        var constructedTimelineHandler = TimelineTranslator.FromBrowserUnitTests(commands);
+                        var orchestrator = new Orchestrator();
+                        orchestrator.RunCommand(constructedTimelineHandler);
+                    }
                 }
-
-                var outfile = e.FullPath.Replace(_in, _out);
-                outfile = outfile.Replace(e.Name, $"{DateTime.Now.ToString("G").Replace("/", "-").Replace(" ", "").Replace(":", "")}-{e.Name}");
-
-                File.Move(e.FullPath, outfile);
+                catch (Exception exc)
+                {
+                    _log.Debug(exc);
+                }
             }
-            catch (Exception exc)
-            {
-                _log.Debug(exc);
-            }
+            
+            var outfile = e.FullPath.Replace(_in, _out);
+            outfile = outfile.Replace(e.Name, $"{DateTime.Now.ToString("G").Replace("/", "-").Replace(" ", "").Replace(":", "")}-{e.Name}");
+
+            File.Move(e.FullPath, outfile);
 
             _currentlyProcessing = string.Empty;
         }
