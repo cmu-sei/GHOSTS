@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using ghosts.client.linux.handlers;
 using Ghosts.Domain;
@@ -148,19 +149,7 @@ namespace ghosts.client.linux.timelineManager
             {
                 try
                 {
-                    var commands = new List<string>();
-                    var raw = File.ReadAllText(e.FullPath);
-                
-                    var lines = raw.Split(Convert.ToChar("\n"));
-                    foreach (var line in lines)
-                    {
-                        var l = line.Trim();
-                        if ((l.StartsWith("driver.") || l.StartsWith("js.")) && !l.StartsWith("driver.Quit"))
-                        {
-                            commands.Add(l);
-                        }
-                    }
-
+                    var commands = File.ReadAllText(e.FullPath).Split(Convert.ToChar("\n")).ToList();
                     if (commands.Count > 0)
                     {
                         var constructedTimelineHandler = TimelineTranslator.FromBrowserUnitTests(commands);

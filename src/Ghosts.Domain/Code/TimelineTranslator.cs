@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using NLog;
+using NPOI.HSSF.Record;
 
 namespace Ghosts.Domain.Code
 {
@@ -22,7 +23,7 @@ namespace Ghosts.Domain.Code
                 TimelineEvent timelineEvent = null;
                 try
                 {
-                    timelineEvent = GetEvent(command);
+                    timelineEvent = GetEvent(command.Trim());
                 }
                 catch (Exception exc)
                 {
@@ -42,6 +43,8 @@ namespace Ghosts.Domain.Code
             timelineEvent.DelayBefore = 0;
             timelineEvent.DelayAfter = 3000;
 
+            if (command.StartsWith("driver.Quit", StringComparison.InvariantCultureIgnoreCase)) return timelineEvent;
+            
             // determine command and commandArgs
             if (command.StartsWith("driver.Navigate()", StringComparison.InvariantCultureIgnoreCase))
             {
