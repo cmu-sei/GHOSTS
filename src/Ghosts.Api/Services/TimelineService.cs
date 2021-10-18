@@ -1,11 +1,15 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Ghosts.Api.Infrastructure.Data;
+using Ghosts.Api.Models;
 using Ghosts.Api.ViewModels;
+using Ghosts.Domain;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace Ghosts.Api.Services
 {
@@ -13,6 +17,7 @@ namespace Ghosts.Api.Services
     {
         Task UpdateAsync(MachineUpdateViewModel machineUpdate, CancellationToken ct);
         Task UpdateGroupAsync(int groupId, MachineUpdateViewModel machineUpdate, CancellationToken ct);
+        Task StopAsync(Guid machineId, Guid timelineId, CancellationToken ct);
     }
 
     public class TimelineService : ITimelineService
@@ -47,6 +52,28 @@ namespace Ghosts.Api.Services
                 await _context.MachineUpdates.AddAsync(machineUpdate, ct);
             }
 
+            await _context.SaveChangesAsync(ct);
+        }
+
+        public async Task StopAsync(Guid machineId, Guid timelineId, CancellationToken ct)
+        {
+            var timeline = new Timeline
+            {
+                Id = timelineId,
+                Status = Timeline.TimelineStatus.Stop
+            };
+
+            var o = new MachineUpdate
+            {
+                Status = StatusType.Active,
+                Update = JsonConvert.SerializeObject(timeline),
+                ActiveUtc = DateTime.UtcNow,
+                CreatedUtc = DateTime.UtcNow,
+                MachineId = machineId,
+                Type = UpdateClientConfig.UpdateType.Timeline
+            };
+
+            await _context.MachineUpdates.AddAsync(o, ct);
             await _context.SaveChangesAsync(ct);
         }
     }

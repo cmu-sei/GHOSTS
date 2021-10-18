@@ -55,6 +55,14 @@ namespace ghosts.api.Controllers
             await _timelineService.UpdateAsync(machineUpdate, ct);
             return NoContent();
         }
+        
+        [HttpPost("timeline/{machineId}/stop/{timelineId}")]
+        [SwaggerOperation(OperationId = "stopTimeline")]
+        public async Task<IActionResult> Timeline([FromRoute] Guid machineId, [FromRoute] Guid timelineId, CancellationToken ct)
+        {
+            await _timelineService.StopAsync(machineId, timelineId, ct);
+            return NoContent();
+        }
 
         /// <summary>
         /// Send a new timeline to an entire group of machines

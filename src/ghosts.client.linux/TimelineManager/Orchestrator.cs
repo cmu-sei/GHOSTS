@@ -6,6 +6,7 @@ using System.IO;
 using System.Threading;
 using ghosts.client.linux.handlers;
 using Ghosts.Domain;
+using Ghosts.Domain.Code;
 using NLog;
 
 namespace ghosts.client.linux.timelineManager
@@ -33,7 +34,7 @@ namespace ghosts.client.linux.timelineManager
                 _log.Trace($"watching {timelineWatcher.Path}");
                 timelineWatcher.NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.FileName | NotifyFilters.Size | NotifyFilters.CreationTime | NotifyFilters.LastWrite;
                 timelineWatcher.EnableRaisingEvents = true;
-                timelineWatcher.Changed += new FileSystemEventHandler(OnChanged);
+                timelineWatcher.Changed += OnChanged;
 
                 this._threadJobs = new List<ThreadJob>();
 
@@ -75,18 +76,14 @@ namespace ghosts.client.linux.timelineManager
 
             foreach (var handler in timeline.TimeLineHandlers)
             {
-                ThreadLaunch(handler);
+                ThreadLaunch(timeline, handler);
             }
-
-            this.MonitorThread = new Thread(this.ThreadMonitor);
-            this.MonitorThread.IsBackground = true;
-            this.MonitorThread.Start();
         }
 
-        public void RunCommand(TimelineHandler handler)
+        public void RunCommand(Timeline timeline, TimelineHandler handler)
         {
             this.WhatsInstalled();
-            ThreadLaunch(handler);
+            ThreadLaunch(timeline, handler);
         }
 
         private void WhatsInstalled()
@@ -94,17 +91,21 @@ namespace ghosts.client.linux.timelineManager
             //TODO: check that used applications exist
         }
 
-        private void ThreadLaunch(TimelineHandler handler)
+        private void ThreadLaunch(Timeline timeline, TimelineHandler handler)
         {
             try
             {
                 _log.Trace($"Attempting new thread for: {handler.HandlerType}");
 
                 Thread t = null;
-                var threadJob = new ThreadJob();
-                threadJob.Id = Guid.NewGuid().ToString();
-                threadJob.Handler = handler;
+                var threadJob = new ThreadJob
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Handler = handler,
+                    TimelineId = timeline.Id
+                };
 
+                object o;
                 switch (handler.HandlerType)
                 {
                     case HandlerType.NpcSystem:
@@ -113,50 +114,46 @@ namespace ghosts.client.linux.timelineManager
                     case HandlerType.Command:
                         t = new Thread(() =>
                         {
-                            var bash = new Bash(handler);
-
-                        });
-                        t.IsBackground = true;
-                        t.Name = threadJob.Id;
+                            o = new Bash(handler);
+                        })
+                        {
+                            IsBackground = true,
+                            Name = threadJob.Id
+                        };
                         t.Start();
-
-                        //threadJob.ProcessName = ProcessManager.ProcessNames.Command;
                         break;
                     case HandlerType.Curl:
                         t = new Thread(() =>
                         {
-                            var curl = new Curl(handler);
-
-                        });
-                        t.IsBackground = true;
-                        t.Name = threadJob.Id;
+                            o = new Curl(handler);
+                        })
+                        {
+                            IsBackground = true,
+                            Name = threadJob.Id
+                        };
                         t.Start();
-
-                        //threadJob.ProcessName = ProcessManager.ProcessNames.Command;
                         break;
                     case HandlerType.BrowserFirefox:
-                        BrowserFirefox o = new BrowserFirefox(handler);
-                        // t = new Thread(() =>
-                        // {
-                        //     BrowserFirefox o = new BrowserFirefox(handler);
-                        // })
-                        // {
-                        //     IsBackground = true,
-                        //     Name = threadJob.Id
-                        // };
-                        // t.Start();
-
+                        t = new Thread(() =>
+                        {
+                            o = new BrowserFirefox(handler);
+                        })
+                        {
+                            IsBackground = true,
+                            Name = threadJob.Id
+                        };
+                        t.Start();
                         break;
-                }
-
-                if (threadJob.ProcessName != null)
-                {
-                    this._threadJobs.Add(threadJob);
                 }
 
                 if (t != null)
                 {
                     this._threads.Add(t);
+                }
+                
+                if (threadJob.ProcessName != null)
+                {
+                    this._threadJobs.Add(threadJob);
                 }
             }
             catch (Exception e)
@@ -165,42 +162,35 @@ namespace ghosts.client.linux.timelineManager
             }
         }
 
-        private void ThreadMonitor()
-        {
-            //this should be the original list only
-            var jobs = this._threadJobs.ToArray();
-            while (true)
-            {
-                Thread.Sleep(30000);
-                //first, get all jobs and if not running, run a new one
-                foreach (var job in jobs)
-                {
-                    //TODO
-                }
-            }
-        }
-
         private void OnChanged(object source, FileSystemEventArgs e)
         {
             // filewatcher throws two events, we only need 1
-            DateTime lastWriteTime = File.GetLastWriteTime(e.FullPath);
-            if (lastWriteTime > _lastRead.AddSeconds(1))
+            var lastWriteTime = File.GetLastWriteTime(e.FullPath);
+            if (lastWriteTime <= _lastRead.AddSeconds(1)) return;
+            
+            _lastRead = lastWriteTime;
+            _log.Trace("File: " + e.FullPath + " " + e.ChangeType);
+            
+            var method = string.Empty;
+            if (System.Reflection.MethodBase.GetCurrentMethod() != null)
             {
-                _lastRead = lastWriteTime;
-                _log.Trace("File: " + e.FullPath + " " + e.ChangeType);
-                _log.Trace($"Reloading {System.Reflection.MethodBase.GetCurrentMethod().DeclaringType}");
-
-                // now terminate existing tasks and rerun
-                this.Shutdown();
-                //StartupTasks.CleanupProcesses();
-                this.Run();
+                var declaringType = System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType;
+                if (declaringType != null)
+                    method = declaringType?.ToString();
             }
+            _log.Trace($"Reloading {method}...");
+
+            // now terminate existing tasks and rerun
+            this.Shutdown();
+            //StartupTasks.CleanupProcesses();
+            this.Run();
         }
     }
 
     public class ThreadJob
     {
         public string Id { get; set; }
+        public Guid TimelineId { get; set; }
         public TimelineHandler Handler { get; set; }
         public string ProcessName { get; set; }
     }

@@ -1,11 +1,9 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using ghosts.client.linux.handlers;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Newtonsoft.Json;
@@ -120,10 +118,7 @@ namespace ghosts.client.linux.timelineManager
             {
                 try
                 {
-                    var raw = File.ReadAllText(e.FullPath);
-
-                    var timeline = JsonConvert.DeserializeObject<Timeline>(raw);
-
+                    var timeline = TimelineBuilder.GetLocalTimeline(e.FullPath);
                     foreach (var timelineHandler in timeline.TimeLineHandlers)
                     {
                         _log.Trace($"DirectoryListener command found: {timelineHandler.HandlerType}");
@@ -137,7 +132,7 @@ namespace ghosts.client.linux.timelineManager
                         }
 
                         var orchestrator = new Orchestrator();
-                        orchestrator.RunCommand(timelineHandler);
+                        orchestrator.RunCommand(timeline, timelineHandler);
                     }
                 }
                 catch (Exception exc)
@@ -154,7 +149,14 @@ namespace ghosts.client.linux.timelineManager
                     {
                         var constructedTimelineHandler = TimelineTranslator.FromBrowserUnitTests(commands);
                         var orchestrator = new Orchestrator();
-                        orchestrator.RunCommand(constructedTimelineHandler);
+                        
+                        var t = new Timeline
+                        {
+                            Id = Guid.NewGuid(),
+                            Status = Timeline.TimelineStatus.Run
+                        };
+                        t.TimeLineHandlers.Add(constructedTimelineHandler);
+                        orchestrator.RunCommand(t, constructedTimelineHandler);
                     }
                 }
                 catch (Exception exc)
@@ -199,12 +201,6 @@ namespace ghosts.client.linux.timelineManager
                     message.ReplyLine($"{obj}{Environment.NewLine}");
                     Console.WriteLine(obj);
                 };
-
-//                while (true)
-//                {
-//                    Console.WriteLine("...");
-//                    Thread.Sleep(10000);
-//                }
             }
             catch (Exception e)
             {
@@ -225,14 +221,23 @@ namespace ghosts.client.linux.timelineManager
             {
                 var timelineHandler = JsonConvert.DeserializeObject<TimelineHandler>(command);
 
-                foreach (var evs in timelineHandler.TimeLineEvents)
-                    if (string.IsNullOrEmpty(evs.TrackableId))
-                        evs.TrackableId = Guid.NewGuid().ToString();
+                foreach (var evs in timelineHandler.TimeLineEvents.Where(evs => string.IsNullOrEmpty(evs.TrackableId)))
+                {
+                    evs.TrackableId = Guid.NewGuid().ToString();
+                }
 
                 _log.Trace($"Command found: {timelineHandler.HandlerType}");
 
                 var o = new Orchestrator();
-                o.RunCommand(timelineHandler);
+                
+                var t = new Timeline
+                {
+                    Id = Guid.NewGuid(),
+                    Status = Timeline.TimelineStatus.Run
+                };
+                t.TimeLineHandlers.Add(timelineHandler);
+                
+                o.RunCommand(t, timelineHandler);
 
                 var obj = JsonConvert.SerializeObject(timelineHandler);
 

@@ -105,7 +105,7 @@ namespace ghosts.client.linux.Comms
                                         }
 
                                         var orchestrator = new Orchestrator();
-                                        orchestrator.RunCommand(timelineHandler);
+                                        orchestrator.RunCommand(timeline, timelineHandler);
                                     }
                                 }
                                 catch (Exception exc)
