@@ -1,6 +1,7 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Net;
@@ -9,21 +10,22 @@ using System.Threading;
 using ghosts.client.linux.Infrastructure;
 using ghosts.client.linux.timelineManager;
 using Ghosts.Domain.Code;
+using Ghosts.Domain.Models;
 using NLog;
 
 namespace ghosts.client.linux
 {
     class Program
     {
-        
-        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
         internal static ClientConfiguration Configuration { get; set; }
         internal static Options OptionFlags;
         internal static bool IsDebug;
-        private static ListenerManager _listenerManager { get; set; }
+        internal static List<ThreadJob> ThreadJobs { get; set; }
+        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
 
         static void Main(string[] args)
         {
+            ThreadJobs = new List<ThreadJob>();
             ClientConfigurationLoader.UpdateConfigurationWithEnvVars();
             
             try
@@ -56,7 +58,7 @@ namespace ghosts.client.linux
             //load configuration
             try
             {
-                Program.Configuration = ClientConfigurationLoader.Config;
+                Configuration = ClientConfigurationLoader.Config;
             }
             catch (Exception e)
             {
@@ -72,7 +74,7 @@ namespace ghosts.client.linux
 
             StartupTasks.SetStartup();
 
-            _listenerManager = new ListenerManager();
+            ListenerManager.Run();
 
             //check id
             _log.Trace(Comms.CheckId.Id);

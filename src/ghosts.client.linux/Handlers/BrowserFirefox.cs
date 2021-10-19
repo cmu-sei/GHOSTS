@@ -45,7 +45,7 @@ namespace ghosts.client.linux.handlers
             {
                 var path = GetInstallLocation();
 
-                FirefoxOptions options = new FirefoxOptions();
+                var options = new FirefoxOptions();
                 options.AddArguments("--disable-infobars");
                 options.AddArguments("--disable-extensions");
                 options.AddArguments("--disable-notifications");

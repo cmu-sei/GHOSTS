@@ -9,16 +9,17 @@ using Ghosts.Domain.Code;
 using Newtonsoft.Json;
 using NLog;
 using SimpleTCP;
+// ReSharper disable ObjectCreationAsStatement
 
 namespace ghosts.client.linux.timelineManager
 {
-    public class ListenerManager
+    public static class ListenerManager
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        private string In = ApplicationDetails.InstanceDirectories.TimelineIn;
-        private string Out = ApplicationDetails.InstanceDirectories.TimelineOut;
+        private static readonly string In = ApplicationDetails.InstanceDirectories.TimelineIn;
+        private static readonly string Out = ApplicationDetails.InstanceDirectories.TimelineOut;
 
-        public ListenerManager()
+        public static void Run()
         {
             try
             {
@@ -60,6 +61,13 @@ namespace ghosts.client.linux.timelineManager
                     };
                     t.Start();
                     
+                    t = new Thread(() => { new InitialDirectoryListener(); })
+                    {
+                        IsBackground = true,
+                        Name = "ghosts-initialdirectorylistener"
+                    };
+                    t.Start();
+                    
                     EnsureWatch();
                 }
                 else
@@ -73,22 +81,71 @@ namespace ghosts.client.linux.timelineManager
             }
         }
 
-        private void EnsureWatch()
+        private static void EnsureWatch()
         {
             File.WriteAllText(In + "init.json", JsonConvert.SerializeObject(new Timeline(), Formatting.None));
         }
     }
 
+    public class InitialDirectoryListener
+    {
+        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
+        private static DateTime _lastRead = DateTime.Now;
+        public InitialDirectoryListener()
+        {
+            var directoryName = TimelineBuilder.TimelineFilePath().DirectoryName;
+            if (directoryName == null)
+            {
+                throw new Exception("Timeline builder path cannot be determined");
+            }
+            
+            var timelineWatcher = new FileSystemWatcher(directoryName);
+            timelineWatcher.Filter = Path.GetFileName(TimelineBuilder.TimelineFilePath().Name);
+            _log.Trace($"watching {timelineWatcher.Path}");
+            timelineWatcher.NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.FileName | NotifyFilters.Size | NotifyFilters.CreationTime |
+                                           NotifyFilters.LastWrite;
+            timelineWatcher.Changed += InitialOnChanged;
+            timelineWatcher.EnableRaisingEvents = true;
+        
+
+            new ManualResetEvent(false).WaitOne();
+        }
+        
+        private void InitialOnChanged(object source, FileSystemEventArgs e)
+        {
+            // file watcher throws two events, we only need 1
+            var lastWriteTime = File.GetLastWriteTime(e.FullPath);
+            if (lastWriteTime <= _lastRead.AddSeconds(1)) return;
+            
+            _lastRead = lastWriteTime;
+            _log.Trace("File: " + e.FullPath + " " + e.ChangeType);
+            
+            var method = string.Empty;
+            if (System.Reflection.MethodBase.GetCurrentMethod() != null)
+            {
+                var declaringType = System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType;
+                if (declaringType != null)
+                    method = declaringType.ToString();
+            }
+            _log.Trace($"Reloading {method}...");
+
+            // now terminate existing tasks and rerun
+            var o = new Orchestrator();
+            o.Stop();
+            o.Run();
+        }
+    }
+    
     /// <summary>
-    /// Watches a directory [ghosts install]\instance\timeline for dropped files, and processes them immediately
+    /// Watches a directory [ghosts install] \ instance \ timeline for dropped files, and processes them immediately
     /// </summary>
     public class DirectoryListener
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        private string _in = ApplicationDetails.InstanceDirectories.TimelineIn;
-        private string _out = ApplicationDetails.InstanceDirectories.TimelineOut;
+        private readonly string _in = ApplicationDetails.InstanceDirectories.TimelineIn;
+        private readonly string _out = ApplicationDetails.InstanceDirectories.TimelineOut;
         private string _currentlyProcessing = string.Empty;
-
+        
         public DirectoryListener()
         {
             var watcher = new FileSystemWatcher
@@ -100,9 +157,9 @@ namespace ghosts.client.linux.timelineManager
             watcher.Changed += OnChanged;
             watcher.Created += OnChanged;
             watcher.EnableRaisingEvents = true;
-            Console.ReadLine();
-        }
-
+            new ManualResetEvent(false).WaitOne();
+        } 
+        
         private void OnChanged(object source, FileSystemEventArgs e)
         {
             // filewatcher throws multiple events, we only need 1
