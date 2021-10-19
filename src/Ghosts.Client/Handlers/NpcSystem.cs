@@ -1,8 +1,10 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
+using System;
 using Ghosts.Client.Infrastructure;
 using Ghosts.Client.TimelineManager;
 using Ghosts.Domain;
+using Ghosts.Domain.Code;
 using NLog;
 
 namespace Ghosts.Client.Handlers
@@ -11,7 +13,7 @@ namespace Ghosts.Client.Handlers
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
 
-        public NpcSystem(TimelineHandler handler)
+        public NpcSystem(Timeline timeline, TimelineHandler handler)
         {
             _log.Trace($"Handling NpcSystem call: {handler}");
 
@@ -20,26 +22,32 @@ namespace Ghosts.Client.Handlers
                 if (string.IsNullOrEmpty(timelineEvent.Command))
                     continue;
 
-                Timeline timeline;
+                Timeline t;
 
                 switch (timelineEvent.Command.ToLower())
                 {
                     case "start":
-                        timeline = TimelineBuilder.GetLocalTimeline();
-                        timeline.Status = Timeline.TimelineStatus.Run;
-                        TimelineBuilder.SetLocalTimeline(timeline);
+                        t = TimelineBuilder.GetLocalTimeline();
+                        t.Status = Timeline.TimelineStatus.Run;
+                        TimelineBuilder.SetLocalTimeline(t);
                         break;
                     case "stop":
-                        timeline = TimelineBuilder.GetLocalTimeline();
-                        timeline.Status = Timeline.TimelineStatus.Stop;
+                        if (timeline.Id != Guid.Empty)
+                        {
+                            var o = new Orchestrator();
+                            o.StopTimeline(timeline.Id);
+                        }
+                        else
+                        {
+                            t = TimelineBuilder.GetLocalTimeline();
+                            t.Status = Timeline.TimelineStatus.Stop;
+                            StartupTasks.CleanupProcesses();
+                            TimelineBuilder.SetLocalTimeline(t);
+                        }
 
-                        StartupTasks.CleanupProcesses();
-
-                        TimelineBuilder.SetLocalTimeline(timeline);
                         break;
                 }
             }
         }
-
     }
 }

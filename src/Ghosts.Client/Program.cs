@@ -1,6 +1,7 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
@@ -11,6 +12,7 @@ using CommandLine;
 using Ghosts.Client.Infrastructure;
 using Ghosts.Client.TimelineManager;
 using Ghosts.Domain.Code;
+using Ghosts.Domain.Models;
 using NLog;
 
 namespace Ghosts.Client
@@ -28,6 +30,7 @@ namespace Ghosts.Client
         private const int SwHide = 0;
         private const int SwShow = 5;
 
+        internal static List<ThreadJob> ThreadJobs { get; set; }
         internal static ClientConfiguration Configuration { get; set; }
         internal static Options OptionFlags;
         internal static bool IsDebug;
@@ -78,7 +81,7 @@ namespace Ghosts.Client
         {
             MinimizeFootprint();
             minimizeMemory();
-
+            
             try
             {
                 Run(args);
@@ -98,6 +101,8 @@ namespace Ghosts.Client
 
         private static void Run(string[] args)
         {
+            ThreadJobs = new List<ThreadJob>();
+
             // ignore all certs
             ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
 

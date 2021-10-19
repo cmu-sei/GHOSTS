@@ -126,7 +126,7 @@ namespace Ghosts.Client.TimelineManager
                         }
 
                         var orchestrator = new Orchestrator();
-                        orchestrator.RunCommand(timelineHandler);
+                        orchestrator.RunCommand(timeline, timelineHandler);
                     }
                 }
                 catch (Exception exc)
@@ -143,7 +143,13 @@ namespace Ghosts.Client.TimelineManager
                     {
                         var constructedTimelineHandler = TimelineTranslator.FromBrowserUnitTests(commands);
                         var orchestrator = new Orchestrator();
-                        orchestrator.RunCommand(constructedTimelineHandler);
+                        var t = new Timeline
+                        {
+                            Id = Guid.NewGuid(),
+                            Status = Timeline.TimelineStatus.Run
+                        };
+                        t.TimeLineHandlers.Add(constructedTimelineHandler);
+                        orchestrator.RunCommand(t, constructedTimelineHandler);
                     }
                 }
                 catch (Exception exc)
@@ -198,13 +204,13 @@ namespace Ghosts.Client.TimelineManager
 
         private string Handle(Message message)
         {
-            string tempMsg =
+            var tempMsg =
                 $"PortListener received raw {message.TcpClient.Client.RemoteEndPoint}: {message.MessageString}";
             Console.WriteLine(tempMsg);
             _log.Trace(tempMsg);
 
-            string command = message.MessageString;
-            int index = command.LastIndexOf("}", StringComparison.InvariantCultureIgnoreCase);
+            var command = message.MessageString;
+            var index = command.LastIndexOf("}", StringComparison.InvariantCultureIgnoreCase);
             if (index > 0)
             {
                 command = command.Substring(0, index + 1);
@@ -214,9 +220,9 @@ namespace Ghosts.Client.TimelineManager
 
             try
             {
-                TimelineHandler timelineHandler = JsonConvert.DeserializeObject<TimelineHandler>(command);
+                var timelineHandler = JsonConvert.DeserializeObject<TimelineHandler>(command);
 
-                foreach (TimelineEvent evs in timelineHandler.TimeLineEvents)
+                foreach (var evs in timelineHandler.TimeLineEvents)
                 {
                     if (string.IsNullOrEmpty(evs.TrackableId))
                     {
@@ -226,10 +232,17 @@ namespace Ghosts.Client.TimelineManager
 
                 _log.Trace($"PortListener command found: {timelineHandler.HandlerType}");
 
-                Orchestrator o = new Orchestrator();
-                o.RunCommand(timelineHandler);
+                var o = new Orchestrator();
+                var t = new Timeline
+                {
+                    Id = Guid.NewGuid(),
+                    Status = Timeline.TimelineStatus.Run
+                };
+                t.TimeLineHandlers.Add(timelineHandler);
 
-                string obj = JsonConvert.SerializeObject(timelineHandler);
+                o.RunCommand(t, timelineHandler);
+
+                var obj = JsonConvert.SerializeObject(timelineHandler);
 
                 return obj;
             }
