@@ -112,7 +112,7 @@ namespace Ghosts.Client.Comms
                                         }
 
                                         var orchestrator = new Orchestrator();
-                                        orchestrator.RunCommand(timelineHandler);
+                                        orchestrator.RunCommand(timeline, timelineHandler);
                                     }
                                 }
                                 catch (Exception exc)

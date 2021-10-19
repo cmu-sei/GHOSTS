@@ -611,7 +611,6 @@
     <Compile Include="Survey\SurveyManager.cs" />
     <Compile Include="TimelineManager\Listener.cs" />
     <Compile Include="TimelineManager\Orchestrator.cs" />
-    <Compile Include="TimelineManager\TimelineBuilder.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <None Include="Sample Timelines\IE-one-time.json" />
