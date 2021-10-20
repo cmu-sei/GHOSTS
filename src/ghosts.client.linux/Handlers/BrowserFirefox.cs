@@ -3,7 +3,6 @@
 using Ghosts.Domain;
 using NLog;
 using System;
-using System.IO;
 using System.Text;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Firefox;
@@ -74,6 +73,7 @@ namespace ghosts.client.linux.handlers
 
                 CodePagesEncodingProvider.Instance.GetEncoding(437);
                 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+                
                 Driver = new FirefoxDriver(options);
                 base.Driver = Driver;
                 

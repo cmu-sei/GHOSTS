@@ -3,27 +3,15 @@
 using Ghosts.Domain;
 using OpenQA.Selenium.Chrome;
 using System;
-using System.IO;
 using OpenQA.Selenium;
 
 namespace ghosts.client.linux.handlers
 {
     public class BrowserChrome : BaseBrowserHandler
     {
+        public new IWebDriver Driver { get; private set; }
         public new IJavaScriptExecutor JS { get; private set; }
 
-        private string GetInstallLocation()
-        {
-            var path = "/bin/google chrome";
-            if (File.Exists(path))
-            {
-                return path;
-            }
-
-            path = "/usr/bin/google chrome";
-            return path;
-        }
-        
         public BrowserChrome(TimelineHandler handler)
         {
             BrowserType = HandlerType.BrowserChrome;
