@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Ghosts.Domain.Code
 {
@@ -19,6 +20,8 @@ namespace Ghosts.Domain.Code
 
     public class LinkManager
     {
+        public List<Link> Links { private set; get; }
+        
         private readonly string _baseUrl;
         private readonly Random _random = new Random();
 
@@ -27,57 +30,75 @@ namespace Ghosts.Domain.Code
             Links = new List<Link>();
             _baseUrl = baseUrl;
         }
-
-        public List<Link> Links { private set; get; }
-
-        /// <summary>
-        /// Adds proper links — invalid links get quickly discarded
-        /// </summary>
-        /// <param name="url">http|s://some.link/path/etc</param>
-        /// <param name="priority">priority for choosing next - indeterminate as highest to 0 as lowest priority</param>
+        
         public void AddLink(string url, int priority)
         {
             try
             {
                 Links.Add(new Link {Url = new Uri(url), Priority = priority});
             }
-            catch
+            catch(Exception e)
             {
+                Console.WriteLine($"{url} {e}");
             }
         }
 
         public Link Choose()
         {
+            var pickList = new List<Link>();
             var baseUri = new Uri(_baseUrl);
+            var schemesToIgnore = new [] {"mailto", "skype", "tel"};
+            
             foreach (var link in Links)
                 try
                 {
-                    if (!link.Url.Host.Replace("www.", "").Contains(baseUri.Host.Replace("www.", "")))
-                        link.Priority += 10;
+                    if(schemesToIgnore.Any(s => s.StartsWith(link.Url.ToString())))
+                        continue;
+                    
+                    // give relative links priority
+                    if((link.Url.Scheme + link.Url.Host).Replace("www.", "").Equals((baseUri.Scheme + baseUri.Host).Replace("www.", ""), StringComparison.InvariantCultureIgnoreCase))
+                        link.Priority += 1;
+                    else if(link.Url.Scheme.Equals("file", StringComparison.InvariantCultureIgnoreCase))
+                        link.Priority += 1;
+                    
+                    pickList.Add(link);
                 }
                 catch (Exception e)
                 {
                     Console.WriteLine($"{link.Url} : {e}");
                 }
 
-            Links = Links.OrderByDescending(o => o.Priority).ToList();
+            Links = pickList.OrderByDescending(o => o.Priority).ToList();
 
             if (Links.Count < 1)
                 return null;
 
-            var totalWeight = Convert.ToInt32(Links.Sum(o => o.Priority));
+            var priority = Links.First().Priority;
+            var chosen = Links.Where(x => x.Priority == priority).PickRandom();
 
-            // totalWeight is the sum of all weights
-            var r = _random.Next(0, totalWeight);
-
-            foreach (var link in Links)
+            if (chosen.Url.Scheme.ToLower().StartsWith("file"))
             {
-                if (r < link.Priority) return link;
-
-                r -= link.Priority;
+                try
+                {
+                    var bUrl = baseUri.ToString();
+                    if (bUrl.EndsWith("/"))
+                        bUrl = bUrl.Substring(0, bUrl.Length - 1);
+                
+                    var thisUrl = chosen.Url.ToString().Replace("file://","");
+                
+                    thisUrl = Regex.Replace(thisUrl, "////", "//");
+                    if (thisUrl.StartsWith("/"))
+                        thisUrl = thisUrl.Substring(1, thisUrl.Length - 1);
+                
+                    chosen.Url = new Uri($"{bUrl}/{thisUrl}");
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"{chosen.Url} : {e}");
+                }
             }
 
-            return Links.PickRandom();
+            return chosen;
         }
-    }
+   }
 }
