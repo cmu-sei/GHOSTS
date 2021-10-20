@@ -30,7 +30,8 @@ namespace Ghosts.Api.Models
         public enum NotificationType
         {
             Timeline = 0,
-            WebhookCreate = 1
+            WebhookCreate = 1,
+            TimelineDelivered = 10
         }
 
         public NotificationType Type { get; set; }

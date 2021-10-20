@@ -8,7 +8,6 @@ using Ghosts.Api.Models;
 using Ghosts.Api.Services;
 using Ghosts.Api.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace ghosts.api.Controllers
