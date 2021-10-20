@@ -189,12 +189,12 @@ namespace ghosts.client.linux.handlers
                                 // http|s links
                                 else if (node.Attributes["href"].Value.ToLower().StartsWith("http"))
                                 {
-                                    linkManager.AddLink(node.Attributes["href"].Value.ToLower());
+                                    linkManager.AddLink(node.Attributes["href"].Value.ToLower(), 1);
                                 }
                                 // relative links - prefix the scheme and host 
                                 else
                                 {
-                                    linkManager.AddLink($"{this._currentHost}{node.Attributes["href"].Value.ToLower()}");
+                                    linkManager.AddLink($"{this._currentHost}{node.Attributes["href"].Value.ToLower()}", 2);
                                 }
                             }
 

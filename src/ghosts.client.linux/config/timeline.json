@@ -9,7 +9,7 @@
         "blockstyles": "true",
         "blockflash": "true",
         "blockscripts": "true",
-        "stickiness": 75,
+        "stickiness": 100,
         "stickiness-depth-min": 5,
         "stickiness-depth-max": 10000,
         "incognito": "true"

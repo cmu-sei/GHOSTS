@@ -31,14 +31,15 @@ namespace Ghosts.Domain.Code
         public List<Link> Links { private set; get; }
 
         /// <summary>
-        ///     Adds proper links — invalid links get quickly discarded
+        /// Adds proper links — invalid links get quickly discarded
         /// </summary>
         /// <param name="url">http|s://some.link/path/etc</param>
-        public void AddLink(string url)
+        /// <param name="priority">priority for choosing next - indeterminate as highest to 0 as lowest priority</param>
+        public void AddLink(string url, int priority)
         {
             try
             {
-                Links.Add(new Link {Url = new Uri(url)});
+                Links.Add(new Link {Url = new Uri(url), Priority = priority});
             }
             catch
             {
