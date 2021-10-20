@@ -3,10 +3,10 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <AssemblyName>ghosts.api</AssemblyName>
-    <ReleaseVersion>5.0.0.0</ReleaseVersion>
-    <Version>5.0.0.0</Version>
-    <AssemblyVersion>5.0.0.0</AssemblyVersion>
-    <FileVersion>5.0.0.0</FileVersion>
+    <ReleaseVersion>6.0.0.0</ReleaseVersion>
+    <Version>6.0.0.0</Version>
+    <AssemblyVersion>6.0.0.0</AssemblyVersion>
+    <FileVersion>6.0.0.0</FileVersion>
     <SynchReleaseVersion>false</SynchReleaseVersion>
     
     <Authors>Dustin Updyke for Carnegie Mellon University</Authors>
