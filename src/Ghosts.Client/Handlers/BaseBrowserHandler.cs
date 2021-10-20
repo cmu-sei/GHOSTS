@@ -97,12 +97,12 @@ namespace Ghosts.Client.Handlers
                                                         // http|s links
                                                         else if (node.ToLower().StartsWith("http"))
                                                         {
-                                                            linkManager.AddLink(node.ToLower());
+                                                            linkManager.AddLink(node.ToLower(), 1);
                                                         }
                                                         // relative links - prefix the scheme and host 
                                                         else
                                                         {
-                                                            linkManager.AddLink($"{config.GetHost()}{node.ToLower()}");
+                                                            linkManager.AddLink($"{config.GetHost()}{node.ToLower()}", 2);
                                                         }
                                                     }
 
