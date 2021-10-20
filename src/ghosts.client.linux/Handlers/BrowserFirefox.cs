@@ -20,31 +20,17 @@ namespace ghosts.client.linux.handlers
         public BrowserFirefox(TimelineHandler handler)
         {
             BrowserType = HandlerType.BrowserFirefox;
-            bool hasRunSuccessfully = false;
+            var hasRunSuccessfully = false;
             while (!hasRunSuccessfully)
             {
                 hasRunSuccessfully = FirefoxEx(handler);
             }
         }
 
-        private string GetInstallLocation()
-        {
-            var path = "/bin/firefox";
-            if (File.Exists(path))
-            {
-                return path;
-            }
-
-            path = "/usr/bin/firefox";
-            return File.Exists(path) ? path : Program.Configuration.FirefoxInstallLocation;
-        }
-
         private bool FirefoxEx(TimelineHandler handler)
         {
             try
             {
-                var path = GetInstallLocation();
-
                 var options = new FirefoxOptions();
                 options.AddArguments("--disable-infobars");
                 options.AddArguments("--disable-extensions");
@@ -126,11 +112,7 @@ namespace ghosts.client.linux.handlers
                 _log.Debug(e);
                 return false;
             }
-            finally
-            {
-                
-            }
-
+            
             return true;
         }
     }

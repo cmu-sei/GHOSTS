@@ -134,6 +134,12 @@ namespace ghosts.client.linux.timelineManager
                             o = new Curl(handler);
                         });
                         break;
+                    case HandlerType.BrowserChrome:
+                        t = new Thread(() =>
+                        {
+                            o = new BrowserChrome(handler);
+                        });
+                        break;
                     case HandlerType.BrowserFirefox:
                         t = new Thread(() =>
                         {
@@ -142,7 +148,11 @@ namespace ghosts.client.linux.timelineManager
                         break;
                 }
 
-                if (t == null) return;
+                if (t == null)
+                {
+                    _log.Debug($"HandlerType {handler.HandlerType} not supported on this platform");
+                    return;
+                }
                 
                 t.IsBackground = true;
                 t.Start();
