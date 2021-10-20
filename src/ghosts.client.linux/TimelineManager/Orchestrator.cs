@@ -116,11 +116,6 @@ namespace ghosts.client.linux.timelineManager
                 _log.Trace($"Attempting new thread for: {handler.HandlerType}");
 
                 Thread t = null;
-                var threadJob = new ThreadJob
-                {
-                    TimelineId = timeline.Id
-                };
-
                 object o;
                 switch (handler.HandlerType)
                 {
@@ -151,8 +146,11 @@ namespace ghosts.client.linux.timelineManager
                 
                 t.IsBackground = true;
                 t.Start();
-                threadJob.Thread = t;
-                Program.ThreadJobs.Add(threadJob);
+                Program.ThreadJobs.Add(new ThreadJob
+                {
+                    TimelineId = timeline.Id,
+                    Thread = t
+                });
             }
             catch (Exception e)
             {

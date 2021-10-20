@@ -21,7 +21,7 @@ namespace Ghosts.Api
 {
     public class Startup
     {
-        public const int apiVersion = 5; 
+        public const int apiVersion = 6; 
         
         public Startup(IConfiguration configuration)
         {

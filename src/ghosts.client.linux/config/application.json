@@ -1,15 +1,15 @@
 ﻿{
     "IdEnabled": true,
-    "IdUrl": "http://ghosts-api:5000/api/clientid",
+    "IdUrl": "http://ghosts-api:52388/api/clientid",
     "ClientResults": {
         "IsEnabled": true,
         "IsSecure": false,
-        "PostUrl": "http://ghosts-api:5000/api/clientresults",
+        "PostUrl": "http://ghosts-api:52388/api/clientresults",
         "CycleSleep": 9000
     },
     "ClientUpdates": {
         "IsEnabled": true,
-        "PostUrl": "http://ghosts-api:5000/api/clientupdates",
+        "PostUrl": "http://ghosts-api:52388/api/clientupdates",
         "CycleSleep": 9000
     },
     "Survey": {
@@ -18,7 +18,7 @@
         "Frequency": "once",
         "CycleSleepMinutes": 720,
         "OutputFormat": "indent",
-        "PostUrl": "http://ghosts-api:5000/api/clientsurvey"
+        "PostUrl": "http://ghosts-api:52388/api/clientsurvey"
     },
     "HealthIsEnabled": true,
     "HandlersIsEnabled": true,

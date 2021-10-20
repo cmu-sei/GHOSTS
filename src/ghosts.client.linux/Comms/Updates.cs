@@ -67,7 +67,11 @@ namespace ghosts.client.linux.Comms
                         }
                         catch (WebException wex)
                         {
-                            if (((HttpWebResponse)wex.Response).StatusCode == HttpStatusCode.NotFound)
+                            if (wex?.Response == null)
+                            {
+                                _log.Debug($"{DateTime.Now} - API Server appears to be not responding");
+                            }
+                            else if (((HttpWebResponse)wex.Response).StatusCode == HttpStatusCode.NotFound)
                             {
                                 _log.Debug($"{DateTime.Now} - No new configuration found");
                             }

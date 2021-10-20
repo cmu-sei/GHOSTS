@@ -5,10 +5,10 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RuntimeIdentifiers>win7-x64;ubuntu.16.10-x64;osx.10.12-x64</RuntimeIdentifiers>
 
-    <Version>3.0.0.0</Version>
-    <AssemblyVersion>3.0.0.0</AssemblyVersion>
-    <FileVersion>3.0.0.0</FileVersion>
-    <ReleaseVersion>3.0.0.0</ReleaseVersion>
+    <Version>6.0.0.0</Version>
+    <AssemblyVersion>6.0.0.0</AssemblyVersion>
+    <FileVersion>6.0.0.0</FileVersion>
+    <ReleaseVersion>6.0.0.0</ReleaseVersion>
     <SynchReleaseVersion>false</SynchReleaseVersion>
         
     <Authors>Dustin Updyke for Carnegie Mellon University</Authors>

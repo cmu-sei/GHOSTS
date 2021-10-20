@@ -177,7 +177,18 @@ namespace Ghosts.Api.Services
 
                 using var httpClient = new HttpClient();
                 // Do the actual request and await the response
-                var httpResponse = await httpClient.PostAsync(webhook.PostbackUrl, httpContent);
+                HttpResponseMessage httpResponse;
+                switch (webhook.PostbackMethod)
+                {
+                    default:
+                        throw new ArgumentException("webhook configuration encountered unspecified postback method");
+                    case Webhook.WebhookMethod.POST:
+                        httpResponse = await httpClient.PostAsync(webhook.PostbackUrl, httpContent);
+                        break;
+                    case Webhook.WebhookMethod.GET:
+                        httpResponse = await httpClient.GetAsync($"{webhook.PostbackUrl}?message={formattedResponse}");
+                        break;
+                }
 
                 log.Trace($"Webhook response {webhook.PostbackUrl} {webhook.PostbackMethod} {httpResponse.StatusCode}");
 

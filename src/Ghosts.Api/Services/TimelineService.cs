@@ -1,6 +1,7 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -57,10 +58,25 @@ namespace Ghosts.Api.Services
 
         public async Task StopAsync(Guid machineId, Guid timelineId, CancellationToken ct)
         {
+            var timelineEvent = new TimelineEvent
+            {
+                Command = "stop"
+            };
+
+            var handler = new TimelineHandler
+            {
+                HandlerType = HandlerType.NpcSystem
+            };
+            handler.TimeLineEvents.Add(timelineEvent);
+
+            var handlers = new List<TimelineHandler>();
+            handlers.Add(handler);
+            
             var timeline = new Timeline
             {
                 Id = timelineId,
-                Status = Timeline.TimelineStatus.Stop
+                Status = Timeline.TimelineStatus.Run,
+                TimeLineHandlers = handlers
             };
 
             var o = new MachineUpdate
@@ -70,7 +86,7 @@ namespace Ghosts.Api.Services
                 ActiveUtc = DateTime.UtcNow,
                 CreatedUtc = DateTime.UtcNow,
                 MachineId = machineId,
-                Type = UpdateClientConfig.UpdateType.Timeline
+                Type = UpdateClientConfig.UpdateType.TimelinePartial
             };
 
             await _context.MachineUpdates.AddAsync(o, ct);
