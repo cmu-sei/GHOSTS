@@ -8,24 +8,25 @@ using Ghosts.Domain.Code;
 using NLog;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
+// ReSharper disable StringLiteralTypo
 
 namespace ghosts.client.linux.handlers
 {
     public abstract class BaseBrowserHandler : BaseHandler
     {
-        public static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        public IWebDriver Driver { get; set; }
-        public IJavaScriptExecutor JS { get; set; }
-        public HandlerType BrowserType { get; set; }
-        private int _stickiness = 0;
+        protected static readonly Logger _log = LogManager.GetCurrentClassLogger();
+        protected IWebDriver Driver { get; set; }
+        protected IJavaScriptExecutor JS { get; set; }
+        protected HandlerType BrowserType { get; set; }
+        private int _stickiness;
         private int _depthMin = 1;
         private int _depthMax = 10;
 
-        public void ExecuteEvents(TimelineHandler handler)
+        protected void ExecuteEvents(TimelineHandler handler)
         {
             try
             {
-                foreach (TimelineEvent timelineEvent in handler.TimeLineEvents)
+                foreach (var timelineEvent in handler.TimeLineEvents)
                 {
                     WorkingHours.Is(handler);
 
@@ -231,21 +232,6 @@ namespace ghosts.client.linux.handlers
             {
                 _log.Trace(e.Message);
             }
-        }
-
-        /// <summary>
-        /// Close browser
-        /// </summary>
-        public void Close()
-        {
-            Report(BrowserType.ToString(), "Close", string.Empty);
-            Driver.Close();
-        }
-
-        public void Stop()
-        {
-            Report(BrowserType.ToString(), "Stop", string.Empty);
-            Close();
         }
     }
 }

@@ -4,13 +4,14 @@ using Ghosts.Domain;
 using OpenQA.Selenium.Chrome;
 using System;
 using OpenQA.Selenium;
+// ReSharper disable StringLiteralTypo
 
 namespace ghosts.client.linux.handlers
 {
     public class BrowserChrome : BaseBrowserHandler
     {
-        public new IWebDriver Driver { get; private set; }
-        public new IJavaScriptExecutor JS { get; private set; }
+        private new IWebDriver Driver { get; set; }
+        private new IJavaScriptExecutor JS { get; set; }
 
         public BrowserChrome(TimelineHandler handler)
         {
@@ -105,10 +106,8 @@ namespace ghosts.client.linux.handlers
                         ExecuteEvents(handler);
                     }
                 }
-                else
-                {
-                    ExecuteEvents(handler);
-                }
+                
+                ExecuteEvents(handler);
             }
             catch (Exception e)
             {

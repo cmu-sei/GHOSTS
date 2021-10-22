@@ -6,6 +6,7 @@ using System;
 using System.Text;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Firefox;
+// ReSharper disable StringLiteralTypo
 
 namespace ghosts.client.linux.handlers
 {
@@ -13,8 +14,8 @@ namespace ghosts.client.linux.handlers
     {
         private new static readonly Logger _log = LogManager.GetCurrentClassLogger();
 
-        public new IWebDriver Driver { get; private set; }
-        public new IJavaScriptExecutor JS { get; private set; }
+        private new IWebDriver Driver { get; set; }
+        private new IJavaScriptExecutor JS { get; set; }
 
         public BrowserFirefox(TimelineHandler handler)
         {
@@ -102,10 +103,8 @@ namespace ghosts.client.linux.handlers
                         ExecuteEvents(handler);
                     }
                 }
-                else
-                {
-                    ExecuteEvents(handler);
-                }
+                
+                ExecuteEvents(handler);
             }
             catch (Exception e)
             {

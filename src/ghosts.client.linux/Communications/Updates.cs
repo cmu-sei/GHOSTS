@@ -2,6 +2,7 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
@@ -13,7 +14,7 @@ using Ghosts.Domain.Messages.MesssagesForServer;
 using Newtonsoft.Json;
 using NLog;
 
-namespace ghosts.client.linux.Comms
+namespace ghosts.client.linux.Communications
 {
     /// <summary>
     /// Get updates from the C2 server - could be timeline, health, etc.
@@ -53,17 +54,15 @@ namespace ghosts.client.linux.Comms
             {
                 try
                 {
-                    string s = string.Empty;
+                    var s = string.Empty;
                     using (var client = WebClientBuilder.Build(machine))
                     {
                         try
                         {
-                            using (var reader =
-                                new StreamReader(client.OpenRead(Program.Configuration.ClientUpdates.PostUrl)))
-                            {
-                                s = reader.ReadToEnd();
-                                _log.Debug($"{DateTime.Now} - Received new configuration");
-                            }
+                            using var reader =
+                                new StreamReader(client.OpenRead(Program.Configuration.ClientUpdates.PostUrl));
+                            s = reader.ReadToEnd();
+                            _log.Debug($"{DateTime.Now} - Received new configuration");
                         }
                         catch (WebException wex)
                         {
@@ -86,6 +85,7 @@ namespace ghosts.client.linux.Comms
                     {
                         var update = JsonConvert.DeserializeObject<UpdateClientConfig>(s);
 
+                        // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
                         switch (update.Type)
                         {
                             case UpdateClientConfig.UpdateType.Timeline:
@@ -100,16 +100,12 @@ namespace ghosts.client.linux.Comms
                                     {
                                         _log.Trace($"PartialTimeline found: {timelineHandler.HandlerType}");
 
-                                        foreach (var timelineEvent in timelineHandler.TimeLineEvents)
+                                        foreach (var timelineEvent in timelineHandler.TimeLineEvents.Where(timelineEvent => string.IsNullOrEmpty(timelineEvent.TrackableId)))
                                         {
-                                            if (string.IsNullOrEmpty(timelineEvent.TrackableId))
-                                            {
-                                                timelineEvent.TrackableId = Guid.NewGuid().ToString();
-                                            }
+                                            timelineEvent.TrackableId = Guid.NewGuid().ToString();
                                         }
 
-                                        var orchestrator = new Orchestrator();
-                                        orchestrator.RunCommand(timeline, timelineHandler);
+                                        Orchestrator.RunCommand(timeline, timelineHandler);
                                     }
                                 }
                                 catch (Exception exc)
@@ -120,14 +116,14 @@ namespace ghosts.client.linux.Comms
                                 break;
                             case UpdateClientConfig.UpdateType.Health:
                             {
-                                var newTimeline = JsonConvert.DeserializeObject<Ghosts.Domain.ResultHealth>(update.Update.ToString());
+                                var newTimeline = JsonConvert.DeserializeObject<ResultHealth>(update.Update.ToString());
                                 //save to local disk
-                                using (var file = File.CreateText(ApplicationDetails.ConfigurationFiles.Health))
+                                using var file = File.CreateText(ApplicationDetails.ConfigurationFiles.Health);
+                                var serializer = new JsonSerializer
                                 {
-                                    var serializer = new JsonSerializer();
-                                    serializer.Formatting = Formatting.Indented;
-                                    serializer.Serialize(file, newTimeline);
-                                }
+                                    Formatting = Formatting.Indented
+                                };
+                                serializer.Serialize(file, newTimeline);
 
                                 break;
                             }
@@ -155,12 +151,12 @@ namespace ghosts.client.linux.Comms
                 return;
 
             var fileName = ApplicationDetails.LogFiles.ClientUpdates;
-            var cyclesleep = Program.Configuration.ClientResults.CycleSleep;
-            var posturl = Program.Configuration.ClientResults.PostUrl;
+            var cycleSleep = Program.Configuration.ClientResults.CycleSleep;
+            var postUrl = Program.Configuration.ClientResults.PostUrl;
 
             var machine = new ResultMachine();
 
-            Thread.Sleep(cyclesleep);
+            Thread.Sleep(cycleSleep);
 
             while (true)
             {
@@ -168,7 +164,7 @@ namespace ghosts.client.linux.Comms
                 {
                     if(File.Exists(fileName))
                     {
-                        PostResults(fileName, machine, posturl);
+                        PostResults(fileName, machine, postUrl);
                     }
                     else
                     {
@@ -187,16 +183,16 @@ namespace ghosts.client.linux.Comms
                     {
                         if (!file.EndsWith("app.log") && file != fileName)
                         {
-                            PostResults(file, machine, posturl, true);
+                            PostResults(file, machine, postUrl, true);
                         }
                     }
                 }
                 catch (Exception e)
                 {
-                    _log.Debug($"Problem posting overflow logs from {fileName} to server {posturl}: {e}");
+                    _log.Debug($"Problem posting overflow logs from {fileName} to server {postUrl}: {e}");
                 }
 
-                Thread.Sleep(cyclesleep);
+                Thread.Sleep(cycleSleep);
             }
         }
 
@@ -209,8 +205,10 @@ namespace ghosts.client.linux.Comms
                 sb.AppendLine(d);
             }
 
-            var r = new TransferLogDump();
-            r.Log = sb.ToString();
+            var r = new TransferLogDump
+            {
+                Log = sb.ToString()
+            };
 
             var payload = JsonConvert.SerializeObject(r);
 
@@ -219,8 +217,10 @@ namespace ghosts.client.linux.Comms
                 payload = Crypto.EncryptStringAes(payload, machine.Name);
                 payload = Base64Encoder.Base64Encode(payload);
 
-                var p = new EncryptedPayload();
-                p.Payload = payload;
+                var p = new EncryptedPayload
+                {
+                    Payload = payload
+                };
 
                 payload = JsonConvert.SerializeObject(p);
             }
@@ -241,51 +241,6 @@ namespace ghosts.client.linux.Comms
             }
 
             _log.Trace($"{DateTime.Now} - {fileName} posted to server successfully");
-        }
-
-        internal static void PostSurvey()
-        {
-            try
-            {
-                _log.Trace("posting survey");
-
-                var posturl = Program.Configuration.Survey.PostUrl;
-
-                if (!File.Exists(ApplicationDetails.InstanceFiles.SurveyResults))
-                    return;
-
-                var survey = JsonConvert.DeserializeObject<Ghosts.Domain.Messages.MesssagesForServer.Survey>(File.ReadAllText(ApplicationDetails.InstanceFiles.SurveyResults));
-
-                var payload = JsonConvert.SerializeObject(survey);
-
-                var machine = new ResultMachine();
-
-                if (Program.Configuration.Survey.IsSecure)
-                {
-                    payload = Crypto.EncryptStringAes(payload, machine.Name);
-                    payload = Base64Encoder.Base64Encode(payload);
-
-                    var p = new EncryptedPayload();
-                    p.Payload = payload;
-
-                    payload = JsonConvert.SerializeObject(p);
-                }
-
-                using (var client = WebClientBuilder.Build(machine))
-                {
-                    client.Headers[HttpRequestHeader.ContentType] = "application/json";
-                    client.UploadString(posturl, payload);
-                }
-
-                _log.Trace($"{DateTime.Now} - survey posted to server successfully");
-
-                File.Delete(ApplicationDetails.InstanceFiles.SurveyResults);
-            }
-            catch (Exception e)
-            {
-                _log.Trace("Problem posting logs to server");
-                _log.Error(e);
-            }
         }
     }
 }

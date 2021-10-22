@@ -1,6 +1,7 @@
 // Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
+using System.Linq;
 using ghosts.client.linux.Infrastructure;
 using ghosts.client.linux.timelineManager;
 using Ghosts.Domain;
@@ -17,11 +18,8 @@ namespace ghosts.client.linux.handlers
         {
             _log.Trace($"Handling NpcSystem call: {handler}");
 
-            foreach (var timelineEvent in handler.TimeLineEvents)
+            foreach (var timelineEvent in handler.TimeLineEvents.Where(timelineEvent => !string.IsNullOrEmpty(timelineEvent.Command)))
             {
-                if (string.IsNullOrEmpty(timelineEvent.Command))
-                    continue;
-
                 Timeline t;
 
                 switch (timelineEvent.Command.ToLower())
@@ -34,8 +32,7 @@ namespace ghosts.client.linux.handlers
                     case "stop":
                         if (timeline.Id != Guid.Empty)
                         {
-                            var o = new Orchestrator();
-                            o.StopTimeline(timeline.Id);
+                            Orchestrator.StopTimeline(timeline.Id);
                         }
                         else
                         {

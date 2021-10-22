@@ -1,7 +1,8 @@
+// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
+
 using System;
-using System.Drawing;
+using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.Versioning;
 using CommandLine;
@@ -14,7 +15,7 @@ namespace ghosts.client.linux.Infrastructure
 {
     internal static class CommandLineFlagManager
     {
-        internal static bool Parse(string[] args)
+        internal static bool Parse(IEnumerable<string> args)
         {
             Console.WriteLine(ApplicationDetails.Header);
             
@@ -31,8 +32,6 @@ namespace ghosts.client.linux.Infrastructure
             var parserResults = parser
                 .ParseArguments<Options>(args)
                 .WithParsed(o => options = o);
-
-            Program.OptionFlags = options;
 
             // start handling flags that result in program exit
             if (options.Help)

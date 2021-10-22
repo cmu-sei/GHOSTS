@@ -111,7 +111,7 @@ namespace ghosts.client.linux.timelineManager
             new ManualResetEvent(false).WaitOne();
         }
         
-        private void InitialOnChanged(object source, FileSystemEventArgs e)
+        private static void InitialOnChanged(object source, FileSystemEventArgs e)
         {
             // file watcher throws two events, we only need 1
             var lastWriteTime = File.GetLastWriteTime(e.FullPath);
@@ -131,7 +131,7 @@ namespace ghosts.client.linux.timelineManager
 
             // now terminate existing tasks and rerun
             var o = new Orchestrator();
-            o.Stop();
+            Orchestrator.Stop();
             o.Run();
         }
     }
@@ -162,7 +162,7 @@ namespace ghosts.client.linux.timelineManager
         
         private void OnChanged(object source, FileSystemEventArgs e)
         {
-            // filewatcher throws multiple events, we only need 1
+            // file watcher throws multiple events, we only need 1
             if (!string.IsNullOrEmpty(_currentlyProcessing) && _currentlyProcessing == e.FullPath) return;
             _currentlyProcessing = e.FullPath;
 
@@ -180,16 +180,12 @@ namespace ghosts.client.linux.timelineManager
                     {
                         _log.Trace($"DirectoryListener command found: {timelineHandler.HandlerType}");
 
-                        foreach (var timelineEvent in timelineHandler.TimeLineEvents)
+                        foreach (var timelineEvent in timelineHandler.TimeLineEvents.Where(timelineEvent => string.IsNullOrEmpty(timelineEvent.TrackableId)))
                         {
-                            if (string.IsNullOrEmpty(timelineEvent.TrackableId))
-                            {
-                                timelineEvent.TrackableId = Guid.NewGuid().ToString();
-                            }
+                            timelineEvent.TrackableId = Guid.NewGuid().ToString();
                         }
 
-                        var orchestrator = new Orchestrator();
-                        orchestrator.RunCommand(timeline, timelineHandler);
+                        Orchestrator.RunCommand(timeline, timelineHandler);
                     }
                 }
                 catch (Exception exc)
@@ -205,7 +201,6 @@ namespace ghosts.client.linux.timelineManager
                     if (commands.Count > 0)
                     {
                         var constructedTimelineHandler = TimelineTranslator.FromBrowserUnitTests(commands);
-                        var orchestrator = new Orchestrator();
                         
                         var t = new Timeline
                         {
@@ -213,7 +208,7 @@ namespace ghosts.client.linux.timelineManager
                             Status = Timeline.TimelineStatus.Run
                         };
                         t.TimeLineHandlers.Add(constructedTimelineHandler);
-                        orchestrator.RunCommand(t, constructedTimelineHandler);
+                        Orchestrator.RunCommand(t, constructedTimelineHandler);
                     }
                 }
                 catch (Exception exc)
@@ -265,12 +260,12 @@ namespace ghosts.client.linux.timelineManager
             }
         }
 
-        private string Handle(Message message)
+        private static string Handle(Message message)
         {
             var command = message.MessageString;
             var index = command.LastIndexOf("}", StringComparison.InvariantCultureIgnoreCase);
             if (index > 0)
-                command = command.Substring(0, index + 1);
+                command = command[..(index + 1)];
 
             _log.Trace($"Received from {message.TcpClient.Client.RemoteEndPoint}: {command}");
 
@@ -285,8 +280,6 @@ namespace ghosts.client.linux.timelineManager
 
                 _log.Trace($"Command found: {timelineHandler.HandlerType}");
 
-                var o = new Orchestrator();
-                
                 var t = new Timeline
                 {
                     Id = Guid.NewGuid(),
@@ -294,7 +287,7 @@ namespace ghosts.client.linux.timelineManager
                 };
                 t.TimeLineHandlers.Add(timelineHandler);
                 
-                o.RunCommand(t, timelineHandler);
+                Orchestrator.RunCommand(t, timelineHandler);
 
                 var obj = JsonConvert.SerializeObject(timelineHandler);
 

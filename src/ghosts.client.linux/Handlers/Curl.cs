@@ -14,9 +14,9 @@ namespace ghosts.client.linux.handlers
     public class Curl : BaseHandler
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        public string Result { get; private set; }
+        private string Result { get; set; }
         private readonly TimelineHandler _handler;
-        private readonly int _stickiness = 0;
+        private readonly int _stickiness;
         private readonly int _depthMin = 1;
         private readonly int _depthMax = 10;
         private int _wait = 500;
@@ -55,10 +55,8 @@ namespace ghosts.client.linux.handlers
                         Ex();
                     }
                 }
-                else
-                {
-                    Ex();
-                }
+                
+                Ex();
             }
             catch (Exception e)
             {
@@ -80,22 +78,18 @@ namespace ghosts.client.linux.handlers
                     default:
                         this.Command(timelineEvent.Command);
 
-                        foreach (var cmd in timelineEvent.CommandArgs)
+                        foreach (var cmd in timelineEvent.CommandArgs.Where(cmd => !string.IsNullOrEmpty(cmd.ToString())))
                         {
-                            if (!string.IsNullOrEmpty(cmd.ToString()))
-                            {
-                                this.Command(cmd.ToString());
-                            }
+                            this.Command(cmd.ToString());
                         }
 
                         break;
                 }
 
-                if (timelineEvent.DelayAfter > 0)
-                {
-                    _wait = timelineEvent.DelayAfter;
-                    Thread.Sleep(timelineEvent.DelayAfter);
-                }
+                if (timelineEvent.DelayAfter <= 0) continue;
+                
+                _wait = timelineEvent.DelayAfter;
+                Thread.Sleep(timelineEvent.DelayAfter);
             }
         }
 
@@ -141,7 +135,7 @@ namespace ghosts.client.linux.handlers
                     this.Result += p.StandardOutput.ReadToEnd();
                 }
 
-                this.Report(HandlerType.Curl.ToString(), escapedArgs, this.Result);
+                Report(HandlerType.Curl.ToString(), escapedArgs, this.Result);
                 this.DeepBrowse();
             }
             catch (Exception exc)
@@ -155,72 +149,69 @@ namespace ghosts.client.linux.handlers
         /// </summary>
         private void DeepBrowse()
         {
-            if (_stickiness > 0)
+            if (_stickiness <= 0) return;
+            var random = new Random();
+            if (random.Next(100) >= _stickiness) return;
+                
+            // some percentage of the time, we should stay on this site
+            var loops = random.Next(_depthMin, _depthMax);
+            for (var loopNumber = 0; loopNumber < loops; loopNumber++)
             {
-                var random = new Random();
-                // some percentage of the time, we should stay on this site
-                if (random.Next(100) < _stickiness)
+                try
                 {
-                    var loops = random.Next(_depthMin, _depthMax);
-                    for (var loopNumber = 0; loopNumber < loops; loopNumber++)
+                    //get all links from results
+                    var doc = new HtmlDocument();
+                    doc.LoadHtml(this.Result.ToLower());
+
+                    var nodes = doc.DocumentNode.SelectNodes("//a");
+                    if (nodes == null || !nodes.Any())
                     {
-                        try
+                        return;
+                    }
+
+                    var linkManager = new LinkManager(this._currentHost);
+                    foreach (var node in nodes)
+                    {
+                        if (!node.HasAttributes 
+                            || node.Attributes["href"] == null 
+                            || string.IsNullOrEmpty(node.Attributes["href"].Value) 
+                            || node.Attributes["href"].Value.ToLower().StartsWith("//"))
                         {
-                            //get all links from results
-                            var doc = new HtmlDocument();
-                            doc.LoadHtml(this.Result.ToLower());
-
-                            var nodes = doc.DocumentNode.SelectNodes("//a");
-                            if (nodes == null || !nodes.Any())
-                            {
-                                return;
-                            }
-
-                            var linkManager = new LinkManager(this._currentHost);
-                            foreach (var node in nodes)
-                            {
-                                if (!node.HasAttributes 
-                                    || node.Attributes["href"] == null 
-                                    || string.IsNullOrEmpty(node.Attributes["href"].Value) 
-                                    || node.Attributes["href"].Value.ToLower().StartsWith("//"))
-                                {
-                                    //skip, these seem ugly
-                                }
-                                // http|s links
-                                else if (node.Attributes["href"].Value.ToLower().StartsWith("http"))
-                                {
-                                    linkManager.AddLink(node.Attributes["href"].Value.ToLower(), 1);
-                                }
-                                // relative links - prefix the scheme and host 
-                                else
-                                {
-                                    linkManager.AddLink($"{this._currentHost}{node.Attributes["href"].Value.ToLower()}", 2);
-                                }
-                            }
-
-                            var link = linkManager.Choose();
-                            if (link == null)
-                            {
-                                return;
-                            }
-                            var href = link.Url.ToString();
-                            
-                            if (!string.IsNullOrEmpty(href))
-                            {
-                                this.Result = "";
-                                Command(href);
-                            }
+                            //skip, these seem ugly
                         }
-                        catch (Exception e)
+                        // http|s links
+                        else if (node.Attributes["href"].Value.ToLower().StartsWith("http"))
                         {
-                            _log.Error(e);
+                            linkManager.AddLink(node.Attributes["href"].Value.ToLower(), 1);
                         }
-
-                        if (_wait > 0)
+                        // relative links - prefix the scheme and host 
+                        else
                         {
-                            Thread.Sleep(_wait);
+                            linkManager.AddLink($"{this._currentHost}{node.Attributes["href"].Value.ToLower()}", 2);
                         }
                     }
+
+                    var link = linkManager.Choose();
+                    if (link == null)
+                    {
+                        return;
+                    }
+                    var href = link.Url.ToString();
+                            
+                    if (!string.IsNullOrEmpty(href))
+                    {
+                        this.Result = "";
+                        Command(href);
+                    }
+                }
+                catch (Exception e)
+                {
+                    _log.Error(e);
+                }
+
+                if (_wait > 0)
+                {
+                    Thread.Sleep(_wait);
                 }
             }
         }

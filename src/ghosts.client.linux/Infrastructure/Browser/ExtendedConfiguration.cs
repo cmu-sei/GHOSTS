@@ -1,6 +1,7 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using Newtonsoft.Json;
+// ReSharper disable UnusedMember.Global
 
 namespace ghosts.client.linux.Infrastructure.Browser
 {
@@ -20,13 +21,10 @@ namespace ghosts.client.linux.Infrastructure.Browser
         {
             var commandArg = o.ToString();
             var result = new ExtendedConfiguration();
-            if (commandArg.StartsWith("{"))
-            {
-                result = JsonConvert.DeserializeObject<ExtendedConfiguration>(commandArg);
-                return result;
-            }
-
+            if (commandArg == null || !commandArg.StartsWith("{")) return result;
+            result = JsonConvert.DeserializeObject<ExtendedConfiguration>(commandArg);
             return result;
+
         }
     }
 }

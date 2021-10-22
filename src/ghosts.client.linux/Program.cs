@@ -7,6 +7,7 @@ using System.IO;
 using System.Net;
 using System.Reflection;
 using System.Threading;
+using ghosts.client.linux.Communications;
 using ghosts.client.linux.Infrastructure;
 using ghosts.client.linux.timelineManager;
 using Ghosts.Domain.Code;
@@ -15,15 +16,14 @@ using NLog;
 
 namespace ghosts.client.linux
 {
-    class Program
+    internal static class Program
     {
-        internal static ClientConfiguration Configuration { get; set; }
-        internal static Options OptionFlags;
+        internal static ClientConfiguration Configuration { get; private set; }
         internal static bool IsDebug;
-        internal static List<ThreadJob> ThreadJobs { get; set; }
+        internal static List<ThreadJob> ThreadJobs { get; private set; }
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
 
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             ThreadJobs = new List<ThreadJob>();
             ClientConfigurationLoader.UpdateConfigurationWithEnvVars();
@@ -40,7 +40,7 @@ namespace ghosts.client.linux
             }
         }
 
-        private static void Run(string[] args)
+        private static void Run(IEnumerable<string> args)
         {
             // ignore all certs
             ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
@@ -77,10 +77,10 @@ namespace ghosts.client.linux
             ListenerManager.Run();
 
             //check id
-            _log.Trace(Comms.CheckId.Id);
+            _log.Trace(CheckId.Id);
 
             //connect to command server for updates and sending logs
-            Comms.Updates.Run();
+            Updates.Run();
 
             //linux clients do not perform local survey
 

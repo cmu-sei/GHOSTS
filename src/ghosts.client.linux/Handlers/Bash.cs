@@ -2,6 +2,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
@@ -12,7 +13,7 @@ namespace ghosts.client.linux.handlers
     public class Bash : BaseHandler
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        public string Result { get; private set; }
+        private string Result { get; set; }
 
         public Bash(TimelineHandler handler)
         {
@@ -36,7 +37,7 @@ namespace ghosts.client.linux.handlers
             }
         }
 
-        public void Ex(TimelineHandler handler)
+        private void Ex(TimelineHandler handler)
         {
             foreach (var timelineEvent in handler.TimeLineEvents)
             {
@@ -53,9 +54,10 @@ namespace ghosts.client.linux.handlers
 
                         this.Command(handler.Initial, timelineEvent.Command);
 
-                        foreach (var cmd in timelineEvent.CommandArgs)
-                            if (!string.IsNullOrEmpty(cmd.ToString()))
-                                this.Command(handler.Initial, cmd.ToString());
+                        foreach (var cmd in timelineEvent.CommandArgs.Where(cmd => !string.IsNullOrEmpty(cmd.ToString())))
+                        {
+                            this.Command(handler.Initial, cmd.ToString());
+                        }
                         break;
                 }
 
@@ -88,15 +90,15 @@ namespace ghosts.client.linux.handlers
 
             p.WaitForExit();
 
-            this.Report(HandlerType.Command.ToString(), escapedArgs, this.Result);
+            Report(HandlerType.Command.ToString(), escapedArgs, this.Result);
         }
 
-        void OutputHandler(object sendingProcess, DataReceivedEventArgs outLine)
+        private void OutputHandler(object sendingProcess, DataReceivedEventArgs outLine)
         {
             this.Result += outLine.Data;
         }
 
-        void ErrorHandler(object sendingProcess, DataReceivedEventArgs outLine)
+        private static void ErrorHandler(object sendingProcess, DataReceivedEventArgs outLine)
         {
             //* Do your stuff with the output (write to console/log/StringBuilder)
             Console.WriteLine(outLine.Data);

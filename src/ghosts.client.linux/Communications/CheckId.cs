@@ -8,10 +8,10 @@ using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using NLog;
 
-namespace ghosts.client.linux.Comms
+namespace ghosts.client.linux.Communications
 {
     /// <summary>
-    /// The client ID is used in the header to save having to send hostname/user/fqdn/etc. inforamtion with every request
+    /// The client ID is used in the header to save having to send hostname/user/fqdn/etc. information with every request
     /// </summary>
     public static class CheckId
     {
@@ -20,7 +20,7 @@ namespace ghosts.client.linux.Comms
         /// <summary>
         /// The actual path to the client id file, specified in application config
         /// </summary>
-        public static string ConfigFile = ApplicationDetails.InstanceFiles.Id;
+        private static readonly string ConfigFile = ApplicationDetails.InstanceFiles.Id;
 
         /// <summary>
         /// Gets the agent's current id from local instance, and if it does not exist, gets an id from the server and saves it locally
@@ -31,11 +31,7 @@ namespace ghosts.client.linux.Comms
             {
                 try
                 {
-                    if (!File.Exists(ConfigFile))
-                    {
-                        return Run();
-                    }
-                    return File.ReadAllText(ConfigFile);
+                    return !File.Exists(ConfigFile) ? Run() : File.ReadAllText(ConfigFile);
                 }
                 catch
                 {
@@ -63,18 +59,16 @@ namespace ghosts.client.linux.Comms
             {
                 try
                 {
-                    using (var reader =
-                        new StreamReader(client.OpenRead(Program.Configuration.IdUrl)))
-                    {
-                        s = reader.ReadToEnd();
-                        _log.Debug($"{DateTime.Now} - Received client ID");
-                    }
+                    using var reader =
+                        new StreamReader(client.OpenRead(Program.Configuration.IdUrl) ?? throw new Exception("Application has invalid ID url"));
+                    s = reader.ReadToEnd();
+                    _log.Debug($"{DateTime.Now} - Received client ID");
                 }
                 catch (WebException wex)
                 {
                     if (((HttpWebResponse)wex.Response).StatusCode == HttpStatusCode.NotFound)
                     {
-                        _log.Debug("No ID returned!", wex);
+                        _log.Debug($"No ID returned from API! {wex}");
                     }
                 }
                 catch (Exception e)

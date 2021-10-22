@@ -11,17 +11,14 @@ namespace ghosts.client.linux.handlers
     {
         private static readonly Logger _timelineLog = LogManager.GetLogger("TIMELINE");
 
-        public void Report(string handler, string command, string arg)
+        protected static void Report(string handler, string command, string arg, string trackable = null)
         {
-            Report(handler, command, arg, null);
-        }
-
-        public void Report(string handler, string command, string arg, string trackable)
-        {
-            var result = new TimeLineRecord();
-            result.Handler = handler;
-            result.Command = command;
-            result.CommandArg = arg;
+            var result = new TimeLineRecord
+            {
+                Handler = handler,
+                Command = command,
+                CommandArg = arg
+            };
 
             if (!string.IsNullOrEmpty(trackable))
             {

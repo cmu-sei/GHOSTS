@@ -17,7 +17,6 @@ namespace ghosts.client.linux.timelineManager
     public class Orchestrator
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        private static DateTime _lastRead = DateTime.MinValue;
         private Thread MonitorThread { get; set; }
 
         public void Run()
@@ -31,15 +30,13 @@ namespace ghosts.client.linux.timelineManager
                 //and creates a thread to execute instructions over that timeline
                 if (timeline.Status == Timeline.TimelineStatus.Run)
                 {
-                    this.RunEx(timeline);
+                    RunEx(timeline);
                 }
                 else
                 {
-                    if (this.MonitorThread != null)
-                    {
-                        this.MonitorThread.Abort();
-                        this.MonitorThread = null;
-                    }
+                    if (this.MonitorThread == null) return;
+                    this.MonitorThread.Abort();
+                    this.MonitorThread = null;
                 }
             }
             catch (Exception exc)
@@ -48,7 +45,7 @@ namespace ghosts.client.linux.timelineManager
             }
         }
 
-        public void StopTimeline(Guid timelineId)
+        public static void StopTimeline(Guid timelineId)
         {
             foreach (var threadJob in Program.ThreadJobs.Where(x=>x.TimelineId == timelineId))
             {
@@ -72,7 +69,7 @@ namespace ghosts.client.linux.timelineManager
             }
         }
 
-        public void Stop()
+        public static void Stop()
         {
             foreach (var threadJob in Program.ThreadJobs)
             {
@@ -96,7 +93,7 @@ namespace ghosts.client.linux.timelineManager
             }
         }
 
-        private void RunEx(Timeline timeline)
+        private static void RunEx(Timeline timeline)
         {
             foreach (var handler in timeline.TimeLineHandlers)
             {
@@ -104,23 +101,26 @@ namespace ghosts.client.linux.timelineManager
             }
         }
 
-        public void RunCommand(Timeline timeline, TimelineHandler handler)
+        public static void RunCommand(Timeline timeline, TimelineHandler handler)
         {
             ThreadLaunch(timeline, handler);
         }
 
-        private void ThreadLaunch(Timeline timeline, TimelineHandler handler)
+        private static void ThreadLaunch(Timeline timeline, TimelineHandler handler)
         {
             try
             {
                 _log.Trace($"Attempting new thread for: {handler.HandlerType}");
 
                 Thread t = null;
+                // ReSharper disable once NotAccessedVariable
                 object o;
+                // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
                 switch (handler.HandlerType)
                 {
                     case HandlerType.NpcSystem:
-                        var npc = new NpcSystem(timeline, handler);
+                        // ReSharper disable once RedundantAssignment
+                        o = new NpcSystem(timeline, handler);
                         break;
                     case HandlerType.Command:
                         t = new Thread(() =>
@@ -146,6 +146,8 @@ namespace ghosts.client.linux.timelineManager
                             o = new BrowserFirefox(handler);
                         });
                         break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
 
                 if (t == null)
