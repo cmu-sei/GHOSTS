@@ -23,7 +23,7 @@ As a result of the system checks required in order for NPCs to be situationally 
 dotnetcore app built to run silently. Client tested on centos, alpine and kali distributions. We typically use this for red teaming and "outside" traffic generation or administration simulation.
 
 ### Ghosts.Api
-.NET Core 2.0 MVC Code-First containing both the api calls for the client (and corresponding api calls the ui needs) in one. 
+Dotnetcore API containing both the api calls for the client (and corresponding api calls you need for integration into other systems) in one. 
 
 Uses postgres on the backend because there is not much that postgres can't do.
 
