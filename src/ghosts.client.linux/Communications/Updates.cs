@@ -88,6 +88,9 @@ namespace ghosts.client.linux.Communications
                         // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
                         switch (update.Type)
                         {
+                            case UpdateClientConfig.UpdateType.RequestForTimeline:
+                                PostCurrentTimeline();
+                                break;
                             case UpdateClientConfig.UpdateType.Timeline:
                                 TimelineBuilder.SetLocalTimeline(update.Update.ToString());
                                 break;
@@ -142,6 +145,45 @@ namespace ghosts.client.linux.Communications
                 }
 
                 Thread.Sleep(Program.Configuration.ClientUpdates.CycleSleep);
+            }
+        }
+        
+        private static void PostCurrentTimeline()
+        {
+            ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
+
+            var posturl = string.Empty;
+
+            try
+            {
+                posturl = Program.Configuration.IdUrl.Replace("clientid", "clienttimeline");
+            }
+            catch (Exception exc)
+            {
+                _log.Error("Can't get timeline posturl!");
+                return;
+            }
+
+            try
+            {
+                _log.Trace("posting timeline");
+
+                var payload = File.ReadAllText(ApplicationDetails.ConfigurationFiles.Timeline);
+                var machine = new ResultMachine();
+                // GuestInfoVars.Load(machine); // TODO?
+
+                using (var client = WebClientBuilder.Build(machine))
+                {
+                    client.Headers[HttpRequestHeader.ContentType] = "application/json";
+                    client.UploadString(posturl, JsonConvert.SerializeObject(payload));
+                }
+
+                _log.Trace($"{DateTime.Now} - timeline posted to server successfully");
+            }
+            catch (Exception e)
+            {
+                _log.Debug($"Problem posting timeline to server from { ApplicationDetails.ConfigurationFiles.Timeline } to { posturl }");
+                _log.Error(e);
             }
         }
 
