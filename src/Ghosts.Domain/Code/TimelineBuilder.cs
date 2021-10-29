@@ -43,18 +43,38 @@ namespace Ghosts.Domain.Code
 
         public static Timeline GetLocalTimeline(string path)
         {
-            var raw = File.ReadAllText(path);
-
-            var timeline = JsonConvert.DeserializeObject<Timeline>(raw);
-            if (timeline.Id == Guid.Empty)
+            try
             {
-                timeline.Id = Guid.NewGuid();
-                SetLocalTimeline(path, timeline);
-            }
+                var raw = File.ReadAllText(path);
 
-            return timeline;
+                var timeline = JsonConvert.DeserializeObject<Timeline>(raw);
+                if (timeline.Id == Guid.Empty)
+                {
+                    timeline.Id = Guid.NewGuid();
+                    SetLocalTimeline(path, timeline);
+                }
+
+                return timeline;
+            }
+            catch
+            {
+                return null;
+            }
         }
 
+        public static string TimelineToString(Timeline timeline)
+        {
+            try
+            {
+                return JsonConvert.SerializeObject(timeline);
+            }
+            catch
+            {
+                // not a timeline?
+                return null;
+            }
+        }
+        
         /// <summary>
         /// Save to local disk
         /// </summary>
@@ -64,7 +84,7 @@ namespace Ghosts.Domain.Code
             var timelineObject = JsonConvert.DeserializeObject<Timeline>(timelineString);
             SetLocalTimeline(timelineObject);
         }
-
+        
         /// <summary>
         /// Save to local disk
         /// </summary>

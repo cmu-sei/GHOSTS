@@ -1,6 +1,7 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -89,7 +90,7 @@ namespace ghosts.client.linux.Communications
                         switch (update.Type)
                         {
                             case UpdateClientConfig.UpdateType.RequestForTimeline:
-                                PostCurrentTimeline();
+                                PostCurrentTimeline(update);
                                 break;
                             case UpdateClientConfig.UpdateType.Timeline:
                                 TimelineBuilder.SetLocalTimeline(update.Update.ToString());
@@ -148,8 +149,31 @@ namespace ghosts.client.linux.Communications
             }
         }
         
-        private static void PostCurrentTimeline()
+        private static void PostCurrentTimeline(UpdateClientConfig update)
         {
+            // is the config for a specific timeline id?
+            var timelineId = TimelineUpdateClientConfigManager.GetConfigUpdateTimelineId(update);
+
+            // get all timelines
+            var localTimelines = TimelineManager.GetLocalTimelines();
+
+            var timelines = localTimelines as Timeline[] ?? localTimelines.ToArray();
+            if (timelineId != Guid.Empty)
+            {
+                foreach (var timeline in timelines)
+                {
+                    if (timeline.Id == timelineId)
+                    {
+                        timelines = new List<Timeline>()
+                        {
+                            timeline
+                        }.ToArray();
+                        break;
+                    }
+                }
+            }
+
+
             ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
 
             var posturl = string.Empty;
@@ -158,32 +182,35 @@ namespace ghosts.client.linux.Communications
             {
                 posturl = Program.Configuration.IdUrl.Replace("clientid", "clienttimeline");
             }
-            catch (Exception exc)
+            catch
             {
                 _log.Error("Can't get timeline posturl!");
                 return;
             }
 
-            try
+            foreach (var timeline in timelines)
             {
-                _log.Trace("posting timeline");
-
-                var payload = File.ReadAllText(ApplicationDetails.ConfigurationFiles.Timeline);
-                var machine = new ResultMachine();
-                // GuestInfoVars.Load(machine); // TODO?
-
-                using (var client = WebClientBuilder.Build(machine))
+                try
                 {
-                    client.Headers[HttpRequestHeader.ContentType] = "application/json";
-                    client.UploadString(posturl, JsonConvert.SerializeObject(payload));
-                }
+                    _log.Trace("posting timeline");
 
-                _log.Trace($"{DateTime.Now} - timeline posted to server successfully");
-            }
-            catch (Exception e)
-            {
-                _log.Debug($"Problem posting timeline to server from { ApplicationDetails.ConfigurationFiles.Timeline } to { posturl }");
-                _log.Error(e);
+                    var payload = TimelineBuilder.TimelineToString(timeline);
+                    var machine = new ResultMachine();
+                    // GuestInfoVars.Load(machine); // TODO?
+
+                    using (var client = WebClientBuilder.Build(machine))
+                    {
+                        client.Headers[HttpRequestHeader.ContentType] = "application/json";
+                        client.UploadString(posturl, JsonConvert.SerializeObject(payload));
+                    }
+
+                    _log.Trace($"{DateTime.Now} - timeline posted to server successfully");
+                }
+                catch (Exception e)
+                {
+                    _log.Debug($"Problem posting timeline to server from {ApplicationDetails.ConfigurationFiles.Timeline} to {posturl}");
+                    _log.Error(e);
+                }
             }
         }
 
