@@ -58,7 +58,7 @@ namespace Ghosts.Domain.Code
             {
                 if (config.Update != null)
                 {
-                    var id = JObject.Parse(config.Update.ToString().ToLower())["id"].ToString();
+                    var id = JObject.Parse(config.Update.ToString().ToLower())["timelineid"].ToString();
                     Guid.TryParse(id, out result);
                 }
             }
