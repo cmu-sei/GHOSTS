@@ -36,12 +36,12 @@ namespace Ghosts.Api.Services
 
         public async Task<IEnumerable<MachineTimeline>> GetByMachineIdAsync(Guid id, CancellationToken ct)
         {
-            return _context.MachineTimelines.Where(x => x.MachineId == id);
+            return await _context.MachineTimelines.Where(x => x.MachineId == id).ToListAsync(ct);
         }
         
         public async Task<MachineTimeline> GetByMachineIdAndTimelineIdAsync(Guid id, Guid timelineId, CancellationToken ct)
         {
-            var timelines = _context.MachineTimelines.Where(x => x.MachineId == id);
+            var timelines = await _context.MachineTimelines.Where(x => x.MachineId == id).ToListAsync(ct);
             foreach (var timeline in timelines)
             {
                 var t = TimelineBuilder.StringToTimeline(timeline.Timeline);
