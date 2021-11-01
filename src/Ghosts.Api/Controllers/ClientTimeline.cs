@@ -22,10 +22,10 @@ namespace ghosts.api.Controllers
     public class ClientTimelineController : Controller
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        private readonly IMachineTimelineService _service;
+        private readonly IMachineTimelinesService _service;
         private readonly IMachineService _machineService;
 
-        public ClientTimelineController(IMachineTimelineService service, IMachineService machineService)
+        public ClientTimelineController(IMachineTimelinesService service, IMachineService machineService)
         {
             _service = service;
             _machineService = machineService;
