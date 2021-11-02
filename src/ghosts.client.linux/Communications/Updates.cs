@@ -311,5 +311,66 @@ namespace ghosts.client.linux.Communications
 
             _log.Trace($"{DateTime.Now} - {fileName} posted to server successfully");
         }
+        
+        internal static void PostSurvey()
+        {
+            // ignore all certs
+            ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
+
+            var posturl = string.Empty;
+
+            try
+            {
+                posturl = Program.Configuration.Survey.PostUrl;
+            }
+            catch (Exception exc)
+            {
+                _log.Error("Can't get survey posturl!");
+                return;
+            }
+
+            try
+            {
+                _log.Trace("posting survey");
+
+                Thread.Sleep(Jitter.Basic(100));
+
+                if (!File.Exists(ApplicationDetails.InstanceFiles.SurveyResults))
+                    return;
+
+                var survey = JsonConvert.DeserializeObject<Ghosts.Domain.Messages.MesssagesForServer.Survey>(File.ReadAllText(ApplicationDetails.InstanceFiles.SurveyResults));
+
+                var payload = JsonConvert.SerializeObject(survey);
+
+                var machine = new ResultMachine();
+                // GuestInfoVars.Load(machine);
+
+                if (Program.Configuration.Survey.IsSecure)
+                {
+                    payload = Crypto.EncryptStringAes(payload, machine.Name);
+                    payload = Base64Encoder.Base64Encode(payload);
+
+                    var p = new EncryptedPayload();
+                    p.Payload = payload;
+
+                    payload = JsonConvert.SerializeObject(p);
+                }
+
+                using (var client = WebClientBuilder.Build(machine))
+                {
+                    client.Headers[HttpRequestHeader.ContentType] = "application/json";
+                    client.UploadString(posturl, payload);
+                }
+
+                _log.Trace($"{DateTime.Now} - survey posted to server successfully");
+
+                File.Delete(ApplicationDetails.InstanceFiles.SurveyResults);
+            }
+            catch (Exception e)
+            {
+                _log.Debug($"Problem posting logs to server from { ApplicationDetails.InstanceFiles.SurveyResults } to { Program.Configuration.Survey.PostUrl }");
+                _log.Error(e);
+            }
+        }
     }
 }

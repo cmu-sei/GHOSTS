@@ -82,7 +82,18 @@ namespace ghosts.client.linux
             //connect to command server for updates and sending logs
             Updates.Run();
 
-            //linux clients do not perform local survey
+            //local survey gathers information such as drives, accounts, logs, etc.
+            if (Configuration.Survey.IsEnabled)
+            {
+                try
+                {
+                    Survey.SurveyManager.Run();
+                }
+                catch (Exception exc)
+                {
+                    _log.Error(exc);
+                }
+            }
 
             if (Configuration.HealthIsEnabled)
             {

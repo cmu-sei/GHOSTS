@@ -16,7 +16,7 @@
         "IsEnabled": true,
         "IsSecure": false,
         "Frequency": "once",
-        "CycleSleepMinutes": 720,
+        "CycleSleepMinutes": 5,
         "OutputFormat": "indent",
         "PostUrl": "http://ghosts-api:52388/api/clientsurvey"
     },
