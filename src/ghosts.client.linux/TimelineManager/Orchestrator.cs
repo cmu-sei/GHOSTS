@@ -60,7 +60,7 @@ namespace ghosts.client.linux.timelineManager
 
                 try
                 {
-                    threadJob.Thread.Interrupt();
+                    threadJob.Thread.Join();
                 }
                 catch (Exception e)
                 {
