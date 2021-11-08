@@ -62,7 +62,7 @@ namespace ghosts.client.linux.Health
             if (this._threads == null) return;
             foreach (var thread in this._threads)
             {
-                thread.Abort(null);
+                thread.Interrupt();
             }
         }
 

@@ -35,7 +35,7 @@ namespace ghosts.client.linux.timelineManager
                 else
                 {
                     if (this.MonitorThread == null) return;
-                    this.MonitorThread.Abort();
+                    this.MonitorThread.Interrupt();
                     this.MonitorThread = null;
                 }
             }
@@ -51,7 +51,7 @@ namespace ghosts.client.linux.timelineManager
             {
                 try
                 {
-                    threadJob.Thread.Abort(null);
+                    threadJob.Thread.Interrupt();
                 }
                 catch (Exception e)
                 {
@@ -60,7 +60,7 @@ namespace ghosts.client.linux.timelineManager
 
                 try
                 {
-                    threadJob.Thread.Join();
+                    threadJob.Thread.Interrupt();
                 }
                 catch (Exception e)
                 {
@@ -75,7 +75,7 @@ namespace ghosts.client.linux.timelineManager
             {
                 try
                 {
-                    threadJob.Thread.Abort(null);
+                    threadJob.Thread.Interrupt();
                 }
                 catch (Exception e)
                 {
@@ -84,7 +84,7 @@ namespace ghosts.client.linux.timelineManager
 
                 try
                 {
-                    threadJob.Thread.Join();
+                    threadJob.Thread.Interrupt();
                 }
                 catch (Exception e)
                 {
