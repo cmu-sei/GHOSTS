@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using FileHelpers;
 using Ghosts.Domain.Code;
+using Ghosts.Domain.Code.Helpers;
 using NLog;
 
 namespace Ghosts.Client.Infrastructure.Email

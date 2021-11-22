@@ -24,7 +24,7 @@ namespace Ghosts.Client.TimelineManager
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
         private static DateTime _lastRead = DateTime.MinValue;
         private Thread MonitorThread { get; set; }
-        private Timeline _timeline;
+        private static Timeline DefaultTimeline;
         private FileSystemWatcher timelineWatcher;
         private bool _isSafetyNetRunning = false;
         private bool _isTempCleanerRunning = false;
@@ -39,6 +39,8 @@ namespace Ghosts.Client.TimelineManager
         {
             try
             {
+                DefaultTimeline = TimelineBuilder.GetLocalTimeline();
+
                 if (_isSafetyNetRunning != true) //checking if safetynet has already been started
                 {
                     this.StartSafetyNet(); //watch instance numbers
@@ -50,8 +52,6 @@ namespace Ghosts.Client.TimelineManager
                     TempFiles.StartTempFileWatcher(); //watch temp directory on a diff schedule
                     _isTempCleanerRunning = true;
                 }
-
-                this._timeline = TimelineBuilder.GetLocalTimeline();
 
                 // now watch that file for changes
                 if(timelineWatcher == null) //you can change this to a bool if you want but checks if the object has been created
@@ -70,9 +70,9 @@ namespace Ghosts.Client.TimelineManager
                 //load into an managing object
                 //which passes the timeline commands to handlers
                 //and creates a thread to execute instructions over that timeline
-                if (this._timeline.Status == Timeline.TimelineStatus.Run)
+                if (DefaultTimeline.Status == Timeline.TimelineStatus.Run)
                 {
-                    RunEx(this._timeline);
+                    RunEx(DefaultTimeline);
                 }
                 else
                 {
@@ -164,7 +164,7 @@ namespace Ghosts.Client.TimelineManager
                     IsBackground = true,
                     Name = "ghosts-safetynet"
                 };
-                t.Start();
+                t.Start(DefaultTimeline);
             }
             catch (Exception e)
             {
@@ -175,17 +175,16 @@ namespace Ghosts.Client.TimelineManager
         ///here lies technical debt
         //TODO clean up
         // if supposed to be one excel running, and there is more than 2, then kill race condition
-        private static void SafetyNet()
+        private static void SafetyNet(object defaultTimeline)
         {
+            var timeline = (Timeline) defaultTimeline;
             while (true)
             {
                 try
                 {
                     _log.Trace("SafetyNet loop beginning");
 
-                    FileListing.FlushList(); //Added 6/10 by AMV to clear clogged while loop.
-
-                    var timeline = TimelineBuilder.GetLocalTimeline();
+                    FileListing.FlushList();
 
                     var handlerCount = timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.Excel);
                     var pids = ProcessManager.GetPids(ProcessManager.ProcessNames.Excel).ToList();

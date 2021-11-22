@@ -8,6 +8,7 @@ using OpenQA.Selenium.Firefox;
 using System;
 using System.Diagnostics;
 using System.IO;
+using Ghosts.Domain.Code.Helpers;
 
 namespace Ghosts.Client.Handlers
 {
@@ -80,27 +81,27 @@ namespace Ghosts.Client.Handlers
 
                 if (handler.HandlerArgs != null)
                 {
-                    if (handler.HandlerArgs.ContainsKey("isheadless") && handler.HandlerArgs["isheadless"] == "true")
+                    if (handler.HandlerArgs.ContainsKeyWithOption("isheadless", "true"))
                     {
                         options.AddArguments("--headless");
                     }
-                    if (handler.HandlerArgs.ContainsKey("incognito") && handler.HandlerArgs["incognito"] == "true")
+                    if (handler.HandlerArgs.ContainsKeyWithOption("incognito", "true"))
                     {
                         options.AddArguments("--incognito");
                     }
-                    if (handler.HandlerArgs.ContainsKey("blockstyles") && handler.HandlerArgs["blockstyles"] == "true")
+                    if (handler.HandlerArgs.ContainsKeyWithOption("blockstyles", "true"))
                     {
                         options.Profile.SetPreference("permissions.default.stylesheet", 2);
                     }
-                    if (handler.HandlerArgs.ContainsKey("blockimages") && handler.HandlerArgs["blockimages"] == "true")
+                    if (handler.HandlerArgs.ContainsKeyWithOption("blockimages", "true"))
                     {
                         options.Profile.SetPreference("permissions.default.image", 2);
                     }
-                    if (handler.HandlerArgs.ContainsKey("blockflash") && handler.HandlerArgs["blockflash"] == "true")
+                    if (handler.HandlerArgs.ContainsKeyWithOption("blockflash", "true"))
                     {
                         options.Profile.SetPreference("dom.ipc.plugins.enabled.libflashplayer.so", false);
                     }
-                    if (handler.HandlerArgs.ContainsKey("blockscripts") && handler.HandlerArgs["blockscripts"] == "true")
+                    if (handler.HandlerArgs.ContainsKeyWithOption("blockscripts", "true"))
                     {
                         options.Profile.SetPreference("permissions.default.script", 2);
                     }

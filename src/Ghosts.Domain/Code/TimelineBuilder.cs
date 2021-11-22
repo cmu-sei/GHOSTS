@@ -29,6 +29,7 @@ namespace Ghosts.Domain.Code
             _log.Trace($"Loading timeline config {TimelineFile }");
 
             var raw = File.ReadAllText(TimelineFile);
+
             var timeline = JsonConvert.DeserializeObject<Timeline>(raw);
             if (timeline.Id == Guid.Empty)
             {

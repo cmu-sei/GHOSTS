@@ -5,6 +5,7 @@ using Ghosts.Domain;
 using OpenQA.Selenium.Chrome;
 using System;
 using System.IO;
+using Ghosts.Domain.Code.Helpers;
 using OpenQA.Selenium;
 
 namespace Ghosts.Client.Handlers
@@ -49,33 +50,32 @@ namespace Ghosts.Client.Handlers
                         options.BinaryLocation = handler.HandlerArgs["executable-location"];
                     }
 
-                    if (handler.HandlerArgs.ContainsKey("isheadless") && handler.HandlerArgs["isheadless"] == "true")
+                    if (handler.HandlerArgs.ContainsKeyWithOption("isheadless", "true"))
                     {
                         options.AddArguments("headless");
                     }
 
-                    if (handler.HandlerArgs.ContainsKey("incognito") && handler.HandlerArgs["incognito"] == "true")
+                    if (handler.HandlerArgs.ContainsKeyWithOption("incognito", "true"))
                     {
                         options.AddArguments("--incognito");
                     }
 
-                    if (handler.HandlerArgs.ContainsKey("blockstyles") && handler.HandlerArgs["blockstyles"] == "true")
+                    if (handler.HandlerArgs.ContainsKeyWithOption("blockstyles", "true"))
                     {
                         options.AddUserProfilePreference("profile.managed_default_content_settings.stylesheets", 2);
                     }
 
-                    if (handler.HandlerArgs.ContainsKey("blockimages") && handler.HandlerArgs["blockimages"] == "true")
+                    if (handler.HandlerArgs.ContainsKeyWithOption("blockimages", "true"))
                     {
                         options.AddUserProfilePreference("profile.managed_default_content_settings.images", 2);
                     }
 
-                    if (handler.HandlerArgs.ContainsKey("blockflash") && handler.HandlerArgs["blockflash"] == "true")
+                    if (handler.HandlerArgs.ContainsKeyWithOption("blockflash", "true"))
                     {
                         // ?
                     }
 
-                    if (handler.HandlerArgs.ContainsKey("blockscripts") &&
-                        handler.HandlerArgs["blockscripts"] == "true")
+                    if (handler.HandlerArgs.ContainsKeyWithOption("blockscripts", "true"))
                     {
                         options.AddUserProfilePreference("profile.managed_default_content_settings.javascript", 1);
                     }

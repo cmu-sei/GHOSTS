@@ -84,7 +84,7 @@ namespace Ghosts.Client.Comms
                         }
                         catch (Exception e)
                         {
-                            _log.Error(e);
+                            _log.Error($"Exception in connecting to server: {e.Message}");
                         }
                     }
 

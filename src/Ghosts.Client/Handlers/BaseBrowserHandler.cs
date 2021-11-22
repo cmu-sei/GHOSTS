@@ -5,6 +5,7 @@ using System.Threading;
 using Ghosts.Client.Infrastructure.Browser;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
+using Ghosts.Domain.Code.Helpers;
 using NLog;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;

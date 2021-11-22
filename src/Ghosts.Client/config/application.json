@@ -38,7 +38,7 @@
     "ChromeExtensions": "",
     "FirefoxInstallLocation": "",
     "FirefoxMajorVersionMinimum": 48,
-    "OfficeDocsMaxAgeInHours": 6,
+    "OfficeDocsMaxAgeInHours": 72,
     "Email": {
         "RecipientsToMin": 1,
         "RecipientsToMax": 3,

@@ -10,9 +10,9 @@ using System.Management.Automation;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-using Ghosts.Client.Infrastructure;
 using Ghosts.Client.Comms;
 using Ghosts.Domain.Code;
+using Ghosts.Domain.Code.Helpers;
 using Newtonsoft.Json;
 using NLog;
 

@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Ghosts.Domain.Code;
+using Ghosts.Domain.Code.Helpers;
 using NLog;
 // ReSharper disable InconsistentNaming
 

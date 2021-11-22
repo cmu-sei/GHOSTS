@@ -1,5 +1,6 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -87,10 +88,8 @@ namespace Ghosts.Client.Infrastructure
                                 continue;
                             }
 
-                            var creationTime = file.CreationTime.Hour;
-                            _log.Trace($"Delete evaluation for {file.FullName} {file.CreationTime}");
-
-                            if (!file.Exists || (creationTime <= Program.Configuration.OfficeDocsMaxAgeInHours))
+                            _log.Trace($"Delete evaluation for {file.FullName} {file.CreationTime} vs. {DateTime.Now.AddHours(-Program.Configuration.OfficeDocsMaxAgeInHours)}");
+                            if (!file.Exists || (file.CreationTime > (DateTime.Now.AddHours(-Program.Configuration.OfficeDocsMaxAgeInHours))))
                                 continue;
 
                             try
