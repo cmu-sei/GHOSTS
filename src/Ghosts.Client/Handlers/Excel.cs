@@ -92,21 +92,7 @@ namespace Ghosts.Client.Handlers
                         var excelApplication = new Excel.Application
                         {
                             DisplayAlerts = false,
-                            //Visible = true
                         };
-
-                        //try
-                        //{
-                        //    excelApplication.WindowState = XlWindowState.xlMinimized;
-                        //    foreach (var item in excelApplication.Workbooks)
-                        //    {
-                        //        item.Windows[1].WindowState = XlWindowState.xlMinimized;
-                        //    }
-                        //}
-                        //catch (Exception e)
-                        //{
-                        //    _log.Trace($"Could not minimize: {e}");
-                        //}
 
                         // create a utils instance, not need for but helpful to keep the lines of code low
                         var utils = new CommonUtils(excelApplication);
@@ -117,33 +103,49 @@ namespace Ghosts.Client.Handlers
                         _log.Trace("Excel adding worksheet");
                         var workSheet = (Excel.Worksheet) workBook.Worksheets[1];
 
-                        var range = GetRandomRange();
-                        // draw back color and perform the BorderAround method
-                        workSheet.Range(range).Interior.Color = utils.Color.ToDouble(StylingExtensions.GetRandomColor());
-                        workSheet.Range(range).BorderAround(XlLineStyle.xlContinuous, XlBorderWeight.xlMedium,
-                            XlColorIndex.xlColorIndexAutomatic);
-
-                        range = GetRandomRange();
-                        // draw back color and border the range explicitly
-                        workSheet.Range(range).Interior.Color = utils.Color.ToDouble(StylingExtensions.GetRandomColor());
-                        workSheet.Range(range)
-                            .Borders[(Excel.Enums.XlBordersIndex) XlBordersIndex.xlInsideHorizontal]
-                            .LineStyle = XlLineStyle.xlDouble;
-                        workSheet.Range(range)
-                            .Borders[(Excel.Enums.XlBordersIndex) XlBordersIndex.xlInsideHorizontal]
-                            .Weight = 4;
-                        workSheet.Range(range)
-                            .Borders[(Excel.Enums.XlBordersIndex) XlBordersIndex.xlInsideHorizontal]
-                            .Color = utils.Color.ToDouble(StylingExtensions.GetRandomColor());
-
-                        var writeSleep = ProcessManager.Jitter(100);
-                        Thread.Sleep(writeSleep);
 
                         var list = RandomText.GetDictionary.GetDictionaryList();
                         var rt = new RandomText(list.ToArray());
                         rt.AddSentence(10);
 
                         workSheet.Cells[1, 1].Value = rt.Content;
+
+                        var random = new Random();
+                        for (var i = 2; i < 100; i++)
+                        {
+                            for (var j = 1; j < 100; j++)
+                            {
+                                if (random.Next(0, 20) != 1) // 1 in 20 cells are blank
+                                    workSheet.Cells[i, j].Value = random.Next(0, 999999999);
+                            }
+                        }
+
+                        for (var i = 0; i < random.Next(1,30); i++)
+                        {
+                            var range = GetRandomRange();
+                            // draw back color and perform the BorderAround method
+                            workSheet.Range(range).Interior.Color =
+                                utils.Color.ToDouble(StylingExtensions.GetRandomColor());
+                            workSheet.Range(range).BorderAround(XlLineStyle.xlContinuous, XlBorderWeight.xlMedium,
+                                XlColorIndex.xlColorIndexAutomatic);
+
+                            range = GetRandomRange();
+                            // draw back color and border the range explicitly
+                            workSheet.Range(range).Interior.Color =
+                                utils.Color.ToDouble(StylingExtensions.GetRandomColor());
+                            workSheet.Range(range)
+                                .Borders[(Excel.Enums.XlBordersIndex) XlBordersIndex.xlInsideHorizontal]
+                                .LineStyle = XlLineStyle.xlDouble;
+                            workSheet.Range(range)
+                                .Borders[(Excel.Enums.XlBordersIndex) XlBordersIndex.xlInsideHorizontal]
+                                .Weight = 4;
+                            workSheet.Range(range)
+                                .Borders[(Excel.Enums.XlBordersIndex) XlBordersIndex.xlInsideHorizontal]
+                                .Color = utils.Color.ToDouble(StylingExtensions.GetRandomColor());
+                        }
+
+                        var writeSleep = ProcessManager.Jitter(100);
+                        Thread.Sleep(writeSleep);
 
                         var rand = RandomFilename.Generate();
 

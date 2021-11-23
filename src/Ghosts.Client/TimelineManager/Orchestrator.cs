@@ -24,10 +24,10 @@ namespace Ghosts.Client.TimelineManager
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
         private static DateTime _lastRead = DateTime.MinValue;
         private Thread MonitorThread { get; set; }
-        private static Timeline DefaultTimeline;
-        private FileSystemWatcher timelineWatcher;
-        private bool _isSafetyNetRunning = false;
-        private bool _isTempCleanerRunning = false;
+        private static Timeline _defaultTimeline;
+        private FileSystemWatcher _timelineWatcher;
+        private bool _isSafetyNetRunning;
+        private bool _isTempCleanerRunning;
 
         private bool _isWordInstalled { get; set; }
         private bool _isExcelInstalled { get; set; }
@@ -39,7 +39,7 @@ namespace Ghosts.Client.TimelineManager
         {
             try
             {
-                DefaultTimeline = TimelineBuilder.GetLocalTimeline();
+                _defaultTimeline = TimelineBuilder.GetLocalTimeline();
 
                 if (_isSafetyNetRunning != true) //checking if safetynet has already been started
                 {
@@ -53,26 +53,27 @@ namespace Ghosts.Client.TimelineManager
                     _isTempCleanerRunning = true;
                 }
 
+                var dirName = TimelineBuilder.TimelineFilePath().DirectoryName;
                 // now watch that file for changes
-                if(timelineWatcher == null) //you can change this to a bool if you want but checks if the object has been created
+                if (_timelineWatcher == null && dirName != null) //you can change this to a bool if you want but checks if the object has been created
                 {
                     _log.Trace("Timeline watcher starting and is null...");
-                    timelineWatcher = new FileSystemWatcher(TimelineBuilder.TimelineFilePath().DirectoryName)
+                    _timelineWatcher = new FileSystemWatcher(dirName)
                     {
                         Filter = Path.GetFileName(TimelineBuilder.TimelineFilePath().Name)
                     };
                     _log.Trace($"watching {Path.GetFileName(TimelineBuilder.TimelineFilePath().Name)}");
-                    timelineWatcher.NotifyFilter = NotifyFilters.LastWrite;
-                    timelineWatcher.EnableRaisingEvents = true;
-                    timelineWatcher.Changed += OnChanged;
+                    _timelineWatcher.NotifyFilter = NotifyFilters.LastWrite;
+                    _timelineWatcher.EnableRaisingEvents = true;
+                    _timelineWatcher.Changed += OnChanged;
                 }
                 
                 //load into an managing object
                 //which passes the timeline commands to handlers
                 //and creates a thread to execute instructions over that timeline
-                if (DefaultTimeline.Status == Timeline.TimelineStatus.Run)
+                if (_defaultTimeline.Status == Timeline.TimelineStatus.Run)
                 {
-                    RunEx(DefaultTimeline);
+                    RunEx(_defaultTimeline);
                 }
                 else
                 {
@@ -164,7 +165,7 @@ namespace Ghosts.Client.TimelineManager
                     IsBackground = true,
                     Name = "ghosts-safetynet"
                 };
-                t.Start(DefaultTimeline);
+                t.Start(_defaultTimeline);
             }
             catch (Exception e)
             {
@@ -411,43 +412,42 @@ namespace Ghosts.Client.TimelineManager
                 _log.Trace($"FileWatcher event raised: {e.FullPath} {e.Name} {e.ChangeType}");
 
                 // filewatcher throws two events, we only need 1
-                DateTime lastWriteTime = File.GetLastWriteTime(e.FullPath);
-                if (lastWriteTime != _lastRead)
-                {
-                    _lastRead = lastWriteTime;
-                    _log.Trace("FileWatcher Processing: " + e.FullPath + " " + e.ChangeType);
-                    _log.Trace($"Reloading {MethodBase.GetCurrentMethod().DeclaringType}");
+                var lastWriteTime = File.GetLastWriteTime(e.FullPath);
+                if (lastWriteTime == _lastRead) return;
 
-                    _log.Trace("terminate existing tasks and rerun orchestrator");
+                _lastRead = lastWriteTime;
+                _log.Trace("FileWatcher Processing: " + e.FullPath + " " + e.ChangeType);
+                _log.Trace($"Reloading {MethodBase.GetCurrentMethod().DeclaringType}");
+
+                _log.Trace("terminate existing tasks and rerun orchestrator");
                     
-                    try
-                    {
-                        Stop();
-                    }
-                    catch (Exception exception)
-                    {
-                        _log.Info(exception);
-                    }
+                try
+                {
+                    Stop();
+                }
+                catch (Exception exception)
+                {
+                    _log.Info(exception);
+                }
 
-                    try
-                    {
-                        StartupTasks.CleanupProcesses();
-                    }
-                    catch (Exception exception)
-                    {
-                        _log.Info(exception);
-                    }
+                try
+                {
+                    StartupTasks.CleanupProcesses();
+                }
+                catch (Exception exception)
+                {
+                    _log.Info(exception);
+                }
 
-                    Thread.Sleep(7500);
+                Thread.Sleep(7500);
 
-                    try
-                    {
-                        Run();
-                    }
-                    catch (Exception exception)
-                    {
-                        _log.Info(exception);
-                    }
+                try
+                {
+                    Run();
+                }
+                catch (Exception exception)
+                {
+                    _log.Info(exception);
                 }
             }
             catch (Exception exc)

@@ -58,6 +58,7 @@ namespace Ghosts.Domain.Code
             return RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
         }
 
+        // ReSharper disable once InconsistentNaming
         public static bool IsOSX()
         {
             return RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
