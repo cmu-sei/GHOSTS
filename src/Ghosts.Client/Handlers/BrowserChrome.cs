@@ -82,12 +82,13 @@ namespace Ghosts.Client.Handlers
                 }
 
                 options.AddUserProfilePreference("profile.default_content_setting_values.notifications", 2);
+                options.AddUserProfilePreference("profile.default_content_setting_values.geolocation", 2);
                 options.AddUserProfilePreference("profile.managed_default_content_settings.cookies", 2);
                 options.AddUserProfilePreference("profile.managed_default_content_settings.plugins", 2);
                 options.AddUserProfilePreference("profile.managed_default_content_settings.popups", 2);
                 options.AddUserProfilePreference("profile.managed_default_content_settings.geolocation", 2);
                 options.AddUserProfilePreference("profile.managed_default_content_settings.media_stream", 2);
-
+                
                 if (!string.IsNullOrEmpty(Program.Configuration.ChromeExtensions))
                 {
                     options.AddArguments($"--load-extension={Program.Configuration.ChromeExtensions}");

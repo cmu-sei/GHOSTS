@@ -252,7 +252,7 @@ namespace Ghosts.Client.Comms
                 }
                 catch (Exception e)
                 {
-                    _log.Error($"Problem posting logs to server {e}");
+                    _log.Error($"Problem posting logs to server: {e.Message}");
                 }
                 finally
                 {

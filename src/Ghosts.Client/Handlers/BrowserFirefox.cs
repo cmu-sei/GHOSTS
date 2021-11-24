@@ -112,6 +112,10 @@ namespace Ghosts.Client.Handlers
                 options.Profile.SetPreference("permissions.default.geolocation", 2);
                 options.Profile.SetPreference("permissions.default.media_stream", 2);
 
+                options.Profile.SetPreference("geo.enabled", false);
+                options.Profile.SetPreference("geo.prompt.testing", false);
+                options.Profile.SetPreference("geo.prompt.testing.allow", false);
+
                 Driver = new FirefoxDriver(options);
                 base.Driver = Driver;
 

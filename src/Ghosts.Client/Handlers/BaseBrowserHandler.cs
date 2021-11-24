@@ -1,6 +1,7 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
+using System.Linq;
 using System.Threading;
 using Ghosts.Client.Infrastructure.Browser;
 using Ghosts.Domain;
@@ -21,6 +22,8 @@ namespace Ghosts.Client.Handlers
         private int _stickiness = 0;
         private int _depthMin = 1;
         private int _depthMax = 10;
+        private LinkManager _linkManager;
+        private int _pageBrowseCount = 0;
 
         public void ExecuteEvents(TimelineHandler handler)
         {
@@ -42,6 +45,36 @@ namespace Ghosts.Client.Handlers
 
                     switch (timelineEvent.Command)
                     {
+                        case "crawl":
+                            if (handler.HandlerArgs.ContainsKey("stickiness"))
+                            {
+                                int.TryParse(handler.HandlerArgs["stickiness"], out _stickiness);
+                            }
+
+                            Driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
+
+                            foreach (var site in timelineEvent.CommandArgs)
+                            {
+                                if (Driver.CurrentWindowHandle == null)
+                                {
+                                    throw new Exception("Browser window handle not available");
+                                }
+
+                                this._pageBrowseCount = 0;
+                                config = RequestConfiguration.Load(site);
+                                this._linkManager = new LinkManager(config.Uri);
+                                if (config.Uri.IsWellFormedOriginalString())
+                                {
+                                    MakeRequest(config);
+                                    Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(),
+                                        timelineEvent.TrackableId);
+
+                                    GetAllLinks(config, true);
+                                    CrawlAllLinks(config, handler, timelineEvent, true);
+                                }
+                            }
+
+                            break;
                         case "random":
 
                             // setup
@@ -82,32 +115,9 @@ namespace Ghosts.Client.Handlers
                                             {
                                                 try
                                                 {
-                                                    var linkManager = new LinkManager(config.GetHost());
-
-
-                                                    //get all links
-                                                    var links = Driver.FindElements(By.TagName("a"));
-                                                    foreach (var l in links)
-                                                    {
-                                                        var node = l.GetAttribute("href");
-                                                        if (string.IsNullOrEmpty(node) ||
-                                                            node.ToLower().StartsWith("//"))
-                                                        {
-                                                            //skip, these seem ugly
-                                                        }
-                                                        // http|s links
-                                                        else if (node.ToLower().StartsWith("http"))
-                                                        {
-                                                            linkManager.AddLink(node.ToLower(), 1);
-                                                        }
-                                                        // relative links - prefix the scheme and host 
-                                                        else
-                                                        {
-                                                            linkManager.AddLink($"{config.GetHost()}{node.ToLower()}", 2);
-                                                        }
-                                                    }
-
-                                                    var link = linkManager.Choose();
+                                                    this._linkManager = new LinkManager(config.Uri);
+                                                    GetAllLinks(config, false);
+                                                    var link = this._linkManager.Choose();
                                                     if (link == null)
                                                     {
                                                         return;
@@ -247,6 +257,73 @@ namespace Ghosts.Client.Handlers
         {
             Report(BrowserType.ToString(), "Stop", string.Empty);
             Close();
+        }
+
+        private void GetAllLinks(RequestConfiguration config, bool sameSite)
+        {
+            if (this._pageBrowseCount > this._stickiness)
+                return;
+
+            try
+            {
+                var links = Driver.FindElements(By.TagName("a"));
+                foreach (var l in links)
+                {
+                    var node = l.GetAttribute("href");
+                    if (string.IsNullOrEmpty(node))
+                        continue;
+                    node = node.ToLower();
+                    if (Uri.TryCreate(node, UriKind.RelativeOrAbsolute, out var uri))
+                    {
+                        if (uri.GetDomain() != config.Uri.GetDomain())
+                        {
+                            if (!sameSite)
+                                this._linkManager.AddLink(uri, 1);
+                        }
+                        // relative links - prefix the scheme and host 
+                        else
+                        {
+                            this._linkManager.AddLink(uri, 2);
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                _log.Trace(e);
+            }
+        }
+
+        private void CrawlAllLinks(RequestConfiguration config, TimelineHandler handler, TimelineEvent timelineEvent, bool sameSite)
+        {
+            if (this._linkManager?.Links == null)
+                return;
+            if (this._pageBrowseCount > this._stickiness)
+                return;
+
+            foreach (var link in this._linkManager.Links.Where(x=>x.WasBrowsed == false).OrderByDescending(x=>x.Priority))
+            {
+                if (this._pageBrowseCount > this._stickiness)
+                    return;
+                if (this._linkManager.Links.Any(x => x.Url.ToString() == link.Url.ToString() && x.WasBrowsed))
+                    continue;
+
+                config.Method = "GET";
+                config.Uri = link.Url;
+
+                MakeRequest(config);
+
+                foreach (var l in this._linkManager.Links.Where(x => x.Url.ToString() == link.Url.ToString()))
+                    l.WasBrowsed = true;
+                this._pageBrowseCount += 1;
+                if (this._pageBrowseCount > this._stickiness)
+                    return;
+
+                Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId);
+                GetAllLinks(config, sameSite);
+                CrawlAllLinks(config, handler, timelineEvent, sameSite);
+                Thread.Sleep(timelineEvent.DelayAfter);
+            }
         }
     }
 }
