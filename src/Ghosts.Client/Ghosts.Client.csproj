@@ -546,6 +546,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Handlers\BaseBrowserHandler.cs" />
+    <Compile Include="Handlers\BrowserCrawl.cs" />
     <Compile Include="Handlers\Print.cs" />
     <Compile Include="Infrastructure\Browser\ExtendedConfiguration.cs" />
     <Compile Include="Infrastructure\Browser\RequestConfiguration.cs" />
