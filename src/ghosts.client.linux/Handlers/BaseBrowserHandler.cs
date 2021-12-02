@@ -83,7 +83,7 @@ namespace ghosts.client.linux.handlers
                                             {
                                                 try
                                                 {
-                                                    var linkManager = new LinkManager(config.GetHost());
+                                                    var linkManager = new LinkManager(new Uri(config.GetHost()));
 
 
                                                     //get all links

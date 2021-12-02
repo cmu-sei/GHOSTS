@@ -169,7 +169,7 @@ namespace ghosts.client.linux.handlers
                         return;
                     }
 
-                    var linkManager = new LinkManager(this._currentHost);
+                    var linkManager = new LinkManager(new Uri(this._currentHost));
                     foreach (var node in nodes)
                     {
                         if (!node.HasAttributes 
