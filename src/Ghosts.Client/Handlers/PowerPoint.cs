@@ -177,19 +177,24 @@ namespace Ghosts.Client.Handlers
                         powerApplication.Quit();
                         powerApplication.Dispose();
                         powerApplication = null;
-                        presentation = null;
-
+                        
                         try
                         {
                             Marshal.ReleaseComObject(powerApplication);
                         }
-                        catch { }
+                        catch
+                        {
+                            // ignore
+                        }
 
                         try
                         {
                             Marshal.FinalReleaseComObject(powerApplication);
                         }
-                        catch { }
+                        catch
+                        {
+                            // ignore
+                        }
 
                         GC.Collect();
                     }
