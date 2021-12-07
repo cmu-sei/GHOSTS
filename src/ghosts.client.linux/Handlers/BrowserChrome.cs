@@ -3,6 +3,7 @@
 using Ghosts.Domain;
 using OpenQA.Selenium.Chrome;
 using System;
+using Ghosts.Domain.Code.Helpers;
 using OpenQA.Selenium;
 // ReSharper disable StringLiteralTypo
 
@@ -10,90 +11,16 @@ namespace ghosts.client.linux.handlers
 {
     public class BrowserChrome : BaseBrowserHandler
     {
-        private new IWebDriver Driver { get; set; }
-        private new IJavaScriptExecutor JS { get; set; }
+        public new IJavaScriptExecutor JS { get; private set; }
 
         public BrowserChrome(TimelineHandler handler)
         {
             BrowserType = HandlerType.BrowserChrome;
-            var hasRunSuccessfully = false;
-            while (!hasRunSuccessfully)
-            {
-                hasRunSuccessfully = ChromeEx(handler);
-            }
-        }
-
-        private bool ChromeEx(TimelineHandler handler)
-        {
-            BrowserType = HandlerType.BrowserChrome;
             try
             {
-                var options = new ChromeOptions();
-                options.AddArguments("disable-infobars");
-                options.AddArguments("disable-logging");
-                options.AddArguments("--disable-logging");
-                options.AddArgument("--log-level=3");
-                options.AddArgument("--silent");
-
-                options.AddUserProfilePreference("download.default_directory", @"%homedrive%%homepath%\\Downloads");
-                options.AddUserProfilePreference("disable-popup-blocking", "true");
-                //options.BinaryLocation = GetInstallLocation();
-
-                if (handler.HandlerArgs != null)
-                {
-                    if (handler.HandlerArgs.ContainsKey("executable-location") &&
-                        !string.IsNullOrEmpty(handler.HandlerArgs["executable-location"]))
-                    {
-                        options.BinaryLocation = handler.HandlerArgs["executable-location"];
-                    }
-
-                    if (handler.HandlerArgs.ContainsKey("isheadless") && handler.HandlerArgs["isheadless"] == "true")
-                    {
-                        options.AddArguments("headless");
-                    }
-
-                    if (handler.HandlerArgs.ContainsKey("incognito") && handler.HandlerArgs["incognito"] == "true")
-                    {
-                        options.AddArguments("--incognito");
-                    }
-
-                    if (handler.HandlerArgs.ContainsKey("blockstyles") && handler.HandlerArgs["blockstyles"] == "true")
-                    {
-                        options.AddUserProfilePreference("profile.managed_default_content_settings.stylesheets", 2);
-                    }
-
-                    if (handler.HandlerArgs.ContainsKey("blockimages") && handler.HandlerArgs["blockimages"] == "true")
-                    {
-                        options.AddUserProfilePreference("profile.managed_default_content_settings.images", 2);
-                    }
-
-                    if (handler.HandlerArgs.ContainsKey("blockflash") && handler.HandlerArgs["blockflash"] == "true")
-                    {
-                        // ?
-                    }
-
-                    if (handler.HandlerArgs.ContainsKey("blockscripts") &&
-                        handler.HandlerArgs["blockscripts"] == "true")
-                    {
-                        options.AddUserProfilePreference("profile.managed_default_content_settings.javascript", 1);
-                    }
-                }
-
-                options.AddUserProfilePreference("profile.default_content_setting_values.notifications", 2);
-                options.AddUserProfilePreference("profile.managed_default_content_settings.cookies", 2);
-                options.AddUserProfilePreference("profile.managed_default_content_settings.plugins", 2);
-                options.AddUserProfilePreference("profile.managed_default_content_settings.popups", 2);
-                options.AddUserProfilePreference("profile.managed_default_content_settings.geolocation", 2);
-                options.AddUserProfilePreference("profile.managed_default_content_settings.media_stream", 2);
-
-                if (!string.IsNullOrEmpty(Program.Configuration.ChromeExtensions))
-                {
-                    options.AddArguments($"--load-extension={Program.Configuration.ChromeExtensions}");
-                }
-
-                Driver = new ChromeDriver(options);
+                Driver = GetDriver(handler);
                 base.Driver = Driver;
-
+                
                 JS = (IJavaScriptExecutor)Driver;
                 base.JS = JS;
 
@@ -106,16 +33,99 @@ namespace ghosts.client.linux.handlers
                         ExecuteEvents(handler);
                     }
                 }
-                
-                ExecuteEvents(handler);
+                else
+                {
+                    ExecuteEvents(handler);
+                }
             }
             catch (Exception e)
             {
                 _log.Error(e);
-                return false;
+            }
+        }
+
+        internal static IWebDriver GetDriver(TimelineHandler handler)
+        {
+            var options = new ChromeOptions();
+            options.AddArguments("disable-infobars");
+            options.AddArguments("disable-logging");
+            options.AddArguments("--disable-logging");
+            options.AddArgument("--log-level=3");
+            options.AddArgument("--silent");
+
+            options.AddUserProfilePreference("download.default_directory", @"%homedrive%%homepath%\\Downloads");
+            options.AddUserProfilePreference("disable-popup-blocking", "true");
+
+            if (handler.HandlerArgs != null)
+            {
+                if (handler.HandlerArgs.ContainsKey("executable-location") &&
+                    !string.IsNullOrEmpty(handler.HandlerArgs["executable-location"]))
+                {
+                    options.BinaryLocation = handler.HandlerArgs["executable-location"];
+                }
+
+                if (handler.HandlerArgs.ContainsKeyWithOption("isheadless", "true"))
+                {
+                    options.AddArguments("headless");
+                }
+
+                if (handler.HandlerArgs.ContainsKeyWithOption("incognito", "true"))
+                {
+                    options.AddArguments("--incognito");
+                }
+
+                if (handler.HandlerArgs.ContainsKeyWithOption("blockstyles", "true"))
+                {
+                    options.AddUserProfilePreference("profile.managed_default_content_settings.stylesheets", 2);
+                }
+
+                if (handler.HandlerArgs.ContainsKeyWithOption("blockimages", "true"))
+                {
+                    options.AddUserProfilePreference("profile.managed_default_content_settings.images", 2);
+                }
+
+                if (handler.HandlerArgs.ContainsKeyWithOption("blockflash", "true"))
+                {
+                    // ?
+                }
+
+                if (handler.HandlerArgs.ContainsKeyWithOption("blockscripts", "true"))
+                {
+                    options.AddUserProfilePreference("profile.managed_default_content_settings.javascript", 1);
+                }
+            }
+
+            options.AddUserProfilePreference("profile.default_content_setting_values.notifications", 2);
+            options.AddUserProfilePreference("profile.default_content_setting_values.geolocation", 2);
+            options.AddUserProfilePreference("profile.managed_default_content_settings.cookies", 2);
+            options.AddUserProfilePreference("profile.managed_default_content_settings.plugins", 2);
+            options.AddUserProfilePreference("profile.managed_default_content_settings.popups", 2);
+            options.AddUserProfilePreference("profile.managed_default_content_settings.geolocation", 2);
+            options.AddUserProfilePreference("profile.managed_default_content_settings.media_stream", 2);
+
+            if (!string.IsNullOrEmpty(Program.Configuration.ChromeExtensions))
+            {
+                options.AddArguments($"--load-extension={Program.Configuration.ChromeExtensions}");
             }
             
-            return true;
+            _log.Trace("Browser preferences set successfully, getting driver...");
+            
+            ChromeDriver driver;
+            
+            try
+            {
+                driver = new ChromeDriver(options);
+            }
+            catch (Exception e)
+            {
+                _log.Trace("Driver could not be instantiated. Does the proper driver exist? Are you running as a user and not root? Sometimes running the driver directly will uncover the underlaying issue.");    
+                throw;
+            }
+            
+            _log.Trace("Driver instantiated successfully, setting timeouts...");
+            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
+            _log.Trace("Driver timeouts set successfully, continuing...");
+            return driver;
         }
     }
 }

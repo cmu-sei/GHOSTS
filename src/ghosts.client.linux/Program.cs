@@ -7,6 +7,7 @@ using System.IO;
 using System.Net;
 using System.Reflection;
 using System.Threading;
+using ghosts.client.linux.Comms;
 using ghosts.client.linux.Communications;
 using ghosts.client.linux.Infrastructure;
 using ghosts.client.linux.timelineManager;

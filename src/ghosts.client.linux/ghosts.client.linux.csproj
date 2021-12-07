@@ -16,7 +16,7 @@
     <Description>GHOSTS NPC Orchestration Platform - please email ddupdyke@sei.cmu.edu with bugs/requests/other</Description>
     <Copyright>Carnegie Mellon University 2017</Copyright>
     <NoWarn>NU1701</NoWarn>
-    <TargetFrameworks>net6.0;netcoreapp3.1</TargetFrameworks>
+    <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
   
   <ItemGroup>
