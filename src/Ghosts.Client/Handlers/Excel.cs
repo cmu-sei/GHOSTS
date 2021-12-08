@@ -13,7 +13,6 @@ using System.Threading;
 using Ghosts.Domain.Code.Helpers;
 using NetOffice.ExcelApi.Tools;
 using Excel = NetOffice.ExcelApi;
-using XlWindowState = NetOffice.ExcelApi.Enums.XlWindowState;
 
 namespace Ghosts.Client.Handlers
 {
@@ -213,20 +212,23 @@ namespace Ghosts.Client.Handlers
                         excelApplication.Dispose();
                         excelApplication = null;
 
-                        workBook = null;
-                        workSheet = null;
-
                         try
                         {
                             Marshal.ReleaseComObject(excelApplication);
                         }
-                        catch { }
+                        catch
+                        { 
+                            // ignore
+                        }
 
                         try
                         {
                             Marshal.FinalReleaseComObject(excelApplication);
                         }
-                        catch { }
+                        catch
+                        {
+                            // ignore
+                        }
 
                         GC.Collect();
                     }

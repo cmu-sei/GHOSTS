@@ -12,7 +12,6 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using Ghosts.Domain.Code.Helpers;
-using Microsoft.Office.Interop.PowerPoint;
 using Word = NetOffice.WordApi;
 using VB = Microsoft.VisualBasic;
 
@@ -201,13 +200,19 @@ namespace Ghosts.Client.Handlers
                         {
                             Marshal.ReleaseComObject(wordApplication);
                         }
-                        catch { }
+                        catch
+                        {
+                            // ignore
+                        }
 
                         try
                         {
                             Marshal.FinalReleaseComObject(wordApplication);
                         }
-                        catch { }
+                        catch
+                        {
+                            // ignore
+                        }
 
                         GC.Collect();
                     }

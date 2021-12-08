@@ -2,6 +2,7 @@
 
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 using Ghosts.Client.Infrastructure.Browser;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
@@ -22,7 +23,13 @@ namespace Ghosts.Client.Handlers
         private int _depthMin = 1;
         private int _depthMax = 10;
         private LinkManager _linkManager;
-        
+
+        private Task LaunchThread(TimelineHandler handler, TimelineEvent timelineEvent, string site)
+        {
+            var o = new BrowserCrawl();
+            return o.Crawl(handler, timelineEvent, site);
+        }
+
         public void ExecuteEvents(TimelineHandler handler)
         {
             try
@@ -44,13 +51,24 @@ namespace Ghosts.Client.Handlers
                     switch (timelineEvent.Command)
                     {
                         case "crawl":
+                            var _taskMax = 1;
+                            if (handler.HandlerArgs.ContainsKey("crawl-tasks-maximum"))
+                            {
+                                int.TryParse(handler.HandlerArgs["crawl-tasks-maximum"], out _taskMax);
+                            }
+
+                            var i = 0;
                             foreach (var site in timelineEvent.CommandArgs)
                             {
-                                new Thread(() =>
-                                {
-                                    new BrowserCrawl(handler, timelineEvent, site.ToString());
-                                });
+                                Task.Factory.StartNew(() => LaunchThread(handler, timelineEvent, site.ToString()));
                                 Thread.Sleep(5000);
+                                i++;
+
+                                if (i >= _taskMax)
+                                {
+                                    Task.WaitAll();
+                                    i = 0;
+                                }
                             }
                             break;
                         case "random":
