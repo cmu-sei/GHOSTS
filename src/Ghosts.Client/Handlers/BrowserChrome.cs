@@ -33,9 +33,12 @@ namespace Ghosts.Client.Handlers
             {
                 Driver = GetDriver(handler);
                 base.Driver = Driver;
-                
-                JS = (IJavaScriptExecutor)Driver;
-                base.JS = JS;
+
+                if (handler.HandlerArgs.ContainsKey("javascript-enable"))
+                {
+                    JS = (IJavaScriptExecutor)Driver;
+                    base.JS = JS;
+                }
 
                 Driver.Navigate().GoToUrl(handler.Initial);
 

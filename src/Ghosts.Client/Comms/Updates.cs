@@ -339,7 +339,7 @@ namespace Ghosts.Client.Comms
             {
                 posturl = Program.Configuration.Survey.PostUrl;
             }
-            catch (Exception exc)
+            catch
             {
                 _log.Error("Can't get survey posturl!");
                 return;
