@@ -86,6 +86,7 @@ namespace ghosts.client.linux
             //local survey gathers information such as drives, accounts, logs, etc.
             if (Configuration.Survey.IsEnabled)
             {
+                _log.Trace("Survey enabled, initalizing...");
                 try
                 {
                     Survey.SurveyManager.Run();
@@ -95,17 +96,31 @@ namespace ghosts.client.linux
                     _log.Error(exc);
                 }
             }
+            else
+            {
+                _log.Trace("Survey disabled, continuing.");
+            }
 
             if (Configuration.HealthIsEnabled)
             {
+                _log.Trace("Health checks enabled, initalizing...");
                 var h = new Health.Check();
                 h.Run();
+            }
+            else
+            {
+                _log.Trace("Health checks disabled, continuing.");
             }
 
             if (Configuration.HandlersIsEnabled)
             {
+                _log.Trace("Handlers enabled, initalizing...");
                 var o = new Orchestrator();
                 o.Run();
+            }
+            else
+            {
+                _log.Trace("Handling disabed, continuing.");
             }
 
             new ManualResetEvent(false).WaitOne();
