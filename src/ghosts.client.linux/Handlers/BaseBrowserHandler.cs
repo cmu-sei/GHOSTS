@@ -61,17 +61,17 @@ namespace ghosts.client.linux.handlers
                             var i = 0;
                             foreach (var site in timelineEvent.CommandArgs)
                             {
-                                LaunchThread(handler, timelineEvent, site.ToString());
+                                //LaunchThread(handler, timelineEvent, site.ToString());
 
-                                // Task.Factory.StartNew(() => LaunchThread(handler, timelineEvent, site.ToString()));
-                                // Thread.Sleep(5000);
-                                // i++;
-                                //
-                                // if (i >= _taskMax)
-                                // {
-                                //     Task.WaitAll();
-                                //     i = 0;
-                                // }
+                                Task.Factory.StartNew(() => LaunchThread(handler, timelineEvent, site.ToString()));
+                                Thread.Sleep(5000);
+                                i++;
+                                
+                                if (i >= _taskMax)
+                                {
+                                    Task.WaitAll();
+                                    i = 0;
+                                }
                             }
                             break;
                         case "random":
