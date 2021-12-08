@@ -1,0 +1,39 @@
+{
+  "Status": "Run",
+  "TimeLineHandlers": [
+    {
+      "HandlerType": "BrowserFirefox",
+      "HandlerArgs": {
+        "isheadless": "false",
+        "blockimages": "false",
+        "blockstyles": "false",
+        "blockflash": "false",
+        "blockscripts": "false",
+        "stickiness": 100,
+        "stickiness-depth-min": 5,
+        "stickiness-depth-max": 10,
+        "incognito": "true",
+        "crawl-proxy-local-url": "http://localhost:8080/test-001/record/",
+        "crawl-tasks-maximum": 2,
+        "crawl-site-depth": 2
+      },
+      "Initial": "about:blank",
+      "UtcTimeOn": "00:00:00",
+      "UtcTimeOff": "24:00:00",
+      "Loop": "false",
+      "TimeLineEvents": [
+        {
+          "Command": "crawl",
+          "CommandArgs": [
+            "http://localhost:8080/test-001/record/https://www.usatoday.com",
+            "http://localhost:8080/test-001/record/https://www.cnn.com",
+            "http://localhost:8080/test-001/record/https://www.cmu.edu",
+            "http://localhost:8080/test-001/record/https://www.espn.com"
+          ],
+          "DelayAfter": 5000,
+          "DelayBefore": 0
+        }
+      ]
+    }
+  ]
+}
