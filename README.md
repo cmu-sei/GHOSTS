@@ -34,7 +34,6 @@ The API server is a RESTful web service that provides a way for clients to inter
 * Get/manage information from clients with regards to their activity, current activities, etc.
 * Orchestrate new activities for particular clients to perform
 
-
 ---
 
 [DISTRIBUTION STATEMENT A] This material has been approved for public release and unlimited distribution.
