@@ -6,14 +6,13 @@ using Ghosts.Domain.Code;
 using Microsoft.Office.Interop.Excel;
 using NLog;
 using System;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
+using Ghosts.Domain.Code.Helpers;
 using NetOffice.ExcelApi.Tools;
 using Excel = NetOffice.ExcelApi;
-using XlWindowState = NetOffice.ExcelApi.Enums.XlWindowState;
 
 namespace Ghosts.Client.Handlers
 {
@@ -92,21 +91,7 @@ namespace Ghosts.Client.Handlers
                         var excelApplication = new Excel.Application
                         {
                             DisplayAlerts = false,
-                            Visible = true
                         };
-
-                        try
-                        {
-                            excelApplication.WindowState = XlWindowState.xlMinimized;
-                            foreach (var item in excelApplication.Workbooks)
-                            {
-                                item.Windows[1].WindowState = XlWindowState.xlMinimized;
-                            }
-                        }
-                        catch (Exception e)
-                        {
-                            _log.Trace($"Could not minimize: {e}");
-                        }
 
                         // create a utils instance, not need for but helpful to keep the lines of code low
                         var utils = new CommonUtils(excelApplication);
@@ -117,27 +102,49 @@ namespace Ghosts.Client.Handlers
                         _log.Trace("Excel adding worksheet");
                         var workSheet = (Excel.Worksheet) workBook.Worksheets[1];
 
-                        // draw back color and perform the BorderAround method
-                        workSheet.Range("$B2:$B5").Interior.Color = utils.Color.ToDouble(Color.DarkGreen);
-                        workSheet.Range("$B2:$B5").BorderAround(XlLineStyle.xlContinuous, XlBorderWeight.xlMedium,
-                            XlColorIndex.xlColorIndexAutomatic);
 
-                        // draw back color and border the range explicitly
-                        workSheet.Range("$D2:$D5").Interior.Color = utils.Color.ToDouble(Color.DarkGreen);
-                        workSheet.Range("$D2:$D5")
-                            .Borders[(Excel.Enums.XlBordersIndex) XlBordersIndex.xlInsideHorizontal]
-                            .LineStyle = XlLineStyle.xlDouble;
-                        workSheet.Range("$D2:$D5")
-                            .Borders[(Excel.Enums.XlBordersIndex) XlBordersIndex.xlInsideHorizontal]
-                            .Weight = 4;
-                        workSheet.Range("$D2:$D5")
-                            .Borders[(Excel.Enums.XlBordersIndex) XlBordersIndex.xlInsideHorizontal]
-                            .Color = utils.Color.ToDouble(Color.Black);
+                        var list = RandomText.GetDictionary.GetDictionaryList();
+                        var rt = new RandomText(list.ToArray());
+                        rt.AddSentence(10);
+
+                        workSheet.Cells[1, 1].Value = rt.Content;
+
+                        var random = new Random();
+                        for (var i = 2; i < 100; i++)
+                        {
+                            for (var j = 1; j < 100; j++)
+                            {
+                                if (random.Next(0, 20) != 1) // 1 in 20 cells are blank
+                                    workSheet.Cells[i, j].Value = random.Next(0, 999999999);
+                            }
+                        }
+
+                        for (var i = 0; i < random.Next(1,30); i++)
+                        {
+                            var range = GetRandomRange();
+                            // draw back color and perform the BorderAround method
+                            workSheet.Range(range).Interior.Color =
+                                utils.Color.ToDouble(StylingExtensions.GetRandomColor());
+                            workSheet.Range(range).BorderAround(XlLineStyle.xlContinuous, XlBorderWeight.xlMedium,
+                                XlColorIndex.xlColorIndexAutomatic);
+
+                            range = GetRandomRange();
+                            // draw back color and border the range explicitly
+                            workSheet.Range(range).Interior.Color =
+                                utils.Color.ToDouble(StylingExtensions.GetRandomColor());
+                            workSheet.Range(range)
+                                .Borders[(Excel.Enums.XlBordersIndex) XlBordersIndex.xlInsideHorizontal]
+                                .LineStyle = XlLineStyle.xlDouble;
+                            workSheet.Range(range)
+                                .Borders[(Excel.Enums.XlBordersIndex) XlBordersIndex.xlInsideHorizontal]
+                                .Weight = 4;
+                            workSheet.Range(range)
+                                .Borders[(Excel.Enums.XlBordersIndex) XlBordersIndex.xlInsideHorizontal]
+                                .Color = utils.Color.ToDouble(StylingExtensions.GetRandomColor());
+                        }
 
                         var writeSleep = ProcessManager.Jitter(100);
                         Thread.Sleep(writeSleep);
-
-                        workSheet.Cells[1, 1].Value = "We have 2 simple shapes created.";
 
                         var rand = RandomFilename.Generate();
 
@@ -177,9 +184,21 @@ namespace Ghosts.Client.Handlers
 
                         _log.Trace($"Excel saving to path - {path}");
                         workBook.SaveAs(path);
+
                         FileListing.Add(path);
-                        Report(handler.HandlerType.ToString(), timelineEvent.Command,
-                            timelineEvent.CommandArgs[0].ToString());
+                        Report(handler.HandlerType.ToString(), timelineEvent.Command, timelineEvent.CommandArgs[0].ToString());
+
+                        if (timelineEvent.CommandArgs.Contains("pdf"))
+                        {
+                            var pdfFileName = timelineEvent.CommandArgs.Contains("pdf-vary-filenames") ? $"{RandomFilename.Generate()}.pdf" : workBook.FullName.Replace(".xlsx", ".pdf");
+                            // Save document into PDF Format
+                            workBook.ExportAsFixedFormat(NetOffice.ExcelApi.Enums.XlFixedFormatType.xlTypePDF, pdfFileName);
+                            // end save as pdf
+                            Report(handler.HandlerType.ToString(), timelineEvent.Command, "pdf");
+                            FileListing.Add(pdfFileName);
+                        }
+
+                        workBook.Close();
 
                         if (timelineEvent.DelayAfter > 0)
                         {
@@ -193,20 +212,23 @@ namespace Ghosts.Client.Handlers
                         excelApplication.Dispose();
                         excelApplication = null;
 
-                        workBook = null;
-                        workSheet = null;
-
                         try
                         {
                             Marshal.ReleaseComObject(excelApplication);
                         }
-                        catch { }
+                        catch
+                        { 
+                            // ignore
+                        }
 
                         try
                         {
                             Marshal.FinalReleaseComObject(excelApplication);
                         }
-                        catch { }
+                        catch
+                        {
+                            // ignore
+                        }
 
                         GC.Collect();
                     }
@@ -229,6 +251,17 @@ namespace Ghosts.Client.Handlers
                 KillApp();
                 _log.Trace("Excel closing...");
             }
+        }
+
+        private string GetRandomRange()
+        {
+            var r = new Random();
+            var x = r.Next(1, 40);
+            var y = r.Next(x, 50);
+            var a1 = RandomText.GetRandomCapitalLetter();
+            var a2 = RandomText.GetRandomCapitalLetter(a1);
+
+            return $"${a1}{x}:${a2}{y}";
         }
     }
 }

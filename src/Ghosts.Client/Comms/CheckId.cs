@@ -5,7 +5,6 @@ using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using NLog;
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Net;
 
@@ -40,7 +39,7 @@ namespace Ghosts.Client.Comms
                 }
                 catch
                 {
-                    _log.Error("config file could not be opened");
+                    _log.Error("No ID file");
                     return string.Empty;
                 }
             }
@@ -64,30 +63,38 @@ namespace Ghosts.Client.Comms
 
             var machine = new ResultMachine();
             GuestInfoVars.Load(machine);
-            
-            //call home
-            using (WebClient client = WebClientBuilder.BuildNoId(machine))
+
+            try
             {
-                try
+                //call home
+                using (var client = WebClientBuilder.BuildNoId(machine))
                 {
-                    using (StreamReader reader =
-                        new StreamReader(client.OpenRead(Program.Configuration.IdUrl)))
+                    try
                     {
-                        s = reader.ReadToEnd();
-                        _log.Debug($"{DateTime.Now} - Received client ID");
+                        using (var reader =
+                            new StreamReader(client.OpenRead(Program.Configuration.IdUrl)))
+                        {
+                            s = reader.ReadToEnd();
+                            _log.Debug("ID Received");
+                        }
+                    }
+                    catch (WebException wex)
+                    {
+                        if (((HttpWebResponse)wex.Response).StatusCode == HttpStatusCode.NotFound)
+                        {
+                            _log.Debug("No ID returned!", wex.Message);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        _log.Error($"General comms exception: {e.Message}");
                     }
                 }
-                catch (WebException wex)
-                {
-                    if (((HttpWebResponse)wex.Response).StatusCode == HttpStatusCode.NotFound)
-                    {
-                        _log.Debug("No ID returned!", wex);
-                    }
-                }
-                catch (Exception e)
-                {
-                    _log.Error(e);
-                }
+            }
+            catch (Exception e)
+            {
+                _log.Error($"Cannot connect to API: {e.Message}");
+                return string.Empty;
             }
 
             s = s.Replace("\"", "");

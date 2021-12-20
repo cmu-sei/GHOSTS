@@ -2,12 +2,15 @@
 
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 using ghosts.client.linux.Infrastructure.Browser;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
+using Ghosts.Domain.Code.Helpers;
 using NLog;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
+// ReSharper disable StringLiteralTypo
 
 namespace ghosts.client.linux.handlers
 {
@@ -15,11 +18,19 @@ namespace ghosts.client.linux.handlers
     {
         public static readonly Logger _log = LogManager.GetCurrentClassLogger();
         public IWebDriver Driver { get; set; }
+        public IJavaScriptExecutor JS { get; set; }
         public HandlerType BrowserType { get; set; }
         private int _stickiness = 0;
         private int _depthMin = 1;
         private int _depthMax = 10;
+        private LinkManager _linkManager;
 
+        private Task LaunchThread(TimelineHandler handler, TimelineEvent timelineEvent, string site)
+        {
+            var o = new BrowserCrawl();
+            return o.Crawl(handler, timelineEvent, site);
+        }
+        
         public void ExecuteEvents(TimelineHandler handler)
         {
             try
@@ -40,6 +51,29 @@ namespace ghosts.client.linux.handlers
 
                     switch (timelineEvent.Command)
                     {
+                        case "crawl":
+                            var _taskMax = 1;
+                            if (handler.HandlerArgs.ContainsKey("crawl-tasks-maximum"))
+                            {
+                                int.TryParse(handler.HandlerArgs["crawl-tasks-maximum"], out _taskMax);
+                            }
+                            
+                            var i = 0;
+                            foreach (var site in timelineEvent.CommandArgs)
+                            {
+                                //LaunchThread(handler, timelineEvent, site.ToString());
+
+                                Task.Factory.StartNew(() => LaunchThread(handler, timelineEvent, site.ToString()));
+                                Thread.Sleep(5000);
+                                i++;
+                                
+                                if (i >= _taskMax)
+                                {
+                                    Task.WaitAll();
+                                    i = 0;
+                                }
+                            }
+                            break;
                         case "random":
 
                             // setup
@@ -80,32 +114,9 @@ namespace ghosts.client.linux.handlers
                                             {
                                                 try
                                                 {
-                                                    var linkManager = new LinkManager(config.GetHost());
-
-
-                                                    //get all links
-                                                    var links = Driver.FindElements(By.TagName("a"));
-                                                    foreach (var l in links)
-                                                    {
-                                                        var node = l.GetAttribute("href");
-                                                        if (string.IsNullOrEmpty(node) ||
-                                                            node.ToLower().StartsWith("//"))
-                                                        {
-                                                            //skip, these seem ugly
-                                                        }
-                                                        // http|s links
-                                                        else if (node.ToLower().StartsWith("http"))
-                                                        {
-                                                            linkManager.AddLink(node.ToLower());
-                                                        }
-                                                        // relative links - prefix the scheme and host 
-                                                        else
-                                                        {
-                                                            linkManager.AddLink($"{config.GetHost()}{node.ToLower()}");
-                                                        }
-                                                    }
-
-                                                    var link = linkManager.Choose();
+                                                    this._linkManager = new LinkManager(config.Uri);
+                                                    GetAllLinks(config, false);
+                                                    var link = this._linkManager.Choose();
                                                     if (link == null)
                                                     {
                                                         return;
@@ -157,14 +168,32 @@ namespace ghosts.client.linux.handlers
                             actions.SendKeys(element, timelineEvent.CommandArgs[1].ToString()).Build().Perform();
                             break;
                         case "click":
+                        case "click.by.name":
                             element = Driver.FindElement(By.Name(timelineEvent.CommandArgs[0].ToString()));
                             actions = new Actions(Driver);
                             actions.MoveToElement(element).Click().Perform();
                             break;
                         case "clickbyid":
+                        case "click.by.id":
                             element = Driver.FindElement(By.Id(timelineEvent.CommandArgs[0].ToString()));
                             actions = new Actions(Driver);
                             actions.MoveToElement(element).Click().Perform();
+                            break;
+                        case "click.by.linktext":
+                            element = Driver.FindElement(By.LinkText(timelineEvent.CommandArgs[0].ToString()));
+                            actions = new Actions(Driver);
+                            actions.MoveToElement(element).Click().Perform();
+                            break;
+                        case "click.by.cssselector":
+                            element = Driver.FindElement(By.CssSelector(timelineEvent.CommandArgs[0].ToString()));
+                            actions = new Actions(Driver);
+                            actions.MoveToElement(element).Click().Perform();
+                            break;
+                        case "js.executescript":
+                            JS.ExecuteScript(timelineEvent.CommandArgs[0].ToString());
+                            break;
+                        case "manage.window.size":
+                            Driver.Manage().Window.Size = new System.Drawing.Size(Convert.ToInt32(timelineEvent.CommandArgs[0]), Convert.ToInt32(timelineEvent.CommandArgs[1]));
                             break;
                     }
 
@@ -177,6 +206,38 @@ namespace ghosts.client.linux.handlers
             catch (Exception e)
             {
                 _log.Error(e);
+            }
+        }
+
+        private void GetAllLinks(RequestConfiguration config, bool sameSite)
+        {
+            try
+            {
+                var links = Driver.FindElements(By.TagName("a"));
+                foreach (var l in links)
+                {
+                    var node = l.GetAttribute("href");
+                    if (string.IsNullOrEmpty(node))
+                        continue;
+                    node = node.ToLower();
+                    if (Uri.TryCreate(node, UriKind.RelativeOrAbsolute, out var uri))
+                    {
+                        if (uri.GetDomain() != config.Uri.GetDomain())
+                        {
+                            if (!sameSite)
+                                this._linkManager.AddLink(uri, 1);
+                        }
+                        // relative links - prefix the scheme and host 
+                        else
+                        {
+                            this._linkManager.AddLink(uri, 2);
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                _log.Trace(e);
             }
         }
 

@@ -71,18 +71,18 @@ namespace Ghosts.Api.Services
         {
             using var scope = _scopeFactory.CreateScope();
             await using var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            
+
             foreach (var item in Queue.GetAll())
                 switch (item.Type)
                 {
                     case QueueEntry.Types.Machine:
-                        await ProcessMachine(scope, context, (MachineQueueEntry) item.Payload);
+                        await ProcessMachine(scope, context, (MachineQueueEntry)item.Payload);
                         break;
                     case QueueEntry.Types.Notification:
-                        await ProcessNotification(context, (NotificationQueueEntry) item.Payload);
+                        await ProcessNotification(context, (NotificationQueueEntry)item.Payload);
                         break;
                     case QueueEntry.Types.Survey:
-                        await ProcessSurvey(context, (Survey) item.Payload);
+                        await ProcessSurvey(context, (Survey)item.Payload);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -115,7 +115,7 @@ namespace Ghosts.Api.Services
 
                 foreach (var webhook in webhooks)
                 {
-                    var t = new Thread(() => { HandleWebhook(webhook, item); }) {IsBackground = true};
+                    var t = new Thread(() => { HandleWebhook(webhook, item); }) { IsBackground = true };
                     t.Start();
                 }
 
@@ -125,73 +125,6 @@ namespace Ghosts.Api.Services
             catch (Exception e)
             {
                 log.Trace($"Error in item {e} - {item}");
-            }
-        }
-
-        internal static async void HandleWebhook(Webhook webhook, NotificationQueueEntry payload)
-        {
-            var historyTimeline = JsonConvert.DeserializeObject<HistoryTimeline>(payload.Payload.ToString());
-            // Serialize our concrete class into a JSON String
-
-            var formattedResponse = webhook.PostbackFormat;
-
-            var isValid = false;
-            var reg = new Regex(@"\[(.*?)\]");
-            foreach (Match match in reg.Matches(formattedResponse))
-                switch (match.Value.ToLower())
-                {
-                    case "[machinename]":
-                        formattedResponse = formattedResponse.Replace(match.Value, historyTimeline.MachineId.ToString());
-                        break;
-                    case "[datetime.utcnow]":
-                        //json formatted date!
-                        formattedResponse = formattedResponse.Replace(match.Value, historyTimeline.CreatedUtc.ToString("s"));
-                        break;
-                    case "[messagetype]":
-                        formattedResponse = formattedResponse.Replace(match.Value, "Binary");
-                        break;
-                    case "[messagepayload]":
-                        if (payload.Payload["Result"] != null && !string.IsNullOrEmpty(payload.Payload["Result"].ToString()))
-                        {
-                            var p = payload.Payload["Result"].ToString().Trim().Trim('"').Trim().Trim('"');
-
-                            p = $"\"{HttpUtility.JavaScriptStringEncode(p)}\"";
-
-                            formattedResponse = formattedResponse.Replace(match.Value, p);
-                            isValid = true;
-                        }
-
-                        break;
-                }
-
-            if (!isValid)
-            {
-                log.Trace("Webhook has no payload, exiting");
-                return;
-            }
-
-            try
-            {
-                // Wrap our JSON inside a StringContent which then can be used by the HttpClient class
-                var httpContent = new StringContent(formattedResponse, Encoding.UTF8, "application/json");
-
-                using var httpClient = new HttpClient();
-                // Do the actual request and await the response
-                var httpResponse = await httpClient.PostAsync(webhook.PostbackUrl, httpContent);
-
-                log.Trace($"Webhook response {webhook.PostbackUrl} {webhook.PostbackMethod} {httpResponse.StatusCode}");
-
-                // If the response contains content we want to read it!
-                if (httpResponse.Content != null)
-                {
-                    var responseContent = await httpResponse.Content.ReadAsStringAsync();
-                    log.Trace($"Webhook notification sent with {responseContent}");
-                    // From here on you could deserialize the ResponseContent back again to a concrete C# type using Json.Net
-                }
-            }
-            catch (Exception e)
-            {
-                log.Trace($"Webhook failed response {webhook.PostbackUrl} {webhook.PostbackMethod} - {e}");
             }
         }
 
@@ -261,7 +194,7 @@ namespace Ghosts.Api.Services
                 if (item.LogDump.Log.Length > 0)
                     log.Trace(item.LogDump.Log);
 
-                var lines = item.LogDump.Log.Split(new[] {Environment.NewLine}, StringSplitOptions.None);
+                var lines = item.LogDump.Log.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
                 foreach (var line in lines)
                     try
                     {
@@ -307,7 +240,7 @@ namespace Ghosts.Api.Services
                                     };
 
                                     if (data.Tags != null)
-                                        timeline.Tags = data.Tags; 
+                                        timeline.Tags = data.Tags;
 
                                     if (data.Result != null)
                                         timeline.Result = data.Result;
@@ -323,7 +256,7 @@ namespace Ghosts.Api.Services
                                                 new NotificationQueueEntry
                                                 {
                                                     Type = NotificationQueueEntry.NotificationType.Timeline,
-                                                    Payload = (JObject) JToken.FromObject(timeline)
+                                                    Payload = (JObject)JToken.FromObject(timeline)
                                                 }
                                         });
 
@@ -479,6 +412,92 @@ namespace Ghosts.Api.Services
                 {
                     log.Error(e);
                 }
+            }
+        }
+
+        internal static async void HandleWebhook(Webhook webhook, NotificationQueueEntry payload)
+        {
+            string formattedResponse;
+            if (payload.Type == NotificationQueueEntry.NotificationType.TimelineDelivered)
+            {
+                formattedResponse = payload.Payload.ToString();
+            }
+            else
+            {
+                var historyTimeline = JsonConvert.DeserializeObject<HistoryTimeline>(payload.Payload.ToString());
+                // Serialize our concrete class into a JSON String
+
+                formattedResponse = webhook.PostbackFormat;
+
+                var isValid = false;
+                var reg = new Regex(@"\[(.*?)\]");
+                foreach (Match match in reg.Matches(formattedResponse))
+                    switch (match.Value.ToLower())
+                    {
+                        case "[machinename]":
+                            formattedResponse = formattedResponse.Replace(match.Value, historyTimeline.MachineId.ToString());
+                            break;
+                        case "[datetime.utcnow]":
+                            //json formatted date!
+                            formattedResponse = formattedResponse.Replace(match.Value, historyTimeline.CreatedUtc.ToString("s"));
+                            break;
+                        case "[messagetype]":
+                            formattedResponse = formattedResponse.Replace(match.Value, "Binary");
+                            break;
+                        case "[messagepayload]":
+                            if (payload.Payload["Result"] != null && !string.IsNullOrEmpty(payload.Payload["Result"].ToString()))
+                            {
+                                var p = payload.Payload["Result"].ToString().Trim().Trim('"').Trim().Trim('"');
+
+                                p = $"\"{HttpUtility.JavaScriptStringEncode(p)}\"";
+
+                                formattedResponse = formattedResponse.Replace(match.Value, p);
+                                isValid = true;
+                            }
+
+                            break;
+                    }
+
+                if (!isValid)
+                {
+                    log.Trace("Webhook has no payload, exiting");
+                    return;
+                }
+            }
+
+            try
+            {
+                // Wrap our JSON inside a StringContent which then can be used by the HttpClient class
+                var httpContent = new StringContent(formattedResponse, Encoding.UTF8, "application/json");
+
+                using var httpClient = new HttpClient();
+                // Do the actual request and await the response
+                HttpResponseMessage httpResponse;
+                switch (webhook.PostbackMethod)
+                {
+                    default:
+                        throw new ArgumentException("webhook configuration encountered unspecified postback method");
+                    case Webhook.WebhookMethod.POST:
+                        httpResponse = await httpClient.PostAsync(webhook.PostbackUrl, httpContent);
+                        break;
+                    case Webhook.WebhookMethod.GET:
+                        httpResponse = await httpClient.GetAsync($"{webhook.PostbackUrl}?message={formattedResponse}");
+                        break;
+                }
+
+                log.Trace($"Webhook response {webhook.PostbackUrl} {webhook.PostbackMethod} {httpResponse.StatusCode}");
+
+                // If the response contains content we want to read it!
+                if (httpResponse.Content != null)
+                {
+                    var responseContent = await httpResponse.Content.ReadAsStringAsync();
+                    log.Trace($"Webhook notification sent with {responseContent}");
+                    // From here on you could deserialize the ResponseContent back again to a concrete C# type using Json.Net
+                }
+            }
+            catch (Exception e)
+            {
+                log.Trace($"Webhook failed response {webhook.PostbackUrl} {webhook.PostbackMethod} - {e}");
             }
         }
     }

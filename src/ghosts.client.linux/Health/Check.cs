@@ -18,7 +18,7 @@ namespace ghosts.client.linux.Health
         private static readonly Logger _healthLog = LogManager.GetLogger("HEALTH");
 
         private static DateTime _lastRead = DateTime.MinValue;
-        private List<Thread> _threads { get; set; }
+        private List<Thread> _threads { get; }
 
         public Check()
         {
@@ -35,7 +35,7 @@ namespace ghosts.client.linux.Health
                 _log.Trace($"watching {watcher.Path}");
                 watcher.NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.FileName | NotifyFilters.Size;
                 watcher.EnableRaisingEvents = true;
-                watcher.Changed += new FileSystemEventHandler(OnChanged);
+                watcher.Changed += OnChanged;
 
                 Thread t = null;
                 new Thread(() =>
@@ -43,15 +43,13 @@ namespace ghosts.client.linux.Health
                     Thread.CurrentThread.IsBackground = true;
                     t = Thread.CurrentThread;
                     t.Name = Guid.NewGuid().ToString();
-                    this.RunEx();
+                    RunEx();
 
                 }).Start();
 
-                if (t != null)
-                {
-                    _log.Trace($"HEALTH THREAD: {t.Name}");
-                    this._threads.Add(t);
-                }
+                if (t == null) return;
+                _log.Trace($"HEALTH THREAD: {t.Name}");
+                this._threads.Add(t);
             }
             catch (Exception exc)
             {
@@ -59,18 +57,16 @@ namespace ghosts.client.linux.Health
             }
         }
 
-        public void Shutdown()
+        private void Shutdown()
         {
-            if (this._threads != null)
+            if (this._threads == null) return;
+            foreach (var thread in this._threads)
             {
-                foreach (var thread in this._threads)
-                {
-                    thread.Abort(null);
-                }
+                thread.Interrupt();
             }
         }
 
-        private void RunEx()
+        private static void RunEx()
         {
             var c = new ConfigHealth(ApplicationDetails.ConfigurationFiles.Health);
             var config = c.Load();
@@ -97,23 +93,22 @@ namespace ghosts.client.linux.Health
                     _log.Debug(e);
                 }
             }
+            // ReSharper disable once FunctionNeverReturns
         }
 
         private void OnChanged(object source, FileSystemEventArgs e)
         {
-            // filewatcher throws two events, we only need 1
-            DateTime lastWriteTime = File.GetLastWriteTime(e.FullPath);
-            if (lastWriteTime > _lastRead.AddSeconds(1))
-            {
-                _lastRead = lastWriteTime;
-                _log.Trace("File: " + e.FullPath + " " + e.ChangeType);
-                _log.Trace($"Reloading {System.Reflection.MethodBase.GetCurrentMethod().DeclaringType}");
+            // file watcher throws two events, we only need 1
+            var lastWriteTime = File.GetLastWriteTime(e.FullPath);
+            if (lastWriteTime <= _lastRead.AddSeconds(1)) return;
+            _lastRead = lastWriteTime;
+            _log.Trace("File: " + e.FullPath + " " + e.ChangeType);
+            _log.Trace($"Reloading {System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType}");
 
-                // now terminate existing tasks and rerun
-                this.Shutdown();
-                StartupTasks.CleanupProcesses();
-                this.RunEx();
-            }
+            // now terminate existing tasks and rerun
+            this.Shutdown();
+            StartupTasks.CleanupProcesses();
+            RunEx();
         }
     }
 }

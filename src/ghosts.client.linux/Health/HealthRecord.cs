@@ -1,7 +1,6 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
-using System.IO;
 using System.Net;
 using Ghosts.Domain;
 
@@ -26,15 +25,15 @@ namespace ghosts.client.linux.Health
                 
                 try
                 {
-                    using (var response = (HttpWebResponse)request.GetResponse())
+                    using var response = (HttpWebResponse)request.GetResponse();
+                    using var stream = response.GetResponseStream();
+                    if (stream != null)
                     {
-                        using (var stream = response.GetResponseStream())
-                        {
-                            using (var reader = new StreamReader(stream))
-                            {
-                                //html = reader.ReadToEnd(); //if we wanted to read html
-                            }
-                        }
+                        // ignore
+                        // using (var reader = new StreamReader(stream))
+                        // {
+                        //     //html = reader.ReadToEnd(); //if we wanted to read html
+                        // }
                     }
                 }
                 catch (WebException e)
@@ -49,7 +48,7 @@ namespace ghosts.client.linux.Health
                 watch.Stop();
 
                 r.ExecutionTime = watch.ElapsedMilliseconds;
-                r.Internet = (r.Errors.Count == 0);
+                r.Internet = r.Errors.Count == 0;
                 r.Stats = MachineHealth.Run();
             }
 

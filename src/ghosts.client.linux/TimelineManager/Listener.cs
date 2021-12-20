@@ -2,22 +2,24 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Newtonsoft.Json;
 using NLog;
 using SimpleTCP;
+// ReSharper disable ObjectCreationAsStatement
 
 namespace ghosts.client.linux.timelineManager
 {
-    public class ListenerManager
+    public static class ListenerManager
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        private string In = ApplicationDetails.InstanceDirectories.TimelineIn;
-        private string Out = ApplicationDetails.InstanceDirectories.TimelineOut;
+        private static readonly string In = ApplicationDetails.InstanceDirectories.TimelineIn;
+        private static readonly string Out = ApplicationDetails.InstanceDirectories.TimelineOut;
 
-        public ListenerManager()
+        public static void Run()
         {
             try
             {
@@ -59,6 +61,13 @@ namespace ghosts.client.linux.timelineManager
                     };
                     t.Start();
                     
+                    t = new Thread(() => { new InitialDirectoryListener(); })
+                    {
+                        IsBackground = true,
+                        Name = "ghosts-initialdirectorylistener"
+                    };
+                    t.Start();
+                    
                     EnsureWatch();
                 }
                 else
@@ -72,39 +81,88 @@ namespace ghosts.client.linux.timelineManager
             }
         }
 
-        private void EnsureWatch()
+        private static void EnsureWatch()
         {
             File.WriteAllText(In + "init.json", JsonConvert.SerializeObject(new Timeline(), Formatting.None));
         }
     }
 
+    public class InitialDirectoryListener
+    {
+        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
+        private static DateTime _lastRead = DateTime.Now;
+        public InitialDirectoryListener()
+        {
+            var directoryName = TimelineBuilder.TimelineFilePath().DirectoryName;
+            if (directoryName == null)
+            {
+                throw new Exception("Timeline builder path cannot be determined");
+            }
+            
+            var timelineWatcher = new FileSystemWatcher(directoryName);
+            timelineWatcher.Filter = Path.GetFileName(TimelineBuilder.TimelineFilePath().Name);
+            _log.Trace($"watching {timelineWatcher.Path}");
+            timelineWatcher.NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.FileName | NotifyFilters.Size | NotifyFilters.CreationTime |
+                                           NotifyFilters.LastWrite;
+            timelineWatcher.Changed += InitialOnChanged;
+            timelineWatcher.EnableRaisingEvents = true;
+        
+
+            new ManualResetEvent(false).WaitOne();
+        }
+        
+        private static void InitialOnChanged(object source, FileSystemEventArgs e)
+        {
+            // file watcher throws two events, we only need 1
+            var lastWriteTime = File.GetLastWriteTime(e.FullPath);
+            if (lastWriteTime <= _lastRead.AddSeconds(1)) return;
+            
+            _lastRead = lastWriteTime;
+            _log.Trace("File: " + e.FullPath + " " + e.ChangeType);
+            
+            var method = string.Empty;
+            if (System.Reflection.MethodBase.GetCurrentMethod() != null)
+            {
+                var declaringType = System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType;
+                if (declaringType != null)
+                    method = declaringType.ToString();
+            }
+            _log.Trace($"Reloading {method}...");
+
+            // now terminate existing tasks and rerun
+            var o = new Orchestrator();
+            Orchestrator.Stop();
+            o.Run();
+        }
+    }
+    
     /// <summary>
-    /// Watches a directory [ghosts install]\instance\timeline for dropped files, and processes them immediately
+    /// Watches a directory [ghosts install] \ instance \ timeline for dropped files, and processes them immediately
     /// </summary>
     public class DirectoryListener
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        private string _in = ApplicationDetails.InstanceDirectories.TimelineIn;
-        private string _out = ApplicationDetails.InstanceDirectories.TimelineOut;
+        private readonly string _in = ApplicationDetails.InstanceDirectories.TimelineIn;
+        private readonly string _out = ApplicationDetails.InstanceDirectories.TimelineOut;
         private string _currentlyProcessing = string.Empty;
-
+        
         public DirectoryListener()
         {
             var watcher = new FileSystemWatcher
             {
                 Path = _in,
                 NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName,
-                Filter = "*.json"
+                Filter = "*.*"
             };
             watcher.Changed += OnChanged;
             watcher.Created += OnChanged;
             watcher.EnableRaisingEvents = true;
-            Console.ReadLine();
-        }
-
+            new ManualResetEvent(false).WaitOne();
+        } 
+        
         private void OnChanged(object source, FileSystemEventArgs e)
         {
-            // filewatcher throws multiple events, we only need 1
+            // file watcher throws multiple events, we only need 1
             if (!string.IsNullOrEmpty(_currentlyProcessing) && _currentlyProcessing == e.FullPath) return;
             _currentlyProcessing = e.FullPath;
 
@@ -112,37 +170,63 @@ namespace ghosts.client.linux.timelineManager
 
             if (!File.Exists(e.FullPath))
                 return;
-            
-            try
+
+            if (e.FullPath.EndsWith(".json"))
             {
-                var raw = File.ReadAllText(e.FullPath);
-
-                var timeline = JsonConvert.DeserializeObject<Timeline>(raw);
-
-                foreach (var timelineHandler in timeline.TimeLineHandlers)
+                try
                 {
-                    _log.Trace($"DirectoryListener command found: {timelineHandler.HandlerType}");
-
-                    foreach (var timelineEvent in timelineHandler.TimeLineEvents)
+                    var timeline = TimelineBuilder.GetLocalTimeline(e.FullPath);
+                    foreach (var timelineHandler in timeline.TimeLineHandlers)
                     {
-                        if (string.IsNullOrEmpty(timelineEvent.TrackableId))
+                        _log.Trace($"DirectoryListener command found: {timelineHandler.HandlerType}");
+
+                        foreach (var timelineEvent in timelineHandler.TimeLineEvents.Where(timelineEvent => string.IsNullOrEmpty(timelineEvent.TrackableId)))
                         {
                             timelineEvent.TrackableId = Guid.NewGuid().ToString();
                         }
+
+                        Orchestrator.RunCommand(timeline, timelineHandler);
                     }
-
-                    var orchestrator = new Orchestrator();
-                    orchestrator.RunCommand(timelineHandler);
                 }
+                catch (Exception exc)
+                {
+                    _log.Debug(exc);
+                }
+            }
+            else if (e.FullPath.EndsWith(".cs"))
+            {
+                try
+                {
+                    var commands = File.ReadAllText(e.FullPath).Split(Convert.ToChar("\n")).ToList();
+                    if (commands.Count > 0)
+                    {
+                        var constructedTimelineHandler = TimelineTranslator.FromBrowserUnitTests(commands);
+                        
+                        var t = new Timeline
+                        {
+                            Id = Guid.NewGuid(),
+                            Status = Timeline.TimelineStatus.Run
+                        };
+                        t.TimeLineHandlers.Add(constructedTimelineHandler);
+                        Orchestrator.RunCommand(t, constructedTimelineHandler);
+                    }
+                }
+                catch (Exception exc)
+                {
+                    _log.Debug(exc);
+                }
+            }
 
+            try
+            {
                 var outfile = e.FullPath.Replace(_in, _out);
                 outfile = outfile.Replace(e.Name, $"{DateTime.Now.ToString("G").Replace("/", "-").Replace(" ", "").Replace(":", "")}-{e.Name}");
 
                 File.Move(e.FullPath, outfile);
             }
-            catch (Exception exc)
+            catch (Exception exception)
             {
-                _log.Debug(exc);
+                _log.Debug(exception);
             }
 
             _currentlyProcessing = string.Empty;
@@ -169,12 +253,6 @@ namespace ghosts.client.linux.timelineManager
                     message.ReplyLine($"{obj}{Environment.NewLine}");
                     Console.WriteLine(obj);
                 };
-
-//                while (true)
-//                {
-//                    Console.WriteLine("...");
-//                    Thread.Sleep(10000);
-//                }
             }
             catch (Exception e)
             {
@@ -182,12 +260,12 @@ namespace ghosts.client.linux.timelineManager
             }
         }
 
-        private string Handle(Message message)
+        private static string Handle(Message message)
         {
             var command = message.MessageString;
             var index = command.LastIndexOf("}", StringComparison.InvariantCultureIgnoreCase);
             if (index > 0)
-                command = command.Substring(0, index + 1);
+                command = command[..(index + 1)];
 
             _log.Trace($"Received from {message.TcpClient.Client.RemoteEndPoint}: {command}");
 
@@ -195,14 +273,21 @@ namespace ghosts.client.linux.timelineManager
             {
                 var timelineHandler = JsonConvert.DeserializeObject<TimelineHandler>(command);
 
-                foreach (var evs in timelineHandler.TimeLineEvents)
-                    if (string.IsNullOrEmpty(evs.TrackableId))
-                        evs.TrackableId = Guid.NewGuid().ToString();
+                foreach (var evs in timelineHandler.TimeLineEvents.Where(evs => string.IsNullOrEmpty(evs.TrackableId)))
+                {
+                    evs.TrackableId = Guid.NewGuid().ToString();
+                }
 
                 _log.Trace($"Command found: {timelineHandler.HandlerType}");
 
-                var o = new Orchestrator();
-                o.RunCommand(timelineHandler);
+                var t = new Timeline
+                {
+                    Id = Guid.NewGuid(),
+                    Status = Timeline.TimelineStatus.Run
+                };
+                t.TimeLineHandlers.Add(timelineHandler);
+                
+                Orchestrator.RunCommand(t, timelineHandler);
 
                 var obj = JsonConvert.SerializeObject(timelineHandler);
 

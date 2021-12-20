@@ -21,7 +21,7 @@ namespace Ghosts.Api
 {
     public class Startup
     {
-        public const int apiVersion = 5; 
+        public const int apiVersion = 6; 
         
         public Startup(IConfiguration configuration)
         {
@@ -67,7 +67,9 @@ namespace Ghosts.Api
             services.AddScoped<IMachineGroupService, MachineGroupService>();
             services.AddScoped<IMachineUpdateService, MachineUpdateService>();
             services.AddScoped<ITimelineService, TimelineService>();
-            services.AddScoped<IMachineTimelineService, MachineTimelineService>();
+            services.AddScoped<IMachineTimelinesService, MachineTimelinesService>();
+            services.AddScoped<ITrackableService, TrackableService>();
+            services.AddScoped<ISurveyService, SurveyService>();
 
             services.AddSingleton<IBackgroundQueue, BackgroundQueue>();
             services.AddSingleton<IHostedService, QueueSyncService>();

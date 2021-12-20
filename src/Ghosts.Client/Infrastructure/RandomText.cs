@@ -17,10 +17,33 @@ namespace Ghosts.Client.Infrastructure
         private readonly StringBuilder _builder;
         private readonly string[] _words;
 
+        public static char GetRandomCapitalLetter()
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            var rand = new Random();
+            return chars[rand.Next(0, chars.Length)];
+        }
+
+        public static char GetRandomCapitalLetter(char after)
+        {
+            after = char.ToUpper(after);
+            var index = (int)after % 32;
+
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            var rand = new Random();
+            return chars[rand.Next(index, chars.Length)];
+        }
+
         public RandomText(string[] words)
         {
             _builder = new StringBuilder();
             _words = words;
+        }
+
+        public void AddContentParagraphs(int minParagraphs, int maxParagraphs)
+        {
+            var paragraphs = _random.Next(minParagraphs, maxParagraphs);
+            AddContentParagraphs(paragraphs, paragraphs, (paragraphs + 10), (paragraphs * 10), (paragraphs * 25));
         }
 
         public void AddContentParagraphs(int numberParagraphs, int minSentences, int maxSentences, int minWords, int maxWords)

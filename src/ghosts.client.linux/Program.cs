@@ -1,29 +1,32 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Net;
 using System.Reflection;
 using System.Threading;
+using ghosts.client.linux.Comms;
+using ghosts.client.linux.Communications;
 using ghosts.client.linux.Infrastructure;
 using ghosts.client.linux.timelineManager;
 using Ghosts.Domain.Code;
+using Ghosts.Domain.Models;
 using NLog;
 
 namespace ghosts.client.linux
 {
-    class Program
+    internal static class Program
     {
-        
-        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        internal static ClientConfiguration Configuration { get; set; }
-        internal static Options OptionFlags;
+        internal static ClientConfiguration Configuration { get; private set; }
         internal static bool IsDebug;
-        private static ListenerManager _listenerManager { get; set; }
+        internal static List<ThreadJob> ThreadJobs { get; private set; }
+        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
 
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
+            ThreadJobs = new List<ThreadJob>();
             ClientConfigurationLoader.UpdateConfigurationWithEnvVars();
             
             try
@@ -38,7 +41,7 @@ namespace ghosts.client.linux
             }
         }
 
-        private static void Run(string[] args)
+        private static void Run(IEnumerable<string> args)
         {
             // ignore all certs
             ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
@@ -56,7 +59,7 @@ namespace ghosts.client.linux
             //load configuration
             try
             {
-                Program.Configuration = ClientConfigurationLoader.Config;
+                Configuration = ClientConfigurationLoader.Config;
             }
             catch (Exception e)
             {
@@ -72,26 +75,52 @@ namespace ghosts.client.linux
 
             StartupTasks.SetStartup();
 
-            _listenerManager = new ListenerManager();
+            ListenerManager.Run();
 
             //check id
-            _log.Trace(Comms.CheckId.Id);
+            _log.Trace(CheckId.Id);
 
             //connect to command server for updates and sending logs
-            Comms.Updates.Run();
+            Updates.Run();
 
-            //linux clients do not perform local survey
+            //local survey gathers information such as drives, accounts, logs, etc.
+            if (Configuration.Survey.IsEnabled)
+            {
+                _log.Trace("Survey enabled, initalizing...");
+                try
+                {
+                    Survey.SurveyManager.Run();
+                }
+                catch (Exception exc)
+                {
+                    _log.Error(exc);
+                }
+            }
+            else
+            {
+                _log.Trace("Survey disabled, continuing.");
+            }
 
             if (Configuration.HealthIsEnabled)
             {
+                _log.Trace("Health checks enabled, initalizing...");
                 var h = new Health.Check();
                 h.Run();
+            }
+            else
+            {
+                _log.Trace("Health checks disabled, continuing.");
             }
 
             if (Configuration.HandlersIsEnabled)
             {
+                _log.Trace("Handlers enabled, initalizing...");
                 var o = new Orchestrator();
                 o.Run();
+            }
+            else
+            {
+                _log.Trace("Handling disabed, continuing.");
             }
 
             new ManualResetEvent(false).WaitOne();

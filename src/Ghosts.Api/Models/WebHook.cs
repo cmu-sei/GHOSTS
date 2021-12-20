@@ -27,8 +27,7 @@ namespace Ghosts.Api.Models
 
         public Webhook(WebhookViewModel model)
         {
-            var id = Guid.NewGuid();
-            if (Guid.TryParse(model.Id, out id))
+            if (Guid.TryParse(model.Id, out var id))
                 Id = id;
             Status = model.Status;
             Description = model.Description;

@@ -6,11 +6,14 @@ using Ghosts.Domain.Code;
 using NetOffice.WordApi.Enums;
 using NLog;
 using System;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
+using Ghosts.Domain.Code.Helpers;
 using Word = NetOffice.WordApi;
+using VB = Microsoft.VisualBasic;
 
 namespace Ghosts.Client.Handlers
 {
@@ -107,20 +110,20 @@ namespace Ghosts.Client.Handlers
                         {
                             _log.Trace($"Could not minimize: {e}");
                         }
-
+                        
                         // insert some text
                         var list = RandomText.GetDictionary.GetDictionaryList();
                         var rt = new RandomText(list.ToArray());
-                        rt.AddContentParagraphs(1, 1, 1, 10, 50);
+                        rt.AddContentParagraphs(1, 50);
                         wordApplication.Selection.TypeText(rt.Content);
 
                         var writeSleep = ProcessManager.Jitter(100);
                         Thread.Sleep(writeSleep);
 
                         wordApplication.Selection.HomeKey(WdUnits.wdLine, WdMovementType.wdExtend);
-                        wordApplication.Selection.Font.Color = WdColor.wdColorSeaGreen;
+                        wordApplication.Selection.Font.Color = GetWdColor(StylingExtensions.GetRandomColor());
                         wordApplication.Selection.Font.Bold = 1;
-                        wordApplication.Selection.Font.Size = 18;
+                        wordApplication.Selection.Font.Size = 12;
 
                         var rand = RandomFilename.Generate();
 
@@ -160,9 +163,27 @@ namespace Ghosts.Client.Handlers
 
                         newDocument.Saved = true;
                         newDocument.SaveAs(path);
-                        Report(handler.HandlerType.ToString(), timelineEvent.Command, timelineEvent.CommandArgs[0].ToString());
 
+                        Report(handler.HandlerType.ToString(), timelineEvent.Command, timelineEvent.CommandArgs[0].ToString());
                         FileListing.Add(path);
+
+                        if (timelineEvent.CommandArgs.Contains("pdf"))
+                        {
+                            // Save document into PDF Format
+                            object oMissing = System.Reflection.Missing.Value;
+                            object outputFileName = timelineEvent.CommandArgs.Contains("pdf-vary-filenames") ? $"{RandomFilename.Generate()}.pdf" : newDocument.FullName.Replace(".docx", ".pdf");
+                            object fileFormat = WdSaveFormat.wdFormatPDF;
+
+                            newDocument.SaveAs(outputFileName, fileFormat, oMissing, oMissing,
+                                oMissing, oMissing, oMissing, oMissing,
+                                oMissing, oMissing, oMissing, oMissing,
+                                oMissing, oMissing, oMissing, oMissing);
+                            // end save as pdf
+                            Report(handler.HandlerType.ToString(), timelineEvent.Command, "pdf");
+                            FileListing.Add(outputFileName.ToString());
+                        }
+
+                        newDocument.Close();
 
                         if (timelineEvent.DelayAfter > 0)
                         {
@@ -179,13 +200,19 @@ namespace Ghosts.Client.Handlers
                         {
                             Marshal.ReleaseComObject(wordApplication);
                         }
-                        catch { }
+                        catch
+                        {
+                            // ignore
+                        }
 
                         try
                         {
                             Marshal.FinalReleaseComObject(wordApplication);
                         }
-                        catch { }
+                        catch
+                        {
+                            // ignore
+                        }
 
                         GC.Collect();
                     }
@@ -208,6 +235,14 @@ namespace Ghosts.Client.Handlers
                 KillApp();
                 _log.Trace("Word closing...");
             }
+        }
+
+
+        private WdColor GetWdColor(Color color)
+        {
+            var rgbColor = VB.Information.RGB(color.R, color.G, color.B);
+            var wdColor = (WdColor)rgbColor;
+            return wdColor;
         }
     }
 }

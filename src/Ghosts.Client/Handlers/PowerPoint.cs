@@ -148,9 +148,23 @@ namespace Ghosts.Client.Handlers
 
                         Thread.Sleep(5000);
                         presentation.SaveAs(path);
+
                         FileListing.Add(path);
-                        Report(handler.HandlerType.ToString(), timelineEvent.Command,
-                            timelineEvent.CommandArgs[0].ToString());
+                        Report(handler.HandlerType.ToString(), timelineEvent.Command, timelineEvent.CommandArgs[0].ToString());
+
+                        if (timelineEvent.CommandArgs.Contains("pdf"))
+                        {
+                            // Save document into PDF Format
+                            var outputFileName = timelineEvent.CommandArgs.Contains("pdf-vary-filenames") ? $"{RandomFilename.Generate()}.pdf" : presentation.FullName.Replace(".pptx", ".pdf");
+                            object fileFormat = PpSaveAsFileType.ppSaveAsPDF;
+
+                            presentation.SaveAs(outputFileName, fileFormat, MsoTriState.msoCTrue);
+                            // end save as pdf
+                            Report(handler.HandlerType.ToString(), timelineEvent.Command, "pdf");
+                            FileListing.Add(outputFileName);
+                        }
+
+                        presentation.Close();
 
                         if (timelineEvent.DelayAfter > 0)
                         {
@@ -163,19 +177,24 @@ namespace Ghosts.Client.Handlers
                         powerApplication.Quit();
                         powerApplication.Dispose();
                         powerApplication = null;
-                        presentation = null;
-
+                        
                         try
                         {
                             Marshal.ReleaseComObject(powerApplication);
                         }
-                        catch { }
+                        catch
+                        {
+                            // ignore
+                        }
 
                         try
                         {
                             Marshal.FinalReleaseComObject(powerApplication);
                         }
-                        catch { }
+                        catch
+                        {
+                            // ignore
+                        }
 
                         GC.Collect();
                     }

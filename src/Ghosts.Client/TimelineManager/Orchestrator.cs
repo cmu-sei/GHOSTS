@@ -6,12 +6,13 @@ using Ghosts.Domain;
 using Microsoft.Win32;
 using NLog;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Security.Permissions;
+using Ghosts.Domain.Code;
+using Ghosts.Domain.Models;
 
 namespace Ghosts.Client.TimelineManager
 {
@@ -22,13 +23,11 @@ namespace Ghosts.Client.TimelineManager
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
         private static DateTime _lastRead = DateTime.MinValue;
-        private List<Thread> _threads { get; set; }
-        private List<ThreadJob> _threadJobs { get; set; }
         private Thread MonitorThread { get; set; }
-        private Timeline _timeline;
-        private FileSystemWatcher timelineWatcher;
-        private bool _isSafetyNetRunning = false;
-        private bool _isTempCleanerRunning = false;
+        private static Timeline _defaultTimeline;
+        private FileSystemWatcher _timelineWatcher;
+        private bool _isSafetyNetRunning;
+        private bool _isTempCleanerRunning;
 
         private bool _isWordInstalled { get; set; }
         private bool _isExcelInstalled { get; set; }
@@ -40,6 +39,8 @@ namespace Ghosts.Client.TimelineManager
         {
             try
             {
+                _defaultTimeline = TimelineBuilder.GetLocalTimeline();
+
                 if (_isSafetyNetRunning != true) //checking if safetynet has already been started
                 {
                     this.StartSafetyNet(); //watch instance numbers
@@ -52,30 +53,27 @@ namespace Ghosts.Client.TimelineManager
                     _isTempCleanerRunning = true;
                 }
 
-                this._timeline = TimelineBuilder.GetLocalTimeline();
-
+                var dirName = TimelineBuilder.TimelineFilePath().DirectoryName;
                 // now watch that file for changes
-                if(timelineWatcher == null) //you can change this to a bool if you want but checks if the object has been created
+                if (_timelineWatcher == null && dirName != null) //you can change this to a bool if you want but checks if the object has been created
                 {
                     _log.Trace("Timeline watcher starting and is null...");
-                    timelineWatcher = new FileSystemWatcher(TimelineBuilder.TimelineFilePath().DirectoryName)
+                    _timelineWatcher = new FileSystemWatcher(dirName)
                     {
                         Filter = Path.GetFileName(TimelineBuilder.TimelineFilePath().Name)
                     };
                     _log.Trace($"watching {Path.GetFileName(TimelineBuilder.TimelineFilePath().Name)}");
-                    timelineWatcher.NotifyFilter = NotifyFilters.LastWrite;
-                    timelineWatcher.EnableRaisingEvents = true;
-                    timelineWatcher.Changed += OnChanged;
+                    _timelineWatcher.NotifyFilter = NotifyFilters.LastWrite;
+                    _timelineWatcher.EnableRaisingEvents = true;
+                    _timelineWatcher.Changed += OnChanged;
                 }
-
-                _threadJobs = new List<ThreadJob>();
-
+                
                 //load into an managing object
                 //which passes the timeline commands to handlers
                 //and creates a thread to execute instructions over that timeline
-                if (this._timeline.Status == Timeline.TimelineStatus.Run)
+                if (_defaultTimeline.Status == Timeline.TimelineStatus.Run)
                 {
-                    RunEx(this._timeline);
+                    RunEx(_defaultTimeline);
                 }
                 else
                 {
@@ -92,34 +90,68 @@ namespace Ghosts.Client.TimelineManager
             }
         }
 
-        public void Shutdown()
+        public void StopTimeline(Guid timelineId)
         {
-            try
+            foreach (var threadJob in Program.ThreadJobs.Where(x => x.TimelineId == timelineId))
             {
-                foreach (var thread in _threads)
+                try
                 {
-                    thread.Abort(null);
+                    threadJob.Thread.Abort(null);
+                }
+                catch (Exception e)
+                {
+                    _log.Debug(e);
+                }
+
+                try
+                {
+                    threadJob.Thread.Join();
+                }
+                catch (Exception e)
+                {
+                    _log.Debug(e);
                 }
             }
-            catch { }
+        }
+
+        public void Stop()
+        {
+            foreach (var threadJob in Program.ThreadJobs)
+            {
+                try
+                {
+                    threadJob.Thread.Abort(null);
+                }
+                catch (Exception e)
+                {
+                    _log.Debug(e);
+                }
+
+                try
+                {
+                    threadJob.Thread.Join();
+                }
+                catch (Exception e)
+                {
+                    _log.Debug(e);
+                }
+            }
         }
 
         private void RunEx(Timeline timeline)
         {
-            _threads = new List<Thread>();
-
             WhatsInstalled();
 
-            foreach (TimelineHandler handler in timeline.TimeLineHandlers)
+            foreach (var handler in timeline.TimeLineHandlers)
             {
                 ThreadLaunch(timeline, handler);
             }
         }
 
-        public void RunCommand(TimelineHandler handler)
+        public void RunCommand(Timeline timeline, TimelineHandler handler)
         {
             WhatsInstalled();
-            ThreadLaunch(null, handler);
+            ThreadLaunch(timeline, handler);
         }
 
         ///here lies technical debt
@@ -133,7 +165,7 @@ namespace Ghosts.Client.TimelineManager
                     IsBackground = true,
                     Name = "ghosts-safetynet"
                 };
-                t.Start();
+                t.Start(_defaultTimeline);
             }
             catch (Exception e)
             {
@@ -144,17 +176,16 @@ namespace Ghosts.Client.TimelineManager
         ///here lies technical debt
         //TODO clean up
         // if supposed to be one excel running, and there is more than 2, then kill race condition
-        private static void SafetyNet()
+        private static void SafetyNet(object defaultTimeline)
         {
+            var timeline = (Timeline) defaultTimeline;
             while (true)
             {
                 try
                 {
                     _log.Trace("SafetyNet loop beginning");
 
-                    FileListing.FlushList(); //Added 6/10 by AMV to clear clogged while loop.
-
-                    var timeline = TimelineBuilder.GetLocalTimeline();
+                    FileListing.FlushList();
 
                     var handlerCount = timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.Excel);
                     var pids = ProcessManager.GetPids(ProcessManager.ProcessNames.Excel).ToList();
@@ -194,7 +225,7 @@ namespace Ghosts.Client.TimelineManager
 
         private void WhatsInstalled()
         {
-            using (RegistryKey regWord = Registry.ClassesRoot.OpenSubKey("Outlook.Application"))
+            using (var regWord = Registry.ClassesRoot.OpenSubKey("Outlook.Application"))
             {
                 if (regWord != null)
                 {
@@ -204,7 +235,7 @@ namespace Ghosts.Client.TimelineManager
                 _log.Trace($"Outlook is installed: {_isOutlookInstalled}");
             }
 
-            using (RegistryKey regWord = Registry.ClassesRoot.OpenSubKey("Word.Application"))
+            using (var regWord = Registry.ClassesRoot.OpenSubKey("Word.Application"))
             {
                 if (regWord != null)
                 {
@@ -214,7 +245,7 @@ namespace Ghosts.Client.TimelineManager
                 _log.Trace($"Word is installed: {_isWordInstalled}");
             }
 
-            using (RegistryKey regWord = Registry.ClassesRoot.OpenSubKey("Excel.Application"))
+            using (var regWord = Registry.ClassesRoot.OpenSubKey("Excel.Application"))
             {
                 if (regWord != null)
                 {
@@ -224,7 +255,7 @@ namespace Ghosts.Client.TimelineManager
                 _log.Trace($"Excel is installed: {_isExcelInstalled}");
             }
 
-            using (RegistryKey regWord = Registry.ClassesRoot.OpenSubKey("PowerPoint.Application"))
+            using (var regWord = Registry.ClassesRoot.OpenSubKey("PowerPoint.Application"))
             {
                 if (regWord != null)
                 {
@@ -237,57 +268,35 @@ namespace Ghosts.Client.TimelineManager
 
         private void ThreadLaunch(Timeline timeline, TimelineHandler handler)
         {
-
             try
             {
                 _log.Trace($"Attempting new thread for: {handler.HandlerType}");
 
                 Thread t = null;
-                ThreadJob threadJob = new ThreadJob
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    Handler = handler
-                };
-
+                object o;
                 switch (handler.HandlerType)
                 {
                     case HandlerType.NpcSystem:
-                        NpcSystem npc = new NpcSystem(handler);
+                        var npc = new NpcSystem(timeline, handler);
                         break;
                     case HandlerType.Command:
-                        t = new Thread(() =>
+                        t = new Thread(start: () =>
                         {
-                            Cmd o = new Cmd(handler);
-
-                        })
-                        {
-                            IsBackground = true,
-                            Name = threadJob.Id
-                        };
-                        t.Start();
-
-                        threadJob.ProcessName = ProcessManager.ProcessNames.Command;
-
+                            o = new Cmd(handler);
+                        });
                         break;
                     case HandlerType.Word:
                         _log.Trace("Launching thread for word");
                         if (_isWordInstalled)
                         {
                             var pids = ProcessManager.GetPids(ProcessManager.ProcessNames.Word).ToList();
-                            if (pids.Count > timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.Word))
+                            if (pids.Count > timeline.TimeLineHandlers.Count(x => x.HandlerType == HandlerType.Word))
                                 return;
 
                             t = new Thread(() =>
                             {
-                                WordHandler o = new WordHandler(timeline, handler);
-                            })
-                            {
-                                IsBackground = true,
-                                Name = threadJob.Id
-                            };
-                            t.Start();
-
-                            threadJob.ProcessName = ProcessManager.ProcessNames.Word;
+                                o = new WordHandler(timeline, handler);
+                            });
                         }
                         break;
                     case HandlerType.Excel:
@@ -295,176 +304,100 @@ namespace Ghosts.Client.TimelineManager
                         if (_isExcelInstalled)
                         {
                             var pids = ProcessManager.GetPids(ProcessManager.ProcessNames.Excel).ToList();
-                            if (pids.Count > timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.Excel))
+                            if (pids.Count > timeline.TimeLineHandlers.Count(x => x.HandlerType == HandlerType.Excel))
                                 return;
 
                             t = new Thread(() =>
                             {
-                                ExcelHandler o = new ExcelHandler(timeline, handler);
-                            })
-                            {
-                                IsBackground = true,
-                                Name = threadJob.Id
-                            };
-                            t.Start();
-
-                            threadJob.ProcessName = ProcessManager.ProcessNames.Excel;
+                                o = new ExcelHandler(timeline, handler);
+                            });
                         }
                         break;
                     case HandlerType.Clicks:
                         _log.Trace("Launching thread to handle clicks");
                         t = new Thread(() =>
                         {
-                            Clicks o = new Clicks(handler);
-                        })
-                        {
-                            IsBackground = true,
-                            Name = threadJob.Id
-                        };
-                        t.Start();
+                            o = new Clicks(handler);
+                        });
                         break;
                     case HandlerType.Reboot:
                         _log.Trace("Launching thread to handle reboot");
                         t = new Thread(() =>
                         {
-                            Reboot o = new Reboot(handler);
-                        })
-                        {
-                            IsBackground = true,
-                            Name = threadJob.Id
-                        };
-                        t.Start();
+                            o = new Reboot(handler);
+                        });
                         break;
                     case HandlerType.PowerPoint:
                         _log.Trace("Launching thread for powerpoint");
                         if (_isPowerPointInstalled)
                         {
                             var pids = ProcessManager.GetPids(ProcessManager.ProcessNames.PowerPoint).ToList();
-                            if (pids.Count > timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.PowerPoint))
+                            if (pids.Count > timeline.TimeLineHandlers.Count(x => x.HandlerType == HandlerType.PowerPoint))
                                 return;
 
                             t = new Thread(() =>
                             {
-                                PowerPointHandler o = new PowerPointHandler(timeline, handler);
-                            })
-                            {
-                                IsBackground = true,
-                                Name = threadJob.Id
-                            };
-                            t.Start();
-
-                            threadJob.ProcessName = ProcessManager.ProcessNames.PowerPoint;
+                                o = new PowerPointHandler(timeline, handler);
+                            });
                         }
                         break;
                     case HandlerType.Outlook:
                         _log.Trace("Launching thread for outlook - note we're not checking if outlook installed, just going for it");
-                        //if (this.IsOutlookInstalled)
-                        //{
                         t = new Thread(() =>
                         {
-                            Outlook o = new Outlook(handler);
-                        })
-                        {
-                            IsBackground = true,
-                            Name = threadJob.Id
-                        };
-                        t.Start();
-
-                        threadJob.ProcessName = ProcessManager.ProcessNames.Outlook;
-                        //}
-
+                            o = new Outlook(handler);
+                        });
                         break;
                     case HandlerType.BrowserIE:
                         //IE demands COM apartmentstate be STA so diff thread creation required
                         t = new Thread(() =>
                         {
-                            BrowserIE o = new BrowserIE(handler);
+                            o = new BrowserIE(handler);
                         });
                         t.SetApartmentState(ApartmentState.STA);
-                        t.IsBackground = true;
-                        t.Name = threadJob.Id;
-                        t.Start();
-
                         break;
                     case HandlerType.Notepad:
                         //TODO
                         t = new Thread(() =>
                         {
-                            Notepad o = new Notepad(handler);
-                        })
-                        {
-                            IsBackground = true,
-                            Name = threadJob.Id
-                        };
-                        t.Start();
-
+                            o = new Notepad(handler);
+                        });
                         break;
-
                     case HandlerType.BrowserChrome:
                         t = new Thread(() =>
                         {
-                            BrowserChrome o = new BrowserChrome(handler);
-                        })
-                        {
-                            IsBackground = true,
-                            Name = threadJob.Id
-                        };
-                        t.Start();
-
-                        threadJob.ProcessName = ProcessManager.ProcessNames.Chrome;
-
+                            o = new BrowserChrome(handler);
+                        });
                         break;
                     case HandlerType.BrowserFirefox:
                         t = new Thread(() =>
                         {
-                            BrowserFirefox o = new BrowserFirefox(handler);
-                        })
-                        {
-                            IsBackground = true,
-                            Name = threadJob.Id
-                        };
-                        t.Start();
-
-                        threadJob.ProcessName = ProcessManager.ProcessNames.Firefox;
-
+                            o = new BrowserFirefox(handler);
+                        });
                         break;
                     case HandlerType.Watcher:
                         t = new Thread(() =>
                         {
-                            Watcher o = new Watcher(handler);
-                        })
-                        {
-                            IsBackground = true,
-                            Name = threadJob.Id
-                        };
-                        t.Start();
-
-                        //threadJob.ProcessName = ProcessManager.ProcessNames.Watcher;
-
+                            o = new Watcher(handler);
+                        });
                         break;
                     case HandlerType.Print:
                         t = new Thread(() =>
                         {
-                            var p = new Print(handler);
-                        })
-                        {
-                            IsBackground = true,
-                            Name = threadJob.Id
-                        };
-                        t.Start();
-
+                            o = new Print(handler);
+                        });
                         break;
                 }
 
-                if (threadJob.ProcessName != null)
-                {
-                    _threadJobs.Add(threadJob);
-                }
+                if (t == null) return;
 
-                if (t != null)
+                t.IsBackground = true;
+                t.Start();
+                Program.ThreadJobs.Add(new ThreadJob
                 {
-                    _threads.Add(t);
-                }
+                    TimelineId = timeline.Id,
+                    Thread = t
+                });
             }
             catch (Exception e)
             {
@@ -479,57 +412,48 @@ namespace Ghosts.Client.TimelineManager
                 _log.Trace($"FileWatcher event raised: {e.FullPath} {e.Name} {e.ChangeType}");
 
                 // filewatcher throws two events, we only need 1
-                DateTime lastWriteTime = File.GetLastWriteTime(e.FullPath);
-                if (lastWriteTime != _lastRead)
-                {
-                    _lastRead = lastWriteTime;
-                    _log.Trace("FileWatcher Processing: " + e.FullPath + " " + e.ChangeType);
-                    _log.Trace($"Reloading {MethodBase.GetCurrentMethod().DeclaringType}");
+                var lastWriteTime = File.GetLastWriteTime(e.FullPath);
+                if (lastWriteTime == _lastRead) return;
 
-                    _log.Trace("terminate existing tasks and rerun orchestrator");
+                _lastRead = lastWriteTime;
+                _log.Trace("FileWatcher Processing: " + e.FullPath + " " + e.ChangeType);
+                _log.Trace($"Reloading {MethodBase.GetCurrentMethod().DeclaringType}");
+
+                _log.Trace("terminate existing tasks and rerun orchestrator");
                     
-                    try
-                    {
-                        Shutdown();
-                    }
-                    catch (Exception exception)
-                    {
-                        _log.Info(exception);
-                    }
+                try
+                {
+                    Stop();
+                }
+                catch (Exception exception)
+                {
+                    _log.Info(exception);
+                }
 
-                    try
-                    {
-                        StartupTasks.CleanupProcesses();
-                    }
-                    catch (Exception exception)
-                    {
-                        _log.Info(exception);
-                    }
+                try
+                {
+                    StartupTasks.CleanupProcesses();
+                }
+                catch (Exception exception)
+                {
+                    _log.Info(exception);
+                }
 
-                    Thread.Sleep(7500);
+                Thread.Sleep(7500);
 
-                    try
-                    {
-                        Run();
-                    }
-                    catch (Exception exception)
-                    {
-                        _log.Info(exception);
-                    }
+                try
+                {
+                    Run();
+                }
+                catch (Exception exception)
+                {
+                    _log.Info(exception);
                 }
             }
             catch (Exception exc)
             {
                 _log.Info(exc);
             }
-
         }
-    }
-
-    public class ThreadJob
-    {
-        public string Id { get; set; }
-        public TimelineHandler Handler { get; set; }
-        public string ProcessName { get; set; }
     }
 }

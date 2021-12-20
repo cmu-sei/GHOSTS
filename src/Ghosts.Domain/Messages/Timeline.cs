@@ -8,10 +8,15 @@ using Newtonsoft.Json.Converters;
 namespace Ghosts.Domain
 {
     /// <summary>
-    ///     an array of events that a client should perform in order to best mimic some persona x
+    /// an array of events that a client should perform in order to best mimic some persona x
     /// </summary>
     public class Timeline
     {
+        /// <summary>
+        /// Useful for tracking where activity on a client originated
+        /// </summary>
+        public Guid Id { get; set; }
+        
         [JsonConverter(typeof(StringEnumConverter))]
         public enum TimelineStatus
         {
@@ -25,7 +30,7 @@ namespace Ghosts.Domain
         }
 
         /// <summary>
-        ///     Run or Stop
+        /// Run or Stop
         /// </summary>
         [JsonConverter(typeof(StringEnumConverter))]
         public TimelineStatus Status { get; set; }
@@ -34,7 +39,7 @@ namespace Ghosts.Domain
     }
 
     /// <summary>
-    ///     an array of application events that a client will execute - aka "randomly browse 6 different web pages for new shoes at 0900"
+    /// an array of application events that a client will execute - aka "randomly browse 6 different web pages for new shoes at 0900"
     /// </summary>
     public class TimelineHandler
     {
@@ -48,7 +53,7 @@ namespace Ghosts.Domain
         public HandlerType HandlerType { get; set; }
 
         /// <summary>
-        ///     Used to instantiate browser object
+        /// Used to instantiate browser object
         /// </summary>
         public string Initial { get; set; }
 
@@ -64,7 +69,7 @@ namespace Ghosts.Domain
     }
 
     /// <summary>
-    ///     handlers map to applications
+    /// handlers map to applications
     /// </summary>
     public enum HandlerType
     {
@@ -90,7 +95,7 @@ namespace Ghosts.Domain
     }
 
     /// <summary>
-    ///     The specific events that a handler will execute
+    /// The specific events that a handler will execute
     /// </summary>
     public class TimelineEvent
     {
@@ -100,7 +105,7 @@ namespace Ghosts.Domain
         }
 
         /// <summary>
-        ///     AlertIds trace back to an alert that monitors specific activity executed within a timeline
+        /// AlertIds trace back to an alert that monitors specific activity executed within a timeline
         /// </summary>
         public string TrackableId { get; set; }
 
@@ -108,18 +113,18 @@ namespace Ghosts.Domain
         public List<object> CommandArgs { get; set; }
 
         /// <summary>
-        ///     Milliseconds
+        /// In milliseconds
         /// </summary>
         public int DelayAfter { get; set; }
 
         /// <summary>
-        ///     Milliseconds
+        /// In milliseconds
         /// </summary>
         public int DelayBefore { get; set; }
     }
 
     /// <summary>
-    ///     Gets passed back to api server 'Chrome, Browse, http://cnn.com'
+    /// Gets passed back to api server 'Chrome, Browse, https://cmu.edu'
     /// </summary>
     public class TimeLineRecord
     {

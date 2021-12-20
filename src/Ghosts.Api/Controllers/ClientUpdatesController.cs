@@ -9,6 +9,7 @@ using Ghosts.Api.Services;
 using Ghosts.Domain;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
 using NLog;
 
 namespace Ghosts.Api.Controllers
@@ -85,6 +86,20 @@ namespace Ghosts.Api.Controllers
             var update = new UpdateClientConfig {Type = u.Type, Update = u.Update};
 
             await _updateService.DeleteAsync(u.Id, ct);
+
+            // integrators want to know that a timeline was actually delivered
+            // (the service only guarantees that the update was received)
+            _queue.Enqueue(
+                new QueueEntry
+                {
+                    Payload =
+                        new NotificationQueueEntry()
+                        {
+                            Type = NotificationQueueEntry.NotificationType.TimelineDelivered,
+                            Payload = (JObject) JToken.FromObject(update)
+                        },
+                    Type = QueueEntry.Types.Notification
+                });
 
             return Json(update);
         }

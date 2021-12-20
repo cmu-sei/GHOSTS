@@ -41,13 +41,14 @@ namespace ghosts.client.linux.Infrastructure
                             Thread.CurrentThread.IsBackground = true;
                             foreach (var process in Process.GetProcessesByName(cleanupItem))
                             {
-                                if (process.Id != ghosts.Id) //don't kill thyself
+                                if (process.Id == ghosts.Id) continue;
+                                try
                                 {
-                                    try
-                                    {
-                                        process.Kill();
-                                    }
-                                    catch { }
+                                    process.Kill();
+                                }
+                                catch
+                                {
+                                    // ignored
                                 }
                             }
                         }).Start();
@@ -70,31 +71,7 @@ namespace ghosts.client.linux.Infrastructure
         /// </summary>
         public static void SetStartup()
         {
-            return;
-            /*
-            try
-            {
-                throw new NotImplementedException();
-                
-                [Unit]
-                Description=GHOSTS NPC Orchestration
-                After=multi-user.target
-
-                [Service]
-                Type=simple
-                ExecStart=/usr/bin/ghosts
-
-                [Install]
-                WantedBy=multi-user.target
-              
-
-                //_log.Trace("Startup set successfully");
-            }
-            catch (Exception e)
-            {
-                //_log.Debug($"Set startup: {e}");
-            }
-            */
+            // ignored
         }
     }
 }

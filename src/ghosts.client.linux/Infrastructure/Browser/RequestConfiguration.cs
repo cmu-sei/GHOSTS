@@ -20,13 +20,16 @@ namespace ghosts.client.linux.Infrastructure.Browser
         /// <summary>
         /// For categorizing browsing, e.g. I want to simulate someone shopping for shoes on x, y and z sites
         /// </summary>
+        // ReSharper disable once UnusedMember.Global
         public string Category { get; set; }
         /// <summary>
         /// GET, POST, PUT, DELETE
         /// </summary>
         public string Method { get; set; }
+        // ReSharper disable once UnusedMember.Global
         public IDictionary<string, string> Headers { get; set; }
         public IDictionary<string, string> FormValues { get; set; }
+        // ReSharper disable once UnusedMember.Global
         public string Body { get; set; }
 
         public override string ToString()
@@ -38,7 +41,7 @@ namespace ghosts.client.linux.Infrastructure.Browser
         {
             var commandArg = o.ToString();
             var result = new RequestConfiguration();
-            if (commandArg.StartsWith("{"))
+            if (commandArg != null && commandArg.StartsWith("{"))
             {
                 result = JsonConvert.DeserializeObject<RequestConfiguration>(commandArg);
                 return result;

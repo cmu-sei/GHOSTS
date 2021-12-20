@@ -1,32 +1,41 @@
 ![GHOSTS Logo](https://github.com/cmu-sei/GHOSTS/blob/master/assets/ghosts-logo.jpg)
 
-Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
-
 # GHOSTS NPC AUTOMATION
 
-GHOSTS is a framework for highly-complex, realistic non-player character (NPC) orchestration. It essentially realistically mimics the behavior of the different types of people you might encounter on any array of different typical office or enterprise networks. The system makes it possible for cybersecurity experts to test their skills and realistically train to defend real networks with real NPC players operating on those networks doing the things we might expect them to do: Create documents, access systems, browse the web, click, run commands, and so on.
+GHOSTS is a framework for highly-complex, realistic non-player character (NPC) orchestration. It essentially realistically mimics the behavior of the different types of people you might encounter on  typical office or enterprise networks. The system makes it possible for cybersecurity experts to test their skills and realistically train to defend real networks with real NPC players operating on those networks doing the things we might expect them to do: Create documents, access systems, browse the web, click, run commands, and so on.
 
-As a result of the system checks required in order for NPCs to be situationally aware, GHOSTS also does health reporting for all configured clients on a given instance.
+As a result of the system checks required for NPCs to be situationally aware, GHOSTS also does health reporting for all configured clients on a given instance.
 
 ## Key Links
 
-[Installation and configuration information is maintained on our wiki](https://github.com/cmu-sei/GHOSTS/wiki)
+* [Quick start: Installation from distribution binaries](https://github.com/cmu-sei/GHOSTS/wiki/Installation-from-distribution-binaries)
 
-[Don't hesitate to submit issues and feature requests here](https://github.com/cmu-sei/GHOSTS/issues)
+* [Detailed installation and configuration information](https://github.com/cmu-sei/GHOSTS/wiki)
+
+* [Don't hesitate to submit issues and feature requests](https://github.com/cmu-sei/GHOSTS/issues)
 
 ## Platform Components
 
-### Ghosts.Client (Windows)
-.NET Console app (but built as forms app so that it is hidden) - requires .NET framework v4.6.1 or higher. Client works on both Windows 7 and Windows 10.
+### Ghosts Clients (Windows & Linux)
 
-### Ghosts.Client (Linux)
-dotnetcore app built to run silently. Client tested on centos, alpine and kali distributions. We typically use this for red teaming and "outside" traffic generation or administration simulation.
+GHOSTS clients simulate users on a machine doing "user-like" things. They [can be configured](https://github.com/cmu-sei/GHOSTS/wiki/Configuring-the-Windows-Client) to perform actions including:
 
-### Ghosts.Api
-Dotnetcore API containing both the api calls for the client (and corresponding api calls you need for integration into other systems) in one. 
+* Browse the web
+* Create and edit office documents
+* Send and respond to email
+* Run terminal commands
+* Etc.
 
-Uses postgres on the backend because there is not much that postgres can't do.
+### Ghosts API Server
 
-## LEGAL
+The API server is a RESTful web service that provides a way for clients to interact with the GHOSTS system and its clients. It can:
+
+* Manage clients, add/remove them from groups, etc.
+* Get/manage information from clients with regards to their activity, current activities, etc.
+* Orchestrate new activities for particular clients to perform
+
+---
 
 [DISTRIBUTION STATEMENT A] This material has been approved for public release and unlimited distribution.
+
+Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.

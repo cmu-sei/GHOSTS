@@ -11,60 +11,61 @@ namespace Ghosts.Domain.Code
     public class ClientConfiguration
     {
         /// <summary>
-        ///     Should each instance generate and use its own ID to identify with server?
+        /// Should each instance generate and use its own ID to identify with server?
         /// </summary>
         public bool IdEnabled { get; set; }
 
         /// <summary>
-        ///     API URL for client to get its instance ID
+        /// API URL for client to get its instance ID
         /// </summary>
         public string IdUrl { get; set; }
 
         /// <summary>
-        ///     guest|guestinfo
+        /// guest|guestinfo
         /// </summary>
         public string IdFormat { get; set; }
 
         /// <summary>
-        ///     if using guestinfo, the key to query for the value to use as hostname
+        /// if using guestinfo, the key to query for the value to use as hostname
         /// </summary>
         public string IdFormatKey { get; set; }
 
         public string IdFormatValue { get; set; }
 
         /// <summary>
-        ///     Where is vmtools?
+        /// Where is vmtools?
         /// </summary>
+        // ReSharper disable once InconsistentNaming
         public string VMWareToolsLocation { get; set; }
 
         /// <summary>
-        ///     Are client health checks enabled?
+        /// Are client health checks enabled?
         /// </summary>
         public bool HealthIsEnabled { get; set; }
 
         /// <summary>
-        ///     Is client executing a timeline of user activities?
+        /// Is client executing a timeline of user activities?
         /// </summary>
         public bool HandlersIsEnabled { get; set; }
 
         /// <summary>
-        ///     Comma sep list of extensions for chrome (aka c:\path\to\extension)
+        /// Comma sep list of extensions for chrome (aka c:\path\to\extension)
         /// </summary>
         public string ChromeExtensions { get; set; }
 
         /// <summary>
-        ///     The amount of hours that office docs will live before being cleaned (based on FileListing class reaper)
-        ///     Set to -1 to disable
+        /// The amount of hours that office docs will live before being cleaned (based on FileListing class reaper)
+        /// Set to -1 to disable
         /// </summary>
         public int OfficeDocsMaxAgeInHours { get; set; }
 
         /// <summary>
-        ///     Tokens to be replaced within email-content.csv for a more customized storyline
+        /// Tokens to be replaced within email-content.csv for a more customized storyline
         /// </summary>
         public Dictionary<string, string> EmailContent { get; set; }
 
         /// <summary>
-        ///     Client survey values
+        /// Client survey values
         /// </summary>
         public SurveySettings Survey { get; set; }
 
@@ -74,12 +75,12 @@ namespace Ghosts.Domain.Code
         public ContentSettings Content { get; set; }
 
         /// <summary>
-        ///     Settable install location for non-standard "c:\program files\" or "c:\program files (x86)\" installs
+        /// Settable install location for non-standard "c:\program files\" or "c:\program files (x86)\" installs
         /// </summary>
         public string FirefoxInstallLocation { get; set; }
 
         /// <summary>
-        ///     Geckodriver depends on at least this version of FF to be used
+        /// Geckodriver depends on at least this version of FF to be used
         /// </summary>
         public int FirefoxMajorVersionMinimum { get; set; }
         public bool EncodeHeaders { get; set; }
@@ -98,19 +99,19 @@ namespace Ghosts.Domain.Code
         public class ClientResultSettings
         {
             /// <summary>
-            ///     Is client posting its results to server?
+            /// Is client posting its results to server?
             /// </summary>
             public bool IsEnabled { get; set; }
 
             public bool IsSecure { get; set; }
 
             /// <summary>
-            ///     API URL for client to post activity results, like timeline, health, etc.
+            /// API URL for client to post activity results, like timeline, health, etc.
             /// </summary>
             public string PostUrl { get; set; }
 
             /// <summary>
-            ///     How often should client post results? (this number is the ms sleep between cycles)
+            /// How often should client post results? (this number is the ms sleep between cycles)
             /// </summary>
             public int CycleSleep { get; set; }
         }
@@ -118,17 +119,17 @@ namespace Ghosts.Domain.Code
         public class ClientUpdateSettings
         {
             /// <summary>
-            ///     Is client attempting to pull down updates from server?
+            /// Is client attempting to pull down updates from server?
             /// </summary>
             public bool IsEnabled { get; set; }
 
             /// <summary>
-            ///     API URL for client to get updates like timeline, health, etc.
+            /// API URL for client to get updates like timeline, health, etc.
             /// </summary>
             public string PostUrl { get; set; }
 
             /// <summary>
-            ///     How often should client poll for updates? (this number is the ms sleep between cycles)
+            /// How often should client poll for updates? (this number is the ms sleep between cycles)
             /// </summary>
             public int CycleSleep { get; set; }
         }
@@ -166,7 +167,7 @@ namespace Ghosts.Domain.Code
         public class ListenerSettings
         {
             /// <summary>
-            ///     Set to -1 to disable
+            /// Set to -1 to disable
             /// </summary>
             public int Port { get; set; }
         }

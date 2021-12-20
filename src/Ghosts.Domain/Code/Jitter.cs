@@ -41,5 +41,16 @@ namespace Ghosts.Domain.Code
 
             return newSleepValue;
         }
+        
+        public static int Basic(int baseSleep)
+        {
+            //sleep with jitter
+            var sleep = baseSleep;
+            var r = new Random().Next(-999, 1999);
+            sleep += r;
+            if (sleep < 0)
+                sleep = 1;
+            return sleep;
+        }
     }
 }

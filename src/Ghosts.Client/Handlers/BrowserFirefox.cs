@@ -8,14 +8,16 @@ using OpenQA.Selenium.Firefox;
 using System;
 using System.Diagnostics;
 using System.IO;
+using Ghosts.Domain.Code.Helpers;
 
 namespace Ghosts.Client.Handlers
 {
     public class BrowserFirefox : BaseBrowserHandler
     {
-        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
+        private new static readonly Logger _log = LogManager.GetCurrentClassLogger();
 
-        public IWebDriver Driver { get; private set; }
+        public new IWebDriver Driver { get; private set; }
+        public new IJavaScriptExecutor JS { get; private set; }
 
         public BrowserFirefox(TimelineHandler handler)
         {
@@ -27,7 +29,7 @@ namespace Ghosts.Client.Handlers
             }
         }
 
-        private string GetInstallLocation()
+        private static string GetInstallLocation()
         {
             var path = @"C:\Program Files\Mozilla Firefox\firefox.exe";
             if (File.Exists(path))
@@ -39,13 +41,13 @@ namespace Ghosts.Client.Handlers
             return File.Exists(path) ? path : Program.Configuration.FirefoxInstallLocation;
         }
 
-        private int GetFirefoxVersion(string path)
+        private static int GetFirefoxVersion(string path)
         {
             var versionInfo = FileVersionInfo.GetVersionInfo(path);
             return versionInfo.FileMajorPart;
         }
 
-        private bool IsSufficientVersion(string path)
+        private static bool IsSufficientVersion(string path)
         {
             int currentVersion = GetFirefoxVersion(path);
             int minimumVersion = Program.Configuration.FirefoxMajorVersionMinimum;
@@ -61,57 +63,14 @@ namespace Ghosts.Client.Handlers
         {
             try
             {
-                var path = GetInstallLocation();
-
-                if (!IsSufficientVersion(path))
-                {
-                    _log.Warn("Firefox version is not sufficient. Exiting");
-                    return true;
-                }
-
-                FirefoxOptions options = new FirefoxOptions();
-                options.AddArguments("--disable-infobars");
-                options.AddArguments("--disable-extensions");
-                options.AddArguments("--disable-notifications");
-
-                options.BrowserExecutableLocation = path;
-                options.Profile = new FirefoxProfile();
-
-                if (handler.HandlerArgs != null)
-                {
-                    if (handler.HandlerArgs.ContainsKey("isheadless") && handler.HandlerArgs["isheadless"] == "true")
-                    {
-                        options.AddArguments("--headless");
-                    }
-                    if (handler.HandlerArgs.ContainsKey("incognito") && handler.HandlerArgs["incognito"] == "true")
-                    {
-                        options.AddArguments("--incognito");
-                    }
-                    if (handler.HandlerArgs.ContainsKey("blockstyles") && handler.HandlerArgs["blockstyles"] == "true")
-                    {
-                        options.Profile.SetPreference("permissions.default.stylesheet", 2);
-                    }
-                    if (handler.HandlerArgs.ContainsKey("blockimages") && handler.HandlerArgs["blockimages"] == "true")
-                    {
-                        options.Profile.SetPreference("permissions.default.image", 2);
-                    }
-                    if (handler.HandlerArgs.ContainsKey("blockflash") && handler.HandlerArgs["blockflash"] == "true")
-                    {
-                        options.Profile.SetPreference("dom.ipc.plugins.enabled.libflashplayer.so", false);
-                    }
-                    if (handler.HandlerArgs.ContainsKey("blockscripts") && handler.HandlerArgs["blockscripts"] == "true")
-                    {
-                        options.Profile.SetPreference("permissions.default.script", 2);
-                    }
-                }
-
-                options.Profile.SetPreference("permissions.default.cookies", 2);
-                options.Profile.SetPreference("permissions.default.popups", 2);
-                options.Profile.SetPreference("permissions.default.geolocation", 2);
-                options.Profile.SetPreference("permissions.default.media_stream", 2);
-
-                Driver = new FirefoxDriver(options);
+                Driver = GetDriver(handler);
                 base.Driver = Driver;
+
+                if (handler.HandlerArgs.ContainsKey("javascript-enable"))
+                {
+                    JS = (IJavaScriptExecutor)Driver;
+                    base.JS = JS;
+                }
 
                 //hack: bad urls used in the past...
                 if (handler.Initial.Equals("") ||
@@ -152,6 +111,65 @@ namespace Ghosts.Client.Handlers
             }
 
             return true;
+        }
+
+        internal static IWebDriver GetDriver(TimelineHandler handler)
+        {
+            var path = GetInstallLocation();
+
+            if (!IsSufficientVersion(path))
+            {
+                _log.Warn("Firefox version is not sufficient. Exiting");
+                return null;
+            }
+
+            FirefoxOptions options = new FirefoxOptions();
+            options.AddArguments("--disable-infobars");
+            options.AddArguments("--disable-extensions");
+            options.AddArguments("--disable-notifications");
+
+            options.BrowserExecutableLocation = path;
+            options.Profile = new FirefoxProfile();
+
+            if (handler.HandlerArgs != null)
+            {
+                if (handler.HandlerArgs.ContainsKeyWithOption("isheadless", "true"))
+                {
+                    options.AddArguments("--headless");
+                }
+                if (handler.HandlerArgs.ContainsKeyWithOption("incognito", "true"))
+                {
+                    options.AddArguments("--incognito");
+                }
+                if (handler.HandlerArgs.ContainsKeyWithOption("blockstyles", "true"))
+                {
+                    options.Profile.SetPreference("permissions.default.stylesheet", 2);
+                }
+                if (handler.HandlerArgs.ContainsKeyWithOption("blockimages", "true"))
+                {
+                    options.Profile.SetPreference("permissions.default.image", 2);
+                }
+                if (handler.HandlerArgs.ContainsKeyWithOption("blockflash", "true"))
+                {
+                    options.Profile.SetPreference("dom.ipc.plugins.enabled.libflashplayer.so", false);
+                }
+                if (handler.HandlerArgs.ContainsKeyWithOption("blockscripts", "true"))
+                {
+                    options.Profile.SetPreference("permissions.default.script", 2);
+                }
+            }
+
+            options.Profile.SetPreference("permissions.default.cookies", 2);
+            options.Profile.SetPreference("permissions.default.popups", 2);
+            options.Profile.SetPreference("permissions.default.geolocation", 2);
+            options.Profile.SetPreference("permissions.default.media_stream", 2);
+
+            options.Profile.SetPreference("geo.enabled", false);
+            options.Profile.SetPreference("geo.prompt.testing", false);
+            options.Profile.SetPreference("geo.prompt.testing.allow", false);
+            var driver = new FirefoxDriver(options);
+            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
+            return driver;
         }
     }
 }

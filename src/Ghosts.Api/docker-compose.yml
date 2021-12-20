@@ -38,7 +38,7 @@ services:
     depends_on:
       - postgres
     ports:
-      - '5000:5000'
+      - '52388:5000'
     networks:
       - ghosts-network
     restart: always

@@ -1,7 +1,9 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
@@ -10,8 +12,8 @@ using ghosts.client.linux.timelineManager;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Messages.MesssagesForServer;
-using Newtonsoft.Json;
 using NLog;
+using Newtonsoft.Json;
 
 namespace ghosts.client.linux.Comms
 {
@@ -45,9 +47,13 @@ namespace ghosts.client.linux.Comms
             if (!Program.Configuration.ClientUpdates.IsEnabled)
                 return;
 
-            var machine = new ResultMachine();
+            // ignore all certs
+            ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
 
-            Thread.Sleep(Program.Configuration.ClientUpdates.CycleSleep);
+            var machine = new ResultMachine();
+            // GuestInfoVars.Load(machine);
+
+            Thread.Sleep(Jitter.Basic(Program.Configuration.ClientUpdates.CycleSleep));
 
             while (true)
             {
@@ -67,14 +73,18 @@ namespace ghosts.client.linux.Comms
                         }
                         catch (WebException wex)
                         {
-                            if (((HttpWebResponse)wex.Response).StatusCode == HttpStatusCode.NotFound)
+                            if (wex?.Response == null)
+                            {
+                                _log.Debug($"{DateTime.Now} - API Server appears to be not responding");
+                            }
+                            else if (((HttpWebResponse)wex.Response).StatusCode == HttpStatusCode.NotFound)
                             {
                                 _log.Debug($"{DateTime.Now} - No new configuration found");
                             }
                         }
                         catch (Exception e)
                         {
-                            _log.Error(e);
+                            _log.Error($"Exception in connecting to server: {e.Message}");
                         }
                     }
 
@@ -84,6 +94,9 @@ namespace ghosts.client.linux.Comms
 
                         switch (update.Type)
                         {
+                            case UpdateClientConfig.UpdateType.RequestForTimeline:
+                                PostCurrentTimeline(update);
+                                break;
                             case UpdateClientConfig.UpdateType.Timeline:
                                 TimelineBuilder.SetLocalTimeline(update.Update.ToString());
                                 break;
@@ -104,8 +117,7 @@ namespace ghosts.client.linux.Comms
                                             }
                                         }
 
-                                        var orchestrator = new Orchestrator();
-                                        orchestrator.RunCommand(timelineHandler);
+                                        Orchestrator.RunCommand(timeline, timelineHandler);
                                     }
                                 }
                                 catch (Exception exc)
@@ -116,7 +128,7 @@ namespace ghosts.client.linux.Comms
                                 break;
                             case UpdateClientConfig.UpdateType.Health:
                             {
-                                var newTimeline = JsonConvert.DeserializeObject<Ghosts.Domain.ResultHealth>(update.Update.ToString());
+                                var newTimeline = JsonConvert.DeserializeObject<ResultHealth>(update.Update.ToString());
                                 //save to local disk
                                 using (var file = File.CreateText(ApplicationDetails.ConfigurationFiles.Health))
                                 {
@@ -128,10 +140,8 @@ namespace ghosts.client.linux.Comms
                                 break;
                             }
                             default:
-                            {
                                 _log.Debug($"Update {update.Type} has no handler, ignoring...");
                                 break;
-                            }
                         }
                     }
                 }
@@ -141,7 +151,72 @@ namespace ghosts.client.linux.Comms
                     _log.Error(e);
                 }
 
-                Thread.Sleep(Program.Configuration.ClientUpdates.CycleSleep);
+                Thread.Sleep(Jitter.Basic(Program.Configuration.ClientUpdates.CycleSleep));
+            }
+        }
+
+        private static void PostCurrentTimeline(UpdateClientConfig update)
+        {
+            // is the config for a specific timeline id?
+            var timelineId = TimelineUpdateClientConfigManager.GetConfigUpdateTimelineId(update);
+
+            // get all timelines
+            var localTimelines = TimelineManager.GetLocalTimelines();
+
+            var timelines = localTimelines as Timeline[] ?? localTimelines.ToArray();
+            if (timelineId != Guid.Empty)
+            {
+                foreach (var timeline in timelines)
+                {
+                    if (timeline.Id == timelineId)
+                    {
+                        timelines = new List<Timeline>()
+                        {
+                            timeline
+                        }.ToArray();
+                        break;
+                    }
+                }
+            }
+
+            ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
+
+            var posturl = string.Empty;
+
+            try
+            {
+                posturl = Program.Configuration.IdUrl.Replace("clientid", "clienttimeline");
+            }
+            catch
+            {
+                _log.Error("Can't get timeline posturl!");
+                return;
+            }
+
+            foreach (var timeline in timelines)
+            {
+                try
+                {
+                    _log.Trace("posting timeline");
+
+                    var payload = TimelineBuilder.TimelineToString(timeline);
+                    var machine = new ResultMachine();
+                    // GuestInfoVars.Load(machine);
+
+                    using (var client = WebClientBuilder.Build(machine))
+                    {
+                        client.Headers[HttpRequestHeader.ContentType] = "application/json";
+                        client.UploadString(posturl, JsonConvert.SerializeObject(payload));
+                    }
+
+                    _log.Trace($"{DateTime.Now} - timeline posted to server successfully");
+                }
+                catch (Exception e)
+                {
+                    _log.Debug(
+                        $"Problem posting timeline to server from {ApplicationDetails.ConfigurationFiles.Timeline} to {posturl}");
+                    _log.Error(e);
+                }
             }
         }
 
@@ -150,19 +225,22 @@ namespace ghosts.client.linux.Comms
             if (!Program.Configuration.ClientResults.IsEnabled)
                 return;
 
+            // ignore all certs
+            ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
+
             var fileName = ApplicationDetails.LogFiles.ClientUpdates;
-            var cyclesleep = Program.Configuration.ClientResults.CycleSleep;
             var posturl = Program.Configuration.ClientResults.PostUrl;
 
             var machine = new ResultMachine();
+            // GuestInfoVars.Load(machine);
 
-            Thread.Sleep(cyclesleep);
+            Thread.Sleep(Jitter.Basic(Program.Configuration.ClientResults.CycleSleep));
 
             while (true)
             {
                 try
                 {
-                    if(File.Exists(fileName))
+                    if (File.Exists(fileName))
                     {
                         PostResults(fileName, machine, posturl);
                     }
@@ -173,13 +251,18 @@ namespace ghosts.client.linux.Comms
                 }
                 catch (Exception e)
                 {
-                    _log.Error($"Problem posting logs to server {e}");
+                    _log.Error($"Problem posting logs to server: {e.Message}");
+                }
+                finally
+                {
+                    GC.Collect();
+                    GC.WaitForPendingFinalizers();
                 }
 
                 // look for other result files that have not been posted
                 try
                 {
-                    foreach(var file in Directory.GetFiles(Path.GetDirectoryName(fileName)))
+                    foreach (var file in Directory.GetFiles(Path.GetDirectoryName(fileName)))
                     {
                         if (!file.EndsWith("app.log") && file != fileName)
                         {
@@ -189,10 +272,15 @@ namespace ghosts.client.linux.Comms
                 }
                 catch (Exception e)
                 {
-                    _log.Debug($"Problem posting overflow logs from {fileName} to server {posturl}: {e}");
+                    _log.Debug($"Problem posting overflow logs from {fileName} to server {posturl} : {e}");
+                }
+                finally
+                {
+                    GC.Collect();
+                    GC.WaitForPendingFinalizers();
                 }
 
-                Thread.Sleep(cyclesleep);
+                Thread.Sleep(Jitter.Basic(Program.Configuration.ClientResults.CycleSleep));
             }
         }
 
@@ -241,11 +329,26 @@ namespace ghosts.client.linux.Comms
 
         internal static void PostSurvey()
         {
+            // ignore all certs
+            ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
+
+            var posturl = string.Empty;
+
+            try
+            {
+                posturl = Program.Configuration.Survey.PostUrl;
+            }
+            catch
+            {
+                _log.Error("Can't get survey posturl!");
+                return;
+            }
+
             try
             {
                 _log.Trace("posting survey");
 
-                var posturl = Program.Configuration.Survey.PostUrl;
+                Thread.Sleep(Jitter.Basic(100));
 
                 if (!File.Exists(ApplicationDetails.InstanceFiles.SurveyResults))
                     return;
@@ -255,6 +358,7 @@ namespace ghosts.client.linux.Comms
                 var payload = JsonConvert.SerializeObject(survey);
 
                 var machine = new ResultMachine();
+                // GuestInfoVars.Load(machine);
 
                 if (Program.Configuration.Survey.IsSecure)
                 {
@@ -279,7 +383,7 @@ namespace ghosts.client.linux.Comms
             }
             catch (Exception e)
             {
-                _log.Trace("Problem posting logs to server");
+                _log.Debug($"Problem posting logs to server from { ApplicationDetails.InstanceFiles.SurveyResults } to { Program.Configuration.Survey.PostUrl }");
                 _log.Error(e);
             }
         }

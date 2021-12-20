@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("CMU > SEI > CERT > MSE > Realism Team")]
 [assembly: AssemblyProduct("GHOSTS NPC Framework Client - please email ddupdyke@sei.cmu.edu with bugs/requests/other")]
-[assembly: AssemblyCopyright("Copyright © 2017 - 2020")]
+[assembly: AssemblyCopyright("Copyright © 2017 - 2021")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -31,5 +31,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("4.0.0.0")]
-[assembly: AssemblyFileVersion("4.0.0.0")]
+[assembly: AssemblyVersion("6.0.1.0")]
+[assembly: AssemblyFileVersion("6.0.1.0")]
