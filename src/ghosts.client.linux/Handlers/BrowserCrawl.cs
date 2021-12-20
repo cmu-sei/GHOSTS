@@ -97,7 +97,9 @@ namespace ghosts.client.linux.handlers
                     {
                         Driver.SwitchTo().Frame(iframe);
                         isInIframe = true;
+                        _log.Trace("replay_iframe found. Made that the focus...");
                     }
+                    _log.Trace($"Iframe found: {iframe.GetAttribute("id")}");
                 }
 
                 var links = Driver.FindElements(By.TagName("a"));
@@ -130,7 +132,10 @@ namespace ghosts.client.linux.handlers
                 }
 
                 if (isInIframe)
+                {
                     Driver.SwitchTo().DefaultContent();
+                    _log.Trace("Switched back to main window focus");
+                }
                 
                 _log.Trace($"Added {linksAdded} links for {config.Uri}");
             }

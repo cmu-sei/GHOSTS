@@ -20,9 +20,12 @@ namespace ghosts.client.linux.handlers
             {
                 Driver = GetDriver(handler);
                 base.Driver = Driver;
-                
-                JS = (IJavaScriptExecutor)Driver;
-                base.JS = JS;
+
+                if (handler.HandlerArgs.ContainsKey("javascript-enable"))
+                {
+                    JS = (IJavaScriptExecutor)Driver;
+                    base.JS = JS;
+                }
 
                 Driver.Navigate().GoToUrl(handler.Initial);
 
@@ -116,7 +119,7 @@ namespace ghosts.client.linux.handlers
             {
                 driver = new ChromeDriver(options);
             }
-            catch (Exception e)
+            catch
             {
                 _log.Trace("Driver could not be instantiated. Does the proper driver exist? Are you running as a user and not root? Sometimes running the driver directly will uncover the underlaying issue.");    
                 throw;
