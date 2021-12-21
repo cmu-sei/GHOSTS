@@ -2,7 +2,7 @@
 
 # GHOSTS NPC AUTOMATION
 
-[Version 6.0](https://github.com/cmu-sei/GHOSTS/wiki/v6.0.0-RELEASE-Notes) is now available, and adds significant improvements and new features. [The quick start is available here](https://github.com/cmu-sei/GHOSTS/wiki/Installation-from-distribution-binaries). Be sure to check out other parts of the GHOSTS framework, �[ANIMATOR](https://github.com/cmu-sei/GHOSTS-ANIMATOR) and [SPECTRE](https://github.com/cmu-sei/GHOSTS-SPECTRE).
+[Version 6.0](https://github.com/cmu-sei/GHOSTS/wiki/v6.0.0-RELEASE-Notes) is now available, and adds significant improvements and new features. [The quick start is available here](https://github.com/cmu-sei/GHOSTS/wiki/Installation-from-distribution-binaries). Be sure to check out other parts of the GHOSTS framework, [ANIMATOR](https://github.com/cmu-sei/GHOSTS-ANIMATOR) and [SPECTRE](https://github.com/cmu-sei/GHOSTS-SPECTRE).
 
 GHOSTS is a framework for highly-complex, realistic non-player character (NPC) orchestration. It essentially realistically mimics the behavior of the different types of people you might encounter on  typical office or enterprise networks. The system makes it possible for cybersecurity experts to test their skills and realistically train to defend real networks with real NPC players operating on those networks doing the things we might expect them to do: Create documents, access systems, browse the web, click, run commands, and so on.
 
