@@ -145,8 +145,11 @@ namespace Ghosts.Client
                 StartupTasks.CleanupProcesses();
             }
 
-            //add ghosts to startup
-            StartupTasks.SetStartup();
+            if (!Configuration.DisableStartup)
+            {
+                //add ghosts to startup
+                StartupTasks.SetStartup();
+            }
 
             //add listener on a port or ephemeral file watch to handle ad hoc commands
             ListenerManager.Run();

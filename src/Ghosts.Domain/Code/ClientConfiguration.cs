@@ -49,6 +49,11 @@ namespace Ghosts.Domain.Code
         public bool HandlersIsEnabled { get; set; }
 
         /// <summary>
+        /// Disable client adding itself to auto-start
+        /// </summary>
+        public bool DisableStartup { get; set; }
+
+        /// <summary>
         /// Comma sep list of extensions for chrome (aka c:\path\to\extension)
         /// </summary>
         public string ChromeExtensions { get; set; }
