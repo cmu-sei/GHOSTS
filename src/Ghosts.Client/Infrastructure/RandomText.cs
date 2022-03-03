@@ -20,18 +20,16 @@ namespace Ghosts.Client.Infrastructure
         public static char GetRandomCapitalLetter()
         {
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-            var rand = new Random();
-            return chars[rand.Next(0, chars.Length)];
+            return chars[_random.Next(0, chars.Length)];
         }
 
         public static char GetRandomCapitalLetter(char after)
         {
             after = char.ToUpper(after);
-            var index = (int)after % 32;
+            var index = after % 32;
 
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-            var rand = new Random();
-            return chars[rand.Next(index, chars.Length)];
+            return chars[_random.Next(index, chars.Length)];
         }
 
         public RandomText(string[] words)

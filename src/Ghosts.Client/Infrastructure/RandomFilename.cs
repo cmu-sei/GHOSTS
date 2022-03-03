@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
 using NLog;
 
@@ -16,6 +15,7 @@ namespace Ghosts.Client.Infrastructure
     public static class RandomFilename
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
+        private static readonly Random _random = new Random();
 
         public static string Generate()
         {
@@ -67,17 +67,17 @@ namespace Ghosts.Client.Infrastructure
             // add variables?
             if (fileName.Contains("$x$"))
             {
-                var rand = new Random().Next(0, 4);
+                var rand = _random.Next(0, 4);
                 switch (rand)
                 {
                     case 0:
-                        fileName = fileName.Replace("$x$", new Random().Next(0, 12).ToString());
+                        fileName = fileName.Replace("$x$", _random.Next(0, 12).ToString());
                         break;
                     case 1:
                         fileName = fileName.Replace("$x$", DateTime.Now.Month.ToString());
                         break;
                     case 2:
-                        fileName = fileName.Replace("$x$", new Random().Next(0, 30).ToString());
+                        fileName = fileName.Replace("$x$", _random.Next(0, 30).ToString());
                         break;
                 }
             }

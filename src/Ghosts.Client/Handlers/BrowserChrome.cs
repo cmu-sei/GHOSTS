@@ -12,8 +12,6 @@ namespace Ghosts.Client.Handlers
 {
     public class BrowserChrome : BaseBrowserHandler
     {
-        public new IJavaScriptExecutor JS { get; private set; }
-
         private static string GetInstallLocation()
         {
             var path = @"C:\Program Files\Google\Chrome\Application\chrome.exe";
@@ -56,7 +54,7 @@ namespace Ghosts.Client.Handlers
             }
             catch (Exception e)
             {
-                _log.Error(e);
+                Log.Error(e);
             }
             finally
             {

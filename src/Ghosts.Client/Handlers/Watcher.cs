@@ -2,7 +2,6 @@
 
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
-using NLog;
 using System;
 using System.IO;
 using System.Threading;
@@ -15,13 +14,11 @@ namespace Ghosts.Client.Handlers
     /// </summary>
     internal class Watcher : BaseHandler
     {
-        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-
         public Watcher(TimelineHandler handler)
         {
-            _log.Trace("Spawning watcher handler...");
+            Log.Trace("Spawning watcher handler...");
 
-            _log.Trace("Can't loop on watcher!...");
+            Log.Trace("Can't loop on watcher!...");
 
             try
             {
@@ -29,7 +26,7 @@ namespace Ghosts.Client.Handlers
             }
             catch (Exception e)
             {
-                _log.Error(e);
+                Log.Error(e);
             }
         }
 
@@ -44,7 +41,7 @@ namespace Ghosts.Client.Handlers
                     Thread.Sleep(timelineEvent.DelayBefore);
                 }
 
-                _log.Trace($"Watcher: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfter}");
+                Log.Trace($"Watcher: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfter}");
 
                 switch (timelineEvent.Command)
                 {
@@ -52,7 +49,7 @@ namespace Ghosts.Client.Handlers
                     //case "folder":
                     //    while (true)
                     //    {
-                    //        var cmd = timelineEvent.CommandArgs[new Random().Next(0, timelineEvent.CommandArgs.Count)];
+                    //        var cmd = timelineEvent.CommandArgs[_random.Next(0, timelineEvent.CommandArgs.Count)];
                     //        if (!string.IsNullOrEmpty(cmd))
                     //        {
                     //            this.Command(handler, timelineEvent, cmd);
@@ -75,7 +72,6 @@ namespace Ghosts.Client.Handlers
 
     internal class FileWatcher : BaseHandler
     {
-        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
         private TimelineHandler _handler;
         private TimelineEvent _timelineEvent;
         private readonly string _command;
@@ -99,7 +95,7 @@ namespace Ghosts.Client.Handlers
             
             if (string.IsNullOrEmpty(_filePath))
             {
-                _log.Trace("file path null or empty");
+                Log.Trace("file path null or empty");
                 return;
             }
 
@@ -110,7 +106,7 @@ namespace Ghosts.Client.Handlers
             if (attr.HasFlag(FileAttributes.Directory))
             {
                 path = _filePath;
-                _log.Trace($"Directory passed: {path}");
+                Log.Trace($"Directory passed: {path}");
             }
             else
             {
@@ -118,7 +114,7 @@ namespace Ghosts.Client.Handlers
                 var f = new FileInfo(_filePath);
                 path = f.DirectoryName;
                 file = f.Name;
-                _log.Trace($"File passed - Directory : {path} File: {file}");
+                Log.Trace($"File passed - Directory : {path} File: {file}");
             }
             
             var watcher = new FileSystemWatcher(path)
@@ -130,9 +126,9 @@ namespace Ghosts.Client.Handlers
                 watcher.Filter = file;
 
             watcher.EnableRaisingEvents = true;
-            watcher.Changed += new FileSystemEventHandler(OnChanged);
+            watcher.Changed += OnChanged;
 
-            _log.Trace($"Setting up watcher for {_filePath} - watching {path} and filtering on {file}");
+            Log.Trace($"Setting up watcher for {_filePath} - watching {path} and filtering on {file}");
 
             // Begin watching.
             watcher.EnableRaisingEvents = true;
@@ -149,11 +145,11 @@ namespace Ghosts.Client.Handlers
             if (lastWriteTime > _lastRead.AddSeconds(1))
             {
                 _lastRead = lastWriteTime;
-                _log.Trace("File: " + e.FullPath + " " + e.ChangeType);
+                Log.Trace("File: " + e.FullPath + " " + e.ChangeType);
                 
                 try
                 {
-                    var fileContents = string.Empty;
+                    string fileContents;
                     using (var logFileStream = new FileStream(_filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                     {
                         using (var logFileReader = new StreamReader(logFileStream))
@@ -169,7 +165,7 @@ namespace Ghosts.Client.Handlers
                 }
                 catch (Exception exception)
                 {
-                    _log.Error(exception);
+                    Log.Error(exception);
                 }
             }
         }

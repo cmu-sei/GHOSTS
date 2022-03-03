@@ -9,8 +9,10 @@ namespace Ghosts.Client.Handlers
 {
     public abstract class BaseHandler
     {
+        public static readonly Logger Log = LogManager.GetCurrentClassLogger();
         private static readonly Logger _timelineLog = LogManager.GetLogger("TIMELINE");
-        
+        internal static readonly Random _random = new Random();
+
         public void Report(string handler, string command, string arg)
         {
             Report(handler, command, arg, null, null);
@@ -46,7 +48,7 @@ namespace Ghosts.Client.Handlers
         {
             if (payload != null)
             {
-                payload = payload.Replace(System.Environment.NewLine, string.Empty);
+                payload = payload.Replace(Environment.NewLine, string.Empty);
                 _timelineLog.Info($"WEBHOOKCREATE|{DateTime.UtcNow}|{payload}");
             }
         }

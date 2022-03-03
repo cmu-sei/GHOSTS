@@ -60,19 +60,16 @@ namespace Ghosts.Client
 
         internal class Options
         {
-            [Option('d', "debug", Default = false, HelpText = "Launch GHOSTS in debug mode")]
+            [Option('d', "debug", Default = false, HelpText = "Launch in debug mode")]
             public bool Debug { get; set; }
 
             [Option('h', "help", Default = false, HelpText = "Display this help screen")]
             public bool Help { get; set; }
 
-            [Option('r', "randomize", Default = false, HelpText = "Create a randomized timeline")]
-            public bool Randomize { get; set; }
-
-            [Option('v', "version", Default = false, HelpText = "GHOSTS client version")]
+            [Option('v', "version", Default = false, HelpText = "Client version")]
             public bool Version { get; set; }
 
-            [Option('i', "information", Default = false, HelpText = "GHOSTS client id information")]
+            [Option('i', "information", Default = false, HelpText = "Client id information")]
             public bool Information { get; set; }
         }
 
@@ -88,7 +85,7 @@ namespace Ghosts.Client
             }
             catch (Exception e)
             {
-                var s = $"Fatal exception in GHOSTS {ApplicationDetails.Version}: {e}";
+                var s = $"Fatal exception in {ApplicationDetails.Name} {ApplicationDetails.Version}: {e}";
                 _log.Fatal(s);
 
                 var handle = GetConsoleWindow();
@@ -101,8 +98,6 @@ namespace Ghosts.Client
 
         private static void Run(string[] args)
         {
-            ThreadJobs = new List<ThreadJob>();
-
             // ignore all certs
             ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
 
@@ -113,7 +108,9 @@ namespace Ghosts.Client
             //attach handler for shutdown tasks
             AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
 
-            _log.Trace($"Initiating Ghosts startup - Local time: {DateTime.Now.TimeOfDay} UTC: {DateTime.UtcNow.TimeOfDay}");
+            _log.Trace($"Initiating {ApplicationDetails.Name} startup - Local time: {DateTime.Now.TimeOfDay} UTC: {DateTime.UtcNow.TimeOfDay}");
+
+            ThreadJobs = new List<ThreadJob>();
 
             //load configuration
             try
@@ -207,7 +204,7 @@ namespace Ghosts.Client
         //hook for shutdown tasks
         private static void CurrentDomain_ProcessExit(object sender, EventArgs e)
         {
-            _log.Debug($"Initiating Ghosts shutdown - Local time: {DateTime.Now.TimeOfDay} UTC: {DateTime.UtcNow.TimeOfDay}");
+            _log.Debug($"Initiating {ApplicationDetails.Name} shutdown - Local time: {DateTime.Now.TimeOfDay} UTC: {DateTime.UtcNow.TimeOfDay}");
             StartupTasks.CleanupProcesses();
         }
     }

@@ -1,7 +1,6 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using Ghosts.Domain;
-using NLog;
 using System;
 using System.Diagnostics;
 using System.Threading;
@@ -11,13 +10,11 @@ namespace Ghosts.Client.Handlers
 {
     public class Print : BaseHandler
     {
-        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-
         public Print(TimelineHandler handler)
         {
             try
             {
-                _log.Trace("Spawning printer job...");
+                Log.Trace("Spawning printer job...");
 
                 if (handler.Loop)
                 {
@@ -33,13 +30,13 @@ namespace Ghosts.Client.Handlers
             }
             catch (Exception e)
             {
-                _log.Error(e);
+                Log.Error(e);
             }
         }
 
         public void Ex(TimelineHandler handler)
         {
-            foreach (TimelineEvent timelineEvent in handler.TimeLineEvents)
+            foreach (var timelineEvent in handler.TimeLineEvents)
             {
                 WorkingHours.Is(handler);
 
@@ -48,7 +45,7 @@ namespace Ghosts.Client.Handlers
                     Thread.Sleep(timelineEvent.DelayBefore);
                 }
 
-                _log.Trace($"Print Job: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfter}");
+                Log.Trace($"Print Job: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfter}");
 
                 Command(handler, timelineEvent, timelineEvent.Command);
 
@@ -84,14 +81,17 @@ namespace Ghosts.Client.Handlers
                         if (false == p.CloseMainWindow())
                             p.Kill();
                     }
-                    catch {}
+                    catch
+                    {
+                        //
+                    }
 
                     Report(handler.HandlerType.ToString(), command, "", timelineEvent.TrackableId);
                 }
             }
             catch (Exception exception)
             {
-                _log.Error(exception);
+                Log.Error(exception);
             }
         }
     }

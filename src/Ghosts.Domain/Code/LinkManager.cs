@@ -29,8 +29,6 @@ namespace Ghosts.Domain.Code
         public List<Link> Links { private set; get; }
 
         private readonly Uri _baseUri;
-        private readonly Random _random = new Random();
-
         public LinkManager(Uri baseUri)
         {
             Links = new List<Link>();

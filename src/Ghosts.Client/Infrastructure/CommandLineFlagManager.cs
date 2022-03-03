@@ -61,13 +61,6 @@ namespace Ghosts.Client.Infrastructure
                 Program.IsDebug = true;
             }
 
-            if (options.Randomize)
-            {
-                throw new NotImplementedException("Randomize not released yet...");
-                //Console.WriteLine("randomize!");
-                //return;
-            }
-
             return true;
         }
 

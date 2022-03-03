@@ -61,7 +61,10 @@ namespace Ghosts.Client.Infrastructure
                     {
                         file.Delete();
                     }
-                    catch { }
+                    catch
+                    {
+                        //
+                    }
                 }
                 foreach (var dir in di.EnumerateDirectories())
                 {
@@ -69,7 +72,10 @@ namespace Ghosts.Client.Infrastructure
                     {
                         dir.Delete(true);
                     }
-                    catch { }
+                    catch
+                    {
+                        //
+                    }
                 }
             }
             catch (Exception e)

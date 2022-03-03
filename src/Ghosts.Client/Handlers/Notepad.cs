@@ -19,16 +19,16 @@ namespace Ghosts.Client.Handlers
         public static extern int SendMessage(IntPtr hWnd, int uMsg, int wParam, string lParam);
 
         //this is a constant indicating the window that we want to send a text message
-        const int WM_SETTEXT = 0X000C;
+        const int WmSetText = 0X000C;
 
-        public Process notepadProccess;
+        public Process NotepadProcess;
 
         public Notepad(TimelineHandler handler)
         {
             //TODO - this class is just stubbed
             Process.Start("notepad.exe");
             Thread.Sleep(1000);
-            this.notepadProccess = Process.GetProcessesByName("notepad")[0];
+            this.NotepadProcess = Process.GetProcessesByName("notepad")[0];
 
             foreach (var timelineEvent in handler.TimeLineEvents)
             {
@@ -49,9 +49,9 @@ namespace Ghosts.Client.Handlers
         {
             //getting notepad's textbox handle from the main window's handle
             //the textbox is called 'Edit'
-            IntPtr notepadTextbox = FindWindowEx(notepadProccess.MainWindowHandle, IntPtr.Zero, "Edit", null);
+            var notepadTextbox = FindWindowEx(NotepadProcess.MainWindowHandle, IntPtr.Zero, "Edit", null);
             //sending the message to the textbox
-            SendMessage(notepadTextbox, WM_SETTEXT, 0, text);
+            SendMessage(notepadTextbox, WmSetText, 0, text);
         }
     }
 }

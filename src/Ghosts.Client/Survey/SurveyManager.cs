@@ -170,6 +170,7 @@ namespace Ghosts.Client.Survey
     public class SurveyResult
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
+        private static readonly Random _random = new Random();
 
         public Domain.Messages.MesssagesForServer.Survey Survey { get; set; }
 
@@ -184,37 +185,35 @@ namespace Ghosts.Client.Survey
 
         public void LoadAll()
         {
-            var random = new Random();
-
             GetNetStatPorts();
             if (!Program.IsDebug)
-                Thread.Sleep(random.Next(500, 900000));
+                Thread.Sleep(_random.Next(500, 900000));
 
             this.Survey.Interfaces = GetInterfaces();
             if (!Program.IsDebug)
-                Thread.Sleep(random.Next(500, 900000));
+                Thread.Sleep(_random.Next(500, 900000));
 
             this.Survey.LocalUsers = GetLocalAccounts();
             if (!Program.IsDebug)
-                Thread.Sleep(random.Next(500, 900000));
+                Thread.Sleep(_random.Next(500, 900000));
 
             this.Survey.Drives = this.GetDriveInfo();
             if (!Program.IsDebug)
-                Thread.Sleep(random.Next(500, 900000));
+                Thread.Sleep(_random.Next(500, 900000));
 
             this.Survey.Processes = this.GetProcesses();
             if (!Program.IsDebug)
-                Thread.Sleep(random.Next(500, 900000));
+                Thread.Sleep(_random.Next(500, 900000));
 
             this.Survey.EventLogs = GetEventLogs();
             if (!Program.IsDebug)
-                Thread.Sleep(random.Next(500, 900000));
+                Thread.Sleep(_random.Next(500, 900000));
 
             foreach (var item in this.Survey.EventLogs)
             {
                 item.Entries = new List<Domain.Messages.MesssagesForServer.Survey.EventLog.EventLogEntry>();
                 if (!Program.IsDebug)
-                    Thread.Sleep(random.Next(500, 5000));
+                    Thread.Sleep(_random.Next(500, 5000));
                 foreach (var o in this.GetEventLogEntries(item.Name).ToList())
                     item.Entries.Add(o);
             }
@@ -283,7 +282,7 @@ namespace Ghosts.Client.Survey
                                 ForeignPort = foreignAddress.Split(':')[1],
                                 State = tokens[1] == "UDP" ? null : tokens[4],
                                 PID = tokens[1] == "UDP" ? Convert.ToInt16(tokens[4]) : Convert.ToInt16(tokens[5]),
-                                Protocol = localAddress.Contains("1.1.1.1") ? String.Format("{0}v6", tokens[1]) : String.Format("{0}v4", tokens[1]),
+                                Protocol = localAddress.Contains("1.1.1.1") ? $"{tokens[1]}v6" : $"{tokens[1]}v4",
                                 Process = tokens[1] == "UDP" ? LookupProcess(Convert.ToInt16(tokens[4])) : LookupProcess(Convert.ToInt16(tokens[5]))
                             });
                         }
@@ -316,9 +315,9 @@ namespace Ghosts.Client.Survey
                 foreach (var o in list)
                     s.AppendLine(o.ToString().RemoveDuplicateSpaces());
 
-                var ifaces = s.ToString().Split(new string[] { "Interface: " }, StringSplitOptions.None);
+                var interfaces = s.ToString().Split(new[] { "Interface: " }, StringSplitOptions.None);
 
-                foreach (var iface in ifaces)
+                foreach (var iface in interfaces)
                 {
                     if (string.IsNullOrEmpty(iface.Replace(Environment.NewLine, "")))
                         continue;
@@ -434,17 +433,18 @@ namespace Ghosts.Client.Survey
                         if (searcher.Get().Count > 0)
                         {
 
-                            foreach (ManagementObject oReturn in searcher.Get())
+                            foreach (var managementBaseObject in searcher.Get())
                             {
+                                var oReturn = (ManagementObject) managementBaseObject;
                                 string[] o = new string[2];
                                 //Invoke the method and populate the o var with the user name and domain
-                                oReturn.InvokeMethod("GetOwner", (object[])o);
+                                oReturn.InvokeMethod("GetOwner", o);
                                 result.Owner = o[0];
                                 if (!string.IsNullOrEmpty(o[1]))
                                     result.OwnerDomain = o[1];
 
                                 var sid = new string[1];
-                                oReturn.InvokeMethod("GetOwnerSid", (object[])sid);
+                                oReturn.InvokeMethod("GetOwnerSid", sid);
                                 result.OwnerSid = sid[0];
                             }
                         }

@@ -20,7 +20,7 @@ namespace Ghosts.Client.Comms
         /// <summary>
         /// The actual path to the client id file, specified in application config
         /// </summary>
-        public static string ConfigFile = ApplicationDetails.InstanceFiles.Id;
+        public static string IdFile = ApplicationDetails.InstanceFiles.Id;
 
         /// <summary>
         /// Gets the agent's current id from local instance, and if it does not exist, gets an id from the server and saves it locally
@@ -31,11 +31,11 @@ namespace Ghosts.Client.Comms
             {
                 try
                 {
-                    if (!File.Exists(ConfigFile))
+                    if (!File.Exists(IdFile))
                     {
                         return Run();
                     }
-                    return File.ReadAllText(ConfigFile);
+                    return File.ReadAllText(IdFile);
                 }
                 catch
                 {
@@ -72,7 +72,7 @@ namespace Ghosts.Client.Comms
                     try
                     {
                         using (var reader =
-                            new StreamReader(client.OpenRead(Program.Configuration.IdUrl)))
+                            new StreamReader(client.OpenRead(Program.Configuration.IdUrl) ?? throw new InvalidOperationException("CheckID client is null")))
                         {
                             s = reader.ReadToEnd();
                             _log.Debug("ID Received");
@@ -110,7 +110,7 @@ namespace Ghosts.Client.Comms
             }
 
             //save returned id
-            File.WriteAllText(ConfigFile, s);
+            File.WriteAllText(IdFile, s);
             return s;
         }
     }

@@ -4,7 +4,6 @@ using Ghosts.Client.Infrastructure;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using NetOffice.WordApi.Enums;
-using NLog;
 using System;
 using System.Drawing;
 using System.IO;
@@ -19,16 +18,14 @@ namespace Ghosts.Client.Handlers
 {
     public class WordHandler : BaseHandler
     {
-        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-
         public WordHandler(Timeline timeline, TimelineHandler handler)
         {
-            _log.Trace("Launching Word handler");
+            Log.Trace("Launching Word handler");
             try
             {
                 if (handler.Loop)
                 {
-                    _log.Trace("Word loop");
+                    Log.Trace("Word loop");
                     while (true)
                     {
                         if (timeline != null)
@@ -45,7 +42,7 @@ namespace Ghosts.Client.Handlers
                 }
                 else
                 {
-                    _log.Trace("Word single run");
+                    Log.Trace("Word single run");
                     KillApp();
                     ExecuteEvents(timeline, handler);
                     KillApp();
@@ -53,7 +50,7 @@ namespace Ghosts.Client.Handlers
             }
             catch (Exception e)
             {
-                _log.Error(e);
+                Log.Error(e);
                 KillApp();
             }
         }
@@ -71,7 +68,7 @@ namespace Ghosts.Client.Handlers
                 {
                     try
                     {
-                        _log.Trace($"Word event - {timelineEvent}");
+                        Log.Trace($"Word event - {timelineEvent}");
                         WorkingHours.Is(handler);
 
                         if (timelineEvent.DelayBefore > 0)
@@ -108,7 +105,7 @@ namespace Ghosts.Client.Handlers
                         }
                         catch (Exception e)
                         {
-                            _log.Trace($"Could not minimize: {e}");
+                            Log.Trace($"Could not minimize: {e}");
                         }
                         
                         // insert some text
@@ -141,11 +138,11 @@ namespace Ghosts.Client.Handlers
                         var path = $"{dir}\\{rand}.docx";
 
                         //if directory does not exist, create!
-                        _log.Trace($"Checking directory at {path}");
+                        Log.Trace($"Checking directory at {path}");
                         var f = new FileInfo(path).Directory;
                         if (f == null)
                         {
-                            _log.Trace($"Directory does not exist, creating directory at {f.FullName}");
+                            Log.Trace($"Directory does not exist, creating directory at {f.FullName}");
                             Directory.CreateDirectory(f.FullName);
                         }
 
@@ -158,7 +155,7 @@ namespace Ghosts.Client.Handlers
                         }
                         catch (Exception e)
                         {
-                            _log.Debug(e);
+                            Log.Debug(e);
                         }
 
                         newDocument.Saved = true;
@@ -188,7 +185,7 @@ namespace Ghosts.Client.Handlers
                         if (timelineEvent.DelayAfter > 0)
                         {
                             //sleep and leave the app open
-                            _log.Trace($"Sleep after for {timelineEvent.DelayAfter}");
+                            Log.Trace($"Sleep after for {timelineEvent.DelayAfter}");
                             Thread.Sleep(timelineEvent.DelayAfter - writeSleep);
                         }
 
@@ -218,7 +215,7 @@ namespace Ghosts.Client.Handlers
                     }
                     catch (Exception e)
                     {
-                        _log.Debug(e);
+                        Log.Debug(e);
                     }
                     finally
                     {
@@ -228,12 +225,12 @@ namespace Ghosts.Client.Handlers
             }
             catch (Exception e)
             {
-                _log.Error(e);
+                Log.Error(e);
             }
             finally
             {
                 KillApp();
-                _log.Trace("Word closing...");
+                Log.Trace("Word closing...");
             }
         }
 

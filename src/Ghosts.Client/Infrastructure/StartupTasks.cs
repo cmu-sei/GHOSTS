@@ -74,7 +74,10 @@ namespace Ghosts.Client.Infrastructure
                                     {
                                         process.Kill();
                                     }
-                                    catch { }
+                                    catch
+                                    {
+                                        //
+                                    }
                                 }
                             }
                         }).Start();

@@ -17,6 +17,7 @@ namespace Ghosts.Client.Infrastructure.Email
         public string Subject { private set; get; }
         public string Body { private set; get; }
         public ClientConfiguration Configuration { private set; get; }
+        private static readonly Random _random = new Random();
 
         internal IList<EmailContent> Content { private set; get; }
 
@@ -48,8 +49,7 @@ namespace Ghosts.Client.Infrastructure.Email
 
             if (total <= 0) return;
 
-            var r = new Random();
-            var o = this.Content[r.Next(0, total)];
+            var o = this.Content[_random.Next(0, total)];
             this.Configuration = Program.Configuration;
 
             this.Subject = ReplaceTokens(o.Subject);
@@ -142,7 +142,8 @@ namespace Ghosts.Client.Infrastructure.Email
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
         public string Reply { private set; get; }
-        
+        private static readonly Random _random = new Random();
+
         public EmailReplyManager()
         {
             try
@@ -157,8 +158,7 @@ namespace Ghosts.Client.Infrastructure.Email
                 var list = engine.ReadFile(ClientConfigurationResolver.EmailReply);
                 var total = list.Count();
 
-                Random r = new Random();
-                var o = list[r.Next(0, total)];
+                var o = list[_random.Next(0, total)];
                 this.Reply = o.Reply;
             }
             catch (Exception exc)

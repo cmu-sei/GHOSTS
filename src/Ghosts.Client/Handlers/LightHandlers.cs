@@ -1,26 +1,25 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
-using System;
-using System.IO;
-using System.Threading;
 using Ghosts.Client.Infrastructure;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
-using NLog;
+using System;
+using System.IO;
+using System.Threading;
 
 namespace Ghosts.Client.Handlers
 {
-    public class LightHandlers
+    public class LightHandlers : BaseHandler
     {
-        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-
         private static string GetSavePath(Type cls, TimelineHandler handler, TimelineEvent timelineEvent, string fileExtension)
         {
-            _log.Trace($"{cls} event - {timelineEvent}");
+            Log.Trace($"{cls} event - {timelineEvent}");
             WorkingHours.Is(handler);
 
             if (timelineEvent.DelayBefore > 0)
+            {
                 Thread.Sleep(timelineEvent.DelayBefore);
+            }
 
             Thread.Sleep(3000);
 
@@ -28,47 +27,52 @@ namespace Ghosts.Client.Handlers
 
             var dir = timelineEvent.CommandArgs[0].ToString();
             if (dir.Contains("%"))
+            {
                 dir = Environment.ExpandEnvironmentVariables(dir);
+            }
+
             if (Directory.Exists(dir))
+            {
                 Directory.CreateDirectory(dir);
+            }
 
             var path = $"{dir}\\{rand}.{fileExtension}";
 
             //if directory does not exist, create!
-            _log.Trace($"Checking directory at {path}");
+            Log.Trace($"Checking directory at {path}");
             var f = new FileInfo(path).Directory;
             if (f == null)
             {
-                _log.Trace($"Directory does not exist, creating directory at {f.FullName}");
-                Directory.CreateDirectory(f.FullName);
+                Log.Trace($"Directory does not exist, creating directory at {path}");
+                Directory.CreateDirectory(path);
             }
 
             try
             {
                 if (File.Exists(path))
+                {
                     File.Delete(path);
+                }
             }
             catch (Exception e)
             {
-                _log.Debug(e);
+                Log.Debug(e);
             }
 
-            _log.Trace($"{cls} saving to path - {path}");
+            Log.Trace($"{cls} saving to path - {path}");
             return path;
         }
 
         public class LightWordHandler : BaseHandler
         {
-          private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-
             public LightWordHandler(TimelineHandler handler)
             {
-                _log.Trace("Launching Light Word handler");
+                Log.Trace("Launching Light Word handler");
                 try
                 {
                     if (handler.Loop)
                     {
-                        _log.Trace("Light Word loop");
+                        Log.Trace("Light Word loop");
                         while (true)
                         {
                             ExecuteEvents(handler);
@@ -76,13 +80,13 @@ namespace Ghosts.Client.Handlers
                     }
                     else
                     {
-                        _log.Trace("Light Word single run");
+                        Log.Trace("Light Word single run");
                         ExecuteEvents(handler);
                     }
                 }
                 catch (Exception e)
                 {
-                    _log.Error(e);
+                    Log.Error(e);
                 }
             }
 
@@ -105,13 +109,13 @@ namespace Ghosts.Client.Handlers
                         Domain.Code.Office.Word.Write(path, title, paragraph);
 
                         FileListing.Add(path);
-                        this.Report(handler.HandlerType.ToString(), timelineEvent.Command,
+                        Report(handler.HandlerType.ToString(), timelineEvent.Command,
                             timelineEvent.CommandArgs[0].ToString());
                     }
                 }
                 catch (Exception e)
                 {
-                    _log.Error(e);
+                    Log.Error(e);
                 }
             }
         }
@@ -123,16 +127,14 @@ namespace Ghosts.Client.Handlers
 
         public class LightExcelHandler : BaseHandler
         {
-            private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-
             public LightExcelHandler(TimelineHandler handler)
             {
-                _log.Trace("Launching Light Excel handler");
+                Log.Trace("Launching Light Excel handler");
                 try
                 {
                     if (handler.Loop)
                     {
-                        _log.Trace("Light Excel loop");
+                        Log.Trace("Light Excel loop");
                         while (true)
                         {
                             ExecuteEvents(handler);
@@ -140,13 +142,13 @@ namespace Ghosts.Client.Handlers
                     }
                     else
                     {
-                        _log.Trace("Light Excel single run");
+                        Log.Trace("Light Excel single run");
                         ExecuteEvents(handler);
                     }
                 }
                 catch (Exception e)
                 {
-                    _log.Error(e);
+                    Log.Error(e);
                 }
             }
 
@@ -161,17 +163,17 @@ namespace Ghosts.Client.Handlers
                         var list = RandomText.GetDictionary.GetDictionaryList();
                         var rt = new RandomText(list.ToArray());
                         rt.AddSentence(5);
-                        
+
                         Domain.Code.Office.Excel.Write(path, rt.Content);
 
                         FileListing.Add(path);
-                        this.Report(handler.HandlerType.ToString(), timelineEvent.Command,
+                        Report(handler.HandlerType.ToString(), timelineEvent.Command,
                             timelineEvent.CommandArgs[0].ToString());
                     }
                 }
                 catch (Exception e)
                 {
-                    _log.Error(e);
+                    Log.Error(e);
                 }
             }
         }

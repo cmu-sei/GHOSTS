@@ -5,7 +5,6 @@ using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using NetOffice.OfficeApi.Enums;
 using NetOffice.PowerPointApi.Enums;
-using NLog;
 using System;
 using System.IO;
 using System.Linq;
@@ -18,16 +17,14 @@ namespace Ghosts.Client.Handlers
 {
     public class PowerPointHandler : BaseHandler
     {
-        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-
         public PowerPointHandler(Timeline timeline, TimelineHandler handler)
         {
-            _log.Trace("Launching PowerPoint handler");
+            Log.Trace("Launching PowerPoint handler");
             try
             {
                 if (handler.Loop)
                 {
-                    _log.Trace("PowerPoint loop");
+                    Log.Trace("PowerPoint loop");
                     while (true)
                     {
                         if (timeline != null)
@@ -44,7 +41,7 @@ namespace Ghosts.Client.Handlers
                 }
                 else
                 {
-                    _log.Trace("PowerPoint single run");
+                    Log.Trace("PowerPoint single run");
                     KillApp();
                     ExecuteEvents(timeline, handler);
                     KillApp();
@@ -52,7 +49,7 @@ namespace Ghosts.Client.Handlers
             }
             catch (Exception e)
             {
-                _log.Error(e);
+                Log.Error(e);
                 KillApp();
             }
         }
@@ -70,7 +67,7 @@ namespace Ghosts.Client.Handlers
                 {
                     try
                     {
-                        _log.Trace($"PowerPoint event - {timelineEvent}");
+                        Log.Trace($"PowerPoint event - {timelineEvent}");
                         WorkingHours.Is(handler);
 
                         if (timelineEvent.DelayBefore > 0)
@@ -99,7 +96,7 @@ namespace Ghosts.Client.Handlers
                         }
                         catch (Exception e)
                         {
-                            _log.Trace($"Could not minimize: {e}");
+                            Log.Trace($"Could not minimize: {e}");
                         }
 
                         // add a new presentation with one new slide
@@ -126,11 +123,11 @@ namespace Ghosts.Client.Handlers
                         var path = $"{dir}\\{rand}.pptx";
 
                         //if directory does not exist, create!
-                        _log.Trace($"Checking directory at {path}");
+                        Log.Trace($"Checking directory at {path}");
                         var f = new FileInfo(path).Directory;
                         if (f == null)
                         {
-                            _log.Trace($"Directory does not exist, creating directory at {path}");
+                            Log.Trace($"Directory does not exist, creating directory at {path}");
                             Directory.CreateDirectory(path);
                         }
 
@@ -143,7 +140,7 @@ namespace Ghosts.Client.Handlers
                         }
                         catch (Exception e)
                         {
-                            _log.Debug(e);
+                            Log.Debug(e);
                         }
 
                         Thread.Sleep(5000);
@@ -169,7 +166,7 @@ namespace Ghosts.Client.Handlers
                         if (timelineEvent.DelayAfter > 0)
                         {
                             //sleep and leave the app open
-                            _log.Trace($"Sleep after for {timelineEvent.DelayAfter}");
+                            Log.Trace($"Sleep after for {timelineEvent.DelayAfter}");
                             Thread.Sleep(timelineEvent.DelayAfter - writeSleep);
                         }
                         
@@ -200,7 +197,7 @@ namespace Ghosts.Client.Handlers
                     }
                     catch (Exception e)
                     {
-                        _log.Debug(e);
+                        Log.Debug(e);
                     }
                     finally
                     {
@@ -210,12 +207,12 @@ namespace Ghosts.Client.Handlers
             }
             catch (Exception e)
             {
-                _log.Debug(e);
+                Log.Debug(e);
             }
             finally
             {
                 KillApp();
-                _log.Trace("PowerPoint closing...");
+                Log.Trace("PowerPoint closing...");
             }
         }
     }

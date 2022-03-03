@@ -10,17 +10,19 @@ namespace Ghosts.Domain.Code
     /// </summary>
     public static class Jitter
     {
+        private static readonly Random _random = new Random();
+
         public static int Randomize(object baseSleepValue, object lowJitter, object highJitter)
         {
             var newSleepValue = Convert.ToInt32(baseSleepValue);
 
-            var r = new Random().Next(Convert.ToInt32(lowJitter), Convert.ToInt32(highJitter));
+            var r = _random.Next(Convert.ToInt32(lowJitter), Convert.ToInt32(highJitter));
             newSleepValue += r;
             if (newSleepValue < 0)
             {
                 //generate a slightly increased value
                 newSleepValue = Convert.ToInt32(baseSleepValue);
-                newSleepValue += new Random().Next(1, 100);
+                newSleepValue += _random.Next(1, 100);
             }
 
             return newSleepValue;
@@ -30,13 +32,13 @@ namespace Ghosts.Domain.Code
         {
             var newSleepValue = baseSleepValue;
 
-            var r = new Random().Next(lowJitter, highJitter);
+            var r = _random.Next(lowJitter, highJitter);
             newSleepValue += r;
             if (newSleepValue < 0)
             {
                 //generate a slightly increased value
                 newSleepValue = baseSleepValue;
-                newSleepValue += new Random().Next(1, 100);
+                newSleepValue += _random.Next(1, 100);
             }
 
             return newSleepValue;
@@ -46,7 +48,7 @@ namespace Ghosts.Domain.Code
         {
             //sleep with jitter
             var sleep = baseSleep;
-            var r = new Random().Next(-999, 1999);
+            var r = _random.Next(-999, 1999);
             sleep += r;
             if (sleep < 0)
                 sleep = 1;

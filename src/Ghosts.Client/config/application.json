@@ -18,7 +18,7 @@
         "CycleSleep": 9000
     },
     "Survey": {
-        "IsEnabled": true,
+        "IsEnabled": false,
         "IsSecure": false,
         "Frequency": "once",
         "CycleSleepMinutes": 5,
@@ -33,7 +33,7 @@
         "FileNames": "",
         "Dictionary": ""
     },
-    "HealthIsEnabled": true,
+    "HealthIsEnabled": false,
     "HandlersIsEnabled": true,
     "DisableStartup": false,
     "ChromeExtensions": "",

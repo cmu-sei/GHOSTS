@@ -6,15 +6,11 @@ using System.Threading;
 using System.Windows.Forms;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
-using Microsoft.Office.Interop.PowerPoint;
-using NLog;
 
 namespace Ghosts.Client.Handlers
 {
     public class Clicks : BaseHandler
     {
-        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-
         [DllImport("user32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
         public static extern void mouse_event(uint dwFlags, uint dx, uint dy, uint cButtons, uint dwExtraInfo);
 
@@ -28,7 +24,7 @@ namespace Ghosts.Client.Handlers
 
         public Clicks(TimelineHandler handler)
         {
-            _log.Trace("Spawning mouse click handler...");
+            Log.Trace("Spawning mouse click handler...");
 
             try
             {
@@ -46,7 +42,7 @@ namespace Ghosts.Client.Handlers
             }
             catch (Exception e)
             {
-                _log.Error(e);
+                Log.Error(e);
             }
         }
 
@@ -59,7 +55,7 @@ namespace Ghosts.Client.Handlers
                 if (timelineEvent.DelayBefore > 0)
                     Thread.Sleep(timelineEvent.DelayBefore);
 
-                _log.Trace($"Click: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfter}");
+                Log.Trace($"Click: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfter}");
 
                 switch (timelineEvent.Command)
                 {
@@ -69,7 +65,7 @@ namespace Ghosts.Client.Handlers
                         var y = Cursor.Position.Y;
 
                         DoLeftMouseClick(x, y);
-                        _log.Trace($"Click: {x}:{y}");
+                        Log.Trace($"Click: {x}:{y}");
 
                         Thread.Sleep(Jitter.Randomize(timelineEvent.CommandArgs[0], timelineEvent.CommandArgs[1], timelineEvent.CommandArgs[2]));
                         this.Report(handler.HandlerType.ToString(), timelineEvent.Command, "", timelineEvent.TrackableId, $"{x}:{y}");

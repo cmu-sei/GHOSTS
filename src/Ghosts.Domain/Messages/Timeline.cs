@@ -73,6 +73,7 @@ namespace Ghosts.Domain
     /// </summary>
     public enum HandlerType
     {
+        [Obsolete("Unsupported going forward (as of v6)", false)]
         BrowserIE = 0,
         BrowserFirefox = 1,
         BrowserChrome = 2,

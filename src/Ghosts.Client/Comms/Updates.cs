@@ -129,12 +129,11 @@ namespace Ghosts.Client.Comms
                                 break;
                             case UpdateClientConfig.UpdateType.Health:
                             {
-                                var newTimeline = JsonConvert.DeserializeObject<Domain.ResultHealth>(update.Update.ToString());
+                                var newTimeline = JsonConvert.DeserializeObject<ResultHealth>(update.Update.ToString());
                                 //save to local disk
                                 using (var file = File.CreateText(ApplicationDetails.ConfigurationFiles.Health))
                                 {
-                                    var serializer = new JsonSerializer();
-                                    serializer.Formatting = Formatting.Indented;
+                                    var serializer = new JsonSerializer {Formatting = Formatting.Indented};
                                     serializer.Serialize(file, newTimeline);
                                 }
 
@@ -182,11 +181,11 @@ namespace Ghosts.Client.Comms
 
             ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
 
-            var posturl = string.Empty;
+            string postUrl;
 
             try
             {
-                posturl = Program.Configuration.IdUrl.Replace("clientid", "clienttimeline");
+                postUrl = Program.Configuration.IdUrl.Replace("clientid", "clienttimeline");
             }
             catch
             {
@@ -207,7 +206,7 @@ namespace Ghosts.Client.Comms
                     using (var client = WebClientBuilder.Build(machine))
                     {
                         client.Headers[HttpRequestHeader.ContentType] = "application/json";
-                        client.UploadString(posturl, JsonConvert.SerializeObject(payload));
+                        client.UploadString(postUrl, JsonConvert.SerializeObject(payload));
                     }
 
                     _log.Trace($"{DateTime.Now} - timeline posted to server successfully");
@@ -215,7 +214,7 @@ namespace Ghosts.Client.Comms
                 catch (Exception e)
                 {
                     _log.Debug(
-                        $"Problem posting timeline to server from {ApplicationDetails.ConfigurationFiles.Timeline} to {posturl}");
+                        $"Problem posting timeline to server from {ApplicationDetails.ConfigurationFiles.Timeline} to {postUrl}");
                     _log.Error(e);
                 }
             }
@@ -230,7 +229,7 @@ namespace Ghosts.Client.Comms
             ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
 
             var fileName = ApplicationDetails.LogFiles.ClientUpdates;
-            var posturl = Program.Configuration.ClientResults.PostUrl;
+            var postUrl = Program.Configuration.ClientResults.PostUrl;
 
             var machine = new ResultMachine();
             GuestInfoVars.Load(machine);
@@ -243,7 +242,7 @@ namespace Ghosts.Client.Comms
                 {
                     if (File.Exists(fileName))
                     {
-                        PostResults(fileName, machine, posturl);
+                        PostResults(fileName, machine, postUrl);
                     }
                     else
                     {
@@ -263,17 +262,17 @@ namespace Ghosts.Client.Comms
                 // look for other result files that have not been posted
                 try
                 {
-                    foreach (var file in Directory.GetFiles(Path.GetDirectoryName(fileName)))
+                    foreach (var file in Directory.GetFiles(Path.GetDirectoryName(fileName) ?? throw new InvalidOperationException("Path declaration failed")))
                     {
                         if (!file.EndsWith("app.log") && file != fileName)
                         {
-                            PostResults(file, machine, posturl, true);
+                            PostResults(file, machine, postUrl, true);
                         }
                     }
                 }
                 catch (Exception e)
                 {
-                    _log.Debug($"Problem posting overflow logs from {fileName} to server {posturl} : {e}");
+                    _log.Debug($"Problem posting overflow logs from {fileName} to server {postUrl} : {e}");
                 }
                 finally
                 {
@@ -294,8 +293,7 @@ namespace Ghosts.Client.Comms
                 sb.AppendLine(d);
             }
 
-            var r = new TransferLogDump();
-            r.Log = sb.ToString();
+            var r = new TransferLogDump {Log = sb.ToString()};
 
             var payload = JsonConvert.SerializeObject(r);
 
@@ -304,8 +302,7 @@ namespace Ghosts.Client.Comms
                 payload = Crypto.EncryptStringAes(payload, machine.Name);
                 payload = Base64Encoder.Base64Encode(payload);
 
-                var p = new EncryptedPayload();
-                p.Payload = payload;
+                var p = new EncryptedPayload {Payload = payload};
 
                 payload = JsonConvert.SerializeObject(p);
             }
@@ -333,11 +330,11 @@ namespace Ghosts.Client.Comms
             // ignore all certs
             ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
 
-            var posturl = string.Empty;
+            string postUrl;
 
             try
             {
-                posturl = Program.Configuration.Survey.PostUrl;
+                postUrl = Program.Configuration.Survey.PostUrl;
             }
             catch
             {
@@ -366,8 +363,7 @@ namespace Ghosts.Client.Comms
                     payload = Crypto.EncryptStringAes(payload, machine.Name);
                     payload = Base64Encoder.Base64Encode(payload);
 
-                    var p = new EncryptedPayload();
-                    p.Payload = payload;
+                    var p = new EncryptedPayload {Payload = payload};
 
                     payload = JsonConvert.SerializeObject(p);
                 }
@@ -375,7 +371,7 @@ namespace Ghosts.Client.Comms
                 using (var client = WebClientBuilder.Build(machine))
                 {
                     client.Headers[HttpRequestHeader.ContentType] = "application/json";
-                    client.UploadString(posturl, payload);
+                    client.UploadString(postUrl, payload);
                 }
 
                 _log.Trace($"{DateTime.Now} - survey posted to server successfully");

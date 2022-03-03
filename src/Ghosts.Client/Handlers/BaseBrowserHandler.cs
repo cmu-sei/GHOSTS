@@ -7,7 +7,6 @@ using Ghosts.Client.Infrastructure.Browser;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
-using NLog;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
 
@@ -15,15 +14,14 @@ namespace Ghosts.Client.Handlers
 {
     public abstract class BaseBrowserHandler : BaseHandler
     {
-        public static readonly Logger _log = LogManager.GetCurrentClassLogger();
         public IWebDriver Driver { get; set; }
         public IJavaScriptExecutor JS { get; set; }
         public HandlerType BrowserType { get; set; }
-        private int _stickiness = 0;
+        private int _stickiness;
         private int _depthMin = 1;
         private int _depthMax = 10;
         private LinkManager _linkManager;
-
+        
         private Task LaunchThread(TimelineHandler handler, TimelineEvent timelineEvent, string site)
         {
             var o = new BrowserCrawl();
@@ -34,7 +32,7 @@ namespace Ghosts.Client.Handlers
         {
             try
             {
-                foreach (TimelineEvent timelineEvent in handler.TimeLineEvents)
+                foreach (var timelineEvent in handler.TimeLineEvents)
                 {
                     WorkingHours.Is(handler);
 
@@ -51,10 +49,10 @@ namespace Ghosts.Client.Handlers
                     switch (timelineEvent.Command)
                     {
                         case "crawl":
-                            var _taskMax = 1;
+                            var taskMax = 1;
                             if (handler.HandlerArgs.ContainsKey("crawl-tasks-maximum"))
                             {
-                                int.TryParse(handler.HandlerArgs["crawl-tasks-maximum"], out _taskMax);
+                                int.TryParse(handler.HandlerArgs["crawl-tasks-maximum"], out taskMax);
                             }
 
                             var i = 0;
@@ -64,7 +62,7 @@ namespace Ghosts.Client.Handlers
                                 Thread.Sleep(5000);
                                 i++;
 
-                                if (i >= _taskMax)
+                                if (i >= taskMax)
                                 {
                                     Task.WaitAll();
                                     i = 0;
@@ -94,7 +92,7 @@ namespace Ghosts.Client.Handlers
                                     throw new Exception("Browser window handle not available");
                                 }
 
-                                config = RequestConfiguration.Load(timelineEvent.CommandArgs[new Random().Next(0, timelineEvent.CommandArgs.Count)]);
+                                config = RequestConfiguration.Load(timelineEvent.CommandArgs[_random.Next(0, timelineEvent.CommandArgs.Count)]);
                                 if (config.Uri.IsWellFormedOriginalString())
                                 {
                                     MakeRequest(config);
@@ -102,11 +100,10 @@ namespace Ghosts.Client.Handlers
 
                                     if (this._stickiness > 0)
                                     {
-                                        var random = new Random();
                                         //now some percentage of the time should stay on this site
-                                        if (random.Next(100) < this._stickiness)
+                                        if (_random.Next(100) < this._stickiness)
                                         {
-                                            var loops = random.Next(this._depthMin, this._depthMax);
+                                            var loops = _random.Next(this._depthMin, this._depthMax);
                                             for (var loopNumber = 0; loopNumber < loops; loopNumber++)
                                             {
                                                 try
@@ -127,7 +124,7 @@ namespace Ghosts.Client.Handlers
                                                 }
                                                 catch (Exception e)
                                                 {
-                                                    _log.Error(e);
+                                                    Log.Error(e);
                                                 }
 
                                                 Thread.Sleep(timelineEvent.DelayAfter);
@@ -202,7 +199,7 @@ namespace Ghosts.Client.Handlers
             }
             catch (Exception e)
             {
-                _log.Error(e);
+                Log.Error(e);
             }
         }
 
@@ -234,7 +231,7 @@ namespace Ghosts.Client.Handlers
             }
             catch (Exception e)
             {
-                _log.Trace(e);
+                Log.Trace(e);
             }
         }
 
@@ -268,7 +265,7 @@ namespace Ghosts.Client.Handlers
             }
             catch (Exception e)
             {
-                _log.Trace(e.Message);
+                Log.Trace(e.Message);
             }
         }
 

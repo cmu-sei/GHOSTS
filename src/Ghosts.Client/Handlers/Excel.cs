@@ -4,7 +4,6 @@ using Ghosts.Client.Infrastructure;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Microsoft.Office.Interop.Excel;
-using NLog;
 using System;
 using System.IO;
 using System.Linq;
@@ -18,16 +17,14 @@ namespace Ghosts.Client.Handlers
 {
     public class ExcelHandler : BaseHandler
     {
-        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-
         public ExcelHandler(Timeline timeline, TimelineHandler handler)
         {
-            _log.Trace("Launching Excel handler");
+            Log.Trace("Launching Excel handler");
             try
             {
                 if (handler.Loop)
                 {
-                    _log.Trace("Excel loop");
+                    Log.Trace("Excel loop");
                     while (true)
                     {
                         if (timeline != null)
@@ -44,7 +41,7 @@ namespace Ghosts.Client.Handlers
                 }
                 else
                 {
-                    _log.Trace("Excel single run");
+                    Log.Trace("Excel single run");
                     KillApp();
                     ExecuteEvents(timeline, handler);
                     KillApp();
@@ -52,7 +49,7 @@ namespace Ghosts.Client.Handlers
             }
             catch (Exception e)
             {
-                _log.Error($"Excel launch handler exception: {e}");
+                Log.Error($"Excel launch handler exception: {e}");
                 KillApp();
             }
         }
@@ -70,7 +67,7 @@ namespace Ghosts.Client.Handlers
                 {
                     try
                     {
-                        _log.Trace($"Excel event - {timelineEvent}");
+                        Log.Trace($"Excel event - {timelineEvent}");
                         WorkingHours.Is(handler);
 
                         if (timelineEvent.DelayBefore > 0)
@@ -96,10 +93,10 @@ namespace Ghosts.Client.Handlers
                         // create a utils instance, not need for but helpful to keep the lines of code low
                         var utils = new CommonUtils(excelApplication);
 
-                        _log.Trace("Excel adding workbook");
+                        Log.Trace("Excel adding workbook");
                         // add a new workbook
                         var workBook = excelApplication.Workbooks.Add();
-                        _log.Trace("Excel adding worksheet");
+                        Log.Trace("Excel adding worksheet");
                         var workSheet = (Excel.Worksheet) workBook.Worksheets[1];
 
 
@@ -109,17 +106,16 @@ namespace Ghosts.Client.Handlers
 
                         workSheet.Cells[1, 1].Value = rt.Content;
 
-                        var random = new Random();
                         for (var i = 2; i < 100; i++)
                         {
                             for (var j = 1; j < 100; j++)
                             {
-                                if (random.Next(0, 20) != 1) // 1 in 20 cells are blank
-                                    workSheet.Cells[i, j].Value = random.Next(0, 999999999);
+                                if (_random.Next(0, 20) != 1) // 1 in 20 cells are blank
+                                    workSheet.Cells[i, j].Value = _random.Next(0, 999999999);
                             }
                         }
 
-                        for (var i = 0; i < random.Next(1,30); i++)
+                        for (var i = 0; i < _random.Next(1,30); i++)
                         {
                             var range = GetRandomRange();
                             // draw back color and perform the BorderAround method
@@ -162,11 +158,11 @@ namespace Ghosts.Client.Handlers
                         var path = $"{dir}\\{rand}.xlsx";
 
                         //if directory does not exist, create!
-                        _log.Trace($"Checking directory at {path}");
+                        Log.Trace($"Checking directory at {path}");
                         var f = new FileInfo(path).Directory;
                         if (f == null)
                         {
-                            _log.Trace($"Directory does not exist, creating directory at {f.FullName}");
+                            Log.Trace($"Directory does not exist, creating directory at {f.FullName}");
                             Directory.CreateDirectory(f.FullName);
                         }
 
@@ -179,10 +175,10 @@ namespace Ghosts.Client.Handlers
                         }
                         catch (Exception e)
                         {
-                            _log.Error($"Excel file delete exception: {e}");
+                            Log.Error($"Excel file delete exception: {e}");
                         }
 
-                        _log.Trace($"Excel saving to path - {path}");
+                        Log.Trace($"Excel saving to path - {path}");
                         workBook.SaveAs(path);
 
                         FileListing.Add(path);
@@ -203,7 +199,7 @@ namespace Ghosts.Client.Handlers
                         if (timelineEvent.DelayAfter > 0)
                         {
                             //sleep and leave the app open
-                            _log.Trace($"Sleep after for {timelineEvent.DelayAfter}");
+                            Log.Trace($"Sleep after for {timelineEvent.DelayAfter}");
                             Thread.Sleep(timelineEvent.DelayAfter - writeSleep);
                         }
 
@@ -234,7 +230,7 @@ namespace Ghosts.Client.Handlers
                     }
                     catch (Exception e)
                     {
-                        _log.Error($"Excel handler exception: {e}");
+                        Log.Error($"Excel handler exception: {e}");
                     }
                     finally
                     {
@@ -244,20 +240,19 @@ namespace Ghosts.Client.Handlers
             }
             catch (Exception e)
             {
-                _log.Error(e);
+                Log.Error(e);
             }
             finally
             {
                 KillApp();
-                _log.Trace("Excel closing...");
+                Log.Trace("Excel closing...");
             }
         }
 
         private string GetRandomRange()
         {
-            var r = new Random();
-            var x = r.Next(1, 40);
-            var y = r.Next(x, 50);
+            var x = _random.Next(1, 40);
+            var y = _random.Next(x, 50);
             var a1 = RandomText.GetRandomCapitalLetter();
             var a2 = RandomText.GetRandomCapitalLetter(a1);
 

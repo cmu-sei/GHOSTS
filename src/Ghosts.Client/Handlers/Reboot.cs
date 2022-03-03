@@ -3,14 +3,11 @@
 using System.Threading;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
-using NLog;
 
 namespace Ghosts.Client.Handlers
 {
     public class Reboot : BaseHandler
     {
-        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-
         public Reboot(TimelineHandler handler)
         {
             foreach (var timelineEvent in handler.TimeLineEvents)
@@ -20,7 +17,7 @@ namespace Ghosts.Client.Handlers
                 if (timelineEvent.DelayBefore > 0)
                     Thread.Sleep(timelineEvent.DelayBefore);
 
-                _log.Trace($"Reboot: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfter}");
+                Log.Trace($"Reboot: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfter}");
 
                 switch (timelineEvent.Command)
                 {

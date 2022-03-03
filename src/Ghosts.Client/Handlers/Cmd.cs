@@ -8,18 +8,15 @@ using WindowsInput;
 using WindowsInput.Native;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
-using NLog;
 
 namespace Ghosts.Client.Handlers
 {
     public class Cmd : BaseHandler
     {
-        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-
         [DllImport("user32.dll", SetLastError = true)]
         static extern bool SetForegroundWindow(IntPtr hWnd);
 
-        private const int WmKeyUp = 0x101;
+        //private const int WmKeyUp = 0x101;
 
         public Process Process;
 
@@ -27,7 +24,7 @@ namespace Ghosts.Client.Handlers
         {
             try
             {
-                _log.Trace("Spawning cmd.exe...");
+                Log.Trace("Spawning cmd.exe...");
                 this.Process = Process.Start("cmd.exe");
             
                 if (handler.Loop)
@@ -44,7 +41,7 @@ namespace Ghosts.Client.Handlers
             }
             catch (Exception e)
             {
-                _log.Error(e);
+                Log.Error(e);
             }
         }
 
@@ -57,14 +54,14 @@ namespace Ghosts.Client.Handlers
                 if (timelineEvent.DelayBefore > 0)
                     this.Sleep(timelineEvent.DelayBefore);
 
-                _log.Trace($"Command line: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfter}");
+                Log.Trace($"Command line: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfter}");
 
                 switch (timelineEvent.Command)
                 {
                     case "random":
                         while (true)
                         {
-                            var cmd = timelineEvent.CommandArgs[new Random().Next(0, timelineEvent.CommandArgs.Count)];
+                            var cmd = timelineEvent.CommandArgs[_random.Next(0, timelineEvent.CommandArgs.Count)];
                             if (!string.IsNullOrEmpty(cmd.ToString()))
                             {
                                 this.Command(handler, timelineEvent, cmd.ToString());

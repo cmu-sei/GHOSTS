@@ -2,18 +2,15 @@
 
 using System;
 using System.Threading;
-using Ghosts.Client.Infrastructure;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
-using NLog;
 using WatiN.Core;
 
 namespace Ghosts.Client.Handlers
 {
+    [Obsolete("Unsupported going forward (as of v6)", false)]
     public class BrowserIE : BaseHandler
     {
-        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-
         public IE Driver;
 
         public BrowserIE(TimelineHandler handler)
@@ -37,7 +34,7 @@ namespace Ghosts.Client.Handlers
             }
             catch (Exception e)
             {
-                _log.Debug(e);
+                Log.Debug(e);
             }
         }
 
@@ -59,7 +56,7 @@ namespace Ghosts.Client.Handlers
                             {
                                 try
                                 {
-                                    var url = timelineEvent.CommandArgs[new Random().Next(0, timelineEvent.CommandArgs.Count)].ToString();
+                                    var url = timelineEvent.CommandArgs[_random.Next(0, timelineEvent.CommandArgs.Count)].ToString();
 
                                     if (Driver == null)
                                         this.Driver = new IE(url);
@@ -70,7 +67,7 @@ namespace Ghosts.Client.Handlers
                                 }
                                 catch (Exception e)
                                 {
-                                    _log.Trace(e);
+                                    Log.Trace(e);
                                 }
                                 Thread.Sleep(timelineEvent.DelayAfter);
                             }
@@ -78,26 +75,6 @@ namespace Ghosts.Client.Handlers
                             Driver.GoTo(timelineEvent.CommandArgs[0].ToString());
                             this.Report(handler.HandlerType.ToString(), timelineEvent.Command, string.Join(",", timelineEvent.CommandArgs), timelineEvent.TrackableId);
                             break;
-                        //case "download":
-                        //    if (timelineEvent.CommandArgs.Count > 0)
-                        //    {
-                        //        var x = this.Driver.FindElement(By.XPath(timelineEvent.CommandArgs[0]));
-                        //        x.Click();
-                        //        this.Report(handler.HandlerType.ToString(), timelineEvent.Command, string.Join(",", timelineEvent.CommandArgs), timelineEvent.TrackableId);
-                        //        Thread.Sleep(1000);
-                        //    }
-                        //    break;
-                        //case "type":
-                        //    var e = Driver.FindElement(By.Name(timelineEvent.CommandArgs[0]));
-                        //    e.SendKeys(timelineEvent.CommandArgs[1]);
-                        //    //this.Report(timelineEvent);
-                        //    break;
-                        //case "click":
-                        //    var element = Driver.FindElement(By.Name(timelineEvent.CommandArgs[0]));
-                        //    var actions = new Actions(Driver);
-                        //    actions.MoveToElement(element).Click().Perform();
-                        //    //this.Report(timelineEvent);
-                        //    break;
                     }
 
                     if (timelineEvent.DelayAfter > 0)
@@ -106,7 +83,7 @@ namespace Ghosts.Client.Handlers
             }
             catch (Exception e)
             {
-                _log.Error(e);
+                Log.Error(e);
             }
         }
 

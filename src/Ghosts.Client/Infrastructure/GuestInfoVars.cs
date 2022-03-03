@@ -18,13 +18,17 @@ namespace Ghosts.Client.Infrastructure
             {
                 if (Program.Configuration.IdFormat.Equals("guestinfo", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    var p = new Process();
-                    p.StartInfo.UseShellExecute = false;
-                    p.StartInfo.RedirectStandardOutput = true;
-
-                    p.StartInfo.FileName = $"{Program.Configuration.VMWareToolsLocation}";
-                    p.StartInfo.Arguments = $"--cmd \"info-get {Program.Configuration.IdFormatKey}\"";
-
+                    var p = new Process
+                    {
+                        StartInfo =
+                        {
+                            UseShellExecute = false,
+                            RedirectStandardOutput = true,
+                            FileName = $"{Program.Configuration.VMWareToolsLocation}",
+                            Arguments = $"--cmd \"info-get {Program.Configuration.IdFormatKey}\""
+                        }
+                    };
+                    
                     p.Start();
 
                     var output = p.StandardOutput.ReadToEnd().Trim();

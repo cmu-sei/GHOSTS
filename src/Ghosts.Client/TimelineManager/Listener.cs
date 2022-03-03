@@ -24,7 +24,7 @@ namespace Ghosts.Client.TimelineManager
             {
                 if (Program.Configuration.Listener.Port > 0)
                 {
-                    Thread t = new Thread(() => { new PortListener(); })
+                    var t = new Thread(() => { var _ = new PortListener(); })
                     {
                         IsBackground = true,
                         Name = "ghosts-portlistener"
@@ -53,7 +53,7 @@ namespace Ghosts.Client.TimelineManager
                         _log.Trace($"DirectoryListener created DirIn: {Out})");
                     }
 
-                    var t = new Thread(() => { new DirectoryListener(); })
+                    var t = new Thread(() => { var _ = new DirectoryListener(); })
                     {
                         IsBackground = true,
                         Name = "ghosts-directorylistener"
@@ -78,8 +78,8 @@ namespace Ghosts.Client.TimelineManager
     public class DirectoryListener
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        private static string _in = ListenerManager.In;
-        private static string _out = ListenerManager.Out;
+        private static readonly string _in = ListenerManager.In;
+        private static readonly string _out = ListenerManager.Out;
         private static string _currentlyProcessing = string.Empty;
 
         public DirectoryListener()
@@ -90,7 +90,7 @@ namespace Ghosts.Client.TimelineManager
                 NotifyFilter = NotifyFilters.LastWrite,
                 Filter = "*.*"
             };
-            watcher.Changed += new FileSystemEventHandler(OnChanged);
+            watcher.Changed += OnChanged;
             watcher.EnableRaisingEvents = true;
         }
 
@@ -182,7 +182,7 @@ namespace Ghosts.Client.TimelineManager
         {
             try
             {
-                SimpleTcpServer server = new SimpleTcpServer().Start(Program.Configuration.Listener.Port);
+                var server = new SimpleTcpServer().Start(Program.Configuration.Listener.Port);
                 server.AutoTrimStrings = true;
                 server.Delimiter = 0x13;
 
@@ -191,7 +191,7 @@ namespace Ghosts.Client.TimelineManager
 
                 server.DataReceived += (sender, message) =>
                 {
-                    string obj = Handle(message);
+                    var obj = Handle(message);
                     message.ReplyLine($"{obj}{Environment.NewLine}");
                 };
             }
@@ -202,7 +202,7 @@ namespace Ghosts.Client.TimelineManager
             }
         }
 
-        private string Handle(Message message)
+        private static string Handle(Message message)
         {
             var tempMsg =
                 $"PortListener received raw {message.TcpClient.Client.RemoteEndPoint}: {message.MessageString}";

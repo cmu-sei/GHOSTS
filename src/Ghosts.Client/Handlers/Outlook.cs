@@ -4,7 +4,6 @@ using Ghosts.Client.Infrastructure.Email;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Microsoft.Office.Interop.Outlook;
-using NLog;
 using Redemption;
 using System;
 using System.Collections.Generic;
@@ -19,13 +18,10 @@ namespace Ghosts.Client.Handlers
 {
     public class Outlook : BaseHandler
     {
-        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        private RDOSession _session;
-        private Microsoft.Office.Interop.Outlook.Application _app;
-        private NameSpace _oMapiNamespace;
-        private MAPIFolder _folderInbox;
-        private MAPIFolder _folderOutbox;
-        private MAPIFolder _folderSent;
+        private readonly Application _app;
+        private readonly NameSpace _oMapiNamespace;
+        private readonly MAPIFolder _folderOutbox;
+        private readonly MAPIFolder _folderSent;
 
         public Outlook(TimelineHandler handler)
         {
@@ -36,29 +32,29 @@ namespace Ghosts.Client.Handlers
                 //by default, they are assumed to be in the same folder as the current assembly and be named
                 //Redemption.dll and Redemption64.dll.
                 //In that case, you do not need to set the two properties below
-                DirectoryInfo currentDir = new FileInfo(GetType().Assembly.Location).Directory;
+                var currentDir = new FileInfo(GetType().Assembly.Location).Directory;
                 RedemptionLoader.DllLocation64Bit = Path.GetFullPath(currentDir + @"\lib\redemption64.dll");
                 RedemptionLoader.DllLocation32Bit = Path.GetFullPath(currentDir + @"\lib\redemption.dll");
                 //Create a Redemption object and use it
-                _log.Trace("Creating new RDO session");
-                _session = RedemptionLoader.new_RDOSession();
-                _log.Trace("Attempting RDO session logon...");
-                _session.Logon(Missing.Value, Missing.Value, Missing.Value, Missing.Value, Missing.Value, Missing.Value);
+                Log.Trace("Creating new RDO session");
+                var session = RedemptionLoader.new_RDOSession();
+                Log.Trace("Attempting RDO session logon...");
+                session.Logon(Missing.Value, Missing.Value, Missing.Value, Missing.Value, Missing.Value, Missing.Value);
             }
             catch (Exception e)
             {
-                _log.Error($"RDO load error: {e}");
+                Log.Error($"RDO load error: {e}");
             }
 
             try
             {
-                _app = new Microsoft.Office.Interop.Outlook.Application();
+                _app = new Application();
                 _oMapiNamespace = _app.GetNamespace("MAPI");
-                _folderInbox = _oMapiNamespace.GetDefaultFolder(OlDefaultFolders.olFolderInbox);
+                var folderInbox = _oMapiNamespace.GetDefaultFolder(OlDefaultFolders.olFolderInbox);
                 _folderOutbox = _oMapiNamespace.GetDefaultFolder(OlDefaultFolders.olFolderOutbox);
                 _folderSent = _oMapiNamespace.GetDefaultFolder(OlDefaultFolders.olFolderSentMail);
-                _log.Trace("Launching Outlook");
-                _folderInbox.Display();
+                Log.Trace("Launching Outlook");
+                folderInbox.Display();
 
                 if (handler.Loop)
                 {
@@ -74,7 +70,7 @@ namespace Ghosts.Client.Handlers
             }
             catch (Exception e)
             {
-                _log.Error(e);
+                Log.Error(e);
             }
         }
 
@@ -104,7 +100,7 @@ namespace Ghosts.Client.Handlers
                             }
                             catch (Exception e)
                             {
-                                _log.Error(e);
+                                Log.Error(e);
                             }
 
                             break;
@@ -119,7 +115,7 @@ namespace Ghosts.Client.Handlers
                             }
                             catch (Exception e)
                             {
-                                _log.Error(e);
+                                Log.Error(e);
                             }
                             break;
                         case "NAVIGATE":
@@ -132,7 +128,7 @@ namespace Ghosts.Client.Handlers
                             }
                             catch (Exception e)
                             {
-                                _log.Error(e);
+                                Log.Error(e);
                             }
                             break;
                     }
@@ -145,7 +141,7 @@ namespace Ghosts.Client.Handlers
             }
             catch (Exception e)
             {
-                _log.Debug(e);
+                Log.Debug(e);
             }
         }
 
@@ -155,7 +151,6 @@ namespace Ghosts.Client.Handlers
 
             try
             {
-                MAPIFolder f;
                 foreach (var configuredFolder in config)
                 {
                     try
@@ -171,25 +166,28 @@ namespace Ghosts.Client.Handlers
                                 fname = configArray[0].Trim();
                                 sleepTime = Convert.ToInt32(configArray[1].Trim()) * 1000;
                             }
-                            catch { }
+                            catch
+                            {
+                                //
+                            }
                         }
 
                         var folderName = GetFolder(fname);
-                        f = this._app.Session.GetDefaultFolder(folderName);
+                        var f = this._app.Session.GetDefaultFolder(folderName);
                         f.Display();
-                        _log.Trace($"Folder displayed: {folderName}");
+                        Log.Trace($"Folder displayed: {folderName}");
                         Thread.Sleep(sleepTime);
                     }
                     catch (Exception e)
                     {
-                        _log.Trace($"Could not navigate to folder: {configuredFolder}: {e}");
+                        Log.Trace($"Could not navigate to folder: {configuredFolder}: {e}");
                     }
                     this.CloseExplorers();
                 }
             }
             catch (Exception exc)
             {
-                _log.Debug(exc);
+                Log.Debug(exc);
                 hasErrors = false;
             }
             return hasErrors;
@@ -197,7 +195,7 @@ namespace Ghosts.Client.Handlers
 
         private OlDefaultFolders GetFolder(string folder)
         {
-            _log.Trace(folder.ToUpper());
+            Log.Trace(folder.ToUpper());
             switch (folder.ToUpper())
             {
                 default:
@@ -217,7 +215,7 @@ namespace Ghosts.Client.Handlers
         private void CloseExplorers()
         {
             var explorerCount = this._app.Explorers.Count;
-            _log.Trace($"Explorer count: {explorerCount}");
+            Log.Trace($"Explorer count: {explorerCount}");
             if (explorerCount > 0)
             {
                 //# MS Program APIs are 1-indexed.
@@ -227,34 +225,38 @@ namespace Ghosts.Client.Handlers
                     {
                         this._app.Explorers[i].Close();
                     }
-                    catch { }
+                    catch
+                    {
+                        //
+                    }
                 }
             }
         }
 
+        // ReSharper disable once UnusedParameter.Local
         private bool ReplyViaOutlook(EmailConfiguration emailConfig)
         {
-            ClientConfiguration.EmailSettings config = Program.Configuration.Email;
+            var config = Program.Configuration.Email;
 
             try
             {
-                Items folderItems = _folderSent.Items;
+                var folderItems = _folderSent.Items;
 
                 foreach (MailItem folderItem in folderItems)
                 {
                     if (folderItem.UnRead)
                     {
-                        EmailReplyManager emailReply = new EmailReplyManager();
+                        var emailReply = new EmailReplyManager();
 
 
                         folderItem.HTMLBody =
                             $"{emailReply.Reply} {Environment.NewLine}{Environment.NewLine}ORIGINAL MESSAGE --- {Environment.NewLine}{Environment.NewLine}{folderItem.Body}";
                         folderItem.Subject = $"RE: {folderItem.Subject}";
 
-                        MailItem replyMail = folderItem.Reply();
+                        var replyMail = folderItem.Reply();
                         replyMail.Move(_folderSent);
-                        
-                        SafeMailItem rdoMail = new Redemption.SafeMailItem
+
+                        var rdoMail = new SafeMailItem
                         {
                             Item = replyMail
                         };
@@ -262,12 +264,12 @@ namespace Ghosts.Client.Handlers
                         rdoMail.Recipients.ResolveAll();
                         rdoMail.Send();
 
-                        var mapiUtils = new Redemption.MAPIUtils();
-                        mapiUtils.DeliverNow(0, 0);
+                        var mapiUtils = new MAPIUtils();
+                        mapiUtils.DeliverNow();
 
                         if (config.SetForcedSendReceive)
                         {
-                            _log.Trace("Forcing mapi - send and receive");
+                            Log.Trace("Forcing mapi - send and receive");
                             _oMapiNamespace.SendAndReceive(false);
                             Thread.Sleep(3000);
                         }
@@ -278,7 +280,7 @@ namespace Ghosts.Client.Handlers
             }
             catch (Exception e)
             {
-                _log.Error($"Outlook reply error: {e}");
+                Log.Error($"Outlook reply error: {e}");
             }
             return false;
         }
@@ -291,7 +293,7 @@ namespace Ghosts.Client.Handlers
             try
             {
                 //now create mail object (but we'll not send it via outlook)
-                _log.Trace("Creating outlook mail item");
+                Log.Trace("Creating outlook mail item");
                 dynamic mailItem = _app.CreateItem(OlItemType.olMailItem);
 
                 //Add subject
@@ -300,22 +302,22 @@ namespace Ghosts.Client.Handlers
                     mailItem.Subject = emailConfig.Subject;
                 }
 
-                _log.Trace($"Setting message subject to: {mailItem.Subject}");
+                Log.Trace($"Setting message subject to: {mailItem.Subject}");
 
                 //Set message body according to type of message
                 switch (emailConfig.BodyType)
                 {
                     case EmailConfiguration.EmailBodyType.HTML:
                         mailItem.HTMLBody = emailConfig.Body;
-                        _log.Trace($"Setting message HTMLBody to: {emailConfig.Body}");
+                        Log.Trace($"Setting message HTMLBody to: {emailConfig.Body}");
                         break;
                     case EmailConfiguration.EmailBodyType.RTF:
                         mailItem.RTFBody = emailConfig.Body;
-                        _log.Trace($"Setting message RTFBody to: {emailConfig.Body}");
+                        Log.Trace($"Setting message RTFBody to: {emailConfig.Body}");
                         break;
                     case EmailConfiguration.EmailBodyType.PlainText:
                         mailItem.Body = emailConfig.Body;
-                        _log.Trace($"Setting message Body to: {emailConfig.Body}");
+                        Log.Trace($"Setting message Body to: {emailConfig.Body}");
                         break;
                     default:
                         throw new Exception("Bad email body type: " + emailConfig.BodyType);
@@ -328,7 +330,7 @@ namespace Ghosts.Client.Handlers
                     foreach (string path in emailConfig.Attachments)
                     {
                         mailItem.Attachments.Add(path);
-                        _log.Trace($"Adding attachment from: {path}");
+                        Log.Trace($"Adding attachment from: {path}");
                     }
                 }
 
@@ -364,7 +366,7 @@ namespace Ghosts.Client.Handlers
                     //Did we get the account?
                     if (acc != null)
                     {
-                        _log.Trace($"Sending via {acc.DisplayName}");
+                        Log.Trace($"Sending via {acc.DisplayName}");
                         //Use this account to send the e-mail
                         mailItem.SendUsingAccount = acc;
                     }
@@ -372,25 +374,25 @@ namespace Ghosts.Client.Handlers
                 
                 if (config.SaveToOutbox)
                 {
-                    _log.Trace("Saving mailItem to outbox...");
+                    Log.Trace("Saving mailItem to outbox...");
                     mailItem.Move(_folderOutbox);
                     mailItem.Save();
                 }
                 
-                _log.Trace("Attempting new Redemtion SafeMailItem...");
-                SafeMailItem rdoMail = new Redemption.SafeMailItem
+                Log.Trace("Attempting new Redemtion SafeMailItem...");
+                var rdoMail = new SafeMailItem
                 {
                     Item = mailItem
                 };
                 //Parse To
                 if (emailConfig.To.Count > 0)
                 {
-                    System.Collections.Generic.IEnumerable<string> list = emailConfig.To.Distinct();
-                    foreach (string a in list)
+                    var list = emailConfig.To.Distinct();
+                    foreach (var a in list)
                     {
-                        SafeRecipient r = rdoMail.Recipients.AddEx(a.Trim());
+                        var r = rdoMail.Recipients.AddEx(a.Trim());
                         r.Resolve();
-                        _log.Trace($"RdoMail TO {a.Trim()}");
+                        Log.Trace($"RdoMail TO {a.Trim()}");
                     }
                 }
                 else
@@ -401,33 +403,33 @@ namespace Ghosts.Client.Handlers
                 //Parse Cc
                 if (emailConfig.Cc.Count > 0)
                 {
-                    System.Collections.Generic.IEnumerable<string> list = emailConfig.Cc.Distinct();
-                    foreach (string a in list)
+                    var list = emailConfig.Cc.Distinct();
+                    foreach (var a in list)
                     {
-                        SafeRecipient r = rdoMail.Recipients.AddEx(a.Trim());
+                        var r = rdoMail.Recipients.AddEx(a.Trim());
                         r.Resolve();
                         if (r.Resolved)
                         {
                             r.Type = 2; //CC
                         }
 
-                        _log.Trace($"RdoMail CC {a.Trim()}");
+                        Log.Trace($"RdoMail CC {a.Trim()}");
                     }
                 }
 
                 if (emailConfig.Bcc.Count > 0)
                 {
-                    System.Collections.Generic.IEnumerable<string> list = emailConfig.Bcc.Distinct();
-                    foreach (string a in list)
+                    var list = emailConfig.Bcc.Distinct();
+                    foreach (var a in list)
                     {
-                        SafeRecipient r = rdoMail.Recipients.AddEx(a.Trim());
+                        var r = rdoMail.Recipients.AddEx(a.Trim());
                         r.Resolve();
                         if (r.Resolved)
                         {
                             r.Type = 3; //BCC
                         }
 
-                        _log.Trace($"RdoMail BCC {a.Trim()}");
+                        Log.Trace($"RdoMail BCC {a.Trim()}");
                     }
                 }
 
@@ -453,29 +455,29 @@ namespace Ghosts.Client.Handlers
 
                 rdoMail.Recipients.ResolveAll();
 
-                _log.Trace("Attempting to send Redemtion SafeMailItem...");
+                Log.Trace("Attempting to send Redemtion SafeMailItem...");
                 rdoMail.Send();
 
-                var mapiUtils = new Redemption.MAPIUtils();
+                var mapiUtils = new MAPIUtils();
                 mapiUtils.DeliverNow();
 
                 //Done
                 wasSuccessful = true;
 
-                _log.Trace("Redemtion SafeMailItem was sent successfully");
+                Log.Trace("Redemtion SafeMailItem was sent successfully");
 
                 if (config.SetForcedSendReceive)
                 {
-                    _log.Trace("Forcing mapi - send and receive");
+                    Log.Trace("Forcing mapi - send and receive");
                     _oMapiNamespace.SendAndReceive(false);
                     Thread.Sleep(3000);
                 }
             }
             catch (Exception ex)
             {
-                _log.Error(ex);
+                Log.Error(ex);
             }
-            _log.Trace($"Returning - wasSuccessful:{wasSuccessful}");
+            Log.Trace($"Returning - wasSuccessful:{wasSuccessful}");
             return wasSuccessful;
         }
     }

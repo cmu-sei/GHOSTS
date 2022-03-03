@@ -2,7 +2,6 @@
 
 using Ghosts.Client.Infrastructure;
 using Ghosts.Domain;
-using NLog;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Firefox;
 using System;
@@ -14,15 +13,10 @@ namespace Ghosts.Client.Handlers
 {
     public class BrowserFirefox : BaseBrowserHandler
     {
-        private new static readonly Logger _log = LogManager.GetCurrentClassLogger();
-
-        public new IWebDriver Driver { get; private set; }
-        public new IJavaScriptExecutor JS { get; private set; }
-
         public BrowserFirefox(TimelineHandler handler)
         {
             BrowserType = HandlerType.BrowserFirefox;
-            bool hasRunSuccessfully = false;
+            var hasRunSuccessfully = false;
             while (!hasRunSuccessfully)
             {
                 hasRunSuccessfully = FirefoxEx(handler);
@@ -49,11 +43,11 @@ namespace Ghosts.Client.Handlers
 
         private static bool IsSufficientVersion(string path)
         {
-            int currentVersion = GetFirefoxVersion(path);
-            int minimumVersion = Program.Configuration.FirefoxMajorVersionMinimum;
+            var currentVersion = GetFirefoxVersion(path);
+            var minimumVersion = Program.Configuration.FirefoxMajorVersionMinimum;
             if (currentVersion < minimumVersion)
             {
-                _log.Debug($"Firefox version ({currentVersion}) is incompatible - requires at least {minimumVersion}");
+                Log.Debug($"Firefox version ({currentVersion}) is incompatible - requires at least {minimumVersion}");
                 return false;
             }
             return true;
@@ -101,7 +95,7 @@ namespace Ghosts.Client.Handlers
             }
             catch (Exception e)
             {
-                _log.Debug(e);
+                Log.Debug(e);
                 return false;
             }
             finally
@@ -119,11 +113,11 @@ namespace Ghosts.Client.Handlers
 
             if (!IsSufficientVersion(path))
             {
-                _log.Warn("Firefox version is not sufficient. Exiting");
+                Log.Warn("Firefox version is not sufficient. Exiting");
                 return null;
             }
 
-            FirefoxOptions options = new FirefoxOptions();
+            var options = new FirefoxOptions();
             options.AddArguments("--disable-infobars");
             options.AddArguments("--disable-extensions");
             options.AddArguments("--disable-notifications");

@@ -273,16 +273,16 @@ namespace Ghosts.Client.TimelineManager
                 _log.Trace($"Attempting new thread for: {handler.HandlerType}");
 
                 Thread t = null;
-                object o;
+                object _;
                 switch (handler.HandlerType)
                 {
                     case HandlerType.NpcSystem:
-                        var npc = new NpcSystem(timeline, handler);
+                        _ = new NpcSystem(timeline, handler);
                         break;
                     case HandlerType.Command:
-                        t = new Thread(start: () =>
+                        t = new Thread(() =>
                         {
-                            o = new Cmd(handler);
+                            _ = new Cmd(handler);
                         });
                         break;
                     case HandlerType.Word:
@@ -295,7 +295,7 @@ namespace Ghosts.Client.TimelineManager
 
                             t = new Thread(() =>
                             {
-                                o = new WordHandler(timeline, handler);
+                                _ = new WordHandler(timeline, handler);
                             });
                         }
                         break;
@@ -309,7 +309,7 @@ namespace Ghosts.Client.TimelineManager
 
                             t = new Thread(() =>
                             {
-                                o = new ExcelHandler(timeline, handler);
+                                _ = new ExcelHandler(timeline, handler);
                             });
                         }
                         break;
@@ -317,14 +317,14 @@ namespace Ghosts.Client.TimelineManager
                         _log.Trace("Launching thread to handle clicks");
                         t = new Thread(() =>
                         {
-                            o = new Clicks(handler);
+                            _ = new Clicks(handler);
                         });
                         break;
                     case HandlerType.Reboot:
                         _log.Trace("Launching thread to handle reboot");
                         t = new Thread(() =>
                         {
-                            o = new Reboot(handler);
+                            _ = new Reboot(handler);
                         });
                         break;
                     case HandlerType.PowerPoint:
@@ -337,7 +337,7 @@ namespace Ghosts.Client.TimelineManager
 
                             t = new Thread(() =>
                             {
-                                o = new PowerPointHandler(timeline, handler);
+                                _ = new PowerPointHandler(timeline, handler);
                             });
                         }
                         break;
@@ -345,14 +345,14 @@ namespace Ghosts.Client.TimelineManager
                         _log.Trace("Launching thread for outlook - note we're not checking if outlook installed, just going for it");
                         t = new Thread(() =>
                         {
-                            o = new Outlook(handler);
+                            _ = new Outlook(handler);
                         });
                         break;
                     case HandlerType.BrowserIE:
                         //IE demands COM apartmentstate be STA so diff thread creation required
                         t = new Thread(() =>
                         {
-                            o = new BrowserIE(handler);
+                            _ = new BrowserIE(handler);
                         });
                         t.SetApartmentState(ApartmentState.STA);
                         break;
@@ -360,31 +360,31 @@ namespace Ghosts.Client.TimelineManager
                         //TODO
                         t = new Thread(() =>
                         {
-                            o = new Notepad(handler);
+                            _ = new Notepad(handler);
                         });
                         break;
                     case HandlerType.BrowserChrome:
                         t = new Thread(() =>
                         {
-                            o = new BrowserChrome(handler);
+                            _ = new BrowserChrome(handler);
                         });
                         break;
                     case HandlerType.BrowserFirefox:
                         t = new Thread(() =>
                         {
-                            o = new BrowserFirefox(handler);
+                            _ = new BrowserFirefox(handler);
                         });
                         break;
                     case HandlerType.Watcher:
                         t = new Thread(() =>
                         {
-                            o = new Watcher(handler);
+                            _ = new Watcher(handler);
                         });
                         break;
                     case HandlerType.Print:
                         t = new Thread(() =>
                         {
-                            o = new Print(handler);
+                            _ = new Print(handler);
                         });
                         break;
                 }
@@ -417,7 +417,7 @@ namespace Ghosts.Client.TimelineManager
 
                 _lastRead = lastWriteTime;
                 _log.Trace("FileWatcher Processing: " + e.FullPath + " " + e.ChangeType);
-                _log.Trace($"Reloading {MethodBase.GetCurrentMethod().DeclaringType}");
+                _log.Trace($"Reloading {MethodBase.GetCurrentMethod()?.DeclaringType}");
 
                 _log.Trace("terminate existing tasks and rerun orchestrator");
                     

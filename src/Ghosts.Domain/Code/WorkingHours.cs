@@ -12,26 +12,28 @@ namespace Ghosts.Domain.Code
     public static class WorkingHours
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
+        private static readonly Random _random = new Random();
 
         public static void Is(TimelineHandler handler)
         {
             var timeOn = handler.UtcTimeOn;
             var timeOff = handler.UtcTimeOff;
+            var defaultTimespan = new TimeSpan(0, 0, 0);
 
-            if (timeOn > new TimeSpan(0, 0, 0) && timeOff > new TimeSpan(0, 0, 0)) //ignore the unset
+            if (timeOn > defaultTimespan && timeOff > defaultTimespan) //ignore the unset
             {
                 //fuzz
-                var r = new Random().Next(-30, 30);
+                var r = _random.Next(-30, 30);
                 if (r > 0)
-                    timeOn = timeOn.Add(new TimeSpan(0, r, new Random().Next(0, 59)));
+                    timeOn = timeOn.Add(new TimeSpan(0, r, _random.Next(0, 59)));
                 else
-                    timeOn = timeOn.Subtract(new TimeSpan(0, r, new Random().Next(0, 59)));
+                    timeOn = timeOn.Subtract(new TimeSpan(0, r, _random.Next(0, 59)));
 
-                r = new Random().Next(-30, 30);
+                r = _random.Next(-30, 30);
                 if (r > 0)
-                    timeOff = timeOff.Add(new TimeSpan(0, new Random().Next(-30, 30), new Random().Next(0, 59)));
+                    timeOff = timeOff.Add(new TimeSpan(0, _random.Next(-30, 30), _random.Next(0, 59)));
                 else
-                    timeOff = timeOff.Subtract(new TimeSpan(0, new Random().Next(-30, 30), new Random().Next(0, 59)));
+                    timeOff = timeOff.Subtract(new TimeSpan(0, _random.Next(-30, 30), _random.Next(0, 59)));
 
                 var isOvernight = timeOff < timeOn;
 

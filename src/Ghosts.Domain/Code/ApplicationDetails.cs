@@ -26,12 +26,12 @@ namespace Ghosts.Domain.Code
         /// <summary>
         ///     Returns current GHOSTS exe name
         /// </summary>
-        public static string Name => Assembly.GetEntryAssembly().GetName().Name;
+        public static string Name => Assembly.GetEntryAssembly()?.GetName().Name;
 
         /// <summary>
         ///     Returns current GHOSTS exe version
         /// </summary>
-        public static string Version => Assembly.GetEntryAssembly().GetName().Version.ToString();
+        public static string Version => Assembly.GetEntryAssembly()?.GetName().Version.ToString().ToUpper();
 
         /// <summary>
         ///     Returns installed exe path, for commands like c:\exercise\ghosts\ghosts.exe to work properly
@@ -42,13 +42,13 @@ namespace Ghosts.Domain.Code
             {
                 try
                 {
-                    var x = Clean(Path.GetDirectoryName(Assembly.GetEntryAssembly().CodeBase));
+                    var x = Clean(Path.GetDirectoryName(Assembly.GetEntryAssembly()?.CodeBase));
                     _log.Trace(x);
                     return x;
                 }
                 catch
                 {
-                    return Assembly.GetEntryAssembly().Location;
+                    return Assembly.GetEntryAssembly()?.Location;
                 }
             }
         }

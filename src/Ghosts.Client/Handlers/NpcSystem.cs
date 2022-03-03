@@ -5,17 +5,14 @@ using Ghosts.Client.Infrastructure;
 using Ghosts.Client.TimelineManager;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
-using NLog;
 
 namespace Ghosts.Client.Handlers
 {
     public class NpcSystem : BaseHandler
     {
-        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-
         public NpcSystem(Timeline timeline, TimelineHandler handler)
         {
-            _log.Trace($"Handling NpcSystem call: {handler}");
+            Log.Trace($"Handling NpcSystem call: {handler}");
 
             foreach (var timelineEvent in handler.TimeLineEvents)
             {

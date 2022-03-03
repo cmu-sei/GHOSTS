@@ -7,22 +7,20 @@ using Ghosts.Client.Infrastructure.Browser;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
-using NLog;
 using OpenQA.Selenium;
 
 namespace Ghosts.Client.Handlers
 {
     class BrowserCrawl : BaseHandler
     {
-        public static readonly Logger _log = LogManager.GetCurrentClassLogger();
         public IWebDriver Driver { get; set; }
         public IJavaScriptExecutor JS { get; set; }
-        private int _stickiness = 0;
+        private int _stickiness;
         private LinkManager _linkManager;
-        private int _pageBrowseCount = 0;
+        private int _pageBrowseCount;
         private string _proxyLocalUrl = string.Empty;
         private int _siteDepthMax = 1;
-        private int _siteDepthCurrent = 0;
+        private int _siteDepthCurrent;
 
         internal Task Crawl(TimelineHandler handler, TimelineEvent timelineEvent, string site)
         {
@@ -72,17 +70,17 @@ namespace Ghosts.Client.Handlers
 
             Driver.Close();
             Driver.Quit();
-            _log.Trace($"Run complete for {site}");
+            Log.Trace($"Run complete for {site}");
             return Task.CompletedTask;
         }
 
         private void GetAllLinks(RequestConfiguration config, bool sameSite)
         {
-            _log.Trace($"Getting links for {config.Uri}...");
+            Log.Trace($"Getting links for {config.Uri}...");
             var linksAdded = 0;
             if (this._pageBrowseCount > this._stickiness)
             {
-                _log.Trace($"Exceeded stickiness for {config.Uri} {this._stickiness}...");
+                Log.Trace($"Exceeded stickiness for {config.Uri} {this._stickiness}...");
                 return;
             }
 
@@ -132,18 +130,18 @@ namespace Ghosts.Client.Handlers
                 if (isInIframe)
                     Driver.SwitchTo().DefaultContent();
 
-                _log.Trace($"Added {linksAdded} links for {config.Uri}");
+                Log.Trace($"Added {linksAdded} links for {config.Uri}");
             }
             catch (Exception e)
             {
-                _log.Trace(e);
+                Log.Trace(e);
             }
         }
 
         private void CrawlAllLinks(RequestConfiguration config, TimelineHandler handler,
             TimelineEvent timelineEvent, bool sameSite)
         {
-            _log.Trace($"Crawling links for {config.Uri}");
+            Log.Trace($"Crawling links for {config.Uri}");
             if (this._linkManager?.Links == null)
             {
                 return;
@@ -158,7 +156,7 @@ namespace Ghosts.Client.Handlers
             {
                 if (this._pageBrowseCount > this._stickiness)
                 {
-                    _log.Trace($"Exceeded stickiness for {config.Uri} {this._stickiness} (2)...");
+                    Log.Trace($"Exceeded stickiness for {config.Uri} {this._stickiness} (2)...");
                     return;
                 }
 
@@ -175,12 +173,12 @@ namespace Ghosts.Client.Handlers
                 foreach (var l in this._linkManager.Links.Where(x => x.Url.ToString() == link.Url.ToString()))
                 {
                     l.WasBrowsed = true;
-                    _log.Trace($"Skipping {config.Uri} (already browsed)");
+                    Log.Trace($"Skipping {config.Uri} (already browsed)");
                 }
                 this._pageBrowseCount += 1;
                 if (this._pageBrowseCount > this._stickiness)
                 {
-                    _log.Trace($"Exceeded stickiness for {config.Uri} {this._stickiness} (3)...");
+                    Log.Trace($"Exceeded stickiness for {config.Uri} {this._stickiness} (3)...");
                     return;
                 }
 
@@ -192,7 +190,7 @@ namespace Ghosts.Client.Handlers
                 // pages at this level to still be scraped
                 if (this._siteDepthCurrent + 1 < this._siteDepthMax)
                 {
-                    _log.Trace($"Drilling into {config.Uri}...");
+                    Log.Trace($"Drilling into {config.Uri}...");
                     GetAllLinks(config, sameSite);
                     CrawlAllLinks(config, handler, timelineEvent, sameSite);
                 }
@@ -207,7 +205,7 @@ namespace Ghosts.Client.Handlers
             }
             catch (Exception e)
             {
-                _log.Trace($"Requst error for {config.Uri}: {e.Message}");
+                Log.Trace($"Requst error for {config.Uri}: {e.Message}");
             }
         }
     }
