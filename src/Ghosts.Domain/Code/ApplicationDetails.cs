@@ -42,9 +42,7 @@ namespace Ghosts.Domain.Code
             {
                 try
                 {
-                    var x = Clean(Path.GetDirectoryName(Assembly.GetEntryAssembly()?.CodeBase));
-                    _log.Trace(x);
-                    return x;
+                    return Clean(Path.GetDirectoryName(Assembly.GetEntryAssembly()?.CodeBase));
                 }
                 catch
                 {
@@ -85,17 +83,7 @@ namespace Ghosts.Domain.Code
         /// </summary>
         public static class ConfigurationFiles
         {
-            //public static string Path => InstalledPath + $"{System.IO.Path.DirectorySeparatorChar}config{System.IO.Path.DirectorySeparatorChar}";
-
-            public static string Path
-            {
-                get
-                {
-                    var x = InstalledPath + $"{System.IO.Path.DirectorySeparatorChar}config{System.IO.Path.DirectorySeparatorChar}";
-                    _log.Trace(x);
-                    return x;
-                }
-            }
+            public static string Path => InstalledPath + $"{System.IO.Path.DirectorySeparatorChar}config{System.IO.Path.DirectorySeparatorChar}";
 
             public static string Application => Clean(Path + "application.json");
             public static string Health => Clean(Path + "health.json");

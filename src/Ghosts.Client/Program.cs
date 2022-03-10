@@ -152,7 +152,7 @@ namespace Ghosts.Client
             ListenerManager.Run();
 
             //do we have client id? or is this first run?
-            _log.Trace(Comms.CheckId.Id);
+            _log.Trace($"CheckID: {Comms.CheckId.Id}");
 
             //connect to command server for 1) client id 2) get updates and 3) sending logs/surveys
             Comms.Updates.Run();
@@ -166,7 +166,7 @@ namespace Ghosts.Client
                 }
                 catch (Exception exc)
                 {
-                    _log.Error(exc);
+                    _log.Error($"Exception instantiating survey: {exc}");
                 }
             }
 
@@ -179,7 +179,7 @@ namespace Ghosts.Client
                 }
                 catch (Exception exc)
                 {
-                    _log.Error(exc);
+                    _log.Error($"Exception instantiating health: {exc}");
                 }
             }
 
@@ -193,7 +193,7 @@ namespace Ghosts.Client
                 }
                 catch (Exception exc)
                 {
-                    _log.Error(exc);
+                    _log.Error($"Exception instantiating orchestrator: {exc}");
                 }
             }
 

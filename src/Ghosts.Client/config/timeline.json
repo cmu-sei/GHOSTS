@@ -140,11 +140,12 @@
                 "blockstyles": "false",
                 "blockflash": "false",
                 "blockscripts": "false",
-                "stickiness": 70,
-                "stickiness-depth-min": 5,
-                "stickiness-depth-max": 1000,
+                "stickiness": "65",
+                "stickiness-depth-min": "3",
+                "stickiness-depth-max": "15",
                 "incognito": "true",
-                "javascript-enable": "true"
+                "javascript-enable": "true",
+                "visited-remember": "10"
             },
             "Initial": "about:blank",
             "UtcTimeOn": "00:00:00",

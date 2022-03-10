@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using NLog;
 
 namespace Ghosts.Domain.Code
 {
@@ -26,13 +27,24 @@ namespace Ghosts.Domain.Code
 
     public class LinkManager
     {
+        public static readonly Logger Log = LogManager.GetCurrentClassLogger();
+        public LifoQueue<Uri> RecentlyVisited { private set; get; }
         public List<Link> Links { private set; get; }
 
-        private readonly Uri _baseUri;
-        public LinkManager(Uri baseUri)
+        private Uri _baseUri;
+
+        public LinkManager(int visitedSitesRemembered)
         {
             Links = new List<Link>();
+            RecentlyVisited = new LifoQueue<Uri>(visitedSitesRemembered);
+            Log.Trace($"Creating new link manager with visitedSitesRemembered = {visitedSitesRemembered}");
+        }
+
+        public void SetCurrent(Uri baseUri)
+        {
             _baseUri = baseUri;
+            Links = new List<Link>();
+            Log.Trace($"Link manager reset with baseuri = {_baseUri}");
         }
 
         public void AddLink(string url, int priority)
@@ -51,7 +63,7 @@ namespace Ghosts.Domain.Code
             {
                 return;
             }
-            
+
             foreach (var link in Links)
             {
                 if (Uri.Compare(uri, link.Url, UriComponents.Host | UriComponents.PathAndQuery, UriFormat.SafeUnescaped, StringComparison.OrdinalIgnoreCase) == 0)
@@ -67,7 +79,7 @@ namespace Ghosts.Domain.Code
             }
             catch (Exception e)
             {
-                Console.WriteLine($"{uri} {e}");
+                Log.Trace($"{uri} {e}");
             }
         }
 
@@ -93,7 +105,7 @@ namespace Ghosts.Domain.Code
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine($"{link.Url} : {e}");
+                    Log.Trace($"{link.Url} : {e}");
                 }
             }
 
@@ -102,6 +114,13 @@ namespace Ghosts.Domain.Code
             if (Links.Count < 1)
             {
                 return null;
+            }
+
+            foreach (var visited in RecentlyVisited)
+            {
+                var itemToRemove = Links.SingleOrDefault(x => x.Url == visited);
+                if (itemToRemove != null)
+                    Links.Remove(itemToRemove);
             }
 
             var priority = Links.First().Priority;
@@ -129,10 +148,11 @@ namespace Ghosts.Domain.Code
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine($"{chosen.Url} : {e}");
+                    Log.Trace($"{chosen.Url} : {e}");
                 }
             }
 
+            this.RecentlyVisited.Add(chosen.Url);
             return chosen;
         }
     }

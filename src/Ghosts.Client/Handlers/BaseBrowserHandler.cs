@@ -20,6 +20,7 @@ namespace Ghosts.Client.Handlers
         private int _stickiness;
         private int _depthMin = 1;
         private int _depthMax = 10;
+        private int _visitedRemember = 5;
         private LinkManager _linkManager;
         
         private Task LaunchThread(TimelineHandler handler, TimelineEvent timelineEvent, string site)
@@ -84,6 +85,12 @@ namespace Ghosts.Client.Handlers
                             {
                                 int.TryParse(handler.HandlerArgs["stickiness-depth-max"], out _depthMax);
                             }
+                            if (handler.HandlerArgs.ContainsKey("visited-remember"))
+                            {
+                                int.TryParse(handler.HandlerArgs["visited-remember"], out _visitedRemember);
+                            }
+
+                            this._linkManager = new LinkManager(_visitedRemember);
 
                             while (true)
                             {
@@ -95,6 +102,7 @@ namespace Ghosts.Client.Handlers
                                 config = RequestConfiguration.Load(timelineEvent.CommandArgs[_random.Next(0, timelineEvent.CommandArgs.Count)]);
                                 if (config.Uri.IsWellFormedOriginalString())
                                 {
+                                    this._linkManager.SetCurrent(config.Uri);
                                     MakeRequest(config);
                                     Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId);
 
@@ -104,11 +112,12 @@ namespace Ghosts.Client.Handlers
                                         if (_random.Next(100) < this._stickiness)
                                         {
                                             var loops = _random.Next(this._depthMin, this._depthMax);
+                                            Log.Trace($"Beginning {loops} loops on {config.Uri}");
                                             for (var loopNumber = 0; loopNumber < loops; loopNumber++)
                                             {
                                                 try
                                                 {
-                                                    this._linkManager = new LinkManager(config.Uri);
+                                                    this._linkManager.SetCurrent(config.Uri);
                                                     GetAllLinks(config, false);
                                                     var link = this._linkManager.Choose();
                                                     if (link == null)
@@ -119,12 +128,13 @@ namespace Ghosts.Client.Handlers
                                                     config.Method = "GET";
                                                     config.Uri = link.Url;
 
+                                                    Log.Trace($"Making request #{loopNumber+1}/{loops} to {config.Uri}");
                                                     MakeRequest(config);
                                                     Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId);
                                                 }
                                                 catch (Exception e)
                                                 {
-                                                    Log.Error(e);
+                                                    Log.Error($"Browser loop error {e}");
                                                 }
 
                                                 Thread.Sleep(timelineEvent.DelayAfter);

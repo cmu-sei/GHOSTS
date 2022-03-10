@@ -272,7 +272,7 @@ namespace Ghosts.Client.Comms
                 }
                 catch (Exception e)
                 {
-                    _log.Debug($"Problem posting overflow logs from {fileName} to server {postUrl} : {e}");
+                    _log.Debug($"Problem posting overflow logs from {fileName} to server {postUrl} : {e.Message}");
                 }
                 finally
                 {

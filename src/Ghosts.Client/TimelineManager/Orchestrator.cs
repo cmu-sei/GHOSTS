@@ -218,7 +218,7 @@ namespace Ghosts.Client.TimelineManager
                 }
                 finally
                 {
-                    Thread.Sleep(60000); //every 60 seconds clean up
+                    Thread.Sleep(300000); //clean up every 5 minutes
                 }
             }
         }
