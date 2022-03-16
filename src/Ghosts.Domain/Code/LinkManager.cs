@@ -109,6 +109,11 @@ namespace Ghosts.Domain.Code
                 }
             }
 
+            if (pickList.Count < 1)
+            {
+                return null;
+            }
+
             Links = pickList.OrderByDescending(o => o.Priority).ToList();
 
             if (Links.Count < 1)

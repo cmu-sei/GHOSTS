@@ -120,7 +120,7 @@ namespace Ghosts.Client.Survey
                     var s = new SurveyResult();
                     s.Survey.Created = DateTime.UtcNow;
 
-                    if (Guid.TryParse(CheckId.Id, out var g))
+                    if (Guid.TryParse(Program.CheckId.Id, out var g))
                         s.Survey.MachineId = g;
 
                     s.LoadAll();

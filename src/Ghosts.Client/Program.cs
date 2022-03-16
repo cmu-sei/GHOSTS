@@ -8,7 +8,9 @@ using System.Net;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Web.ClientServices;
 using CommandLine;
+using Ghosts.Client.Comms;
 using Ghosts.Client.Infrastructure;
 using Ghosts.Client.TimelineManager;
 using Ghosts.Domain.Code;
@@ -34,6 +36,8 @@ namespace Ghosts.Client
         internal static ClientConfiguration Configuration { get; set; }
         internal static Options OptionFlags;
         internal static bool IsDebug;
+
+        public static CheckId CheckId { get; set; }
 
         // minimize memory use
         [DllImport("psapi.dll")]
@@ -127,6 +131,8 @@ namespace Ghosts.Client
                 return;
             }
 
+            Program.CheckId = new CheckId();
+
             DebugManager.Evaluate();
 
             StartupTasks.CheckConfigs();
@@ -152,7 +158,7 @@ namespace Ghosts.Client
             ListenerManager.Run();
 
             //do we have client id? or is this first run?
-            _log.Trace($"CheckID: {Comms.CheckId.Id}");
+            _log.Trace($"CheckID: {Program.CheckId.Id}");
 
             //connect to command server for 1) client id 2) get updates and 3) sending logs/surveys
             Comms.Updates.Run();

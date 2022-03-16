@@ -11,31 +11,50 @@ using System.Net;
 namespace Ghosts.Client.Comms
 {
     /// <summary>
-    /// The client ID is used in the header to save having to send hostname/user/fqdn/etc. inforamtion with every request
+    /// The client ID is used in the header to save having to send hostname/user/fqdn/etc. information with every request
     /// </summary>
-    public static class CheckId
+    public class CheckId
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
 
         /// <summary>
         /// The actual path to the client id file, specified in application config
         /// </summary>
-        public static string IdFile = ApplicationDetails.InstanceFiles.Id;
+        public string IdFile = ApplicationDetails.InstanceFiles.Id;
+
+        private DateTime _lastChecked = DateTime.Now;
+        private string _id = string.Empty;
+
+        public CheckId()
+        {
+            _log.Trace($"CheckId instantiated with ID: {Id}");
+        }
 
         /// <summary>
         /// Gets the agent's current id from local instance, and if it does not exist, gets an id from the server and saves it locally
         /// </summary>
-        public static string Id
+        public string Id
         {
             get
             {
+                if (!string.IsNullOrEmpty(_id))
+                    return _id;
+
                 try
                 {
                     if (!File.Exists(IdFile))
                     {
+                        if (DateTime.Now > _lastChecked.AddMinutes(5))
+                        {
+                            _log.Error("Skipping Check for ID from server, too many requests in a short amount of time...");
+                            return string.Empty;
+                        }
+
+                        _lastChecked = DateTime.Now;
                         return Run();
                     }
-                    return File.ReadAllText(IdFile);
+                    Id = File.ReadAllText(IdFile);
+                    return _id;
                 }
                 catch
                 {
@@ -43,13 +62,14 @@ namespace Ghosts.Client.Comms
                     return string.Empty;
                 }
             }
+            set => _id = value;
         }
 
         /// <summary>
         /// API call to get client ID (probably based on hostname, but configurable) and saves it locally
         /// </summary>
         /// <returns></returns>
-        private static string Run()
+        private string Run()
         {
             // ignore all certs
             ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
