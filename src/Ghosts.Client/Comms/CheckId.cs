@@ -100,7 +100,11 @@ namespace Ghosts.Client.Comms
                     }
                     catch (WebException wex)
                     {
-                        if (((HttpWebResponse)wex.Response).StatusCode == HttpStatusCode.NotFound)
+                        if (wex.Message.StartsWith("The remote name could not be resolved:"))
+                        {
+                            _log.Debug("API not reachable", wex.Message);
+                        }
+                        else if (((HttpWebResponse)wex.Response).StatusCode == HttpStatusCode.NotFound)
                         {
                             _log.Debug("No ID returned!", wex.Message);
                         }

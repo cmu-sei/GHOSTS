@@ -78,7 +78,7 @@ namespace Ghosts.Client.Handlers
                         if (timeline != null)
                         {
                             var processIds = ProcessManager.GetPids(ProcessManager.ProcessNames.Excel).ToList();
-                            if (processIds.Count > timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.Excel))
+                            if (processIds.Count > 2 && processIds.Count > timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.Excel))
                             {
                                 return;
                             }
@@ -88,6 +88,7 @@ namespace Ghosts.Client.Handlers
                         var excelApplication = new Excel.Application
                         {
                             DisplayAlerts = false,
+                            Visible = true
                         };
 
                         // create a utils instance, not need for but helpful to keep the lines of code low
@@ -194,7 +195,8 @@ namespace Ghosts.Client.Handlers
                             FileListing.Add(pdfFileName);
                         }
 
-                        workBook.Close();
+                        if (_random.Next(100) < 50)
+                            workBook.Close();
 
                         if (timelineEvent.DelayAfter > 0)
                         {

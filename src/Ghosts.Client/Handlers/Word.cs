@@ -31,7 +31,7 @@ namespace Ghosts.Client.Handlers
                         if (timeline != null)
                         {
                             System.Collections.Generic.List<int> processIds = ProcessManager.GetPids(ProcessManager.ProcessNames.Word).ToList();
-                            if (processIds.Count > timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.Word))
+                            if (processIds.Count > 2 && processIds.Count > timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.Word))
                             {
                                 continue;
                             }
@@ -180,7 +180,8 @@ namespace Ghosts.Client.Handlers
                             FileListing.Add(outputFileName.ToString());
                         }
 
-                        newDocument.Close();
+                        if (_random.Next(100) < 50)
+                            newDocument.Close();
 
                         if (timelineEvent.DelayAfter > 0)
                         {
