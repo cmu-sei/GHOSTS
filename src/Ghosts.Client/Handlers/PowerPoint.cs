@@ -19,6 +19,7 @@ namespace Ghosts.Client.Handlers
     {
         public PowerPointHandler(Timeline timeline, TimelineHandler handler)
         {
+            base.Init(handler);
             Log.Trace("Launching PowerPoint handler");
             try
             {

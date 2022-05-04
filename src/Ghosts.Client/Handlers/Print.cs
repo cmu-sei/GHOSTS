@@ -14,6 +14,7 @@ namespace Ghosts.Client.Handlers
         {
             try
             {
+                base.Init(handler);
                 Log.Trace("Spawning printer job...");
 
                 if (handler.Loop)

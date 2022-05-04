@@ -15,6 +15,7 @@ namespace Ghosts.Client.Handlers
     {
         public BrowserFirefox(TimelineHandler handler)
         {
+            base.Init(handler);
             BrowserType = HandlerType.BrowserFirefox;
             var hasRunSuccessfully = false;
             while (!hasRunSuccessfully)

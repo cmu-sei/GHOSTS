@@ -25,6 +25,7 @@ namespace Ghosts.Client.Handlers
 
         public Notepad(TimelineHandler handler)
         {
+            base.Init(handler);
             //TODO - this class is just stubbed
             Process.Start("notepad.exe");
             Thread.Sleep(1000);

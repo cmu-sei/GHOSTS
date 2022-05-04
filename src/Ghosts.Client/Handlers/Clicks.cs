@@ -24,6 +24,7 @@ namespace Ghosts.Client.Handlers
 
         public Clicks(TimelineHandler handler)
         {
+            base.Init(handler);
             Log.Trace("Spawning mouse click handler...");
 
             try

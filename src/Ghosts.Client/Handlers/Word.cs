@@ -20,9 +20,11 @@ namespace Ghosts.Client.Handlers
     {
         public WordHandler(Timeline timeline, TimelineHandler handler)
         {
-            Log.Trace("Launching Word handler");
             try
             {
+                base.Init(handler);
+                Log.Trace("Launching Word handler");
+
                 if (handler.Loop)
                 {
                     Log.Trace("Word loop");

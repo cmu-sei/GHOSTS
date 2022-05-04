@@ -27,6 +27,7 @@ namespace Ghosts.Client.Handlers
         {
             try
             {
+                base.Init(handler);
                 //redemption prep
                 //tell the app where the 32 and 64 bit dlls are located
                 //by default, they are assumed to be in the same folder as the current assembly and be named

@@ -26,6 +26,7 @@ namespace Ghosts.Client.Handlers
 
         public BrowserChrome(TimelineHandler handler)
         {
+            base.Init(handler);
             BrowserType = HandlerType.BrowserChrome;
             try
             {

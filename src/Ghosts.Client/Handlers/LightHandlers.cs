@@ -67,6 +67,7 @@ namespace Ghosts.Client.Handlers
         {
             public LightWordHandler(TimelineHandler handler)
             {
+                base.Init(handler);
                 Log.Trace("Launching Light Word handler");
                 try
                 {
@@ -129,6 +130,7 @@ namespace Ghosts.Client.Handlers
         {
             public LightExcelHandler(TimelineHandler handler)
             {
+                base.Init(handler);
                 Log.Trace("Launching Light Excel handler");
                 try
                 {

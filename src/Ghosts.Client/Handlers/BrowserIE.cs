@@ -17,6 +17,7 @@ namespace Ghosts.Client.Handlers
         {
             try
             {
+                base.Init(handler);
 
                 this.Driver = new IE(handler.Initial);
 

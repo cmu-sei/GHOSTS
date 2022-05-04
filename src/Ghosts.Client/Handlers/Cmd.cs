@@ -24,7 +24,9 @@ namespace Ghosts.Client.Handlers
         {
             try
             {
+                base.Init(handler);
                 Log.Trace("Spawning cmd.exe...");
+                
                 this.Process = Process.Start("cmd.exe");
             
                 if (handler.Loop)

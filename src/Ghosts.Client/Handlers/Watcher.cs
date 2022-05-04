@@ -16,6 +16,7 @@ namespace Ghosts.Client.Handlers
     {
         public Watcher(TimelineHandler handler)
         {
+            base.Init(handler);
             Log.Trace("Spawning watcher handler...");
 
             Log.Trace("Can't loop on watcher!...");

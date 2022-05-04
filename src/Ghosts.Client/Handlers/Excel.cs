@@ -19,7 +19,9 @@ namespace Ghosts.Client.Handlers
     {
         public ExcelHandler(Timeline timeline, TimelineHandler handler)
         {
+            base.Init(handler);
             Log.Trace("Launching Excel handler");
+
             try
             {
                 if (handler.Loop)
