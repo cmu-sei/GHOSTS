@@ -14,7 +14,7 @@ namespace Ghosts.Client.Handlers
         private static string GetSavePath(Type cls, TimelineHandler handler, TimelineEvent timelineEvent, string fileExtension)
         {
             Log.Trace($"{cls} event - {timelineEvent}");
-            WorkingHours.Is(handler);
+            Infrastructure.WorkingHours.Is(handler);
 
             if (timelineEvent.DelayBefore > 0)
             {

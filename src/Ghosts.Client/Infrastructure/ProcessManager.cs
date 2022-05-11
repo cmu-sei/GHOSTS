@@ -1,5 +1,6 @@
 // Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
+using Ghosts.Domain;
 using NLog;
 using System;
 using System.Collections.Generic;
@@ -30,6 +31,37 @@ namespace Ghosts.Client.Infrastructure
             return currentProcess.Id;
         }
 
+        public static void KillProcessAndChildrenByHandler(TimelineHandler handler)
+        {
+            switch (handler.HandlerType)
+            {
+                case HandlerType.BrowserChrome:
+                    KillProcessAndChildrenByName("chrome");
+                    KillProcessAndChildrenByName("chromedriver");
+                    break;
+                case HandlerType.BrowserFirefox:
+                    KillProcessAndChildrenByName("firefox");
+                    KillProcessAndChildrenByName("geckodriver");
+                    break;
+                case HandlerType.Command:
+                    KillProcessAndChildrenByName("cmd");
+                    break;
+                case HandlerType.Word:
+                    KillProcessAndChildrenByName("winword");
+                    break;
+                case HandlerType.Excel:
+                    KillProcessAndChildrenByName("excel");
+                    break;
+                case HandlerType.PowerPoint:
+                    KillProcessAndChildrenByName("powerpnt");
+                    break;
+                case HandlerType.Outlook:
+                    KillProcessAndChildrenByName("outlook");
+                    break;
+
+            }
+        }
+
         public static void KillProcessAndChildrenByName(string procName)
         {
             try
@@ -38,7 +70,7 @@ namespace Ghosts.Client.Infrastructure
                 processes.Sort((x1, x2) => x1.StartTime.CompareTo(x2.StartTime));
 
                 var thisPid = GetThisProcessPid();
-                
+
                 foreach (var process in processes)
                 {
                     try
@@ -66,7 +98,7 @@ namespace Ghosts.Client.Infrastructure
         {
             try
             {
-                
+
                 if (pid == 0) // Cannot close 'system idle process'.
                     return;
 

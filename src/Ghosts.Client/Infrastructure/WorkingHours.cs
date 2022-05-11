@@ -3,16 +3,19 @@
 using System;
 using System.Threading;
 using NLog;
+using Ghosts.Domain;
 
-namespace Ghosts.Domain.Code
+namespace Ghosts.Client.Infrastructure
 {
     /// <summary>
-    /// In and out of office hour management, used to have fuzz, but now does not (6.0.2.6)
+    /// This largely replicates the same class in Domain, 
+    /// but adds a kill switch for the handler so that 
+    /// when out of office, the app is sure to be closed
     /// </summary>
     public static class WorkingHours
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        
+
         public static void Is(TimelineHandler handler)
         {
             var timeOn = handler.UtcTimeOn;
@@ -21,7 +24,7 @@ namespace Ghosts.Domain.Code
 
             if (timeOn == defaultTimespan && timeOff == defaultTimespan) //ignore timelines that are unset (00:00:00)
                 return;
-        
+
             var isOvernight = timeOff < timeOn;
 
             _log.Debug(
@@ -49,6 +52,7 @@ namespace Ghosts.Domain.Code
 
         private static void Sleep(TimelineHandler handler, int sleep)
         {
+            ProcessManager.KillProcessAndChildrenByHandler(handler);
             _log.Trace($"Sleeping for {sleep}");
             Thread.Sleep(sleep);
         }

@@ -51,7 +51,7 @@ namespace Ghosts.Client.Handlers
         {
             foreach (var timelineEvent in handler.TimeLineEvents)
             {
-                WorkingHours.Is(handler);
+                Infrastructure.WorkingHours.Is(handler);
 
                 if (timelineEvent.DelayBefore > 0)
                     Thread.Sleep(timelineEvent.DelayBefore);

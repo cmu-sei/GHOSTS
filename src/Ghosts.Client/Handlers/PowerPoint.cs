@@ -69,7 +69,7 @@ namespace Ghosts.Client.Handlers
                     try
                     {
                         Log.Trace($"PowerPoint event - {timelineEvent}");
-                        WorkingHours.Is(handler);
+                        Infrastructure.WorkingHours.Is(handler);
 
                         if (timelineEvent.DelayBefore > 0)
                         {

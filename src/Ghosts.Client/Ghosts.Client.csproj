@@ -629,6 +629,7 @@
     <None Include="Sample Timelines\command.json" />
     <None Include="Sample Timelines\Excel.json" />
     <None Include="Sample Timelines\Full sample.timeline.json" />
+    <Compile Include="Infrastructure\WorkingHours.cs" />
     <Compile Include="Survey\SurveyManager.cs" />
     <Compile Include="TimelineManager\Listener.cs" />
     <Compile Include="TimelineManager\Orchestrator.cs" />
