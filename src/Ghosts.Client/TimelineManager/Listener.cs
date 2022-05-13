@@ -7,7 +7,6 @@ using SimpleTCP;
 using System;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using Ghosts.Domain.Code;
 
 namespace Ghosts.Client.TimelineManager
@@ -24,12 +23,7 @@ namespace Ghosts.Client.TimelineManager
             {
                 if (Program.Configuration.Listener.Port > 0)
                 {
-                    var t = new Thread(() => { var _ = new PortListener(); })
-                    {
-                        IsBackground = true,
-                        Name = "ghosts-portlistener"
-                    };
-                    t.Start();
+                    new PortListener();
                 }
             }
             catch (Exception e)
@@ -53,12 +47,7 @@ namespace Ghosts.Client.TimelineManager
                         _log.Trace($"DirectoryListener created DirIn: {Out})");
                     }
 
-                    var t = new Thread(() => { var _ = new DirectoryListener(); })
-                    {
-                        IsBackground = true,
-                        Name = "ghosts-directorylistener"
-                    };
-                    t.Start();
+                    new DirectoryListener();
                 }
                 else
                 {
