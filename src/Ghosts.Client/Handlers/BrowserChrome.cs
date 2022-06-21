@@ -80,9 +80,9 @@ namespace Ghosts.Client.Handlers
             if (handler.HandlerArgs != null)
             {
                 if (handler.HandlerArgs.ContainsKey("executable-location") &&
-                    !string.IsNullOrEmpty(handler.HandlerArgs["executable-location"]))
+                    !string.IsNullOrEmpty(handler.HandlerArgs["executable-location"].ToString()))
                 {
-                    options.BinaryLocation = handler.HandlerArgs["executable-location"];
+                    options.BinaryLocation = handler.HandlerArgs["executable-location"].ToString();
                 }
 
                 if (handler.HandlerArgs.ContainsKeyWithOption("isheadless", "true"))
