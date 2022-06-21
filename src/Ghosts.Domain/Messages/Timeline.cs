@@ -46,7 +46,7 @@ namespace Ghosts.Domain
         public TimelineHandler()
         {
             TimeLineEvents = new List<TimelineEvent>();
-            HandlerArgs = new Dictionary<string, string>();
+            HandlerArgs = new Dictionary<string, object>();
         }
 
         [JsonConverter(typeof(StringEnumConverter))]
@@ -61,7 +61,7 @@ namespace Ghosts.Domain
         public TimeSpan UtcTimeOff { get; set; }
 
         //not required currently (2.4)
-        public Dictionary<string, string> HandlerArgs { get; set; }
+        public Dictionary<string, object> HandlerArgs { get; set; }
 
         public bool Loop { get; set; }
 

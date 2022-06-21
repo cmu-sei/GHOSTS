@@ -24,7 +24,6 @@ namespace ghosts.client.linux.Infrastructure.Browser
             if (commandArg == null || !commandArg.StartsWith("{")) return result;
             result = JsonConvert.DeserializeObject<ExtendedConfiguration>(commandArg);
             return result;
-
         }
     }
 }

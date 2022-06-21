@@ -55,7 +55,7 @@ namespace ghosts.client.linux.handlers
                             var taskMax = 1;
                             if (handler.HandlerArgs.ContainsKey("crawl-tasks-maximum"))
                             {
-                                int.TryParse(handler.HandlerArgs["crawl-tasks-maximum"], out taskMax);
+                                int.TryParse(handler.HandlerArgs["crawl-tasks-maximum"].ToString(), out taskMax);
                             }
 
                             var i = 0;
@@ -77,19 +77,19 @@ namespace ghosts.client.linux.handlers
                             // setup
                             if (handler.HandlerArgs.ContainsKey("stickiness"))
                             {
-                                int.TryParse(handler.HandlerArgs["stickiness"], out _stickiness);
+                                int.TryParse(handler.HandlerArgs["stickiness"].ToString(), out _stickiness);
                             }
                             if (handler.HandlerArgs.ContainsKey("stickiness-depth-min"))
                             {
-                                int.TryParse(handler.HandlerArgs["stickiness-depth-min"], out _depthMin);
+                                int.TryParse(handler.HandlerArgs["stickiness-depth-min"].ToString(), out _depthMin);
                             }
                             if (handler.HandlerArgs.ContainsKey("stickiness-depth-max"))
                             {
-                                int.TryParse(handler.HandlerArgs["stickiness-depth-max"], out _depthMax);
+                                int.TryParse(handler.HandlerArgs["stickiness-depth-max"].ToString(), out _depthMax);
                             }
                             if (handler.HandlerArgs.ContainsKey("visited-remember"))
                             {
-                                int.TryParse(handler.HandlerArgs["visited-remember"], out _visitedRemember);
+                                int.TryParse(handler.HandlerArgs["visited-remember"].ToString(), out _visitedRemember);
                             }
 
                             this._linkManager = new LinkManager(_visitedRemember);
@@ -101,7 +101,7 @@ namespace ghosts.client.linux.handlers
                                     throw new Exception("Browser window handle not available");
                                 }
                                 var random = new Random();
-                                config = RequestConfiguration.Load(timelineEvent.CommandArgs[random.Next(0, timelineEvent.CommandArgs.Count)]);
+                                config = RequestConfiguration.Load(handler, timelineEvent.CommandArgs[random.Next(0, timelineEvent.CommandArgs.Count)]);
                                 if (config.Uri.IsWellFormedOriginalString())
                                 {
                                     this._linkManager.SetCurrent(config.Uri);
@@ -147,7 +147,7 @@ namespace ghosts.client.linux.handlers
                                 Thread.Sleep(timelineEvent.DelayAfter);
                             }
                         case "browse":
-                            config = RequestConfiguration.Load(timelineEvent.CommandArgs[0]);
+                            config = RequestConfiguration.Load(handler, timelineEvent.CommandArgs[0]);
                             if (config.Uri.IsWellFormedOriginalString())
                             {
                                 MakeRequest(config);

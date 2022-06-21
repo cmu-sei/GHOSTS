@@ -6,9 +6,9 @@ namespace Ghosts.Domain.Code.Helpers
 {
     public static class DictionaryExtensions
     {
-        public static bool ContainsKeyWithOption(this Dictionary<string, string> options, string key, string value)
+        public static bool ContainsKeyWithOption(this Dictionary<string, object> options, string key, string value)
         {
-            return options.ContainsKey(key) && options[key] == value;
+            return options.ContainsKey(key) && (string)options[key] == value;
         }
     }
 }

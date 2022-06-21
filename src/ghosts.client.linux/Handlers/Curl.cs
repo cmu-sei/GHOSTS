@@ -30,15 +30,15 @@ namespace ghosts.client.linux.handlers
 
             if (_handler.HandlerArgs.ContainsKey("stickiness"))
             {
-                int.TryParse(_handler.HandlerArgs["stickiness"], out _stickiness);
+                int.TryParse(_handler.HandlerArgs["stickiness"].ToString(), out _stickiness);
             }
             if (_handler.HandlerArgs.ContainsKey("stickiness-depth-min"))
             {
-                int.TryParse(_handler.HandlerArgs["stickiness-depth-min"], out _depthMin);
+                int.TryParse(_handler.HandlerArgs["stickiness-depth-min"].ToString(), out _depthMin);
             }
             if (_handler.HandlerArgs.ContainsKey("stickiness-depth-max"))
             {
-                int.TryParse(_handler.HandlerArgs["stickiness-depth-max"], out _depthMax);
+                int.TryParse(_handler.HandlerArgs["stickiness-depth-max"].ToString(), out _depthMax);
             }
             
             this._currentUserAgent = UserAgentManager.Get(); 

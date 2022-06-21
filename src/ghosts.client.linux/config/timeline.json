@@ -12,7 +12,13 @@
         "stickiness": 100,
         "stickiness-depth-min": 5,
         "stickiness-depth-max": 10000,
-        "incognito": "true"
+        "incognito": "true",
+        "url-replace": [
+          {"verb": ["order", "enable", "engage"]},
+          {"group": ["operations", "logistics", "medical"]},
+          {"org": ["army", "command", "brigade", "battalion"]},
+          {"type": ["document", "doc", "files", "vault", "filevault"]}
+        ]
       },
       "Initial": "about:blank",
       "UtcTimeOn": "00:00:00",
@@ -22,6 +28,7 @@
         {
           "Command": "random",
           "CommandArgs": [
+            "http://craigslist.org/{org}/{group}/{uuid}/{verb}/{type}/{n}?{c}={now}",
             "http://www.ceoexpress.com",
             "http://wikipedia.org",
             "http://ebay.com",
