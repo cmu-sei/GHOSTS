@@ -55,7 +55,7 @@ namespace ghosts.client.linux.handlers
             
             this._pageBrowseCount = 0;
             var config = RequestConfiguration.Load(site);
-            this._linkManager = new LinkManager(config.Uri);
+            this._linkManager = new LinkManager(0);
             if (config.Uri.IsWellFormedOriginalString())
             {
                 MakeRequest(config);

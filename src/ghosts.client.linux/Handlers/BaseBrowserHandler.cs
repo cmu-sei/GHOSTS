@@ -10,7 +10,6 @@ using Ghosts.Domain.Code.Helpers;
 using NLog;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
-// ReSharper disable StringLiteralTypo
 
 namespace ghosts.client.linux.handlers
 {
@@ -20,22 +19,23 @@ namespace ghosts.client.linux.handlers
         public IWebDriver Driver { get; set; }
         public IJavaScriptExecutor JS { get; set; }
         public HandlerType BrowserType { get; set; }
-        private int _stickiness = 0;
+        private int _stickiness;
         private int _depthMin = 1;
         private int _depthMax = 10;
+        private int _visitedRemember = 5;
         private LinkManager _linkManager;
-
+        
         private Task LaunchThread(TimelineHandler handler, TimelineEvent timelineEvent, string site)
         {
             var o = new BrowserCrawl();
             return o.Crawl(handler, timelineEvent, site);
         }
-        
+
         public void ExecuteEvents(TimelineHandler handler)
         {
             try
             {
-                foreach (TimelineEvent timelineEvent in handler.TimeLineEvents)
+                foreach (var timelineEvent in handler.TimeLineEvents)
                 {
                     WorkingHours.Is(handler);
 
@@ -52,22 +52,20 @@ namespace ghosts.client.linux.handlers
                     switch (timelineEvent.Command)
                     {
                         case "crawl":
-                            var _taskMax = 1;
+                            var taskMax = 1;
                             if (handler.HandlerArgs.ContainsKey("crawl-tasks-maximum"))
                             {
-                                int.TryParse(handler.HandlerArgs["crawl-tasks-maximum"], out _taskMax);
+                                int.TryParse(handler.HandlerArgs["crawl-tasks-maximum"], out taskMax);
                             }
-                            
+
                             var i = 0;
                             foreach (var site in timelineEvent.CommandArgs)
                             {
-                                //LaunchThread(handler, timelineEvent, site.ToString());
-
                                 Task.Factory.StartNew(() => LaunchThread(handler, timelineEvent, site.ToString()));
                                 Thread.Sleep(5000);
                                 i++;
-                                
-                                if (i >= _taskMax)
+
+                                if (i >= taskMax)
                                 {
                                     Task.WaitAll();
                                     i = 0;
@@ -89,6 +87,12 @@ namespace ghosts.client.linux.handlers
                             {
                                 int.TryParse(handler.HandlerArgs["stickiness-depth-max"], out _depthMax);
                             }
+                            if (handler.HandlerArgs.ContainsKey("visited-remember"))
+                            {
+                                int.TryParse(handler.HandlerArgs["visited-remember"], out _visitedRemember);
+                            }
+
+                            this._linkManager = new LinkManager(_visitedRemember);
 
                             while (true)
                             {
@@ -96,25 +100,26 @@ namespace ghosts.client.linux.handlers
                                 {
                                     throw new Exception("Browser window handle not available");
                                 }
-
-                                config = RequestConfiguration.Load(timelineEvent.CommandArgs[new Random().Next(0, timelineEvent.CommandArgs.Count)]);
+                                var random = new Random();
+                                config = RequestConfiguration.Load(timelineEvent.CommandArgs[random.Next(0, timelineEvent.CommandArgs.Count)]);
                                 if (config.Uri.IsWellFormedOriginalString())
                                 {
+                                    this._linkManager.SetCurrent(config.Uri);
                                     MakeRequest(config);
                                     Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId);
 
                                     if (this._stickiness > 0)
                                     {
-                                        var random = new Random();
                                         //now some percentage of the time should stay on this site
                                         if (random.Next(100) < this._stickiness)
                                         {
                                             var loops = random.Next(this._depthMin, this._depthMax);
+                                            _log.Trace($"Beginning {loops} loops on {config.Uri}");
                                             for (var loopNumber = 0; loopNumber < loops; loopNumber++)
                                             {
                                                 try
                                                 {
-                                                    this._linkManager = new LinkManager(config.Uri);
+                                                    this._linkManager.SetCurrent(config.Uri);
                                                     GetAllLinks(config, false);
                                                     var link = this._linkManager.Choose();
                                                     if (link == null)
@@ -125,12 +130,13 @@ namespace ghosts.client.linux.handlers
                                                     config.Method = "GET";
                                                     config.Uri = link.Url;
 
+                                                    _log.Trace($"Making request #{loopNumber+1}/{loops} to {config.Uri}");
                                                     MakeRequest(config);
                                                     Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId);
                                                 }
                                                 catch (Exception e)
                                                 {
-                                                    _log.Error(e);
+                                                    _log.Error($"Browser loop error {e}");
                                                 }
 
                                                 Thread.Sleep(timelineEvent.DelayAfter);
