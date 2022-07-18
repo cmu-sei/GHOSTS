@@ -38,21 +38,21 @@ namespace Ghosts.Client.Handlers
 
             if (handler.HandlerArgs.ContainsKey("stickiness"))
             {
-                int.TryParse(handler.HandlerArgs["stickiness"], out _stickiness);
+                int.TryParse(handler.HandlerArgs["stickiness"].ToString(), out _stickiness);
             }
 
             if (handler.HandlerArgs.ContainsKey("crawl-site-depth"))
             {
-                int.TryParse(handler.HandlerArgs["crawl-site-depth"], out _siteDepthMax);
+                int.TryParse(handler.HandlerArgs["crawl-site-depth"].ToString(), out _siteDepthMax);
             }
 
             if (handler.HandlerArgs.ContainsKey("crawl-proxy-local-url"))
             {
-                _proxyLocalUrl = handler.HandlerArgs["crawl-proxy-local-url"];
+                _proxyLocalUrl = handler.HandlerArgs["crawl-proxy-local-url"].ToString();
             }
 
             this._pageBrowseCount = 0;
-            var config = RequestConfiguration.Load(site);
+            var config = RequestConfiguration.Load(handler, site);
             this._linkManager = new LinkManager(0);
             if (config.Uri.IsWellFormedOriginalString())
             {
