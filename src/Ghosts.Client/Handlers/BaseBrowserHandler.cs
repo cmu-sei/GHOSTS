@@ -222,7 +222,6 @@ namespace Ghosts.Client.Handlers
                     var node = l.GetAttribute("href");
                     if (string.IsNullOrEmpty(node))
                         continue;
-                    node = node.ToLower();
                     if (Uri.TryCreate(node, UriKind.RelativeOrAbsolute, out var uri))
                     {
                         if (uri.GetDomain() != config.Uri.GetDomain())
