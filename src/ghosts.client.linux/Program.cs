@@ -13,6 +13,7 @@ using ghosts.client.linux.Infrastructure;
 using ghosts.client.linux.timelineManager;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Models;
+using Newtonsoft.Json;
 using NLog;
 
 namespace ghosts.client.linux
@@ -26,6 +27,15 @@ namespace ghosts.client.linux
 
         private static void Main(string[] args)
         {
+            try
+            {
+                JsonConvert.DefaultSettings = () => new JsonSerializerSettings { MaxDepth = 128 };
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            
             ThreadJobs = new List<ThreadJob>();
             ClientConfigurationLoader.UpdateConfigurationWithEnvVars();
             
