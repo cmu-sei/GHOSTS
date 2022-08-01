@@ -553,6 +553,7 @@
     <Compile Include="Infrastructure\GuestInfoVars.cs" />
     <Compile Include="Infrastructure\CommandLineFlagManager.cs" />
     <Compile Include="Infrastructure\ClientConfigurationResolver.cs" />
+    <Compile Include="Infrastructure\KnownFolders.cs" />
     <Compile Include="Infrastructure\TempFiles.cs" />
     <Compile Include="Handlers\Clicks.cs" />
     <Compile Include="Handlers\LightHandlers.cs" />
