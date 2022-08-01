@@ -27,15 +27,6 @@ namespace ghosts.client.linux
 
         private static void Main(string[] args)
         {
-            try
-            {
-                JsonConvert.DefaultSettings = () => new JsonSerializerSettings { MaxDepth = 128 };
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
-            
             ThreadJobs = new List<ThreadJob>();
             ClientConfigurationLoader.UpdateConfigurationWithEnvVars();
             
