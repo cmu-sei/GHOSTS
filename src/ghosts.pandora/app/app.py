@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 
 """
+v0.1.1 - changes pdf renders to force download
+
 Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 Usage::
@@ -47,6 +49,7 @@ class S(BaseHTTPRequestHandler):
     image_array = ["png", "gif", "jpg", "jpeg", "pdf", "ico"]
     strict_image_array = ["png", "gif", "jpg", "jpeg"]
     request_url = ""
+    file_requested = ""
 
     config = cp.ConfigParser()
     config.read_file(open(r'./app.config'))
@@ -91,7 +94,8 @@ class S(BaseHTTPRequestHandler):
             self.send_header('Content-type', content_type)
         if file_name is not None:
             self.send_header('Content-Disposition', f'attachment; filename="{file_name}"')
-
+        if self.file_requested.endswith(".pdf"):
+            self.send_header('Content-Disposition', f'attachment; filename="{self.file_requested}"')
         self.end_headers()
 
     def return_zip(self, file_name):
@@ -263,7 +267,7 @@ class S(BaseHTTPRequestHandler):
     def serve_response(self):
         o = urllib.parse.urlparse(self.path)
         self.request_url = o.path
-        file_requested = os.path.basename(self.request_url)
+        self.file_requested = os.path.basename(self.request_url)
 
         request_type = None
         if "." in self.request_url:
@@ -327,18 +331,18 @@ Part of the GHOSTS NPC Orchestration Platform - please email ddupdyke[-at-]sei.c
             return
 
         elif o.path.startswith("/docs"):
-            file_requested = f"{self.fake.word()}.docx"
-            self.return_doc_file(file_requested)
+            self.file_requested = f"{self.fake.word()}.docx"
+            self.return_doc_file(self.file_requested)
             return
 
         elif o.path.startswith("/slides"):
-            file_requested = f"{self.fake.word()}.pptx"
-            self.return_ppt_file(file_requested)
+            self.file_requested = f"{self.fake.word()}.pptx"
+            self.return_ppt_file(self.file_requested)
             return
 
         elif o.path.startswith("/sheets"):
-            file_requested = f"{self.fake.word()}.xlsx"
-            self.return_xls_file(file_requested)
+            self.file_requested = f"{self.fake.word()}.xlsx"
+            self.return_xls_file(self.file_requested)
             return
 
         elif o.path.startswith("/i/") or o.path.startswith("/img") or o.path.startswith("/images"):
@@ -365,13 +369,13 @@ Part of the GHOSTS NPC Orchestration Platform - please email ddupdyke[-at-]sei.c
         # handle specific file types
         # https://en.wikipedia.org/wiki/List_of_file_formats
         if request_type in ["doc", "docx", "dotx", "dot", "docm", "dotm", "odt"]:
-            self.return_doc_file(file_requested)
+            self.return_doc_file(self.file_requested)
 
         elif request_type in ["xls", "xlsx", "xlsm", "xlsb", "xltm", "xla", "xlam", "xla", "ods"]:
-            self.return_xls_file(file_requested)
+            self.return_xls_file(self.file_requested)
 
         elif request_type in ["ppt", "pptx", "potx", "pot", "ppsx", "pps", "pptm", "potm", "ppsm", "odp"]:
-            self.return_ppt_file(file_requested)
+            self.return_ppt_file(self.file_requested)
 
         elif request_type in ["png", "gif", "jpg", "jpeg", "pdf", "ico"]:
             self.return_image(request_type)
@@ -389,13 +393,13 @@ Part of the GHOSTS NPC Orchestration Platform - please email ddupdyke[-at-]sei.c
             self.return_script()
 
         elif request_type in ["zip"]:
-            self.return_zip(file_requested)
+            self.return_zip(self.file_requested)
 
         elif request_type in ["msi", "tar", "gz", "iso", "rar", "exe", "bin", "chm"]:
-            self.return_binary(file_requested)
+            self.return_binary(self.file_requested)
 
         elif request_type in ["txt"]:
-            self.return_text(file_requested)
+            self.return_text(self.file_requested)
 
         else:
             if random.randint(2, 100) > 90:

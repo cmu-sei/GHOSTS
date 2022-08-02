@@ -15,7 +15,7 @@ RUN apk add -u zlib-dev jpeg-dev gcc musl-dev
 RUN python3 -m pip install --upgrade pip
 COPY ./requirements.txt /usr/src/app
 COPY ./readme.md /usr/src
-COPY ../../LICENSE.md /usr/src
+
 RUN pip install -r requirements.txt
 
 # copy project
