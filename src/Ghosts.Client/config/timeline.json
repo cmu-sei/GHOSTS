@@ -96,7 +96,7 @@
       "TimeLineEvents": [
         {
           "Command": "create",
-          "CommandArgs": [ "%homedrive%%homepath%\\Documents", "pdf", "pdf-vary-filenames" ],
+          "CommandArgs": [ "%homedrive%%homepath%\\Documents", "pdf", "pdf-vary-filenames", "save-array:['c:\\tmp','c:\\tmp\\path2','c:\\tmp\\path3']" ],
           "DelayAfter": 900000,
           "DelayBefore": 0
         }
@@ -111,7 +111,7 @@
       "TimeLineEvents": [
         {
           "Command": "create",
-          "CommandArgs": [ "%homedrive%%homepath%\\Documents", "pdf", "pdf-vary-filenames" ],
+          "CommandArgs": [ "%homedrive%%homepath%\\Documents", "pdf", "pdf-vary-filenames", "save-array:['c:\\tmp','c:\\tmp\\path2','c:\\tmp\\path3']" ],
           "DelayAfter": 900000,
           "DelayBefore": 0
         }
@@ -126,7 +126,7 @@
       "TimeLineEvents": [
         {
           "Command": "create",
-          "CommandArgs": [ "%homedrive%%homepath%\\Documents", "pdf", "pdf-vary-filenames" ],
+          "CommandArgs": [ "%homedrive%%homepath%\\Documents", "pdf", "pdf-vary-filenames", "save-array:['c:\\tmp','c:\\tmp\\path2','c:\\tmp\\path3']" ],
           "DelayAfter": 900000,
           "DelayBefore": 0
         }

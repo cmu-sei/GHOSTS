@@ -2,7 +2,6 @@
 
 using Ghosts.Client.Infrastructure;
 using Ghosts.Domain;
-using Ghosts.Domain.Code;
 using Microsoft.Office.Interop.Excel;
 using System;
 using System.IO;
@@ -11,6 +10,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using Ghosts.Domain.Code.Helpers;
 using NetOffice.ExcelApi.Tools;
+using Newtonsoft.Json;
 using Excel = NetOffice.ExcelApi;
 
 namespace Ghosts.Client.Handlers
@@ -147,18 +147,37 @@ namespace Ghosts.Client.Handlers
 
                         var rand = RandomFilename.Generate();
 
-                        var dir = timelineEvent.CommandArgs[0].ToString();
-                        if (dir.Contains("%"))
+                        var defaultSaveDirectory = timelineEvent.CommandArgs[0].ToString();
+                        if (defaultSaveDirectory.Contains("%"))
                         {
-                            dir = Environment.ExpandEnvironmentVariables(dir);
+                            defaultSaveDirectory = Environment.ExpandEnvironmentVariables(defaultSaveDirectory);
                         }
 
-                        if (Directory.Exists(dir))
+                        try
                         {
-                            Directory.CreateDirectory(dir);
+                            foreach (var key in timelineEvent.CommandArgs)
+                            {
+                                if (key.ToString().StartsWith("save-array:"))
+                                {
+                                    var savePathString = key.ToString().Replace("save-array:", "").Replace("'", "\"");
+                                    savePathString = savePathString.Replace("\\", "/"); //can't seem to deserialize windows path \
+                                    var savePaths = JsonConvert.DeserializeObject<string[]>(savePathString);
+                                    defaultSaveDirectory = savePaths.PickRandom().Replace("/", "\\"); //put windows path back
+                                    break;
+                                }
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Log.Trace($"save-array exception: {e}");
                         }
 
-                        var path = $"{dir}\\{rand}.xlsx";
+                        if (!Directory.Exists(defaultSaveDirectory))
+                        {
+                            Directory.CreateDirectory(defaultSaveDirectory);
+                        }
+
+                        var path = $"{defaultSaveDirectory}\\{rand}.xlsx";
 
                         //if directory does not exist, create!
                         Log.Trace($"Checking directory at {path}");
