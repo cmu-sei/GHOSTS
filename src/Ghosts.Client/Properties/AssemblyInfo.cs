@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("GHOSTS Client")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("CMU > SEI > CERT > MSE > Realism Team")]
-[assembly: AssemblyProduct("GHOSTS NPC Framework Client - please email ddupdyke@sei.cmu.edu with bugs/requests/other")]
+[assembly: AssemblyProduct("GHOSTS NPC Framework Client - please email ddupdyke[at]sei.cmu.edu with bugs/requests/other")]
 [assembly: AssemblyCopyright("Copyright © 2017 - 2021")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

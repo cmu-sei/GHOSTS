@@ -47,7 +47,7 @@ namespace Ghosts.Api
                     Contact = new OpenApiContact
                     {
                         Name = "Dustin Updyke",
-                        Email = "ddupdyke@sei.cmu.edu",
+                        Email = "ddupdyke[at]sei.cmu.edu",
                         Url = new Uri("https://sei.cmu.edu")
                     },
                     License = new OpenApiLicense

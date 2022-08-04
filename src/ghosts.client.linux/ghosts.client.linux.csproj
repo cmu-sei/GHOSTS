@@ -13,7 +13,7 @@
     <Authors>Dustin Updyke for Carnegie Mellon University</Authors>
     <Company>Carnegie Mellon University</Company>
     <Product>GHOSTS</Product>
-    <Description>GHOSTS NPC Orchestration Platform - please email ddupdyke@sei.cmu.edu with bugs/requests/other</Description>
+    <Description>GHOSTS NPC Orchestration Platform - please email ddupdyke[at]sei.cmu.edu with bugs/requests/other</Description>
     <Copyright>Carnegie Mellon University 2017</Copyright>
     <NoWarn>NU1701</NoWarn>
     <TargetFramework>net6.0</TargetFramework>

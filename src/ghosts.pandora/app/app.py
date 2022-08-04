@@ -285,7 +285,7 @@ class S(BaseHTTPRequestHandler):
             body = f"""<html><body><pre>
 GHOSTS PANDORA, v0.1
 Copyright 2022 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
-Part of the GHOSTS NPC Orchestration Platform - please email ddupdyke[-at-]sei.cmu.edu with bugs/requests/other.
+Part of the GHOSTS NPC Orchestration Platform - please email ddupdyke[at]sei.cmu.edu with bugs/requests/other.
 </pre><hr/>
 <h2>README</h2>
 <pre>
