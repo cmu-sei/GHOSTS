@@ -1,8 +1,8 @@
 ![GHOSTS Logo](https://github.com/cmu-sei/GHOSTS/blob/master/assets/ghosts-logo.jpg)
 
-GHOSTS simulates what anyone might do at a computer all day long. It creates documents, browses websites, downloads files. It uses all sorts of popular applications on many versions of Windows and Linux machines. Whether you're a friendly administrator or a powerful cyber-adversary, GHOSTS can replicate your expected behaviors.
+GHOSTS simulates what anyone might do at a computer all day long. It creates documents, browses websites, and downloads files. It uses all sorts of popular applications on many versions of Windows and Linux machines. Whether you're a friendly administrator or a powerful cyber-adversary, GHOSTS can replicate your expected behaviors.
 
-GHOSTS has many use-cases in cyber training and exercises, most notably for brining non-player characters (NPCs) to life within the environment, but GHOSTS can be used for many other purposes where realistic activity on a computer is needed we well.
+GHOSTS has many use-cases in cyber training and exercises, most notably for bringing non-player characters (NPCs) to life, but GHOSTS can be used for many other purposes where realistic activity on a computer is needed as well.
 
 # GHOSTS NPC AUTOMATION
 
