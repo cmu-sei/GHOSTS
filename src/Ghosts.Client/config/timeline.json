@@ -9,78 +9,9 @@
       "Loop": "True",
       "TimeLineEvents": [
         {
-          "Command": "explorer \\\\nec-file\\base",
+          "Command": "explorer \\\\file-server\\reports",
           "CommandArgs": [
             "exit"
-          ],
-          "DelayAfter": 900000,
-          "DelayBefore": 0
-        }
-      ]
-    },
-    {
-      "HandlerType": "Command",
-      "Initial": "",
-      "UtcTimeOn": "00:00:00",
-      "UtcTimeOff": "24:00:00",
-      "Loop": "True",
-      "TimeLineEvents": [
-        {
-          "Command": "explorer \\\\nec-file\\schedule",
-          "CommandArgs": [
-            "exit"
-          ],
-          "DelayAfter": 900000,
-          "DelayBefore": 0
-        }
-      ]
-    },
-    {
-      "HandlerType": "Command",
-      "Initial": "",
-      "UtcTimeOn": "00:00:00",
-      "UtcTimeOff": "24:00:00",
-      "Loop": "True",
-      "TimeLineEvents": [
-        {
-          "Command": "explorer \\\\nec-file\\reports",
-          "CommandArgs": [
-            "exit"
-          ],
-          "DelayAfter": 900000,
-          "DelayBefore": 0
-        }
-      ]
-    },
-
-    {
-      "HandlerType": "Outlook",
-      "Initial": "",
-      "UtcTimeOn": "00:00:00",
-      "UtcTimeOff": "24:00:00",
-      "Loop": "True",
-      "TimeLineEvents": [
-        {
-          "Command": "create",
-          "CommandArgs": [
-            "CurrentUser",
-            "random",
-            "random",
-            "random",
-            "Random",
-            "Random",
-            "PlainText",
-            ""
-          ],
-          "DelayAfter": 900000,
-          "DelayBefore": 0
-        },
-        {
-          "Command": "navigate",
-          "CommandArgs": [
-            "Outbox|5",
-            "Drafts|5",
-            "Inbox"
           ],
           "DelayAfter": 900000,
           "DelayBefore": 0

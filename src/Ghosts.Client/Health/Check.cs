@@ -16,25 +16,25 @@ namespace Ghosts.Client.Health
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
         private static readonly Logger _healthLog = LogManager.GetLogger("HEALTH");
-        private static FileSystemWatcher watcher = new FileSystemWatcher();
+        private static FileSystemWatcher _watcher = new FileSystemWatcher();
 
         private static DateTime _lastRead = DateTime.MinValue;
-        private List<Thread> _threads { get; set; }
+        private List<Thread> Threads { get; set; }
 
         public Check()
         {
-            this._threads = new List<Thread>();
+            this.Threads = new List<Thread>();
         }
 
         public void Run()
         {
             // now watch that file for changes
-            watcher = new FileSystemWatcher(ApplicationDetails.ConfigurationFiles.Path);
-            watcher.Filter = Path.GetFileName(ApplicationDetails.ConfigurationFiles.Health);
-            _log.Trace($"watching {watcher.Path}");
-            watcher.NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.FileName | NotifyFilters.Size;
-            watcher.EnableRaisingEvents = true;
-            watcher.Changed += new FileSystemEventHandler(OnChanged);
+            _watcher = new FileSystemWatcher(ApplicationDetails.ConfigurationFiles.Path);
+            _watcher.Filter = Path.GetFileName(ApplicationDetails.ConfigurationFiles.Health);
+            _log.Trace($"watching {_watcher.Path}");
+            _watcher.NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.FileName | NotifyFilters.Size;
+            _watcher.EnableRaisingEvents = true;
+            _watcher.Changed += OnChanged;
 
             Thread t = null;
             new Thread(() =>
@@ -49,15 +49,15 @@ namespace Ghosts.Client.Health
             if (t != null)
             {
                 _log.Trace($"HEALTH THREAD: {t.Name}");
-                this._threads.Add(t);
+                this.Threads.Add(t);
             }
         }
 
         public void Shutdown()
         {
-            if (this._threads != null)
+            if (this.Threads != null)
             {
-                foreach (var thread in this._threads)
+                foreach (var thread in this.Threads)
                 {
                     thread.Abort(null);
                 }
@@ -91,6 +91,7 @@ namespace Ghosts.Client.Health
                     _log.Debug(e);
                 }
             }
+            // ReSharper disable once FunctionNeverReturns
         }
 
         private void OnChanged(object source, FileSystemEventArgs e)
@@ -101,7 +102,7 @@ namespace Ghosts.Client.Health
             {
                 _lastRead = lastWriteTime;
                 _log.Trace("File: " + e.FullPath + " " + e.ChangeType);
-                _log.Trace($"Reloading {System.Reflection.MethodBase.GetCurrentMethod().DeclaringType}");
+                _log.Trace($"Reloading {System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType}");
 
                 // now terminate existing tasks and rerun
                 this.Shutdown();

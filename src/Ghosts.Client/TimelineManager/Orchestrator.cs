@@ -13,6 +13,7 @@ using System.Threading;
 using System.Security.Permissions;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Models;
+// ReSharper disable RedundantAssignment
 
 namespace Ghosts.Client.TimelineManager
 {
@@ -29,10 +30,10 @@ namespace Ghosts.Client.TimelineManager
         private bool _isSafetyNetRunning;
         private bool _isTempCleanerRunning;
 
-        private bool _isWordInstalled { get; set; }
-        private bool _isExcelInstalled { get; set; }
-        private bool _isPowerPointInstalled { get; set; }
-        private bool _isOutlookInstalled { get; set; }
+        private bool IsWordInstalled { get; set; }
+        private bool IsExcelInstalled { get; set; }
+        private bool IsPowerPointInstalled { get; set; }
+        private bool IsOutlookInstalled { get; set; }
 
         [PermissionSet(SecurityAction.Demand, Name ="FullTrust")]
         public void Run()
@@ -229,40 +230,40 @@ namespace Ghosts.Client.TimelineManager
             {
                 if (regWord != null)
                 {
-                    _isOutlookInstalled = true;
+                    IsOutlookInstalled = true;
                 }
 
-                _log.Trace($"Outlook is installed: {_isOutlookInstalled}");
+                _log.Trace($"Outlook is installed: {IsOutlookInstalled}");
             }
 
             using (var regWord = Registry.ClassesRoot.OpenSubKey("Word.Application"))
             {
                 if (regWord != null)
                 {
-                    _isWordInstalled = true;
+                    IsWordInstalled = true;
                 }
 
-                _log.Trace($"Word is installed: {_isWordInstalled}");
+                _log.Trace($"Word is installed: {IsWordInstalled}");
             }
 
             using (var regWord = Registry.ClassesRoot.OpenSubKey("Excel.Application"))
             {
                 if (regWord != null)
                 {
-                    _isExcelInstalled = true;
+                    IsExcelInstalled = true;
                 }
 
-                _log.Trace($"Excel is installed: {_isExcelInstalled}");
+                _log.Trace($"Excel is installed: {IsExcelInstalled}");
             }
 
             using (var regWord = Registry.ClassesRoot.OpenSubKey("PowerPoint.Application"))
             {
                 if (regWord != null)
                 {
-                    _isPowerPointInstalled = true;
+                    IsPowerPointInstalled = true;
                 }
 
-                _log.Trace($"PowerPoint is installed: {_isPowerPointInstalled}");
+                _log.Trace($"PowerPoint is installed: {IsPowerPointInstalled}");
             }
         }
 
@@ -287,7 +288,7 @@ namespace Ghosts.Client.TimelineManager
                         break;
                     case HandlerType.Word:
                         _log.Trace("Launching thread for word");
-                        if (_isWordInstalled)
+                        if (IsWordInstalled)
                         {
                             var pids = ProcessManager.GetPids(ProcessManager.ProcessNames.Word).ToList();
                             if (pids.Count > timeline.TimeLineHandlers.Count(x => x.HandlerType == HandlerType.Word))
@@ -301,7 +302,7 @@ namespace Ghosts.Client.TimelineManager
                         break;
                     case HandlerType.Excel:
                         _log.Trace("Launching thread for excel");
-                        if (_isExcelInstalled)
+                        if (IsExcelInstalled)
                         {
                             var pids = ProcessManager.GetPids(ProcessManager.ProcessNames.Excel).ToList();
                             if (pids.Count > timeline.TimeLineHandlers.Count(x => x.HandlerType == HandlerType.Excel))
@@ -329,7 +330,7 @@ namespace Ghosts.Client.TimelineManager
                         break;
                     case HandlerType.PowerPoint:
                         _log.Trace("Launching thread for powerpoint");
-                        if (_isPowerPointInstalled)
+                        if (IsPowerPointInstalled)
                         {
                             var pids = ProcessManager.GetPids(ProcessManager.ProcessNames.PowerPoint).ToList();
                             if (pids.Count > timeline.TimeLineHandlers.Count(x => x.HandlerType == HandlerType.PowerPoint))
@@ -347,14 +348,6 @@ namespace Ghosts.Client.TimelineManager
                         {
                             _ = new Outlook(handler);
                         });
-                        break;
-                    case HandlerType.BrowserIE:
-                        //IE demands COM apartmentstate be STA so diff thread creation required
-                        t = new Thread(() =>
-                        {
-                            _ = new BrowserIE(handler);
-                        });
-                        t.SetApartmentState(ApartmentState.STA);
                         break;
                     case HandlerType.Notepad:
                         //TODO

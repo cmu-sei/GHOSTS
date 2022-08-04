@@ -23,7 +23,7 @@ namespace Ghosts.Client.TimelineManager
             {
                 if (Program.Configuration.Listener.Port > 0)
                 {
-                    new PortListener();
+                    var _ = new PortListener();
                 }
             }
             catch (Exception e)
@@ -47,7 +47,7 @@ namespace Ghosts.Client.TimelineManager
                         _log.Trace($"DirectoryListener created DirIn: {Out})");
                     }
 
-                    new DirectoryListener();
+                    var _ = new DirectoryListener();
                 }
                 else
                 {
@@ -101,6 +101,9 @@ namespace Ghosts.Client.TimelineManager
                     var raw = File.ReadAllText(e.FullPath);
 
                     var timeline = JsonConvert.DeserializeObject<Timeline>(raw);
+
+                    if (timeline is null)
+                        return;
 
                     foreach (var timelineHandler in timeline.TimeLineHandlers)
                     {
@@ -210,6 +213,10 @@ namespace Ghosts.Client.TimelineManager
             try
             {
                 var timelineHandler = JsonConvert.DeserializeObject<TimelineHandler>(command);
+
+                if (timelineHandler is null)
+                    throw new DataMisalignedException(
+                        "Portlistener received something that could not be interpreted as a timeline");
 
                 foreach (var evs in timelineHandler.TimeLineEvents)
                 {

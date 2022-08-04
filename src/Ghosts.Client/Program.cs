@@ -8,7 +8,6 @@ using System.Net;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
-using System.Web.ClientServices;
 using CommandLine;
 using Ghosts.Client.Comms;
 using Ghosts.Client.Infrastructure;
@@ -48,7 +47,7 @@ namespace Ghosts.Client
             EmptyWorkingSet(Process.GetCurrentProcess().Handle);
         }
 
-        private static void minimizeMemory()
+        private static void MinimizeMemory()
         {
             GC.Collect(GC.MaxGeneration);
             GC.WaitForPendingFinalizers();
@@ -81,7 +80,7 @@ namespace Ghosts.Client
         static void Main(string[] args)
         {
             MinimizeFootprint();
-            minimizeMemory();
+            MinimizeMemory();
             
             try
             {
@@ -161,7 +160,7 @@ namespace Ghosts.Client
             _log.Trace($"CheckID: {Program.CheckId.Id}");
 
             //connect to command server for 1) client id 2) get updates and 3) sending logs/surveys
-            Comms.Updates.Run();
+            Updates.Run();
 
             //local survey gathers information such as drives, accounts, logs, etc.
             if (Configuration.Survey.IsEnabled)

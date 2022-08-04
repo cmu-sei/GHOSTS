@@ -4,7 +4,6 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
-using Ghosts.Client.Infrastructure;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using NLog;

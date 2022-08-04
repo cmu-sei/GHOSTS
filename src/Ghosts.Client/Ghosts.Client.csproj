@@ -17,8 +17,8 @@
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
     <IsWebBootstrapper>false</IsWebBootstrapper>
-    <ReleaseVersion>6.0.1.0</ReleaseVersion>
-    <ApplicationVersion>6.0.1.0</ApplicationVersion>
+    <ReleaseVersion>6.1.0.0</ReleaseVersion>
+    <ApplicationVersion>6.1.0.0</ApplicationVersion>
     <PublishUrl>C:\Projects\ghosts\Ghosts.Client\Publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -524,9 +524,6 @@
       <HintPath>..\packages\NetOffice.Core.Net45.1.7.4.4\lib\net45\VBIDEApi.dll</HintPath>
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
-    <Reference Include="WatiN.Core, Version=2.1.0.1196, Culture=neutral, PublicKeyToken=db7cfd3acb5ad44e, processorArchitecture=MSIL">
-      <HintPath>..\packages\WatiN.2.1.0\lib\net40\WatiN.Core.dll</HintPath>
-    </Reference>
     <Reference Include="WebDriver, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Selenium.WebDriver.4.3.0\lib\net46\WebDriver.dll</HintPath>
     </Reference>
@@ -571,7 +568,6 @@
     <Compile Include="Comms\Updates.cs" />
     <Compile Include="Handlers\BrowserChrome.cs" />
     <Compile Include="Handlers\BrowserFirefox.cs" />
-    <Compile Include="Handlers\BrowserIE.cs" />
     <Compile Include="Handlers\Cmd.cs" />
     <Compile Include="Handlers\Excel.cs" />
     <Compile Include="Handlers\BaseHandler.cs" />
@@ -617,7 +613,6 @@
     <None Include="Sample Timelines\Administrative Commands.json" />
     <None Include="Sample Timelines\BrowserChrome.json" />
     <None Include="Sample Timelines\BrowserFirefox.json" />
-    <None Include="Sample Timelines\BrowserIE.json" />
     <None Include="Sample Timelines\Notepad.json" />
     <None Include="Sample Timelines\Clicks.json" />
     <None Include="Sample Timelines\command.json" />
@@ -629,7 +624,6 @@
     <Compile Include="TimelineManager\Orchestrator.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <None Include="Sample Timelines\IE-one-time.json" />
     <None Include="Sample Timelines\outlook.json" />
     <None Include="Sample Timelines\PowerPoint.json" />
     <None Include="Sample Timelines\Print.json" />
