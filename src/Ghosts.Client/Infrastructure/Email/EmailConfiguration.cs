@@ -141,7 +141,7 @@ namespace Ghosts.Client.Infrastructure.Email
             {
                 var o = raw.Split(Convert.ToChar(":"));
 
-                if (o.GetUpperBound(0) > 1) //supplied list
+                if (o.GetUpperBound(0) > 0) //supplied list
                 {
                     var l = o[1];
                     var emails = l.Split(Convert.ToChar(","));
