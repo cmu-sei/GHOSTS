@@ -79,8 +79,8 @@ namespace Ghosts.Client.Handlers
 
                         if (timeline != null)
                         {
-                            var processIds = ProcessManager.GetPids(ProcessManager.ProcessNames.PowerPoint).ToList();
-                            if (processIds.Count > 2 && processIds.Count > timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.PowerPoint))
+                            var processIds = ProcessManager.GetPids(ProcessManager.ProcessNames.PowerPoint).Count();
+                            if (processIds > 2 && processIds > timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.PowerPoint))
                             {
                                 return;
                             }
@@ -192,6 +192,9 @@ namespace Ghosts.Client.Handlers
                             Thread.Sleep(timelineEvent.DelayAfter - writeSleep);
                         }
                         
+                        presentation.Dispose();
+                        presentation = null;
+
                         // close power point and dispose reference
                         powerApplication.Quit();
                         powerApplication.Dispose();

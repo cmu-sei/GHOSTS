@@ -31,8 +31,8 @@ namespace Ghosts.Client.Handlers
                     {
                         if (timeline != null)
                         {
-                            var processIds = ProcessManager.GetPids(ProcessManager.ProcessNames.Excel).ToList();
-                            if (processIds.Count > timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.Excel))
+                            var processIds = ProcessManager.GetPids(ProcessManager.ProcessNames.Excel).Count();
+                            if (processIds > timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.Excel))
                             {
                                 continue;
                             }
@@ -70,7 +70,7 @@ namespace Ghosts.Client.Handlers
                     try
                     {
                         Log.Trace($"Excel event - {timelineEvent}");
-                        Infrastructure.WorkingHours.Is(handler);
+                        WorkingHours.Is(handler);
 
                         if (timelineEvent.DelayBefore > 0)
                         {
@@ -104,43 +104,48 @@ namespace Ghosts.Client.Handlers
 
 
                         var list = RandomText.GetDictionary.GetDictionaryList();
-                        var rt = new RandomText(list.ToArray());
-                        rt.AddSentence(10);
-
-                        workSheet.Cells[1, 1].Value = rt.Content;
+                        using (var rt = new RandomText(list.ToArray()))
+                        {
+                            rt.AddSentence(10);
+                            workSheet.Cells[1, 1].Value = rt.Content;
+                            workSheet.Cells[1, 1].Dispose();
+                        }
 
                         for (var i = 2; i < 100; i++)
-                        {
-                            for (var j = 1; j < 100; j++)
                             {
-                                if (_random.Next(0, 20) != 1) // 1 in 20 cells are blank
-                                    workSheet.Cells[i, j].Value = _random.Next(0, 999999999);
+                                for (var j = 1; j < 100; j++)
+                                {
+                                    if (_random.Next(0, 20) != 1) // 1 in 20 cells are blank
+                                    {
+                                        workSheet.Cells[i, j].Value = _random.Next(0, 999999999);
+                                        workSheet.Cells[i, j].Dispose();
+                                }
+                                }
                             }
-                        }
 
-                        for (var i = 0; i < _random.Next(1,30); i++)
-                        {
-                            var range = GetRandomRange();
-                            // draw back color and perform the BorderAround method
-                            workSheet.Range(range).Interior.Color =
-                                utils.Color.ToDouble(StylingExtensions.GetRandomColor());
-                            workSheet.Range(range).BorderAround(XlLineStyle.xlContinuous, XlBorderWeight.xlMedium,
-                                XlColorIndex.xlColorIndexAutomatic);
+                        //for (var i = 0; i < _random.Next(1,30); i++)
+                        //{
+                        //    var range = GetRandomRange();
+                        //    // draw back color and perform the BorderAround method
+                        //    workSheet.Range(range).Interior.Color =
+                        //        utils.Color.ToDouble(StylingExtensions.GetRandomColor());
+                        //    workSheet.Range(range).BorderAround(XlLineStyle.xlContinuous, XlBorderWeight.xlMedium,
+                        //        XlColorIndex.xlColorIndexAutomatic);
 
-                            range = GetRandomRange();
-                            // draw back color and border the range explicitly
-                            workSheet.Range(range).Interior.Color =
-                                utils.Color.ToDouble(StylingExtensions.GetRandomColor());
-                            workSheet.Range(range)
-                                .Borders[(Excel.Enums.XlBordersIndex) XlBordersIndex.xlInsideHorizontal]
-                                .LineStyle = XlLineStyle.xlDouble;
-                            workSheet.Range(range)
-                                .Borders[(Excel.Enums.XlBordersIndex) XlBordersIndex.xlInsideHorizontal]
-                                .Weight = 4;
-                            workSheet.Range(range)
-                                .Borders[(Excel.Enums.XlBordersIndex) XlBordersIndex.xlInsideHorizontal]
-                                .Color = utils.Color.ToDouble(StylingExtensions.GetRandomColor());
-                        }
+                        //    range = GetRandomRange();
+                        //    // draw back color and border the range explicitly
+                        //    workSheet.Range(range).Interior.Color =
+                        //        utils.Color.ToDouble(StylingExtensions.GetRandomColor());
+                        //    workSheet.Range(range)
+                        //        .Borders[(Excel.Enums.XlBordersIndex) XlBordersIndex.xlInsideHorizontal]
+                        //        .LineStyle = XlLineStyle.xlDouble;
+                        //    workSheet.Range(range)
+                        //        .Borders[(Excel.Enums.XlBordersIndex) XlBordersIndex.xlInsideHorizontal]
+                        //        .Weight = 4;
+                        //    workSheet.Range(range)
+                        //        .Borders[(Excel.Enums.XlBordersIndex) XlBordersIndex.xlInsideHorizontal]
+                        //        .Color = utils.Color.ToDouble(StylingExtensions.GetRandomColor());
+                        //}
 
                         var writeSleep = ProcessManager.Jitter(100);
                         Thread.Sleep(writeSleep);
@@ -219,12 +224,12 @@ namespace Ghosts.Client.Handlers
                         if (_random.Next(100) < 50)
                             workBook.Close();
 
-                        if (timelineEvent.DelayAfter > 0)
-                        {
-                            //sleep and leave the app open
-                            Log.Trace($"Sleep after for {timelineEvent.DelayAfter}");
-                            Thread.Sleep(timelineEvent.DelayAfter - writeSleep);
-                        }
+                        
+                        workSheet.Dispose();
+                        workSheet = null;
+
+                        workBook.Dispose();
+                        workBook = null;
 
                         // close excel and dispose reference
                         excelApplication.Quit();
@@ -250,6 +255,14 @@ namespace Ghosts.Client.Handlers
                         }
 
                         GC.Collect();
+
+                        if (timelineEvent.DelayAfter > 0)
+                        {
+                            //sleep and leave the app open
+                            Log.Trace($"Sleep after for {timelineEvent.DelayAfter}");
+                            Thread.Sleep(timelineEvent.DelayAfter - writeSleep);
+                        }
+
                     }
                     catch (Exception e)
                     {

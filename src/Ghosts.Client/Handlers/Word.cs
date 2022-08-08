@@ -80,8 +80,8 @@ namespace Ghosts.Client.Handlers
 
                         if (timeline != null)
                         {
-                            var processIds = ProcessManager.GetPids(ProcessManager.ProcessNames.Word).ToList();
-                            if (processIds.Count > timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.Word))
+                            var processIds = ProcessManager.GetPids(ProcessManager.ProcessNames.Word).Count();
+                            if (processIds > timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.Word))
                             {
                                 return;
                             }
@@ -112,9 +112,11 @@ namespace Ghosts.Client.Handlers
                         
                         // insert some text
                         var list = RandomText.GetDictionary.GetDictionaryList();
-                        var rt = new RandomText(list.ToArray());
-                        rt.AddContentParagraphs(1, 50);
-                        wordApplication.Selection.TypeText(rt.Content);
+                        using (var rt = new RandomText(list))
+                        {
+                            rt.AddContentParagraphs(1, 50);
+                            wordApplication.Selection.TypeText(rt.Content);
+                        }
 
                         var writeSleep = ProcessManager.Jitter(100);
                         Thread.Sleep(writeSleep);
@@ -210,6 +212,9 @@ namespace Ghosts.Client.Handlers
                             Log.Trace($"Sleep after for {timelineEvent.DelayAfter}");
                             Thread.Sleep(timelineEvent.DelayAfter - writeSleep);
                         }
+
+                        newDocument.Dispose();
+                        newDocument = null;
 
                         wordApplication.Quit();
                         wordApplication.Dispose();

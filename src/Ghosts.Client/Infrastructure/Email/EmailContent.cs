@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Management;
 using System.Text;
 using FileHelpers;
 using Ghosts.Domain.Code;
@@ -92,7 +93,7 @@ namespace Ghosts.Client.Infrastructure.Email
             {
                 if (line > 0)
                 {
-                    var splits = new List<string>() { "from:", "Original", "UNCLASSIFIED" };
+                    var splits = new string[] { "from:", "Original", "UNCLASSIFIED" };
                     foreach (var split in splits)
                     {
                         if (word.StartsWith(split, StringComparison.InvariantCultureIgnoreCase))
@@ -102,7 +103,7 @@ namespace Ghosts.Client.Infrastructure.Email
                         }
                     }
 
-                    splits = new List<string>() { "subject:", "to:", "date:", "sent:", "timestamp:", "subject", "Timestamp:", "ID:" };
+                    splits = new string[] { "subject:", "to:", "date:", "sent:", "timestamp:", "subject", "Timestamp:", "ID:" };
                     foreach (var split in splits)
                     {
                         if (word.StartsWith(split, StringComparison.InvariantCultureIgnoreCase))

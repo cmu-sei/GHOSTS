@@ -2,7 +2,6 @@
 
 using Ghosts.Client.Infrastructure;
 using Ghosts.Domain;
-using Ghosts.Domain.Code;
 using System;
 using System.IO;
 using System.Threading;
@@ -100,15 +99,16 @@ namespace Ghosts.Client.Handlers
                         var path = GetSavePath(typeof(LightExcelHandler), handler, timelineEvent, "docx");
 
                         var list = RandomText.GetDictionary.GetDictionaryList();
-                        var rt = new RandomText(list.ToArray());
-                        rt.AddSentence(5);
+                        using (var rt = new RandomText(list))
+                        {
+                            rt.AddSentence(5);
 
-                        var title = rt.Content;
-                        rt.AddContentParagraphs(2, 3, 5, 7, 22);
-                        var paragraph = rt.Content;
-
-                        Domain.Code.Office.Word.Write(path, title, paragraph);
-
+                            var title = rt.Content;
+                            rt.AddContentParagraphs(2, 3, 5, 7, 22);
+                            var paragraph = rt.Content;
+                            Domain.Code.Office.Word.Write(path, title, paragraph);
+                        }
+                        
                         FileListing.Add(path);
                         Report(handler.HandlerType.ToString(), timelineEvent.Command,
                             timelineEvent.CommandArgs[0].ToString());
@@ -163,10 +163,11 @@ namespace Ghosts.Client.Handlers
                         var path = GetSavePath(typeof(LightExcelHandler), handler, timelineEvent, "xlsx");
 
                         var list = RandomText.GetDictionary.GetDictionaryList();
-                        var rt = new RandomText(list.ToArray());
-                        rt.AddSentence(5);
-
-                        Domain.Code.Office.Excel.Write(path, rt.Content);
+                        using (var rt = new RandomText(list))
+                        {
+                            rt.AddSentence(5);
+                            Domain.Code.Office.Excel.Write(path, rt.Content);
+                        }
 
                         FileListing.Add(path);
                         Report(handler.HandlerType.ToString(), timelineEvent.Command,

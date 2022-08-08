@@ -3,7 +3,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
+using Ghosts.Domain.Code.Helpers;
 using Newtonsoft.Json;
 
 namespace Ghosts.Client.Infrastructure
@@ -11,11 +13,19 @@ namespace Ghosts.Client.Infrastructure
     /// <summary>
     /// Creates random text for emails - uses dictionary.json in the config folder
     /// </summary>
-    public class RandomText
+    public class RandomText : IDisposable
     {
         private static readonly Random _random = new Random();
-        private readonly StringBuilder _builder;
-        private readonly string[] _words;
+        private StringBuilder _builder;
+        private IEnumerable<string> _words;
+
+        public string Content => _builder.ToString();
+
+        public void Dispose()
+        {
+            this._builder = null;
+            this._words = null;
+        }
 
         public static char GetRandomCapitalLetter()
         {
@@ -32,7 +42,7 @@ namespace Ghosts.Client.Infrastructure
             return chars[_random.Next(index, chars.Length)];
         }
 
-        public RandomText(string[] words)
+        public RandomText(IEnumerable<string> words)
         {
             _builder = new StringBuilder();
             _words = words;
@@ -64,11 +74,13 @@ namespace Ghosts.Client.Infrastructure
 
         public void AddSentence(int numberWords)
         {
+            var newWords = new List<string>();
+            newWords.AddRange(this._words);
             var b = new StringBuilder();
             // Add n words together.
             for (var i = 0; i < numberWords; i++) // Number of words
             {
-                b.Append(_words[_random.Next(_words.Length)]).Append(" ");
+                b.Append(_words.PickRandom()).Append(" ");
             }
             var sentence = b.ToString().Trim() + ". ";
             // Uppercase sentence
@@ -76,10 +88,7 @@ namespace Ghosts.Client.Infrastructure
             // Add this sentence to the class
             _builder.Append(sentence);
         }
-
-        public string Content => _builder.ToString();
-
-
+        
         public static class GetDictionary
         {
             public static List<string> GetDictionaryList()

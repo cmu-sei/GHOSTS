@@ -6,6 +6,7 @@ using Ghosts.Domain;
 using Microsoft.Win32;
 using NLog;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -219,6 +220,22 @@ namespace Ghosts.Client.TimelineManager
                 }
                 finally
                 {
+                    try
+                    {
+                        using (var proc = Process.GetCurrentProcess())
+                        {
+                            Console.WriteLine($"Minimizing footprint and memory. Current is {proc.PrivateMemorySize64 / (1024 * 1024)}...");
+                            Program.MinimizeFootprint();
+                            Program.MinimizeMemory();
+                            Console.WriteLine($"Minimized footprint and memory.  Current is {proc.PrivateMemorySize64 / (1024 * 1024)}...");
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                    }
+
+
                     Thread.Sleep(300000); //clean up every 5 minutes
                 }
             }

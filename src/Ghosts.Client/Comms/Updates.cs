@@ -286,17 +286,8 @@ namespace Ghosts.Client.Comms
 
         private static void PostResults(string fileName, ResultMachine machine, string postUrl, bool isDeletable = false)
         {
-            var sb = new StringBuilder();
-            var data = File.ReadLines(fileName);
-            foreach (var d in data)
-            {
-                sb.AppendLine(d);
-            }
-
-            var r = new TransferLogDump {Log = sb.ToString()};
-
+            var r = new TransferLogDump {Log = File.ReadAllText(fileName) };
             var payload = JsonConvert.SerializeObject(r);
-
             if (Program.Configuration.ClientResults.IsSecure)
             {
                 payload = Crypto.EncryptStringAes(payload, machine.Name);

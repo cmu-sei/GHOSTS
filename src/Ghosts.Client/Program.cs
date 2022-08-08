@@ -40,14 +40,14 @@ namespace Ghosts.Client
 
         // minimize memory use
         [DllImport("psapi.dll")]
-        static extern int EmptyWorkingSet(IntPtr hwProc);
+        internal static extern int EmptyWorkingSet(IntPtr hwProc);
 
-        static void MinimizeFootprint()
+        internal static void MinimizeFootprint()
         {
             EmptyWorkingSet(Process.GetCurrentProcess().Handle);
         }
 
-        private static void MinimizeMemory()
+        internal static void MinimizeMemory()
         {
             GC.Collect(GC.MaxGeneration);
             GC.WaitForPendingFinalizers();
@@ -57,7 +57,7 @@ namespace Ghosts.Client
 
         [DllImport("kernel32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool SetProcessWorkingSetSize(IntPtr process,
+        internal static extern bool SetProcessWorkingSetSize(IntPtr process,
             UIntPtr minimumWorkingSetSize, UIntPtr maximumWorkingSetSize);
         // end minimize memory use
 
