@@ -18,7 +18,7 @@
     </NuGetPackageImportStamp>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <ReleaseVersion>6.1.0.0</ReleaseVersion>
-    <ApplicationVersion>6.1.1.0</ApplicationVersion>
+    <ApplicationVersion>6.1.2.0</ApplicationVersion>
     <PublishUrl>C:\Projects\ghosts\Ghosts.Client\Publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>

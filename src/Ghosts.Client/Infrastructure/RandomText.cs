@@ -74,15 +74,7 @@ namespace Ghosts.Client.Infrastructure
 
         public void AddSentence(int numberWords)
         {
-            var newWords = new List<string>();
-            newWords.AddRange(this._words);
-            var b = new StringBuilder();
-            // Add n words together.
-            for (var i = 0; i < numberWords; i++) // Number of words
-            {
-                b.Append(_words.PickRandom()).Append(" ");
-            }
-            var sentence = b.ToString().Trim() + ". ";
+            var sentence = string.Join(" ", _words.PickRandom(numberWords)).Trim() + ". ";
             // Uppercase sentence
             sentence = char.ToUpper(sentence[0]) + sentence.Substring(1);
             // Add this sentence to the class
