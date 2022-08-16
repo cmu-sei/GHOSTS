@@ -266,6 +266,12 @@ namespace Ghosts.Client.Comms
                     {
                         if (!file.EndsWith("app.log") && file != fileName)
                         {
+                            while(IsFileLocked(new FileInfo(file)))
+                            {
+                                var sleepTime = 5000;
+                                _log.Trace($"{file} is locked, sleeping for {sleepTime}...");
+                                Thread.Sleep(sleepTime);
+                            }
                             PostResults(file, machine, postUrl, true);
                         }
                     }
@@ -374,6 +380,28 @@ namespace Ghosts.Client.Comms
                 _log.Debug($"Problem posting logs to server from { ApplicationDetails.InstanceFiles.SurveyResults } to { Program.Configuration.Survey.PostUrl }");
                 _log.Error(e);
             }
+        }
+
+        private static bool IsFileLocked(FileInfo file)
+        {
+            try
+            {
+                using (var stream = file.Open(FileMode.Open, FileAccess.Read, FileShare.None))
+                {
+                    stream.Close();
+                }
+            }
+            catch (IOException)
+            {
+                //the file is unavailable because it is:
+                //(1) still being written to
+                //(2) being processed by another thread
+                //(3) does not exist
+                return true;
+            }
+
+            //file is not locked
+            return false;
         }
     }
 }

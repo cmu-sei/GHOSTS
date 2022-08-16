@@ -8,6 +8,7 @@ using WindowsInput;
 using WindowsInput.Native;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
+using Ghosts.Domain.Code.Helpers;
 
 namespace Ghosts.Client.Handlers
 {
@@ -103,7 +104,7 @@ namespace Ghosts.Client.Handlers
 
         public void Kill()
         {
-            this.Process.Kill();
+            this.Process.SafeKill();
         }
     }
 }

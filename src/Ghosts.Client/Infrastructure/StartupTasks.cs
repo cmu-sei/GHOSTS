@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Windows.Forms;
 using Ghosts.Client.Infrastructure.Email;
+using Ghosts.Domain.Code.Helpers;
 using NLog;
 using Microsoft.Win32;
 
@@ -70,14 +71,7 @@ namespace Ghosts.Client.Infrastructure
                             {
                                 if (process.Id != ghosts.Id) //don't kill thyself
                                 {
-                                    try
-                                    {
-                                        process.Kill();
-                                    }
-                                    catch
-                                    {
-                                        //
-                                    }
+                                    process.SafeKill();
                                 }
                             }
                         }).Start();

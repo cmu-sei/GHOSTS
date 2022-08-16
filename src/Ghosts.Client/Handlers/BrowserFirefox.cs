@@ -58,40 +58,48 @@ namespace Ghosts.Client.Handlers
         {
             try
             {
-                Driver = GetDriver(handler);
-                base.Driver = Driver;
-
-                if (handler.HandlerArgs.ContainsKey("javascript-enable"))
+                using (Driver = GetDriver(handler))
                 {
-                    JS = (IJavaScriptExecutor)Driver;
-                    base.JS = JS;
-                }
+                    base.Driver = Driver;
 
-                //hack: bad urls used in the past...
-                if (handler.Initial.Equals("") ||
-                    handler.Initial.Equals("about:internal", StringComparison.InvariantCultureIgnoreCase) ||
-                    handler.Initial.Equals("about:external", StringComparison.InvariantCultureIgnoreCase))
-                {
-                    handler.Initial = "about:blank";
-                }
-
-                Driver.Navigate().GoToUrl(handler.Initial);
-
-                if (handler.Loop)
-                {
-                    while (true)
+                    if (handler.HandlerArgs.ContainsKey("javascript-enable"))
                     {
-                        if (Driver.CurrentWindowHandle == null)
-                        {
-                            throw new Exception("Firefox window handle not available");
-                        }
+                        JS = (IJavaScriptExecutor)Driver;
+                        base.JS = JS;
+                    }
 
+                    //hack: bad urls used in the past...
+                    if (handler.Initial.Equals("") ||
+                        handler.Initial.Equals("about:internal", StringComparison.InvariantCultureIgnoreCase) ||
+                        handler.Initial.Equals("about:external", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        handler.Initial = "about:blank";
+                    }
+
+                    try
+                    {
+                        Driver.Navigate().GoToUrl(handler.Initial);
+                    }
+                    catch
+                    {
+                    }
+
+                    if (handler.Loop)
+                    {
+                        while (true)
+                        {
+                            if (Driver.CurrentWindowHandle == null)
+                            {
+                                throw new Exception("Firefox window handle not available");
+                            }
+
+                            ExecuteEvents(handler);
+                        }
+                    }
+                    else
+                    {
                         ExecuteEvents(handler);
                     }
-                }
-                else
-                {
-                    ExecuteEvents(handler);
                 }
             }
             catch (Exception e)
@@ -101,8 +109,20 @@ namespace Ghosts.Client.Handlers
             }
             finally
             {
-                ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.Firefox);
+                try
+                {
+                    Driver.Quit();
+                }
+                catch { }
+
+                try
+                {
+                    Driver.Dispose();
+                }
+                catch { }
+
                 ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.GeckoDriver);
+                ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.Firefox);
             }
 
             return true;

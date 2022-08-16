@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Management;
+using Ghosts.Domain.Code.Helpers;
 
 namespace Ghosts.Client.Infrastructure
 {
@@ -33,6 +34,7 @@ namespace Ghosts.Client.Infrastructure
 
         public static void KillProcessAndChildrenByHandler(TimelineHandler handler)
         {
+            _log.Trace($"Killing: {handler.HandlerType}...");
             switch (handler.HandlerType)
             {
                 case HandlerType.BrowserChrome:
@@ -78,13 +80,11 @@ namespace Ghosts.Client.Infrastructure
                         if (process.Id == thisPid) //don't kill thyself
                             continue;
 
-                        process.Kill();
-                        process.WaitForExit();
-                        _log.Trace($"Successfully killed {procName}");
+                        process.SafeKill();
                     }
                     catch (Exception e)
                     {
-                        _log.Trace($"Killing {procName} threw exception - {e}");
+                        _log.Trace($"Closing {procName} threw exception - {e}");
                     }
                 }
             }
@@ -114,7 +114,7 @@ namespace Ghosts.Client.Infrastructure
                 try
                 {
                     var proc = Process.GetProcessById(pid);
-                    proc.Kill();
+                    proc.SafeKill();
                 }
                 catch (Exception e)
                 {
