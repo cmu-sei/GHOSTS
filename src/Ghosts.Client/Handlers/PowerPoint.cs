@@ -180,8 +180,8 @@ namespace Ghosts.Client.Handlers
                             {
                                 // Save document into PDF Format
                                 var outputFileName = timelineEvent.CommandArgs.Contains("pdf-vary-filenames")
-                                    ? $"{RandomFilename.Generate()}.pdf"
-                                    : presentation.FullName.Replace(".pptx", ".pdf");
+                                    ? $"{defaultSaveDirectory}\\{RandomFilename.Generate()}.pdf"
+                                    : path.Replace(".pptx", ".pdf");
                                 object fileFormat = PpSaveAsFileType.ppSaveAsPDF;
 
                                 presentation.SaveAs(outputFileName, fileFormat, MsoTriState.msoCTrue);

@@ -219,8 +219,8 @@ namespace Ghosts.Client.Handlers
                             if (timelineEvent.CommandArgs.Contains("pdf"))
                             {
                                 var pdfFileName = timelineEvent.CommandArgs.Contains("pdf-vary-filenames")
-                                    ? $"{RandomFilename.Generate()}.pdf"
-                                    : workBook.FullName.Replace(".xlsx", ".pdf");
+                                    ? $"{defaultSaveDirectory}\\{RandomFilename.Generate()}.pdf"
+                                    : path.Replace(".xlsx", ".pdf");
                                 // Save document into PDF Format
                                 workBook.ExportAsFixedFormat(NetOffice.ExcelApi.Enums.XlFixedFormatType.xlTypePDF,
                                     pdfFileName);

@@ -198,8 +198,8 @@ namespace Ghosts.Client.Handlers
                                 // Save document into PDF Format
                                 object oMissing = System.Reflection.Missing.Value;
                                 object outputFileName = timelineEvent.CommandArgs.Contains("pdf-vary-filenames")
-                                    ? $"{RandomFilename.Generate()}.pdf"
-                                    : newDocument.FullName.Replace(".docx", ".pdf");
+                                    ? $"{defaultSaveDirectory}\\{RandomFilename.Generate()}.pdf"
+                                    : path.Replace(".docx", ".pdf");
                                 object fileFormat = WdSaveFormat.wdFormatPDF;
 
                                 newDocument.SaveAs(outputFileName, fileFormat, oMissing, oMissing,
