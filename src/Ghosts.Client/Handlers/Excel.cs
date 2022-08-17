@@ -2,14 +2,12 @@
 
 using Ghosts.Client.Infrastructure;
 using Ghosts.Domain;
-using Microsoft.Office.Interop.Excel;
 using System;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using Ghosts.Domain.Code.Helpers;
-using NetOffice.ExcelApi.Tools;
 using Newtonsoft.Json;
 using Excel = NetOffice.ExcelApi;
 
@@ -94,59 +92,23 @@ namespace Ghosts.Client.Handlers
                                })
                         {
 
-                            // create a utils instance, not need for but helpful to keep the lines of code low
-                            var utils = new CommonUtils(excelApplication);
-
                             Log.Trace("Excel adding workbook");
                             // add a new workbook
                             var workBook = excelApplication.Workbooks.Add();
                             Log.Trace("Excel adding worksheet");
                             var workSheet = (Excel.Worksheet)workBook.Worksheets[1];
 
-
-                            var list = RandomText.GetDictionary.GetDictionaryList();
-                            using (var rt = new RandomText(list.ToArray()))
+                            for (var i = 2; i < 10; i++)
                             {
-                                rt.AddSentence(10);
-                                workSheet.Cells[1, 1].Value = rt.Content;
-                                workSheet.Cells[1, 1].Dispose();
-                            }
-
-                            for (var i = 2; i < 100; i++)
-                            {
-                                for (var j = 1; j < 100; j++)
+                                for (var j = 1; j < 10; j++)
                                 {
-                                    if (_random.Next(0, 20) != 1) // 1 in 20 cells are blank
+                                    if (_random.Next(0, 30) != 1) // 1 in x cells are blank
                                     {
-                                        workSheet.Cells[i, j].Value = _random.Next(0, 999999999);
+                                        workSheet.Cells[i, j].Value = _random.Next(0, 9999);
                                         workSheet.Cells[i, j].Dispose();
                                     }
                                 }
                             }
-
-                            //for (var i = 0; i < _random.Next(1,30); i++)
-                            //{
-                            //    var range = GetRandomRange();
-                            //    // draw back color and perform the BorderAround method
-                            //    workSheet.Range(range).Interior.Color =
-                            //        utils.Color.ToDouble(StylingExtensions.GetRandomColor());
-                            //    workSheet.Range(range).BorderAround(XlLineStyle.xlContinuous, XlBorderWeight.xlMedium,
-                            //        XlColorIndex.xlColorIndexAutomatic);
-
-                            //    range = GetRandomRange();
-                            //    // draw back color and border the range explicitly
-                            //    workSheet.Range(range).Interior.Color =
-                            //        utils.Color.ToDouble(StylingExtensions.GetRandomColor());
-                            //    workSheet.Range(range)
-                            //        .Borders[(Excel.Enums.XlBordersIndex) XlBordersIndex.xlInsideHorizontal]
-                            //        .LineStyle = XlLineStyle.xlDouble;
-                            //    workSheet.Range(range)
-                            //        .Borders[(Excel.Enums.XlBordersIndex) XlBordersIndex.xlInsideHorizontal]
-                            //        .Weight = 4;
-                            //    workSheet.Range(range)
-                            //        .Borders[(Excel.Enums.XlBordersIndex) XlBordersIndex.xlInsideHorizontal]
-                            //        .Color = utils.Color.ToDouble(StylingExtensions.GetRandomColor());
-                            //}
 
                             Thread.Sleep(writeSleep);
 

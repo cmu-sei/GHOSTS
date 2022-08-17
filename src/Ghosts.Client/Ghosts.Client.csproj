@@ -14,11 +14,7 @@
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
     <IsWebBootstrapper>false</IsWebBootstrapper>
-    <ReleaseVersion>6.1.0.0</ReleaseVersion>
-    <ApplicationVersion>6.1.5.0</ApplicationVersion>
     <PublishUrl>C:\Projects\ghosts\Ghosts.Client\Publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
