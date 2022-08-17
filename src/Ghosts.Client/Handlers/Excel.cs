@@ -86,32 +86,33 @@ namespace Ghosts.Client.Handlers
                             }
                         }
 
-                        // start excel and turn off msg boxes
-                        var excelApplication = new Excel.Application
+                        var writeSleep = ProcessManager.Jitter(100);
+                        using (var excelApplication = new Excel.Application
+                               {
+                                   DisplayAlerts = false,
+                                   Visible = true
+                               })
                         {
-                            DisplayAlerts = false,
-                            Visible = true
-                        };
 
-                        // create a utils instance, not need for but helpful to keep the lines of code low
-                        var utils = new CommonUtils(excelApplication);
+                            // create a utils instance, not need for but helpful to keep the lines of code low
+                            var utils = new CommonUtils(excelApplication);
 
-                        Log.Trace("Excel adding workbook");
-                        // add a new workbook
-                        var workBook = excelApplication.Workbooks.Add();
-                        Log.Trace("Excel adding worksheet");
-                        var workSheet = (Excel.Worksheet) workBook.Worksheets[1];
+                            Log.Trace("Excel adding workbook");
+                            // add a new workbook
+                            var workBook = excelApplication.Workbooks.Add();
+                            Log.Trace("Excel adding worksheet");
+                            var workSheet = (Excel.Worksheet)workBook.Worksheets[1];
 
 
-                        var list = RandomText.GetDictionary.GetDictionaryList();
-                        using (var rt = new RandomText(list.ToArray()))
-                        {
-                            rt.AddSentence(10);
-                            workSheet.Cells[1, 1].Value = rt.Content;
-                            workSheet.Cells[1, 1].Dispose();
-                        }
+                            var list = RandomText.GetDictionary.GetDictionaryList();
+                            using (var rt = new RandomText(list.ToArray()))
+                            {
+                                rt.AddSentence(10);
+                                workSheet.Cells[1, 1].Value = rt.Content;
+                                workSheet.Cells[1, 1].Dispose();
+                            }
 
-                        for (var i = 2; i < 100; i++)
+                            for (var i = 2; i < 100; i++)
                             {
                                 for (var j = 1; j < 100; j++)
                                 {
@@ -119,139 +120,154 @@ namespace Ghosts.Client.Handlers
                                     {
                                         workSheet.Cells[i, j].Value = _random.Next(0, 999999999);
                                         workSheet.Cells[i, j].Dispose();
-                                }
+                                    }
                                 }
                             }
 
-                        //for (var i = 0; i < _random.Next(1,30); i++)
-                        //{
-                        //    var range = GetRandomRange();
-                        //    // draw back color and perform the BorderAround method
-                        //    workSheet.Range(range).Interior.Color =
-                        //        utils.Color.ToDouble(StylingExtensions.GetRandomColor());
-                        //    workSheet.Range(range).BorderAround(XlLineStyle.xlContinuous, XlBorderWeight.xlMedium,
-                        //        XlColorIndex.xlColorIndexAutomatic);
+                            //for (var i = 0; i < _random.Next(1,30); i++)
+                            //{
+                            //    var range = GetRandomRange();
+                            //    // draw back color and perform the BorderAround method
+                            //    workSheet.Range(range).Interior.Color =
+                            //        utils.Color.ToDouble(StylingExtensions.GetRandomColor());
+                            //    workSheet.Range(range).BorderAround(XlLineStyle.xlContinuous, XlBorderWeight.xlMedium,
+                            //        XlColorIndex.xlColorIndexAutomatic);
 
-                        //    range = GetRandomRange();
-                        //    // draw back color and border the range explicitly
-                        //    workSheet.Range(range).Interior.Color =
-                        //        utils.Color.ToDouble(StylingExtensions.GetRandomColor());
-                        //    workSheet.Range(range)
-                        //        .Borders[(Excel.Enums.XlBordersIndex) XlBordersIndex.xlInsideHorizontal]
-                        //        .LineStyle = XlLineStyle.xlDouble;
-                        //    workSheet.Range(range)
-                        //        .Borders[(Excel.Enums.XlBordersIndex) XlBordersIndex.xlInsideHorizontal]
-                        //        .Weight = 4;
-                        //    workSheet.Range(range)
-                        //        .Borders[(Excel.Enums.XlBordersIndex) XlBordersIndex.xlInsideHorizontal]
-                        //        .Color = utils.Color.ToDouble(StylingExtensions.GetRandomColor());
-                        //}
+                            //    range = GetRandomRange();
+                            //    // draw back color and border the range explicitly
+                            //    workSheet.Range(range).Interior.Color =
+                            //        utils.Color.ToDouble(StylingExtensions.GetRandomColor());
+                            //    workSheet.Range(range)
+                            //        .Borders[(Excel.Enums.XlBordersIndex) XlBordersIndex.xlInsideHorizontal]
+                            //        .LineStyle = XlLineStyle.xlDouble;
+                            //    workSheet.Range(range)
+                            //        .Borders[(Excel.Enums.XlBordersIndex) XlBordersIndex.xlInsideHorizontal]
+                            //        .Weight = 4;
+                            //    workSheet.Range(range)
+                            //        .Borders[(Excel.Enums.XlBordersIndex) XlBordersIndex.xlInsideHorizontal]
+                            //        .Color = utils.Color.ToDouble(StylingExtensions.GetRandomColor());
+                            //}
 
-                        var writeSleep = ProcessManager.Jitter(100);
-                        Thread.Sleep(writeSleep);
+                            Thread.Sleep(writeSleep);
 
-                        var rand = RandomFilename.Generate();
+                            var rand = RandomFilename.Generate();
 
-                        var defaultSaveDirectory = timelineEvent.CommandArgs[0].ToString();
-                        if (defaultSaveDirectory.Contains("%"))
-                        {
-                            defaultSaveDirectory = Environment.ExpandEnvironmentVariables(defaultSaveDirectory);
-                        }
-
-                        try
-                        {
-                            foreach (var key in timelineEvent.CommandArgs)
+                            var defaultSaveDirectory = timelineEvent.CommandArgs[0].ToString();
+                            if (defaultSaveDirectory.Contains("%"))
                             {
-                                if (key.ToString().StartsWith("save-array:"))
+                                defaultSaveDirectory = Environment.ExpandEnvironmentVariables(defaultSaveDirectory);
+                            }
+
+                            try
+                            {
+                                foreach (var key in timelineEvent.CommandArgs)
                                 {
-                                    var savePathString = key.ToString().Replace("save-array:", "").Replace("'", "\"");
-                                    savePathString = savePathString.Replace("\\", "/"); //can't seem to deserialize windows path \
-                                    var savePaths = JsonConvert.DeserializeObject<string[]>(savePathString);
-                                    defaultSaveDirectory = savePaths.PickRandom().Replace("/", "\\"); //put windows path back
-                                    break;
+                                    if (key.ToString().StartsWith("save-array:"))
+                                    {
+                                        var savePathString =
+                                            key.ToString().Replace("save-array:", "").Replace("'", "\"");
+                                        savePathString =
+                                            savePathString.Replace("\\",
+                                                "/"); //can't seem to deserialize windows path \
+                                        var savePaths = JsonConvert.DeserializeObject<string[]>(savePathString);
+                                        defaultSaveDirectory =
+                                            savePaths.PickRandom().Replace("/", "\\"); //put windows path back
+                                        break;
+                                    }
                                 }
                             }
-                        }
-                        catch (Exception e)
-                        {
-                            Log.Trace($"save-array exception: {e}");
-                        }
-
-                        if (!Directory.Exists(defaultSaveDirectory))
-                        {
-                            Directory.CreateDirectory(defaultSaveDirectory);
-                        }
-
-                        var path = $"{defaultSaveDirectory}\\{rand}.xlsx";
-
-                        //if directory does not exist, create!
-                        Log.Trace($"Checking directory at {path}");
-                        var f = new FileInfo(path).Directory;
-                        if (f == null)
-                        {
-                            Log.Trace($"Directory does not exist, creating directory at {f.FullName}");
-                            Directory.CreateDirectory(f.FullName);
-                        }
-
-                        try
-                        {
-                            if (File.Exists(path))
+                            catch (Exception e)
                             {
-                                File.Delete(path);
+                                Log.Trace($"save-array exception: {e}");
                             }
-                        }
-                        catch (Exception e)
-                        {
-                            Log.Error($"Excel file delete exception: {e}");
-                        }
 
-                        Log.Trace($"Excel saving to path - {path}");
-                        workBook.SaveAs(path);
+                            if (!Directory.Exists(defaultSaveDirectory))
+                            {
+                                Directory.CreateDirectory(defaultSaveDirectory);
+                            }
 
-                        FileListing.Add(path);
-                        Report(handler.HandlerType.ToString(), timelineEvent.Command, timelineEvent.CommandArgs[0].ToString());
+                            var path = $"{defaultSaveDirectory}\\{rand}.xlsx";
 
-                        if (timelineEvent.CommandArgs.Contains("pdf"))
-                        {
-                            var pdfFileName = timelineEvent.CommandArgs.Contains("pdf-vary-filenames") ? $"{RandomFilename.Generate()}.pdf" : workBook.FullName.Replace(".xlsx", ".pdf");
-                            // Save document into PDF Format
-                            workBook.ExportAsFixedFormat(NetOffice.ExcelApi.Enums.XlFixedFormatType.xlTypePDF, pdfFileName);
-                            // end save as pdf
-                            Report(handler.HandlerType.ToString(), timelineEvent.Command, "pdf");
-                            FileListing.Add(pdfFileName);
-                        }
+                            //if directory does not exist, create!
+                            Log.Trace($"Checking directory at {path}");
+                            var f = new FileInfo(path).Directory;
+                            if (f == null)
+                            {
+                                Log.Trace($"Directory does not exist, creating directory at {f.FullName}");
+                                Directory.CreateDirectory(f.FullName);
+                            }
 
-                        if (_random.Next(100) < 50)
-                            workBook.Close();
+                            try
+                            {
+                                if (File.Exists(path))
+                                {
+                                    File.Delete(path);
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                Log.Error($"Excel file delete exception: {e}");
+                            }
 
-                        
-                        workSheet.Dispose();
-                        workSheet = null;
+                            Log.Trace($"Excel saving to path - {path}");
+                            workBook.SaveAs(path);
 
-                        workBook.Dispose();
-                        workBook = null;
+                            FileListing.Add(path);
+                            Report(handler.HandlerType.ToString(), timelineEvent.Command,
+                                timelineEvent.CommandArgs[0].ToString());
 
-                        // close excel and dispose reference
-                        excelApplication.Quit();
-                        excelApplication.Dispose();
-                        excelApplication = null;
+                            if (timelineEvent.CommandArgs.Contains("pdf"))
+                            {
+                                var pdfFileName = timelineEvent.CommandArgs.Contains("pdf-vary-filenames")
+                                    ? $"{RandomFilename.Generate()}.pdf"
+                                    : workBook.FullName.Replace(".xlsx", ".pdf");
+                                // Save document into PDF Format
+                                workBook.ExportAsFixedFormat(NetOffice.ExcelApi.Enums.XlFixedFormatType.xlTypePDF,
+                                    pdfFileName);
+                                // end save as pdf
+                                Report(handler.HandlerType.ToString(), timelineEvent.Command, "pdf");
+                                FileListing.Add(pdfFileName);
+                            }
 
-                        try
-                        {
-                            Marshal.ReleaseComObject(excelApplication);
-                        }
-                        catch
-                        { 
-                            // ignore
-                        }
+                            if (_random.Next(100) < 50)
+                                workBook.Close();
 
-                        try
-                        {
-                            Marshal.FinalReleaseComObject(excelApplication);
-                        }
-                        catch
-                        {
-                            // ignore
+
+                            workSheet.Dispose();
+                            workSheet = null;
+
+                            workBook.Dispose();
+                            workBook = null;
+
+                            // close excel and dispose reference
+                            excelApplication.Quit();
+
+                            try
+                            {
+                                excelApplication.Dispose();
+                            }
+                            catch
+                            {
+                                // ignore
+                            }
+
+                            try
+                            {
+                                Marshal.ReleaseComObject(excelApplication);
+                            }
+                            catch
+                            {
+                                // ignore
+                            }
+
+                            try
+                            {
+                                Marshal.FinalReleaseComObject(excelApplication);
+                            }
+                            catch
+                            {
+                                // ignore
+                            }
                         }
 
                         GC.Collect();
