@@ -11,6 +11,7 @@ using Ghosts.Client.Infrastructure;
 using Ghosts.Client.TimelineManager;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
+using Ghosts.Domain.Code.Helpers;
 using Ghosts.Domain.Messages.MesssagesForServer;
 using NLog;
 using Newtonsoft.Json;
@@ -242,7 +243,14 @@ namespace Ghosts.Client.Comms
                 {
                     if (File.Exists(fileName))
                     {
+                        while (new FileInfo(fileName).IsFileLocked())
+                        {
+                            var sleepTime = 15000;
+                            _log.Trace($"{fileName} is locked, sleeping for {sleepTime}...");
+                            Thread.Sleep(sleepTime);
+                        }
                         PostResults(fileName, machine, postUrl);
+                        _log.Trace($"{fileName} posted successfully...");
                     }
                     else
                     {
@@ -266,13 +274,14 @@ namespace Ghosts.Client.Comms
                     {
                         if (!file.EndsWith("app.log") && file != fileName)
                         {
-                            while(IsFileLocked(new FileInfo(file)))
+                            while(new FileInfo(file).IsFileLocked())
                             {
-                                var sleepTime = 5000;
+                                var sleepTime = 15000;
                                 _log.Trace($"{file} is locked, sleeping for {sleepTime}...");
                                 Thread.Sleep(sleepTime);
                             }
                             PostResults(file, machine, postUrl, true);
+                            _log.Trace($"{fileName} posted successfully...");
                         }
                     }
                 }
@@ -380,28 +389,6 @@ namespace Ghosts.Client.Comms
                 _log.Debug($"Problem posting logs to server from { ApplicationDetails.InstanceFiles.SurveyResults } to { Program.Configuration.Survey.PostUrl }");
                 _log.Error(e);
             }
-        }
-
-        private static bool IsFileLocked(FileInfo file)
-        {
-            try
-            {
-                using (var stream = file.Open(FileMode.Open, FileAccess.Read, FileShare.None))
-                {
-                    stream.Close();
-                }
-            }
-            catch (IOException)
-            {
-                //the file is unavailable because it is:
-                //(1) still being written to
-                //(2) being processed by another thread
-                //(3) does not exist
-                return true;
-            }
-
-            //file is not locked
-            return false;
         }
     }
 }

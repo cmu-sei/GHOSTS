@@ -8,6 +8,7 @@ using Ghosts.Domain.Code;
 using NLog;
 using Exception = System.Exception;
 using System.Threading;
+using Ghosts.Domain.Code.Helpers;
 
 namespace Ghosts.Client.Infrastructure
 {
@@ -32,10 +33,18 @@ namespace Ghosts.Client.Infrastructure
                 {
                     lock (_locked) //if a thread has entered, the others will wait
                     {
-                        var writer = new StreamWriter(_fileName, true);
-                        writer.WriteLine(path);
-                        writer.Flush();
-                        writer.Close();
+                        while (new FileInfo(_fileName).IsFileLocked())
+                        {
+                            var sleepTime = 10000;
+                            _log.Trace($"{_fileName} is locked, sleeping for {sleepTime}...");
+                            Thread.Sleep(sleepTime);
+                        }
+                        using (var writer = new StreamWriter(_fileName, true))
+                        {
+                            writer.WriteLine(path);
+                            writer.Flush();
+                            writer.Close();
+                        }
                     }
                 }
                 else //sleep if safety net is being safe
@@ -45,7 +54,7 @@ namespace Ghosts.Client.Infrastructure
             }
             catch (Exception e)
             {
-                _log.Trace(e);
+                _log.Error(e);
             }
         }
 
@@ -83,7 +92,7 @@ namespace Ghosts.Client.Infrastructure
                             }
                             catch (Exception e)
                             {
-                                _log.Trace($"Error with file in deleted list {line}: {e}");
+                                _log.Warn($"Could not create FileInfo with file {line}: {e}");
                                 deletedFiles.Add(line);
                                 continue;
                             }
@@ -100,7 +109,7 @@ namespace Ghosts.Client.Infrastructure
                             }
                             catch (Exception e)
                             {
-                                _log.Debug($"Could not delete file {_fileName}: {e}");
+                                _log.Warn($"Could not delete file {_fileName}: {e}");
                             }
                         }
                     }

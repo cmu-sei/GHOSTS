@@ -86,26 +86,31 @@ namespace Ghosts.Domain.Code
         public Link Choose()
         {
             var pickList = new List<Link>();
-            
-            foreach (var link in Links)
-            {
-                try
-                {
-                    // give relative links priority
-                    if ((link.Url.Scheme + link.Url.Host).Replace("www.", "").Equals((_baseUri.Scheme + _baseUri.Host).Replace("www.", ""), StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        link.Priority += 1;
-                    }
-                    else if (link.Url.Scheme.Equals("file", StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        link.Priority += 1;
-                    }
 
-                    pickList.Add(link);
-                }
-                catch (Exception e)
+            if (Links != null && Links.Any())
+            {
+                foreach (var link in Links)
                 {
-                    Log.Trace($"{link.Url} : {e}");
+                    try
+                    {
+                        // give relative links priority
+                        if ((link.Url.Scheme + link.Url.Host).Replace("www.", "").Equals(
+                                (_baseUri.Scheme + _baseUri.Host).Replace("www.", ""),
+                                StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            link.Priority += 1;
+                        }
+                        else if (link.Url.Scheme.Equals("file", StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            link.Priority += 1;
+                        }
+
+                        pickList.Add(link);
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Trace($"{link.Url} : {e}");
+                    }
                 }
             }
 
