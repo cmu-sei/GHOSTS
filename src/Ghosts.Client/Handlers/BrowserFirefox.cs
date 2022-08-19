@@ -7,6 +7,7 @@ using OpenQA.Selenium.Firefox;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using Ghosts.Domain.Code.Helpers;
 
 namespace Ghosts.Client.Handlers
@@ -101,6 +102,10 @@ namespace Ghosts.Client.Handlers
                         ExecuteEvents(handler);
                     }
                 }
+            }
+            catch (ThreadAbortException)
+            {
+                //ignore
             }
             catch (Exception e)
             {

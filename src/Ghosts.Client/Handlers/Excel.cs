@@ -47,6 +47,11 @@ namespace Ghosts.Client.Handlers
                     KillApp();
                 }
             }
+            catch (ThreadAbortException)
+            {
+                KillApp();
+                Log.Trace("Thread aborted, Excel closing...");
+            }
             catch (Exception e)
             {
                 Log.Error($"Excel launch handler exception: {e}");
@@ -78,7 +83,8 @@ namespace Ghosts.Client.Handlers
                         if (timeline != null)
                         {
                             var processIds = ProcessManager.GetPids(ProcessManager.ProcessNames.Excel).ToList();
-                            if (processIds.Count > 2 && processIds.Count > timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.Excel))
+                            if (processIds.Count > 2 && processIds.Count >
+                                timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.Excel))
                             {
                                 return;
                             }
@@ -242,6 +248,11 @@ namespace Ghosts.Client.Handlers
                         }
 
                     }
+                    catch (ThreadAbortException)
+                    {
+                        KillApp();
+                        Log.Trace("Excel closing...");
+                    }
                     catch (Exception e)
                     {
                         Log.Error($"Excel handler exception: {e}");
@@ -251,6 +262,10 @@ namespace Ghosts.Client.Handlers
                         Thread.Sleep(5000);
                     }
                 }
+            }
+            catch (ThreadAbortException)
+            {
+                //ignore
             }
             catch (Exception e)
             {

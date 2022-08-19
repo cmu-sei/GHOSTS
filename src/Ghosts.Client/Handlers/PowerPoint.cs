@@ -49,6 +49,11 @@ namespace Ghosts.Client.Handlers
                     KillApp();
                 }
             }
+            catch (ThreadAbortException)
+            {
+                KillApp();
+                Log.Trace("Thread aborted, PowerPoint closing...");
+            }
             catch (Exception e)
             {
                 Log.Error(e);
@@ -237,6 +242,11 @@ namespace Ghosts.Client.Handlers
 
                         GC.Collect();
                     }
+                    catch (ThreadAbortException)
+                    {
+                        KillApp();
+                        Log.Trace("Powerpoint closing...");
+                    }
                     catch (Exception e)
                     {
                         Log.Debug(e);
@@ -246,6 +256,10 @@ namespace Ghosts.Client.Handlers
                         Thread.Sleep(5000);
                     }
                 }
+            }
+            catch (ThreadAbortException)
+            {
+                //ignore
             }
             catch (Exception e)
             {

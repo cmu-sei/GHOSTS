@@ -5,6 +5,7 @@ using Ghosts.Domain;
 using OpenQA.Selenium.Chrome;
 using System;
 using System.IO;
+using System.Threading;
 using Ghosts.Domain.Code.Helpers;
 using OpenQA.Selenium;
 
@@ -60,6 +61,10 @@ namespace Ghosts.Client.Handlers
                         ExecuteEvents(handler);
                     }
                 }
+            }
+            catch (ThreadAbortException)
+            {
+                //ignore
             }
             catch (Exception e)
             {

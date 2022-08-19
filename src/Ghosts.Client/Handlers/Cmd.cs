@@ -4,6 +4,7 @@ using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
+using Ghosts.Client.Infrastructure;
 using WindowsInput;
 using WindowsInput.Native;
 using Ghosts.Domain;
@@ -41,6 +42,11 @@ namespace Ghosts.Client.Handlers
                 {
                     Ex(handler);
                 }
+            }
+            catch (ThreadAbortException)
+            {
+                ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.Command);
+                Log.Trace("Cmd closing...");
             }
             catch (Exception e)
             {

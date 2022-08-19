@@ -3,6 +3,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Ghosts.Client.Infrastructure;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
@@ -131,6 +132,12 @@ namespace Ghosts.Client.Handlers
                                                     MakeRequest(config);
                                                     Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId);
                                                 }
+                                                catch (ThreadAbortException)
+                                                {
+                                                    ProcessManager.KillProcessAndChildrenByName(this.BrowserType.ToString().Replace("Browser", ""));
+                                                    Log.Trace($"Thread aborted, {this.BrowserType.ToString()} closing...");
+                                                    return;
+                                                }
                                                 catch (Exception e)
                                                 {
                                                     Log.Error($"Browser loop error {e}");
@@ -205,6 +212,11 @@ namespace Ghosts.Client.Handlers
                         Thread.Sleep(timelineEvent.DelayAfter);
                     }
                 }
+            }
+            catch (ThreadAbortException)
+            {
+                ProcessManager.KillProcessAndChildrenByName(this.BrowserType.ToString().Replace("Browser", ""));
+                Log.Trace($"Thread aborted, {this.BrowserType.ToString()} closing...");
             }
             catch (Exception e)
             {
