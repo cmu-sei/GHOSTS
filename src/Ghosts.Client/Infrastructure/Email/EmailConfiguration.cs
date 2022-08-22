@@ -158,8 +158,8 @@ namespace Ghosts.Client.Infrastructure.Email
                         list.Add(emails.PickRandom());
 
                     //add outside
-                    var x = rnd.Next(Program.Configuration.Email.RecipientsOutsideMin, Program.Configuration.Email.RecipientsOutsideMax);
-                    if (x >= 1) return list;
+                    var x = rnd.Next(Program.Configuration.Email.RecipientsOutsideMin, Program.Configuration.Email.RecipientsOutsideMax + 1);
+                    if (x < 1) return list;
                     
                     var outsideEmails = EmailListManager.GetOutsideList();
                     for (var i = 0; i < x; i++)

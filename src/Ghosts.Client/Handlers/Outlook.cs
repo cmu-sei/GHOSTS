@@ -108,7 +108,7 @@ namespace Ghosts.Client.Handlers
                         case "REPLY":
                             try
                             {
-                                EmailConfiguration emailConfig = new EmailConfiguration(timelineEvent.CommandArgs);
+                                var emailConfig = new EmailConfiguration(timelineEvent.CommandArgs);
                                 if (ReplyViaOutlook(emailConfig))
                                 {
                                     Report(handler.HandlerType.ToString(), timelineEvent.Command, emailConfig.ToString());
@@ -248,8 +248,7 @@ namespace Ghosts.Client.Handlers
                     if (folderItem.UnRead)
                     {
                         var emailReply = new EmailReplyManager();
-
-
+                        
                         folderItem.HTMLBody =
                             $"{emailReply.Reply} {Environment.NewLine}{Environment.NewLine}ORIGINAL MESSAGE --- {Environment.NewLine}{Environment.NewLine}{folderItem.Body}";
                         folderItem.Subject = $"RE: {folderItem.Subject}";
@@ -385,6 +384,7 @@ namespace Ghosts.Client.Handlers
                 {
                     Item = mailItem
                 };
+
                 //Parse To
                 if (emailConfig.To.Count > 0)
                 {
@@ -433,27 +433,7 @@ namespace Ghosts.Client.Handlers
                         Log.Trace($"RdoMail BCC {a.Trim()}");
                     }
                 }
-
-                /*
-                    outlook_mail_item = self._outlook.outlook_application.CreateItem(win32com.client.constants.olMailItem)
-                    outlook_mail_item = outlook_mail_item.Move(outbox)
-
-                    outlook_mail_item.Subject = subject
-                    outlook_mail_item.Body = body
-                    outlook_mail_item.Save()
-
-                    for file_ in self._config['attachments']:
-                        outlook_mail_item.Attachments.Add(file_)
-
-                    # Need to use Redemption to actually get it to send correctly.
-                    new_email = win32com.client.Dispatch('Redemption.SafeMailItem')
-                    new_email.Item = outlook_mail_item
-                    new_email.Recipients.Add(self._config['destination'])
-                    new_email.Recipients.ResolveAll()
-                    new_email.Send()
-                 */
-
-
+                
                 rdoMail.Recipients.ResolveAll();
 
                 Log.Trace("Attempting to send Redemtion SafeMailItem...");
