@@ -2,24 +2,15 @@
 
 using System;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using System.Threading;
 using Ghosts.Client.Infrastructure;
-using WindowsInput;
-using WindowsInput.Native;
 using Ghosts.Domain;
-using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
 
 namespace Ghosts.Client.Handlers
 {
     public class Cmd : BaseHandler
     {
-        [DllImport("user32.dll", SetLastError = true)]
-        static extern bool SetForegroundWindow(IntPtr hWnd);
-
-        //private const int WmKeyUp = 0x101;
-
         public Process Process;
 
         public Cmd(TimelineHandler handler)
@@ -28,8 +19,15 @@ namespace Ghosts.Client.Handlers
             {
                 base.Init(handler);
                 Log.Trace("Spawning cmd.exe...");
-                
-                this.Process = Process.Start("cmd.exe");
+
+                var processStartInfo = new ProcessStartInfo("cmd.exe")
+                {
+                    RedirectStandardInput = true,
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false
+                };
+
+                this.Process = Process.Start(processStartInfo);
             
                 if (handler.Loop)
                 {
@@ -58,7 +56,7 @@ namespace Ghosts.Client.Handlers
         {
             foreach (var timelineEvent in handler.TimeLineEvents)
             {
-                Infrastructure.WorkingHours.Is(handler);
+                WorkingHours.Is(handler);
 
                 if (timelineEvent.DelayBefore > 0)
                     this.Sleep(timelineEvent.DelayBefore);
@@ -94,13 +92,10 @@ namespace Ghosts.Client.Handlers
         public void Command(TimelineHandler handler, TimelineEvent timelineEvent, string command)
         {
             this.Sleep(1000);
-
-            SetForegroundWindow(this.Process.MainWindowHandle);
-            var i = new InputSimulator();
-            i.Keyboard.TextEntry(command);
-            i.Keyboard.KeyPress(VirtualKeyCode.RETURN);
-
-            this.Report(handler.HandlerType.ToString(), command, "", timelineEvent.TrackableId);
+            this.Process.StandardInput.WriteLine(command);
+            this.Process.StandardInput.Close(); // line added to stop process from hanging on ReadToEnd()
+            var outputString = this.Process.StandardOutput.ReadToEnd();
+            this.Report(handler.HandlerType.ToString(), command, outputString, timelineEvent.TrackableId);
         }
 
         public void Sleep(int length)
