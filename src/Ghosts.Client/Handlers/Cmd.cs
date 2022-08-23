@@ -5,30 +5,16 @@ using System.Diagnostics;
 using System.Threading;
 using Ghosts.Client.Infrastructure;
 using Ghosts.Domain;
-using Ghosts.Domain.Code.Helpers;
 
 namespace Ghosts.Client.Handlers
 {
     public class Cmd : BaseHandler
     {
-        public Process Process;
-
         public Cmd(TimelineHandler handler)
         {
             try
             {
                 base.Init(handler);
-                Log.Trace("Spawning cmd.exe...");
-
-                var processStartInfo = new ProcessStartInfo("cmd.exe")
-                {
-                    RedirectStandardInput = true,
-                    RedirectStandardOutput = true,
-                    UseShellExecute = false
-                };
-
-                this.Process = Process.Start(processStartInfo);
-            
                 if (handler.Loop)
                 {
                     while (true)
@@ -59,7 +45,7 @@ namespace Ghosts.Client.Handlers
                 WorkingHours.Is(handler);
 
                 if (timelineEvent.DelayBefore > 0)
-                    this.Sleep(timelineEvent.DelayBefore);
+                    Thread.Sleep(timelineEvent.DelayBefore);
 
                 Log.Trace($"Command line: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfter}");
 
@@ -85,27 +71,31 @@ namespace Ghosts.Client.Handlers
                 }
 
                 if (timelineEvent.DelayAfter > 0)
-                    this.Sleep(timelineEvent.DelayAfter);
+                    Thread.Sleep(timelineEvent.DelayAfter);
             }
         }
 
         public void Command(TimelineHandler handler, TimelineEvent timelineEvent, string command)
         {
-            this.Sleep(1000);
-            this.Process.StandardInput.WriteLine(command);
-            this.Process.StandardInput.Close(); // line added to stop process from hanging on ReadToEnd()
-            var outputString = this.Process.StandardOutput.ReadToEnd();
-            this.Report(handler.HandlerType.ToString(), command, outputString, timelineEvent.TrackableId);
-        }
+            Log.Trace("Spawning cmd.exe...");
+            var processStartInfo = new ProcessStartInfo("cmd.exe")
+            {
+                RedirectStandardInput = true,
+                RedirectStandardOutput = true,
+                UseShellExecute = false
+            };
 
-        public void Sleep(int length)
-        {
-            Thread.Sleep(length);
-        }
-
-        public void Kill()
-        {
-            this.Process.SafeKill();
+            using (var process = Process.Start(processStartInfo))
+            {
+                Thread.Sleep(1000);
+                if (process != null)
+                {
+                    process.StandardInput.WriteLine(command);
+                    process.StandardInput.Close(); // line added to stop process from hanging on ReadToEnd()
+                    var outputString = process.StandardOutput.ReadToEnd();
+                    this.Report(handler.HandlerType.ToString(), command, outputString, timelineEvent.TrackableId);
+                }
+            }
         }
     }
 }
