@@ -1,6 +1,7 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -32,6 +33,15 @@ namespace Ghosts.Domain.Code
         ///     Returns current GHOSTS exe version
         /// </summary>
         public static string Version => Assembly.GetEntryAssembly()?.GetName().Version.ToString().ToUpper();
+
+        public static string VersionFile
+        {
+            get
+            {
+                var fileName = Assembly.GetEntryAssembly()?.Location;
+                return fileName != null ? FileVersionInfo.GetVersionInfo(fileName).FileVersion : "";
+            }
+        }
 
         /// <summary>
         ///     Returns installed exe path, for commands like c:\exercise\ghosts\ghosts.exe to work properly

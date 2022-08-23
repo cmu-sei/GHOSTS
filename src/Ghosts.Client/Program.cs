@@ -14,7 +14,6 @@ using Ghosts.Client.Infrastructure;
 using Ghosts.Client.TimelineManager;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Models;
-using Microsoft.VisualBasic.Logging;
 using NLog;
 
 namespace Ghosts.Client
