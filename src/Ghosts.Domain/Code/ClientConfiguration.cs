@@ -91,6 +91,8 @@ namespace Ghosts.Domain.Code
         public bool EncodeHeaders { get; set; }
         public ListenerSettings Listener { get; set; }
 
+        public ResourceControlSettings ResourceControl { get; set; }
+
         public class ContentSettings
         {
             public string EmailContent { get; set; }
@@ -175,6 +177,16 @@ namespace Ghosts.Domain.Code
             /// Set to -1 to disable
             /// </summary>
             public int Port { get; set; }
+        }
+
+        public class ResourceControlSettings
+        {
+            public bool ManageProcesses { get; set; }
+
+            public ResourceControlSettings()
+            {
+                this.ManageProcesses = true;
+            }
         }
     }
 

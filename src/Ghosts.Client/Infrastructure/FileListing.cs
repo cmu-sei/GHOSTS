@@ -21,6 +21,7 @@ namespace Ghosts.Client.Infrastructure
         private static readonly string _fileName = ApplicationDetails.InstanceFiles.FilesCreated;
         private static readonly object _locked = new object();
         private static readonly object _safetyLocked = new object();
+        private static readonly int _sleepTime = 10000;
 
         public static void Add(string path)
         {
@@ -35,9 +36,8 @@ namespace Ghosts.Client.Infrastructure
                     {
                         while (new FileInfo(_fileName).IsFileLocked())
                         {
-                            var sleepTime = 10000;
-                            _log.Trace($"{_fileName} is locked, sleeping for {sleepTime}...");
-                            Thread.Sleep(sleepTime);
+                            _log.Trace($"{_fileName} is locked, sleeping for {_sleepTime}...");
+                            Thread.Sleep(_sleepTime);
                         }
                         using (var writer = new StreamWriter(_fileName, true))
                         {
@@ -78,6 +78,11 @@ namespace Ghosts.Client.Infrastructure
                 {
                     var deletedFiles = new List<string>();
 
+                    while (new FileInfo(_fileName).IsFileLocked())
+                    {
+                        _log.Trace($"{_fileName} is locked, sleeping for {_sleepTime}...");
+                        Thread.Sleep(_sleepTime);
+                    }
                     using (var reader = new StreamReader(_fileName))
                     {
                         string line;

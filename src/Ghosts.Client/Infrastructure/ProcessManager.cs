@@ -66,6 +66,7 @@ namespace Ghosts.Client.Infrastructure
 
         public static void KillProcessAndChildrenByName(string procName)
         {
+            if (!Program.Configuration.ResourceControl.ManageProcesses) return;
             try
             {
                 var processes = Process.GetProcessesByName(procName).ToList();
@@ -96,6 +97,7 @@ namespace Ghosts.Client.Infrastructure
 
         public static void KillProcessAndChildrenByPid(int pid)
         {
+            if (!Program.Configuration.ResourceControl.ManageProcesses) return;
             try
             {
 

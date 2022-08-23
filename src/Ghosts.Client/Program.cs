@@ -14,6 +14,7 @@ using Ghosts.Client.Infrastructure;
 using Ghosts.Client.TimelineManager;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Models;
+using Microsoft.VisualBasic.Logging;
 using NLog;
 
 namespace Ghosts.Client
@@ -129,6 +130,14 @@ namespace Ghosts.Client
                 Console.ReadLine();
                 return;
             }
+
+            if (Configuration.ResourceControl == null)
+            {
+                Configuration.ResourceControl = new ClientConfiguration.ResourceControlSettings();
+                Configuration.ResourceControl.ManageProcesses = true;
+            }
+
+            _log.Trace($"Configuration.ResourceControl.ManageProcesses = {Program.Configuration.ResourceControl.ManageProcesses}");
 
             Program.CheckId = new CheckId();
 
