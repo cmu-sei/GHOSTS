@@ -22,6 +22,7 @@ namespace Ghosts.Client.Handlers
         private readonly NameSpace _oMapiNamespace;
         private readonly MAPIFolder _folderOutbox;
         private readonly MAPIFolder _folderSent;
+        private readonly MAPIFolder _folderInbox;
 
         public Outlook(TimelineHandler handler)
         {
@@ -51,11 +52,11 @@ namespace Ghosts.Client.Handlers
             {
                 _app = new Application();
                 _oMapiNamespace = _app.GetNamespace("MAPI");
-                var folderInbox = _oMapiNamespace.GetDefaultFolder(OlDefaultFolders.olFolderInbox);
+                _folderInbox = _oMapiNamespace.GetDefaultFolder(OlDefaultFolders.olFolderInbox);
                 _folderOutbox = _oMapiNamespace.GetDefaultFolder(OlDefaultFolders.olFolderOutbox);
                 _folderSent = _oMapiNamespace.GetDefaultFolder(OlDefaultFolders.olFolderSentMail);
                 Log.Trace("Launching Outlook");
-                folderInbox.Display();
+                _folderInbox.Display();
 
                 if (handler.Loop)
                 {
@@ -85,6 +86,7 @@ namespace Ghosts.Client.Handlers
 
                     if (timelineEvent.DelayBefore > 0)
                     {
+                        Log.Trace($"DelayBefore sleeping for {timelineEvent.DelayBefore} ms");
                         Thread.Sleep(timelineEvent.DelayBefore);
                     }
 
@@ -136,13 +138,14 @@ namespace Ghosts.Client.Handlers
 
                     if (timelineEvent.DelayAfter > 0)
                     {
+                        Log.Trace($"DelayAfter sleeping for {timelineEvent.DelayAfter} ms");
                         Thread.Sleep(timelineEvent.DelayAfter);
                     }
                 }
             }
             catch (Exception e)
             {
-                Log.Debug(e);
+                Log.Error(e);
             }
         }
 
@@ -176,12 +179,12 @@ namespace Ghosts.Client.Handlers
                         var folderName = GetFolder(fname);
                         var f = this._app.Session.GetDefaultFolder(folderName);
                         f.Display();
-                        Log.Trace($"Folder displayed: {folderName}");
+                        Log.Trace($"Folder displayed: {folderName} - now sleeping for {sleepTime}");
                         Thread.Sleep(sleepTime);
                     }
                     catch (Exception e)
                     {
-                        Log.Trace($"Could not navigate to folder: {configuredFolder}: {e}");
+                        Log.Debug($"Could not navigate to folder: {configuredFolder}: {e}");
                     }
                     this.CloseExplorers();
                 }
@@ -225,10 +228,11 @@ namespace Ghosts.Client.Handlers
                     try
                     {
                         this._app.Explorers[i].Close();
+                        Log.Trace($"Closing app explorer: {i}");
                     }
-                    catch
+                    catch (Exception exc)
                     {
-                        //
+                        Log.Trace($"Error in closing app explorer: {exc}");
                     }
                 }
             }
@@ -241,7 +245,7 @@ namespace Ghosts.Client.Handlers
 
             try
             {
-                var folderItems = _folderSent.Items;
+                var folderItems = _folderInbox.Items;
 
                 foreach (MailItem folderItem in folderItems)
                 {
@@ -260,7 +264,9 @@ namespace Ghosts.Client.Handlers
                         {
                             Item = replyMail
                         };
-                        
+
+                        var r = rdoMail.Recipients.AddEx(folderItem.SenderEmailAddress);
+                        r.Resolve();
                         rdoMail.Recipients.ResolveAll();
                         rdoMail.Send();
 
@@ -269,7 +275,7 @@ namespace Ghosts.Client.Handlers
 
                         if (config.SetForcedSendReceive)
                         {
-                            Log.Trace("Forcing mapi - send and receive");
+                            Log.Trace("Forcing mapi - send and receive, then sleeping for 3000");
                             _oMapiNamespace.SendAndReceive(false);
                             Thread.Sleep(3000);
                         }
@@ -449,7 +455,7 @@ namespace Ghosts.Client.Handlers
 
                 if (config.SetForcedSendReceive)
                 {
-                    Log.Trace("Forcing mapi - send and receive");
+                    Log.Trace("Forcing mapi - send and receive, then sleeping for 3000");
                     _oMapiNamespace.SendAndReceive(false);
                     Thread.Sleep(3000);
                 }
