@@ -122,7 +122,7 @@ namespace Ghosts.Client.Infrastructure.Email
                 s.Replace(t, token.Value);
             }
 
-            var o = s.ToString().Replace("\\n", Environment.NewLine).Trim('"').Trim(' ').Trim('"');
+            var o = s.ToString().Replace("\\n", " ").Trim('"').Trim(' ').Trim('"');
             o = o.RemoveFirstLines(3);
 
             if (o.StartsWith("Subject:", StringComparison.InvariantCultureIgnoreCase))

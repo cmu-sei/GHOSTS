@@ -253,12 +253,28 @@ namespace Ghosts.Client.Handlers
                     {
                         var emailReply = new EmailReplyManager();
                         
-                        folderItem.HTMLBody =
-                            $"{emailReply.Reply} {Environment.NewLine}{Environment.NewLine}ORIGINAL MESSAGE --- {Environment.NewLine}{Environment.NewLine}{folderItem.Body}";
-                        folderItem.Subject = $"RE: {folderItem.Subject}";
-
                         var replyMail = folderItem.Reply();
-                        replyMail.Move(_folderSent);
+
+                        using (var quoted = new StringWriter())
+                        {
+                            quoted.WriteLine(emailReply.Reply);
+                            quoted.WriteLine("");
+                            quoted.WriteLine("");
+                            quoted.WriteLine($"On {folderItem.SentOn:f}, {folderItem.SenderEmailAddress} wrote:");
+                            using (var reader = new StringReader(folderItem.Body))
+                            {
+                                string line;
+                                while ((line = reader.ReadLine()) != null)
+                                {
+                                    quoted.Write("> ");
+                                    quoted.WriteLine(line);
+                                }
+                            }
+
+                            replyMail.Body = quoted.ToString();
+                        };
+
+                        replyMail.Subject = $"RE: {folderItem.Subject}";
 
                         var rdoMail = new SafeMailItem
                         {
@@ -272,6 +288,9 @@ namespace Ghosts.Client.Handlers
 
                         var mapiUtils = new MAPIUtils();
                         mapiUtils.DeliverNow();
+
+                        // mark as read
+                        folderItem.UnRead = false;
 
                         if (config.SetForcedSendReceive)
                         {
