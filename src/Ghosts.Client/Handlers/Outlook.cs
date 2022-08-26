@@ -21,7 +21,6 @@ namespace Ghosts.Client.Handlers
         private readonly Application _app;
         private readonly NameSpace _oMapiNamespace;
         private readonly MAPIFolder _folderOutbox;
-        private readonly MAPIFolder _folderSent;
         private readonly MAPIFolder _folderInbox;
 
         public Outlook(TimelineHandler handler)
@@ -54,7 +53,6 @@ namespace Ghosts.Client.Handlers
                 _oMapiNamespace = _app.GetNamespace("MAPI");
                 _folderInbox = _oMapiNamespace.GetDefaultFolder(OlDefaultFolders.olFolderInbox);
                 _folderOutbox = _oMapiNamespace.GetDefaultFolder(OlDefaultFolders.olFolderOutbox);
-                _folderSent = _oMapiNamespace.GetDefaultFolder(OlDefaultFolders.olFolderSentMail);
                 Log.Trace("Launching Outlook");
                 _folderInbox.Display();
 
@@ -159,15 +157,15 @@ namespace Ghosts.Client.Handlers
                 {
                     try
                     {
-                        var fname = configuredFolder.ToString();
+                        var fName = configuredFolder.ToString();
                         var sleepTime = 5000;
 
-                        var configArray = fname.Split(Convert.ToChar("|"));
+                        var configArray = fName.Split(Convert.ToChar("|"));
                         if (configArray.GetUpperBound(0) > 0)
                         {
                             try
                             {
-                                fname = configArray[0].Trim();
+                                fName = configArray[0].Trim();
                                 sleepTime = Convert.ToInt32(configArray[1].Trim()) * 1000;
                             }
                             catch
@@ -176,7 +174,7 @@ namespace Ghosts.Client.Handlers
                             }
                         }
 
-                        var folderName = GetFolder(fname);
+                        var folderName = GetFolder(fName);
                         var f = this._app.Session.GetDefaultFolder(folderName);
                         f.Display();
                         Log.Trace($"Folder displayed: {folderName} - now sleeping for {sleepTime}");
@@ -249,58 +247,57 @@ namespace Ghosts.Client.Handlers
 
                 foreach (MailItem folderItem in folderItems)
                 {
-                    if (folderItem.UnRead)
-                    {
-                        var emailReply = new EmailReplyManager();
+                    if (!folderItem.UnRead) continue;
+
+                    var emailReply = new EmailReplyManager();
                         
-                        var replyMail = folderItem.Reply();
+                    var replyMail = folderItem.Reply();
 
-                        using (var quoted = new StringWriter())
+                    using (var quoted = new StringWriter())
+                    {
+                        quoted.WriteLine(emailReply.Reply);
+                        quoted.WriteLine("");
+                        quoted.WriteLine("");
+                        quoted.WriteLine($"On {folderItem.SentOn:f}, {folderItem.SenderEmailAddress} wrote:");
+                        using (var reader = new StringReader(folderItem.Body))
                         {
-                            quoted.WriteLine(emailReply.Reply);
-                            quoted.WriteLine("");
-                            quoted.WriteLine("");
-                            quoted.WriteLine($"On {folderItem.SentOn:f}, {folderItem.SenderEmailAddress} wrote:");
-                            using (var reader = new StringReader(folderItem.Body))
+                            string line;
+                            while ((line = reader.ReadLine()) != null)
                             {
-                                string line;
-                                while ((line = reader.ReadLine()) != null)
-                                {
-                                    quoted.Write("> ");
-                                    quoted.WriteLine(line);
-                                }
+                                quoted.Write("> ");
+                                quoted.WriteLine(line);
                             }
-
-                            replyMail.Body = quoted.ToString();
-                        };
-
-                        replyMail.Subject = $"RE: {folderItem.Subject}";
-
-                        var rdoMail = new SafeMailItem
-                        {
-                            Item = replyMail
-                        };
-
-                        var r = rdoMail.Recipients.AddEx(folderItem.SenderEmailAddress);
-                        r.Resolve();
-                        rdoMail.Recipients.ResolveAll();
-                        rdoMail.Send();
-
-                        var mapiUtils = new MAPIUtils();
-                        mapiUtils.DeliverNow();
-
-                        // mark as read
-                        folderItem.UnRead = false;
-
-                        if (config.SetForcedSendReceive)
-                        {
-                            Log.Trace("Forcing mapi - send and receive, then sleeping for 3000");
-                            _oMapiNamespace.SendAndReceive(false);
-                            Thread.Sleep(3000);
                         }
 
-                        return true;
+                        replyMail.Body = quoted.ToString();
                     }
+
+                    replyMail.Subject = $"RE: {folderItem.Subject}";
+
+                    var rdoMail = new SafeMailItem
+                    {
+                        Item = replyMail
+                    };
+
+                    var r = rdoMail.Recipients.AddEx(folderItem.SenderEmailAddress);
+                    r.Resolve();
+                    rdoMail.Recipients.ResolveAll();
+                    rdoMail.Send();
+
+                    var mapiUtils = new MAPIUtils();
+                    mapiUtils.DeliverNow();
+
+                    // mark as read
+                    folderItem.UnRead = false;
+
+                    if (config.SetForcedSendReceive)
+                    {
+                        Log.Trace("Forcing mapi - send and receive, then sleeping for 3000");
+                        _oMapiNamespace.SendAndReceive(false);
+                        Thread.Sleep(3000);
+                    }
+
+                    return true;
                 }
             }
             catch (Exception e)
@@ -378,7 +375,6 @@ namespace Ghosts.Client.Handlers
                         }
                     }
 
-                    //TODO: if no from account found, just use first one found to send - but should ghosts do this?
                     if (acc == null)
                     {
                         foreach (Account account in accounts)

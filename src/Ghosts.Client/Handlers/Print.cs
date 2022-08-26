@@ -4,7 +4,6 @@ using Ghosts.Domain;
 using System;
 using System.Diagnostics;
 using System.Threading;
-using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
 
 namespace Ghosts.Client.Handlers

@@ -4,7 +4,6 @@ using System;
 using Ghosts.Domain;
 using NLog;
 using Newtonsoft.Json;
-using Ghosts.Domain.Code;
 
 namespace Ghosts.Client.Handlers
 {
