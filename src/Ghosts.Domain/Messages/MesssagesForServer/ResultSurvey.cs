@@ -109,6 +109,7 @@ namespace Ghosts.Domain.Messages.MesssagesForServer
 
             [ForeignKey("SurveyId")] public int SurveyId { get; set; }
 
+            public long PrivateMemorySize64 { get; set; } = 0;
             public string MainWindowTitle { get; set; }
             public string ProcessName { get; set; }
             public DateTime? StartTime { get; set; }
