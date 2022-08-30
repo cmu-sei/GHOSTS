@@ -17,10 +17,12 @@ namespace Ghosts.Client.Handlers
         public IWebDriver Driver { get; set; }
         public IJavaScriptExecutor JS { get; set; }
         public HandlerType BrowserType { get; set; }
+        internal bool Restart { get; set; }
         private int _stickiness;
         private int _depthMin = 1;
         private int _depthMax = 10;
         private int _visitedRemember = 5;
+        private int _actionsBeforeRestart = -1;
         private LinkManager _linkManager;
         
         private Task LaunchThread(TimelineHandler handler, TimelineEvent timelineEvent, string site)
@@ -89,9 +91,14 @@ namespace Ghosts.Client.Handlers
                             {
                                 int.TryParse(handler.HandlerArgs["visited-remember"].ToString(), out _visitedRemember);
                             }
+                            if (handler.HandlerArgs.ContainsKey("actions-before-restart"))
+                            {
+                                int.TryParse(handler.HandlerArgs["actions-before-restart"].ToString(), out _actionsBeforeRestart);
+                            }
 
                             this._linkManager = new LinkManager(_visitedRemember);
 
+                            var pagesBrowsed = 0;
                             while (true)
                             {
                                 if (Driver.CurrentWindowHandle == null)
@@ -148,6 +155,17 @@ namespace Ghosts.Client.Handlers
                                         }
                                     }
                                 }
+
+                                if (_actionsBeforeRestart > 0)
+                                {
+                                    pagesBrowsed++;
+                                    if (pagesBrowsed > _actionsBeforeRestart)
+                                    {
+                                        this.Restart = true;
+                                        return;
+                                    }
+                                }
+
                                 Thread.Sleep(timelineEvent.DelayAfter);
                             }
                         case "browse":

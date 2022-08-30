@@ -95,6 +95,10 @@ namespace Ghosts.Client.Handlers
                             }
 
                             ExecuteEvents(handler);
+                            if (this.Restart)
+                            {
+                                break;
+                            }
                         }
                     }
                     else
@@ -128,6 +132,12 @@ namespace Ghosts.Client.Handlers
 
                 ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.GeckoDriver);
                 ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.Firefox);
+
+                if (this.Restart)
+                {
+                    Thread.Sleep(2000);
+                    _ = new BrowserFirefox(handler);
+                }
             }
 
             return true;
