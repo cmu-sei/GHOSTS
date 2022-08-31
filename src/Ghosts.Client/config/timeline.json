@@ -77,7 +77,7 @@
         "incognito": "true",
         "javascript-enable": "true",
         "visited-remember": "10",
-        "actions-before-restart": 500,
+        "actions-before-restart": 100,
         "url-replace": [
           { "verb": [ "order", "enable", "engage" ] },
           { "group": [ "operations", "logistics", "medical" ] },

@@ -24,6 +24,7 @@ namespace Ghosts.Client.Handlers
         private int _visitedRemember = 5;
         private int _actionsBeforeRestart = -1;
         private LinkManager _linkManager;
+        private int _actionsCount = 0;
         
         private Task LaunchThread(TimelineHandler handler, TimelineEvent timelineEvent, string site)
         {
@@ -98,7 +99,6 @@ namespace Ghosts.Client.Handlers
 
                             this._linkManager = new LinkManager(_visitedRemember);
 
-                            var pagesBrowsed = 0;
                             while (true)
                             {
                                 if (Driver.CurrentWindowHandle == null)
@@ -150,6 +150,20 @@ namespace Ghosts.Client.Handlers
                                                     Log.Error($"Browser loop error {e}");
                                                 }
 
+                                                if (_actionsBeforeRestart > 0)
+                                                {
+                                                    if (this._actionsCount.IsDivisibleByN(10))
+                                                    {
+                                                        Log.Trace($"Browser actions == {this._actionsCount}");
+                                                    }
+                                                    if (this._actionsCount > _actionsBeforeRestart)
+                                                    {
+                                                        this.Restart = true;
+                                                        Log.Trace("Browser reached action threshold. Restarting...");
+                                                        return;
+                                                    }
+                                                }
+
                                                 Thread.Sleep(timelineEvent.DelayAfter);
                                             }
                                         }
@@ -158,10 +172,14 @@ namespace Ghosts.Client.Handlers
 
                                 if (_actionsBeforeRestart > 0)
                                 {
-                                    pagesBrowsed++;
-                                    if (pagesBrowsed > _actionsBeforeRestart)
+                                    if (this._actionsCount.IsDivisibleByN(10))
+                                    {
+                                        Log.Trace($"Browser actions == {this._actionsCount}");
+                                    }
+                                    if (this._actionsCount > _actionsBeforeRestart)
                                     {
                                         this.Restart = true;
+                                        Log.Trace("Browser reached action threshold. Restarting...");
                                         return;
                                     }
                                 }
@@ -300,6 +318,8 @@ namespace Ghosts.Client.Handlers
                         javaScriptExecutor.ExecuteScript(script);
                         break;
                 }
+
+                this._actionsCount++;
             }
             catch (Exception e)
             {
