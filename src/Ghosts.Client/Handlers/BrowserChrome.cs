@@ -104,6 +104,13 @@ namespace Ghosts.Client.Handlers
 
             if (handler.HandlerArgs != null)
             {
+                if (handler.HandlerArgs.ContainsKey("user-data-dir"))
+                {
+                    var profile = handler.HandlerArgs["user-data-dir"];
+                    options.AddArgument($"user-data-dir={profile}");
+                    Log.Trace($"Loading chromedriver profile from {profile}...");
+                }
+
                 if (handler.HandlerArgs.ContainsKey("executable-location") &&
                     !string.IsNullOrEmpty(handler.HandlerArgs["executable-location"].ToString()))
                 {
