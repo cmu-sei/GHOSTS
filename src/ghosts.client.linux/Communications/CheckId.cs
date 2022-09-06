@@ -13,77 +13,127 @@ namespace ghosts.client.linux.Communications
     /// <summary>
     /// The client ID is used in the header to save having to send hostname/user/fqdn/etc. information with every request
     /// </summary>
-    public static class CheckId
+    public class CheckId
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
 
         /// <summary>
         /// The actual path to the client id file, specified in application config
         /// </summary>
-        private static readonly string ConfigFile = ApplicationDetails.InstanceFiles.Id;
+        public string IdFile = ApplicationDetails.InstanceFiles.Id;
+
+        private DateTime _lastChecked = DateTime.Now;
+        private string _id = string.Empty;
+
+        public CheckId()
+        {
+            _log.Trace($"CheckId instantiated with ID: {Id}");
+        }
 
         /// <summary>
         /// Gets the agent's current id from local instance, and if it does not exist, gets an id from the server and saves it locally
         /// </summary>
-        public static string Id
+        public string Id
         {
             get
             {
+                if (!string.IsNullOrEmpty(_id))
+                    return _id;
+
                 try
                 {
-                    return !File.Exists(ConfigFile) ? Run() : File.ReadAllText(ConfigFile);
+                    if (!File.Exists(IdFile))
+                    {
+                        if (DateTime.Now > _lastChecked.AddMinutes(5))
+                        {
+                            _log.Error("Skipping Check for ID from server, too many requests in a short amount of time...");
+                            return string.Empty;
+                        }
+
+                        _lastChecked = DateTime.Now;
+                        return Run();
+                    }
+                    Id = File.ReadAllText(IdFile);
+                    return _id;
                 }
                 catch
                 {
-                    _log.Error("config file could not be opened");
+                    _log.Error("No ID file");
                     return string.Empty;
                 }
             }
+            set => _id = value;
         }
-        
+
         /// <summary>
         /// API call to get client ID (probably based on hostname, but configurable) and saves it locally
         /// </summary>
         /// <returns></returns>
-        private static string Run()
+        private string Run()
         {
+            // ignore all certs
+            ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
+
             var s = string.Empty;
 
             if (!Program.Configuration.IdEnabled)
+            {
                 return s;
+            }
 
             var machine = new ResultMachine();
-
-            //call home
-            using (var client = WebClientBuilder.BuildNoId(machine))
+            
+            try
             {
-                try
+                //call home
+                using (var client = WebClientBuilder.BuildNoId(machine))
                 {
-                    using var reader =
-                        new StreamReader(client.OpenRead(Program.Configuration.IdUrl) ?? throw new Exception("Application has invalid ID url"));
-                    s = reader.ReadToEnd();
-                    _log.Debug($"{DateTime.Now} - Received client ID");
-                }
-                catch (WebException wex)
-                {
-                    if (((HttpWebResponse)wex.Response).StatusCode == HttpStatusCode.NotFound)
+                    try
                     {
-                        _log.Debug($"No ID returned from API! {wex}");
+                        using (var reader =
+                            new StreamReader(client.OpenRead(Program.Configuration.IdUrl) ?? throw new InvalidOperationException("CheckID client is null")))
+                        {
+                            s = reader.ReadToEnd();
+                            _log.Debug("ID Received");
+                        }
+                    }
+                    catch (WebException wex)
+                    {
+                        if (wex.Message.StartsWith("The remote name could not be resolved:"))
+                        {
+                            _log.Debug($"API not reachable: {wex.Message}");
+                        }
+                        else if (((HttpWebResponse)wex.Response).StatusCode == HttpStatusCode.NotFound)
+                        {
+                            _log.Debug($"No ID returned! {wex.Message}");
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        _log.Error($"General comms exception: {e.Message}");
                     }
                 }
-                catch (Exception e)
-                {
-                    _log.Error(e);
-                }
+            }
+            catch (Exception e)
+            {
+                _log.Error($"Cannot connect to API: {e.Message}");
+                return string.Empty;
             }
 
             s = s.Replace("\"", "");
 
             if (!Directory.Exists(ApplicationDetails.InstanceFiles.Path))
+            {
                 Directory.CreateDirectory(ApplicationDetails.InstanceFiles.Path);
+            }
+
+            if (string.IsNullOrEmpty(s))
+            {
+                return string.Empty;
+            }
 
             //save returned id
-            File.WriteAllText(ConfigFile, s);
+            File.WriteAllText(IdFile, s);
             return s;
         }
     }

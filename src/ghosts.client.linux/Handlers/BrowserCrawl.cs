@@ -3,18 +3,15 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using ghosts.client.linux.Infrastructure.Browser;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
-using NLog;
 using OpenQA.Selenium;
 
 namespace ghosts.client.linux.handlers
 {
     class BrowserCrawl : BaseHandler
     {
-        public static readonly Logger _log = LogManager.GetCurrentClassLogger();
         public IWebDriver Driver { get; set; }
         public IJavaScriptExecutor JS { get; set; }
         private int _stickiness = 0;

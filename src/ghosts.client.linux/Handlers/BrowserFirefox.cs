@@ -1,23 +1,18 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using Ghosts.Domain;
-using NLog;
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Runtime.CompilerServices;
 using System.Text;
 using Ghosts.Domain.Code.Helpers;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Firefox;
-// ReSharper disable StringLiteralTypo
 
 namespace ghosts.client.linux.handlers
 {
     public class BrowserFirefox : BaseBrowserHandler
     {
-        private new static readonly Logger _log = LogManager.GetCurrentClassLogger();
-
         public new IWebDriver Driver { get; private set; }
         public new IJavaScriptExecutor JS { get; private set; }
 

@@ -2,6 +2,7 @@
 
 using System;
 using Ghosts.Domain;
+using Ghosts.Domain.Code;
 using NLog;
 using Newtonsoft.Json;
 
@@ -9,7 +10,14 @@ namespace ghosts.client.linux.handlers
 {
     public abstract class BaseHandler
     {
+        public static readonly Logger _log = LogManager.GetCurrentClassLogger();
         private static readonly Logger _timelineLog = LogManager.GetLogger("TIMELINE");
+        internal static readonly Random _random = new Random();
+        
+        public void Init(TimelineHandler handler)
+        {
+            WorkingHours.Is(handler);
+        }
 
         protected static void Report(string handler, string command, string arg, string trackable = null)
         {

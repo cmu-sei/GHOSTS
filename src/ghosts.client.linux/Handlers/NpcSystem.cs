@@ -6,14 +6,11 @@ using ghosts.client.linux.Infrastructure;
 using ghosts.client.linux.timelineManager;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
-using NLog;
 
 namespace ghosts.client.linux.handlers
 {
     public class NpcSystem : BaseHandler
     {
-        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-
         public NpcSystem(Timeline timeline, TimelineHandler handler)
         {
             _log.Trace($"Handling NpcSystem call: {handler}");
@@ -46,6 +43,5 @@ namespace ghosts.client.linux.handlers
                 }
             }
         }
-
     }
 }

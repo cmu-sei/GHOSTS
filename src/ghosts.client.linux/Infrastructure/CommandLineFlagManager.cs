@@ -64,8 +64,7 @@ namespace ghosts.client.linux.Infrastructure
             }
             else
             {
-                Console.WriteLine(
-                    $"GHOSTS ({ApplicationDetails.Name}:{ApplicationDetails.Version}) running in production mode. Installed path: {ApplicationDetails.InstalledPath}");
+                Console.WriteLine($"GHOSTS ({ApplicationDetails.Name}:{ApplicationDetails.Version} [{ApplicationDetails.VersionFile}]) running in production mode. Installed path: {ApplicationDetails.InstalledPath}");
             }
 
             if (options.Randomize)
@@ -80,8 +79,7 @@ namespace ghosts.client.linux.Infrastructure
 
         private static void Debug()
         {
-            Console.WriteLine(
-                $"GHOSTS ({ApplicationDetails.Name}:{ApplicationDetails.Version}) running in debug mode. Installed path: {ApplicationDetails.InstalledPath}");
+            Console.WriteLine($"GHOSTS ({ApplicationDetails.Name}:{ApplicationDetails.Version} [{ApplicationDetails.VersionFile}]) running in debug mode. Installed path: {ApplicationDetails.InstalledPath}");
 
             Console.WriteLine($"{ApplicationDetails.ConfigurationFiles.Application} == {File.Exists(ApplicationDetails.ConfigurationFiles.Application)}");
             
@@ -119,7 +117,7 @@ namespace ghosts.client.linux.Infrastructure
         private static void Version()
         {
             //handle version flag and return ghosts and referenced assemblies information
-            Console.WriteLine($"{ApplicationDetails.Name}:{ApplicationDetails.Version}");
+            Console.WriteLine($"{ApplicationDetails.Name}: {ApplicationDetails.Version} [{ApplicationDetails.VersionFile}]");
             foreach (var assemblyName in Assembly.GetExecutingAssembly().GetReferencedAssemblies())
             {
                 Console.WriteLine($"{assemblyName.Name}: {assemblyName.Version}");

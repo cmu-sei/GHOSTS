@@ -6,8 +6,8 @@
 
     <Version>6.1.0.0</Version>
     <AssemblyVersion>6.1.0.0</AssemblyVersion>
-    <FileVersion>6.1.0.0</FileVersion>
     <ReleaseVersion>6.1.0.0</ReleaseVersion>
+    <FileVersion>6.1.25.0</FileVersion>
     <SynchReleaseVersion>false</SynchReleaseVersion>
         
     <Authors>Dustin Updyke for Carnegie Mellon University</Authors>

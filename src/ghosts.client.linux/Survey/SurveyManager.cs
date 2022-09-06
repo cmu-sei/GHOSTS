@@ -58,7 +58,7 @@ namespace ghosts.client.linux.Survey
                         }
                     };
 
-                    if (Guid.TryParse(CheckId.Id, out var g))
+                    if (Guid.TryParse(Program.CheckId.Id, out var g))
                         s.Survey.MachineId = g;
 
                     s.LoadAll();

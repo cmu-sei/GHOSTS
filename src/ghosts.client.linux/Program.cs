@@ -24,6 +24,7 @@ namespace ghosts.client.linux
         internal static bool IsDebug;
         internal static List<ThreadJob> ThreadJobs { get; private set; }
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
+        public static CheckId CheckId { get; set; }
 
         private static void Main(string[] args)
         {
@@ -71,15 +72,17 @@ namespace ghosts.client.linux
                 Console.ReadLine();
                 return;
             }
+            
+            Program.CheckId = new CheckId();
 
             //linux clients do not catch stray processes or check for job duplication
 
             StartupTasks.SetStartup();
 
             ListenerManager.Run();
-
-            //check id
-            _log.Trace(CheckId.Id);
+            
+            //do we have client id? or is this first run?
+            _log.Trace($"CheckID: {Program.CheckId.Id}");
 
             //connect to command server for updates and sending logs
             Updates.Run();

@@ -16,8 +16,8 @@ namespace ghosts.client.linux.timelineManager
     public static class ListenerManager
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        private static readonly string In = ApplicationDetails.InstanceDirectories.TimelineIn;
-        private static readonly string Out = ApplicationDetails.InstanceDirectories.TimelineOut;
+        internal static string In = ApplicationDetails.InstanceDirectories.TimelineIn;
+        internal static string Out = ApplicationDetails.InstanceDirectories.TimelineOut;
 
         public static void Run()
         {
@@ -25,12 +25,7 @@ namespace ghosts.client.linux.timelineManager
             {
                 if (Program.Configuration.Listener.Port > 0)
                 {
-                    var t = new Thread(() => { new Listener(); })
-                    {
-                        IsBackground = true,
-                        Name = "ghosts-portlistener"
-                    };
-                    t.Start();
+                    var _ = new PortListener();
                 }
             }
             catch (Exception e)
@@ -40,7 +35,7 @@ namespace ghosts.client.linux.timelineManager
 
             try
             {
-                if (!string.IsNullOrEmpty(In) && !string.IsNullOrEmpty(Out))
+                if (!string.IsNullOrEmpty(In))
                 {
                     if (!Directory.Exists(In))
                     {
@@ -54,21 +49,7 @@ namespace ghosts.client.linux.timelineManager
                         _log.Trace($"DirectoryListener created DirIn: {Out})");
                     }
 
-                    var t = new Thread(() => { new DirectoryListener(); })
-                    {
-                        IsBackground = true,
-                        Name = "ghosts-directorylistener"
-                    };
-                    t.Start();
-                    
-                    t = new Thread(() => { new InitialDirectoryListener(); })
-                    {
-                        IsBackground = true,
-                        Name = "ghosts-initialdirectorylistener"
-                    };
-                    t.Start();
-                    
-                    EnsureWatch();
+                    var _ = new DirectoryListener();
                 }
                 else
                 {
@@ -80,89 +61,33 @@ namespace ghosts.client.linux.timelineManager
                 _log.Debug(e);
             }
         }
-
-        private static void EnsureWatch()
-        {
-            File.WriteAllText(In + "init.json", JsonConvert.SerializeObject(new Timeline(), Formatting.None));
-        }
     }
 
-    public class InitialDirectoryListener
-    {
-        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        private static DateTime _lastRead = DateTime.Now;
-        public InitialDirectoryListener()
-        {
-            var directoryName = TimelineBuilder.TimelineFilePath().DirectoryName;
-            if (directoryName == null)
-            {
-                throw new Exception("Timeline builder path cannot be determined");
-            }
-            
-            var timelineWatcher = new FileSystemWatcher(directoryName);
-            timelineWatcher.Filter = Path.GetFileName(TimelineBuilder.TimelineFilePath().Name);
-            _log.Trace($"watching {timelineWatcher.Path}");
-            timelineWatcher.NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.FileName | NotifyFilters.Size | NotifyFilters.CreationTime |
-                                           NotifyFilters.LastWrite;
-            timelineWatcher.Changed += InitialOnChanged;
-            timelineWatcher.EnableRaisingEvents = true;
-        
-
-            new ManualResetEvent(false).WaitOne();
-        }
-        
-        private static void InitialOnChanged(object source, FileSystemEventArgs e)
-        {
-            // file watcher throws two events, we only need 1
-            var lastWriteTime = File.GetLastWriteTime(e.FullPath);
-            if (lastWriteTime <= _lastRead.AddSeconds(1)) return;
-            
-            _lastRead = lastWriteTime;
-            _log.Trace("File: " + e.FullPath + " " + e.ChangeType);
-            
-            var method = string.Empty;
-            if (System.Reflection.MethodBase.GetCurrentMethod() != null)
-            {
-                var declaringType = System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType;
-                if (declaringType != null)
-                    method = declaringType.ToString();
-            }
-            _log.Trace($"Reloading {method}...");
-
-            // now terminate existing tasks and rerun
-            var o = new Orchestrator();
-            Orchestrator.Stop();
-            o.Run();
-        }
-    }
-    
     /// <summary>
-    /// Watches a directory [ghosts install] \ instance \ timeline for dropped files, and processes them immediately
+    /// Watches a directory [ghosts install]\instance\timeline for dropped files, and processes them immediately
     /// </summary>
     public class DirectoryListener
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        private readonly string _in = ApplicationDetails.InstanceDirectories.TimelineIn;
-        private readonly string _out = ApplicationDetails.InstanceDirectories.TimelineOut;
-        private string _currentlyProcessing = string.Empty;
-        
+        private static readonly string _in = ListenerManager.In;
+        private static readonly string _out = ListenerManager.Out;
+        private static string _currentlyProcessing = string.Empty;
+
         public DirectoryListener()
         {
             var watcher = new FileSystemWatcher
             {
                 Path = _in,
-                NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName,
+                NotifyFilter = NotifyFilters.LastWrite,
                 Filter = "*.*"
             };
             watcher.Changed += OnChanged;
-            watcher.Created += OnChanged;
             watcher.EnableRaisingEvents = true;
-            new ManualResetEvent(false).WaitOne();
-        } 
-        
+        }
+
         private void OnChanged(object source, FileSystemEventArgs e)
         {
-            // file watcher throws multiple events, we only need 1
+            // filewatcher throws multiple events, we only need 1
             if (!string.IsNullOrEmpty(_currentlyProcessing) && _currentlyProcessing == e.FullPath) return;
             _currentlyProcessing = e.FullPath;
 
@@ -175,14 +100,23 @@ namespace ghosts.client.linux.timelineManager
             {
                 try
                 {
-                    var timeline = TimelineBuilder.GetLocalTimeline(e.FullPath);
+                    var raw = File.ReadAllText(e.FullPath);
+
+                    var timeline = JsonConvert.DeserializeObject<Timeline>(raw);
+
+                    if (timeline is null)
+                        return;
+
                     foreach (var timelineHandler in timeline.TimeLineHandlers)
                     {
                         _log.Trace($"DirectoryListener command found: {timelineHandler.HandlerType}");
 
-                        foreach (var timelineEvent in timelineHandler.TimeLineEvents.Where(timelineEvent => string.IsNullOrEmpty(timelineEvent.TrackableId)))
+                        foreach (var timelineEvent in timelineHandler.TimeLineEvents)
                         {
-                            timelineEvent.TrackableId = Guid.NewGuid().ToString();
+                            if (string.IsNullOrEmpty(timelineEvent.TrackableId))
+                            {
+                                timelineEvent.TrackableId = Guid.NewGuid().ToString();
+                            }
                         }
 
                         Orchestrator.RunCommand(timeline, timelineHandler);
@@ -201,7 +135,6 @@ namespace ghosts.client.linux.timelineManager
                     if (commands.Count > 0)
                     {
                         var constructedTimelineHandler = TimelineTranslator.FromBrowserUnitTests(commands);
-                        
                         var t = new Timeline
                         {
                             Id = Guid.NewGuid(),
@@ -233,11 +166,11 @@ namespace ghosts.client.linux.timelineManager
         }
     }
 
-    public class Listener
+    public class PortListener
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
 
-        public Listener()
+        public PortListener()
         {
             try
             {
@@ -245,40 +178,55 @@ namespace ghosts.client.linux.timelineManager
                 server.AutoTrimStrings = true;
                 server.Delimiter = 0x13;
 
-                Console.WriteLine($"Listener active on {string.Join(",", server.GetListeningIPs())} : {Program.Configuration.Listener.Port}");
+                Console.WriteLine(
+                    $"PortListener active on {string.Join(",", server.GetListeningIPs())} : {Program.Configuration.Listener.Port}");
 
                 server.DataReceived += (sender, message) =>
                 {
                     var obj = Handle(message);
                     message.ReplyLine($"{obj}{Environment.NewLine}");
-                    Console.WriteLine(obj);
                 };
             }
             catch (Exception e)
             {
                 _log.Trace(e);
+                Console.WriteLine($"PortListener could not be started on {Program.Configuration.Listener.Port}");
             }
         }
 
         private static string Handle(Message message)
         {
+            var tempMsg =
+                $"PortListener received raw {message.TcpClient.Client.RemoteEndPoint}: {message.MessageString}";
+            Console.WriteLine(tempMsg);
+            _log.Trace(tempMsg);
+
             var command = message.MessageString;
             var index = command.LastIndexOf("}", StringComparison.InvariantCultureIgnoreCase);
             if (index > 0)
-                command = command[..(index + 1)];
+            {
+                command = command.Substring(0, index + 1);
+            }
 
-            _log.Trace($"Received from {message.TcpClient.Client.RemoteEndPoint}: {command}");
+            _log.Trace($"PortListener received from {message.TcpClient.Client.RemoteEndPoint}: {command}");
 
             try
             {
                 var timelineHandler = JsonConvert.DeserializeObject<TimelineHandler>(command);
 
-                foreach (var evs in timelineHandler.TimeLineEvents.Where(evs => string.IsNullOrEmpty(evs.TrackableId)))
+                if (timelineHandler is null)
+                    throw new DataMisalignedException(
+                        "Portlistener received something that could not be interpreted as a timeline");
+
+                foreach (var evs in timelineHandler.TimeLineEvents)
                 {
-                    evs.TrackableId = Guid.NewGuid().ToString();
+                    if (string.IsNullOrEmpty(evs.TrackableId))
+                    {
+                        evs.TrackableId = Guid.NewGuid().ToString();
+                    }
                 }
 
-                _log.Trace($"Command found: {timelineHandler.HandlerType}");
+                _log.Trace($"PortListener command found: {timelineHandler.HandlerType}");
 
                 var t = new Timeline
                 {
@@ -286,7 +234,7 @@ namespace ghosts.client.linux.timelineManager
                     Status = Timeline.TimelineStatus.Run
                 };
                 t.TimeLineHandlers.Add(timelineHandler);
-                
+
                 Orchestrator.RunCommand(t, timelineHandler);
 
                 var obj = JsonConvert.SerializeObject(timelineHandler);

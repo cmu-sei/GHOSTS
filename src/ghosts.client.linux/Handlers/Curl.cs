@@ -7,13 +7,11 @@ using System.Threading;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using HtmlAgilityPack;
-using NLog;
 
 namespace ghosts.client.linux.handlers
 {
     public class Curl : BaseHandler
     {
-        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
         private string Result { get; set; }
         private readonly TimelineHandler _handler;
         private readonly int _stickiness;

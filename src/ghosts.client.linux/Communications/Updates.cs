@@ -5,12 +5,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Threading;
 using ghosts.client.linux.Infrastructure;
 using ghosts.client.linux.timelineManager;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
+using Ghosts.Domain.Code.Helpers;
 using Ghosts.Domain.Messages.MesssagesForServer;
 using NLog;
 using Newtonsoft.Json;
@@ -51,7 +51,6 @@ namespace ghosts.client.linux.Comms
             ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
 
             var machine = new ResultMachine();
-            // GuestInfoVars.Load(machine);
 
             Thread.Sleep(Jitter.Basic(Program.Configuration.ClientUpdates.CycleSleep));
 
@@ -132,8 +131,7 @@ namespace ghosts.client.linux.Comms
                                 //save to local disk
                                 using (var file = File.CreateText(ApplicationDetails.ConfigurationFiles.Health))
                                 {
-                                    var serializer = new JsonSerializer();
-                                    serializer.Formatting = Formatting.Indented;
+                                    var serializer = new JsonSerializer {Formatting = Formatting.Indented};
                                     serializer.Serialize(file, newTimeline);
                                 }
 
@@ -181,11 +179,11 @@ namespace ghosts.client.linux.Comms
 
             ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
 
-            var posturl = string.Empty;
+            string postUrl;
 
             try
             {
-                posturl = Program.Configuration.IdUrl.Replace("clientid", "clienttimeline");
+                postUrl = Program.Configuration.IdUrl.Replace("clientid", "clienttimeline");
             }
             catch
             {
@@ -201,12 +199,11 @@ namespace ghosts.client.linux.Comms
 
                     var payload = TimelineBuilder.TimelineToString(timeline);
                     var machine = new ResultMachine();
-                    // GuestInfoVars.Load(machine);
-
+                    
                     using (var client = WebClientBuilder.Build(machine))
                     {
                         client.Headers[HttpRequestHeader.ContentType] = "application/json";
-                        client.UploadString(posturl, JsonConvert.SerializeObject(payload));
+                        client.UploadString(postUrl, JsonConvert.SerializeObject(payload));
                     }
 
                     _log.Trace($"{DateTime.Now} - timeline posted to server successfully");
@@ -214,7 +211,7 @@ namespace ghosts.client.linux.Comms
                 catch (Exception e)
                 {
                     _log.Debug(
-                        $"Problem posting timeline to server from {ApplicationDetails.ConfigurationFiles.Timeline} to {posturl}");
+                        $"Problem posting timeline to server from {ApplicationDetails.ConfigurationFiles.Timeline} to {postUrl}");
                     _log.Error(e);
                 }
             }
@@ -229,11 +226,10 @@ namespace ghosts.client.linux.Comms
             ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
 
             var fileName = ApplicationDetails.LogFiles.ClientUpdates;
-            var posturl = Program.Configuration.ClientResults.PostUrl;
+            var postUrl = Program.Configuration.ClientResults.PostUrl;
 
             var machine = new ResultMachine();
-            // GuestInfoVars.Load(machine);
-
+            
             Thread.Sleep(Jitter.Basic(Program.Configuration.ClientResults.CycleSleep));
 
             while (true)
@@ -242,7 +238,14 @@ namespace ghosts.client.linux.Comms
                 {
                     if (File.Exists(fileName))
                     {
-                        PostResults(fileName, machine, posturl);
+                        while (new FileInfo(fileName).IsFileLocked())
+                        {
+                            var sleepTime = 15000;
+                            _log.Trace($"{fileName} is locked, sleeping for {sleepTime}...");
+                            Thread.Sleep(sleepTime);
+                        }
+                        PostResults(fileName, machine, postUrl);
+                        _log.Trace($"{fileName} posted successfully...");
                     }
                     else
                     {
@@ -262,17 +265,24 @@ namespace ghosts.client.linux.Comms
                 // look for other result files that have not been posted
                 try
                 {
-                    foreach (var file in Directory.GetFiles(Path.GetDirectoryName(fileName)))
+                    foreach (var file in Directory.GetFiles(Path.GetDirectoryName(fileName) ?? throw new InvalidOperationException("Path declaration failed")))
                     {
                         if (!file.EndsWith("app.log") && file != fileName)
                         {
-                            PostResults(file, machine, posturl, true);
+                            while(new FileInfo(file).IsFileLocked())
+                            {
+                                var sleepTime = 15000;
+                                _log.Trace($"{file} is locked, sleeping for {sleepTime}...");
+                                Thread.Sleep(sleepTime);
+                            }
+                            PostResults(file, machine, postUrl, true);
+                            _log.Trace($"{fileName} posted successfully...");
                         }
                     }
                 }
                 catch (Exception e)
                 {
-                    _log.Debug($"Problem posting overflow logs from {fileName} to server {posturl} : {e}");
+                    _log.Debug($"Problem posting overflow logs from {fileName} to server {postUrl} : {e.Message}");
                 }
                 finally
                 {
@@ -286,25 +296,14 @@ namespace ghosts.client.linux.Comms
 
         private static void PostResults(string fileName, ResultMachine machine, string postUrl, bool isDeletable = false)
         {
-            var sb = new StringBuilder();
-            var data = File.ReadLines(fileName);
-            foreach (var d in data)
-            {
-                sb.AppendLine(d);
-            }
-
-            var r = new TransferLogDump();
-            r.Log = sb.ToString();
-
+            var r = new TransferLogDump {Log = File.ReadAllText(fileName) };
             var payload = JsonConvert.SerializeObject(r);
-
             if (Program.Configuration.ClientResults.IsSecure)
             {
                 payload = Crypto.EncryptStringAes(payload, machine.Name);
                 payload = Base64Encoder.Base64Encode(payload);
 
-                var p = new EncryptedPayload();
-                p.Payload = payload;
+                var p = new EncryptedPayload {Payload = payload};
 
                 payload = JsonConvert.SerializeObject(p);
             }
@@ -332,11 +331,11 @@ namespace ghosts.client.linux.Comms
             // ignore all certs
             ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
 
-            var posturl = string.Empty;
+            string postUrl;
 
             try
             {
-                posturl = Program.Configuration.Survey.PostUrl;
+                postUrl = Program.Configuration.Survey.PostUrl;
             }
             catch
             {
@@ -358,15 +357,13 @@ namespace ghosts.client.linux.Comms
                 var payload = JsonConvert.SerializeObject(survey);
 
                 var machine = new ResultMachine();
-                // GuestInfoVars.Load(machine);
-
+ 
                 if (Program.Configuration.Survey.IsSecure)
                 {
                     payload = Crypto.EncryptStringAes(payload, machine.Name);
                     payload = Base64Encoder.Base64Encode(payload);
 
-                    var p = new EncryptedPayload();
-                    p.Payload = payload;
+                    var p = new EncryptedPayload {Payload = payload};
 
                     payload = JsonConvert.SerializeObject(p);
                 }
@@ -374,7 +371,7 @@ namespace ghosts.client.linux.Comms
                 using (var client = WebClientBuilder.Build(machine))
                 {
                     client.Headers[HttpRequestHeader.ContentType] = "application/json";
-                    client.UploadString(posturl, payload);
+                    client.UploadString(postUrl, payload);
                 }
 
                 _log.Trace($"{DateTime.Now} - survey posted to server successfully");

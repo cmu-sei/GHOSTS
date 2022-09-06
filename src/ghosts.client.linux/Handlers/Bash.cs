@@ -6,13 +6,11 @@ using System.Linq;
 using System.Threading;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
-using NLog;
 
 namespace ghosts.client.linux.handlers
 {
     public class Bash : BaseHandler
     {
-        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
         private string Result { get; set; }
 
         public Bash(TimelineHandler handler)

@@ -3,11 +3,9 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using ghosts.client.linux.Infrastructure.Browser;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
-using NLog;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
 
@@ -15,15 +13,17 @@ namespace ghosts.client.linux.handlers
 {
     public abstract class BaseBrowserHandler : BaseHandler
     {
-        public static readonly Logger _log = LogManager.GetCurrentClassLogger();
         public IWebDriver Driver { get; set; }
         public IJavaScriptExecutor JS { get; set; }
         public HandlerType BrowserType { get; set; }
+        internal bool Restart { get; set; }
         private int _stickiness;
         private int _depthMin = 1;
         private int _depthMax = 10;
         private int _visitedRemember = 5;
+        private int _actionsBeforeRestart = -1;
         private LinkManager _linkManager;
+        private int _actionsCount = 0;
         
         private Task LaunchThread(TimelineHandler handler, TimelineEvent timelineEvent, string site)
         {
@@ -91,6 +91,10 @@ namespace ghosts.client.linux.handlers
                             {
                                 int.TryParse(handler.HandlerArgs["visited-remember"].ToString(), out _visitedRemember);
                             }
+                            if (handler.HandlerArgs.ContainsKey("actions-before-restart"))
+                            {
+                                int.TryParse(handler.HandlerArgs["actions-before-restart"].ToString(), out _actionsBeforeRestart);
+                            }
 
                             this._linkManager = new LinkManager(_visitedRemember);
 
@@ -100,8 +104,8 @@ namespace ghosts.client.linux.handlers
                                 {
                                     throw new Exception("Browser window handle not available");
                                 }
-                                var random = new Random();
-                                config = RequestConfiguration.Load(handler, timelineEvent.CommandArgs[random.Next(0, timelineEvent.CommandArgs.Count)]);
+
+                                config = RequestConfiguration.Load(handler, timelineEvent.CommandArgs[_random.Next(0, timelineEvent.CommandArgs.Count)]);
                                 if (config.Uri.IsWellFormedOriginalString())
                                 {
                                     this._linkManager.SetCurrent(config.Uri);
@@ -111,9 +115,9 @@ namespace ghosts.client.linux.handlers
                                     if (this._stickiness > 0)
                                     {
                                         //now some percentage of the time should stay on this site
-                                        if (random.Next(100) < this._stickiness)
+                                        if (_random.Next(100) < this._stickiness)
                                         {
-                                            var loops = random.Next(this._depthMin, this._depthMax);
+                                            var loops = _random.Next(this._depthMin, this._depthMax);
                                             _log.Trace($"Beginning {loops} loops on {config.Uri}");
                                             for (var loopNumber = 0; loopNumber < loops; loopNumber++)
                                             {
@@ -134,9 +138,28 @@ namespace ghosts.client.linux.handlers
                                                     MakeRequest(config);
                                                     Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId);
                                                 }
+                                                catch (ThreadAbortException)
+                                                {
+                                                    _log.Trace($"Thread aborted, {this.BrowserType.ToString()} closing...");
+                                                    return;
+                                                }
                                                 catch (Exception e)
                                                 {
                                                     _log.Error($"Browser loop error {e}");
+                                                }
+
+                                                if (_actionsBeforeRestart > 0)
+                                                {
+                                                    if (this._actionsCount.IsDivisibleByN(10))
+                                                    {
+                                                        _log.Trace($"Browser actions == {this._actionsCount}");
+                                                    }
+                                                    if (this._actionsCount > _actionsBeforeRestart)
+                                                    {
+                                                        this.Restart = true;
+                                                        _log.Trace("Browser reached action threshold. Restarting...");
+                                                        return;
+                                                    }
                                                 }
 
                                                 Thread.Sleep(timelineEvent.DelayAfter);
@@ -144,6 +167,21 @@ namespace ghosts.client.linux.handlers
                                         }
                                     }
                                 }
+
+                                if (_actionsBeforeRestart > 0)
+                                {
+                                    if (this._actionsCount.IsDivisibleByN(10))
+                                    {
+                                        _log.Trace($"Browser actions == {this._actionsCount}");
+                                    }
+                                    if (this._actionsCount > _actionsBeforeRestart)
+                                    {
+                                        this.Restart = true;
+                                        _log.Trace("Browser reached action threshold. Restarting...");
+                                        return;
+                                    }
+                                }
+
                                 Thread.Sleep(timelineEvent.DelayAfter);
                             }
                         case "browse":
@@ -209,6 +247,10 @@ namespace ghosts.client.linux.handlers
                     }
                 }
             }
+            catch (ThreadAbortException)
+            {
+                _log.Trace($"Thread aborted, {this.BrowserType.ToString()} closing...");
+            }
             catch (Exception e)
             {
                 _log.Error(e);
@@ -273,6 +315,8 @@ namespace ghosts.client.linux.handlers
                         javaScriptExecutor.ExecuteScript(script);
                         break;
                 }
+
+                this._actionsCount++;
             }
             catch (Exception e)
             {
