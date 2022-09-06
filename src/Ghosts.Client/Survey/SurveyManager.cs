@@ -201,7 +201,7 @@ namespace Ghosts.Client.Survey
             if (!Program.IsDebug)
                 Thread.Sleep(_random.Next(500, 900000));
 
-            this.Survey.Processes = this.GetProcesses();
+            this.Survey.Processes = GetProcesses();
             if (!Program.IsDebug)
                 Thread.Sleep(_random.Next(500, 900000));
 
@@ -408,7 +408,7 @@ namespace Ghosts.Client.Survey
             return results;
         }
 
-        public List<Domain.Messages.MesssagesForServer.Survey.LocalProcess> GetProcesses()
+        public static List<Domain.Messages.MesssagesForServer.Survey.LocalProcess> GetProcesses()
         {
             var results = new List<Domain.Messages.MesssagesForServer.Survey.LocalProcess>();
             try
@@ -416,7 +416,8 @@ namespace Ghosts.Client.Survey
                 foreach (var item in Process.GetProcesses())
                 {
                     var result = new Domain.Messages.MesssagesForServer.Survey.LocalProcess();
-
+                    result.Id = item.Id;
+                    result.PrivateMemorySize64 = item.PrivateMemorySize64;
                     if (!string.IsNullOrEmpty(item.MainWindowTitle))
                         result.MainWindowTitle = item.MainWindowTitle;
                     if (!string.IsNullOrEmpty(item.ProcessName))

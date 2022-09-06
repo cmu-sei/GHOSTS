@@ -9,7 +9,6 @@ namespace Ghosts.Client.Infrastructure
             return Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%");
         }
 
-
         public static string GetDownloadFolderPath()
         {
             return GetHomePath() + "\\Downloads";

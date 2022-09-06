@@ -26,12 +26,15 @@
         "PostUrl": "http://ghosts-api:52388/api/clientsurvey"
     },
     "Content": {
-        "EmailContent": "",
-        "EmailReply": "",
-        "EmailDomain": "",
-        "EmailOutside": "",
-        "FileNames": "",
-        "Dictionary": ""
+      "EmailContent": "",
+      "EmailReply": "",
+      "EmailDomain": "",
+      "EmailOutside": "",
+      "FileNames": "",
+      "Dictionary": ""
+    },
+    "ResourceControl": {
+      "ManageProcesses": true
     },
     "HealthIsEnabled": false,
     "HandlersIsEnabled": true,

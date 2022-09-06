@@ -5,6 +5,7 @@ using Ghosts.Domain;
 using OpenQA.Selenium.Chrome;
 using System;
 using System.IO;
+using System.Threading;
 using Ghosts.Domain.Code.Helpers;
 using OpenQA.Selenium;
 
@@ -30,28 +31,40 @@ namespace Ghosts.Client.Handlers
             BrowserType = HandlerType.BrowserChrome;
             try
             {
-                Driver = GetDriver(handler);
-                base.Driver = Driver;
-
-                if (handler.HandlerArgs.ContainsKey("javascript-enable"))
+                using (Driver = GetDriver(handler))
                 {
-                    JS = (IJavaScriptExecutor)Driver;
-                    base.JS = JS;
-                }
+                    base.Driver = Driver;
 
-                Driver.Navigate().GoToUrl(handler.Initial);
+                    if (handler.HandlerArgs.ContainsKey("javascript-enable"))
+                    {
+                        JS = (IJavaScriptExecutor)Driver;
+                        base.JS = JS;
+                    }
 
-                if (handler.Loop)
-                {
-                    while (true)
+                    try
+                    {
+                        Driver.Navigate().GoToUrl(handler.Initial);
+                    }
+                    catch
+                    {
+                    }
+
+                    if (handler.Loop)
+                    {
+                        while (true)
+                        {
+                            ExecuteEvents(handler);
+                        }
+                    }
+                    else
                     {
                         ExecuteEvents(handler);
                     }
                 }
-                else
-                {
-                    ExecuteEvents(handler);
-                }
+            }
+            catch (ThreadAbortException)
+            {
+                //ignore
             }
             catch (Exception e)
             {
@@ -59,8 +72,20 @@ namespace Ghosts.Client.Handlers
             }
             finally
             {
-                ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.Chrome);
+                try
+                {
+                    Driver.Quit();
+                }
+                catch { }
+
+                try
+                {
+                    Driver.Dispose();
+                }
+                catch { }
+
                 ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.ChromeDriver);
+                ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.Chrome);
             }
         }
 

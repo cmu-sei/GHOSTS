@@ -1,10 +1,10 @@
-taskkill /im "ghosts.exe" /F
-taskkill /im "geckodriver.exe" /F
-taskkill /im "firefox.exe" /F
-taskkill /im "chromedriver.exe" /F
-taskkill /im "chrome.exe" /F
-taskkill /im "outlook.exe" /F
-taskkill /im "winword.exe" /F
-taskkill /im "powerpnt.exe" /F
-taskkill /im "excel.exe" /F
-taskkill /im "crashreporter.exe" /F
+taskkill /im "ghosts.exe" /F /T
+taskkill /im "geckodriver.exe" /F /T
+taskkill /im "firefox.exe" /F /T
+taskkill /im "chromedriver.exe" /F /T
+taskkill /im "chrome.exe" /F /T
+taskkill /im "outlook.exe" /F /T
+taskkill /im "winword.exe" /F /T
+taskkill /im "powerpnt.exe" /F /T
+taskkill /im "excel.exe" /F /T
+taskkill /im "crashreporter.exe" /F /T

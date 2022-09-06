@@ -2,33 +2,19 @@
 
 using System;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using System.Threading;
-using WindowsInput;
-using WindowsInput.Native;
+using Ghosts.Client.Infrastructure;
 using Ghosts.Domain;
-using Ghosts.Domain.Code;
 
 namespace Ghosts.Client.Handlers
 {
     public class Cmd : BaseHandler
     {
-        [DllImport("user32.dll", SetLastError = true)]
-        static extern bool SetForegroundWindow(IntPtr hWnd);
-
-        //private const int WmKeyUp = 0x101;
-
-        public Process Process;
-
         public Cmd(TimelineHandler handler)
         {
             try
             {
                 base.Init(handler);
-                Log.Trace("Spawning cmd.exe...");
-                
-                this.Process = Process.Start("cmd.exe");
-            
                 if (handler.Loop)
                 {
                     while (true)
@@ -41,6 +27,11 @@ namespace Ghosts.Client.Handlers
                     Ex(handler);
                 }
             }
+            catch (ThreadAbortException)
+            {
+                ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.Command);
+                Log.Trace("Cmd closing...");
+            }
             catch (Exception e)
             {
                 Log.Error(e);
@@ -51,10 +42,10 @@ namespace Ghosts.Client.Handlers
         {
             foreach (var timelineEvent in handler.TimeLineEvents)
             {
-                Infrastructure.WorkingHours.Is(handler);
+                WorkingHours.Is(handler);
 
                 if (timelineEvent.DelayBefore > 0)
-                    this.Sleep(timelineEvent.DelayBefore);
+                    Thread.Sleep(timelineEvent.DelayBefore);
 
                 Log.Trace($"Command line: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfter}");
 
@@ -80,30 +71,31 @@ namespace Ghosts.Client.Handlers
                 }
 
                 if (timelineEvent.DelayAfter > 0)
-                    this.Sleep(timelineEvent.DelayAfter);
+                    Thread.Sleep(timelineEvent.DelayAfter);
             }
         }
 
         public void Command(TimelineHandler handler, TimelineEvent timelineEvent, string command)
         {
-            this.Sleep(1000);
+            Log.Trace("Spawning cmd.exe...");
+            var processStartInfo = new ProcessStartInfo("cmd.exe")
+            {
+                RedirectStandardInput = true,
+                RedirectStandardOutput = true,
+                UseShellExecute = false
+            };
 
-            SetForegroundWindow(this.Process.MainWindowHandle);
-            var i = new InputSimulator();
-            i.Keyboard.TextEntry(command);
-            i.Keyboard.KeyPress(VirtualKeyCode.RETURN);
-
-            this.Report(handler.HandlerType.ToString(), command, "", timelineEvent.TrackableId);
-        }
-
-        public void Sleep(int length)
-        {
-            Thread.Sleep(length);
-        }
-
-        public void Kill()
-        {
-            this.Process.Kill();
+            using (var process = Process.Start(processStartInfo))
+            {
+                Thread.Sleep(1000);
+                if (process != null)
+                {
+                    process.StandardInput.WriteLine(command);
+                    process.StandardInput.Close(); // line added to stop process from hanging on ReadToEnd()
+                    var outputString = process.StandardOutput.ReadToEnd();
+                    this.Report(handler.HandlerType.ToString(), command, outputString, timelineEvent.TrackableId);
+                }
+            }
         }
     }
 }

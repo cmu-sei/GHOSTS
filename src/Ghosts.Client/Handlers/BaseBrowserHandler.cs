@@ -3,6 +3,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Ghosts.Client.Infrastructure;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
@@ -16,11 +17,14 @@ namespace Ghosts.Client.Handlers
         public IWebDriver Driver { get; set; }
         public IJavaScriptExecutor JS { get; set; }
         public HandlerType BrowserType { get; set; }
+        internal bool Restart { get; set; }
         private int _stickiness;
         private int _depthMin = 1;
         private int _depthMax = 10;
         private int _visitedRemember = 5;
+        private int _actionsBeforeRestart = -1;
         private LinkManager _linkManager;
+        private int _actionsCount = 0;
         
         private Task LaunchThread(TimelineHandler handler, TimelineEvent timelineEvent, string site)
         {
@@ -88,6 +92,10 @@ namespace Ghosts.Client.Handlers
                             {
                                 int.TryParse(handler.HandlerArgs["visited-remember"].ToString(), out _visitedRemember);
                             }
+                            if (handler.HandlerArgs.ContainsKey("actions-before-restart"))
+                            {
+                                int.TryParse(handler.HandlerArgs["actions-before-restart"].ToString(), out _actionsBeforeRestart);
+                            }
 
                             this._linkManager = new LinkManager(_visitedRemember);
 
@@ -131,9 +139,29 @@ namespace Ghosts.Client.Handlers
                                                     MakeRequest(config);
                                                     Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId);
                                                 }
+                                                catch (ThreadAbortException)
+                                                {
+                                                    ProcessManager.KillProcessAndChildrenByName(this.BrowserType.ToString().Replace("Browser", ""));
+                                                    Log.Trace($"Thread aborted, {this.BrowserType.ToString()} closing...");
+                                                    return;
+                                                }
                                                 catch (Exception e)
                                                 {
                                                     Log.Error($"Browser loop error {e}");
+                                                }
+
+                                                if (_actionsBeforeRestart > 0)
+                                                {
+                                                    if (this._actionsCount.IsDivisibleByN(10))
+                                                    {
+                                                        Log.Trace($"Browser actions == {this._actionsCount}");
+                                                    }
+                                                    if (this._actionsCount > _actionsBeforeRestart)
+                                                    {
+                                                        this.Restart = true;
+                                                        Log.Trace("Browser reached action threshold. Restarting...");
+                                                        return;
+                                                    }
                                                 }
 
                                                 Thread.Sleep(timelineEvent.DelayAfter);
@@ -141,6 +169,21 @@ namespace Ghosts.Client.Handlers
                                         }
                                     }
                                 }
+
+                                if (_actionsBeforeRestart > 0)
+                                {
+                                    if (this._actionsCount.IsDivisibleByN(10))
+                                    {
+                                        Log.Trace($"Browser actions == {this._actionsCount}");
+                                    }
+                                    if (this._actionsCount > _actionsBeforeRestart)
+                                    {
+                                        this.Restart = true;
+                                        Log.Trace("Browser reached action threshold. Restarting...");
+                                        return;
+                                    }
+                                }
+
                                 Thread.Sleep(timelineEvent.DelayAfter);
                             }
                         case "browse":
@@ -206,6 +249,11 @@ namespace Ghosts.Client.Handlers
                     }
                 }
             }
+            catch (ThreadAbortException)
+            {
+                ProcessManager.KillProcessAndChildrenByName(this.BrowserType.ToString().Replace("Browser", ""));
+                Log.Trace($"Thread aborted, {this.BrowserType.ToString()} closing...");
+            }
             catch (Exception e)
             {
                 Log.Error(e);
@@ -270,6 +318,8 @@ namespace Ghosts.Client.Handlers
                         javaScriptExecutor.ExecuteScript(script);
                         break;
                 }
+
+                this._actionsCount++;
             }
             catch (Exception e)
             {

@@ -2,7 +2,6 @@
 
 using System.Threading;
 using Ghosts.Domain;
-using Ghosts.Domain.Code;
 
 namespace Ghosts.Client.Handlers
 {

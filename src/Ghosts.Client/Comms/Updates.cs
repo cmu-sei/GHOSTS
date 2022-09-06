@@ -5,12 +5,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Threading;
 using Ghosts.Client.Infrastructure;
 using Ghosts.Client.TimelineManager;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
+using Ghosts.Domain.Code.Helpers;
 using Ghosts.Domain.Messages.MesssagesForServer;
 using NLog;
 using Newtonsoft.Json;
@@ -242,7 +242,14 @@ namespace Ghosts.Client.Comms
                 {
                     if (File.Exists(fileName))
                     {
+                        while (new FileInfo(fileName).IsFileLocked())
+                        {
+                            var sleepTime = 15000;
+                            _log.Trace($"{fileName} is locked, sleeping for {sleepTime}...");
+                            Thread.Sleep(sleepTime);
+                        }
                         PostResults(fileName, machine, postUrl);
+                        _log.Trace($"{fileName} posted successfully...");
                     }
                     else
                     {
@@ -266,7 +273,14 @@ namespace Ghosts.Client.Comms
                     {
                         if (!file.EndsWith("app.log") && file != fileName)
                         {
+                            while(new FileInfo(file).IsFileLocked())
+                            {
+                                var sleepTime = 15000;
+                                _log.Trace($"{file} is locked, sleeping for {sleepTime}...");
+                                Thread.Sleep(sleepTime);
+                            }
                             PostResults(file, machine, postUrl, true);
+                            _log.Trace($"{fileName} posted successfully...");
                         }
                     }
                 }

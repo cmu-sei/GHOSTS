@@ -52,8 +52,8 @@ namespace Ghosts.Client.Infrastructure
 
         private static void Sleep(TimelineHandler handler, int sleep)
         {
+            _log.Trace($"Sleeping for {sleep} and killing processes...");
             ProcessManager.KillProcessAndChildrenByHandler(handler);
-            _log.Trace($"Sleeping for {sleep}");
             Thread.Sleep(sleep);
         }
     }

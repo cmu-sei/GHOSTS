@@ -1,8 +1,14 @@
 $configuration = "release" # release || debug
 
 # release version is determined by the project file release version parameter
-[XML]$p = Get-Content "..\src\Ghosts.Client\Ghosts.Client.csproj"
-$r = ($p.Project.PropertyGroup.ReleaseVersion | Out-String).trim()
+$r = ""
+foreach($line in Get-Content "..\src\Ghosts.Client\Properties\AssemblyInfo.cs") {
+    if($line.StartsWith("[assembly: AssemblyVersion(")){
+        $r = $line.Replace("[assembly: AssemblyVersion(", "").Replace(")]", "").Replace("`"","")
+        break
+    }
+}
+
 $release_version = $r.split(".")[0..2] -join "."
 Write-Host "Preparing to build and package $release_version"
 

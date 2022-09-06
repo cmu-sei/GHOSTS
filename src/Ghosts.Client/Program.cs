@@ -130,6 +130,14 @@ namespace Ghosts.Client
                 return;
             }
 
+            if (Configuration.ResourceControl == null)
+            {
+                Configuration.ResourceControl = new ClientConfiguration.ResourceControlSettings();
+                Configuration.ResourceControl.ManageProcesses = true;
+            }
+
+            _log.Trace($"Configuration.ResourceControl.ManageProcesses = {Program.Configuration.ResourceControl.ManageProcesses}");
+
             Program.CheckId = new CheckId();
 
             DebugManager.Evaluate();

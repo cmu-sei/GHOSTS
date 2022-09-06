@@ -4,7 +4,7 @@ using Ghosts.Domain;
 using System;
 using System.Diagnostics;
 using System.Threading;
-using Ghosts.Domain.Code;
+using Ghosts.Domain.Code.Helpers;
 
 namespace Ghosts.Client.Handlers
 {
@@ -71,16 +71,18 @@ namespace Ghosts.Client.Handlers
                     info.CreateNoWindow = true;
                     info.WindowStyle = ProcessWindowStyle.Hidden;
 
-                    var p = new Process();
-                    p.StartInfo = info;
-                    p.Start();
+                    var process = new Process();
+                    process.StartInfo = info;
+                    process.Start();
 
                     try
                     {
-                        p.WaitForInputIdle();
+                        process.WaitForInputIdle();
                         Thread.Sleep(3000);
-                        if (false == p.CloseMainWindow())
-                            p.Kill();
+                        if (false == process.CloseMainWindow())
+                        {
+                            process.SafeKill();
+                        }
                     }
                     catch
                     {

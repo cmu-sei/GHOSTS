@@ -8,6 +8,7 @@ using Ghosts.Domain.Code;
 using NLog;
 using Exception = System.Exception;
 using System.Threading;
+using Ghosts.Domain.Code.Helpers;
 
 namespace Ghosts.Client.Infrastructure
 {
@@ -20,6 +21,7 @@ namespace Ghosts.Client.Infrastructure
         private static readonly string _fileName = ApplicationDetails.InstanceFiles.FilesCreated;
         private static readonly object _locked = new object();
         private static readonly object _safetyLocked = new object();
+        private static readonly int _sleepTime = 10000;
 
         public static void Add(string path)
         {
@@ -32,10 +34,17 @@ namespace Ghosts.Client.Infrastructure
                 {
                     lock (_locked) //if a thread has entered, the others will wait
                     {
-                        var writer = new StreamWriter(_fileName, true);
-                        writer.WriteLine(path);
-                        writer.Flush();
-                        writer.Close();
+                        while (new FileInfo(_fileName).IsFileLocked())
+                        {
+                            _log.Trace($"{_fileName} is locked, sleeping for {_sleepTime}...");
+                            Thread.Sleep(_sleepTime);
+                        }
+                        using (var writer = new StreamWriter(_fileName, true))
+                        {
+                            writer.WriteLine(path);
+                            writer.Flush();
+                            writer.Close();
+                        }
                     }
                 }
                 else //sleep if safety net is being safe
@@ -45,7 +54,7 @@ namespace Ghosts.Client.Infrastructure
             }
             catch (Exception e)
             {
-                _log.Trace(e);
+                _log.Error(e);
             }
         }
 
@@ -69,6 +78,11 @@ namespace Ghosts.Client.Infrastructure
                 {
                     var deletedFiles = new List<string>();
 
+                    while (new FileInfo(_fileName).IsFileLocked())
+                    {
+                        _log.Trace($"{_fileName} is locked, sleeping for {_sleepTime}...");
+                        Thread.Sleep(_sleepTime);
+                    }
                     using (var reader = new StreamReader(_fileName))
                     {
                         string line;
@@ -83,7 +97,7 @@ namespace Ghosts.Client.Infrastructure
                             }
                             catch (Exception e)
                             {
-                                _log.Trace($"Error with file in deleted list {line}: {e}");
+                                _log.Warn($"Could not create FileInfo with file {line}: {e}");
                                 deletedFiles.Add(line);
                                 continue;
                             }
@@ -100,7 +114,7 @@ namespace Ghosts.Client.Infrastructure
                             }
                             catch (Exception e)
                             {
-                                _log.Debug($"Could not delete file {_fileName}: {e}");
+                                _log.Warn($"Could not delete file {_fileName}: {e}");
                             }
                         }
                     }

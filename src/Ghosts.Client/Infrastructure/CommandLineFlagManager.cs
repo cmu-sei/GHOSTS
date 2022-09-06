@@ -80,7 +80,7 @@ namespace Ghosts.Client.Infrastructure
         private static void Version()
         {
             //handle version flag and return ghosts and referenced assemblies information
-            Console.WriteLine($"{ApplicationDetails.Name}:{ApplicationDetails.Version}");
+            Console.WriteLine($"{ApplicationDetails.Name}:{ApplicationDetails.Version} [{ApplicationDetails.VersionFile}]");
             foreach (var assemblyName in Assembly.GetExecutingAssembly().GetReferencedAssemblies())
             {
                 Console.WriteLine($"{assemblyName.Name}: {assemblyName.Version}");

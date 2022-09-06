@@ -49,6 +49,11 @@ namespace Ghosts.Client.Handlers
                     KillApp();
                 }
             }
+            catch (ThreadAbortException)
+            {
+                KillApp();
+                Log.Trace("Thread aborted, PowerPoint closing...");
+            }
             catch (Exception e)
             {
                 Log.Error(e);
@@ -86,139 +91,161 @@ namespace Ghosts.Client.Handlers
                             }
                         }
 
-                        var powerApplication = new PowerPoint.Application
+                        using (var powerApplication = new PowerPoint.Application
+                               {
+                                   DisplayAlerts = PpAlertLevel.ppAlertsNone,
+                                   Visible = MsoTriState.msoTrue
+                               })
                         {
-                            DisplayAlerts = PpAlertLevel.ppAlertsNone,
-                            Visible = MsoTriState.msoTrue
-                        };
 
-                        try
-                        {
-                            powerApplication.WindowState = PpWindowState.ppWindowMinimized;
-                        }
-                        catch (Exception e)
-                        {
-                            Log.Trace($"Could not minimize: {e}");
-                        }
-
-                        // add a new presentation with one new slide
-                        var presentation = powerApplication.Presentations.Add(MsoTriState.msoTrue);
-                        presentation.Slides.Add(1, PpSlideLayout.ppLayoutClipArtAndVerticalText);
-
-                        var writeSleep = ProcessManager.Jitter(100);
-                        Thread.Sleep(writeSleep);
-
-                        // save the document 
-                        var rand = RandomFilename.Generate();
-
-                        var defaultSaveDirectory = timelineEvent.CommandArgs[0].ToString();
-                        if (defaultSaveDirectory.Contains("%"))
-                        {
-                            defaultSaveDirectory = Environment.ExpandEnvironmentVariables(defaultSaveDirectory);
-                        }
-
-                        try
-                        {
-                            foreach (var key in timelineEvent.CommandArgs)
+                            try
                             {
-                                if (key.ToString().StartsWith("save-array:"))
+                                powerApplication.WindowState = PpWindowState.ppWindowMinimized;
+                            }
+                            catch (Exception e)
+                            {
+                                Log.Trace($"Could not minimize: {e}");
+                            }
+
+                            // add a new presentation with one new slide
+                            var presentation = powerApplication.Presentations.Add(MsoTriState.msoTrue);
+                            presentation.Slides.Add(1, PpSlideLayout.ppLayoutClipArtAndVerticalText);
+
+                            var writeSleep = ProcessManager.Jitter(100);
+                            Thread.Sleep(writeSleep);
+
+                            // save the document 
+                            var rand = RandomFilename.Generate();
+
+                            var defaultSaveDirectory = timelineEvent.CommandArgs[0].ToString();
+                            if (defaultSaveDirectory.Contains("%"))
+                            {
+                                defaultSaveDirectory = Environment.ExpandEnvironmentVariables(defaultSaveDirectory);
+                            }
+
+                            try
+                            {
+                                foreach (var key in timelineEvent.CommandArgs)
                                 {
-                                    var savePathString = key.ToString().Replace("save-array:", "").Replace("'", "\"");
-                                    savePathString = savePathString.Replace("\\", "/"); //can't seem to deserialize windows path \
-                                    var savePaths = JsonConvert.DeserializeObject<string[]>(savePathString);
-                                    defaultSaveDirectory = savePaths.PickRandom().Replace("/", "\\"); //put windows path back
-                                    break;
+                                    if (key.ToString().StartsWith("save-array:"))
+                                    {
+                                        var savePathString =
+                                            key.ToString().Replace("save-array:", "").Replace("'", "\"");
+                                        savePathString =
+                                            savePathString.Replace("\\",
+                                                "/"); //can't seem to deserialize windows path \
+                                        var savePaths = JsonConvert.DeserializeObject<string[]>(savePathString);
+                                        defaultSaveDirectory =
+                                            savePaths.PickRandom().Replace("/", "\\"); //put windows path back
+                                        break;
+                                    }
                                 }
                             }
-                        }
-                        catch (Exception e)
-                        {
-                            Log.Trace($"save-array exception: {e}");
-                        }
-
-                        if (!Directory.Exists(defaultSaveDirectory))
-                        {
-                            Directory.CreateDirectory(defaultSaveDirectory);
-                        }
-
-                        var path = $"{defaultSaveDirectory}\\{rand}.pptx";
-
-                        //if directory does not exist, create!
-                        Log.Trace($"Checking directory at {path}");
-                        var f = new FileInfo(path).Directory;
-                        if (f == null)
-                        {
-                            Log.Trace($"Directory does not exist, creating directory at {path}");
-                            Directory.CreateDirectory(path);
-                        }
-
-                        try
-                        {
-                            if (File.Exists(path))
+                            catch (Exception e)
                             {
-                                File.Delete(path);
+                                Log.Trace($"save-array exception: {e}");
                             }
-                        }
-                        catch (Exception e)
-                        {
-                            Log.Debug(e);
-                        }
 
-                        Thread.Sleep(5000);
-                        presentation.SaveAs(path);
+                            if (!Directory.Exists(defaultSaveDirectory))
+                            {
+                                Directory.CreateDirectory(defaultSaveDirectory);
+                            }
 
-                        FileListing.Add(path);
-                        Report(handler.HandlerType.ToString(), timelineEvent.Command, timelineEvent.CommandArgs[0].ToString());
+                            var path = $"{defaultSaveDirectory}\\{rand}.pptx";
 
-                        if (timelineEvent.CommandArgs.Contains("pdf"))
-                        {
-                            // Save document into PDF Format
-                            var outputFileName = timelineEvent.CommandArgs.Contains("pdf-vary-filenames") ? $"{RandomFilename.Generate()}.pdf" : presentation.FullName.Replace(".pptx", ".pdf");
-                            object fileFormat = PpSaveAsFileType.ppSaveAsPDF;
+                            //if directory does not exist, create!
+                            Log.Trace($"Checking directory at {path}");
+                            var f = new FileInfo(path).Directory;
+                            if (f == null)
+                            {
+                                Log.Trace($"Directory does not exist, creating directory at {path}");
+                                Directory.CreateDirectory(path);
+                            }
 
-                            presentation.SaveAs(outputFileName, fileFormat, MsoTriState.msoCTrue);
-                            // end save as pdf
-                            Report(handler.HandlerType.ToString(), timelineEvent.Command, "pdf");
-                            FileListing.Add(outputFileName);
-                        }
+                            try
+                            {
+                                if (File.Exists(path))
+                                {
+                                    File.Delete(path);
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                Log.Debug(e);
+                            }
 
-                        if (_random.Next(100) < 50)
-                            presentation.Close();
+                            Thread.Sleep(5000);
+                            presentation.SaveAs(path);
 
-                        if (timelineEvent.DelayAfter > 0)
-                        {
-                            //sleep and leave the app open
-                            Log.Trace($"Sleep after for {timelineEvent.DelayAfter}");
-                            Thread.Sleep(timelineEvent.DelayAfter - writeSleep);
-                        }
-                        
-                        presentation.Dispose();
-                        presentation = null;
+                            FileListing.Add(path);
+                            Report(handler.HandlerType.ToString(), timelineEvent.Command,
+                                timelineEvent.CommandArgs[0].ToString());
 
-                        // close power point and dispose reference
-                        powerApplication.Quit();
-                        powerApplication.Dispose();
-                        powerApplication = null;
-                        
-                        try
-                        {
-                            Marshal.ReleaseComObject(powerApplication);
-                        }
-                        catch
-                        {
-                            // ignore
-                        }
+                            if (timelineEvent.CommandArgs.Contains("pdf"))
+                            {
+                                // Save document into PDF Format
+                                var outputFileName = timelineEvent.CommandArgs.Contains("pdf-vary-filenames")
+                                    ? $"{defaultSaveDirectory}\\{RandomFilename.Generate()}.pdf"
+                                    : path.Replace(".pptx", ".pdf");
+                                object fileFormat = PpSaveAsFileType.ppSaveAsPDF;
 
-                        try
-                        {
-                            Marshal.FinalReleaseComObject(powerApplication);
-                        }
-                        catch
-                        {
-                            // ignore
+                                presentation.SaveAs(outputFileName, fileFormat, MsoTriState.msoCTrue);
+                                // end save as pdf
+                                Report(handler.HandlerType.ToString(), timelineEvent.Command, "pdf");
+                                FileListing.Add(outputFileName);
+                            }
+
+                            if (_random.Next(100) < 50)
+                                presentation.Close();
+
+                            if (timelineEvent.DelayAfter > 0)
+                            {
+                                //sleep and leave the app open
+                                Log.Trace($"Sleep after for {timelineEvent.DelayAfter}");
+                                Thread.Sleep(timelineEvent.DelayAfter - writeSleep);
+                            }
+
+                            presentation.Dispose();
+                            presentation = null;
+
+                            // close power point and dispose reference
+                            powerApplication.Quit();
+
+                            try
+                            {
+                                powerApplication.Dispose();
+                            }
+                            catch
+                            {
+                                // ignore
+                            }
+                            
+
+                            try
+                            {
+                                Marshal.ReleaseComObject(powerApplication);
+                            }
+                            catch
+                            {
+                                // ignore
+                            }
+
+                            try
+                            {
+                                Marshal.FinalReleaseComObject(powerApplication);
+                            }
+                            catch
+                            {
+                                // ignore
+                            }
                         }
 
                         GC.Collect();
+                    }
+                    catch (ThreadAbortException)
+                    {
+                        KillApp();
+                        Log.Trace("Powerpoint closing...");
                     }
                     catch (Exception e)
                     {
@@ -229,6 +256,10 @@ namespace Ghosts.Client.Handlers
                         Thread.Sleep(5000);
                     }
                 }
+            }
+            catch (ThreadAbortException)
+            {
+                //ignore
             }
             catch (Exception e)
             {
