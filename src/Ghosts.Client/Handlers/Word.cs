@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
+using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
 using Newtonsoft.Json;
 using Word = NetOffice.WordApi;
@@ -124,7 +125,7 @@ namespace Ghosts.Client.Handlers
                                 wordApplication.Selection.TypeText(rt.Content);
                             }
 
-                            var writeSleep = ProcessManager.Jitter(100);
+                            var writeSleep = Jitter.Basic(100);
                             Thread.Sleep(writeSleep);
 
                             wordApplication.Selection.HomeKey(WdUnits.wdLine, WdMovementType.wdExtend);

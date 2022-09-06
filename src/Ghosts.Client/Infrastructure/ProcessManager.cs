@@ -15,17 +15,6 @@ namespace Ghosts.Client.Infrastructure
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
 
-        public static int Jitter(int baseSleep)
-        {
-            //sleep with jitter
-            var sleep = baseSleep;
-            var r = new Random().Next(-999, 1999);
-            sleep += r;
-            if (sleep < 0)
-                sleep = 1;
-            return sleep;
-        }
-
         public static int GetThisProcessPid()
         {
             var currentProcess = Process.GetCurrentProcess();

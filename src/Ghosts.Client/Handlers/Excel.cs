@@ -7,9 +7,11 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
+using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
 using Newtonsoft.Json;
 using Excel = NetOffice.ExcelApi;
+using WorkingHours = Ghosts.Client.Infrastructure.WorkingHours;
 
 namespace Ghosts.Client.Handlers
 {
@@ -90,7 +92,7 @@ namespace Ghosts.Client.Handlers
                             }
                         }
 
-                        var writeSleep = ProcessManager.Jitter(100);
+                        var writeSleep = Jitter.Basic(100);
                         using (var excelApplication = new Excel.Application
                                {
                                    DisplayAlerts = false,

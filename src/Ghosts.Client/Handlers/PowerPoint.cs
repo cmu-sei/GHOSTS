@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
+using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
 using Newtonsoft.Json;
 using PowerPoint = NetOffice.PowerPointApi;
@@ -111,7 +112,7 @@ namespace Ghosts.Client.Handlers
                             var presentation = powerApplication.Presentations.Add(MsoTriState.msoTrue);
                             presentation.Slides.Add(1, PpSlideLayout.ppLayoutClipArtAndVerticalText);
 
-                            var writeSleep = ProcessManager.Jitter(100);
+                            var writeSleep = Jitter.Basic(100);
                             Thread.Sleep(writeSleep);
 
                             // save the document 

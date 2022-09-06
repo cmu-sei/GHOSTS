@@ -53,7 +53,7 @@ namespace Ghosts.Client.Comms
             var machine = new ResultMachine();
             GuestInfoVars.Load(machine);
 
-            Thread.Sleep(ProcessManager.Jitter(Program.Configuration.ClientUpdates.CycleSleep));
+            Thread.Sleep(Jitter.Basic(Program.Configuration.ClientUpdates.CycleSleep));
 
             while (true)
             {
@@ -151,7 +151,7 @@ namespace Ghosts.Client.Comms
                     _log.Error(e);
                 }
 
-                Thread.Sleep(ProcessManager.Jitter(Program.Configuration.ClientUpdates.CycleSleep));
+                Thread.Sleep(Jitter.Basic(Program.Configuration.ClientUpdates.CycleSleep));
             }
         }
 
@@ -234,7 +234,7 @@ namespace Ghosts.Client.Comms
             var machine = new ResultMachine();
             GuestInfoVars.Load(machine);
 
-            Thread.Sleep(ProcessManager.Jitter(Program.Configuration.ClientResults.CycleSleep));
+            Thread.Sleep(Jitter.Basic(Program.Configuration.ClientResults.CycleSleep));
 
             while (true)
             {
@@ -294,7 +294,7 @@ namespace Ghosts.Client.Comms
                     GC.WaitForPendingFinalizers();
                 }
 
-                Thread.Sleep(ProcessManager.Jitter(Program.Configuration.ClientResults.CycleSleep));
+                Thread.Sleep(Jitter.Basic(Program.Configuration.ClientResults.CycleSleep));
             }
         }
 
@@ -351,7 +351,7 @@ namespace Ghosts.Client.Comms
             {
                 _log.Trace("posting survey");
 
-                Thread.Sleep(ProcessManager.Jitter(100));
+                Thread.Sleep(Jitter.Basic(100));
 
                 if (!File.Exists(ApplicationDetails.InstanceFiles.SurveyResults))
                     return;
