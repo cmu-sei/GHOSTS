@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("CMU > SEI > CERT > MSE > Realism Team")]
 [assembly: AssemblyProduct("GHOSTS NPC Framework Client - please email ddupdyke[at]sei.cmu.edu with bugs/requests/other")]
-[assembly: AssemblyCopyright("Copyright © 2017 - 2021")]
+[assembly: AssemblyCopyright("Copyright © 2017 - 2022")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -33,4 +33,4 @@ using System.Runtime.InteropServices;
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("6.1.0.0")]
 [assembly: AssemblyInformationalVersion("6.1.0.0")]
-[assembly: AssemblyFileVersion("6.1.26.0")]
+[assembly: AssemblyFileVersion("6.1.27.0")]

@@ -106,7 +106,7 @@ namespace Ghosts.Client.Handlers
             {
                 if (handler.HandlerArgs.ContainsKey("user-data-dir"))
                 {
-                    var profile = handler.HandlerArgs["user-data-dir"];
+                    var profile = Environment.ExpandEnvironmentVariables(handler.HandlerArgs["user-data-dir"].ToString());
                     options.AddArgument($"user-data-dir={profile}");
                     Log.Trace($"Loading chromedriver profile from {profile}...");
                 }
