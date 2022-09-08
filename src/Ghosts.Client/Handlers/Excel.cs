@@ -99,12 +99,20 @@ namespace Ghosts.Client.Handlers
                                    Visible = true
                                })
                         {
-
-                            Log.Trace("Excel adding workbook");
-                            // add a new workbook
-                            var workBook = excelApplication.Workbooks.Add();
+                            Excel.Workbook document = null;
+                            if (OfficeHelpers.ShouldOpenExisting(handler))
+                            {
+                                document = excelApplication.Workbooks.Open(FileListing.GetRandomFile(handler.HandlerType));
+                                Log.Trace($"{handler.HandlerType} opening existing file: {document.FullName}");
+                            }
+                            if (document == null)
+                            {
+                                document = excelApplication.Workbooks.Add();
+                                Log.Trace($"{handler.HandlerType} adding new...");
+                            }
+                            
                             Log.Trace("Excel adding worksheet");
-                            var workSheet = (Excel.Worksheet)workBook.Worksheets[1];
+                            var workSheet = (Excel.Worksheet)document.Worksheets[1];
 
                             for (var i = 2; i < 10; i++)
                             {
@@ -179,10 +187,18 @@ namespace Ghosts.Client.Handlers
                                 Log.Error($"Excel file delete exception: {e}");
                             }
 
-                            Log.Trace($"Excel saving to path - {path}");
-                            workBook.SaveAs(path);
+                            if (string.IsNullOrEmpty(document.Path))
+                            {
+                                document.SaveAs(path);
+                                FileListing.Add(path, handler.HandlerType);
+                                Log.Trace($"{handler.HandlerType} saving new file: {path}");
+                            }
+                            else
+                            {
+                                document.Save();
+                                Log.Trace($"{handler.HandlerType} saving existing file: {document.FullName}");
+                            }
 
-                            FileListing.Add(path);
                             Report(handler.HandlerType.ToString(), timelineEvent.Command,
                                 timelineEvent.CommandArgs[0].ToString());
 
@@ -192,22 +208,22 @@ namespace Ghosts.Client.Handlers
                                     ? $"{defaultSaveDirectory}\\{RandomFilename.Generate()}.pdf"
                                     : path.Replace(".xlsx", ".pdf");
                                 // Save document into PDF Format
-                                workBook.ExportAsFixedFormat(NetOffice.ExcelApi.Enums.XlFixedFormatType.xlTypePDF,
+                                document.ExportAsFixedFormat(NetOffice.ExcelApi.Enums.XlFixedFormatType.xlTypePDF,
                                     pdfFileName);
                                 // end save as pdf
                                 Report(handler.HandlerType.ToString(), timelineEvent.Command, "pdf");
-                                FileListing.Add(pdfFileName);
+                                FileListing.Add(pdfFileName, handler.HandlerType);
                             }
 
                             if (_random.Next(100) < 50)
-                                workBook.Close();
+                                document.Close();
 
 
                             workSheet.Dispose();
                             workSheet = null;
 
-                            workBook.Dispose();
-                            workBook = null;
+                            document.Dispose();
+                            document = null;
 
                             // close excel and dispose reference
                             excelApplication.Quit();

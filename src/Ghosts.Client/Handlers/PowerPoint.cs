@@ -108,9 +108,21 @@ namespace Ghosts.Client.Handlers
                                 Log.Trace($"Could not minimize: {e}");
                             }
 
-                            // add a new presentation with one new slide
-                            var presentation = powerApplication.Presentations.Add(MsoTriState.msoTrue);
-                            presentation.Slides.Add(1, PpSlideLayout.ppLayoutClipArtAndVerticalText);
+
+                            PowerPoint.Presentation document = null;
+                            if (OfficeHelpers.ShouldOpenExisting(handler))
+                            {
+                                document = powerApplication.Presentations.Open(FileListing.GetRandomFile(handler.HandlerType));
+                                Log.Trace($"{handler.HandlerType} opening existing file: {document.FullName}");
+                            }
+                            if (document == null)
+                            {
+                                document = powerApplication.Presentations.Add(MsoTriState.msoTrue);
+                                Log.Trace($"{handler.HandlerType} adding new...");
+                            }
+
+                            // add new slide
+                            document.Slides.Add(1, PpSlideLayout.ppLayoutClipArtAndVerticalText);
 
                             var writeSleep = Jitter.Basic(100);
                             Thread.Sleep(writeSleep);
@@ -176,9 +188,18 @@ namespace Ghosts.Client.Handlers
                             }
 
                             Thread.Sleep(5000);
-                            presentation.SaveAs(path);
+                            if (string.IsNullOrEmpty(document.Path))
+                            {
+                                document.SaveAs(path);
+                                FileListing.Add(path, handler.HandlerType);
+                                Log.Trace($"{handler.HandlerType} saving new file: {path}");
+                            }
+                            else
+                            {
+                                document.Save();
+                                Log.Trace($"{handler.HandlerType} saving existing file: {document.FullName}");
+                            }
 
-                            FileListing.Add(path);
                             Report(handler.HandlerType.ToString(), timelineEvent.Command,
                                 timelineEvent.CommandArgs[0].ToString());
 
@@ -190,14 +211,14 @@ namespace Ghosts.Client.Handlers
                                     : path.Replace(".pptx", ".pdf");
                                 object fileFormat = PpSaveAsFileType.ppSaveAsPDF;
 
-                                presentation.SaveAs(outputFileName, fileFormat, MsoTriState.msoCTrue);
+                                document.SaveAs(outputFileName, fileFormat, MsoTriState.msoCTrue);
                                 // end save as pdf
                                 Report(handler.HandlerType.ToString(), timelineEvent.Command, "pdf");
-                                FileListing.Add(outputFileName);
+                                FileListing.Add(outputFileName, handler.HandlerType);
                             }
 
                             if (_random.Next(100) < 50)
-                                presentation.Close();
+                                document.Close();
 
                             if (timelineEvent.DelayAfter > 0)
                             {
@@ -206,8 +227,8 @@ namespace Ghosts.Client.Handlers
                                 Thread.Sleep(timelineEvent.DelayAfter - writeSleep);
                             }
 
-                            presentation.Dispose();
-                            presentation = null;
+                            document.Dispose();
+                            document = null;
 
                             // close power point and dispose reference
                             powerApplication.Quit();

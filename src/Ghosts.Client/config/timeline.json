@@ -23,6 +23,12 @@
       "Initial": "",
       "UtcTimeOn": "00:00:00",
       "UtcTimeOff": "24:00:00",
+      "HandlerArgs": {
+        "workingset": {
+          "max": 20,
+          "max-age-in-hours": 72
+        }
+      },
       "Loop": "True",
       "TimeLineEvents": [
         {

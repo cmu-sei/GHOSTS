@@ -109,7 +109,7 @@ namespace Ghosts.Client.Handlers
                             Domain.Code.Office.Word.Write(path, title, paragraph);
                         }
                         
-                        FileListing.Add(path);
+                        FileListing.Add(path, handler.HandlerType);
                         Report(handler.HandlerType.ToString(), timelineEvent.Command,
                             timelineEvent.CommandArgs[0].ToString());
                     }
@@ -169,7 +169,7 @@ namespace Ghosts.Client.Handlers
                             Domain.Code.Office.Excel.Write(path, rt.Content);
                         }
 
-                        FileListing.Add(path);
+                        FileListing.Add(path, handler.HandlerType);
                         Report(handler.HandlerType.ToString(), timelineEvent.Command,
                             timelineEvent.CommandArgs[0].ToString());
                     }

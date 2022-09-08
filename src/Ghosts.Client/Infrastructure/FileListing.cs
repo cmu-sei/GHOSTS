@@ -8,6 +8,7 @@ using Ghosts.Domain.Code;
 using NLog;
 using Exception = System.Exception;
 using System.Threading;
+using Ghosts.Domain;
 using Ghosts.Domain.Code.Helpers;
 
 namespace Ghosts.Client.Infrastructure
@@ -23,7 +24,7 @@ namespace Ghosts.Client.Infrastructure
         private static readonly object _safetyLocked = new object();
         private static readonly int _sleepTime = 10000;
 
-        public static void Add(string path)
+        public static void Add(string path, HandlerType handlerType)
         {
             try
             {
@@ -40,7 +41,7 @@ namespace Ghosts.Client.Infrastructure
                             Thread.Sleep(_sleepTime);
                         }
 
-                        File.AppendAllText(_fileName, $"{DateTime.UtcNow}|{path}{Environment.NewLine}");
+                        File.AppendAllText(_fileName, $"{DateTime.UtcNow}|{handlerType}|{path}{Environment.NewLine}");
                     }
                 }
                 else //sleep if safety net is being safe
@@ -52,6 +53,24 @@ namespace Ghosts.Client.Infrastructure
             {
                 _log.Error(e);
             }
+        }
+
+        public static int GetFileCount(HandlerType handlerType, int maxAgeInHours)
+        {
+            if (!File.Exists(_fileName))
+            {
+                File.Create(_fileName);
+                return 0;
+            }
+
+            return File.ReadAllLines(_fileName).Where(x => x.Contains($"|{handlerType}|") && !x.EndsWith(".pdf"))
+                    .Select(line => Convert.ToDateTime(line.Split("|").ToArray()[0]))
+                    .Count(date => date > (DateTime.UtcNow.AddHours(-maxAgeInHours)));
+        }
+
+        public static string GetRandomFile(HandlerType handlerType)
+        {
+            return File.ReadAllLines(_fileName).Where(x => x.Contains($"|{handlerType}|") && !x.EndsWith(".pdf")).PickRandom().Split("|").ToArray()[2].ToString();
         }
 
         /// <summary>
@@ -83,10 +102,11 @@ namespace Ghosts.Client.Infrastructure
                 {
                     //new style
                     var arr = line.Split("|").ToArray();
-                    if (arr.Count() > 1)
+                    if (arr.Count() > 2)
                     {
                         var date = Convert.ToDateTime(arr[0]);
-                        var path = arr[1];
+                        var handlerType = arr[1];
+                        var path = arr[2];
                         if (date < (DateTime.UtcNow.AddHours(-Program.Configuration.OfficeDocsMaxAgeInHours)))
                         {
                             try

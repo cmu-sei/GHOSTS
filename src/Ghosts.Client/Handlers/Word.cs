@@ -100,9 +100,17 @@ namespace Ghosts.Client.Handlers
                                    Visible = true
                                })
                         {
-
-                            // add a new document
-                            var newDocument = wordApplication.Documents.Add();
+                            Word.Document document = null;
+                            if (OfficeHelpers.ShouldOpenExisting(handler))
+                            {
+                                document = wordApplication.Documents.Open(FileListing.GetRandomFile(handler.HandlerType));
+                                Log.Trace($"{handler.HandlerType} opening existing file: {document.FullName}");
+                            }
+                            if (document == null)
+                            {
+                                document = wordApplication.Documents.Add();
+                                Log.Trace($"{handler.HandlerType} adding new...");
+                            }
 
                             try
                             {
@@ -192,12 +200,22 @@ namespace Ghosts.Client.Handlers
                                 Log.Debug(e);
                             }
 
-                            newDocument.Saved = true;
-                            newDocument.SaveAs(path);
+                            document.Saved = true;
+                            if (string.IsNullOrEmpty(document.Path))
+                            {
+                                document.SaveAs(path);
+                                FileListing.Add(path, handler.HandlerType);
+                                Log.Trace($"{handler.HandlerType} saving new file: {path}");
+                            }
+                            else
+                            {
+                                document.Save();
+                                Log.Trace($"{handler.HandlerType} saving existing file: {document.FullName}");
+                            }
 
                             Report(handler.HandlerType.ToString(), timelineEvent.Command,
                                 timelineEvent.CommandArgs[0].ToString());
-                            FileListing.Add(path);
+                            
 
                             if (timelineEvent.CommandArgs.Contains("pdf"))
                             {
@@ -208,17 +226,17 @@ namespace Ghosts.Client.Handlers
                                     : path.Replace(".docx", ".pdf");
                                 object fileFormat = WdSaveFormat.wdFormatPDF;
 
-                                newDocument.SaveAs(outputFileName, fileFormat, oMissing, oMissing,
+                                document.SaveAs(outputFileName, fileFormat, oMissing, oMissing,
                                     oMissing, oMissing, oMissing, oMissing,
                                     oMissing, oMissing, oMissing, oMissing,
                                     oMissing, oMissing, oMissing, oMissing);
                                 // end save as pdf
                                 Report(handler.HandlerType.ToString(), timelineEvent.Command, "pdf");
-                                FileListing.Add(outputFileName.ToString());
+                                FileListing.Add(outputFileName.ToString(), handler.HandlerType);
                             }
 
                             if (_random.Next(100) < 50)
-                                newDocument.Close();
+                                document.Close();
 
                             if (timelineEvent.DelayAfter > 0)
                             {
@@ -227,8 +245,8 @@ namespace Ghosts.Client.Handlers
                                 Thread.Sleep(timelineEvent.DelayAfter - writeSleep);
                             }
 
-                            newDocument.Dispose();
-                            newDocument = null;
+                            document.Dispose();
+                            document = null;
 
                             wordApplication.Quit();
 
