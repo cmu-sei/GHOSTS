@@ -39,12 +39,8 @@ namespace Ghosts.Client.Infrastructure
                             _log.Trace($"{_fileName} is locked, sleeping for {_sleepTime}...");
                             Thread.Sleep(_sleepTime);
                         }
-                        using (var writer = new StreamWriter(_fileName, true))
-                        {
-                            writer.WriteLine(path);
-                            writer.Flush();
-                            writer.Close();
-                        }
+
+                        File.AppendAllText(_fileName, $"{DateTime.UtcNow}|{path}{Environment.NewLine}");
                     }
                 }
                 else //sleep if safety net is being safe
@@ -67,74 +63,101 @@ namespace Ghosts.Client.Infrastructure
             if (Program.Configuration.OfficeDocsMaxAgeInHours == -1)
                 return;
 
-            if(!File.Exists(_fileName))
+            if (!File.Exists(_fileName))
                 return;
 
             //locking thread to make sure files can't write to the log
-            lock (_safetyLocked)
+
+            _log.Trace("Flushing list...");
+            try
             {
-                _log.Trace("Flushing list...");
-                try
+                var deletedFiles = new List<string>();
+
+                while (new FileInfo(_fileName).IsFileLocked())
                 {
-                    var deletedFiles = new List<string>();
+                    _log.Trace($"{_fileName} is locked, sleeping for {_sleepTime}...");
+                    Thread.Sleep(_sleepTime);
+                }
 
-                    while (new FileInfo(_fileName).IsFileLocked())
+                foreach (var line in File.ReadAllLines(_fileName))
+                {
+                    //new style
+                    var arr = line.Split("|").ToArray();
+                    if (arr.Count() > 1)
                     {
-                        _log.Trace($"{_fileName} is locked, sleeping for {_sleepTime}...");
-                        Thread.Sleep(_sleepTime);
-                    }
-                    using (var reader = new StreamReader(_fileName))
-                    {
-                        string line;
-                        while ((line = reader.ReadLine()) != null)
+                        var date = Convert.ToDateTime(arr[0]);
+                        var path = arr[1];
+                        if (date < (DateTime.UtcNow.AddHours(-Program.Configuration.OfficeDocsMaxAgeInHours)))
                         {
-
-                            FileInfo file;
-
                             try
                             {
-                                file = new FileInfo(line);
-                            }
-                            catch (Exception e)
-                            {
-                                _log.Warn($"Could not create FileInfo with file {line}: {e}");
+                                _log.Trace($"Deleting: {path}");
+                                File.Delete(path);
                                 deletedFiles.Add(line);
-                                continue;
-                            }
-
-                            _log.Trace($"Delete evaluation for {file.FullName} {file.CreationTime} vs. {DateTime.Now.AddHours(-Program.Configuration.OfficeDocsMaxAgeInHours)}");
-                            if (!file.Exists || (file.CreationTime > (DateTime.Now.AddHours(-Program.Configuration.OfficeDocsMaxAgeInHours))))
-                                continue;
-
-                            try
-                            {
-                                _log.Trace($"Deleting: {file.FullName}");
-                                file.Delete();
-                                deletedFiles.Add(file.FullName);
                             }
                             catch (Exception e)
                             {
                                 _log.Warn($"Could not delete file {_fileName}: {e}");
                             }
                         }
+                        continue;
                     }
 
-                    if (deletedFiles.Count < 0) return;
-                    
-                    var lines = File.ReadAllLines(_fileName).ToList();
-                    foreach (var line in lines.ToArray())
+                    //old style TODO:depreciated
+                    FileInfo file;
+                    try
                     {
-                        if (deletedFiles.Contains(line))
+                        file = new FileInfo(line);
+                    }
+                    catch (Exception e)
+                    {
+                        _log.Warn($"Could not create FileInfo with file {line}: {e}");
+                        deletedFiles.Add(line);
+                        continue;
+                    }
+
+                    _log.Trace(
+                        $"Delete evaluation for {file.FullName} {file.CreationTime} vs. {DateTime.Now.AddHours(-Program.Configuration.OfficeDocsMaxAgeInHours)}");
+                    if (!file.Exists || (file.CreationTime <
+                                         (DateTime.Now.AddHours(-Program.Configuration.OfficeDocsMaxAgeInHours))))
+                        continue;
+
+                    try
+                    {
+                        _log.Trace($"Deleting: {file.FullName}");
+                        file.Delete();
+                        deletedFiles.Add(file.FullName);
+                    }
+                    catch (Exception e)
+                    {
+                        _log.Warn($"Could not delete file {_fileName}: {e}");
+                    }
+                }
+
+
+                if (deletedFiles.Count < 0) return;
+
+                lock (_safetyLocked)
+                {
+                    var recordsToWrite = new List<string>();
+                    foreach (var line in File.ReadAllLines(_fileName))
+                    {
+                        if (deletedFiles.Any(x => x.Equals(line, StringComparison.InvariantCultureIgnoreCase)))
                         {
-                            lines.Remove(line);
+                            // was deleted
+                        }
+                        else
+                        {
+                            recordsToWrite.Add(line);
                         }
                     }
-                    File.WriteAllLines(_fileName, lines);
+
+                    File.WriteAllLines(_fileName, recordsToWrite);
                 }
-                catch (Exception e)
-                {
-                    _log.Error($"Error flushing {_fileName}: {e}");
-                }
+            }
+            catch (Exception e)
+            {
+                _log.Error($"Error flushing {_fileName}: {e}");
             }
         }
     }
