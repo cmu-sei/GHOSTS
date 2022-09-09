@@ -11,6 +11,8 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using Ghosts.Domain.Code.Helpers;
+using NetOffice.ExcelApi.Enums;
 using Exception = System.Exception;
 using MAPIFolder = Microsoft.Office.Interop.Outlook.MAPIFolder;
 
@@ -132,6 +134,19 @@ namespace Ghosts.Client.Handlers
                                 Log.Error(e);
                             }
                             break;
+                        case "CLICKRANDOMLINK":
+                            try
+                            {
+                                if (ClickRandomLink(timelineEvent))
+                                {
+                                    Report(handler.HandlerType.ToString(), timelineEvent.Command, string.Join(",", timelineEvent.CommandArgs));
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                Log.Error(e);
+                            }
+                            break;
                     }
 
                     if (timelineEvent.DelayAfter > 0)
@@ -145,6 +160,36 @@ namespace Ghosts.Client.Handlers
             {
                 Log.Error(e);
             }
+        }
+
+        private bool ClickRandomLink(TimelineEvent timelineEvent)
+        {
+            try
+            {
+                var folderItemsRaw = _folderInbox.Items;
+                var folderItems = new List<MailItem>();
+                foreach (MailItem folderItem in folderItemsRaw)
+                {
+                    folderItems.Add(folderItem);
+                }
+
+                var filteredEmails = folderItems.Where(x => x.BodyFormat == OlBodyFormat.olFormatHTML && x.HTMLBody.Contains("<a href="));
+                var mailItem = filteredEmails.PickRandom();
+                
+                //check deny list
+                var list = DenyListManager.ScrubList(mailItem.HTMLBody.GetHrefUrls());
+                if (list.Any())
+                {
+                    list.PickRandom().OpenUrl();
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Error(e);
+                return false;
+            }
+
+            return true;
         }
 
         private bool Navigate(IEnumerable<object> config)

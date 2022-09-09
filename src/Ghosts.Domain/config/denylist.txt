@@ -1,0 +1,3 @@
+﻿herein_lies_the_format_of_the_deny_list.org
+we_can_deny_entire_domains.com
+or_some_subnet.of_some_domain.net

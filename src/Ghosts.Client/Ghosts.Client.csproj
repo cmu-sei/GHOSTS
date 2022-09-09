@@ -95,6 +95,9 @@
     <Reference Include="FileHelpers, Version=3.4.1.0, Culture=neutral, PublicKeyToken=3e0c08d59cc3d657, processorArchitecture=MSIL">
       <HintPath>..\packages\FileHelpers.3.4.1\lib\net45\FileHelpers.dll</HintPath>
     </Reference>
+    <Reference Include="HtmlAgilityPack, Version=1.11.45.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
+      <HintPath>..\packages\HtmlAgilityPack.1.11.45\lib\Net45\HtmlAgilityPack.dll</HintPath>
+    </Reference>
     <Reference Include="Interop.ProfMan">
       <HintPath>lib\Interop.ProfMan.dll</HintPath>
       <EmbedInteropTypes>True</EmbedInteropTypes>

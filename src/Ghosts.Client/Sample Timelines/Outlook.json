@@ -22,21 +22,27 @@
                     "DelayAfter": 900000,
                     "DelayBefore": 0
                 },
-                {
-                    "Command": "reply",
-                    "CommandArgs": [
-                        "CurrentUser",
-                        "All - reply to all",
-                        "All",
-                        "All",
-                        "Parent - format is 'RE: <original message/>'",
-                        "Random+Parent - format is reply then original message",
-                        "Parent - format of original message",
-                        ""
-                    ],
-                    "DelayAfter": 900000,
-                    "DelayBefore": 0
-                }
+              {
+                "Command": "reply",
+                "CommandArgs": [
+                  "CurrentUser",
+                  "All - reply to all",
+                  "All",
+                  "All",
+                  "Parent - format is 'RE: <original message/>'",
+                  "Random+Parent - format is reply then original message",
+                  "Parent - format of original message",
+                  ""
+                ],
+                "DelayAfter": 900000,
+                "DelayBefore": 0
+              },
+              {
+                "Command": "clickrandomlink",
+                "CommandArgs": [],
+                "DelayAfter": 900000,
+                "DelayBefore": 0
+              }
             ]
         },
         {
@@ -61,21 +67,27 @@
                     "DelayAfter": 900000,
                     "DelayBefore": 0
                 },
-                {
-                    "Command": "reply",
-                    "CommandArgs": [
-                        "CurrentUser",
-                        "All",
-                        "All",
-                        "All",
-                        "Parent",
-                        "Parent+Random",
-                        "Parent",
-                        ""
-                    ],
-                    "DelayAfter": 900000,
-                    "DelayBefore": 0
-                }
+              {
+                "Command": "reply",
+                "CommandArgs": [
+                  "CurrentUser",
+                  "All",
+                  "All",
+                  "All",
+                  "Parent",
+                  "Parent+Random",
+                  "Parent",
+                  ""
+                ],
+                "DelayAfter": 900000,
+                "DelayBefore": 0
+              },
+              {
+                "Command": "clickrandomlink",
+                "CommandArgs": [],
+                "DelayAfter": 900000,
+                "DelayBefore": 0
+              }
             ]
         }
     ]
