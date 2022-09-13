@@ -2,18 +2,18 @@
     "IdEnabled": false,
     "IdUrl": "http://ghosts-api:52388/api/clientid",
     "ClientResults": {
-        "IsEnabled": false,
+        "IsEnabled": true,
         "IsSecure": false,
         "PostUrl": "http://ghosts-api:52388/api/clientresults",
         "CycleSleep": 9000
     },
     "ClientUpdates": {
-        "IsEnabled": false,
+        "IsEnabled": true,
         "PostUrl": "http://ghosts-api:52388/api/clientupdates",
         "CycleSleep": 9000
     },
     "Survey": {
-        "IsEnabled": false,
+        "IsEnabled": true,
         "IsSecure": false,
         "Frequency": "once",
         "CycleSleepMinutes": 5,

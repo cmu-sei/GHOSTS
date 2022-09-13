@@ -1,5 +1,6 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
+using System;
 using System.IO;
 
 namespace Ghosts.Domain.Code.Helpers
@@ -15,8 +16,9 @@ namespace Ghosts.Domain.Code.Helpers
                     stream.Close();
                 }
             }
-            catch (IOException)
+            catch (IOException e)
             {
+                Console.WriteLine(e);
                 //the file is unavailable because it is:
                 //(1) still being written to
                 //(2) being processed by another thread

@@ -4,10 +4,10 @@
     <OutputType>Exe</OutputType>
     <RuntimeIdentifiers>win7-x64;ubuntu.16.10-x64;osx.10.12-x64</RuntimeIdentifiers>
 
-    <Version>6.1.0.0</Version>
-    <AssemblyVersion>6.1.0.0</AssemblyVersion>
-    <ReleaseVersion>6.1.0.0</ReleaseVersion>
-    <FileVersion>6.1.25.0</FileVersion>
+    <Version>6.2.0.0</Version>
+    <AssemblyVersion>6.2.0.0</AssemblyVersion>
+    <ReleaseVersion>6.2.0.0</ReleaseVersion>
+    <FileVersion>6.2.1.0</FileVersion>
     <SynchReleaseVersion>false</SynchReleaseVersion>
         
     <Authors>Dustin Updyke for Carnegie Mellon University</Authors>
@@ -21,10 +21,10 @@
   
   <ItemGroup>
     <PackageReference Include="CommandLineParser" Version="2.9.1" />
-    <PackageReference Include="HtmlAgilityPack" Version="1.11.43" />
-    <PackageReference Include="NLog" Version="5.0.1" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.45" />
+    <PackageReference Include="NLog" Version="5.0.4" />
     <PackageReference Include="Selenium.Firefox.WebDriver" Version="0.27.0" />
-    <PackageReference Include="Selenium.WebDriver" Version="4.3.0" />
+    <PackageReference Include="Selenium.WebDriver" Version="4.4.0" />
     <PackageReference Include="SimpleTCP" Version="1.0.24" />
     <PackageReference Include="System.Diagnostics.Process" Version="4.3.0" />
   </ItemGroup>

@@ -58,7 +58,7 @@ namespace ghosts.client.linux.Comms
             {
                 try
                 {
-                    string s = string.Empty;
+                    var s = string.Empty;
                     using (var client = WebClientBuilder.Build(machine))
                     {
                         try
@@ -238,12 +238,6 @@ namespace ghosts.client.linux.Comms
                 {
                     if (File.Exists(fileName))
                     {
-                        while (new FileInfo(fileName).IsFileLocked())
-                        {
-                            var sleepTime = 15000;
-                            _log.Trace($"{fileName} is locked, sleeping for {sleepTime}...");
-                            Thread.Sleep(sleepTime);
-                        }
                         PostResults(fileName, machine, postUrl);
                         _log.Trace($"{fileName} posted successfully...");
                     }
@@ -265,16 +259,10 @@ namespace ghosts.client.linux.Comms
                 // look for other result files that have not been posted
                 try
                 {
-                    foreach (var file in Directory.GetFiles(Path.GetDirectoryName(fileName) ?? throw new InvalidOperationException("Path declaration failed")))
+                    foreach (var file in Directory.GetFiles(Path.GetDirectoryName(fileName), "*.log" ?? throw new InvalidOperationException("Path declaration failed")))
                     {
                         if (!file.EndsWith("app.log") && file != fileName)
                         {
-                            while(new FileInfo(file).IsFileLocked())
-                            {
-                                var sleepTime = 15000;
-                                _log.Trace($"{file} is locked, sleeping for {sleepTime}...");
-                                Thread.Sleep(sleepTime);
-                            }
                             PostResults(file, machine, postUrl, true);
                             _log.Trace($"{fileName} posted successfully...");
                         }
@@ -296,7 +284,11 @@ namespace ghosts.client.linux.Comms
 
         private static void PostResults(string fileName, ResultMachine machine, string postUrl, bool isDeletable = false)
         {
-            var r = new TransferLogDump {Log = File.ReadAllText(fileName) };
+            var tempFile = $"{fileName.Replace("clientupdates.log", Guid.NewGuid().ToString())}.proc";
+            File.Copy(fileName, tempFile);
+            File.WriteAllText(fileName, "");
+            
+            var r = new TransferLogDump {Log = File.ReadAllText(tempFile) };
             var payload = JsonConvert.SerializeObject(r);
             if (Program.Configuration.ClientResults.IsSecure)
             {
@@ -314,13 +306,16 @@ namespace ghosts.client.linux.Comms
                 client.UploadString(postUrl, payload);
             }
 
+            //delete the temp file we used for reading
+            File.Delete(tempFile);
+            
             if (isDeletable)
-            {
+            { 
                 File.Delete(fileName);
             }
             else
             {
-                File.WriteAllText(fileName, string.Empty);
+                File.WriteAllText(fileName, "");
             }
 
             _log.Trace($"{DateTime.Now} - {fileName} posted to server successfully");
