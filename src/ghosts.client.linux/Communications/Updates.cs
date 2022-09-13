@@ -288,24 +288,43 @@ namespace ghosts.client.linux.Comms
             File.Copy(fileName, tempFile);
             File.WriteAllText(fileName, "");
             
-            var r = new TransferLogDump {Log = File.ReadAllText(tempFile) };
-            var payload = JsonConvert.SerializeObject(r);
-            if (Program.Configuration.ClientResults.IsSecure)
+            var rawLogContents = File.ReadAllText(tempFile);
+            
+            try
             {
-                payload = Crypto.EncryptStringAes(payload, machine.Name);
-                payload = Base64Encoder.Base64Encode(payload);
+                var r = new TransferLogDump {Log = rawLogContents};
+                var payload = JsonConvert.SerializeObject(r);
+                if (Program.Configuration.ClientResults.IsSecure)
+                {
+                    payload = Crypto.EncryptStringAes(payload, machine.Name);
+                    payload = Base64Encoder.Base64Encode(payload);
 
-                var p = new EncryptedPayload {Payload = payload};
+                    var p = new EncryptedPayload {Payload = payload};
 
-                payload = JsonConvert.SerializeObject(p);
+                    payload = JsonConvert.SerializeObject(p);
+                }
+
+                using (var client = WebClientBuilder.Build(machine))
+                {
+                    client.Headers[HttpRequestHeader.ContentType] = "application/json";
+                    client.UploadString(postUrl, payload);
+                }
             }
-
-            using (var client = WebClientBuilder.Build(machine))
+            catch (Exception e)
             {
-                client.Headers[HttpRequestHeader.ContentType] = "application/json";
-                client.UploadString(postUrl, payload);
+                try
+                {
+                    //put the temp file contents back
+                    File.AppendAllText(fileName, rawLogContents);
+                    File.Delete(tempFile);
+                }
+                catch 
+                { 
+                    _log.Trace($"Log post failure cleanup also failed: {e}");
+                }
+                throw;
             }
-
+            
             //delete the temp file we used for reading
             File.Delete(tempFile);
             
