@@ -8,7 +8,6 @@ using System.Net.NetworkInformation;
 using System.Text.RegularExpressions;
 using System.Threading;
 using ghosts.client.linux.Comms;
-using ghosts.client.linux.Communications;
 using Ghosts.Domain.Code;
 using Newtonsoft.Json;
 using NLog;

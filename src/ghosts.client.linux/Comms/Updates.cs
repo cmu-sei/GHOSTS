@@ -10,7 +10,6 @@ using ghosts.client.linux.Infrastructure;
 using ghosts.client.linux.timelineManager;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
-using Ghosts.Domain.Code.Helpers;
 using Ghosts.Domain.Messages.MesssagesForServer;
 using NLog;
 using Newtonsoft.Json;

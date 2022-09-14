@@ -8,7 +8,7 @@ using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using NLog;
 
-namespace ghosts.client.linux.Communications
+namespace ghosts.client.linux.Comms
 {
     /// <summary>
     /// The client ID is used in the header to save having to send hostname/user/fqdn/etc. information with every request
