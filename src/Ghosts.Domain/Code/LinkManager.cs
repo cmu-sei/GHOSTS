@@ -85,85 +85,105 @@ namespace Ghosts.Domain.Code
 
         public Link Choose()
         {
-            var pickList = new List<Link>();
-
-            if (Links != null && Links.Any())
+            try
             {
-                foreach (var link in Links)
+                var pickList = new List<Link>();
+
+                if (Links != null && Links.Any())
+                {
+                    foreach (var link in Links)
+                    {
+                        try
+                        {
+                            // give relative links priority
+                            if ((link.Url.Scheme + link.Url.Host).Replace("www.", "").Equals(
+                                    (_baseUri.Scheme + _baseUri.Host).Replace("www.", ""),
+                                    StringComparison.InvariantCultureIgnoreCase))
+                            {
+                                link.Priority += 1;
+                            }
+                            else if (link.Url.Scheme.Equals("file", StringComparison.InvariantCultureIgnoreCase))
+                            {
+                                link.Priority += 1;
+                            }
+
+                            pickList.Add(link);
+                        }
+                        catch (Exception e)
+                        {
+                            Log.Trace($"{link.Url} : {e}");
+                        }
+                    }
+                }
+
+                if (!pickList.Any())
+                {
+                    return null;
+                }
+
+                Links = pickList.OrderByDescending(o => o.Priority).ToList();
+
+                if (!Links.Any())
+                {
+                    return null;
+                }
+
+                foreach (var visited in RecentlyVisited)
+                {
+                    var itemToRemove = Links.SingleOrDefault(x => x.Url == visited);
+                    if (itemToRemove != null)
+                        Links.Remove(itemToRemove);
+                }
+
+                if (!Links.Any())
+                {
+                    return null;
+                }
+
+                var priority = Links.First().Priority;
+                var chosenList = Links.Where(x => x.Priority == priority).ToArray();
+
+                if (!chosenList.Any())
+                {
+                    return null;
+                }
+
+                var chosen = chosenList.PickRandom();
+
+                if (chosen.Url.Scheme.ToLower().StartsWith("file"))
                 {
                     try
                     {
-                        // give relative links priority
-                        if ((link.Url.Scheme + link.Url.Host).Replace("www.", "").Equals(
-                                (_baseUri.Scheme + _baseUri.Host).Replace("www.", ""),
-                                StringComparison.InvariantCultureIgnoreCase))
+                        var bUrl = _baseUri.ToString();
+                        if (bUrl.EndsWith("/"))
                         {
-                            link.Priority += 1;
-                        }
-                        else if (link.Url.Scheme.Equals("file", StringComparison.InvariantCultureIgnoreCase))
-                        {
-                            link.Priority += 1;
+                            bUrl = bUrl.Substring(0, bUrl.Length - 1);
                         }
 
-                        pickList.Add(link);
+                        var thisUrl = chosen.Url.ToString().Replace("file://", "");
+
+                        thisUrl = Regex.Replace(thisUrl, "////", "//");
+                        if (thisUrl.StartsWith("/"))
+                        {
+                            thisUrl = thisUrl.Substring(1, thisUrl.Length - 1);
+                        }
+
+                        chosen.Url = new Uri($"{bUrl}/{thisUrl}");
                     }
                     catch (Exception e)
                     {
-                        Log.Trace($"{link.Url} : {e}");
+                        Log.Trace($"{chosen.Url} : {e}");
                     }
                 }
-            }
 
-            if (pickList.Count < 1)
+                this.RecentlyVisited.Add(chosen.Url);
+                return chosen;
+            }
+            catch (Exception e)
             {
-                return null;
+                Log.Trace(e);
+                throw;
             }
-
-            Links = pickList.OrderByDescending(o => o.Priority).ToList();
-
-            if (Links.Count < 1)
-            {
-                return null;
-            }
-
-            foreach (var visited in RecentlyVisited)
-            {
-                var itemToRemove = Links.SingleOrDefault(x => x.Url == visited);
-                if (itemToRemove != null)
-                    Links.Remove(itemToRemove);
-            }
-
-            var priority = Links.First().Priority;
-            var chosen = Links.Where(x => x.Priority == priority).PickRandom();
-
-            if (chosen.Url.Scheme.ToLower().StartsWith("file"))
-            {
-                try
-                {
-                    var bUrl = _baseUri.ToString();
-                    if (bUrl.EndsWith("/"))
-                    {
-                        bUrl = bUrl.Substring(0, bUrl.Length - 1);
-                    }
-
-                    var thisUrl = chosen.Url.ToString().Replace("file://", "");
-
-                    thisUrl = Regex.Replace(thisUrl, "////", "//");
-                    if (thisUrl.StartsWith("/"))
-                    {
-                        thisUrl = thisUrl.Substring(1, thisUrl.Length - 1);
-                    }
-
-                    chosen.Url = new Uri($"{bUrl}/{thisUrl}");
-                }
-                catch (Exception e)
-                {
-                    Log.Trace($"{chosen.Url} : {e}");
-                }
-            }
-
-            this.RecentlyVisited.Add(chosen.Url);
-            return chosen;
         }
     }
 }

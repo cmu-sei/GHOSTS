@@ -10,10 +10,9 @@ using Ghosts.Client.Infrastructure;
 using Ghosts.Client.TimelineManager;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
-using Ghosts.Domain.Code.Helpers;
 using Ghosts.Domain.Messages.MesssagesForServer;
-using NLog;
 using Newtonsoft.Json;
+using NLog;
 
 namespace Ghosts.Client.Comms
 {
@@ -48,10 +47,9 @@ namespace Ghosts.Client.Comms
                 return;
 
             // ignore all certs
-            ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
+            ServicePointManager.ServerCertificateValidationCallback += (_, _, _, _) => true;
 
             var machine = new ResultMachine();
-            GuestInfoVars.Load(machine);
 
             Thread.Sleep(Jitter.Basic(Program.Configuration.ClientUpdates.CycleSleep));
 
@@ -59,7 +57,7 @@ namespace Ghosts.Client.Comms
             {
                 try
                 {
-                    string s = string.Empty;
+                    var s = string.Empty;
                     using (var client = WebClientBuilder.Build(machine))
                     {
                         try
@@ -128,17 +126,17 @@ namespace Ghosts.Client.Comms
 
                                 break;
                             case UpdateClientConfig.UpdateType.Health:
-                            {
-                                var newTimeline = JsonConvert.DeserializeObject<ResultHealth>(update.Update.ToString());
-                                //save to local disk
-                                using (var file = File.CreateText(ApplicationDetails.ConfigurationFiles.Health))
                                 {
-                                    var serializer = new JsonSerializer {Formatting = Formatting.Indented};
-                                    serializer.Serialize(file, newTimeline);
-                                }
+                                    var newTimeline = JsonConvert.DeserializeObject<ResultHealth>(update.Update.ToString());
+                                    //save to local disk
+                                    using (var file = File.CreateText(ApplicationDetails.ConfigurationFiles.Health))
+                                    {
+                                        var serializer = new JsonSerializer { Formatting = Formatting.Indented };
+                                        serializer.Serialize(file, newTimeline);
+                                    }
 
-                                break;
-                            }
+                                    break;
+                                }
                             default:
                                 _log.Debug($"Update {update.Type} has no handler, ignoring...");
                                 break;
@@ -179,7 +177,7 @@ namespace Ghosts.Client.Comms
                 }
             }
 
-            ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
+            ServicePointManager.ServerCertificateValidationCallback += (_, _, _, _) => true;
 
             string postUrl;
 
@@ -201,7 +199,6 @@ namespace Ghosts.Client.Comms
 
                     var payload = TimelineBuilder.TimelineToString(timeline);
                     var machine = new ResultMachine();
-                    GuestInfoVars.Load(machine);
 
                     using (var client = WebClientBuilder.Build(machine))
                     {
@@ -226,13 +223,12 @@ namespace Ghosts.Client.Comms
                 return;
 
             // ignore all certs
-            ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
+            ServicePointManager.ServerCertificateValidationCallback += (_, _, _, _) => true;
 
             var fileName = ApplicationDetails.LogFiles.ClientUpdates;
             var postUrl = Program.Configuration.ClientResults.PostUrl;
 
             var machine = new ResultMachine();
-            GuestInfoVars.Load(machine);
 
             Thread.Sleep(Jitter.Basic(Program.Configuration.ClientResults.CycleSleep));
 
@@ -242,12 +238,6 @@ namespace Ghosts.Client.Comms
                 {
                     if (File.Exists(fileName))
                     {
-                        while (new FileInfo(fileName).IsFileLocked())
-                        {
-                            var sleepTime = 15000;
-                            _log.Trace($"{fileName} is locked, sleeping for {sleepTime}...");
-                            Thread.Sleep(sleepTime);
-                        }
                         PostResults(fileName, machine, postUrl);
                         _log.Trace($"{fileName} posted successfully...");
                     }
@@ -269,17 +259,12 @@ namespace Ghosts.Client.Comms
                 // look for other result files that have not been posted
                 try
                 {
-                    foreach (var file in Directory.GetFiles(Path.GetDirectoryName(fileName) ?? throw new InvalidOperationException("Path declaration failed")))
+                    var files = Directory.GetFiles(Path.GetDirectoryName(fileName) ?? throw new InvalidOperationException("Path declaration failed"), "*.log");
+                    foreach (var file in files)
                     {
                         if (!file.EndsWith("app.log") && file != fileName)
                         {
-                            while(new FileInfo(file).IsFileLocked())
-                            {
-                                var sleepTime = 15000;
-                                _log.Trace($"{file} is locked, sleeping for {sleepTime}...");
-                                Thread.Sleep(sleepTime);
-                            }
-                            PostResults(file, machine, postUrl, true);
+                            PostResults(file, machine, postUrl);
                             _log.Trace($"{fileName} posted successfully...");
                         }
                     }
@@ -298,42 +283,97 @@ namespace Ghosts.Client.Comms
             }
         }
 
-        private static void PostResults(string fileName, ResultMachine machine, string postUrl, bool isDeletable = false)
+        private static void PostResults(string fileName, ResultMachine machine, string postUrl)
         {
-            var r = new TransferLogDump {Log = File.ReadAllText(fileName) };
-            var payload = JsonConvert.SerializeObject(r);
-            if (Program.Configuration.ClientResults.IsSecure)
+            var tempFile = ($"{fileName.Replace("clientupdates.log", Guid.NewGuid().ToString())}.log");
+            if (fileName.EndsWith("clientupdates_not_posted.log"))
             {
-                payload = Crypto.EncryptStringAes(payload, machine.Name);
-                payload = Base64Encoder.Base64Encode(payload);
-
-                var p = new EncryptedPayload {Payload = payload};
-
-                payload = JsonConvert.SerializeObject(p);
+                tempFile = ($"{fileName.Replace("clientupdates_not_posted.log", Guid.NewGuid().ToString())}.log");
             }
 
-            using (var client = WebClientBuilder.Build(machine))
+            var isCopied = false;
+            var i = 0;
+            while (!isCopied)
             {
-                client.Headers[HttpRequestHeader.ContentType] = "application/json";
-                client.UploadString(postUrl, payload);
+                try
+                {
+                    File.Move(fileName, tempFile);
+                    isCopied = true;
+                    break;
+                }
+                catch
+                {
+                    if (i > 50)
+                    {
+                        throw;
+                    }
+                    Thread.Sleep(1000);
+                }
+
+                i++;
             }
 
-            if (isDeletable)
-            {
-                File.Delete(fileName);
-            }
-            else
-            {
-                File.WriteAllText(fileName, string.Empty);
-            }
+            Thread.Sleep(2000);
+            
+            string rawLogContents = null;
 
+            try
+            {
+                using (var s = new FileStream(tempFile, FileMode.Open, FileAccess.Read, FileShare.None))
+                {
+                    using (var tr = new StreamReader(s))
+                    {
+                        rawLogContents = tr.ReadToEnd();
+                    }
+                }
+
+                var r = new TransferLogDump { Log = rawLogContents };
+                var payload = JsonConvert.SerializeObject(r);
+                if (Program.Configuration.ClientResults.IsSecure)
+                {
+                    payload = Crypto.EncryptStringAes(payload, machine.Name);
+                    payload = Base64Encoder.Base64Encode(payload);
+
+                    var p = new EncryptedPayload { Payload = payload };
+
+                    payload = JsonConvert.SerializeObject(p);
+                }
+
+                using (var client = WebClientBuilder.Build(machine))
+                {
+                    client.Headers[HttpRequestHeader.ContentType] = "application/json";
+                    client.UploadString(postUrl, payload);
+                }
+            }
+            catch (Exception e)
+            {
+                if (!string.IsNullOrEmpty(rawLogContents))
+                {
+                    try
+                    {
+                        //put the temp file contents back
+                        var backupFile = fileName.Replace("clientupdates.log", "clientupdates_not_posted.log" );
+                        File.AppendAllText(backupFile, rawLogContents);
+                        File.Delete(tempFile);
+                    }
+                    catch
+                    {
+                        _log.Trace($"Log post failure cleanup also failed: {e}");
+                    }
+                }
+
+                throw;
+            }
+            
+            //delete the temp file we used for reading
+            File.Delete(tempFile);
             _log.Trace($"{DateTime.Now} - {fileName} posted to server successfully");
         }
 
         internal static void PostSurvey()
         {
             // ignore all certs
-            ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
+            ServicePointManager.ServerCertificateValidationCallback += (_, _, _, _) => true;
 
             string postUrl;
 
@@ -356,19 +396,18 @@ namespace Ghosts.Client.Comms
                 if (!File.Exists(ApplicationDetails.InstanceFiles.SurveyResults))
                     return;
 
-                var survey = JsonConvert.DeserializeObject<Domain.Messages.MesssagesForServer.Survey>(File.ReadAllText(ApplicationDetails.InstanceFiles.SurveyResults));
+                var survey = JsonConvert.DeserializeObject<Ghosts.Domain.Messages.MesssagesForServer.Survey>(File.ReadAllText(ApplicationDetails.InstanceFiles.SurveyResults));
 
                 var payload = JsonConvert.SerializeObject(survey);
 
                 var machine = new ResultMachine();
-                GuestInfoVars.Load(machine);
 
                 if (Program.Configuration.Survey.IsSecure)
                 {
                     payload = Crypto.EncryptStringAes(payload, machine.Name);
                     payload = Base64Encoder.Base64Encode(payload);
 
-                    var p = new EncryptedPayload {Payload = payload};
+                    var p = new EncryptedPayload { Payload = payload };
 
                     payload = JsonConvert.SerializeObject(p);
                 }
