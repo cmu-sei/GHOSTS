@@ -11,8 +11,8 @@ using ghosts.client.linux.timelineManager;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Messages.MesssagesForServer;
-using NLog;
 using Newtonsoft.Json;
+using NLog;
 
 namespace ghosts.client.linux.Comms
 {
@@ -47,7 +47,7 @@ namespace ghosts.client.linux.Comms
                 return;
 
             // ignore all certs
-            ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
+            ServicePointManager.ServerCertificateValidationCallback += (_, _, _, _) => true;
 
             var machine = new ResultMachine();
 
@@ -125,17 +125,17 @@ namespace ghosts.client.linux.Comms
 
                                 break;
                             case UpdateClientConfig.UpdateType.Health:
-                            {
-                                var newTimeline = JsonConvert.DeserializeObject<ResultHealth>(update.Update.ToString());
-                                //save to local disk
-                                using (var file = File.CreateText(ApplicationDetails.ConfigurationFiles.Health))
                                 {
-                                    var serializer = new JsonSerializer {Formatting = Formatting.Indented};
-                                    serializer.Serialize(file, newTimeline);
-                                }
+                                    var newTimeline = JsonConvert.DeserializeObject<ResultHealth>(update.Update.ToString());
+                                    //save to local disk
+                                    using (var file = File.CreateText(ApplicationDetails.ConfigurationFiles.Health))
+                                    {
+                                        var serializer = new JsonSerializer { Formatting = Formatting.Indented };
+                                        serializer.Serialize(file, newTimeline);
+                                    }
 
-                                break;
-                            }
+                                    break;
+                                }
                             default:
                                 _log.Debug($"Update {update.Type} has no handler, ignoring...");
                                 break;
@@ -176,7 +176,7 @@ namespace ghosts.client.linux.Comms
                 }
             }
 
-            ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
+            ServicePointManager.ServerCertificateValidationCallback += (_, _, _, _) => true;
 
             string postUrl;
 
@@ -198,7 +198,7 @@ namespace ghosts.client.linux.Comms
 
                     var payload = TimelineBuilder.TimelineToString(timeline);
                     var machine = new ResultMachine();
-                    
+
                     using (var client = WebClientBuilder.Build(machine))
                     {
                         client.Headers[HttpRequestHeader.ContentType] = "application/json";
@@ -222,13 +222,13 @@ namespace ghosts.client.linux.Comms
                 return;
 
             // ignore all certs
-            ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
+            ServicePointManager.ServerCertificateValidationCallback += (_, _, _, _) => true;
 
             var fileName = ApplicationDetails.LogFiles.ClientUpdates;
             var postUrl = Program.Configuration.ClientResults.PostUrl;
 
             var machine = new ResultMachine();
-            
+
             Thread.Sleep(Jitter.Basic(Program.Configuration.ClientResults.CycleSleep));
 
             while (true)
@@ -258,11 +258,12 @@ namespace ghosts.client.linux.Comms
                 // look for other result files that have not been posted
                 try
                 {
-                    foreach (var file in Directory.GetFiles(Path.GetDirectoryName(fileName), "*.log" ?? throw new InvalidOperationException("Path declaration failed")))
+                    var files = Directory.GetFiles(Path.GetDirectoryName(fileName) ?? throw new InvalidOperationException("Path declaration failed"), "*.log");
+                    foreach (var file in files)
                     {
                         if (!file.EndsWith("app.log") && file != fileName)
                         {
-                            PostResults(file, machine, postUrl, true);
+                            PostResults(file, machine, postUrl);
                             _log.Trace($"{fileName} posted successfully...");
                         }
                     }
@@ -281,24 +282,58 @@ namespace ghosts.client.linux.Comms
             }
         }
 
-        private static void PostResults(string fileName, ResultMachine machine, string postUrl, bool isDeletable = false)
+        private static void PostResults(string fileName, ResultMachine machine, string postUrl)
         {
-            var tempFile = $"{fileName.Replace("clientupdates.log", Guid.NewGuid().ToString())}.proc";
-            File.Copy(fileName, tempFile);
-            File.WriteAllText(fileName, "");
+            var tempFile = ($"{fileName.Replace("clientupdates.log", Guid.NewGuid().ToString())}.log");
+            if (fileName.EndsWith("clientupdates_not_posted.log"))
+            {
+                tempFile = ($"{fileName.Replace("clientupdates_not_posted.log", Guid.NewGuid().ToString())}.log");
+            }
+
+            var isCopied = false;
+            var i = 0;
+            while (!isCopied)
+            {
+                try
+                {
+                    File.Move(fileName, tempFile);
+                    isCopied = true;
+                    break;
+                }
+                catch
+                {
+                    if (i > 50)
+                    {
+                        throw;
+                    }
+                    Thread.Sleep(1000);
+                }
+
+                i++;
+            }
+
+            Thread.Sleep(2000);
             
-            var rawLogContents = File.ReadAllText(tempFile);
-            
+            string rawLogContents = null;
+
             try
             {
-                var r = new TransferLogDump {Log = rawLogContents};
+                using (var s = new FileStream(tempFile, FileMode.Open, FileAccess.Read, FileShare.None))
+                {
+                    using (var tr = new StreamReader(s))
+                    {
+                        rawLogContents = tr.ReadToEnd();
+                    }
+                }
+
+                var r = new TransferLogDump { Log = rawLogContents };
                 var payload = JsonConvert.SerializeObject(r);
                 if (Program.Configuration.ClientResults.IsSecure)
                 {
                     payload = Crypto.EncryptStringAes(payload, machine.Name);
                     payload = Base64Encoder.Base64Encode(payload);
 
-                    var p = new EncryptedPayload {Payload = payload};
+                    var p = new EncryptedPayload { Payload = payload };
 
                     payload = JsonConvert.SerializeObject(p);
                 }
@@ -311,38 +346,33 @@ namespace ghosts.client.linux.Comms
             }
             catch (Exception e)
             {
-                try
+                if (!string.IsNullOrEmpty(rawLogContents))
                 {
-                    //put the temp file contents back
-                    File.AppendAllText(fileName, rawLogContents);
-                    File.Delete(tempFile);
+                    try
+                    {
+                        //put the temp file contents back
+                        var backupFile = ApplicationDetails.LogFiles.ClientUpdates.Replace("clientupdates.log", "clientupdates_not_posted.log" );
+                        File.AppendAllText(backupFile, rawLogContents);
+                        File.Delete(tempFile);
+                    }
+                    catch
+                    {
+                        _log.Trace($"Log post failure cleanup also failed: {e}");
+                    }
                 }
-                catch 
-                { 
-                    _log.Trace($"Log post failure cleanup also failed: {e}");
-                }
+
                 throw;
             }
             
             //delete the temp file we used for reading
             File.Delete(tempFile);
-            
-            if (isDeletable)
-            { 
-                File.Delete(fileName);
-            }
-            else
-            {
-                File.WriteAllText(fileName, "");
-            }
-
             _log.Trace($"{DateTime.Now} - {fileName} posted to server successfully");
         }
 
         internal static void PostSurvey()
         {
             // ignore all certs
-            ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
+            ServicePointManager.ServerCertificateValidationCallback += (_, _, _, _) => true;
 
             string postUrl;
 
@@ -370,13 +400,13 @@ namespace ghosts.client.linux.Comms
                 var payload = JsonConvert.SerializeObject(survey);
 
                 var machine = new ResultMachine();
- 
+
                 if (Program.Configuration.Survey.IsSecure)
                 {
                     payload = Crypto.EncryptStringAes(payload, machine.Name);
                     payload = Base64Encoder.Base64Encode(payload);
 
-                    var p = new EncryptedPayload {Payload = payload};
+                    var p = new EncryptedPayload { Payload = payload };
 
                     payload = JsonConvert.SerializeObject(p);
                 }
