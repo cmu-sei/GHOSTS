@@ -352,7 +352,7 @@ namespace Ghosts.Client.Comms
                     try
                     {
                         //put the temp file contents back
-                        var backupFile = fileName.Replace("clientupdates.log", "clientupdates_not_posted.log" );
+                        var backupFile = ApplicationDetails.LogFiles.ClientUpdates.Replace("clientupdates.log", "clientupdates_not_posted.log");
                         File.AppendAllText(backupFile, rawLogContents);
                         File.Delete(tempFile);
                     }
