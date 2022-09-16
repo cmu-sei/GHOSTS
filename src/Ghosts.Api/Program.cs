@@ -32,6 +32,8 @@ namespace Ghosts.Api
                 .UseStartup<Startup>()
                 .Build();
             
+            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+            
             using (var scope = host.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;

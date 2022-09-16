@@ -1,5 +1,5 @@
 ﻿{
-    "IdEnabled": false,
+    "IdEnabled": true,
     "IdUrl": "http://ghosts-api:52388/api/clientid",
     "ClientResults": {
         "IsEnabled": true,
@@ -13,7 +13,7 @@
         "CycleSleep": 90000
     },
     "Survey": {
-        "IsEnabled": true,
+        "IsEnabled": false,
         "IsSecure": false,
         "Frequency": "once",
         "CycleSleepMinutes": 35,
