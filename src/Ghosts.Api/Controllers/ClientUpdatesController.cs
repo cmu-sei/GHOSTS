@@ -47,7 +47,7 @@ namespace Ghosts.Api.Controllers
         public async Task<IActionResult> Index(CancellationToken ct)
         {
             var id = Request.Headers["ghosts-id"];
-            if (string.IsNullOrEmpty(id)) throw new Exceptions.GhostsClientFormattingException("Web Headers are not configured correctly");
+            if (string.IsNullOrEmpty(id)) throw new Exceptions.GhostsClientFormattingException("Web Headers are not configured correctly - no ghosts-id set");
 
             log.Trace($"Request by {id}");
 
