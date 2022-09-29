@@ -7,6 +7,7 @@ using System.IO;
 using System.Threading;
 using Ghosts.Domain.Code.Helpers;
 using OpenQA.Selenium;
+using Newtonsoft.Json.Linq;
 
 namespace ghosts.client.linux.handlers
 {
@@ -74,7 +75,7 @@ namespace ghosts.client.linux.handlers
                 catch { }
             }
         }
-        
+
         internal static IWebDriver GetDriver(TimelineHandler handler)
         {
             var options = new ChromeOptions();
@@ -83,10 +84,17 @@ namespace ghosts.client.linux.handlers
             options.AddArguments("--disable-logging");
             options.AddArgument("--log-level=3");
             options.AddArgument("--silent");
+            if (handler.HandlerArgs.ContainsKey("command-line-args"))
+            {
+                foreach (var option in (JArray)handler.HandlerArgs["command-line-args"])
+                {
+                    options.AddArgument(option.Value<string>());
+                }
+            }
 
             options.AddLocalStatePreference("download.default_directory", @"~/downloads");
             options.AddLocalStatePreference("disable-popup-blocking", "true");
-        
+
             if (handler.HandlerArgs != null)
             {
                 if (handler.HandlerArgs.ContainsKey("executable-location") &&
@@ -150,7 +158,7 @@ namespace ghosts.client.linux.handlers
             {
                 options.AddArguments($"--load-extension={Program.Configuration.ChromeExtensions}");
             }
-            
+
             var driver = new ChromeDriver(options);
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
             return driver;

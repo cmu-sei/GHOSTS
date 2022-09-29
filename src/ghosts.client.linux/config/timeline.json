@@ -13,12 +13,8 @@
         "stickiness-depth-min": 5,
         "stickiness-depth-max": 10000,
         "incognito": "false",
-        "url-replace": [
-          {"verb": ["order", "enable", "engage"]},
-          {"group": ["operations", "logistics", "medical"]},
-          {"org": ["army", "command", "brigade", "battalion"]},
-          {"type": ["document", "doc", "files", "vault", "filevault"]}
-        ]
+        "command-line-args": ["--ignore-certificate-errors"],
+        "url-replace": [{ "verb": ["order", "enable", "engage"] }, { "group": ["operations", "logistics", "medical"] }, { "org": ["army", "command", "brigade", "battalion"] }, { "type": ["document", "doc", "files", "vault", "filevault"] }]
       },
       "Initial": "about:blank",
       "UtcTimeOn": "00:00:00",
@@ -576,8 +572,4 @@
       ]
     }
   ]
-} 
-
-
-
-
+}

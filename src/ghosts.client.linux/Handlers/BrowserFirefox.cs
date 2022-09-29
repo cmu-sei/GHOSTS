@@ -8,6 +8,7 @@ using System.Text;
 using Ghosts.Domain.Code.Helpers;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Firefox;
+using Newtonsoft.Json.Linq;
 
 namespace ghosts.client.linux.handlers
 {
@@ -43,7 +44,7 @@ namespace ghosts.client.linux.handlers
             }
             return true;
         }
-        
+
         internal static string GetInstallLocation()
         {
             var path = "/bin/firefox";
@@ -110,12 +111,19 @@ namespace ghosts.client.linux.handlers
         internal static IWebDriver GetDriver(TimelineHandler handler)
         {
             var path = GetInstallLocation();
-            
+
             var options = new FirefoxOptions();
             options.BrowserExecutableLocation = path;
             options.AddArguments("--disable-infobars");
             options.AddArguments("--disable-extensions");
             options.AddArguments("--disable-notifications");
+            if (handler.HandlerArgs.ContainsKey("command-line-args"))
+            {
+                foreach (var option in (JArray)handler.HandlerArgs["command-line-args"])
+                {
+                    options.AddArgument(option.Value<string>());
+                }
+            }
 
             options.Profile = new FirefoxProfile();
 
@@ -155,23 +163,23 @@ namespace ghosts.client.linux.handlers
             options.Profile.SetPreference("geo.enabled", false);
             options.Profile.SetPreference("geo.prompt.testing", false);
             options.Profile.SetPreference("geo.prompt.testing.allow", false);
-            
+
             _log.Trace("Browser preferences set successfully, getting driver...");
-            
+
             CodePagesEncodingProvider.Instance.GetEncoding(437);
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             FirefoxDriver driver;
-            
+
             try
             {
                 driver = new FirefoxDriver(options);
             }
             catch
             {
-                _log.Trace("Driver could not be instantiated. Does the proper driver exist? Are you running as a user and not root? Sometimes running the driver directly will uncover the underlaying issue.");    
+                _log.Trace("Driver could not be instantiated. Does the proper driver exist? Are you running as a user and not root? Sometimes running the driver directly will uncover the underlaying issue.");
                 throw;
             }
-            
+
             _log.Trace("Driver instantiated successfully, setting timeouts...");
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
             _log.Trace("Driver timeouts set successfully, continuing...");
