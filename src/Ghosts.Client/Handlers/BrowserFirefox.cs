@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using Ghosts.Domain.Code.Helpers;
+using Newtonsoft.Json.Linq;
 
 namespace Ghosts.Client.Handlers
 {
@@ -157,6 +158,13 @@ namespace Ghosts.Client.Handlers
             options.AddArguments("--disable-infobars");
             options.AddArguments("--disable-extensions");
             options.AddArguments("--disable-notifications");
+            if (handler.HandlerArgs.ContainsKey("command-line-args"))
+            {
+                foreach (var option in (JArray)handler.HandlerArgs["command-line-args"])
+                {
+                    options.AddArgument(option.Value<string>());
+                }
+            }
 
             options.BrowserExecutableLocation = path;
             options.Profile = new FirefoxProfile();

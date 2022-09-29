@@ -7,6 +7,7 @@ using System;
 using System.IO;
 using System.Threading;
 using Ghosts.Domain.Code.Helpers;
+using Newtonsoft.Json.Linq;
 using OpenQA.Selenium;
 
 namespace Ghosts.Client.Handlers
@@ -97,6 +98,13 @@ namespace Ghosts.Client.Handlers
             options.AddArguments("--disable-logging");
             options.AddArgument("--log-level=3");
             options.AddArgument("--silent");
+            if (handler.HandlerArgs.ContainsKey("command-line-args"))
+            {
+                foreach (var option in (JArray)handler.HandlerArgs["command-line-args"])
+                {
+                    options.AddArgument(option.Value<string>());
+                }
+            }
 
             options.AddLocalStatePreference("download.default_directory", @"%homedrive%%homepath%\\Downloads");
             options.AddLocalStatePreference("disable-popup-blocking", "true");

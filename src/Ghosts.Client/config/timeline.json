@@ -84,6 +84,7 @@
         "javascript-enable": "true",
         "visited-remember": "10",
         "actions-before-restart": 100,
+        "command-line-args": [ "--ignore-certificate-errors" ],
         "url-replace": [
           { "verb": [ "order", "enable", "engage" ] },
           { "group": [ "operations", "logistics", "medical" ] },
