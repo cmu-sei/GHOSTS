@@ -300,15 +300,13 @@ Part of the GHOSTS NPC Orchestration Platform - please email ddupdyke[at]sei.cmu
             self.wfile.write(body.encode("utf8"))
             return
 
-        # elif o.path.startswith("/video"):
-        #     self.send_standard_headers("video/webm")
-
-        #     for _ in range(1000, 8000000):
-        #         buf = BytesIO(self.fake.binary(length=random.choice(range(1000, 80000))))
-        #         buf.seek(0, 0)
-        #         self.wfile.write(buf.read())
-
-        #     return
+        elif o.path.startswith("/video"):
+            f = open(f"./static/player.html", "rb")
+            self.send_standard_headers("text/html")
+            content = f.read()
+            self.wfile.write(content)
+            f.close()
+            return
 
         elif o.path.startswith("/css") or o.path.startswith("/styles"):
             self.return_stylesheet()
@@ -402,7 +400,7 @@ Part of the GHOSTS NPC Orchestration Platform - please email ddupdyke[at]sei.cmu
             self.return_text(self.file_requested)
 
         else:
-            if random.randint(2, 100) > 90:
+            if random.randint(2, 100) > 95:
                 self.send_non_200()
             else:
                 self.send_standard_headers("text/html")
