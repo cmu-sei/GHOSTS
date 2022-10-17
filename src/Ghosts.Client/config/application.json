@@ -7,13 +7,13 @@
     "VMWareToolsLocation": "C:\\progra~1\\VMware\\VMware Tools\\vmtoolsd.exe",
     "EncodeHeaders": true,
     "ClientResults": {
-        "IsEnabled": true,
+        "IsEnabled": false,
         "IsSecure": false,
         "PostUrl": "http://ghosts-api:52388/api/clientresults",
         "CycleSleep": 300000
     },
     "ClientUpdates": {
-        "IsEnabled": true,
+        "IsEnabled": false,
         "PostUrl": "http://ghosts-api:52388/api/clientupdates",
         "CycleSleep": 300000
     },
