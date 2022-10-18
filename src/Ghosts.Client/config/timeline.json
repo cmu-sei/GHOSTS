@@ -18,7 +18,7 @@
         {
           "Command": "random",
           "CommandArgs": [
-            "10.200.128.135|10.200.128.135_ncraf|channel|ls -lah;ls -ltrh;cd tmp;touch ghosts_test.txt"
+            "10.200.128.135|10.200.128.135_ncraf|cd [remotedirectory];ls"
           ],
           "DelayAfter": 900000,
           "DelayBefore": 0

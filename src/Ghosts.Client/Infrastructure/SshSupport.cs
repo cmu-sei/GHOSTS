@@ -25,23 +25,36 @@ namespace Ghosts.Client.Infrastructure
 
         private string GetRandomDirectory(ShellStream client)
         {
-            string cmdout = this.RunSshCommandBase(client, "ls -ld */ ", true);
+            client.WriteLine("ls -ld */ ");  //write command to client
+            string cmdout = this.GetSshCommandOutput(client,  false);
             cmdout = cmdout.Replace("\r", "");
             string[] lines = cmdout.ToString().Split('\n');
-            List<string> dirs = new List<string>;
-            foreach (string line in lines)
+            List<string> dirs = new List<string>();
+            if (lines.Length > 2)
             {
-                if (System.Text.RegularExpressions.Regex.IsMatch(line, "^d"))
+                //must have at least three lines as first line is command, last line is prompt
+                int i = 0;
+                foreach (string line in lines)
                 {
-                    string[] words = line.Split(' ');
-                    if (words.Length == 9)
+                    i += 1;
+                    if (i == 1 || i == lines.Length)
                     {
-                        var dirName = words[8];
-                        dirName = dirName.Replace("/", "");
-                        dirs.Add(dirName);
+                        continue;//skip first, last lines
                     }
-                }
+                    if (System.Text.RegularExpressions.Regex.IsMatch(line, "^d"))
+                    {
+                        string[] words = line.Split(null);  //split on whitespace
+                        //for some reason, some of the words can be null strings. WUT. So can't check exact number.
+                        if (words.Length > 8)
+                        {
+                            var dirName = words[words.Length-1]; //get last entry
+                            dirName = dirName.Replace("/", "");
+                            dirs.Add(dirName);
+                        }
+                    }
+                   
 
+                }
             }
             if (dirs.Count > 0)
             {
@@ -79,7 +92,7 @@ namespace Ghosts.Client.Infrastructure
         }
 
         /// <summary>
-        /// Method <c>RunSshCommandBase</c> uses ShellStream to run a command because the channel model does not have any
+        /// Method <c>GetSshCommandOutput</c> uses ShellStream to run a command because the channel model does not have any
         /// shell context, ie. if you cd to a directory, the  next command still runs in the 
         /// home directory. This  implementation using SshStream just uses long timeouts
         /// to wait for data since for a traffic generator do not care about performance
@@ -87,10 +100,10 @@ namespace Ghosts.Client.Infrastructure
         /// <param name="client"></param>
         /// <param name="cmd"></param>
         /// <returns></returns>
-        public string RunSshCommandBase(ShellStream client, string cmd, bool skiptimeout)
+        public string GetSshCommandOutput(ShellStream client, bool skiptimeout)
         {
 
-            client.WriteLine(cmd);
+            
             //read data until timeout reached
             long startTimeMs = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
             string CmdData = "";
@@ -123,7 +136,8 @@ namespace Ghosts.Client.Infrastructure
         public string RunSshCommand(ShellStream client, string cmd)
         {
             string newcmd = this.ParseSshCmd(client, cmd);
-            return this.RunSshCommandBase(client, newcmd, false);
+            client.WriteLine(newcmd);  //write command to client
+            return this.GetSshCommandOutput(client, false);
         }
 
 

@@ -195,6 +195,8 @@ namespace Ghosts.Client.Handlers
                     }
                     //we are connected, execute the commands
                     ShellStream shellStreamSSH = client.CreateShellStream("vt220", 80, 60, 800, 600, 65536);
+                    //before running commands, flush the input of welcome login text
+                    this.CurrentSshSupport.GetSshCommandOutput(shellStreamSSH, true);
                     foreach (var sshCmd in sshCmds)
                     {
                         try
