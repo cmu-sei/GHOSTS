@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using System.Threading;
-using Renci.SshNet.Connection;
+using Renci.SshNet;
 using Ghosts.Client.Infrastructure;
 using Ghosts.Domain;
 using System.Net;
@@ -21,29 +21,92 @@ using Newtonsoft.Json;
 
 namespace Ghosts.Client.Handlers
 {
+    /// <summary>
+    /// This handler connects to a remote host and executes SSH commands.
+    /// This uses the Credentials class that keeps a simple dictionary of credentials
+    /// For SSH, is  uses the Renci.sshNet package, install via PM with Install-Package SSH.NET
+    /// The SSH connection uses a ShellStream for executing commands once a connection is established.
+    /// Each SSH shell command can have reserved words in it, such as '[remotedirectory]' which 
+    /// is replaced by a random remote directory on the server.  So 'cd [remotedirectory]' will change
+    /// to a random remote directory. 
+    /// See the Sample Timelines/Ssh.json for a sample timeline using this handler.
+    /// </summary>
     public class Ssh : BaseHandler
     {
 
-        private Credentials currentCreds = null;
-        
+        private Credentials CurrentCreds = null;
+        private SshSupport CurrentSshSupport = null;   //current SshSupport for this object
+
         public Ssh(TimelineHandler handler)
         {
             try
             {
                 base.Init(handler);
-                if (handler.HandlerArgs != null && handler.HandlerArgs.ContainsKey("credfile"))
+                this.CurrentSshSupport = new SshSupport();
+                if (handler.HandlerArgs != null)
                 {
-                    try
+                    if (handler.HandlerArgs.ContainsKey("CredentialsFile"))
                     {
-                        this.currentCreds = JsonConvert.DeserializeObject<Credentials>(File.ReadAllText(File.ReadAllText(handler.HandlerArgs["credfile"].ToString())));
+                        try
+                        {
+                            this.CurrentCreds = JsonConvert.DeserializeObject<Credentials>(File.ReadAllText(handler.HandlerArgs["CredentialsFile"].ToString()));
+                        }
+                        catch (Exception e)
+                        {
+                            Log.Error(e);
+                        }
                     }
-                    catch (Exception e)
+                    if (handler.HandlerArgs.ContainsKey("ValidExts"))
                     {
-                        Log.Error(e);
+                        try
+                        {
+                            this.CurrentSshSupport.ValidExts = handler.HandlerArgs["ValidExts"].ToString().Split(';');
+                        }
+                        catch (Exception e)
+                        {
+                            Log.Error(e);
+                        }
+                    }
+                    if (handler.HandlerArgs.ContainsKey("CommandTimeout"))
+                    {
+                        try
+                        {
+                            this.CurrentSshSupport.CommandTimeout = Int32.Parse(handler.HandlerArgs["CommandTimeout"].ToString());
+                        }
+                        catch (Exception e)
+                        {
+                            Log.Error(e);
+                        }
+                    }
+                    if (handler.HandlerArgs.ContainsKey("TimeBetweenCommandsMax"))
+                    {
+                        try
+                        {
+                            this.CurrentSshSupport.TimeBetweenCommandsMax = Int32.Parse(handler.HandlerArgs["TimeBetweenCommandsMax"].ToString());
+                            if (this.CurrentSshSupport.TimeBetweenCommandsMax < 0) this.CurrentSshSupport.TimeBetweenCommandsMax = 0;
+                        }
+                        catch (Exception e)
+                        {
+                            Log.Error(e);
+                        }
+                    }
+                    if (handler.HandlerArgs.ContainsKey("TimeBetweenCommandsMin"))
+                    {
+                        try
+                        {
+                            this.CurrentSshSupport.TimeBetweenCommandsMin = Int32.Parse(handler.HandlerArgs["TimeBetweenCommandsMin"].ToString());
+                            if (this.CurrentSshSupport.TimeBetweenCommandsMin < 0) this.CurrentSshSupport.TimeBetweenCommandsMin = 0;
+                        }
+                        catch (Exception e)
+                        {
+                            Log.Error(e);
+                        }
                     }
                 }
 
-                    if (handler.Loop)
+
+
+                if (handler.Loop)
                 {
                     while (true)
                     {
@@ -75,7 +138,7 @@ namespace Ghosts.Client.Handlers
                 if (timelineEvent.DelayBefore > 0)
                     Thread.Sleep(timelineEvent.DelayBefore);
 
-                Log.Trace($"Command line: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfter}");
+                Log.Trace($"SSH Command: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfter}");
 
                 switch (timelineEvent.Command)
                 {
@@ -103,28 +166,54 @@ namespace Ghosts.Client.Handlers
             }
         }
 
+
         public void Command(TimelineHandler handler, TimelineEvent timelineEvent, string command)
         {
-            Log.Trace("Spawning cmd.exe...");
-            var processStartInfo = new ProcessStartInfo("cmd.exe")
-            {
-                RedirectStandardInput = true,
-                RedirectStandardOutput = true,
-                UseShellExecute = false
-            };
+            Log.Trace("Beginning SSH execution of: " + command);
+            char[] charSeparators = new char[] { '|' };
+            var cmdArgs = command.Split(charSeparators, 3,StringSplitOptions.None);
+            var hostIp = cmdArgs[0];
+            var credKey = cmdArgs[1];
+            var sshCmds = cmdArgs[2].Split(';');
+            var userName = this.CurrentCreds.GetProperty(credKey, "username");
+            var pwBase64 = this.CurrentCreds.GetProperty(credKey, "password");
 
-            using (var process = Process.Start(processStartInfo))
+            if (userName != null && pwBase64 != null)
             {
-                Thread.Sleep(1000);
-                if (process != null)
+                var pwPlainText = Encoding.UTF8.GetString(Convert.FromBase64String(pwBase64));
+                //have IP, user/pass, try connecting 
+                using (var client = new SshClient(hostIp, userName, pwPlainText))
                 {
-                    process.StandardInput.WriteLine(command);
-                    process.StandardInput.Close(); // line added to stop process from hanging on ReadToEnd()
-                    var outputString = process.StandardOutput.ReadToEnd();
-                    this.Report(handler.HandlerType.ToString(), command, outputString, timelineEvent.TrackableId);
+                    try
+                    {
+                        client.Connect();
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error(e);
+                        return;  //unable to connect
+                    }
+                    //we are connected, execute the commands
+                    ShellStream shellStreamSSH = client.CreateShellStream("vt220", 80, 60, 800, 600, 65536);
+                    foreach (var sshCmd in sshCmds)
+                    {
+                        try
+                        {
+                            this.CurrentSshSupport.RunSshCommand(shellStreamSSH, sshCmd);
+                        }
+                        catch (Exception e)
+                        {
+                            Log.Error(e); //some error occurred during this command, try the next one
+                        }
+                    }
+                    client.Disconnect();
+                    client.Dispose();
                 }
             }
+
         }
+
+
 
 
 

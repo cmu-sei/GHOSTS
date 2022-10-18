@@ -3,15 +3,22 @@
   "TimeLineHandlers": [
     {
       "HandlerType": "Ssh",
+      "HandlerArgs": {
+                "CommandTimeout": 1000,
+                "TimeBetweenCommandsMax": 5000,
+                "TimeBetweenCommandsMin": 1000,
+                "ValidExts": "txt;doc;png;jpeg",
+                "CredentialsFile": "d:\\ghosts_data\\creds.json",
+             },
       "Initial": "",
       "UtcTimeOn": "00:00:00",
       "UtcTimeOff": "24:00:00",
       "Loop": "True",
       "TimeLineEvents": [
         {
-          "Command": "explorer \\\\file-server\\reports",
+          "Command": "random",
           "CommandArgs": [
-            "exit"
+            "10.200.128.135|10.200.128.135_ncraf|channel|ls -lah;ls -ltrh;cd tmp;touch ghosts_test.txt"
           ],
           "DelayAfter": 900000,
           "DelayBefore": 0

@@ -15,6 +15,17 @@ namespace Ghosts.Client.Infrastructure
 
         public string Version { get; set; }
         public Dictionary<string, Dictionary<string, string>> Data { get; set; }
+
+
+        public string GetProperty(string credId, string prop)
+        {
+            
+            if (this.Data != null && this.Data.ContainsKey(credId))
+            {
+                if (this.Data[credId].ContainsKey(prop)) return this.Data[credId][prop];
+            }
+            return null;
+        }
     }
 
        
