@@ -18,9 +18,9 @@
         {
           "Command": "random",
           "CommandArgs": [
-            "10.200.128.135|10.200.128.135_ncraf|cd [remotedirectory];ls"
+            "10.200.128.135|10.200.128.135_ncraf|ls -lah;ls -ltrh;help;pwd"
           ],
-          "DelayAfter": 900000,
+          "DelayAfter": 20000,
           "DelayBefore": 0
         }
       ]

@@ -169,7 +169,7 @@ namespace Ghosts.Client.Handlers
 
         public void Command(TimelineHandler handler, TimelineEvent timelineEvent, string command)
         {
-            Log.Trace("Beginning SSH execution of: " + command);
+            
             char[] charSeparators = new char[] { '|' };
             var cmdArgs = command.Split(charSeparators, 3,StringSplitOptions.None);
             var hostIp = cmdArgs[0];
@@ -177,6 +177,7 @@ namespace Ghosts.Client.Handlers
             var sshCmds = cmdArgs[2].Split(';');
             var userName = this.CurrentCreds.GetProperty(credKey, "username");
             var pwBase64 = this.CurrentCreds.GetProperty(credKey, "password");
+            Log.Trace("Beginning SSH to host:  " + hostIp + " with command: " + command);
 
             if (userName != null && pwBase64 != null)
             {
@@ -210,6 +211,7 @@ namespace Ghosts.Client.Handlers
                     }
                     client.Disconnect();
                     client.Dispose();
+                    this.Report(handler.HandlerType.ToString(), command, "", timelineEvent.TrackableId);
                 }
             }
 

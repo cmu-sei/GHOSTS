@@ -15,13 +15,46 @@ namespace Ghosts.Client.Infrastructure
     public class SshSupport
     {
 
-        public string[] ValidExts { get; set; } = null;
+        public string[] ValidExts { get; set; } = { "txt", "py", "log", "c", "o", "jpg", "cs", "dll", "so", "zip", "gz","jar" };
         public int TimeBetweenCommandsMax { get; set; } = 0;
         public int TimeBetweenCommandsMin { get; set; } = 0;
 
         public int CommandTimeout { get; set; } = 1000;
 
         internal static readonly Random _random = new Random();
+
+        private static string RandomString(int min, int max, bool lowercase=false)
+        {
+            var size = _random.Next(min, max);
+            var builder = new StringBuilder(size);
+            const int lettersOffset = 26; // A...Z or a..z: length=26  
+            char[] others = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+
+            for (var i = 0; i < size; i++)
+            {
+                var choice = _random.Next(2);
+                char offset = choice == 0 ? 'a' : 'A';
+
+                if (i == 0 || _random.Next(10) < 7)
+                {
+                    var @char = (char)_random.Next(offset, offset + lettersOffset);
+                    builder.Append(@char);
+                }
+                else
+                {
+                    var @char = others[_random.Next(others.Length)];
+                    builder.Append(@char);
+                }
+
+            }
+            if (lowercase)
+            {
+                return builder.ToString().ToLower();
+            } else {
+                return builder.ToString();
+            }
+        }
+
 
         private string GetRandomDirectory(ShellStream client)
         {
@@ -70,7 +103,7 @@ namespace Ghosts.Client.Infrastructure
         /// Supported reserved words:
         ///  remotedirectory -- returns a random directory from the remote host
         ///  randomname -- generates a random ASCII lowercase string
-        ///  randomext -- selects a random extension from the set of random extensions
+        ///  randomextension -- selects a random extension from the set of random extensions
         ///  
         /// 
         /// This may require execution and parsing of an internal SSH command before returning
@@ -85,6 +118,14 @@ namespace Ghosts.Client.Infrastructure
             {
                 var dir = this.GetRandomDirectory(client);
                 if (dir != null) currentcmd = currentcmd.Replace("[remotedirectory]", dir);
+            } 
+            if (currentcmd.Contains("[randomextension]"))
+            { 
+                   currentcmd = currentcmd.Replace("[randomextension]", this.ValidExts[_random.Next(0, this.ValidExts.Length-1)]); 
+            }
+            if (currentcmd.Contains("[randomname]"))
+            {
+                currentcmd = currentcmd.Replace("[randomname]", RandomString(3,15,true));
             }
 
 
