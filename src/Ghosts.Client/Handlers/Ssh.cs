@@ -175,15 +175,15 @@ namespace Ghosts.Client.Handlers
             var hostIp = cmdArgs[0];
             var credKey = cmdArgs[1];
             var sshCmds = cmdArgs[2].Split(';');
-            var userName = this.CurrentCreds.GetProperty(credKey, "username");
-            var pwBase64 = this.CurrentCreds.GetProperty(credKey, "password");
+            var username = this.CurrentCreds.GetUsername(credKey);
+            var password = this.CurrentCreds.GetPassword(credKey);
             Log.Trace("Beginning SSH to host:  " + hostIp + " with command: " + command);
 
-            if (userName != null && pwBase64 != null)
+            if (username != null && password != null)
             {
-                var pwPlainText = Encoding.UTF8.GetString(Convert.FromBase64String(pwBase64));
+                
                 //have IP, user/pass, try connecting 
-                using (var client = new SshClient(hostIp, userName, pwPlainText))
+                using (var client = new SshClient(hostIp, username, password))
                 {
                     try
                     {

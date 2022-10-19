@@ -118,6 +118,7 @@ namespace Ghosts.Client.Infrastructure
             {
                 var dir = this.GetRandomDirectory(client);
                 if (dir != null) currentcmd = currentcmd.Replace("[remotedirectory]", dir);
+                else return null;  //this  translation failed, return null
             } 
             if (currentcmd.Contains("[randomextension]"))
             { 
@@ -177,8 +178,14 @@ namespace Ghosts.Client.Infrastructure
         public string RunSshCommand(ShellStream client, string cmd)
         {
             string newcmd = this.ParseSshCmd(client, cmd);
-            client.WriteLine(newcmd);  //write command to client
-            return this.GetSshCommandOutput(client, false);
+            if (newcmd != null)
+            {
+                client.WriteLine(newcmd);  //write command to client
+                return this.GetSshCommandOutput(client, false);
+            } else
+            {
+                return null;  //can return null if translation of keyword fails
+            }
         }
 
 
