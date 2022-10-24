@@ -303,6 +303,12 @@ namespace Ghosts.Client.TimelineManager
                             _ = new Cmd(handler);
                         });
                         break;
+                    case HandlerType.Ssh:
+                        t = new Thread(() =>
+                        {
+                            _ = new Ssh(handler);
+                        });
+                        break;
                     case HandlerType.Word:
                         _log.Trace("Launching thread for word");
                         if (IsWordInstalled)
