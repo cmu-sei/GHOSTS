@@ -35,7 +35,7 @@
       var params = new URLSearchParams(window.location.search);
       var url = params.get('url');
       if (!url) {
-        url = 'http://localhost/live/hello.m3u8';
+        url = '/live/hello.m3u8';
       }
       console.log('loading video at ', url);
       if (Hls.isSupported()) {

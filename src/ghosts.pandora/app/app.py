@@ -2,8 +2,6 @@
 # -*- coding: utf-8 -*-
 
 """
-v0.1.1 - changes pdf renders to force download
-
 Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 Usage::
@@ -38,6 +36,8 @@ from pptx.util import Inches
 import uuid
 import zipstream
 import configparser as cp
+
+VERSION = "0.5.0"
 
 
 class S(BaseHTTPRequestHandler):
@@ -276,25 +276,17 @@ class S(BaseHTTPRequestHandler):
         # handle specific urls
         if o.path == ("/about"):
             self.send_standard_headers("text/html")
-            license = ""
-            with open('../license.md', 'r') as file:
-                license = file.read()
             read_me = ""
             with open('../readme.md', 'r') as file:
                 read_me = file.read()
             body = f"""<html><body><pre>
-GHOSTS PANDORA, v0.1
+GHOSTS PANDORA, version {VERSION}
 Copyright 2022 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 Part of the GHOSTS NPC Orchestration Platform - please email ddupdyke[at]sei.cmu.edu with bugs/requests/other.
 </pre><hr/>
 <h2>README</h2>
 <pre>
 {read_me}
-</pre>
-
-<h2>LICENSE</h2>
-<pre>
-{license}
 </pre>
 </body></html>"""
             self.wfile.write(body.encode("utf8"))

@@ -189,6 +189,7 @@ COPY ./app /usr/src/app
 
 LABEL MAINTAINER Dustin Updyke <ddupdyke[at]sei.cmu.edu>
 LABEL PRODUCT GHOSTS PANDORA
+LABEL VERSION Browse to /about
 
 EXPOSE 80
 EXPOSE 8081
