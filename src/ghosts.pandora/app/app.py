@@ -292,7 +292,7 @@ Part of the GHOSTS NPC Orchestration Platform - please email ddupdyke[at]sei.cmu
             self.wfile.write(body.encode("utf8"))
             return
 
-        elif o.path.startswith("/video"):
+        elif o.path.startswith("/video") and self.config.get("video", "video_enabled").upper() != "TRUE":
             f = open(f"./static/player.html", "rb")
             self.send_standard_headers("text/html")
             content = f.read()

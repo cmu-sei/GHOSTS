@@ -46,14 +46,32 @@ if [ "$FILESYSTEM" = "s3" ] ; then
     s3fs $S3FS_DEBUG $S3FS_ARGS -o default_acl=public-read -o passwd_file=${AWS_S3_AUTHFILE} -o url=${AWS_S3_URL} -o endpoint=${AWS_S3_REGION} -o allow_other ${AWS_S3_BUCKET_NAME} ${STORAGE_PATH}
 fi
 
-echo "launching pandora on port 8081..."
-nohup bash -c "python3 app.py 8081 &"
+nginx=False
+file="/usr/src/app/app.config"
+while read -r line; do
+    if [[ "$line" == "$nginx_enabled"* ]] ; then
+        if [ "$line" == *"=True" ] ; then
+            nginx=True
+        fi
+    fi
+done <$file 
 
-echo "serving video on port 1935..."
-nohup bash -c "python3 serve_movie_file.py &"
 
-echo "configuring and launching nginx..."
-# Run NGINX
-envsubst "$(env | sed -e 's/=.*//' -e 's/^/\$/g')" < \
-  /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf && \
-  nginx
+if [ "$nginx" == "True" ] ; then
+    echo "launching pandora on port 8081..."
+    nohup bash -c "python3 app.py 8081 &"
+
+    echo "serving video on port 1935..."
+    nohup bash -c "python3 serve_movie_file.py &"
+
+    echo "configuring and launching nginx..."
+    # Run NGINX
+    envsubst "$(env | sed -e 's/=.*//' -e 's/^/\$/g')" < \
+    /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf && \
+    nginx
+else
+    echo "nginx disabled, skipping..."
+
+    echo "launching pandora on port 80..."
+    nohup bash -c "python3 app.py 80"
+fi
