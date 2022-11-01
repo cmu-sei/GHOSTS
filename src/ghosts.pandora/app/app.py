@@ -17,6 +17,7 @@ Send a POST request::
     curl -d "foo=bar&bin=baz" http://localhost
 
 """
+import subprocess as sp
 from docx.shared import Inches
 from docx import Document
 from io import BytesIO
@@ -37,7 +38,7 @@ import uuid
 import zipstream
 import configparser as cp
 
-VERSION = "0.5.0"
+VERSION = "0.5.5"
 
 
 class S(BaseHTTPRequestHandler):
@@ -264,6 +265,26 @@ class S(BaseHTTPRequestHandler):
         buf.seek(0, 0)
         self.wfile.write(buf.read())
 
+    def return_mp4(self, file_name):
+        test_movie = "static/test_movie.mp4"
+        if not os.path.isfile(test_movie):
+            sp.call(
+                f'ffmpeg -y -f lavfi -i testsrc=size=1920x1080:rate=1 -vf hue=s=0 -vcodec libx264 -preset superfast -tune zerolatency -pix_fmt yuv420p -t 1000 -movflags +faststart {test_movie}', shell=True)
+
+            # Add zero padding to the end of the file https://stackoverflow.com/questions/12768026/write-zeros-to-file-blocks
+            stat = os.stat(test_movie)
+            with open(test_movie, 'r+') as of:
+                of.seek(0, os.SEEK_END)
+                of.write('\0' * (50*1024*1024 - stat.st_size))
+                of.flush()
+
+        f = open(test_movie, "rb")
+        self.send_standard_headers("video/mp4")
+        content = f.read()
+        self.wfile.write(content)
+        f.close()
+        return
+
     def serve_response(self):
         o = urllib.parse.urlparse(self.path)
         self.request_url = o.path
@@ -292,7 +313,15 @@ Part of the GHOSTS NPC Orchestration Platform - please email ddupdyke[at]sei.cmu
             self.wfile.write(body.encode("utf8"))
             return
 
-        elif o.path.startswith("/video") and self.config.get("video", "video_enabled").upper() != "TRUE":
+        elif o.path.startswith("/video"):
+            f = open(f"./static/mp4.html", "rb")
+            self.send_standard_headers("text/html")
+            content = f.read()
+            self.wfile.write(content)
+            f.close()
+            return
+
+        elif o.path.startswith("/stream"):
             f = open(f"./static/player.html", "rb")
             self.send_standard_headers("text/html")
             content = f.read()
@@ -360,6 +389,9 @@ Part of the GHOSTS NPC Orchestration Platform - please email ddupdyke[at]sei.cmu
         # https://en.wikipedia.org/wiki/List_of_file_formats
         if request_type in ["doc", "docx", "dotx", "dot", "docm", "dotm", "odt"]:
             self.return_doc_file(self.file_requested)
+
+        elif request_type in ["mp4"]:
+            self.return_mp4(self.file_requested)
 
         elif request_type in ["xls", "xlsx", "xlsm", "xlsb", "xltm", "xla", "xlam", "xla", "ods"]:
             self.return_xls_file(self.file_requested)

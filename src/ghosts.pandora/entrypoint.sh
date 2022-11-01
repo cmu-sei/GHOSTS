@@ -49,13 +49,11 @@ fi
 nginx=False
 file="/usr/src/app/app.config"
 while read -r line; do
-    if [[ "$line" == "$nginx_enabled"* ]] ; then
-        if [ "$line" == *"=True" ] ; then
-            nginx=True
-        fi
+    if [[ $line == "nginx_enabled=True" ]] ; then
+        nginx=True
+        break
     fi
 done <$file 
-
 
 if [ "$nginx" == "True" ] ; then
     echo "launching pandora on port 8081..."
