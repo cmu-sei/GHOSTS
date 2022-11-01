@@ -30,20 +30,22 @@ This assumes the host server is a common linux distribution. For images to rende
 
 To enable streaming video:
 
-1. In the container's /usr/src/app/app.config file:
+1. In the container's `/usr/src/app/app.config` file:
 
+```
 $ docker exec -it pandora /bin/bash
 $ vi /usr/src/app/app.config
 
 [video]
 video_enabled=False
 nginx_enabled=False
+```
 
 2. set these to `True`, save the file, and exit.
 
 3. Exit the container and docker restart pandora and it should start
 
-(If starting the container via docker run -p 80:80 --name pandora -d dustinupdyke/ghosts-pandora:0.5.1)
+(If starting the container via `docker run -p 80:80 --name pandora -d dustinupdyke/ghosts-pandora:0.5.1`)
 
 ### By directory
 
