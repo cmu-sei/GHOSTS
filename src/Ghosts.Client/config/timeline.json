@@ -2,29 +2,20 @@
   "Status": "Run",
   "TimeLineHandlers": [
     {
-      "HandlerType": "Ssh",
-      "HandlerArgs": {
-                "CommandTimeout": 1000,
-                "TimeBetweenCommandsMax": 5000,
-                "TimeBetweenCommandsMin": 1000,
-                "ValidExts": "txt;doc;png;jpeg",
-                "CredentialsFile": "d:\\ghosts_data\\creds.json",
-             },
+      "HandlerType": "Watcher",
       "Initial": "",
       "UtcTimeOn": "00:00:00",
       "UtcTimeOff": "24:00:00",
-      "Loop": "True",
+      "Loop": true,
       "TimeLineEvents": [
         {
-          "Command": "random",
-          "CommandArgs": [
-            "10.200.128.135|10.200.128.135_ncraf|ls -lah;ls -ltrh;help;pwd"
-          ],
-          "DelayAfter": 20000,
+          "Command": "folder",
+          "CommandArgs": [ "path:D:\\ghosts_test", "size:100", "deletionApproach:oldest" ],
+          "DelayAfter": 0,
           "DelayBefore": 0
         }
       ]
-    }
+    }, 
 
   ]
 }
