@@ -46,7 +46,7 @@ namespace Ghosts.Client.Handlers
 
                 switch (timelineEvent.Command)
                 {
-                    //watch a folder, each handler watches one folder
+                    //watch a folder
                     case "folder":
                         var fw = new FolderWatcher(handler, timelineEvent, timelineEvent.Command);
                         break;
@@ -64,26 +64,31 @@ namespace Ghosts.Client.Handlers
         }
     }
 
+
+    /// <summary>
+    /// Helper class to sort file list by size or creation time.
+    /// </summary>
     internal class Afile 
     {
         public string name { get; set; }
         public long size { get; set; }
         public DateTime ctime { get; set; }
 
-        //default sort method uses only the size
+        //default sort method uses only the size, returns largest to smallest
         public static int CompareBySize(Afile x, Afile y)
         {
             // A null value means that this object is greater.
-            if (y == null || x.size > y.size)
+            if ( y.size > x.size)
                 return 1;
             else if (x.size == y.size) return 0;
             else return -1;
         }
 
+        //this sort returns oldest to newest
         public static int CompareByDate(Afile x, Afile y)
         {
             // A null value means that this object is greater.
-            if (y == null || x.ctime > y.ctime)
+            if (x.ctime > y.ctime)
                 return 1;
             else if (x.ctime == y.ctime) return 0;
             else return -1;
@@ -104,6 +109,11 @@ namespace Ghosts.Client.Handlers
         private string deletionApproach = "random";
         private FileSystemWatcher watcher;
 
+        /// <summary>
+        /// Return all files (recursively) under starting folder
+        /// </summary>
+        /// <param name="folder"></param>
+        /// <param name="allfiles"></param>
         static void GetAllFiles(string folder, List<Afile> allfiles )
         {
             // Get array of all file names.
@@ -111,7 +121,7 @@ namespace Ghosts.Client.Handlers
             foreach (string fname in filelist)
             {
                 FileInfo info = new FileInfo(fname);
-                allfiles.Add(new Afile() { name = info.FullName, size = info.Length, ctime = info.LastWriteTime });
+                allfiles.Add(new Afile() { name = info.FullName, size = info.Length, ctime = info.CreationTime });
             }
             //get subdirectories
             string[] dirlist = Directory.GetDirectories(folder, "*");
@@ -121,7 +131,11 @@ namespace Ghosts.Client.Handlers
             }
         }
 
-        //returns total directory size including sub directories
+       /// <summary>
+       /// Return total folder size including all sub folders (recursively)
+       /// </summary>
+       /// <param name="folder"></param>
+       /// <returns></returns>
         static long GetDirectorySize(string folder)
         {
             // Get array of all file names.
@@ -209,7 +223,14 @@ namespace Ghosts.Client.Handlers
             Application.Run();
         }
 
-        // Define the event handlers.
+        /// <summary>
+        /// Triggered only folder size change
+        /// Will do nothing if folder size shrinks; action is taken if folder size greater than current size
+        /// Approach is to get a file list, then loop deleting by either random, oldest, or largest
+        /// until target size is reached.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="e"></param>
         private void OnChanged(object source, FileSystemEventArgs e)
         {
             // ignore if size is shrinking
@@ -220,19 +241,21 @@ namespace Ghosts.Client.Handlers
                 //get a list of all files with their sizes
                 List<Afile> allfiles = new List<Afile>();
                 GetAllFiles(folderPath, allfiles);
+                //do the sort here before looping and deleting
+                if (deletionApproach == "oldest")
+                {
+                    allfiles.Sort(Afile.CompareByDate);
+                }
+                else if (deletionApproach == "largest")
+                {
+                    allfiles.Sort(Afile.CompareBySize);
+                }
 
                 while (true) {
                     Afile targetFile = null;
                     
-                    if (deletionApproach == "oldest")
+                    if (deletionApproach == "oldest" || deletionApproach == "largest")
                     {
-                        allfiles.Sort(Afile.CompareByDate);
-                        targetFile = allfiles[0];
-                        allfiles.RemoveAt(0);
-                    }
-                    else if (deletionApproach == "largest")
-                    {
-                        allfiles.Sort(Afile.CompareBySize);
                         targetFile = allfiles[0];
                         allfiles.RemoveAt(0);
                     }
@@ -249,18 +272,22 @@ namespace Ghosts.Client.Handlers
                         File.Delete(targetFile.name);
                         //update current size
                         currentSize = currentSize - targetFile.size;
-                        if (currentSize < folderMaxSize) break;  //break from loop, we have hit the target size
+                        Log.Trace($"Watcher: successfully deleted {targetFile.name} to reduce folder {folderPath} size.");
+                        if (currentSize < folderMaxSize)
+                        {
+                            Log.Trace($"Watcher: successfully reduced folder {folderPath} size to target {folderMaxSize} (bytes).");
+                            break;  //break from loop, we have hit the target size
+                        }
+                        
                     }
                     catch (Exception deletionException)
                     {
-                        //ignore the exception, file may be protected
-                        Log.Trace($"Watcher: unable to delete {targetFile.name} to reduce folder {folderPath} size, exception {deletionException}");
+                        //ignore the exception, file may be protected or in the process of being written
+                        Log.Trace($"Watcher: unable to delete {targetFile.name} to reduce folder {folderPath} size, either in use or protected.");
                     }
                     if (allfiles.Count == 0)
                     {
                         //no more files to try to delete and loop is still running. 
-                        //disable any future execution
-                        watcher.EnableRaisingEvents = false;
                         break; //break out of the loop
 
                     }
