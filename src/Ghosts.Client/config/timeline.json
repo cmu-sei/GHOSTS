@@ -10,7 +10,7 @@
       "TimeLineEvents": [
         {
           "Command": "folder",
-          "CommandArgs": [ "path:D:\\ghosts_test", "size:100", "deletionApproach:largest" ],
+          "CommandArgs": [ "path:%HOMEDRIVE%%HOMEPATH%\\Downloads", "size:2000", "deletionApproach:oldest" ],
           "DelayAfter": 0,
           "DelayBefore": 0
         }

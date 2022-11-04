@@ -145,8 +145,12 @@ namespace Ghosts.Client.Handlers
             long size = 0;
             foreach (string fname in filelist)
             {
-                FileInfo info = new FileInfo(fname);
-                size += info.Length;
+                try
+                {
+                    FileInfo info = new FileInfo(fname);
+                    size += info.Length;
+                }
+                catch { }  //ignore any errors when accessing the file
             }
             //recurse, sum sub directory sizes
             string [] dirlist = Directory.GetDirectories(folder, "*");
@@ -176,7 +180,7 @@ namespace Ghosts.Client.Handlers
                     var words = argString.Split(charSeparators, 2, StringSplitOptions.None);
                     if (words.Length == 2)
                     {
-                        if (words[0] == "path") folderPath = words[1];
+                        if (words[0] == "path") folderPath = Environment.ExpandEnvironmentVariables(words[1]);
                         else if (words[0] == "size" && Int64.TryParse(words[1], out long localsize)) folderMaxSize = localsize * 1024 * 1024;
                         else if (words[0] == "deletionApproach") deletionApproach = words[1];
                     }
@@ -280,7 +284,7 @@ namespace Ghosts.Client.Handlers
                         }
                         
                     }
-                    catch (Exception deletionException)
+                    catch 
                     {
                         //ignore the exception, file may be protected or in the process of being written
                         Log.Trace($"Watcher: unable to delete {targetFile.name} to reduce folder {folderPath} size, either in use or protected.");
