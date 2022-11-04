@@ -40,7 +40,7 @@
         {
           "Command": "random",
           "CommandArgs": [
-            "10.200.128.135|10.200.128.135_ncraf|ls -lah;ls -ltrh;help;pwd;date;time;uptime;uname -a;df -h;cd ~;cd [remotedirectory];touch [randomname].[randomextension];mkdir [randomname]"  //<serverIP>|<credKey|<commmandList>
+            "<an IP>|<unique_key_from_credentials>|ls -lah;ls -ltrh;help;pwd;date;time;uptime;uname -a;df -h;cd ~;cd [remotedirectory];touch [randomname].[randomextension];mkdir [randomname]"  //<serverIP>|<credKey|<commmandList>
           ],
           "DelayAfter": 20000,
           "DelayBefore": 0
