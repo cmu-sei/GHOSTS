@@ -106,7 +106,7 @@ namespace ghosts.client.linux.handlers
                                 }
 
                                 config = RequestConfiguration.Load(handler, timelineEvent.CommandArgs[_random.Next(0, timelineEvent.CommandArgs.Count)]);
-                                if (config.Uri.IsWellFormedOriginalString())
+                                if (config.Uri != null && config.Uri.IsWellFormedOriginalString())
                                 {
                                     this._linkManager.SetCurrent(config.Uri);
                                     MakeRequest(config);
