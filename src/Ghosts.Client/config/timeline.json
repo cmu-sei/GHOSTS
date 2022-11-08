@@ -1,21 +1,41 @@
 {
-  "Status": "Run",
-  "TimeLineHandlers": [
-    {
-      "HandlerType": "Watcher",
-      "Initial": "",
-      "UtcTimeOn": "00:00:00",
-      "UtcTimeOff": "24:00:00",
-      "Loop": true,
-      "TimeLineEvents": [
-        {
-          "Command": "folder",
-          "CommandArgs": [ "path:%HOMEDRIVE%%HOMEPATH%\\Downloads", "size:2000", "deletionApproach:oldest" ],
-          "DelayAfter": 0,
-          "DelayBefore": 0
-        }
-      ]
-    }, 
+    "Status": "Run",
+    "TimeLineHandlers": [
+      {
+        "HandlerType": "BrowserChrome",
+        "HandlerArgs": {
+          "isheadless": "false",
+          "blockimages": "true",
+          "blockstyles": "true",
+          "blockflash": "true",
+          "blockscripts": "true",
+          "stickiness": 75,
+          "stickiness-depth-min": 5,
+          "stickiness-depth-max": 10000,
+          "incognito": "true",
+          "sharepoint-credentials-file": "c:\\ghosts_data\\sharepoint_creds.json",
+          "sharepoint-deletion-probability": 0,
+          "sharepoint-upload-probability": 100,
+          "sharepoint-download-probability": 0,
+          "sharepoint-version": "2013",
+          "sharepoint-upload-directory": "C:\\ghosts_data\\uploads"
 
-  ]
+        },
+            "Initial": "about:blank",
+            "UtcTimeOn": "00:00:00",
+            "UtcTimeOff": "24:00:00",
+            "Loop": "True",
+            "TimeLineEvents": [
+                {
+                    "Command": "sharepoint",
+                  "CommandArgs": [
+                    "site:portal.sitea.com",
+                    "credentialKey:credkey1"
+                  ],
+                    "DelayAfter": 10000,
+                    "DelayBefore": 0
+                }
+            ]
+        }
+    ]
 }
