@@ -14,9 +14,9 @@
           "stickiness-depth-max": 10000,
           "incognito": "true",
           "sharepoint-credentials-file": "c:\\ghosts_data\\sharepoint_creds.json",
-          "sharepoint-deletion-probability": 0,
-          "sharepoint-upload-probability": 100,
-          "sharepoint-download-probability": 0,
+          "sharepoint-deletion-probability": 15,
+          "sharepoint-upload-probability": 35,
+          "sharepoint-download-probability": 35,
           "sharepoint-version": "2013",
           "sharepoint-upload-directory": "C:\\ghosts_data\\uploads"
 
@@ -29,10 +29,10 @@
                 {
                     "Command": "sharepoint",
                   "CommandArgs": [
-                    "site:portal.sitea.com",
+                    "site:http://portal.sitea.com",
                     "credentialKey:credkey1"
                   ],
-                    "DelayAfter": 10000,
+                    "DelayAfter": 60000,
                     "DelayBefore": 0
                 }
             ]

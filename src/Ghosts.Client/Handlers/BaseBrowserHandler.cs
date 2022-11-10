@@ -9,7 +9,6 @@ using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
-using AutoItX3Lib;
 using static System.Net.WebRequestMethods;
 using Newtonsoft.Json;
 using System.IO;
@@ -18,6 +17,7 @@ using OpenQA.Selenium.Support.UI;
 using Microsoft.Office.Interop.Outlook;
 using Actions = OpenQA.Selenium.Interactions.Actions;
 using Exception = System.Exception;
+using System.Text.RegularExpressions;
 
 namespace Ghosts.Client.Handlers
 {
@@ -300,7 +300,7 @@ namespace Ghosts.Client.Handlers
         /// <summary>
         /// If a sharepoint file upload is not accepted, deal with the error popup
         /// </summary>
-        private void handleSharepointUploadBlocked()
+        private bool SharepointUploadBlocked()
         {
             Actions actions;
             try
@@ -311,11 +311,13 @@ namespace Ghosts.Client.Handlers
                 actions = new Actions(Driver);
                 //close popup
                 actions.MoveToElement(targetElement).Click().Perform();
+                return true;  //was blocked
             }
             catch  //ignore any errors, upload may have not been blocked
             {
 
             }
+            return false; //not blocked
 
         }
 
@@ -345,6 +347,7 @@ namespace Ghosts.Client.Handlers
             Actions actions;
 
 
+
             switch (_sharepointState) {
 
 
@@ -370,7 +373,7 @@ namespace Ghosts.Client.Handlers
 
                     if (handler.HandlerArgs.ContainsKey("sharepoint-upload-directory"))
                     {
-                        string targetDir = handler.HandlerArgs["sharepoint-version"].ToString();
+                        string targetDir = handler.HandlerArgs["sharepoint-upload-directory"].ToString();
                         targetDir = Environment.ExpandEnvironmentVariables(targetDir);
                         if (!Directory.Exists(targetDir))
                         {
@@ -471,6 +474,29 @@ namespace Ghosts.Client.Handlers
                         return;
                     }
 
+                    //check if site starts with http:// or https:// 
+                    _sharepointSite = _sharepointSite.ToLower();
+                    string header = null;
+                    Regex rx = new Regex("^http://.*",RegexOptions.Compiled);
+                    var match = rx.Matches(_sharepointSite);
+                    if (match.Count > 0) header = "http://";
+                    if (header == null)
+                    {
+                        rx = new Regex("^https://.*", RegexOptions.Compiled);
+                        match = rx.Matches(_sharepointSite);
+                        if (match.Count > 0) header = "https://";
+                    }
+                    if (header != null)
+                    {
+                        _sharepointSite = _sharepointSite.Replace(header, "");
+                    } else
+                    {
+                        header = "http://";  //default header
+                    }
+
+                    
+
+
                     if (credentialKey == null)
                     {
                         Log.Trace($"Sharepoint:: The command args must specify a 'credentialKey:<value>' , sharepoint browser action will not be executed.");
@@ -491,7 +517,8 @@ namespace Ghosts.Client.Handlers
 
                     //have the username, password
                     string portal = _sharepointSite;
-                    string target = "http://" + _sharepointUsername + ":" + _sharepointPassword + "@" + portal + "/";
+                     
+                    string target = header + _sharepointUsername + ":" + _sharepointPassword + "@" + portal + "/";
                     config = RequestConfiguration.Load(handler, target);
                     try
                     {
@@ -505,7 +532,7 @@ namespace Ghosts.Client.Handlers
                         return;
 
                     }
-                    target = "http://" + portal + "/Documents/Forms/Allitems.aspx";
+                    target = header + portal + "/Documents/Forms/Allitems.aspx";
                     config = RequestConfiguration.Load(handler, target);
                     MakeRequest(config);
                     //click on the files tab
@@ -570,20 +597,27 @@ namespace Ghosts.Client.Handlers
                             var targetElements = Driver.FindElements(By.CssSelector("td[class='ms-cellStyleNonEditable ms-vb-itmcbx ms-vb-imgFirstCell']"));
                             if (targetElements.Count > 0)
                             {
+                                
+
                                 int docNum = _random.Next(0, targetElements.Count);
                                 actions = new Actions(Driver);
                                 actions.MoveToElement(targetElements[docNum]).Click().Perform();
+
+                                var checkboxElement = targetElements[docNum].FindElement(By.XPath(".//div[@role='checkbox']"));
+                                string fname = checkboxElement.GetAttribute("title");
 
                                 Thread.Sleep(1000);
                                 //download it
                                 var targetElement = Driver.FindElement(By.Id("Ribbon.Documents.Copies.Download-Large"));
                                 actions = new Actions(Driver);
                                 actions.MoveToElement(targetElement).Click().Perform();
+                                
                                 Thread.Sleep(1000);
                                 //have to click on document element again to deselect it in order to enable next download
                                 //targetElements[docNum].Click();  //select the doc
                                 actions = new Actions(Driver);
                                 actions.MoveToElement(targetElements[docNum]).Click().Perform();
+                                Log.Trace($"Sharepoint:: Downloaded file {fname} from site {_sharepointSite}.");
                                 Thread.Sleep(1000);
                             }
                         }
@@ -611,15 +645,21 @@ namespace Ghosts.Client.Handlers
                             Driver.SwitchTo().Frame(Driver.FindElement(By.ClassName("ms-dlgFrame")));
                             WebDriverWait wait = new WebDriverWait(Driver, span);                          
                             var uploadElement = Driver.FindElement(By.Id("ctl00_PlaceHolderMain_UploadDocumentSection_ctl05_InputFile"));
-                            //uploadElement.SendKeys(@"C:\ghosts_data\uploads\test.bat");
-                            uploadElement.SendKeys(@"C:\ghosts_data\uploads\misc.txt");
+                            uploadElement.SendKeys(fname);
                             Thread.Sleep(500);
                             var okElement = Driver.FindElement(By.Id("ctl00_PlaceHolderMain_ctl03_RptControls_btnOK"));
                             actions = new Actions(Driver);
                             actions.MoveToElement(okElement).Click().Perform();
                             Thread.Sleep(500);
-                            handleSharepointUploadBlocked();
-                            Thread.Sleep(500);
+                            if (SharepointUploadBlocked())
+                            {
+                                Log.Trace($"Sharepoint:: Failed to upload file {fname} to site {_sharepointSite}.");
+                            } else
+                            {
+                                Log.Trace($"Sharepoint:: Uploaded file {fname} to site {_sharepointSite}.");
+                            }
+                            
+                            
                         } 
                         catch (Exception e)
                         {
@@ -640,6 +680,9 @@ namespace Ghosts.Client.Handlers
                                 actions = new Actions(Driver);
                                 actions.MoveToElement(targetElements[docNum]).Click().Perform();
 
+                                var checkboxElement = targetElements[docNum].FindElement(By.XPath(".//div[@role='checkbox']"));
+                                string fname = checkboxElement.GetAttribute("title");
+
                                 Thread.Sleep(1000);
                                 //delete it
                                 //somewhat weird, had to locate this element by the tooltip
@@ -649,6 +692,7 @@ namespace Ghosts.Client.Handlers
                                 actions.MoveToElement(targetElement).Click().Perform();
                                 Thread.Sleep(1000);
                                 Driver.SwitchTo().Alert().Accept();
+                                Log.Trace($"Sharepoint:: Deleted file {fname} from site {_sharepointSite}.");
                                 Thread.Sleep(1000);
                             } else
                             {
