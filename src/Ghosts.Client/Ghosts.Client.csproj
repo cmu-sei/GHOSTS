@@ -620,6 +620,7 @@
     </None>
     <None Include="Sample Timelines\Administrative Commands.json" />
     <None Include="Sample Timelines\BrowserChrome.json" />
+    <None Include="Sample Timelines\BrowserChromeSharepoint.json" />
     <None Include="Sample Timelines\BrowserFirefox.json" />
     <None Include="Sample Timelines\Notepad.json" />
     <None Include="Sample Timelines\Clicks.json" />
