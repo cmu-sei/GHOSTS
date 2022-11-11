@@ -14,6 +14,11 @@ namespace Ghosts.Domain.Code
     {
         public static void Build(this RequestConfiguration requestConfiguration, TimelineHandler handler)
         {
+	        if (requestConfiguration.Uri == null)
+	        {
+		        return;
+	        }
+	        
 	        var url = requestConfiguration.Uri.ToString();
 	        
 	        // these are the standard replacements
