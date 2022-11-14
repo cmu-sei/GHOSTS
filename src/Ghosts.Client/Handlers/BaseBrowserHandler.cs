@@ -91,7 +91,7 @@ namespace Ghosts.Client.Handlers
                             if (!sharepointAbort)
                             {
                                 if (_sharepointhelper == null) _sharepointhelper = new SharepointHelper(this);
-                                _sharepointhelper.SharepointExecute(handler, timelineEvent);
+                                _sharepointhelper.Execute(handler, timelineEvent);
                             }
                             break;
                        case "random":
