@@ -58,8 +58,8 @@ namespace Ghosts.Client.Infrastructure.Browser
             var o = this.Content[_random.Next(0, total)];
             
 
-            this.Subject = o.Subject;
-            this.Body = o.Body;
+            this.Subject = o.Subject.Replace("\\n","\n");
+            this.Body = o.Body.Replace("\\n", "\n");
         }
 
         public void LoadBlogFile()

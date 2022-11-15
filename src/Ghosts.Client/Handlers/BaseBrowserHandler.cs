@@ -95,15 +95,53 @@ namespace Ghosts.Client.Handlers
                        case "sharepoint":
                             if (!sharepointAbort)
                             {
-                                if (_sharepointhelper == null) _sharepointhelper = new SharepointHelper(this);
-                                _sharepointhelper.Execute(handler, timelineEvent);
+                                if (_sharepointhelper == null)
+                                {
+                                    if (handler.HandlerArgs.ContainsKey("sharepoint-version"))
+                                    {
+                                        var version = handler.HandlerArgs["sharepoint-version"].ToString();
+                                        //this needs to be extended in the future
+                                        if (version == "2013") _sharepointhelper = new SharepointHelper2013(this, Driver);
+                                        
+                                        if (_sharepointhelper == null)
+                                        {
+                                            Log.Trace($"Sharepoint:: Unsupported Sharepoint version {version} , sharepoint browser action will not be executed.");
+                                            sharepointAbort = true;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Log.Trace($"Sharepoint:: Handler option 'sharepoint-version' must be specified, currently supported versions: '2013'. Sharepoint browser action will not be executed.");
+                                        sharepointAbort = true;
+                                        
+                                    }
+                                }
+
+                                if (_sharepointhelper != null) _sharepointhelper.Execute(handler, timelineEvent);
                             }
                             break;
                        case "blog":
                             if (!blogAbort)
                             {
-                                if (_bloghelper == null) _bloghelper = new BlogHelper(this);
-                                _bloghelper.Execute(handler, timelineEvent);
+                                if (_bloghelper == null)
+                                {
+                                    //get helper based on version
+                                    if (handler.HandlerArgs.ContainsKey("blog-version"))
+                                    {
+                                        var version = handler.HandlerArgs["blog-version"].ToString();
+                                        if (version == "drupal") _bloghelper = new BlogHelperDrupal(this, Driver);
+                                        if (_bloghelper == null)
+                                        {
+                                            Log.Trace($"Blog:: Unsupported Blog version {version} , Blog browser action will not be executed.");
+                                            blogAbort = true;
+                                        }
+                                    } else
+                                    {
+                                        Log.Trace($"Blog:: Handler option 'blog-version' must be specified, currently supported versions: 'drupal'. Blog browser action will not be executed.");
+                                        blogAbort = true;
+                                    }
+                                }
+                                if (_bloghelper != null) _bloghelper.Execute(handler, timelineEvent);
                             }
                             break;
                         case "random":

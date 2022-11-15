@@ -16,15 +16,19 @@ using System.Threading.Tasks;
 using Actions = OpenQA.Selenium.Interactions.Actions;
 using Exception = System.Exception;
 using System.Reflection;
+using NLog;
 
 namespace Ghosts.Client.Handlers
 {
+
     /// <summary>
     /// Handles Blog actions for BaseBrowserHandler
     /// </summary>
-    internal class BlogHelper
+    public abstract class BlogHelper
     {
 
+        public static readonly Logger Log = LogManager.GetCurrentClassLogger();
+        internal static readonly Random _random = new Random();
         private int _deletionProbability = -1;
         private int _uploadProbability = -1;
         private int _downloadProbability = -1;
@@ -32,59 +36,63 @@ namespace Ghosts.Client.Handlers
         private Credentials _credentials = null;
         private string _state = "initial";
         public string site { get; set; } = null;
+        public string header { get; set; } = null;
         public string username { get; set; } = null;
         public string password { get; set; } = null;
         string _version = null;
 
         public BaseBrowserHandler baseHandler = null;
         public BlogContentManager contentManager = null;
+        public IWebDriver Driver = null;
 
-        public BlogHelper(BaseBrowserHandler parent)
+        
+        public void Init(BaseBrowserHandler parent, IWebDriver currentDriver)
         {
             baseHandler = parent;
             contentManager = new BlogContentManager();
+            Driver = currentDriver;
         }
 
         private bool CheckProbabilityVar(string name, int value)
         {
             if (!(value >= 0 && value <= 100))
             {
-                baseHandler.DoLogTrace($"Variable {name} with value {value} must be an int between 0 and 100, setting to 0");
+                Log.Trace($"Variable {name} with value {value} must be an int between 0 and 100, setting to 0");
                 return false;
             }
             return true;
         }
 
-        /// <summary>
-        /// Only one supported version for now
-        /// </summary>
-        /// <param name="version"></param>
-        /// <returns></returns>
-        private bool CheckVersion(string version)
+        
+        
+        public virtual bool DoInitialLogin(TimelineHandler handler, string user, string pw)
         {
-            if (version == "drupal") return true;
+            Log.Trace($"Blog:: Unsupported action 'DoInitialLogin' in Blog version {_version} ");
             return false;
         }
 
-        /// <summary>
-        /// Does the initial login based on version
-        /// </summary>
-        /// <returns></returns>
-        private bool DoInitialLogin(TimelineHandler handler, string header,string user, string pw)
+        public virtual bool DoBrowse(TimelineHandler handler)
         {
-            if (_version == "drupal") return BlogHelperDrupal.DoInitialLogin(handler,this,header,user,pw);
+            Log.Trace($"Blog:: Unsupported action 'Browse' in Blog version {_version} ");
             return false;
         }
 
-        private bool DoBrowse(TimelineHandler handler)
+        public virtual bool DoDelete(TimelineHandler handler)
         {
-            if (_version == "drupal") return BlogHelperDrupal.DoBrowse(handler, this);
+            Log.Trace($"Blog:: Unsupported action 'Delete' in Blog version {_version} ");
             return false;
         }
 
+        public virtual bool DoUpload(TimelineHandler handler, string subject, string body)
+        {
+            Log.Trace($"Blog:: Unsupported action 'upload' in Blog version {_version} ");
+            return true;
+        }
+
+        
         private string GetNextAction()
         {
-            int choice = baseHandler.DoRandomNext(0, 101);
+            int choice = _random.Next(0, 101);
             string blogAction = null;
             int endRange;
             int startRange = 0;
@@ -93,26 +101,28 @@ namespace Ghosts.Client.Handlers
             {
                 endRange = _deletionProbability;
                 if (choice >= startRange && choice <= endRange) blogAction = "delete";
-                else startRange = _deletionProbability + 1;
+                else startRange = endRange + 1;
             }
 
             if (blogAction == null && _uploadProbability > 0)
             {
                 endRange = startRange + _uploadProbability;
                 if (choice >= startRange && choice <= endRange) blogAction = "upload";
-                else startRange = _uploadProbability + 1;
+                else startRange = endRange + 1;
             }
 
             if (blogAction == null && _downloadProbability > 0)
             {
                 endRange = startRange + _downloadProbability;
                 if (choice >= startRange && choice <= endRange) blogAction = "download";
+                else startRange = endRange + 1;
 
             }
             if (blogAction == null && _replyProbability > 0)
             {
                 endRange = startRange + _replyProbability;
                 if (choice >= startRange && choice <= endRange) blogAction = "reply";
+                else startRange = endRange + 1;
 
             }
             return blogAction;
@@ -129,7 +139,7 @@ namespace Ghosts.Client.Handlers
         {
             string credFname;
             string credentialKey = null;
-            RequestConfiguration config;
+            
             Actions actions;
 
             switch (_state)
@@ -138,26 +148,9 @@ namespace Ghosts.Client.Handlers
 
                 case "initial":
                     //these are only parsed once, global for the handler as handler can only have one entry.
-                    if (handler.HandlerArgs.ContainsKey("blog-version"))
-                    {
-                        _version = handler.HandlerArgs["blog-version"].ToString();
-                        //this needs to be extended in the future
-                        if (!CheckVersion(_version))
-                        {
-                            baseHandler.DoLogTrace($"Blog:: Unsupported Blog version {_version} , Blog browser action will not be executed.");
-                            baseHandler.blogAbort = true;
-                            return;
-                        }
-                    }
-                    else
-                    {
-                        baseHandler.DoLogTrace($"Blog:: Handler option 'blog-version' must be specified, currently supported versions: 'drupal'. Blog browser action will not be executed.");
-                        baseHandler.blogAbort = true;
-                        return;
-                    }
-
+                    _version = handler.HandlerArgs["blog-version"].ToString();  //guaranteed to have this option, already checked in base handler
+                    
                   
-
                     if (_deletionProbability < 0 && handler.HandlerArgs.ContainsKey("blog-deletion-probability"))
                     {
                         int.TryParse(handler.HandlerArgs["blog-deletion-probability"].ToString(), out _deletionProbability);
@@ -194,14 +187,14 @@ namespace Ghosts.Client.Handlers
 
                     if ((_deletionProbability + _uploadProbability + _downloadProbability + _replyProbability) > 100)
                     {
-                        baseHandler.DoLogTrace($"Blog:: The sum of the browse/upload/deletion/reply blog probabilities is > 100 , blog browser action will not be executed.");
+                        Log.Trace($"Blog:: The sum of the browse/upload/deletion/reply blog probabilities is > 100 , blog browser action will not be executed.");
                         baseHandler.blogAbort = true;
                         return;
                     }
 
                     if ((_deletionProbability + _uploadProbability + _downloadProbability + _replyProbability) == 0)
                     {
-                        baseHandler.DoLogTrace($"Blog:: The sum of the download/upload/deletion/reply blog probabilities == 0 , blog browser action will not be executed.");
+                        Log.Trace($"Blog:: The sum of the download/upload/deletion/reply blog probabilities == 0 , blog browser action will not be executed.");
                         baseHandler.blogAbort = true;
                         return;
                     }
@@ -217,9 +210,9 @@ namespace Ghosts.Client.Handlers
                         }
                         catch (System.Exception e)
                         {
-                            baseHandler.DoLogTrace($"Blog:: Error parsing blog credentials file {credFname} , blog browser action will not be executed.");
+                            Log.Trace($"Blog:: Error parsing blog credentials file {credFname} , blog browser action will not be executed.");
                             baseHandler.blogAbort = true;
-                            baseHandler.DoLogError(e);
+                            Log.Error(e);
                             return;
                         }
                     }
@@ -246,14 +239,14 @@ namespace Ghosts.Client.Handlers
 
                     if (site == null)
                     {
-                        baseHandler.DoLogTrace($"Blog:: The command args must specify a 'site:<value>' , blog browser action will not be executed.");
+                        Log.Trace($"Blog:: The command args must specify a 'site:<value>' , blog browser action will not be executed.");
                         baseHandler.blogAbort = true;
                         return;
                     }
 
                     //check if site starts with http:// or https:// 
                     site = site.ToLower();
-                    string header = null;
+                    
                     Regex rx = new Regex("^http://.*", RegexOptions.Compiled);
                     var match = rx.Matches(site);
                     if (match.Count > 0) header = "http://";
@@ -277,7 +270,7 @@ namespace Ghosts.Client.Handlers
 
                     if (credentialKey == null)
                     {
-                        baseHandler.DoLogTrace($"Blog:: The command args must specify a 'credentialKey:<value>' , blog browser action will not be executed.");
+                        Log.Trace($"Blog:: The command args must specify a 'credentialKey:<value>' , blog browser action will not be executed.");
                         baseHandler.blogAbort = true;
                         return;
                     }
@@ -287,13 +280,13 @@ namespace Ghosts.Client.Handlers
 
                     if (username == null || password == null)
                     {
-                        baseHandler.DoLogTrace($"Blog:: The credential key {credentialKey} does not return a valid credential from file {credFname}, blog browser action will not be executed");
+                        Log.Trace($"Blog:: The credential key {credentialKey} does not return a valid credential from file {credFname}, blog browser action will not be executed");
                         baseHandler.blogAbort = true;
                         return;
                     }
 
-                    //have username, password - do the loging
-                    if (!DoInitialLogin(handler,header,username,password)) {
+                    //have username, password - do the initial login
+                    if (!DoInitialLogin(handler,username,password)) {
                         baseHandler.blogAbort = true;
                         return;
                     }
@@ -311,7 +304,7 @@ namespace Ghosts.Client.Handlers
                     if (blogAction == null)
                     {
                         //nothing to do this cycle
-                        baseHandler.DoLogTrace($"Blog:: Action is skipped for this cycle.");
+                        Log.Trace($"Blog:: Action is skipped for this cycle.");
                         return;
                     }
 
@@ -323,16 +316,39 @@ namespace Ghosts.Client.Handlers
                             return;
                         }
                     }
+
+                    if (blogAction == "delete")
+                    {
+                        if (!DoDelete(handler))
+                        {
+                            baseHandler.blogAbort = true;
+                            return;
+                        }
+                    }
+
+                    if (blogAction == "upload")
+                    {
+                        //get new content
+                        contentManager.BlogContentNext();
+                        if (contentManager.Subject == null || contentManager.Body == null)
+                        {
+                            Log.Trace($"Blog:: Content unavailable, check Blog content file, upload skipped.");
+                        } else if (!DoUpload(handler, contentManager.Subject, contentManager.Body))
+                        {
+                            baseHandler.blogAbort = true;
+                            return;
+                        }
+                    }
                     if (blogAction == "delete")
                     {
                         //select a file to delete
                         try
                         {
-                            var targetElements = baseHandler.Driver.FindElements(By.CssSelector("td[class='ms-cellStyleNonEditable ms-vb-itmcbx ms-vb-imgFirstCell']"));
+                            var targetElements = Driver.FindElements(By.CssSelector("td[class='ms-cellStyleNonEditable ms-vb-itmcbx ms-vb-imgFirstCell']"));
                             if (targetElements.Count > 0)
                             {
-                                int docNum = baseHandler.DoRandomNext(0, targetElements.Count);
-                                actions = new Actions(baseHandler.Driver);
+                                int docNum = _random.Next(0, targetElements.Count);
+                                actions = new Actions(Driver);
                                 actions.MoveToElement(targetElements[docNum]).Click().Perform();
 
                                 var checkboxElement = targetElements[docNum].FindElement(By.XPath(".//div[@role='checkbox']"));
@@ -341,24 +357,24 @@ namespace Ghosts.Client.Handlers
                                 Thread.Sleep(1000);
                                 //delete it
                                 //somewhat weird, had to locate this element by the tooltip
-                                var targetElement = baseHandler.Driver.FindElement(By.CssSelector("a[aria-describedby='Ribbon.Documents.Manage.Delete_ToolTip'"));
-                                actions = new Actions(baseHandler.Driver);
+                                var targetElement = Driver.FindElement(By.CssSelector("a[aria-describedby='Ribbon.Documents.Manage.Delete_ToolTip'"));
+                                actions = new Actions(Driver);
                                 //deal with the popup
                                 actions.MoveToElement(targetElement).Click().Perform();
                                 Thread.Sleep(1000);
-                                baseHandler.Driver.SwitchTo().Alert().Accept();
-                                baseHandler.DoLogTrace($"Blog:: Deleted file {fname} from site {site}.");
+                                Driver.SwitchTo().Alert().Accept();
+                                Log.Trace($"Blog:: Deleted file {fname} from site {site}.");
                                 Thread.Sleep(1000);
                             }
                             else
                             {
-                                baseHandler.DoLogTrace($"Blog:: No documents to delete from {site}.");
+                                Log.Trace($"Blog:: No documents to delete from {site}.");
                             }
                         }
                         catch (Exception e)
                         {
-                            baseHandler.DoLogTrace($"Blog:: Error performing sharepoint download from site {site}.");
-                            baseHandler.DoLogError(e);
+                            Log.Trace($"Blog:: Error performing sharepoint download from site {site}.");
+                            Log.Error(e);
                         }
                     }
                     break;

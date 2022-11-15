@@ -15,40 +15,102 @@ using System.Threading.Tasks;
 using NPOI.POIFS.Properties;
 using Actions = OpenQA.Selenium.Interactions.Actions;
 using Exception = System.Exception;
+using NLog;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
+using System.Security.Policy;
 
 namespace Ghosts.Client.Handlers
 {
 
-    /// <summary>
-    /// Handles Sharepoint actions for base browser handler
-    /// </summary>
-    internal class SharepointHelper
+    public class SharepointHelper2013 : SharepointHelper
     {
-        
-        private int _deletionProbability = -1;
-        private int _uploadProbability = -1;
-        private int _downloadProbability = -1;
-        private Credentials _credentials = null;
-        private string _state = "initial";
-        string _site = null;
-        string _username = null;
-        string _password = null;
-        string _version = null;
-        string _uploadDirectory = null;
 
-        BaseBrowserHandler parentHandler = null; 
-
-        public SharepointHelper(BaseBrowserHandler parent)
+        public SharepointHelper2013(BaseBrowserHandler callingHandler, IWebDriver callingDriver)
         {
-            parentHandler = parent;
+            base.Init(callingHandler, callingDriver);
+
         }
 
-        private bool CheckProbabilityVar(string name, int value)
+        public override bool DoInitialLogin(TimelineHandler handler, string user, string pw)
         {
-            if (!(value >= 0 && value <= 100))
+            //have the username, password
+            RequestConfiguration config;
+
+            string portal = site;
+
+            string target = header + user + ":" + pw + "@" + portal + "/";
+            config = RequestConfiguration.Load(handler, target);
+            try
             {
-                parentHandler.DoLogTrace($"Variable {name} with value {value} must be an int between 0 and 100, setting to 0");
+                baseHandler.MakeRequest(config);
+            }
+            catch (System.Exception e)
+            {
+                Log.Trace($"Sharepoint:: Unable to parse site {site}, url may be malformed. Sharepoint browser action will not be executed.");
+                baseHandler.sharepointAbort = true;
+                Log.Error(e);
                 return false;
+
+            }
+            target = header + portal + "/Documents/Forms/Allitems.aspx";
+            config = RequestConfiguration.Load(handler, target);
+            baseHandler.MakeRequest(config);
+            //click on the files tab
+            try
+            {
+                var targetElement = Driver.FindElement(By.Id("Ribbon.Document-title"));
+                targetElement.Click();
+            }
+            catch (System.Exception e)
+            {
+                Log.Trace($"Sharepoint:: Unable to find Sharepoint menu, login may have failed, check the credentials. Sharepoint browser action will not be executed.");
+                baseHandler.sharepointAbort = true;
+                Log.Error(e);
+                return false;
+
+            }
+
+            return true;
+        }
+
+        public override bool DoDownload(TimelineHandler handler)
+        {
+            
+            Actions actions;
+
+            try
+            {
+                var targetElements = Driver.FindElements(By.CssSelector("td[class='ms-cellStyleNonEditable ms-vb-itmcbx ms-vb-imgFirstCell']"));
+                if (targetElements.Count > 0)
+                {
+
+
+                    int docNum = _random.Next(0, targetElements.Count);
+                    actions = new Actions(Driver);
+                    actions.MoveToElement(targetElements[docNum]).Click().Perform();
+
+                    var checkboxElement = targetElements[docNum].FindElement(By.XPath(".//div[@role='checkbox']"));
+                    string fname = checkboxElement.GetAttribute("title");
+
+                    Thread.Sleep(1000);
+                    //download it
+                    var targetElement = Driver.FindElement(By.Id("Ribbon.Documents.Copies.Download-Large"));
+                    actions = new Actions(Driver);
+                    actions.MoveToElement(targetElement).Click().Perform();
+
+                    Thread.Sleep(1000);
+                    //have to click on document element again to deselect it in order to enable next download
+                    //targetElements[docNum].Click();  //select the doc
+                    actions = new Actions(Driver);
+                    actions.MoveToElement(targetElements[docNum]).Click().Perform();
+                    Log.Trace($"Sharepoint:: Downloaded file {fname} from site {site}.");
+                    Thread.Sleep(1000);
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Trace($"Sharepoint:: Error performing sharepoint download from site {site}.");
+                Log.Error(e);
             }
             return true;
         }
@@ -56,15 +118,15 @@ namespace Ghosts.Client.Handlers
         /// <summary>
         /// If a sharepoint file upload is not accepted, deal with the error popup
         /// </summary>
-        private bool UploadBlocked()
+        public bool UploadBlocked()
         {
             Actions actions;
             try
             {
 
-                parentHandler.Driver.SwitchTo().ParentFrame();
-                var targetElement = parentHandler.Driver.FindElement(By.XPath("//a[@class='ms-dlgCloseBtn']"));
-                actions = new Actions(parentHandler.Driver);
+                Driver.SwitchTo().ParentFrame();
+                var targetElement = Driver.FindElement(By.XPath("//a[@class='ms-dlgCloseBtn']"));
+                actions = new Actions(Driver);
                 //close popup
                 actions.MoveToElement(targetElement).Click().Perform();
                 return true;  //was blocked
@@ -77,16 +139,205 @@ namespace Ghosts.Client.Handlers
 
         }
 
-        private string GetUploadFile()
+        public override bool DoUpload(TimelineHandler handler)
+        {
+            Actions actions;
+
+            try
+            {
+                string fname = GetUploadFile();
+                if (fname == null)
+                {
+                    Log.Trace($"Sharepoint:: Cannot find a valid file to upload from directory {uploadDirectory}.");
+                    return true;
+                }
+                var span = new TimeSpan(0, 0, 0, 5, 0);
+                var targetElement = Driver.FindElement(By.Id("Ribbon.Documents.New.AddDocument-Large"));
+                actions = new Actions(Driver);
+                actions.MoveToElement(targetElement).Click().Perform();
+                Thread.Sleep(1000);
+                Driver.SwitchTo().Frame(Driver.FindElement(By.ClassName("ms-dlgFrame")));
+                WebDriverWait wait = new WebDriverWait(Driver, span);
+                var uploadElement = Driver.FindElement(By.Id("ctl00_PlaceHolderMain_UploadDocumentSection_ctl05_InputFile"));
+                uploadElement.SendKeys(fname);
+                Thread.Sleep(500);
+                var okElement = Driver.FindElement(By.Id("ctl00_PlaceHolderMain_ctl03_RptControls_btnOK"));
+                actions = new Actions(Driver);
+                actions.MoveToElement(okElement).Click().Perform();
+                Thread.Sleep(500);
+                if (UploadBlocked())
+                {
+                    Log.Trace($"Sharepoint:: Failed to upload file {fname} to site {site}.");
+                }
+                else
+                {
+                    Log.Trace($"Sharepoint:: Uploaded file {fname} to site {site}.");
+                }
+
+
+            }
+            catch (Exception e)
+            {
+                Log.Trace($"Sharepoint:: Error performing sharepoint upload to site {site}.");
+                Log.Error(e);
+            }
+            return true;
+        }
+
+        public override bool DoDelete(TimelineHandler handler)
+        {
+            Actions actions;
+            //select a file to delete
+            try
+            {
+                var targetElements = Driver.FindElements(By.CssSelector("td[class='ms-cellStyleNonEditable ms-vb-itmcbx ms-vb-imgFirstCell']"));
+                if (targetElements.Count > 0)
+                {
+                    int docNum = _random.Next(0, targetElements.Count);
+                    actions = new Actions(Driver);
+                    actions.MoveToElement(targetElements[docNum]).Click().Perform();
+
+                    var checkboxElement = targetElements[docNum].FindElement(By.XPath(".//div[@role='checkbox']"));
+                    string fname = checkboxElement.GetAttribute("title");
+
+                    Thread.Sleep(1000);
+                    //delete it
+                    //somewhat weird, had to locate this element by the tooltip
+                    var targetElement = Driver.FindElement(By.CssSelector("a[aria-describedby='Ribbon.Documents.Manage.Delete_ToolTip'"));
+                    actions = new Actions(Driver);
+                    //deal with the popup
+                    actions.MoveToElement(targetElement).Click().Perform();
+                    Thread.Sleep(1000);
+                    Driver.SwitchTo().Alert().Accept();
+                    Log.Trace($"Sharepoint:: Deleted file {fname} from site {site}.");
+                    Thread.Sleep(1000);
+                }
+                else
+                {
+                    Log.Trace($"Sharepoint:: No documents to delete from {site}.");
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Trace($"Sharepoint:: Error performing sharepoint download from site {site}.");
+                Log.Error(e);
+            }
+            return true;
+        }
+
+
+
+    }
+
+    /// <summary>
+    /// Handles Sharepoint actions for base browser handler
+    /// </summary>
+    public abstract class SharepointHelper
+    {
+
+        public static readonly Logger Log = LogManager.GetCurrentClassLogger();
+        internal static readonly Random _random = new Random();
+        private int _deletionProbability = -1;
+        private int _uploadProbability = -1;
+        private int _downloadProbability = -1;
+        private Credentials _credentials = null;
+        private string _state = "initial";
+        public string site { get; set; } = null;
+        string username { get; set; } = null;
+        string password { get; set; } = null;
+        public string header { get; set; } = null;
+
+        string _version = null;
+        public string uploadDirectory { get; set; } = null;
+
+        public BaseBrowserHandler baseHandler = null;
+        public IWebDriver Driver = null;
+
+        public void Init(BaseBrowserHandler callingHandler, IWebDriver currentDriver)
+        {
+            baseHandler = callingHandler;
+            Driver = currentDriver;
+        }
+
+        private bool CheckProbabilityVar(string name, int value)
+        {
+            if (!(value >= 0 && value <= 100))
+            {
+                Log.Trace($"Variable {name} with value {value} must be an int between 0 and 100, setting to 0");
+                return false;
+            }
+            return true;
+        }
+
+       
+        public string GetUploadFile()
         {
             try
             {
-                string[] filelist = Directory.GetFiles(_uploadDirectory, "*");
-                if (filelist.Length > 0) return filelist[parentHandler.DoRandomNext(0, filelist.Length)];
+                string[] filelist = Directory.GetFiles(uploadDirectory, "*");
+                if (filelist.Length > 0) return filelist[_random.Next(0, filelist.Length)];
                 else return null;
             }
             catch { } //ignore any errors
             return null;
+        }
+
+       
+        public virtual bool DoInitialLogin(TimelineHandler handler, string user, string pw)
+        {
+            Log.Trace($"Blog:: Unsupported action 'DoInitialLogin' in Blog version {_version} ");
+            return false;
+        }
+
+        public virtual bool DoDownload(TimelineHandler handler)
+        {
+            Log.Trace($"Blog:: Unsupported action 'Browse' in Blog version {_version} ");
+            return false;
+        }
+
+        public virtual bool DoDelete(TimelineHandler handler)
+        {
+            Log.Trace($"Blog:: Unsupported action 'Delete' in Blog version {_version} ");
+            return false;
+        }
+
+        public virtual bool DoUpload(TimelineHandler handler)
+        {
+            Log.Trace($"Blog:: Unsupported action 'upload' in Blog version {_version} ");
+            return true;
+        }
+
+        private string GetNextAction()
+        {
+            int choice = _random.Next(0, 101);
+            string spAction = null;
+            int endRange;
+            int startRange = 0;
+
+            if (_deletionProbability > 0)
+            {
+                endRange = _deletionProbability;
+                if (choice >= startRange && choice <= endRange) spAction = "delete";
+                else startRange = endRange + 1;
+            }
+
+            if (spAction == null && _uploadProbability > 0)
+            {
+                endRange = startRange + _uploadProbability;
+                if (choice >= startRange && choice <= endRange) spAction = "upload";
+                else startRange = endRange + 1;
+            }
+
+            if (spAction == null && _downloadProbability > 0)
+            {
+                endRange = startRange + _downloadProbability;
+                if (choice >= startRange && choice <= endRange) spAction = "download";
+                else startRange = endRange + 1;
+
+            }
+           
+            return spAction;
+
         }
 
         /// <summary>
@@ -99,8 +350,7 @@ namespace Ghosts.Client.Handlers
         {
             string credFname;
             string credentialKey = null;
-            RequestConfiguration config;
-            Actions actions;
+            
 
             switch (_state)
             {
@@ -108,23 +358,8 @@ namespace Ghosts.Client.Handlers
 
                 case "initial":
                     //these are only parsed once, global for the handler as handler can only have one entry.
-                    if (handler.HandlerArgs.ContainsKey("sharepoint-version"))
-                    {
-                        _version = handler.HandlerArgs["sharepoint-version"].ToString();
-                        //this needs to be extended in the future
-                        if (_version != "2013")
-                        {
-                            parentHandler.DoLogTrace($"Sharepoint:: Unsupported Sharepoint version {_version} , sharepoint browser action will not be executed.");
-                            parentHandler.sharepointAbort = true;
-                            return;
-                        }
-                    }
-                    else
-                    {
-                        parentHandler.DoLogTrace($"Sharepoint:: Handler option 'sharepoint-version' must be specified, currently supported versions: '2013'. Sharepoint browser action will not be executed.");
-                        parentHandler.sharepointAbort = true;
-                        return;
-                    }
+                    _version = handler.HandlerArgs["sharepoint-version"].ToString();  //guaranteed to have this option, parsed in calling handler
+                    
 
                     if (handler.HandlerArgs.ContainsKey("sharepoint-upload-directory"))
                     {
@@ -132,17 +367,17 @@ namespace Ghosts.Client.Handlers
                         targetDir = Environment.ExpandEnvironmentVariables(targetDir);
                         if (!Directory.Exists(targetDir))
                         {
-                            parentHandler.DoLogTrace($"Sharepoint:: upload directory {targetDir} does not exist, using browser downloads directory.");
+                            Log.Trace($"Sharepoint:: upload directory {targetDir} does not exist, using browser downloads directory.");
                         }
                         else
                         {
-                            _uploadDirectory = targetDir;
+                            uploadDirectory = targetDir;
                         }
                     }
 
-                    if (_uploadDirectory == null)
+                    if (uploadDirectory == null)
                     {
-                        _uploadDirectory = KnownFolders.GetDownloadFolderPath();
+                        uploadDirectory = KnownFolders.GetDownloadFolderPath();
                     }
 
 
@@ -173,15 +408,15 @@ namespace Ghosts.Client.Handlers
 
                     if ((_deletionProbability + _uploadProbability + _downloadProbability) > 100)
                     {
-                        parentHandler.DoLogTrace($"Sharepoint:: The sum of the download/upload/deletion sharepoint probabilities is > 100 , sharepoint browser action will not be executed.");
-                        parentHandler.sharepointAbort = true;
+                        Log.Trace($"Sharepoint:: The sum of the download/upload/deletion sharepoint probabilities is > 100 , sharepoint browser action will not be executed.");
+                        baseHandler.sharepointAbort = true;
                         return;
                     }
 
                     if ((_deletionProbability + _uploadProbability + _downloadProbability) == 0)
                     {
-                        parentHandler.DoLogTrace($"Sharepoint:: The sum of the download/upload/deletion sharepoint probabilities == 0 , sharepoint browser action will not be executed.");
-                        parentHandler.sharepointAbort = true;
+                        Log.Trace($"Sharepoint:: The sum of the download/upload/deletion sharepoint probabilities == 0 , sharepoint browser action will not be executed.");
+                        baseHandler.sharepointAbort = true;
                         return;
                     }
 
@@ -196,9 +431,9 @@ namespace Ghosts.Client.Handlers
                         }
                         catch (System.Exception e)
                         {
-                            parentHandler.DoLogTrace($"Sharepoint:: Error parsing sharepoint credentials file {credFname} , sharepoint browser action will not be executed.");
-                            parentHandler.sharepointAbort = true;
-                            parentHandler.DoLogError(e);
+                            Log.Trace($"Sharepoint:: Error parsing sharepoint credentials file {credFname} , sharepoint browser action will not be executed.");
+                            baseHandler.sharepointAbort = true;
+                            Log.Error(e);
                             return;
                         }
                     }
@@ -217,34 +452,34 @@ namespace Ghosts.Client.Handlers
                             var words = argString.Split(charSeparators, 2, StringSplitOptions.None);
                             if (words.Length == 2)
                             {
-                                if (words[0] == "site") _site = words[1];
+                                if (words[0] == "site") site = words[1];
                                 else if (words[0] == "credentialKey") credentialKey = words[1];
                             }
                         }
                     }
 
-                    if (_site == null)
+                    if (site == null)
                     {
-                        parentHandler.DoLogTrace($"Sharepoint:: The command args must specify a 'site:<value>' , sharepoint browser action will not be executed.");
-                        parentHandler.sharepointAbort = true;
+                        Log.Trace($"Sharepoint:: The command args must specify a 'site:<value>' , sharepoint browser action will not be executed.");
+                        baseHandler.sharepointAbort = true;
                         return;
                     }
 
                     //check if site starts with http:// or https:// 
-                    _site = _site.ToLower();
+                    site = site.ToLower();
                     string header = null;
                     Regex rx = new Regex("^http://.*", RegexOptions.Compiled);
-                    var match = rx.Matches(_site);
+                    var match = rx.Matches(site);
                     if (match.Count > 0) header = "http://";
                     if (header == null)
                     {
                         rx = new Regex("^https://.*", RegexOptions.Compiled);
-                        match = rx.Matches(_site);
+                        match = rx.Matches(site);
                         if (match.Count > 0) header = "https://";
                     }
                     if (header != null)
                     {
-                        _site = _site.Replace(header, "");
+                        site = site.Replace(header, "");
                     }
                     else
                     {
@@ -256,56 +491,29 @@ namespace Ghosts.Client.Handlers
 
                     if (credentialKey == null)
                     {
-                        parentHandler.DoLogTrace($"Sharepoint:: The command args must specify a 'credentialKey:<value>' , sharepoint browser action will not be executed.");
-                        parentHandler.sharepointAbort = true;
+                        Log.Trace($"Sharepoint:: The command args must specify a 'credentialKey:<value>' , sharepoint browser action will not be executed.");
+                        baseHandler.sharepointAbort = true;
                         return;
                     }
 
-                    _username = _credentials.GetUsername(credentialKey);
-                    _password = _credentials.GetPassword(credentialKey);
+                    username = _credentials.GetUsername(credentialKey);
+                    password = _credentials.GetPassword(credentialKey);
 
-                    if (_username == null || _password == null)
+                    if (username == null || password == null)
                     {
-                        parentHandler.DoLogTrace($"Sharepoint:: The credential key {credentialKey} does not return a valid credential from file {credFname},   sharepoint browser action will not be executed");
-                        parentHandler.sharepointAbort = true;
+                        Log.Trace($"Sharepoint:: The credential key {credentialKey} does not return a valid credential from file {credFname},   sharepoint browser action will not be executed");
+                        baseHandler.sharepointAbort = true;
+                        return;
+                    }
+
+                    //have username, password - do the initial login
+                    if (!DoInitialLogin(handler, username, password))
+                    {
+                        baseHandler.blogAbort = true;
                         return;
                     }
 
 
-                    //have the username, password
-                    string portal = _site;
-
-                    string target = header + _username + ":" + _password + "@" + portal + "/";
-                    config = RequestConfiguration.Load(handler, target);
-                    try
-                    {
-                        parentHandler.MakeRequest(config);
-                    }
-                    catch (System.Exception e)
-                    {
-                        parentHandler.DoLogTrace($"Sharepoint:: Unable to parse site {_site}, url may be malformed. Sharepoint browser action will not be executed.");
-                        parentHandler.sharepointAbort = true;
-                        parentHandler.DoLogError(e);
-                        return;
-
-                    }
-                    target = header + portal + "/Documents/Forms/Allitems.aspx";
-                    config = RequestConfiguration.Load(handler, target);
-                    parentHandler.MakeRequest(config);
-                    //click on the files tab
-                    try
-                    {
-                        var targetElement = parentHandler.Driver.FindElement(By.Id("Ribbon.Document-title"));
-                        targetElement.Click();
-                    }
-                    catch (System.Exception e)
-                    {
-                        parentHandler.DoLogTrace($"Sharepoint:: Unable to find Sharepoint menu, login may have failed, check the credentials. Sharepoint browser action will not be executed.");
-                        parentHandler.sharepointAbort = true;
-                        parentHandler.DoLogError(e);
-                        return;
-
-                    }
 
                     //at this point we are logged in, files tab selected, ready for action
                     _state = "execute";
@@ -314,159 +522,37 @@ namespace Ghosts.Client.Handlers
                 case "execute":
 
                     //determine what to do
-                    int choice = parentHandler.DoRandomNext(0, 101);
-                    string sharepointAction = null;
-                    int endRange;
-                    int startRange = 0;
-
-                    if (_deletionProbability > 0)
-                    {
-                        endRange = _deletionProbability;
-                        if (choice >= startRange && choice <= endRange) sharepointAction = "delete";
-                        else startRange = _deletionProbability + 1;
-                    }
-
-                    if (sharepointAction == null && _uploadProbability > 0)
-                    {
-                        endRange = startRange + _uploadProbability;
-                        if (choice >= startRange && choice <= endRange) sharepointAction = "upload";
-                        else startRange = _uploadProbability + 1;
-                    }
-
-                    if (sharepointAction == null && _downloadProbability > 0)
-                    {
-                        endRange = startRange + _downloadProbability;
-                        if (choice >= startRange && choice <= endRange) sharepointAction = "download";
-
-                    }
-                    if (sharepointAction == null)
-                    {
-                        //nothing to do this cycle
-                        parentHandler.DoLogTrace($"Sharepoint:: Action is skipped for this cycle.");
-                        return;
-                    }
+                    
+                    string sharepointAction = GetNextAction();
+                    
 
                     if (sharepointAction == "download")
                     {
-                        //select a file to download
-                        try
+                        if (!DoDownload(handler))
                         {
-                            var targetElements = parentHandler.Driver.FindElements(By.CssSelector("td[class='ms-cellStyleNonEditable ms-vb-itmcbx ms-vb-imgFirstCell']"));
-                            if (targetElements.Count > 0)
-                            {
-
-
-                                int docNum = parentHandler.DoRandomNext(0, targetElements.Count);
-                                actions = new Actions(parentHandler.Driver);
-                                actions.MoveToElement(targetElements[docNum]).Click().Perform();
-
-                                var checkboxElement = targetElements[docNum].FindElement(By.XPath(".//div[@role='checkbox']"));
-                                string fname = checkboxElement.GetAttribute("title");
-
-                                Thread.Sleep(1000);
-                                //download it
-                                var targetElement = parentHandler.Driver.FindElement(By.Id("Ribbon.Documents.Copies.Download-Large"));
-                                actions = new Actions(parentHandler.Driver);
-                                actions.MoveToElement(targetElement).Click().Perform();
-
-                                Thread.Sleep(1000);
-                                //have to click on document element again to deselect it in order to enable next download
-                                //targetElements[docNum].Click();  //select the doc
-                                actions = new Actions(parentHandler.Driver);
-                                actions.MoveToElement(targetElements[docNum]).Click().Perform();
-                                parentHandler.DoLogTrace($"Sharepoint:: Downloaded file {fname} from site {_site}.");
-                                Thread.Sleep(1000);
-                            }
+                            baseHandler.blogAbort = true;
+                            return;
                         }
-                        catch (Exception e)
-                        {
-                            parentHandler.DoLogTrace($"Sharepoint:: Error performing sharepoint download from site {_site}.");
-                            parentHandler.DoLogError(e);
-                        }
+                        
                     }
                     if (sharepointAction == "upload")
                     {
-                        try
+                        if (!DoUpload(handler))
                         {
-                            string fname = GetUploadFile();
-                            if (fname == null)
-                            {
-                                parentHandler.DoLogTrace($"Sharepoint:: Cannot find a valid file to upload from directory {_uploadDirectory}.");
-                                return;
-                            }
-                            var span = new TimeSpan(0, 0, 0, 5, 0);
-                            var targetElement = parentHandler.Driver.FindElement(By.Id("Ribbon.Documents.New.AddDocument-Large"));
-                            actions = new Actions(parentHandler.Driver);
-                            actions.MoveToElement(targetElement).Click().Perform();
-                            Thread.Sleep(1000);
-                            parentHandler.Driver.SwitchTo().Frame(parentHandler.Driver.FindElement(By.ClassName("ms-dlgFrame")));
-                            WebDriverWait wait = new WebDriverWait(parentHandler.Driver, span);
-                            var uploadElement = parentHandler.Driver.FindElement(By.Id("ctl00_PlaceHolderMain_UploadDocumentSection_ctl05_InputFile"));
-                            uploadElement.SendKeys(fname);
-                            Thread.Sleep(500);
-                            var okElement = parentHandler.Driver.FindElement(By.Id("ctl00_PlaceHolderMain_ctl03_RptControls_btnOK"));
-                            actions = new Actions(parentHandler.Driver);
-                            actions.MoveToElement(okElement).Click().Perform();
-                            Thread.Sleep(500);
-                            if (UploadBlocked())
-                            {
-                                parentHandler.DoLogTrace($"Sharepoint:: Failed to upload file {fname} to site {_site}.");
-                            }
-                            else
-                            {
-                                parentHandler.DoLogTrace($"Sharepoint:: Uploaded file {fname} to site {_site}.");
-                            }
-
-
+                            baseHandler.blogAbort = true;
+                            return;
                         }
-                        catch (Exception e)
-                        {
-                            parentHandler.DoLogTrace($"Sharepoint:: Error performing sharepoint upload to site {_site}.");
-                            parentHandler.DoLogError(e);
-                        }
-
                     }
+
                     if (sharepointAction == "delete")
                     {
-                        //select a file to delete
-                        try
+                        if (!DoDelete(handler))
                         {
-                            var targetElements = parentHandler.Driver.FindElements(By.CssSelector("td[class='ms-cellStyleNonEditable ms-vb-itmcbx ms-vb-imgFirstCell']"));
-                            if (targetElements.Count > 0)
-                            {
-                                int docNum = parentHandler.DoRandomNext(0, targetElements.Count);
-                                actions = new Actions(parentHandler.Driver);
-                                actions.MoveToElement(targetElements[docNum]).Click().Perform();
-
-                                var checkboxElement = targetElements[docNum].FindElement(By.XPath(".//div[@role='checkbox']"));
-                                string fname = checkboxElement.GetAttribute("title");
-
-                                Thread.Sleep(1000);
-                                //delete it
-                                //somewhat weird, had to locate this element by the tooltip
-                                var targetElement = parentHandler.Driver.FindElement(By.CssSelector("a[aria-describedby='Ribbon.Documents.Manage.Delete_ToolTip'"));
-                                actions = new Actions(parentHandler.Driver);
-                                //deal with the popup
-                                actions.MoveToElement(targetElement).Click().Perform();
-                                Thread.Sleep(1000);
-                                parentHandler.Driver.SwitchTo().Alert().Accept();
-                                parentHandler.DoLogTrace($"Sharepoint:: Deleted file {fname} from site {_site}.");
-                                Thread.Sleep(1000);
-                            }
-                            else
-                            {
-                                parentHandler.DoLogTrace($"Sharepoint:: No documents to delete from {_site}.");
-                            }
-                        }
-                        catch (Exception e)
-                        {
-                            parentHandler.DoLogTrace($"Sharepoint:: Error performing sharepoint download from site {_site}.");
-                            parentHandler.DoLogError(e);
+                            baseHandler.blogAbort = true;
+                            return;
                         }
                     }
                     break;
-
-
 
 
             }
