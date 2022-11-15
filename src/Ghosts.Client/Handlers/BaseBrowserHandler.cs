@@ -4,6 +4,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Ghosts.Client.Infrastructure;
+
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
@@ -37,7 +38,11 @@ namespace Ghosts.Client.Handlers
 
         public bool sharepointAbort { get; set; } = false;  //will be set to True if unable to proceed with Handler execution
         SharepointHelper _sharepointhelper = null;
-       
+
+        public bool blogAbort { get; set; } = false;  //will be set to True if unable to proceed with Handler execution
+        BlogHelper _bloghelper = null;
+
+
 
 
         private Task LaunchThread(TimelineHandler handler, TimelineEvent timelineEvent, string site)
@@ -94,7 +99,14 @@ namespace Ghosts.Client.Handlers
                                 _sharepointhelper.Execute(handler, timelineEvent);
                             }
                             break;
-                       case "random":
+                       case "blog":
+                            if (!blogAbort)
+                            {
+                                if (_bloghelper == null) _bloghelper = new BlogHelper(this);
+                                _bloghelper.Execute(handler, timelineEvent);
+                            }
+                            break;
+                        case "random":
 
                             // setup
                             if (handler.HandlerArgs.ContainsKey("stickiness"))

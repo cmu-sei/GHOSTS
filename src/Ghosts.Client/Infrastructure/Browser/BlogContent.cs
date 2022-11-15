@@ -1,0 +1,95 @@
+﻿using FileHelpers;
+using Ghosts.Client.Infrastructure.Email;
+using NLog;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Ghosts.Client.Infrastructure.Browser
+{
+    public class BlogContentManager
+    {
+        public string Subject { private set; get; }
+        public string Body { private set; get; }
+
+        internal IList<BlogContent> Content { private set; get; }
+        private static readonly Random _random = new Random();
+
+        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
+
+        public static void Check()
+        {
+            var blogContentManager = new BlogContentManager();
+            blogContentManager.LoadBlogFile();
+            if (blogContentManager.Content.Count < 1)
+            {
+                const string msg = "Blog content could not be loaded. Blog content will not be posted";
+                _log.Error(msg);
+                Console.WriteLine(msg);
+            }
+            else
+            {
+                var msg = $"Blog content loaded successfully with {blogContentManager.Content.Count} records found";
+                _log.Info(msg);
+                Console.WriteLine(msg);
+            }
+        }
+
+        public BlogContentManager()
+        {
+            LoadBlogFile();
+        }
+
+        public void BlogContentNext()
+        {
+
+            var total = this.Content.Count;
+
+            if (total <= 0)
+            {
+                this.Subject = null;
+                this.Body = null;
+                return;
+            };
+
+
+            var o = this.Content[_random.Next(0, total)];
+            
+
+            this.Subject = o.Subject;
+            this.Body = o.Body;
+        }
+
+        public void LoadBlogFile()
+        {
+            try
+            {
+                var engine = new FileHelperEngine<BlogContent>();
+                this.Content = engine.ReadFile(ClientConfigurationResolver.BlogContent).ToList();
+            }
+            catch (Exception e)
+            {
+                _log.Error($"Blog content  file could not be loaded: {e}");
+                this.Content = new List<BlogContent>();
+            }
+        }
+    }
+
+    [DelimitedRecord("|")]
+    internal class BlogContent
+    {
+        public string Id { get; set; }
+        public string Subject { get; set; }
+        public string Body { get; set; }
+    }
+
+    [DelimitedRecord("|")]
+    internal class BlogReply
+    {
+        public string Reply { get; set; }
+    }
+
+
+}

@@ -99,6 +99,8 @@ namespace Ghosts.Domain.Code
             public string EmailReply { get; set; }
             public string EmailDomain { get; set; }
             public string EmailOutside { get; set; }
+            public string BlogContent { get; set; }
+            public string BlogReply { get; set; }
             public string FileNames { get; set; }
             public string Dictionary { get; set; }
         }
