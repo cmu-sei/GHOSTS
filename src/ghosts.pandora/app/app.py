@@ -45,7 +45,10 @@ VERSION = "0.5.6"
 class S(BaseHTTPRequestHandler):
 
     def log_message(self, format, *args):
-        print(f'{args} - {self.headers["User-Agent"]}')
+        if self.headers:
+            print(f'{args} - {self.headers["User-Agent"]}')
+        else:
+            print(f'{args}')
 
     fake = Faker()
     image_array = ["png", "gif", "jpg", "jpeg", "pdf", "ico"]
