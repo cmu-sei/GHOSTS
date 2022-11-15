@@ -17,28 +17,29 @@ Send a POST request::
     curl -d "foo=bar&bin=baz" http://localhost
 
 """
-import subprocess as sp
-from docx.shared import Inches
-from docx import Document
-from io import BytesIO
+import configparser as cp
 import os
-from os.path import isfile, join
-from http.server import BaseHTTPRequestHandler, HTTPServer
-import ssl
 import random
 import re
+import ssl
+import subprocess as sp
 import urllib.parse
+import uuid
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from io import BytesIO
+from os.path import isfile, join
+
+import zipstream
+from docx import Document
+from docx.shared import Inches
 from faker import Faker
-from PIL import Image
 from openpyxl import Workbook
 from openpyxl.styles import Font
+from PIL import Image
 from pptx import Presentation
 from pptx.util import Inches
-import uuid
-import zipstream
-import configparser as cp
 
-VERSION = "0.5.5"
+VERSION = "0.5.6"
 
 
 class S(BaseHTTPRequestHandler):
@@ -55,6 +56,10 @@ class S(BaseHTTPRequestHandler):
     config = cp.ConfigParser()
     config.read_file(open(r'./app.config'))
     payloads = config["payloads"]
+
+    def setup(self):
+        BaseHTTPRequestHandler.setup(self)
+        self.request.settimeout(30)
 
     def do_GET(self):
         self.serve_response()
@@ -76,7 +81,7 @@ class S(BaseHTTPRequestHandler):
 
     def send_non_200(self):
         p = self.config.get("non_200s", "percent_is_302")
-        if random.randint(2, 100) > int(p):
+        if random.randint(2, 100) > (100 - int(p)):
             self.send_response(302)
             x = re.sub("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}", str(uuid.uuid4()), self.request_url)
             self.send_header('Location', x)
