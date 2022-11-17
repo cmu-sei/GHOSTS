@@ -17,6 +17,7 @@ using Actions = OpenQA.Selenium.Interactions.Actions;
 using Exception = System.Exception;
 using System.Reflection;
 using NLog;
+using Microsoft.IdentityModel.Logging;
 
 namespace Ghosts.Client.Handlers
 {
@@ -45,7 +46,27 @@ namespace Ghosts.Client.Handlers
         public BlogContentManager contentManager = null;
         public IWebDriver Driver = null;
 
-        
+        public static BlogHelper MakeHelper(BaseBrowserHandler callingHandler, IWebDriver callingDriver, TimelineHandler handler, Logger tlog)
+        {
+            BlogHelper helper = null;
+
+            //get helper based on version
+            if (handler.HandlerArgs.ContainsKey("blog-version"))
+            {
+                var version = handler.HandlerArgs["blog-version"].ToString();
+                if (version == "drupal") helper = new BlogHelperDrupal(callingHandler, callingDriver);
+                if (helper == null)
+                {
+                    tlog.Trace($"Blog:: Unsupported Blog version {version} , Blog browser action will not be executed.");
+                }
+            }
+            else
+            {
+                tlog.Trace($"Blog:: Handler option 'blog-version' must be specified, currently supported versions: 'drupal'. Blog browser action will not be executed.");
+            }
+            return helper;
+        }
+
         public void Init(BaseBrowserHandler parent, IWebDriver currentDriver)
         {
             baseHandler = parent;
@@ -89,7 +110,13 @@ namespace Ghosts.Client.Handlers
             return true;
         }
 
-        
+        public virtual bool DoReply(TimelineHandler handler, string reply)
+        {
+            Log.Trace($"Blog:: Unsupported action 'reply' in Blog version {_version} ");
+            return true;
+        }
+
+
         private string GetNextAction()
         {
             int choice = _random.Next(0, 101);
@@ -140,7 +167,6 @@ namespace Ghosts.Client.Handlers
             string credFname;
             string credentialKey = null;
             
-            Actions actions;
 
             switch (_state)
             {
@@ -339,44 +365,21 @@ namespace Ghosts.Client.Handlers
                             return;
                         }
                     }
-                    if (blogAction == "delete")
+                    if (blogAction == "reply")
                     {
-                        //select a file to delete
-                        try
+                        //get new content
+                        var reply = contentManager.BlogReplyNext();
+                        if (reply == null )
                         {
-                            var targetElements = Driver.FindElements(By.CssSelector("td[class='ms-cellStyleNonEditable ms-vb-itmcbx ms-vb-imgFirstCell']"));
-                            if (targetElements.Count > 0)
-                            {
-                                int docNum = _random.Next(0, targetElements.Count);
-                                actions = new Actions(Driver);
-                                actions.MoveToElement(targetElements[docNum]).Click().Perform();
-
-                                var checkboxElement = targetElements[docNum].FindElement(By.XPath(".//div[@role='checkbox']"));
-                                string fname = checkboxElement.GetAttribute("title");
-
-                                Thread.Sleep(1000);
-                                //delete it
-                                //somewhat weird, had to locate this element by the tooltip
-                                var targetElement = Driver.FindElement(By.CssSelector("a[aria-describedby='Ribbon.Documents.Manage.Delete_ToolTip'"));
-                                actions = new Actions(Driver);
-                                //deal with the popup
-                                actions.MoveToElement(targetElement).Click().Perform();
-                                Thread.Sleep(1000);
-                                Driver.SwitchTo().Alert().Accept();
-                                Log.Trace($"Blog:: Deleted file {fname} from site {site}.");
-                                Thread.Sleep(1000);
-                            }
-                            else
-                            {
-                                Log.Trace($"Blog:: No documents to delete from {site}.");
-                            }
+                            Log.Trace($"Blog:: Reply content unavailable, check Blog reply file, reply action skipped.");
                         }
-                        catch (Exception e)
+                        else if (!DoReply(handler, reply))
                         {
-                            Log.Trace($"Blog:: Error performing sharepoint download from site {site}.");
-                            Log.Error(e);
+                            baseHandler.blogAbort = true;
+                            return;
                         }
                     }
+
                     break;
 
 

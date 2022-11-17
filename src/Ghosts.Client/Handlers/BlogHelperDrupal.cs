@@ -12,6 +12,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Tab;
 using Actions = OpenQA.Selenium.Interactions.Actions;
 
 namespace Ghosts.Client.Handlers
@@ -94,6 +95,31 @@ namespace Ghosts.Client.Handlers
                 //ignore
             }
 
+            return true;
+        }
+        public override bool DoReply(TimelineHandler handler, string reply)
+        {
+            Actions actions;
+            //first, browse to an existing entry
+            if (DoBrowse(handler))
+            {
+                try
+                {
+                    
+                    var targetElement = Driver.FindElement(By.CssSelector("textarea#edit-comment-body-und-0-value.text-full.form-textarea.required"));
+                    targetElement.SendKeys(reply);
+                    Thread.Sleep(1000);
+                    targetElement = Driver.FindElement(By.CssSelector("input#edit-submit.form-submit"));
+                    actions = new Actions(Driver);
+                    actions.MoveToElement(targetElement).Click().Perform();
+                    Log.Trace($"Blog:: Added reply to site {site}.");
+                }
+                catch
+                {
+                    return true;
+                }
+
+            }
             return true;
         }
 

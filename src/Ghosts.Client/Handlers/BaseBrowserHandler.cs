@@ -97,24 +97,8 @@ namespace Ghosts.Client.Handlers
                             {
                                 if (_sharepointhelper == null)
                                 {
-                                    if (handler.HandlerArgs.ContainsKey("sharepoint-version"))
-                                    {
-                                        var version = handler.HandlerArgs["sharepoint-version"].ToString();
-                                        //this needs to be extended in the future
-                                        if (version == "2013") _sharepointhelper = new SharepointHelper2013(this, Driver);
-                                        
-                                        if (_sharepointhelper == null)
-                                        {
-                                            Log.Trace($"Sharepoint:: Unsupported Sharepoint version {version} , sharepoint browser action will not be executed.");
-                                            sharepointAbort = true;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        Log.Trace($"Sharepoint:: Handler option 'sharepoint-version' must be specified, currently supported versions: '2013'. Sharepoint browser action will not be executed.");
-                                        sharepointAbort = true;
-                                        
-                                    }
+                                    _sharepointhelper = SharepointHelper.MakeHelper(this, Driver, handler, Log);
+                                    if (_sharepointhelper == null) sharepointAbort = true;
                                 }
 
                                 if (_sharepointhelper != null) _sharepointhelper.Execute(handler, timelineEvent);
@@ -125,21 +109,8 @@ namespace Ghosts.Client.Handlers
                             {
                                 if (_bloghelper == null)
                                 {
-                                    //get helper based on version
-                                    if (handler.HandlerArgs.ContainsKey("blog-version"))
-                                    {
-                                        var version = handler.HandlerArgs["blog-version"].ToString();
-                                        if (version == "drupal") _bloghelper = new BlogHelperDrupal(this, Driver);
-                                        if (_bloghelper == null)
-                                        {
-                                            Log.Trace($"Blog:: Unsupported Blog version {version} , Blog browser action will not be executed.");
-                                            blogAbort = true;
-                                        }
-                                    } else
-                                    {
-                                        Log.Trace($"Blog:: Handler option 'blog-version' must be specified, currently supported versions: 'drupal'. Blog browser action will not be executed.");
-                                        blogAbort = true;
-                                    }
+                                    _bloghelper = BlogHelper.MakeHelper(this, Driver, handler, Log);
+                                    if  (_bloghelper == null) blogAbort = true;  //failed to create a helper
                                 }
                                 if (_bloghelper != null) _bloghelper.Execute(handler, timelineEvent);
                             }
@@ -331,35 +302,7 @@ namespace Ghosts.Client.Handlers
             }
         }
 
-        /// <summary>
-        /// Utility callback for helper
-        /// </summary>
-        /// <param name="msg"></param>
-        public void DoLogTrace(string msg)
-        {
-            Log.Trace(msg);
-        }
-
-        /// <summary>
-        /// Utility  callback for helper
-        /// </summary>
-        /// <param name="e"></param>
-        public void DoLogError(object e)
-        {
-            Log.Error(e);
-        }
-
-        /// <summary>
-        /// Utility callback for helper
-        /// </summary>
-        /// <param name="start"></param>
-        /// <param name="end"></param>
-        /// <returns></returns>
-        public int DoRandomNext(int start, int end)
-        {
-            return _random.Next(start, end);
-        }
-      
+        
         private void GetAllLinks(RequestConfiguration config, bool sameSite)
         {
             try

@@ -17,6 +17,8 @@ namespace Ghosts.Client.Infrastructure.Browser
         internal IList<BlogContent> Content { private set; get; }
         private static readonly Random _random = new Random();
 
+        internal IList<BlogReply> Replies { private set; get; }
+
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
 
         public static void Check()
@@ -40,9 +42,19 @@ namespace Ghosts.Client.Infrastructure.Browser
         public BlogContentManager()
         {
             LoadBlogFile();
+            LoadReplyFile();
+        }
+        public string BlogReplyNext()
+        {
+            var total = this.Replies.Count;
+
+            if (total <= 0) return null;
+           
+            BlogReply o = this.Replies[_random.Next(0, total)];
+            return o.Reply.Replace("\\n", "\n");
         }
 
-        public void BlogContentNext()
+            public void BlogContentNext()
         {
 
             var total = this.Content.Count;
@@ -67,12 +79,28 @@ namespace Ghosts.Client.Infrastructure.Browser
             try
             {
                 var engine = new FileHelperEngine<BlogContent>();
+                engine.Encoding = Encoding.UTF8;
                 this.Content = engine.ReadFile(ClientConfigurationResolver.BlogContent).ToList();
             }
             catch (Exception e)
             {
-                _log.Error($"Blog content  file could not be loaded: {e}");
+                _log.Error($"Blog content file could not be loaded: {e}");
                 this.Content = new List<BlogContent>();
+            }
+        }
+
+        public void LoadReplyFile()
+        {
+            try
+            {
+                var engine = new FileHelperEngine<BlogReply>();
+                engine.Encoding = Encoding.UTF8;
+                this.Replies = engine.ReadFile(ClientConfigurationResolver.BlogReply).ToList();
+            }
+            catch (Exception e)
+            {
+                _log.Error($"Blog reply file could not be loaded: {e}");
+                this.Replies = new List<BlogReply>();
             }
         }
     }

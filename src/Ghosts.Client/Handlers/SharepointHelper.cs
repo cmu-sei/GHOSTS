@@ -253,7 +253,29 @@ namespace Ghosts.Client.Handlers
         public BaseBrowserHandler baseHandler = null;
         public IWebDriver Driver = null;
 
-        public void Init(BaseBrowserHandler callingHandler, IWebDriver currentDriver)
+        public static SharepointHelper MakeHelper(BaseBrowserHandler callingHandler, IWebDriver callingDriver, TimelineHandler handler, Logger tlog)
+        {
+            SharepointHelper helper = null;
+            if (handler.HandlerArgs.ContainsKey("sharepoint-version"))
+            {
+                var version = handler.HandlerArgs["sharepoint-version"].ToString();
+                //this needs to be extended in the future
+                if (version == "2013") helper = new SharepointHelper2013(callingHandler, callingDriver);
+
+                if (helper == null)
+                {
+                    tlog.Trace($"Sharepoint:: Unsupported Sharepoint version {version} , sharepoint browser action will not be executed.");
+                }
+            }
+            else
+            {
+                Log.Trace($"Sharepoint:: Handler option 'sharepoint-version' must be specified, currently supported versions: '2013'. Sharepoint browser action will not be executed.");
+
+            }
+            return helper;
+        }
+
+            public void Init(BaseBrowserHandler callingHandler, IWebDriver currentDriver)
         {
             baseHandler = callingHandler;
             Driver = currentDriver;
