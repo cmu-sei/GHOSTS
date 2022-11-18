@@ -605,10 +605,10 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Include="config\blog-content.csv">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="config\blog-reply.csv">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="config\dictionary.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -630,6 +630,7 @@
     </None>
     <None Include="Sample Timelines\Administrative Commands.json" />
     <None Include="Sample Timelines\BrowserChrome.json" />
+    <None Include="Sample Timelines\BrowserChromeBlogDrupal.json" />
     <None Include="Sample Timelines\BrowserChromeSharepoint.json" />
     <None Include="Sample Timelines\BrowserFirefox.json" />
     <None Include="Sample Timelines\Notepad.json" />

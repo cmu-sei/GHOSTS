@@ -54,7 +54,7 @@ namespace Ghosts.Client.Infrastructure.Browser
             return o.Reply.Replace("\\n", "\n");
         }
 
-            public void BlogContentNext()
+        public void BlogContentNext()
         {
 
             var total = this.Content.Count;
@@ -97,6 +97,7 @@ namespace Ghosts.Client.Infrastructure.Browser
                 engine.Encoding = Encoding.UTF8;
                 this.Replies = engine.ReadFile(ClientConfigurationResolver.BlogReply).ToList();
             }
+                
             catch (Exception e)
             {
                 _log.Error($"Blog reply file could not be loaded: {e}");
@@ -106,6 +107,7 @@ namespace Ghosts.Client.Infrastructure.Browser
     }
 
     [DelimitedRecord("|")]
+    [IgnoreEmptyLines()]
     internal class BlogContent
     {
         public string Id { get; set; }
@@ -114,6 +116,7 @@ namespace Ghosts.Client.Infrastructure.Browser
     }
 
     [DelimitedRecord("|")]
+    [IgnoreEmptyLines()]
     internal class BlogReply
     {
         public string Reply { get; set; }

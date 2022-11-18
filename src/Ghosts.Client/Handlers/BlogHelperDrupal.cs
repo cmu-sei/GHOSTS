@@ -263,27 +263,61 @@ namespace Ghosts.Client.Handlers
             }
 
             //first pick a page if there are multiple pages
+            bool onTargetPage = false;
             try
             {
-                var targetElements = Driver.FindElements(By.CssSelector("li.pager-item"));
-                if (targetElements.Count > 0)
+                //first, check if there is a link to a last page
+                var targetElement = Driver.FindElement(By.CssSelector("li.pager-last.last"));
+                // if get there, then there is a last page element. Get the link to it and parse out the last page number
+                var pageLink = targetElement.FindElement(By.XPath(".//a"));
+                string href = pageLink.GetAttribute("href");
+                char[] charSeparators = new char[] { '=' };
+                var words = href.Split(charSeparators, 2, StringSplitOptions.None);
+                if (words.Length == 2)
                 {
-                    int pageNum = _random.Next(0, targetElements.Count + 1);
-                    if (pageNum != targetElements.Count)
+                    string pageNumString = words[1];
+                    int lastpage;
+                    if (int.TryParse(pageNumString, out lastpage))
                     {
-                        //pick a different page
-                        actions = new Actions(Driver);
-                        actions.MoveToElement(targetElements[pageNum]).Click().Perform();
+                        int pageNum = _random.Next(0, lastpage + 1);
+                        string targetPage = header + site + $"/node?page={pageNum}";
+                        config = RequestConfiguration.Load(handler, targetPage);
+                        baseHandler.MakeRequest(config);
+                        onTargetPage = true;
                         Thread.Sleep(1000);
-
                     }
                 }
+                    
+
             }
-            catch
+            catch {  }
+
+            if (!onTargetPage)
             {
+                //unable to navigate to a target page, perhaps there was not a last page link
+                //just pick a random page from the li.pager-items at bottom
+                try
+                {
 
+                    var targetElements = Driver.FindElements(By.CssSelector("li.pager-item"));
+                    if (targetElements.Count > 0)
+                    {
+                        int pageNum = _random.Next(0, targetElements.Count + 1);
+                        if (pageNum != targetElements.Count)
+                        {
+                            //pick a different page
+                            actions = new Actions(Driver);
+                            actions.MoveToElement(targetElements[pageNum]).Click().Perform();
+                            Thread.Sleep(1000);
+
+                        }
+                    }
+                }
+                catch
+                {  }
             }
-
+            
+            //on some page, click a random readmore link
             try
             {
                 var targetElements = Driver.FindElements(By.CssSelector("li.node-readmore"));
