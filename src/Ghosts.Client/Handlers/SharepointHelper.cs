@@ -22,6 +22,10 @@ using System.Security.Policy;
 namespace Ghosts.Client.Handlers
 {
 
+    /// <summary>
+    /// Supports upload, download, deletion of documents
+    /// download, deletion only done from the first page
+    /// </summary>
     public class SharepointHelper2013 : SharepointHelper
     {
 
@@ -75,7 +79,7 @@ namespace Ghosts.Client.Handlers
 
         public override bool DoDownload(TimelineHandler handler)
         {
-            
+
             Actions actions;
 
             try
@@ -86,23 +90,22 @@ namespace Ghosts.Client.Handlers
 
 
                     int docNum = _random.Next(0, targetElements.Count);
-                    actions = new Actions(Driver);
-                    actions.MoveToElement(targetElements[docNum]).Click().Perform();
-
-                    var checkboxElement = targetElements[docNum].FindElement(By.XPath(".//div[@role='checkbox']"));
+                    var targetElement = targetElements[docNum];
+                    MoveToElementAndClick(targetElement);
+                    var checkboxElement = targetElement.FindElement(By.XPath(".//div[@role='checkbox']"));
                     string fname = checkboxElement.GetAttribute("title");
 
                     Thread.Sleep(1000);
                     //download it
-                    var targetElement = Driver.FindElement(By.Id("Ribbon.Documents.Copies.Download-Large"));
+                    targetElement = Driver.FindElement(By.Id("Ribbon.Documents.Copies.Download-Large"));
                     actions = new Actions(Driver);
                     actions.MoveToElement(targetElement).Click().Perform();
 
                     Thread.Sleep(1000);
                     //have to click on document element again to deselect it in order to enable next download
                     //targetElements[docNum].Click();  //select the doc
-                    actions = new Actions(Driver);
-                    actions.MoveToElement(targetElements[docNum]).Click().Perform();
+                    targetElement = targetElements[docNum];
+                    MoveToElementAndClick(targetElement);
                     Log.Trace($"Sharepoint:: Downloaded file {fname} from site {site}.");
                     Thread.Sleep(1000);
                 }
@@ -194,16 +197,16 @@ namespace Ghosts.Client.Handlers
                 if (targetElements.Count > 0)
                 {
                     int docNum = _random.Next(0, targetElements.Count);
-                    actions = new Actions(Driver);
-                    actions.MoveToElement(targetElements[docNum]).Click().Perform();
-
+                    var targetElement = targetElements[docNum];
+                    MoveToElementAndClick(targetElement);
+                   
                     var checkboxElement = targetElements[docNum].FindElement(By.XPath(".//div[@role='checkbox']"));
                     string fname = checkboxElement.GetAttribute("title");
 
                     Thread.Sleep(1000);
                     //delete it
                     //somewhat weird, had to locate this element by the tooltip
-                    var targetElement = Driver.FindElement(By.CssSelector("a[aria-describedby='Ribbon.Documents.Manage.Delete_ToolTip'"));
+                    targetElement = Driver.FindElement(By.CssSelector("a[aria-describedby='Ribbon.Documents.Manage.Delete_ToolTip'"));
                     actions = new Actions(Driver);
                     //deal with the popup
                     actions.MoveToElement(targetElement).Click().Perform();
@@ -232,11 +235,10 @@ namespace Ghosts.Client.Handlers
     /// <summary>
     /// Handles Sharepoint actions for base browser handler
     /// </summary>
-    public abstract class SharepointHelper
+    public abstract class SharepointHelper : BrowserHelper
     {
 
-        public static readonly Logger Log = LogManager.GetCurrentClassLogger();
-        internal static readonly Random _random = new Random();
+        
         private int _deletionProbability = -1;
         private int _uploadProbability = -1;
         private int _downloadProbability = -1;
@@ -250,8 +252,7 @@ namespace Ghosts.Client.Handlers
         string _version = null;
         public string uploadDirectory { get; set; } = null;
 
-        public BaseBrowserHandler baseHandler = null;
-        public IWebDriver Driver = null;
+        
 
         public static SharepointHelper MakeHelper(BaseBrowserHandler callingHandler, IWebDriver callingDriver, TimelineHandler handler, Logger tlog)
         {
@@ -275,7 +276,9 @@ namespace Ghosts.Client.Handlers
             return helper;
         }
 
-            public void Init(BaseBrowserHandler callingHandler, IWebDriver currentDriver)
+        
+
+        public void Init(BaseBrowserHandler callingHandler, IWebDriver currentDriver)
         {
             baseHandler = callingHandler;
             Driver = currentDriver;
@@ -291,7 +294,7 @@ namespace Ghosts.Client.Handlers
             return true;
         }
 
-       
+
         public string GetUploadFile()
         {
             try
@@ -304,7 +307,7 @@ namespace Ghosts.Client.Handlers
             return null;
         }
 
-       
+
         public virtual bool DoInitialLogin(TimelineHandler handler, string user, string pw)
         {
             Log.Trace($"Blog:: Unsupported action 'DoInitialLogin' in Blog version {_version} ");
@@ -357,7 +360,7 @@ namespace Ghosts.Client.Handlers
                 else startRange = endRange + 1;
 
             }
-           
+
             return spAction;
 
         }
@@ -372,7 +375,7 @@ namespace Ghosts.Client.Handlers
         {
             string credFname;
             string credentialKey = null;
-            
+
 
             switch (_state)
             {
@@ -381,7 +384,7 @@ namespace Ghosts.Client.Handlers
                 case "initial":
                     //these are only parsed once, global for the handler as handler can only have one entry.
                     _version = handler.HandlerArgs["sharepoint-version"].ToString();  //guaranteed to have this option, parsed in calling handler
-                    
+
 
                     if (handler.HandlerArgs.ContainsKey("sharepoint-upload-directory"))
                     {
@@ -489,7 +492,7 @@ namespace Ghosts.Client.Handlers
 
                     //check if site starts with http:// or https:// 
                     site = site.ToLower();
-                    string header = null;
+                    header = null;
                     Regex rx = new Regex("^http://.*", RegexOptions.Compiled);
                     var match = rx.Matches(site);
                     if (match.Count > 0) header = "http://";
@@ -544,9 +547,9 @@ namespace Ghosts.Client.Handlers
                 case "execute":
 
                     //determine what to do
-                    
+
                     string sharepointAction = GetNextAction();
-                    
+
 
                     if (sharepointAction == "download")
                     {
@@ -555,7 +558,7 @@ namespace Ghosts.Client.Handlers
                             baseHandler.blogAbort = true;
                             return;
                         }
-                        
+
                     }
                     if (sharepointAction == "upload")
                     {
@@ -583,4 +586,36 @@ namespace Ghosts.Client.Handlers
 
 
     }
+
+    public abstract class BrowserHelper
+    {
+        public static readonly Logger Log = LogManager.GetCurrentClassLogger();
+        internal static readonly Random _random = new Random();
+        public BaseBrowserHandler baseHandler = null;
+        public IWebDriver Driver = null;
+
+
+        /// <summary>
+        /// This is used when the element being moved to may be out of the viewport (ie, at the bottom of the page).
+        /// Chrome handles this OK, but Firefox throws an exception, have to manually
+        /// scroll to ensure the element is in view
+        /// </summary>
+        /// <param name="targetElement"></param>
+        public void MoveToElementAndClick(IWebElement targetElement)
+        {
+            Actions actions;
+
+            if (Driver is OpenQA.Selenium.Firefox.FirefoxDriver)
+            {
+                IJavaScriptExecutor je = (IJavaScriptExecutor)Driver;
+                //be safe and scroll to element
+                je.ExecuteScript("arguments[0].scrollIntoView()", targetElement);
+                Thread.Sleep(500);
+            }
+            actions = new Actions(Driver);
+            actions.MoveToElement(targetElement).Click().Perform();
+        }
+
+    }
+
 }

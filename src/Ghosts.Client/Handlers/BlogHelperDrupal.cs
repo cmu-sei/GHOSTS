@@ -99,7 +99,7 @@ namespace Ghosts.Client.Handlers
         }
         public override bool DoReply(TimelineHandler handler, string reply)
         {
-            Actions actions;
+            
             //first, browse to an existing entry
             if (DoBrowse(handler))
             {
@@ -110,15 +110,7 @@ namespace Ghosts.Client.Handlers
                     targetElement.SendKeys(reply);
                     Thread.Sleep(1000);
                     targetElement = Driver.FindElement(By.CssSelector("input#edit-submit.form-submit"));
-                    if (Driver is OpenQA.Selenium.Firefox.FirefoxDriver)
-                    {
-                        IJavaScriptExecutor je = (IJavaScriptExecutor)Driver;
-                        //scroll needed as button is at bottom, need this or Firefox fails
-                        je.ExecuteScript("arguments[0].scrollIntoView()", targetElement);
-                        Thread.Sleep(500);
-                    }
-                    actions = new Actions(Driver);
-                    actions.MoveToElement(targetElement).Click().Perform();
+                    MoveToElementAndClick(targetElement);
                     Log.Trace($"Blog:: Added reply to site {site}.");
                 }
                 catch
@@ -141,8 +133,7 @@ namespace Ghosts.Client.Handlers
         {
 
             RequestConfiguration config;
-            Actions actions;
-
+            
             string target = header + site + "/node/add/blog";
             //navigate to the add content page
             try
@@ -166,15 +157,7 @@ namespace Ghosts.Client.Handlers
                 targetElement.SendKeys(body);
                 Thread.Sleep(1000);
                 targetElement = Driver.FindElement(By.CssSelector("input#edit-submit.form-submit"));
-                if (Driver is OpenQA.Selenium.Firefox.FirefoxDriver)
-                {
-                    IJavaScriptExecutor je = (IJavaScriptExecutor)Driver;
-                    //scroll needed as button is at bottom, need this or Firefox fails
-                    je.ExecuteScript("arguments[0].scrollIntoView()", targetElement);
-                    Thread.Sleep(500);
-                }
-                actions = new Actions(Driver);
-                actions.MoveToElement(targetElement).Click().Perform();
+                MoveToElementAndClick(targetElement);
                 Log.Trace($"Blog:: Added post to site {site}.");
 
             }
@@ -222,15 +205,7 @@ namespace Ghosts.Client.Handlers
                                 var iframe = overlay.FindElement(By.CssSelector("iframe.overlay-element.overlay-active"));
                                 Driver.SwitchTo().Frame(iframe);
                                 targetElement = Driver.FindElement(By.CssSelector("input#edit-delete.form-submit"));
-                                if (Driver is OpenQA.Selenium.Firefox.FirefoxDriver)
-                                {
-                                    IJavaScriptExecutor je = (IJavaScriptExecutor)Driver;
-                                    //scroll needed as button is at bottom, need this or Firefox fails
-                                    je.ExecuteScript("arguments[0].scrollIntoView()", targetElement);
-                                    Thread.Sleep(500);
-                                }
-                                actions = new Actions(Driver);
-                                actions.MoveToElement(targetElement).Click().Perform();
+                                MoveToElementAndClick(targetElement);
                                 Thread.Sleep(1000);
                                 //another overlay pops up
                                 overlay = Driver.FindElement(By.Id("overlay"));

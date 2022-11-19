@@ -25,11 +25,9 @@ namespace Ghosts.Client.Handlers
     /// <summary>
     /// Handles Blog actions for BaseBrowserHandler
     /// </summary>
-    public abstract class BlogHelper
+    public abstract class BlogHelper : BrowserHelper
     {
 
-        public static readonly Logger Log = LogManager.GetCurrentClassLogger();
-        internal static readonly Random _random = new Random();
         private int _deletionProbability = -1;
         private int _uploadProbability = -1;
         private int _downloadProbability = -1;
@@ -42,9 +40,8 @@ namespace Ghosts.Client.Handlers
         public string password { get; set; } = null;
         string _version = null;
 
-        public BaseBrowserHandler baseHandler = null;
         public BlogContentManager contentManager = null;
-        public IWebDriver Driver = null;
+        
 
         public static BlogHelper MakeHelper(BaseBrowserHandler callingHandler, IWebDriver callingDriver, TimelineHandler handler, Logger tlog)
         {
