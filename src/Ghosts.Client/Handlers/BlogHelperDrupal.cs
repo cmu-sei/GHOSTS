@@ -110,6 +110,13 @@ namespace Ghosts.Client.Handlers
                     targetElement.SendKeys(reply);
                     Thread.Sleep(1000);
                     targetElement = Driver.FindElement(By.CssSelector("input#edit-submit.form-submit"));
+                    if (Driver is OpenQA.Selenium.Firefox.FirefoxDriver)
+                    {
+                        IJavaScriptExecutor je = (IJavaScriptExecutor)Driver;
+                        //scroll needed as button is at bottom, need this or Firefox fails
+                        je.ExecuteScript("arguments[0].scrollIntoView()", targetElement);
+                        Thread.Sleep(500);
+                    }
                     actions = new Actions(Driver);
                     actions.MoveToElement(targetElement).Click().Perform();
                     Log.Trace($"Blog:: Added reply to site {site}.");
@@ -159,6 +166,13 @@ namespace Ghosts.Client.Handlers
                 targetElement.SendKeys(body);
                 Thread.Sleep(1000);
                 targetElement = Driver.FindElement(By.CssSelector("input#edit-submit.form-submit"));
+                if (Driver is OpenQA.Selenium.Firefox.FirefoxDriver)
+                {
+                    IJavaScriptExecutor je = (IJavaScriptExecutor)Driver;
+                    //scroll needed as button is at bottom, need this or Firefox fails
+                    je.ExecuteScript("arguments[0].scrollIntoView()", targetElement);
+                    Thread.Sleep(500);
+                }
                 actions = new Actions(Driver);
                 actions.MoveToElement(targetElement).Click().Perform();
                 Log.Trace($"Blog:: Added post to site {site}.");
@@ -208,6 +222,13 @@ namespace Ghosts.Client.Handlers
                                 var iframe = overlay.FindElement(By.CssSelector("iframe.overlay-element.overlay-active"));
                                 Driver.SwitchTo().Frame(iframe);
                                 targetElement = Driver.FindElement(By.CssSelector("input#edit-delete.form-submit"));
+                                if (Driver is OpenQA.Selenium.Firefox.FirefoxDriver)
+                                {
+                                    IJavaScriptExecutor je = (IJavaScriptExecutor)Driver;
+                                    //scroll needed as button is at bottom, need this or Firefox fails
+                                    je.ExecuteScript("arguments[0].scrollIntoView()", targetElement);
+                                    Thread.Sleep(500);
+                                }
                                 actions = new Actions(Driver);
                                 actions.MoveToElement(targetElement).Click().Perform();
                                 Thread.Sleep(1000);
@@ -320,22 +341,26 @@ namespace Ghosts.Client.Handlers
             //on some page, click a random readmore link
             try
             {
-                var targetElements = Driver.FindElements(By.CssSelector("li.node-readmore"));
-
+                var targetElements = Driver.FindElements(By.CssSelector("li.node-readmore.first"));
 
                 if (targetElements.Count > 0)
                 {
                     int docNum = _random.Next(0, targetElements.Count);
-                    actions = new Actions(Driver);
-                    actions.MoveToElement(targetElements[docNum]).Click().Perform();
-                    Log.Trace($"Blog:: Browsed post on site {site}.");
-                    return true;
+                    var targetElement = targetElements[docNum];
+                    var pageLink = targetElement.FindElement(By.XPath(".//a"));
+                    string href = pageLink.GetAttribute("href");
+                    if (href != null)
+                    {
+                        //string targetpost = header + site + href;
+                        config = RequestConfiguration.Load(handler, href);
+                        baseHandler.MakeRequest(config);
+                        Thread.Sleep(1000);
+                        Log.Trace($"Blog:: Browsed post on site {site}.");
+                        return true;
+                    }
                 }
             }
-            catch
-            {
-
-            }
+            catch { }
             Log.Trace($"Blog:: No articles to browse on site {site}.");
             return true;
         }
