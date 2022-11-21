@@ -10,5 +10,9 @@ namespace Ghosts.Client.Infrastructure
         public static string EmailDomain => ApplicationDetails.ConfigurationFiles.EmailDomain(Program.Configuration.Content.EmailDomain);
         public static string EmailOutside => ApplicationDetails.ConfigurationFiles.EmailOutside(Program.Configuration.Content.EmailOutside);
         public static string FileNames => ApplicationDetails.ConfigurationFiles.FileNames(Program.Configuration.Content.FileNames);
+
+        public static string BlogContent => ApplicationDetails.ConfigurationFiles.BlogContent(Program.Configuration.Content.BlogContent);
+
+        public static string BlogReply => ApplicationDetails.ConfigurationFiles.BlogReply(Program.Configuration.Content.BlogReply);
     }
 }

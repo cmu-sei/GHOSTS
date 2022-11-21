@@ -108,6 +108,10 @@ namespace Ghosts.Domain.Code
             public static string Dictionary(string raw) => Determine(raw, "dictionary.json");
             public static string FileNames(string raw) => Determine(raw, "filenames.txt");
 
+            public static string BlogContent(string raw) => Determine(raw, "blog-content.csv");
+
+            public static string BlogReply(string raw) => Determine(raw, "blog-reply.csv");
+
             private static string Determine(string raw, string defaultValue)
             {
                 return !string.IsNullOrEmpty(raw) ? raw : Clean(Path + defaultValue);

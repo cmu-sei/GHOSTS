@@ -541,9 +541,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Handlers\BaseBrowserHandler.cs" />
+    <Compile Include="Handlers\BlogHelper.cs" />
+    <Compile Include="Handlers\BlogHelperDrupal.cs" />
     <Compile Include="Handlers\BrowserCrawl.cs" />
     <Compile Include="Handlers\Print.cs" />
+    <Compile Include="Handlers\SharepointHelper.cs" />
     <Compile Include="Handlers\Ssh.cs" />
+    <Compile Include="Infrastructure\Browser\BlogContent.cs" />
     <Compile Include="Infrastructure\Browser\ExtendedConfiguration.cs" />
     <Compile Include="Infrastructure\Credentials.cs" />
     <Compile Include="Infrastructure\DebugManager.cs" />
@@ -600,6 +604,12 @@
     <Content Include="config\emails-outside.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <None Include="config\blog-content.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="config\blog-reply.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="config\dictionary.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -620,6 +630,7 @@
     </None>
     <None Include="Sample Timelines\Administrative Commands.json" />
     <None Include="Sample Timelines\BrowserChrome.json" />
+    <None Include="Sample Timelines\BrowserChromeBlogDrupal.json" />
     <None Include="Sample Timelines\BrowserChromeSharepoint.json" />
     <None Include="Sample Timelines\BrowserFirefox.json" />
     <None Include="Sample Timelines\Notepad.json" />
