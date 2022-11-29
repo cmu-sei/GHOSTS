@@ -12,7 +12,6 @@ using Ghosts.Domain;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using NLog;
-using SimpleTCP;
 
 namespace Ghosts.Api.Services
 {
@@ -27,7 +26,6 @@ namespace Ghosts.Api.Services
         Task<Guid> DeleteAsync(Guid model, CancellationToken ct);
         Task<List<HistoryHealth>> GetMachineHistoryHealth(Guid model, CancellationToken ct);
         Task<List<Machine.MachineHistoryItem>> GetMachineHistory(Guid model, CancellationToken ct);
-        Task<TimelineHandler> SendCommand(Guid id, string command, CancellationToken ct);
         Task<List<HistoryTimeline>> GetActivity(Guid id, CancellationToken ct);
     }
 
@@ -199,41 +197,6 @@ namespace Ghosts.Api.Services
         public async Task<List<Machine.MachineHistoryItem>> GetMachineHistory(Guid id, CancellationToken ct)
         {
             return await _context.HistoryMachine.Where(o => o.MachineId == id).ToListAsync(ct);
-        }
-
-        public async Task<TimelineHandler> SendCommand(Guid id, string command, CancellationToken ct)
-        {
-            TimelineHandler handler;
-
-            var machine = await _context.Machines.FirstOrDefaultAsync(o => o.Id == id, ct);
-            if (machine == null)
-            {
-                _log.Error($"Machine not found: {id}");
-                throw new InvalidOperationException("Machine not found");
-            }
-
-            try
-            {
-                var client = new SimpleTcpClient().Connect(machine.HostIp, Program.ClientConfig.ListenerPort);
-                client.AutoTrimStrings = true;
-                client.Delimiter = 0x13;
-
-                var replyMsg = client.WriteLineAndGetReply(command, TimeSpan.FromSeconds(3));
-
-                var ret = replyMsg.MessageString;
-                var index = ret.LastIndexOf("}", StringComparison.InvariantCultureIgnoreCase);
-                if (index > 0)
-                    ret = ret.Substring(0, index + 1);
-
-                handler = JsonConvert.DeserializeObject<TimelineHandler>(ret);
-            }
-            catch (Exception e)
-            {
-                _log.Debug(e);
-                throw;
-            }
-
-            return handler;
         }
 
         public async Task<List<HistoryTimeline>> GetActivity(Guid id, CancellationToken ct)

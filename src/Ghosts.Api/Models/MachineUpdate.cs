@@ -13,8 +13,10 @@ namespace Ghosts.Api.Models
     {
         public int Id { get; set; }
 
-        [ForeignKey("MachineId")] public Guid MachineId { get; set; }
+        public Guid MachineId { get; set; }
 
+        public string Username { get; set; }
+        
         [JsonConverter(typeof(StringEnumConverter))]
         public UpdateClientConfig.UpdateType Type { get; set; }
 

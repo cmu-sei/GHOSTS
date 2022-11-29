@@ -80,7 +80,7 @@ namespace Ghosts.Api.Controllers
                 return NotFound();
 
             //check dB for new updates to deliver
-            var u = await _updateService.GetAsync(m.Id, ct);
+            var u = await _updateService.GetAsync(m.Id, m.CurrentUsername, ct);
             if (u == null) return NotFound();
 
             var update = new UpdateClientConfig {Type = u.Type, Update = u.Update};
