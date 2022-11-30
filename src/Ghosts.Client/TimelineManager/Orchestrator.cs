@@ -224,10 +224,10 @@ namespace Ghosts.Client.TimelineManager
                     {
                         using (var proc = Process.GetCurrentProcess())
                         {
-                            Console.WriteLine($"Minimizing footprint and memory. Current is {proc.PrivateMemorySize64 / (1024 * 1024)}...");
+                            var was = proc.PrivateMemorySize64 / (1024 * 1024);
                             Program.MinimizeFootprint();
                             Program.MinimizeMemory();
-                            Console.WriteLine($"Minimized footprint and memory.  Current is {proc.PrivateMemorySize64 / (1024 * 1024)}...");
+                            Console.WriteLine($"Minimized footprint and memory.  Was/Is: {was}/{proc.PrivateMemorySize64 / (1024 * 1024)}...");
                         }
                     }
                     catch (Exception e)
@@ -236,7 +236,7 @@ namespace Ghosts.Client.TimelineManager
                     }
 
 
-                    Thread.Sleep(300000); //clean up every 5 minutes
+                    Thread.Sleep(900000); //clean up every 15 minutes
                 }
             }
         }

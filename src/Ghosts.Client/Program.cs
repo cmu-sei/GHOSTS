@@ -161,7 +161,7 @@ namespace Ghosts.Client
                 StartupTasks.SetStartup();
             }
 
-            //add listener on a port or ephemeral file watch to handle ad hoc commands
+            //add file watch to handle ad hoc commands
             ListenerManager.Run();
 
             //do we have client id? or is this first run?
