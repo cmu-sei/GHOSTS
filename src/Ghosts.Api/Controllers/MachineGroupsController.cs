@@ -108,46 +108,6 @@ namespace Ghosts.Api.Controllers
         }
 
         /// <summary>
-        /// Send a specific command to a group of machines
-        /// </summary>
-        /// <param name="id">Group ID</param>
-        /// <param name="command">The command to execute</param>
-        /// <param name="ct">Cancellation Token</param>
-        /// <returns>The results of running the command on each machine</returns>
-        [HttpPost("{id}/command")]
-        public async Task<IActionResult> SendCommand([FromRoute] int id, string command, CancellationToken ct)
-        {
-            var handlers = new List<TimelineHandler>();
-            var machines = await _service.GetAsync(id, ct);
-            if (machines == null)
-            {
-                _log.Error($"Machine group not found: {id}");
-                throw new InvalidOperationException("Machine group not found");
-            }
-
-            try
-            {
-                foreach (var machine in machines.GroupMachines)
-                    try
-                    {
-                        var response = await _serviceMachine.SendCommand(machine.MachineId, command, ct);
-                        handlers.Add(response);
-                    }
-                    catch (Exception e)
-                    {
-                        _log.Trace(e);
-                    }
-
-                return Ok(handlers);
-            }
-            catch (Exception e)
-            {
-                var response = new HttpResponseMessage(HttpStatusCode.InternalServerError) {Content = new StringContent(e.Message)};
-                return BadRequest(response);
-            }
-        }
-
-        /// <summary>
         /// Gets teh activity for a group of machines
         /// </summary>
         /// <param name="id">Group ID</param>
