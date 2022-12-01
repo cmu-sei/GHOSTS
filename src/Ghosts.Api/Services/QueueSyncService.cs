@@ -93,9 +93,8 @@ namespace Ghosts.Api.Services
         {
             try
             {
-                var survey = item;
-                await context.Surveys.AddAsync(survey);
-                context.Entry(survey).State = EntityState.Added;
+                await context.Surveys.AddAsync(item);
+                context.Entry(item).State = EntityState.Added;
                 await context.SaveChangesAsync();
                 await Queue.DequeueAsync(new CancellationToken());
             }
@@ -325,8 +324,7 @@ namespace Ghosts.Api.Services
                 {
                     var i = await context.SaveChangesAsync();
                     if (i > 0)
-                        log.Info(
-                            $"Queue: {i} (machines: {machines.Count()}");
+                        log.Info($"Queue: {i} (machines: {machines.Count}");
                 }
                 catch (Exception e)
                 {
@@ -341,8 +339,7 @@ namespace Ghosts.Api.Services
                 {
                     var i = await context.SaveChangesAsync();
                     if (i > 0)
-                        log.Info(
-                            $"Queue: {i} (Trackables: {trackables.Count()})");
+                        log.Info($"Queue: {i} (Trackables: {trackables.Count})");
                 }
                 catch (Exception e)
                 {
@@ -357,8 +354,7 @@ namespace Ghosts.Api.Services
                 {
                     var i = await context.SaveChangesAsync();
                     if (i > 0)
-                        log.Info(
-                            $"Queue: {i} (Health: {health.Count()})");
+                        log.Info($"Queue: {i} (Health: {health.Count})");
                 }
                 catch (Exception e)
                 {
@@ -373,8 +369,7 @@ namespace Ghosts.Api.Services
                 {
                     var i = await context.SaveChangesAsync();
                     if (i > 0)
-                        log.Info(
-                            $"Queue: {i} (Timeline: {timelines.Count()})");
+                        log.Info($"Queue: {i} (Timeline: {timelines.Count})");
                 }
                 catch (Exception e)
                 {
@@ -389,8 +384,7 @@ namespace Ghosts.Api.Services
                 {
                     var i = await context.SaveChangesAsync();
                     if (i > 0)
-                        log.Info(
-                            $"Queue: {i} (History: {histories.Count()}");
+                        log.Info($"Queue: {i} (History: {histories.Count}");
                 }
                 catch (Exception e)
                 {
@@ -405,8 +399,7 @@ namespace Ghosts.Api.Services
                 {
                     var i = await context.SaveChangesAsync();
                     if (i > 0)
-                        log.Info(
-                            $"Queue: {i} (Webhooks: {webhooks.Count()}");
+                        log.Info($"Queue: {i} (Webhooks: {webhooks.Count}");
                 }
                 catch (Exception e)
                 {
@@ -472,18 +465,12 @@ namespace Ghosts.Api.Services
 
                 using var httpClient = new HttpClient();
                 // Do the actual request and await the response
-                HttpResponseMessage httpResponse;
-                switch (webhook.PostbackMethod)
+                var httpResponse = webhook.PostbackMethod switch
                 {
-                    default:
-                        throw new ArgumentException("webhook configuration encountered unspecified postback method");
-                    case Webhook.WebhookMethod.POST:
-                        httpResponse = await httpClient.PostAsync(webhook.PostbackUrl, httpContent);
-                        break;
-                    case Webhook.WebhookMethod.GET:
-                        httpResponse = await httpClient.GetAsync($"{webhook.PostbackUrl}?message={formattedResponse}");
-                        break;
-                }
+                    Webhook.WebhookMethod.POST => await httpClient.PostAsync(webhook.PostbackUrl, httpContent),
+                    Webhook.WebhookMethod.GET => await httpClient.GetAsync($"{webhook.PostbackUrl}?message={formattedResponse}"),
+                    _ => throw new ArgumentException("webhook configuration encountered unspecified postback method")
+                };
 
                 log.Trace($"Webhook response {webhook.PostbackUrl} {webhook.PostbackMethod} {httpResponse.StatusCode}");
 
