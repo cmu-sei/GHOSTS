@@ -3,7 +3,6 @@
 using Ghosts.Domain;
 using Newtonsoft.Json;
 using NLog;
-using SimpleTCP;
 using System;
 using System.IO;
 using System.Linq;
@@ -19,18 +18,6 @@ namespace Ghosts.Client.TimelineManager
 
         public static void Run()
         {
-            try
-            {
-                if (Program.Configuration.Listener.Port > 0)
-                {
-                    var _ = new PortListener();
-                }
-            }
-            catch (Exception e)
-            {
-                _log.Debug(e);
-            }
-
             try
             {
                 if (!string.IsNullOrEmpty(In))
@@ -163,91 +150,6 @@ namespace Ghosts.Client.TimelineManager
             }
 
             _currentlyProcessing = string.Empty;
-        }
-    }
-
-    public class PortListener
-    {
-        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-
-        public PortListener()
-        {
-            try
-            {
-                var server = new SimpleTcpServer().Start(Program.Configuration.Listener.Port);
-                server.AutoTrimStrings = true;
-                server.Delimiter = 0x13;
-
-                Console.WriteLine(
-                    $"PortListener active on {string.Join(",", server.GetListeningIPs())} : {Program.Configuration.Listener.Port}");
-
-                server.DataReceived += (sender, message) =>
-                {
-                    var obj = Handle(message);
-                    message.ReplyLine($"{obj}{Environment.NewLine}");
-                };
-            }
-            catch (Exception e)
-            {
-                _log.Trace(e);
-                Console.WriteLine($"PortListener could not be started on {Program.Configuration.Listener.Port}");
-            }
-        }
-
-        private static string Handle(Message message)
-        {
-            var tempMsg =
-                $"PortListener received raw {message.TcpClient.Client.RemoteEndPoint}: {message.MessageString}";
-            Console.WriteLine(tempMsg);
-            _log.Trace(tempMsg);
-
-            var command = message.MessageString;
-            var index = command.LastIndexOf("}", StringComparison.InvariantCultureIgnoreCase);
-            if (index > 0)
-            {
-                command = command.Substring(0, index + 1);
-            }
-
-            _log.Trace($"PortListener received from {message.TcpClient.Client.RemoteEndPoint}: {command}");
-
-            try
-            {
-                var timelineHandler = JsonConvert.DeserializeObject<TimelineHandler>(command);
-
-                if (timelineHandler is null)
-                    throw new DataMisalignedException(
-                        "Portlistener received something that could not be interpreted as a timeline");
-
-                foreach (var evs in timelineHandler.TimeLineEvents)
-                {
-                    if (string.IsNullOrEmpty(evs.TrackableId))
-                    {
-                        evs.TrackableId = Guid.NewGuid().ToString();
-                    }
-                }
-
-                _log.Trace($"PortListener command found: {timelineHandler.HandlerType}");
-
-                var o = new Orchestrator();
-                var t = new Timeline
-                {
-                    Id = Guid.NewGuid(),
-                    Status = Timeline.TimelineStatus.Run
-                };
-                t.TimeLineHandlers.Add(timelineHandler);
-
-                o.RunCommand(t, timelineHandler);
-
-                var obj = JsonConvert.SerializeObject(timelineHandler);
-
-                return obj;
-            }
-            catch (Exception e)
-            {
-                _log.Trace(e);
-            }
-
-            return null;
         }
     }
 }

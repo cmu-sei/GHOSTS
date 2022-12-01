@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Security.Principal;
 using Ghosts.Domain.Code;
 
 namespace Ghosts.Client.Infrastructure
@@ -29,6 +30,7 @@ namespace Ghosts.Client.Infrastructure
                 Console.WriteLine(
                     $"GHOSTS ({ApplicationDetails.Name}:{ApplicationDetails.Version} [{ApplicationDetails.VersionFile}]) running in production mode. Installed path: {ApplicationDetails.InstalledPath}");
             }
+            Console.WriteLine($"Running as Username: {Environment.UserName} - WindowsIdentity: {WindowsIdentity.GetCurrent().Name}");
         }
     }
 }
