@@ -603,6 +603,15 @@ namespace Ghosts.Client.Handlers
         /// <param name="targetElement"></param>
         public void MoveToElementAndClick(IWebElement targetElement)
         {
+            BrowserHelperSupport.MoveToElementAndClick(Driver, targetElement);
+        }
+
+    }
+
+    public class BrowserHelperSupport
+    {
+        public static void MoveToElementAndClick(IWebDriver Driver, IWebElement targetElement)
+        {
             Actions actions;
 
             if (Driver is OpenQA.Selenium.Firefox.FirefoxDriver)
@@ -618,4 +627,4 @@ namespace Ghosts.Client.Handlers
 
     }
 
-}
+    }
