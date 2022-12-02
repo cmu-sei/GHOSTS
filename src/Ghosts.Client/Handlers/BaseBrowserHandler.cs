@@ -249,6 +249,7 @@ namespace Ghosts.Client.Handlers
                     this.linkManager.SetCurrent(config.Uri);
                     MakeRequest(config);
                     Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId);
+                    Thread.Sleep(timelineEvent.DelayAfter);
 
                     if (this.stickiness > 0)
                     {
@@ -477,6 +478,7 @@ namespace Ghosts.Client.Handlers
                     urlQueue = new LifoQueue<Uri>(visitedRemember);
                     MakeRequest(config);
                     Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId);
+                    Thread.Sleep(timelineEvent.DelayAfter);
 
                     if (this.stickiness > 0)
                     {
