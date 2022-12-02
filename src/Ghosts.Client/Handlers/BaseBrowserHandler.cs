@@ -24,6 +24,7 @@ using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Linq;
+using static System.Windows.Forms.LinkLabel;
 
 namespace Ghosts.Client.Handlers
 {
@@ -395,7 +396,7 @@ namespace Ghosts.Client.Handlers
             }
         }
 
-        private bool ClickRandomLink(Dictionary<string, int> urlDict)
+        private bool ClickRandomLink(RequestConfiguration config, Dictionary<string, int> urlDict, LifoQueue<Uri> urlQueue)
         {
             try
             {
@@ -415,30 +416,26 @@ namespace Ghosts.Client.Handlers
                             if (urlDict.ContainsKey(uri.ToString())) continue;  //skip this
                             elementList.Add(l);
                             uriList.Add(uri);
-                            if (urlDict.Count > visitedRemember)
-                            {
-                                //delete a random member from URL dict
-                                int deleteNum = _random.Next(0, urlDict.Count);
-                                int i = 0;
-                                
-                                foreach (var key in urlDict.Keys)
-                                {
-                                    if (i == deleteNum)
-                                    {
-                                        urlDict.Remove(key);
-                                        break;
-                                    }
-                                }
-                                urlDict.Add(uri.ToString(), 0);
-                            }
                         }
-
                     }
                 }
                 if (uriList.Count == 0) return false;  //no links to click
                 int linkNum = _random.Next(0, uriList.Count);
                 var targetUri = uriList[linkNum];
                 var targetElement = elementList[linkNum];
+                //remember this Url
+                if (urlDict.Count == visitedRemember && visitedRemember > 0)
+                {
+                    //at capacity, need to remove oldest
+                    var lastItem = urlQueue.Last();
+                    urlDict.Remove(lastItem.ToString());  //remove from dict
+                }
+                urlQueue.Add(targetUri);  //Queue is at capacity, last item is removed when this is added
+                urlDict.Add(targetUri.ToString(), 0);
+                config.Method = "GET";
+                config.Uri = targetUri;  //set this so that can print out info on return
+
+
                 if (targetUri.ToString().ToLower().EndsWith(".htm") || targetUri.ToString().ToLower().EndsWith(".html"))
                 {
                     Driver.Navigate().GoToUrl(targetUri);
@@ -462,8 +459,10 @@ namespace Ghosts.Client.Handlers
         public void DoRandomAltCommand(TimelineHandler handler, TimelineEvent timelineEvent)
         {
             RequestConfiguration config;
-            Dictionary<string, int> urlDict;  
-            
+            Dictionary<string, int> urlDict;
+            LifoQueue<Uri> urlQueue;
+
+
             while (true)
             {
                 if (Driver.CurrentWindowHandle == null)
@@ -475,6 +474,7 @@ namespace Ghosts.Client.Handlers
                 if (config.Uri != null && config.Uri.IsWellFormedOriginalString())
                 {
                     urlDict = new Dictionary<string, int>();  //use this to remember visited sites
+                    urlQueue = new LifoQueue<Uri>(visitedRemember);
                     MakeRequest(config);
                     Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId);
 
@@ -489,7 +489,9 @@ namespace Ghosts.Client.Handlers
                             {
                                 try
                                 {
-                                    if (!ClickRandomLink(urlDict)) break;
+                                    if (!ClickRandomLink(config, urlDict, urlQueue)) break;  //break if no links found, reset to next choice
+                                    Log.Trace($"Making request #{loopNumber + 1}/{loops} to {config.Uri}");
+                                    Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId);
                                 }
                                 catch (ThreadAbortException)
                                 {
