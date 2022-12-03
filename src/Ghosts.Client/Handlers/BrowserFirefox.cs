@@ -67,7 +67,7 @@ namespace Ghosts.Client.Handlers
 
         public override void HandleBrowserException(Exception e)
         {
-            if (e.Message.Contains("InsecureCertificate"))
+            if (e.Message.Contains("InsecureCertificate") || e.Message.Contains("Reached error page:"))
             {
                 HandleInsecureCertificate();
             }

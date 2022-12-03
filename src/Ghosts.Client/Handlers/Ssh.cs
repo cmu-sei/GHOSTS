@@ -11,6 +11,8 @@ using Ghosts.Domain;
 using System.Net;
 using System.Diagnostics;
 using Newtonsoft.Json;
+using Ghosts.Domain.Code;
+using WorkingHours = Ghosts.Client.Infrastructure.WorkingHours;
 
 /*
  * Used Package Renci.sshNet
@@ -36,6 +38,7 @@ namespace Ghosts.Client.Handlers
 
         private Credentials CurrentCreds = null;
         private SshSupport CurrentSshSupport = null;   //current SshSupport for this object
+        public int jitterfactor = 0;
 
         public Ssh(TimelineHandler handler)
         {
@@ -102,6 +105,10 @@ namespace Ghosts.Client.Handlers
                             Log.Error(e);
                         }
                     }
+                    if (handler.HandlerArgs.ContainsKey("delay-jitter"))
+                    {
+                        jitterfactor = Jitter.JitterFactorParse(handler.HandlerArgs["delay-jitter"].ToString());
+                    }
                 }
 
 
@@ -150,7 +157,7 @@ namespace Ghosts.Client.Handlers
                             {
                                 this.Command(handler, timelineEvent, cmd.ToString());
                             }
-                            Thread.Sleep(timelineEvent.DelayAfter);
+                            Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, jitterfactor)); ;
                         }
                     default:
                         this.Command(handler, timelineEvent, timelineEvent.Command);
@@ -162,7 +169,7 @@ namespace Ghosts.Client.Handlers
                 }
 
                 if (timelineEvent.DelayAfter > 0)
-                    Thread.Sleep(timelineEvent.DelayAfter);
+                    Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, jitterfactor)); ;
             }
         }
 

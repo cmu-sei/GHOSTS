@@ -41,6 +41,8 @@ namespace Ghosts.Client.Handlers
         public int actionsBeforeRestart = -1;
         public LinkManager linkManager;
         public int actionsCount = 0;
+        public int browseprobability = 100;
+        public int jitterfactor { get; set; }  = 0;  //used with Jitter.JitterFactorDelay
 
         public bool sharepointAbort { get; set; } = false;  //will be set to True if unable to proceed with Handler execution
         SharepointHelper _sharepointhelper = null;
@@ -190,7 +192,7 @@ namespace Ghosts.Client.Handlers
 
                     if (timelineEvent.DelayAfter > 0)
                     {
-                        Thread.Sleep(timelineEvent.DelayAfter);
+                        Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, jitterfactor));
                     }
                 }
             }
@@ -227,6 +229,17 @@ namespace Ghosts.Client.Handlers
             {
                 int.TryParse(handler.HandlerArgs["actions-before-restart"].ToString(), out actionsBeforeRestart);
             }
+            if (handler.HandlerArgs.ContainsKey("browse-probability"))
+            {
+                int.TryParse(handler.HandlerArgs["browse-probability"].ToString(), out browseprobability);
+                if (browseprobability < 0 || browseprobability > 100) browseprobability = 100;
+            }
+            if (handler.HandlerArgs.ContainsKey("delay-jitter"))
+            {
+                jitterfactor = Jitter.JitterFactorParse(handler.HandlerArgs["delay-jitter"].ToString());
+            }
+
+
 
         }
 
@@ -397,6 +410,25 @@ namespace Ghosts.Client.Handlers
             }
         }
 
+        private bool isGoodLink(Uri uri)
+        {
+            //check if this link needs to be rejected
+            var linkText = uri.ToString();
+            if (linkText.Contains("support.mozilla.org") && linkText.Contains("connection-not-secure"))
+            {
+                //for some reason, occassionaly the Insecure Cert exception is not thrown and this
+                //page about the security issue is not filtered. Do not click this link as it pops
+                //up another page. Just reject it, as it is the only link on the page, and we will
+                //pop back up to the top and try again
+                Log.Trace($"Rejected link {linkText}");
+                return false;  
+            }
+
+
+
+            return true;
+        }
+
         private bool ClickRandomLink(RequestConfiguration config, Dictionary<string, int> urlDict, LifoQueue<Uri> urlQueue)
         {
             try
@@ -412,7 +444,7 @@ namespace Ghosts.Client.Handlers
                         continue;
                     if (Uri.TryCreate(node, UriKind.RelativeOrAbsolute, out var uri))
                     {
-                        if (validSchemes.Contains(uri.Scheme))
+                        if (validSchemes.Contains(uri.Scheme) && isGoodLink(uri))
                         {
                             if (urlDict.ContainsKey(uri.ToString())) continue;  //skip this
                             elementList.Add(l);
@@ -472,6 +504,12 @@ namespace Ghosts.Client.Handlers
                 }
 
                 config = RequestConfiguration.Load(handler, timelineEvent.CommandArgs[_random.Next(0, timelineEvent.CommandArgs.Count)]);
+                
+                if (browseprobability < _random.Next(0, 100)) {
+                    //skipping this link
+                    Log.Trace($"Timeline choice skipped due to browse probability");
+                    Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter,jitterfactor));
+                }
                 if (config.Uri != null && config.Uri.IsWellFormedOriginalString())
                 {
                     urlDict = new Dictionary<string, int>();  //use this to remember visited sites
@@ -491,9 +529,15 @@ namespace Ghosts.Client.Handlers
                             {
                                 try
                                 {
-                                    if (!ClickRandomLink(config, urlDict, urlQueue)) break;  //break if no links found, reset to next choice
-                                    Log.Trace($"Making request #{loopNumber + 1}/{loops} to {config.Uri}");
-                                    Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId);
+                                    if (browseprobability > _random.Next(0, 100))
+                                    {
+                                        if (!ClickRandomLink(config, urlDict, urlQueue)) break;  //break if no links found, reset to next choice
+                                        Log.Trace($"Making request #{loopNumber + 1}/{loops} to {config.Uri}");
+                                        Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId);
+                                    } else
+                                    {
+                                        Log.Trace($"Request skipped due to browse probability for #{loopNumber + 1}/{loops} to {config.Uri}");
+                                    }
                                 }
                                 catch (ThreadAbortException)
                                 {
@@ -520,7 +564,7 @@ namespace Ghosts.Client.Handlers
                                     }
                                 }
 
-                                Thread.Sleep(timelineEvent.DelayAfter);
+                                Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, jitterfactor));
                             }
                         }
                     }

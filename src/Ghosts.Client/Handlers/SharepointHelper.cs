@@ -444,6 +444,10 @@ namespace Ghosts.Client.Handlers
                         baseHandler.sharepointAbort = true;
                         return;
                     }
+                    if (handler.HandlerArgs.ContainsKey("delay-jitter"))
+                    {
+                        baseHandler.jitterfactor = Jitter.JitterFactorParse(handler.HandlerArgs["delay-jitter"].ToString());
+                    }
 
                     credFname = handler.HandlerArgs["sharepoint-credentials-file"].ToString();
 
