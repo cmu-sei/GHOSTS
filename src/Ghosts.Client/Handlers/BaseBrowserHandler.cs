@@ -126,11 +126,13 @@ namespace Ghosts.Client.Handlers
                         case "random":
                             ParseRandomHandlerArgs(handler);
                             DoRandomCommand(handler, timelineEvent);
+                            if (this.Restart) return;  //restart has been requested
                             break;
 
                         case "randomalt":
                             ParseRandomHandlerArgs(handler);
                             DoRandomAltCommand(handler, timelineEvent);
+                            if (this.Restart) return;  //restart has been requested
                             break;
 
                         case "browse":
@@ -192,7 +194,7 @@ namespace Ghosts.Client.Handlers
 
                     if (timelineEvent.DelayAfter > 0)
                     {
-                        Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, jitterfactor));
+                        Thread.Sleep(timelineEvent.DelayAfter);
                     }
                 }
             }
@@ -334,7 +336,8 @@ namespace Ghosts.Client.Handlers
                         return;
                     }
                 }
-
+                
+                Thread.Sleep(timelineEvent.DelayAfter);
 
             }
         }
@@ -489,6 +492,19 @@ namespace Ghosts.Client.Handlers
             return true;
         }
 
+        /// <summary>
+        /// This differs from 'random' in the following ways
+        ///   Jitter factor (default 0) is used in delayAfter - random value chosen from delay-delay*%jitterfactor, delay+delay*%jitterfactor
+        ///   During stickiness browsing, a random link is chosen from a page with no preference to relative links
+        ///   If no random links found, bounce back up and chose another link from the timeline.
+        ///   After a random link is chosen, NavigateTo() is used only if the link ends with .htm/.html, else 
+        ///   Javascript is used to click the link. This avoids a problem with Firefox browsing if a downloadable file link is found.
+        ///   A random link is rejected if it has been recently used, or if a known 'bad' link (ie. 'Learn more' link Firefox security page)
+        ///   The browse-probablity value (default 100) is also used, can cause a timelink or random link to be skipped.
+        /// </summary>
+        /// <param name="handler"></param>
+        /// <param name="timelineEvent"></param>
+        /// <exception cref="Exception"></exception>
         public void DoRandomAltCommand(TimelineHandler handler, TimelineEvent timelineEvent)
         {
             RequestConfiguration config;
@@ -509,6 +525,7 @@ namespace Ghosts.Client.Handlers
                     //skipping this link
                     Log.Trace($"Timeline choice skipped due to browse probability");
                     Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter,jitterfactor));
+                    continue;
                 }
                 if (config.Uri != null && config.Uri.IsWellFormedOriginalString())
                 {
@@ -583,6 +600,8 @@ namespace Ghosts.Client.Handlers
                         return;
                     }
                 }
+
+                Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, jitterfactor));
 
 
             }
