@@ -5,25 +5,23 @@ using System.Text;
 using System.Threading;
 using Renci.SshNet;
 using Ghosts.Client.Infrastructure;
+using NLog;
 
 namespace Ghosts.Client.Infrastructure
 {
     /// <summary>
-    /// This class provides SSH support using Renci.SshNet
+    /// This class provides SSH/SFTP support using Renci.SshNet
     /// 
     /// </summary>
-    public class SshSupport
+    public class SshSupport : SshSftpSupport
     {
 
-        public string[] ValidExts { get; set; } = { "txt", "py", "log", "c", "o", "jpg", "cs", "dll", "so", "zip", "gz","jar" };
-        public int TimeBetweenCommandsMax { get; set; } = 0;
-        public int TimeBetweenCommandsMin { get; set; } = 0;
+        public string[] ValidExts { get; set; } = { "txt", "py", "log", "c", "o", "jpg", "cs", "dll", "so", "zip", "gz", "jar" };
+       
+        public string uploadDirectory { get; set; } = null;
 
-        public int CommandTimeout { get; set; } = 1000;
 
-        internal static readonly Random _random = new Random();
-
-        private static string RandomString(int min, int max, bool lowercase=false)
+        private static string RandomString(int min, int max, bool lowercase = false)
         {
             var size = _random.Next(min, max);
             var builder = new StringBuilder(size);
@@ -50,7 +48,9 @@ namespace Ghosts.Client.Infrastructure
             if (lowercase)
             {
                 return builder.ToString().ToLower();
-            } else {
+            }
+            else
+            {
                 return builder.ToString();
             }
         }
@@ -59,7 +59,7 @@ namespace Ghosts.Client.Infrastructure
         private string GetRandomDirectory(ShellStream client)
         {
             client.WriteLine("ls -ld */ ");  //write command to client
-            string cmdout = this.GetSshCommandOutput(client,  false);
+            string cmdout = this.GetSshCommandOutput(client, false);
             cmdout = cmdout.Replace("\r", "");
             string[] lines = cmdout.ToString().Split('\n');
             List<string> dirs = new List<string>();
@@ -80,12 +80,12 @@ namespace Ghosts.Client.Infrastructure
                         //for some reason, some of the words can be null strings. WUT. So can't check exact number.
                         if (words.Length > 8)
                         {
-                            var dirName = words[words.Length-1]; //get last entry
+                            var dirName = words[words.Length - 1]; //get last entry
                             dirName = dirName.Replace("/", "");
                             dirs.Add(dirName);
                         }
                     }
-                   
+
 
                 }
             }
@@ -119,14 +119,14 @@ namespace Ghosts.Client.Infrastructure
                 var dir = this.GetRandomDirectory(client);
                 if (dir != null) currentcmd = currentcmd.Replace("[remotedirectory]", dir);
                 else return null;  //this  translation failed, return null
-            } 
+            }
             if (currentcmd.Contains("[randomextension]"))
-            { 
-                   currentcmd = currentcmd.Replace("[randomextension]", this.ValidExts[_random.Next(0, this.ValidExts.Length-1)]); 
+            {
+                currentcmd = currentcmd.Replace("[randomextension]", this.ValidExts[_random.Next(0, this.ValidExts.Length - 1)]);
             }
             if (currentcmd.Contains("[randomname]"))
             {
-                currentcmd = currentcmd.Replace("[randomname]", RandomString(3,15,true));
+                currentcmd = currentcmd.Replace("[randomname]", RandomString(3, 15, true));
             }
 
 
@@ -145,7 +145,7 @@ namespace Ghosts.Client.Infrastructure
         public string GetSshCommandOutput(ShellStream client, bool skiptimeout)
         {
 
-            
+
             //read data until timeout reached
             long startTimeMs = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
             string CmdData = "";
@@ -182,12 +182,26 @@ namespace Ghosts.Client.Infrastructure
             {
                 client.WriteLine(newcmd);  //write command to client
                 return this.GetSshCommandOutput(client, false);
-            } else
+            }
+            else
             {
                 return null;  //can return null if translation of keyword fails
             }
         }
 
-
     }
+
+
+    public abstract class SshSftpSupport
+    {
+        public static readonly Logger Log = LogManager.GetCurrentClassLogger();
+        internal static readonly Random _random = new Random();
+        public int TimeBetweenCommandsMax { get; set; } = 0;
+        public int TimeBetweenCommandsMin { get; set; } = 0;
+
+        public int CommandTimeout { get; set; } = 1000;
+
+        public string HostIp { get; set; } = null;
+    }
+
 }
