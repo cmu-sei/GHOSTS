@@ -81,6 +81,26 @@ namespace Ghosts.Client.Infrastructure
 
         }
 
+        public SftpFile FindDir(SftpClient client,string targetdir)
+        {
+
+            try
+            {
+                var remoteFiles = client.ListDirectory(".").ToList<SftpFile>();
+                List<SftpFile> normalFiles = new List<SftpFile>();
+                foreach (var f in remoteFiles)
+                {
+                    if (f.IsRegularFile || f.IsSymbolicLink) continue;
+                    if (f.IsDirectory && f.Name == targetdir) return f;
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Error(e);
+            }
+            return null; //target directory does not exist
+        }
+
         /// <summary>
         /// Replaces reserved words in command string with a value
         /// Reserved words are marked in command string like [reserved_word]
@@ -152,6 +172,45 @@ namespace Ghosts.Client.Infrastructure
                     Log.Trace($"Sftp:: Uploaded local file {fileName} to file {remoteFileName}, host {this.HostIp} ");
                     fileStream.Close();
                 }
+            }
+            catch (Exception e)
+            {
+                Log.Error(e);
+            }
+        }
+
+        /// <summary>
+        /// Expecting a string of 'rm filename'
+        /// </summary>
+        /// <param name="client"></param>
+        /// <param name="cmd"></param>
+        public void DoRemoveFile(SftpClient client, string cmd)
+        {
+            char[] charSeparators = new char[] { ' ' };
+            var cmdArgs = cmd.Split(charSeparators, 2, StringSplitOptions.None);
+            if (cmdArgs.Length != 2)
+            {
+                Log.Trace($"Sftp:: ill-formatted rm command: {cmd} ");
+                return;
+            }
+            var fileName = cmdArgs[1];
+            
+            if (fileName.Contains("[remotefile]"))
+            {
+                SftpFile file = GetRemoteFile(client);
+                if (file == null)
+                {
+                    Log.Trace($"Sft[:: Cannot find a valid file to delete from remote host {this.HostIp}.");
+                    return;
+                }
+                fileName = file.FullName;
+            }
+            
+            //now delete the remote file
+            try
+            {
+                client.DeleteFile(fileName);
+                Log.Trace($"Sftp:: Deleted {fileName} on remote host {this.HostIp}.");
             }
             catch (Exception e)
             {
@@ -254,7 +313,7 @@ namespace Ghosts.Client.Infrastructure
             var dirName = cmdArgs[1];
             if (dirName.Contains("[remotedir]"))
             {
-                SftpFile file = GetRemoteFile(client);
+                SftpFile file = GetRemoteDir(client);
                 if (file == null)
                 {
                     Log.Trace($"Sft[:: Cannot find a valid directory to change to on remote host {this.HostIp}.");
@@ -266,7 +325,70 @@ namespace Ghosts.Client.Infrastructure
             try
             {
                 client.ChangeDirectory(dirName);
-                
+                Log.Trace($"Sftp:: Changed to directory {dirName} on remote host {this.HostIp}.");
+            }
+            catch (Exception e)
+            {
+                Log.Error(e);
+            }
+
+        }
+
+        public void DoMakeDir(SftpClient client, string cmd)
+        {
+            char[] charSeparators = new char[] { ' ' };
+            var cmdArgs = cmd.Split(charSeparators, 2, StringSplitOptions.None);
+            if (cmdArgs.Length != 2)
+            {
+                Log.Trace($"Sftp:: ill-formatted mkdir command: {cmd} ");
+                return;
+            }
+            var dirName = cmdArgs[1];
+            if (dirName.Contains("[randomname]"))
+            {
+                dirName = RandomString(7, 10, true);
+            }
+
+            try
+            {
+                if (FindDir(client, dirName) == null)
+                {
+                    client.CreateDirectory(dirName);
+                    Log.Trace($"Sftp:: Created directory {dirName} on remote host {this.HostIp}.");
+                } else
+                {
+                    Log.Trace($"Sftp:: mkdir directory command skipped, as {dirName} already exists remote host {this.HostIp}.");
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Error(e);
+            }
+
+        }
+
+        public void DoListDir(SftpClient client, string cmd)
+        {
+            char[] charSeparators = new char[] { ' ' };
+            var cmdArgs = cmd.Split(charSeparators, 2, StringSplitOptions.None);
+            
+            var dirName = ".";
+            if (cmdArgs.Length == 2) dirName = cmdArgs[1];
+            if (dirName.Contains("[remotedir]"))
+            {
+                SftpFile file = GetRemoteDir(client);
+                if (file == null)
+                {
+                    Log.Trace($"Sftp:: Cannot find a valid directory to list in current working directory on remote host {this.HostIp}.");
+                    return;
+                }
+                dirName = file.FullName;
+            }
+
+            try
+            {
+                var remoteFiles = client.ListDirectory(dirName).ToList<SftpFile>();
+                Log.Trace($"Sftp::Found {remoteFiles.Count} in directory {dirName} on remote host {this.HostIp}.");
             }
             catch (Exception e)
             {
@@ -281,15 +403,15 @@ namespace Ghosts.Client.Infrastructure
         /// put [localfile] - uploads random remote file from local upload directory to remote host. Can specify absolute/relative path instead of [localfile]
         /// cd [remotedir] - change to random directory in current directory on remote host. Can specify absolute/relative path instead of [remotedir]
         /// rm [remotefile] - deletes random remote file from remote host. Can specify absolute/relative path instead of [remotefile]
-        /// ls  - list remote contents of current directory
-        /// mkdir [randomname] - make a random directory on remote host. Can specify absolute/relative path instead of [randomname]
+        /// ls [remotedir] - list remote contents of current directory, if no directory specified use current directory. Can specify absolute/relative path instead of [remotedir]
+        /// mkdir [randomname] - make a random directory in cwd on remote host. Can specify absolute/relative path instead of [randomname]
         /// </summary>
         /// <param name="client"></param>
         /// <param name="cmd"></param>
 
         public void RunSftpCommand(SftpClient client, string cmd)
         {
-
+            //TODO: rm, ls, mkdir
             if (cmd.StartsWith("put"))
             {
                 DoPut(client, cmd);
@@ -300,10 +422,31 @@ namespace Ghosts.Client.Infrastructure
                 DoGet(client, cmd);
                 return;
             }
-            string newcmd = this.ParseSftpCmd(client, cmd);
-            if (newcmd == null) return;
-            
-            if (newcmd.StartsWith("cd")) DoChangeDir(client, newcmd);
+            else if (cmd.StartsWith("cd"))
+            {
+                DoChangeDir(client, cmd);
+                return;
+            }
+            else if (cmd.StartsWith("ls"))
+            {
+                DoListDir(client, cmd);
+                return;
+            }
+            else if (cmd.StartsWith("rm"))
+            {
+                DoRemoveFile(client, cmd);
+                return;
+            }
+            else if (cmd.StartsWith("mkdir"))
+            {
+                DoMakeDir(client, cmd);
+                return;
+            }
+            else
+            {
+                Log.Trace($"Sftp::Unsupported command, execution skipped : {cmd}.");
+            }
+
 
 
             return;

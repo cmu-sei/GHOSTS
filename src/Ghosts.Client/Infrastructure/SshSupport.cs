@@ -21,40 +21,6 @@ namespace Ghosts.Client.Infrastructure
         public string uploadDirectory { get; set; } = null;
 
 
-        private static string RandomString(int min, int max, bool lowercase = false)
-        {
-            var size = _random.Next(min, max);
-            var builder = new StringBuilder(size);
-            const int lettersOffset = 26; // A...Z or a..z: length=26  
-            char[] others = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
-
-            for (var i = 0; i < size; i++)
-            {
-                var choice = _random.Next(2);
-                char offset = choice == 0 ? 'a' : 'A';
-
-                if (i == 0 || _random.Next(10) < 7)
-                {
-                    var @char = (char)_random.Next(offset, offset + lettersOffset);
-                    builder.Append(@char);
-                }
-                else
-                {
-                    var @char = others[_random.Next(others.Length)];
-                    builder.Append(@char);
-                }
-
-            }
-            if (lowercase)
-            {
-                return builder.ToString().ToLower();
-            }
-            else
-            {
-                return builder.ToString();
-            }
-        }
-
 
         private string GetRandomDirectory(ShellStream client)
         {
@@ -202,6 +168,42 @@ namespace Ghosts.Client.Infrastructure
         public int CommandTimeout { get; set; } = 1000;
 
         public string HostIp { get; set; } = null;
+
+
+        public static string RandomString(int min, int max, bool lowercase = false)
+        {
+            var size = _random.Next(min, max);
+            var builder = new StringBuilder(size);
+            const int lettersOffset = 26; // A...Z or a..z: length=26  
+            char[] others = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+
+            for (var i = 0; i < size; i++)
+            {
+                var choice = _random.Next(2);
+                char offset = choice == 0 ? 'a' : 'A';
+
+                if (i == 0 || _random.Next(10) < 7)
+                {
+                    var @char = (char)_random.Next(offset, offset + lettersOffset);
+                    builder.Append(@char);
+                }
+                else
+                {
+                    var @char = others[_random.Next(others.Length)];
+                    builder.Append(@char);
+                }
+
+            }
+            if (lowercase)
+            {
+                return builder.ToString().ToLower();
+            }
+            else
+            {
+                return builder.ToString();
+            }
+        }
+
     }
 
 }

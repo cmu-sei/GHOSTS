@@ -202,7 +202,7 @@ namespace Ghosts.Client.Handlers
                     {
                         try
                         {
-                            this.CurrentSshSupport.RunSshCommand(shellStreamSSH, sshCmd);
+                            this.CurrentSshSupport.RunSshCommand(shellStreamSSH, sshCmd.Trim());
                         }
                         catch (Exception e)
                         {

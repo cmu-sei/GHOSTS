@@ -44,17 +44,6 @@ namespace Ghosts.Client.Handlers
                         }
                     }
                    
-                    if (handler.HandlerArgs.ContainsKey("CommandTimeout"))
-                    {
-                        try
-                        {
-                            this.CurrentSftpSupport.CommandTimeout = Int32.Parse(handler.HandlerArgs["CommandTimeout"].ToString());
-                        }
-                        catch (Exception e)
-                        {
-                            Log.Error(e);
-                        }
-                    }
                     if (handler.HandlerArgs.ContainsKey("TimeBetweenCommandsMax"))
                     {
                         try
@@ -197,7 +186,7 @@ namespace Ghosts.Client.Handlers
                     {
                         try
                         {
-                            this.CurrentSftpSupport.RunSftpCommand(client, sftpCmd);
+                            this.CurrentSftpSupport.RunSftpCommand(client, sftpCmd.Trim());
                             if (this.CurrentSftpSupport.TimeBetweenCommandsMin != 0 && this.CurrentSftpSupport.TimeBetweenCommandsMax != 0 && this.CurrentSftpSupport.TimeBetweenCommandsMin < this.CurrentSftpSupport.TimeBetweenCommandsMax)
                             {
                                 Thread.Sleep(_random.Next(this.CurrentSftpSupport.TimeBetweenCommandsMin, this.CurrentSftpSupport.TimeBetweenCommandsMax));
