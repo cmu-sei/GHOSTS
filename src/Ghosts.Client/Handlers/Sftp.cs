@@ -14,38 +14,22 @@ using Newtonsoft.Json;
 using Ghosts.Domain.Code;
 using WorkingHours = Ghosts.Client.Infrastructure.WorkingHours;
 
-/*
- * Used Package Renci.sshNet
- * Installed via packag manager
- * Install-Package SSH.NET
- * 
- */
-
 namespace Ghosts.Client.Handlers
 {
-    /// <summary>
-    /// This handler connects to a remote host and executes SSH commands.
-    /// This uses the Credentials class that keeps a simple dictionary of credentials
-    /// For SSH, is  uses the Renci.sshNet package, install via PM with Install-Package SSH.NET
-    /// The SSH connection uses a ShellStream for executing commands once a connection is established.
-    /// Each SSH shell command can have reserved words in it, such as '[remotedirectory]' which 
-    /// is replaced by a random remote directory on the server.  So 'cd [remotedirectory]' will change
-    /// to a random remote directory. 
-    /// See the Sample Timelines/Ssh.json for a sample timeline using this handler.
-    /// </summary>
-    public class Ssh : BaseHandler
+    public class Sftp : BaseHandler
     {
 
         private Credentials CurrentCreds = null;
-        private SshSupport CurrentSshSupport = null;   //current SshSupport for this object
+        private SftpSupport CurrentSftpSupport = null;   //current SftpSupport for this object
         public int jitterfactor = 0;
 
-        public Ssh(TimelineHandler handler)
+
+        public Sftp(TimelineHandler handler)
         {
             try
             {
                 base.Init(handler);
-                this.CurrentSshSupport = new SshSupport();
+                this.CurrentSftpSupport = new SftpSupport();
                 if (handler.HandlerArgs != null)
                 {
                     if (handler.HandlerArgs.ContainsKey("CredentialsFile"))
@@ -59,34 +43,13 @@ namespace Ghosts.Client.Handlers
                             Log.Error(e);
                         }
                     }
-                    if (handler.HandlerArgs.ContainsKey("ValidExts"))
-                    {
-                        try
-                        {
-                            this.CurrentSshSupport.ValidExts = handler.HandlerArgs["ValidExts"].ToString().Split(';');
-                        }
-                        catch (Exception e)
-                        {
-                            Log.Error(e);
-                        }
-                    }
-                    if (handler.HandlerArgs.ContainsKey("CommandTimeout"))
-                    {
-                        try
-                        {
-                            this.CurrentSshSupport.CommandTimeout = Int32.Parse(handler.HandlerArgs["CommandTimeout"].ToString());
-                        }
-                        catch (Exception e)
-                        {
-                            Log.Error(e);
-                        }
-                    }
+                   
                     if (handler.HandlerArgs.ContainsKey("TimeBetweenCommandsMax"))
                     {
                         try
                         {
-                            this.CurrentSshSupport.TimeBetweenCommandsMax = Int32.Parse(handler.HandlerArgs["TimeBetweenCommandsMax"].ToString());
-                            if (this.CurrentSshSupport.TimeBetweenCommandsMax < 0) this.CurrentSshSupport.TimeBetweenCommandsMax = 0;
+                            this.CurrentSftpSupport.TimeBetweenCommandsMax = Int32.Parse(handler.HandlerArgs["TimeBetweenCommandsMax"].ToString());
+                            if (this.CurrentSftpSupport.TimeBetweenCommandsMax < 0) this.CurrentSftpSupport.TimeBetweenCommandsMax = 0;
                         }
                         catch (Exception e)
                         {
@@ -97,14 +60,35 @@ namespace Ghosts.Client.Handlers
                     {
                         try
                         {
-                            this.CurrentSshSupport.TimeBetweenCommandsMin = Int32.Parse(handler.HandlerArgs["TimeBetweenCommandsMin"].ToString());
-                            if (this.CurrentSshSupport.TimeBetweenCommandsMin < 0) this.CurrentSshSupport.TimeBetweenCommandsMin = 0;
+                            this.CurrentSftpSupport.TimeBetweenCommandsMin = Int32.Parse(handler.HandlerArgs["TimeBetweenCommandsMin"].ToString());
+                            if (this.CurrentSftpSupport.TimeBetweenCommandsMin < 0) this.CurrentSftpSupport.TimeBetweenCommandsMin = 0;
                         }
                         catch (Exception e)
                         {
                             Log.Error(e);
                         }
                     }
+                    if (handler.HandlerArgs.ContainsKey("UploadDirectory"))
+                    {
+                        string targetDir = handler.HandlerArgs["UploadDirectory"].ToString();
+                        targetDir = Environment.ExpandEnvironmentVariables(targetDir);
+                        if (!Directory.Exists(targetDir))
+                        {
+                            Log.Trace($"Sftp:: upload directory {targetDir} does not exist, using browser downloads directory.");
+                        }
+                        else
+                        {
+                            this.CurrentSftpSupport.uploadDirectory = targetDir;
+                        }
+                    }
+
+                    if (this.CurrentSftpSupport.uploadDirectory == null)
+                    {
+                        this.CurrentSftpSupport.uploadDirectory = KnownFolders.GetDownloadFolderPath();
+                    }
+
+                    this.CurrentSftpSupport.downloadDirectory = KnownFolders.GetDownloadFolderPath();
+
                     if (handler.HandlerArgs.ContainsKey("delay-jitter"))
                     {
                         jitterfactor = Jitter.JitterFactorParse(handler.HandlerArgs["delay-jitter"].ToString());
@@ -128,7 +112,7 @@ namespace Ghosts.Client.Handlers
             catch (ThreadAbortException)
             {
                 ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.Command);
-                Log.Trace("Ssh closing...");
+                Log.Trace("Sftp closing...");
             }
             catch (Exception e)
             {
@@ -145,7 +129,7 @@ namespace Ghosts.Client.Handlers
                 if (timelineEvent.DelayBefore > 0)
                     Thread.Sleep(timelineEvent.DelayBefore);
 
-                Log.Trace($"SSH Command: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfter}");
+                Log.Trace($"Sftp Command: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfter}");
 
                 switch (timelineEvent.Command)
                 {
@@ -169,21 +153,22 @@ namespace Ghosts.Client.Handlers
 
         public void Command(TimelineHandler handler, TimelineEvent timelineEvent, string command)
         {
-            
+
             char[] charSeparators = new char[] { '|' };
-            var cmdArgs = command.Split(charSeparators, 3,StringSplitOptions.None);
+            var cmdArgs = command.Split(charSeparators, 3, StringSplitOptions.None);
             var hostIp = cmdArgs[0];
+            this.CurrentSftpSupport.HostIp = hostIp; //for trace output
             var credKey = cmdArgs[1];
-            var sshCmds = cmdArgs[2].Split(';');
+            var sftpCmds = cmdArgs[2].Split(';');
             var username = this.CurrentCreds.GetUsername(credKey);
             var password = this.CurrentCreds.GetPassword(credKey);
-            Log.Trace("Beginning SSH to host:  " + hostIp + " with command: " + command);
+            Log.Trace("Beginning Sftp to host:  " + hostIp + " with command: " + command);
 
             if (username != null && password != null)
             {
-                
+
                 //have IP, user/pass, try connecting 
-                using (var client = new SshClient(hostIp, username, password))
+                using (var client = new SftpClient(hostIp, username, password))
                 {
                     try
                     {
@@ -195,14 +180,17 @@ namespace Ghosts.Client.Handlers
                         return;  //unable to connect
                     }
                     //we are connected, execute the commands
-                    ShellStream shellStreamSSH = client.CreateShellStream("vt220", 80, 60, 800, 600, 65536);
-                    //before running commands, flush the input of welcome login text
-                    this.CurrentSshSupport.GetSshCommandOutput(shellStreamSSH, true);
-                    foreach (var sshCmd in sshCmds)
+                    
+                    
+                    foreach (var sftpCmd in sftpCmds)
                     {
                         try
                         {
-                            this.CurrentSshSupport.RunSshCommand(shellStreamSSH, sshCmd.Trim());
+                            this.CurrentSftpSupport.RunSftpCommand(client, sftpCmd.Trim());
+                            if (this.CurrentSftpSupport.TimeBetweenCommandsMin != 0 && this.CurrentSftpSupport.TimeBetweenCommandsMax != 0 && this.CurrentSftpSupport.TimeBetweenCommandsMin < this.CurrentSftpSupport.TimeBetweenCommandsMax)
+                            {
+                                Thread.Sleep(_random.Next(this.CurrentSftpSupport.TimeBetweenCommandsMin, this.CurrentSftpSupport.TimeBetweenCommandsMax));
+                            }
                         }
                         catch (Exception e)
                         {
@@ -218,9 +206,5 @@ namespace Ghosts.Client.Handlers
         }
 
 
-
-
-
     }
-
 }

@@ -93,7 +93,9 @@ namespace Ghosts.Domain
         LightPowerPoint = 33,
         Bash = 40,
         Print = 45,
-        Ssh = 100
+        Ssh = 100,
+        Sftp = 101,
+
     }
 
     /// <summary>

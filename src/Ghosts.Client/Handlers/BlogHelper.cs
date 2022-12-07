@@ -221,6 +221,11 @@ namespace Ghosts.Client.Handlers
                         baseHandler.blogAbort = true;
                         return;
                     }
+                    if (handler.HandlerArgs.ContainsKey("delay-jitter"))
+                    {
+                        baseHandler.jitterfactor = Jitter.JitterFactorParse(handler.HandlerArgs["delay-jitter"].ToString());
+                    }
+
 
                     credFname = handler.HandlerArgs["blog-credentials-file"].ToString();
 

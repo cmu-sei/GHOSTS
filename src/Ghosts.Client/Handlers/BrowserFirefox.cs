@@ -10,6 +10,9 @@ using System.IO;
 using System.Threading;
 using Ghosts.Domain.Code.Helpers;
 using Newtonsoft.Json.Linq;
+using Ghosts.Domain.Code;
+using System.Text.RegularExpressions;
+using System.Runtime.InteropServices;
 
 namespace Ghosts.Client.Handlers
 {
@@ -19,6 +22,12 @@ namespace Ghosts.Client.Handlers
         {
             base.Init(handler);
             BrowserType = HandlerType.BrowserFirefox;
+            StartEx(handler);
+            
+        }
+
+        public virtual void StartEx(TimelineHandler handler)
+        {
             var hasRunSuccessfully = false;
             while (!hasRunSuccessfully)
             {
@@ -56,7 +65,49 @@ namespace Ghosts.Client.Handlers
             return true;
         }
 
-        private bool FirefoxEx(TimelineHandler handler)
+        public override void HandleBrowserException(Exception e)
+        {
+            if (e.Message.Contains("InsecureCertificate") || e.Message.Contains("Reached error page:"))
+            {
+                HandleInsecureCertificate();
+            }
+        }
+
+        public void HandleInsecureCertificate()
+        {
+            //look for security override
+            IWebElement targetElement;
+            try
+            {
+                Thread.Sleep(500);
+                targetElement = Driver.FindElement(By.Id("advancedButton"));
+                BrowserHelperSupport.MoveToElementAndClick(Driver, targetElement); //click advanced 
+                Thread.Sleep(500);
+            }
+            catch
+            {
+                return; //return if not present
+            }
+            try { 
+                targetElement = Driver.FindElement(By.Id("exceptionDialogButton"));  
+                BrowserHelperSupport.MoveToElementAndClick(Driver, targetElement);   //accept risk and continue
+                Thread.Sleep(1000);
+                return;
+            }
+            catch { }
+            //look for return button
+            try
+            {
+                targetElement = Driver.FindElement(By.Id("advancedPanelReturnButton"));
+                BrowserHelperSupport.MoveToElementAndClick(Driver, targetElement);   //return, cannot continue
+                Thread.Sleep(1000);
+                
+            }
+            catch { }
+
+        }
+
+        public bool FirefoxEx(TimelineHandler handler)
         {
             try
             {
@@ -136,12 +187,17 @@ namespace Ghosts.Client.Handlers
 
                 if (this.Restart)
                 {
-                    Thread.Sleep(2000);
-                    _ = new BrowserFirefox(handler);
+                    DoRestart(handler);
                 }
             }
 
             return true;
+        }
+
+        public virtual void DoRestart(TimelineHandler handler)
+        {
+            Thread.Sleep(2000);
+            _ = new BrowserFirefox(handler);
         }
 
         internal static IWebDriver GetDriver(TimelineHandler handler)
@@ -158,6 +214,7 @@ namespace Ghosts.Client.Handlers
             options.AddArguments("--disable-infobars");
             options.AddArguments("--disable-extensions");
             options.AddArguments("--disable-notifications");
+            //options.AddArguments("--remote-debugging-port=0");
             if (handler.HandlerArgs.ContainsKey("command-line-args"))
             {
                 foreach (var option in (JArray)handler.HandlerArgs["command-line-args"])
