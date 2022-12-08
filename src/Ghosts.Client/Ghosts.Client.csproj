@@ -542,6 +542,7 @@
     <Compile Include="Handlers\BlogHelperDrupal.cs" />
     <Compile Include="Handlers\BrowserCrawl.cs" />
     <Compile Include="Handlers\Print.cs" />
+    <Compile Include="Handlers\Sftp.cs" />
     <Compile Include="Handlers\SharepointHelper.cs" />
     <Compile Include="Handlers\Ssh.cs" />
     <Compile Include="Infrastructure\Browser\BlogContent.cs" />
@@ -553,6 +554,7 @@
     <Compile Include="Infrastructure\ClientConfigurationResolver.cs" />
     <Compile Include="Infrastructure\KnownFolders.cs" />
     <Compile Include="Infrastructure\OfficeHelpers.cs" />
+    <Compile Include="Infrastructure\SftpSupport.cs" />
     <Compile Include="Infrastructure\SshSupport.cs" />
     <Compile Include="Infrastructure\TempFiles.cs" />
     <Compile Include="Handlers\Clicks.cs" />
@@ -645,6 +647,7 @@
     <None Include="Sample Timelines\PowerPoint.json" />
     <None Include="Sample Timelines\Print.json" />
     <None Include="Sample Timelines\Reboot.json" />
+    <None Include="Sample Timelines\Sftp.json" />
     <None Include="Sample Timelines\Ssh.json" />
     <None Include="Sample Timelines\trackables timeline.json" />
     <None Include="Sample Timelines\watcher.json" />
