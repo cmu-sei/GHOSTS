@@ -6,95 +6,94 @@ using System.Threading;
 using Ghosts.Client.Infrastructure;
 using Ghosts.Domain;
 
-namespace Ghosts.Client.Handlers
+namespace Ghosts.Client.Handlers;
+
+public class Cmd : BaseHandler
 {
-    public class Cmd : BaseHandler
+    public Cmd(TimelineHandler handler)
     {
-        public Cmd(TimelineHandler handler)
+        try
         {
-            try
+            base.Init(handler);
+            if (handler.Loop)
             {
-                base.Init(handler);
-                if (handler.Loop)
-                {
-                    while (true)
-                    {
-                        Ex(handler);
-                    }
-                }
-                else
+                while (true)
                 {
                     Ex(handler);
                 }
             }
-            catch (ThreadAbortException)
+            else
             {
-                ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.Command);
-                Log.Trace("Cmd closing...");
-            }
-            catch (Exception e)
-            {
-                Log.Error(e);
+                Ex(handler);
             }
         }
-
-        public void Ex(TimelineHandler handler)
+        catch (ThreadAbortException)
         {
-            foreach (var timelineEvent in handler.TimeLineEvents)
+            ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.Command);
+            Log.Trace("Cmd closing...");
+        }
+        catch (Exception e)
+        {
+            Log.Error(e);
+        }
+    }
+
+    public void Ex(TimelineHandler handler)
+    {
+        foreach (var timelineEvent in handler.TimeLineEvents)
+        {
+            WorkingHours.Is(handler);
+
+            if (timelineEvent.DelayBefore > 0)
+                Thread.Sleep(timelineEvent.DelayBefore);
+
+            Log.Trace($"Command line: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfter}");
+
+            switch (timelineEvent.Command)
             {
-                WorkingHours.Is(handler);
-
-                if (timelineEvent.DelayBefore > 0)
-                    Thread.Sleep(timelineEvent.DelayBefore);
-
-                Log.Trace($"Command line: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfter}");
-
-                switch (timelineEvent.Command)
-                {
-                    case "random":
-                        while (true)
+                case "random":
+                    while (true)
+                    {
+                        var cmd = timelineEvent.CommandArgs[_random.Next(0, timelineEvent.CommandArgs.Count)];
+                        if (!string.IsNullOrEmpty(cmd.ToString()))
                         {
-                            var cmd = timelineEvent.CommandArgs[_random.Next(0, timelineEvent.CommandArgs.Count)];
-                            if (!string.IsNullOrEmpty(cmd.ToString()))
-                            {
-                                this.Command(handler, timelineEvent, cmd.ToString());
-                            }
-                            Thread.Sleep(timelineEvent.DelayAfter);
+                            this.Command(handler, timelineEvent, cmd.ToString());
                         }
-                    default:
-                        this.Command(handler, timelineEvent, timelineEvent.Command);
+                        Thread.Sleep(timelineEvent.DelayAfter);
+                    }
+                default:
+                    this.Command(handler, timelineEvent, timelineEvent.Command);
 
-                        foreach (var cmd in timelineEvent.CommandArgs)
-                            if (!string.IsNullOrEmpty(cmd.ToString()))
-                                this.Command(handler, timelineEvent, cmd.ToString());
-                        break;
-                }
-
-                if (timelineEvent.DelayAfter > 0)
-                    Thread.Sleep(timelineEvent.DelayAfter);
+                    foreach (var cmd in timelineEvent.CommandArgs)
+                        if (!string.IsNullOrEmpty(cmd.ToString()))
+                            this.Command(handler, timelineEvent, cmd.ToString());
+                    break;
             }
+
+            if (timelineEvent.DelayAfter > 0)
+                Thread.Sleep(timelineEvent.DelayAfter);
         }
+    }
 
-        public void Command(TimelineHandler handler, TimelineEvent timelineEvent, string command)
+    public void Command(TimelineHandler handler, TimelineEvent timelineEvent, string command)
+    {
+        Log.Trace("Spawning cmd.exe...");
+        var processStartInfo = new ProcessStartInfo("cmd.exe")
         {
-            Log.Trace("Spawning cmd.exe...");
-            var processStartInfo = new ProcessStartInfo("cmd.exe")
-            {
-                RedirectStandardInput = true,
-                RedirectStandardOutput = true,
-                UseShellExecute = false
-            };
+            RedirectStandardInput = true,
+            RedirectStandardOutput = true,
+            UseShellExecute = false
+        };
 
-            using (var process = Process.Start(processStartInfo))
+        using (var process = Process.Start(processStartInfo))
+        {
+            Thread.Sleep(1000);
+            if (process != null)
             {
-                Thread.Sleep(1000);
-                if (process != null)
-                {
-                    process.StandardInput.WriteLine(command);
-                    process.StandardInput.Close(); // line added to stop process from hanging on ReadToEnd()
-                    var outputString = process.StandardOutput.ReadToEnd();
-                    this.Report(handler.HandlerType.ToString(), command, outputString, timelineEvent.TrackableId);
-                }
+                process.StandardInput.WriteLine(command);
+                process.StandardInput.Close(); // line added to stop process from hanging on ReadToEnd()
+                var outputString = process.StandardOutput.ReadToEnd();
+                this.Report(handler.HandlerType.ToString(), command, outputString, timelineEvent.TrackableId);
             }
         }
     }

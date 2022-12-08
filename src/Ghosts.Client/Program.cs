@@ -16,209 +16,208 @@ using Ghosts.Domain.Code;
 using Ghosts.Domain.Models;
 using NLog;
 
-namespace Ghosts.Client
+namespace Ghosts.Client;
+
+class Program
 {
-    class Program
+    private static readonly Logger _log = LogManager.GetCurrentClassLogger();
+
+    [DllImport("kernel32.dll")]
+    private static extern IntPtr GetConsoleWindow();
+
+    [DllImport("user32.dll")]
+    private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+    private const int SwHide = 0;
+    private const int SwShow = 5;
+
+    internal static List<ThreadJob> ThreadJobs { get; set; }
+    internal static ClientConfiguration Configuration { get; set; }
+    internal static Options OptionFlags;
+    internal static bool IsDebug;
+
+    public static CheckId CheckId { get; set; }
+
+    // minimize memory use
+    [DllImport("psapi.dll")]
+    internal static extern int EmptyWorkingSet(IntPtr hwProc);
+
+    internal static void MinimizeFootprint()
     {
-        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
+        EmptyWorkingSet(Process.GetCurrentProcess().Handle);
+    }
 
-        [DllImport("kernel32.dll")]
-        private static extern IntPtr GetConsoleWindow();
+    internal static void MinimizeMemory()
+    {
+        GC.Collect(GC.MaxGeneration);
+        GC.WaitForPendingFinalizers();
+        SetProcessWorkingSetSize(Process.GetCurrentProcess().Handle,
+            (UIntPtr)0xFFFFFFFF, (UIntPtr)0xFFFFFFFF);
+    }
 
-        [DllImport("user32.dll")]
-        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+    [DllImport("kernel32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool SetProcessWorkingSetSize(IntPtr process,
+        UIntPtr minimumWorkingSetSize, UIntPtr maximumWorkingSetSize);
+    // end minimize memory use
 
-        private const int SwHide = 0;
-        private const int SwShow = 5;
+    internal class Options
+    {
+        [Option('d', "debug", Default = false, HelpText = "Launch in debug mode")]
+        public bool Debug { get; set; }
 
-        internal static List<ThreadJob> ThreadJobs { get; set; }
-        internal static ClientConfiguration Configuration { get; set; }
-        internal static Options OptionFlags;
-        internal static bool IsDebug;
+        [Option('h', "help", Default = false, HelpText = "Display this help screen")]
+        public bool Help { get; set; }
 
-        public static CheckId CheckId { get; set; }
+        [Option('v', "version", Default = false, HelpText = "Client version")]
+        public bool Version { get; set; }
 
-        // minimize memory use
-        [DllImport("psapi.dll")]
-        internal static extern int EmptyWorkingSet(IntPtr hwProc);
+        [Option('i', "information", Default = false, HelpText = "Client id information")]
+        public bool Information { get; set; }
+    }
 
-        internal static void MinimizeFootprint()
-        {
-            EmptyWorkingSet(Process.GetCurrentProcess().Handle);
-        }
-
-        internal static void MinimizeMemory()
-        {
-            GC.Collect(GC.MaxGeneration);
-            GC.WaitForPendingFinalizers();
-            SetProcessWorkingSetSize(Process.GetCurrentProcess().Handle,
-                (UIntPtr)0xFFFFFFFF, (UIntPtr)0xFFFFFFFF);
-        }
-
-        [DllImport("kernel32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool SetProcessWorkingSetSize(IntPtr process,
-            UIntPtr minimumWorkingSetSize, UIntPtr maximumWorkingSetSize);
-        // end minimize memory use
-
-        internal class Options
-        {
-            [Option('d', "debug", Default = false, HelpText = "Launch in debug mode")]
-            public bool Debug { get; set; }
-
-            [Option('h', "help", Default = false, HelpText = "Display this help screen")]
-            public bool Help { get; set; }
-
-            [Option('v', "version", Default = false, HelpText = "Client version")]
-            public bool Version { get; set; }
-
-            [Option('i', "information", Default = false, HelpText = "Client id information")]
-            public bool Information { get; set; }
-        }
-
-        [STAThread]
-        static void Main(string[] args)
-        {
-            MinimizeFootprint();
-            MinimizeMemory();
+    [STAThread]
+    static void Main(string[] args)
+    {
+        MinimizeFootprint();
+        MinimizeMemory();
             
-            try
-            {
-                Run(args);
-            }
-            catch (Exception e)
-            {
-                var s = $"Fatal exception in {ApplicationDetails.Name} {ApplicationDetails.Version}: {e}";
-                _log.Fatal(s);
-
-                var handle = GetConsoleWindow();
-                ShowWindow(handle, SwShow);
-
-                Console.WriteLine(s);
-                Console.ReadLine();
-            }
-        }
-
-        private static void Run(string[] args)
+        try
         {
-            // ignore all certs
-            ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
+            Run(args);
+        }
+        catch (Exception e)
+        {
+            var s = $"Fatal exception in {ApplicationDetails.Name} {ApplicationDetails.Version}: {e}";
+            _log.Fatal(s);
 
-            // parse program flags
-            if (!CommandLineFlagManager.Parse(args))
-                return;
-            
-            //attach handler for shutdown tasks
-            AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
-
-            _log.Trace($"Initiating {ApplicationDetails.Name} startup - Local time: {DateTime.Now.TimeOfDay} UTC: {DateTime.UtcNow.TimeOfDay}");
-
-            ThreadJobs = new List<ThreadJob>();
-
-            //load configuration
-            try
-            {
-                Configuration = ClientConfigurationLoader.Config;
-            }
-            catch (Exception e)
-            {
-                var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-                var o = $"Exec path: {path} - configuration 404: {ApplicationDetails.ConfigurationFiles.Application} - exiting. Exception: {e}";
-                _log.Fatal(o);
-                Console.WriteLine(o);
-                Console.ReadLine();
-                return;
-            }
-
-            if (Configuration.ResourceControl == null)
-            {
-                Configuration.ResourceControl = new ClientConfiguration.ResourceControlSettings();
-                Configuration.ResourceControl.ManageProcesses = true;
-            }
-
-            _log.Trace($"Configuration.ResourceControl.ManageProcesses = {Program.Configuration.ResourceControl.ManageProcesses}");
-
-            Program.CheckId = new CheckId();
-
-            DebugManager.Evaluate();
-
-            StartupTasks.CheckConfigs();
-
-            Thread.Sleep(500);
-            
-            //show window if debugging or if --debug flag passed in
             var handle = GetConsoleWindow();
-            if (!IsDebug)
-            {
-                ShowWindow(handle, SwHide);
-                //add hook to manage processes running in order to never tip a machine over
-                StartupTasks.CleanupProcesses();
-            }
+            ShowWindow(handle, SwShow);
 
-            if (!Configuration.DisableStartup)
-            {
-                //add ghosts to startup
-                StartupTasks.SetStartup();
-            }
+            Console.WriteLine(s);
+            Console.ReadLine();
+        }
+    }
 
-            //add file watch to handle ad hoc commands
-            ListenerManager.Run();
+    private static void Run(string[] args)
+    {
+        // ignore all certs
+        ServicePointManager.ServerCertificateValidationCallback += (_, _, _, _) => true;
 
-            //do we have client id? or is this first run?
-            _log.Trace($"CheckID: {Program.CheckId.Id}");
+        // parse program flags
+        if (!CommandLineFlagManager.Parse(args))
+            return;
+            
+        //attach handler for shutdown tasks
+        AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
 
-            //connect to command server for 1) client id 2) get updates and 3) sending logs/surveys
-            Updates.Run();
+        _log.Trace($"Initiating {ApplicationDetails.Name} startup - Local time: {DateTime.Now.TimeOfDay} UTC: {DateTime.UtcNow.TimeOfDay}");
 
-            //local survey gathers information such as drives, accounts, logs, etc.
-            if (Configuration.Survey.IsEnabled)
-            {
-                try
-                {
-                    Survey.SurveyManager.Run();
-                }
-                catch (Exception exc)
-                {
-                    _log.Error($"Exception instantiating survey: {exc}");
-                }
-            }
+        ThreadJobs = new List<ThreadJob>();
 
-            if (Configuration.HealthIsEnabled)
-            {
-                try
-                {
-                    var h = new Health.Check();
-                    h.Run();
-                }
-                catch (Exception exc)
-                {
-                    _log.Error($"Exception instantiating health: {exc}");
-                }
-            }
-
-            //timeline processing
-            if (Configuration.HandlersIsEnabled)
-            {
-                try
-                {
-                    var o = new Orchestrator();
-                    o.Run();
-                }
-                catch (Exception exc)
-                {
-                    _log.Error($"Exception instantiating orchestrator: {exc}");
-                }
-            }
-
-            //ghosts singleton
-            new ManualResetEvent(false).WaitOne();
+        //load configuration
+        try
+        {
+            Configuration = ClientConfigurationLoader.Config;
+        }
+        catch (Exception e)
+        {
+            var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            var o = $"Exec path: {path} - configuration 404: {ApplicationDetails.ConfigurationFiles.Application} - exiting. Exception: {e}";
+            _log.Fatal(o);
+            Console.WriteLine(o);
+            Console.ReadLine();
+            return;
         }
 
-        //hook for shutdown tasks
-        private static void CurrentDomain_ProcessExit(object sender, EventArgs e)
+        if (Configuration.ResourceControl == null)
         {
-            _log.Debug($"Initiating {ApplicationDetails.Name} shutdown - Local time: {DateTime.Now.TimeOfDay} UTC: {DateTime.UtcNow.TimeOfDay}");
+            Configuration.ResourceControl = new ClientConfiguration.ResourceControlSettings();
+            Configuration.ResourceControl.ManageProcesses = true;
+        }
+
+        _log.Trace($"Configuration.ResourceControl.ManageProcesses = {Program.Configuration.ResourceControl.ManageProcesses}");
+
+        Program.CheckId = new CheckId();
+
+        DebugManager.Evaluate();
+
+        StartupTasks.CheckConfigs();
+
+        Thread.Sleep(500);
+            
+        //show window if debugging or if --debug flag passed in
+        var handle = GetConsoleWindow();
+        if (!IsDebug)
+        {
+            ShowWindow(handle, SwHide);
+            //add hook to manage processes running in order to never tip a machine over
             StartupTasks.CleanupProcesses();
         }
+
+        if (!Configuration.DisableStartup)
+        {
+            //add ghosts to startup
+            StartupTasks.SetStartup();
+        }
+
+        //add file watch to handle ad hoc commands
+        ListenerManager.Run();
+
+        //do we have client id? or is this first run?
+        _log.Trace($"CheckID: {Program.CheckId.Id}");
+
+        //connect to command server for 1) client id 2) get updates and 3) sending logs/surveys
+        Updates.Run();
+
+        //local survey gathers information such as drives, accounts, logs, etc.
+        if (Configuration.Survey.IsEnabled)
+        {
+            try
+            {
+                Survey.SurveyManager.Run();
+            }
+            catch (Exception exc)
+            {
+                _log.Error($"Exception instantiating survey: {exc}");
+            }
+        }
+
+        if (Configuration.HealthIsEnabled)
+        {
+            try
+            {
+                var h = new Health.Check();
+                h.Run();
+            }
+            catch (Exception exc)
+            {
+                _log.Error($"Exception instantiating health: {exc}");
+            }
+        }
+
+        //timeline processing
+        if (Configuration.HandlersIsEnabled)
+        {
+            try
+            {
+                var o = new Orchestrator();
+                o.Run();
+            }
+            catch (Exception exc)
+            {
+                _log.Error($"Exception instantiating orchestrator: {exc}");
+            }
+        }
+
+        //ghosts singleton
+        new ManualResetEvent(false).WaitOne();
+    }
+
+    //hook for shutdown tasks
+    private static void CurrentDomain_ProcessExit(object sender, EventArgs e)
+    {
+        _log.Debug($"Initiating {ApplicationDetails.Name} shutdown - Local time: {DateTime.Now.TimeOfDay} UTC: {DateTime.UtcNow.TimeOfDay}");
+        StartupTasks.CleanupProcesses();
     }
 }

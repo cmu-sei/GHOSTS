@@ -15,307 +15,306 @@ using Newtonsoft.Json;
 using Word = NetOffice.WordApi;
 using VB = Microsoft.VisualBasic;
 
-namespace Ghosts.Client.Handlers
+namespace Ghosts.Client.Handlers;
+
+public class WordHandler : BaseHandler
 {
-    public class WordHandler : BaseHandler
+    public WordHandler(Timeline timeline, TimelineHandler handler)
     {
-        public WordHandler(Timeline timeline, TimelineHandler handler)
+        try
         {
-            try
+            base.Init(handler);
+            Log.Trace("Launching Word handler");
+
+            if (handler.Loop)
             {
-                base.Init(handler);
-                Log.Trace("Launching Word handler");
-
-                if (handler.Loop)
+                Log.Trace("Word loop");
+                while (true)
                 {
-                    Log.Trace("Word loop");
-                    while (true)
+                    if (timeline != null)
                     {
-                        if (timeline != null)
+                        System.Collections.Generic.List<int> processIds = ProcessManager.GetPids(ProcessManager.ProcessNames.Word).ToList();
+                        if (processIds.Count > 2 && processIds.Count > timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.Word))
                         {
-                            System.Collections.Generic.List<int> processIds = ProcessManager.GetPids(ProcessManager.ProcessNames.Word).ToList();
-                            if (processIds.Count > 2 && processIds.Count > timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.Word))
-                            {
-                                continue;
-                            }
+                            continue;
                         }
-
-                        ExecuteEvents(timeline, handler);
                     }
-                }
-                else
-                {
-                    Log.Trace("Word single run");
-                    KillApp();
+
                     ExecuteEvents(timeline, handler);
-                    KillApp();
                 }
             }
-            catch (ThreadAbortException)
+            else
             {
+                Log.Trace("Word single run");
                 KillApp();
-                Log.Trace("Thread aborted, Word closing...");
-            }
-            catch (Exception e)
-            {
-                Log.Error(e);
+                ExecuteEvents(timeline, handler);
                 KillApp();
             }
         }
-
-        private static void KillApp()
+        catch (ThreadAbortException)
         {
-            ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.Word);
+            KillApp();
+            Log.Trace("Thread aborted, Word closing...");
         }
-
-        private void ExecuteEvents(Timeline timeline, TimelineHandler handler)
+        catch (Exception e)
         {
-            try
+            Log.Error(e);
+            KillApp();
+        }
+    }
+
+    private static void KillApp()
+    {
+        ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.Word);
+    }
+
+    private void ExecuteEvents(Timeline timeline, TimelineHandler handler)
+    {
+        try
+        {
+            foreach (var timelineEvent in handler.TimeLineEvents)
             {
-                foreach (var timelineEvent in handler.TimeLineEvents)
+                try
                 {
-                    try
+                    Log.Trace($"Word event - {timelineEvent}");
+                    Infrastructure.WorkingHours.Is(handler);
+
+                    if (timelineEvent.DelayBefore > 0)
                     {
-                        Log.Trace($"Word event - {timelineEvent}");
-                        Infrastructure.WorkingHours.Is(handler);
+                        Thread.Sleep(timelineEvent.DelayBefore);
+                    }
 
-                        if (timelineEvent.DelayBefore > 0)
+                    if (timeline != null)
+                    {
+                        var processIds = ProcessManager.GetPids(ProcessManager.ProcessNames.Word).Count();
+                        if (processIds > timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.Word))
                         {
-                            Thread.Sleep(timelineEvent.DelayBefore);
+                            return;
+                        }
+                    }
+
+                    // start word and turn off msg boxes
+                    using (var wordApplication = new Word.Application
+                           {
+                               DisplayAlerts = WdAlertLevel.wdAlertsNone,
+                               Visible = true
+                           })
+                    {
+                        Word.Document document = null;
+                        if (OfficeHelpers.ShouldOpenExisting(handler))
+                        {
+                            document = wordApplication.Documents.Open(FileListing.GetRandomFile(handler.HandlerType));
+                            Log.Trace($"{handler.HandlerType} opening existing file: {document.FullName}");
+                        }
+                        if (document == null)
+                        {
+                            document = wordApplication.Documents.Add();
+                            Log.Trace($"{handler.HandlerType} adding new...");
                         }
 
-                        if (timeline != null)
+                        try
                         {
-                            var processIds = ProcessManager.GetPids(ProcessManager.ProcessNames.Word).Count();
-                            if (processIds > timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.Word))
+                            wordApplication.WindowState = WdWindowState.wdWindowStateMinimize;
+                            foreach (var item in wordApplication.Documents)
                             {
-                                return;
+                                item.Windows[1].WindowState = WdWindowState.wdWindowStateMinimize;
                             }
                         }
-
-                        // start word and turn off msg boxes
-                        using (var wordApplication = new Word.Application
-                               {
-                                   DisplayAlerts = WdAlertLevel.wdAlertsNone,
-                                   Visible = true
-                               })
+                        catch (Exception e)
                         {
-                            Word.Document document = null;
-                            if (OfficeHelpers.ShouldOpenExisting(handler))
-                            {
-                                document = wordApplication.Documents.Open(FileListing.GetRandomFile(handler.HandlerType));
-                                Log.Trace($"{handler.HandlerType} opening existing file: {document.FullName}");
-                            }
-                            if (document == null)
-                            {
-                                document = wordApplication.Documents.Add();
-                                Log.Trace($"{handler.HandlerType} adding new...");
-                            }
+                            Log.Trace($"Could not minimize: {e}");
+                        }
 
-                            try
+                        // insert some text
+                        var list = RandomText.GetDictionary.GetDictionaryList();
+                        using (var rt = new RandomText(list))
+                        {
+                            rt.AddContentParagraphs(1, 50);
+                            wordApplication.Selection.TypeText(rt.Content);
+                        }
+
+                        var writeSleep = Jitter.Basic(100);
+                        Thread.Sleep(writeSleep);
+
+                        wordApplication.Selection.HomeKey(WdUnits.wdLine, WdMovementType.wdExtend);
+                        wordApplication.Selection.Font.Color = GetWdColor(StylingExtensions.GetRandomColor());
+                        wordApplication.Selection.Font.Bold = 1;
+                        wordApplication.Selection.Font.Size = 12;
+
+                        var rand = RandomFilename.Generate();
+
+                        var defaultSaveDirectory = timelineEvent.CommandArgs[0].ToString();
+                        if (defaultSaveDirectory.Contains("%"))
+                        {
+                            defaultSaveDirectory = Environment.ExpandEnvironmentVariables(defaultSaveDirectory);
+                        }
+
+                        try
+                        {
+                            foreach (var key in timelineEvent.CommandArgs)
                             {
-                                wordApplication.WindowState = WdWindowState.wdWindowStateMinimize;
-                                foreach (var item in wordApplication.Documents)
+                                if (key.ToString().StartsWith("save-array:"))
                                 {
-                                    item.Windows[1].WindowState = WdWindowState.wdWindowStateMinimize;
+                                    var savePathString =
+                                        key.ToString().Replace("save-array:", "").Replace("'", "\"");
+                                    savePathString =
+                                        savePathString.Replace("\\",
+                                            "/"); //can't seem to deserialize windows path \
+                                    var savePaths = JsonConvert.DeserializeObject<string[]>(savePathString);
+                                    defaultSaveDirectory =
+                                        savePaths.PickRandom().Replace("/", "\\"); //put windows path back
+                                    break;
                                 }
                             }
-                            catch (Exception e)
+                        }
+                        catch (Exception e)
+                        {
+                            Log.Trace($"save-array exception: {e}");
+                        }
+
+                        if (!Directory.Exists(defaultSaveDirectory))
+                        {
+                            Directory.CreateDirectory(defaultSaveDirectory);
+                        }
+
+                        var path = $"{defaultSaveDirectory}\\{rand}.docx";
+
+                        //if directory does not exist, create!
+                        Log.Trace($"Checking directory at {path}");
+                        var f = new FileInfo(path).Directory;
+                        if (f == null)
+                        {
+                            Log.Trace($"Directory does not exist, creating directory at {f.FullName}");
+                            Directory.CreateDirectory(f.FullName);
+                        }
+
+                        try
+                        {
+                            if (File.Exists(path))
                             {
-                                Log.Trace($"Could not minimize: {e}");
+                                File.Delete(path);
                             }
+                        }
+                        catch (Exception e)
+                        {
+                            Log.Debug(e);
+                        }
 
-                            // insert some text
-                            var list = RandomText.GetDictionary.GetDictionaryList();
-                            using (var rt = new RandomText(list))
-                            {
-                                rt.AddContentParagraphs(1, 50);
-                                wordApplication.Selection.TypeText(rt.Content);
-                            }
+                        document.Saved = true;
+                        if (string.IsNullOrEmpty(document.Path))
+                        {
+                            document.SaveAs(path);
+                            FileListing.Add(path, handler.HandlerType);
+                            Log.Trace($"{handler.HandlerType} saving new file: {path}");
+                        }
+                        else
+                        {
+                            document.Save();
+                            Log.Trace($"{handler.HandlerType} saving existing file: {document.FullName}");
+                        }
 
-                            var writeSleep = Jitter.Basic(100);
-                            Thread.Sleep(writeSleep);
-
-                            wordApplication.Selection.HomeKey(WdUnits.wdLine, WdMovementType.wdExtend);
-                            wordApplication.Selection.Font.Color = GetWdColor(StylingExtensions.GetRandomColor());
-                            wordApplication.Selection.Font.Bold = 1;
-                            wordApplication.Selection.Font.Size = 12;
-
-                            var rand = RandomFilename.Generate();
-
-                            var defaultSaveDirectory = timelineEvent.CommandArgs[0].ToString();
-                            if (defaultSaveDirectory.Contains("%"))
-                            {
-                                defaultSaveDirectory = Environment.ExpandEnvironmentVariables(defaultSaveDirectory);
-                            }
-
-                            try
-                            {
-                                foreach (var key in timelineEvent.CommandArgs)
-                                {
-                                    if (key.ToString().StartsWith("save-array:"))
-                                    {
-                                        var savePathString =
-                                            key.ToString().Replace("save-array:", "").Replace("'", "\"");
-                                        savePathString =
-                                            savePathString.Replace("\\",
-                                                "/"); //can't seem to deserialize windows path \
-                                        var savePaths = JsonConvert.DeserializeObject<string[]>(savePathString);
-                                        defaultSaveDirectory =
-                                            savePaths.PickRandom().Replace("/", "\\"); //put windows path back
-                                        break;
-                                    }
-                                }
-                            }
-                            catch (Exception e)
-                            {
-                                Log.Trace($"save-array exception: {e}");
-                            }
-
-                            if (!Directory.Exists(defaultSaveDirectory))
-                            {
-                                Directory.CreateDirectory(defaultSaveDirectory);
-                            }
-
-                            var path = $"{defaultSaveDirectory}\\{rand}.docx";
-
-                            //if directory does not exist, create!
-                            Log.Trace($"Checking directory at {path}");
-                            var f = new FileInfo(path).Directory;
-                            if (f == null)
-                            {
-                                Log.Trace($"Directory does not exist, creating directory at {f.FullName}");
-                                Directory.CreateDirectory(f.FullName);
-                            }
-
-                            try
-                            {
-                                if (File.Exists(path))
-                                {
-                                    File.Delete(path);
-                                }
-                            }
-                            catch (Exception e)
-                            {
-                                Log.Debug(e);
-                            }
-
-                            document.Saved = true;
-                            if (string.IsNullOrEmpty(document.Path))
-                            {
-                                document.SaveAs(path);
-                                FileListing.Add(path, handler.HandlerType);
-                                Log.Trace($"{handler.HandlerType} saving new file: {path}");
-                            }
-                            else
-                            {
-                                document.Save();
-                                Log.Trace($"{handler.HandlerType} saving existing file: {document.FullName}");
-                            }
-
-                            Report(handler.HandlerType.ToString(), timelineEvent.Command,
-                                timelineEvent.CommandArgs[0].ToString());
+                        Report(handler.HandlerType.ToString(), timelineEvent.Command,
+                            timelineEvent.CommandArgs[0].ToString());
                             
 
-                            if (timelineEvent.CommandArgs.Contains("pdf"))
-                            {
-                                // Save document into PDF Format
-                                object oMissing = System.Reflection.Missing.Value;
-                                object outputFileName = timelineEvent.CommandArgs.Contains("pdf-vary-filenames")
-                                    ? $"{defaultSaveDirectory}\\{RandomFilename.Generate()}.pdf"
-                                    : path.Replace(".docx", ".pdf");
-                                object fileFormat = WdSaveFormat.wdFormatPDF;
+                        if (timelineEvent.CommandArgs.Contains("pdf"))
+                        {
+                            // Save document into PDF Format
+                            object oMissing = System.Reflection.Missing.Value;
+                            object outputFileName = timelineEvent.CommandArgs.Contains("pdf-vary-filenames")
+                                ? $"{defaultSaveDirectory}\\{RandomFilename.Generate()}.pdf"
+                                : path.Replace(".docx", ".pdf");
+                            object fileFormat = WdSaveFormat.wdFormatPDF;
 
-                                document.SaveAs(outputFileName, fileFormat, oMissing, oMissing,
-                                    oMissing, oMissing, oMissing, oMissing,
-                                    oMissing, oMissing, oMissing, oMissing,
-                                    oMissing, oMissing, oMissing, oMissing);
-                                // end save as pdf
-                                Report(handler.HandlerType.ToString(), timelineEvent.Command, "pdf");
-                                FileListing.Add(outputFileName.ToString(), handler.HandlerType);
-                            }
-
-                            if (_random.Next(100) < 50)
-                                document.Close();
-
-                            if (timelineEvent.DelayAfter > 0)
-                            {
-                                //sleep and leave the app open
-                                Log.Trace($"Sleep after for {timelineEvent.DelayAfter}");
-                                Thread.Sleep(timelineEvent.DelayAfter - writeSleep);
-                            }
-
-                            document.Dispose();
-                            document = null;
-
-                            wordApplication.Quit();
-
-                            try
-                            {
-                                wordApplication.Dispose();
-                            }
-                            catch
-                            {
-                                // ignore
-                            }
-                            
-                            try
-                            {
-                                Marshal.ReleaseComObject(wordApplication);
-                            }
-                            catch
-                            {
-                                // ignore
-                            }
-
-                            try
-                            {
-                                Marshal.FinalReleaseComObject(wordApplication);
-                            }
-                            catch
-                            {
-                                // ignore
-                            }
+                            document.SaveAs(outputFileName, fileFormat, oMissing, oMissing,
+                                oMissing, oMissing, oMissing, oMissing,
+                                oMissing, oMissing, oMissing, oMissing,
+                                oMissing, oMissing, oMissing, oMissing);
+                            // end save as pdf
+                            Report(handler.HandlerType.ToString(), timelineEvent.Command, "pdf");
+                            FileListing.Add(outputFileName.ToString(), handler.HandlerType);
                         }
 
-                        GC.Collect();
+                        if (_random.Next(100) < 50)
+                            document.Close();
+
+                        if (timelineEvent.DelayAfter > 0)
+                        {
+                            //sleep and leave the app open
+                            Log.Trace($"Sleep after for {timelineEvent.DelayAfter}");
+                            Thread.Sleep(timelineEvent.DelayAfter - writeSleep);
+                        }
+
+                        document.Dispose();
+                        document = null;
+
+                        wordApplication.Quit();
+
+                        try
+                        {
+                            wordApplication.Dispose();
+                        }
+                        catch
+                        {
+                            // ignore
+                        }
+                            
+                        try
+                        {
+                            Marshal.ReleaseComObject(wordApplication);
+                        }
+                        catch
+                        {
+                            // ignore
+                        }
+
+                        try
+                        {
+                            Marshal.FinalReleaseComObject(wordApplication);
+                        }
+                        catch
+                        {
+                            // ignore
+                        }
                     }
-                    catch (ThreadAbortException)
-                    {
-                        KillApp();
-                        Log.Trace("Word closing...");
-                    }
-                    catch (Exception e)
-                    {
-                        Log.Debug(e);
-                    }
-                    finally
-                    {
-                        Thread.Sleep(5000);
-                    }
+
+                    GC.Collect();
+                }
+                catch (ThreadAbortException)
+                {
+                    KillApp();
+                    Log.Trace("Word closing...");
+                }
+                catch (Exception e)
+                {
+                    Log.Debug(e);
+                }
+                finally
+                {
+                    Thread.Sleep(5000);
                 }
             }
-            catch (ThreadAbortException)
-            {
-                //ignore
-            }
-            catch (Exception e)
-            {
-                Log.Error(e);
-            }
-            finally
-            {
-                KillApp();
-                Log.Trace("Word closing...");
-            }
         }
-
-
-        private WdColor GetWdColor(Color color)
+        catch (ThreadAbortException)
         {
-            var rgbColor = VB.Information.RGB(color.R, color.G, color.B);
-            var wdColor = (WdColor)rgbColor;
-            return wdColor;
+            //ignore
         }
+        catch (Exception e)
+        {
+            Log.Error(e);
+        }
+        finally
+        {
+            KillApp();
+            Log.Trace("Word closing...");
+        }
+    }
+
+
+    private WdColor GetWdColor(Color color)
+    {
+        var rgbColor = VB.Information.RGB(color.R, color.G, color.B);
+        var wdColor = (WdColor)rgbColor;
+        return wdColor;
     }
 }

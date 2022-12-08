@@ -13,297 +13,296 @@ using Newtonsoft.Json;
 using Excel = NetOffice.ExcelApi;
 using WorkingHours = Ghosts.Client.Infrastructure.WorkingHours;
 
-namespace Ghosts.Client.Handlers
+namespace Ghosts.Client.Handlers;
+
+public class ExcelHandler : BaseHandler
 {
-    public class ExcelHandler : BaseHandler
+    public ExcelHandler(Timeline timeline, TimelineHandler handler)
     {
-        public ExcelHandler(Timeline timeline, TimelineHandler handler)
+        base.Init(handler);
+        Log.Trace("Launching Excel handler");
+
+        try
         {
-            base.Init(handler);
-            Log.Trace("Launching Excel handler");
-
-            try
+            if (handler.Loop)
             {
-                if (handler.Loop)
+                Log.Trace("Excel loop");
+                while (true)
                 {
-                    Log.Trace("Excel loop");
-                    while (true)
+                    if (timeline != null)
                     {
-                        if (timeline != null)
+                        var processIds = ProcessManager.GetPids(ProcessManager.ProcessNames.Excel).Count();
+                        if (processIds > timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.Excel))
                         {
-                            var processIds = ProcessManager.GetPids(ProcessManager.ProcessNames.Excel).Count();
-                            if (processIds > timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.Excel))
-                            {
-                                continue;
-                            }
+                            continue;
                         }
-
-                        ExecuteEvents(timeline, handler);
                     }
-                }
-                else
-                {
-                    Log.Trace("Excel single run");
-                    KillApp();
+
                     ExecuteEvents(timeline, handler);
-                    KillApp();
                 }
             }
-            catch (ThreadAbortException)
+            else
             {
+                Log.Trace("Excel single run");
                 KillApp();
-                Log.Trace("Thread aborted, Excel closing...");
-            }
-            catch (Exception e)
-            {
-                Log.Error($"Excel launch handler exception: {e}");
+                ExecuteEvents(timeline, handler);
                 KillApp();
             }
         }
-
-        private static void KillApp()
+        catch (ThreadAbortException)
         {
-            ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.Excel);
+            KillApp();
+            Log.Trace("Thread aborted, Excel closing...");
         }
-
-        private void ExecuteEvents(Timeline timeline, TimelineHandler handler)
+        catch (Exception e)
         {
-            try
+            Log.Error($"Excel launch handler exception: {e}");
+            KillApp();
+        }
+    }
+
+    private static void KillApp()
+    {
+        ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.Excel);
+    }
+
+    private void ExecuteEvents(Timeline timeline, TimelineHandler handler)
+    {
+        try
+        {
+            foreach (var timelineEvent in handler.TimeLineEvents)
             {
-                foreach (var timelineEvent in handler.TimeLineEvents)
+                try
                 {
-                    try
+                    Log.Trace($"Excel event - {timelineEvent}");
+                    WorkingHours.Is(handler);
+
+                    if (timelineEvent.DelayBefore > 0)
                     {
-                        Log.Trace($"Excel event - {timelineEvent}");
-                        WorkingHours.Is(handler);
+                        Thread.Sleep(timelineEvent.DelayBefore);
+                    }
 
-                        if (timelineEvent.DelayBefore > 0)
+                    if (timeline != null)
+                    {
+                        var processIds = ProcessManager.GetPids(ProcessManager.ProcessNames.Excel).ToList();
+                        if (processIds.Count > 2 && processIds.Count >
+                            timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.Excel))
                         {
-                            Thread.Sleep(timelineEvent.DelayBefore);
+                            return;
                         }
+                    }
 
-                        if (timeline != null)
+                    var writeSleep = Jitter.Basic(100);
+                    using (var excelApplication = new Excel.Application
+                           {
+                               DisplayAlerts = false,
+                               Visible = true
+                           })
+                    {
+                        Excel.Workbook document = null;
+                        if (OfficeHelpers.ShouldOpenExisting(handler))
                         {
-                            var processIds = ProcessManager.GetPids(ProcessManager.ProcessNames.Excel).ToList();
-                            if (processIds.Count > 2 && processIds.Count >
-                                timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.Excel))
-                            {
-                                return;
-                            }
+                            document = excelApplication.Workbooks.Open(FileListing.GetRandomFile(handler.HandlerType));
+                            Log.Trace($"{handler.HandlerType} opening existing file: {document.FullName}");
                         }
-
-                        var writeSleep = Jitter.Basic(100);
-                        using (var excelApplication = new Excel.Application
-                               {
-                                   DisplayAlerts = false,
-                                   Visible = true
-                               })
+                        if (document == null)
                         {
-                            Excel.Workbook document = null;
-                            if (OfficeHelpers.ShouldOpenExisting(handler))
-                            {
-                                document = excelApplication.Workbooks.Open(FileListing.GetRandomFile(handler.HandlerType));
-                                Log.Trace($"{handler.HandlerType} opening existing file: {document.FullName}");
-                            }
-                            if (document == null)
-                            {
-                                document = excelApplication.Workbooks.Add();
-                                Log.Trace($"{handler.HandlerType} adding new...");
-                            }
+                            document = excelApplication.Workbooks.Add();
+                            Log.Trace($"{handler.HandlerType} adding new...");
+                        }
                             
-                            Log.Trace("Excel adding worksheet");
-                            var workSheet = (Excel.Worksheet)document.Worksheets[1];
+                        Log.Trace("Excel adding worksheet");
+                        var workSheet = (Excel.Worksheet)document.Worksheets[1];
 
-                            for (var i = 2; i < 10; i++)
-                            {
-                                for (var j = 1; j < 10; j++)
-                                {
-                                    if (_random.Next(0, 30) != 1) // 1 in x cells are blank
-                                    {
-                                        workSheet.Cells[i, j].Value = _random.Next(0, 9999);
-                                        workSheet.Cells[i, j].Dispose();
-                                    }
-                                }
-                            }
-
-                            Thread.Sleep(writeSleep);
-
-                            var rand = RandomFilename.Generate();
-
-                            var defaultSaveDirectory = timelineEvent.CommandArgs[0].ToString();
-                            if (defaultSaveDirectory.Contains("%"))
-                            {
-                                defaultSaveDirectory = Environment.ExpandEnvironmentVariables(defaultSaveDirectory);
-                            }
-
-                            try
-                            {
-                                foreach (var key in timelineEvent.CommandArgs)
-                                {
-                                    if (key.ToString().StartsWith("save-array:"))
-                                    {
-                                        var savePathString =
-                                            key.ToString().Replace("save-array:", "").Replace("'", "\"");
-                                        savePathString =
-                                            savePathString.Replace("\\",
-                                                "/"); //can't seem to deserialize windows path \
-                                        var savePaths = JsonConvert.DeserializeObject<string[]>(savePathString);
-                                        defaultSaveDirectory =
-                                            savePaths.PickRandom().Replace("/", "\\"); //put windows path back
-                                        break;
-                                    }
-                                }
-                            }
-                            catch (Exception e)
-                            {
-                                Log.Trace($"save-array exception: {e}");
-                            }
-
-                            if (!Directory.Exists(defaultSaveDirectory))
-                            {
-                                Directory.CreateDirectory(defaultSaveDirectory);
-                            }
-
-                            var path = $"{defaultSaveDirectory}\\{rand}.xlsx";
-
-                            //if directory does not exist, create!
-                            Log.Trace($"Checking directory at {path}");
-                            var f = new FileInfo(path).Directory;
-                            if (f == null)
-                            {
-                                Log.Trace($"Directory does not exist, creating directory at {f.FullName}");
-                                Directory.CreateDirectory(f.FullName);
-                            }
-
-                            try
-                            {
-                                if (File.Exists(path))
-                                {
-                                    File.Delete(path);
-                                }
-                            }
-                            catch (Exception e)
-                            {
-                                Log.Error($"Excel file delete exception: {e}");
-                            }
-
-                            if (string.IsNullOrEmpty(document.Path))
-                            {
-                                document.SaveAs(path);
-                                FileListing.Add(path, handler.HandlerType);
-                                Log.Trace($"{handler.HandlerType} saving new file: {path}");
-                            }
-                            else
-                            {
-                                document.Save();
-                                Log.Trace($"{handler.HandlerType} saving existing file: {document.FullName}");
-                            }
-
-                            Report(handler.HandlerType.ToString(), timelineEvent.Command,
-                                timelineEvent.CommandArgs[0].ToString());
-
-                            if (timelineEvent.CommandArgs.Contains("pdf"))
-                            {
-                                var pdfFileName = timelineEvent.CommandArgs.Contains("pdf-vary-filenames")
-                                    ? $"{defaultSaveDirectory}\\{RandomFilename.Generate()}.pdf"
-                                    : path.Replace(".xlsx", ".pdf");
-                                // Save document into PDF Format
-                                document.ExportAsFixedFormat(NetOffice.ExcelApi.Enums.XlFixedFormatType.xlTypePDF,
-                                    pdfFileName);
-                                // end save as pdf
-                                Report(handler.HandlerType.ToString(), timelineEvent.Command, "pdf");
-                                FileListing.Add(pdfFileName, handler.HandlerType);
-                            }
-
-                            if (_random.Next(100) < 50)
-                                document.Close();
-
-
-                            workSheet.Dispose();
-                            workSheet = null;
-
-                            document.Dispose();
-                            document = null;
-
-                            // close excel and dispose reference
-                            excelApplication.Quit();
-
-                            try
-                            {
-                                excelApplication.Dispose();
-                            }
-                            catch
-                            {
-                                // ignore
-                            }
-
-                            try
-                            {
-                                Marshal.ReleaseComObject(excelApplication);
-                            }
-                            catch
-                            {
-                                // ignore
-                            }
-
-                            try
-                            {
-                                Marshal.FinalReleaseComObject(excelApplication);
-                            }
-                            catch
-                            {
-                                // ignore
-                            }
-                        }
-
-                        GC.Collect();
-
-                        if (timelineEvent.DelayAfter > 0)
+                        for (var i = 2; i < 10; i++)
                         {
-                            //sleep and leave the app open
-                            Log.Trace($"Sleep after for {timelineEvent.DelayAfter}");
-                            Thread.Sleep(timelineEvent.DelayAfter - writeSleep);
+                            for (var j = 1; j < 10; j++)
+                            {
+                                if (_random.Next(0, 30) != 1) // 1 in x cells are blank
+                                {
+                                    workSheet.Cells[i, j].Value = _random.Next(0, 9999);
+                                    workSheet.Cells[i, j].Dispose();
+                                }
+                            }
                         }
 
+                        Thread.Sleep(writeSleep);
+
+                        var rand = RandomFilename.Generate();
+
+                        var defaultSaveDirectory = timelineEvent.CommandArgs[0].ToString();
+                        if (defaultSaveDirectory.Contains("%"))
+                        {
+                            defaultSaveDirectory = Environment.ExpandEnvironmentVariables(defaultSaveDirectory);
+                        }
+
+                        try
+                        {
+                            foreach (var key in timelineEvent.CommandArgs)
+                            {
+                                if (key.ToString().StartsWith("save-array:"))
+                                {
+                                    var savePathString =
+                                        key.ToString().Replace("save-array:", "").Replace("'", "\"");
+                                    savePathString =
+                                        savePathString.Replace("\\",
+                                            "/"); //can't seem to deserialize windows path \
+                                    var savePaths = JsonConvert.DeserializeObject<string[]>(savePathString);
+                                    defaultSaveDirectory =
+                                        savePaths.PickRandom().Replace("/", "\\"); //put windows path back
+                                    break;
+                                }
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Log.Trace($"save-array exception: {e}");
+                        }
+
+                        if (!Directory.Exists(defaultSaveDirectory))
+                        {
+                            Directory.CreateDirectory(defaultSaveDirectory);
+                        }
+
+                        var path = $"{defaultSaveDirectory}\\{rand}.xlsx";
+
+                        //if directory does not exist, create!
+                        Log.Trace($"Checking directory at {path}");
+                        var f = new FileInfo(path).Directory;
+                        if (f == null)
+                        {
+                            Log.Trace($"Directory does not exist, creating directory at {f.FullName}");
+                            Directory.CreateDirectory(f.FullName);
+                        }
+
+                        try
+                        {
+                            if (File.Exists(path))
+                            {
+                                File.Delete(path);
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Log.Error($"Excel file delete exception: {e}");
+                        }
+
+                        if (string.IsNullOrEmpty(document.Path))
+                        {
+                            document.SaveAs(path);
+                            FileListing.Add(path, handler.HandlerType);
+                            Log.Trace($"{handler.HandlerType} saving new file: {path}");
+                        }
+                        else
+                        {
+                            document.Save();
+                            Log.Trace($"{handler.HandlerType} saving existing file: {document.FullName}");
+                        }
+
+                        Report(handler.HandlerType.ToString(), timelineEvent.Command,
+                            timelineEvent.CommandArgs[0].ToString());
+
+                        if (timelineEvent.CommandArgs.Contains("pdf"))
+                        {
+                            var pdfFileName = timelineEvent.CommandArgs.Contains("pdf-vary-filenames")
+                                ? $"{defaultSaveDirectory}\\{RandomFilename.Generate()}.pdf"
+                                : path.Replace(".xlsx", ".pdf");
+                            // Save document into PDF Format
+                            document.ExportAsFixedFormat(NetOffice.ExcelApi.Enums.XlFixedFormatType.xlTypePDF,
+                                pdfFileName);
+                            // end save as pdf
+                            Report(handler.HandlerType.ToString(), timelineEvent.Command, "pdf");
+                            FileListing.Add(pdfFileName, handler.HandlerType);
+                        }
+
+                        if (_random.Next(100) < 50)
+                            document.Close();
+
+
+                        workSheet.Dispose();
+                        workSheet = null;
+
+                        document.Dispose();
+                        document = null;
+
+                        // close excel and dispose reference
+                        excelApplication.Quit();
+
+                        try
+                        {
+                            excelApplication.Dispose();
+                        }
+                        catch
+                        {
+                            // ignore
+                        }
+
+                        try
+                        {
+                            Marshal.ReleaseComObject(excelApplication);
+                        }
+                        catch
+                        {
+                            // ignore
+                        }
+
+                        try
+                        {
+                            Marshal.FinalReleaseComObject(excelApplication);
+                        }
+                        catch
+                        {
+                            // ignore
+                        }
                     }
-                    catch (ThreadAbortException)
+
+                    GC.Collect();
+
+                    if (timelineEvent.DelayAfter > 0)
                     {
-                        KillApp();
-                        Log.Trace("Excel closing...");
+                        //sleep and leave the app open
+                        Log.Trace($"Sleep after for {timelineEvent.DelayAfter}");
+                        Thread.Sleep(timelineEvent.DelayAfter - writeSleep);
                     }
-                    catch (Exception e)
-                    {
-                        Log.Error($"Excel handler exception: {e}");
-                    }
-                    finally
-                    {
-                        Thread.Sleep(5000);
-                    }
+
+                }
+                catch (ThreadAbortException)
+                {
+                    KillApp();
+                    Log.Trace("Excel closing...");
+                }
+                catch (Exception e)
+                {
+                    Log.Error($"Excel handler exception: {e}");
+                }
+                finally
+                {
+                    Thread.Sleep(5000);
                 }
             }
-            catch (ThreadAbortException)
-            {
-                //ignore
-            }
-            catch (Exception e)
-            {
-                Log.Error(e);
-            }
-            finally
-            {
-                KillApp();
-                Log.Trace("Excel closing...");
-            }
         }
-
-        private string GetRandomRange()
+        catch (ThreadAbortException)
         {
-            var x = _random.Next(1, 40);
-            var y = _random.Next(x, 50);
-            var a1 = RandomText.GetRandomCapitalLetter();
-            var a2 = RandomText.GetRandomCapitalLetter(a1);
-
-            return $"${a1}{x}:${a2}{y}";
+            //ignore
         }
+        catch (Exception e)
+        {
+            Log.Error(e);
+        }
+        finally
+        {
+            KillApp();
+            Log.Trace("Excel closing...");
+        }
+    }
+
+    private string GetRandomRange()
+    {
+        var x = _random.Next(1, 40);
+        var y = _random.Next(x, 50);
+        var a1 = RandomText.GetRandomCapitalLetter();
+        var a2 = RandomText.GetRandomCapitalLetter(a1);
+
+        return $"${a1}{x}:${a2}{y}";
     }
 }

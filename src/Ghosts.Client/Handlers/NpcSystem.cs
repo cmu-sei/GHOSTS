@@ -6,44 +6,43 @@ using Ghosts.Client.TimelineManager;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 
-namespace Ghosts.Client.Handlers
+namespace Ghosts.Client.Handlers;
+
+public class NpcSystem : BaseHandler
 {
-    public class NpcSystem : BaseHandler
+    public NpcSystem(Timeline timeline, TimelineHandler handler)
     {
-        public NpcSystem(Timeline timeline, TimelineHandler handler)
+        Log.Trace($"Handling NpcSystem call: {handler}");
+
+        foreach (var timelineEvent in handler.TimeLineEvents)
         {
-            Log.Trace($"Handling NpcSystem call: {handler}");
+            if (string.IsNullOrEmpty(timelineEvent.Command))
+                continue;
 
-            foreach (var timelineEvent in handler.TimeLineEvents)
+            Timeline t;
+
+            switch (timelineEvent.Command.ToLower())
             {
-                if (string.IsNullOrEmpty(timelineEvent.Command))
-                    continue;
-
-                Timeline t;
-
-                switch (timelineEvent.Command.ToLower())
-                {
-                    case "start":
+                case "start":
+                    t = TimelineBuilder.GetLocalTimeline();
+                    t.Status = Timeline.TimelineStatus.Run;
+                    TimelineBuilder.SetLocalTimeline(t);
+                    break;
+                case "stop":
+                    if (timeline.Id != Guid.Empty)
+                    {
+                        var o = new Orchestrator();
+                        o.StopTimeline(timeline.Id);
+                    }
+                    else
+                    {
                         t = TimelineBuilder.GetLocalTimeline();
-                        t.Status = Timeline.TimelineStatus.Run;
+                        t.Status = Timeline.TimelineStatus.Stop;
+                        StartupTasks.CleanupProcesses();
                         TimelineBuilder.SetLocalTimeline(t);
-                        break;
-                    case "stop":
-                        if (timeline.Id != Guid.Empty)
-                        {
-                            var o = new Orchestrator();
-                            o.StopTimeline(timeline.Id);
-                        }
-                        else
-                        {
-                            t = TimelineBuilder.GetLocalTimeline();
-                            t.Status = Timeline.TimelineStatus.Stop;
-                            StartupTasks.CleanupProcesses();
-                            TimelineBuilder.SetLocalTimeline(t);
-                        }
+                    }
 
-                        break;
-                }
+                    break;
             }
         }
     }
