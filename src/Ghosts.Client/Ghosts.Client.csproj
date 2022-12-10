@@ -550,6 +550,7 @@
     <Compile Include="Handlers\Ssh.cs" />
     <Compile Include="Infrastructure\Browser\BlogContent.cs" />
     <Compile Include="Infrastructure\Browser\ExtendedConfiguration.cs" />
+    <Compile Include="Infrastructure\Browser\PostContent.cs" />
     <Compile Include="Infrastructure\Credentials.cs" />
     <Compile Include="Infrastructure\DebugManager.cs" />
     <Compile Include="Infrastructure\GuestInfoVars.cs" />
@@ -592,6 +593,15 @@
     <Compile Include="Health\HealthRecord.cs" />
     <Compile Include="Health\Check.cs" />
     <Content Include="config\application.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="config\email_targets.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="config\first_names.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="config\last_names.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="lib\Redemption.dll">

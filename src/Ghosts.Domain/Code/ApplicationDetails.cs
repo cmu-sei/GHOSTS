@@ -108,6 +108,12 @@ namespace Ghosts.Domain.Code
             public static string Dictionary(string raw) => Determine(raw, "dictionary.json");
             public static string FileNames(string raw) => Determine(raw, "filenames.txt");
 
+            public static string LastNames(string raw) => Determine(raw, "last_names.txt");
+            public static string FirstNames(string raw) => Determine(raw, "first_names.txt");
+            public static string EmailTargets(string raw) => Determine(raw, "email_targets.txt");
+
+            //be lazy and use the Blog content as generic post content as default
+            public static string GenericPostContent(string raw) => Determine(raw, "blog-content.csv");
             public static string BlogContent(string raw) => Determine(raw, "blog-content.csv");
 
             public static string BlogReply(string raw) => Determine(raw, "blog-reply.csv");

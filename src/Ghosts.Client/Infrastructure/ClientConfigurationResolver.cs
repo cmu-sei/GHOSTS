@@ -11,6 +11,13 @@ namespace Ghosts.Client.Infrastructure
         public static string EmailOutside => ApplicationDetails.ConfigurationFiles.EmailOutside(Program.Configuration.Content.EmailOutside);
         public static string FileNames => ApplicationDetails.ConfigurationFiles.FileNames(Program.Configuration.Content.FileNames);
 
+        public static string FirstNames => ApplicationDetails.ConfigurationFiles.FirstNames(Program.Configuration.Content.FirstNames);
+
+        public static string LastNames => ApplicationDetails.ConfigurationFiles.LastNames(Program.Configuration.Content.LastNames);
+        public static string EmailTargets => ApplicationDetails.ConfigurationFiles.EmailTargets(Program.Configuration.Content.EmailTargets);
+
+        public static string GenericPostContent => ApplicationDetails.ConfigurationFiles.BlogContent(Program.Configuration.Content.GenericPostContent);
+
         public static string BlogContent => ApplicationDetails.ConfigurationFiles.BlogContent(Program.Configuration.Content.BlogContent);
 
         public static string BlogReply => ApplicationDetails.ConfigurationFiles.BlogReply(Program.Configuration.Content.BlogReply);
