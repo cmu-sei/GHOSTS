@@ -57,7 +57,7 @@ class S(BaseHTTPRequestHandler):
     file_requested = ""
 
     config = cp.ConfigParser()
-    config.read_file(open(r'./app.config'))
+    config.read_file(open(r'./config/app.config'))
     payloads = config["payloads"]
 
     def setup(self):

@@ -2,7 +2,7 @@ import os
 import configparser as cp
 
 config = cp.ConfigParser()
-config.read_file(open(r'./app.config'))
+config.read_file(open(r'./config/app.config'))
 
 if config.get("video", "video_enabled").upper() != "TRUE":
     print("Video not enabled, exiting...")
