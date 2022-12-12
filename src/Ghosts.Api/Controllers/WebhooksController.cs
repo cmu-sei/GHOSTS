@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Api.Models;
@@ -93,7 +94,7 @@ namespace ghosts.api.Controllers
             if (!ModelState.IsValid) return BadRequest(ModelState);
             if (webhook.Id == Guid.Empty)
                 webhook.Id = Guid.NewGuid();
-            await _context.Webhooks.AddAsync(webhook);
+            _context.Webhooks.Add(webhook);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetWebhook", new {id = webhook.Id}, webhook);

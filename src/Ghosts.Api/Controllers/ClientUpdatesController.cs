@@ -76,9 +76,6 @@ namespace Ghosts.Api.Controllers
                     Type = QueueEntry.Types.Machine
                 });
 
-            if (m.Id == Guid.Empty)
-                return NotFound();
-
             //check dB for new updates to deliver
             var u = await _updateService.GetAsync(m.Id, m.CurrentUsername, ct);
             if (u == null) return NotFound();

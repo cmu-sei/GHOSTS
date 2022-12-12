@@ -34,10 +34,21 @@ namespace Ghosts.Api.Services
             var update = new MachineUpdate();
             if (!string.IsNullOrEmpty(currentUsername))
             {
-                update = await _context.MachineUpdates
-                    .FirstOrDefaultAsync(m => (m.MachineId == machineId || m.Username.ToLower().StartsWith(currentUsername.ToLower())) && m.ActiveUtc < DateTime.UtcNow && m.Status == StatusType.Active, ct);
+                // if the username is there, but the machine id is not
+                if (machineId == Guid.Empty)
+                {
+                    update = await _context.MachineUpdates
+                        .FirstOrDefaultAsync(m => (m.Username.ToLower().StartsWith(currentUsername.ToLower())) && m.ActiveUtc < DateTime.UtcNow && m.Status == StatusType.Active, ct);
+                }
+                else // pick either
+                {
+                    update = await _context.MachineUpdates
+                        .FirstOrDefaultAsync(
+                            m => (m.MachineId == machineId || m.Username.ToLower().StartsWith(currentUsername.ToLower())) &&
+                                 m.ActiveUtc < DateTime.UtcNow && m.Status == StatusType.Active, ct);
+                }
             }
-            else
+            else // just search for machine id
             {
                 update = await _context.MachineUpdates
                     .FirstOrDefaultAsync(m => (m.MachineId == machineId) && m.ActiveUtc < DateTime.UtcNow && m.Status == StatusType.Active, ct);
@@ -48,7 +59,7 @@ namespace Ghosts.Api.Services
 
         public async Task<MachineUpdate> CreateAsync(MachineUpdate model, CancellationToken ct)
         {
-            await _context.MachineUpdates.AddAsync(model, ct);
+            _context.MachineUpdates.Add(model);
             await _context.SaveChangesAsync(ct);
             return model;
         }

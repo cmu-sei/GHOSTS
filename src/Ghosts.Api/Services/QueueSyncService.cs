@@ -93,7 +93,7 @@ namespace Ghosts.Api.Services
         {
             try
             {
-                await context.Surveys.AddAsync(item);
+                context.Surveys.Add(item);
                 context.Entry(item).State = EntityState.Added;
                 await context.SaveChangesAsync();
                 await Queue.DequeueAsync(new CancellationToken());
