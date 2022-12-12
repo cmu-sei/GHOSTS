@@ -108,6 +108,8 @@ namespace Ghosts.Client.Handlers
 
             options.AddLocalStatePreference("download.default_directory", @"%homedrive%%homepath%\\Downloads");
             options.AddLocalStatePreference("disable-popup-blocking", "true");
+            
+
             options.BinaryLocation = GetInstallLocation();
 
             if (handler.HandlerArgs != null)
@@ -174,6 +176,8 @@ namespace Ghosts.Client.Handlers
             options.AddUserProfilePreference("download.directory_upgrade", true);
             options.AddUserProfilePreference("plugins.plugins_disabled", "Chrome PDF Viewer");
             options.AddUserProfilePreference("plugins.always_open_pdf_externally", true);
+            options.AddUserProfilePreference("safebrowsing.enabled", "false");  //this stops the confirmation popup when downloading files like .exe, .xml,etc
+            
 
 
             if (!string.IsNullOrEmpty(Program.Configuration.ChromeExtensions))

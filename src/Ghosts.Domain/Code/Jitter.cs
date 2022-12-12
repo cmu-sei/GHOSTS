@@ -1,6 +1,7 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
+using System.Runtime.InteropServices;
 
 namespace Ghosts.Domain.Code
 {
@@ -54,5 +55,33 @@ namespace Ghosts.Domain.Code
                 sleep = 1;
             return sleep;
         }
+
+
+        /// <summary>
+        /// The jstring is expected to be a decimal integer string between 0 and 50
+        /// which represents a +/-%window about a base value
+        /// </summary>
+        /// <param name="jstring"></param>
+        /// <returns></returns>
+        public static int JitterFactorParse(string jstring)
+        {
+            int jitterFactor;
+            if (int.TryParse(jstring, out jitterFactor))
+            {
+                if (jitterFactor < 0 || jitterFactor > 50) jitterFactor = 0;
+            } else
+            {
+                jitterFactor = 0;
+            }
+                return jitterFactor;
+        }
+
+        public static int JitterFactorDelay(int baseSleep, int jitterFactor)
+        {
+            if (jitterFactor == 0) return baseSleep;
+            return _random.Next(baseSleep - ((baseSleep * jitterFactor) / 100), baseSleep + ((baseSleep * jitterFactor) / 100));
+        }
+
+
     }
 }

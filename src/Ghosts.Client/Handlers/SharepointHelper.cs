@@ -444,6 +444,10 @@ namespace Ghosts.Client.Handlers
                         baseHandler.sharepointAbort = true;
                         return;
                     }
+                    if (handler.HandlerArgs.ContainsKey("delay-jitter"))
+                    {
+                        baseHandler.jitterfactor = Jitter.JitterFactorParse(handler.HandlerArgs["delay-jitter"].ToString());
+                    }
 
                     credFname = handler.HandlerArgs["sharepoint-credentials-file"].ToString();
 
@@ -603,6 +607,15 @@ namespace Ghosts.Client.Handlers
         /// <param name="targetElement"></param>
         public void MoveToElementAndClick(IWebElement targetElement)
         {
+            BrowserHelperSupport.MoveToElementAndClick(Driver, targetElement);
+        }
+
+    }
+
+    public class BrowserHelperSupport
+    {
+        public static void MoveToElementAndClick(IWebDriver Driver, IWebElement targetElement)
+        {
             Actions actions;
 
             if (Driver is OpenQA.Selenium.Firefox.FirefoxDriver)
@@ -618,4 +631,4 @@ namespace Ghosts.Client.Handlers
 
     }
 
-}
+    }
