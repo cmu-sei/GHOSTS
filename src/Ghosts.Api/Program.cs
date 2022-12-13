@@ -21,7 +21,7 @@ namespace Ghosts.Api
 
         public static void Main(string[] args)
         {
-            var msg = $"GHOSTS API {ApplicationDetails.Version} coming online...";
+            var msg = $"GHOSTS API {ApplicationDetails.Version} ({ApplicationDetails.VersionFile}) coming online...";
             Console.WriteLine(ApplicationDetails.Header);
             Console.WriteLine(msg);
             log.Warn(msg);

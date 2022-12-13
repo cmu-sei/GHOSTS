@@ -54,7 +54,7 @@ namespace Ghosts.Api.Services
 
         public async Task<int> CreateAsync(Group model, CancellationToken ct)
         {
-            await _context.Groups.AddAsync(model, ct);
+            _context.Groups.Add(model);
             await _context.SaveChangesAsync(ct);
             return model.Id;
         }
