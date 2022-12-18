@@ -108,6 +108,7 @@ namespace Ghosts.Domain.Code
             public static string Dictionary(string raw) => Determine(raw, "dictionary.json");
             public static string FileNames(string raw) => Determine(raw, "filenames.txt");
 
+            public static string ChatMessages(string raw) => Determine(raw, "blog-reply.csv");  //lazy, use blog-reply for now
             public static string LastNames(string raw) => Determine(raw, "last_names.txt");
             public static string FirstNames(string raw) => Determine(raw, "first_names.txt");
             public static string EmailTargets(string raw) => Determine(raw, "email_targets.txt");

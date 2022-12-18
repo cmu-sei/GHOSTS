@@ -29,6 +29,8 @@
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -102,6 +104,10 @@
     </Reference>
     <Reference Include="HtmlAgilityPack, Version=1.11.45.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
       <HintPath>..\packages\HtmlAgilityPack.1.11.45\lib\Net45\HtmlAgilityPack.dll</HintPath>
+    </Reference>
+    <Reference Include="Interop.AutoItX3Lib">
+      <HintPath>lib\Interop.AutoItX3Lib.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
     <Reference Include="Interop.ProfMan">
       <HintPath>lib\Interop.ProfMan.dll</HintPath>
@@ -544,6 +550,7 @@
     <Compile Include="Handlers\BlogHelper.cs" />
     <Compile Include="Handlers\BlogHelperDrupal.cs" />
     <Compile Include="Handlers\BrowserCrawl.cs" />
+    <Compile Include="Handlers\Pidgin.cs" />
     <Compile Include="Handlers\Print.cs" />
     <Compile Include="Handlers\Sftp.cs" />
     <Compile Include="Handlers\SharepointHelper.cs" />
@@ -551,6 +558,7 @@
     <Compile Include="Infrastructure\Browser\BlogContent.cs" />
     <Compile Include="Infrastructure\Browser\ExtendedConfiguration.cs" />
     <Compile Include="Infrastructure\Browser\PostContent.cs" />
+    <Compile Include="Infrastructure\ChatContent.cs" />
     <Compile Include="Infrastructure\Credentials.cs" />
     <Compile Include="Infrastructure\DebugManager.cs" />
     <Compile Include="Infrastructure\GuestInfoVars.cs" />
@@ -604,6 +612,9 @@
     <Content Include="config\last_names.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="lib\AutoItX3.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="lib\Redemption.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -650,6 +661,7 @@
     <None Include="Sample Timelines\command.json" />
     <None Include="Sample Timelines\Excel.json" />
     <None Include="Sample Timelines\Full sample.timeline.json" />
+    <Compile Include="Infrastructure\Winuser.cs" />
     <Compile Include="Infrastructure\WorkingHours.cs" />
     <Compile Include="Survey\SurveyManager.cs" />
     <Compile Include="TimelineManager\Listener.cs" />

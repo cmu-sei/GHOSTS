@@ -101,6 +101,7 @@ namespace Ghosts.Domain.Code
             public string EmailOutside { get; set; }
             public string BlogContent { get; set; }
 
+            public string ChatMessages { get; set; }
             public string GenericPostContent { get; set; }
             public string BlogReply { get; set; }
             public string FileNames { get; set; }
