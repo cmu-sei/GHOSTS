@@ -30,34 +30,37 @@ namespace Ghosts.Client.Handlers
 {
 
     /// <summary>
-    /// Exercises a Pidgin client - tested with Pidgin 2.14.1 (libpurple 2.14.1)
-    /// It assumed that Pidgin is already configured with an enabled account in %APPDATA%\.purple\accounts.xml 
-    /// and pointing to the target server. 
-    /// It  is assumed that the logged in user only has one Pidgin account, and that this is enabled when pidgin is opened
-    /// Also assumed that preferences are set in  %APPDATA%\.purple\prefs.xml
-    /// Chat logging must enabled to the default directory
-    /// The time line lists chat targets (username@domain)
-    /// At startup, Pidgin is started if it is not up.
-    /// An FileSystemWatcher is setup for %APPDATA%/Roaming/.purple/logs
-    /// Any new directory/file creation/file write is monitored.
-    /// The file watcher events are saved on a local queue that is handled during an activation period
-    /// The queue is simply a list of file names, queue capacity is fixed.
-    /// At startup, the queue is initialized with the names of the most recent files %APPDATA%/.purple/logs 
-    /// whose path contains the UserAccount name, ie,%APPDATA%\.purple\logs\(protocol)\(useraccount)\(chattarget)
-    /// The last directory element is the chat target, so jabber\susan@sitea.com\bill@sitea.com is susan is local account, bill is chat target
-    /// For each activation period, the following is done:
-    ///   1. if the Pidgin 'Buddy List' window is not detected, then Pidgin is started if it is not already started.
-    ///   2. Search for open IM chat windows. For each one found, execute a response probability and respond.
-    ///   3. If there are no open chat windows, pick one of the targets from the timline, open an IM chat, and start a chat.
-    ///   4. If there are no open chat windows, and the timline is empty, then nothing will be done until an incoming chat is recieved.
+    /// Exercises a Pidgin client - tested with Pidgin 2.14.1 (libpurple 2.14.1) ane Centos 7.3 ejabberd server
+    /// Prequisites
+    ///   Pidgin must be installed and already configured with an enabled account in %APPDATA%\.purple\accounts.xml 
+    ///     and pointing to the target server. 
+    ///   The logged in user must have an enabled Pidgin account in accounts.xml
+    ///   Pidgin preferences must have already been set in  %APPDATA%\.purple\prefs.xml
+    ///   This implementation uses AutoItX and the GHOSTSINSTALL\AutoItX3.dll must be registered.
+    ///     To register the DLL, execute with admin priviledges: C:\Windows\System32\regsvr32.exe  targetdll   during the client setup.
+    /// Implementation
+    ///   This implementation is about 95% open loop as there are no C# bindings for the Pidgin libpurple.dll
+    ///   The only feedback to GHOSTS is via window titles, it cannot determine when messages arrive or message content.
+    ///   GHOSTS cannot parse the chat logs to synch converstations as the Pidgin process has these log files locked.
+    ///   So messages are sent open loop with simple delays between messages.
+    ///   The GHOSTS time line CommandArgs lists chat targets (username@domain)
+    /// Activity Cycle - each activity cycle is seperated by DelayAfter. An activity cycle does:
+    ///   Pick a random target from the timeline -  this is only used to initiate the first chat
+    ///   If Pidgin is not started then Pidgin is started.
+    ///   If an IM window is not open, the roll against NewChatProbability and open an IM window to the random target chosen from the timeline
+    ///   If roll against  NewChatProbability was not successful, end activity cycle.
+    ///   If an IM window is open and a new chat was not initiated, the roll against CloseChatProbability, if successful, close current chat and end activity cycle.
+    ///   If get to this point, then IM window is open with one or more targets and message loop is entered.
+    ///   Enter a loop in which between RepliesMin and RepliesMax messages are sent.
+    ///   The first message is sent to current selected target in the Chat window, then the next chat 
+    ///   target in the Chat window is selected. If the max replies is reached, then the loop exits and
+    ///   the activity cycle is ended. The next activity cycle picks up where the last activity cycle 
+    ///   ended as per the first chat target.
+    /// 
     ///   
-    /// When responding to a chat, we have the chat window title as user@domain.
-    /// Foreach chat window title, find the corresponding chat log by looking through the queue for a file name
-    /// that contains useraccount and whose chat target matches the window title.
-    /// Once the file is located, parse the chat log find the last entry.
-    /// If the last entry was sent by the local user account, we are waiting for reply. If the 
-    /// wait time for a reply has been exceeded, then close the IM window.
-    /// If the last entry was sent by the chat target, then respond, and record the reply time.
+    ///   A chat target can be the current logged in user, which means messages are simply echoed back from the server.
+    ///   As chats arrive from other different users, the number of open tabs in the grows, but chats can be closed by CloseChatProbability
+    ///   Between 1-4 random emojis are added to a message based on EmojiProbability
     /// 
     /// 
     /// </summary>
@@ -68,7 +71,8 @@ namespace Ghosts.Client.Handlers
         private int RepliesMin = 0;
         private int RepliesMax = 6;
         private int EmojiProbability = 10;
-        private int NewMessageProbability = 60;
+        private int NewChatProbability = 60;
+        private int CloseChatProbability = 10;
         private int jitterfactor = 50;
         private string UserAccount = null;   //pidgin user account
         private List<string> emojis;
@@ -155,12 +159,24 @@ namespace Ghosts.Client.Handlers
                             Log.Error(e);
                         }
                     }
-                    if (handler.HandlerArgs.ContainsKey("NewMessageProbability"))
+                    if (handler.HandlerArgs.ContainsKey("CloseChatProbability"))
                     {
                         try
                         {
-                            this.NewMessageProbability = Int32.Parse(handler.HandlerArgs["NewMessageProbability"].ToString());
-                            if (this.NewMessageProbability < 0) this.NewMessageProbability = 0;
+                            this.CloseChatProbability = Int32.Parse(handler.HandlerArgs["CloseChatProbability"].ToString());
+                            if (this.CloseChatProbability < 0) this.CloseChatProbability = 0;
+                        }
+                        catch (Exception e)
+                        {
+                            Log.Error(e);
+                        }
+                    }
+                    if (handler.HandlerArgs.ContainsKey("NewChatProbability"))
+                    {
+                        try
+                        {
+                            this.NewChatProbability = Int32.Parse(handler.HandlerArgs["NewChatProbability"].ToString());
+                            if (this.NewChatProbability < 0) this.NewChatProbability = 0;
                         }
                         catch (Exception e)
                         {
@@ -258,18 +274,27 @@ namespace Ghosts.Client.Handlers
 
                 
                 AutoItX3 au = new AutoItX3();
+                bool chatInitiated = false;
 
                 //determine if there are any open IM windows
                 string imWindowTitle = getImWindow();
                 if (imWindowTitle == null)
                 {
-                    if (NewMessageProbability < _random.Next(0, 100)) return true; //skip this cycle
+                    if (NewChatProbability < _random.Next(0, 100)) return true; //skip this cycle
                     openChatWindow(au, chatTarget);
+                    chatInitiated = true;
+                }
+                if (!chatInitiated && (_random.Next(0, 100) <= CloseChatProbability)) {
+                    //close the currently selected chat
+                    imWindowTitle = getImWindow();
+                    if (imWindowTitle == null) return true;
+                    closeCurrentlySelectedChat(imWindowTitle);
+                    return true;
                 }
 
                 int numReplies = _random.Next(RepliesMin, RepliesMax);
                 int i = 0;
-               while ( i < numReplies)
+                while ( i < numReplies)
                 {
                     imWindowTitle = getImWindow();
                     if (imWindowTitle == null) break;
@@ -282,6 +307,7 @@ namespace Ghosts.Client.Handlers
                     while (true)
                     {
                         sendChatMessage(au, imWindowTitle, thisTarget);
+                        Thread.Sleep(_random.Next(TimeBetweenMessagesMin, TimeBetweenMessagesMax));
                         currentImWindowTitle = selectNextChat(au, imWindowTitle);
                         i++;
                         if (i >= numReplies) break;
@@ -290,22 +316,15 @@ namespace Ghosts.Client.Handlers
                         //this is a new chat
                         imWindowTitle = currentImWindowTitle;
                         targetList.Add(thisTarget);
-                        Thread.Sleep(_random.Next(TimeBetweenMessagesMin, TimeBetweenMessagesMax));
-                        
                     }
-                    
-                    
                 }
-                return true;
-                
+                return true;   
             }
 
             catch (Exception e)
             {
 
-
                 Log.Error(e);
-
             }
             return true;
            
@@ -349,7 +368,6 @@ namespace Ghosts.Client.Handlers
                 au3.Send("{TAB}");
                 au3.Send("{ENTER}");
                 Thread.Sleep(500);
-
             }
         }
 
@@ -361,12 +379,24 @@ namespace Ghosts.Client.Handlers
         /// <returns></returns>
         private string selectNextChat(AutoItX3 au, string windowTitle)
         {
-            var windHandle = Winuser.FindWindow("gdkWindowToplevel", windowTitle);
+            var windHandle = Winuser.FindWindow("gdkWindowToplevel", "Pidgin");
             Winuser.SetForegroundWindow(windHandle);
             au.Send("^{TAB}");
             Thread.Sleep(500);
             //at this point the window title may have changed. Check that.
             return getImWindow(); //return the new title of the IM window
+
+        }
+
+        private void closeCurrentlySelectedChat( string windowTitle)
+        {
+            
+            var windHandle = Winuser.FindWindow("gdkWindowToplevel", windowTitle);
+            Winuser.SetForegroundWindow(windHandle);
+            System.Windows.Forms.SendKeys.SendWait("^w");
+            Log.Trace($"Pidgin:: closed chat {windowTitle}. ");
+            Thread.Sleep(500);
+            
 
         }
 
@@ -425,7 +455,8 @@ namespace Ghosts.Client.Handlers
         }
 
         /// <summary>
-        /// This looks for the buddy list window. If not found, start Pidgin, then look for it
+        /// This looks for the buddy list window. If not found, start Pidgin, then look for itf bet friends with like all celebrities, so. . . .
+        /// 
         /// </summary>
         /// <returns></returns>
         private IntPtr getBuddyListWindow()
