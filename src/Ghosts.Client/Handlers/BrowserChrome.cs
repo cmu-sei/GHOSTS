@@ -50,6 +50,16 @@ namespace Ghosts.Client.Handlers
                     }
                     catch
                     {
+                        //ignore
+                    }
+
+                    try
+                    {
+                        this.UserAgentString = JS.ExecuteScript("return navigator.userAgent").ToString();
+                    }
+                    catch
+                    {
+                        //ignore
                     }
 
                     if (handler.Loop)

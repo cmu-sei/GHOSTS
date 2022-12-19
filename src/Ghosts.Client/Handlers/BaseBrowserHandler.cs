@@ -37,6 +37,7 @@ namespace Ghosts.Client.Handlers
 
         public bool blogAbort { get; set; } = false;  //will be set to True if unable to proceed with Handler execution
         BlogHelper _bloghelper = null;
+        public string UserAgentString { get; set; }
         
         private Task LaunchThread(TimelineHandler handler, TimelineEvent timelineEvent, string site)
         {
@@ -233,32 +234,15 @@ namespace Ghosts.Client.Handlers
 
         public void Upload(TimelineHandler handler, TimelineEvent timelineEvent)
         {
-            var config = RequestConfiguration.Load(handler, timelineEvent.CommandArgs[_random.Next(0, timelineEvent.CommandArgs.Count)]);
-
-            Driver.Navigate().GoToUrl("about:blank");
-            var script = new StringBuilder("var xhr = new XMLHttpRequest();");
-            script.Append($"xhr.open('{config.Method.ToUpper()}', '{config.Uri}', true);");
-            script.Append("xhr.setRequestHeader('Content-Type', 'multipart/form-data');");
-            script.Append("var formData = new FormData();");
-            var f = config.FormValues["file"];
-            script.Append($"formData.append('file', '{f}');");
-            script.Append("xhr.onload = function() {");
-            script.Append("document.write(this.responseText);");
-            script.Append("};");
-            script.Append($"xhr.send('{config.FormValues.ToFormValueString()}');");
-
-            script.Append("xhr.addEventListener('load', function(event) {");
-            script.Append("console.log('File uploaded successfully');");
-            script.Append("});");
-
-            script.Append("xhr.addEventListener('error', function(event) {");
-            script.Append("console.error('Error uploading file');");
-            script.Append("});");
-
-            var javaScriptExecutor = (IJavaScriptExecutor)Driver;
-            javaScriptExecutor.ExecuteScript(script.ToString());
-
-            Console.WriteLine("done");
+            //var client = new RestClient("http://localhost:5000/files");
+            //client.Timeout = -1;
+            //var request = new RestRequest(Method.POST);
+            //request.AddHeader("Authorization", "Bearer CuPbaGNd3MYEg15ECi9mtFRcLDgbDtnK");
+            //request.AddParameter("user", "tom");
+            //request.AddParameter("message", "heyadsfsdaadfasdfasdfasdf");
+            //request.AddFile("File", "/Users/dustin/Pictures/grover.jpg");
+            //IRestResponse response = client.Execute(request);
+            //Console.WriteLine(response.Content);
         }
 
         public void DoRandomCommand(TimelineHandler handler, TimelineEvent timelineEvent)
