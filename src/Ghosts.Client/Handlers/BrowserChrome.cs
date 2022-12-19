@@ -6,9 +6,11 @@ using OpenQA.Selenium.Chrome;
 using System;
 using System.IO;
 using System.Threading;
+using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
 using Newtonsoft.Json.Linq;
 using OpenQA.Selenium;
+using OpenQA.Selenium.DevTools;
 
 namespace Ghosts.Client.Handlers
 {
@@ -156,6 +158,23 @@ namespace Ghosts.Client.Handlers
                 {
                     options.AddLocalStatePreference("profile.managed_default_content_settings.javascript", 1);
                 }
+
+                if (handler.HandlerArgs.ContainsKey("ua-string"))
+                {
+                    switch (handler.HandlerArgs["ua-string"].ToString().ToLower())
+                    {
+                        case "random":
+                            options.AddArgument($"--user-agent={UserAgentManager.Get()}");
+                            break;
+                        case "strict":
+                            options.AddArgument($"--user-agent={UserAgentManager.GetBrowserSpecific("chrome")}");
+                            break;
+                        default:
+                            options.AddArgument($"--user-agent={handler.HandlerArgs["ua-string"]}");
+                            break;
+                    }
+                    
+                }
             }
 
             options.AddLocalStatePreference("profile.default_content_setting_values.notifications", 2);
@@ -177,8 +196,6 @@ namespace Ghosts.Client.Handlers
             options.AddUserProfilePreference("plugins.plugins_disabled", "Chrome PDF Viewer");
             options.AddUserProfilePreference("plugins.always_open_pdf_externally", true);
             options.AddUserProfilePreference("safebrowsing.enabled", "false");  //this stops the confirmation popup when downloading files like .exe, .xml,etc
-            
-
 
             if (!string.IsNullOrEmpty(Program.Configuration.ChromeExtensions))
             {

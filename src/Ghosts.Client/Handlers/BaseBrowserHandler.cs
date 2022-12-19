@@ -12,6 +12,7 @@ using Actions = OpenQA.Selenium.Interactions.Actions;
 using Exception = System.Exception;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace Ghosts.Client.Handlers
 {
@@ -136,6 +137,10 @@ namespace Ghosts.Client.Handlers
                                 Thread.Sleep(1000);
                             }
                             break;
+                        case "upload":
+                            ParseRandomHandlerArgs(handler);
+                            Upload(handler, timelineEvent);
+                            break;
                         case "type":
                             element = Driver.FindElement(By.Name(timelineEvent.CommandArgs[0].ToString()));
                             actions = new Actions(Driver);
@@ -224,9 +229,36 @@ namespace Ghosts.Client.Handlers
             {
                 jitterfactor = Jitter.JitterFactorParse(handler.HandlerArgs["delay-jitter"].ToString());
             }
+        }
 
+        public void Upload(TimelineHandler handler, TimelineEvent timelineEvent)
+        {
+            var config = RequestConfiguration.Load(handler, timelineEvent.CommandArgs[_random.Next(0, timelineEvent.CommandArgs.Count)]);
 
+            Driver.Navigate().GoToUrl("about:blank");
+            var script = new StringBuilder("var xhr = new XMLHttpRequest();");
+            script.Append($"xhr.open('{config.Method.ToUpper()}', '{config.Uri}', true);");
+            script.Append("xhr.setRequestHeader('Content-Type', 'multipart/form-data');");
+            script.Append("var formData = new FormData();");
+            var f = config.FormValues["file"];
+            script.Append($"formData.append('file', '{f}');");
+            script.Append("xhr.onload = function() {");
+            script.Append("document.write(this.responseText);");
+            script.Append("};");
+            script.Append($"xhr.send('{config.FormValues.ToFormValueString()}');");
 
+            script.Append("xhr.addEventListener('load', function(event) {");
+            script.Append("console.log('File uploaded successfully');");
+            script.Append("});");
+
+            script.Append("xhr.addEventListener('error', function(event) {");
+            script.Append("console.error('Error uploading file');");
+            script.Append("});");
+
+            var javaScriptExecutor = (IJavaScriptExecutor)Driver;
+            javaScriptExecutor.ExecuteScript(script.ToString());
+
+            Console.WriteLine("done");
         }
 
         public void DoRandomCommand(TimelineHandler handler, TimelineEvent timelineEvent)

@@ -29,6 +29,13 @@ namespace Ghosts.Domain.Code
             return entries.PickRandom();
         }
 
+        public static string GetBrowserSpecific(string type)
+        {
+            var file = Path.Combine(ApplicationDetails.UserAgents.Path, type, ".txt");
+            var entries = GetEntries(file);
+            return entries.PickRandom();
+        }
+
         private static FileInfo[] GetFiles()
         {
             var files = new List<FileInfo>();
