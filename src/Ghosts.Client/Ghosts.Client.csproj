@@ -557,6 +557,7 @@
     <Compile Include="Infrastructure\Browser\ExtendedConfiguration.cs" />
     <Compile Include="Infrastructure\Credentials.cs" />
     <Compile Include="Infrastructure\DebugManager.cs" />
+    <Compile Include="Infrastructure\Trackables.cs" />
     <Compile Include="Infrastructure\GuestInfoVars.cs" />
     <Compile Include="Infrastructure\CommandLineFlagManager.cs" />
     <Compile Include="Infrastructure\ClientConfigurationResolver.cs" />

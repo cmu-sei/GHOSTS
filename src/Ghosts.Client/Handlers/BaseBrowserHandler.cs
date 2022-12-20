@@ -264,6 +264,13 @@ namespace Ghosts.Client.Handlers
                 request.AddFile("File", config.FormValues["file"]);
                 var response = client.Execute(request);
                 Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId, response.Content);
+
+                if (!string.IsNullOrEmpty(timelineEvent.TrackableId) && !string.IsNullOrEmpty(response.Content))
+                {
+                    var tm = new Trackables.TrackablesManager();
+                    tm.Add(new Trackables.Trackable(timelineEvent.TrackableId, response.Content.Replace("\"","")));
+                    tm.Save();
+                }
             }
             catch(Exception ex)
             {
@@ -398,8 +405,9 @@ namespace Ghosts.Client.Handlers
             }
         }
 
-        public void MakeRequest(RequestConfiguration config)
+        public string MakeRequest(RequestConfiguration config)
         {
+            var retVal = string.Empty;
             // Added try here because some versions of FF (v56) throw an exception for an unresolved site,
             // but in other versions it seems to fail gracefully. We want to always fail gracefully
             try
@@ -412,17 +420,45 @@ namespace Ghosts.Client.Handlers
                     case "POST":
                     case "PUT":
                     case "DELETE":
-                        Driver.Navigate().GoToUrl("about:blank");
-                        var script = "var xhr = new XMLHttpRequest();";
-                        script += $"xhr.open('{config.Method.ToUpper()}', '{config.Uri}', true);";
-                        script += "xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');";
-                        script += "xhr.onload = function() {";
-                        script += "document.write(this.responseText);";
-                        script += "};";
-                        script += $"xhr.send('{config.FormValues.ToFormValueString()}');";
+                        var options = new RestClientOptions
+                        {
+                            UserAgent = this.UserAgentString
+                        };
+                        var client = new RestClient(options);
 
-                        var javaScriptExecutor = (IJavaScriptExecutor)Driver;
-                        javaScriptExecutor.ExecuteScript(script);
+                        var method = config.Method.ToUpper() switch
+                        {
+                            "PUT" => Method.Put,
+                            "DELETE" => Method.Delete,
+                            _ => Method.Post
+                        };
+
+                        var request = new RestRequest(config.Uri, method)
+                        {
+                            Timeout = -1
+                        };
+                        
+                        if (config.FormValues != null)
+                        {
+                            request.AddHeader("Content-type", "application/x-www-form-urlencoded");
+                            foreach (var item in config.FormValues)
+                            {
+                                var v = item.Value;
+                                if (v.Contains("{t:"))
+                                {
+                                    foreach (var t in new Trackables.TrackablesManager().Items)
+                                    {
+                                        v = v.Replace($"{{t:{t.Key}}}", t.Value);
+                                    }
+                                }
+
+                                request.AddParameter(item.Key, v);
+                            }
+                        }
+
+                        var response = client.Execute(request);
+                        if(response.IsSuccessful && !string.IsNullOrEmpty(response.Content))
+                            retVal = response.Content;
                         break;
                 }
 
@@ -433,8 +469,9 @@ namespace Ghosts.Client.Handlers
 
                 Log.Trace(e.Message);
                 HandleBrowserException(e);
-
             }
+
+            return retVal;
         }
 
         private bool isGoodLink(Uri uri)
@@ -630,19 +667,11 @@ namespace Ghosts.Client.Handlers
 
             }
         }
-
-
-
-
- 
-
+        
         public virtual void HandleBrowserException(Exception e)
         {
-
         }
-
-      
-
+        
         /// <summary>
         /// Close browser
         /// </summary>
