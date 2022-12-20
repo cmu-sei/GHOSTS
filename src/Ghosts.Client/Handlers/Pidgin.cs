@@ -34,8 +34,10 @@ namespace Ghosts.Client.Handlers
     /// Prequisites
     ///   Pidgin must be installed and already configured with an enabled account in %APPDATA%\.purple\accounts.xml 
     ///     and pointing to the target server. 
+    ///   
     ///   The logged in user must have an enabled Pidgin account in accounts.xml
     ///   Pidgin preferences must have already been set in  %APPDATA%\.purple\prefs.xml
+    ///   Conversations must be TABBED (in prefs.xml/conversations section, name='tabs' type='bool' value='1')
     ///   This implementation uses AutoItX and the GHOSTSINSTALL\AutoItX3.dll must be registered.
     ///     To register the DLL, execute with admin priviledges: C:\Windows\System32\regsvr32.exe  targetdll   during the client setup.
     /// Implementation
@@ -61,6 +63,8 @@ namespace Ghosts.Client.Handlers
     ///   A chat target can be the current logged in user, which means messages are simply echoed back from the server.
     ///   As chats arrive from other different users, the number of open tabs in the grows, but chats can be closed by CloseChatProbability
     ///   Between 1-4 random emojis are added to a message based on EmojiProbability
+    ///   
+    ///   During an activity cycle, any popup windows that match a title in ErrorWindowTitles are closed
     /// 
     /// 
     /// </summary>
@@ -74,10 +78,11 @@ namespace Ghosts.Client.Handlers
         private int NewChatProbability = 60;
         private int CloseChatProbability = 10;
         private int jitterfactor = 50;
-        private string UserAccount = null;   //pidgin user account
         private List<string> emojis;
-        private string exepath = "C:\\Program Files (x86)\\Pidgin\\pidgin.exe";
-        private ChatContent messages;
+        private string Exepath = "C:\\Program Files (x86)\\Pidgin\\pidgin.exe";
+        private List<string> ErrorWindowTitles;   //list of window titles for possible popup error windows that should be closed
+        private List<string> MiscWindowTitles;  //list of window titles that sometime popup and must be closed
+        private ChatContent messages;  
 
 
         public Pidgin(TimelineHandler handler)
@@ -86,9 +91,19 @@ namespace Ghosts.Client.Handlers
             {
                 base.Init(handler);
                 messages = new ChatContent();
+                //default error window titles, can be protocol specific
+                ErrorWindowTitles = new List<string>()
+                {
+                    "XMPP Message Error"
+                };
+                MiscWindowTitles = new List<string>()
+                {
+                    "Accounts", "Modify Account"
+                };
+
                 emojis = new List<string>()
                 {
-                    ":beer:",":coffe:",":money:",":moon:",";star:",":|","\\m/",
+                    ":beer:",":coffee:",":money:",":moon:",":star:",":|","\\m/",
                     ":-D",":-(",";-)",":P", "=-O", ":kiss:","8-)",":-[",":'-(",":-/",
                     "O:-)",":-X",":-$",":-!",">:o",">:-(",":yes:",":no:",
                     ":wait:","@->--",":telephone:",":email:",":jabber:",":cake:",":heart:",":brokenheart:",":music:"
@@ -97,8 +112,43 @@ namespace Ghosts.Client.Handlers
 
                 if (handler.HandlerArgs != null)
                 {
+                    if (handler.HandlerArgs.ContainsKey("ErrorWindowTitles"))
+                    {
+                        try
+                        {
+                            ErrorWindowTitles = new List<string>();
+                            foreach (var option in (JArray)handler.HandlerArgs["ErrorWindowTitles"])
+                            {
+                                ErrorWindowTitles.Add(option.Value<string>());
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Log.Error(e);
+                        }
+                    }
 
-                    
+                    if (handler.HandlerArgs.ContainsKey("Exepath"))
+                    {
+                        try
+                        {
+                            string targetExe = handler.HandlerArgs["Exepath"].ToString();
+                            targetExe = Environment.ExpandEnvironmentVariables(targetExe);
+                            if (!File.Exists(targetExe))
+                            {
+                                Log.Trace($"Pidgin:: Exepath {targetExe} does not exist, using default of {Exepath}.");
+                            }
+                            else
+                            {
+                                Exepath = targetExe;
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Log.Error(e);
+                        }
+                    }
+
                     if (handler.HandlerArgs.ContainsKey("TimeBetweenMessagesMax"))
                     {
                         try
@@ -184,11 +234,7 @@ namespace Ghosts.Client.Handlers
                         }
                     }
 
-                    if (handler.HandlerArgs.ContainsKey("UserAccount"))
-                    {
-                        this.UserAccount = handler.HandlerArgs["UserAccount"].ToString();
-                    }
-
+                    
 
 
 
@@ -235,7 +281,7 @@ namespace Ghosts.Client.Handlers
                 if (timelineEvent.DelayBefore > 0)
                     Thread.Sleep(timelineEvent.DelayBefore);
 
-                Log.Trace($"Pidgin Command: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfter}");
+                Log.Trace($"Pidgin::  Command {timelineEvent.Command} with delay after of {timelineEvent.DelayAfter}");
 
                 switch (timelineEvent.Command)
                 {
@@ -265,6 +311,8 @@ namespace Ghosts.Client.Handlers
 
             try
             {
+                closeWindows(MiscWindowTitles);
+                closeWindows(ErrorWindowTitles);
                 IntPtr pidginHandle = getBuddyListWindow();
                 if (pidginHandle == IntPtr.Zero)
                 {
@@ -272,7 +320,7 @@ namespace Ghosts.Client.Handlers
                     return false;
                 }
 
-                
+               
                 AutoItX3 au = new AutoItX3();
                 bool chatInitiated = false;
 
@@ -291,7 +339,7 @@ namespace Ghosts.Client.Handlers
                     closeCurrentlySelectedChat(imWindowTitle);
                     return true;
                 }
-
+               
                 int numReplies = _random.Next(RepliesMin, RepliesMax);
                 int i = 0;
                 while ( i < numReplies)
@@ -318,6 +366,7 @@ namespace Ghosts.Client.Handlers
                         targetList.Add(thisTarget);
                     }
                 }
+               
                 return true;   
             }
 
@@ -344,6 +393,27 @@ namespace Ghosts.Client.Handlers
                 return windowTitle;
             }
         }
+
+        /// <summary>
+        /// Close any error windows due to chat sending
+        /// </summary>
+        private void closeWindows(List<string> windowTitles)
+        {
+            foreach (var windowTitle in windowTitles)
+            {
+                while (true)
+                {
+                    var winHandle = Winuser.FindWindow("gdkWindowToplevel", windowTitle);
+                    if (winHandle == IntPtr.Zero) break;
+                    Winuser.SetForegroundWindow(winHandle);
+                    System.Windows.Forms.SendKeys.SendWait("%c");  //close the window
+                    Thread.Sleep(1000);
+                    Log.Trace($"Pidgin:: Closed window {windowTitle}. ");
+                }
+            }
+        }
+
+        
 
        
         /// <summary>
@@ -420,8 +490,8 @@ namespace Ghosts.Client.Handlers
                         msg = msg + emojis[_random.Next(0,emojis.Count)];
                     }
                 }
+                msg = msg + "{ENTER}";
                 au.Send(msg);
-                au.Send("{ENTER}");
                 Thread.Sleep(1000);
                 Log.Trace($"Pidgin:: Sent message to target {chatTarget}. ");
             }
@@ -466,8 +536,9 @@ namespace Ghosts.Client.Handlers
             if (plist.Length == 0)
             {
                 //try to start Pidgin
-                Process.Start(exepath);
-                Thread.Sleep(1000);
+                Log.Trace($"Pidgin:: Starting Pidgin. ");
+                Process.Start(Exepath);
+                Thread.Sleep(180000);   //wait for three minutes for pidgin to start and make contact with server 
             }
 
             else if (plist.Length > 0)
@@ -477,8 +548,9 @@ namespace Ghosts.Client.Handlers
                 {
                     //this is the background process. Start pidgin
                     //try to start Pidgin
-                    Process.Start(exepath);
-                    Thread.Sleep(1000);
+                    Log.Trace($"Pidgin:: Starting Pidgin. ");
+                    Process.Start(Exepath);
+                    Thread.Sleep(180000);  //wait for three minutes for pidgin to start and make contact with server 
                 }
                     
             }

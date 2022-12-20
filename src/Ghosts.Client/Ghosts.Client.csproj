@@ -669,6 +669,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <None Include="Sample Timelines\outlook.json" />
+    <None Include="Sample Timelines\Pidgin.json" />
     <None Include="Sample Timelines\PowerPoint.json" />
     <None Include="Sample Timelines\Print.json" />
     <None Include="Sample Timelines\Reboot.json" />
