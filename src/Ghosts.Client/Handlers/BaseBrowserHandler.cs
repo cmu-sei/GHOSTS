@@ -13,6 +13,7 @@ using Exception = System.Exception;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using RestSharp;
 
 namespace Ghosts.Client.Handlers
 {
@@ -234,21 +235,44 @@ namespace Ghosts.Client.Handlers
 
         public void Upload(TimelineHandler handler, TimelineEvent timelineEvent)
         {
-            //var client = new RestClient("http://localhost:5000/files");
-            //client.Timeout = -1;
-            //var request = new RestRequest(Method.POST);
-            //request.AddHeader("Authorization", "Bearer CuPbaGNd3MYEg15ECi9mtFRcLDgbDtnK");
-            //request.AddParameter("user", "tom");
-            //request.AddParameter("message", "heyadsfsdaadfasdfasdfasdf");
-            //request.AddFile("File", "/Users/dustin/Pictures/grover.jpg");
-            //IRestResponse response = client.Execute(request);
-            //Console.WriteLine(response.Content);
+            try
+            {
+                if (Driver.CurrentWindowHandle == null)
+                {
+                    throw new Exception("Browser window handle not available");
+                }
+
+                var config = RequestConfiguration.Load(handler,
+                    timelineEvent.CommandArgs[_random.Next(0, timelineEvent.CommandArgs.Count)]);
+
+                var options = new RestClientOptions
+                {
+                    UserAgent = this.UserAgentString
+                };
+                var client = new RestClient(options);
+                var request = new RestRequest(config.Uri, Method.Post)
+                {
+                    Timeout = -1
+                };
+                
+
+                if (config.FormValues == null || string.IsNullOrEmpty(config.FormValues["file"]))
+                {
+                    throw new Exception("Config formValues is malformed");
+                }
+
+                request.AddFile("File", config.FormValues["file"]);
+                var response = client.Execute(request);
+                Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId, response.Content);
+            }
+            catch(Exception ex)
+            {
+                Log.Trace($"Upload request failed, exiting... {ex}");
+            }
         }
 
         public void DoRandomCommand(TimelineHandler handler, TimelineEvent timelineEvent)
         {
-            RequestConfiguration config;
-
             this.linkManager = new LinkManager(visitedRemember);
 
             while (true)
@@ -258,7 +282,7 @@ namespace Ghosts.Client.Handlers
                     throw new Exception("Browser window handle not available");
                 }
 
-                config = RequestConfiguration.Load(handler, timelineEvent.CommandArgs[_random.Next(0, timelineEvent.CommandArgs.Count)]);
+                var config = RequestConfiguration.Load(handler, timelineEvent.CommandArgs[_random.Next(0, timelineEvent.CommandArgs.Count)]);
                 if (config.Uri != null && config.Uri.IsWellFormedOriginalString())
                 {
                     this.linkManager.SetCurrent(config.Uri);
@@ -290,7 +314,7 @@ namespace Ghosts.Client.Handlers
 
                                     Log.Trace($"Making request #{loopNumber+1}/{loops} to {config.Uri}");
                                     MakeRequest(config);
-                                    Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId);                                 
+                                    Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId);
                                 }
                                 catch (ThreadAbortException)
                                 {
