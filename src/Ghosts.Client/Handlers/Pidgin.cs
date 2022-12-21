@@ -82,7 +82,8 @@ namespace Ghosts.Client.Handlers
         private string Exepath = "C:\\Program Files (x86)\\Pidgin\\pidgin.exe";
         private List<string> ErrorWindowTitles;   //list of window titles for possible popup error windows that should be closed
         private List<string> MiscWindowTitles;  //list of window titles that sometime popup and must be closed
-        private ChatContent messages;  
+        private ChatContent messages;
+        private Dictionary<string, bool> chatStatus;  //tracks if chat triggered an error message or not
 
 
         public Pidgin(TimelineHandler handler)
@@ -90,6 +91,7 @@ namespace Ghosts.Client.Handlers
             try
             {
                 base.Init(handler);
+                chatStatus = new Dictionary<string, bool>();
                 messages = new ChatContent();
                 //default error window titles, can be protocol specific
                 ErrorWindowTitles = new List<string>()
@@ -307,7 +309,9 @@ namespace Ghosts.Client.Handlers
         {
             var chatTarget = command;
 
-            Log.Trace($"Beginning Pidgin activity cycle ");
+           
+
+            Log.Trace($"Pidgin:: Beginning Pidgin activity cycle ");
 
             try
             {
@@ -329,14 +333,12 @@ namespace Ghosts.Client.Handlers
                 if (imWindowTitle == null)
                 {
                     if (NewChatProbability < _random.Next(0, 100)) return true; //skip this cycle
-                    openChatWindow(au, chatTarget);
-                    chatInitiated = true;
+                    chatInitiated =  openChatWindow(au, chatTarget);
+                    if (!chatInitiated) return true; //wait for another cycle, failed to inititate chat
                 }
                 if (!chatInitiated && (_random.Next(0, 100) <= CloseChatProbability)) {
                     //close the currently selected chat
-                    imWindowTitle = getImWindow();
-                    if (imWindowTitle == null) return true;
-                    closeCurrentlySelectedChat(imWindowTitle);
+                    findAndCloseChatWindow();
                     return true;
                 }
                
@@ -356,6 +358,17 @@ namespace Ghosts.Client.Handlers
                     {
                         sendChatMessage(au, imWindowTitle, thisTarget);
                         Thread.Sleep(_random.Next(TimeBetweenMessagesMin, TimeBetweenMessagesMax));
+                        if (closeWindows(ErrorWindowTitles))
+                        {
+                            //an error window popped up. Mark this chat as bad, and close it
+                            chatStatus[thisTarget] = false;
+                            //close the currently selected chat
+                            findAndCloseChatWindow();
+                            return true;
+                        } else
+                        {
+                            chatStatus[thisTarget] = true;  
+                        }
                         currentImWindowTitle = selectNextChat(au, imWindowTitle);
                         i++;
                         if (i >= numReplies) break;
@@ -379,6 +392,15 @@ namespace Ghosts.Client.Handlers
            
         }
 
+        /// <summary>
+        /// Find and close the chat window
+        /// </summary>
+        private void findAndCloseChatWindow()
+        {
+            var imWindowTitle = getImWindow();
+            if (imWindowTitle != null) closeCurrentlySelectedChat(imWindowTitle);
+        }
+
         
         private string getChatTargetFromWindowTitle(string windowTitle)
         {
@@ -397,8 +419,10 @@ namespace Ghosts.Client.Handlers
         /// <summary>
         /// Close any error windows due to chat sending
         /// </summary>
-        private void closeWindows(List<string> windowTitles)
+        private bool closeWindows(List<string> windowTitles)
         {
+
+            bool windowFound = false;
             foreach (var windowTitle in windowTitles)
             {
                 while (true)
@@ -409,8 +433,10 @@ namespace Ghosts.Client.Handlers
                     System.Windows.Forms.SendKeys.SendWait("%c");  //close the window
                     Thread.Sleep(1000);
                     Log.Trace($"Pidgin:: Closed window {windowTitle}. ");
+                    windowFound = true;
                 }
             }
+            return windowFound;
         }
 
         
@@ -420,8 +446,30 @@ namespace Ghosts.Client.Handlers
         /// Open a new chat window to the imTarget
         /// </summary>
         /// <param name="imTarget"></param>
-        private void openChatWindow(AutoItX3 au, string imTarget)
+        private bool openChatWindow(AutoItX3 au, string imTarget)
         {
+
+            //before opening chat window, verify target 
+            if (chatStatus.ContainsKey(imTarget) && !chatStatus[imTarget])
+            {
+                //this target generated an error, pick another chatTarget
+                List<string> goodChats = new List<string>();
+                foreach (var key in chatStatus.Keys)
+                {
+                    var status = chatStatus[key];
+                    if (status) goodChats.Add(key);
+                }
+                if (goodChats.Count > 0)
+                {
+                    //pick a new known-good target
+                    imTarget = goodChats[_random.Next(0, goodChats.Count)];
+                }
+                else
+                {
+                    Log.Trace($"Pidgin:: Chat target {imTarget} not responsive and no good targets to try, waiting for a message. ");
+                    return false;
+                }
+            }
             var pidginHandle = Winuser.FindWindow("gdkWindowToplevel", "Buddy List");
             if (pidginHandle != IntPtr.Zero)
             {
@@ -430,15 +478,14 @@ namespace Ghosts.Client.Handlers
                 Thread.Sleep(1000);
                 pidginHandle = Winuser.FindWindow("gdkWindowToplevel", "Pidgin");
                 Winuser.SetForegroundWindow(pidginHandle);
-                AutoItX3 au3 = new AutoItX3();
-                var windHandle = au3.WinGetHandle("Pidgin");
-                au3.WinActivate(windHandle);
-                au3.Send(imTarget);
-                au3.Send("{TAB}");
-                au3.Send("{TAB}");
-                au3.Send("{ENTER}");
+                var windHandle = au.WinGetHandle("Pidgin");
+                au.WinActivate(windHandle);
+                var msg = imTarget + "{TAB}" + "{TAB}" + "{ENTER}";
+                au.Send(msg);
                 Thread.Sleep(500);
+                return true;
             }
+            return false;
         }
 
         /// <summary>
