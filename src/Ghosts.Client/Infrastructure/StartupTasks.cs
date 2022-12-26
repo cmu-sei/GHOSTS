@@ -36,6 +36,8 @@ public static class StartupTasks
 
     public static void CleanupProcesses()
     {
+        _log.Trace("Running process cleaner...");
+
         try
         {
             var cleanupList = new List<string>
@@ -58,7 +60,7 @@ public static class StartupTasks
             var ghosts = Process.GetCurrentProcess();
             cleanupList.Add(ghosts.ProcessName);
 
-            _log.Trace($"Got ghosts pid: {ghosts.Id}");
+            _log.Trace($"Found ghosts pid: {ghosts.Id}");
 
             foreach (var cleanupItem in cleanupList)
             {

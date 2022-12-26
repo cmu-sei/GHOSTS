@@ -10,7 +10,8 @@ namespace Ghosts.Domain.Code.Helpers
         {
             try
             {
-                process.Close();
+                Process.Start("taskkill", $"/pid {process.Id} /F /T");
+
             }
             catch
             {

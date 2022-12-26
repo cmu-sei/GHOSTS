@@ -9,11 +9,9 @@ using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
 using OpenQA.Selenium;
 using Actions = OpenQA.Selenium.Interactions.Actions;
-using Exception = System.Exception;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using RestSharp;
 
 namespace Ghosts.Client.Handlers
 {
@@ -235,47 +233,48 @@ namespace Ghosts.Client.Handlers
 
         public void Upload(TimelineHandler handler, TimelineEvent timelineEvent)
         {
-            try
-            {
-                if (Driver.CurrentWindowHandle == null)
-                {
-                    throw new Exception("Browser window handle not available");
-                }
+            throw new NotImplementedException();
+            //try
+            //{
+            //    if (Driver.CurrentWindowHandle == null)
+            //    {
+            //        throw new Exception("Browser window handle not available");
+            //    }
 
-                var config = RequestConfiguration.Load(handler,
-                    timelineEvent.CommandArgs[_random.Next(0, timelineEvent.CommandArgs.Count)]);
+            //    var config = RequestConfiguration.Load(handler,
+            //        timelineEvent.CommandArgs[_random.Next(0, timelineEvent.CommandArgs.Count)]);
 
-                var options = new RestClientOptions
-                {
-                    UserAgent = this.UserAgentString
-                };
-                var client = new RestClient(options);
-                var request = new RestRequest(config.Uri, Method.Post)
-                {
-                    Timeout = -1
-                };
+            //    //var options = new RestClientOptions
+            //    //{
+            //    //    UserAgent = this.UserAgentString
+            //    //};
+            //    //var client = new RestClient(options);
+            //    //var request = new RestRequest(config.Uri, Method.Post)
+            //    //{
+            //    //    Timeout = -1
+            //    //};
                 
 
-                if (config.FormValues == null || string.IsNullOrEmpty(config.FormValues["file"]))
-                {
-                    throw new Exception("Config formValues is malformed");
-                }
+            //    //if (config.FormValues == null || string.IsNullOrEmpty(config.FormValues["file"]))
+            //    //{
+            //    //    throw new Exception("Config formValues is malformed");
+            //    //}
 
-                request.AddFile("File", config.FormValues["file"]);
-                var response = client.Execute(request);
-                Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId, response.Content);
+            //    //request.AddFile("File", config.FormValues["file"]);
+            //    //var response = client.Execute(request);
+            //    //Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId, response.Content);
 
-                if (!string.IsNullOrEmpty(timelineEvent.TrackableId) && !string.IsNullOrEmpty(response.Content))
-                {
-                    var tm = new Trackables.TrackablesManager();
-                    tm.Add(new Trackables.Trackable(timelineEvent.TrackableId, response.Content.Replace("\"","")));
-                    tm.Save();
-                }
-            }
-            catch(Exception ex)
-            {
-                Log.Trace($"Upload request failed, exiting... {ex}");
-            }
+            //    //if (!string.IsNullOrEmpty(timelineEvent.TrackableId) && !string.IsNullOrEmpty(response.Content))
+            //    //{
+            //    //    var tm = new Trackables.TrackablesManager();
+            //    //    tm.Add(new Trackables.Trackable(timelineEvent.TrackableId, response.Content.Replace("\"","")));
+            //    //    tm.Save();
+            //    //}
+            //}
+            //catch(Exception ex)
+            //{
+            //    Log.Trace($"Upload request failed, exiting... {ex}");
+            //}
         }
 
         public void DoRandomCommand(TimelineHandler handler, TimelineEvent timelineEvent)
@@ -420,45 +419,17 @@ namespace Ghosts.Client.Handlers
                     case "POST":
                     case "PUT":
                     case "DELETE":
-                        var options = new RestClientOptions
-                        {
-                            UserAgent = this.UserAgentString
-                        };
-                        var client = new RestClient(options);
+                        Driver.Navigate().GoToUrl("about:blank");
+                        var script = "var xhr = new XMLHttpRequest();";
+                        script += $"xhr.open('{config.Method.ToUpper()}', '{config.Uri}', true);";
+                        script += "xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');";
+                        script += "xhr.onload = function() {";
+                        script += "document.write(this.responseText);";
+                        script += "};";
+                        script += $"xhr.send('{config.FormValues.ToFormValueString()}');";
 
-                        var method = config.Method.ToUpper() switch
-                        {
-                            "PUT" => Method.Put,
-                            "DELETE" => Method.Delete,
-                            _ => Method.Post
-                        };
-
-                        var request = new RestRequest(config.Uri, method)
-                        {
-                            Timeout = -1
-                        };
-                        
-                        if (config.FormValues != null)
-                        {
-                            request.AddHeader("Content-type", "application/x-www-form-urlencoded");
-                            foreach (var item in config.FormValues)
-                            {
-                                var v = item.Value;
-                                if (v.Contains("{t:"))
-                                {
-                                    foreach (var t in new Trackables.TrackablesManager().Items)
-                                    {
-                                        v = v.Replace($"{{t:{t.Key}}}", t.Value);
-                                    }
-                                }
-
-                                request.AddParameter(item.Key, v);
-                            }
-                        }
-
-                        var response = client.Execute(request);
-                        if(response.IsSuccessful && !string.IsNullOrEmpty(response.Content))
-                            retVal = response.Content;
+                        var javaScriptExecutor = (IJavaScriptExecutor)Driver;
+                        javaScriptExecutor.ExecuteScript(script);
                         break;
                 }
 

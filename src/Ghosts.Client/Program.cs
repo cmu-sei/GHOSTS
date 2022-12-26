@@ -130,14 +130,6 @@ class Program
             return;
         }
 
-        if (Configuration.ResourceControl == null)
-        {
-            Configuration.ResourceControl = new ClientConfiguration.ResourceControlSettings();
-            Configuration.ResourceControl.ManageProcesses = true;
-        }
-
-        _log.Trace($"Configuration.ResourceControl.ManageProcesses = {Program.Configuration.ResourceControl.ManageProcesses}");
-
         Program.CheckId = new CheckId();
 
         DebugManager.Evaluate();
@@ -151,6 +143,17 @@ class Program
         if (!IsDebug)
         {
             ShowWindow(handle, SwHide);
+        }
+
+        if (Configuration.ResourceControl == null)
+        {
+            Configuration.ResourceControl = new ClientConfiguration.ResourceControlSettings();
+            Configuration.ResourceControl.ManageProcesses = true;
+        }
+
+        _log.Trace($"Configuration.ResourceControl.ManageProcesses = {Configuration.ResourceControl.ManageProcesses}");
+        if (Configuration.ResourceControl.ManageProcesses)
+        {
             //add hook to manage processes running in order to never tip a machine over
             StartupTasks.CleanupProcesses();
         }
@@ -218,6 +221,7 @@ class Program
     private static void CurrentDomain_ProcessExit(object sender, EventArgs e)
     {
         _log.Debug($"Initiating {ApplicationDetails.Name} shutdown - Local time: {DateTime.Now.TimeOfDay} UTC: {DateTime.UtcNow.TimeOfDay}");
-        StartupTasks.CleanupProcesses();
+        if(Configuration.ResourceControl.ManageProcesses)
+            StartupTasks.CleanupProcesses();
     }
 }
