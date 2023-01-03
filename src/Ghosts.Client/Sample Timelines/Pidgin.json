@@ -1,0 +1,40 @@
+
+/// See documentation in Handlers/Pidgin.cs
+
+
+{
+  "Status": "Run",
+  "TimeLineHandlers": [
+    {
+      "HandlerType": "Pidgin",
+      "HandlerArgs": {
+        "RepliesMin": 2,
+        "RepliesMax": 5,
+        "ErrorWindowTitles": [ "XMPP Message Error" ],
+        "EmoticonProbability": 50,
+        "NewChatProbability": 100,
+        "CloseChatProbability": 100,
+        "TimeBetweenMessagesMax": 10000,
+        "TimeBetweenMessagesMin": 5000
+      },
+      "Initial": "",
+      "UtcTimeOn": "00:00:00",
+      "UtcTimeOff": "24:00:00",
+      "Loop": "True",
+      "TimeLineEvents": [
+        {
+          "Command": "random",
+          "CommandArgs": [
+            "bjones@sitea.com",
+            "pharvey@sitea.com",
+
+          ],
+          "DelayAfter": 20000,
+          "DelayBefore": 0
+        }
+      ]
+    }
+
+
+  ]
+}

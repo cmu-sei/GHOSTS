@@ -315,6 +315,12 @@ namespace Ghosts.Client.TimelineManager
                             _ = new Sftp(handler);
                         });
                         break;
+                    case HandlerType.Pidgin:
+                        t = new Thread(() =>
+                        {
+                            _ = new Pidgin(handler);
+                        });
+                        break;
                     case HandlerType.Word:
                         _log.Trace("Launching thread for word");
                         if (IsWordInstalled)
