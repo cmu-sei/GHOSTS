@@ -92,6 +92,9 @@
     <LangVersion>preview</LangVersion>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AutoItX3.Assembly, Version=3.0.0.0, Culture=neutral, PublicKeyToken=a646454c8d475470, processorArchitecture=MSIL">
+      <HintPath>..\packages\AutoItX.Dotnet.3.3.14.5\lib\AutoItX3.Assembly.dll</HintPath>
+    </Reference>
     <Reference Include="CommandLine, Version=2.8.0.0, Culture=neutral, PublicKeyToken=5a870481e358d379, processorArchitecture=MSIL">
       <HintPath>..\packages\CommandLineParser.2.8.0\lib\net461\CommandLine.dll</HintPath>
     </Reference>
@@ -104,6 +107,10 @@
     </Reference>
     <Reference Include="HtmlAgilityPack, Version=1.11.45.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
       <HintPath>..\packages\HtmlAgilityPack.1.11.45\lib\Net45\HtmlAgilityPack.dll</HintPath>
+    </Reference>
+    <Reference Include="Interop.AutoItX3Lib">
+      <HintPath>lib\Interop.AutoItX3Lib.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
     <Reference Include="Interop.ProfMan">
       <HintPath>lib\Interop.ProfMan.dll</HintPath>
@@ -520,12 +527,15 @@
     <Compile Include="Handlers\BlogHelper.cs" />
     <Compile Include="Handlers\BlogHelperDrupal.cs" />
     <Compile Include="Handlers\BrowserCrawl.cs" />
+    <Compile Include="Handlers\Pidgin.cs" />
     <Compile Include="Handlers\Print.cs" />
     <Compile Include="Handlers\Sftp.cs" />
     <Compile Include="Handlers\SharepointHelper.cs" />
     <Compile Include="Handlers\Ssh.cs" />
     <Compile Include="Infrastructure\Browser\BlogContent.cs" />
     <Compile Include="Infrastructure\Browser\ExtendedConfiguration.cs" />
+    <Compile Include="Infrastructure\Browser\PostContent.cs" />
+    <Compile Include="Infrastructure\ChatContent.cs" />
     <Compile Include="Infrastructure\Credentials.cs" />
     <Compile Include="Infrastructure\DebugManager.cs" />
     <Compile Include="Infrastructure\Trackables.cs" />
@@ -569,6 +579,15 @@
     <Compile Include="Health\HealthRecord.cs" />
     <Compile Include="Health\Check.cs" />
     <Content Include="config\application.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="config\email_targets.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="config\first_names.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="config\last_names.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="lib\Redemption.dll">
@@ -618,6 +637,7 @@
     <None Include="Sample Timelines\command.json" />
     <None Include="Sample Timelines\Excel.json" />
     <None Include="Sample Timelines\Full sample.timeline.json" />
+    <Compile Include="Infrastructure\Winuser.cs" />
     <Compile Include="Infrastructure\WorkingHours.cs" />
     <Compile Include="Survey\SurveyManager.cs" />
     <Compile Include="TimelineManager\Listener.cs" />
@@ -625,6 +645,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <None Include="Sample Timelines\outlook.json" />
+    <None Include="Sample Timelines\Pidgin.json" />
     <None Include="Sample Timelines\PowerPoint.json" />
     <None Include="Sample Timelines\Print.json" />
     <None Include="Sample Timelines\Reboot.json" />
@@ -679,6 +700,7 @@
     <Error Condition="!Exists('..\packages\Microsoft.Extensions.ApiDescription.Server.3.1.3\build\Microsoft.Extensions.ApiDescription.Server.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Extensions.ApiDescription.Server.3.1.3\build\Microsoft.Extensions.ApiDescription.Server.targets'))" />
     <Error Condition="!Exists('..\packages\Selenium.WebDriver.GeckoDriver.0.31.0.1\build\Selenium.WebDriver.GeckoDriver.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Selenium.WebDriver.GeckoDriver.0.31.0.1\build\Selenium.WebDriver.GeckoDriver.targets'))" />
     <Error Condition="!Exists('..\packages\Selenium.WebDriver.ChromeDriver.108.0.5359.7100\build\Selenium.WebDriver.ChromeDriver.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Selenium.WebDriver.ChromeDriver.108.0.5359.7100\build\Selenium.WebDriver.ChromeDriver.targets'))" />
+    <Error Condition="!Exists('..\packages\AutoItX.Dotnet.3.3.14.5\build\AutoItX.Dotnet.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\AutoItX.Dotnet.3.3.14.5\build\AutoItX.Dotnet.targets'))" />
   </Target>
   <Import Project="..\packages\NETStandard.Library.2.0.3\build\netstandard2.0\NETStandard.Library.targets" Condition="Exists('..\packages\NETStandard.Library.2.0.3\build\netstandard2.0\NETStandard.Library.targets')" />
   <Import Project="..\packages\Microsoft.Extensions.FileProviders.Embedded.3.1.3\build\netstandard2.0\Microsoft.Extensions.FileProviders.Embedded.targets" Condition="Exists('..\packages\Microsoft.Extensions.FileProviders.Embedded.3.1.3\build\netstandard2.0\Microsoft.Extensions.FileProviders.Embedded.targets')" />
@@ -686,4 +708,5 @@
   <Import Project="..\packages\Microsoft.Extensions.ApiDescription.Server.3.1.3\build\Microsoft.Extensions.ApiDescription.Server.targets" Condition="Exists('..\packages\Microsoft.Extensions.ApiDescription.Server.3.1.3\build\Microsoft.Extensions.ApiDescription.Server.targets')" />
   <Import Project="..\packages\Selenium.WebDriver.GeckoDriver.0.31.0.1\build\Selenium.WebDriver.GeckoDriver.targets" Condition="Exists('..\packages\Selenium.WebDriver.GeckoDriver.0.31.0.1\build\Selenium.WebDriver.GeckoDriver.targets')" />
   <Import Project="..\packages\Selenium.WebDriver.ChromeDriver.108.0.5359.7100\build\Selenium.WebDriver.ChromeDriver.targets" Condition="Exists('..\packages\Selenium.WebDriver.ChromeDriver.108.0.5359.7100\build\Selenium.WebDriver.ChromeDriver.targets')" />
+  <Import Project="..\packages\AutoItX.Dotnet.3.3.14.5\build\AutoItX.Dotnet.targets" Condition="Exists('..\packages\AutoItX.Dotnet.3.3.14.5\build\AutoItX.Dotnet.targets')" />
 </Project>

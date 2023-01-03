@@ -4,6 +4,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Ghosts.Client.Infrastructure;
+using Ghosts.Client.Infrastructure.Browser;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
@@ -12,6 +13,8 @@ using Actions = OpenQA.Selenium.Interactions.Actions;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using static System.Windows.Forms.LinkLabel;
+using System.ComponentModel.Composition;
 
 namespace Ghosts.Client.Handlers
 {
@@ -37,7 +40,8 @@ namespace Ghosts.Client.Handlers
         public bool blogAbort { get; set; } = false;  //will be set to True if unable to proceed with Handler execution
         BlogHelper _bloghelper = null;
         public string UserAgentString { get; set; }
-        
+        PostContentManager _posthelper = null;
+
         private Task LaunchThread(TimelineHandler handler, TimelineEvent timelineEvent, string site)
         {
             var o = new BrowserCrawl();
@@ -116,6 +120,7 @@ namespace Ghosts.Client.Handlers
 
                         case "randomalt":
                             ParseRandomHandlerArgs(handler);
+                            if (_posthelper == null) _posthelper = new PostContentManager();
                             DoRandomAltCommand(handler, timelineEvent);
                             if (this.Restart) return;  //restart has been requested
                             break;
@@ -445,6 +450,69 @@ namespace Ghosts.Client.Handlers
             return retVal;
         }
 
+        private string GetInputElementText(IWebElement targetElement)
+        {
+            var attr = targetElement.GetAttribute("type");
+            if (attr == "email") return _posthelper.Email ;
+            else
+            {
+                attr = targetElement.GetAttribute("id");
+                if (attr != null && attr.ToLower().Contains("name"))
+                {
+                    //assume this is a name field
+                    return _posthelper.FullName;
+                }
+                else
+                {
+                    return _posthelper.Subject;   //this is a single line of unknown type, not sure what to repond with here
+                }
+            }
+        }
+
+        private void HandleInputElement(IWebElement targetElement)
+        {
+            
+            var text = GetInputElementText(targetElement);
+            if (text != null) targetElement.SendKeys(text);
+        }
+
+        private void HandleTextareaElement(IWebElement targetElement)
+        {
+            
+            targetElement.SendKeys(_posthelper.Body);
+        }
+
+        private bool HandleFormSubmit(RequestConfiguration config,IWebElement gfElement)
+        {
+
+            var inputElements = gfElement.FindElements(By.XPath(".//input"));
+            var textareaElements = gfElement.FindElements(By.XPath(".//textarea"));
+            IWebElement submitElement = null;
+            _posthelper.NameEmailNext();  //generate a name and email for this page
+            _posthelper.GenericContentNext();
+            foreach (var inputElement in inputElements)
+            {
+                var attr = inputElement.GetAttribute("type");
+                if (attr == "submit") submitElement = inputElement;
+                else
+                {
+                    HandleInputElement(inputElement);
+                }
+            }
+            foreach (var textareaElement in textareaElements)
+            {
+                HandleTextareaElement(textareaElement);
+                Thread.Sleep(2000);
+            }
+            if (submitElement != null)
+            {
+                BrowserHelperSupport.MoveToElementAndClick(Driver, submitElement);
+                Thread.Sleep(3000);
+                return true;
+            }
+            return false;
+        }
+
         private bool isGoodLink(Uri uri)
         {
             //check if this link needs to be rejected
@@ -458,9 +526,6 @@ namespace Ghosts.Client.Handlers
                 Log.Trace($"Rejected link {linkText}");
                 return false;  
             }
-
-
-
             return true;
         }
 
@@ -471,6 +536,13 @@ namespace Ghosts.Client.Handlers
                 var elementList = new List<IWebElement>();
                 var uriList = new List<Uri>();
                 var links = Driver.FindElements(By.TagName("a"));
+                var gfElements = Driver.FindElements(By.TagName("gf"));
+                if (gfElements.Count > 0)
+                {
+                    //found a submit form. Fill this out. If more than one, pick a random one
+                    if (HandleFormSubmit(config, gfElements[_random.Next(0, gfElements.Count)])) return true;
+                }
+                //look for links
                 string[] validSchemes = { "http", "https" };
                 foreach (var l in links)
                 {
@@ -514,7 +586,6 @@ namespace Ghosts.Client.Handlers
                 }
                 this.actionsCount++;
                 return true;
-
             }
             catch (Exception e)
             {
