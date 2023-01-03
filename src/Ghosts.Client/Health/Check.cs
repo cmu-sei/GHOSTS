@@ -106,7 +106,6 @@ public class Check
 
             // now terminate existing tasks and rerun
             this.Shutdown();
-            StartupTasks.CleanupProcesses();
             this.RunEx();
         }
     }

@@ -6,6 +6,8 @@ using System.Diagnostics;
 using System.Threading;
 using System.Windows.Forms;
 using Ghosts.Client.Infrastructure.Email;
+using Ghosts.Domain;
+using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
 using NLog;
 using Microsoft.Win32;
@@ -40,22 +42,39 @@ public static class StartupTasks
 
         try
         {
-            var cleanupList = new List<string>
-            {
-                ProcessManager.ProcessNames.ChromeDriver,
-                ProcessManager.ProcessNames.Word,
-                ProcessManager.ProcessNames.PowerPoint,
-                ProcessManager.ProcessNames.Excel,
-                ProcessManager.ProcessNames.Chrome,
-                ProcessManager.ProcessNames.Outlook,
-                ProcessManager.ProcessNames.Command,
-                ProcessManager.ProcessNames.PowerShell,
-                ProcessManager.ProcessNames.GeckoDriver,
-                ProcessManager.ProcessNames.Firefox,
-                ProcessManager.ProcessNames.WindowsFault,
-                ProcessManager.ProcessNames.WindowsFaultSecure
-            };
+            var cleanupList = new List<string>();
 
+            var timeline = TimelineBuilder.GetLocalTimeline();
+            foreach (var handler in timeline.TimeLineHandlers)
+            {
+                switch (handler.HandlerType)
+                {
+                    case HandlerType.BrowserChrome:
+                        cleanupList.Add(ProcessManager.ProcessNames.Chrome);
+                        cleanupList.Add(ProcessManager.ProcessNames.ChromeDriver);
+                        break;
+                    case HandlerType.BrowserFirefox:
+                        cleanupList.Add(ProcessManager.ProcessNames.Firefox);
+                        cleanupList.Add(ProcessManager.ProcessNames.GeckoDriver);
+                        break;
+                    case HandlerType.Command:
+                        cleanupList.Add(ProcessManager.ProcessNames.Command);
+                        break;
+                    case HandlerType.Outlook:
+                        cleanupList.Add(ProcessManager.ProcessNames.Outlook);
+                        break;
+                    case HandlerType.Word:
+                        cleanupList.Add(ProcessManager.ProcessNames.Word);
+                        break;
+                    case HandlerType.Excel:
+                        cleanupList.Add(ProcessManager.ProcessNames.Excel);
+                        break;
+                    case HandlerType.PowerPoint:
+                        cleanupList.Add(ProcessManager.ProcessNames.PowerPoint);
+                        break;
+                }
+            }
+            
             //need to kill any other instance of ghosts already running
             var ghosts = Process.GetCurrentProcess();
             cleanupList.Add(ghosts.ProcessName);

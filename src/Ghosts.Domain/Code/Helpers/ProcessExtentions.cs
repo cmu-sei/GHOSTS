@@ -10,7 +10,15 @@ namespace Ghosts.Domain.Code.Helpers
         {
             try
             {
-                Process.Start("taskkill", $"/pid {process.Id} /F /T");
+                var info = new ProcessStartInfo
+                {
+                    RedirectStandardOutput = true,
+                    CreateNoWindow = true,
+                    UseShellExecute = false,
+                    FileName = "taskkill",
+                    Arguments = $"/pid {process.Id} /F /T"
+                };
+                Process.Start(info);
 
             }
             catch
