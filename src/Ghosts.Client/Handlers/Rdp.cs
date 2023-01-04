@@ -8,7 +8,8 @@ using WorkingHours = Ghosts.Client.Infrastructure.WorkingHours;
 using AutoItX3Lib;
 using System.Linq;
 using System.Text;
-
+using Newtonsoft.Json;
+using System.IO;
 
 namespace Ghosts.Client.Handlers
 {
@@ -19,10 +20,12 @@ namespace Ghosts.Client.Handlers
     {
         private int MouseSleep = 10000;
 
-        public int ExecutionTime = 20000;
+        private Credentials CurrentCreds = null;
 
-        public int executionprobability = 100;
-        public int jitterfactor { get; set; } = 0;  //used with Jitter.JitterFactorDelay
+        private int ExecutionTime = 20000;
+
+        private int ExecutionProbability = 100;
+        private int JitterFactor { get; set; } = 0;  //used with Jitter.JitterFactorDelay
         public Rdp(TimelineHandler handler)
         {
             try
@@ -53,15 +56,40 @@ namespace Ghosts.Client.Handlers
 
         public void Ex(TimelineHandler handler)
         {
+            if (handler.HandlerArgs != null)
+            {
+                if (handler.HandlerArgs.ContainsKey("CredentialsFile"))
+                {
+                    try
+                    {
+                        this.CurrentCreds = JsonConvert.DeserializeObject<Credentials>(File.ReadAllText(handler.HandlerArgs["CredentialsFile"].ToString()));
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error(e);
+                    }
+                }
+                if (handler.HandlerArgs.ContainsKey("mouse-sleep-time"))
+                {
+                    int.TryParse(handler.HandlerArgs["mouse-sleep-time"].ToString(), out MouseSleep);
+                    if (MouseSleep < 0) MouseSleep = 10000;
+                }
+                if (handler.HandlerArgs.ContainsKey("execution-time"))
+                {
+                    int.TryParse(handler.HandlerArgs["execution-time"].ToString(), out ExecutionTime);
+                    if (ExecutionTime < 0) ExecutionTime = 5*60*1000;  //5 minutes
+                }
 
-            if (handler.HandlerArgs.ContainsKey("execution-probability"))
-            {
-                int.TryParse(handler.HandlerArgs["execution-probability"].ToString(), out executionprobability);
-                if (executionprobability < 0 || executionprobability > 100) executionprobability = 100;
-            }
-            if (handler.HandlerArgs.ContainsKey("delay-jitter"))
-            {
-                jitterfactor = Jitter.JitterFactorParse(handler.HandlerArgs["delay-jitter"].ToString());
+
+                if (handler.HandlerArgs.ContainsKey("execution-probability"))
+                {
+                    int.TryParse(handler.HandlerArgs["execution-probability"].ToString(), out ExecutionProbability);
+                    if (ExecutionProbability < 0 || ExecutionProbability > 100) ExecutionProbability = 100;
+                }
+                if (handler.HandlerArgs.ContainsKey("delay-jitter"))
+                {
+                    JitterFactor = Jitter.JitterFactorParse(handler.HandlerArgs["delay-jitter"].ToString());
+                }
             }
             foreach (var timelineEvent in handler.TimeLineEvents)
             {
@@ -77,19 +105,19 @@ namespace Ghosts.Client.Handlers
                     default:
                         while (true)
                         {
-                            if (executionprobability < _random.Next(0, 100))
+                            if (ExecutionProbability < _random.Next(0, 100))
                             {
                                 //skipping this command
                                 Log.Trace($"RDP choice skipped due to execution probability");
-                                Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, jitterfactor));
+                                Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, JitterFactor));
                                 continue;
                             }
-                            var target = timelineEvent.CommandArgs[_random.Next(0, timelineEvent.CommandArgs.Count)];
-                            if (!string.IsNullOrEmpty(target.ToString()))
+                            var choice = timelineEvent.CommandArgs[_random.Next(0, timelineEvent.CommandArgs.Count)];
+                            if (!string.IsNullOrEmpty(choice.ToString()))
                             {
-                                this.RdpEx(handler, timelineEvent, target.ToString());
+                                this.RdpEx(handler, timelineEvent, choice.ToString());
                             }
-                            Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, jitterfactor));
+                            Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, JitterFactor));
                         }
                     
                 }
@@ -99,9 +127,15 @@ namespace Ghosts.Client.Handlers
             }
         }
 
-        public void RdpEx(TimelineHandler handler, TimelineEvent timelineEvent, string target)
+        public void RdpEx(TimelineHandler handler, TimelineEvent timelineEvent, string choice)
         {
+
+            char[] charSeparators = new char[] { '|' };
+            var cmdArgs = choice.Split(charSeparators, 2, StringSplitOptions.None);
+            var target = cmdArgs[0];
             string command = $"mstsc /v:{target}";
+            var credKey = cmdArgs[1];
+            var password = CurrentCreds.GetPassword(credKey);
             Log.Trace($"RDP:: Spawning RDP connection for target {target}");
             var processStartInfo = new ProcessStartInfo("cmd.exe")
             {
@@ -110,7 +144,7 @@ namespace Ghosts.Client.Handlers
                 UseShellExecute = false
             };
 
-            string password = "P455w0rd!";
+            
             AutoItX3 au = new AutoItX3();
 
             using (var process = Process.Start(processStartInfo))
