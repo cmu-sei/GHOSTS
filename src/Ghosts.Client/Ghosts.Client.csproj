@@ -555,6 +555,7 @@
     <Compile Include="Handlers\BrowserCrawl.cs" />
     <Compile Include="Handlers\Pidgin.cs" />
     <Compile Include="Handlers\Print.cs" />
+    <Compile Include="Handlers\Rdp.cs" />
     <Compile Include="Handlers\Sftp.cs" />
     <Compile Include="Handlers\SharepointHelper.cs" />
     <Compile Include="Handlers\Ssh.cs" />
