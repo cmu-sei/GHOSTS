@@ -15,6 +15,23 @@ namespace Ghosts.Client.Handlers
 {
     /// <summary>
     /// Remote Desktop Protocol Handler
+    /// Action:  The logged-in user (i.e. ghosts user) opens a remote desktop to randomly chosen target, and does random
+    /// mouse movements for the specified ExecutionTime. When this time has elapsed, the connection is closed,
+    /// another target is chosen, and the cycle repeats.
+    /// 
+    /// The Credential file is only used to get a password value, the username is ignored as it is assumed to
+    /// be the password of the logged-in user. Even though only a password is needed, the Credential
+    /// file is used to be compatible with other handlers that use a credential file (SFTP, SSH, Sharepoint, etc).
+    /// 
+    /// See the sample Rdp timeline for all options.
+    /// 
+    /// This handler will supply a password if prompted, and dismiss a untrused certificate check prompt if one
+    /// appears.
+    /// 
+    /// It is assumed that the logged-in user has the right to log into the target system.
+    /// Caveat: This has only be tested in a Windows domain system where the domain policy was altered to allow all users
+    /// remote desktop priviledges, and only tested using RDP to a domain controller server.
+    /// 
     /// </summary>
     public class Rdp : BaseHandler
     {
@@ -26,6 +43,9 @@ namespace Ghosts.Client.Handlers
 
         private int ExecutionProbability = 100;
         private int JitterFactor { get; set; } = 0;  //used with Jitter.JitterFactorDelay
+
+        private string CurrentTarget;
+
         public Rdp(TimelineHandler handler)
         {
             try
@@ -95,9 +115,6 @@ namespace Ghosts.Client.Handlers
             {
                 WorkingHours.Is(handler);
 
-                if (timelineEvent.DelayBefore > 0)
-                    Thread.Sleep(timelineEvent.DelayBefore);
-
                 switch (timelineEvent.Command)
                 {
 
@@ -112,18 +129,18 @@ namespace Ghosts.Client.Handlers
                                 Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, JitterFactor));
                                 continue;
                             }
+                            if (timelineEvent.DelayBefore > 0)
+                                Thread.Sleep(timelineEvent.DelayBefore);
                             var choice = timelineEvent.CommandArgs[_random.Next(0, timelineEvent.CommandArgs.Count)];
                             if (!string.IsNullOrEmpty(choice.ToString()))
                             {
                                 this.RdpEx(handler, timelineEvent, choice.ToString());
                             }
                             Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, JitterFactor));
-                        }
-                    
+                        }                
                 }
 
-                if (timelineEvent.DelayAfter > 0)
-                    Thread.Sleep(timelineEvent.DelayAfter);
+                
             }
         }
 
@@ -133,6 +150,7 @@ namespace Ghosts.Client.Handlers
             char[] charSeparators = new char[] { '|' };
             var cmdArgs = choice.Split(charSeparators, 2, StringSplitOptions.None);
             var target = cmdArgs[0];
+            CurrentTarget = target;
             string command = $"mstsc /v:{target}";
             var credKey = cmdArgs[1];
             var password = CurrentCreds.GetPassword(credKey);
@@ -198,8 +216,9 @@ namespace Ghosts.Client.Handlers
                 int totalTime = 0;
                 while (totalTime < ExecutionTime)
                 {
-                    Thread.Sleep(MouseSleep);
-                    totalTime += MouseSleep;
+                    var sleepTime = Jitter.JitterFactorDelay(MouseSleep, JitterFactor);
+                    Thread.Sleep(sleepTime);
+                    totalTime += sleepTime;
                     //move the mouse
                     Winuser.SetForegroundWindow(winHandle);
                     Winuser.RECT rc;
@@ -245,26 +264,33 @@ namespace Ghosts.Client.Handlers
             return s;
         }
 
-        public void checkGenericPrompt(AutoItX3 au, string closeString)
+        public IntPtr findDialogWindow(string caption)
         {
-            var winHandle = Winuser.FindWindow(null, "Remote Desktop Connection");
+            var winHandle = Winuser.FindWindow(null, caption);
             if (winHandle != IntPtr.Zero)
             {
-                //this finds any window with title 'Remote Desktop Connection'.
-                //determine if class name has 'Dialog' in it
+                //this finds any window with this caption
+                //determine if class name is for standard dialogue
                 int bufSize = 256;
                 StringBuilder buffer = new StringBuilder(bufSize);
                 Winuser.GetClassName(winHandle, buffer, bufSize);
                 var s = buffer.ToString();
-                if (s.Contains("32770"))
-                {
-                    //this is a standard dialog class. By default, chooses 'No'. Select yes prompt
-                    Winuser.SetForegroundWindow(winHandle);
-                    au.Send(closeString); //send the close string
-                    Thread.Sleep(1000);
-                }
+                if (s.Contains("32770")) return winHandle; //success
+            }
+            return IntPtr.Zero;
+        }
 
-
+        public void checkGenericPrompt(AutoItX3 au, string closeString)
+        {
+            var caption = "Remote Desktop Connection";
+            var winHandle = findDialogWindow(caption);
+            if (winHandle != IntPtr.Zero)
+            {
+                //this is a standard dialog class. By default, chooses 'No'. Select yes prompt
+                Winuser.SetForegroundWindow(winHandle);
+                au.Send(closeString); //send the close string
+                Thread.Sleep(1000);
+                Log.Trace($"RDP:: Found window prompt, caption: {caption} for {CurrentTarget}.");
             }
             return;
         }
@@ -273,6 +299,13 @@ namespace Ghosts.Client.Handlers
         {
 
             var winHandle = Winuser.FindWindow("Credential Dialog Xaml Host", "Windows Security");
+            var responseString = "{TAB}{TAB}{TAB}{ENTER}";
+            if (winHandle == IntPtr.Zero)
+            {
+                //try harder
+                winHandle = findDialogWindow("Windows Security");
+                responseString = "{TAB}{TAB}{ENTER}";  //this form has a different response string
+            }
             if (winHandle != IntPtr.Zero)
             {
                 //password prompt is up.  handle it.
@@ -280,10 +313,10 @@ namespace Ghosts.Client.Handlers
                 var s = escapePassword(password);
                 //au.Send(s);
                 System.Windows.Forms.SendKeys.SendWait(s);  //fill in password field
-                s = "{TAB}{TAB}{TAB}{ENTER}";   //tab to OK button
-                au.Send(s);
+                au.Send(responseString);
                 Thread.Sleep(1000);
-                
+                Log.Trace($"RDP:: Found password prompt for {CurrentTarget}.");
+
 
             }
             return;
