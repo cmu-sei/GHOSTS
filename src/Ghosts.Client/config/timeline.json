@@ -638,43 +638,6 @@
           "DelayBefore": 0
         }
       ]
-    },
-    {
-      "HandlerType": "BrowserChrome",
-      "HandlerArgs": {
-        "isheadless": "false",
-        "blockimages": "true",
-        "blockstyles": "true",
-        "blockflash": "true",
-        "blockscripts": "true",
-        "stickiness": 75,
-        "stickiness-depth-min": 5,
-        "stickiness-depth-max": 10000,
-        "incognito": "true",
-        "blog-credentials-file": "c:\\ghosts_data\\sharepoint_creds.json",
-        "blog-deletion-probability": 0,
-        "blog-upload-probability": 0,
-        "blog-browse-probability": 0,
-        "blog-reply-probability": 100,
-        "blog-version": "drupal"
-
-      },
-      "Initial": "about:blank",
-      "UtcTimeOn": "00:00:00",
-      "UtcTimeOff": "24:00:00",
-      "Loop": "True",
-      "TimeLineEvents": [
-        "f",
-        {
-          "Command": "blog",
-          "CommandArgs": [
-            "site:http://www.netexhsv.com:8080",
-            "credentialKey:credkey1"
-          ],
-          "DelayAfter": 10000,
-          "DelayBefore": 0
-        }
-      ]
     }
   ]
 }
