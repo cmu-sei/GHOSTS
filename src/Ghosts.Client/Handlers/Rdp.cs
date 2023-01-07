@@ -42,7 +42,7 @@ namespace Ghosts.Client.Handlers
         private int ExecutionTime = 20000;
 
         private int ExecutionProbability = 100;
-        private int JitterFactor { get; set; } = 0;  //used with Jitter.JitterFactorDelay
+        private int JitterFactor = 0;  //used with Jitter.JitterFactorDelay
 
         private string CurrentTarget;
 
@@ -111,17 +111,18 @@ namespace Ghosts.Client.Handlers
                     JitterFactor = Jitter.JitterFactorParse(handler.HandlerArgs["delay-jitter"].ToString());
                 }
             }
-            foreach (var timelineEvent in handler.TimeLineEvents)
+
+            //arguments parsed. Enter loop that does not exit unless forced exit
+            while (true)
             {
-                WorkingHours.Is(handler);
-
-                switch (timelineEvent.Command)
+                
+                foreach (var timelineEvent in handler.TimeLineEvents)
                 {
-
-                    case "random":
-                    default:
-                        while (true)
-                        {
+                    WorkingHours.Is(handler);
+                    switch (timelineEvent.Command)
+                    {
+                        case "random":
+                        default:
                             if (ExecutionProbability < _random.Next(0, 100))
                             {
                                 //skipping this command
@@ -137,10 +138,10 @@ namespace Ghosts.Client.Handlers
                                 this.RdpEx(handler, timelineEvent, choice.ToString());
                             }
                             Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, JitterFactor));
-                        }                
+                            break;
+                           
+                    }
                 }
-
-                
             }
         }
 
