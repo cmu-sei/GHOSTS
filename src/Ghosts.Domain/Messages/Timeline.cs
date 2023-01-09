@@ -95,6 +95,7 @@ namespace Ghosts.Domain
         Print = 45,
         Ssh = 100,
         Sftp = 101,
+        Pidgin = 102,
 
     }
 
