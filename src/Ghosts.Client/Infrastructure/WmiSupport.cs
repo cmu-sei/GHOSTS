@@ -1,15 +1,18 @@
-﻿using System;
+﻿using Ghosts.Client.Handlers;
+using Ghosts.Client.Infrastructure;
+using Microsoft.Management.Infrastructure.Options;
+using Microsoft.Management.Infrastructure;
+using NLog;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
+using System.Security;
 using System.Text;
 using System.Threading.Tasks;
-using Ghosts.Client.Handlers;
-using Microsoft.Management.Infrastructure;
-using Microsoft.Management.Infrastructure.Options;
-using System.Security;
-using System.IO.StreamWriter;
+using System.Threading;
+using System;
+
 
 namespace Ghosts.Client.Infrastructure
 {
@@ -23,7 +26,16 @@ namespace Ghosts.Client.Infrastructure
         private readonly string _password;
         private readonly SecureString _securepassword;
 
-        public WmiSupportSupport(string computerName, string username, string password)
+        public static readonly Logger Log = LogManager.GetCurrentClassLogger();
+ 
+        public int TimeBetweenCommandsMax { get; set; } = 0;
+        public int TimeBetweenCommandsMin { get; set; } = 0;
+
+        public int CommandTimeout { get; set; } = 1000;
+
+        public string HostIp { get; set; } = null;
+
+        public WmiSupport(string computerName, string username, string password)
         {
             string _computerName = computerName;
             string _domain = computerName;
@@ -34,12 +46,11 @@ namespace Ghosts.Client.Infrastructure
             {
                 _securepassword.AppendChar(c);
             }
-            // session = new CimSession();
-            return;
         }
 
         public void Connect()
         {
+
             try
             {
                 try
@@ -83,34 +94,17 @@ namespace Ghosts.Client.Infrastructure
                 {
                     if (null != session)
                     {
-                        var GetOperatingSystem = new GetOperatingSystem(session);
-                        GetOperatingSystem.Info();
-
-                        var GetBios = new GetBios(session);
-                        GetBios.Info();
-
-                        var GetProcessor = new GetProcessor(session);
-                        GetProcessor.Info();
-
-                        var GetUserList = new GetUserList(session);
-                        GetUserList.Info();
-
-                        var GetNetworkInfo = new GetNetworkInfo(session);
-                        GetNetworkInfo.Info();
-
-                        // produces a lot of output use sparingly
-                        // var GetFilesList = new GetFilesList(session);
-                        // GetFilesList.Info();
-
-                        // produces a lot of output use sparingly
-                        // var GetProcessList = new GetProcessList(session);
-                        // GetProcessList.Info();
+                        GetOperatingSystem(session);
+                        GetBios(session);
+                        GetProcessor(session);
+                        GetUserList(session);
+                        GetNetworkInfo(session);
+                        GetFilesList(session);
+                        GetProcessList(session);
 
                         // troubleshoot locally on system using powershell with:
                         // (Get-CimInstance -ClassName Win32_Directory -Property *).CimInstanceProperties
                         // https://powershell.one/wmi/root/cimv2/win32_directory
-
-                        session.Close;
                     }
                 }
                 catch (CimException ex)
@@ -127,14 +121,51 @@ namespace Ghosts.Client.Infrastructure
             {
                 // handle any errors that occur when connecting to the remote computer
                 Log.Error(
-                  "Wmi:: An error occurred while connecting to the remote computer: {0}",
-        
-
+                  "Wmi:: An error occurred while connecting to the remote computer: {0}"
                 );
                 throw;
             }
         }
-
+        public void OperatingSystemOutput(session)
+        {
+            var _session = session;
+            try
+            {
+                // use the CimSession to create a CimInstance object representing a WMI instance
+                // in this case, we're using the Win32_OperatingSystem class to get information about the operating system
+                var cimInstance = new CimInstance(@"Win32_OperatingSystem");
+                var instance = _session.GetInstance(@"root\cimv2", cimInstance);
+                var OsInfoList = new List<string>();
+                string[] OsInfo = OsInfoList.ToArray();
+                // print out the instance's properties
+                if (null != instance.CimInstanceProperties["Name"].Value)
+                {
+                    OsInfoList.Add(
+                        instance.CimInstanceProperties["Name"].Value
+                    );
+                }
+                if (null != instance.CimInstanceProperties["Version"].Value)
+                {
+                    OsInfoList.Add(
+                        instance.CimInstanceProperties["Version"].Value
+                    );
+                }
+                if (null != instance.CimInstanceProperties["InstallDate"].Value)
+                {
+                    OsInfoList.Add(
+                        instance.CimInstanceProperties["InstallDate"].Value
+                    );
+                }
+            }
+            catch (CimException ex)
+            {
+                // handle any errors that occur when querying the remote computer
+                Log.Error(
+                    "Failed on OperatingSystemOutput: An error occurred while querying the remote computer: {0}",
+                    ex.Message
+                );
+            }
+        }
         public void GetBios(CimSession session)
         {
             var _session = session;
@@ -142,7 +173,7 @@ namespace Ghosts.Client.Infrastructure
             {
                 // use the CimSession to create a CimInstance object representing a WMI instance
                 // in this case, we're using the Win32_BIOS class to get information about the BIOS
-                var instances = _session.EnumerateInstances(@ "root\cimv2", "Win32_BIOS");
+                var instances = _session.EnumerateInstances(@"root\cimv2", "Win32_BIOS");
                 var BiosVersionList = new List<string>();
                 string[] BiosVersions = BiosVersionList.ToArray();
                 // print out the instance's properties to a list
@@ -173,7 +204,7 @@ namespace Ghosts.Client.Infrastructure
             {
                 // use the CimSession to create a CimInstance object representing a WMI instance
                 // in this case, we're using the Win32_Processor class to get information about the processor
-                var instances = _session.EnumerateInstances(@ "root\cimv2", "Win32_Processor");
+                var instances = _session.EnumerateInstances(@"root\cimv2", "Win32_Processor");
                 var ProcessorList = new List<string>();
                 string[] ProcessorInfo = ProcessorList.ToArray();
                 // print out the instance's properties to a list
@@ -208,7 +239,7 @@ namespace Ghosts.Client.Infrastructure
             {
                 // use the CimSession to create a CimInstance object representing a WMI instance
                 // in this case, we're using the Win32_UserAccount class to get information about users on the system
-                var instances = _session.EnumerateInstances(@ "root\cimv2", "Win32_UserAccount");
+                var instances = _session.EnumerateInstances(@"root\cimv2", "Win32_UserAccount");
                 var UserList = new List<string>();
                 string[] UserInfo = UserList.ToArray();
                 // print out the instance's properties to a list
@@ -240,7 +271,7 @@ namespace Ghosts.Client.Infrastructure
             {
                 // use the CimSession to create a CimInstance object representing a WMI instance
                 // in this case, we're using the Win32_NetworkAdapter class to get information about network devices on the system
-                var instances = _session.EnumerateInstances(@ "root\cimv2", "Win32_NetworkAdapter");
+                var instances = _session.EnumerateInstances(@"root\cimv2", "Win32_NetworkAdapter");
                 var NetworkList = new List<string>();
                 string[] NetworkInfo = NetworkList.ToArray();
 
@@ -287,7 +318,7 @@ namespace Ghosts.Client.Infrastructure
             {
                 // use the CimSession to create a CimInstance object representing a WMI instance
                 // in this case, we're using the Win32_Directory class to get information about a directory
-                var instances = _session.EnumerateInstances(@ "root\cimv2", "Win32_Directory");
+                var instances = _session.EnumerateInstances(@"root\cimv2", "Win32_Directory");
                 var FilesList = new List<string>();
                 string[] FilesInfo = FilesList.ToArray();
 
@@ -321,7 +352,7 @@ namespace Ghosts.Client.Infrastructure
             {
                 // use the CimSession to create a CimInstance object representing a WMI instance
                 // in this case, we're using the Win32_Process class to get information about processes running on the system
-                var instances = _session.EnumerateInstances(@ "root\cimv2", "Win32_Process");
+                var instances = _session.EnumerateInstances(@"root\cimv2", "Win32_Process");
                 var ProcessList = new List<string>();
                 string[] ProcessInfo = ProcessList.ToArray();
 
@@ -352,6 +383,5 @@ namespace Ghosts.Client.Infrastructure
                 );
             }
         }
-        return;
     }
 }
