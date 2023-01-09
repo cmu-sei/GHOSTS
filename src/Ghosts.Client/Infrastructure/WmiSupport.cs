@@ -126,7 +126,7 @@ namespace Ghosts.Client.Infrastructure
                 throw;
             }
         }
-        public void OperatingSystemOutput(session)
+        public void GetOperatingSystem(CimSession session)
         {
             var _session = session;
             try
