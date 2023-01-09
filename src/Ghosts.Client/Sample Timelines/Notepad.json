@@ -36,7 +36,7 @@
         "text-generation": "random",
         "min-paragraphs": 4,
         "max-paragraphs": 15,
-        "delay-jitter": 50
+        "delay-jitter": 50        
       },
       "Initial": "",
       "UtcTimeOn": "00:00:00",
