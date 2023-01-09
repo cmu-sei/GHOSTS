@@ -352,5 +352,6 @@ namespace Ghosts.Client.Infrastructure
                 );
             }
         }
+        return;
     }
 }
