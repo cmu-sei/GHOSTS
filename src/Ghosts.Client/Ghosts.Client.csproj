@@ -675,6 +675,7 @@
     <None Include="Sample Timelines\PowerPoint.json" />
     <None Include="Sample Timelines\Print.json" />
     <None Include="Sample Timelines\Reboot.json" />
+    <None Include="Sample Timelines\Wmi.json" />
     <None Include="Sample Timelines\Sftp.json" />
     <None Include="Sample Timelines\Ssh.json" />
     <None Include="Sample Timelines\trackables timeline.json" />
