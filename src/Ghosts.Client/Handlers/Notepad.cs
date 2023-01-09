@@ -37,6 +37,7 @@ namespace Ghosts.Client.Handlers
         private int ModificationProbability = 0;
         private int ViewProbability = 0;
         private int CreationProbability = 0;
+        private int PdfProbability = 0;
         private string InputDirectory = null;
         private string OutputDirectory = null;
         private string TextGeneration = "random";
@@ -167,7 +168,56 @@ namespace Ghosts.Client.Handlers
             System.Windows.Forms.SendKeys.SendWait("^s");
             Thread.Sleep(1000);
             Log.Trace($"Notepad::  File {outfile} modified.");
+            DoPdfAction(outfile);
             return;
+        }
+
+        /// <summary>
+        /// This uses the Print action, assumes the default printer is Microsoft Save to PDF
+        /// </summary>
+        /// <param name="outfile"></param>
+        private void DoPdfAction(string outfile)
+        {
+            if (PdfProbability == 0 || PdfProbability < _random.Next(0, 101)) return;
+            var pdfName = Path.GetFileNameWithoutExtension(outfile) + ".pdf";
+            pdfName =  Path.Combine(Path.GetDirectoryName(outfile),pdfName);
+            //do print action
+            if (File.Exists(pdfName))
+            {
+                try
+                {
+                    File.Delete(pdfName);  //delete existing PDF
+                }
+                catch (Exception e)
+                {
+                    Log.Trace($"Notepad:: Error deleting existing pdf  file {pdfName}");
+                    Log.Trace(e);
+                    return; //abort
+                }
+            }
+            Winuser.SetForegroundWindow(NotepadProcess.MainWindowHandle);
+            System.Windows.Forms.SendKeys.SendWait("^p");  //bring up print window
+            Thread.Sleep(1000);
+            var winHandle = Winuser.FindWindow(null, "Print");
+            if (winHandle != IntPtr.Zero)
+            {
+
+                Winuser.SetForegroundWindow(winHandle);
+                System.Windows.Forms.SendKeys.SendWait("%p");  //do print
+                Thread.Sleep(500);
+                winHandle = Winuser.FindWindow(null, "Save Print Output As");
+                if (winHandle != IntPtr.Zero)
+                {
+                    Winuser.SetForegroundWindow(winHandle);
+                    au.Send(pdfName);    //send pdf file name
+                    Thread.Sleep(500);
+                    Winuser.SetForegroundWindow(winHandle);
+                    System.Windows.Forms.SendKeys.SendWait("%s");
+                    Thread.Sleep(2000);
+                    Log.Trace($"Notepad::  File {outfile} created.");
+                }
+            }
+            
         }
 
         private void DoCreateAction(string outfile)
@@ -188,10 +238,13 @@ namespace Ghosts.Client.Handlers
                 Winuser.SetForegroundWindow(winHandle);
                 System.Windows.Forms.SendKeys.SendWait("%s");
                 Thread.Sleep(500);
+                Log.Trace($"Notepad::  File {outfile} created.");
             }
-            Log.Trace($"Notepad::  File {outfile} created.");
+            DoPdfAction(outfile);
             return;
         }
+
+
 
         private void AddRandomText()
         {
@@ -236,6 +289,14 @@ namespace Ghosts.Client.Handlers
 
         private void ParseHandlerArgs(TimelineHandler handler)
         {
+            if (handler.HandlerArgs.ContainsKey("pdf-probability"))
+            {
+                int.TryParse(handler.HandlerArgs["pdf-probability"].ToString(), out PdfProbability);
+                if (!CheckProbabilityVar(handler.HandlerArgs["pdf-probability"].ToString(), PdfProbability))
+                {
+                    PdfProbability = 0;
+                }
+            }
             if (handler.HandlerArgs.ContainsKey("deletion-probability"))
             {
                 int.TryParse(handler.HandlerArgs["deletion-probability"].ToString(), out DeletionProbability);
