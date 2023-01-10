@@ -19,7 +19,9 @@ namespace Ghosts.Client.Infrastructure
     public class WmiSupport
     {
         // declare the CimSession as a field of the WmiSupportSupport class
+        #pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
         private CimSession? session = null;
+        #pragma warning restore CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
         private readonly string _computerName;
         private readonly string _domain;
         private readonly string _username;
@@ -135,8 +137,8 @@ namespace Ghosts.Client.Infrastructure
                 // in this case, we're using the Win32_OperatingSystem class to get information about the operating system
                 var cimInstance = new CimInstance(@"Win32_OperatingSystem");
                 var instance = _session.GetInstance(@"root\cimv2", cimInstance);
-                var OsInfoList = new List<string>();
-                string[] OsInfo = OsInfoList.ToArray();
+                var OsInfoList = new List<object>();
+                object[] OsInfo = OsInfoList.ToArray();
                 // print out the instance's properties
                 if (null != instance.CimInstanceProperties["Name"].Value)
                 {
@@ -174,8 +176,8 @@ namespace Ghosts.Client.Infrastructure
                 // use the CimSession to create a CimInstance object representing a WMI instance
                 // in this case, we're using the Win32_BIOS class to get information about the BIOS
                 var instances = _session.EnumerateInstances(@"root\cimv2", "Win32_BIOS");
-                var BiosVersionList = new List<string>();
-                string[] BiosVersions = BiosVersionList.ToArray();
+                var BiosVersionList = new List<object>();
+                object[] BiosVersions = BiosVersionList.ToArray();
                 // print out the instance's properties to a list
                 foreach (var instance in instances)
                 {
@@ -205,8 +207,8 @@ namespace Ghosts.Client.Infrastructure
                 // use the CimSession to create a CimInstance object representing a WMI instance
                 // in this case, we're using the Win32_Processor class to get information about the processor
                 var instances = _session.EnumerateInstances(@"root\cimv2", "Win32_Processor");
-                var ProcessorList = new List<string>();
-                string[] ProcessorInfo = ProcessorList.ToArray();
+                var ProcessorList = new List<object>();
+                object[] ProcessorInfo = ProcessorList.ToArray();
                 // print out the instance's properties to a list
                 foreach (var instance in instances)
                 {
@@ -240,8 +242,8 @@ namespace Ghosts.Client.Infrastructure
                 // use the CimSession to create a CimInstance object representing a WMI instance
                 // in this case, we're using the Win32_UserAccount class to get information about users on the system
                 var instances = _session.EnumerateInstances(@"root\cimv2", "Win32_UserAccount");
-                var UserList = new List<string>();
-                string[] UserInfo = UserList.ToArray();
+                var UserList = new List<object>();
+                object[] UserInfo = UserList.ToArray();
                 // print out the instance's properties to a list
                 foreach (var instance in instances)
                 {
@@ -272,8 +274,8 @@ namespace Ghosts.Client.Infrastructure
                 // use the CimSession to create a CimInstance object representing a WMI instance
                 // in this case, we're using the Win32_NetworkAdapter class to get information about network devices on the system
                 var instances = _session.EnumerateInstances(@"root\cimv2", "Win32_NetworkAdapter");
-                var NetworkList = new List<string>();
-                string[] NetworkInfo = NetworkList.ToArray();
+                var NetworkList = new List<object>();
+                object[] NetworkInfo = NetworkList.ToArray();
 
                 // print out the network information for each network device to a list
                 foreach (var instance in instances)
@@ -319,8 +321,8 @@ namespace Ghosts.Client.Infrastructure
                 // use the CimSession to create a CimInstance object representing a WMI instance
                 // in this case, we're using the Win32_Directory class to get information about a directory
                 var instances = _session.EnumerateInstances(@"root\cimv2", "Win32_Directory");
-                var FilesList = new List<string>();
-                string[] FilesInfo = FilesList.ToArray();
+                var FilesList = new List<object>();
+                object[] FilesInfo = FilesList.ToArray();
 
                 // print out the list of users on the system to list
                 foreach (var instance in instances)
@@ -353,8 +355,8 @@ namespace Ghosts.Client.Infrastructure
                 // use the CimSession to create a CimInstance object representing a WMI instance
                 // in this case, we're using the Win32_Process class to get information about processes running on the system
                 var instances = _session.EnumerateInstances(@"root\cimv2", "Win32_Process");
-                var ProcessList = new List<string>();
-                string[] ProcessInfo = ProcessList.ToArray();
+                var ProcessList = new List<object>();
+                object[] ProcessInfo = ProcessList.ToArray();
 
                 // print out the list of processes to list
                 foreach (var instance in instances)
