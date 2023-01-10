@@ -5,7 +5,7 @@ Developed by Carnegie Mellon University's Software Engineering Institute (SEI), 
 GHOSTS is typically run on machines within a virtualized network, often referred to as "the range". This network can be as simple or as complex as required for training and exercise purposes.
 
 ???+ tip "Run GHOSTS on the Crucible Framework"
-    GHOSTS runs very well within the SEI's [Crucible Framework](https://github.com/cmu-sei/crucible) which we use extensively for training and exercise here at Carnegie Mellon University (CMU)
+    GHOSTS runs very well within the SEI's Crucible Framework ([Source Code](https://github.com/cmu-sei/crucible) and [Docs](https://cmu-sei.github.io/crucible/)) which we use extensively for training and exercise here at [Carnegie Mellon University](https://www.cmu.edu) (CMU)'s [Software Engineering Institute](https://sei.cmu.edu/), and particularly, [CERT](https://cert.org)
 
 ## Documentation
 
@@ -78,5 +78,7 @@ In the spirit of the original PANDORA, this server also responds to a very broad
 - Have a good idea for a new feature? Submit all new feature requests through the [cmu-sei/ghosts issue tracker](https://github.com/cmu-sei/ghosts/issues). Include the reasons why you're requesting the new feature and how it might benefit other users.
 
 ## License
+
+[DISTRIBUTION STATEMENT A] This material has been approved for public release and unlimited distribution.
 
 Copyright 2018 Carnegie Mellon University. See the [LICENSE.md](https://github.com/cmu-sei/GHOSTS/blob/master/LICENSE.md) file for details.
