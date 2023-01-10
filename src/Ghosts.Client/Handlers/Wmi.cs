@@ -29,6 +29,7 @@ namespace Ghosts.Client.Handlers
             try
             {
                 base.Init(handler);
+                this.CurrentWmiSupport = new WmiSupport();
                 if (handler.HandlerArgs != null)
                 {
                     if (handler.HandlerArgs.ContainsKey("CredentialsFile"))
@@ -141,7 +142,7 @@ namespace Ghosts.Client.Handlers
             {
 
                 //have IP, user/pass, try connecting 
-                this.CurrentWmiSupport = new WmiSupport(hostIp, username, password);
+                this.CurrentWmiSupport.Init(hostIp, username, password);
                 this.CurrentWmiSupport.HostIp = hostIp; //for trace output
                 var client = this.CurrentWmiSupport;
                 {

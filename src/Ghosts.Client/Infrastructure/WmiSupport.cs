@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using System;
 using Renci.SshNet;
+using Ghosts.Domain;
 
  
 namespace Ghosts.Client.Infrastructure
@@ -23,11 +24,12 @@ namespace Ghosts.Client.Infrastructure
         #pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
         private CimSession? session = null;
         #pragma warning restore CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
-        private readonly string _computerName;
-        private readonly string _domain;
-        private readonly string _username;
-        private readonly string _password;
-        private readonly SecureString _securepassword;
+        private string _computerName;
+        private string _domain;
+        private string _username;
+        private string _password;
+        private SecureString _securepassword;
+        private bool failconnect = false;
 
 
         public static readonly Logger Log = LogManager.GetCurrentClassLogger();
@@ -38,13 +40,15 @@ namespace Ghosts.Client.Infrastructure
         public int CommandTimeout { get; set; } = 1000;
 
         public string HostIp { get; set; } = null;
-
-        public WmiSupport(string computerName, string username, string password)
+        public WmiSupport()
         {
-            string _computerName = computerName;
-            string _domain = computerName;
-            string _username = username;
-            string _password = password;
+        }
+        public void Init(string computerName, string username, string password)
+        {
+            _computerName = computerName;
+            _domain = computerName;
+            _username = username;
+            _password = password;
             _securepassword = new SecureString();
             foreach (char c in _password)
             {
@@ -76,11 +80,12 @@ namespace Ghosts.Client.Infrastructure
 
                     if (session.TestConnection())
                     {
-                        Console.WriteLine($"Connection Test Was Successful. Continuing...");
+                        Log.Trace($"Wmi:: Connection Test Was Successful to {_computerName}.  Continuing...");
                     }
                     else
                     {
                         Log.Error($"WMI:: Connection Test Failed!");
+                        var failconnect = true;
                     }
                 }
                 catch
@@ -97,13 +102,13 @@ namespace Ghosts.Client.Infrastructure
                 {
                     if (null != session)
                     {
-                        GetOperatingSystem(session);
-                        GetBios(session);
-                        GetProcessor(session);
-                        GetUserList(session);
-                        GetNetworkInfo(session);
-                        GetFilesList(session);
-                        GetProcessList(session);
+                        //GetOperatingSystem(session);
+                        //GetBios(session);
+                        //GetProcessor(session);
+                        //GetUserList(session);
+                        //GetNetworkInfo(session);
+                        //GetFilesList(session);
+                        //GetProcessList(session);
 
                         // troubleshoot locally on system using powershell with:
                         // (Get-CimInstance -ClassName Win32_Directory -Property *).CimInstanceProperties
@@ -389,41 +394,54 @@ namespace Ghosts.Client.Infrastructure
 
         public void RunWmiCommand(string cmd)
         {
-            if (cmd == "GetOperatingSystem")
+            if (failconnect == true)
             {
-                GetOperatingSystem(session);
-                return;
-            }
-            else if (cmd == "GetProcessor")
-            {
-                GetProcessor(session);
-                return;
-            }
-            else if (cmd == "GetUserList")
-            {
-                GetUserList(session);
-                return;
-            }
-            else if (cmd == "GetNetworkInfo")
-            {
-                GetNetworkInfo(session);
-                return;
-            }
-            else if (cmd == "GetFilesList")
-            {
-                GetFilesList(session);
-                return;
-            }
-            else if (cmd == "GetProcessList")
-            {
-                GetProcessList(session);
                 return;
             }
             else
             {
-                Log.Trace($"Wmi::Unsupported command, execution skipped : {cmd}.");
+                Log.Trace($"Wmi:: Running Command {cmd}");
+                if (cmd == "GetOperatingSystem")
+                {
+                    GetOperatingSystem(session);
+                    return;
+                }
+                else if (cmd == "GetBios")
+                {
+                    GetBios(session);
+                    return;
+                }
+                else if (cmd == "GetProcessor")
+                {
+                    GetProcessor(session);
+                    return;
+                }
+                else if (cmd == "GetUserList")
+                {
+                    GetUserList(session);
+                    return;
+                }
+                else if (cmd == "GetNetworkInfo")
+                {
+                    GetNetworkInfo(session);
+                    return;
+                }
+                else if (cmd == "GetFilesList")
+                {
+                    GetFilesList(session);
+                    return;
+                }
+                else if (cmd == "GetProcessList")
+                {
+                    GetProcessList(session);
+                    return;
+                }
+                else
+                {
+                    Log.Trace($"Wmi::Unsupported command, execution skipped : {cmd}.");
+                }
+                return;
             }
-            return;
         }
     }
 }
