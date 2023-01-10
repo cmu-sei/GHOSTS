@@ -389,7 +389,6 @@ namespace Ghosts.Client.Infrastructure
 
         public void RunWmiCommand(string cmd)
         {
-            //TODO: rm, ls, mkdir
             if (cmd == "GetOperatingSystem")
             {
                 GetOperatingSystem(session);
@@ -424,9 +423,6 @@ namespace Ghosts.Client.Infrastructure
             {
                 Log.Trace($"Wmi::Unsupported command, execution skipped : {cmd}.");
             }
-
-
-
             return;
         }
     }
