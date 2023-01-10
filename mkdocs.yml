@@ -1,0 +1,75 @@
+site_name: GHOSTS Documentation
+extra_css:
+  - stylesheets/extra.css
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.indexes
+    - toc.integrate
+  logo: assets/img/ghosts.png
+  favicon: assets/img/ghosts.png
+  palette:
+    # Palette toggle for light mode
+    - scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+      primary: green
+
+    # Palette toggle for dark mode
+    - scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+      primary: green
+nav:
+  - Home: index.md
+  - Core Client: ghosts/core/client.md
+  - Core API: ghosts/core/api.md
+  - Animator: ghosts/animator/index.md
+  - Spectre: ghosts/spectre/index.md
+  - Content Servers: 
+    - ghosts/content/index.md
+    - Pandora: ghosts/content/pandora.md
+    - Pandora Social: ghosts/content/social.md
+  - Advanced:
+    - ghosts/advanced/index.md
+    - Cyclone: ghosts/advanced/cyclone.md
+    - Enchanter (Keysender): ghosts/advanced/enchanter.md
+    - Necromancer: ghosts/advanced/necromancer.md
+markdown_extensions:
+
+  # Python Markdown
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - toc:
+      permalink: true
+
+  # Python Markdown Extensions
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
