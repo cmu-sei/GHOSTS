@@ -321,6 +321,12 @@ namespace Ghosts.Client.TimelineManager
                             _ = new Sftp(handler);
                         });
                         break;
+                    case HandlerType.Wmi:
+                        t = new Thread(() =>
+                        {
+                            _ = new Wmi(handler);
+                        });
+                        break;
                     case HandlerType.Pidgin:
                         t = new Thread(() =>
                         {

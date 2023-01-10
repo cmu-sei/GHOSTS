@@ -556,6 +556,7 @@
     <Compile Include="Handlers\Pidgin.cs" />
     <Compile Include="Handlers\Print.cs" />
     <Compile Include="Handlers\Rdp.cs" />
+    <Compile Include="Handlers\Wmi.cs" />
     <Compile Include="Handlers\Sftp.cs" />
     <Compile Include="Handlers\SharepointHelper.cs" />
     <Compile Include="Handlers\Ssh.cs" />
@@ -570,6 +571,7 @@
     <Compile Include="Infrastructure\ClientConfigurationResolver.cs" />
     <Compile Include="Infrastructure\KnownFolders.cs" />
     <Compile Include="Infrastructure\OfficeHelpers.cs" />
+    <Compile Include="Infrastructure\WmiSupport.cs" />
     <Compile Include="Infrastructure\SftpSupport.cs" />
     <Compile Include="Infrastructure\SshSupport.cs" />
     <Compile Include="Infrastructure\TempFiles.cs" />
@@ -675,6 +677,7 @@
     <None Include="Sample Timelines\Print.json" />
     <None Include="Sample Timelines\Rdp.json" />
     <None Include="Sample Timelines\Reboot.json" />
+    <None Include="Sample Timelines\Wmi.json" />
     <None Include="Sample Timelines\Sftp.json" />
     <None Include="Sample Timelines\Ssh.json" />
     <None Include="Sample Timelines\trackables timeline.json" />
