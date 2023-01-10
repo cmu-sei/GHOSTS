@@ -116,7 +116,7 @@ Note that on Linux machines running the client as root and utilizing web browsin
         "russia": "",
         "azerbaijan": "",
         "turkish": "",
-        "turkey": "",
+        "turkey": "", 
         "pakistani": "",
         "pakistan": "",
         "palestinian": "",
