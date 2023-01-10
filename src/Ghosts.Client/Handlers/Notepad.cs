@@ -33,6 +33,7 @@ namespace Ghosts.Client.Handlers
         public Process NotepadProcess;
 
         private int JitterFactor = 50;  //used with Jitter.JitterFactorDelay
+        private int ExecutionProbability = 100;  //probability that an action is taken this cycle
         private int DeletionProbability = 0;
         private int ModificationProbability = 0;
         private int ViewProbability = 0;
@@ -100,6 +101,11 @@ namespace Ghosts.Client.Handlers
                     {
                         case "random":
 
+                            if (ExecutionProbability < _random.Next(0,101))
+                            {
+                                Log.Trace("Notepad:: Action skipped this due to execution probability.");
+                                continue;
+                            }
                             //decided what to do in this activity cycle
                             var action = SelectActionFromProbabilities(probabilityList, actionList);
                             if (action == null)
@@ -289,6 +295,14 @@ namespace Ghosts.Client.Handlers
 
         private void ParseHandlerArgs(TimelineHandler handler)
         {
+            if (handler.HandlerArgs.ContainsKey("execution-probability"))
+            {
+                int.TryParse(handler.HandlerArgs["execution-probability"].ToString(), out ExecutionProbability);
+                if (!CheckProbabilityVar(handler.HandlerArgs["execution-probability"].ToString(), ExecutionProbability))
+                {
+                    ExecutionProbability = 100;
+                }
+            }
             if (handler.HandlerArgs.ContainsKey("pdf-probability"))
             {
                 int.TryParse(handler.HandlerArgs["pdf-probability"].ToString(), out PdfProbability);

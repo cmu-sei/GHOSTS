@@ -26,6 +26,7 @@
     {
       "HandlerType": "Notepad",
       "HandlerArgs": {
+        "execution-probability": 100,
         "deletion-probability": 0,
         "view-probability": 0,
         "creation-probability": 0,
@@ -36,7 +37,7 @@
         "text-generation": "random",
         "min-paragraphs": 4,
         "max-paragraphs": 15,
-        "delay-jitter": 50        
+        "delay-jitter": 50
       },
       "Initial": "",
       "UtcTimeOn": "00:00:00",
