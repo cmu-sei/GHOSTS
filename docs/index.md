@@ -1,11 +1,12 @@
-# GHOSTS Framework
+# The GHOSTS NPC Framework
 
 Developed by Carnegie Mellon University's Software Engineering Institute (SEI), The GHOSTS Framework is an open-source (OSS) software framework that enables creating, deploying, and orchestrating complex non-player character (NPC) activity within training, exercise, simulation, and educational environments. Within GHOSTS there are several systems and applications, all of which are modular and extendable to fit a wide array of use cases and needs.
 
 GHOSTS is typically run on machines within a virtualized network, often referred to as "the range". This network can be as simple or as complex as required for training and exercise purposes.
 
 ???+ tip "Run GHOSTS on the Crucible Framework"
-    GHOSTS runs very well within the SEI's Crucible Framework ([Source Code](https://github.com/cmu-sei/crucible) and [Docs](https://cmu-sei.github.io/crucible/)) which we use extensively for training and exercise here at [Carnegie Mellon University](https://www.cmu.edu) (CMU)'s [Software Engineering Institute](https://sei.cmu.edu/), and particularly, [CERT](https://cert.org)
+    ![Crucible Logo](assets/img/crucible-icon-c-alpha.svg)
+    GHOSTS runs very well within the SEI's Crucible Framework ([Source Code](https://github.com/cmu-sei/crucible) and [Docs](https://cmu-sei.github.io/crucible/)) - which we use extensively for training and exercise here at [Carnegie Mellon University](https://www.cmu.edu) (CMU)'s [Software Engineering Institute](https://sei.cmu.edu/), and particularly, [CERT](https://cert.org)
 
 ## Documentation
 
@@ -17,6 +18,8 @@ You can find documentation on The GHOSTS Framework and all of its components [he
 ## Core Client
 
 GHOSTS clients simulate what anyone might do at a computer given their particular role or membership within some team. It creates documents, browses websites, downloads files, and uses all sorts of popular applications on many versions of Windows and Linux machines. Whether you're a friendly administrator or a powerful cyber adversary, GHOSTS can replicate your expected behavior.
+
+![Types of NPCs](assets/img/npc-types.png)
 
 GHOSTS has many use cases in cyber training and exercises, most notably for bringing non-player characters (NPCs) to life, but GHOSTS can be used for many other purposes where realistic activity on a computer or network is needed as well: Testing, or generating network or activity datasets, for example.
 
