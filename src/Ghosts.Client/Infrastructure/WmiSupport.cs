@@ -12,8 +12,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
 using System;
+using Renci.SshNet;
 
-
+ 
 namespace Ghosts.Client.Infrastructure
 {
     public class WmiSupport
@@ -27,6 +28,7 @@ namespace Ghosts.Client.Infrastructure
         private readonly string _username;
         private readonly string _password;
         private readonly SecureString _securepassword;
+
 
         public static readonly Logger Log = LogManager.GetCurrentClassLogger();
  
@@ -52,7 +54,6 @@ namespace Ghosts.Client.Infrastructure
 
         public void Connect()
         {
-
             try
             {
                 try
@@ -384,6 +385,49 @@ namespace Ghosts.Client.Infrastructure
                   ex.Message
                 );
             }
+        }
+
+        public void RunWmiCommand(string cmd)
+        {
+            //TODO: rm, ls, mkdir
+            if (cmd == "GetOperatingSystem")
+            {
+                GetOperatingSystem(session);
+                return;
+            }
+            else if (cmd == "GetProcessor")
+            {
+                GetProcessor(session);
+                return;
+            }
+            else if (cmd == "GetUserList")
+            {
+                GetUserList(session);
+                return;
+            }
+            else if (cmd == "GetNetworkInfo")
+            {
+                GetNetworkInfo(session);
+                return;
+            }
+            else if (cmd == "GetFilesList")
+            {
+                GetFilesList(session);
+                return;
+            }
+            else if (cmd == "GetProcessList")
+            {
+                GetProcessList(session);
+                return;
+            }
+            else
+            {
+                Log.Trace($"Wmi::Unsupported command, execution skipped : {cmd}.");
+            }
+
+
+
+            return;
         }
     }
 }

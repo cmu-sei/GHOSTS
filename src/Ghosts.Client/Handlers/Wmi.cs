@@ -29,7 +29,6 @@ namespace Ghosts.Client.Handlers
             try
             {
                 base.Init(handler);
-                this.CurrentWmiSupport = new WmiSupport();
                 if (handler.HandlerArgs != null)
                 {
                     if (handler.HandlerArgs.ContainsKey("CredentialsFile"))
@@ -132,7 +131,6 @@ namespace Ghosts.Client.Handlers
             char[] charSeparators = new char[] { '|' };
             var cmdArgs = command.Split(charSeparators, 3, StringSplitOptions.None);
             var hostIp = cmdArgs[0];
-            this.CurrentWmiSupport.HostIp = hostIp; //for trace output
             var credKey = cmdArgs[1];
             var WmiCmds = cmdArgs[2].Split(';');
             var username = this.CurrentCreds.GetUsername(credKey);
@@ -143,7 +141,9 @@ namespace Ghosts.Client.Handlers
             {
 
                 //have IP, user/pass, try connecting 
-                using (var client = new WmiSupport(hostIp, username, password))
+                this.CurrentWmiSupport = new WmiSupport(hostIp, username, password);
+                this.CurrentWmiSupport.HostIp = hostIp; //for trace output
+                var client = this.CurrentWmiSupport;
                 {
                     try
                     {
@@ -161,7 +161,7 @@ namespace Ghosts.Client.Handlers
                     {
                         try
                         {
-                            this.CurrentWmiSupport.RunWmiCommand(client, WmiCmd.Trim());
+                            this.CurrentWmiSupport.RunWmiCommand(WmiCmd.Trim());
                             if (this.CurrentWmiSupport.TimeBetweenCommandsMin != 0 && this.CurrentWmiSupport.TimeBetweenCommandsMax != 0 && this.CurrentWmiSupport.TimeBetweenCommandsMin < this.CurrentWmiSupport.TimeBetweenCommandsMax)
                             {
                                 Thread.Sleep(_random.Next(this.CurrentWmiSupport.TimeBetweenCommandsMin, this.CurrentWmiSupport.TimeBetweenCommandsMax));
