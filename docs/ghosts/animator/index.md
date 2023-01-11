@@ -1,5 +1,7 @@
 # GHOSTS ANIMATOR Overview
 
+ANIMATOR is a configurable and extensible library for generating modeling, simulation, and exercise data. We like to say it creates, "NPCs so real, they sell for a premium on the dark web."
+
 At its core, Animator is a hyper-realistic user details generator. Its primary function is to create fake identities and accompanying verbose portfolios of personal information. Each generated user, or NPC (Non-Player Character) as we call them, has over 25 categories of details associated with them, and over a hundred pieces of metadata defining who they are. Each piece of information is generated using sourced datasets in an attempt to distribute characteristics realistically.
 
 ## Quick Start

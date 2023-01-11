@@ -12,10 +12,12 @@ GHOSTS is typically run on machines within a virtualized network, often referred
 
 You can find documentation on The GHOSTS Framework and all of its components [here](https://cmu-sei.github.io/ghosts/).
 
+## GHOSTS Core
+
 ???+ info "GHOSTS Source Code"
     The [GHOSTS Source Code Repository](https://github.com/cmu-sei/GHOSTS) is hosted on GitHub
 
-## Core Client
+### Core Client
 
 GHOSTS clients simulate what anyone might do at a computer given their particular role or membership within some team. It creates documents, browses websites, downloads files, and uses all sorts of popular applications on many versions of Windows and Linux machines. Whether you're a friendly administrator or a powerful cyber adversary, GHOSTS can replicate your expected behavior.
 
@@ -26,15 +28,13 @@ GHOSTS has many use cases in cyber training and exercises, most notably for brin
 ???+ warning "Do I need the API?"
     Although clients are fully functional without the API server, the latter enables logging, reports, and remote administration capabilities. Without the API, changes to clients must be managed in some other manner.
 
-## Core API Server
+### Core API Server
 
 The GHOSTS API enables the control and orchestration of non-player characters (NPCs) within a deployment. It supports logging, reporting, and managing individual, groups of, or entire deployments of client installs.
 
 ## ANIMATOR
 
-ANIMATOR is a configurable and extensible library for generating modeling, simulation, and exercise data. We like to say it creates, "NPCs so real, they sell for a premium on the dark web."
-
-At its core, Animator is a realistic user details generator. Its primary function is to create fake identities and accompanying verbose portfolios of personal information. Each generated NPC has over 25 categories of details associated with them, and over a hundred pieces of metadata defining who they are. Each piece of information is generated using sourced datasets in an attempt to distribute characteristics realistically.
+At its core, Animator is a realistic user details generator. Its primary function is to create NPC identities and accompanying verbose portfolios of personal information. Each generated NPC has over 25 categories of details associated with them, and over a hundred pieces of metadata defining who they are. Each piece of information is generated using sourced datasets in an attempt to distribute characteristics realistically.
 
 ???+ info "GHOSTS ANIMATOR Source Code"
     The [GHOSTS ANIMATOR Source Code Repository](https://github.com/cmu-sei/GHOSTS-ANIMATOR) is hosted on GitHub
@@ -48,37 +48,26 @@ SPECTRE is our attempt to reduce that agent browsing patterns appear as "compute
 
 ## Content Servers
 
-GHOSTS content servers are an evolving part of the framework. They exist for several reasons:
+Many ranges are air-gapped, which means they have no access to the wider internet. In these cases, recreating a reasonable facsimile of the internet is key to the training experience. While there are many systems that do this well, we often want to augment the scenario with a wider array of URL traffic, or we want to introduce more of certain kinds of content going across the wire. PANDORA was created to address these concerns. Soon afterwards, we added a social server as well.
 
-1. On an air-gapped network, where we are simulating some subset of the internet, we want more types of browsable content within that range — documents, spreadsheets, presentations, pdf files, streamed movies, and the like.
-2. We want a broad range of URLs within a site we are representing in the range.
-3. We want to simulate a document store, such as SharePoint, OneCloud, or similar, but without the hassle of installing and maintaining those actual systems.
+???+ info "GHOSTS PANDORA Source Code"
+    The [GHOSTS PANDORA Source Code Repository](https://github.com/cmu-sei/GHOSTS/tree/master/src/ghosts.pandora) is hosted on GitHub
 
 ### PANDORA
 
-PANDORA is a python-based web server that responds to all sorts of content requests on-the-fly, and supports a very broad array of URLs. Basically, any request made to a PANDORA server should return a response that corresponds to the request, for example:
-
-| Request                                                                       | Response                                                                      |
-| ----------------------------------------------------------------------------- | ------------------------------------------------------------------            |
-| `GET` /vault/documents/01012019/report.docx                                   | :material-check: responds with a randomly-generated Word document             |
-| `GET` /users/michelle_smith/                                                  | :material-check: responds with a randomly-generated html document             |
-| `GET` /video/org/human-resources/eastern-region/06/23/2022                    | :material-check: responds with a randomly-generated streamed video            |
+PANDORA is a python-based web server that responds to all sorts of content requests on-the-fly, and supports a very broad array of URLs. Basically, any request made to a PANDORA server should return a response that corresponds to the request.
 
 ### PANDORA Social
 
-In the spirit of the original PANDORA, this server also responds to a very broad array of URLs but enables clients to POST/PUT/DELETE to it as well, for example:
+In the spirit of the original PANDORA, this server also responds to a very broad array of URLs but enables clients to POST/PUT/DELETE to it as well.
 
-| Request                                                                       | Response                                                                      |
-| ----------------------------------------------------------------------------- | ------------------------------------------------------------------            |
-| `POST` /images                                                                | :material-check: responds with a url to the saved image file                  |
-| `POST` /                                                                      | :material-check: responds with a randomly-generated streamed video            |
-| `POST` /users/michelle_smith/af2d00aa-4a89-4af3-baff-1746b556e7a1/            | :material-check: responds with a reply to the original user's social post     |
+## Reporting Bugs
 
-## Reporting bugs and requesting features
+Found a bug? Please report all bugs - including bugs for the individual applications - in the [cmu-sei/ghosts issue tracker](https://github.com/cmu-sei/ghosts/issues). Include as much detail as possible including steps to reproduce, the specific app involved, and any error messages you may have received.
 
-- Found a bug? Please report all bugs - including bugs for the individual applications - in the [cmu-sei/ghosts issue tracker](https://github.com/cmu-sei/ghosts/issues). Include as much detail as possible including steps to reproduce, the specific app involved, and any error messages you may have received.
+## Requesting Features
 
-- Have a good idea for a new feature? Submit all new feature requests through the [cmu-sei/ghosts issue tracker](https://github.com/cmu-sei/ghosts/issues). Include the reasons why you're requesting the new feature and how it might benefit other users.
+Have a good idea for a new feature? Submit all new feature requests through the [cmu-sei/ghosts issue tracker](https://github.com/cmu-sei/ghosts/issues). Include the reasons why you're requesting the new feature and how it might benefit other users.
 
 ## License
 

@@ -27,7 +27,13 @@ theme:
       primary: green
 nav:
   - Home: index.md
-  - Core Client: ghosts/core/client.md
+  - Core Client: 
+    - ghosts/core/client.md
+    - Handlers:
+      - Browsers (Firefox|Chrome): ghosts/core/handlers/browser.md
+      - Excel: ghosts/core/handlers/excel.md
+      - PowerPoint: ghosts/core/handlers/powerpoint.md
+      - Word: ghosts/core/handlers/word.md
   - Core API: ghosts/core/api.md
   - Animator: ghosts/animator/index.md
   - Spectre: ghosts/spectre/index.md

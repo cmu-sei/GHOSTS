@@ -47,3 +47,53 @@ This is how often the synch job runs. Incoming machine requests are not real-tim
 - Default login is admin/admin.
 - First step is to setup a datasource named "ghosts" to the ghosts postgres database.
 - Now import your choice of the [grafana json files](https://github.com/cmu-sei/GHOSTS/tree/master/configuration/grafana) in this repository. It creates the default GHOSTS dashboard.
+
+## Webhooks
+
+The GHOSTS API provides webhook callbacks based on the configuration on the endpoint: `/api/webhooks`. The payload for creating a webhook is in the format:
+
+```json
+{
+  "status": 0,
+  "description": "some description",
+  "postbackUrl": "http://localhost/endpoint:port",
+  "postbackMethod": 0, (0 == get, 1 == post)
+  "postbackFormat": "see below"
+}
+```
+
+Payloads can be any format — here is a sample:
+
+```json
+{
+ 'machine':'[machinename]',
+ 'created':'[datetime.utcnow]',
+ 'type':'[messagetype]',
+ 'payload':'[messagepayload]'
+}
+```
+
+On send, the payload will be converted into correct json format:
+
+```json
+{
+ "machine":"some_guid",
+ "created":"some_datetime",
+ "type":"some_message",
+ "payload":"some_payload"
+}
+```
+
+If the postback method is POST, the payload will be sent as the message body. If the postback method is get, the payload will be sent as part of the querystring value ?message=`payload`.
+
+The following events are reported via webhooks:
+
+1. Timeline delivered (with the timeline that was delivered as payload) to machine via API (original API posting of timeline only holds timeline in wait - client still must check-in in order for that timeline to be delivered)
+2. Machine requested updates ("checked in") from API
+3. Machine posted results to API
+
+## Troubleshooting
+
+> Is the API up?
+
+- Go to `/api/home` in the browser, it should return the current api version and number of machines and groups under management. If it says relationship not found, restart the API application and it should create the database automatically.

@@ -43,20 +43,20 @@ nginx_enabled=False
 ### By directory
 
 - **/api** - All requests beginning with `/api` automatically respond with json. This includes:
-  - `/api/users`
-  - `/api/user/a320f971-b3d9-4b79-bb8d-b41d02572942`
-  - `/api/reports/personnel`
+    - `/api/users`
+    - `/api/user/a320f971-b3d9-4b79-bb8d-b41d02572942`
+    - `/api/reports/personnel`
 - **/csv** - All requests beginning with `/csv` automatically respond with csv. Like the above, this includes urls such as:
-  - `/csv/users`
-  - `/csv/user/winx.jalton`
-  - `/csv/reports/HR/payroll`
+    - `/csv/users`
+    - `/csv/user/winx.jalton`
+    - `/csv/reports/HR/payroll`
 - **/i, /img, /images** - All requests beginning with these directories automatically respond with a random image of type [gif, jpg, png]. Examples:
-  - `/i/v1/a9f6e2b7-636c-4821-acf4-90220f091351/f8f8b1f0-9aa5-4fc7-8880-379e3192748e/small`
-  - `/images/products/184f3515-f49b-4e07-8c8b-7f978666df0e/view`
-  - `/img/432.png`
+    - `/i/v1/a9f6e2b7-636c-4821-acf4-90220f091351/f8f8b1f0-9aa5-4fc7-8880-379e3192748e/small`
+    - `/images/products/184f3515-f49b-4e07-8c8b-7f978666df0e/view`
+    - `/img/432.png`
 - **/pdf** - All requests respond with a random pdf document. Examples:
-  - `/pdf/operations/SOP_Vault/a7f48bd5-84cb-43a1-8d3d-cd2c732ddff6`
-  - `/pdf/products`
+    - `/pdf/operations/SOP_Vault/a7f48bd5-84cb-43a1-8d3d-cd2c732ddff6`
+    - `/pdf/products`
 - **/docs** - All requests respond with a random word document
 - **/slides** - All requests respond with a random powerpoint document
 - **/sheets** - All requests respond with a random excel document

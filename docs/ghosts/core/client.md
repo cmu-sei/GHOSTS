@@ -312,3 +312,35 @@ For specific Timeline Events where the outcome is needed to be tracked, like for
     ]
 }
 ```
+
+## Troubleshooting
+
+> Clients aren't running (immediately exiting, throwing copious exceptions, or similar)
+
+- Is the dotnet framework runtime 4.x installed on the machine?
+- If GPO is doing white-listing of what apps can run, is `ghosts.exe` white-listed?
+- Will the client run by simply double-clicking on the exe?
+- Does it report anything to the windows application event logs?
+- What's in `logs/app.log`?
+- Is the ghosts executable set to execute automatically when the machine restarts?
+
+> Clients aren't reporting their activity to the API
+
+- Is the client running correctly? (if not, see above)
+- Is there entries in the logs/clientupdates.log?
+- If there are, is the file too large? (Try removing it, ghosts might be hung trying to process a lot of log data)
+- If the folder `instance` created? Does the file `instance/id.json` exist? (If it does and has an ID within, then ghosts has reported home to the api at least once)
+- The file `logs/app.log` indicating any fatal issues? (Logging can be ratcheted up and down via nlog configuration)
+
+> Can I update what clients are doing?
+
+- Clients operate off their `config/timeline.json` file and this can be updated via Powershell, Ansible, or other means - it's just a file.
+- Clients can also do just-in-time activities via the `instance/timeline/in` folder. Anything placed here will be picked up, executed, and moved to the corresponding out folder once complete. This does not affect any activity currently controlled with the default timeline file.
+
+> Can I reset a client on a box?
+
+- Yes, launching a new instance of Ghosts kills the previous one and all associated tasks from the timeline (any instances of Word, PowerShell, etc.). Only one instance of Ghosts will be running on a client box at any time.
+
+> What is the easiest way to determine the running version of the client?
+
+- run the version flag: `ghosts.exe --version`
