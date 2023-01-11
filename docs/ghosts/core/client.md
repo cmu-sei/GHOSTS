@@ -5,7 +5,7 @@
 
 The GHOSTS client simulates what anyone might do at a computer given their particular role or membership within some team. It creates documents, browses websites, downloads files, and uses all sorts of popular applications on many versions of Windows and Linux machines. Whether you're a friendly administrator or a powerful cyber adversary, GHOSTS can replicate your expected behavior.
 
-![Types of NPCs](/assets/img/npc-types.png)
+![Types of NPCs](../../assets/img/npc-types.png)
 
 GHOSTS has many use cases in cyber training and exercises, most notably for bringing non-player characters (NPCs) to life, but GHOSTS can be used for many other purposes where realistic activity on a computer or network is needed as well - testing or generating datasets, for example.
 
@@ -38,7 +38,7 @@ Unzip to your client machine in a directory such as `c:\exercise\ghosts`. You wi
 
 ## Linux Client
 
-Your client Linux machine will need to have the latest [Microsoft dotnetcore runtime](https://dotnet.microsoft.com/download) :material-open-in-new: installed (Note that for the GHOSTS client, there are versions for dotnetcoreapp3.1 - this will eventually go away — and dotnet6.0, which is LTS and should stick around for a while). Again, note that you only need the runtime installed, not the full SDK.
+Your client Linux machine will need to have the latest [Microsoft dotnetcore runtime](https://dotnet.microsoft.com/download) :material-open-in-new: installed (Note that for the GHOSTS client, there are versions for dotnetcoreapp3.1 - this will eventually go away — and dotnet6.0, which is long term support (LTS) and will stick around for a while). Again, note that you only need the runtime installed, not the full SDK.
 
 ### Linux Installation
 
@@ -48,9 +48,7 @@ Unzip to a folder such as `~/ghosts` for the user that you want GHOSTS to run as
 
 Note that on Linux machines running the client as root and utilizing web browsing may result in failures due to Gecko/Chromedriver display issues.
 
-## Initial client configuration
-
-### Client Directory Structure
+## Client Directory Structure
 
 - `config/` - configuration files are stored here.
 - `instance/` - generated files and information relative to this particular installed instance of ghosts is stored here. **This folder should never be copied from one machine to another**
@@ -60,9 +58,13 @@ Note that on Linux machines running the client as root and utilizing web browsin
 ???+ danger "Do not copy the instance folder"
     You should never copy the `instance` folder from one machine to another.
 
-### Configuration Files
+## Configuration Quick Start
 
-#### application.json
+To get the client running quickly, there are just two files that we might need to adjust:
+
+### application.json
+
+In this file, often all we need to change are the URLs for the API, IdUrl, ClientResultsUrl, ClientUpdatesUrl, and the like. Change the hostname to your installed API location, and GHOSTS should check in as expected.
 
 ```javascript
 {
@@ -86,120 +88,18 @@ Note that on Linux machines running the client as root and utilizing web browsin
     "FirefoxInstallLocation": "",                                           //geckodriver needs this for non-standard installs (is pesky)
     "FirefoxMajorVersionMinimum": 48,                                       //geckodriver is picky about versions
     "OfficeDocsMaxAgeInHours": 6,                                           //cleanup kills docs in the documents folder older than this setting
-    "Email": {
-        "RecipientsToMin": 1,
-        "RecipientsToMax": 3,
-        "RecipientsCcMin": 0,
-        "RecipientsCcMax": 2,
-        "RecipientsBccMin": 2,
-        "RecipientsBccMax": 2,
-        "RecipientsOutsideMin": 0,
-        "RecipientsOutsideMax": 1,
-        "SetAccountFromConfig": false,
-        "SetAccountFromLocal": false,
-        "SetForcedSendReceive": false,
-        "SaveToOutbox": false,
-        "EmailDomainSearchString": "Get-ADUser -filter * -searchbase \"CN=USERS,DC=JRSS,DC=GOV\" -properties UserPrincipalName | select -expand UserPrincipalName"
-    },
-    "Listener": {
-        "Port": 8443                                                        //local listener port on client to receive commands from C2 (C2 requires the same port number setting as the sender)
-    },
-    "EmailContent": {
-        "conflict_1_capital": "",
-        "conflict_1_name": "",
-        "conflict_1_peoples": "",
-        "conflict_1_president": "",
-        "localized_flashpoint_locale": "",
-        "friendly_nation_leader_lastname": "",
-        "friendly_nation_leader_name": "",
-        "friendly_nation_name": "",
-        "friendly_nation_peoples": "",
-        "commander_title": "",
-        "commander_name": "",
-        "commander_initials": "",
-        "commander_lastname": "",
-        "commander_email": "",
-        "commander_sub1": "",
-        "commander_sub2": "",
-        "us_president": "",
-        "iraq": "",
-        "iraqi": "",
-        "iran": "",
-        "iranian": "",
-        "china": "",
-        "chinese": "",
-        "russia": "",
-        "azerbaijan": "",
-        "turkish": "",
-        "turkey": "",
-        "pakistani": "",
-        "pakistan": "",
-        "palestinian": "",
-        "palestine": "",
-        "gaza": "",
-        "korea": ""
-    }
 }
 ```
 
-#### dictionary.json
+### timeline.json
 
-Dictionary is a straightforward word list used to generate text within random Word documents.
+The other file we may want to adjust is the default timeline. This is what the agent does all day, including browsing the internet, creating documents, and similar. The defaults hopefully give you a good idea of what is possible, and of course, the array of configurations here is endless - be creative!
 
-```javascript
-[
-    "data",
-    ...
-]
-```
+The primary item is the HandlerType. This tells GHOSTS to run a command (Command), use Firefox to browse an array of websites (BrowserFirefox), create Excel documents (Excel)  and so on. Some of the other items related to a handler's configuration are:
 
-#### email-content.csv
-
-Email content is used to generate random email subject and bodies. Tags are substituted with values from the email settings in application.json above.
-
-```"7475"|"ESPINOSA"|"From: <commander_email/> \nSent:  Sunday, March 21, 2017 3:57 PM \nTo: 'ValmoroU@mail.mil'; Huma Abedin \nSubject: Espinosa Am I supposed to call her tomorrow? "
-"7477"|"LATIMES OP ED"|"From: <commander_sub1/> \nSent:  Monday, September 27, 2017 10:38 AM \nTo: \nSubject: Fw: LATimes op ed Attachments: 1ATimes - Why H. <commander_lastname/>
-```
-
-#### email-reply.csv
-
-Email reply contains short text strings used in random responses.
-
-#### emails-domain.json
-
-Internal domain email addresses used to generate and send random messages.
-
-#### emails-outside.json
-
-"Company external" emails (and are mocks of major government contractor companies).
-
-#### health.json
-
-Health is the local checks a client undergoes periodically:
-
-```javascript
-{
-    "Sleep": 600000,                //Sleep time between posting client results up to the API for each client.
-    "CheckUrls": [                  //Urls that the client will GET request to confirm their internet connectivity
-        "http://google.com",       
-        "http://cmu.edu"
-    ]
-}
-```
-
-#### timeline.json
-
-HandlerType: Command | BrowserChrome | Excel | PowerPoint | Word
-
-Initial: The initial command for a handler to execute. For a web browser, you might enter either a url or "about:blank".
-
-UtcTimeOn | UtcTimeOff: "00:00:00": "24:00:00" to not shut off. Otherwise, enter an on and off time to simulate things like, office hours of 9-5, etc. There is 30 minutes of jitter plus or minus from the time entered.
-
-Loop: Set this to true in order to continue to execute this same command on a loop, false to execute something just one time.
-
-TimeLineEvents (Other examples)
-
-Command
+- Initial: The initial command for a handler to execute. For a web browser, you might enter either a URL or "about:blank".
+- UtcTimeOn | UtcTimeOff: "00:00:00": "24:00:00" to not shut off. Otherwise, enter an on and an off time to simulate things such as office hours of 9-5, etc. There are 30 minutes of jitter plus or minus from the time entered.
+- Loop: Set this to true to continue to execute this same command on a loop, or false to execute something just one time.
 
 ```javascript
 {
@@ -275,7 +175,7 @@ Excel, PowerPoint, Word
 }
 ```
 
-#### Trackables
+## Trackables
 
 For specific Timeline Events where the outcome is needed to be tracked, like for example, a client machine spawned inject, use a Trackable (via TrackableId in the following example):
 
