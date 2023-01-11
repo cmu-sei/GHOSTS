@@ -85,7 +85,7 @@ namespace Ghosts.Client.Infrastructure
                     else
                     {
                         Log.Error($"WMI:: Connection Test Failed!");
-                        var failconnect = true;
+                        failconnect = true;
                     }
                 }
                 catch
