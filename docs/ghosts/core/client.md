@@ -17,7 +17,7 @@ GHOSTS has many use cases in cyber training and exercises, most notably for brin
 
 ## The Windows Client
 
-GHOSTS on Windows is a .NET Console application that performs user activity on client workstations (Win10 and Win7 are currently supported) - web browsing, working with office documents, using the command prompt or PowerShell, etc. Our team typically installs in an out-of-game directory (`c:\exercise\ghosts\`), where no event or injects will originate. It is recommended you verify one working client before deploying to multiple machines. You will need the base URL from the API installation for the client to communicate home. You should never copy the `instance` folder from one machine to another.
+GHOSTS on Windows is a .NET Console application that performs user activity on client workstations (Win10 and Win7 are currently supported) - web browsing, working with office documents, using the command prompt or PowerShell, etc. Our team typically installs in an out-of-game directory (`c:\exercise\ghosts\`), where no event or injects will originate. It is recommended you verify one working client before deploying to multiple machines. You will need the base URL from the API installation for the client to communicate home.
 
 ???+ info "Additional configuration required for web browsing"
     For any client utilizing the FireFox or Chrome web browser, an automation driver is necessary to be included in the same folder as the GHOSTS binary. For Firefox, [download the appropriate 🦎&nbsp; Geckodriver for your version of the browser here](https://github.com/mozilla/geckodriver/releases) :material-open-in-new:. For Chrome, [download the appropriate Chromedriver for your version of the browser here](https://chromedriver.chromium.org/downloads) :material-open-in-new:.
@@ -56,6 +56,9 @@ Note that on Linux machines running the client as root and utilizing web browsin
 - `instance/` - generated files and information relative to this particular installed instance of ghosts is stored here. **This folder should never be copied from one machine to another**
 - `lib/` - third party libraries used by ghosts are stored here
 - `logs/` - output logs for the installed instance (logs/app.log), and logs that are transferred to the server (`logs/clientupdates.log`)
+
+???+ danger "Do not copy the instance folder"
+    You should never copy the `instance` folder from one machine to another.
 
 ### Configuration Files
 
