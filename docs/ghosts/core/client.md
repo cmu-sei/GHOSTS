@@ -1,18 +1,30 @@
 # GHOSTS Core Client Overview
 
+???+ info "GHOSTS Source Code"
+    The [GHOSTS Source Code Repository](https://github.com/cmu-sei/GHOSTS) is hosted on GitHub.
+
+The GHOSTS client simulates what anyone might do at a computer given their particular role or membership within some team. It creates documents, browses websites, downloads files, and uses all sorts of popular applications on many versions of Windows and Linux machines. Whether you're a friendly administrator or a powerful cyber adversary, GHOSTS can replicate your expected behavior.
+
+![Types of NPCs](/assets/img/npc-types.png)
+
+GHOSTS has many use cases in cyber training and exercises, most notably for bringing non-player characters (NPCs) to life, but GHOSTS can be used for many other purposes where realistic activity on a computer or network is needed as well - testing or generating datasets, for example.
+
+???+ warning "Do I need the API?"
+    Although clients are fully functional without the API server, the latter enables logging, reports, and remote administration capabilities. Without the API, changes to clients must be managed in some other manner.
+
+???+ warning "Run as the NPC you're representing"
+    The GHOSTS client should typically be run as a user, and not as root. Training or exercising teams will notice this immediately otherwise.
+
+## The Windows Client
+
+GHOSTS on Windows is a .NET Console application that performs user activity on client workstations (Win10 and Win7 are currently supported) - web browsing, working with office documents, using the command prompt or PowerShell, etc. Our team typically installs in an out-of-game directory (`c:\exercise\ghosts\`), where no event or injects will originate. It is recommended you verify one working client before deploying to multiple machines. You will need the base URL from the API installation for the client to communicate home. You should never copy the `instance` folder from one machine to another.
+
 ???+ info "Additional configuration required for web browsing"
     For any client utilizing the FireFox or Chrome web browser, an automation driver is necessary to be included in the same folder as the GHOSTS binary. For Firefox, [download the appropriate 🦎&nbsp; Geckodriver for your version of the browser here](https://github.com/mozilla/geckodriver/releases) :material-open-in-new:. For Chrome, [download the appropriate Chromedriver for your version of the browser here](https://chromedriver.chromium.org/downloads) :material-open-in-new:.
 
 ???+ info "Additional configuration required for email"
     Using the Windows client email functions requires the use of [Redemption](http://www.dimastr.com/redemption/home.htm) :material-open-in-new: which provides robust Outlook automation.
     The full Redemption library of .dll files should be found in `/lib`.
-
-???+ warning "Run as the NPC you're representing"
-    The GHOSTS client should typically be run as a user, and not as root. Exercising teams will notice this immediately otherwise.
-
-## The Windows Client
-
-GHOSTS on Windows is a .NET Console application that orchestrates user behavior on client workstations - web browsing, command prompt, PowerShell, etc. Our team typically installs in an out-of-game-bounds directory (`c:\exercise\ghosts\`), where no event or injects will originate. This client has been tested on Win10 and Win7 boxes. It is recommended you verify one working client before deploying to multiple machines. You will need the base url from the API installation for the client to communicate home.
 
 ### Windows Installation
 

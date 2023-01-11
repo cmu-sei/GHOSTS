@@ -1,6 +1,6 @@
 # GHOSTS Core API Overview
 
-The GHOSTS API enables the programmatic orchestration of all agents you have deployed to your range.
+The GHOSTS API enables the control and orchestration of non-player characters (NPCs) within a deployment. It supports logging, reporting, and managing individual, groups of, or entire deployments of client installs.
 
 ## Installation
 

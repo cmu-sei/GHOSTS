@@ -1,5 +1,10 @@
 # GHOSTS SPECTRE Overview
 
+SPECTRE is our attempt to reduce that agent browsing patterns appear as "computer random". This module modifies user web browser timelines so that they more closely match that agent's preferences over time. We expect this simple model of ML to be used for other types of agent activity in the future.
+
+???+ info "GHOSTS SPECTRE Source Code"
+    The [GHOSTS SPECTRE Source Code Repository](https://github.com/cmu-sei/GHOSTS-SPECTRE) is hosted on GitHub
+
 Agent browsing patterns are no longer random, and match different types of users on a network. These patterns improve over time.
 
 Also, this simple model of ML can now be used for other types of agent activity. This makes for an exciting future on the GHOSTS platform.
