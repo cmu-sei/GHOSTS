@@ -254,7 +254,7 @@ For specific Timeline Events where the outcome is needed to be tracked, like for
 
 > Can I reset a client on a box?
 
-- Yes, launching a new instance of Ghosts kills the previous one and all associated tasks from the timeline (any instances of Word, PowerShell, etc.). Only one instance of Ghosts will be running on a client box at any time.
+- Yes, launching a new instance of Ghosts kills the previous one and all associated tasks from the timeline (any instances of Word, PowerShell, etc.). Only one instance of Ghosts will be running on a client box at any time. We can also run the .bat script `kill-ghosts.bat` included in the distribution to clean everything up.
 
 > What is the easiest way to determine the running version of the client?
 
