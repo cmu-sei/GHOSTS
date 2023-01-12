@@ -7,34 +7,35 @@ The GHOSTS client simulates what anyone might do at a computer given their parti
 
 ![Types of NPCs](../../assets/img/npc-types.png)
 
-GHOSTS has many use cases in cyber training and exercises, most notably for bringing non-player characters (NPCs) to life, but GHOSTS can be used for many other purposes where realistic activity on a computer or network is needed as well - testing or generating datasets, for example.
+GHOSTS has many use cases in cyber training and exercises, most notably for bringing non-player characters (NPCs) to life, but it can also be used for other purposes where realistic activity on a computer or network is needed - testing or generating datasets, for example.
 
 ???+ warning "Do I need the API?"
     Although clients are fully functional without the API server, the latter enables logging, reports, and remote administration capabilities. Without the API, changes to clients must be managed in some other manner.
 
+The client's configuration and command system are file-based, so if you do not wish to use the API, you can manage these through some other tool, such as Ansible or similar. All of these files are under the client's install location.
+
 ???+ warning "Run as the NPC you're representing"
-    The GHOSTS client should typically be run as a user, and not as root. Training or exercising teams will notice this immediately otherwise.
+    The GHOSTS client should typically be run as a user, and not as administrator or root - training or exercising teams will notice this immediately.
 
 ## The Windows Client
 
-GHOSTS on Windows is a .NET Console application that performs user activity on client workstations (Win10 and Win7 are currently supported) - web browsing, working with office documents, using the command prompt or PowerShell, etc. Our team typically installs in an out-of-game directory (`c:\exercise\ghosts\`), where no event or injects will originate. It is recommended you verify one working client before deploying to multiple machines. You will need the base URL from the API installation for the client to communicate home.
-
-???+ info "Additional configuration required for web browsing"
-    For any client utilizing the FireFox or Chrome web browser, an automation driver is necessary to be included in the same folder as the GHOSTS binary. For Firefox, [download the appropriate 🦎&nbsp; Geckodriver for your version of the browser here](https://github.com/mozilla/geckodriver/releases) :material-open-in-new:. For Chrome, [download the appropriate Chromedriver for your version of the browser here](https://chromedriver.chromium.org/downloads) :material-open-in-new:.
-
-???+ info "Additional configuration required for email"
-    Using the Windows client email functions requires the use of [Redemption](http://www.dimastr.com/redemption/home.htm) :material-open-in-new: which provides robust Outlook automation.
-    The full Redemption library of .dll files should be found in `/lib`.
+GHOSTS on Windows (Win10 and Win7 currently supported) is a .NET Console application that performs user activity on client workstations - web browsing, working with office documents, using the command prompt or PowerShell, etc. Our team typically installs the client in an out-of-game directory (`c:\exercise\ghosts\`), where no event or injects will originate. It is recommended you verify one working client before deploying to multiple machines. You will need the base URL from the API installation for the client to communicate home.
 
 ### Windows Installation
 
-- Your client Windows machine will need to have (at least) the [Microsoft DotNet 4.6.1 runtime installed](https://dotnet.microsoft.com/download/dotnet-framework/net47) :material-open-in-new:. Again, note that you only need the runtime, not the full SDK.
+- Your client Windows machine will need to have (at least) the [Microsoft DotNet 4.6.1 runtime installed](https://dotnet.microsoft.com/download/dotnet-framework/net47) :material-open-in-new:. Again, note that you only need the runtime, not the full SDK. We continue to use 4.6.1 on Windows to maintain backward compatibility.
 
 - [Download 6.2.0 Win x64 (for use with Office x64)](https://cmu.box.com/s/3g8x4sowss1u4ngm4vy68obdsq4ir354)
 
 - [Download 6.2.0 Win x32 (for use with Office x32)](https://cmu.box.com/s/ip8xuntjbsalarb4kblswyne1hhcfo4n)
 
-Unzip to your client machine in a directory such as `c:\exercise\ghosts`. You will need to adjust configuration in `config/application.json` in order for your client to talk to your already installed API server above.
+Unzip to your client machine in a directory such as `c:\exercise\ghosts`. You will need to adjust the configuration in `config/application.json` for your client to talk to your an installed instance of the GHOSTS API server.
+
+???+ info "Additional configuration required for web browsing"
+    For any client utilizing the Firefox or Chrome web browser, an automation driver is necessary to be included in the same folder as the GHOSTS binary. For Firefox, [download the appropriate 🦎&nbsp; Geckodriver for your version of the browser here](https://github.com/mozilla/geckodriver/releases) :material-open-in-new:. For Chrome, [download the appropriate Chromedriver for your version of the browser here](https://chromedriver.chromium.org/downloads) :material-open-in-new:.
+
+???+ info "Additional configuration required for email"
+    Using the Windows client email functions requires the use of [Redemption](http://www.dimastr.com/redemption/home.htm) :material-open-in-new: which provides robust Outlook automation. The full Redemption library should be found in `/lib`.
 
 ## Linux Client
 
@@ -50,17 +51,21 @@ Note that on Linux machines running the client as root and utilizing web browsin
 
 ## Client Directory Structure
 
-- `config/` - configuration files are stored here.
-- `instance/` - generated files and information relative to this particular installed instance of ghosts is stored here. **This folder should never be copied from one machine to another**
-- `lib/` - third party libraries used by ghosts are stored here
-- `logs/` - output logs for the installed instance (logs/app.log), and logs that are transferred to the server (`logs/clientupdates.log`)
-
 ???+ danger "Do not copy the instance folder"
     You should never copy the `instance` folder from one machine to another.
 
+| Folder          | Description                            |
+| --------------- | ---------------------------------------|
+| `config/`       |   configuration files are stored here. |
+| `instance/`     | generated files and information relative to this particular installed instance of ghosts is stored here. **This folder should never be copied from one machine to another** |
+| `lib/`          | third-party libraries used by ghosts are stored here |
+| `logs/`         | output logs for the installed instance (logs/app.log), and logs that are transferred to the server (`logs/clientupdates.log`) |
+
 ## Configuration Quick Start
 
-To get the client running quickly, there are just two files that we might need to adjust:
+After unzipping the GHOSTS client, we can simply double-click it to run. Note that the console window likely printed a few messages, but then disappeared. This is normal, in production mode GHOSTS hides itself. We can see it in the Windows Task Manager, however, and we can kill the process from there. We can also run the included `kill-ghosts.bat` file that closes the application and any applications it might control.
+
+Beyond this initial step of verifying that the client will run, there are two files that we might need to adjust to fit many deployments:
 
 ### application.json
 
