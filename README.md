@@ -1,9 +1,8 @@
-# ![GHOSTS Logo](https://github.com/cmu-sei/GHOSTS/blob/master/assets/ghosts.png) GHOSTS NPC AUTOMATION
+# GHOSTS NPC AUTOMATION
 
 GHOSTS simulates what anyone might do at a computer all day long. It creates documents, browses websites, and downloads files. It uses all sorts of popular applications on many versions of Windows and Linux machines. Whether you're a friendly administrator or a powerful cyber-adversary, GHOSTS can replicate your expected behaviors.
 
 GHOSTS has many use-cases in cyber training and exercises, most notably for bringing non-player characters (NPCs) to life, but GHOSTS can be used for many other purposes where realistic activity on a computer is needed as well.
-
 
 
 [Version 6.1](https://github.com/cmu-sei/GHOSTS/wiki/v6.1.0-RELEASE-Notes) is now available, and adds significant improvements and new features. [The quick start is available here](https://github.com/cmu-sei/GHOSTS/wiki/Installation-from-distribution-binaries). Be sure to check out other parts of the GHOSTS framework, [ANIMATOR](https://github.com/cmu-sei/GHOSTS-ANIMATOR) and [SPECTRE](https://github.com/cmu-sei/GHOSTS-SPECTRE).
