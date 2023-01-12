@@ -27,6 +27,7 @@ theme:
       primary: green
 nav:
   - Home: index.md
+  - Quick Start: quickstart.md
   - Core Client: 
     - ghosts/core/client.md
     - Handlers:

@@ -9,9 +9,9 @@ GHOSTS has many use cases in cyber training and exercises, most notably for brin
 
 ## Key Links
 
-* [Quick start: Installation from distribution binaries](https://github.com/cmu-sei/GHOSTS/wiki/Installation-from-distribution-binaries)
+* [Quick start: Installation from distribution binaries](https://cmu-sei.github.io/GHOSTS/quickstart/)
 
-* [Detailed installation and configuration information](https://github.com/cmu-sei/GHOSTS/wiki)
+* [GHOSTS Documentation](https://cmu-sei.github.io/GHOSTS/)
 
 * [Don't hesitate to submit issues and feature requests](https://github.com/cmu-sei/GHOSTS/issues)
 
@@ -19,7 +19,7 @@ GHOSTS has many use cases in cyber training and exercises, most notably for brin
 
 ### Ghosts Clients (Windows & Linux)
 
-GHOSTS clients simulate users on a machine doing "user-like" things. They [can be configured](https://github.com/cmu-sei/GHOSTS/wiki/Configuring-the-Windows-Client) to perform actions including:
+GHOSTS clients simulate users on a machine doing "user-like" things. They can be configured to:
 
 * Browse the web
 * Create and edit office documents
@@ -32,7 +32,7 @@ GHOSTS clients simulate users on a machine doing "user-like" things. They [can b
 The API server is a RESTful web service that provides a way for clients to interact with the GHOSTS system and its clients. It can:
 
 * Manage clients, add/remove them from groups, etc.
-* Get/manage information from clients with regard to their activity, current activities, etc.
+* Get/manage information from clients regarding their previous or current activities, etc.
 * Orchestrate new activities for particular clients to perform
 
 ## License
