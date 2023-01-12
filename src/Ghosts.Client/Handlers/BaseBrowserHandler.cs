@@ -296,14 +296,14 @@ namespace Ghosts.Client.Handlers
                                     MakeRequest(config);
                                     Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId);                                 
                                 }
-                                catch (ThreadAbortException)
-                                {
-                                    ProcessManager.KillProcessAndChildrenByName(this.BrowserType.ToString().Replace("Browser", ""));
-                                    Log.Trace($"Thread aborted, {this.BrowserType.ToString()} closing...");
-                                    return;
-                                }
                                 catch (Exception e)
                                 {
+                                    if (e is ThreadAbortException || e is ThreadInterruptedException)
+                                    {
+                                        ProcessManager.KillProcessAndChildrenByName(this.BrowserType.ToString().Replace("Browser", ""));
+                                        Log.Trace($"Thread aborted, {this.BrowserType.ToString()} closing...");
+                                        throw;
+                                    }
                                     Log.Error($"Browser loop error {e}");
                                 }
 
