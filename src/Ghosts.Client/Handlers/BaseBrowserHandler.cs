@@ -201,13 +201,14 @@ namespace Ghosts.Client.Handlers
                     }
                 }
             }
-            catch (ThreadAbortException)
-            {
-                ProcessManager.KillProcessAndChildrenByName(this.BrowserType.ToString().Replace("Browser", ""));
-                Log.Trace($"Thread aborted, {this.BrowserType.ToString()} closing...");
-            }
             catch (Exception e)
             {
+                if (e is ThreadAbortException || e is ThreadInterruptedException)
+                {
+                    ProcessManager.KillProcessAndChildrenByName(this.BrowserType.ToString().Replace("Browser", ""));
+                    Log.Trace($"Thread aborted, {this.BrowserType.ToString()} closing...");
+                    throw;
+                }
                 Log.Error(e);
             }
         }
@@ -295,14 +296,14 @@ namespace Ghosts.Client.Handlers
                                     MakeRequest(config);
                                     Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId);                                 
                                 }
-                                catch (ThreadAbortException)
-                                {
-                                    ProcessManager.KillProcessAndChildrenByName(this.BrowserType.ToString().Replace("Browser", ""));
-                                    Log.Trace($"Thread aborted, {this.BrowserType.ToString()} closing...");
-                                    return;
-                                }
                                 catch (Exception e)
                                 {
+                                    if (e is ThreadAbortException || e is ThreadInterruptedException)
+                                    {
+                                        ProcessManager.KillProcessAndChildrenByName(this.BrowserType.ToString().Replace("Browser", ""));
+                                        Log.Trace($"Thread aborted, {this.BrowserType.ToString()} closing...");
+                                        throw;
+                                    }
                                     Log.Error($"Browser loop error {e}");
                                 }
 
@@ -373,6 +374,10 @@ namespace Ghosts.Client.Handlers
             }
             catch (Exception e)
             {
+                if (e is ThreadAbortException || e is ThreadInterruptedException)
+                {
+                    throw;
+                }
                 Log.Trace(e);
             }
         }
@@ -409,6 +414,10 @@ namespace Ghosts.Client.Handlers
             }
             catch (Exception e)
             {
+                if (e is ThreadAbortException || e is ThreadInterruptedException)
+                {
+                    throw;
+                }
 
                 Log.Trace(e.Message);
                 HandleBrowserException(e);
@@ -555,6 +564,10 @@ namespace Ghosts.Client.Handlers
             }
             catch (Exception e)
             {
+                if (e is ThreadAbortException || e is ThreadInterruptedException)
+                {
+                    throw;
+                }
                 Log.Trace(e);
                 HandleBrowserException(e);
             }
@@ -625,14 +638,14 @@ namespace Ghosts.Client.Handlers
                                         Log.Trace($"Request skipped due to browse probability for #{loopNumber + 1}/{loops} to {config.Uri}");
                                     }
                                 }
-                                catch (ThreadAbortException)
-                                {
-                                    ProcessManager.KillProcessAndChildrenByName(this.BrowserType.ToString().Replace("Browser", ""));
-                                    Log.Trace($"Thread aborted, {this.BrowserType.ToString()} closing...");
-                                    return;
-                                }
                                 catch (Exception e)
                                 {
+                                    if (e is ThreadAbortException || e is ThreadInterruptedException)
+                                    {
+                                        ProcessManager.KillProcessAndChildrenByName(this.BrowserType.ToString().Replace("Browser", ""));
+                                        Log.Trace($"Thread aborted, {this.BrowserType.ToString()} closing...");
+                                        throw;
+                                    }
                                     Log.Error($"Browser loop error {e}");
                                 }
 
