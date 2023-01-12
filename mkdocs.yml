@@ -47,7 +47,6 @@ nav:
     - Enchanter (Keysender): ghosts/advanced/enchanter.md
     - Necromancer: ghosts/advanced/necromancer.md
 markdown_extensions:
-
   # Python Markdown
   - abbr
   - admonition
@@ -79,3 +78,7 @@ markdown_extensions:
   - pymdownx.tasklist:
       custom_checkbox: true
   - pymdownx.tilde
+extra:
+  analytics:
+    provider: google
+    property: G-QXR9QHNERH
