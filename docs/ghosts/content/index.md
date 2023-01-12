@@ -10,7 +10,4 @@ GHOSTS content servers are an evolving part of the framework. They exist for sev
 
 
 
-Many ranges are air-gapped, which means they have no access to the wider internet. In these cases, recreating a reasonable facsimile of the internet is key to the training experience. While there are many systems that do this well, we often want to augment the scenario with a wider array of URL traffic, or we want to introduce more of certain kinds of content going across the wire. PANDORA was created to address these concerns. Soon afterwards, we added a social server as well.
-
-???+ info "GHOSTS PANDORA Source Code"
-    The [GHOSTS PANDORA Source Code Repository](https://github.com/cmu-sei/GHOSTS/tree/master/src/ghosts.pandora) is hosted on GitHub
+Many ranges are air-gapped, which means they have no access to the wider internet. In these cases, recreating a reasonable facsimile of the internet is key to the training experience. While there are many systems that do this well, we often want to augment the scenario with a wider array of URL traffic, or we want to introduce more of certain kinds of content going across the wire. PANDORA was created to address these concerns. Shortly later, we added a social server as well.

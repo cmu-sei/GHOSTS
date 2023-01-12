@@ -10,11 +10,11 @@ GHOSTS is typically run on machines within a virtualized network, often referred
 
 ## Documentation
 
-You can find documentation on The GHOSTS Framework and all of its components [here](https://cmu-sei.github.io/ghosts/). Each main component's detail is accessible from the main navigation.
+We have a continually updated [GHOSTS documentation site](https://cmu-sei.github.io/ghosts/) for the framework and all of its components. Each major component's detail is accessible from the main navigation. If anything is unclear or you still have questions, please do not hesitate to start a [discussion](https://github.com/cmu-sei/GHOSTS/discussions) — our community is growing and eager to help!
 
 ## Philosophy
 
-GHOSTS evolved in our quest to create more realistic NPCs within cyberwarfare training and exercise. We began with a 2018 white paper entitled [_GHOSTS in the Machine: A Framework for Cyber-Warfare Exercise NPC Simulation_](https://resources.sei.cmu.edu/library/asset-view.cfm?assetid=534316). In that report, we outline how the GHOSTS framework accomplishes the creation of simulations in which NPCs realistically represent a vast array of possible encounters and outcomes. We have continued to follow our initial path since. The litmus has always been that if we looked over someone's shoulder while they were using a computer, that's what GHOSTS should look like.
+GHOSTS evolved in our quest to create more realistic NPCs within cyberwarfare training and exercise. In 2018, we outlined our thoughts in a whitepaper entitled [_GHOSTS in the Machine: A Framework for Cyber-Warfare Exercise NPC Simulation_](https://resources.sei.cmu.edu/library/asset-view.cfm?assetid=534316).[^1] In that report, we outline how the GHOSTS framework accomplishes the creation of simulations in which NPCs realistically represent a vast array of possible encounters and outcomes. We have continued to follow our initial path since. The litmus has always been that if we looked over someone's shoulder while they were using a computer, that's what GHOSTS should look like.
 
 ## Reporting Bugs
 
@@ -29,3 +29,5 @@ Have a good idea for a new feature? Submit all new feature requests through the 
 [DISTRIBUTION STATEMENT A] This material has been approved for public release and unlimited distribution.
 
 Copyright 2018 Carnegie Mellon University. See the [LICENSE.md](https://github.com/cmu-sei/GHOSTS/blob/master/LICENSE.md) file for details.
+
+[^1]: This paper is heavily influenced by our previous paper [_R-EACTR: A Framework for Designing Realistic Cyber Warfare Exercises_](https://resources.sei.cmu.edu/library/asset-view.cfm?assetid=505224) which outlines a design framework for cyber warfare exercises. It ensures that designs of team-based exercises factor realism into all aspects of the participant experience.

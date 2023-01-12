@@ -1,12 +1,15 @@
 # GHOSTS PANDORA SERVER Overview
 
-GHOSTS PANDORA is a web server that responds to a myriad of request types with randomized content generated in real-time. Used in conjunction with [GHOSTS](https://github.com/cmu-sei/GHOSTS) NPCs, the two can provide for agents that are periodically downloading content other than simple html and associated image, css, and js files.
+???+ info "Pandora is part of GHOSTS"
+    [Pandora is within the GHOSTS Source Code Repository](https://github.com/cmu-sei/GHOSTS/tree/master/src/ghosts.pandora) hosted on GitHub.
+
+GHOSTS PANDORA is a web server that responds to a myriad of request types with randomized content generated in real-time. Used in conjunction with [GHOSTS](https://github.com/cmu-sei/GHOSTS) NPCs, the two can provide for agents that are periodically downloading content other than simple HTML and associated image, CSS, and js files.
 
 ## Running this server
 
 ### 1. Bare metal
 
-This assumes the host server is a common linux distribution. For images to render correctly, PIL or the more recent Pillow library is necessary. See here for more information on [Pillow installation and configuration](https://pillow.readthedocs.io/en/latest/installation.html).
+This assumes the host server is a common Linux distribution. For images to render correctly, PIL or the more recent Pillow library is necessary. See here for more information on [Pillow installation and configuration](https://pillow.readthedocs.io/en/latest/installation.html).
 
 1. Using a Python 3 distribution >= 3.6.2
 2. In the terminal run: `pip install -r requirements.txt`

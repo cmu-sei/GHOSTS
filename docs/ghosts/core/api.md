@@ -1,5 +1,8 @@
 # GHOSTS Core API Overview
 
+???+ info "GHOSTS Source Code"
+    The [GHOSTS Source Code Repository](https://github.com/cmu-sei/GHOSTS) is hosted on GitHub.
+    
 The GHOSTS API enables the control and orchestration of non-player characters (NPCs) within a deployment. It supports logging, reporting, and managing individual, groups of, or entire deployments of client installs.
 
 ## Installation
