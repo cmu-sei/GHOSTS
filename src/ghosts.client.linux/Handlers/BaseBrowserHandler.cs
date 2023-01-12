@@ -247,12 +247,13 @@ namespace ghosts.client.linux.handlers
                     }
                 }
             }
-            catch (ThreadAbortException)
-            {
-                _log.Trace($"Thread aborted, {this.BrowserType.ToString()} closing...");
-            }
             catch (Exception e)
             {
+                if (e is ThreadAbortException || e is ThreadInterruptedException)
+                {
+                    _log.Trace($"Thread aborted, {this.BrowserType.ToString()} closing...");
+                    throw;
+                }
                 _log.Error(e);
             }
         }
@@ -284,6 +285,10 @@ namespace ghosts.client.linux.handlers
             }
             catch (Exception e)
             {
+                if (e is ThreadAbortException || e is ThreadInterruptedException)
+                {
+                    throw;
+                }
                 _log.Trace(e);
             }
         }
@@ -320,6 +325,10 @@ namespace ghosts.client.linux.handlers
             }
             catch (Exception e)
             {
+                if (e is ThreadAbortException || e is ThreadInterruptedException)
+                {
+                    throw;
+                }
                 _log.Trace(e.Message);
             }
         }
