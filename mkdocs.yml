@@ -29,24 +29,24 @@ nav:
   - Home: index.md
   - Quick Start: quickstart.md
   - Core Client: 
-    - ghosts/core/client.md
+    - core/client.md
     - Handlers:
-      - Browsers (Firefox|Chrome): ghosts/core/handlers/browser.md
-      - Excel: ghosts/core/handlers/excel.md
-      - PowerPoint: ghosts/core/handlers/powerpoint.md
-      - Word: ghosts/core/handlers/word.md
-  - Core API: ghosts/core/api.md
-  - Animator: ghosts/animator/index.md
-  - Spectre: ghosts/spectre/index.md
+      - Browsers (Firefox|Chrome): core/handlers/browser.md
+      - Excel: core/handlers/excel.md
+      - PowerPoint: core/handlers/powerpoint.md
+      - Word: core/handlers/word.md
+  - Core API: core/api.md
+  - Animator: animator/index.md
+  - Spectre: spectre/index.md
   - Content Servers: 
-    - ghosts/content/index.md
-    - Pandora: ghosts/content/pandora.md
-    - Pandora Social: ghosts/content/social.md
+    - content/index.md
+    - Pandora: content/pandora.md
+    - Pandora Social: content/social.md
   - Advanced:
-    - ghosts/advanced/index.md
-    - Cyclone: ghosts/advanced/cyclone.md
-    - Enchanter (Keysender): ghosts/advanced/enchanter.md
-    - Necromancer: ghosts/advanced/necromancer.md
+    - advanced/index.md
+    - Cyclone: advanced/cyclone.md
+    - Enchanter (Keysender): advanced/enchanter.md
+    - Necromancer: advanced/necromancer.md
 markdown_extensions:
   # Python Markdown
   - abbr
