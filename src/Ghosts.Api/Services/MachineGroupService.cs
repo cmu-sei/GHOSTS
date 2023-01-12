@@ -19,7 +19,7 @@ namespace Ghosts.Api.Services
         Task<int> CreateAsync(Group model, CancellationToken ct);
         Task<Group> UpdateAsync(Group model, CancellationToken ct);
         Task<int> DeleteAsync(int model, CancellationToken ct);
-        Task<List<HistoryTimeline>> GetActivity(int id, CancellationToken ct);
+        Task<List<HistoryTimeline>> GetActivity(int id, int skip, int take, CancellationToken ct);
     }
 
     public class MachineGroupService : IMachineGroupService
@@ -83,14 +83,14 @@ namespace Ghosts.Api.Services
             return id;
         }
 
-        public async Task<List<HistoryTimeline>> GetActivity(int id, CancellationToken ct)
+        public async Task<List<HistoryTimeline>> GetActivity(int id, int skip, int take, CancellationToken ct)
         {
             var machineGroup = await _context.Groups.Include(o => o.GroupMachines).FirstOrDefaultAsync(o => o.Id == id, ct);
             var machineIds = machineGroup.GroupMachines.Select(m => m.MachineId).ToList();
 
             try
             {
-                return (from o in _context.HistoryTimeline where machineIds.Contains(o.MachineId) select o).Take(50).ToList();
+                return (from o in _context.HistoryTimeline where machineIds.Contains(o.MachineId) select o).Skip(skip).Take(take).ToList();
             }
             catch (Exception e)
             {

@@ -9,6 +9,7 @@ using Ghosts.Api.Infrastructure;
 using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Api.Models;
 using Ghosts.Domain;
+using Microsoft.AspNetCore.Mvc.TagHelpers.Cache;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using NLog;
@@ -28,7 +29,7 @@ namespace Ghosts.Api.Services
         Task<List<HistoryHealth>> GetMachineHistoryHealth(Guid model, CancellationToken ct);
         Task<List<Machine.MachineHistoryItem>> GetMachineHistory(Guid model, CancellationToken ct);
         Task<TimelineHandler> SendCommand(Guid id, string command, CancellationToken ct);
-        Task<List<HistoryTimeline>> GetActivity(Guid id, CancellationToken ct);
+        Task<List<HistoryTimeline>> GetActivity(Guid id, int skip, int take, CancellationToken ct);
     }
 
     public class MachineService : IMachineService
@@ -236,7 +237,7 @@ namespace Ghosts.Api.Services
             return handler;
         }
 
-        public async Task<List<HistoryTimeline>> GetActivity(Guid id, CancellationToken ct)
+        public async Task<List<HistoryTimeline>> GetActivity(Guid id, int skip, int take, CancellationToken ct)
         {
             var machine = await _context.Machines.FirstOrDefaultAsync(o => o.Id == id, ct);
             if (machine == null)
@@ -247,7 +248,7 @@ namespace Ghosts.Api.Services
 
             try
             {
-                return _context.HistoryTimeline.Where(o => o.MachineId == id).OrderByDescending(o => o.CreatedUtc).Take(50).ToList();
+                return _context.HistoryTimeline.Where(o => o.MachineId == id).OrderByDescending(o => o.CreatedUtc).Skip(skip).Take(take).ToList();
             }
             catch (Exception e)
             {

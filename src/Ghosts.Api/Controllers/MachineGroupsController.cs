@@ -148,17 +148,19 @@ namespace Ghosts.Api.Controllers
         }
 
         /// <summary>
-        /// Gets teh activity for a group of machines
+        /// Gets the activity for a group of machines
         /// </summary>
         /// <param name="id">Group ID</param>
+        /// <param name="skip">How many records to skip for pagination</param>
+        /// <param name="take">How many records to return</param>
         /// <param name="ct">Cancellation token</param>
         /// <returns>The activity for the group</returns>
         [HttpGet("{id}/activity")]
-        public async Task<IActionResult> Activity([FromRoute] int id, CancellationToken ct)
+        public async Task<IActionResult> Activity([FromRoute] int id, int skip, int take, CancellationToken ct)
         {
             try
             {
-                var response = await _service.GetActivity(id, ct);
+                var response = await _service.GetActivity(id, skip, take, ct);
                 return Ok(response);
             }
             catch (Exception exc)

@@ -142,16 +142,18 @@ namespace Ghosts.Api.Controllers
         /// Lists the activity for a given machine
         /// </summary>
         /// <param name="id">The machine to get activity for</param>
+        /// <param name="skip">How many records to skip for pagination</param>
+        /// <param name="take">How many records to return</param>
         /// <param name="ct">Cancellation Token</param>
         /// <returns>The activity history for the requested machine</returns>
         [HttpGet("{id}/activity")]
-        public async Task<IActionResult> Activity([FromRoute] Guid id, CancellationToken ct)
+        public async Task<IActionResult> Activity([FromRoute] Guid id, int skip, int take, CancellationToken ct)
         {
             if (!ModelState.IsValid || id == Guid.Empty) return BadRequest(ModelState);
 
             try
             {
-                var response = await _service.GetActivity(id, ct);
+                var response = await _service.GetActivity(id, skip, take, ct);
                 return Ok(response);
             }
             catch (Exception exc)
