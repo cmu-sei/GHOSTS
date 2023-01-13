@@ -25,28 +25,6 @@ theme:
         icon: material/brightness-4
         name: Switch to light mode
       primary: green
-nav:
-  - Home: index.md
-  - Quick Start: quickstart.md
-  - Core Client: 
-    - core/client.md
-    - Handlers:
-      - Browsers (Firefox|Chrome): core/handlers/browser.md
-      - Excel: core/handlers/excel.md
-      - PowerPoint: core/handlers/powerpoint.md
-      - Word: core/handlers/word.md
-  - Core API: core/api.md
-  - Animator: animator/index.md
-  - Spectre: spectre/index.md
-  - Content Servers: 
-    - content/index.md
-    - Pandora: content/pandora.md
-    - Pandora Social: content/social.md
-  - Advanced:
-    - advanced/index.md
-    - Cyclone: advanced/cyclone.md
-    - Enchanter (Keysender): advanced/enchanter.md
-    - Necromancer: advanced/necromancer.md
 markdown_extensions:
   # Python Markdown
   - abbr
@@ -83,3 +61,26 @@ extra:
   analytics:
     provider: google
     property: G-QXR9QHNERH
+nav:
+  - Home: index.md
+  - Quick Start: quickstart.md
+  - Core Client: 
+    - core/client.md
+    - Client Handlers:
+      - Basic Configuration: core/handlers.md
+      - Web Browsers (Firefox|Chrome): core/handlers/browser.md
+      - Excel: core/handlers/excel.md
+      - PowerPoint: core/handlers/powerpoint.md
+      - Word: core/handlers/word.md
+  - Core API: core/api.md
+  - Animator: animator/index.md
+  - Spectre: spectre/index.md
+  - Content Servers: 
+    - content/index.md
+    - Pandora: content/pandora.md
+    - Pandora Social: content/social.md
+  - Advanced:
+    - advanced/index.md
+    - Cyclone: advanced/cyclone.md
+    - Enchanter (Keysender): advanced/enchanter.md
+    - Necromancer: advanced/necromancer.md

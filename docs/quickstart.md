@@ -3,50 +3,44 @@
 ???+ info "No Compilers Necessary"
     This section details the installation and configuration of GHOSTS from precompiled binaries for both the server and the client.
 
-## GHOSTS API Server
+If you are just checking out the project for the first time and want to see NPCs performing activities, skip to the [client section below](#ghosts-clients). Otherwise, it is easier to install the API first and then a client that will connect to that installed API instance.
 
-Easy installation requires 🐳 &nbsp; [Docker](https://docs.docker.com/install/) and [Docker Compose](https://docs.docker.com/compose/install/). Using [this docker-compose.yml file](https://github.com/cmu-sei/GHOSTS/blob/master/src/Ghosts.Api/docker-compose.yml), the required containers will be downloaded and configured automatically. The command to stand up the GHOSTS containers is simply (in the directory where you placed the docker-compose file:
+## :material-api: GHOSTS API Server
 
-$ `docker-compose up -d`
+Easy installation requires:
 
-Once the command completes, if you open [http://localhost:5000/api/home](http://localhost:5000/api/home) in your browser, you should see the initial API page outlining the version of the install, and a few test machine entries. If this page renders, your API is up, running, and available.
+1. Install 🐳 [Docker](https://docs.docker.com/install/) 
+2. Install [Docker Compose](https://docs.docker.com/compose/install/). 
+3. We'll use [this docker-compose.yml file](https://github.com/cmu-sei/GHOSTS/blob/master/src/Ghosts.Api/docker-compose.yml) in the following command block which will download the required containers will automatically. The commands to stand up the GHOSTS API containers is:
 
-[You will still need to set up Grafana](https://github.com/cmu-sei/GHOSTS/wiki/Configuring-Grafana-Reporting). Beware that you must often `chown` the host location of the container as listed in the docker-compose file or the container will just continually restart in error due to insufficient permissions.
+    ```cmd
+    mkdir ghosts-api
+    cd ghosts-api
+    curl https://github.com/cmu-sei/GHOSTS/blob/master/src/Ghosts.Api/docker-compose.yml -o docker-compose.yml
+    docker-compose up -d
+    ```
 
-For those installing on bare metal, a Postgresql server is required for the database backend. [Then you'll need version 6.0 of the dotnet framework runtime](https://dotnet.microsoft.com/download). Then install [the latest zip of the GHOSTS API](https://cmu.box.com/s/gz62rltw8ajkhomt3c2kvbtpw56yikd1).
+4. Once the command completes, if you open [http://localhost:5000/api/home](http://localhost:5000/api/home) in your browser, you should see the initial API page outlining the version of the install, and a few test machine entries. If this page renders, your API is up, running, and available. If the page does not render, follow the advice in the [API troubleshooting section](core/api.md#troubleshooting).
 
-The API generally has good defaults to get you up and running quickly, but there are some considerations in the `appconfig.json` file:
+[You will still need to set up Grafana](core/api.md#configuring-grafana). Beware that you must often `chown g_data`, which is the host location for the Graphana container as listed in the docker-compose file. Otherwise, the Grafana container will just continually restart in error due to insufficient permissions (detailed in [API troubleshooting](core/api.md#troubleshooting)).
 
-```json
-    "ClientSettings": {
-        "OfflineAfterMinutes": 30, ...
-```
+## :material-account: GHOSTS Clients
 
-"MatchMachinesBy": null,
-Can be fqdn|host|resolvedhost|null - null tells the API to match incoming requests with machine records by the machine name. For installations where multiple domains are reporting into the same API, you probably want to use "fqdn" in order to avoid machines being duplicated.
+For any of the clients utilizing the browser, an automation driver is necessary to be included in the same folder as the GHOSTS binary. For Firefox, [download the appropriate 🦎 Geckodriver for your version of the browser here](https://github.com/mozilla/geckodriver/releases). For Chrome, [download the appropriate :material-google-chrome: Chromedriver for your version of the browser here](https://chromedriver.chromium.org/downloads).
 
-"QueueSyncDelayInSeconds": 10,
-"NotificationsQueueSyncDelayInSeconds": 10,
-This is how often the synch job runs. Incoming machine requests are not real-time in order to best bundle like records together.
+Note there are [additional configuration steps for :material-microsoft-outlook: Outlook email automation](core/client.md).
 
-## GHOSTS Clients
+The GHOSTS client should typically be run as a specific user, and not as an administrator or root account.
 
-For any of the clients utilizing the browser, an automation driver is necessary to be included in the same folder as the GHOSTS binary. For Firefox, [download the appropriate 🦎&nbsp; Geckodriver for your version of the browser here](https://github.com/mozilla/geckodriver/releases). For Chrome, [download the appropriate Chromedriver for your version of the browser here](https://chromedriver.chromium.org/downloads).
+### :material-microsoft-windows: Windows Client
 
-### Windows Client
+1. Your client machine will need to have (at least) the [Microsoft DotNet 4.6.1 runtime installed](https://dotnet.microsoft.com/download/dotnet-framework/net47). You do not need the full SDK.
+2. [Download 6.2.0 Win x64 (for use with Office x64)](https://cmu.box.com/s/3g8x4sowss1u4ngm4vy68obdsq4ir354) or [6.2.0 Win x32 (for use with Office x32)](https://cmu.box.com/s/ip8xuntjbsalarb4kblswyne1hhcfo4n).
+4. Unzip to your client machine in a directory such as `c:\exercise\ghosts`. You will need to adjust the configuration in `config/application.json` for your client to talk to the already installed API server from above.
 
-* Your client Windows machine will need to have (at least) the [Microsoft DotNet 4.6.1 runtime installed](https://dotnet.microsoft.com/download/dotnet-framework/net47). Again, note that you only need the runtime, not the full SDK.
+### :material-linux: Linux Client
 
-* [Download 6.2.0 Win x64 (for use with Office x64)](https://cmu.box.com/s/3g8x4sowss1u4ngm4vy68obdsq4ir354).
+1. Your client Linux machine will need to have the latest [Microsoft dotnetcore runtime](https://dotnet.microsoft.com/download) installed (Note that for the GHOSTS client, there are versions for dotnetcoreapp3.1 - this will eventually go away — and dotnet6.0, which is LTS and should stick around for a while). Again, note that you only need the runtime installed, not the full SDK.
+2. [Download the current Linux client](https://cmu.box.com/s/onpe9b8dzw3ysk4h577wferfyhsrus1w) zip file. Unzip to a folder such as ~/ghosts for the user that you want GHOSTS to run as.
 
-* [Download 6.2.0 Win x32 (for use with Office x32)](https://cmu.box.com/s/ip8xuntjbsalarb4kblswyne1hhcfo4n).
-
-    Unzip to your client machine in a directory such as `c:\exercise\ghosts`. You will need to adjust configuration in `config/application.json` in order for your client to talk to your already installed API server above.
-
-### Linux Client
-
-* Your client Linux machine will need to have the latest [Microsoft dotnetcore runtime](https://dotnet.microsoft.com/download) installed (Note that for the GHOSTS client, there are versions for dotnetcoreapp3.1 - this will eventually go away — and dotnet6.0, which is LTS and should stick around for a while). Again, note that you only need the runtime installed, not the full SDK.
-
-* [Download the current Linux client](https://cmu.box.com/s/onpe9b8dzw3ysk4h577wferfyhsrus1w) zip file. Unzip to a folder such as ~/ghosts for the user that you want GHOSTS to run as.
-
-    Note that on Linux machines running the client as root and utilizing web browsing may result in failures due to Gecko/Chromedriver display issues. The GHOSTS client should typically be run as a user, and not as root.
+Note that on Linux machines running the client as root and utilizing web browsing may result in failures due to Gecko/Chromedriver display issues.

@@ -97,6 +97,7 @@ The following events are reported via webhooks:
 
 ## Troubleshooting
 
-> Is the API up?
+> Is the API up and running?
 
 - Go to `/api/home` in the browser, it should return the current api version and number of machines and groups under management. If it says relationship not found, restart the API application and it should create the database automatically.
+- Run `docker ps --all` and see that all containers are running normally. If one or more is not running, look at the logs for that machine via `docker logs [machine name]`.
