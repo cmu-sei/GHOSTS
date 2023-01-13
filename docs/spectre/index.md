@@ -3,7 +3,7 @@
 ???+ info "GHOSTS SPECTRE Source Code"
     The [GHOSTS SPECTRE Source Code Repository](https://github.com/cmu-sei/GHOSTS-SPECTRE) is hosted on GitHub
 
-SPECTRE is our attempt to reduce that agent browsing patterns appear as "computer random". This module modifies user web browser timelines so that they more closely match that agent's preferences over time. We expect this simple model of ML to be used for other types of agent activity in the future.
+SPECTRE is our attempt to reduce that agent browsing patterns appear as "computer random".[^1] This module modifies user web browser timelines so that they more closely match that agent's preferences over time. We expect this simple model of ML to be used for other types of agent activity in the future.
 
 Agent browsing patterns are no longer random and match different types of users on a network. These patterns improve over time.
 
@@ -52,3 +52,5 @@ There are only two configuration settings, both contained within `appsettings.js
 The first setting is for your connection to a necessary postgres database, which SPECTRE will use for its operations. It is fine to host this on the same machine or container that you might be using for GHOSTS itself. In this case either use the same user as GHOSTS, or create a new user for SPECTRE.
 
 The second setting is for SPECTRE to access the GHOSTS API endpoints. This is used to get information about machines and to update their timelines, based on SPECTRE findings and executions.
+
+[^1]: This work is detailed in the technical report [_Using Machine Learning to Increase NPC Fidelity_](https://resources.sei.cmu.edu/library/asset-view.cfm?assetid=743896). Some of the team also discussed this project in a SEI podcast episode, entitled [_ML-Driven Decision-Making in Realistic Cyber Exercises_](https://resources.sei.cmu.edu/library/asset-view.cfm?assetid=888745).
