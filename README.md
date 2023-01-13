@@ -7,9 +7,7 @@ GHOSTS has many use cases in cyber training and exercises, most notably for brin
 
 Be sure to check out other parts of the GHOSTS framework, [ANIMATOR](https://github.com/cmu-sei/GHOSTS-ANIMATOR) and [SPECTRE](https://github.com/cmu-sei/GHOSTS-SPECTRE).
 
-## Video Demo
-
-<iframe width="560" height="315" src="https://www.youtube.com/embed/EkwK-cqwjjA" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+There is a [short demonstration video available on YouTube](https://www.youtube.com/watch?v=EkwK-cqwjjA) (3:03).
 
 ## Key Links
 
