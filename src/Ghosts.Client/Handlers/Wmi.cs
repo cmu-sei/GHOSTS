@@ -143,11 +143,11 @@ namespace Ghosts.Client.Handlers
                 domain = hostIp;
             }
 
-            if (domain != null && username != null && password != null)
+            if (username != null && password != null && domain != null)
             {
 
                 //have IP, user/pass, try connecting 
-                this.CurrentWmiSupport.Init(hostIp, domain, username, password);
+                this.CurrentWmiSupport.Init(hostIp, username, password, domain);
                 this.CurrentWmiSupport.HostIp = hostIp; //for trace output
                 var client = this.CurrentWmiSupport;
                 {
