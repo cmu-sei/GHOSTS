@@ -43,7 +43,7 @@ namespace Ghosts.Client.Infrastructure
         public WmiSupport()
         {
         }
-        public void Init(string computerName, string domain = "", string username, string password, )
+        public void Init(string computerName, string domain = "", string username, string password)
         {
             _computerName = computerName;
             _domain = string.IsNullOrEmpty(domain) ? computerName : domain;
