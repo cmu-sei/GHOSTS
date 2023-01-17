@@ -21,9 +21,9 @@
     {
       "HandlerType": "Wmi",
       "HandlerArgs": {
-        "TimeBetweenCommandsMax": 5000, //max,min between individual SFTP commands
+        "TimeBetweenCommandsMax": 5000, //max,min between individual WMI commands
         "TimeBetweenCommandsMin": 1000,
-        "CredentialsFile": "<path to credentials>", //required, file path to a JSON file containing the SSH credentials
+        "CredentialsFile": "<path to credentials>", //required, file path to a JSON file containing the WMI credentials
         "delay-jitter": 0 //optional, default =0, range 0 to 50, if specified, DelayAfter varied by delay-%jitter*delay to delay+%jitter*delay
       },
       "Initial": "",

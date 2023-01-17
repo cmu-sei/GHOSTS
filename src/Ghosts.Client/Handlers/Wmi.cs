@@ -134,15 +134,20 @@ namespace Ghosts.Client.Handlers
             var hostIp = cmdArgs[0];
             var credKey = cmdArgs[1];
             var WmiCmds = cmdArgs[2].Split(';');
+            var domain = this.CurrentCreds.GetDomain(credKey);
             var username = this.CurrentCreds.GetUsername(credKey);
             var password = this.CurrentCreds.GetPassword(credKey);
             Log.Trace("Beginning Wmi to host:  " + hostIp + " with command: " + command);
+            if (domain == null)
+            {
+                domain = hostIp;
+            }
 
-            if (username != null && password != null)
+            if (username != null && password != null && domain != null)
             {
 
                 //have IP, user/pass, try connecting 
-                this.CurrentWmiSupport.Init(hostIp, username, password);
+                this.CurrentWmiSupport.Init(hostIp, username, password, domain);
                 this.CurrentWmiSupport.HostIp = hostIp; //for trace output
                 var client = this.CurrentWmiSupport;
                 {
