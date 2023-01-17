@@ -33,9 +33,9 @@ Have a good idea for a new feature? Submit all new feature requests through the 
 Copyright 2018 Carnegie Mellon University. See the [LICENSE.md](https://github.com/cmu-sei/GHOSTS/blob/master/LICENSE.md) file for details.
 
 
-[^1]: CERT's Cyber Workforce Development team has a great deal of experience in building ranges, captured in the technical report entitled, [_Foundation of Cyber Ranges_](https://resources.sei.cmu.edu/library/asset-view.cfm?assetid=734198). The report details the design considerations and execution plan for building high-fidelity, realistic virtual cyber ranges that deliver maximum training and exercise value for cyberwarfare participants.
+[^1]: CERT's Cyber Workforce Development (CWD) team has a great deal of experience in building cyber ranges for training and exercise, captured in the technical report entitled, [_Foundation of Cyber Ranges_](https://resources.sei.cmu.edu/library/asset-view.cfm?assetid=734198):material-file-document:. The report details the design considerations and execution plan for building high-fidelity, realistic virtual cyber ranges that deliver maximum training and exercise value for cyberwarfare participants.
 
 
-[^2]: There is also a [GHOSTS video presentation](https://resources.sei.cmu.edu/library/asset-view.cfm?assetid=735300) from FloCon 2021 that provides a general introduction to the framework.
+[^2]: There is also a [GHOSTS video presentation](https://resources.sei.cmu.edu/library/asset-view.cfm?assetid=735300):material-video: from FloCon 2021 that provides a general introduction to the framework.
 
-[^3]: This paper is heavily influenced by our previous paper [_R-EACTR: A Framework for Designing Realistic Cyber Warfare Exercises_](https://resources.sei.cmu.edu/library/asset-view.cfm?assetid=505224) which outlines a design framework for cyber warfare exercises. It ensures that designs of team-based exercises factor realism into all aspects of the participant experience.
+[^3]: This paper is heavily influenced by our previous paper [_R-EACTR: A Framework for Designing Realistic Cyber Warfare Exercises_](https://resources.sei.cmu.edu/library/asset-view.cfm?assetid=505224):material-file-document: which outlines a design framework for cyber warfare exercises. It ensures that designs of team-based exercises factor realism into all aspects of the participant experience.
