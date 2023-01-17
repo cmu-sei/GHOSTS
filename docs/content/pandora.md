@@ -7,7 +7,21 @@ GHOSTS PANDORA is a web server that responds to a myriad of request types with r
 
 ## Running this server
 
-### 1. Bare metal
+### As a Docker Container
+
+Docker is the preferred way to run Pandora - mostly because this is how we run and test it before version releases.
+
+1. Review the repository [docker-compose.yml](https://github.com/cmu-sei/GHOSTS/blob/master/src/ghosts.pandora/docker-compose.yml) file
+2. Run the following in your terminal 
+
+```cmd
+mkdir ghosts-pandora
+cd ghosts-pandora
+curl https://github.com/cmu-sei/GHOSTS/blob/master/src/ghosts.pandora/docker-compose.yml -o docker-compose.yml
+docker-compose up -d
+```
+
+### Bare metal
 
 This assumes the host server is a common Linux distribution. For images to render correctly, PIL or the more recent Pillow library is necessary. See here for more information on [Pillow installation and configuration](https://pillow.readthedocs.io/en/latest/installation.html).
 
@@ -15,35 +29,9 @@ This assumes the host server is a common Linux distribution. For images to rende
 2. In the terminal run: `pip install -r requirements.txt`
 3. Then run `python app.py`
 
-### 2. As a Docker Container
-
-1. See the included docker-compose.yml file
-2. Run `docker-compose up -d` in your terminal
-
 ## Capabilities
 
-### Video
-
-To enable streaming video:
-
-1. In the container's `/usr/src/app/app.config` file:
-
-```cmd
-docker exec -it pandora /bin/bash
-vi /usr/src/app/app.config
-
-[video]
-video_enabled=False
-nginx_enabled=False
-```
-
-2. set these to `True`, save the file, and exit.
-
-3. Exit the container and docker restart pandora and it should start
-
-(If starting the container via `docker run -p 80:80 --name pandora -d dustinupdyke/ghosts-pandora:0.5.1`)
-
-### By directory
+### Handling requests by directory
 
 - **/api** - All requests beginning with `/api` automatically respond with json. This includes:
     - `/api/users`
@@ -64,9 +52,9 @@ nginx_enabled=False
 - **/slides** - All requests respond with a random powerpoint document
 - **/sheets** - All requests respond with a random excel document
 
-### By request type
+### Handling requests by type
 
-For requests indicating a specific file type, there are a number of specific handlers built to respond with that particular kind of file, such as:
+For requests indicating a specific file type, there are several specific handlers built to respond with that particular kind of file, such as:
 
 - .csv
 - Image requests [.gif, .ico, .jpg, .jpeg, .png]
@@ -77,10 +65,30 @@ For requests indicating a specific file type, there are a number of specific han
   - .xls, .xlsx
 - .pdf
 
-So that a url such as `/users/58361185-c9f2-460f-ac45-cb845ba88574/profile.pdf` would return a pdf document typically rendered right in the browser.
+So that a URL such as `/users/58361185-c9f2-460f-ac45-cb845ba88574/profile.pdf` would return a pdf document typically rendered right in the browser.
 
 All unhandled request types, urls without a specific file indicator, or requests made outside specifically handled directories (from the preceding section) are returned as html, including:
 
 - `/docs/by_department/operations/users`
 - `/blog/d/2022/12/4/blog_title-text`
 - `/hello/index.html`
+
+### Hiding malicious payloads for red-teaming
+
+Pandora also can hide payloads in a particular request for things like red-teaming and such. This is done in the configuration file, and looks like this:
+
+```config
+
+[payloads]
+1=/1/,a.zip,application/zip
+2=/2/users,b.zip,application/zip
+3=/3/some/report/url,c.zip,application/zip
+```
+
+Each record must be an incrementing integer with no duplication. The values are:
+
+- The URL that this payload responds to
+- The local file (stored in `./payloads/`) to be returned
+- The MIME type of the response
+
+So for 1 in the example above, requests to /1/ return the a.zip file as an application/zip file.
