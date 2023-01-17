@@ -178,6 +178,7 @@ namespace Ghosts.Client.Handlers
                             Log.Error(e); //some error occurred during this command, try the next one
                         }
                     }
+                    client.Close();
                     this.Report(handler.HandlerType.ToString(), command, "", timelineEvent.TrackableId);
                 }
             }

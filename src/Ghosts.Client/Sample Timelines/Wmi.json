@@ -12,6 +12,16 @@
 // GetNetworkInfo
 // GetFilesList
 // GetProcessList
+//
+// The credentials file uses the same format as SFTP/SSH, but requires a 'domain' keyword in addition to 'username', 'password'
+// For this to work, the target host needs to be configured to allow WMI
+// The domain admin is the best choice for username/password
+// The trusted hosts of the VM running GHOSTS must be set to include the IPs of any of the hosts being interrogated by WMI
+// You can print the Trusted hosts if the current host by executing in Powershell:
+//   winrm g winrm/config/client
+// You can set Trusted Hosts to a wild card (trust all hosts) by executing in Powershell:
+//  winrm s winrm/config/client '@{TrustedHosts="*"}'
+//
 
 
 

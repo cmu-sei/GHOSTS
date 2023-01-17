@@ -56,6 +56,22 @@ namespace Ghosts.Client.Infrastructure
             }
         }
 
+        public void Close()
+        {
+            try
+            {
+                if (session != null)
+                {
+                    session.Close();
+                    Log.Trace($"Wmi:: Closed session to remote host: {_computerName}");
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Trace($"Wmi:: Error closing session to remote host: {_computerName}");
+                Log.Trace(e);
+            }
+        }
         public void Connect()
         {
             try
