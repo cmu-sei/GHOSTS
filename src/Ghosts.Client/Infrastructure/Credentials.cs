@@ -45,6 +45,11 @@ namespace Ghosts.Client.Infrastructure
             return null;
         }
 
+        public string GetDomain(string credId)
+        {
+            return GetProperty(credId, "domain");
+        }
+
         public string GetUsername(string credId)
         {
             return GetProperty(credId, "username");
@@ -56,6 +61,7 @@ namespace Ghosts.Client.Infrastructure
             if (val != null) return Encoding.UTF8.GetString(Convert.FromBase64String(val));
             else return null;
         }
+
 
     }
 

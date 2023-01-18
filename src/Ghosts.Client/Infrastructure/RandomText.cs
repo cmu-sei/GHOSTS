@@ -47,6 +47,49 @@ namespace Ghosts.Client.Infrastructure
             _words = words;
         }
 
+        public string FormatContent(int SentenceLengthMin, int SentenceLengthMax)
+        {
+            //format the content
+            StringBuilder builder = new StringBuilder();
+            string[] paragraphs = _builder.ToString().Split('\n');
+            string newLine = Environment.NewLine;  //format using platform new line
+            foreach (var pstring in paragraphs)
+            {
+                if (pstring == "")
+                {
+                    //marks the end of a paragraph
+                    builder.Append(newLine);
+                    builder.Append(newLine);
+                }
+                else
+                {
+                    //format
+                    var index = 0;
+                    while (true)
+                    {
+                        var sentenceLength = _random.Next(SentenceLengthMin, SentenceLengthMax);
+                        var endIndex = index + sentenceLength;
+                        if (endIndex >= pstring.Length) endIndex = pstring.Length;
+                        while (endIndex < pstring.Length && pstring[endIndex] != ' ') endIndex++;
+                        if (endIndex == pstring.Length)
+                        {
+                            builder.Append(pstring.Substring(index).Trim());
+                            builder.Append(newLine);
+                            break;
+                        }
+                        else
+                        {
+                            builder.Append(pstring.Substring(index, endIndex - index).Trim());
+                            builder.Append(newLine);
+                            index = endIndex;
+                        }
+
+                    }
+                }
+            }
+            return builder.ToString();
+        }
+
         public void AddContentParagraphs(int minParagraphs, int maxParagraphs)
         {
             var paragraphs = _random.Next(minParagraphs, maxParagraphs);
