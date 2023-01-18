@@ -303,6 +303,12 @@ namespace Ghosts.Client.TimelineManager
                             _ = new Cmd(handler);
                         });
                         break;
+                    case HandlerType.Rdp:
+                        t = new Thread(() =>
+                        {
+                            _ = new Rdp(handler);
+                        });
+                        break;
                     case HandlerType.Ssh:
                         t = new Thread(() =>
                         {
@@ -315,6 +321,14 @@ namespace Ghosts.Client.TimelineManager
                             _ = new Sftp(handler);
                         });
                         break;
+                   
+                    case HandlerType.Wmi:
+                        t = new Thread(() =>
+                        {
+                            _ = new Wmi(handler);
+                        });
+                        break;
+                   
                     case HandlerType.Pidgin:
                         t = new Thread(() =>
                         {
