@@ -9,12 +9,12 @@ The GHOSTS API enables the control and orchestration of non-player characters (N
 
 1. Install 🐳 [Docker](https://docs.docker.com/install/) :material-open-in-new:
 2. Install [Docker Compose](https://docs.docker.com/compose/install/) :material-open-in-new:
-3. Run the following commands - we'll use [this docker-compose.yml file](https://github.com/cmu-sei/GHOSTS/blob/master/src/Ghosts.Api/docker-compose.yml)
+3. Run the following commands - we'll use [this docker-compose.yml file](https://raw.githubusercontent.com/cmu-sei/GHOSTS/master/src/Ghosts.Api/docker-compose.yml)
 
 ```cmd
 mkdir ghosts
 cd ghosts
-curl https://github.com/cmu-sei/GHOSTS/blob/master/src/Ghosts.Api/docker-compose.yml -o docker-compose.yml
+curl https://raw.githubusercontent.com/cmu-sei/GHOSTS/master/src/Ghosts.Api/docker-compose.yml -o docker-compose.yml
 docker-compose up -d
 ```
 

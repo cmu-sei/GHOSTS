@@ -11,13 +11,13 @@ GHOSTS PANDORA is a web server that responds to a myriad of request types with r
 
 Docker is the preferred way to run Pandora - mostly because this is how we run and test it before version releases.
 
-1. Review the repository [docker-compose.yml](https://github.com/cmu-sei/GHOSTS/blob/master/src/ghosts.pandora/docker-compose.yml) file
+1. Review the repository [docker-compose.yml](https://raw.githubusercontent.com/cmu-sei/GHOSTS/master/src/ghosts.pandora/docker-compose.yml) file
 2. Run the following in your terminal 
 
 ```cmd
 mkdir ghosts-pandora
 cd ghosts-pandora
-curl https://github.com/cmu-sei/GHOSTS/blob/master/src/ghosts.pandora/docker-compose.yml -o docker-compose.yml
+curl https://raw.githubusercontent.com/cmu-sei/GHOSTS/master/src/ghosts.pandora/docker-compose.yml -o docker-compose.yml
 docker-compose up -d
 ```
 

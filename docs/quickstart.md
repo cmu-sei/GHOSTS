@@ -11,12 +11,12 @@ Easy installation requires:
 
 1. Install 🐳 [Docker](https://docs.docker.com/install/){:target="_blank"}
 2. Install [Docker Compose](https://docs.docker.com/compose/install/){:target="_blank"}
-3. We'll use [this docker-compose.yml file](https://github.com/cmu-sei/GHOSTS/blob/master/src/Ghosts.Api/docker-compose.yml){:target="_blank"} in the following command block which will download the required containers will automatically. The commands to stand up the GHOSTS API containers is:
+3. We'll use [this docker-compose.yml file](https://raw.githubusercontent.com/cmu-sei/GHOSTS/master/src/Ghosts.Api/docker-compose.yml){:target="_blank"} in the following command block which will download the required containers will automatically. The commands to stand up the GHOSTS API containers is:
 
     ```cmd
     mkdir ghosts-api
     cd ghosts-api
-    curl https://github.com/cmu-sei/GHOSTS/blob/master/src/Ghosts.Api/docker-compose.yml -o docker-compose.yml
+    curl https://raw.githubusercontent.com/cmu-sei/GHOSTS/master/src/Ghosts.Api/docker-compose.yml -o docker-compose.yml
     docker-compose up -d
     ```
 
