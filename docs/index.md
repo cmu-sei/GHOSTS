@@ -10,7 +10,7 @@ GHOSTS is typically run on machines within a virtualized network, often referred
 
 ## :material-file-document: Documentation
 
-This is the [GHOSTS documentation site](https://cmu-sei.github.io/ghosts/) for the framework and all of its components. Each major component's detail is accessible from the main navigation. If anything is unclear or you still have questions, please do not hesitate to start a [discussion](https://github.com/cmu-sei/GHOSTS/discussions){:target="_blank"} — our community is growing and eager to help!
+This is the [GHOSTS documentation site](https://cmu-sei.github.io/GHOSTS/) for the framework and all of its components. Each major component's detail is accessible from the main navigation. If anything is unclear or you still have questions, please do not hesitate to start a [discussion](https://github.com/cmu-sei/GHOSTS/discussions){:target="_blank"} — our community is growing and eager to help!
 
 ## :material-lightbulb: Philosophy
 
