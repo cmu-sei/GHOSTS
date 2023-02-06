@@ -7,9 +7,6 @@
 #
 FROM mcr.microsoft.com/dotnet/sdk:6.0-alpine AS dev
 
-ENV ASPNETCORE_URLS=http://*:5000 \
-    ASPNETCORE_ENVIRONMENT=DEVELOPMENT
-
 COPY Ghosts.Api/. /app/Ghosts.Api
 COPY Ghosts.Domain/. /app/Ghosts.Domain
 
@@ -26,10 +23,12 @@ ENV COMMIT=$commit
 COPY --from=dev /app/dist /app
 WORKDIR /app
 
-ENV GHOSTS_VERSION=6.2.0.0
-ENV GHOSTS_API_VERSION=v6
-ENV ASPNETCORE_URLS=http://*:5000
+LABEL "product"="GHOSTS API"
+LABEL "maintainer"="Dustin Updyke <ddupdyke[@]sei.cmu.edu>"
+LABEL "version"="Browse to /swagger"
 
 EXPOSE 5000
-ENV ASPNETCORE_URLS=http://*:5000
+ENV ASPNETCORE_URLS=http://*:5000 \
+    ASPNETCORE_ENVIRONMENT=DEVELOPMENT
+
 CMD ["dotnet", "ghosts.api.dll"]

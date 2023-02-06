@@ -13,7 +13,6 @@ using Microsoft.AspNetCore.Mvc.TagHelpers.Cache;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using NLog;
-using SimpleTCP;
 
 namespace Ghosts.Api.Services
 {
@@ -112,7 +111,7 @@ namespace Ghosts.Api.Services
 
             if (model.Id == Guid.Empty)
                 model.Id = Guid.NewGuid();
-            await _context.Machines.AddAsync(model, ct);
+            _context.Machines.Add(model);
 
             var operation = await _context.SaveChangesAsync(ct);
             if (operation < 1)

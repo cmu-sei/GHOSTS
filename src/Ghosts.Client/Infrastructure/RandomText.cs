@@ -122,7 +122,7 @@ namespace Ghosts.Client.Infrastructure
             // Add this sentence to the class
             _builder.Append(sentence);
         }
-        
+
         public static class GetDictionary
         {
             public static List<string> GetDictionaryList()

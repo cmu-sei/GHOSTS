@@ -1,0 +1,28 @@
+﻿{
+  "HandlerType": "BrowserFirefox",
+  "HandlerArgs": {
+  },
+  "Initial": "about:blank",
+  "UtcTimeOn": "00:00:00",
+  "UtcTimeOff": "24:00:00",
+  "Loop": "False",
+  "TimeLineEvents": [
+    {
+      "Command": "upload",
+      "CommandArgs": [
+        {
+          "Uri": "http://some_server.com/files",
+          "Method": "POST",
+          "Headers": {
+            "key": "value"
+          },
+          "FormValues": {
+            "file": "c:\\tmp\\my_file.jpg"
+          }
+        }
+      ],
+      "DelayAfter": 0,
+      "DelayBefore": 0
+    }
+  ]
+}

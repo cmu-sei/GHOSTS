@@ -67,7 +67,7 @@ namespace Ghosts.Client.Handlers
             catch (ThreadAbortException)
             {
                 ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.Command);
-                
+
             }
             catch (Exception e)
             {
@@ -101,7 +101,7 @@ namespace Ghosts.Client.Handlers
                     {
                         case "random":
 
-                            if (ExecutionProbability < _random.Next(0,101))
+                            if (ExecutionProbability < _random.Next(0, 101))
                             {
                                 Log.Trace("Notepad:: Action skipped this due to execution probability.");
                                 continue;
@@ -159,7 +159,7 @@ namespace Ghosts.Client.Handlers
                             if (timelineEvent.DelayAfter > 0)
                                 Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, JitterFactor));
                             CloseNotePad();  //closes notepad if it is open. New notepad will be opened on next cycle if needed
-                            
+
                             break;
                     }
 
@@ -186,7 +186,7 @@ namespace Ghosts.Client.Handlers
         {
             if (PdfProbability == 0 || PdfProbability < _random.Next(0, 101)) return;
             var pdfName = Path.GetFileNameWithoutExtension(outfile) + ".pdf";
-            pdfName =  Path.Combine(Path.GetDirectoryName(outfile),pdfName);
+            pdfName = Path.Combine(Path.GetDirectoryName(outfile), pdfName);
             //do print action
             if (File.Exists(pdfName))
             {
@@ -223,13 +223,13 @@ namespace Ghosts.Client.Handlers
                     Log.Trace($"Notepad::  File {outfile} created.");
                 }
             }
-            
+
         }
 
         private void DoCreateAction(string outfile)
         {
-            
-           
+
+
             AddRandomText();
             //do save action
             Winuser.SetForegroundWindow(NotepadProcess.MainWindowHandle);
@@ -264,16 +264,17 @@ namespace Ghosts.Client.Handlers
             }
         }
 
-        
+
         private void DoDeleteAction(string target)
         {
-            
+
             try
             {
                 File.Delete(target);
                 Log.Trace($"Notepad:: Deleted file {target}");
             }
-            catch (Exception e){
+            catch (Exception e)
+            {
                 Log.Trace($"Notepad:: Error deleting file {target}");
                 Log.Trace(e);
             }
@@ -471,9 +472,10 @@ namespace Ghosts.Client.Handlers
                 if (fname == null)
                 {
                     this.NotepadProcess = Process.Start("notepad.exe");
-                } else
+                }
+                else
                 {
-                    this.NotepadProcess = Process.Start("notepad.exe",fname);
+                    this.NotepadProcess = Process.Start("notepad.exe", fname);
                 }
                 if (this.NotepadProcess == null)
                 {
@@ -491,9 +493,9 @@ namespace Ghosts.Client.Handlers
             return true;
         }
 
-        
 
-       
+
+
 
         public void Paste(string text)
         {

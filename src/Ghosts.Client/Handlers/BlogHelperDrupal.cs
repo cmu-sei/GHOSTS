@@ -1,18 +1,8 @@
 ﻿using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using OpenQA.Selenium;
-//using OpenQA.Selenium.DevTools.V101.Overlay;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Security.Policy;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
-using System.Threading.Tasks;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Tab;
 using Actions = OpenQA.Selenium.Interactions.Actions;
 
 namespace Ghosts.Client.Handlers

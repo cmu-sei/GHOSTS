@@ -34,7 +34,7 @@ namespace Ghosts.Api.Services
         {
             var machineUpdate = machineUpdateViewModel.ToMachineUpdate();
 
-            await _context.MachineUpdates.AddAsync(machineUpdate, ct);
+            _context.MachineUpdates.Add(machineUpdate);
             await _context.SaveChangesAsync(ct);
         }
 
@@ -50,7 +50,7 @@ namespace Ghosts.Api.Services
             foreach (var machineMapping in group.GroupMachines)
             {
                 machineUpdate.MachineId = machineMapping.MachineId;
-                await _context.MachineUpdates.AddAsync(machineUpdate, ct);
+                _context.MachineUpdates.Add(machineUpdate);
             }
 
             await _context.SaveChangesAsync(ct);
@@ -89,7 +89,7 @@ namespace Ghosts.Api.Services
                 Type = UpdateClientConfig.UpdateType.TimelinePartial
             };
 
-            await _context.MachineUpdates.AddAsync(o, ct);
+            _context.MachineUpdates.Add(o);
             await _context.SaveChangesAsync(ct);
         }
     }

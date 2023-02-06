@@ -5,19 +5,12 @@ using Newtonsoft.Json;
 using OpenQA.Selenium.Support.UI;
 using OpenQA.Selenium;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Threading.Tasks;
-using NPOI.POIFS.Properties;
 using Actions = OpenQA.Selenium.Interactions.Actions;
 using Exception = System.Exception;
 using NLog;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
-using System.Security.Policy;
 
 namespace Ghosts.Client.Handlers
 {

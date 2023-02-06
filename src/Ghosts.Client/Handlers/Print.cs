@@ -6,96 +6,95 @@ using System.Diagnostics;
 using System.Threading;
 using Ghosts.Domain.Code.Helpers;
 
-namespace Ghosts.Client.Handlers
-{
-    public class Print : BaseHandler
-    {
-        public Print(TimelineHandler handler)
-        {
-            try
-            {
-                base.Init(handler);
-                Log.Trace("Spawning printer job...");
+namespace Ghosts.Client.Handlers;
 
-                if (handler.Loop)
-                {
-                    while (true)
-                    {
-                        Ex(handler);
-                    }
-                }
-                else
+public class Print : BaseHandler
+{
+    public Print(TimelineHandler handler)
+    {
+        try
+        {
+            base.Init(handler);
+            Log.Trace("Spawning printer job...");
+
+            if (handler.Loop)
+            {
+                while (true)
                 {
                     Ex(handler);
                 }
             }
-            catch (Exception e)
+            else
             {
-                Log.Error(e);
+                Ex(handler);
             }
         }
-
-        public void Ex(TimelineHandler handler)
+        catch (Exception e)
         {
-            foreach (var timelineEvent in handler.TimeLineEvents)
+            Log.Error(e);
+        }
+    }
+
+    public void Ex(TimelineHandler handler)
+    {
+        foreach (var timelineEvent in handler.TimeLineEvents)
+        {
+            Infrastructure.WorkingHours.Is(handler);
+
+            if (timelineEvent.DelayBefore > 0)
             {
-                Infrastructure.WorkingHours.Is(handler);
+                Thread.Sleep(timelineEvent.DelayBefore);
+            }
 
-                if (timelineEvent.DelayBefore > 0)
-                {
-                    Thread.Sleep(timelineEvent.DelayBefore);
-                }
+            Log.Trace($"Print Job: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfter}");
 
-                Log.Trace($"Print Job: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfter}");
+            Command(handler, timelineEvent, timelineEvent.Command);
 
-                Command(handler, timelineEvent, timelineEvent.Command);
-
-                if (timelineEvent.DelayAfter > 0)
-                {
-                    Thread.Sleep(timelineEvent.DelayAfter);
-                }
+            if (timelineEvent.DelayAfter > 0)
+            {
+                Thread.Sleep(timelineEvent.DelayAfter);
             }
         }
+    }
 
-        public void Command(TimelineHandler handler, TimelineEvent timelineEvent, string command)
+    public void Command(TimelineHandler handler, TimelineEvent timelineEvent, string command)
+    {
+        Thread.Sleep(1000);
+
+        try
         {
-            Thread.Sleep(1000);
-
-            try
+            foreach (var fileToPrint in timelineEvent.CommandArgs)
             {
-                foreach (var fileToPrint in timelineEvent.CommandArgs)
+                var info = new ProcessStartInfo();
+                info.Verb = "print";
+                info.FileName = fileToPrint.ToString();
+                info.CreateNoWindow = true;
+                info.WindowStyle = ProcessWindowStyle.Hidden;
+
+                var process = new Process();
+                process.StartInfo = info;
+                process.Start();
+
+                try
                 {
-                    var info = new ProcessStartInfo();
-                    info.Verb = "print";
-                    info.FileName = fileToPrint.ToString();
-                    info.CreateNoWindow = true;
-                    info.WindowStyle = ProcessWindowStyle.Hidden;
-
-                    var process = new Process();
-                    process.StartInfo = info;
-                    process.Start();
-
-                    try
+                    process.WaitForInputIdle();
+                    Thread.Sleep(3000);
+                    if (false == process.CloseMainWindow())
                     {
-                        process.WaitForInputIdle();
-                        Thread.Sleep(3000);
-                        if (false == process.CloseMainWindow())
-                        {
-                            process.SafeKill();
-                        }
+                        process.SafeKill();
                     }
-                    catch
-                    {
-                        //
-                    }
-
-                    Report(handler.HandlerType.ToString(), command, "", timelineEvent.TrackableId);
                 }
+                catch
+                {
+                    //
+                }
+
+                Report(handler.HandlerType.ToString(), command, "", timelineEvent.TrackableId);
             }
-            catch (Exception exception)
-            {
-                Log.Error(exception);
-            }
+        }
+        catch (Exception exception)
+        {
+            Log.Error(exception);
         }
     }
 }

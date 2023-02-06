@@ -56,7 +56,7 @@ namespace Ghosts.Api.Services
         {
             var t = new MachineTimeline {Timeline = JsonConvert.SerializeObject(timeline), MachineId = model.Id};
 
-            await _context.MachineTimelines.AddAsync(t, ct);
+            _context.MachineTimelines.Add(t);
             _context.Entry(t).State = EntityState.Added;
             await _context.SaveChangesAsync(ct);
             

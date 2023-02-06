@@ -13,7 +13,7 @@
         "CycleSleep": 300000
     },
     "ClientUpdates": {
-        "IsEnabled": false,
+        "IsEnabled": true,
         "PostUrl": "http://ghosts-api:52388/api/clientupdates",
         "CycleSleep": 300000
     },

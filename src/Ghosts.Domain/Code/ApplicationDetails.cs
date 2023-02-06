@@ -141,6 +141,7 @@ namespace Ghosts.Domain.Code
             public static string Id => Clean(Path + "id.json");
             public static string SurveyResults => Clean(Path + "survey-results.json");
             public static string FilesCreated => Clean(Path + "files-created.log");
+            public static string Trackables => Clean(Path + "trackables.json");
         }
 
         public static class InstanceDirectories

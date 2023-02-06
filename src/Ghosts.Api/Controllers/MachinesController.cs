@@ -116,29 +116,6 @@ namespace Ghosts.Api.Controllers
         }
 
         /// <summary>
-        /// Runs a command on a specific machine
-        /// </summary>
-        /// <param name="id">The machine to run the command upon</param>
-        /// <param name="command">The command to run</param>
-        /// <param name="ct">Cancellation Token</param>
-        /// <returns>The machine response</returns>
-        [HttpPost("{id}/command")]
-        public IActionResult Command([FromRoute] Guid id, string command, CancellationToken ct)
-        {
-            if (!ModelState.IsValid || id == Guid.Empty) return BadRequest(ModelState);
-
-            try
-            {
-                var response = _service.SendCommand(id, command, ct).Result;
-                return Ok(response);
-            }
-            catch (Exception exc)
-            {
-                return Json(exc);
-            }
-        }
-
-        /// <summary>
         /// Lists the activity for a given machine
         /// </summary>
         /// <param name="id">The machine to get activity for</param>

@@ -5,83 +5,82 @@ using System.IO;
 using System.Threading;
 using NLog;
 
-namespace Ghosts.Client.Infrastructure
-{
-    public class TempFiles
-    {
-        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
+namespace Ghosts.Client.Infrastructure;
 
-        public static void StartTempFileWatcher()
+public class TempFiles
+{
+    private static readonly Logger _log = LogManager.GetCurrentClassLogger();
+
+    public static void StartTempFileWatcher()
+    {
+        try
+        {
+            var t = new Thread(TempFileWatcher)
+            {
+                IsBackground = true,
+                Name = "ghosts-tempfoldercleanup"
+            };
+            t.Start();
+        }
+        catch (Exception e)
+        {
+            _log.Error($"TempFileWatcher thread launch exception: {e}");
+        }
+    }
+
+    private static void TempFileWatcher()
+    {
+        while (true)
         {
             try
             {
-                var t = new Thread(TempFileWatcher)
-                {
-                    IsBackground = true,
-                    Name = "ghosts-tempfoldercleanup"
-                };
-                t.Start();
+                _log.Trace("TempFileWatcher loop beginning");
+                CleanUpTempFolder();
+                _log.Trace("TempFileWatcher loop ending");
             }
             catch (Exception e)
             {
-                _log.Error($"TempFileWatcher thread launch exception: {e}");
+                _log.Trace($"TempFileWatcher exception: {e}");
+            }
+            finally
+            {
+                Thread.Sleep(300000); //every 5 minutes clean up
             }
         }
+    }
 
-        private static void TempFileWatcher()
+    private static void CleanUpTempFolder()
+    {
+        try
         {
-            while (true)
+            var di = new DirectoryInfo(Path.GetTempPath());
+
+            foreach (var file in di.EnumerateFiles())
             {
                 try
                 {
-                    _log.Trace("TempFileWatcher loop beginning");
-                    CleanUpTempFolder();
-                    _log.Trace("TempFileWatcher loop ending");
+                    file.Delete();
                 }
-                catch (Exception e)
+                catch
                 {
-                    _log.Trace($"TempFileWatcher exception: {e}");
+                    //
                 }
-                finally
+            }
+            foreach (var dir in di.EnumerateDirectories())
+            {
+                try
                 {
-                    Thread.Sleep(300000); //every 5 minutes clean up
+                    dir.Delete(true);
+                }
+                catch
+                {
+                    //
                 }
             }
         }
-
-        private static void CleanUpTempFolder()
+        catch (Exception e)
         {
-            try
-            {
-                var di = new DirectoryInfo(Path.GetTempPath());
-
-                foreach (var file in di.EnumerateFiles())
-                {
-                    try
-                    {
-                        file.Delete();
-                    }
-                    catch
-                    {
-                        //
-                    }
-                }
-                foreach (var dir in di.EnumerateDirectories())
-                {
-                    try
-                    {
-                        dir.Delete(true);
-                    }
-                    catch
-                    {
-                        //
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                _log.Error($"Error deleting temp files {e}");
-            }
+            _log.Error($"Error deleting temp files {e}");
         }
     }
 }

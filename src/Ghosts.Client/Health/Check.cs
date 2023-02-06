@@ -10,105 +10,103 @@ using Ghosts.Domain.Code;
 using Newtonsoft.Json;
 using NLog;
 
-namespace Ghosts.Client.Health
+namespace Ghosts.Client.Health;
+
+public class Check
 {
-    public class Check
+    private static readonly Logger _log = LogManager.GetCurrentClassLogger();
+    private static readonly Logger _healthLog = LogManager.GetLogger("HEALTH");
+    private static FileSystemWatcher _watcher = new FileSystemWatcher();
+
+    private static DateTime _lastRead = DateTime.MinValue;
+    private List<Thread> Threads { get; set; }
+
+    public Check()
     {
-        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        private static readonly Logger _healthLog = LogManager.GetLogger("HEALTH");
-        private static FileSystemWatcher _watcher = new FileSystemWatcher();
+        this.Threads = new List<Thread>();
+    }
 
-        private static DateTime _lastRead = DateTime.MinValue;
-        private List<Thread> Threads { get; set; }
+    public void Run()
+    {
+        // now watch that file for changes
+        _watcher = new FileSystemWatcher(ApplicationDetails.ConfigurationFiles.Path);
+        _watcher.Filter = Path.GetFileName(ApplicationDetails.ConfigurationFiles.Health);
+        _log.Trace($"watching {_watcher.Path}");
+        _watcher.NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.FileName | NotifyFilters.Size;
+        _watcher.EnableRaisingEvents = true;
+        _watcher.Changed += OnChanged;
 
-        public Check()
+        Thread t = null;
+        new Thread(() =>
         {
-            this.Threads = new List<Thread>();
+            Thread.CurrentThread.IsBackground = true;
+            t = Thread.CurrentThread;
+            t.Name = Guid.NewGuid().ToString();
+            this.RunEx();
+
+        }).Start();
+
+        if (t != null)
+        {
+            _log.Trace($"HEALTH THREAD: {t.Name}");
+            this.Threads.Add(t);
         }
+    }
 
-        public void Run()
+    public void Shutdown()
+    {
+        if (this.Threads != null)
         {
-            // now watch that file for changes
-            _watcher = new FileSystemWatcher(ApplicationDetails.ConfigurationFiles.Path);
-            _watcher.Filter = Path.GetFileName(ApplicationDetails.ConfigurationFiles.Health);
-            _log.Trace($"watching {_watcher.Path}");
-            _watcher.NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.FileName | NotifyFilters.Size;
-            _watcher.EnableRaisingEvents = true;
-            _watcher.Changed += OnChanged;
-
-            Thread t = null;
-            new Thread(() =>
+            foreach (var thread in this.Threads)
             {
-                Thread.CurrentThread.IsBackground = true;
-                t = Thread.CurrentThread;
-                t.Name = Guid.NewGuid().ToString();
-                this.RunEx();
-
-            }).Start();
-
-            if (t != null)
-            {
-                _log.Trace($"HEALTH THREAD: {t.Name}");
-                this.Threads.Add(t);
+                thread.Abort(null);
             }
         }
+    }
 
-        public void Shutdown()
+    private void RunEx()
+    {
+        var c = new ConfigHealth(ApplicationDetails.ConfigurationFiles.Health);
+        var config = c.Load();
+        while (true)
         {
-            if (this.Threads != null)
+            try
             {
-                foreach (var thread in this.Threads)
-                {
-                    thread.Abort(null);
-                }
+                var r = HealthManager.Check(config);
+
+                var o = JsonConvert.SerializeObject(r,
+                    Formatting.None,
+                    new JsonSerializerSettings
+                    {
+                        NullValueHandling = NullValueHandling.Ignore
+                    });
+
+                _healthLog.Info($"HEALTH|{DateTime.UtcNow}|{o}");
+
+
+                Thread.Sleep(config.Sleep);
+            }
+            catch (Exception e)
+            {
+                _log.Debug(e);
             }
         }
+        // ReSharper disable once FunctionNeverReturns
+    }
 
-        private void RunEx()
+    private void OnChanged(object source, FileSystemEventArgs e)
+    {
+        // filewatcher throws two events, we only need 1
+        DateTime lastWriteTime = File.GetLastWriteTime(e.FullPath);
+        if (lastWriteTime > _lastRead.AddSeconds(1))
         {
-            var c = new ConfigHealth(ApplicationDetails.ConfigurationFiles.Health);
-            var config = c.Load();
-            while (true)
-            {
-                try
-                {
-                    var r = HealthManager.Check(config);
+            _lastRead = lastWriteTime;
+            _log.Trace("File: " + e.FullPath + " " + e.ChangeType);
+            _log.Trace($"Reloading {System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType}");
 
-                    var o = JsonConvert.SerializeObject(r,
-                        Formatting.None,
-                        new JsonSerializerSettings
-                        {
-                            NullValueHandling = NullValueHandling.Ignore
-                        });
-
-                    _healthLog.Info($"HEALTH|{DateTime.UtcNow}|{o}");
-
-
-                    Thread.Sleep(config.Sleep);
-                }
-                catch (Exception e)
-                {
-                    _log.Debug(e);
-                }
-            }
-            // ReSharper disable once FunctionNeverReturns
-        }
-
-        private void OnChanged(object source, FileSystemEventArgs e)
-        {
-            // filewatcher throws two events, we only need 1
-            DateTime lastWriteTime = File.GetLastWriteTime(e.FullPath);
-            if (lastWriteTime > _lastRead.AddSeconds(1))
-            {
-                _lastRead = lastWriteTime;
-                _log.Trace("File: " + e.FullPath + " " + e.ChangeType);
-                _log.Trace($"Reloading {System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType}");
-
-                // now terminate existing tasks and rerun
-                this.Shutdown();
-                StartupTasks.CleanupProcesses();
-                this.RunEx();
-            }
+            // now terminate existing tasks and rerun
+            this.Shutdown();
+            this.RunEx();
         }
     }
 }

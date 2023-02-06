@@ -1,15 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
 using System.Threading;
 using Renci.SshNet;
 using Ghosts.Client.Infrastructure;
 using Ghosts.Domain;
-using System.Net;
-using System.Diagnostics;
 using Newtonsoft.Json;
 using Ghosts.Domain.Code;
 using WorkingHours = Ghosts.Client.Infrastructure.WorkingHours;
@@ -18,7 +12,6 @@ using WorkingHours = Ghosts.Client.Infrastructure.WorkingHours;
  * Used Package Renci.sshNet
  * Installed via packag manager
  * Install-Package SSH.NET
- * 
  */
 
 namespace Ghosts.Client.Handlers

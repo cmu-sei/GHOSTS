@@ -1,9 +1,13 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
+using System;
+using System.IO;
 using Ghosts.Api.Infrastructure.Extensions;
 using Ghosts.Api.Models;
 using Ghosts.Domain.Messages.MesssagesForServer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.Configuration;
 
 namespace Ghosts.Api.Infrastructure.Data
 {
@@ -85,6 +89,26 @@ namespace Ghosts.Api.Infrastructure.Data
                 foreach (var index in entity.GetIndexes())
                     index.SetDatabaseName(index.GetDatabaseName().ToCondensedLowerCase());
             }
+        }
+    }
+    
+    public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<ApplicationDbContext>
+    {
+        public ApplicationDbContext CreateDbContext(string[] args)
+        {
+            var path = $"{Directory.GetCurrentDirectory()}/../ghosts.api/";
+            Console.WriteLine(path);
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(path)
+                .AddJsonFile("appsettings.json")
+                .Build();
+
+            var connectionString = configuration.GetConnectionString("DefaultConnection");
+            
+            var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+            optionsBuilder.UseNpgsql(connectionString, x=>x.MigrationsAssembly("ghosts.api.migrations"));
+
+            return new ApplicationDbContext(optionsBuilder.Options);
         }
     }
 }

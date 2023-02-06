@@ -8,11 +8,9 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
+using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
 using Newtonsoft.Json.Linq;
-using Ghosts.Domain.Code;
-using System.Text.RegularExpressions;
-using System.Runtime.InteropServices;
 
 namespace Ghosts.Client.Handlers
 {
@@ -135,6 +133,16 @@ namespace Ghosts.Client.Handlers
                     }
                     catch
                     {
+                        //ignore
+                    }
+
+                    try
+                    {
+                        this.UserAgentString = JS.ExecuteScript("return navigator.userAgent").ToString();
+                    }
+                    catch
+                    {
+                        //ignore
                     }
 
                     if (handler.Loop)
@@ -251,6 +259,23 @@ namespace Ghosts.Client.Handlers
                 if (handler.HandlerArgs.ContainsKeyWithOption("blockscripts", "true"))
                 {
                     options.SetPreference("permissions.default.script", 2);
+                }
+
+                if (handler.HandlerArgs.ContainsKey("ua-string"))
+                {
+                    switch (handler.HandlerArgs["ua-string"].ToString().ToLower())
+                    {
+                        case "random":
+                            options.Profile.SetPreference("general.useragent.override", UserAgentManager.Get());
+                            break;
+                        case "strict":
+                            options.Profile.SetPreference("general.useragent.override", UserAgentManager.GetBrowserSpecific("chrome"));
+                            break;
+                        default:
+                            options.Profile.SetPreference("general.useragent.override", handler.HandlerArgs["ua-string"].ToString());
+                            break;
+                    }
+
                 }
             }
 

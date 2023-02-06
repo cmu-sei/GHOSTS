@@ -3,21 +3,10 @@ using Ghosts.Client.Infrastructure.Browser;
 using Ghosts.Domain.Code;
 using Ghosts.Domain;
 using Newtonsoft.Json;
-using OpenQA.Selenium.Support.UI;
 using OpenQA.Selenium;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
-using Actions = OpenQA.Selenium.Interactions.Actions;
-using Exception = System.Exception;
-using System.Reflection;
 using NLog;
-using Microsoft.IdentityModel.Logging;
 
 namespace Ghosts.Client.Handlers
 {

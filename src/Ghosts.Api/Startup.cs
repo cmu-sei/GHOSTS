@@ -21,7 +21,7 @@ namespace Ghosts.Api
 {
     public class Startup
     {
-        public const int apiVersion = 6; 
+        public const int apiVersion = 7;
         
         public Startup(IConfiguration configuration)
         {
@@ -47,7 +47,7 @@ namespace Ghosts.Api
                     Contact = new OpenApiContact
                     {
                         Name = "Dustin Updyke",
-                        Email = "ddupdyke[at]sei.cmu.edu",
+                        Email = "ddupdyke [*at*] sei.cmu.edu",
                         Url = new Uri("https://sei.cmu.edu")
                     },
                     License = new OpenApiLicense

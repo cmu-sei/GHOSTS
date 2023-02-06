@@ -9,21 +9,10 @@ using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
 using OpenQA.Selenium;
-using OpenQA.Selenium.Interactions;
-using static System.Net.WebRequestMethods;
-using Newtonsoft.Json;
-using System.IO;
-using System.Xml.Linq;
-using OpenQA.Selenium.Support.UI;
-using Microsoft.Office.Interop.Outlook;
 using Actions = OpenQA.Selenium.Interactions.Actions;
-using Exception = System.Exception;
-using System.Diagnostics;
-using System.Security.Policy;
-using System.Text.RegularExpressions;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using System.Linq;
+using System.Text;
 using static System.Windows.Forms.LinkLabel;
 using System.ComponentModel.Composition;
 
@@ -50,10 +39,8 @@ namespace Ghosts.Client.Handlers
 
         public bool blogAbort { get; set; } = false;  //will be set to True if unable to proceed with Handler execution
         BlogHelper _bloghelper = null;
+        public string UserAgentString { get; set; }
         PostContentManager _posthelper = null;
-
-
-
 
         private Task LaunchThread(TimelineHandler handler, TimelineEvent timelineEvent, string site)
         {
@@ -155,6 +142,10 @@ namespace Ghosts.Client.Handlers
                                 Thread.Sleep(1000);
                             }
                             break;
+                        case "upload":
+                            ParseRandomHandlerArgs(handler);
+                            Upload(handler, timelineEvent);
+                            break;
                         case "type":
                             element = Driver.FindElement(By.Name(timelineEvent.CommandArgs[0].ToString()));
                             actions = new Actions(Driver);
@@ -244,15 +235,56 @@ namespace Ghosts.Client.Handlers
             {
                 jitterfactor = Jitter.JitterFactorParse(handler.HandlerArgs["delay-jitter"].ToString());
             }
+        }
 
+        public void Upload(TimelineHandler handler, TimelineEvent timelineEvent)
+        {
+            throw new NotImplementedException();
+            //try
+            //{
+            //    if (Driver.CurrentWindowHandle == null)
+            //    {
+            //        throw new Exception("Browser window handle not available");
+            //    }
 
+            //    var config = RequestConfiguration.Load(handler,
+            //        timelineEvent.CommandArgs[_random.Next(0, timelineEvent.CommandArgs.Count)]);
 
+            //    //var options = new RestClientOptions
+            //    //{
+            //    //    UserAgent = this.UserAgentString
+            //    //};
+            //    //var client = new RestClient(options);
+            //    //var request = new RestRequest(config.Uri, Method.Post)
+            //    //{
+            //    //    Timeout = -1
+            //    //};
+                
+
+            //    //if (config.FormValues == null || string.IsNullOrEmpty(config.FormValues["file"]))
+            //    //{
+            //    //    throw new Exception("Config formValues is malformed");
+            //    //}
+
+            //    //request.AddFile("File", config.FormValues["file"]);
+            //    //var response = client.Execute(request);
+            //    //Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId, response.Content);
+
+            //    //if (!string.IsNullOrEmpty(timelineEvent.TrackableId) && !string.IsNullOrEmpty(response.Content))
+            //    //{
+            //    //    var tm = new Trackables.TrackablesManager();
+            //    //    tm.Add(new Trackables.Trackable(timelineEvent.TrackableId, response.Content.Replace("\"","")));
+            //    //    tm.Save();
+            //    //}
+            //}
+            //catch(Exception ex)
+            //{
+            //    Log.Trace($"Upload request failed, exiting... {ex}");
+            //}
         }
 
         public void DoRandomCommand(TimelineHandler handler, TimelineEvent timelineEvent)
         {
-            RequestConfiguration config;
-
             this.linkManager = new LinkManager(visitedRemember);
 
             while (true)
@@ -262,7 +294,7 @@ namespace Ghosts.Client.Handlers
                     throw new Exception("Browser window handle not available");
                 }
 
-                config = RequestConfiguration.Load(handler, timelineEvent.CommandArgs[_random.Next(0, timelineEvent.CommandArgs.Count)]);
+                var config = RequestConfiguration.Load(handler, timelineEvent.CommandArgs[_random.Next(0, timelineEvent.CommandArgs.Count)]);
                 if (config.Uri != null && config.Uri.IsWellFormedOriginalString())
                 {
                     this.linkManager.SetCurrent(config.Uri);
@@ -294,7 +326,7 @@ namespace Ghosts.Client.Handlers
 
                                     Log.Trace($"Making request #{loopNumber+1}/{loops} to {config.Uri}");
                                     MakeRequest(config);
-                                    Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId);                                 
+                                    Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId);
                                 }
                                 catch (Exception e)
                                 {
@@ -382,8 +414,9 @@ namespace Ghosts.Client.Handlers
             }
         }
 
-        public void MakeRequest(RequestConfiguration config)
+        public string MakeRequest(RequestConfiguration config)
         {
+            var retVal = string.Empty;
             // Added try here because some versions of FF (v56) throw an exception for an unresolved site,
             // but in other versions it seems to fail gracefully. We want to always fail gracefully
             try
@@ -421,8 +454,9 @@ namespace Ghosts.Client.Handlers
 
                 Log.Trace(e.Message);
                 HandleBrowserException(e);
-
             }
+
+            return retVal;
         }
 
         private string GetInputElementText(IWebElement targetElement)
@@ -688,19 +722,11 @@ namespace Ghosts.Client.Handlers
 
             }
         }
-
-
-
-
- 
-
+        
         public virtual void HandleBrowserException(Exception e)
         {
-
         }
-
-      
-
+        
         /// <summary>
         /// Close browser
         /// </summary>

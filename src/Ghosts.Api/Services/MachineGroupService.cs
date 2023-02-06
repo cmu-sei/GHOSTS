@@ -54,7 +54,7 @@ namespace Ghosts.Api.Services
 
         public async Task<int> CreateAsync(Group model, CancellationToken ct)
         {
-            await _context.Groups.AddAsync(model, ct);
+            _context.Groups.Add(model);
             await _context.SaveChangesAsync(ct);
             return model.Id;
         }
@@ -69,7 +69,7 @@ namespace Ghosts.Api.Services
             }
             catch (DbUpdateConcurrencyException ex)
             {
-                _log.Error("Machine group update exception", ex);
+                _log.Error($"Machine group update exception: {ex}");
             }
 
             return model;
@@ -78,8 +78,11 @@ namespace Ghosts.Api.Services
         public async Task<int> DeleteAsync(int id, CancellationToken ct)
         {
             var machineGroup = await _context.Groups.FirstOrDefaultAsync(o => o.Id == id, ct);
-            _context.Groups.Remove(machineGroup);
-            await _context.SaveChangesAsync(ct);
+            if (machineGroup != null)
+            {
+                _context.Groups.Remove(machineGroup);
+                await _context.SaveChangesAsync(ct);
+            }
             return id;
         }
 

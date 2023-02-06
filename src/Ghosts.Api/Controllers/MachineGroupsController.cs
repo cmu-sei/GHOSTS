@@ -149,6 +149,7 @@ namespace Ghosts.Api.Controllers
 
         /// <summary>
         /// Gets the activity for a group of machines
+>>>>>>> 335c3dd58bd51ec9ac3c40d97d8cc1772fec4338
         /// </summary>
         /// <param name="id">Group ID</param>
         /// <param name="skip">How many records to skip for pagination</param>

@@ -12,7 +12,7 @@ namespace Ghosts.Api.Services
 {
     public interface IMachineUpdateService
     {
-        Task<MachineUpdate> GetAsync(Guid id, CancellationToken ct);
+        Task<MachineUpdate> GetAsync(Guid id, string currentUsername, CancellationToken ct);
 
         Task<MachineUpdate> CreateAsync(MachineUpdate model, CancellationToken ct);
         //Task<Machine> UpdateAsync(Machine model, CancellationToken ct);
@@ -29,17 +29,37 @@ namespace Ghosts.Api.Services
             _context = context;
         }
 
-        public async Task<MachineUpdate> GetAsync(Guid machineId, CancellationToken ct)
+        public async Task<MachineUpdate> GetAsync(Guid machineId, string currentUsername, CancellationToken ct)
         {
-            var update = await _context.MachineUpdates
-                .FirstOrDefaultAsync(m => m.MachineId == machineId && m.ActiveUtc < DateTime.UtcNow && m.Status == StatusType.Active, ct);
+            var update = new MachineUpdate();
+            if (!string.IsNullOrEmpty(currentUsername))
+            {
+                // if the username is there, but the machine id is not
+                if (machineId == Guid.Empty)
+                {
+                    update = await _context.MachineUpdates
+                        .FirstOrDefaultAsync(m => (m.Username.ToLower().StartsWith(currentUsername.ToLower())) && m.ActiveUtc < DateTime.UtcNow && m.Status == StatusType.Active, ct);
+                }
+                else // pick either
+                {
+                    update = await _context.MachineUpdates
+                        .FirstOrDefaultAsync(
+                            m => (m.MachineId == machineId || m.Username.ToLower().StartsWith(currentUsername.ToLower())) &&
+                                 m.ActiveUtc < DateTime.UtcNow && m.Status == StatusType.Active, ct);
+                }
+            }
+            else // just search for machine id
+            {
+                update = await _context.MachineUpdates
+                    .FirstOrDefaultAsync(m => (m.MachineId == machineId) && m.ActiveUtc < DateTime.UtcNow && m.Status == StatusType.Active, ct);
+            }
 
             return update;
         }
 
         public async Task<MachineUpdate> CreateAsync(MachineUpdate model, CancellationToken ct)
         {
-            await _context.MachineUpdates.AddAsync(model, ct);
+            _context.MachineUpdates.Add(model);
             await _context.SaveChangesAsync(ct);
             return model;
         }
