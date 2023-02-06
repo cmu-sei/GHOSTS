@@ -1,0 +1,60 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+@model List<Socializer.Infrastructure.Post>
+
+<div class="row row-cols-1 row-cols-md-6 g-4" id="itemList">
+    @if (Model != null)
+    {
+        foreach (var post in Model)
+        {
+            <div class="col" id="@post.Id">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <p class="card-text">
+                            @Html.Raw(post.Message)
+                        </p>
+                        <p class="card-text">
+                            <span class="user">@post.User</span>
+                            <br/>
+                            <span class="created">@post.CreatedUtc</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>
+<br/>
+@* <div class="row"> *@
+@*     <div class="col-12"> *@
+@*         <hr/> *@
+@*     </div> *@
+@* </div> *@
+@* <div class="container"> *@
+@*     <div class="row">&nbsp;</div> *@
+@*     <div class="row"> *@
+@*         <div class="col-2">User</div> *@
+@*         <div class="col-4"> *@
+@*             <input type="text" id="userInput" class="form-control" value="@ViewBag.User"/> *@
+@*         </div> *@
+@*     </div> *@
+@*     <div class="row"> *@
+@*         <div class="col-2">Message</div> *@
+@*         <div class="col-4"> *@
+@*             <textarea type="text" id="messageInput" class="form-control"></textarea> *@
+@*         </div> *@
+@*     </div> *@
+@*     <div class="row">&nbsp;</div> *@
+@*     <div class="row"> *@
+@*         <div class="col-6"> *@
+@*             <input type="button" id="sendButton" value="Send Message"/> *@
+@*         </div> *@
+@*     </div> *@
+@* </div> *@
+<br/>
+<form method="post" enctype="multipart/form-data">
+    <input type="text" name="u"/> <input type="text" name="m"/> <input type="file" name="File"/> <input type="submit" name="submit"/>
+</form>
+<script src="~/js/signalr/dist/browser/signalr.js"></script>
+<script src="~/js/posts.js" asp-append-version="true"></script>
