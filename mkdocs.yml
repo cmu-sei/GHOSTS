@@ -1,0 +1,86 @@
+site_name: GHOSTS Documentation
+extra_css:
+  - stylesheets/extra.css
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.indexes
+    - toc.integrate
+  logo: assets/img/ghosts.png
+  favicon: assets/img/ghosts.png
+  palette:
+    # Palette toggle for light mode
+    - scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+      primary: green
+
+    # Palette toggle for dark mode
+    - scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+      primary: green
+markdown_extensions:
+  # Python Markdown
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - toc:
+      permalink: true
+
+  # Python Markdown Extensions
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+extra:
+  analytics:
+    provider: google
+    property: G-QXR9QHNERH
+nav:
+  - Home: index.md
+  - Quick Start: quickstart.md
+  - Core Client: 
+    - core/client.md
+    - Client Handlers:
+      - Basic Configuration: core/handlers.md
+      - Web Browsers (Firefox|Chrome): core/handlers/browser.md
+      - Excel: core/handlers/excel.md
+      - PowerPoint: core/handlers/powerpoint.md
+      - Word: core/handlers/word.md
+  - Core API: core/api.md
+  - Animator: animator/index.md
+  - Spectre: spectre/index.md
+  - Content Servers: 
+    - content/index.md
+    - Pandora: content/pandora.md
+    - Pandora Social: content/social.md
+  - Advanced:
+    - advanced/index.md
+    - Cyclone: advanced/cyclone.md
+    - Enchanter (Keysender): advanced/enchanter.md
+    - Necromancer: advanced/necromancer.md

@@ -41,7 +41,7 @@ namespace ghosts.tools.loadtestercore
             }
             else
             {
-                throw new Exception("Host not set");
+                options.Host = "http://localhost:5000";
             }
 
             if (!string.IsNullOrEmpty(options.UpdatesFile))
@@ -50,7 +50,7 @@ namespace ghosts.tools.loadtestercore
             }
             else
             {
-                throw new Exception("Client updates file not set");
+                options.UpdatesFile = "clientupdates.log";
             }
             
             Program.Options = options;
@@ -78,7 +78,7 @@ class Program
     {
         if (!CommandLineFlagManager.Parse(args))
             return;
-
+        
         RestClient client;
         IRestResponse o;
         string id;
@@ -109,7 +109,7 @@ class Program
             request.AddHeader("ghosts-resolvedhost", $"resolvedHost.{i}");
             request.AddHeader("ghosts-fqdn", $"flag01.hq.win10.user-test-vpn-{i}");
             request.AddHeader("ghosts-name", $"flag01.hq.win10.user-test-vpn-{i}");
-            request.AddHeader("ghosts-version", "2.6.0.0");
+            request.AddHeader("ghosts-version", "7.0.0.0");
             o = client.Execute(request);
             id = o.Content.Replace("\"", "");
 

@@ -11,4 +11,10 @@
       <PackageReference Include="RestSharp" Version="106.12.0" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="clientupdates.log">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
 </Project>

@@ -1,10 +1,8 @@
-![GHOSTS Logo](https://github.com/cmu-sei/GHOSTS/blob/master/assets/ghosts-logo.jpg)
+# GHOSTS NPC Framework
 
-GHOSTS simulates what anyone might do at a computer all day long. It creates documents, browses websites, and downloads files. It uses all sorts of popular applications on many versions of Windows and Linux machines. Whether you're a friendly administrator or a powerful cyber-adversary, GHOSTS can replicate your expected behaviors.
+GHOSTS simulates what anyone might do at a computer all day long. It creates documents, browses websites, and downloads files. It uses all sorts of popular applications on many versions of Windows and Linux machines. Whether you're a friendly administrator or a powerful cyber adversary, GHOSTS can replicate your expected behaviors.
 
-GHOSTS has many use-cases in cyber training and exercises, most notably for bringing non-player characters (NPCs) to life, but GHOSTS can be used for many other purposes where realistic activity on a computer is needed as well.
-
-# GHOSTS NPC AUTOMATION
+GHOSTS has many use cases in cyber training and exercises, most notably for bringing non-player characters (NPCs) to life, but GHOSTS can be used for many other purposes where realistic activity on a computer is needed as well.
 
 Version 7:
 
@@ -12,17 +10,15 @@ Version 7:
 - Bumps all software and dependencies to the latest versions
 - Adds sending users specific commands to execute (namely social media posts)
 
-[Version 6.1](https://github.com/cmu-sei/GHOSTS/wiki/v6.1.0-RELEASE-Notes) is now available, and adds significant improvements and new features. [The quick start is available here](https://github.com/cmu-sei/GHOSTS/wiki/Installation-from-distribution-binaries). Be sure to check out other parts of the GHOSTS framework, [ANIMATOR](https://github.com/cmu-sei/GHOSTS-ANIMATOR) and [SPECTRE](https://github.com/cmu-sei/GHOSTS-SPECTRE).
+Be sure to check out other parts of the GHOSTS framework, [ANIMATOR](https://github.com/cmu-sei/GHOSTS-ANIMATOR) and [SPECTRE](https://github.com/cmu-sei/GHOSTS-SPECTRE).
 
-GHOSTS is a framework for highly-complex, realistic non-player character (NPC) orchestration. It essentially realistically mimics the behavior of the different types of people you might encounter on  typical office or enterprise networks. The system makes it possible for cybersecurity experts to test their skills and realistically train to defend real networks with real NPC players operating on those networks doing the things we might expect them to do: Create documents, access systems, browse the web, click, run commands, and so on.
-
-As a result of the system checks required for NPCs to be situationally aware, GHOSTS also does health reporting for all configured clients on a given instance.
+There is a [short demonstration video available on YouTube](https://www.youtube.com/watch?v=EkwK-cqwjjA) (3:03).
 
 ## Key Links
 
-* [Quick start: Installation from distribution binaries](https://github.com/cmu-sei/GHOSTS/wiki/Installation-from-distribution-binaries)
+* [Quick Start: Installation from distribution binaries](https://cmu-sei.github.io/GHOSTS/quickstart/)
 
-* [Detailed installation and configuration information](https://github.com/cmu-sei/GHOSTS/wiki)
+* [GHOSTS Documentation](https://cmu-sei.github.io/GHOSTS/)
 
 * [Don't hesitate to submit issues and feature requests](https://github.com/cmu-sei/GHOSTS/issues)
 
@@ -30,7 +26,7 @@ As a result of the system checks required for NPCs to be situationally aware, GH
 
 ### Ghosts Clients (Windows & Linux)
 
-GHOSTS clients simulate users on a machine doing "user-like" things. They [can be configured](https://github.com/cmu-sei/GHOSTS/wiki/Configuring-the-Windows-Client) to perform actions including:
+GHOSTS clients simulate users on a machine doing "user-like" things. They can be configured to:
 
 * Browse the web
 * Create and edit office documents
@@ -43,10 +39,10 @@ GHOSTS clients simulate users on a machine doing "user-like" things. They [can b
 The API server is a RESTful web service that provides a way for clients to interact with the GHOSTS system and its clients. It can:
 
 * Manage clients, add/remove them from groups, etc.
-* Get/manage information from clients with regards to their activity, current activities, etc.
+* Get/manage information from clients regarding their previous or current activities, etc.
 * Orchestrate new activities for particular clients to perform
 
----
+## License
 
 [DISTRIBUTION STATEMENT A] This material has been approved for public release and unlimited distribution.
 

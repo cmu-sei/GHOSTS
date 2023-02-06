@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -23,6 +24,23 @@ namespace Ghosts.Client.Infrastructure
 
         [DllImport("USER32.DLL", CharSet = CharSet.Unicode)]
         public static extern IntPtr GetAncestor(IntPtr hWndChild, uint gaFlags);
+
+        [DllImport("USER32.DLL", CharSet = CharSet.Unicode)]
+        public static extern IntPtr GetClassName(IntPtr hWnd, StringBuilder buffer, int bufsize);
+
+
+        [DllImport("USER32.DLL", CharSet = CharSet.Unicode)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct RECT
+        {
+            public int Left;
+            public int Top;
+            public int Right;
+            public int Bottom;
+        }
 
 
     }

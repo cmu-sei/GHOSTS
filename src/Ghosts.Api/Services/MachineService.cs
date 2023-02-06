@@ -9,6 +9,7 @@ using Ghosts.Api.Infrastructure;
 using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Api.Models;
 using Ghosts.Domain;
+using Microsoft.AspNetCore.Mvc.TagHelpers.Cache;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using NLog;
@@ -26,7 +27,8 @@ namespace Ghosts.Api.Services
         Task<Guid> DeleteAsync(Guid model, CancellationToken ct);
         Task<List<HistoryHealth>> GetMachineHistoryHealth(Guid model, CancellationToken ct);
         Task<List<Machine.MachineHistoryItem>> GetMachineHistory(Guid model, CancellationToken ct);
-        Task<List<HistoryTimeline>> GetActivity(Guid id, CancellationToken ct);
+        Task<TimelineHandler> SendCommand(Guid id, string command, CancellationToken ct);
+        Task<List<HistoryTimeline>> GetActivity(Guid id, int skip, int take, CancellationToken ct);
     }
 
     public class MachineService : IMachineService
@@ -199,7 +201,42 @@ namespace Ghosts.Api.Services
             return await _context.HistoryMachine.Where(o => o.MachineId == id).ToListAsync(ct);
         }
 
-        public async Task<List<HistoryTimeline>> GetActivity(Guid id, CancellationToken ct)
+        public async Task<TimelineHandler> SendCommand(Guid id, string command, CancellationToken ct)
+        {
+            TimelineHandler handler;
+
+            var machine = await _context.Machines.FirstOrDefaultAsync(o => o.Id == id, ct);
+            if (machine == null)
+            {
+                _log.Error($"Machine not found: {id}");
+                throw new InvalidOperationException("Machine not found");
+            }
+
+            try
+            {
+                var client = new SimpleTcpClient().Connect(machine.HostIp, Program.ClientConfig.ListenerPort);
+                client.AutoTrimStrings = true;
+                client.Delimiter = 0x13;
+
+                var replyMsg = client.WriteLineAndGetReply(command, TimeSpan.FromSeconds(3));
+
+                var ret = replyMsg.MessageString;
+                var index = ret.LastIndexOf("}", StringComparison.InvariantCultureIgnoreCase);
+                if (index > 0)
+                    ret = ret.Substring(0, index + 1);
+
+                handler = JsonConvert.DeserializeObject<TimelineHandler>(ret);
+            }
+            catch (Exception e)
+            {
+                _log.Debug(e);
+                throw;
+            }
+
+            return handler;
+        }
+
+        public async Task<List<HistoryTimeline>> GetActivity(Guid id, int skip, int take, CancellationToken ct)
         {
             var machine = await _context.Machines.FirstOrDefaultAsync(o => o.Id == id, ct);
             if (machine == null)
@@ -210,7 +247,7 @@ namespace Ghosts.Api.Services
 
             try
             {
-                return _context.HistoryTimeline.Where(o => o.MachineId == id).OrderByDescending(o => o.CreatedUtc).Take(50).ToList();
+                return _context.HistoryTimeline.Where(o => o.MachineId == id).OrderByDescending(o => o.CreatedUtc).Skip(skip).Take(take).ToList();
             }
             catch (Exception e)
             {

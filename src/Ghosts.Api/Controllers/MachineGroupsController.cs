@@ -108,17 +108,60 @@ namespace Ghosts.Api.Controllers
         }
 
         /// <summary>
-        /// Gets teh activity for a group of machines
+        /// Send a specific command to a group of machines
         /// </summary>
         /// <param name="id">Group ID</param>
+        /// <param name="command">The command to execute</param>
+        /// <param name="ct">Cancellation Token</param>
+        /// <returns>The results of running the command on each machine</returns>
+        [HttpPost("{id}/command")]
+        public async Task<IActionResult> SendCommand([FromRoute] int id, string command, CancellationToken ct)
+        {
+            var handlers = new List<TimelineHandler>();
+            var machines = await _service.GetAsync(id, ct);
+            if (machines == null)
+            {
+                _log.Error($"Machine group not found: {id}");
+                throw new InvalidOperationException("Machine group not found");
+            }
+
+            try
+            {
+                foreach (var machine in machines.GroupMachines)
+                    try
+                    {
+                        var response = await _serviceMachine.SendCommand(machine.MachineId, command, ct);
+                        handlers.Add(response);
+                    }
+                    catch (Exception e)
+                    {
+                        _log.Trace(e);
+                    }
+
+                return Ok(handlers);
+            }
+            catch (Exception e)
+            {
+                var response = new HttpResponseMessage(HttpStatusCode.InternalServerError) {Content = new StringContent(e.Message)};
+                return BadRequest(response);
+            }
+        }
+
+        /// <summary>
+        /// Gets the activity for a group of machines
+>>>>>>> 335c3dd58bd51ec9ac3c40d97d8cc1772fec4338
+        /// </summary>
+        /// <param name="id">Group ID</param>
+        /// <param name="skip">How many records to skip for pagination</param>
+        /// <param name="take">How many records to return</param>
         /// <param name="ct">Cancellation token</param>
         /// <returns>The activity for the group</returns>
         [HttpGet("{id}/activity")]
-        public async Task<IActionResult> Activity([FromRoute] int id, CancellationToken ct)
+        public async Task<IActionResult> Activity([FromRoute] int id, int skip, int take, CancellationToken ct)
         {
             try
             {
-                var response = await _service.GetActivity(id, ct);
+                var response = await _service.GetActivity(id, skip, take, ct);
                 return Ok(response);
             }
             catch (Exception exc)

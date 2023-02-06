@@ -4,6 +4,5 @@ venv
 .venv
 .vscode
 __pycache__
-app/payloads/*
 _config/
 _config/*

@@ -5,7 +5,7 @@ services:
   pandora:
     restart: always
     container_name: ghosts-pandora
-    image: dustinupdyke/ghosts-pandora
+    image: dustinupdyke/ghosts-pandora:0.5.7
     ports:
       - "80:80"
       - "8081:8081"
