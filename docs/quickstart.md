@@ -35,12 +35,12 @@ The GHOSTS client should typically be run as a specific user, and not as an admi
 ### :material-microsoft-windows: Windows Client
 
 1. Your client machine will need to have (at least) the [Microsoft DotNet 4.6.1 runtime installed](https://dotnet.microsoft.com/download/dotnet-framework/net47){:target="_blank"}. You do not need the full SDK.
-2. [Download 6.2.0 Win x64 (for use with Office x64)](https://cmu.box.com/s/3g8x4sowss1u4ngm4vy68obdsq4ir354) or [6.2.0 Win x32 (for use with Office x32)](https://cmu.box.com/s/ip8xuntjbsalarb4kblswyne1hhcfo4n).
-4. Unzip to your client machine in a directory such as `c:\exercise\ghosts`. You will need to adjust the configuration in `config/application.json` for your client to talk to the already installed API server from above.
+2. [Download the latest Windows client](https://github.com/cmu-sei/GHOSTS/releases/latest){:target="_blank"}.
+3. Unzip to your client machine in a directory such as `c:\exercise\ghosts`. You will need to adjust the configuration in `config/application.json` for your client to talk to the already installed API server from above.
 
 ### :material-linux: Linux Client
 
 1. Your client Linux machine will need to have the latest [Microsoft dotnetcore runtime](https://dotnet.microsoft.com/download){:target="_blank"} installed (Note that for the GHOSTS client, there are versions for dotnetcoreapp3.1 - this will eventually go away — and dotnet6.0, which is LTS and should stick around for a while). Again, note that you only need the runtime installed, not the full SDK.
-2. [Download the current Linux client](https://cmu.box.com/s/onpe9b8dzw3ysk4h577wferfyhsrus1w) zip file. Unzip to a folder such as ~/ghosts for the user that you want GHOSTS to run as.
+2. [Download the latest Linux client](https://github.com/cmu-sei/GHOSTS/releases/latest){:target="_blank"} zip file. Unzip to a folder such as ~/ghosts for the user that you want GHOSTS to run as.
 
 Note that on Linux machines running the client as root and utilizing web browsing may result in failures due to Gecko/Chromedriver display issues.

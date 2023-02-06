@@ -25,9 +25,7 @@ GHOSTS on Windows (Win10 and Win7 currently supported) is a .NET Console applica
 
 - Your client Windows machine will need to have (at least) the [Microsoft DotNet 4.6.1 runtime installed](https://dotnet.microsoft.com/download/dotnet-framework/net47) :material-open-in-new:. Again, note that you only need the runtime, not the full SDK. We continue to use 4.6.1 on Windows to maintain backward compatibility.
 
-- [Download 6.2.0 Win x64 (for use with Office x64)](https://cmu.box.com/s/3g8x4sowss1u4ngm4vy68obdsq4ir354)
-
-- [Download 6.2.0 Win x32 (for use with Office x32)](https://cmu.box.com/s/ip8xuntjbsalarb4kblswyne1hhcfo4n)
+- [Download the appropriate latest client](https://github.com/cmu-sei/GHOSTS/releases/latest){:target="_blank"}
 
 Unzip to your client machine in a directory such as `c:\exercise\ghosts`. You will need to adjust the configuration in `config/application.json` for your client to talk to your an installed instance of the GHOSTS API server.
 
@@ -43,7 +41,7 @@ Your client Linux machine will need to have the latest [Microsoft dotnetcore run
 
 ### Linux Installation
 
-- [Download the current Linux client](https://cmu.box.com/s/onpe9b8dzw3ysk4h577wferfyhsrus1w)
+- [Download the latest Linux client](https://github.com/cmu-sei/GHOSTS/releases/latest){:target="_blank"}
 
 Unzip to a folder such as `~/ghosts` for the user that you want GHOSTS to run as.
 
