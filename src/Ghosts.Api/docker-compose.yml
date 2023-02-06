@@ -33,7 +33,7 @@ services:
     restart: always
 
   ghosts-api:
-    image: dustinupdyke/ghosts:6.2.5
+    image: dustinupdyke/ghosts:7.0.0
     container_name: ghosts-api
     depends_on:
       - postgres
