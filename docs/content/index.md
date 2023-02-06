@@ -19,7 +19,7 @@ The other problem is that the internet works by the client having to “know” 
 - Actually knowing the URL
 - Being referred from another page - I might know google.com and search for something, which gives me a reference to another page I was not aware of previously.
 - Inferring the URL from some like resource - If one is poking around and looking for something on a server, a slight change of URL often gives hints that get you to where you wanted to go.
-- Guessing - the proliferation of .com domains means that for something new, its often fruitful to just try that thing.com and see if it works first time!
+- Guessing - the proliferation of .com domains means that for something new, it's often fruitful to just try that thing.com and see if it works!
 
 The problem here is that currently, clients must know valid URLs that actually exist out in a simulated greyspace (via [TopGen](https://github.com/cmu-sei/topgen){:target="_blank"}, [GreyBox](https://github.com/cmu-sei/greybox){:target="_blank"}, or otherwise), which limits the array of potential requests and creates range work to maintain. So we created GHOSTS PANDORA, which serves whatever clients ask for - if the request is for a doc file, the server creates a random doc file on the fly — in memory — and serves it back to the client. Pandora serves the following content types: 
 
@@ -48,7 +48,7 @@ sharepoint.hello.com/{org}/{report_type}/{uuid}/{file_name}.{file_type}
 These variables are processed at runtime, and produce a final url that might look something like:
 
 ```text
-sharepoint.hello.com/ops/maintenance/80e6af4e-5107-43b5-832f-0d8027efbd76/report.docx
+sharepoint.hello.com/operations/maintenance/80e6af4e-5107-43b5-832f-0d8027efbd76/report.docx
 ```
 
 In addition, Pandora supports “bad” payloads via configuration. Here the server responds to specific configured URLs to deploy planted injects. So clients can download malware in an exercise in a manner that is hard to differentiate based on URLs already seen within the event. The configuration looks like:

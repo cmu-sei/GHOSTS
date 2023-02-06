@@ -12,5 +12,5 @@ services:
       - "1935:1935"
       - "443:443"
     volumes:
-      - "./config:/usr/src/app/config"
-      - "./payloads:/usr/src/app/payloads"
+      - "./app/config:/usr/src/app/config"
+      - "./app/payloads:/usr/src/app/payloads"

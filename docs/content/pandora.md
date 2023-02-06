@@ -5,6 +5,8 @@
 
 GHOSTS PANDORA is a web server that responds to a myriad of request types with randomized content generated in real-time. Used in conjunction with [GHOSTS](https://github.com/cmu-sei/GHOSTS) NPCs, the two can provide for agents that are periodically downloading content other than simple HTML and associated image, CSS, and js files.
 
+![Pandora](../../assets/screens/pandora.gif)
+
 ## Running this server
 
 ### As a Docker Container
