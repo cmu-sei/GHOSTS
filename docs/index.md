@@ -2,6 +2,10 @@
 
 Developed by Carnegie Mellon University's Software Engineering Institute (SEI), The GHOSTS Framework is an open-source (OSS) software framework that enables creating, deploying, and orchestrating complex non-player character (NPC) activity within training, exercise, simulation, and educational environments. Within GHOSTS there are several systems and applications, all of which are modular and extendable to fit a wide array of use cases and needs.
 
+If you've never seen GHOSTS in action, watch this quick three-minute introductory video on YouTube:
+
+<iframe width="1000" height="563" src="https://www.youtube.com/embed/EkwK-cqwjjA" title="GHOSTS Intro on YouTube" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+
 GHOSTS is typically run on machines within a virtualized network, often referred to as "the range".[^1] This network can be as simple or as complex as required for training and exercise purposes.
 
 ???+ tip "Run GHOSTS on the Crucible Framework"
