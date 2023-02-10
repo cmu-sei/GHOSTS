@@ -54,6 +54,11 @@ namespace Ghosts.Domain.Code
         public bool DisableStartup { get; set; }
 
         /// <summary>
+        /// Allow multiple instances to run on a single host (usually only 1 can run at any given time
+        /// </summary>
+        public bool AllowMultipleInstances { get; set; }
+
+        /// <summary>
         /// Comma sep list of extensions for chrome (aka c:\path\to\extension)
         /// </summary>
         public string ChromeExtensions { get; set; }

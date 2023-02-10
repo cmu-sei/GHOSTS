@@ -92,7 +92,11 @@ public static class StartupTasks
                         {
                             if (process.Id != ghosts.Id) //don't kill thyself
                             {
-                                process.SafeKill();
+                                if (process.ProcessName == ApplicationDetails.Name &&
+                                    Program.Configuration.AllowMultipleInstances == false)
+                                {
+                                    process.SafeKill();
+                                }
                             }
                         }
                     }).Start();
