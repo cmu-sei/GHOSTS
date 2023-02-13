@@ -63,6 +63,7 @@ extra:
     property: G-QXR9QHNERH
 nav:
   - Home: index.md
+  - What's New: new.md
   - Quick Start: quickstart.md
   - Core Client: 
     - core/client.md
