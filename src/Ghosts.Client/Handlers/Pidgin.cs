@@ -1,30 +1,15 @@
-﻿using System.Text;
-using System.Threading.Tasks;
-using System.IO;
+﻿using System.IO;
 using System.Threading;
 using Ghosts.Client.Infrastructure;
 using Ghosts.Domain;
-using System.Net;
 using System.Diagnostics;
-using Newtonsoft.Json;
 using Ghosts.Domain.Code;
 using WorkingHours = Ghosts.Client.Infrastructure.WorkingHours;
-using System.Net.Sockets;
-using NLog.Layouts;
-using NPOI.HSSF.Record.Common;
-using System.Runtime.InteropServices;
 using AutoItX3Lib;
 using System;
 using Newtonsoft.Json.Linq;
-using Microsoft.Office.Interop.Word;
 using System.Collections.Generic;
-using System.ServiceModel.Channels;
-using System.Security.Permissions;
-using Microsoft.Office.Interop.Outlook;
 using Exception = System.Exception;
-using HtmlAgilityPack;
-using NPOI.SS.Formula.Functions;
-using Ghosts.Client.Infrastructure.Browser;
 
 namespace Ghosts.Client.Handlers
 {
@@ -66,12 +51,11 @@ namespace Ghosts.Client.Handlers
     ///   
     ///   During an activity cycle, any popup windows that match a title in ErrorWindowTitles are closed
     /// 
-    /// 
     /// </summary>
     public class Pidgin : BaseHandler
     {
-        private int TimeBetweenMessagesMax  = 10000;
-        private int TimeBetweenMessagesMin  = 4000;
+        private int TimeBetweenMessagesMax = 10000;
+        private int TimeBetweenMessagesMin = 4000;
         private int RepliesMin = 0;
         private int RepliesMax = 6;
         private int EmojiProbability = 10;
@@ -84,8 +68,7 @@ namespace Ghosts.Client.Handlers
         private List<string> MiscWindowTitles;  //list of window titles that sometime popup and must be closed
         private ChatContent messages;
         private Dictionary<string, bool> chatStatus;  //tracks if chat triggered an error message or not
-
-
+        
         public Pidgin(TimelineHandler handler)
         {
             try
@@ -204,7 +187,7 @@ namespace Ghosts.Client.Handlers
                         try
                         {
                             this.EmojiProbability = Int32.Parse(handler.HandlerArgs["EmojiProbability"].ToString());
-                            if (this.EmojiProbability < 0 ) this.EmojiProbability = 0;
+                            if (this.EmojiProbability < 0) this.EmojiProbability = 0;
                         }
                         catch (Exception e)
                         {
@@ -236,7 +219,7 @@ namespace Ghosts.Client.Handlers
                         }
                     }
 
-                    
+
 
 
 
@@ -294,7 +277,7 @@ namespace Ghosts.Client.Handlers
                             if (!string.IsNullOrEmpty(cmd.ToString()))
                             {
                                 if (!this.Command(handler, timelineEvent, cmd.ToString())) return;
-                                
+
                             }
                             Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, jitterfactor)); ;
                         }
@@ -309,7 +292,7 @@ namespace Ghosts.Client.Handlers
         {
             var chatTarget = command;
 
-           
+
 
             Log.Trace($"Pidgin:: Beginning Pidgin activity cycle ");
 
@@ -324,7 +307,7 @@ namespace Ghosts.Client.Handlers
                     return false;
                 }
 
-               
+
                 AutoItX3 au = new AutoItX3();
                 bool chatInitiated = false;
 
@@ -333,18 +316,19 @@ namespace Ghosts.Client.Handlers
                 if (imWindowTitle == null)
                 {
                     if (NewChatProbability < _random.Next(0, 100)) return true; //skip this cycle
-                    chatInitiated =  openChatWindow(au, chatTarget);
+                    chatInitiated = openChatWindow(au, chatTarget);
                     if (!chatInitiated) return true; //wait for another cycle, failed to inititate chat
                 }
-                if (!chatInitiated && (_random.Next(0, 100) <= CloseChatProbability)) {
+                if (!chatInitiated && (_random.Next(0, 100) <= CloseChatProbability))
+                {
                     //close the currently selected chat
                     findAndCloseChatWindow();
                     return true;
                 }
-               
+
                 int numReplies = _random.Next(RepliesMin, RepliesMax);
                 int i = 0;
-                while ( i < numReplies)
+                while (i < numReplies)
                 {
                     imWindowTitle = getImWindow();
                     if (imWindowTitle == null) break;
@@ -365,9 +349,10 @@ namespace Ghosts.Client.Handlers
                             //close the currently selected chat
                             findAndCloseChatWindow();
                             return true;
-                        } else
+                        }
+                        else
                         {
-                            chatStatus[thisTarget] = true;  
+                            chatStatus[thisTarget] = true;
                         }
                         currentImWindowTitle = selectNextChat(au, imWindowTitle);
                         i++;
@@ -379,8 +364,8 @@ namespace Ghosts.Client.Handlers
                         targetList.Add(thisTarget);
                     }
                 }
-               
-                return true;   
+
+                return true;
             }
 
             catch (Exception e)
@@ -389,7 +374,7 @@ namespace Ghosts.Client.Handlers
                 Log.Error(e);
             }
             return true;
-           
+
         }
 
         /// <summary>
@@ -401,10 +386,10 @@ namespace Ghosts.Client.Handlers
             if (imWindowTitle != null) closeCurrentlySelectedChat(imWindowTitle);
         }
 
-        
+
         private string getChatTargetFromWindowTitle(string windowTitle)
         {
-            
+
             if (windowTitle != null && windowTitle.Contains("/"))
             {
                 char[] seps = { '/' };
@@ -439,9 +424,9 @@ namespace Ghosts.Client.Handlers
             return windowFound;
         }
 
-        
 
-       
+
+
         /// <summary>
         /// Open a new chat window to the imTarget
         /// </summary>
@@ -505,15 +490,15 @@ namespace Ghosts.Client.Handlers
 
         }
 
-        private void closeCurrentlySelectedChat( string windowTitle)
+        private void closeCurrentlySelectedChat(string windowTitle)
         {
-            
+
             var windHandle = Winuser.FindWindow("gdkWindowToplevel", windowTitle);
             Winuser.SetForegroundWindow(windHandle);
             System.Windows.Forms.SendKeys.SendWait("^w");
             Log.Trace($"Pidgin:: closed chat {windowTitle}. ");
             Thread.Sleep(500);
-            
+
 
         }
 
@@ -532,9 +517,9 @@ namespace Ghosts.Client.Handlers
                 if (EmojiProbability > _random.Next(0, 100))
                 {
                     var numEmojis = _random.Next(1, 5);
-                    for(int i = 0; i < numEmojis; i++)
+                    for (int i = 0; i < numEmojis; i++)
                     {
-                        msg = msg + emojis[_random.Next(0,emojis.Count)];
+                        msg = msg + emojis[_random.Next(0, emojis.Count)];
                     }
                 }
                 msg = msg + "{ENTER}";
@@ -557,7 +542,7 @@ namespace Ghosts.Client.Handlers
         /// </summary>
         private string getImWindow()
         {
-           
+
             var plist = Process.GetProcessesByName("Pidgin");
             foreach (var process in plist)
             {
@@ -599,14 +584,9 @@ namespace Ghosts.Client.Handlers
                     Process.Start(Exepath);
                     Thread.Sleep(180000);  //wait for three minutes for pidgin to start and make contact with server 
                 }
-                    
+
             }
             return Winuser.FindWindow("gdkWindowToplevel", "Buddy List");
         }
-
-          
-
     }
-
-
- }
+}
