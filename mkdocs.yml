@@ -74,7 +74,10 @@ nav:
       - PowerPoint: core/handlers/powerpoint.md
       - Word: core/handlers/word.md
   - Core API: core/api.md
-  - Animator: animator/index.md
+  - Animator: 
+    - animator/index.md
+    - Animation Jobs: animator/jobs.md
+    - Running Animations: animator/run.md
   - Spectre: spectre/index.md
   - Content Servers: 
     - content/index.md

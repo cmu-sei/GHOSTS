@@ -6,9 +6,9 @@ Welcome to what's new in the GHOSTS framework. Use this page to review the lates
 
 - 10+ significant features built by 6+ contributors!
 - We surpassed 175 issues/discussions!
-- These new docs hosted on GitHub Pages
+- These new docs are hosted on GitHub Pages
 - [GHOSTS PANDORA](content/pandora.md) - a new tool for delivering randomized content within a range
-- [GHOSTS PANDORA SOCIAL](content/pandora-social.md) - a new tool for managing social media content within a range
+- [GHOSTS PANDORA SOCIAL](content/social.md) - a new tool for managing social media content within a range
 
 In the Core Client, v7 Improves:
 
