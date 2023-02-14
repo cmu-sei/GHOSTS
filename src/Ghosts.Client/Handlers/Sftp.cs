@@ -1,15 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
 using System.Threading;
 using Renci.SshNet;
 using Ghosts.Client.Infrastructure;
 using Ghosts.Domain;
-using System.Net;
-using System.Diagnostics;
 using Newtonsoft.Json;
 using Ghosts.Domain.Code;
 using WorkingHours = Ghosts.Client.Infrastructure.WorkingHours;
@@ -43,7 +37,7 @@ namespace Ghosts.Client.Handlers
                             Log.Error(e);
                         }
                     }
-                   
+
                     if (handler.HandlerArgs.ContainsKey("TimeBetweenCommandsMax"))
                     {
                         try
@@ -180,8 +174,8 @@ namespace Ghosts.Client.Handlers
                         return;  //unable to connect
                     }
                     //we are connected, execute the commands
-                    
-                    
+
+
                     foreach (var sftpCmd in sftpCmds)
                     {
                         try
@@ -202,9 +196,6 @@ namespace Ghosts.Client.Handlers
                     this.Report(handler.HandlerType.ToString(), command, "", timelineEvent.TrackableId);
                 }
             }
-
         }
-
-
     }
 }

@@ -6,7 +6,6 @@ using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using WorkingHours = Ghosts.Client.Infrastructure.WorkingHours;
 using AutoItX3Lib;
-using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
 using System.IO;
@@ -97,7 +96,7 @@ namespace Ghosts.Client.Handlers
                 if (handler.HandlerArgs.ContainsKey("execution-time"))
                 {
                     int.TryParse(handler.HandlerArgs["execution-time"].ToString(), out ExecutionTime);
-                    if (ExecutionTime < 0) ExecutionTime = 5*60*1000;  //5 minutes
+                    if (ExecutionTime < 0) ExecutionTime = 5 * 60 * 1000;  //5 minutes
                 }
 
 
@@ -115,7 +114,7 @@ namespace Ghosts.Client.Handlers
             //arguments parsed. Enter loop that does not exit unless forced exit
             while (true)
             {
-                
+
                 foreach (var timelineEvent in handler.TimeLineEvents)
                 {
                     WorkingHours.Is(handler);
@@ -139,7 +138,7 @@ namespace Ghosts.Client.Handlers
                             }
                             Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, JitterFactor));
                             break;
-                           
+
                     }
                 }
             }
@@ -163,7 +162,7 @@ namespace Ghosts.Client.Handlers
                 UseShellExecute = false
             };
 
-            
+
             AutoItX3 au = new AutoItX3();
 
             using (var process = Process.Start(processStartInfo))
@@ -177,7 +176,7 @@ namespace Ghosts.Client.Handlers
                     checkPasswordPrompt(au, password);
                     checkGenericPrompt(au, "{TAB}{TAB}{TAB}{ENTER}");  //this is for a certificate prompt
                     Thread.Sleep(10000);  //wait for connection
-                    doMouseLoop(target,au);
+                    doMouseLoop(target, au);
                     Thread.Sleep(2000);
                     if (!process.HasExited)
                     {
@@ -199,7 +198,8 @@ namespace Ghosts.Client.Handlers
                         }
                         catch { }
                     }
-                } else
+                }
+                else
                 {
                     Log.Trace($"RDP:: Failed to execute the remote desktop connection program for {target}");
                 }
@@ -224,8 +224,8 @@ namespace Ghosts.Client.Handlers
                     Winuser.SetForegroundWindow(winHandle);
                     Winuser.RECT rc;
                     Winuser.GetWindowRect(winHandle, out rc);
-                    au.MouseMove(rc.Left, rc.Top,30);
-                    au.MouseMove(_random.Next(rc.Left, rc.Right), _random.Next(rc.Top, rc.Bottom),30);
+                    au.MouseMove(rc.Left, rc.Top, 30);
+                    au.MouseMove(_random.Next(rc.Left, rc.Right), _random.Next(rc.Top, rc.Bottom), 30);
                     Winuser.SetForegroundWindow(winHandle);
                 }
                 //close the window
@@ -236,7 +236,8 @@ namespace Ghosts.Client.Handlers
                 checkGenericPrompt(au, "{ENTER}");
                 Thread.Sleep(1000);
 
-            } else
+            }
+            else
             {
                 Log.Trace($"RDP:: Unable to find remote desktop window for {target}.");
             }
@@ -249,18 +250,18 @@ namespace Ghosts.Client.Handlers
         /// <returns></returns>
         public static string escapePassword(string password)
         {
-            char[] special = { '+', '^', '%', '(', ')', '~', '{' , '}', '[',']'};
+            char[] special = { '+', '^', '%', '(', ')', '~', '{', '}', '[', ']' };
             var s = password;
             foreach (var c in special)
             {
-               
+
                 var cstr = c.ToString();
                 if (s.Contains(cstr))
                 {
                     var rep = "{" + cstr + "}";
-                    s = s.Replace(cstr,rep);   
+                    s = s.Replace(cstr, rep);
                 }
-                    
+
             }
             return s;
         }
