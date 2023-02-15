@@ -203,6 +203,8 @@ namespace Ghosts.Api.Services
 
         public async Task<TimelineHandler> SendCommand(Guid id, string command, CancellationToken ct)
         {
+            throw new NotImplementedException();
+            /*
             TimelineHandler handler;
 
             var machine = await _context.Machines.FirstOrDefaultAsync(o => o.Id == id, ct);
@@ -234,6 +236,7 @@ namespace Ghosts.Api.Services
             }
 
             return handler;
+            */
         }
 
         public async Task<List<HistoryTimeline>> GetActivity(Guid id, int skip, int take, CancellationToken ct)
