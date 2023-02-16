@@ -123,7 +123,7 @@ namespace Ghosts.Client.Infrastructure
                 var fname = GetUploadFilename();
                 if (fname == null)
                 {
-                    Log.Trace($"Sft[:: Cannot find a valid file to upload from directory {uploadDirectory}.");
+                    Log.Trace($"Sftp:: Cannot find a valid file to upload from directory {uploadDirectory}.");
                     return null;
                 }
                 currentcmd = currentcmd.Replace("[localfile]", fname);
@@ -157,7 +157,7 @@ namespace Ghosts.Client.Infrastructure
                 fileName = GetUploadFilename();
                 if (fileName == null)
                 {
-                    Log.Trace($"Sft[:: Cannot find a valid file to upload from directory {uploadDirectory}.");
+                    Log.Trace($"Sftp:: Cannot find a valid file to upload from directory {uploadDirectory}.");
                     return;
                 }
             }
@@ -169,7 +169,7 @@ namespace Ghosts.Client.Infrastructure
                     var components = fileName.Split(Path.DirectorySeparatorChar);
                     var remoteFileName = components[components.Length - 1];
                     client.UploadFile(fileStream, remoteFileName, true);
-                    Log.Trace($"Sftp:: Uploaded local file {fileName} to file {remoteFileName}, host {this.HostIp} ");
+                    Log.Trace($"Sftp:: Success, Uploaded local file {fileName} to file {remoteFileName}, host {this.HostIp} ");
                     fileStream.Close();
                 }
             }
@@ -200,7 +200,7 @@ namespace Ghosts.Client.Infrastructure
                 SftpFile file = GetRemoteFile(client);
                 if (file == null)
                 {
-                    Log.Trace($"Sft[:: Cannot find a valid file to delete from remote host {this.HostIp}.");
+                    Log.Trace($"Sftp:: Cannot find a valid file to delete from remote host {this.HostIp}.");
                     return;
                 }
                 fileName = file.FullName;
@@ -210,7 +210,7 @@ namespace Ghosts.Client.Infrastructure
             try
             {
                 client.DeleteFile(fileName);
-                Log.Trace($"Sftp:: Deleted {fileName} on remote host {this.HostIp}.");
+                Log.Trace($"Sftp:: Success, Deleted {fileName} on remote host {this.HostIp}.");
             }
             catch (Exception e)
             {
@@ -240,7 +240,7 @@ namespace Ghosts.Client.Infrastructure
                 SftpFile file = GetRemoteFile(client);
                 if (file == null)
                 {
-                    Log.Trace($"Sft[:: Cannot find a valid file to download from remote host {this.HostIp}.");
+                    Log.Trace($"Sftp:: Cannot find a valid file to download from remote host {this.HostIp}.");
                     return;
                 }
                 remoteFilePath = file.FullName;
@@ -291,7 +291,7 @@ namespace Ghosts.Client.Infrastructure
                 using (var fileStream = System.IO.File.OpenWrite(localFilePath))
                 {
                     client.DownloadFile(remoteFilePath, fileStream);
-                    Log.Trace($"Sftp:: Downloaded remote file {remoteFilePath},host {this.HostIp}  to file {localFilePath},  ");
+                    Log.Trace($"Sftp:: Success, Downloaded remote file {remoteFilePath},host {this.HostIp}  to file {localFilePath},  ");
                     fileStream.Close();
                 }
             }
@@ -316,7 +316,7 @@ namespace Ghosts.Client.Infrastructure
                 SftpFile file = GetRemoteDir(client);
                 if (file == null)
                 {
-                    Log.Trace($"Sft[:: Cannot find a valid directory to change to on remote host {this.HostIp}.");
+                    Log.Trace($"Sftp:: Cannot find a valid directory to change to on remote host {this.HostIp}.");
                     return;
                 }
                 dirName = file.FullName;
@@ -325,7 +325,7 @@ namespace Ghosts.Client.Infrastructure
             try
             {
                 client.ChangeDirectory(dirName);
-                Log.Trace($"Sftp:: Changed to directory {dirName} on remote host {this.HostIp}.");
+                Log.Trace($"Sftp:: Success, Changed to directory {dirName} on remote host {this.HostIp}.");
             }
             catch (Exception e)
             {
@@ -354,7 +354,7 @@ namespace Ghosts.Client.Infrastructure
                 if (FindDir(client, dirName) == null)
                 {
                     client.CreateDirectory(dirName);
-                    Log.Trace($"Sftp:: Created directory {dirName} on remote host {this.HostIp}.");
+                    Log.Trace($"Sftp:: Success, Created directory {dirName} on remote host {this.HostIp}.");
                 } else
                 {
                     Log.Trace($"Sftp:: mkdir directory command skipped, as {dirName} already exists remote host {this.HostIp}.");
@@ -388,7 +388,7 @@ namespace Ghosts.Client.Infrastructure
             try
             {
                 var remoteFiles = client.ListDirectory(dirName).ToList<SftpFile>();
-                Log.Trace($"Sftp::Found {remoteFiles.Count} in directory {dirName} on remote host {this.HostIp}.");
+                Log.Trace($"Sftp:: Success, Found {remoteFiles.Count} in directory {dirName} on remote host {this.HostIp}.");
             }
             catch (Exception e)
             {

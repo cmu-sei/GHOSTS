@@ -183,7 +183,7 @@ namespace Ghosts.Client.Handlers
                             options.AddArgument($"--user-agent={handler.HandlerArgs["ua-string"]}");
                             break;
                     }
-                    
+
                 }
             }
 
@@ -205,7 +205,13 @@ namespace Ghosts.Client.Handlers
             options.AddUserProfilePreference("download.directory_upgrade", true);
             options.AddUserProfilePreference("plugins.plugins_disabled", "Chrome PDF Viewer");
             options.AddUserProfilePreference("plugins.always_open_pdf_externally", true);
-            options.AddUserProfilePreference("safebrowsing.enabled", "false");  //this stops the confirmation popup when downloading files like .exe, .xml,etc
+
+            //disable keep/discard popup query for files with extensions like .exe
+            options.AddUserProfilePreference("safebrowsing.enabled", true);  //ironically, must be set to true along with the next two options
+            options.AddArguments("--safebrowsing-disable-download-protection");
+            options.AddArguments("--safebrowsing-disable-extension-blacklist");
+
+
 
             if (!string.IsNullOrEmpty(Program.Configuration.ChromeExtensions))
             {

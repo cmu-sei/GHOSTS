@@ -42,6 +42,9 @@ namespace Ghosts.Client.Handlers
         public string UserAgentString { get; set; }
         PostContentManager _posthelper = null;
 
+
+
+
         private Task LaunchThread(TimelineHandler handler, TimelineEvent timelineEvent, string site)
         {
             var o = new BrowserCrawl();
@@ -98,7 +101,17 @@ namespace Ghosts.Client.Handlers
                                     if (_sharepointhelper == null) sharepointAbort = true;
                                 }
 
-                                if (_sharepointhelper != null) _sharepointhelper.Execute(handler, timelineEvent);
+                                if (_sharepointhelper != null)
+                                {
+                                    _sharepointhelper.Execute(handler, timelineEvent);
+                                    this.Restart = _sharepointhelper.RestartNeeded();
+                                    if (this.Restart)
+                                    {
+                                        _sharepointhelper = null;  //remove the helper
+                                        Log.Trace($"Sharepoint:: Restart requested for {this.BrowserType.ToString()} , restarting...");
+                                        return;  //restart has been requested 
+                                    }
+                                } 
                             }
                             break;
                        case "blog":
@@ -235,56 +248,19 @@ namespace Ghosts.Client.Handlers
             {
                 jitterfactor = Jitter.JitterFactorParse(handler.HandlerArgs["delay-jitter"].ToString());
             }
+
+
+
         }
 
         public void Upload(TimelineHandler handler, TimelineEvent timelineEvent)
         {
             throw new NotImplementedException();
-            //try
-            //{
-            //    if (Driver.CurrentWindowHandle == null)
-            //    {
-            //        throw new Exception("Browser window handle not available");
-            //    }
-
-            //    var config = RequestConfiguration.Load(handler,
-            //        timelineEvent.CommandArgs[_random.Next(0, timelineEvent.CommandArgs.Count)]);
-
-            //    //var options = new RestClientOptions
-            //    //{
-            //    //    UserAgent = this.UserAgentString
-            //    //};
-            //    //var client = new RestClient(options);
-            //    //var request = new RestRequest(config.Uri, Method.Post)
-            //    //{
-            //    //    Timeout = -1
-            //    //};
-                
-
-            //    //if (config.FormValues == null || string.IsNullOrEmpty(config.FormValues["file"]))
-            //    //{
-            //    //    throw new Exception("Config formValues is malformed");
-            //    //}
-
-            //    //request.AddFile("File", config.FormValues["file"]);
-            //    //var response = client.Execute(request);
-            //    //Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId, response.Content);
-
-            //    //if (!string.IsNullOrEmpty(timelineEvent.TrackableId) && !string.IsNullOrEmpty(response.Content))
-            //    //{
-            //    //    var tm = new Trackables.TrackablesManager();
-            //    //    tm.Add(new Trackables.Trackable(timelineEvent.TrackableId, response.Content.Replace("\"","")));
-            //    //    tm.Save();
-            //    //}
-            //}
-            //catch(Exception ex)
-            //{
-            //    Log.Trace($"Upload request failed, exiting... {ex}");
-            //}
         }
 
-        public void DoRandomCommand(TimelineHandler handler, TimelineEvent timelineEvent)
+            public void DoRandomCommand(TimelineHandler handler, TimelineEvent timelineEvent)
         {
+            
             this.linkManager = new LinkManager(visitedRemember);
 
             while (true)
@@ -326,7 +302,7 @@ namespace Ghosts.Client.Handlers
 
                                     Log.Trace($"Making request #{loopNumber+1}/{loops} to {config.Uri}");
                                     MakeRequest(config);
-                                    Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId);
+                                    Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId);                                 
                                 }
                                 catch (Exception e)
                                 {
@@ -454,8 +430,8 @@ namespace Ghosts.Client.Handlers
 
                 Log.Trace(e.Message);
                 HandleBrowserException(e);
-            }
 
+            }
             return retVal;
         }
 
@@ -722,11 +698,19 @@ namespace Ghosts.Client.Handlers
 
             }
         }
-        
+
+
+
+
+ 
+
         public virtual void HandleBrowserException(Exception e)
         {
+
         }
-        
+
+      
+
         /// <summary>
         /// Close browser
         /// </summary>

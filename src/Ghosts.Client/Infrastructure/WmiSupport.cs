@@ -180,6 +180,7 @@ namespace Ghosts.Client.Infrastructure
                         instance.CimInstanceProperties["InstallDate"].Value
                     );
                 }
+                Log.Trace($"Wmi:: Success, Cmd: GetOperatingSystem, remote host: {_computerName}");
             }
             catch (CimException ex)
             {
@@ -209,6 +210,7 @@ namespace Ghosts.Client.Infrastructure
                         return;
                     }
                 }
+                Log.Trace($"Wmi:: Success, Cmd: GetBios, remote host: {_computerName}");
             }
             catch (CimException ex)
             {
@@ -243,6 +245,7 @@ namespace Ghosts.Client.Infrastructure
                         ProcessorList.Add(instance.CimInstanceProperties["Manufacturer"].Value);
                     }
                 }
+                Log.Trace($"Wmi:: Success, Cmd: GetProcessor, remote host: {_computerName}");
                 return;
             }
             catch (CimException ex)
@@ -274,6 +277,7 @@ namespace Ghosts.Client.Infrastructure
                         UserList.Add(instance.CimInstanceProperties["Name"].Value);
                     }
                 }
+                Log.Trace($"Wmi:: Success, Cmd: GetUserList, remote host: {_computerName}");
                 return;
             }
             catch (CimException ex)
@@ -321,6 +325,7 @@ namespace Ghosts.Client.Infrastructure
                         );
                     }
                 }
+                Log.Trace($"Wmi:: Success, Cmd: GetNetworkInfo, remote host: {_computerName}");
                 return;
             }
             catch (CimException ex)
@@ -356,6 +361,7 @@ namespace Ghosts.Client.Infrastructure
                         );
                     }
                 }
+                Log.Trace($"Wmi:: Success, Cmd: GetFilesList, remote host: {_computerName}");
                 return;
             }
             catch (CimException ex)
@@ -396,6 +402,7 @@ namespace Ghosts.Client.Infrastructure
                         );
                     }
                 }
+                Log.Trace($"Wmi:: Success, Cmd: GetProcessList, remote host: {_computerName}");
                 return;
             }
             catch (CimException ex)

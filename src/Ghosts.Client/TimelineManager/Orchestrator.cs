@@ -14,6 +14,8 @@ using System.Threading;
 using System.Security.Permissions;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Models;
+
+
 // ReSharper disable RedundantAssignment
 
 namespace Ghosts.Client.TimelineManager
@@ -28,15 +30,17 @@ namespace Ghosts.Client.TimelineManager
         private Thread MonitorThread { get; set; }
         private static Timeline _defaultTimeline;
         private FileSystemWatcher _timelineWatcher;
+        private FileSystemWatcher _stopfileWatcher;  //watches for changes to config/stop.txt indicating a stop request
         private bool _isSafetyNetRunning;
         private bool _isTempCleanerRunning;
+        
 
         private bool IsWordInstalled { get; set; }
         private bool IsExcelInstalled { get; set; }
         private bool IsPowerPointInstalled { get; set; }
         private bool IsOutlookInstalled { get; set; }
 
-        [PermissionSet(SecurityAction.Demand, Name ="FullTrust")]
+        [PermissionSet(SecurityAction.Demand, Name = "FullTrust")]
         public void Run()
         {
             try
@@ -69,7 +73,18 @@ namespace Ghosts.Client.TimelineManager
                     _timelineWatcher.EnableRaisingEvents = true;
                     _timelineWatcher.Changed += OnChanged;
                 }
-                
+                if (_stopfileWatcher == null && dirName != null)
+                {
+
+                    _log.Trace("Stopfile watcher is starting");
+                    _stopfileWatcher = new FileSystemWatcher(dirName);
+                    var stopFile = "stop.txt";
+                    _stopfileWatcher.Filter = stopFile;
+                    _stopfileWatcher.EnableRaisingEvents = true;
+                    _stopfileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Attributes;
+                    _stopfileWatcher.Changed += StopFileChanged;
+                }
+
                 //load into an managing object
                 //which passes the timeline commands to handlers
                 //and creates a thread to execute instructions over that timeline
@@ -180,7 +195,7 @@ namespace Ghosts.Client.TimelineManager
         // if supposed to be one excel running, and there is more than 2, then kill race condition
         private static void SafetyNet(object defaultTimeline)
         {
-            var timeline = (Timeline) defaultTimeline;
+            var timeline = (Timeline)defaultTimeline;
             while (true)
             {
                 try
@@ -321,14 +336,14 @@ namespace Ghosts.Client.TimelineManager
                             _ = new Sftp(handler);
                         });
                         break;
-                   
+
                     case HandlerType.Wmi:
                         t = new Thread(() =>
                         {
                             _ = new Wmi(handler);
                         });
                         break;
-                   
+
                     case HandlerType.Pidgin:
                         t = new Thread(() =>
                         {
@@ -446,8 +461,46 @@ namespace Ghosts.Client.TimelineManager
                 _log.Error(e);
             }
         }
-        
-        private void OnChanged(object source, FileSystemEventArgs e)
+
+        private void StopCommon()
+        {
+            try
+            {
+                Stop();
+            }
+            catch (Exception exception)
+            {
+                _log.Info(exception);
+            }
+
+            try
+            {
+                StartupTasks.CleanupProcesses();
+            }
+            catch (Exception exception)
+            {
+                _log.Info(exception);
+            }
+
+        }
+
+        private void StopFileChanged(object source, FileSystemEventArgs e)
+        {
+            try
+            {
+                _log.Trace($"Stop file Watcher event raised: {e.FullPath} {e.Name} {e.ChangeType}");
+                _log.Trace("Terminating existing tasks and exiting orchestrator");
+                StopCommon();
+                Thread.Sleep(10000);
+                System.Environment.Exit(0); //exit
+            }
+            catch (Exception exc)
+            {
+                _log.Info(exc);
+            }
+        }
+
+    private void OnChanged(object source, FileSystemEventArgs e)
         {
             try
             {
@@ -462,25 +515,8 @@ namespace Ghosts.Client.TimelineManager
                 _log.Trace($"Reloading {MethodBase.GetCurrentMethod()?.DeclaringType}");
 
                 _log.Trace("terminate existing tasks and rerun orchestrator");
-                    
-                try
-                {
-                    Stop();
-                }
-                catch (Exception exception)
-                {
-                    _log.Info(exception);
-                }
 
-                try
-                {
-                    StartupTasks.CleanupProcesses();
-                }
-                catch (Exception exception)
-                {
-                    _log.Info(exception);
-                }
-
+                StopCommon();
                 Thread.Sleep(7500);
 
                 try

@@ -147,7 +147,9 @@ namespace Ghosts.Client.Infrastructure
             if (newcmd != null)
             {
                 client.WriteLine(newcmd);  //write command to client
-                return this.GetSshCommandOutput(client, false);
+                string result = this.GetSshCommandOutput(client, false);
+                Log.Trace($"SSH: Success, executed command: {newcmd} on remote host: {HostIp}");
+                return result;
             }
             else
             {

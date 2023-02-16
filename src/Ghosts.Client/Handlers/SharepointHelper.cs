@@ -74,6 +74,7 @@ namespace Ghosts.Client.Handlers
         {
 
             Actions actions;
+            
 
             try
             {
@@ -107,6 +108,7 @@ namespace Ghosts.Client.Handlers
             {
                 Log.Trace($"Sharepoint:: Error performing sharepoint download from site {site}.");
                 Log.Error(e);
+                errorCount += 1;
             }
             return true;
         }
@@ -176,6 +178,7 @@ namespace Ghosts.Client.Handlers
             {
                 Log.Trace($"Sharepoint:: Error performing sharepoint upload to site {site}.");
                 Log.Error(e);
+                errorCount += 1;
             }
             return true;
         }
@@ -217,6 +220,7 @@ namespace Ghosts.Client.Handlers
             {
                 Log.Trace($"Sharepoint:: Error performing sharepoint download from site {site}.");
                 Log.Error(e);
+                errorCount += 1;
             }
             return true;
         }
@@ -237,6 +241,8 @@ namespace Ghosts.Client.Handlers
         private int _downloadProbability = -1;
         private Credentials _credentials = null;
         private string _state = "initial";
+        public int errorCount = 0;
+        public int errorThreshold = 3;  //after three strikes, restart the browser
         public string site { get; set; } = null;
         string username { get; set; } = null;
         string password { get; set; } = null;
@@ -269,6 +275,10 @@ namespace Ghosts.Client.Handlers
             return helper;
         }
 
+        public bool RestartNeeded()
+        {
+            return errorCount > errorThreshold;
+        }
         
 
         public void Init(BaseBrowserHandler callingHandler, IWebDriver currentDriver)
