@@ -3,9 +3,17 @@
 ???+ info "GHOSTS ANIMATOR Source Code"
     The [GHOSTS ANIMATOR Source Code Repository](https://github.com/cmu-sei/GHOSTS-ANIMATOR) is hosted on GitHub
 
-Animator brings NPCs to life - it is a configurable and extensible library for generating modeling, simulation, and exercise data. We like to say it creates, "NPCs so real, they sell for a premium on the dark web."[^1]
+Animator brings NPCs to life in two ways:
 
-At its core, Animator is a hyper-realistic user detail generator. Its primary function is to create fake identities and accompanying verbose portfolios of personal information. Each generated user, or NPC (Non-Player Character) as we call them, has over 25 categories of details associated with them, and over a hundred pieces of metadata defining who they are. Each piece of information is generated using sourced datasets in an attempt to distribute characteristics realistically.
+1. **Initial Creation**
+
+    Animator creates the initial NPC profile, including details such as name, address, career, finances, and family members. Based on configuration, it can place users in a multi-level organizational structure, and establish relationships between users.
+
+2. **Animation Jobs**
+
+    Via jobs that can be run during training and exercise events, Animator can update the NPC's preferences, beliefs, and relationships. This enables dynamic NPCs that change over time.
+
+At its core, Animator is a realistic user detail generator. Its primary function is to create sufficiently realistic identities and accompanying verbose portfolios of personal information. Each generated user, or NPC (Non-Player Character) as we call them, has numerous categories of details associated with them, and a great deal of metadata that define who they are. Each piece of information is generated using sourced datasets in an attempt to distribute characteristics realistically. We like to say it creates, "NPCs so real, they sell for a premium on the dark web."[^1]
 
 ## Quick Start
 
