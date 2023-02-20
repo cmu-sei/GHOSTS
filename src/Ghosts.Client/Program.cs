@@ -8,6 +8,7 @@ using System.Net;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 using CommandLine;
 using Ghosts.Client.Comms;
 using Ghosts.Client.Infrastructure;
@@ -15,6 +16,8 @@ using Ghosts.Client.TimelineManager;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Models;
 using NLog;
+using Quartz;
+using Quartz.Impl;
 
 namespace Ghosts.Client;
 
@@ -35,6 +38,7 @@ class Program
     internal static ClientConfiguration Configuration { get; set; }
     internal static Options OptionFlags;
     internal static bool IsDebug;
+    internal static IScheduler Scheduler;
 
     public static CheckId CheckId { get; set; }
 
@@ -163,7 +167,12 @@ class Program
             //add ghosts to startup
             StartupTasks.SetStartup();
         }
-
+        
+        // Setup Quartz Scheduler
+        var factory = new StdSchedulerFactory();
+        Scheduler = factory.GetScheduler().Result;
+        Scheduler.Start();
+        
         //add file watch to handle ad hoc commands
         ListenerManager.Run();
 
@@ -223,5 +232,6 @@ class Program
         _log.Debug($"Initiating {ApplicationDetails.Name} shutdown - Local time: {DateTime.Now.TimeOfDay} UTC: {DateTime.UtcNow.TimeOfDay}");
         if(Configuration.ResourceControl.ManageProcesses)
             StartupTasks.CleanupProcesses();
+        Scheduler.Shutdown();
     }
 }
