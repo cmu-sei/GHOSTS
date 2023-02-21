@@ -109,6 +109,7 @@ namespace Ghosts.Domain
         Pidgin = 102,
         Rdp = 103,
         Wmi = 104,
+        Outlookv2 = 105,
     }
 
     /// <summary>
