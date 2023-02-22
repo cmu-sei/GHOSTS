@@ -14,6 +14,8 @@ using System.Threading;
 using Ghosts.Domain.Code.Helpers;
 using Exception = System.Exception;
 using MAPIFolder = Microsoft.Office.Interop.Outlook.MAPIFolder;
+using Ghosts.Client.Infrastructure;
+using NPOI.SS.Formula.Functions;
 
 namespace Ghosts.Client.Handlers;
 
@@ -35,10 +37,14 @@ public class Outlookv2 : BaseHandler
     private int _uploadProbability = 0;   //when creating, probability to add an attachment
     private int _downloadProbability = 0; //when reading, probability to download an attachment
     private int _clickProbability = 0;   //when reading, probability to click on a link
+    private int _attachmentProbability = 0;   //when creating, probability to add an attachment
+    private int _saveattachmentProbability = 0;   //when reading, probability to save attachment to disk
 
-    private string _uploadDirectory = null;
-    private string _downloadDirectory = null;
+    private string _inputDirectory = null;
+    private string _outputDirectory = null;
     private int _jitterfactor = 0;  //used with Jitter.JitterFactorDelay
+    private int _attachmentsMax = 0;
+    private int _attachmentsMin = 0;
 
     private string[] _actionList = { "read", "reply", "create", "delete" };
     private int[] _probabilityList = { 0, 0, 0, 0 };
@@ -76,15 +82,6 @@ public class Outlookv2 : BaseHandler
             Log.Trace("Launching Outlook");
             _folderInbox.Display();
 
-            //TODO: Add parsing of handler args
-
-            _probabilityList[0] = _readProbability;
-            _probabilityList[1] = _replyProbability;
-            _probabilityList[2] = _createProbability;
-            _probabilityList[3] = _deleteProbability;
-            
-            
-
             if (handler.Loop)
             {
                 while (true)
@@ -105,6 +102,13 @@ public class Outlookv2 : BaseHandler
 
     public void ExecuteEvents(TimelineHandler handler)
     {
+        ParseHandlerArgs(handler);
+        _probabilityList[0] = _readProbability;
+        _probabilityList[1] = _replyProbability;
+        _probabilityList[2] = _createProbability;
+        _probabilityList[3] = _deleteProbability;
+
+
         try
         {
             foreach (var timelineEvent in handler.TimeLineEvents)
@@ -203,6 +207,185 @@ public class Outlookv2 : BaseHandler
         }
     }
 
+    private void ParseHandlerArgs(TimelineHandler handler)
+    {
+        if (handler.HandlerArgs.ContainsKey("read-probability"))
+        {
+            int.TryParse(handler.HandlerArgs["read-probability"].ToString(), out _readProbability);
+            if (!CheckProbabilityVar(handler.HandlerArgs["read-probability"].ToString(), _readProbability))
+            {
+                _readProbability = 0;
+            }
+        }
+        if (handler.HandlerArgs.ContainsKey("delete-probability"))
+        {
+            int.TryParse(handler.HandlerArgs["delete-probability"].ToString(), out _deleteProbability);
+            if (!CheckProbabilityVar(handler.HandlerArgs["delete-probability"].ToString(), _deleteProbability))
+            {
+                _deleteProbability = 0;
+            }
+        }
+        if (handler.HandlerArgs.ContainsKey("reply-probability"))
+        {
+            int.TryParse(handler.HandlerArgs["reply-probability"].ToString(), out _replyProbability);
+            if (!CheckProbabilityVar(handler.HandlerArgs["reply-probability"].ToString(), _replyProbability))
+            {
+                _replyProbability = 0;
+            }
+        }
+        if (handler.HandlerArgs.ContainsKey("create-probability"))
+        {
+            int.TryParse(handler.HandlerArgs["create-probability"].ToString(), out _createProbability);
+            if (!CheckProbabilityVar(handler.HandlerArgs["create-probability"].ToString(), _createProbability))
+            {
+                _createProbability = 0;
+            }
+        }
+       
+        if ((_readProbability + _deleteProbability + _createProbability + _replyProbability) > 100)
+        {
+            Log.Trace($"Outlookv2:: The sum of the read/delete/create/reply probabilities is > 100 , using defaults.");
+            setProbabilityDefaults();
+
+        }
+
+        if ((_readProbability + _deleteProbability + _createProbability + _replyProbability) == 0)
+        {
+            Log.Trace($"Outlookv2:: The sum of the read/delete/create/reply probabilities == 0 , using defaults.");
+            setProbabilityDefaults();
+        }
+
+        if (handler.HandlerArgs.ContainsKey("click-probability"))
+        {
+            int.TryParse(handler.HandlerArgs["click-probability"].ToString(), out _clickProbability);
+            if (!CheckProbabilityVar(handler.HandlerArgs["click-probability"].ToString(), _clickProbability))
+            {
+                _clickProbability = 0;
+            }
+        }
+
+        if (handler.HandlerArgs.ContainsKey("attachment-probability"))
+        {
+            int.TryParse(handler.HandlerArgs["attachment-probability"].ToString(), out _attachmentProbability);
+            if (!CheckProbabilityVar(handler.HandlerArgs["attachment-probability"].ToString(), _attachmentProbability))
+            {
+                _attachmentProbability = 0;
+            }
+        }
+
+        if (handler.HandlerArgs.ContainsKey("save-attachment-probability"))
+        {
+            int.TryParse(handler.HandlerArgs["save-attachment-probability"].ToString(), out _saveattachmentProbability);
+            if (!CheckProbabilityVar(handler.HandlerArgs["save-attachment-probability"].ToString(), _saveattachmentProbability))
+            {
+                _saveattachmentProbability = 0;
+            }
+        }
+
+
+        if (handler.HandlerArgs.ContainsKey("upload-probability"))
+        {
+            int.TryParse(handler.HandlerArgs["upload-probability"].ToString(), out _uploadProbability);
+            if (!CheckProbabilityVar(handler.HandlerArgs["upload-probability"].ToString(), _uploadProbability))
+            {
+                _uploadProbability = 0;
+            }
+        }
+
+        if (handler.HandlerArgs.ContainsKey("download-probability"))
+        {
+            int.TryParse(handler.HandlerArgs["download-probability"].ToString(), out _downloadProbability);
+            if (!CheckProbabilityVar(handler.HandlerArgs["download-probability"].ToString(), _downloadProbability))
+            {
+                _downloadProbability = 0;
+            }
+        }
+
+        if (handler.HandlerArgs.ContainsKey("input-directory"))
+        {
+            string targetDir = handler.HandlerArgs["input-directory"].ToString();
+            targetDir = Environment.ExpandEnvironmentVariables(targetDir);
+            if (!Directory.Exists(targetDir))
+            {
+                Log.Trace($"Outlookv2:: input directory {targetDir} does not exist, using browser downloads directory.");
+            }
+            else
+            {
+                _inputDirectory = targetDir;
+            }
+        }
+
+        if (_inputDirectory == null)
+        {
+            _inputDirectory = KnownFolders.GetDownloadFolderPath();
+        }
+
+        if (handler.HandlerArgs.ContainsKey("output-directory"))
+        {
+            string targetDir = handler.HandlerArgs["output-directory"].ToString();
+            targetDir = Environment.ExpandEnvironmentVariables(targetDir);
+            if (!Directory.Exists(targetDir))
+            {
+                //try creating the directory
+                try
+                {
+                    Directory.CreateDirectory(targetDir);
+                    _outputDirectory = targetDir;
+                }
+                catch(Exception ex)
+                {
+                    Log.Trace(ex);
+                    Log.Trace($"Outlookv2:: output directory {targetDir} does not exist and cannot be created, using browser downloads directory.");
+                }
+                
+            }
+            else
+            {
+                _outputDirectory = targetDir;
+            }
+        }
+
+        if (_outputDirectory == null)
+        {
+            _outputDirectory = KnownFolders.GetDownloadFolderPath();
+        }
+
+        if (handler.HandlerArgs.ContainsKey("min-attachments"))
+        {
+            int.TryParse(handler.HandlerArgs["min-attachments"].ToString(), out _attachmentsMin);
+            if (_attachmentsMin < 0)
+            {
+                _attachmentsMin = 1;
+            }
+        }
+
+        if (handler.HandlerArgs.ContainsKey("max-attachments"))
+        {
+            int.TryParse(handler.HandlerArgs["max-attachments"].ToString(), out _attachmentsMax);
+            if (_attachmentsMax < 0)
+            {
+                _attachmentsMax = 10;
+            }
+        }
+
+        if (_attachmentsMax < _attachmentsMin) _attachmentsMax = _attachmentsMin;
+
+        if (handler.HandlerArgs.ContainsKey("delay-jitter"))
+        {
+            _jitterfactor = Jitter.JitterFactorParse(handler.HandlerArgs["delay-jitter"].ToString());
+            if (_jitterfactor < 0) _jitterfactor = 0;
+        }
+    }
+
+    private void setProbabilityDefaults()
+    {
+        _readProbability = 25;
+        _deleteProbability = 10;
+        _createProbability = 40;
+        _replyProbability = 25;
+    }
+
+
     private void CleanFolder(string targetFolderName, bool deleteAll, bool deleteUnread)
     {
         var folderName = GetFolder(targetFolderName);
@@ -266,6 +449,42 @@ public class Outlookv2 : BaseHandler
         return true;
     }
 
+    private List<string> DownloadAttachments(MailItem folderItem)
+    {
+        List<string> retval = null;
+
+        if (_saveattachmentProbability == 0) return retval;
+
+        try
+        {
+            if (folderItem.Attachments.Count > 0)
+            {
+                
+                for (int i = 1; i <= folderItem.Attachments.Count; i++)
+                {
+                    if (_random.Next(0, 100) <= _saveattachmentProbability)
+                    {
+                        string outpath = Path.Combine(_outputDirectory, folderItem.Attachments[i].FileName);
+                        if (File.Exists(outpath))
+                        {
+                            File.Delete(outpath);   //delete the existing file
+                        }
+                        folderItem.Attachments[i].SaveAsFile(outpath);
+                        if (retval == null) retval = new List<string>();
+                        retval.Add(outpath);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Trace("Outlookv2::  error while dowloading attachments");
+            Log.Error(ex);
+        }
+
+        return retval;  //eventually may want to do something with these attachments
+    }
+
     private bool ReadViaOutlook()
     {
         try
@@ -278,6 +497,7 @@ public class Outlookv2 : BaseHandler
                 // mark as read
                 folderItem.UnRead = false;
                 folderItem.Display(false);
+                DownloadAttachments(folderItem);
                 Thread.Sleep(10000);
                 folderItem.Close(Microsoft.Office.Interop.Outlook.OlInspectorClose.olDiscard);
                 return true;
@@ -290,6 +510,7 @@ public class Outlookv2 : BaseHandler
                 if (index == choice)
                 {
                     folderItem.Display(false);
+                    DownloadAttachments(folderItem);
                     Thread.Sleep(10000);
                     folderItem.Close(Microsoft.Office.Interop.Outlook.OlInspectorClose.olDiscard);
                     break;
@@ -499,6 +720,41 @@ public class Outlookv2 : BaseHandler
         return false;
     }
 
+    private List<string> GetRandomFiles(string targetDir, string pattern, int count)
+    {
+        try
+        {
+            while (true)
+            {
+                string[] filelist = Directory.GetFiles(targetDir, pattern);
+                if (filelist.Length == 0) return null;
+                if (count == 0) return null;
+                List<string> retVal = new List<string>();
+                if (count == 1)
+                {
+                    retVal.Add(filelist[_random.Next(0,filelist.Length-1)]);
+                    return retVal;
+                }
+                // need more than one, have to avoid duplicates, prune down
+                foreach (string file in filelist)
+                {
+                    retVal.Add(file);
+                }
+                
+                while (true)
+                {
+                    if (retVal.Count <= count) break;
+                    var index = _random.Next(0, retVal.Count - 1);
+                    retVal.RemoveAt(index);
+                }
+
+                return retVal;
+            }
+        }
+        catch { } //ignore any errors
+        return null;
+    }
+
     private bool SendEmailViaOutlook(EmailConfiguration emailConfig)
     {
         ClientConfiguration.EmailSettings config = Program.Configuration.Email;
@@ -518,6 +774,7 @@ public class Outlookv2 : BaseHandler
 
             Log.Trace($"Setting message subject to: {mailItem.Subject}");
 
+     
             //Set message body according to type of message
             switch (emailConfig.BodyType)
             {
@@ -537,11 +794,25 @@ public class Outlookv2 : BaseHandler
                     throw new Exception("Bad email body type: " + emailConfig.BodyType);
             }
 
+            List<string> attachments = emailConfig.Attachments;
+
+            if (attachments.Count == 0)
+            {
+                if (_attachmentProbability != 0 && _random.Next(0,100) <= _attachmentProbability)
+                {
+                    int numAttachments = _random.Next(_attachmentsMin, _attachmentsMax);
+                    if (numAttachments > 0)
+                    {
+                        attachments = GetRandomFiles(_inputDirectory, "*", numAttachments);
+                    }
+                }
+            }
+
             //attachments
-            if (emailConfig.Attachments.Count > 0)
+            if (attachments != null && attachments.Count > 0)
             {
                 //Add attachments
-                foreach (string path in emailConfig.Attachments)
+                foreach (string path in attachments)
                 {
                     mailItem.Attachments.Add(path);
                     Log.Trace($"Adding attachment from: {path}");
