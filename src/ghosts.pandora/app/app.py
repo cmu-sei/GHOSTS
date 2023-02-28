@@ -39,7 +39,7 @@ from PIL import Image
 from pptx import Presentation
 from pptx.util import Inches
 
-VERSION = "0.5.6"
+VERSION = "0.5.7"
 
 
 class S(BaseHTTPRequestHandler):
@@ -175,6 +175,12 @@ class S(BaseHTTPRequestHandler):
         if request_type == "jpg":
             request_type = "JPEG"
         img.save(buf, request_type.upper())
+        buf.seek(0, 0)
+        self.wfile.write(buf.read())
+
+    def return_onenote(self, file_name):
+        self.send_standard_headers("application/onenote", file_name)
+        buf = BytesIO(self.fake.binary(length=random.choice(range(1000, 300000))))
         buf.seek(0, 0)
         self.wfile.write(buf.read())
 
@@ -357,6 +363,11 @@ Part of the GHOSTS NPC Orchestration Platform - please email ddupdyke[at]sei.cmu
             self.return_image("pdf")
             return
 
+        elif o.path.startswith("/onenote") or o.path.startswith("/notebook"):
+            self.file_requested = f"{self.fake.word()}.one"
+            self.return_onenote(self.file_requested)
+            return
+
         elif o.path.startswith("/docs"):
             self.file_requested = f"{self.fake.word()}.docx"
             self.return_doc_file(self.file_requested)
@@ -406,6 +417,9 @@ Part of the GHOSTS NPC Orchestration Platform - please email ddupdyke[at]sei.cmu
 
         elif request_type in ["ppt", "pptx", "potx", "pot", "ppsx", "pps", "pptm", "potm", "ppsm", "odp"]:
             self.return_ppt_file(self.file_requested)
+
+        elif request_type in ["one"]:
+            self.return_onenote(self.file_requested)
 
         elif request_type in ["png", "gif", "jpg", "jpeg", "pdf", "ico"]:
             self.return_image(request_type)
