@@ -17,6 +17,7 @@ using MAPIFolder = Microsoft.Office.Interop.Outlook.MAPIFolder;
 using Ghosts.Client.Infrastructure;
 using NPOI.SS.Formula.Functions;
 
+
 namespace Ghosts.Client.Handlers;
 
 public class Outlookv2 : BaseHandler
@@ -386,7 +387,8 @@ public class Outlookv2 : BaseHandler
     }
 
 
-    private void CleanFolder(string targetFolderName, bool deleteAll, bool deleteUnread)
+    // return false if nothing to do
+    private bool CleanFolderOneItem(string targetFolderName, bool deleteAll)
     {
         var folderName = GetFolder(targetFolderName);
         var targetFolder = this._app.Session.GetDefaultFolder(folderName);
@@ -397,27 +399,21 @@ public class Outlookv2 : BaseHandler
 
         if (!deleteAll && count <= settings.EmailsMax)
         {
-            return; //nothing to do
+            return false ; //finished
         }
-        
-        foreach (MailItem folderItem in folderItems)
-        {
-            if (deleteAll)
-            {
-                folderItem.Delete();
-            }
-            else
-            {
-                if (folderItem.UnRead && !deleteUnread) continue;
-                folderItem.Delete();
-                count = count - 1;
-                if (count <= settings.EmailsMax)
-                {
-                    break;
-                }
-            }
 
-        }
+        if (deleteAll && count == 0) return false ; //finished
+        MailItem folderItem = (MailItem)folderItems.GetLast();
+        //you are supposed to delete starting at the last item
+        folderItem.Delete();
+        
+        return true;
+    }
+
+
+    private void CleanFolder(string targetFolderName, bool deleteAll)
+    {
+        while (CleanFolderOneItem(targetFolderName, deleteAll)) ;
     }
 
 
@@ -434,10 +430,10 @@ public class Outlookv2 : BaseHandler
                 return true;
             }
 
-            CleanFolder("INBOX", false, false);
-            CleanFolder("INBOX", false, true);
-            CleanFolder("SENT", false, true);
-            CleanFolder("DELETED", true, true);
+            CleanFolder("INBOX", false);
+            CleanFolder("SENT", false);
+            CleanFolder("DRAFTS", true);
+            CleanFolder("DELETED", true);
 
         }
         catch (Exception e)
@@ -605,6 +601,8 @@ public class Outlookv2 : BaseHandler
         }
         return hasErrors;
     }
+
+
 
     private OlDefaultFolders GetFolder(string folder)
     {
