@@ -11,6 +11,7 @@ using System.Threading;
 using Actions = OpenQA.Selenium.Interactions.Actions;
 using Exception = System.Exception;
 using NLog;
+using System.Web;
 
 namespace Ghosts.Client.Handlers
 {
@@ -35,7 +36,9 @@ namespace Ghosts.Client.Handlers
 
             string portal = site;
 
-            string target = header + user + ":" + pw + "@" + portal + "/";
+            var pw_encoded = HttpUtility.UrlEncode(pw);
+            var user_encoded = HttpUtility.UrlEncode(user); 
+            string target = header + user_encoded + ":" + pw_encoded + "@" + portal + "/";
             config = RequestConfiguration.Load(handler, target);
             try
             {

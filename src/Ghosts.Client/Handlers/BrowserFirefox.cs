@@ -138,7 +138,10 @@ namespace Ghosts.Client.Handlers
 
                     try
                     {
-                        this.UserAgentString = JS.ExecuteScript("return navigator.userAgent").ToString();
+                        if (JS != null)
+                        {
+                            this.UserAgentString = JS.ExecuteScript("return navigator.userAgent").ToString();
+                        }
                     }
                     catch
                     {

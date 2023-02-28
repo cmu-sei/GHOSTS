@@ -14,8 +14,6 @@ using System.Threading;
 using System.Security.Permissions;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Models;
-
-
 // ReSharper disable RedundantAssignment
 
 namespace Ghosts.Client.TimelineManager
@@ -34,7 +32,6 @@ namespace Ghosts.Client.TimelineManager
         private bool _isSafetyNetRunning;
         private bool _isTempCleanerRunning;
         
-
         private bool IsWordInstalled { get; set; }
         private bool IsExcelInstalled { get; set; }
         private bool IsPowerPointInstalled { get; set; }
@@ -158,7 +155,6 @@ namespace Ghosts.Client.TimelineManager
         private void RunEx(Timeline timeline)
         {
             WhatsInstalled();
-
             foreach (var handler in timeline.TimeLineHandlers)
             {
                 ThreadLaunch(timeline, handler);
@@ -169,6 +165,12 @@ namespace Ghosts.Client.TimelineManager
         {
             WhatsInstalled();
             ThreadLaunch(timeline, handler);
+        }
+
+        public void RunCommandCron(Timeline timeline, TimelineHandler handler)
+        {
+            WhatsInstalled();
+            ThreadLaunchEx(timeline, handler);
         }
 
         ///here lies technical debt
@@ -300,6 +302,19 @@ namespace Ghosts.Client.TimelineManager
         }
 
         private void ThreadLaunch(Timeline timeline, TimelineHandler handler)
+        {
+            if (handler.ScheduleType == TimelineHandler.TimelineScheduleType.Cron)
+            {
+                _log.Trace($"Attempting new cron job for: {handler.HandlerType}");
+                var s = new CronScheduling();
+                Program.Scheduler.ScheduleJob(s.GetJob(handler), s.GetTrigger(handler));
+                return;
+            }
+            
+            ThreadLaunchEx(timeline, handler);
+        }
+
+        private void ThreadLaunchEx(Timeline timeline, TimelineHandler handler)
         {
             try
             {

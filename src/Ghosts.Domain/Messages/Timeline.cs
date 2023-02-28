@@ -47,6 +47,7 @@ namespace Ghosts.Domain
         {
             TimeLineEvents = new List<TimelineEvent>();
             HandlerArgs = new Dictionary<string, object>();
+            ScheduleType = TimelineScheduleType.Other;
         }
 
         [JsonConverter(typeof(StringEnumConverter))]
@@ -66,6 +67,16 @@ namespace Ghosts.Domain
         public bool Loop { get; set; }
 
         public List<TimelineEvent> TimeLineEvents { get; set; }
+
+        [JsonConverter(typeof(StringEnumConverter))]
+        public enum TimelineScheduleType
+        {
+            Other,
+            Cron
+        }
+
+        public TimelineScheduleType ScheduleType { get; set; }
+        public string Schedule { get; set; }
     }
 
     /// <summary>
