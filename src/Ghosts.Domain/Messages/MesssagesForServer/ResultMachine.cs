@@ -96,15 +96,22 @@ namespace Ghosts.Domain
 
         private static string GetLocalIPAddress()
         {
-            if (NetworkInterface.GetIsNetworkAvailable())
+            try
             {
-                var host = Dns.GetHostEntry(Dns.GetHostName());
-                foreach (var ip in host.AddressList)
-                    if (ip.AddressFamily == AddressFamily.InterNetwork)
-                        return ip.ToString();
+                if (NetworkInterface.GetIsNetworkAvailable())
+                {
+                    var host = Dns.GetHostEntry(Dns.GetHostName());
+                    foreach (var ip in host.AddressList)
+                        if (ip.AddressFamily == AddressFamily.InterNetwork)
+                            return ip.ToString();
+                }
+            }
+            catch
+            {
+                // ignore
             }
 
-            return "-9";
+			return "-9";    
         }
     }
 }
