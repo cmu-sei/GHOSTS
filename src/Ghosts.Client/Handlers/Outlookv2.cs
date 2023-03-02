@@ -16,6 +16,7 @@ using Exception = System.Exception;
 using MAPIFolder = Microsoft.Office.Interop.Outlook.MAPIFolder;
 using Ghosts.Client.Infrastructure;
 using NPOI.SS.Formula.Functions;
+using Microsoft.AspNetCore.Mvc.Filters;
 
 
 namespace Ghosts.Client.Handlers;
@@ -26,7 +27,8 @@ public class Outlookv2 : BaseHandler
     private readonly NameSpace _oMapiNamespace;
     private readonly MAPIFolder _folderOutbox;
     private readonly MAPIFolder _folderInbox;
-    
+    private readonly MAPIFolder _folderDeletedItems;
+
 
     //primary actions - delete, send, reply, read
     private int _deleteProbability = 25;  //cleanup email
@@ -80,6 +82,7 @@ public class Outlookv2 : BaseHandler
             _oMapiNamespace = _app.GetNamespace("MAPI");
             _folderInbox = _oMapiNamespace.GetDefaultFolder(OlDefaultFolders.olFolderInbox);
             _folderOutbox = _oMapiNamespace.GetDefaultFolder(OlDefaultFolders.olFolderOutbox);
+            _folderDeletedItems = _oMapiNamespace.GetDefaultFolder(OlDefaultFolders.olFolderDeletedItems);
             Log.Trace("Launching Outlook");
             _folderInbox.Display();
 
@@ -131,6 +134,8 @@ public class Outlookv2 : BaseHandler
                     }
 
                     Log.Trace($"Outlookv2:: Performing action {action} .");
+                    //before doing any action, clean the drafts folder as there should be no drafts here.
+                    MoveToDeleted("DRAFTS", true, true);  
 
                     switch (action)
                     {
@@ -386,9 +391,7 @@ public class Outlookv2 : BaseHandler
         _replyProbability = 25;
     }
 
-
-    // return false if nothing to do
-    private bool CleanFolderOneItem(string targetFolderName, bool deleteAll)
+    private void CleanFolderOld(string targetFolderName, bool deleteAll, bool deleteUnread)
     {
         var folderName = GetFolder(targetFolderName);
         var targetFolder = this._app.Session.GetDefaultFolder(folderName);
@@ -396,24 +399,112 @@ public class Outlookv2 : BaseHandler
         var folderItems = targetFolder.Items;
         var count = folderItems.Count;
         var settings = Program.Configuration.Email;
+        if (count == 0) return;
 
         if (!deleteAll && count <= settings.EmailsMax)
         {
-            return false ; //finished
+            return; //nothing to do
         }
+        MailItem folderItem;
 
-        if (deleteAll && count == 0) return false ; //finished
-        MailItem folderItem = (MailItem)folderItems.GetLast();
-        //you are supposed to delete starting at the last item
-        folderItem.Delete();
-        
-        return true;
+        foreach (object item in folderItems)
+        {
+            try
+            {
+                folderItem = item as MailItem;
+                if (folderItem == null) continue;
+                if (deleteAll)
+                {
+                    folderItem.Delete();
+                }
+                else
+                {
+                    if (folderItem.UnRead && !deleteUnread) continue;
+                    folderItem.Delete();
+                    count--;
+                    if (count <= settings.EmailsMax)
+                    {
+                        break; //finished
+                    }
+                }
+            }
+            catch
+            {
+
+            }
+        }
+        return;
     }
 
-
-    private void CleanFolder(string targetFolderName, bool deleteAll)
+    private void CleanDeletedItems()
     {
-        while (CleanFolderOneItem(targetFolderName, deleteAll)) ;
+        var folderName = GetFolder("DELETED");
+        var targetFolder = this._app.Session.GetDefaultFolder(folderName);
+        var folderItems = targetFolder.Items;
+        var count = folderItems.Count;
+        if (count == 0) return;
+
+       
+        MailItem folderItem;
+        for (int i = count; i > 0; i--)
+        {
+            try
+            {
+                object item = folderItems[i];
+                folderItem = item as MailItem;
+                if (folderItem != null) folderItem.Delete();
+            }
+            catch
+            {
+
+            }
+        }
+        return;
+    }
+
+    private void MoveToDeleted(string targetFolderName, bool deleteAll, bool deleteUnread)
+    {
+        var folderName = GetFolder(targetFolderName);
+        var targetFolder = this._app.Session.GetDefaultFolder(folderName);
+
+        var folderItems = targetFolder.Items;
+        var count = folderItems.Count;
+        var settings = Program.Configuration.Email;
+        if (count == 0) return;
+
+        if (!deleteAll && count <= settings.EmailsMax)
+        {
+            return; //nothing to do
+        }
+        MailItem folderItem;
+
+        foreach (object item in folderItems)
+        {
+            try
+            {
+                folderItem = item as MailItem;
+                if (folderItem == null) continue;
+                if (deleteAll)
+                {
+                    folderItem.Move(_folderDeletedItems);
+                }
+                else
+                {
+                    if (folderItem.UnRead && !deleteUnread) continue;
+                    folderItem.Move(_folderDeletedItems);
+                    count--;
+                    if (count <= settings.EmailsMax)
+                    {
+                        break; //finished
+                    }
+                }
+            }
+            catch
+            {
+
+            }
+        }
+        return;
     }
 
 
@@ -430,10 +521,11 @@ public class Outlookv2 : BaseHandler
                 return true;
             }
 
-            CleanFolder("INBOX", false);
-            CleanFolder("SENT", false);
-            CleanFolder("DRAFTS", true);
-            CleanFolder("DELETED", true);
+            MoveToDeleted("INBOX", false, false);
+            MoveToDeleted("INBOX", false, true);
+            MoveToDeleted("SENT", false, true);
+            MoveToDeleted("DRAFTS", true, true);
+            CleanDeletedItems();
 
         }
         catch (Exception e)
@@ -486,33 +578,46 @@ public class Outlookv2 : BaseHandler
         try
         {
             var folderItems = _folderInbox.Items;
+            MailItem folderItem;
 
-            foreach (MailItem folderItem in folderItems)
+            foreach (object item in folderItems)
             {
-                if (!folderItem.UnRead) continue;
-                // mark as read
-                folderItem.UnRead = false;
-                folderItem.Display(false);
-                DownloadAttachments(folderItem);
-                Thread.Sleep(10000);
-                folderItem.Close(Microsoft.Office.Interop.Outlook.OlInspectorClose.olDiscard);
-                return true;
-            }
-            //if get here, read an email already read
-            var choice = _random.Next(0, folderItems.Count - 1);
-            var index = 0;
-            foreach (MailItem folderItem in folderItems)
-            {
-                if (index == choice)
+                try
                 {
+                    folderItem = item as MailItem;
+                    if (folderItem == null) continue;
+                    // mark as read
+                    folderItem.UnRead = false;
                     folderItem.Display(false);
                     DownloadAttachments(folderItem);
                     Thread.Sleep(10000);
                     folderItem.Close(Microsoft.Office.Interop.Outlook.OlInspectorClose.olDiscard);
-                    break;
+                    return true;
                 }
-                index += 1;
+                catch { }
             }
+            var count = folderItems.Count;
+            var choice = _random.Next(1, count);
+            //if get here, read an email already read
+            for (int i = count; i > 0; i--)
+            {
+                object item = folderItems[i];
+                try
+                {
+                    folderItem = item as MailItem;
+                    if (folderItem == null) continue;
+                    if (choice <= i)
+                    {
+                        folderItem.Display(false);
+                        DownloadAttachments(folderItem);
+                        Thread.Sleep(10000);
+                        folderItem.Close(Microsoft.Office.Interop.Outlook.OlInspectorClose.olDiscard);
+                        break;
+                    }
+                    
+                }
+                catch { }
+            }     
         }
         catch (Exception e)
         {
@@ -655,60 +760,67 @@ public class Outlookv2 : BaseHandler
         try
         {
             var folderItems = _folderInbox.Items;
-
-            foreach (MailItem folderItem in folderItems)
+            MailItem folderItem;
+            foreach (object item in folderItems)
             {
-                if (!folderItem.UnRead) continue;
-
-                var emailReply = new EmailReplyManager();
-
-                var replyMail = folderItem.Reply();
-
-                using (var quoted = new StringWriter())
+                try
                 {
-                    quoted.WriteLine(emailReply.Reply);
-                    quoted.WriteLine("");
-                    quoted.WriteLine("");
-                    quoted.WriteLine($"On {folderItem.SentOn:f}, {folderItem.SenderEmailAddress} wrote:");
-                    using (var reader = new StringReader(folderItem.Body))
+                    folderItem = item as MailItem;
+                    if (folderItem == null) continue;
+                    var emailReply = new EmailReplyManager();
+                    var replyMail = folderItem.Reply();
+
+                    using (var quoted = new StringWriter())
                     {
-                        string line;
-                        while ((line = reader.ReadLine()) != null)
+                        quoted.WriteLine(emailReply.Reply);
+                        quoted.WriteLine("");
+                        quoted.WriteLine("");
+                        quoted.WriteLine($"On {folderItem.SentOn:f}, {folderItem.SenderEmailAddress} wrote:");
+                        using (var reader = new StringReader(folderItem.Body))
                         {
-                            quoted.Write("> ");
-                            quoted.WriteLine(line);
+                            string line;
+                            while ((line = reader.ReadLine()) != null)
+                            {
+                                quoted.Write("> ");
+                                quoted.WriteLine(line);
+                            }
                         }
+
+                        replyMail.Body = quoted.ToString();
                     }
 
-                    replyMail.Body = quoted.ToString();
+                    replyMail.Subject = $"RE: {folderItem.Subject}";
+
+                    var rdoMail = new SafeMailItem
+                    {
+                        Item = replyMail
+                    };
+
+                    var r = rdoMail.Recipients.AddEx(folderItem.SenderEmailAddress);
+                    r.Resolve();
+                    rdoMail.Recipients.ResolveAll();
+                    rdoMail.Send();
+
+                    var mapiUtils = new MAPIUtils();
+                    mapiUtils.DeliverNow();
+
+                    // mark as read
+                    folderItem.UnRead = false;
+
+                    if (config.SetForcedSendReceive)
+                    {
+                        Log.Trace("Forcing mapi - send and receive, then sleeping for 3000");
+                        _oMapiNamespace.SendAndReceive(false);
+                        Thread.Sleep(3000);
+                    }
+                    Log.Trace("Outlookv2:: Reply action completed.");
+
+                    return true;
                 }
-
-                replyMail.Subject = $"RE: {folderItem.Subject}";
-
-                var rdoMail = new SafeMailItem
+                catch (Exception exc)
                 {
-                    Item = replyMail
-                };
-
-                var r = rdoMail.Recipients.AddEx(folderItem.SenderEmailAddress);
-                r.Resolve();
-                rdoMail.Recipients.ResolveAll();
-                rdoMail.Send();
-
-                var mapiUtils = new MAPIUtils();
-                mapiUtils.DeliverNow();
-
-                // mark as read
-                folderItem.UnRead = false;
-
-                if (config.SetForcedSendReceive)
-                {
-                    Log.Trace("Forcing mapi - send and receive, then sleeping for 3000");
-                    _oMapiNamespace.SendAndReceive(false);
-                    Thread.Sleep(3000);
+                    Log.Error($"Outlook reply error: {exc}");
                 }
-
-                return true;
             }
         }
         catch (Exception e)
