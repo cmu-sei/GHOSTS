@@ -31,10 +31,9 @@ namespace Ghosts.Client.Handlers
                     Ex(handler);
                 }
             }
-            catch (ThreadAbortException)
+            catch (ThreadAbortException e)
             {
-                ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.Command);
-                Log.Trace("Cmd closing...");
+                Log.Trace($"Cmd had a ThreadAbortException: {e}");
             }
             catch (Exception e)
             {

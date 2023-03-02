@@ -1,0 +1,3 @@
+﻿some_domain.com/cb/nb/some_page_to_specifically_deny.html
+*/some_url_to_specifically_deny_across_all_domains
+*some_word_to_deny_across_space_and_time*
