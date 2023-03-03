@@ -218,6 +218,12 @@ public class ExcelHandler : BaseHandler
                         if (_random.Next(100) < 50)
                             document.Close();
 
+                        if (timelineEvent.DelayAfter > 0)
+                        {
+                            //sleep and leave the app open
+                            Log.Trace($"Sleep after for {timelineEvent.DelayAfter}");
+                            Thread.Sleep(timelineEvent.DelayAfter - writeSleep);
+                        }
 
                         workSheet.Dispose();
                         workSheet = null;
@@ -257,14 +263,6 @@ public class ExcelHandler : BaseHandler
                     }
 
                     GC.Collect();
-
-                    if (timelineEvent.DelayAfter > 0)
-                    {
-                        //sleep and leave the app open
-                        Log.Trace($"Sleep after for {timelineEvent.DelayAfter}");
-                        Thread.Sleep(timelineEvent.DelayAfter - writeSleep);
-                    }
-
                 }
                 catch (ThreadAbortException)
                 {
