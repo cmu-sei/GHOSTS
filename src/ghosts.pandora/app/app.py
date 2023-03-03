@@ -39,14 +39,14 @@ from PIL import Image
 from pptx import Presentation
 from pptx.util import Inches
 
-VERSION = "0.5.7"
+VERSION = "0.5.8"
 
 
 class S(BaseHTTPRequestHandler):
 
     def log_message(self, format, *args):
         if self.headers:
-            print(f'{args} - {self.headers["User-Agent"]}')
+            print(f'{args} - {self.handler} - {self.headers["User-Agent"]}')
         else:
             print(f'{args}')
 
@@ -55,6 +55,7 @@ class S(BaseHTTPRequestHandler):
     strict_image_array = ["png", "gif", "jpg", "jpeg"]
     request_url = ""
     file_requested = ""
+    handler = "html"
 
     config = cp.ConfigParser()
     config.read_file(open(r'./config/app.config'))
@@ -108,6 +109,7 @@ class S(BaseHTTPRequestHandler):
         self.end_headers()
 
     def return_zip(self, file_name):
+        self.handler = "zip"
         self.send_standard_headers("application/zip", file_name)
         buf = BytesIO(self.fake.binary(length=random.choice(range(1000, 80000))))
         buf.seek(0, 0)
@@ -120,38 +122,45 @@ class S(BaseHTTPRequestHandler):
                 self.wfile.write(chunk)
 
     def return_binary(self, file_name):
+        self.handler = "binary"
         self.send_standard_headers("application/octet-stream", file_name)
         buf = BytesIO(self.fake.binary(length=random.choice(range(1000, 300000))))
         buf.seek(0, 0)
         self.wfile.write(buf.read())
 
     def return_json(self):
+        self.handler = "json"
         self.send_standard_headers("application/json")
         body = self.fake.json(data_columns={'Candidates': ['name', 'name', 'name']}, num_rows=random.randint(1, 1000))
         self.wfile.write(body.encode("utf8"))
 
     def return_csv(self):
+        self.handler = "csv"
         self.send_standard_headers("text/csv")
         body = self.fake.csv(header=('Name', 'Address', 'Password'), data_columns=('{{name}}', '{{address}}', '{{password}}'), num_rows=random.randint(1, 100), include_row_ids=True)
         self.wfile.write(body.encode("utf8"))
 
     def return_text(self, file_name):
+        self.handler = "text"
         self.send_standard_headers("text/text")
         body = self.fake.paragraph(nb_sentences=random.randint(1, 13))
         self.wfile.write(body.encode("utf8"))
 
     def return_stylesheet(self):
+        self.handler = "css"
         self.send_standard_headers("text/css")
         fonts = self.config.get("css", "fonts_array").split(",")
         body = "* {font-family:" + random.choice(fonts) + "} h1 {font-family:" + random.choice(fonts) + "} body {width:" + str(random.randint(65, 100)) + "%;}"
         self.wfile.write(body.encode("utf8"))
 
     def return_script(self):
+        self.handler = "js"
         self.send_standard_headers("text/javascript")
         body = f"console.log('{self.fake.word()}, /{self.fake.date()}');"
         self.wfile.write(body.encode("utf8"))
 
     def return_image(self, request_type):
+        self.handler = "img"
         height = random.randint(10, 2000)
         width = random.randint(10, 2000)
 
@@ -179,12 +188,14 @@ class S(BaseHTTPRequestHandler):
         self.wfile.write(buf.read())
 
     def return_onenote(self, file_name):
+        self.handler = "onenote"
         self.send_standard_headers("application/onenote", file_name)
         buf = BytesIO(self.fake.binary(length=random.choice(range(1000, 300000))))
         buf.seek(0, 0)
         self.wfile.write(buf.read())
 
     def return_doc_file(self, file_name):
+        self.handler = "doc"
         self.send_standard_headers("application/msword", file_name)
 
         document = Document()
@@ -227,6 +238,7 @@ class S(BaseHTTPRequestHandler):
         self.wfile.write(buf.read())
 
     def return_ppt_file(self, file_name):
+        self.handler = "ppt"
         self.send_standard_headers("application/vnd.ms-powerpoint", file_name)
         ppt_file = Presentation()
 
@@ -252,6 +264,7 @@ class S(BaseHTTPRequestHandler):
         self.wfile.write(buf.read())
 
     def return_xls_file(self, file_name):
+        self.handler = "xls"
         self.send_standard_headers("application/vnd.ms-excel", file_name)
         wb = Workbook()
         wb['Sheet'].sheet_properties.tabColor = self.fake.hex_color().replace("#", "")
@@ -280,6 +293,7 @@ class S(BaseHTTPRequestHandler):
         self.wfile.write(buf.read())
 
     def return_mp4(self, file_name):
+        self.handler = "mp4"
         test_movie = "static/test_movie.mp4"
         if not os.path.isfile(test_movie):
             sp.call(
@@ -304,26 +318,102 @@ class S(BaseHTTPRequestHandler):
         self.request_url = o.path
         self.file_requested = os.path.basename(self.request_url)
 
+        # determinations are made in order of priority
+        # 1. specific payloads
+        # 2. specific file types (.docx, .pptx, .xlsx, .mp4, etc.)
+        # 3. specific directory types (css, slides, video, etc.)
+        # 4. html
+
+        # 1. payloads: check first in case we are serving a pre-defined url
+        for i in self.payloads:
+            payload = self.config.get("payloads", i)
+            payload_url = payload.split(",")[0]
+            payload_file = payload.split(",")[1]
+            payload_header = payload.split(",")[2]
+            if o.path.startswith(payload_url):
+                print(f"{o.path} starts with {payload_url} - dropping {payload_file} with headers of {payload_header}")
+                # need to be able to serve bad documents based on url or sequence
+                # files = [f for f in os.listdir("./payloads") if os.path.isfile(join("./payloads", f))]
+                f = open(f"./payloads/{payload_file}", "rb")
+                self.send_standard_headers(payload_header)
+                self.wfile.write(f.read())
+                f.close()
+                return
+
+        # 2. handle specific file extensions
+        # https://en.wikipedia.org/wiki/List_of_file_formats
         request_type = None
         if "." in self.request_url:
             request_type = self.request_url.split(".")[-1]
 
-        # handle specific urls
+            if request_type in ["doc", "docx", "dotx", "dot", "docm", "dotm", "odt"]:
+                self.return_doc_file(self.file_requested)
+                return
+
+            elif request_type in ["mp4"]:
+                self.return_mp4(self.file_requested)
+                return
+
+            elif request_type in ["xls", "xlsx", "xlsm", "xlsb", "xltm", "xla", "xlam", "xla", "ods"]:
+                self.return_xls_file(self.file_requested)
+                return
+
+            elif request_type in ["ppt", "pptx", "potx", "pot", "ppsx", "pps", "pptm", "potm", "ppsm", "odp"]:
+                self.return_ppt_file(self.file_requested)
+                return
+
+            elif request_type in ["one"]:
+                self.return_onenote(self.file_requested)
+                return
+
+            elif request_type in ["png", "gif", "jpg", "jpeg", "pdf", "ico"]:
+                self.return_image(request_type)
+                return
+
+            elif request_type in ["csv"]:
+                self.return_csv()
+                return
+
+            elif request_type in ["json"]:
+                self.return_json()
+                return
+
+            elif request_type in ["css"]:
+                self.return_stylesheet()
+                return
+
+            elif request_type in ["js"]:
+                self.return_script()
+                return
+
+            elif request_type in ["zip"]:
+                self.return_zip(self.file_requested)
+                return
+
+            elif request_type in ["msi", "tar", "gz", "iso", "rar", "exe", "bin", "chm"]:
+                self.return_binary(self.file_requested)
+                return
+
+            elif request_type in ["txt"]:
+                self.return_text(self.file_requested)
+                return
+
+        # 3. handle specific directories
         if o.path == ("/about"):
+            self.handler = "about"
             self.send_standard_headers("text/html")
             read_me = ""
             with open('../readme.md', 'r') as file:
                 read_me = file.read()
             body = f"""<html><body><pre>
-GHOSTS PANDORA, version {VERSION}
-Copyright 2022 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
-Part of the GHOSTS NPC Orchestration Platform - please email ddupdyke[at]sei.cmu.edu with bugs/requests/other.
-</pre><hr/>
-<h2>README</h2>
-<pre>
-{read_me}
-</pre>
-</body></html>"""
+                GHOSTS PANDORA, version {VERSION}
+                Copyright 2022 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
+                Part of the GHOSTS NPC Orchestration Platform - please email ddupdyke[at]sei.cmu.edu with bugs/requests/other.
+                </pre><hr/>
+                <h2>README</h2>
+                <pre>
+                {read_me}
+            </pre></body></html>"""
             self.wfile.write(body.encode("utf8"))
             return
 
@@ -345,6 +435,10 @@ Part of the GHOSTS NPC Orchestration Platform - please email ddupdyke[at]sei.cmu
 
         elif o.path.startswith("/css") or o.path.startswith("/styles"):
             self.return_stylesheet()
+            return
+
+        elif o.path.startswith("/json"):
+            self.return_json()
             return
 
         elif o.path.startswith("/js") or o.path.startswith("/scripts"):
@@ -388,77 +482,19 @@ Part of the GHOSTS NPC Orchestration Platform - please email ddupdyke[at]sei.cmu
             self.return_image(request_type)
             return
 
-        # payloads
-        for i in self.payloads:
-            payload = self.config.get("payloads", i)
-            payload_url = payload.split(",")[0]
-            payload_file = payload.split(",")[1]
-            payload_header = payload.split(",")[2]
-            if o.path.startswith(payload_url):
-                print(f"{o.path} starts with {payload_url} - dropping {payload_file} with headers of {payload_header}")
-                # need to be able to serve bad documents based on url or sequence
-                # files = [f for f in os.listdir("./payloads") if os.path.isfile(join("./payloads", f))]
-                f = open(f"./payloads/{payload_file}", "rb")
-                self.send_standard_headers(payload_header)
-                self.wfile.write(f.read())
-                f.close()
-                return
-
-        # handle specific file types
-        # https://en.wikipedia.org/wiki/List_of_file_formats
-        if request_type in ["doc", "docx", "dotx", "dot", "docm", "dotm", "odt"]:
-            self.return_doc_file(self.file_requested)
-
-        elif request_type in ["mp4"]:
-            self.return_mp4(self.file_requested)
-
-        elif request_type in ["xls", "xlsx", "xlsm", "xlsb", "xltm", "xla", "xlam", "xla", "ods"]:
-            self.return_xls_file(self.file_requested)
-
-        elif request_type in ["ppt", "pptx", "potx", "pot", "ppsx", "pps", "pptm", "potm", "ppsm", "odp"]:
-            self.return_ppt_file(self.file_requested)
-
-        elif request_type in ["one"]:
-            self.return_onenote(self.file_requested)
-
-        elif request_type in ["png", "gif", "jpg", "jpeg", "pdf", "ico"]:
-            self.return_image(request_type)
-
-        elif request_type in ["csv"]:
-            self.return_csv()
-
-        elif request_type in ["json"]:
-            self.return_json()
-
-        elif request_type in ["css"]:
-            self.return_stylesheet()
-
-        elif request_type in ["js"]:
-            self.return_script()
-
-        elif request_type in ["zip"]:
-            self.return_zip(self.file_requested)
-
-        elif request_type in ["msi", "tar", "gz", "iso", "rar", "exe", "bin", "chm"]:
-            self.return_binary(self.file_requested)
-
-        elif request_type in ["txt"]:
-            self.return_text(self.file_requested)
-
+        if random.randint(2, 100) > 95:
+            self.send_non_200()
         else:
-            if random.randint(2, 100) > 95:
-                self.send_non_200()
-            else:
-                self.send_standard_headers("text/html")
-                body = ""
-                header = f'<script type="text/javascript" src="/scripts/{self.fake.uuid4()}.js"></script><link rel="stylesheet" href="/css/{self.fake.uuid4()}/{self.fake.word()}.css" type="text/css" />'
-                for _ in range(random.randint(1, 20)):
-                    if random.randint(2, 100) > 55:
-                        body = body + f"<h3>{self.fake.sentence().replace('.','')}</h3>"
-                        body = body + f"<p>{self.fake.paragraph(nb_sentences=random.randint(1, 100))}</p>"
-                        if random.randint(1, 100) > 85:
-                            body = body + f"<img src='images/{self.fake.word()}.png?h={random.randint(80, 200)}&w={random.randint(200, 400)}'/>"
-                self.wfile.write(f"<html><head>{header}<title>{self.fake.catch_phrase()}</title></head><body><h1>{self.fake.catch_phrase()}</h1>{body}</body></html>".encode("utf8"))
+            self.send_standard_headers("text/html")
+            body = ""
+            header = f'<script type="text/javascript" src="/scripts/{self.fake.uuid4()}.js"></script><link rel="stylesheet" href="/css/{self.fake.uuid4()}/{self.fake.word()}.css" type="text/css" />'
+            for _ in range(random.randint(1, 20)):
+                if random.randint(2, 100) > 55:
+                    body = body + f"<h3>{self.fake.sentence().replace('.','')}</h3>"
+                    body = body + f"<p>{self.fake.paragraph(nb_sentences=random.randint(1, 100))}</p>"
+                    if random.randint(1, 100) > 85:
+                        body = body + f"<img src='images/{self.fake.word()}.png?h={random.randint(80, 200)}&w={random.randint(200, 400)}'/>"
+            self.wfile.write(f"<html><head>{header}<title>{self.fake.catch_phrase()}</title></head><body><h1>{self.fake.catch_phrase()}</h1>{body}</body></html>".encode("utf8"))
 
 
 def run(server_class=HTTPServer, handler_class=S, port=80):
@@ -470,7 +506,11 @@ def run(server_class=HTTPServer, handler_class=S, port=80):
             exit(1)
         httpd.socket = ssl.wrap_socket(httpd.socket, certfile="./server.pem", server_side=True)
 
-    print(f"Starting GHOSTS PANDORA server on port {port}...\nRunning...")
+    print("""
+░▄▀▒░█▄█░▄▀▄░▄▀▀░▀█▀░▄▀▀░░▒█▀▄▒▄▀▄░█▄░█░█▀▄░▄▀▄▒█▀▄▒▄▀▄
+░▀▄█▒█▒█░▀▄▀▒▄██░▒█▒▒▄██▒░░█▀▒░█▀█░█▒▀█▒█▄▀░▀▄▀░█▀▄░█▀█
+""")
+    print(f"Starting GHOSTS PANDORA server {VERSION} on port {port}...\nReady for requests!")
     httpd.serve_forever()
 
 
@@ -480,5 +520,5 @@ if __name__ == "__main__":
     if len(argv) == 2:
         run(port=int(argv[1]))
     else:
-        print("Error - port arg not supplied")
+        print("Error - you did not supply a port to run on!")
         exit(1)
