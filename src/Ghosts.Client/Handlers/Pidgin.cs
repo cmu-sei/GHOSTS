@@ -5,11 +5,11 @@ using Ghosts.Domain;
 using System.Diagnostics;
 using Ghosts.Domain.Code;
 using WorkingHours = Ghosts.Client.Infrastructure.WorkingHours;
-using AutoItX3Lib;
 using System;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using Exception = System.Exception;
+using System.Windows.Interop;
 
 namespace Ghosts.Client.Handlers
 {
@@ -23,8 +23,6 @@ namespace Ghosts.Client.Handlers
     ///   The logged in user must have an enabled Pidgin account in accounts.xml
     ///   Pidgin preferences must have already been set in  %APPDATA%\.purple\prefs.xml
     ///   Conversations must be TABBED (in prefs.xml/conversations section, name='tabs' type='bool' value='1')
-    ///   This implementation uses AutoItX and the GHOSTSINSTALL\AutoItX3.dll must be registered.
-    ///     To register the DLL, execute with admin priviledges: C:\Windows\System32\regsvr32.exe  targetdll   during the client setup.
     /// Implementation
     ///   This implementation is about 95% open loop as there are no C# bindings for the Pidgin libpurple.dll
     ///   The only feedback to GHOSTS is via window titles, it cannot determine when messages arrive or message content.
@@ -308,7 +306,6 @@ namespace Ghosts.Client.Handlers
                 }
 
 
-                AutoItX3 au = new AutoItX3();
                 bool chatInitiated = false;
 
                 //determine if there are any open IM windows
@@ -316,7 +313,7 @@ namespace Ghosts.Client.Handlers
                 if (imWindowTitle == null)
                 {
                     if (NewChatProbability < _random.Next(0, 100)) return true; //skip this cycle
-                    chatInitiated = openChatWindow(au, chatTarget);
+                    chatInitiated = openChatWindow(chatTarget);
                     if (!chatInitiated) return true; //wait for another cycle, failed to inititate chat
                 }
                 if (!chatInitiated && (_random.Next(0, 100) <= CloseChatProbability))
@@ -340,7 +337,7 @@ namespace Ghosts.Client.Handlers
                     //need to respond to each one
                     while (true)
                     {
-                        sendChatMessage(au, imWindowTitle, thisTarget);
+                        sendChatMessage(imWindowTitle, thisTarget);
                         Thread.Sleep(_random.Next(TimeBetweenMessagesMin, TimeBetweenMessagesMax));
                         if (closeWindows(ErrorWindowTitles))
                         {
@@ -354,7 +351,7 @@ namespace Ghosts.Client.Handlers
                         {
                             chatStatus[thisTarget] = true;
                         }
-                        currentImWindowTitle = selectNextChat(au, imWindowTitle);
+                        currentImWindowTitle = selectNextChat(imWindowTitle);
                         i++;
                         if (i >= numReplies) break;
                         thisTarget = getChatTargetFromWindowTitle(currentImWindowTitle);
@@ -431,7 +428,7 @@ namespace Ghosts.Client.Handlers
         /// Open a new chat window to the imTarget
         /// </summary>
         /// <param name="imTarget"></param>
-        private bool openChatWindow(AutoItX3 au, string imTarget)
+        private bool openChatWindow(string imTarget)
         {
 
             //before opening chat window, verify target 
@@ -461,12 +458,12 @@ namespace Ghosts.Client.Handlers
                 Winuser.SetForegroundWindow(pidginHandle);
                 System.Windows.Forms.SendKeys.SendWait("^m");
                 Thread.Sleep(1000);
-                pidginHandle = Winuser.FindWindow("gdkWindowToplevel", "Pidgin");
-                Winuser.SetForegroundWindow(pidginHandle);
-                var windHandle = au.WinGetHandle("Pidgin");
-                au.WinActivate(windHandle);
+                
                 var msg = imTarget + "{TAB}" + "{TAB}" + "{ENTER}";
-                au.Send(msg);
+                var windHandle = Winuser.FindWindow("gdkWindowToplevel", "Pidgin");
+                Winuser.SetForegroundWindow(windHandle);
+                System.Windows.Forms.SendKeys.SendWait(msg);
+                
                 Thread.Sleep(500);
                 return true;
             }
@@ -479,11 +476,12 @@ namespace Ghosts.Client.Handlers
         /// <param name="au"></param>
         /// <param name="windowTitle"></param>
         /// <returns></returns>
-        private string selectNextChat(AutoItX3 au, string windowTitle)
+        private string selectNextChat(string windowTitle)
         {
             var windHandle = Winuser.FindWindow("gdkWindowToplevel", "Pidgin");
             Winuser.SetForegroundWindow(windHandle);
-            au.Send("^{TAB}");
+            System.Windows.Forms.SendKeys.SendWait("^{TAB}");
+          
             Thread.Sleep(500);
             //at this point the window title may have changed. Check that.
             return getImWindow(); //return the new title of the IM window
@@ -507,7 +505,7 @@ namespace Ghosts.Client.Handlers
         /// </summary>
         /// <param name="au"></param>
         /// <param name="windowTitle"></param>
-        private void sendChatMessage(AutoItX3 au, string windowTitle, string chatTarget)
+        private void sendChatMessage(string windowTitle, string chatTarget)
         {
             try
             {
@@ -523,7 +521,7 @@ namespace Ghosts.Client.Handlers
                     }
                 }
                 msg = msg + "{ENTER}";
-                au.Send(msg);
+                System.Windows.Forms.SendKeys.SendWait(msg);
                 Thread.Sleep(1000);
                 Log.Trace($"Pidgin:: Sent message to target {chatTarget}. ");
             }

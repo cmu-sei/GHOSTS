@@ -8,12 +8,10 @@ using System.Threading;
 using Ghosts.Client.Infrastructure;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
-using AutoItX3Lib;
 
 using WorkingHours = Ghosts.Client.Infrastructure.WorkingHours;
-using Microsoft.Office.Interop.Word;
 using System.Text;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
+
 
 namespace Ghosts.Client.Handlers
 {
@@ -38,14 +36,12 @@ namespace Ghosts.Client.Handlers
         private int ModificationProbability = 0;
         private int ViewProbability = 0;
         private int CreationProbability = 0;
-        private int PdfProbability = 0;
         private string InputDirectory = null;
         private string OutputDirectory = null;
         private string TextGeneration = "random";
         private int ParagraphsMin = 1;
         private int ParagraphsMax = 10;
 
-        private AutoItX3 au;
 
         public Notepad(TimelineHandler handler)
         {
@@ -81,9 +77,6 @@ namespace Ghosts.Client.Handlers
 
             int[] probabilityList = { ViewProbability, DeletionProbability, CreationProbability, ModificationProbability };
             string[] actionList = { "view", "delete", "create", "modify" };
-
-
-            au = new AutoItX3();
 
             //arguments parsed. Enter loop that does not exit unless forced exit, which stops handler.
             while (true)
@@ -130,24 +123,25 @@ namespace Ghosts.Client.Handlers
                                 switch (action)
                                 {
                                     case "create":
-                                        //create a file that does not exist, start notepad, add content, save to new file name
+                                        //create a file that does not exist, add content, save to new file name, open with Notepad
                                         while (true)
                                         {
 
                                             outfile = Path.Combine(OutputDirectory, SshSftpSupport.RandomString(5, 15) + ".txt");
                                             if (!File.Exists(outfile)) break;
                                         }
-                                        if (!StartNotePad(null)) return;
+                                        
                                         DoCreateAction(outfile);
+                                        if (!StartNotePad(outfile)) return;
                                         break;
                                     case "delete":
                                         //delete random file
                                         DoDeleteAction(outfile);
                                         break;
                                     case "modify":
-                                        //open notepad with random existing file, replace content, save
-                                        if (!StartNotePad(outfile)) return;
+                                        //open random existing file, replace content, save, open with notepad
                                         DoModifyAction(outfile);
+                                        if (!StartNotePad(outfile)) return;
                                         break;
                                     case "view":
                                         if (!StartNotePad(infile)) return;
@@ -168,91 +162,69 @@ namespace Ghosts.Client.Handlers
         }
         private void DoModifyAction(string outfile)
         {
-            AddRandomText();
-            //save the file
-            Winuser.SetForegroundWindow(NotepadProcess.MainWindowHandle);
-            System.Windows.Forms.SendKeys.SendWait("^s");
-            Thread.Sleep(1000);
-            Log.Trace($"Notepad::  File {outfile} modified.");
-            DoPdfAction(outfile);
+            try
+            {
+                string allText = "";
+                // Open the stream and read it back.
+                using (StreamReader sr = File.OpenText(outfile))
+                {
+                    string s = "";
+                    while ((s = sr.ReadLine()) != null)
+                    {
+                        allText += s;
+                    }
+                }
+                
+                allText += GetRandomText(); // add text
+                //now write all text to file
+                using (FileStream fs = File.Create(outfile))
+                {
+                    
+                    byte[] info = new UTF8Encoding(true).GetBytes(allText);
+                    // Add some information to the file.
+                    fs.Write(info, 0, info.Length);
+                }
+
+            }
+
+            catch (Exception e)
+            {
+                Log.Trace($"Notepad:: Error modifying file {outfile}");
+                Log.Trace(e);
+            }
             return;
         }
+
+
 
         /// <summary>
-        /// This uses the Print action, assumes the default printer is Microsoft Save to PDF
+        /// This creates the file on disk.
         /// </summary>
         /// <param name="outfile"></param>
-        private void DoPdfAction(string outfile)
-        {
-            if (PdfProbability == 0 || PdfProbability < _random.Next(0, 101)) return;
-            var pdfName = Path.GetFileNameWithoutExtension(outfile) + ".pdf";
-            pdfName = Path.Combine(Path.GetDirectoryName(outfile), pdfName);
-            //do print action
-            if (File.Exists(pdfName))
-            {
-                try
-                {
-                    File.Delete(pdfName);  //delete existing PDF
-                }
-                catch (Exception e)
-                {
-                    Log.Trace($"Notepad:: Error deleting existing pdf  file {pdfName}");
-                    Log.Trace(e);
-                    return; //abort
-                }
-            }
-            Winuser.SetForegroundWindow(NotepadProcess.MainWindowHandle);
-            System.Windows.Forms.SendKeys.SendWait("^p");  //bring up print window
-            Thread.Sleep(1000);
-            var winHandle = Winuser.FindWindow(null, "Print");
-            if (winHandle != IntPtr.Zero)
-            {
-
-                Winuser.SetForegroundWindow(winHandle);
-                System.Windows.Forms.SendKeys.SendWait("%p");  //do print
-                Thread.Sleep(500);
-                winHandle = Winuser.FindWindow(null, "Save Print Output As");
-                if (winHandle != IntPtr.Zero)
-                {
-                    Winuser.SetForegroundWindow(winHandle);
-                    au.Send(pdfName);    //send pdf file name
-                    Thread.Sleep(500);
-                    Winuser.SetForegroundWindow(winHandle);
-                    System.Windows.Forms.SendKeys.SendWait("%s");
-                    Thread.Sleep(2000);
-                    Log.Trace($"Notepad::  File {outfile} created.");
-                }
-            }
-
-        }
-
         private void DoCreateAction(string outfile)
         {
-
-
-            AddRandomText();
-            //do save action
-            Winuser.SetForegroundWindow(NotepadProcess.MainWindowHandle);
-            System.Windows.Forms.SendKeys.SendWait("^s");
-            Thread.Sleep(1000);
-            var winHandle = Winuser.FindWindow(null, "Save As");
-            if (winHandle != IntPtr.Zero)
+            try
             {
-                Winuser.SetForegroundWindow(winHandle);
-                au.Send(outfile);
-                Thread.Sleep(500);
-                Winuser.SetForegroundWindow(winHandle);
-                System.Windows.Forms.SendKeys.SendWait("%s");
-                Thread.Sleep(500);
+                // Create the file, or overwrite if the file exists.
+                using (FileStream fs = File.Create(outfile))
+                {
+                    var newText = GetRandomText();
+                    byte[] info = new UTF8Encoding(true).GetBytes(newText);
+                    // Add some information to the file.
+                    fs.Write(info, 0, info.Length);
+                }
                 Log.Trace($"Notepad::  File {outfile} created.");
             }
-            DoPdfAction(outfile);
-            return;
+
+            catch (Exception e)
+            {
+                Log.Trace($"Notepad:: Error creating file {outfile}");
+                Log.Trace(e);
+            }
         }
 
 
-
-        private void AddRandomText()
+        private string GetRandomText()
         {
             var list = RandomText.GetDictionary.GetDictionaryList();
             using (var rt = new RandomText(list))
@@ -260,11 +232,11 @@ namespace Ghosts.Client.Handlers
                 var numberParagraphs = _random.Next(ParagraphsMin, ParagraphsMax + 1);
                 rt.AddContentParagraphs(numberParagraphs, 4, 10, 4, 15);
                 var formattedContent = rt.FormatContent(60, 90);
-                Paste(formattedContent);
+                return formattedContent;
             }
         }
 
-
+       
         private void DoDeleteAction(string target)
         {
 
@@ -302,14 +274,6 @@ namespace Ghosts.Client.Handlers
                 if (!CheckProbabilityVar(handler.HandlerArgs["execution-probability"].ToString(), ExecutionProbability))
                 {
                     ExecutionProbability = 100;
-                }
-            }
-            if (handler.HandlerArgs.ContainsKey("pdf-probability"))
-            {
-                int.TryParse(handler.HandlerArgs["pdf-probability"].ToString(), out PdfProbability);
-                if (!CheckProbabilityVar(handler.HandlerArgs["pdf-probability"].ToString(), PdfProbability))
-                {
-                    PdfProbability = 0;
                 }
             }
             if (handler.HandlerArgs.ContainsKey("deletion-probability"))
@@ -479,14 +443,14 @@ namespace Ghosts.Client.Handlers
                 }
                 if (this.NotepadProcess == null)
                 {
-                    Log.Trace("RDP:: Unable to start Notepad process, handler exiting.");
+                    Log.Trace("Notepad:: Unable to start Notepad process, handler exiting.");
                     return false;
                 }
                 Thread.Sleep(1000);
             }
             catch (Exception e)
             {
-                Log.Trace("RDP:: Unable to start Notepad process, handler exiting.");
+                Log.Trace("Notepad:: Unable to start Notepad process, handler exiting.");
                 Log.Trace(e);
                 return false;
             }

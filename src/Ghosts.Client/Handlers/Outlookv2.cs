@@ -42,6 +42,7 @@ public class Outlookv2 : BaseHandler
     private int _clickProbability = 0;   //when reading, probability to click on a link
     private int _attachmentProbability = 0;   //when creating, probability to add an attachment
     private int _saveattachmentProbability = 0;   //when reading, probability to save attachment to disk
+    private int _initialOutlookDelay = 3 * 60 * 1000;
 
     private string _inputDirectory = null;
     private string _outputDirectory = null;
@@ -51,6 +52,10 @@ public class Outlookv2 : BaseHandler
 
     private string[] _actionList = { "read", "reply", "create", "delete" };
     private int[] _probabilityList = { 0, 0, 0, 0 };
+    
+    private int _actionCount = 0;
+    private int _replyErrorCount = 0;
+    private bool _firstDisplay = false;
 
     public Outlookv2(TimelineHandler handler)
     {
@@ -70,10 +75,11 @@ public class Outlookv2 : BaseHandler
             var session = RedemptionLoader.new_RDOSession();
             Log.Trace("Attempting RDO session logon...");
             session.Logon(Missing.Value, Missing.Value, Missing.Value, Missing.Value, Missing.Value, Missing.Value);
+                    
         }
         catch (Exception e)
         {
-            Log.Error($"RDO load error: {e}");
+            Log.Error($"Outlookv2:: RDO load error, iteration: {e}");
         }
 
         try
@@ -85,6 +91,7 @@ public class Outlookv2 : BaseHandler
             _folderDeletedItems = _oMapiNamespace.GetDefaultFolder(OlDefaultFolders.olFolderDeletedItems);
             Log.Trace("Launching Outlook");
             _folderInbox.Display();
+           
 
             if (handler.Loop)
             {
@@ -107,23 +114,40 @@ public class Outlookv2 : BaseHandler
     public void ExecuteEvents(TimelineHandler handler)
     {
         ParseHandlerArgs(handler);
-        _probabilityList[0] = _readProbability;
-        _probabilityList[1] = _replyProbability;
-        _probabilityList[2] = _createProbability;
-        _probabilityList[3] = _deleteProbability;
+        if (!_firstDisplay)
+        {
+            Thread.Sleep(_initialOutlookDelay); //wait 5 minutes before attempting any action
+            _firstDisplay = true;
+        }
+
 
 
         try
         {
             foreach (var timelineEvent in handler.TimeLineEvents)
             {
+                if (_replyProbability > 0 && _replyErrorCount > 10)
+                {
+                    //too many reply errors.  Null this out.
+                    _createProbability += _replyProbability;
+                    _replyProbability = 0;
+                    Log.Trace($"Outlookv2:: Too many reply errors, added reply probability to create, and halted future reply actions.");
+                }
+                _probabilityList[0] = _readProbability;
+                _probabilityList[1] = _replyProbability;
+                _probabilityList[2] = _createProbability;
+                _probabilityList[3] = _deleteProbability;
+
                 var action = SelectActionFromProbabilities(_probabilityList, _actionList);
+                if (_actionCount < 5) action = "create";  //always send 5 emails first before allowing other actions
+                if (_actionCount < 100) _actionCount += 1;
                 if (action == null)
                 {
                     Log.Trace("Outlookv2:: No action this cycle.");
                 }
                 else
                 {
+                    
                     Infrastructure.WorkingHours.Is(handler);
 
 
@@ -215,6 +239,14 @@ public class Outlookv2 : BaseHandler
 
     private void ParseHandlerArgs(TimelineHandler handler)
     {
+        if (handler.HandlerArgs.ContainsKey("initial-outlook-delay"))
+        {
+            int.TryParse(handler.HandlerArgs["initial-outlook-delay"].ToString(), out _initialOutlookDelay);
+            if (_initialOutlookDelay < 0 || _initialOutlookDelay > 5*60*1000)
+            {
+                _initialOutlookDelay = 0;
+            }
+        }
         if (handler.HandlerArgs.ContainsKey("read-probability"))
         {
             int.TryParse(handler.HandlerArgs["read-probability"].ToString(), out _readProbability);
@@ -760,6 +792,7 @@ public class Outlookv2 : BaseHandler
         try
         {
             var folderItems = _folderInbox.Items;
+            bool replyStarted = false;
             MailItem folderItem;
             foreach (object item in folderItems)
             {
@@ -767,6 +800,7 @@ public class Outlookv2 : BaseHandler
                 {
                     folderItem = item as MailItem;
                     if (folderItem == null) continue;
+                    replyStarted = true;
                     var emailReply = new EmailReplyManager();
                     var replyMail = folderItem.Reply();
 
@@ -820,6 +854,12 @@ public class Outlookv2 : BaseHandler
                 catch (Exception exc)
                 {
                     Log.Error($"Outlook reply error: {exc}");
+                    if (replyStarted)
+                    {
+                        //we found an email, and tried to reply, but an error occurred.
+                        _replyErrorCount += 1;
+                        return false;  
+                    }
                 }
             }
         }
