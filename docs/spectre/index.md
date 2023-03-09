@@ -54,3 +54,14 @@ The first setting is for your connection to a necessary postgres database, which
 The second setting is for SPECTRE to access the GHOSTS API endpoints. This is used to get information about machines and to update their timelines, based on SPECTRE findings and executions.
 
 [^1]: This work is detailed in the technical report [_Using Machine Learning to Increase NPC Fidelity_](https://resources.sei.cmu.edu/library/asset-view.cfm?assetid=743896). Some of the team also discussed this project in a SEI podcast episode, entitled [_ML-Driven Decision-Making in Realistic Cyber Exercises_](https://resources.sei.cmu.edu/library/asset-view.cfm?assetid=888745).
+
+## Quick Start
+
+Spectre is rather like an add-on -- it sits alongside the core API and uses that system to get its initial agent information, process their timelines, and then post updated timelines back to the API for dissemination to the clients.
+
+- There is one setting in the spectre `appsettings.json` file may need updated based on the install - it is how Spectre will connect to the Ghosts core API: `"GhostsApiUrl": "http://host.docker.internal:52388"` — update this to your core API host and port.
+- Now go to Spectre's host:port/swagger to bring up the API.
+- `GET /Agents` will show you what you have under spectre control - at the start, it is likely no agents. We need to sync with core Ghosts API in order to get its agents into Spectre.
+- So, we need to run `POST /Agents/sync` once ito pull the agents in the core API over to Spectre.
+- Now Spectre's `GET /Agents` will show you the same agents from ghosts core API.
+- You can now run a browse recommendations job.
