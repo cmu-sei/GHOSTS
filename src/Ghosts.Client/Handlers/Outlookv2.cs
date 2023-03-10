@@ -468,6 +468,22 @@ public class Outlookv2 : BaseHandler
         return;
     }
 
+    private bool DeleteMailItem (MailItem item)
+    {
+        try
+        {
+            item.Delete();
+            Thread.Sleep(500);
+            return true;
+        }
+        catch (Exception e)
+        {
+            Log.Trace("Outlookv2:: Error while deleting item from deleted items folder.");
+            Log.Error(e);
+            return false;
+        }
+    }
+
     private void CleanDeletedItems()
     {
         var folderName = GetFolder("DELETED");
@@ -484,7 +500,11 @@ public class Outlookv2 : BaseHandler
             {
                 object item = folderItems[i];
                 folderItem = item as MailItem;
-                if (folderItem != null) folderItem.Delete();
+                if (folderItem != null)
+                {
+                    //break if unsuccessful as may have reached the maximum number
+                    if (!DeleteMailItem(folderItem)) break; 
+                }
             }
             catch
             {
@@ -492,6 +512,22 @@ public class Outlookv2 : BaseHandler
             }
         }
         return;
+    }
+
+    private bool MoveMailItem(MailItem item)
+    {
+        try
+        {
+            item.Move(_folderDeletedItems);
+            Thread.Sleep(500);
+            return true;
+        }
+        catch (Exception e)
+        {
+            Log.Trace("Outlookv2:: Error while moving mail item to deleted items folder.");
+            Log.Error(e);
+            return false;
+        }
     }
 
     private void MoveToDeleted(string targetFolderName, bool deleteAll, bool deleteUnread)
@@ -518,12 +554,14 @@ public class Outlookv2 : BaseHandler
                 if (folderItem == null) continue;
                 if (deleteAll)
                 {
-                    folderItem.Move(_folderDeletedItems);
+                    //break if unsuccessful as may have reached the maximum number
+                    if (!MoveMailItem(folderItem)) break;
                 }
                 else
                 {
                     if (folderItem.UnRead && !deleteUnread) continue;
-                    folderItem.Move(_folderDeletedItems);
+                    //break if unsuccessful as may have reached the maximum number
+                    if (!MoveMailItem(folderItem)) break;
                     count--;
                     if (count <= settings.EmailsMax)
                     {
@@ -531,9 +569,10 @@ public class Outlookv2 : BaseHandler
                     }
                 }
             }
-            catch
+            catch 
             {
 
+               
             }
         }
         return;
