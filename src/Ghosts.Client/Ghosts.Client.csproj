@@ -283,6 +283,7 @@
     <Compile Include="Handlers\BlogHelper.cs" />
     <Compile Include="Handlers\BlogHelperDrupal.cs" />
     <Compile Include="Handlers\BrowserCrawl.cs" />
+    <Compile Include="Handlers\Outlookv2.cs" />
     <Compile Include="Handlers\Pidgin.cs" />
     <Compile Include="Handlers\Print.cs" />
     <Compile Include="Handlers\Rdp.cs" />
@@ -409,6 +410,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <None Include="Sample Timelines\outlook.json" />
+    <None Include="Sample Timelines\Outlookv2.json" />
     <None Include="Sample Timelines\Pidgin.json" />
     <None Include="Sample Timelines\PowerPoint.json" />
     <None Include="Sample Timelines\Print.json" />
