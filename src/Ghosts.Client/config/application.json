@@ -8,7 +8,7 @@
   "AllowMultipleInstances": false,
   "EncodeHeaders": true,
   "ClientResults": {
-    "IsEnabled": false,
+    "IsEnabled": true,
     "IsSecure": false,
     "PostUrl": "http://ghosts-api:52388/api/clientresults",
     "CycleSleep": 300000

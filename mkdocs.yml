@@ -69,11 +69,31 @@ nav:
     - core/client.md
     - Client Handlers:
       - Basic Configuration: core/handlers.md
+      - Clicks: core/handlers/clicks.md
+      - Cmd: core/handlers/cmd.md
+      - Notepad: core/handlers/notepad.md
+      - NPCSystem: core/handlers/npc_system.md
+      - Office:
+        - Excel: core/handlers/excel.md
+        - Outlook: core/handlers/outlook.md
+        - PowerPoint: core/handlers/powerpoint.md
+        - Word: core/handlers/word.md
+      - Pidgin: core/handlers/pidgin.md
+      - Print: core/handlers/print.md
+      - RDP: core/handlers/rdp.md
+      - Reboot: core/handlers/reboot.md
+      - Sftp: core/handlers/sftp.md
+      - Ssh: core/handlers/ssh.md
+      - Watcher: core/handlers/watcher.md
       - Web Browsers (Firefox|Chrome): core/handlers/browser.md
-      - Excel: core/handlers/excel.md
-      - PowerPoint: core/handlers/powerpoint.md
-      - Word: core/handlers/word.md
-  - Core API: core/api.md
+      - Web Browser Helper Functions:
+        - Blogs/Drupal: core/handlers/blog_helper.md
+        - Sharepoint: core/handlers/sharepoint_helper.md
+      - Wmi: core/handlers/wmi.md
+  - Core API: 
+      - core/api.md
+      - Capabilities:
+        - Managing Timelines: core/api/timelines.md
   - Animator: 
     - animator/index.md
     - Animation Jobs: animator/jobs.md

@@ -36,7 +36,7 @@ SPECTRE currently has two components:
 
 ### Machine Learning
 
-The incoming GHOSTS agent browsing activity can be attenuated to individual agent preferences after they are assigned some number of preferences based on default persona profiles. SPECTRE will aggregate this information periodically and perform model training and testing against that browsing activity, and recommend new browsing patterns for that agent to execute. This basically creates a new activity timeline for the agent. This cycle is referred to as a "Test". After any given test, that information would be used to inform the next round of ML testing to be done.
+The incoming GHOSTS agent browsing activity can be attenuated to individual agent preferences after they are assigned some number of preferences based on default persona profiles. SPECTRE will aggregate this information periodically and perform model training and testing against that browsing activity, and recommend new browsing patterns for that agent to execute. This creates a new activity timeline for the agent. This cycle is referred to as a "Test". After any given test, that information would be used to inform the next round of ML testing to be done.
 
 ## Installation
 
@@ -49,8 +49,19 @@ There are only two configuration settings, both contained within `appsettings.js
 "GhostsApiUrl": "http://localhost:5000"
 ```
 
-The first setting is for your connection to a necessary postgres database, which SPECTRE will use for its operations. It is fine to host this on the same machine or container that you might be using for GHOSTS itself. In this case either use the same user as GHOSTS, or create a new user for SPECTRE.
+The first setting is for your connection to a necessary Postgres database, which SPECTRE will use for its operations. It is fine to host this on the same machine or container that you might be using for GHOSTS itself. In this case, either use the same user as GHOSTS or create a new user for SPECTRE.
 
 The second setting is for SPECTRE to access the GHOSTS API endpoints. This is used to get information about machines and to update their timelines, based on SPECTRE findings and executions.
 
-[^1]: This work is detailed in the technical report [_Using Machine Learning to Increase NPC Fidelity_](https://resources.sei.cmu.edu/library/asset-view.cfm?assetid=743896). Some of the team also discussed this project in a SEI podcast episode, entitled [_ML-Driven Decision-Making in Realistic Cyber Exercises_](https://resources.sei.cmu.edu/library/asset-view.cfm?assetid=888745).
+[^1]: This work is detailed in the technical report [_Using Machine Learning to Increase NPC Fidelity_](https://resources.sei.cmu.edu/library/asset-view.cfm?assetid=743896). Some of the team also discussed this project in an SEI podcast episode, entitled [_ML-Driven Decision-Making in Realistic Cyber Exercises_](https://resources.sei.cmu.edu/library/asset-view.cfm?assetid=888745).
+
+## Quick Start
+
+Spectre is rather like an add-on -- it sits alongside the core API and uses that system to get its initial agent information, process their timelines, and then post updated timelines back to the API for dissemination to the clients.
+
+- There is one setting in the spectre `appsettings.json` file that may need updating based on the install - it is how Spectre will connect to the GHOSTS Core API: `"GhostsApiUrl": "http://host.docker.internal:52388"` — update this to your core API host and port.
+- Now go to Spectre's host:port/swagger to bring up the API.
+- `GET /Agents` will show you what you have under SPECTRE control - at the start, it is likely no agents. We need to sync with core GHOSTS Core API to get its agents into SPECTRE.
+- So, we need to run `POST /Agents/sync` once to pull the agents in the core API over to SPECTRE.
+- Now Spectre's `GET /Agents` will show you the same agents from ghosts Core API.
+- You can now run a browse recommendations job.

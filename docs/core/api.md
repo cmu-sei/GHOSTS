@@ -34,7 +34,7 @@ The API generally has good defaults to get you up and running quickly, but there
         "MatchMachinesBy": null,
 ```
 
-Can be fqdn|host|resolvedhost|null - null tells the API to match incoming requests with machine records by the machine name. For installations where multiple domains are reporting into the same API, you probably want to use "fqdn" in order to avoid machines being duplicated.
+Can be fqdn|host|resolvedhost|null - null tells the API to match incoming requests with machine records by the machine name. For installations where multiple domains are reporting into the same API, you probably want to use FQDN in order to avoid machines being duplicated.
 
 
 ```json
@@ -46,9 +46,9 @@ This is how often the synch job runs. Incoming machine requests are not real-tim
 
 ## Configuring Grafana
 
-- Grafana will be running (if containerized) at :3000, and we can access it via the same url we use for the API, but on port :3000 in a web browser.
-- Default login is admin/admin.
-- First step is to setup a datasource named "ghosts" to the ghosts postgres database.
+- Grafana will be running (if containerized) on port 3000, and we can access it via the same URL we use for the API.
+- The default login is admin/admin.
+- The first step is to set up a datasource named "ghosts" to the ghosts Postgres database.
 - Now import your choice of the [grafana json files](https://github.com/cmu-sei/GHOSTS/tree/master/configuration/grafana) in this repository. It creates the default GHOSTS dashboard.
 
 ## Webhooks
@@ -76,7 +76,7 @@ Payloads can be any format — here is a sample:
 }
 ```
 
-On send, the payload will be converted into correct json format:
+On send, the payload will be converted into the correct JSON format:
 
 ```json
 {
@@ -87,11 +87,11 @@ On send, the payload will be converted into correct json format:
 }
 ```
 
-If the postback method is POST, the payload will be sent as the message body. If the postback method is get, the payload will be sent as part of the querystring value ?message=`payload`.
+If the postback method is POST, the payload will be sent as the message body. If the postback method is GET, the payload will be sent as part of the querystring value ?message=`payload`.
 
 The following events are reported via webhooks:
 
-1. Timeline delivered (with the timeline that was delivered as payload) to machine via API (original API posting of timeline only holds timeline in wait - client still must check-in in order for that timeline to be delivered)
+1. Timeline delivered (with the timeline that was delivered as payload) to a machine via API (original API posting of timeline only holds timeline in wait - the client still must check-in in order for that timeline to be delivered)
 2. Machine requested updates ("checked in") from API
 3. Machine posted results to API
 
@@ -99,5 +99,9 @@ The following events are reported via webhooks:
 
 > Is the API up and running?
 
-- Go to `/api/home` in the browser, it should return the current api version and number of machines and groups under management. If it says relationship not found, restart the API application and it should create the database automatically.
+- Go to `/api/home` in the browser, it should return the current API version and the number of machines and groups under management. If it says relationship not found, restart the API application and it should create the database automatically.
 - Run `docker ps --all` and see that all containers are running normally. If one or more is not running, look at the logs for that machine via `docker logs [machine name]`.
+
+> The ClientId, ClientResults, and other Client* endpoints are failing.
+
+The Client* endpoints are for the Clients to use only. There are specific header values set by the client in the request that is used to authenticate the request. If you are not using the client, you will not have these headers set, and these endpoints will fail.
