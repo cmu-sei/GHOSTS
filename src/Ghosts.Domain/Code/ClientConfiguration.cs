@@ -183,6 +183,7 @@ namespace Ghosts.Domain.Code
             public int RecipientsOutsideMin { get; set; }
             public int RecipientsOutsideMax { get; set; }
             public string EmailDomainSearchString { get; set; }
+            public int EmailsMax { get; set; }
         }
 
         public class ListenerSettings

@@ -66,7 +66,7 @@ namespace Ghosts.Client.Infrastructure
                         var orchestrator = new Orchestrator();
                         orchestrator.RunCommandCron(timeline, handler);
                     }
-                    catch (Exception e)
+                    catch
                     {
                         _log.Trace("could not schedule cron job, deserialization failed");
                     }

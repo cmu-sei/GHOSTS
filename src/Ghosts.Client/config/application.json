@@ -27,6 +27,7 @@
     "PostUrl": "http://ghosts-api:52388/api/clientsurvey"
   },
   "Content": {
+    "EmailsMax":  20,
     "EmailContent": "",
     "EmailReply": "",
     "EmailDomain": "",

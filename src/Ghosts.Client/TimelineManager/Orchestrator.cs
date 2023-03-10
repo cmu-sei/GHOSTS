@@ -428,8 +428,14 @@ namespace Ghosts.Client.TimelineManager
                             _ = new Outlook(handler);
                         });
                         break;
+                    case HandlerType.Outlookv2:
+                        _log.Trace("Launching thread for outlookv2 - note we're not checking if outlook installed, just going for it");
+                        t = new Thread(() =>
+                        {
+                            _ = new Outlookv2(handler);
+                        });
+                        break;
                     case HandlerType.Notepad:
-                        //TODO
                         t = new Thread(() =>
                         {
                             _ = new Notepad(handler);
