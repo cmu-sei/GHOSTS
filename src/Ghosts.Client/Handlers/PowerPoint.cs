@@ -159,6 +159,8 @@ public class PowerPointHandler : BaseHandler
                             Log.Trace($"save-array exception: {e}");
                         }
 
+                        defaultSaveDirectory = ApplicationDetails.GetPath(defaultSaveDirectory);
+
                         if (!Directory.Exists(defaultSaveDirectory))
                         {
                             Directory.CreateDirectory(defaultSaveDirectory);

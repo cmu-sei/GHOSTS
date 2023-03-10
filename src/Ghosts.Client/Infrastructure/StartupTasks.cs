@@ -114,7 +114,20 @@ public static class StartupTasks
         }
     }
 
-    public static void SetStartup()
+    public static void ConfigureStartup(bool isStartupDisabled)
+    {
+        if (isStartupDisabled)
+        {
+            RemoveStartup();
+            
+        }
+        else
+        {
+            SetStartup();
+        }
+    }
+    
+    private static void SetStartup()
     {
         try
         {
@@ -125,6 +138,27 @@ public static class StartupTasks
         catch (Exception e)
         {
             _log.Debug($"Could not set registry key for startup: {e}");
+        }
+    }
+
+    private static void RemoveStartup()
+    {
+        try
+        {
+            var rk = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+            if (rk?.GetValue(System.Reflection.Assembly.GetExecutingAssembly().GetName().Name) != null)
+            {
+                rk?.DeleteValue(System.Reflection.Assembly.GetExecutingAssembly().GetName().Name);
+                _log.Trace("Removed startup registry key successfully");
+            }
+            else
+            {
+                _log.Trace("Startup registry key does not exist");
+            }
+        }
+        catch (Exception e)
+        {
+            _log.Debug($"Could not remove registry key for startup: {e}");
         }
     }
 }

@@ -63,6 +63,11 @@ namespace Ghosts.Domain.Code
             }
         }
 
+        public static string GetPath(string loc)
+        {
+            return Path.GetFullPath(Path.Combine(InstalledPath, loc));
+        }
+        
         public static bool IsLinux()
         {
             return RuntimeInformation.IsOSPlatform(OSPlatform.Linux);

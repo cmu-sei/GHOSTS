@@ -162,11 +162,8 @@ class Program
             StartupTasks.CleanupProcesses();
         }
 
-        if (!Configuration.DisableStartup)
-        {
-            //add ghosts to startup
-            StartupTasks.SetStartup();
-        }
+        // add this app to windows startup?
+        StartupTasks.ConfigureStartup(Configuration.DisableStartup);
         
         // Setup Quartz Scheduler
         var factory = new StdSchedulerFactory();
