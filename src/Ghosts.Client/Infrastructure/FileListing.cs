@@ -111,8 +111,11 @@ public static class FileListing
                     {
                         try
                         {
-                            _log.Trace($"Deleting: {path}");
-                            File.Delete(path);
+                            if (File.Exists(path))
+                            {
+                                _log.Trace($"Deleting: {path}");
+                                File.Delete(path);
+                            }
                             deletedFiles.Add(line);
                         }
                         catch (Exception e)

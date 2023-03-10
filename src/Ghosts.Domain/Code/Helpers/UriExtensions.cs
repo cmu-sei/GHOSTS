@@ -33,6 +33,17 @@ namespace Ghosts.Domain.Code.Helpers
             }
         }
 
+        public static string CleanUrl(this string url)
+        {
+            var index = url.IndexOf("#");
+            if (index >= 0)
+                url= url.Substring(0, index);
+            index = url.IndexOf("?");
+            if (index >= 0)
+                url = url.Substring(0, index);
+            return url;
+        }
+
         public static IEnumerable<string> GetHrefUrls(this string input)
         {
             var doc = new HtmlDocument();

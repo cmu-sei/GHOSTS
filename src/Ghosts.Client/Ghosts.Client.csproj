@@ -340,7 +340,9 @@
     <Content Include="config\application.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="config\denylist.txt" />
+    <Content Include="config\denylist.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="config\email_targets.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

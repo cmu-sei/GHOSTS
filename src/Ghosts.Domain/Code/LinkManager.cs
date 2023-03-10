@@ -76,7 +76,7 @@ namespace Ghosts.Domain.Code
             }
 
             // is in deny list?
-            if (DenyListManager.IsInDenyList(this._denyList, uri.ToString()))
+            if (DenyListManager.IsInDenyList(this._denyList, uri))
                 return;
             
 

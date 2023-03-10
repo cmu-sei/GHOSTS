@@ -21,7 +21,7 @@ namespace Ghosts.Domain.Code
             }
             catch (Exception e)
             {
-                _log.Trace(e);
+                _log.Trace($"Cannot load deny list with exception: {e}");
                 return new List<string>();
             }
         }
@@ -37,18 +37,42 @@ namespace Ghosts.Domain.Code
             return EvaluateItemAgainstDenyList(denyList, itemToEvaluate);
         }
 
+        public static bool IsInDenyList(IEnumerable<string> denyList, Uri uri)
+        {
+            var itemToEvaluate = uri.ToString();
+            if (itemToEvaluate.Contains("#"))
+            {
+                itemToEvaluate = itemToEvaluate.Substring(0, uri.ToString().IndexOf("#", StringComparison.InvariantCultureIgnoreCase));
+            }
+            if (itemToEvaluate.Contains("?"))
+            {
+                itemToEvaluate = itemToEvaluate.Substring(0, uri.ToString().IndexOf("?", StringComparison.InvariantCultureIgnoreCase));
+            }
+            return EvaluateItemAgainstDenyList(denyList, itemToEvaluate);
+        }
+
         public static IEnumerable<string> RemoveDeniedFromList(IEnumerable<string> listToEvaluate)
         {
-            var denyList = LoadDenyList().ToArray();
-            var filteredList = new List<string>();
-            foreach (var itemToEvaluate in listToEvaluate)
+            var originalList = listToEvaluate.ToArray();
+
+            try
             {
-                if (!EvaluateItemAgainstDenyList(denyList, itemToEvaluate))
+                var denyList = LoadDenyList().ToArray();
+                var filteredList = new List<string>();
+                foreach (var itemToEvaluate in listToEvaluate)
                 {
-                    filteredList.Add(itemToEvaluate);
+                    if (!EvaluateItemAgainstDenyList(denyList, itemToEvaluate))
+                    {
+                        filteredList.Add(itemToEvaluate);
+                    }
                 }
+                return filteredList;
             }
-            return filteredList;
+            catch (Exception e)
+            {
+                _log.Trace($"Could not remove from list: {e}");
+                return originalList;
+            }
         }
 
         private static bool EvaluateItemAgainstDenyList(IEnumerable<string> denyList, string itemToEvaluate)
@@ -58,32 +82,55 @@ namespace Ghosts.Domain.Code
                 if (ShouldDeny(denyItem, itemToEvaluate))
                     return true;
             }
-
             return false;
         }
 
         private static bool ShouldDeny(string denyRule, string itemToEvaluate)
         {
+            itemToEvaluate = itemToEvaluate.CleanUrl();
+
+            if (itemToEvaluate.Equals(denyRule))
+            {
+                Console.WriteLine("Matches exact");
+                return true;
+            }
+
             if (denyRule.Contains("*"))
             {
                 if (denyRule.Count(x => x == '*') > 1)
                 {
-                    if (itemToEvaluate.Contains(denyRule.Replace("*", "").GetUriHost()))
+                    if (itemToEvaluate.Contains(denyRule.Replace("*", "")))
+                    {
+                        Console.WriteLine("Matches (*/* deny rule");
                         return true;
+                    }
                 }
                 else if (denyRule.EndsWith("*"))
                 {
-                    if (itemToEvaluate.EndsWith(denyRule.Replace("*", "").GetUriHost(), StringComparison.InvariantCultureIgnoreCase))
+                    if (itemToEvaluate.StartsWith(denyRule.Replace("*", ""),
+                            StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        Console.WriteLine("Matches (end/*) deny rule");
                         return true;
+                    }
                 }
                 else if (denyRule.StartsWith("*"))
                 {
-                    if (itemToEvaluate.StartsWith(denyRule.Replace("*", "").GetUriHost(), StringComparison.InvariantCultureIgnoreCase))
+                    if (itemToEvaluate.EndsWith(denyRule.Replace("*", ""),
+                            StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        Console.WriteLine("Matches (*/deny) deny rule");
                         return true;
+                    }
                 }
             }
 
-            return itemToEvaluate.StartsWith(denyRule.Replace("*", "").GetUriHost(), StringComparison.InvariantCultureIgnoreCase);
+            var o = itemToEvaluate.Equals(denyRule.Replace("*", ""), StringComparison.InvariantCultureIgnoreCase);
+            if (o)
+            {
+                Console.WriteLine("Matches full (*/deny) deny rule");
+            }
+            return o;
         }
     }
 }
