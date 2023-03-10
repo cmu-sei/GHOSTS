@@ -33,10 +33,13 @@ namespace Ghosts.Domain.Code
 
         private Uri _baseUri;
 
+        private IEnumerable<string> _denyList;
+
         public LinkManager(int visitedSitesRemembered)
         {
             Links = new List<Link>();
             RecentlyVisited = new LifoQueue<Uri>(visitedSitesRemembered);
+            this._denyList = DenyListManager.LoadDenyList();
             Log.Trace($"Creating new link manager with visitedSitesRemembered = {visitedSitesRemembered}");
         }
 
@@ -47,14 +50,14 @@ namespace Ghosts.Domain.Code
             Log.Trace($"Link manager reset with baseuri = {_baseUri}");
         }
 
-        public void AddLink(string url, int priority)
-        {
-            if (!Uri.TryCreate(url, UriKind.RelativeOrAbsolute, out var uri))
-            {
-                return;
-            }
-            this.AddLink(uri, priority);
-        }
+        //public void AddLink(string url, int priority)
+        //{
+        //    if (!Uri.TryCreate(url, UriKind.RelativeOrAbsolute, out var uri))
+        //    {
+        //        return;
+        //    }
+        //    this.AddLink(uri, priority);
+        //}
 
         public void AddLink(Uri uri, int priority)
         {
@@ -72,7 +75,12 @@ namespace Ghosts.Domain.Code
                 }
             }
 
-            //truly a new link, add it
+            // is in deny list?
+            if (DenyListManager.IsInDenyList(this._denyList, uri.ToString()))
+                return;
+            
+
+            // truly a new link, add it
             try
             {
                 Links.Add(new Link { Url = uri, Priority = priority });

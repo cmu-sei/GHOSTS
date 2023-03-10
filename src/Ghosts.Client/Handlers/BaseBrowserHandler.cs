@@ -12,9 +12,6 @@ using OpenQA.Selenium;
 using Actions = OpenQA.Selenium.Interactions.Actions;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using static System.Windows.Forms.LinkLabel;
-using System.ComponentModel.Composition;
 
 namespace Ghosts.Client.Handlers
 {
@@ -24,27 +21,24 @@ namespace Ghosts.Client.Handlers
         public IJavaScriptExecutor JS { get; set; }
         public HandlerType BrowserType { get; set; }
         internal bool Restart { get; set; }
-        public int stickiness;
-        public int depthMin = 1;
-        public int depthMax = 10;
-        public int visitedRemember = 5;
-        public int actionsBeforeRestart = -1;
-        public LinkManager linkManager;
-        public int actionsCount = 0;
-        public int browseprobability = 100;
-        public int jitterfactor { get; set; }  = 0;  //used with Jitter.JitterFactorDelay
+        public int Stickiness;
+        public int DepthMin = 1;
+        public int DepthMax = 10;
+        public int VisitedRemember = 5;
+        public int ActionsBeforeRestart = -1;
+        public LinkManager LinkManager;
+        public int ActionsCount = 0;
+        public int BrowseProbability = 100;
+        public int JitterFactor { get; set; }  = 0;  //used with Jitter.JitterFactorDelay
 
-        public bool sharepointAbort { get; set; } = false;  //will be set to True if unable to proceed with Handler execution
-        SharepointHelper _sharepointhelper = null;
-
-        public bool blogAbort { get; set; } = false;  //will be set to True if unable to proceed with Handler execution
-        BlogHelper _bloghelper = null;
+        public bool SharePointAbort { get; set; } = false;  //will be set to True if unable to proceed with Handler execution
+        public bool BlogAbort { get; set; } = false;  //will be set to True if unable to proceed with Handler execution
         public string UserAgentString { get; set; }
-        PostContentManager _posthelper = null;
-
-
-
-
+        
+        private SharepointHelper _sharePointHelper = null;
+        private BlogHelper _blogHelper = null;
+        private PostContentManager _postHelper = null;
+        
         private Task LaunchThread(TimelineHandler handler, TimelineEvent timelineEvent, string site)
         {
             var o = new BrowserCrawl();
@@ -93,21 +87,21 @@ namespace Ghosts.Client.Handlers
                             }
                             break;
                        case "sharepoint":
-                            if (!sharepointAbort)
+                            if (!SharePointAbort)
                             {
-                                if (_sharepointhelper == null)
+                                if (_sharePointHelper == null)
                                 {
-                                    _sharepointhelper = SharepointHelper.MakeHelper(this, Driver, handler, Log);
-                                    if (_sharepointhelper == null) sharepointAbort = true;
+                                    _sharePointHelper = SharepointHelper.MakeHelper(this, Driver, handler, Log);
+                                    if (_sharePointHelper == null) SharePointAbort = true;
                                 }
 
-                                if (_sharepointhelper != null)
+                                if (_sharePointHelper != null)
                                 {
-                                    _sharepointhelper.Execute(handler, timelineEvent);
-                                    this.Restart = _sharepointhelper.RestartNeeded();
+                                    _sharePointHelper.Execute(handler, timelineEvent);
+                                    this.Restart = _sharePointHelper.RestartNeeded();
                                     if (this.Restart)
                                     {
-                                        _sharepointhelper = null;  //remove the helper
+                                        _sharePointHelper = null;  //remove the helper
                                         Log.Trace($"Sharepoint:: Restart requested for {this.BrowserType.ToString()} , restarting...");
                                         return;  //restart has been requested 
                                     }
@@ -115,14 +109,14 @@ namespace Ghosts.Client.Handlers
                             }
                             break;
                        case "blog":
-                            if (!blogAbort)
+                            if (!BlogAbort)
                             {
-                                if (_bloghelper == null)
+                                if (_blogHelper == null)
                                 {
-                                    _bloghelper = BlogHelper.MakeHelper(this, Driver, handler, Log);
-                                    if  (_bloghelper == null) blogAbort = true;  //failed to create a helper
+                                    _blogHelper = BlogHelper.MakeHelper(this, Driver, handler, Log);
+                                    if  (_blogHelper == null) BlogAbort = true;  //failed to create a helper
                                 }
-                                if (_bloghelper != null) _bloghelper.Execute(handler, timelineEvent);
+                                if (_blogHelper != null) _blogHelper.Execute(handler, timelineEvent);
                             }
                             break;
                         case "random":
@@ -133,7 +127,7 @@ namespace Ghosts.Client.Handlers
 
                         case "randomalt":
                             ParseRandomHandlerArgs(handler);
-                            if (_posthelper == null) _posthelper = new PostContentManager();
+                            if (_postHelper == null) _postHelper = new PostContentManager();
                             DoRandomAltCommand(handler, timelineEvent);
                             if (this.Restart) return;  //restart has been requested
                             break;
@@ -221,32 +215,32 @@ namespace Ghosts.Client.Handlers
         {
             if (handler.HandlerArgs.ContainsKey("stickiness"))
             {
-                int.TryParse(handler.HandlerArgs["stickiness"].ToString(), out stickiness);
+                int.TryParse(handler.HandlerArgs["stickiness"].ToString(), out Stickiness);
             }
             if (handler.HandlerArgs.ContainsKey("stickiness-depth-min"))
             {
-                int.TryParse(handler.HandlerArgs["stickiness-depth-min"].ToString(), out depthMin);
+                int.TryParse(handler.HandlerArgs["stickiness-depth-min"].ToString(), out DepthMin);
             }
             if (handler.HandlerArgs.ContainsKey("stickiness-depth-max"))
             {
-                int.TryParse(handler.HandlerArgs["stickiness-depth-max"].ToString(), out depthMax);
+                int.TryParse(handler.HandlerArgs["stickiness-depth-max"].ToString(), out DepthMax);
             }
             if (handler.HandlerArgs.ContainsKey("visited-remember"))
             {
-                int.TryParse(handler.HandlerArgs["visited-remember"].ToString(), out visitedRemember);
+                int.TryParse(handler.HandlerArgs["visited-remember"].ToString(), out VisitedRemember);
             }
             if (handler.HandlerArgs.ContainsKey("actions-before-restart"))
             {
-                int.TryParse(handler.HandlerArgs["actions-before-restart"].ToString(), out actionsBeforeRestart);
+                int.TryParse(handler.HandlerArgs["actions-before-restart"].ToString(), out ActionsBeforeRestart);
             }
             if (handler.HandlerArgs.ContainsKey("browse-probability"))
             {
-                int.TryParse(handler.HandlerArgs["browse-probability"].ToString(), out browseprobability);
-                if (browseprobability < 0 || browseprobability > 100) browseprobability = 100;
+                int.TryParse(handler.HandlerArgs["browse-probability"].ToString(), out BrowseProbability);
+                if (BrowseProbability < 0 || BrowseProbability > 100) BrowseProbability = 100;
             }
             if (handler.HandlerArgs.ContainsKey("delay-jitter"))
             {
-                jitterfactor = Jitter.JitterFactorParse(handler.HandlerArgs["delay-jitter"].ToString());
+                JitterFactor = Jitter.JitterFactorParse(handler.HandlerArgs["delay-jitter"].ToString());
             }
 
 
@@ -261,7 +255,7 @@ namespace Ghosts.Client.Handlers
             public void DoRandomCommand(TimelineHandler handler, TimelineEvent timelineEvent)
         {
             
-            this.linkManager = new LinkManager(visitedRemember);
+            this.LinkManager = new LinkManager(VisitedRemember);
 
             while (true)
             {
@@ -273,25 +267,25 @@ namespace Ghosts.Client.Handlers
                 var config = RequestConfiguration.Load(handler, timelineEvent.CommandArgs[_random.Next(0, timelineEvent.CommandArgs.Count)]);
                 if (config.Uri != null && config.Uri.IsWellFormedOriginalString())
                 {
-                    this.linkManager.SetCurrent(config.Uri);
+                    this.LinkManager.SetCurrent(config.Uri);
                     MakeRequest(config);
                     Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId);
                     Thread.Sleep(timelineEvent.DelayAfter);
 
-                    if (this.stickiness > 0)
+                    if (this.Stickiness > 0)
                     {
                         //now some percentage of the time should stay on this site
-                        if (_random.Next(100) < this.stickiness)
+                        if (_random.Next(100) < this.Stickiness)
                         {
-                            var loops = _random.Next(this.depthMin, this.depthMax);
+                            var loops = _random.Next(this.DepthMin, this.DepthMax);
                             Log.Trace($"Beginning {loops} loops on {config.Uri}");
                             for (var loopNumber = 0; loopNumber < loops; loopNumber++)
                             {
                                 try
                                 {
-                                    this.linkManager.SetCurrent(config.Uri);
+                                    this.LinkManager.SetCurrent(config.Uri);
                                     GetAllLinks(config, false);
-                                    var link = this.linkManager.Choose();
+                                    var link = this.LinkManager.Choose();
                                     if (link == null)
                                     {
                                         return;
@@ -315,13 +309,13 @@ namespace Ghosts.Client.Handlers
                                     Log.Error($"Browser loop error {e}");
                                 }
 
-                                if (actionsBeforeRestart > 0)
+                                if (ActionsBeforeRestart > 0)
                                 {
-                                    if (this.actionsCount.IsDivisibleByN(10))
+                                    if (this.ActionsCount.IsDivisibleByN(10))
                                     {
-                                        Log.Trace($"Browser actions == {this.actionsCount}");
+                                        Log.Trace($"Browser actions == {this.ActionsCount}");
                                     }
-                                    if (this.actionsCount > actionsBeforeRestart)
+                                    if (this.ActionsCount > ActionsBeforeRestart)
                                     {
                                         this.Restart = true;
                                         Log.Trace("Browser reached action threshold. Restarting...");
@@ -335,13 +329,13 @@ namespace Ghosts.Client.Handlers
                     }
                 }
 
-                if (actionsBeforeRestart > 0)
+                if (ActionsBeforeRestart > 0)
                 {
-                    if (this.actionsCount.IsDivisibleByN(10))
+                    if (this.ActionsCount.IsDivisibleByN(10))
                     {
-                        Log.Trace($"Browser actions == {this.actionsCount}");
+                        Log.Trace($"Browser actions == {this.ActionsCount}");
                     }
-                    if (this.actionsCount > actionsBeforeRestart)
+                    if (this.ActionsCount > ActionsBeforeRestart)
                     {
                         this.Restart = true;
                         Log.Trace("Browser reached action threshold. Restarting...");
@@ -370,12 +364,12 @@ namespace Ghosts.Client.Handlers
                         if (uri.GetDomain() != config.Uri.GetDomain())
                         {
                             if (!sameSite)
-                                this.linkManager.AddLink(uri, 1);
+                                this.LinkManager.AddLink(uri, 1);
                         }
                         // relative links - prefix the scheme and host 
                         else
                         {
-                            this.linkManager.AddLink(uri, 2);
+                            this.LinkManager.AddLink(uri, 2);
                         }
                     }
                 }
@@ -419,7 +413,7 @@ namespace Ghosts.Client.Handlers
                         break;
                 }
 
-                this.actionsCount++;
+                this.ActionsCount++;
             }
             catch (Exception e)
             {
@@ -438,18 +432,18 @@ namespace Ghosts.Client.Handlers
         private string GetInputElementText(IWebElement targetElement)
         {
             var attr = targetElement.GetAttribute("type");
-            if (attr == "email") return _posthelper.Email ;
+            if (attr == "email") return _postHelper.Email ;
             else
             {
                 attr = targetElement.GetAttribute("id");
                 if (attr != null && attr.ToLower().Contains("name"))
                 {
                     //assume this is a name field
-                    return _posthelper.FullName;
+                    return _postHelper.FullName;
                 }
                 else
                 {
-                    return _posthelper.Subject;   //this is a single line of unknown type, not sure what to repond with here
+                    return _postHelper.Subject;   //this is a single line of unknown type, not sure what to repond with here
                 }
             }
         }
@@ -464,7 +458,7 @@ namespace Ghosts.Client.Handlers
         private void HandleTextareaElement(IWebElement targetElement)
         {
             
-            targetElement.SendKeys(_posthelper.Body);
+            targetElement.SendKeys(_postHelper.Body);
         }
 
         private bool HandleFormSubmit(RequestConfiguration config,IWebElement gfElement)
@@ -473,8 +467,8 @@ namespace Ghosts.Client.Handlers
             var inputElements = gfElement.FindElements(By.XPath(".//input"));
             var textareaElements = gfElement.FindElements(By.XPath(".//textarea"));
             IWebElement submitElement = null;
-            _posthelper.NameEmailNext();  //generate a name and email for this page
-            _posthelper.GenericContentNext();
+            _postHelper.NameEmailNext();  //generate a name and email for this page
+            _postHelper.GenericContentNext();
             foreach (var inputElement in inputElements)
             {
                 var attr = inputElement.GetAttribute("type");
@@ -549,7 +543,7 @@ namespace Ghosts.Client.Handlers
                 var targetUri = uriList[linkNum];
                 var targetElement = elementList[linkNum];
                 //remember this Url
-                if (urlDict.Count == visitedRemember && visitedRemember > 0)
+                if (urlDict.Count == VisitedRemember && VisitedRemember > 0)
                 {
                     //at capacity, need to remove oldest
                     var lastItem = urlQueue.Last();
@@ -569,7 +563,7 @@ namespace Ghosts.Client.Handlers
                 {
                     BrowserHelperSupport.MoveToElementAndClick(Driver, targetElement);
                 }
-                this.actionsCount++;
+                this.ActionsCount++;
                 return true;
             }
             catch (Exception e)
@@ -599,11 +593,6 @@ namespace Ghosts.Client.Handlers
         /// <exception cref="Exception"></exception>
         public void DoRandomAltCommand(TimelineHandler handler, TimelineEvent timelineEvent)
         {
-            RequestConfiguration config;
-            Dictionary<string, int> urlDict;
-            LifoQueue<Uri> urlQueue;
-
-
             while (true)
             {
                 if (Driver.CurrentWindowHandle == null)
@@ -611,34 +600,34 @@ namespace Ghosts.Client.Handlers
                     throw new Exception("Browser window handle not available");
                 }
 
-                config = RequestConfiguration.Load(handler, timelineEvent.CommandArgs[_random.Next(0, timelineEvent.CommandArgs.Count)]);
+                var config = RequestConfiguration.Load(handler, timelineEvent.CommandArgs[_random.Next(0, timelineEvent.CommandArgs.Count)]);
                 
-                if (browseprobability < _random.Next(0, 100)) {
+                if (BrowseProbability < _random.Next(0, 100)) {
                     //skipping this link
                     Log.Trace($"Timeline choice skipped due to browse probability");
-                    Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter,jitterfactor));
+                    Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter,JitterFactor));
                     continue;
                 }
                 if (config.Uri != null && config.Uri.IsWellFormedOriginalString())
                 {
-                    urlDict = new Dictionary<string, int>();  //use this to remember visited sites
-                    urlQueue = new LifoQueue<Uri>(visitedRemember);
+                    var urlDict = new Dictionary<string, int>();
+                    var urlQueue = new LifoQueue<Uri>(VisitedRemember);
                     MakeRequest(config);
                     Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId);
                     Thread.Sleep(timelineEvent.DelayAfter);
 
-                    if (this.stickiness > 0)
+                    if (this.Stickiness > 0)
                     {
                         //now some percentage of the time should stay on this site
-                        if (_random.Next(100) < this.stickiness)
+                        if (_random.Next(100) < this.Stickiness)
                         {
-                            var loops = _random.Next(this.depthMin, this.depthMax);
+                            var loops = _random.Next(this.DepthMin, this.DepthMax);
                             Log.Trace($"Beginning {loops} loops on {config.Uri}");
                             for (var loopNumber = 0; loopNumber < loops; loopNumber++)
                             {
                                 try
                                 {
-                                    if (browseprobability > _random.Next(0, 100))
+                                    if (BrowseProbability > _random.Next(0, 100))
                                     {
                                         if (!ClickRandomLink(config, urlDict, urlQueue)) break;  //break if no links found, reset to next choice
                                         Log.Trace($"Making request #{loopNumber + 1}/{loops} to {config.Uri}");
@@ -659,13 +648,13 @@ namespace Ghosts.Client.Handlers
                                     Log.Error($"Browser loop error {e}");
                                 }
 
-                                if (actionsBeforeRestart > 0)
+                                if (ActionsBeforeRestart > 0)
                                 {
-                                    if (this.actionsCount.IsDivisibleByN(10))
+                                    if (this.ActionsCount.IsDivisibleByN(10))
                                     {
-                                        Log.Trace($"Browser actions == {this.actionsCount}");
+                                        Log.Trace($"Browser actions == {this.ActionsCount}");
                                     }
-                                    if (this.actionsCount > actionsBeforeRestart)
+                                    if (this.ActionsCount > ActionsBeforeRestart)
                                     {
                                         this.Restart = true;
                                         Log.Trace("Browser reached action threshold. Restarting...");
@@ -673,19 +662,19 @@ namespace Ghosts.Client.Handlers
                                     }
                                 }
 
-                                Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, jitterfactor));
+                                Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, JitterFactor));
                             }
                         }
                     }
                 }
 
-                if (actionsBeforeRestart > 0)
+                if (ActionsBeforeRestart > 0)
                 {
-                    if (this.actionsCount.IsDivisibleByN(10))
+                    if (this.ActionsCount.IsDivisibleByN(10))
                     {
-                        Log.Trace($"Browser actions == {this.actionsCount}");
+                        Log.Trace($"Browser actions == {this.ActionsCount}");
                     }
-                    if (this.actionsCount > actionsBeforeRestart)
+                    if (this.ActionsCount > ActionsBeforeRestart)
                     {
                         this.Restart = true;
                         Log.Trace("Browser reached action threshold. Restarting...");
@@ -693,37 +682,22 @@ namespace Ghosts.Client.Handlers
                     }
                 }
 
-                Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, jitterfactor));
-
-
+                Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, JitterFactor));
             }
         }
-
-
-
-
- 
-
+        
         public virtual void HandleBrowserException(Exception e)
         {
-
+            // ignore
         }
-
-      
-
+        
         /// <summary>
-        /// Close browser
+        /// Close browser entirely
         /// </summary>
         public void Close()
         {
             Report(BrowserType.ToString(), "Close", string.Empty);
             Driver.Close();
-        }
-
-        public void Stop()
-        {
-            Report(BrowserType.ToString(), "Stop", string.Empty);
-            Close();
         }
     }
 }

@@ -200,19 +200,19 @@ namespace Ghosts.Client.Handlers
                     if ((_deletionProbability + _uploadProbability + _downloadProbability + _replyProbability) > 100)
                     {
                         Log.Trace($"Blog:: The sum of the browse/upload/deletion/reply blog probabilities is > 100 , blog browser action will not be executed.");
-                        baseHandler.blogAbort = true;
+                        baseHandler.BlogAbort = true;
                         return;
                     }
 
                     if ((_deletionProbability + _uploadProbability + _downloadProbability + _replyProbability) == 0)
                     {
                         Log.Trace($"Blog:: The sum of the download/upload/deletion/reply blog probabilities == 0 , blog browser action will not be executed.");
-                        baseHandler.blogAbort = true;
+                        baseHandler.BlogAbort = true;
                         return;
                     }
                     if (handler.HandlerArgs.ContainsKey("delay-jitter"))
                     {
-                        baseHandler.jitterfactor = Jitter.JitterFactorParse(handler.HandlerArgs["delay-jitter"].ToString());
+                        baseHandler.JitterFactor = Jitter.JitterFactorParse(handler.HandlerArgs["delay-jitter"].ToString());
                     }
 
 
@@ -228,7 +228,7 @@ namespace Ghosts.Client.Handlers
                         catch (System.Exception e)
                         {
                             Log.Trace($"Blog:: Error parsing blog credentials file {credFname} , blog browser action will not be executed.");
-                            baseHandler.blogAbort = true;
+                            baseHandler.BlogAbort = true;
                             Log.Error(e);
                             return;
                         }
@@ -257,7 +257,7 @@ namespace Ghosts.Client.Handlers
                     if (site == null)
                     {
                         Log.Trace($"Blog:: The command args must specify a 'site:<value>' , blog browser action will not be executed.");
-                        baseHandler.blogAbort = true;
+                        baseHandler.BlogAbort = true;
                         return;
                     }
 
@@ -288,7 +288,7 @@ namespace Ghosts.Client.Handlers
                     if (credentialKey == null)
                     {
                         Log.Trace($"Blog:: The command args must specify a 'credentialKey:<value>' , blog browser action will not be executed.");
-                        baseHandler.blogAbort = true;
+                        baseHandler.BlogAbort = true;
                         return;
                     }
 
@@ -298,13 +298,13 @@ namespace Ghosts.Client.Handlers
                     if (username == null || password == null)
                     {
                         Log.Trace($"Blog:: The credential key {credentialKey} does not return a valid credential from file {credFname}, blog browser action will not be executed");
-                        baseHandler.blogAbort = true;
+                        baseHandler.BlogAbort = true;
                         return;
                     }
 
                     //have username, password - do the initial login
                     if (!DoInitialLogin(handler,username,password)) {
-                        baseHandler.blogAbort = true;
+                        baseHandler.BlogAbort = true;
                         return;
                     }
 
@@ -329,7 +329,7 @@ namespace Ghosts.Client.Handlers
                     {
                         if (!DoBrowse(handler))
                         {
-                            baseHandler.blogAbort = true;
+                            baseHandler.BlogAbort = true;
                             return;
                         }
                     }
@@ -338,7 +338,7 @@ namespace Ghosts.Client.Handlers
                     {
                         if (!DoDelete(handler))
                         {
-                            baseHandler.blogAbort = true;
+                            baseHandler.BlogAbort = true;
                             return;
                         }
                     }
@@ -352,7 +352,7 @@ namespace Ghosts.Client.Handlers
                             Log.Trace($"Blog:: Content unavailable, check Blog content file, upload skipped.");
                         } else if (!DoUpload(handler, contentManager.Subject, contentManager.Body))
                         {
-                            baseHandler.blogAbort = true;
+                            baseHandler.BlogAbort = true;
                             return;
                         }
                     }
@@ -366,7 +366,7 @@ namespace Ghosts.Client.Handlers
                         }
                         else if (!DoReply(handler, reply))
                         {
-                            baseHandler.blogAbort = true;
+                            baseHandler.BlogAbort = true;
                             return;
                         }
                     }

@@ -47,7 +47,7 @@ namespace Ghosts.Client.Handlers
             catch (System.Exception e)
             {
                 Log.Trace($"Sharepoint:: Unable to parse site {site}, url may be malformed. Sharepoint browser action will not be executed.");
-                baseHandler.sharepointAbort = true;
+                baseHandler.SharePointAbort = true;
                 Log.Error(e);
                 return false;
 
@@ -64,7 +64,7 @@ namespace Ghosts.Client.Handlers
             catch (System.Exception e)
             {
                 Log.Trace($"Sharepoint:: Unable to find Sharepoint menu, login may have failed, check the credentials. Sharepoint browser action will not be executed.");
-                baseHandler.sharepointAbort = true;
+                baseHandler.SharePointAbort = true;
                 Log.Error(e);
                 return false;
 
@@ -440,19 +440,19 @@ namespace Ghosts.Client.Handlers
                     if ((_deletionProbability + _uploadProbability + _downloadProbability) > 100)
                     {
                         Log.Trace($"Sharepoint:: The sum of the download/upload/deletion sharepoint probabilities is > 100 , sharepoint browser action will not be executed.");
-                        baseHandler.sharepointAbort = true;
+                        baseHandler.SharePointAbort = true;
                         return;
                     }
 
                     if ((_deletionProbability + _uploadProbability + _downloadProbability) == 0)
                     {
                         Log.Trace($"Sharepoint:: The sum of the download/upload/deletion sharepoint probabilities == 0 , sharepoint browser action will not be executed.");
-                        baseHandler.sharepointAbort = true;
+                        baseHandler.SharePointAbort = true;
                         return;
                     }
                     if (handler.HandlerArgs.ContainsKey("delay-jitter"))
                     {
-                        baseHandler.jitterfactor = Jitter.JitterFactorParse(handler.HandlerArgs["delay-jitter"].ToString());
+                        baseHandler.JitterFactor = Jitter.JitterFactorParse(handler.HandlerArgs["delay-jitter"].ToString());
                     }
 
                     credFname = handler.HandlerArgs["sharepoint-credentials-file"].ToString();
@@ -467,7 +467,7 @@ namespace Ghosts.Client.Handlers
                         catch (System.Exception e)
                         {
                             Log.Trace($"Sharepoint:: Error parsing sharepoint credentials file {credFname} , sharepoint browser action will not be executed.");
-                            baseHandler.sharepointAbort = true;
+                            baseHandler.SharePointAbort = true;
                             Log.Error(e);
                             return;
                         }
@@ -496,7 +496,7 @@ namespace Ghosts.Client.Handlers
                     if (site == null)
                     {
                         Log.Trace($"Sharepoint:: The command args must specify a 'site:<value>' , sharepoint browser action will not be executed.");
-                        baseHandler.sharepointAbort = true;
+                        baseHandler.SharePointAbort = true;
                         return;
                     }
 
@@ -527,7 +527,7 @@ namespace Ghosts.Client.Handlers
                     if (credentialKey == null)
                     {
                         Log.Trace($"Sharepoint:: The command args must specify a 'credentialKey:<value>' , sharepoint browser action will not be executed.");
-                        baseHandler.sharepointAbort = true;
+                        baseHandler.SharePointAbort = true;
                         return;
                     }
 
@@ -537,14 +537,14 @@ namespace Ghosts.Client.Handlers
                     if (username == null || password == null)
                     {
                         Log.Trace($"Sharepoint:: The credential key {credentialKey} does not return a valid credential from file {credFname},   sharepoint browser action will not be executed");
-                        baseHandler.sharepointAbort = true;
+                        baseHandler.SharePointAbort = true;
                         return;
                     }
 
                     //have username, password - do the initial login
                     if (!DoInitialLogin(handler, username, password))
                     {
-                        baseHandler.blogAbort = true;
+                        baseHandler.BlogAbort = true;
                         return;
                     }
 
@@ -565,7 +565,7 @@ namespace Ghosts.Client.Handlers
                     {
                         if (!DoDownload(handler))
                         {
-                            baseHandler.blogAbort = true;
+                            baseHandler.BlogAbort = true;
                             return;
                         }
 
@@ -574,7 +574,7 @@ namespace Ghosts.Client.Handlers
                     {
                         if (!DoUpload(handler))
                         {
-                            baseHandler.blogAbort = true;
+                            baseHandler.BlogAbort = true;
                             return;
                         }
                     }
@@ -583,7 +583,7 @@ namespace Ghosts.Client.Handlers
                     {
                         if (!DoDelete(handler))
                         {
-                            baseHandler.blogAbort = true;
+                            baseHandler.BlogAbort = true;
                             return;
                         }
                     }

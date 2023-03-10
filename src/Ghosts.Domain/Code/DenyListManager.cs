@@ -32,6 +32,11 @@ namespace Ghosts.Domain.Code
             return EvaluateItemAgainstDenyList(denyList, itemToEvaluate);
         }
 
+        public static bool IsInDenyList(IEnumerable<string> denyList, string itemToEvaluate)
+        {
+            return EvaluateItemAgainstDenyList(denyList, itemToEvaluate);
+        }
+
         public static IEnumerable<string> RemoveDeniedFromList(IEnumerable<string> listToEvaluate)
         {
             var denyList = LoadDenyList().ToArray();
