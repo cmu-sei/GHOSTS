@@ -715,7 +715,7 @@ public class Outlookv2 : BaseHandler
             var mailItem = filteredEmails.PickRandom();
 
             //check deny list
-            var list = DenyListManager.ScrubList(mailItem.HTMLBody.GetHrefUrls());
+            var list = DenyListManager.RemoveDeniedFromList(mailItem.HTMLBody.GetHrefUrls());
             if (list.Any())
             {
                 list.PickRandom().OpenUrl();
