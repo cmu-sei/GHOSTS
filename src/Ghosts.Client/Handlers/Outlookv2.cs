@@ -17,17 +17,24 @@ using MAPIFolder = Microsoft.Office.Interop.Outlook.MAPIFolder;
 using Ghosts.Client.Infrastructure;
 using NPOI.SS.Formula.Functions;
 using Microsoft.AspNetCore.Mvc.Filters;
-
+using NPOI.OpenXmlFormats.Dml;
+using System.Runtime.InteropServices;
 
 namespace Ghosts.Client.Handlers;
 
 public class Outlookv2 : BaseHandler
 {
-    private readonly Application _app;
-    private readonly NameSpace _oMapiNamespace;
-    private readonly MAPIFolder _folderOutbox;
-    private readonly MAPIFolder _folderInbox;
-    private readonly MAPIFolder _folderDeletedItems;
+    //private readonly Application _app;
+    //private readonly NameSpace _oMapiNamespace;
+    //private readonly MAPIFolder _folderOutbox;
+    //private readonly MAPIFolder _folderInbox;
+    //private readonly MAPIFolder _folderDeletedItems;
+
+    private Application _app;
+    private NameSpace _oMapiNamespace;
+    private MAPIFolder _folderOutbox;
+    private MAPIFolder _folderInbox;
+    private MAPIFolder _folderDeletedItems;
 
 
     //primary actions - delete, send, reply, read
@@ -55,13 +62,65 @@ public class Outlookv2 : BaseHandler
     
     private int _actionCount = 0;
     private int _replyErrorCount = 0;
+    private int _replyErrorThreshold = 10;  //after this many reply errors, abandon replies in favor of create
     private bool _firstDisplay = false;
+    private int _totalErrorCount = 0;
+    private int _restartThreadhold = 20;
+    
+    
 
     public Outlookv2(TimelineHandler handler)
     {
         try
         {
             base.Init(handler);
+            MakeRdoSession();
+        }
+        
+        catch (Exception e)
+        {
+            Log.Error($"Outlookv2:: Init error {e}");
+        }
+
+        try
+        {
+            InitialDisplay();
+
+            if (handler.Loop)
+            {
+                while (true)
+                {
+                    ExecuteEvents(handler);
+                    if (_totalErrorCount > _restartThreadhold )
+                    {
+                        _totalErrorCount = 0;
+                        Log.Trace("Outlookv2:: Total successive error count exceeded threshold, Outlookv2 restarting.");
+                        doRestart();
+                    }
+                }
+            }
+            else
+            {
+                ExecuteEvents(handler);
+            }
+        }
+        catch (ThreadAbortException)
+        {
+            ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.Outlook);
+            Log.Trace("Outlookv2 closing...");
+        }
+        catch (Exception e)
+        {
+            Log.Error(e);
+        }
+
+    }
+
+    public void MakeRdoSession()
+    {
+        try
+        {
+
             //redemption prep
             //tell the app where the 32 and 64 bit dlls are located
             //by default, they are assumed to be in the same folder as the current assembly and be named
@@ -75,35 +134,45 @@ public class Outlookv2 : BaseHandler
             var session = RedemptionLoader.new_RDOSession();
             Log.Trace("Attempting RDO session logon...");
             session.Logon(Missing.Value, Missing.Value, Missing.Value, Missing.Value, Missing.Value, Missing.Value);
-                    
+
         }
+
         catch (Exception e)
         {
-            Log.Error($"Outlookv2:: RDO load error, iteration: {e}");
+            Log.Error($"Outlookv2:: RDO load error {e}");
         }
 
+    }
+
+    public void InitialDisplay()
+    {
+        _app = new Application();
+        _oMapiNamespace = _app.GetNamespace("MAPI");
+        _folderInbox = _oMapiNamespace.GetDefaultFolder(OlDefaultFolders.olFolderInbox);
+        _folderOutbox = _oMapiNamespace.GetDefaultFolder(OlDefaultFolders.olFolderOutbox);
+        _folderDeletedItems = _oMapiNamespace.GetDefaultFolder(OlDefaultFolders.olFolderDeletedItems);
+        Log.Trace("Launching Outlook");
+        _folderInbox.Display();
+
+    }
+
+
+
+    public void doRestart()
+    {
         try
         {
-            _app = new Application();
-            _oMapiNamespace = _app.GetNamespace("MAPI");
-            _folderInbox = _oMapiNamespace.GetDefaultFolder(OlDefaultFolders.olFolderInbox);
-            _folderOutbox = _oMapiNamespace.GetDefaultFolder(OlDefaultFolders.olFolderOutbox);
-            _folderDeletedItems = _oMapiNamespace.GetDefaultFolder(OlDefaultFolders.olFolderDeletedItems);
-            Log.Trace("Launching Outlook");
-            _folderInbox.Display();
-           
-
-            if (handler.Loop)
-            {
-                while (true)
-                {
-                    ExecuteEvents(handler);
-                }
-            }
-            else
-            {
-                ExecuteEvents(handler);
-            }
+            //this will restart Ghosts by updating the timeline file date
+            //File.SetLastWriteTime(TimelineBuilder.TimelineFilePath().FullName, DateTime.Now);
+            ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.Outlook);
+            Thread.Sleep(10000);
+            //restart
+            MakeRdoSession();
+            InitialDisplay();
+        }
+        catch (ThreadAbortException AbortE)
+        {
+            throw AbortE;  //pass up
         }
         catch (Exception e)
         {
@@ -111,22 +180,32 @@ public class Outlookv2 : BaseHandler
         }
     }
 
+    
     public void ExecuteEvents(TimelineHandler handler)
     {
-        ParseHandlerArgs(handler);
+        try
+        {
+            ParseHandlerArgs(handler);
+        }
+        
+        catch (Exception e)
+        {
+            Log.Trace("Outlookv2:: Error parsing handler args");
+            Log.Error(e);
+
+        }
+
         if (!_firstDisplay)
         {
             Thread.Sleep(_initialOutlookDelay); //wait 5 minutes before attempting any action
             _firstDisplay = true;
         }
 
-
-
         try
         {
             foreach (var timelineEvent in handler.TimeLineEvents)
             {
-                if (_replyProbability > 0 && _replyErrorCount > 10)
+                if (_replyProbability > 0 && _replyErrorCount > _replyErrorThreshold)
                 {
                     //too many reply errors.  Null this out.
                     _createProbability += _replyProbability;
@@ -159,66 +238,66 @@ public class Outlookv2 : BaseHandler
 
                     Log.Trace($"Outlookv2:: Performing action {action} .");
                     //before doing any action, clean the drafts folder as there should be no drafts here.
-                    MoveToDeleted("DRAFTS", true, true);  
+                    MoveToDeleted("DRAFTS", true, true);
+                    EmailConfiguration emailConfig;
 
                     switch (action)
                     {
                         case "create":
-                            try
+                            
+                            emailConfig = new EmailConfiguration(timelineEvent.CommandArgs);
+                            if (SendEmailViaOutlook(emailConfig))
                             {
-                                var emailConfig = new EmailConfiguration(timelineEvent.CommandArgs);
-                                if (SendEmailViaOutlook(emailConfig))
-                                {
-                                    Report(handler.HandlerType.ToString(), timelineEvent.Command, emailConfig.ToString());
-                                    Log.Trace("Outlookv2:: Created email");
-                                }
+                                Report(handler.HandlerType.ToString(), timelineEvent.Command, emailConfig.ToString());
+                                Log.Trace("Outlookv2:: Created email");
+                                _totalErrorCount = 0;  //zero on success
                             }
-                            catch (Exception e)
+                            else
                             {
-                                Log.Error(e);
+                                _totalErrorCount++;
                             }
-
+                           
                             break;
                         case "reply":
-                            try
+                            
+                            emailConfig = new EmailConfiguration(timelineEvent.CommandArgs);
+                            if (ReplyViaOutlook(emailConfig))
                             {
-                                var emailConfig = new EmailConfiguration(timelineEvent.CommandArgs);
-                                if (ReplyViaOutlook(emailConfig))
-                                {
-                                    Report(handler.HandlerType.ToString(), timelineEvent.Command, emailConfig.ToString());
-                                    Log.Trace("Outlookv2:: Replied email");
-                                }
+                                Report(handler.HandlerType.ToString(), timelineEvent.Command, emailConfig.ToString());
+                                Log.Trace("Outlookv2:: Replied email");
+                                _totalErrorCount = 0;  //zero on success
                             }
-                            catch (Exception e)
+                            else
                             {
-                                Log.Error(e);
+                                _totalErrorCount++;
                             }
+                            
                             break;
                         case "read":
-                            try
+                            
+                            if (ReadViaOutlook())
                             {
-                                if (ReadViaOutlook())
-                                {
-                                    Log.Trace("Outlookv2:: Read email");
-                                }
+                                Log.Trace("Outlookv2:: Read email");
+                                _totalErrorCount = 0;  //zero on success
                             }
-                            catch (Exception e)
+                            else
                             {
-                                Log.Error(e);
+                                _totalErrorCount++;
                             }
+                            
                             break;
                         case "delete":
-                            try
+                            
+                            if (DeleteViaOutlook())
                             {
-                                if (DeleteViaOutlook())
-                                {
-                                    Log.Trace("Outlookv2:: Deleted email");
-                                }
+                                Log.Trace("Outlookv2:: Deleted email");
+                                _totalErrorCount = 0;  //zero on success
                             }
-                            catch (Exception e)
+                            else
                             {
-                                Log.Error(e);
+                                _totalErrorCount++;
                             }
+                            
                             break;
 
                     }
@@ -227,13 +306,20 @@ public class Outlookv2 : BaseHandler
                     {
                         Log.Trace($"DelayAfter sleeping for {timelineEvent.DelayAfter} ms");
                         Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, _jitterfactor));
+                        
                     }
                 }
             }
         }
+        catch (ThreadAbortException AbortE)
+        {
+            throw AbortE;  //pass up
+        }
         catch (Exception e)
         {
             Log.Error(e);
+            _totalErrorCount++;
+            Thread.Sleep(10000);  //need delay here to avoid fast error loop
         }
     }
 
@@ -370,7 +456,8 @@ public class Outlookv2 : BaseHandler
                     Directory.CreateDirectory(targetDir);
                     _outputDirectory = targetDir;
                 }
-                catch(Exception ex)
+                
+                catch (Exception ex)
                 {
                     Log.Trace(ex);
                     Log.Trace($"Outlookv2:: output directory {targetDir} does not exist and cannot be created, using browser downloads directory.");
@@ -423,51 +510,7 @@ public class Outlookv2 : BaseHandler
         _replyProbability = 25;
     }
 
-    private void CleanFolderOld(string targetFolderName, bool deleteAll, bool deleteUnread)
-    {
-        var folderName = GetFolder(targetFolderName);
-        var targetFolder = this._app.Session.GetDefaultFolder(folderName);
-
-        var folderItems = targetFolder.Items;
-        var count = folderItems.Count;
-        var settings = Program.Configuration.Email;
-        if (count == 0) return;
-
-        if (!deleteAll && count <= settings.EmailsMax)
-        {
-            return; //nothing to do
-        }
-        MailItem folderItem;
-
-        foreach (object item in folderItems)
-        {
-            try
-            {
-                folderItem = item as MailItem;
-                if (folderItem == null) continue;
-                if (deleteAll)
-                {
-                    folderItem.Delete();
-                }
-                else
-                {
-                    if (folderItem.UnRead && !deleteUnread) continue;
-                    folderItem.Delete();
-                    count--;
-                    if (count <= settings.EmailsMax)
-                    {
-                        break; //finished
-                    }
-                }
-            }
-            catch
-            {
-
-            }
-        }
-        return;
-    }
-
+    
     private bool DeleteMailItem (MailItem item)
     {
         try
@@ -475,6 +518,10 @@ public class Outlookv2 : BaseHandler
             item.Delete();
             Thread.Sleep(500);
             return true;
+        }
+        catch (ThreadAbortException AbortE)
+        {
+            throw AbortE;  //pass up
         }
         catch (Exception e)
         {
@@ -506,9 +553,13 @@ public class Outlookv2 : BaseHandler
                     if (!DeleteMailItem(folderItem)) break; 
                 }
             }
-            catch
+            catch (ThreadAbortException AbortE)
             {
-
+                throw AbortE;  //pass up
+            }
+            catch 
+            {
+                //ignore others
             }
         }
         return;
@@ -521,6 +572,10 @@ public class Outlookv2 : BaseHandler
             item.Move(_folderDeletedItems);
             Thread.Sleep(500);
             return true;
+        }
+        catch (ThreadAbortException AbortE)
+        {
+            throw AbortE;  //pass up
         }
         catch (Exception e)
         {
@@ -569,9 +624,13 @@ public class Outlookv2 : BaseHandler
                     }
                 }
             }
+            catch (ThreadAbortException AbortE)
+            {
+                throw AbortE;  //pass up
+            }
             catch 
             {
-
+                //ignore others
                
             }
         }
@@ -597,7 +656,10 @@ public class Outlookv2 : BaseHandler
             MoveToDeleted("SENT", false, true);
             MoveToDeleted("DRAFTS", true, true);
             CleanDeletedItems();
-
+        }
+        catch (ThreadAbortException AbortE)
+        {
+            throw AbortE;  //pass up
         }
         catch (Exception e)
         {
@@ -635,6 +697,10 @@ public class Outlookv2 : BaseHandler
                 }
             }
         }
+        catch (ThreadAbortException AbortE)
+        {
+            throw AbortE;  //pass up
+        }
         catch (Exception ex)
         {
             Log.Trace("Outlookv2::  error while dowloading attachments");
@@ -665,7 +731,13 @@ public class Outlookv2 : BaseHandler
                     folderItem.Close(Microsoft.Office.Interop.Outlook.OlInspectorClose.olDiscard);
                     return true;
                 }
-                catch { }
+                catch (ThreadAbortException AbortE)
+                {
+                    throw AbortE;  //pass up
+                }
+                catch { 
+                    //ignore others
+                }
             }
             var count = folderItems.Count;
             var choice = _random.Next(1, count);
@@ -683,12 +755,22 @@ public class Outlookv2 : BaseHandler
                         DownloadAttachments(folderItem);
                         Thread.Sleep(10000);
                         folderItem.Close(Microsoft.Office.Interop.Outlook.OlInspectorClose.olDiscard);
-                        break;
+                        return true;
                     }
                     
                 }
-                catch { }
+                catch (ThreadAbortException AbortE)
+                {
+                    throw AbortE;  //pass up
+                }
+                catch { 
+                    //ignore others
+                }
             }     
+        }
+        catch (ThreadAbortException AbortE)
+        {
+            throw AbortE;  //pass up
         }
         catch (Exception e)
         {
@@ -696,7 +778,7 @@ public class Outlookv2 : BaseHandler
             return false;
         }
 
-        return true;
+        return false;
     }
 
 
@@ -720,6 +802,10 @@ public class Outlookv2 : BaseHandler
             {
                 list.PickRandom().OpenUrl();
             }
+        }
+        catch (ThreadAbortException AbortE)
+        {
+            throw AbortE;  //pass up
         }
         catch (Exception e)
         {
@@ -815,6 +901,10 @@ public class Outlookv2 : BaseHandler
                     this._app.Explorers[i].Close();
                     Log.Trace($"Closing app explorer: {i}");
                 }
+                catch (ThreadAbortException AbortE)
+                {
+                    throw AbortE;  //pass up
+                }
                 catch (Exception exc)
                 {
                     Log.Trace($"Error in closing app explorer: {exc}");
@@ -890,6 +980,10 @@ public class Outlookv2 : BaseHandler
 
                     return true;
                 }
+                catch (ThreadAbortException AbortE)
+                {
+                    throw AbortE;  //pass up
+                }
                 catch (Exception exc)
                 {
                     Log.Error($"Outlook reply error: {exc}");
@@ -901,6 +995,10 @@ public class Outlookv2 : BaseHandler
                     }
                 }
             }
+        }
+        catch (ThreadAbortException AbortE)
+        {
+            throw AbortE;  //pass up
         }
         catch (Exception e)
         {
@@ -940,7 +1038,13 @@ public class Outlookv2 : BaseHandler
                 return retVal;
             }
         }
-        catch { } //ignore any errors
+        catch (ThreadAbortException AbortE)
+        {
+            throw AbortE;  //pass up
+        }
+        catch {
+            //ignore others
+        }
         return null;
     }
 
@@ -1127,6 +1231,11 @@ public class Outlookv2 : BaseHandler
                 Thread.Sleep(3000);
             }
         }
+        catch (ThreadAbortException AbortE)
+        {
+            throw AbortE;  //pass up
+        }
+
         catch (Exception ex)
         {
             Log.Error(ex);

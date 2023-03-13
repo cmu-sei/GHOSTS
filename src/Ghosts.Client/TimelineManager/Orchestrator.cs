@@ -14,6 +14,7 @@ using System.Threading;
 using System.Security.Permissions;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Models;
+using Quartz;
 // ReSharper disable RedundantAssignment
 
 namespace Ghosts.Client.TimelineManager
@@ -135,15 +136,18 @@ namespace Ghosts.Client.TimelineManager
                 try
                 {
                     threadJob.Thread.Abort(null);
+                    _log.Trace($"Sent abort signal to Thread job {threadJob.ToString()} ");
                 }
                 catch (Exception e)
                 {
                     _log.Debug(e);
                 }
 
+                
                 try
                 {
                     threadJob.Thread.Join();
+                    _log.Trace($"Thread job {threadJob.ToString()}  has aborted.");
                 }
                 catch (Exception e)
                 {
@@ -320,6 +324,7 @@ namespace Ghosts.Client.TimelineManager
             {
                 _log.Trace($"Attempting new thread for: {handler.HandlerType}");
 
+                bool AddToThreadJobs = true;
                 Thread t = null;
                 object _;
                 switch (handler.HandlerType)
@@ -454,6 +459,7 @@ namespace Ghosts.Client.TimelineManager
                         });
                         break;
                     case HandlerType.Watcher:
+                        AddToThreadJobs = false; //do not add this to thread jobs to be stopped, thread only adds event handlers
                         t = new Thread(() =>
                         {
                             _ = new Watcher(handler);
@@ -471,11 +477,15 @@ namespace Ghosts.Client.TimelineManager
 
                 t.IsBackground = true;
                 t.Start();
-                Program.ThreadJobs.Add(new ThreadJob
+                if (AddToThreadJobs)
                 {
-                    TimelineId = timeline.Id,
-                    Thread = t
-                });
+                    Program.ThreadJobs.Add(new ThreadJob
+                    {
+                        TimelineId = timeline.Id,
+                        Thread = t
+                    });
+                }
+                
             }
             catch (Exception e)
             {
@@ -487,7 +497,9 @@ namespace Ghosts.Client.TimelineManager
         {
             try
             {
+                _log.Trace("Stopping all threads.");
                 Stop();
+                _log.Trace("All threads have been stopped.");
             }
             catch (Exception exception)
             {
@@ -496,7 +508,9 @@ namespace Ghosts.Client.TimelineManager
 
             try
             {
+                _log.Trace("Cleaning all processes.");
                 StartupTasks.CleanupProcesses();
+                _log.Trace("All processes have been cleaned.");
             }
             catch (Exception exception)
             {
@@ -512,6 +526,9 @@ namespace Ghosts.Client.TimelineManager
                 _log.Trace($"Stop file Watcher event raised: {e.FullPath} {e.Name} {e.ChangeType}");
                 _log.Trace("Terminating existing tasks and exiting orchestrator");
                 StopCommon();
+                Program.Scheduler.Shutdown(); //shutdown Quartz
+                _log.Trace("Quartz terminated");
+                LogManager.Shutdown();  //shutdown all logging
                 Thread.Sleep(10000);
                 System.Environment.Exit(0); //exit
             }
