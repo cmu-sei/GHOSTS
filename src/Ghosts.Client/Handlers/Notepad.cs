@@ -62,7 +62,7 @@ namespace Ghosts.Client.Handlers
             }
             catch (ThreadAbortException)
             {
-                ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.Command);
+                CloseNotePad();
 
             }
             catch (Exception e)
