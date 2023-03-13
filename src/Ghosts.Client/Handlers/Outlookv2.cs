@@ -162,17 +162,16 @@ public class Outlookv2 : BaseHandler
     {
         try
         {
-            //this will restart Ghosts by updating the timeline file date
-            //File.SetLastWriteTime(TimelineBuilder.TimelineFilePath().FullName, DateTime.Now);
+            //this will restart by killing Outlook, then restarting it.
             ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.Outlook);
             Thread.Sleep(10000);
             //restart
             MakeRdoSession();
             InitialDisplay();
         }
-        catch (ThreadAbortException AbortE)
+        catch (ThreadAbortException)
         {
-            throw AbortE;  //pass up
+            throw;  //pass up
         }
         catch (Exception e)
         {
@@ -311,9 +310,9 @@ public class Outlookv2 : BaseHandler
                 }
             }
         }
-        catch (ThreadAbortException AbortE)
+        catch (ThreadAbortException)
         {
-            throw AbortE;  //pass up
+            throw;  //pass up
         }
         catch (Exception e)
         {
@@ -519,9 +518,9 @@ public class Outlookv2 : BaseHandler
             Thread.Sleep(500);
             return true;
         }
-        catch (ThreadAbortException AbortE)
+        catch (ThreadAbortException)
         {
-            throw AbortE;  //pass up
+            throw;  //pass up
         }
         catch (Exception e)
         {
@@ -553,9 +552,9 @@ public class Outlookv2 : BaseHandler
                     if (!DeleteMailItem(folderItem)) break; 
                 }
             }
-            catch (ThreadAbortException AbortE)
+            catch (ThreadAbortException)
             {
-                throw AbortE;  //pass up
+                throw;  //pass up
             }
             catch 
             {
@@ -573,9 +572,9 @@ public class Outlookv2 : BaseHandler
             Thread.Sleep(500);
             return true;
         }
-        catch (ThreadAbortException AbortE)
+        catch (ThreadAbortException)
         {
-            throw AbortE;  //pass up
+            throw;  //pass up
         }
         catch (Exception e)
         {
@@ -624,9 +623,9 @@ public class Outlookv2 : BaseHandler
                     }
                 }
             }
-            catch (ThreadAbortException AbortE)
+            catch (ThreadAbortException)
             {
-                throw AbortE;  //pass up
+                throw;  //pass up
             }
             catch 
             {
@@ -657,9 +656,9 @@ public class Outlookv2 : BaseHandler
             MoveToDeleted("DRAFTS", true, true);
             CleanDeletedItems();
         }
-        catch (ThreadAbortException AbortE)
+        catch (ThreadAbortException)
         {
-            throw AbortE;  //pass up
+            throw;  //pass up
         }
         catch (Exception e)
         {
@@ -697,9 +696,9 @@ public class Outlookv2 : BaseHandler
                 }
             }
         }
-        catch (ThreadAbortException AbortE)
+        catch (ThreadAbortException)
         {
-            throw AbortE;  //pass up
+            throw;  //pass up
         }
         catch (Exception ex)
         {
@@ -731,9 +730,9 @@ public class Outlookv2 : BaseHandler
                     folderItem.Close(Microsoft.Office.Interop.Outlook.OlInspectorClose.olDiscard);
                     return true;
                 }
-                catch (ThreadAbortException AbortE)
+                catch (ThreadAbortException)
                 {
-                    throw AbortE;  //pass up
+                    throw;  //pass up
                 }
                 catch { 
                     //ignore others
@@ -759,18 +758,18 @@ public class Outlookv2 : BaseHandler
                     }
                     
                 }
-                catch (ThreadAbortException AbortE)
+                catch (ThreadAbortException)
                 {
-                    throw AbortE;  //pass up
+                    throw;  //pass up
                 }
                 catch { 
                     //ignore others
                 }
             }     
         }
-        catch (ThreadAbortException AbortE)
+        catch (ThreadAbortException)
         {
-            throw AbortE;  //pass up
+            throw;  //pass up
         }
         catch (Exception e)
         {
@@ -803,9 +802,9 @@ public class Outlookv2 : BaseHandler
                 list.PickRandom().OpenUrl();
             }
         }
-        catch (ThreadAbortException AbortE)
+        catch (ThreadAbortException)
         {
-            throw AbortE;  //pass up
+            throw;  //pass up
         }
         catch (Exception e)
         {
@@ -901,9 +900,9 @@ public class Outlookv2 : BaseHandler
                     this._app.Explorers[i].Close();
                     Log.Trace($"Closing app explorer: {i}");
                 }
-                catch (ThreadAbortException AbortE)
+                catch (ThreadAbortException)
                 {
-                    throw AbortE;  //pass up
+                    throw;  //pass up
                 }
                 catch (Exception exc)
                 {
@@ -980,9 +979,9 @@ public class Outlookv2 : BaseHandler
 
                     return true;
                 }
-                catch (ThreadAbortException AbortE)
+                catch (ThreadAbortException)
                 {
-                    throw AbortE;  //pass up
+                    throw;  //pass up
                 }
                 catch (Exception exc)
                 {
@@ -996,9 +995,9 @@ public class Outlookv2 : BaseHandler
                 }
             }
         }
-        catch (ThreadAbortException AbortE)
+        catch (ThreadAbortException)
         {
-            throw AbortE;  //pass up
+            throw;  //pass up
         }
         catch (Exception e)
         {
@@ -1038,9 +1037,9 @@ public class Outlookv2 : BaseHandler
                 return retVal;
             }
         }
-        catch (ThreadAbortException AbortE)
+        catch (ThreadAbortException)
         {
-            throw AbortE;  //pass up
+            throw;  //pass up
         }
         catch {
             //ignore others
@@ -1231,9 +1230,9 @@ public class Outlookv2 : BaseHandler
                 Thread.Sleep(3000);
             }
         }
-        catch (ThreadAbortException AbortE)
+        catch (ThreadAbortException)
         {
-            throw AbortE;  //pass up
+            throw;  //pass up
         }
 
         catch (Exception ex)

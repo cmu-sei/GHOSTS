@@ -66,6 +66,10 @@ namespace Ghosts.Client.Infrastructure
                     Log.Trace($"Wmi:: Closed session to remote host: {_computerName}");
                 }
             }
+            catch (ThreadAbortException)
+            {
+                throw;  //pass up
+            }
             catch (Exception e)
             {
                 Log.Trace($"Wmi:: Error closing session to remote host: {_computerName}");
@@ -104,6 +108,10 @@ namespace Ghosts.Client.Infrastructure
                         failconnect = true;
                     }
                 }
+                catch (ThreadAbortException)
+                {
+                    throw;  //pass up
+                }
                 catch
                 {
                     Log.Error(
@@ -131,6 +139,10 @@ namespace Ghosts.Client.Infrastructure
                         // https://powershell.one/wmi/root/cimv2/win32_directory
                     }
                 }
+                catch (ThreadAbortException)
+                {
+                    throw;  //pass up
+                }
                 catch (CimException ex)
                 {
                     // handle any errors that occur when connecting to the remote computer
@@ -140,6 +152,10 @@ namespace Ghosts.Client.Infrastructure
                     );
                     throw;
                 }
+            }
+            catch (ThreadAbortException)
+            {
+                throw;  //pass up
             }
             catch
             {
@@ -182,6 +198,10 @@ namespace Ghosts.Client.Infrastructure
                 }
                 Log.Trace($"Wmi:: Success, Cmd: GetOperatingSystem, remote host: {_computerName}");
             }
+            catch (ThreadAbortException)
+            {
+                throw;  //pass up
+            }
             catch (CimException ex)
             {
                 // handle any errors that occur when querying the remote computer
@@ -211,6 +231,10 @@ namespace Ghosts.Client.Infrastructure
                     }
                 }
                 Log.Trace($"Wmi:: Success, Cmd: GetBios, remote host: {_computerName}");
+            }
+            catch (ThreadAbortException)
+            {
+                throw;  //pass up
             }
             catch (CimException ex)
             {
@@ -248,6 +272,10 @@ namespace Ghosts.Client.Infrastructure
                 Log.Trace($"Wmi:: Success, Cmd: GetProcessor, remote host: {_computerName}");
                 return;
             }
+            catch (ThreadAbortException)
+            {
+                throw;  //pass up
+            }
             catch (CimException ex)
             {
                 // handle any errors that occur when querying the remote computer
@@ -279,6 +307,10 @@ namespace Ghosts.Client.Infrastructure
                 }
                 Log.Trace($"Wmi:: Success, Cmd: GetUserList, remote host: {_computerName}");
                 return;
+            }
+            catch (ThreadAbortException)
+            {
+                throw;  //pass up
             }
             catch (CimException ex)
             {
@@ -328,6 +360,10 @@ namespace Ghosts.Client.Infrastructure
                 Log.Trace($"Wmi:: Success, Cmd: GetNetworkInfo, remote host: {_computerName}");
                 return;
             }
+            catch (ThreadAbortException)
+            {
+                throw;  //pass up
+            }
             catch (CimException ex)
             {
                 // handle any errors that occur when querying the remote computer
@@ -363,6 +399,10 @@ namespace Ghosts.Client.Infrastructure
                 }
                 Log.Trace($"Wmi:: Success, Cmd: GetFilesList, remote host: {_computerName}");
                 return;
+            }
+            catch (ThreadAbortException)
+            {
+                throw;  //pass up
             }
             catch (CimException ex)
             {
@@ -404,6 +444,10 @@ namespace Ghosts.Client.Infrastructure
                 }
                 Log.Trace($"Wmi:: Success, Cmd: GetProcessList, remote host: {_computerName}");
                 return;
+            }
+            catch (ThreadAbortException)
+            {
+                throw;  //pass up
             }
             catch (CimException ex)
             {

@@ -79,7 +79,6 @@ namespace Ghosts.Client.Handlers
             }
             catch (ThreadAbortException)
             {
-                ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.Command);
                 Log.Trace("Wmi closing...");
             }
             catch (Exception e)
@@ -148,6 +147,10 @@ namespace Ghosts.Client.Handlers
                     {
                         client.Connect();
                     }
+                    catch (ThreadAbortException)
+                    {
+                        throw;  //pass up
+                    }
                     catch (Exception e)
                     {
                         Log.Error(e);
@@ -165,6 +168,10 @@ namespace Ghosts.Client.Handlers
                             {
                                 Thread.Sleep(_random.Next(this.CurrentWmiSupport.TimeBetweenCommandsMin, this.CurrentWmiSupport.TimeBetweenCommandsMax));
                             }
+                        }
+                        catch (ThreadAbortException)
+                        {
+                            throw;  //pass up
                         }
                         catch (Exception e)
                         {

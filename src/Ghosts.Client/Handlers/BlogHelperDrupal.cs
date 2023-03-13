@@ -44,6 +44,10 @@ namespace Ghosts.Client.Handlers
                 config = RequestConfiguration.Load(handler, target);
                 baseHandler.MakeRequest(config);
             }
+            catch (ThreadAbortException)
+            {
+                throw;  //pass up
+            }
             catch (System.Exception e)
             {
                 Log.Trace($"Blog:: Unable to parse site {target}, url may be malformed. Blog browser action will not be executed.");
@@ -65,6 +69,10 @@ namespace Ghosts.Client.Handlers
                 Thread.Sleep(500);
                 //check if login was successful
             }
+            catch (ThreadAbortException)
+            {
+                throw;  //pass up
+            }
             catch (System.Exception e)
             {
                 Log.Trace($"Blog:: Unable to login into site {target}, check username/password. Blog browser action will not be executed.");
@@ -79,6 +87,10 @@ namespace Ghosts.Client.Handlers
                 //if reach here, login was unsuccessful
                 Log.Trace($"Blog:: Unable to login into site {target}, check username/password. Blog browser action will not be executed.");
                 return false;
+            }
+            catch (ThreadAbortException)
+            {
+                throw;  //pass up
             }
             catch
             {
@@ -102,6 +114,10 @@ namespace Ghosts.Client.Handlers
                     targetElement = Driver.FindElement(By.CssSelector("input#edit-submit.form-submit"));
                     MoveToElementAndClick(targetElement);
                     Log.Trace($"Blog:: Added reply to site {site}.");
+                }
+                catch (ThreadAbortException)
+                {
+                    throw;  //pass up
                 }
                 catch
                 {
@@ -130,6 +146,10 @@ namespace Ghosts.Client.Handlers
             {
                 config = RequestConfiguration.Load(handler, target);
                 baseHandler.MakeRequest(config);
+            }
+            catch (ThreadAbortException)
+            {
+                throw;  //pass up
             }
             catch (System.Exception e)
             {
@@ -213,6 +233,10 @@ namespace Ghosts.Client.Handlers
                         }
                     }
                 }
+                catch (ThreadAbortException)
+                {
+                    throw;  //pass up
+                }
                 catch
                 {
                     return true;
@@ -240,6 +264,10 @@ namespace Ghosts.Client.Handlers
                 config = RequestConfiguration.Load(handler, target);
                 baseHandler.MakeRequest(config);
                 Thread.Sleep(1000);
+            }
+            catch (ThreadAbortException)
+            {
+                throw;  //pass up
             }
             catch (System.Exception e)
             {
@@ -276,6 +304,10 @@ namespace Ghosts.Client.Handlers
                     
 
             }
+            catch (ThreadAbortException)
+            {
+                throw;  //pass up
+            }
             catch {  }
 
             if (!onTargetPage)
@@ -298,6 +330,10 @@ namespace Ghosts.Client.Handlers
 
                         }
                     }
+                }
+                catch (ThreadAbortException)
+                {
+                    throw;  //pass up
                 }
                 catch
                 {  }
@@ -324,6 +360,10 @@ namespace Ghosts.Client.Handlers
                         return true;
                     }
                 }
+            }
+            catch (ThreadAbortException)
+            {
+                throw;  //pass up
             }
             catch { }
             Log.Trace($"Blog:: No articles to browse on site {site}.");

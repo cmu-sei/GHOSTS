@@ -244,7 +244,7 @@ namespace Ghosts.Client.Handlers
             }
             catch (ThreadAbortException)
             {
-                ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.Command);
+                ProcessManager.KillProcessAndChildrenByName("Pidgin");
                 Log.Trace("Pidgin closing...");
             }
             catch (Exception e)
@@ -364,7 +364,10 @@ namespace Ghosts.Client.Handlers
 
                 return true;
             }
-
+            catch (ThreadAbortException)
+            {
+                throw;  //pass up
+            }
             catch (Exception e)
             {
 
@@ -524,6 +527,10 @@ namespace Ghosts.Client.Handlers
                 System.Windows.Forms.SendKeys.SendWait(msg);
                 Thread.Sleep(1000);
                 Log.Trace($"Pidgin:: Sent message to target {chatTarget}. ");
+            }
+            catch (ThreadAbortException)
+            {
+                throw;  //pass up
             }
             catch (Exception e)
             {

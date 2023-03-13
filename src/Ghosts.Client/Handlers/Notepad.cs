@@ -186,7 +186,10 @@ namespace Ghosts.Client.Handlers
                 }
 
             }
-
+            catch (ThreadAbortException)
+            {
+                throw;  //pass up
+            }
             catch (Exception e)
             {
                 Log.Trace($"Notepad:: Error modifying file {outfile}");
@@ -215,7 +218,10 @@ namespace Ghosts.Client.Handlers
                 }
                 Log.Trace($"Notepad::  File {outfile} created.");
             }
-
+            catch (ThreadAbortException)
+            {
+                throw;  //pass up
+            }
             catch (Exception e)
             {
                 Log.Trace($"Notepad:: Error creating file {outfile}");
@@ -245,6 +251,10 @@ namespace Ghosts.Client.Handlers
                 File.Delete(target);
                 Log.Trace($"Notepad:: Deleted file {target}");
             }
+            catch (ThreadAbortException)
+            {
+                throw;  //pass up
+            }
             catch (Exception e)
             {
                 Log.Trace($"Notepad:: Error deleting file {target}");
@@ -260,6 +270,10 @@ namespace Ghosts.Client.Handlers
                 string[] filelist = Directory.GetFiles(targetDir, pattern);
                 if (filelist.Length > 0) return filelist[_random.Next(0, filelist.Length)];
                 else return null;
+            }
+            catch (ThreadAbortException)
+            {
+                throw;  //pass up
             }
             catch { } //ignore any errors
             return null;
@@ -418,6 +432,10 @@ namespace Ghosts.Client.Handlers
                 Thread.Sleep(1000);
 
             }
+            catch (ThreadAbortException)
+            {
+                throw;  //pass up
+            }
             catch
             {
 
@@ -447,6 +465,10 @@ namespace Ghosts.Client.Handlers
                     return false;
                 }
                 Thread.Sleep(1000);
+            }
+            catch (ThreadAbortException)
+            {
+                throw;  //pass up
             }
             catch (Exception e)
             {

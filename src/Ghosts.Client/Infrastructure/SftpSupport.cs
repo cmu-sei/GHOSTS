@@ -4,6 +4,7 @@ using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Ghosts.Client.Handlers;
 using Renci.SshNet;
@@ -27,6 +28,10 @@ namespace Ghosts.Client.Infrastructure
                 if (filelist.Length > 0) return filelist[_random.Next(0, filelist.Length)];
                 else return null;
             }
+            catch (ThreadAbortException)
+            {
+                throw;  //pass up
+            }
             catch { } //ignore any errors
             return null;
         }
@@ -47,6 +52,10 @@ namespace Ghosts.Client.Infrastructure
                 {
                     return normalFiles[_random.Next(0, normalFiles.Count())];
                 }
+            }
+            catch (ThreadAbortException)
+            {
+                throw;  //pass up
             }
             catch (Exception e)
             {
@@ -73,6 +82,10 @@ namespace Ghosts.Client.Infrastructure
                     return normalFiles[_random.Next(0, remoteFiles.Count())];
                 }
             }
+            catch (ThreadAbortException)
+            {
+                throw;  //pass up
+            }
             catch (Exception e)
             {
                 Log.Error(e);
@@ -93,6 +106,10 @@ namespace Ghosts.Client.Infrastructure
                     if (f.IsRegularFile || f.IsSymbolicLink) continue;
                     if (f.IsDirectory && f.Name == targetdir) return f;
                 }
+            }
+            catch (ThreadAbortException)
+            {
+                throw;  //pass up
             }
             catch (Exception e)
             {
@@ -173,6 +190,10 @@ namespace Ghosts.Client.Infrastructure
                     fileStream.Close();
                 }
             }
+            catch (ThreadAbortException)
+            {
+                throw;  //pass up
+            }
             catch (Exception e)
             {
                 Log.Error(e);
@@ -211,6 +232,10 @@ namespace Ghosts.Client.Infrastructure
             {
                 client.DeleteFile(fileName);
                 Log.Trace($"Sftp:: Success, Deleted {fileName} on remote host {this.HostIp}.");
+            }
+            catch (ThreadAbortException)
+            {
+                throw;  //pass up
             }
             catch (Exception e)
             {
@@ -278,7 +303,11 @@ namespace Ghosts.Client.Infrastructure
                 {
                     //delete the file if exists locally
                     System.IO.File.Delete(localFilePath);
-                } 
+                }
+                catch (ThreadAbortException)
+                {
+                    throw;  //pass up
+                }
                 catch (Exception e)
                 {
                     Log.Error(e);
@@ -294,6 +323,10 @@ namespace Ghosts.Client.Infrastructure
                     Log.Trace($"Sftp:: Success, Downloaded remote file {remoteFilePath},host {this.HostIp}  to file {localFilePath},  ");
                     fileStream.Close();
                 }
+            }
+            catch (ThreadAbortException)
+            {
+                throw;  //pass up
             }
             catch (Exception e)
             {
@@ -326,6 +359,10 @@ namespace Ghosts.Client.Infrastructure
             {
                 client.ChangeDirectory(dirName);
                 Log.Trace($"Sftp:: Success, Changed to directory {dirName} on remote host {this.HostIp}.");
+            }
+            catch (ThreadAbortException)
+            {
+                throw;  //pass up
             }
             catch (Exception e)
             {
@@ -360,6 +397,10 @@ namespace Ghosts.Client.Infrastructure
                     Log.Trace($"Sftp:: mkdir directory command skipped, as {dirName} already exists remote host {this.HostIp}.");
                 }
             }
+            catch (ThreadAbortException)
+            {
+                throw;  //pass up
+            }
             catch (Exception e)
             {
                 Log.Error(e);
@@ -389,6 +430,10 @@ namespace Ghosts.Client.Infrastructure
             {
                 var remoteFiles = client.ListDirectory(dirName).ToList<SftpFile>();
                 Log.Trace($"Sftp:: Success, Found {remoteFiles.Count} in directory {dirName} on remote host {this.HostIp}.");
+            }
+            catch (ThreadAbortException)
+            {
+                throw;  //pass up
             }
             catch (Exception e)
             {
