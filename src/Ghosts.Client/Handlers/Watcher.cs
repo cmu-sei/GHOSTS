@@ -237,78 +237,98 @@ internal class FolderWatcher : BaseHandler
     /// <param name="e"></param>
     private void OnChanged(object source, FileSystemEventArgs e)
     {
-        // ignore if size is shrinking
-        var currentSize = GetDirectorySize(folderPath);
-        if (currentSize > lastFolderSize && currentSize > folderMaxSize)
+        try
         {
-            //size has grown, exceeds max, need to delete
-            //get a list of all files with their sizes
-            List<Afile> allfiles = new List<Afile>();
-            GetAllFiles(folderPath, allfiles);
-            //do the sort here before looping and deleting
-            if (deletionApproach == "oldest")
+            // ignore if size is shrinking
+            long currentSize;
+            try
             {
-                allfiles.Sort(Afile.CompareByDate);
+                currentSize = GetDirectorySize(folderPath);
             }
-            else if (deletionApproach == "largest")
+            catch
             {
-                allfiles.Sort(Afile.CompareBySize);
+                return; //if  there was an exception, return and try again next time.
             }
-
-            while (true) {
-                Afile targetFile = null;
-                    
-                if (deletionApproach == "oldest" || deletionApproach == "largest")
-                {
-                    targetFile = allfiles[0];
-                    allfiles.RemoveAt(0);
-                }
-                else
-                {
-                    //default is random
-                    int targetIndex = _random.Next(0, allfiles.Count);
-                    targetFile = allfiles[targetIndex];
-                    allfiles.RemoveAt(targetIndex);
-                }
-                //now delete the file
+            if (currentSize > lastFolderSize && currentSize > folderMaxSize)
+            {
+                //size has grown, exceeds max, need to delete
+                //get a list of all files with their sizes
+                List<Afile> allfiles = new List<Afile>();
                 try
                 {
-                    File.Delete(targetFile.name);
-                    //update current size
-                    currentSize = currentSize - targetFile.size;
-                    Log.Trace($"Watcher: successfully deleted {targetFile.name} to reduce folder {folderPath} size.");
-                    if (currentSize < folderMaxSize)
+                    GetAllFiles(folderPath, allfiles);
+                }
+                catch
+                {
+                    return; //if  there was an exception, return and try again next time.
+                }
+                //do the sort here before looping and deleting
+                if (deletionApproach == "oldest")
+                {
+                    allfiles.Sort(Afile.CompareByDate);
+                }
+                else if (deletionApproach == "largest")
+                {
+                    allfiles.Sort(Afile.CompareBySize);
+                }
+
+                while (true)
+                {
+                    Afile targetFile = null;
+
+                    if (deletionApproach == "oldest" || deletionApproach == "largest")
                     {
-                        Log.Trace($"Watcher: successfully reduced folder {folderPath} size to target {folderMaxSize} (bytes).");
-                        break;  //break from loop, we have hit the target size
+                        targetFile = allfiles[0];
+                        allfiles.RemoveAt(0);
                     }
-                        
-                }
-                catch 
-                {
-                    //ignore the exception, file may be protected or in the process of being written
-                    Log.Trace($"Watcher: unable to delete {targetFile.name} to reduce folder {folderPath} size, either in use or protected.");
-                }
-                if (allfiles.Count == 0)
-                {
-                    //no more files to try to delete and loop is still running. 
-                    break; //break out of the loop
+                    else
+                    {
+                        //default is random
+                        int targetIndex = _random.Next(0, allfiles.Count);
+                        targetFile = allfiles[targetIndex];
+                        allfiles.RemoveAt(targetIndex);
+                    }
+                    //now delete the file
+                    try
+                    {
+                        File.Delete(targetFile.name);
+                        //update current size
+                        currentSize = currentSize - targetFile.size;
+                        Log.Trace($"Watcher: successfully deleted {targetFile.name} to reduce folder {folderPath} size.");
+                        if (currentSize < folderMaxSize)
+                        {
+                            Log.Trace($"Watcher: successfully reduced folder {folderPath} size to target {folderMaxSize} (bytes).");
+                            break;  //break from loop, we have hit the target size
+                        }
+
+                    }
+                    catch
+                    {
+                        //ignore the exception, file may be protected or in the process of being written
+                        Log.Trace($"Watcher: unable to delete {targetFile.name} to reduce folder {folderPath} size, either in use or protected.");
+                    }
+                    if (allfiles.Count == 0)
+                    {
+                        //no more files to try to delete and loop is still running. 
+                        break; //break out of the loop
+
+                    }
 
                 }
 
+                lastFolderSize = currentSize;
             }
-                
-
-
-            lastFolderSize = currentSize;
+            else
+            {
+                lastFolderSize = currentSize;
+            }
         }
-        else
+        catch (Exception exception)
         {
-            lastFolderSize = currentSize;
+            Log.Trace("Watcher:: Unexpected exception.");
+            Log.Error(exception);
         }
     }
-
-
 
 }
 
