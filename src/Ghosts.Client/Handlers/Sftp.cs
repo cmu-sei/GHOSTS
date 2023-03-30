@@ -32,6 +32,10 @@ namespace Ghosts.Client.Handlers
                         {
                             this.CurrentCreds = JsonConvert.DeserializeObject<Credentials>(File.ReadAllText(handler.HandlerArgs["CredentialsFile"].ToString()));
                         }
+                        catch (ThreadAbortException)
+                        {
+                            throw;  //pass up
+                        }
                         catch (Exception e)
                         {
                             Log.Error(e);
@@ -44,6 +48,10 @@ namespace Ghosts.Client.Handlers
                         {
                             this.CurrentSftpSupport.TimeBetweenCommandsMax = Int32.Parse(handler.HandlerArgs["TimeBetweenCommandsMax"].ToString());
                             if (this.CurrentSftpSupport.TimeBetweenCommandsMax < 0) this.CurrentSftpSupport.TimeBetweenCommandsMax = 0;
+                        }
+                        catch (ThreadAbortException)
+                        {
+                            throw;  //pass up
                         }
                         catch (Exception e)
                         {
@@ -105,7 +113,6 @@ namespace Ghosts.Client.Handlers
             }
             catch (ThreadAbortException)
             {
-                ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.Command);
                 Log.Trace("Sftp closing...");
             }
             catch (Exception e)

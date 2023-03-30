@@ -120,7 +120,6 @@ namespace Ghosts.Client.Handlers
             }
             catch (ThreadAbortException)
             {
-                ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.Command);
                 Log.Trace("Ssh closing...");
             }
             catch (Exception e)
@@ -182,6 +181,10 @@ namespace Ghosts.Client.Handlers
                     {
                         client.Connect();
                     }
+                    catch (ThreadAbortException)
+                    {
+                        throw;  //pass up
+                    }
                     catch (Exception e)
                     {
                         Log.Error(e);
@@ -196,6 +199,10 @@ namespace Ghosts.Client.Handlers
                         try
                         {
                             this.CurrentSshSupport.RunSshCommand(shellStreamSSH, sshCmd.Trim());
+                        }
+                        catch (ThreadAbortException)
+                        {
+                            throw;  //pass up
                         }
                         catch (Exception e)
                         {

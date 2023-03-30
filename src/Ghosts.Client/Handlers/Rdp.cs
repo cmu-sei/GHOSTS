@@ -185,6 +185,10 @@ namespace Ghosts.Client.Handlers
                             process.CloseMainWindow();
                             Thread.Sleep(1000);
                         }
+                        catch (ThreadAbortException)
+                        {
+                            throw;  //pass up
+                        }
                         catch { }
 
                     }
@@ -195,6 +199,10 @@ namespace Ghosts.Client.Handlers
                             //ok, stop being nice and just kill it
                             process.Kill();
                             Thread.Sleep(1000);
+                        }
+                        catch (ThreadAbortException)
+                        {
+                            throw;  //pass up
                         }
                         catch { }
                     }

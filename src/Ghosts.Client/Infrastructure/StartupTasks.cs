@@ -63,6 +63,9 @@ public static class StartupTasks
                     case HandlerType.Outlook:
                         cleanupList.Add(ProcessManager.ProcessNames.Outlook);
                         break;
+                    case HandlerType.Outlookv2:
+                        cleanupList.Add(ProcessManager.ProcessNames.Outlook);
+                        break;
                     case HandlerType.Word:
                         cleanupList.Add(ProcessManager.ProcessNames.Word);
                         break;

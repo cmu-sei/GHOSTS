@@ -44,6 +44,10 @@ namespace Ghosts.Client.Handlers
             {
                 baseHandler.MakeRequest(config);
             }
+            catch (ThreadAbortException)
+            {
+                throw;  //pass up
+            }
             catch (System.Exception e)
             {
                 Log.Trace($"Sharepoint:: Unable to parse site {site}, url may be malformed. Sharepoint browser action will not be executed.");
@@ -60,6 +64,10 @@ namespace Ghosts.Client.Handlers
             {
                 var targetElement = Driver.FindElement(By.Id("Ribbon.Document-title"));
                 targetElement.Click();
+            }
+            catch (ThreadAbortException)
+            {
+                throw;  //pass up
             }
             catch (System.Exception e)
             {
@@ -107,6 +115,10 @@ namespace Ghosts.Client.Handlers
                     Thread.Sleep(1000);
                 }
             }
+            catch (ThreadAbortException)
+            {
+                throw;  //pass up
+            }
             catch (Exception e)
             {
                 Log.Trace($"Sharepoint:: Error performing sharepoint download from site {site}.");
@@ -131,6 +143,10 @@ namespace Ghosts.Client.Handlers
                 //close popup
                 actions.MoveToElement(targetElement).Click().Perform();
                 return true;  //was blocked
+            }
+            catch (ThreadAbortException)
+            {
+                throw;  //pass up
             }
             catch  //ignore any errors, upload may have not been blocked
             {
@@ -177,6 +193,10 @@ namespace Ghosts.Client.Handlers
 
 
             }
+            catch (ThreadAbortException)
+            {
+                throw;  //pass up
+            }
             catch (Exception e)
             {
                 Log.Trace($"Sharepoint:: Error performing sharepoint upload to site {site}.");
@@ -218,6 +238,10 @@ namespace Ghosts.Client.Handlers
                 {
                     Log.Trace($"Sharepoint:: No documents to delete from {site}.");
                 }
+            }
+            catch (ThreadAbortException)
+            {
+                throw;  //pass up
             }
             catch (Exception e)
             {
@@ -308,6 +332,10 @@ namespace Ghosts.Client.Handlers
                 string[] filelist = Directory.GetFiles(uploadDirectory, "*");
                 if (filelist.Length > 0) return filelist[_random.Next(0, filelist.Length)];
                 else return null;
+            }
+            catch (ThreadAbortException)
+            {
+                throw;  //pass up
             }
             catch { } //ignore any errors
             return null;
