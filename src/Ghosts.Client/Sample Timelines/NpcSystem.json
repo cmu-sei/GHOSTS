@@ -1,0 +1,34 @@
+{
+    "TimeLineHandlers": [
+        {
+            "HandlerType": "NpcSystem",
+            "Initial": "",
+            "UtcTimeOn": "00:00:00",
+            "UtcTimeOff": "24:00:00",
+            "Loop": false,
+            "TimeLineEvents": [
+                {
+                    "Command": "Stop",
+                    "CommandArgs": [],
+                    "DelayAfter": 0,
+                    "DelayBefore": 0
+                }
+            ]
+        },
+       {
+            "HandlerType": "NpcSystem",
+            "Initial": "",
+            "UtcTimeOn": "00:00:00",
+            "UtcTimeOff": "24:00:00",
+            "Loop": false,
+            "TimeLineEvents": [
+                {
+                    "Command": "Start",
+                    "CommandArgs": [],
+                    "DelayAfter": 0,
+                    "DelayBefore": 0
+                }
+            ]
+        }
+    ]
+}
