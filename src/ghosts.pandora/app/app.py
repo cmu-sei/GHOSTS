@@ -28,7 +28,7 @@ import uuid
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from io import BytesIO
 from os.path import isfile, join
-
+import traceback
 import zipstream
 from docx import Document
 from docx.shared import Inches
@@ -39,11 +39,10 @@ from PIL import Image
 from pptx import Presentation
 from pptx.util import Inches
 
-VERSION = "0.5.8"
+VERSION = "0.5.25"
 
 
 class S(BaseHTTPRequestHandler):
-
     def log_message(self, format, *args):
         if self.headers:
             print(f'{args} - {self.handler} - {self.headers["User-Agent"]}')
@@ -66,22 +65,30 @@ class S(BaseHTTPRequestHandler):
         self.request.settimeout(30)
 
     def do_GET(self):
-        self.serve_response()
+        self.serve_handler()
 
     def do_HEAD(self):
-        self.serve_response()
+        self.serve_handler()
 
     def do_POST(self):
-        self.serve_response()
+        self.serve_handler()
 
     def do_PUT(self):
-        self.serve_response()
+        self.serve_handler()
 
     def do_DELETE(self):
-        self.serve_response()
+        self.serve_handler()
 
     def do_PATCH(self):
-        self.serve_response()
+        self.serve_handler()
+
+    def serve_handler(self):
+        try:
+            self.serve_response()
+        except Exception as e:
+            self.send_error(500, "Internal Server Error")
+            self.log_error("Error processing request: %s", str(e))
+            self.log_error(traceback.format_exc())
 
     def send_non_200(self):
         p = self.config.get("non_200s", "percent_is_302")
