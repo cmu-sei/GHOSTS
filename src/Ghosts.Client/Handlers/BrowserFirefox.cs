@@ -280,7 +280,12 @@ namespace Ghosts.Client.Handlers
                     }
 
                 }
-            }
+
+                if (handler.HandlerArgs.ContainsKeyWithOption("accept-insecure-certificates", "true"))
+                {
+                    options.AcceptInsecureCertificates = true;
+                }
+
 
             options.SetPreference("permissions.default.cookies", 2);
             options.SetPreference("permissions.default.popups", 2);

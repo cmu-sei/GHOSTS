@@ -186,7 +186,11 @@ namespace Ghosts.Client.Handlers
                             options.AddArgument($"--user-agent={handler.HandlerArgs["ua-string"]}");
                             break;
                     }
+                }
 
+                if (handler.HandlerArgs.ContainsKeyWithOption("accept-insecure-certificates", "true"))
+                {
+                    options.AddArguments("ignore-certificate-errors")
                 }
             }
 
