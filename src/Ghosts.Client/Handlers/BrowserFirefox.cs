@@ -285,7 +285,7 @@ namespace Ghosts.Client.Handlers
                 {
                     options.AcceptInsecureCertificates = true;
                 }
-
+            }
 
             options.SetPreference("permissions.default.cookies", 2);
             options.SetPreference("permissions.default.popups", 2);

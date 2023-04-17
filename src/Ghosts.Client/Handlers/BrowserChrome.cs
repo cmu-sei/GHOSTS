@@ -190,7 +190,7 @@ namespace Ghosts.Client.Handlers
 
                 if (handler.HandlerArgs.ContainsKeyWithOption("accept-insecure-certificates", "true"))
                 {
-                    options.AddArguments("ignore-certificate-errors")
+                    options.AddArguments("ignore-certificate-errors");
                 }
             }
 
