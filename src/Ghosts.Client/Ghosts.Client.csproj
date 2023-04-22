@@ -150,6 +150,7 @@
     <Compile Include="Handlers\BlogHelper.cs" />
     <Compile Include="Handlers\BlogHelperDrupal.cs" />
     <Compile Include="Handlers\BrowserCrawl.cs" />
+    <Compile Include="Handlers\Ftp.cs" />
     <Compile Include="Handlers\Outlookv2.cs" />
     <Compile Include="Handlers\Pidgin.cs" />
     <Compile Include="Handlers\Print.cs" />
@@ -165,6 +166,7 @@
     <Compile Include="Infrastructure\Credentials.cs" />
     <Compile Include="Infrastructure\CronScheduling.cs" />
     <Compile Include="Infrastructure\DebugManager.cs" />
+    <Compile Include="Infrastructure\FtpSupport.cs" />
     <Compile Include="Infrastructure\GuestInfoVars.cs" />
     <Compile Include="Infrastructure\CommandLineFlagManager.cs" />
     <Compile Include="Infrastructure\ClientConfigurationResolver.cs" />
@@ -262,6 +264,7 @@
     <None Include="Sample Timelines\BrowserChromeBlogDrupal.json" />
     <None Include="Sample Timelines\BrowserChromeSharepoint.json" />
     <None Include="Sample Timelines\BrowserFirefox.json" />
+    <None Include="Sample Timelines\Ftp.json" />
     <None Include="Sample Timelines\Notepad.json" />
     <None Include="Sample Timelines\Clicks.json" />
     <None Include="Sample Timelines\command.json" />

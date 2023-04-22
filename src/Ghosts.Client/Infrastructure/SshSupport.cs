@@ -6,6 +6,7 @@ using System.Threading;
 using Renci.SshNet;
 using Ghosts.Client.Infrastructure;
 using NLog;
+using System.IO;
 
 namespace Ghosts.Client.Infrastructure
 {
@@ -170,6 +171,22 @@ namespace Ghosts.Client.Infrastructure
         public int CommandTimeout { get; set; } = 1000;
 
         public string HostIp { get; set; } = null;
+
+        public string GetUploadFilenameBase(string targetDirectory, string searchPattern)
+        {
+            try
+            {
+                string[] filelist = Directory.GetFiles(targetDirectory, searchPattern);
+                if (filelist.Length > 0) return filelist[_random.Next(0, filelist.Length)];
+                else return null;
+            }
+            catch (ThreadAbortException)
+            {
+                throw;  //pass up
+            }
+            catch { } //ignore any errors
+            return null;
+        }
 
 
         public static string RandomString(int min, int max, bool lowercase = false)

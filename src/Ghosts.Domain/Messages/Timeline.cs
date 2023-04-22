@@ -110,6 +110,7 @@ namespace Ghosts.Domain
         Rdp = 103,
         Wmi = 104,
         Outlookv2 = 105,
+        Ftp = 106,
     }
 
     /// <summary>

@@ -1,0 +1,44 @@
+
+
+/// FTP handler.
+/// Each CommandArg is of the formation shown below, if multiple CommandArgs are present a random one is chosen for execution on each cycle.
+/// Credential handling is done in the same manner as the SSH handler, see that sample timeline for documentation
+/// After the <cred_key> is a ';' delimited list of FTP commands that are executed in sequence during a cycle.
+/// Downloaded files are placed in the user's default downloads directory
+/// Supported commands files:
+/// get [remotefile] - downloads random remote file from remote host. 
+/// put [localfile] - uploads random remote file from local upload directory to remote host. 
+/// ls -  list remote contents of current directory
+
+
+
+{
+  "Status": "Run",
+  "TimeLineHandlers": [
+    {
+      "HandlerType": "Ftp",
+        "HandlerArgs": {
+            "TimeBetweenCommandsMax": 5000, //max,min between individual FTP commands
+            "TimeBetweenCommandsMin": 1000,
+            "CredentialsFile": "C:\\ghosts_data\\ftp_creds.json", //required, file path to a JSON file containing the FTP credentials
+            "UploadDirectory": "C:\\ghosts_data\\uploads", //optional, directory that contains files for upload, it not specified user Downloads directory is used
+            "delay-jitter": 0 //optional, default =0, range 0 to 50, if specified, DelayAfter varied by delay-%jitter*delay to delay+%jitter*delay
+        },
+      "Initial": "",
+      "UtcTimeOn": "00:00:00",
+      "UtcTimeOff": "24:00:00",
+      "Loop": "True",
+      "TimeLineEvents": [
+        {
+          "Command": "random",
+            "CommandArgs": [
+                "<someIp>|<credKey>|<a_cmd>;<a_cmd>;<a_cmd>....;<a_cmd>"
+            ],
+          "DelayAfter": 20000,
+          "DelayBefore": 0
+        }
+      ]
+    } 
+
+  ]
+}

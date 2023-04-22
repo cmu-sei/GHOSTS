@@ -574,7 +574,7 @@ namespace Ghosts.Client.Handlers
                     {
                         //login failed, keep trying every 5 minutes in case it is a server startup problem
                         Log.Trace($"Sharepoint:: Login failed, sleeping and trying again.");
-                        Thread.Sleep(300); 
+                        Thread.Sleep(300*1000); 
                     }
 
 
