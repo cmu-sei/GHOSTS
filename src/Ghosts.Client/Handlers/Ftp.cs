@@ -43,35 +43,6 @@ namespace Ghosts.Client.Handlers
                             Log.Error(e);
                         }
                     }
-
-                    if (handler.HandlerArgs.ContainsKey("TimeBetweenCommandsMax"))
-                    {
-                        try
-                        {
-                            this.CurrentFtpSupport.TimeBetweenCommandsMax = Int32.Parse(handler.HandlerArgs["TimeBetweenCommandsMax"].ToString());
-                            if (this.CurrentFtpSupport.TimeBetweenCommandsMax < 0) this.CurrentFtpSupport.TimeBetweenCommandsMax = 0;
-                        }
-                        catch (ThreadAbortException)
-                        {
-                            throw;  //pass up
-                        }
-                        catch (Exception e)
-                        {
-                            Log.Error(e);
-                        }
-                    }
-                    if (handler.HandlerArgs.ContainsKey("TimeBetweenCommandsMin"))
-                    {
-                        try
-                        {
-                            this.CurrentFtpSupport.TimeBetweenCommandsMin = Int32.Parse(handler.HandlerArgs["TimeBetweenCommandsMin"].ToString());
-                            if (this.CurrentFtpSupport.TimeBetweenCommandsMin < 0) this.CurrentFtpSupport.TimeBetweenCommandsMin = 0;
-                        }
-                        catch (Exception e)
-                        {
-                            Log.Error(e);
-                        }
-                    }
                     if (handler.HandlerArgs.ContainsKey("UploadDirectory"))
                     {
                         string targetDir = handler.HandlerArgs["UploadDirectory"].ToString();
@@ -97,6 +68,41 @@ namespace Ghosts.Client.Handlers
                     {
                         jitterfactor = Jitter.JitterFactorParse(handler.HandlerArgs["delay-jitter"].ToString());
                     }
+                }
+                int value;
+                if (handler.HandlerArgs.ContainsKey("deletion-probability"))
+                {
+                    int.TryParse(handler.HandlerArgs["deletion-probability"].ToString(), out value);
+                    this.CurrentFtpSupport.deletionProbability = value;
+                    if (!CheckProbabilityVar(handler.HandlerArgs["deletion-probability"].ToString(), this.CurrentFtpSupport.deletionProbability))
+                    {
+                        this.CurrentFtpSupport.deletionProbability = 20;
+                    }
+                }
+                if (handler.HandlerArgs.ContainsKey("download-probability"))
+                {
+                    int.TryParse(handler.HandlerArgs["download-probability"].ToString(), out value);
+                    this.CurrentFtpSupport.downloadProbability = value;
+                    if (!CheckProbabilityVar(handler.HandlerArgs["download-probability"].ToString(), this.CurrentFtpSupport.downloadProbability))
+                    {
+                        this.CurrentFtpSupport.downloadProbability = 40;
+                    }
+                }
+                if (handler.HandlerArgs.ContainsKey("upload-probability"))
+                {
+                    int.TryParse(handler.HandlerArgs["upload-probability"].ToString(), out value);
+                    this.CurrentFtpSupport.uploadProbability = value;
+                    if (!CheckProbabilityVar(handler.HandlerArgs["upload-probability"].ToString(), this.CurrentFtpSupport.uploadProbability))
+                    {
+                        this.CurrentFtpSupport.uploadProbability = 40;
+                    }
+                }
+                if ((this.CurrentFtpSupport.deletionProbability + this.CurrentFtpSupport.uploadProbability + this.CurrentFtpSupport.downloadProbability) > 100)
+                {
+                    Log.Trace("Ftp:: Sum of deletion/upload/download probabilities > 100, setting to defaults.");
+                    this.CurrentFtpSupport.uploadProbability = 40;
+                    this.CurrentFtpSupport.downloadProbability = 40;
+                    this.CurrentFtpSupport.deletionProbability = 20;
                 }
 
 
@@ -133,6 +139,8 @@ namespace Ghosts.Client.Handlers
                     Thread.Sleep(timelineEvent.DelayBefore);
 
                 Log.Trace($"Ftp Command: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfter}");
+                int[] probabilityList = { this.CurrentFtpSupport.uploadProbability, this.CurrentFtpSupport.downloadProbability, this.CurrentFtpSupport.deletionProbability };
+                string[] actionList = { "upload", "download", "delete" };
 
                 switch (timelineEvent.Command)
                 {
@@ -142,7 +150,8 @@ namespace Ghosts.Client.Handlers
                             var cmd = timelineEvent.CommandArgs[_random.Next(0, timelineEvent.CommandArgs.Count)];
                             if (!string.IsNullOrEmpty(cmd.ToString()))
                             {
-                                this.Command(handler, timelineEvent, cmd.ToString());
+                                var action = SelectActionFromProbabilities(probabilityList, actionList);
+                                this.Command(handler, timelineEvent, cmd.ToString(), action);
                             }
                             Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, jitterfactor)); ;
                         }
@@ -154,15 +163,14 @@ namespace Ghosts.Client.Handlers
         }
 
 
-        public void Command(TimelineHandler handler, TimelineEvent timelineEvent, string command)
+        public void Command(TimelineHandler handler, TimelineEvent timelineEvent, string command, string action)
         {
-
+            
             char[] charSeparators = new char[] { '|' };
-            var cmdArgs = command.Split(charSeparators, 3, StringSplitOptions.None);
+            var cmdArgs = command.Split(charSeparators, 2, StringSplitOptions.None);
             var hostIp = cmdArgs[0];
             this.CurrentFtpSupport.HostIp = hostIp; //for trace output
             var credKey = cmdArgs[1];
-            var ftpCmds = cmdArgs[2].Split(';');
             var username = this.CurrentCreds.GetUsername(credKey);
             var password = this.CurrentCreds.GetPassword(credKey);
             Log.Trace("Beginning Ftp to host:  " + hostIp + " with command: " + command);
@@ -173,25 +181,20 @@ namespace Ghosts.Client.Handlers
                 try
                 {
                     NetworkCredential netcred = new NetworkCredential(username, password);
-                    foreach (var cmd in ftpCmds)
+                   
+                    try
                     {
-                        try
-                        {
-                            this.CurrentFtpSupport.RunFtpCommand(hostIp, netcred, cmd.Trim());
-                            if (this.CurrentFtpSupport.TimeBetweenCommandsMin != 0 && this.CurrentFtpSupport.TimeBetweenCommandsMax != 0 && this.CurrentFtpSupport.TimeBetweenCommandsMin < this.CurrentFtpSupport.TimeBetweenCommandsMax)
-                            {
-                                Thread.Sleep(_random.Next(this.CurrentFtpSupport.TimeBetweenCommandsMin, this.CurrentFtpSupport.TimeBetweenCommandsMax));
-                            }
-                        }
-                        catch (ThreadAbortException)
-                        {
-                            throw;  //pass up
-                        }
-                        catch (Exception e)
-                        {
-                            Log.Error(e); //some error occurred during this command, try the next one
-                        }
+                        this.CurrentFtpSupport.RunFtpCommand(hostIp, netcred, action);
                     }
+                    catch (ThreadAbortException)
+                    {
+                        throw;  //pass up
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error(e); //some error occurred during this command, try the next one
+                    }
+                    
 
                 }
                 catch (ThreadAbortException)

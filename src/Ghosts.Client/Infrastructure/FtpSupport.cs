@@ -16,6 +16,10 @@ namespace Ghosts.Client.Infrastructure
         public string uploadDirectory { get; set; } = null;
         public string downloadDirectory { get; set; } = null;
 
+        public int deletionProbability { get; set; } = 20;
+        public int uploadProbability { get; set; } = 40;
+        public int downloadProbability { get; set; } = 40;
+
 
         public string GetUploadFilename()
         {
@@ -49,7 +53,7 @@ namespace Ghosts.Client.Infrastructure
             return null;
         }
 
-        // This returns a random remote file
+        // This returns the name of a random remote file
         public string GetRemoteFile(string hostip, NetworkCredential cred)
         {
             var remoteFiles = DoFtpListDir(hostip, cred);
@@ -60,40 +64,57 @@ namespace Ghosts.Client.Infrastructure
             return null;
         }
 
-        /// <summary>
-        /// Expecting a string of 'get filename'
-        /// Only downloads .txt files
-        /// </summary>
-        /// <param name="client"></param>
-        /// <param name="cmd"></param>
-        public void DoGet(string hostip, NetworkCredential cred, string cmd)
+        public void DoDelete(string hostip, NetworkCredential cred)
         {
-            char[] charSeparators = new char[] { ' ' };
-            var cmdArgs = cmd.Split(charSeparators, 2, StringSplitOptions.None);
-            if (cmdArgs.Length != 2)
+
+            var file = GetRemoteFile(hostip, cred);
+            if (file == null)
             {
-                Log.Trace($"Ftp:: ill-formatted get command: {cmd} ");
+                Log.Trace($"Ftp:: Cannot find a valid file to delete from remote host {hostip}.");
                 return;
             }
-            var fileName = cmdArgs[1];
-            string localFilePath;
-            string remoteFilePath;
-            if (fileName.Contains("[remotefile]"))
+            var remoteFilePath = file;
+            
+            //now delete the file
+            try
             {
-                var file = GetRemoteFile(hostip,cred);
-                if (file == null)
+                FtpWebRequest request = (FtpWebRequest)WebRequest.Create($"ftp://{hostip}/{remoteFilePath}");
+                request.Credentials = cred;
+                request.Method = WebRequestMethods.Ftp.DeleteFile;
+                FtpWebResponse response = (FtpWebResponse)request.GetResponse();
+                if (response != null)
                 {
-                    Log.Trace($"Ftp:: Cannot find a valid file to download from remote host {hostip}.");
-                    return;
+                    response.Close();
+                    Log.Trace($"Ftp:: Success, deleted remote file {remoteFilePath} from host {hostip}");
+
                 }
-                remoteFilePath = file ;
-                localFilePath = Path.Combine(downloadDirectory, file);
             }
-            else
+            catch (ThreadAbortException)
             {
-                remoteFilePath = fileName;
-                localFilePath = Path.Combine(downloadDirectory, fileName);
+                throw;  //pass up
             }
+            catch (Exception e)
+            {
+                Log.Error(e);
+            }
+        }
+
+
+
+
+        public void DoGet(string hostip, NetworkCredential cred)
+        {
+           
+            var file = GetRemoteFile(hostip,cred);
+            if (file == null)
+            {
+                Log.Trace($"Ftp:: Cannot find a valid file to download from remote host {hostip}.");
+                return;
+            }
+            var remoteFilePath = file ;
+            var localFilePath = Path.Combine(downloadDirectory, file);
+            
+           
             //at this point, localFilePath, remoteFilePath are set
             if (System.IO.File.Exists(localFilePath))
             {
@@ -201,26 +222,16 @@ namespace Ghosts.Client.Infrastructure
         /// </summary>
         /// <param name="client"></param>
         /// <param name="cmd"></param>
-        public void DoPut(string hostip, NetworkCredential cred, string cmd)
+        public void DoPut(string hostip, NetworkCredential cred)
         {
-            char[] charSeparators = new char[] { ' ' };
-            var cmdArgs = cmd.Split(charSeparators, 2, StringSplitOptions.None);
-            if (cmdArgs.Length != 2)
+            
+            var fileName = GetUploadFilename();
+            if (fileName == null)
             {
-                Log.Trace($"Ftp:: ill-formatted put command: {cmd} ");
+                Log.Trace($"Ftp:: Cannot find a valid file to upload from directory {uploadDirectory}.");
                 return;
             }
-            var fileName = cmdArgs[1];
-            if (fileName.Contains("[localfile]"))
-            {
-                fileName = GetUploadFilename();
-                if (fileName == null)
-                {
-                    Log.Trace($"Ftp:: Cannot find a valid file to upload from directory {uploadDirectory}.");
-                    return;
-                }
-            }
-
+            
             try
             {
                 writeTask(hostip, cred, fileName);
@@ -237,20 +248,20 @@ namespace Ghosts.Client.Infrastructure
 
         public void RunFtpCommand(string hostip, NetworkCredential cred, string cmd)
         {
-            if (cmd.StartsWith("put"))
+            if (cmd == "upload")
             {
-                DoPut(hostip, cred, cmd);
+                DoPut(hostip, cred);
                 return;
             }
-            else if (cmd.StartsWith("get"))
+            else if (cmd == "download")
             {
-                DoGet(hostip, cred, cmd);
+                DoGet(hostip, cred);
                 return;
             }
             
-            else if (cmd.StartsWith("ls"))
+            else if (cmd == "delete")
             {
-                DoFtpListDir(hostip, cred);
+                DoDelete(hostip, cred);
                 return;
             }
             else
