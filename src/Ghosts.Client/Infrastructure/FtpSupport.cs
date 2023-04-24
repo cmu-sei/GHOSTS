@@ -153,7 +153,6 @@ namespace Ghosts.Client.Infrastructure
                             int n = responseStream.Read(bytes, 0, 2048);
                             if (n == 0) break;
                             fileStream.Write(bytes, 0, n);
-                            if (n != 2048) break;
                         }
                         responseStream.Close();
 
