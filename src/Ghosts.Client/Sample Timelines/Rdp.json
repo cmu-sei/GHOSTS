@@ -2,8 +2,8 @@
 /// Each CommandArg is of the form shown below, if multiple CommandArgs are present a random one is chosen for execution on each cycle.
 ///  <targetIp>|<credkey>  The targetIP is the IP to use for the RDP connection
 /// The <credKey> is only used to retrieve the password of the matching record in the credentials file.
-/// The username is ignored as it assumed to be the password of the current logged in user.
-/// The password is supplied if a password  prompt appears on RDP open
+/// The username (if supplied) is  used instead of the logged-in user (can also provide 'domain' keyword in credentials)
+/// The password is used if a password  prompt appears on RDP open
 ///
 
 
