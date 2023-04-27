@@ -570,10 +570,11 @@ namespace Ghosts.Client.Handlers
                     }
 
                     //have username, password - do the initial login
-                    if (!DoInitialLogin(handler, username, password))
+                    while (!DoInitialLogin(handler, username, password))
                     {
-                        baseHandler.BlogAbort = true;
-                        return;
+                        //login failed, keep trying every 5 minutes in case it is a server startup problem
+                        Log.Trace($"Sharepoint:: Login failed, sleeping and trying again.");
+                        Thread.Sleep(300*1000); 
                     }
 
 

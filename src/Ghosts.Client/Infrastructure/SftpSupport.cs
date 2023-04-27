@@ -1,15 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using Ghosts.Client.Handlers;
 using Renci.SshNet;
 using Renci.SshNet.Sftp;
-using static System.Net.WebRequestMethods;
+
 
 namespace Ghosts.Client.Infrastructure
 {
@@ -22,18 +18,7 @@ namespace Ghosts.Client.Infrastructure
 
         public string GetUploadFilename()
         {
-            try
-            {
-                string[] filelist = Directory.GetFiles(uploadDirectory, "*");
-                if (filelist.Length > 0) return filelist[_random.Next(0, filelist.Length)];
-                else return null;
-            }
-            catch (ThreadAbortException)
-            {
-                throw;  //pass up
-            }
-            catch { } //ignore any errors
-            return null;
+            return GetUploadFilenameBase(uploadDirectory, "*");
         }
 
         public SftpFile GetRemoteFile(SftpClient client)
@@ -118,42 +103,6 @@ namespace Ghosts.Client.Infrastructure
             return null; //target directory does not exist
         }
 
-        /// <summary>
-        /// Replaces reserved words in command string with a value
-        /// Reserved words are marked in command string like [reserved_word]
-        /// Supported reserved words:
-        ///  localfile --  substituted with random file from local uploadDirectory
-        ///  remotefile -- substituted with random file from remote current directory
-        ///  
-        ///  
-        /// 
-        /// This may require execution and parsing of an internal sftp command before returning
-        /// the new command
-        /// </summary> 
-        /// <param name="cmd"></param>  - string parse for reserved words
-        /// <returns></returns>
-        private string ParseSftpCmd(SftpClient client, string cmd)
-        {
-            string currentcmd = cmd;
-            if (currentcmd.Contains("[localfile]"))
-            {
-                var fname = GetUploadFilename();
-                if (fname == null)
-                {
-                    Log.Trace($"Sftp:: Cannot find a valid file to upload from directory {uploadDirectory}.");
-                    return null;
-                }
-                currentcmd = currentcmd.Replace("[localfile]", fname);
-
-            }
-            if (currentcmd.Contains("[remotefile]"))
-            {
-                var file = GetRemoteFile(client);
-                currentcmd = currentcmd.Replace("[remotefile]", file.FullName); //use full name
-            }
-
-                return currentcmd;
-        }
 
         /// <summary>
         /// Expecting a string of 'put filename'
@@ -254,7 +203,7 @@ namespace Ghosts.Client.Infrastructure
             var cmdArgs = cmd.Split(charSeparators, 2, StringSplitOptions.None);
             if (cmdArgs.Length != 2)
             {
-                Log.Trace($"Sftp:: ill-formatted put command: {cmd} ");
+                Log.Trace($"Sftp:: ill-formatted get command: {cmd} ");
                 return;
             }
             var fileName = cmdArgs[1];
@@ -456,7 +405,7 @@ namespace Ghosts.Client.Infrastructure
 
         public void RunSftpCommand(SftpClient client, string cmd)
         {
-            //TODO: rm, ls, mkdir
+           
             if (cmd.StartsWith("put"))
             {
                 DoPut(client, cmd);
@@ -496,6 +445,8 @@ namespace Ghosts.Client.Infrastructure
 
             return;
         }
+
+      
 
     }
 }

@@ -1,0 +1,37 @@
+
+
+/// FTP handler - each activity cycle will either delete, upload, or download a file 
+/// Credential handling is done in the same manner as the SSH handler, see that sample timeline for documentation
+/// Downloaded files are placed in the user's default downloads directory
+
+{
+  "Status": "Run",
+  "TimeLineHandlers": [
+    {
+      "HandlerType": "Ftp",
+        "HandlerArgs": {
+            "deletion-probability": 20,  //deletion of random file from FTP server
+            "upload-probability": 40,    //upload of random file to FTP server
+            "download-probability": 40, //download of random file from FTP
+            "CredentialsFile": "C:\\ghosts_data\\ftp_creds.json", //required, file path to a JSON file containing the FTP credentials
+            "UploadDirectory": "C:\\ghosts_data\\uploads", //optional, directory that contains files for upload, it not specified user Downloads directory is used
+            "delay-jitter": 0 //optional, default =0, range 0 to 50, if specified, DelayAfter varied by delay-%jitter*delay to delay+%jitter*delay
+        },
+      "Initial": "",
+      "UtcTimeOn": "00:00:00",
+      "UtcTimeOff": "24:00:00",
+      "Loop": "True",
+      "TimeLineEvents": [
+        {
+          "Command": "random",
+            "CommandArgs": [
+                "<FtpServerIp>|<credKey>"
+            ],
+          "DelayAfter": 20000,
+          "DelayBefore": 0
+        }
+      ]
+    } 
+
+  ]
+}
