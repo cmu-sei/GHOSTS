@@ -18,18 +18,22 @@ namespace Ghosts.Client.Handlers
     /// mouse movements for the specified ExecutionTime. When this time has elapsed, the connection is closed,
     /// another target is chosen, and the cycle repeats.
     /// 
-    /// The Credential file is only used to get a password value, the username is ignored as it is assumed to
-    /// be the password of the logged-in user. Even though only a password is needed, the Credential
-    /// file is used to be compatible with other handlers that use a credential file (SFTP, SSH, Sharepoint, etc).
+    /// The credential file is the same format as WMI, SFTP, SSH, etc.
+    /// If only the password is specified, then the login user is assumed to be the current user.
+    /// If username is specified (and optionally domain), and the current user is not the logged in user,
+    /// then a login using the specified domain\username is used.
     /// 
     /// See the sample Rdp timeline for all options.
     /// 
-    /// This handler will supply a password if prompted, and dismiss a untrused certificate check prompt if one
+    /// This handler will supply a password (and also usename if supplied) if prompted, and dismiss a untrused certificate check prompt if one
     /// appears.
     /// 
-    /// It is assumed that the logged-in user has the right to log into the target system.
+    /// It is assumed that the logged-in user (or the specified user) has the right to log into the target system.
     /// Caveat: This has only be tested in a Windows domain system where the domain policy was altered to allow all users
     /// remote desktop priviledges, and only tested using RDP to a domain controller server.
+    /// It has also been tested using the Domain Admin user (not the current logged in user), in which the handler
+    /// supplied both username and password to the crdential prompts. Using the Domain Admin user does not require
+    /// modification of the domain policy to enable RDP.
     /// 
     /// </summary>
     public class Rdp : BaseHandler
@@ -153,8 +157,26 @@ namespace Ghosts.Client.Handlers
             CurrentTarget = target;
             string command = $"mstsc /v:{target}";
             var credKey = cmdArgs[1];
+            var domain = CurrentCreds.GetDomain(credKey);
+            var username = CurrentCreds.GetUsername(credKey);
             var password = CurrentCreds.GetPassword(credKey);
             Log.Trace($"RDP:: Spawning RDP connection for target {target}");
+            var localUser = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
+            bool usePasswordOnly = true;
+            if (username != null)
+            {
+                if (domain != null)
+                {
+                    username = $"{domain}\\{username}";
+                }
+                if (!localUser.ToLower().Contains(username.ToLower())) {
+                    usePasswordOnly = false;
+                }
+            }
+
+
+
+
             var processStartInfo = new ProcessStartInfo("cmd.exe")
             {
                 RedirectStandardInput = true,
@@ -173,10 +195,23 @@ namespace Ghosts.Client.Handlers
                     process.StandardInput.WriteLine(command);
                     process.StandardInput.Close(); // line added to stop process from hanging on ReadToEnd()
                     Thread.Sleep(2000);  //give time for response
-                    checkPasswordPrompt(au, password);
-                    checkGenericPrompt(au, "{TAB}{TAB}{TAB}{ENTER}");  //this is for a certificate prompt
-                    Thread.Sleep(10000);  //wait for connection
-                    doMouseLoop(target, au);
+                    checkPasswordPrompt(au, password,username,usePasswordOnly);
+                    //wait 3 minutes for connection window
+                    if (!findRdpWindow(target, 3))
+                    {
+                        //may have a certificate problem
+                        checkGenericPrompt(au, "{TAB}{TAB}{TAB}{ENTER}");  //this is for a certificate prompt
+                    }
+                    //try again for another 3 minutes to find
+                    if (findRdpWindow(target, 3))
+                    {
+                        doMouseLoop(target, au);
+                    }
+                    else
+                    {
+                        Log.Trace($"RDP:: Unable to connect to remote desktop for {target}");
+                    }
+                    
                     Thread.Sleep(2000);
                     if (!process.HasExited)
                     {
@@ -214,13 +249,30 @@ namespace Ghosts.Client.Handlers
             }
         }
 
+        public bool findRdpWindow(string target,int minutes)
+        {
+            var caption = $"{target} - Remote Desktop Connection";
+            var winHandle = Winuser.FindWindow("TscShellContainerClass", caption);
+            int count = 0;
+            //wait for window to appear 
+            while (winHandle == IntPtr.Zero)
+            {
+                Log.Trace($"RDP:: Unable to find desktop window for {target}, sleeping 1 minute");
+                Thread.Sleep(60 * 1000); //sleep 1 minute, then try again
+                count++;
+                if (count >= minutes) break;
+                winHandle = Winuser.FindWindow("TscShellContainerClass", caption);
+            }
+            return winHandle != IntPtr.Zero;
+        }
+
         public void doMouseLoop(string target, AutoItX3 au)
         {
             var caption = $"{target} - Remote Desktop Connection";
             var winHandle = Winuser.FindWindow("TscShellContainerClass", caption);
-            Log.Trace($"RDP:: Connected to {target}, beginning activity loop");
             if (winHandle != IntPtr.Zero)
             {
+                Log.Trace($"RDP:: Connected to {target}, beginning activity loop");
                 // found the remote desktop window
                 int totalTime = 0;
                 while (totalTime < ExecutionTime)
@@ -305,27 +357,70 @@ namespace Ghosts.Client.Handlers
             return;
         }
 
-        public void checkPasswordPrompt(AutoItX3 au, string password)
+        public void checkPasswordPrompt(AutoItX3 au, string password, string username, bool usePasswordOnly)
         {
 
+            bool foundWinSecurity = false; 
             var winHandle = Winuser.FindWindow("Credential Dialog Xaml Host", "Windows Security");
-            var responseString = "{TAB}{TAB}{TAB}{ENTER}";
             if (winHandle == IntPtr.Zero)
             {
                 //try harder
+                foundWinSecurity = true;
                 winHandle = findDialogWindow("Windows Security");
-                responseString = "{TAB}{TAB}{ENTER}";  //this form has a different response string
             }
             if (winHandle != IntPtr.Zero)
             {
-                //password prompt is up.  handle it.
-                Winuser.SetForegroundWindow(winHandle);
-                var s = escapePassword(password);
-                //au.Send(s);
-                System.Windows.Forms.SendKeys.SendWait(s);  //fill in password field
-                au.Send(responseString);
-                Thread.Sleep(1000);
-                Log.Trace($"RDP:: Found password prompt for {CurrentTarget}.");
+                if (usePasswordOnly)
+                {
+                    string responseString;
+                    if (foundWinSecurity)
+                    {
+                        responseString = "{TAB}{TAB}{ENTER}";  //this form has a different response string
+                    } else
+                    {
+                        responseString = "{TAB}{TAB}{TAB}{ENTER}";
+                    }
+                    //password prompt is up.  handle it.
+                    Winuser.SetForegroundWindow(winHandle);
+                    var s = escapePassword(password);
+                    System.Windows.Forms.SendKeys.SendWait(s);  //fill in password field
+                    au.Send(responseString);
+                    Thread.Sleep(1000);
+                    Log.Trace($"RDP:: Found password prompt for {CurrentTarget}.");
+                }  else
+                {
+                    //try entering full username
+                    Winuser.SetForegroundWindow(winHandle);
+                    if (foundWinSecurity)
+                    {
+                        au.Send("{DOWN}");  //moves down to next user
+                        Thread.Sleep(1000);
+                        Winuser.SetForegroundWindow(winHandle);
+                        System.Windows.Forms.SendKeys.SendWait(username);  //fill in user field, tab to password field
+                        au.Send("{TAB}");
+                        var s = escapePassword(password);
+                        System.Windows.Forms.SendKeys.SendWait(s);  //fill in password field
+                        au.Send("{ENTER}");
+                        Thread.Sleep(1000);
+                    }
+                    else
+                    {
+                        au.Send("{TAB}{TAB}{ENTER}");  //this clicks on 'More Choices'
+                        Thread.Sleep(1000);
+                        Winuser.SetForegroundWindow(winHandle);
+                        au.Send("{TAB}{TAB}{ENTER}");  //this clicks on 'Use diff user'
+                        Thread.Sleep(1000);
+                        Winuser.SetForegroundWindow(winHandle);
+                        System.Windows.Forms.SendKeys.SendWait(username);  //fill in user field, tab to password field
+                        au.Send("{TAB}");
+                        var s = escapePassword(password);
+                        System.Windows.Forms.SendKeys.SendWait(s);  //fill in password field
+                        au.Send("{ENTER}");
+                        Thread.Sleep(1000);
+                    }
+                    Log.Trace($"RDP:: Found user/password prompt for {CurrentTarget}.");
+
+                }
 
 
             }
