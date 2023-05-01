@@ -38,6 +38,11 @@ class Program
                 name: "files",
                 pattern: "/files/{id?}",
                 defaults: new { controller = "Files", action = "UploadFile" });
+            
+            endpoints.MapControllerRoute(
+                name: "detail",
+                pattern: "/{id?}",
+                defaults: new { controller = "Home", action = "Detail" });
 
             endpoints.MapControllerRoute(
                 name: "other",

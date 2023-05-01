@@ -30,6 +30,18 @@ public class HomeController : Controller
             ViewBag.User = Request.Query["u"];
         return View(posts);
     }
+    
+    [HttpGet("/{id:guid}")]
+    public IActionResult Detail(Guid id)
+    {
+        this._logger.LogTrace("{RequestScheme}://{RequestHost}{RequestPath}{RequestQueryString}|{RequestMethod}|", Request.Scheme, Request.Host, Request.Path, Request.QueryString, Request.Method);
+
+        var post = _db.Posts.FirstOrDefault(x => x.Id == id.ToString());
+
+        if (Request.QueryString.HasValue && !string.IsNullOrEmpty(Request.Query["u"]))
+            ViewBag.User = Request.Query["u"];
+        return View(post);
+    }
 
     [HttpPost]
     public async Task<IActionResult> Post([FromForm] FilesController.FileInputModel model)

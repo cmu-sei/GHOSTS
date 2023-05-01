@@ -1,32 +1,26 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Detail";
 }
-@model List<Socializer.Infrastructure.Post>
+@model Socializer.Infrastructure.Post
 
-<style>
-    .card-text img {max-width: 100px;}
-</style>
-
-<div class="row row-cols-1 row-cols-md-6 g-4" id="itemList">
+<div class="row row-cols-1 row-cols-md-12" id="itemList">
     @if (Model != null)
     {
-        foreach (var post in Model)
-        {
-            <div class="col" id="@post.Id" onclick="window.location.href = '/@post.Id';" style="cursor: pointer">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <p class="card-text">
-                            @Html.Raw(post.Message)
-                        </p>
-                        <p class="card-text">
-                            <span class="user">@post.User</span>
-                            <br/>
-                            <span class="created">@post.CreatedUtc</span>
-                        </p>
-                    </div>
+        var post = Model;
+        <div class="col" id="@post.Id">
+            <div class="card h-100">
+                <div class="card-body">
+                    <p class="card-text">
+                        @Html.Raw(post.Message)
+                    </p>
+                    <p class="card-text">
+                        <span class="user">@post.User</span>
+                        <br/>
+                        <span class="created">@post.CreatedUtc</span>
+                    </p>
                 </div>
             </div>
-        }
+        </div>
     }
 </div>
 <br/>
