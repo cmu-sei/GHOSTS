@@ -14,7 +14,7 @@
                         @Html.Raw(post.Message)
                     </p>
                     <p class="card-text">
-                        <span class="user">@post.User</span>
+                        <a href="/u/@post.User" class="user">@post.User</a>
                         <br/>
                         <span class="created">@post.CreatedUtc</span>
                     </p>

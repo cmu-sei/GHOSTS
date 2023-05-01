@@ -31,6 +31,18 @@ public class HomeController : Controller
         return View(posts);
     }
     
+    [HttpGet("/u/{userId}")]
+    public IActionResult User(string userId)
+    {
+        this._logger.LogTrace("{RequestScheme}://{RequestHost}{RequestPath}{RequestQueryString}|{RequestMethod}|", Request.Scheme, Request.Host, Request.Path, Request.QueryString, Request.Method);
+        
+        var posts = _db.Posts.Where(x=>x.User.ToLower() == userId.ToLower()).OrderByDescending(x=>x.CreatedUtc).Take(Program.Configuration.DefaultDisplay).ToList();
+
+        if (Request.QueryString.HasValue && !string.IsNullOrEmpty(Request.Query["u"]))
+            ViewBag.User = Request.Query["u"];
+        return View("Index", posts);
+    }
+    
     [HttpGet("/{id:guid}")]
     public IActionResult Detail(Guid id)
     {
