@@ -43,6 +43,37 @@ public class HomeController : Controller
         return View(post);
     }
 
+    [HttpGet("/admin/delete")]
+    public async Task<IActionResult> Delete()
+    {
+        this._db.Posts.RemoveRange(this._db.Posts);
+        await this._db.SaveChangesAsync();
+        return NoContent();
+    }
+    
+    [HttpGet("/admin/generate/{n}")]
+    public async Task<IActionResult> Generate(int n)
+    {
+        this._logger.LogTrace("{RequestScheme}://{RequestHost}{RequestPath}{RequestQueryString}|{RequestMethod}|", Request.Scheme, Request.Host, Request.Path, Request.QueryString, Request.Method);
+
+        var r = new Random();
+        for (var i = 0; i < n; i++)
+        {
+            var min = DateTime.Now.AddDays(-7);
+            var randTicks = r.Next(0, (int) (DateTime.Now.Ticks - min.Ticks));
+            
+            var post = new Post();
+            post.Id = Guid.NewGuid().ToString();
+            post.CreatedUtc = DateTime.MinValue.Add(TimeSpan.FromTicks(min.Ticks + (long) (r.NextDouble()*(DateTime.Now.Ticks - min.Ticks))));
+            post.User = Faker.Internet.UserName();
+            post.Message = Faker.Lorem.Sentence(15);
+            this._db.Posts.Add(post);
+        }
+        await _db.SaveChangesAsync();
+
+        return NoContent();
+    }
+
     [HttpPost]
     public async Task<IActionResult> Post([FromForm] FilesController.FileInputModel model)
     {

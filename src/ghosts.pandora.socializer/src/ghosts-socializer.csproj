@@ -11,7 +11,7 @@
         <ReleaseVersion>0.2.0.0</ReleaseVersion>
         <Version>0.2.0.0</Version>
         <AssemblyVersion>0.2.0.0</AssemblyVersion>
-        <FileVersion>0.2.0.0</FileVersion>
+        <FileVersion>0.2.0.1</FileVersion>
         <SynchReleaseVersion>false</SynchReleaseVersion>
 
         <Authors>GHOSTS Development Team @ Carnegie Mellon University</Authors>
@@ -22,6 +22,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="Faker.Net" Version="2.0.154" />
       <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="6.0.11" />
       <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.0" />
