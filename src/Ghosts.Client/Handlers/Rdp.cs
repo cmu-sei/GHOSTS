@@ -9,6 +9,7 @@ using AutoItX3Lib;
 using System.Text;
 using Newtonsoft.Json;
 using System.IO;
+using NPOI.SS.Formula.Functions;
 
 namespace Ghosts.Client.Handlers
 {
@@ -68,7 +69,6 @@ namespace Ghosts.Client.Handlers
             }
             catch (ThreadAbortException)
             {
-                ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.Command);
                 Log.Trace("Rdp closing...");
             }
             catch (Exception e)
@@ -148,6 +148,43 @@ namespace Ghosts.Client.Handlers
             }
         }
 
+        public void Cleanup(AutoItX3 au, string caption,Process process)
+        {
+            //close window if still open
+            var winHandle = Winuser.FindWindow("TscShellContainerClass", caption);
+            if (winHandle != IntPtr.Zero)
+            {
+                Log.Trace($"RDP:: Closing Remote Desktop window.");
+                au.WinClose(caption);
+                Thread.Sleep(1000);
+                // handle the close dialog
+                checkGenericPrompt(au, "{ENTER}");
+                Thread.Sleep(1000);
+            }
+            if (process != null)
+            {
+                if (!process.HasExited)
+                {
+                    Log.Trace($"RDP:: Closing Remote Desktop process window.");
+                    process.CloseMainWindow();
+                    Thread.Sleep(10000);
+                    if (!process.HasExited)
+                    {
+                        Log.Trace($"RDP:: Killing Remote Desktop process.");
+                        process.Kill();
+                        Thread.Sleep(1000);
+                    }
+                } else
+                {
+                    Log.Trace($"RDP:: Remote Desktop process has exited.");
+                }
+            }
+            else
+            {
+                Log.Trace($"RDP:: No Remote Desktop process to cleanup.");
+            }
+        }
+
         public void RdpEx(TimelineHandler handler, TimelineEvent timelineEvent, string choice)
         {
 
@@ -174,9 +211,6 @@ namespace Ghosts.Client.Handlers
                 }
             }
 
-
-
-
             var processStartInfo = new ProcessStartInfo("cmd.exe")
             {
                 RedirectStandardInput = true,
@@ -184,67 +218,52 @@ namespace Ghosts.Client.Handlers
                 UseShellExecute = false
             };
 
-
             AutoItX3 au = new AutoItX3();
+            var caption = $"{target} - Remote Desktop Connection";
 
             using (var process = Process.Start(processStartInfo))
             {
-                Thread.Sleep(1000);
-                if (process != null)
+                try
                 {
-                    process.StandardInput.WriteLine(command);
-                    process.StandardInput.Close(); // line added to stop process from hanging on ReadToEnd()
-                    Thread.Sleep(2000);  //give time for response
-                    checkPasswordPrompt(au, password,username,usePasswordOnly);
-                    //wait 3 minutes for connection window
-                    if (!findRdpWindow(target, 3))
+                    Thread.Sleep(1000);
+                    if (process != null)
                     {
-                        //may have a certificate problem
-                        checkGenericPrompt(au, "{TAB}{TAB}{TAB}{ENTER}");  //this is for a certificate prompt
-                    }
-                    //try again for another 3 minutes to find
-                    if (findRdpWindow(target, 3))
-                    {
-                        doMouseLoop(target, au);
+                        process.StandardInput.WriteLine(command);
+                        process.StandardInput.Close(); // line added to stop process from hanging on ReadToEnd()
+                        Thread.Sleep(2000);  //give time for response
+                        checkPasswordPrompt(au, password, username, usePasswordOnly);
+                        //wait 3 minutes for connection window
+                        if (!findRdpWindow(target, 3))
+                        {
+                            //may have a certificate problem
+                            checkGenericPrompt(au, "{TAB}{TAB}{TAB}{ENTER}");  //this is for a certificate prompt
+                        }
+                        //try again for another 3 minutes to find
+                        if (findRdpWindow(target, 3))
+                        {
+                            doMouseLoop(caption, target, au);
+                        }
+                        else
+                        {
+                            Log.Trace($"RDP:: Unable to connect to remote desktop for {target}");
+                        }
+                        Thread.Sleep(2000);
+                        Cleanup(au, caption,process);
                     }
                     else
                     {
-                        Log.Trace($"RDP:: Unable to connect to remote desktop for {target}");
-                    }
-                    
-                    Thread.Sleep(2000);
-                    if (!process.HasExited)
-                    {
-                        try
-                        {
-                            process.CloseMainWindow();
-                            Thread.Sleep(1000);
-                        }
-                        catch (ThreadAbortException)
-                        {
-                            throw;  //pass up
-                        }
-                        catch { }
-
-                    }
-                    if (!process.HasExited)
-                    {
-                        try
-                        {
-                            //ok, stop being nice and just kill it
-                            process.Kill();
-                            Thread.Sleep(1000);
-                        }
-                        catch (ThreadAbortException)
-                        {
-                            throw;  //pass up
-                        }
-                        catch { }
+                        Log.Trace($"RDP:: Failed to execute the remote desktop connection program for {target}");
                     }
                 }
-                else
+                catch (ThreadAbortException)
                 {
-                    Log.Trace($"RDP:: Failed to execute the remote desktop connection program for {target}");
+                    Cleanup(au, caption, process);
+                    throw;  //pass up
+                }
+                catch (Exception e)
+                {
+                    Cleanup(au, caption, process);
+                    Log.Error(e);
                 }
             }
         }
@@ -266,9 +285,9 @@ namespace Ghosts.Client.Handlers
             return winHandle != IntPtr.Zero;
         }
 
-        public void doMouseLoop(string target, AutoItX3 au)
+        public void doMouseLoop(string caption, string target, AutoItX3 au)
         {
-            var caption = $"{target} - Remote Desktop Connection";
+            
             var winHandle = Winuser.FindWindow("TscShellContainerClass", caption);
             if (winHandle != IntPtr.Zero)
             {
