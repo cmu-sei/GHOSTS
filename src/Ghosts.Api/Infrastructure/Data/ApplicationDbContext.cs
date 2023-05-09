@@ -20,6 +20,7 @@ namespace Ghosts.Api.Infrastructure.Data
 
         public DbSet<Machine> Machines { get; set; }
         public DbSet<Group> Groups { get; set; }
+        public DbSet<GroupMachine> GroupMachines { get; set; }
 
         public DbSet<Machine.MachineHistoryItem> HistoryMachine { get; set; }
         public DbSet<HistoryHealth> HistoryHealth { get; set; }

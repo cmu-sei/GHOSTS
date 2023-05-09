@@ -61,7 +61,42 @@ namespace Ghosts.Api.Services
 
         public async Task<Group> UpdateAsync(Group model, CancellationToken ct)
         {
-            _context.Entry(model).State = EntityState.Modified;
+            // Get the original record
+            var originalRecord = await this._context.Groups.Include(x => x.GroupMachines).FirstOrDefaultAsync(x => x.Id == model.Id, ct);
+            if (originalRecord == null)
+            {
+                // Handle situation when the original record doesn't exist
+                _log.Error($"No Group found with Id {model.Id}");
+                return model;
+            }
+
+            // Remove all machines for the original record
+            foreach (var g in originalRecord.GroupMachines.ToList())
+            {
+                this._context.GroupMachines.Remove(g);
+            }
+
+            if (model.GroupMachines.Count > 0)
+            {
+                // Add new GroupMachines from the model
+                foreach (var g in model.GroupMachines)
+                {
+                    if (g.MachineId != Guid.Empty)
+                    {
+                        g.GroupId = originalRecord.Id;
+                        this._context.GroupMachines.Add(g);
+                    }
+                }
+            }
+            else
+            {
+                originalRecord.Machines.Clear();
+            }
+
+            // Update properties of the original record to match those of the model
+            // Assuming Group has properties Name and Description
+            originalRecord.Name = model.Name;
+            originalRecord.Status = model.Status;
 
             try
             {
@@ -69,10 +104,11 @@ namespace Ghosts.Api.Services
             }
             catch (DbUpdateConcurrencyException ex)
             {
+                // Log the exception
                 _log.Error($"Machine group update exception: {ex}");
             }
 
-            return model;
+            return originalRecord;
         }
 
         public async Task<int> DeleteAsync(int id, CancellationToken ct)
@@ -83,6 +119,7 @@ namespace Ghosts.Api.Services
                 _context.Groups.Remove(machineGroup);
                 await _context.SaveChangesAsync(ct);
             }
+
             return id;
         }
 
