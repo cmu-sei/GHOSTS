@@ -107,6 +107,7 @@ namespace Ghosts.Domain.Code
             public static string Timeline => Clean(Path + "timeline.json");
 
             public static string DenyList => Clean(Path + "denylist.txt");
+            public static string EmailsFooter => Clean(Path + "emails-footer.txt");
 
             public static string EmailContent(string raw) => Determine(raw, "email-content.csv");
             public static string EmailReply(string raw) => Determine(raw, "email-reply.csv");

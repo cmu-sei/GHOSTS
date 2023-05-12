@@ -146,6 +146,9 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="config\emails-footer.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Compile Include="Handlers\BaseBrowserHandler.cs" />
     <Compile Include="Handlers\BlogHelper.cs" />
     <Compile Include="Handlers\BlogHelperDrupal.cs" />
