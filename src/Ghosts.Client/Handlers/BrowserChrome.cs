@@ -113,13 +113,7 @@ namespace Ghosts.Client.Handlers
             options.AddArguments("--disable-logging");
             options.AddArgument("--log-level=3");
             options.AddArgument("--silent");
-            if (handler.HandlerArgs.ContainsKey("command-line-args"))
-            {
-                foreach (var option in (JArray)handler.HandlerArgs["command-line-args"])
-                {
-                    options.AddArgument(option.Value<string>());
-                }
-            }
+            
 
             options.AddLocalStatePreference("download.default_directory", @"%homedrive%%homepath%\\Downloads");
             options.AddLocalStatePreference("disable-popup-blocking", "true");
@@ -129,6 +123,29 @@ namespace Ghosts.Client.Handlers
 
             if (handler.HandlerArgs != null)
             {
+                if (handler.HandlerArgs.ContainsKey("command-line-args"))
+                {
+                    foreach (var option in (JArray)handler.HandlerArgs["command-line-args"])
+                    {
+                        options.AddArgument(option.Value<string>());
+                    }
+                }
+                
+                if (handler.HandlerArgs.ContainsKey("socks-proxy"))
+                {
+                    Proxy proxy = new Proxy();
+                    proxy.Kind = ProxyKind.Manual;
+                    proxy.SocksProxy = handler.HandlerArgs["socks-proxy"].ToString();
+                    proxy.SocksVersion = 5;
+                    if (handler.HandlerArgs.ContainsKey("socks-proxy-version"))
+                    {
+                        int value = 5;
+                        int.TryParse(handler.HandlerArgs["socks-proxy-version"].ToString(), out value);
+                        proxy.SocksVersion = value;
+                    }
+                    options.Proxy = proxy;
+
+                }
                 if (handler.HandlerArgs.ContainsKey("user-data-dir"))
                 {
                     var profile = Environment.ExpandEnvironmentVariables(handler.HandlerArgs["user-data-dir"].ToString());
