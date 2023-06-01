@@ -713,7 +713,7 @@ public class Outlookv2 : BaseHandler
     {
         try
         {
-            var folderItems = _folderInbox.Items;
+            var folderItems = _folderInbox.Items.Restrict("[Unread]=true");
             MailItem folderItem;
 
             foreach (object item in folderItems)
@@ -722,6 +722,7 @@ public class Outlookv2 : BaseHandler
                 {
                     folderItem = item as MailItem;
                     if (folderItem == null) continue;
+                    if (!folderItem.UnRead) continue;  //should not be needed but WTH
                     // mark as read
                     folderItem.UnRead = false;
                     folderItem.Display(false);
@@ -741,22 +742,18 @@ public class Outlookv2 : BaseHandler
             var count = folderItems.Count;
             var choice = _random.Next(1, count);
             //if get here, read an email already read
-            for (int i = count; i > 0; i--)
+            for (int i = choice; i > 0; i--)
             {
                 object item = folderItems[i];
                 try
                 {
                     folderItem = item as MailItem;
                     if (folderItem == null) continue;
-                    if (choice <= i)
-                    {
-                        folderItem.Display(false);
-                        DownloadAttachments(folderItem);
-                        Thread.Sleep(10000);
-                        folderItem.Close(Microsoft.Office.Interop.Outlook.OlInspectorClose.olDiscard);
-                        return true;
-                    }
-                    
+                    folderItem.Display(false);
+                    DownloadAttachments(folderItem);
+                    Thread.Sleep(10000);
+                    folderItem.Close(Microsoft.Office.Interop.Outlook.OlInspectorClose.olDiscard);
+                    return true; 
                 }
                 catch (ThreadAbortException)
                 {
