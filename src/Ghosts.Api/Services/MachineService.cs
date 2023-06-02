@@ -9,6 +9,7 @@ using Ghosts.Api.Infrastructure;
 using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Api.Models;
 using Ghosts.Domain;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.TagHelpers.Cache;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -20,7 +21,8 @@ namespace Ghosts.Api.Services
     {
         Task<List<Machine>> GetAsync(string q, CancellationToken ct);
         Task<Machine> GetByIdAsync(Guid id, CancellationToken ct);
-        Task<Machine> FindByValue(Machine machine, CancellationToken ct);
+        
+        Task<FindMachineResponse> FindOrCreate(HttpContext httpContext, CancellationToken ct);
         List<MachineListItem> GetList();
         Task<Guid> CreateAsync(Machine model, CancellationToken ct);
         Task<Machine> UpdateAsync(Machine model, CancellationToken ct);
@@ -56,15 +58,63 @@ namespace Ghosts.Api.Services
             return list;
         }
 
-        public async Task<Machine> FindByValue(Machine machine, CancellationToken ct)
+        public async Task<FindMachineResponse> FindOrCreate(HttpContext httpContext, CancellationToken ct)
         {
-            return Program.ClientConfig.MatchMachinesBy.ToLower() switch
+            var machineResponse = new FindMachineResponse();
+            var m = WebRequestReader.GetMachine(httpContext);
+
+            if (m.Id == Guid.Empty)
             {
-                "fqdn" => await _context.Machines.FirstOrDefaultAsync(o => o.FQDN.Contains(machine.FQDN), ct),
-                "host" => await _context.Machines.FirstOrDefaultAsync(o => o.Host.Contains(machine.Host), ct),
-                "resolvedhost" => await _context.Machines.FirstOrDefaultAsync(o => o.ResolvedHost.Contains(machine.ResolvedHost), ct),
-                _ => await _context.Machines.FirstOrDefaultAsync(o => o.Name.Contains(machine.Name), ct)
-            };
+                m = await this.FindByValue(WebRequestReader.GetMachine(httpContext), ct);
+            }
+
+            if (m is null || !m.IsValid())
+            {
+                m = WebRequestReader.GetMachine(httpContext);
+
+                m.History.Add(new Machine.MachineHistoryItem { Type = Machine.MachineHistoryItem.HistoryType.Created });
+                await this.CreateAsync(m, ct);
+
+                if (!m.IsValid())
+                {
+                    machineResponse.Error = "Invalid machine request";
+                }
+                else
+                {
+                    m.History.Add(new Machine.MachineHistoryItem { Type = Machine.MachineHistoryItem.HistoryType.RequestedId });
+                    await this.UpdateAsync(m, ct);
+
+                    machineResponse.Machine = m;
+                }
+            }
+            else
+            {
+                machineResponse.Machine = m;
+            }
+
+            return machineResponse;
+        }
+
+        private async Task<Machine> FindByValue(Machine machine, CancellationToken ct)
+        {
+            if (string.IsNullOrEmpty(Program.ClientConfig.MatchMachinesBy))
+            {
+                return await _context.Machines.FirstOrDefaultAsync(o => o.Name.ToLower().Contains(machine.Name)
+                                                                        || o.FQDN.ToLower().Contains(machine.FQDN.ToLower())
+                                                                        || o.Host.ToLower().Contains(machine.Host.ToLower())
+                                                                        || o.ResolvedHost.ToLower().Contains(machine.ResolvedHost.ToLower()), ct);
+            }
+            else
+            {
+                return Program.ClientConfig.MatchMachinesBy.ToLower() switch
+                {
+                    "name" => await _context.Machines.FirstOrDefaultAsync(o => o.Name.ToLower().Contains(machine.Name.ToLower()), ct),
+                    "fqdn" => await _context.Machines.FirstOrDefaultAsync(o => o.FQDN.ToLower().Contains(machine.FQDN.ToLower()), ct),
+                    "host" => await _context.Machines.FirstOrDefaultAsync(o => o.Host.ToLower().Contains(machine.Host.ToLower()), ct),
+                    "resolvedhost" => await _context.Machines.FirstOrDefaultAsync(o => o.ResolvedHost.ToLower().Contains(machine.ResolvedHost.ToLower()), ct),
+                    _ => await _context.Machines.FirstOrDefaultAsync(o => o.Name.ToLower().Contains(machine.Name.ToLower()), ct)
+                };
+            }
         }
 
         public List<MachineListItem> GetList()
@@ -183,7 +233,7 @@ namespace Ghosts.Api.Services
 
             var operation = await _context.SaveChangesAsync(ct);
             if (operation >= 1) return id;
-            
+
             _log.Error($"Could not delete machine: {operation}");
             throw new InvalidOperationException("Could not delete Machine");
         }
@@ -271,14 +321,14 @@ namespace Ghosts.Api.Services
                 if (existingGroup != null && existingGroup.Name == group)
                 {
                     if (existingGroup.GroupMachines.Any(o => o.MachineId.Equals(model.Id))) continue;
-                    
-                    existingGroup.GroupMachines.Add(new GroupMachine {GroupId = existingGroup.Id, MachineId = model.Id});
+
+                    existingGroup.GroupMachines.Add(new GroupMachine { GroupId = existingGroup.Id, MachineId = model.Id });
                     _context.SaveChanges();
                 }
                 else
                 {
-                    var newGroup = new Group {Name = @group, Status = StatusType.Active};
-                    newGroup.GroupMachines.Add(new GroupMachine {GroupId = newGroup.Id, MachineId = model.Id});
+                    var newGroup = new Group { Name = @group, Status = StatusType.Active };
+                    newGroup.GroupMachines.Add(new GroupMachine { GroupId = newGroup.Id, MachineId = model.Id });
                     _context.Groups.Add(newGroup);
                     _context.SaveChanges();
                 }

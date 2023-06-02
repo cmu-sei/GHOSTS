@@ -10,6 +10,22 @@ using Newtonsoft.Json.Converters;
 
 namespace Ghosts.Api.Models
 {
+    public class FindMachineResponse
+    {
+        public Machine Machine { get; set; }
+        public string Error { get; set; }
+
+        public FindMachineResponse()
+        {
+            this.Machine = new Machine();
+        }
+        
+        public bool IsValid()
+        {
+            return string.IsNullOrEmpty(this.Error);
+        }
+    }
+    
     [Table("machines")]
     public class Machine
     {

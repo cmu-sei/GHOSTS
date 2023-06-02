@@ -1,9 +1,7 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
-using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Ghosts.Api.Infrastructure;
 using Ghosts.Api.Models;
 using Ghosts.Api.Services;
 using Ghosts.Domain;
@@ -25,11 +23,13 @@ namespace Ghosts.Api.Controllers
         private static readonly Logger log = LogManager.GetCurrentClassLogger();
         private readonly IBackgroundQueue _queue;
         private readonly IMachineUpdateService _updateService;
+        private readonly IMachineService _machineService;
 
-        public ClientUpdatesController(IMachineUpdateService updateService, IBackgroundQueue queue)
+        public ClientUpdatesController(IMachineService machineService, IMachineUpdateService updateService, IBackgroundQueue queue)
         {
             _updateService = updateService;
             _queue = queue;
+            _machineService = machineService;
         }
 
         /// <summary>
@@ -47,21 +47,15 @@ namespace Ghosts.Api.Controllers
         public async Task<IActionResult> Index(CancellationToken ct)
         {
             var id = Request.Headers["ghosts-id"];
-            if (string.IsNullOrEmpty(id)) throw new Exceptions.GhostsClientFormattingException("Web Headers are not configured correctly - no ghosts-id set");
-
             log.Trace($"Request by {id}");
-
-            var m = WebRequestReader.GetMachine(HttpContext);
-
-            if (!string.IsNullOrEmpty(id))
+            
+            var findMachineResponse = await this._machineService.FindOrCreate(HttpContext, ct);
+            if (!findMachineResponse.IsValid())
             {
-                m.Id = new Guid(id);
+                return StatusCode(StatusCodes.Status401Unauthorized, findMachineResponse.Error);
             }
-            else
-            {
-                if (!m.IsValid())
-                    return StatusCode(StatusCodes.Status401Unauthorized, "Invalid machine request");
-            }
+
+            var m = findMachineResponse.Machine;
 
             _queue.Enqueue(
                 new QueueEntry
@@ -80,9 +74,11 @@ namespace Ghosts.Api.Controllers
             var u = await _updateService.GetAsync(m.Id, m.CurrentUsername, ct);
             if (u == null) return NotFound();
 
-            var update = new UpdateClientConfig {Type = u.Type, Update = u.Update};
+            log.Trace($"Update sent to {m.Id} {m.FQDN} {u.Id} {u.Username} {u.Update}");
+            
+            var update = new UpdateClientConfig { Type = u.Type, Update = u.Update };
 
-            await _updateService.DeleteAsync(u.Id, ct);
+            await _updateService.DeleteAsync(u.Id, m.Id, ct);
 
             // integrators want to know that a timeline was actually delivered
             // (the service only guarantees that the update was received)
@@ -93,7 +89,7 @@ namespace Ghosts.Api.Controllers
                         new NotificationQueueEntry()
                         {
                             Type = NotificationQueueEntry.NotificationType.TimelineDelivered,
-                            Payload = (JObject) JToken.FromObject(update)
+                            Payload = (JObject)JToken.FromObject(update)
                         },
                     Type = QueueEntry.Types.Notification
                 });

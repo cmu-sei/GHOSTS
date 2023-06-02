@@ -33,6 +33,6 @@ public class PostsHub: Hub
         _db.Posts.Add(post);
         await _db.SaveChangesAsync();
         
-        await Clients.All.SendAsync("ReceiveMessage", id, user, message, created);
+        await Clients.All.SendAsync("SendMessage", id, user, message, created);
     }
 }

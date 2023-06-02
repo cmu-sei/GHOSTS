@@ -16,7 +16,7 @@ namespace Ghosts.Api.Services
 
         Task<MachineUpdate> CreateAsync(MachineUpdate model, CancellationToken ct);
         //Task<Machine> UpdateAsync(Machine model, CancellationToken ct);
-        Task<int> DeleteAsync(int model, CancellationToken ct);
+        Task<int> DeleteAsync(int id, Guid machineId, CancellationToken ct);
     }
 
     public class MachineUpdateService : IMachineUpdateService
@@ -64,7 +64,7 @@ namespace Ghosts.Api.Services
             return model;
         }
 
-        public async Task<int> DeleteAsync(int id, CancellationToken ct)
+        public async Task<int> DeleteAsync(int id, Guid machineId, CancellationToken ct)
         {
             var model = await _context.MachineUpdates.FirstOrDefaultAsync(o => o.Id == id, ct);
             if (model == null)
@@ -74,6 +74,7 @@ namespace Ghosts.Api.Services
             }
 
             model.Status = StatusType.Deleted;
+            model.MachineId = machineId;
 
             var operation = await _context.SaveChangesAsync(ct);
             if (operation >= 1) return id;

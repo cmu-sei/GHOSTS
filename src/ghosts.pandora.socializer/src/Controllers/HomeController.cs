@@ -163,7 +163,7 @@ public class HomeController : Controller
         _db.Posts.Add(post);
         await _db.SaveChangesAsync();
         
-        await _hubContext.Clients.All.SendAsync("ReceiveMessage", post.Id, post.User, post.Message, post.CreatedUtc);
+        await _hubContext.Clients.All.SendAsync("SendMessage", post.Id, post.User, post.Message, post.CreatedUtc);
 
         return NoContent();
     }
