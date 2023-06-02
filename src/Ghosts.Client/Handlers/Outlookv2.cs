@@ -739,30 +739,35 @@ public class Outlookv2 : BaseHandler
                     //ignore others
                 }
             }
+            folderItems = _folderInbox.Items;  //no filter this time
             var count = folderItems.Count;
-            var choice = _random.Next(1, count);
-            //if get here, read an email already read
-            for (int i = choice; i > 0; i--)
+            if (count > 0)
             {
-                object item = folderItems[i];
-                try
+                var choice = _random.Next(1, count);
+                //if get here, read an email already read
+                for (int i = choice; i > 0; i--)
                 {
-                    folderItem = item as MailItem;
-                    if (folderItem == null) continue;
-                    folderItem.Display(false);
-                    DownloadAttachments(folderItem);
-                    Thread.Sleep(10000);
-                    folderItem.Close(Microsoft.Office.Interop.Outlook.OlInspectorClose.olDiscard);
-                    return true; 
+                    object item = folderItems[i];
+                    try
+                    {
+                        folderItem = item as MailItem;
+                        if (folderItem == null) continue;
+                        folderItem.Display(false);
+                        DownloadAttachments(folderItem);
+                        Thread.Sleep(10000);
+                        folderItem.Close(Microsoft.Office.Interop.Outlook.OlInspectorClose.olDiscard);
+                        return true;
+                    }
+                    catch (ThreadAbortException)
+                    {
+                        throw;  //pass up
+                    }
+                    catch
+                    {
+                        //ignore others
+                    }
                 }
-                catch (ThreadAbortException)
-                {
-                    throw;  //pass up
-                }
-                catch { 
-                    //ignore others
-                }
-            }     
+            }
         }
         catch (ThreadAbortException)
         {
