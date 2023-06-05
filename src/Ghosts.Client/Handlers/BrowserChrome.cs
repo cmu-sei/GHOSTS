@@ -10,12 +10,27 @@ using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
 using Newtonsoft.Json.Linq;
 using OpenQA.Selenium;
-using OpenQA.Selenium.DevTools;
+
 
 namespace Ghosts.Client.Handlers
 {
     public class BrowserChrome : BaseBrowserHandler
     {
+        public BrowserChrome(TimelineHandler handler)
+        {
+            base.Init(handler);
+            BrowserType = HandlerType.BrowserChrome;
+            StartEx(handler);
+
+        }
+        public virtual void StartEx(TimelineHandler handler)
+        {
+            var hasRunSuccessfully = false;
+            while (!hasRunSuccessfully)
+            {
+                hasRunSuccessfully = ChromeEx(handler);
+            }
+        }
         private static string GetInstallLocation()
         {
             var path = @"C:\Program Files\Google\Chrome\Application\chrome.exe";
@@ -28,10 +43,8 @@ namespace Ghosts.Client.Handlers
             return path;
         }
 
-        public BrowserChrome(TimelineHandler handler)
+        public bool ChromeEx(TimelineHandler handler)
         {
-            base.Init(handler);
-            BrowserType = HandlerType.BrowserChrome;
             try
             {
                 using (Driver = GetDriver(handler))
@@ -42,6 +55,14 @@ namespace Ghosts.Client.Handlers
                     {
                         JS = (IJavaScriptExecutor)Driver;
                         base.JS = JS;
+                    }
+
+                    //hack: bad urls used in the past...
+                    if (handler.Initial.Equals("") ||
+                        handler.Initial.Equals("about:internal", StringComparison.InvariantCultureIgnoreCase) ||
+                        handler.Initial.Equals("about:external", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        handler.Initial = "about:blank";
                     }
 
                     try
@@ -69,7 +90,16 @@ namespace Ghosts.Client.Handlers
                     {
                         while (true)
                         {
+                            if (Driver.CurrentWindowHandle == null)
+                            {
+                                throw new Exception("Chrome window handle not available");
+                            }
+
                             ExecuteEvents(handler);
+                            if (this.Restart)
+                            {
+                                break;
+                            }
                         }
                     }
                     else
@@ -85,6 +115,7 @@ namespace Ghosts.Client.Handlers
             catch (Exception e)
             {
                 Log.Error(e);
+                return false;
             }
             finally
             {
@@ -102,7 +133,19 @@ namespace Ghosts.Client.Handlers
 
                 ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.ChromeDriver);
                 ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.Chrome);
+
+                if (this.Restart)
+                {
+                    DoRestart(handler);
+                }
             }
+
+            return true;
+        }
+        public virtual void DoRestart(TimelineHandler handler)
+        {
+            Thread.Sleep(2000);
+            _ = new BrowserChrome(handler);
         }
 
         internal static IWebDriver GetDriver(TimelineHandler handler)
