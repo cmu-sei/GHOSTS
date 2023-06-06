@@ -72,6 +72,17 @@ public class WordHandler : BaseHandler
     {
         try
         {
+            var jitterFactor = 0;
+            var stayOpen = 0;
+            if (handler.HandlerArgs.ContainsKey("stay-open"))
+            {
+                int.TryParse(handler.HandlerArgs["stay-open"].ToString(), out stayOpen);
+            }
+            if (handler.HandlerArgs.ContainsKey("delay-jitter"))
+            {
+                jitterFactor = Jitter.JitterFactorParse(handler.HandlerArgs["delay-jitter"].ToString());
+            }
+            
             foreach (var timelineEvent in handler.TimeLineEvents)
             {
                 try
@@ -81,7 +92,16 @@ public class WordHandler : BaseHandler
 
                     if (timelineEvent.DelayBefore > 0)
                     {
-                        Thread.Sleep(timelineEvent.DelayBefore);
+                        if (jitterFactor > 0)
+                        {
+                            Log.Trace($"DelayBefore, Sleeping with jitterfactor of {jitterFactor}% {timelineEvent.DelayBefore}");
+                            Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayBefore, jitterFactor));
+                        }
+                        else
+                        {
+                            Log.Trace($"DelayBefore, Sleeping {timelineEvent.DelayBefore}");
+                            Thread.Sleep(timelineEvent.DelayBefore);
+                        }
                     }
 
                     if (timeline != null)
@@ -125,6 +145,14 @@ public class WordHandler : BaseHandler
                             Log.Trace($"Could not minimize: {e}");
                         }
 
+                        var writeSleep = Jitter.Basic(100);
+                        if (jitterFactor > 0)
+                        {
+                            writeSleep = Jitter.JitterFactorDelay((stayOpen / 4), jitterFactor);
+                        }
+                        Log.Trace($"Write sleep, Sleeping {writeSleep}");
+                        Thread.Sleep(writeSleep);
+
                         // insert some text
                         var list = RandomText.GetDictionary.GetDictionaryList();
                         using (var rt = new RandomText(list))
@@ -132,9 +160,6 @@ public class WordHandler : BaseHandler
                             rt.AddContentParagraphs(1, 50);
                             wordApplication.Selection.TypeText(rt.Content);
                         }
-
-                        var writeSleep = Jitter.Basic(100);
-                        Thread.Sleep(writeSleep);
 
                         wordApplication.Selection.HomeKey(WdUnits.wdLine, WdMovementType.wdExtend);
                         wordApplication.Selection.Font.Color = GetWdColor(StylingExtensions.GetRandomColor());
@@ -163,6 +188,10 @@ public class WordHandler : BaseHandler
                                     var savePaths = JsonConvert.DeserializeObject<string[]>(savePathString);
                                     defaultSaveDirectory =
                                         savePaths.PickRandom().Replace("/", "\\"); //put windows path back
+                                    if (defaultSaveDirectory.Contains("%"))
+                                    {
+                                        defaultSaveDirectory = Environment.ExpandEnvironmentVariables(defaultSaveDirectory);
+                                    }
                                     break;
                                 }
                             }
@@ -240,7 +269,7 @@ public class WordHandler : BaseHandler
                         if (_random.Next(100) < 50)
                             document.Close();
 
-                        if (timelineEvent.DelayAfter > 0)
+                        if (timelineEvent.DelayAfter > 0 && jitterFactor < 1)
                         {
                             //sleep and leave the app open
                             Log.Trace($"Sleep after for {timelineEvent.DelayAfter}");
@@ -293,7 +322,17 @@ public class WordHandler : BaseHandler
                 }
                 finally
                 {
-                    Thread.Sleep(5000);
+                    if (timelineEvent.DelayAfter > 0 && jitterFactor > 0)
+                    {
+                        //sleep and leave the app open
+                        Log.Trace($"Sleep after for {timelineEvent.DelayAfter} with jitter");
+                        // Thread.Sleep(timelineEvent.DelayAfter - writeSleep);
+                        Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, jitterFactor));
+                    }
+                    else
+                    {
+                        Thread.Sleep(5000);
+                    }
                 }
             }
         }
@@ -311,8 +350,7 @@ public class WordHandler : BaseHandler
             Log.Trace("Word closing...");
         }
     }
-
-
+    
     private WdColor GetWdColor(Color color)
     {
         var rgbColor = VB.Information.RGB(color.R, color.G, color.B);

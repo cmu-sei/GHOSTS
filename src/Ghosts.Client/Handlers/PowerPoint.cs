@@ -13,7 +13,6 @@ using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
 using Newtonsoft.Json;
 using PowerPoint = NetOffice.PowerPointApi;
-using PpSlideLayout = NetOffice.PowerPointApi.Enums.PpSlideLayout;
 
 namespace Ghosts.Client.Handlers;
 
@@ -71,6 +70,17 @@ public class PowerPointHandler : BaseHandler
     {
         try
         {
+            var jitterFactor = 0;
+            var stayOpen = 0;
+            if (handler.HandlerArgs.ContainsKey("stay-open"))
+            {
+                int.TryParse(handler.HandlerArgs["stay-open"].ToString(), out stayOpen);
+            }
+            if (handler.HandlerArgs.ContainsKey("delay-jitter"))
+            {
+                jitterFactor = Jitter.JitterFactorParse(handler.HandlerArgs["delay-jitter"].ToString());
+            }
+
             foreach (var timelineEvent in handler.TimeLineEvents)
             {
                 try
@@ -80,7 +90,16 @@ public class PowerPointHandler : BaseHandler
 
                     if (timelineEvent.DelayBefore > 0)
                     {
-                        Thread.Sleep(timelineEvent.DelayBefore);
+                        if (jitterFactor > 0)
+                        {
+                            Log.Trace($"DelayBefore, Sleeping with jitterfactor of {jitterFactor}% {timelineEvent.DelayBefore}");
+                            Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayBefore, jitterFactor));
+                        }
+                        else
+                        {
+                            Log.Trace($"DelayBefore, Sleeping {timelineEvent.DelayBefore}");
+                            Thread.Sleep(timelineEvent.DelayBefore);
+                        }
                     }
 
                     if (timeline != null)
@@ -102,12 +121,23 @@ public class PowerPointHandler : BaseHandler
                         try
                         {
                             powerApplication.WindowState = PpWindowState.ppWindowMinimized;
+                            foreach (PowerPoint.Presentation item in powerApplication.Presentations)
+                            {
+                                item.Windows[1].WindowState = PpWindowState.ppWindowMinimized;
+                            }
                         }
                         catch (Exception e)
                         {
                             Log.Trace($"Could not minimize: {e}");
                         }
 
+                        var writeSleep = Jitter.Basic(100);
+                        if (jitterFactor > 0)
+                        {
+                            writeSleep = Jitter.JitterFactorDelay((stayOpen / 4), jitterFactor);
+                        }
+                        Log.Trace($"Write sleep, Sleeping {writeSleep}");
+                        Thread.Sleep(writeSleep);
 
                         PowerPoint.Presentation document = null;
                         if (OfficeHelpers.ShouldOpenExisting(handler))
@@ -123,9 +153,6 @@ public class PowerPointHandler : BaseHandler
 
                         // add new slide
                         document.Slides.Add(1, PpSlideLayout.ppLayoutClipArtAndVerticalText);
-
-                        var writeSleep = Jitter.Basic(100);
-                        Thread.Sleep(writeSleep);
 
                         // save the document 
                         var rand = RandomFilename.Generate();
@@ -150,6 +177,10 @@ public class PowerPointHandler : BaseHandler
                                     var savePaths = JsonConvert.DeserializeObject<string[]>(savePathString);
                                     defaultSaveDirectory =
                                         savePaths.PickRandom().Replace("/", "\\"); //put windows path back
+                                    if (defaultSaveDirectory.Contains("%"))
+                                    {
+                                        defaultSaveDirectory = Environment.ExpandEnvironmentVariables(defaultSaveDirectory);
+                                    }
                                     break;
                                 }
                             }
@@ -222,7 +253,7 @@ public class PowerPointHandler : BaseHandler
                         if (_random.Next(100) < 50)
                             document.Close();
 
-                        if (timelineEvent.DelayAfter > 0)
+                        if (timelineEvent.DelayAfter > 0 && jitterFactor < 1)
                         {
                             //sleep and leave the app open
                             Log.Trace($"Sleep after for {timelineEvent.DelayAfter}");
@@ -277,7 +308,17 @@ public class PowerPointHandler : BaseHandler
                 }
                 finally
                 {
-                    Thread.Sleep(5000);
+                    if (timelineEvent.DelayAfter > 0 && jitterFactor > 0)
+                    {
+                        //sleep and leave the app open
+                        Log.Trace($"Sleep after for {timelineEvent.DelayAfter} with jitter");
+                        // Thread.Sleep(timelineEvent.DelayAfter - writeSleep);
+                        Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, jitterFactor));
+                    }
+                    else
+                    {
+                        Thread.Sleep(5000);
+                    }
                 }
             }
         }

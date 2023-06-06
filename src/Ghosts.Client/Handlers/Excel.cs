@@ -9,6 +9,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
+using NetOffice.ExcelApi.Enums;
 using Newtonsoft.Json;
 using Excel = NetOffice.ExcelApi;
 using WorkingHours = Ghosts.Client.Infrastructure.WorkingHours;
@@ -70,6 +71,17 @@ public class ExcelHandler : BaseHandler
     {
         try
         {
+            var jitterFactor = 0;
+            var stayOpen = 0;
+            if (handler.HandlerArgs.ContainsKey("stay-open"))
+            {
+                int.TryParse(handler.HandlerArgs["stay-open"].ToString(), out stayOpen);
+            }
+            if (handler.HandlerArgs.ContainsKey("delay-jitter"))
+            {
+                jitterFactor = Jitter.JitterFactorParse(handler.HandlerArgs["delay-jitter"].ToString());
+            }
+
             foreach (var timelineEvent in handler.TimeLineEvents)
             {
                 try
@@ -79,7 +91,16 @@ public class ExcelHandler : BaseHandler
 
                     if (timelineEvent.DelayBefore > 0)
                     {
-                        Thread.Sleep(timelineEvent.DelayBefore);
+                        if (jitterFactor > 0)
+                        {
+                            Log.Trace($"DelayBefore, Sleeping with jitterfactor of {jitterFactor}% {timelineEvent.DelayBefore}");
+                            Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayBefore, jitterFactor));
+                        }
+                        else
+                        {
+                            Log.Trace($"DelayBefore, Sleeping {timelineEvent.DelayBefore}");
+                            Thread.Sleep(timelineEvent.DelayBefore);
+                        }
                     }
 
                     if (timeline != null)
@@ -92,7 +113,6 @@ public class ExcelHandler : BaseHandler
                         }
                     }
 
-                    var writeSleep = Jitter.Basic(100);
                     using (var excelApplication = new Excel.Application
                            {
                                DisplayAlerts = false,
@@ -126,6 +146,25 @@ public class ExcelHandler : BaseHandler
                             }
                         }
 
+                        try
+                        {
+                            excelApplication.WindowState = XlWindowState.xlMinimized;
+                            foreach (var item in excelApplication.Workbooks)
+                            {
+                                item.Windows[1].WindowState = XlWindowState.xlMinimized;
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Log.Trace($"Could not minimize: {e}");
+                        }
+
+                        var writeSleep = Jitter.Basic(100);
+                        if (jitterFactor > 0)
+                        {
+                            writeSleep = Jitter.JitterFactorDelay((stayOpen / 4), jitterFactor);
+                        }
+                        Log.Trace($"Write sleep, Sleeping {writeSleep}");
                         Thread.Sleep(writeSleep);
 
                         var rand = RandomFilename.Generate();
@@ -150,6 +189,10 @@ public class ExcelHandler : BaseHandler
                                     var savePaths = JsonConvert.DeserializeObject<string[]>(savePathString);
                                     defaultSaveDirectory =
                                         savePaths.PickRandom().Replace("/", "\\"); //put windows path back
+                                    if (defaultSaveDirectory.Contains("%"))
+                                    {
+                                        defaultSaveDirectory = Environment.ExpandEnvironmentVariables(defaultSaveDirectory);
+                                    }
                                     break;
                                 }
                             }
@@ -220,7 +263,7 @@ public class ExcelHandler : BaseHandler
                         if (_random.Next(100) < 50)
                             document.Close();
 
-                        if (timelineEvent.DelayAfter > 0)
+                        if (timelineEvent.DelayAfter > 0 && jitterFactor < 1)
                         {
                             //sleep and leave the app open
                             Log.Trace($"Sleep after for {timelineEvent.DelayAfter}");
@@ -277,7 +320,17 @@ public class ExcelHandler : BaseHandler
                 }
                 finally
                 {
-                    Thread.Sleep(5000);
+                    if (timelineEvent.DelayAfter > 0 && jitterFactor > 0)
+                    {
+                        //sleep and leave the app open
+                        Log.Trace($"Sleep after for {timelineEvent.DelayAfter} with jitter");
+                        // Thread.Sleep(timelineEvent.DelayAfter - writeSleep);
+                        Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, jitterFactor));
+                    }
+                    else
+                    {
+                        Thread.Sleep(5000);
+                    }
                 }
             }
         }
