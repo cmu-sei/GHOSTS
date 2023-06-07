@@ -2,8 +2,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.DirectoryServices.AccountManagement;
 using System.IO;
 using System.Linq;
+using System.Security.Principal;
+using System.Threading;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
 using NLog;
@@ -128,10 +131,34 @@ public class EmailConfiguration
             return $"{Environment.NewLine}{Environment.NewLine}CONFIDENTIALITY NOTICE: This e-mail message, including any attachments, may contain information that is protected by the DoD Privacy Act. This e-mail transmission is intended solely for the addressee(s). If you are not the intended recipient, you are hereby notified that you are not authorized to read, print, retain, copy, disclose, distribute, or use this message, any part of it, or any attachments. If you have received this message in error, please immediately notify the sender by telephone or return e-mail and delete this message and any attachments from your system without reading or saving in any manner. You can obtain additional information about the DoD Privacy Act at http://dpclo.defense.gov/privacy. Thank you.{Environment.NewLine}Timestamp: {DateTime.Now} ID: {this.Id}";
         }
 
+        var email = "";
+        var firstName = "";
+        var lastName = "";
+        var samAccountName = "";
+        var name = "";
+        try
+        {
+            var user = UserPrincipal.Current;
+            email = user.EmailAddress;
+            firstName = user.GivenName;
+            lastName = user.Surname;
+            samAccountName = user.SamAccountName;
+            name = user.Name;
+        }
+        catch (Exception e)
+        {
+            _log.Trace($"Can't get current userprinciple for the email footer, skipping... {e}");
+        }
+        
         var f = File.ReadAllText(ApplicationDetails.ConfigurationFiles.EmailsFooter);
         f = f.Replace("{{from}}", this.From);
         f = f.Replace("{{now}}", DateTime.Now.ToLongDateString());
         f = f.Replace("{{id}}", this.Id.ToString());
+        f = f.Replace("{{email}}", email);
+        f = f.Replace("{{samaccountname}}", samAccountName);
+        f = f.Replace("{{firstname}}", firstName);
+        f = f.Replace("{{lastname}}", lastName);
+        f = f.Replace("{{name}}", name);
         return f;
     }
 
