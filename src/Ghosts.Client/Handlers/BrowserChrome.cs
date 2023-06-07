@@ -204,7 +204,7 @@ namespace Ghosts.Client.Handlers
 
                 if (handler.HandlerArgs.ContainsKeyWithOption("isheadless", "true"))
                 {
-                    options.AddArguments("headless");
+                    options.AddArguments("--headless=new");
                 }
 
                 if (handler.HandlerArgs.ContainsKeyWithOption("incognito", "true"))
