@@ -9,6 +9,8 @@ using Ghosts.Domain.Code.Helpers;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Firefox;
 using Newtonsoft.Json.Linq;
+using System.Threading;
+
 
 namespace ghosts.client.linux.handlers
 {
@@ -58,6 +60,49 @@ namespace ghosts.client.linux.handlers
             _log.Trace($"Using install location of [{retVal}]");
             return retVal;
         }
+
+        public override void HandleBrowserException(Exception e)
+        {
+            if (e.Message.Contains("InsecureCertificate") || e.Message.Contains("Reached error page:"))
+            {
+                HandleInsecureCertificate();
+            }
+        }
+
+        public void HandleInsecureCertificate()
+        {
+            //look for security override
+            IWebElement targetElement;
+            try
+            {
+                Thread.Sleep(500);
+                targetElement = Driver.FindElement(By.Id("advancedButton"));
+                BrowserHelperSupport.MoveToElementAndClick(Driver, targetElement); //click advanced 
+                Thread.Sleep(500);
+            }
+            catch
+            {
+                return; //return if not present
+            }
+            try { 
+                targetElement = Driver.FindElement(By.Id("exceptionDialogButton"));  
+                BrowserHelperSupport.MoveToElementAndClick(Driver, targetElement);   //accept risk and continue
+                Thread.Sleep(1000);
+                return;
+            }
+            catch { }
+            //look for return button
+            try
+            {
+                targetElement = Driver.FindElement(By.Id("advancedPanelReturnButton"));
+                BrowserHelperSupport.MoveToElementAndClick(Driver, targetElement);   //return, cannot continue
+                Thread.Sleep(1000);
+                
+            }
+            catch { }
+
+        }
+
 
         private bool FirefoxEx(TimelineHandler handler)
         {

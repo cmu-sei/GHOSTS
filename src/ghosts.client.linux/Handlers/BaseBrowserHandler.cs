@@ -8,6 +8,9 @@ using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
+using System.Collections.Generic;
+using System.Linq;
+using ghosts.client.linux.Infrastructure.Browser;
 
 namespace ghosts.client.linux.handlers
 {
@@ -24,6 +27,11 @@ namespace ghosts.client.linux.handlers
         private int _actionsBeforeRestart = -1;
         private LinkManager _linkManager;
         private int _actionsCount = 0;
+
+        public int BrowseProbability = 100;
+        public int JitterFactor { get; set; }  = 0;  //used with Jitter.JitterFactorDelay
+
+        private PostContentManager _postHelper = null;
         
         private Task LaunchThread(TimelineHandler handler, TimelineEvent timelineEvent, string site)
         {
@@ -73,117 +81,19 @@ namespace ghosts.client.linux.handlers
                             }
                             break;
                         case "random":
+                            ParseRandomHandlerArgs(handler);
+                            DoRandomCommand(handler, timelineEvent);
+                            if (this.Restart) return;  //restart has been requested
+                            break;
 
-                            // setup
-                            if (handler.HandlerArgs.ContainsKey("stickiness"))
-                            {
-                                int.TryParse(handler.HandlerArgs["stickiness"].ToString(), out _stickiness);
-                            }
-                            if (handler.HandlerArgs.ContainsKey("stickiness-depth-min"))
-                            {
-                                int.TryParse(handler.HandlerArgs["stickiness-depth-min"].ToString(), out _depthMin);
-                            }
-                            if (handler.HandlerArgs.ContainsKey("stickiness-depth-max"))
-                            {
-                                int.TryParse(handler.HandlerArgs["stickiness-depth-max"].ToString(), out _depthMax);
-                            }
-                            if (handler.HandlerArgs.ContainsKey("visited-remember"))
-                            {
-                                int.TryParse(handler.HandlerArgs["visited-remember"].ToString(), out _visitedRemember);
-                            }
-                            if (handler.HandlerArgs.ContainsKey("actions-before-restart"))
-                            {
-                                int.TryParse(handler.HandlerArgs["actions-before-restart"].ToString(), out _actionsBeforeRestart);
-                            }
+                        case "randomalt":
+                            ParseRandomHandlerArgs(handler);
+                            if (_postHelper == null) _postHelper = new PostContentManager();
+                            DoRandomAltCommand(handler, timelineEvent);
+                            if (this.Restart) return;  //restart has been requested
+                            break;
 
-                            this._linkManager = new LinkManager(_visitedRemember);
-
-                            while (true)
-                            {
-                                if (Driver.CurrentWindowHandle == null)
-                                {
-                                    throw new Exception("Browser window handle not available");
-                                }
-
-                                config = RequestConfiguration.Load(handler, timelineEvent.CommandArgs[_random.Next(0, timelineEvent.CommandArgs.Count)]);
-                                if (config.Uri != null && config.Uri.IsWellFormedOriginalString())
-                                {
-                                    this._linkManager.SetCurrent(config.Uri);
-                                    MakeRequest(config);
-                                    Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId);
-
-                                    if (this._stickiness > 0)
-                                    {
-                                        //now some percentage of the time should stay on this site
-                                        if (_random.Next(100) < this._stickiness)
-                                        {
-                                            var loops = _random.Next(this._depthMin, this._depthMax);
-                                            _log.Trace($"Beginning {loops} loops on {config.Uri}");
-                                            for (var loopNumber = 0; loopNumber < loops; loopNumber++)
-                                            {
-                                                try
-                                                {
-                                                    this._linkManager.SetCurrent(config.Uri);
-                                                    GetAllLinks(config, false);
-                                                    var link = this._linkManager.Choose();
-                                                    if (link == null)
-                                                    {
-                                                        return;
-                                                    }
-
-                                                    config.Method = "GET";
-                                                    config.Uri = link.Url;
-
-                                                    _log.Trace($"Making request #{loopNumber+1}/{loops} to {config.Uri}");
-                                                    MakeRequest(config);
-                                                    Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId);
-                                                }
-                                                catch (Exception e)
-                                                {
-                                                    if (e is ThreadAbortException || e is ThreadInterruptedException)
-                                                    {
-                                                        _log.Trace($"Thread aborted, {this.BrowserType.ToString()} closing...");
-                                                        throw;
-                                                    }
-                                                    _log.Error($"Browser loop error {e}");
-                                                }
-
-                                                if (_actionsBeforeRestart > 0)
-                                                {
-                                                    if (this._actionsCount.IsDivisibleByN(10))
-                                                    {
-                                                        _log.Trace($"Browser actions == {this._actionsCount}");
-                                                    }
-                                                    if (this._actionsCount > _actionsBeforeRestart)
-                                                    {
-                                                        this.Restart = true;
-                                                        _log.Trace("Browser reached action threshold. Restarting...");
-                                                        return;
-                                                    }
-                                                }
-
-                                                Thread.Sleep(timelineEvent.DelayAfter);
-                                            }
-                                        }
-                                    }
-                                }
-
-                                if (_actionsBeforeRestart > 0)
-                                {
-                                    if (this._actionsCount.IsDivisibleByN(10))
-                                    {
-                                        _log.Trace($"Browser actions == {this._actionsCount}");
-                                    }
-                                    if (this._actionsCount > _actionsBeforeRestart)
-                                    {
-                                        this.Restart = true;
-                                        _log.Trace("Browser reached action threshold. Restarting...");
-                                        return;
-                                    }
-                                }
-
-                                Thread.Sleep(timelineEvent.DelayAfter);
-                            }
+                            
                         case "browse":
                             config = RequestConfiguration.Load(handler, timelineEvent.CommandArgs[0]);
                             if (config.Uri.IsWellFormedOriginalString())
@@ -257,6 +167,404 @@ namespace ghosts.client.linux.handlers
                 _log.Error(e);
             }
         }
+
+        public void ParseRandomHandlerArgs(TimelineHandler handler)
+        {
+            if (handler.HandlerArgs.ContainsKey("stickiness"))
+            {
+                int.TryParse(handler.HandlerArgs["stickiness"].ToString(), out _stickiness);
+            }
+            if (handler.HandlerArgs.ContainsKey("stickiness-depth-min"))
+            {
+                int.TryParse(handler.HandlerArgs["stickiness-depth-min"].ToString(), out _depthMin);
+            }
+            if (handler.HandlerArgs.ContainsKey("stickiness-depth-max"))
+            {
+                int.TryParse(handler.HandlerArgs["stickiness-depth-max"].ToString(), out _depthMax);
+            }
+            if (handler.HandlerArgs.ContainsKey("visited-remember"))
+            {
+                int.TryParse(handler.HandlerArgs["visited-remember"].ToString(), out _visitedRemember);
+            }
+            if (handler.HandlerArgs.ContainsKey("actions-before-restart"))
+            {
+                int.TryParse(handler.HandlerArgs["actions-before-restart"].ToString(), out _actionsBeforeRestart);
+            }
+            
+            if (handler.HandlerArgs.ContainsKey("browse-probability"))
+            {
+                int.TryParse(handler.HandlerArgs["browse-probability"].ToString(), out BrowseProbability);
+                if (BrowseProbability < 0 || BrowseProbability > 100) BrowseProbability = 100;
+            }
+            if (handler.HandlerArgs.ContainsKey("delay-jitter"))
+            {
+                JitterFactor = Jitter.JitterFactorParse(handler.HandlerArgs["delay-jitter"].ToString());
+            }
+
+
+
+        }
+
+        public void DoRandomCommand(TimelineHandler handler, TimelineEvent timelineEvent)
+        {
+            this._linkManager = new LinkManager(_visitedRemember);
+
+            while (true)
+            {
+                if (Driver.CurrentWindowHandle == null)
+                {
+                    throw new Exception("Browser window handle not available");
+                }
+
+                var config = RequestConfiguration.Load(handler, timelineEvent.CommandArgs[_random.Next(0, timelineEvent.CommandArgs.Count)]);
+                if (config.Uri != null && config.Uri.IsWellFormedOriginalString())
+                {
+                    this._linkManager.SetCurrent(config.Uri);
+                    MakeRequest(config);
+                    Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId);
+
+                    if (this._stickiness > 0)
+                    {
+                        //now some percentage of the time should stay on this site
+                        if (_random.Next(100) < this._stickiness)
+                        {
+                            var loops = _random.Next(this._depthMin, this._depthMax);
+                            _log.Trace($"Beginning {loops} loops on {config.Uri}");
+                            for (var loopNumber = 0; loopNumber < loops; loopNumber++)
+                            {
+                                try
+                                {
+                                    this._linkManager.SetCurrent(config.Uri);
+                                    GetAllLinks(config, false);
+                                    var link = this._linkManager.Choose();
+                                    if (link == null)
+                                    {
+                                        return;
+                                    }
+
+                                    config.Method = "GET";
+                                    config.Uri = link.Url;
+
+                                    _log.Trace($"Making request #{loopNumber+1}/{loops} to {config.Uri}");
+                                    MakeRequest(config);
+                                    Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId);
+                                }
+                                catch (Exception e)
+                                {
+                                    if (e is ThreadAbortException || e is ThreadInterruptedException)
+                                    {
+                                        _log.Trace($"Thread aborted, {this.BrowserType.ToString()} closing...");
+                                        throw;
+                                    }
+                                    _log.Error($"Browser loop error {e}");
+                                }
+
+                                if (_actionsBeforeRestart > 0)
+                                {
+                                    if (this._actionsCount.IsDivisibleByN(10))
+                                    {
+                                        _log.Trace($"Browser actions == {this._actionsCount}");
+                                    }
+                                    if (this._actionsCount > _actionsBeforeRestart)
+                                    {
+                                        this.Restart = true;
+                                        _log.Trace("Browser reached action threshold. Restarting...");
+                                        return;
+                                    }
+                                }
+
+                                Thread.Sleep(timelineEvent.DelayAfter);
+                            }
+                        }
+                    }
+                }
+
+                if (_actionsBeforeRestart > 0)
+                {
+                    if (this._actionsCount.IsDivisibleByN(10))
+                    {
+                        _log.Trace($"Browser actions == {this._actionsCount}");
+                    }
+                    if (this._actionsCount > _actionsBeforeRestart)
+                    {
+                        this.Restart = true;
+                        _log.Trace("Browser reached action threshold. Restarting...");
+                        return;
+                    }
+                }
+
+                Thread.Sleep(timelineEvent.DelayAfter);
+            }
+
+        }
+
+        /// <summary>
+        /// This differs from 'random' in the following ways
+        ///   Jitter factor (default 0) is used in delayAfter - random value chosen from delay-delay*%jitterfactor, delay+delay*%jitterfactor
+        ///   During stickiness browsing, a random link is chosen from a page with no preference to relative links
+        ///   If no random links found, bounce back up and chose another link from the timeline.
+        ///   After a random link is chosen, NavigateTo() is used only if the link ends with .htm/.html, else 
+        ///   Javascript is used to click the link. This avoids a problem with Firefox browsing if a downloadable file link is found.
+        ///   A random link is rejected if it has been recently used, or if a known 'bad' link (ie. 'Learn more' link Firefox security page)
+        ///   The browse-probablity value (default 100) is also used, can cause a timelink or random link to be skipped.
+        /// </summary>
+        /// <param name="handler"></param>
+        /// <param name="timelineEvent"></param>
+        /// <exception cref="Exception"></exception>
+        public void DoRandomAltCommand(TimelineHandler handler, TimelineEvent timelineEvent)
+        {
+            while (true)
+            {
+                if (Driver.CurrentWindowHandle == null)
+                {
+                    throw new Exception("Browser window handle not available");
+                }
+
+                var config = RequestConfiguration.Load(handler, timelineEvent.CommandArgs[_random.Next(0, timelineEvent.CommandArgs.Count)]);
+                
+                if (BrowseProbability < _random.Next(0, 100)) {
+                    //skipping this link
+                    _log.Trace($"Timeline choice skipped due to browse probability");
+                    Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter,JitterFactor));
+                    continue;
+                }
+                if (config.Uri != null && config.Uri.IsWellFormedOriginalString())
+                {
+                    var urlDict = new Dictionary<string, int>();
+                    var urlQueue = new LifoQueue<Uri>(_visitedRemember);
+                    MakeRequest(config);
+                    Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId);
+                    Thread.Sleep(timelineEvent.DelayAfter);
+
+                    if (this._stickiness > 0)
+                    {
+                        //now some percentage of the time should stay on this site
+                        if (_random.Next(100) < this._stickiness)
+                        {
+                            var loops = _random.Next(this._depthMin, this._depthMax);
+                            _log.Trace($"Beginning {loops} loops on {config.Uri}");
+                            for (var loopNumber = 0; loopNumber < loops; loopNumber++)
+                            {
+                                try
+                                {
+                                    if (BrowseProbability > _random.Next(0, 100))
+                                    {
+                                        if (!ClickRandomLink(config, urlDict, urlQueue)) break;  //break if no links found, reset to next choice
+                                        _log.Trace($"Making request #{loopNumber + 1}/{loops} to {config.Uri}");
+                                        Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId);
+                                    } else
+                                    {
+                                        _log.Trace($"Request skipped due to browse probability for #{loopNumber + 1}/{loops} to {config.Uri}");
+                                    }
+                                }
+                                catch (Exception e)
+                                {
+                                    if (e is ThreadAbortException || e is ThreadInterruptedException)
+                                    {
+                                        _log.Trace($"Thread aborted, {this.BrowserType.ToString()} closing...");
+                                        throw;
+                                    }
+                                    _log.Error($"Browser loop error {e}");
+                                }
+                                
+
+                                if (_actionsBeforeRestart > 0)
+                                {
+                                    if (this._actionsCount.IsDivisibleByN(10))
+                                    {
+                                        _log.Trace($"Browser actions == {this._actionsCount}");
+                                    }
+                                    if (this._actionsCount > _actionsBeforeRestart)
+                                    {
+                                        this.Restart = true;
+                                        _log.Trace("Browser reached action threshold. Restarting...");
+                                        return;
+                                    }
+                                }
+
+                                Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, JitterFactor));
+                            }
+                        }
+                    }
+                }
+
+                if (_actionsBeforeRestart > 0)
+                {
+                    if (this._actionsCount.IsDivisibleByN(10))
+                    {
+                        _log.Trace($"Browser actions == {this._actionsCount}");
+                    }
+                    if (this._actionsCount > _actionsBeforeRestart)
+                    {
+                        this.Restart = true;
+                        _log.Trace("Browser reached action threshold. Restarting...");
+                        return;
+                    }
+                }
+
+                Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, JitterFactor));
+            }
+        }
+
+        private bool isGoodLink(Uri uri)
+        {
+            //check if this link needs to be rejected
+            var linkText = uri.ToString();
+            if (linkText.Contains("support.mozilla.org") && linkText.Contains("connection-not-secure"))
+            {
+                //for some reason, occassionaly the Insecure Cert exception is not thrown and this
+                //page about the security issue is not filtered. Do not click this link as it pops
+                //up another page. Just reject it, as it is the only link on the page, and we will
+                //pop back up to the top and try again
+                _log.Trace($"Rejected link {linkText}");
+                return false;  
+            }
+            return true;
+        }
+
+        
+        private bool ClickRandomLink(RequestConfiguration config, Dictionary<string, int> urlDict, LifoQueue<Uri> urlQueue)
+        {
+            try
+            {
+                var elementList = new List<IWebElement>();
+                var uriList = new List<Uri>();
+                var links = Driver.FindElements(By.TagName("a"));
+                var gfElements = Driver.FindElements(By.TagName("gf"));
+                if (gfElements.Count > 0)
+                {
+                    //found a submit form. Fill this out. If more than one, pick a random one
+                    if (HandleFormSubmit(config, gfElements[_random.Next(0, gfElements.Count)])) return true;
+                }
+                //look for links
+                string[] validSchemes = { "http", "https" };
+                foreach (var l in links)
+                {
+                    var node = l.GetAttribute("href");
+                    if (string.IsNullOrEmpty(node))
+                        continue;
+                    if (Uri.TryCreate(node, UriKind.RelativeOrAbsolute, out var uri))
+                    {
+                        if (validSchemes.Contains(uri.Scheme) && isGoodLink(uri))
+                        {
+                            if (urlDict.ContainsKey(uri.ToString())) continue;  //skip this
+                            elementList.Add(l);
+                            uriList.Add(uri);
+                        }
+                    }
+                }
+                if (uriList.Count == 0) return false;  //no links to click
+                int linkNum = _random.Next(0, uriList.Count);
+                var targetUri = uriList[linkNum];
+                var targetElement = elementList[linkNum];
+                //remember this Url
+                if (urlDict.Count == _visitedRemember && _visitedRemember > 0)
+                {
+                    //at capacity, need to remove oldest
+                    var lastItem = urlQueue.Last();
+                    urlDict.Remove(lastItem.ToString());  //remove from dict
+                }
+                urlQueue.Add(targetUri);  //Queue is at capacity, last item is removed when this is added
+                urlDict.Add(targetUri.ToString(), 0);
+                config.Method = "GET";
+                config.Uri = targetUri;  //set this so that can print out info on return
+
+
+                if (targetUri.ToString().ToLower().EndsWith(".htm") || targetUri.ToString().ToLower().EndsWith(".html"))
+                {
+                    Driver.Navigate().GoToUrl(targetUri);
+                }
+                else
+                {
+                    BrowserHelperSupport.MoveToElementAndClick(Driver, targetElement);
+                }
+                this._actionsCount++;
+                return true;
+            }
+            catch (Exception e)
+            {
+                if (e is ThreadAbortException || e is ThreadInterruptedException)
+                {
+                    throw;
+                }
+                _log.Trace(e);
+                HandleBrowserException(e);
+            }
+            return true;
+        }
+
+        private string GetInputElementText(IWebElement targetElement)
+        {
+            var attr = targetElement.GetAttribute("type");
+            if (attr == "email") return _postHelper.Email ;
+            else
+            {
+                attr = targetElement.GetAttribute("id");
+                if (attr != null && attr.ToLower().Contains("name"))
+                {
+                    //assume this is a name field
+                    return _postHelper.FullName;
+                }
+                else
+                {
+                    return _postHelper.Subject;   //this is a single line of unknown type, not sure what to repond with here
+                }
+            }
+        }
+
+
+        private void HandleInputElement(IWebElement targetElement)
+        {
+            
+            var text = GetInputElementText(targetElement);
+            if (text != null) targetElement.SendKeys(text);
+        }
+
+        private void HandleTextareaElement(IWebElement targetElement)
+        {
+            
+            targetElement.SendKeys(_postHelper.Body);
+        }
+
+
+        private bool HandleFormSubmit(RequestConfiguration config,IWebElement gfElement)
+        {
+
+            var inputElements = gfElement.FindElements(By.XPath(".//input"));
+            var textareaElements = gfElement.FindElements(By.XPath(".//textarea"));
+            IWebElement submitElement = null;
+            _postHelper.NameEmailNext();  //generate a name and email for this page
+            _postHelper.GenericContentNext();
+            foreach (var inputElement in inputElements)
+            {
+                var attr = inputElement.GetAttribute("type");
+                if (attr == "submit") submitElement = inputElement;
+                else
+                {
+                    HandleInputElement(inputElement);
+                }
+            }
+            foreach (var textareaElement in textareaElements)
+            {
+                HandleTextareaElement(textareaElement);
+                Thread.Sleep(2000);
+            }
+            if (submitElement != null)
+            {
+                BrowserHelperSupport.MoveToElementAndClick(Driver, submitElement);
+                Thread.Sleep(3000);
+                return true;
+            }
+            return false;
+        }
+
+
+        public virtual void HandleBrowserException(Exception e)
+        {
+            // ignore this will be overridden if needed
+        }
+        
+
 
         private void GetAllLinks(RequestConfiguration config, bool sameSite)
         {
