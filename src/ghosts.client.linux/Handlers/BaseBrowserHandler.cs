@@ -30,6 +30,12 @@ namespace ghosts.client.linux.handlers
 
         public int BrowseProbability = 100;
         public int JitterFactor { get; set; }  = 0;  //used with Jitter.JitterFactorDelay
+        public bool SharePointAbort { get; set; } = false;  //will be set to True if unable to proceed with Handler execution
+        public bool BlogAbort { get; set; } = false;  //will be set to True if unable to proceed with Handler execution
+ 
+        private SharepointHelper _sharePointHelper = null;
+
+        private BlogHelper _blogHelper = null;
 
         private PostContentManager _postHelper = null;
         
@@ -78,6 +84,39 @@ namespace ghosts.client.linux.handlers
                                     Task.WaitAll();
                                     i = 0;
                                 }
+                            }
+                            break;
+                        case "sharepoint":
+                            if (!SharePointAbort)
+                            {
+                                if (_sharePointHelper == null)
+                                {
+                                    _sharePointHelper = SharepointHelper.MakeHelper(this, Driver, handler, _log);
+                                    if (_sharePointHelper == null) SharePointAbort = true;
+                                }
+
+                                if (_sharePointHelper != null)
+                                {
+                                    _sharePointHelper.Execute(handler, timelineEvent);
+                                    this.Restart = _sharePointHelper.RestartNeeded();
+                                    if (this.Restart)
+                                    {
+                                        _sharePointHelper = null;  //remove the helper
+                                        _log.Trace($"Sharepoint:: Restart requested for {this.BrowserType.ToString()} , restarting...");
+                                        return;  //restart has been requested 
+                                    }
+                                } 
+                            }
+                            break;
+                        case "blog":
+                            if (!BlogAbort)
+                            {
+                                if (_blogHelper == null)
+                                {
+                                    _blogHelper = BlogHelper.MakeHelper(this, Driver, handler, _log);
+                                    if  (_blogHelper == null) BlogAbort = true;  //failed to create a helper
+                                }
+                                if (_blogHelper != null) _blogHelper.Execute(handler, timelineEvent);
                             }
                             break;
                         case "random":
@@ -601,7 +640,7 @@ namespace ghosts.client.linux.handlers
             }
         }
 
-        private void MakeRequest(RequestConfiguration config)
+        public void MakeRequest(RequestConfiguration config)
         {
             // Added try here because some versions of FF (v56) throw an exception for an unresolved site,
             // but in other versions it seems to fail gracefully. We want to always fail gracefully
