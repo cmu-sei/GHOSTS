@@ -197,6 +197,18 @@ namespace ghosts.client.linux.timelineManager
                             o = new BrowserFirefox(handler);
                         });
                         break;
+                    case HandlerType.Ssh:
+                        t = new Thread(() =>
+                        {
+                            _ = new Ssh(handler);
+                        });
+                        break;
+                    case HandlerType.Sftp:
+                        t = new Thread(() =>
+                        {
+                            _ = new Sftp(handler);
+                        });
+                        break;
                     case HandlerType.Watcher:
                         t = new Thread(() =>
                         {

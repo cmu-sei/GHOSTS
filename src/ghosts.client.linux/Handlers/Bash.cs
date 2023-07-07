@@ -13,6 +13,9 @@ namespace ghosts.client.linux.handlers
     {
         private string Result { get; set; }
 
+        public int executionprobability = 100;
+        public int jitterfactor { get; set; } = 0;  //used with Jitter.JitterFactorDelay
+
         public Bash(TimelineHandler handler)
         {
             _log.Trace("Spawning Bash...");
@@ -31,12 +34,27 @@ namespace ghosts.client.linux.handlers
             }
             catch (Exception e)
             {
+                if (e is ThreadAbortException || e is ThreadInterruptedException)
+                {
+                    _log.Trace($"Thread aborted, Command handler exiting");
+                    throw;
+                }
                 _log.Error(e);
             }
         }
 
         private void Ex(TimelineHandler handler)
         {
+            if (handler.HandlerArgs.ContainsKey("execution-probability"))
+            {
+                int.TryParse(handler.HandlerArgs["execution-probability"].ToString(), out executionprobability);
+                if (executionprobability < 0 || executionprobability > 100) executionprobability = 100;
+            }
+            if (handler.HandlerArgs.ContainsKey("delay-jitter"))
+            {
+                jitterfactor = Jitter.JitterFactorParse(handler.HandlerArgs["delay-jitter"].ToString());
+            }
+
             foreach (var timelineEvent in handler.TimeLineEvents)
             {
                 WorkingHours.Is(handler);
@@ -48,6 +66,23 @@ namespace ghosts.client.linux.handlers
 
                 switch (timelineEvent.Command)
                 {
+                    case "random":
+                        while (true)
+                        {
+                            if (executionprobability < _random.Next(0, 100))
+                            {
+                                //skipping this command
+                                _log.Trace($"Command choice skipped due to execution probability");
+                                Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, jitterfactor));
+                                continue;
+                            }
+                            var cmd = timelineEvent.CommandArgs[_random.Next(0, timelineEvent.CommandArgs.Count)];
+                            if (!string.IsNullOrEmpty(cmd.ToString()))
+                            {
+                                this.Command(handler.Initial, cmd.ToString());
+                            }
+                            Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, jitterfactor));
+                        }
                     default:
 
                         this.Command(handler.Initial, timelineEvent.Command);
@@ -79,6 +114,7 @@ namespace ghosts.client.linux.handlers
             p.OutputDataReceived += OutputHandler;
             p.ErrorDataReceived += ErrorHandler;
             p.StartInfo.CreateNoWindow = true;
+            _log.Trace($"Spawning {p.StartInfo.FileName} with command {escapedArgs}");
             p.Start();
 
             while (!p.StandardOutput.EndOfStream)
