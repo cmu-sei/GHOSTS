@@ -123,7 +123,7 @@ public class LightHandlers : BaseHandler
 
     public class LightPowerPointHandler : BaseHandler
     {
-        // TODO
+        // NPOI Does not support PowerPoint Presentations
     }
 
     public class LightExcelHandler : BaseHandler

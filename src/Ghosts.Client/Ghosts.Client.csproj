@@ -269,6 +269,7 @@
     <None Include="Sample Timelines\BrowserChromeSharepoint.json" />
     <None Include="Sample Timelines\BrowserFirefox.json" />
     <None Include="Sample Timelines\Ftp.json" />
+    <None Include="Sample Timelines\LightHandlers.json" />
     <None Include="Sample Timelines\Notepad.json" />
     <None Include="Sample Timelines\Clicks.json" />
     <None Include="Sample Timelines\command.json" />

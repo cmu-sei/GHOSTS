@@ -1,0 +1,35 @@
+﻿{
+  "Status": "Run",
+  "TimeLineHandlers": [
+    {
+      "HandlerType": "LightExcel",
+      "Initial": "",
+      "UtcTimeOn": "00:00:00",
+      "UtcTimeOff": "24:00:00",
+      "Loop": true,
+      "TimeLineEvents": [
+        {
+          "Command": "create",
+          "CommandArgs": [ "%HOMEDRIVE%%HOMEPATH%\\Downloads" ],
+          "DelayAfter": 0,
+          "DelayBefore": 0
+        }
+      ]
+    },
+    {
+      "HandlerType": "LightWord",
+      "Initial": "",
+      "UtcTimeOn": "00:00:00",
+      "UtcTimeOff": "24:00:00",
+      "Loop": true,
+      "TimeLineEvents": [
+        {
+          "Command": "create",
+          "CommandArgs": [ "%HOMEDRIVE%%HOMEPATH%\\Downloads" ],
+          "DelayAfter": 0,
+          "DelayBefore": 0
+        }
+      ]
+    }
+  ]
+}

@@ -477,6 +477,19 @@ namespace Ghosts.Client.TimelineManager
                             _ = new Print(handler);
                         });
                         break;
+                    case HandlerType.LightWord:
+                        t = new Thread(() =>
+                        {
+                            _ = new LightHandlers.LightWordHandler(handler);
+
+                        });
+                        break;
+                    case HandlerType.LightExcel:
+                        t = new Thread(() =>
+                        {
+                            _ = new LightHandlers.LightExcelHandler(handler);
+                        });
+                        break;
                 }
 
                 if (t == null) return;
