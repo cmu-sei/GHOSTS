@@ -1,6 +1,7 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using ghosts.client.linux.handlers;
@@ -18,12 +19,27 @@ namespace ghosts.client.linux.timelineManager
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
         private Thread MonitorThread { get; set; }
+        private FileSystemWatcher _stopfileWatcher;  //watches for changes to config/stop.txt indicating a stop request
 
         public void Run()
         {
             try
             {
                 var timeline = TimelineBuilder.GetLocalTimeline();
+
+                var dirName = TimelineBuilder.TimelineFilePath().DirectoryName;
+
+                if (_stopfileWatcher == null && dirName != null)
+                {
+
+                    _log.Trace("Stopfile watcher is starting");
+                    _stopfileWatcher = new FileSystemWatcher(dirName);
+                    var stopFile = "stop.txt";
+                    _stopfileWatcher.Filter = stopFile;
+                    _stopfileWatcher.EnableRaisingEvents = true;
+                    _stopfileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Attributes;
+                    _stopfileWatcher.Changed += StopFileChanged;
+                }
             
                 //load into an managing object
                 //which passes the timeline commands to handlers
@@ -93,6 +109,41 @@ namespace ghosts.client.linux.timelineManager
             }
         }
 
+        
+
+        private void StopCommon()
+        {
+            try
+            {
+                _log.Trace("Stopping all threads.");
+                Stop();
+                _log.Trace("All threads have been stopped.");
+            }
+            catch (Exception exception)
+            {
+                _log.Info(exception);
+            }
+
+        }
+
+        private void StopFileChanged(object source, FileSystemEventArgs e)
+        {
+            try
+            {
+                _log.Trace($"Stop file Watcher event raised: {e.FullPath} {e.Name} {e.ChangeType}");
+                _log.Trace("Terminating existing tasks and exiting orchestrator");
+                StopCommon();
+                Thread.Sleep(5000);
+                LogManager.Shutdown();  //shutdown all logging
+                System.Environment.Exit(0); //exit
+            }
+            catch (Exception exc)
+            {
+                _log.Info(exc);
+            }
+        }
+
+
         private static void RunEx(Timeline timeline)
         {
             foreach (var handler in timeline.TimeLineHandlers)
@@ -144,6 +195,24 @@ namespace ghosts.client.linux.timelineManager
                         t = new Thread(() =>
                         {
                             o = new BrowserFirefox(handler);
+                        });
+                        break;
+                    case HandlerType.Ssh:
+                        t = new Thread(() =>
+                        {
+                            _ = new Ssh(handler);
+                        });
+                        break;
+                    case HandlerType.Sftp:
+                        t = new Thread(() =>
+                        {
+                            _ = new Sftp(handler);
+                        });
+                        break;
+                    case HandlerType.Watcher:
+                        t = new Thread(() =>
+                        {
+                            o = new Watcher(handler);
                         });
                         break;
                     default:
