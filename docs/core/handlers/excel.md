@@ -33,8 +33,15 @@
 
 Some of the key-value pairs are self-explanatory, but let's review a few important ones:
 
-| Key                     | Value                                                                                                                                     |
-| ---------------         | ---------------------------------------                                                                                                   |
-| `workingset`            | For the documents Excel creates, how many should we create (max) and how old can they be before we start creating new ones (max-age-in-hours). |
-| `Command`               | (create) Create new documents. This is currently the only setting, but there is space for new commands to be built in the future          |
-| `CommandArgs`           | [0] The path to the folder where the documents should be created. [1] Also periodically export documents as PDFs as well as saving them natively. [2] if creating PDFs, vary their name from the original document. [3] Randomly save documents in an array of locations. |
+| Key                       | Value                                                                                                                                             |
+| ----------------------    |  ---------------------------------------                                                                                                          |
+| `workingset`              | For the documents Excel creates, how many should we create (max) and how old can they be before we start creating new ones (max-age-in-hours).    |
+| `Command`                 | (create) Create new documents. This is currently the only setting, but there is space for new commands to be built in the future                  |
+| `CommandArgs`&nbsp;       | See below                                                                                                                                         |
+
+For CommandArgs, we began with positional arguments, but this quickly became unwieldy. We are now using named arguments, which are easier to read and maintain, but the mix remains for now. The following arguments are available:
+
+- [0] The path to the folder where the documents should be created. (old style)
+- [1] Also periodically export documents as PDFs as well as saving them natively. (middle style)
+- [2] if creating PDFs, vary their name from the original document. (new style)
+- [3] Randomly save documents in an array of locations. (new style)
