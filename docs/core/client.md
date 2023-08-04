@@ -19,7 +19,7 @@ The client's configuration and command system are file-based, so if you do not w
 
 ## The Windows Client
 
-GHOSTS on Windows (Win10 and Win7 currently supported) is a .NET Console application that performs user activity on client workstations - web browsing, working with office documents, using the command prompt or PowerShell, etc. Our team typically installs the client in an out-of-game directory (`c:\exercise\ghosts\`), where no event or injects will originate. It is recommended you verify one working client before deploying to multiple machines. You will need the base URL from the API installation for the client to communicate home.
+GHOSTS on Windows (Win7, 10, 11, and corresponding server versions, such as 2022, etc. are currently supported) is a .NET Console application that performs user activity on client workstations - web browsing, working with office documents, using the command prompt or PowerShell, etc. Our team typically installs the client in an out-of-game directory (`c:\exercise\ghosts\`), where no event or injects will originate. It is recommended you verify one working client before deploying to multiple machines. You will need the base URL from the API installation for the client to communicate home.
 
 ### Windows Installation
 
