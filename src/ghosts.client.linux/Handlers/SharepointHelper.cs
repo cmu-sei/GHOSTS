@@ -12,20 +12,25 @@ using Actions = OpenQA.Selenium.Interactions.Actions;
 using Exception = System.Exception;
 using NLog;
 using System.Web;
+using NPOI.OpenXmlFormats.Spreadsheet;
 
 namespace ghosts.client.linux.handlers
 {
 
+   
     /// <summary>
     /// Supports upload, download, deletion of documents
     /// download, deletion only done from the first page
+    /// Tested with Sharepoint 2013 and 2019
+    /// 2019 uses the 'classic view' for 2013 compatibility
+    /// The site Web template used is 'Teams Classic'
     /// </summary>
-    public class SharepointHelper2013 : SharepointHelper
+    public class SharepointHelper2013_2019 : SharepointHelper
     {
 
-        public SharepointHelper2013(BaseBrowserHandler callingHandler, IWebDriver callingDriver)
+        public SharepointHelper2013_2019(BaseBrowserHandler callingHandler, IWebDriver callingDriver, string aversion)
         {
-            base.Init(callingHandler, callingDriver);
+            base.Init(callingHandler, callingDriver, aversion);
 
         }
 
@@ -37,7 +42,7 @@ namespace ghosts.client.linux.handlers
             string portal = site;
 
             var pw_encoded = HttpUtility.UrlEncode(pw);
-            var user_encoded = HttpUtility.UrlEncode(user); 
+            var user_encoded = HttpUtility.UrlEncode(user);
             string target = header + user_encoded + ":" + pw_encoded + "@" + portal + "/";
             config = RequestConfiguration.Load(handler, target);
             try
@@ -56,9 +61,27 @@ namespace ghosts.client.linux.handlers
                 return false;
 
             }
-            target = header + portal + "/Documents/Forms/Allitems.aspx";
+            if (version == "2013")  target = header + portal + "/Documents/Forms/Allitems.aspx";
+            else target = header + portal + "/Shared Documents/Forms/Allitems.aspx";
             config = RequestConfiguration.Load(handler, target);
             baseHandler.MakeRequest(config);
+
+            // check if there is a 'Return to classic Sharepoint link
+            if (version != "2013")
+            {
+                try
+                {
+
+                    var targetElement = Driver.FindElement(By.CssSelector("[aria-label=\"Click or enter to return to classic SharePoint\""));
+
+                    targetElement.Click();
+                }
+                catch (ThreadAbortException)
+                {
+                    throw;  //pass up
+                }
+            }
+
             //click on the files tab
             try
             {
@@ -85,7 +108,7 @@ namespace ghosts.client.linux.handlers
         {
 
             Actions actions;
-            
+
 
             try
             {
@@ -176,9 +199,17 @@ namespace ghosts.client.linux.handlers
                 Driver.SwitchTo().Frame(Driver.FindElement(By.ClassName("ms-dlgFrame")));
                 WebDriverWait wait = new WebDriverWait(Driver, span);
                 var uploadElement = Driver.FindElement(By.Id("ctl00_PlaceHolderMain_UploadDocumentSection_ctl05_InputFile"));
+
                 uploadElement.SendKeys(fname);
                 Thread.Sleep(500);
-                var okElement = Driver.FindElement(By.Id("ctl00_PlaceHolderMain_ctl03_RptControls_btnOK"));
+                IWebElement okElement;
+                if (version == "2013")
+                {
+                    okElement = Driver.FindElement(By.Id("ctl00_PlaceHolderMain_ctl03_RptControls_btnOK"));
+                }
+                else { 
+                    okElement = Driver.FindElement(By.XPath("//*[@value='OK']"));
+                }
                 actions = new Actions(Driver);
                 actions.MoveToElement(okElement).Click().Perform();
                 Thread.Sleep(500);
@@ -218,7 +249,7 @@ namespace ghosts.client.linux.handlers
                     int docNum = _random.Next(0, targetElements.Count);
                     var targetElement = targetElements[docNum];
                     MoveToElementAndClick(targetElement);
-                   
+
                     var checkboxElement = targetElements[docNum].FindElement(By.XPath(".//div[@role='checkbox']"));
                     string fname = checkboxElement.GetAttribute("title");
 
@@ -245,7 +276,7 @@ namespace ghosts.client.linux.handlers
             }
             catch (Exception e)
             {
-                Log.Trace($"Sharepoint:: Error performing sharepoint download from site {site}.");
+                Log.Trace($"Sharepoint:: Error performing sharepoint delete from site {site}.");
                 Log.Error(e);
                 errorCount += 1;
             }
@@ -275,7 +306,7 @@ namespace ghosts.client.linux.handlers
         string password { get; set; } = null;
         public string header { get; set; } = null;
 
-        string _version = null;
+        public string version { get; set; } = null;
         public string uploadDirectory { get; set; } = null;
 
         
@@ -287,7 +318,8 @@ namespace ghosts.client.linux.handlers
             {
                 var version = handler.HandlerArgs["sharepoint-version"].ToString();
                 //this needs to be extended in the future
-                if (version == "2013") helper = new SharepointHelper2013(callingHandler, callingDriver);
+                if (version == "2013" || version == "2019") helper = new SharepointHelper2013_2019(callingHandler, callingDriver, version);
+               
 
                 if (helper == null)
                 {
@@ -308,10 +340,11 @@ namespace ghosts.client.linux.handlers
         }
         
 
-        public void Init(BaseBrowserHandler callingHandler, IWebDriver currentDriver)
+        public void Init(BaseBrowserHandler callingHandler, IWebDriver currentDriver, string aversion)
         {
             baseHandler = callingHandler;
             Driver = currentDriver;
+            version = aversion;
         }
 
         private bool CheckProbabilityVar(string name, int value)
@@ -344,25 +377,25 @@ namespace ghosts.client.linux.handlers
 
         public virtual bool DoInitialLogin(TimelineHandler handler, string user, string pw)
         {
-            Log.Trace($"Blog:: Unsupported action 'DoInitialLogin' in Blog version {_version} ");
+            Log.Trace($"Blog:: Unsupported action 'DoInitialLogin' in Blog version {version} ");
             return false;
         }
 
         public virtual bool DoDownload(TimelineHandler handler)
         {
-            Log.Trace($"Blog:: Unsupported action 'Browse' in Blog version {_version} ");
+            Log.Trace($"Blog:: Unsupported action 'Browse' in Blog version {version} ");
             return false;
         }
 
         public virtual bool DoDelete(TimelineHandler handler)
         {
-            Log.Trace($"Blog:: Unsupported action 'Delete' in Blog version {_version} ");
+            Log.Trace($"Blog:: Unsupported action 'Delete' in Blog version {version} ");
             return false;
         }
 
         public virtual bool DoUpload(TimelineHandler handler)
         {
-            Log.Trace($"Blog:: Unsupported action 'upload' in Blog version {_version} ");
+            Log.Trace($"Blog:: Unsupported action 'upload' in Blog version {version} ");
             return true;
         }
 
@@ -417,7 +450,7 @@ namespace ghosts.client.linux.handlers
 
                 case "initial":
                     //these are only parsed once, global for the handler as handler can only have one entry.
-                    _version = handler.HandlerArgs["sharepoint-version"].ToString();  //guaranteed to have this option, parsed in calling handler
+                    version = handler.HandlerArgs["sharepoint-version"].ToString();  //guaranteed to have this option, parsed in calling handler
 
 
                     if (handler.HandlerArgs.ContainsKey("sharepoint-upload-directory"))
@@ -666,4 +699,4 @@ namespace ghosts.client.linux.handlers
 
     }
 
-}
+    }

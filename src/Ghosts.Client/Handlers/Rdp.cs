@@ -10,6 +10,8 @@ using System.Text;
 using Newtonsoft.Json;
 using System.IO;
 using NPOI.SS.Formula.Functions;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
+using System.ComponentModel.Composition;
 
 namespace Ghosts.Client.Handlers
 {
@@ -49,6 +51,8 @@ namespace Ghosts.Client.Handlers
         private int JitterFactor = 0;  //used with Jitter.JitterFactorDelay
 
         private string CurrentTarget;
+
+        private string CustomLogin = null;
 
         public Rdp(TimelineHandler handler)
         {
@@ -102,7 +106,11 @@ namespace Ghosts.Client.Handlers
                     int.TryParse(handler.HandlerArgs["execution-time"].ToString(), out ExecutionTime);
                     if (ExecutionTime < 0) ExecutionTime = 5 * 60 * 1000;  //5 minutes
                 }
-
+                if (handler.HandlerArgs.ContainsKey("custom-login") &&
+                    !string.IsNullOrEmpty(handler.HandlerArgs["custom-login"].ToString()))
+                {
+                    CustomLogin = handler.HandlerArgs["custom-login"].ToString();
+                }
 
                 if (handler.HandlerArgs.ContainsKey("execution-probability"))
                 {
@@ -114,6 +122,7 @@ namespace Ghosts.Client.Handlers
                     JitterFactor = Jitter.JitterFactorParse(handler.HandlerArgs["delay-jitter"].ToString());
                 }
             }
+            AutoItX3 au = new AutoItX3();
 
             //arguments parsed. Enter loop that does not exit unless forced exit
             while (true)
@@ -138,7 +147,7 @@ namespace Ghosts.Client.Handlers
                             var choice = timelineEvent.CommandArgs[_random.Next(0, timelineEvent.CommandArgs.Count)];
                             if (!string.IsNullOrEmpty(choice.ToString()))
                             {
-                                this.RdpEx(handler, timelineEvent, choice.ToString());
+                                this.RdpEx(handler, timelineEvent, choice.ToString(), au);
                             }
                             Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, JitterFactor));
                             break;
@@ -185,7 +194,7 @@ namespace Ghosts.Client.Handlers
             }
         }
 
-        public void RdpEx(TimelineHandler handler, TimelineEvent timelineEvent, string choice)
+        public void RdpEx(TimelineHandler handler, TimelineEvent timelineEvent, string choice, AutoItX3 au)
         {
 
             char[] charSeparators = new char[] { '|' };
@@ -218,7 +227,7 @@ namespace Ghosts.Client.Handlers
                 UseShellExecute = false
             };
 
-            AutoItX3 au = new AutoItX3();
+            
             var caption = $"{target} - Remote Desktop Connection";
 
             using (var process = Process.Start(processStartInfo))
@@ -378,7 +387,7 @@ namespace Ghosts.Client.Handlers
 
         public void checkPasswordPrompt(AutoItX3 au, string password, string username, bool usePasswordOnly)
         {
-
+            Log.Trace($"RDP:: Checking for password prompt, usePasswordOnly is  {usePasswordOnly}.");
             bool foundWinSecurity = false; 
             var winHandle = Winuser.FindWindow("Credential Dialog Xaml Host", "Windows Security");
             if (winHandle == IntPtr.Zero)
@@ -386,10 +395,52 @@ namespace Ghosts.Client.Handlers
                 //try harder
                 foundWinSecurity = true;
                 winHandle = findDialogWindow("Windows Security");
+                if (winHandle != IntPtr.Zero)
+                {
+                   Log.Trace($"RDP:: Found window prompt, caption: 'Windows Security' for {CurrentTarget}.");
+                }
+            } else
+            {
+                Log.Trace($"RDP:: Found window prompt, caption: 'Credential Dialog Xaml Host' for {CurrentTarget}.");
             }
             if (winHandle != IntPtr.Zero)
             {
-                if (usePasswordOnly)
+                if (CustomLogin != null)
+                {
+                    Log.Trace($"RDP:: Executing custom login to {CurrentTarget}.");
+                    string[] cmds = CustomLogin.Split('\n');
+                    foreach ( string cmd in cmds )
+                    {
+                        if (cmd.Contains("#USERNAME"))
+                        {
+                            System.Windows.Forms.SendKeys.SendWait(username);
+                        }
+                        else if (cmd.Contains("#PASSWORD"))
+                        {
+                           
+                            var s = escapePassword(password);
+                            System.Windows.Forms.SendKeys.SendWait(s);  //fill in password field
+                        }
+                        else if (cmd.Contains("#DELAY"))
+                        {
+                            var s = cmd.Replace("#DELAY", "");
+                            int delay;
+                            if (int.TryParse(s, out delay))
+                            {
+                               Thread.Sleep(delay);
+                            }
+                            
+                        }
+                        else
+                        {
+                            au.Send(cmd);
+                        }
+                        
+                    }
+                    Log.Trace($"RDP:: Finished custom login to {CurrentTarget}.");
+
+                }
+                else if (usePasswordOnly)
                 {
                     string responseString;
                     if (foundWinSecurity)
@@ -412,6 +463,7 @@ namespace Ghosts.Client.Handlers
                     Winuser.SetForegroundWindow(winHandle);
                     if (foundWinSecurity)
                     {
+                        Log.Trace($"RDP:: Attempting user/password fill on 'Windows Security' window for {CurrentTarget}.");
                         au.Send("{DOWN}");  //moves down to next user
                         Thread.Sleep(1000);
                         Winuser.SetForegroundWindow(winHandle);
@@ -424,6 +476,7 @@ namespace Ghosts.Client.Handlers
                     }
                     else
                     {
+                        Log.Trace($"RDP:: Attempting More Choices option for user/password prompt for {CurrentTarget}.");
                         au.Send("{TAB}{TAB}{ENTER}");  //this clicks on 'More Choices'
                         Thread.Sleep(1000);
                         Winuser.SetForegroundWindow(winHandle);

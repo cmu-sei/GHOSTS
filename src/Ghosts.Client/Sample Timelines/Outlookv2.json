@@ -34,6 +34,7 @@
         "save-attachment-probability": 100, //when reading a email, probability that emails are saved to disk
         "min-attachments": 5, //when adding an attachment, min number of attachments
         "max-attachments": 5, //when adding an attachment, max number of attachments
+        "max-attachments-size":  10, //in MB, total size of all attachments will not exceed this
         "input-directory": "C:\\ghosts_data\\uploads", // source directory for attachments
         "output-directory": "C:\\ghosts_data\\downloads" // target directory for saved attachments, created if does not exist
       },

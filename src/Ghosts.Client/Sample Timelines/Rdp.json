@@ -5,6 +5,15 @@
 /// The username (if supplied) is  used instead of the logged-in user (can also provide 'domain' keyword in credentials)
 /// The password is used if a password  prompt appears on RDP open
 ///
+/// The custom-login HandlerArg is optional, and is an AutoIt sequence to use in case the default login
+/// procedure does not work. It is executed when the credential prompt window is detected, you can use AutoIt
+/// commands like {TAB}, {ENTER} etc, newlines must seperate the commands. There are three non-standard commands:
+///  #USERNAME  - send the username using sendkeys
+///  #PASSWORD  - send the password using sendkeys
+///  #DELAYnnnn - delay for nnnn milliseconds
+///
+/// After this sequence is execution, no other action is taken until the RDP session window is detected
+///
 
 
 
@@ -17,6 +26,7 @@
         "CredentialsFile": "<path to credentials>", //required, file path to a JSON file containing the RDP credentials
         "mouse-sleep-time": 10000, //time to sleep between random mouse movements
         "execution-time": 60000, //after this total connection time has elapsed, the RDP is closed and a new connection opened
+        "custom-login": "#PASSWORD\n#DELAY1000\n{TAB}\n{TAB}\n{TAB}\n{ENTER}", //see explanation above
         "execution-probability": 100, //after choosing a random target, the probability that a RDP to the target is opened
         "delay-jitter": 50
 
