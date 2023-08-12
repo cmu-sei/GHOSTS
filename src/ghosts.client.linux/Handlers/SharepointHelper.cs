@@ -12,7 +12,7 @@ using Actions = OpenQA.Selenium.Interactions.Actions;
 using Exception = System.Exception;
 using NLog;
 using System.Web;
-using NPOI.OpenXmlFormats.Spreadsheet;
+
 
 namespace ghosts.client.linux.handlers
 {
@@ -23,7 +23,6 @@ namespace ghosts.client.linux.handlers
     /// download, deletion only done from the first page
     /// Tested with Sharepoint 2013 and 2019
     /// 2019 uses the 'classic view' for 2013 compatibility
-    /// The site Web template used is 'Teams Classic'
     /// </summary>
     public class SharepointHelper2013_2019 : SharepointHelper
     {
@@ -104,6 +103,7 @@ namespace ghosts.client.linux.handlers
             return true;
         }
 
+       
         public override bool DoDownload(TimelineHandler handler)
         {
 
@@ -112,28 +112,25 @@ namespace ghosts.client.linux.handlers
 
             try
             {
-                var targetElements = Driver.FindElements(By.CssSelector("td[class='ms-cellStyleNonEditable ms-vb-itmcbx ms-vb-imgFirstCell']"));
-                if (targetElements.Count > 0)
+                //this only gets non-folder elements
+                var targetElements = Driver.FindElements(By.XPath("//img[@draggable='true']"));
+                if (targetElements != null && targetElements.Count > 0)
                 {
-
-
                     int docNum = _random.Next(0, targetElements.Count);
                     var targetElement = targetElements[docNum];
-                    MoveToElementAndClick(targetElement);
-                    var checkboxElement = targetElement.FindElement(By.XPath(".//div[@role='checkbox']"));
-                    string fname = checkboxElement.GetAttribute("title");
-
-                    Thread.Sleep(1000);
+                    string fname = targetElement.GetAttribute("title");
+                    //now find the chkbox element corresponding to this
+                    //get the element, then parent, then preceding sibling
+                    var checkBoxElement = Driver.FindElement(By.XPath($"//img[contains(@title,'{fname}')]//parent::td//preceding-sibling::td[contains(@class,'ms-vb-imgFirstCell')]"));
+                    MoveToElementAndClick(checkBoxElement);
+                    Thread.Sleep(5000);
                     //download it
                     targetElement = Driver.FindElement(By.Id("Ribbon.Documents.Copies.Download-Large"));
                     actions = new Actions(Driver);
                     actions.MoveToElement(targetElement).Click().Perform();
-
-                    Thread.Sleep(1000);
+                    Thread.Sleep(5000);
                     //have to click on document element again to deselect it in order to enable next download
-                    //targetElements[docNum].Click();  //select the doc
-                    targetElement = targetElements[docNum];
-                    MoveToElementAndClick(targetElement);
+                    MoveToElementAndClick(checkBoxElement);
                     Log.Trace($"Sharepoint:: Downloaded file {fname} from site {site}.");
                     Thread.Sleep(1000);
                 }
@@ -195,13 +192,32 @@ namespace ghosts.client.linux.handlers
                 var targetElement = Driver.FindElement(By.Id("Ribbon.Documents.New.AddDocument-Large"));
                 actions = new Actions(Driver);
                 actions.MoveToElement(targetElement).Click().Perform();
-                Thread.Sleep(1000);
-                Driver.SwitchTo().Frame(Driver.FindElement(By.ClassName("ms-dlgFrame")));
-                WebDriverWait wait = new WebDriverWait(Driver, span);
-                var uploadElement = Driver.FindElement(By.Id("ctl00_PlaceHolderMain_UploadDocumentSection_ctl05_InputFile"));
-
-                uploadElement.SendKeys(fname);
-                Thread.Sleep(500);
+                IWebElement uploadElement;
+                var i = 0;
+                // do these contortions as sometimes in 2019 this will fail because there is an
+                // an intermediate popup called 'WORKING' that can confuse Selenium.
+                // When this happens, the upload will not succeed but we will not get hung up on the upload pane
+                while (true)
+                {
+                    try
+                    {
+                        Thread.Sleep(5000);
+                        Driver.SwitchTo().Frame(Driver.FindElement(By.ClassName("ms-dlgFrame")));
+                        uploadElement = Driver.FindElement(By.XPath("//input[contains(@class,'ms-fileinput')]"));
+                        uploadElement.SendKeys(fname);
+                        Thread.Sleep(500);
+                        break;
+                    }
+                    catch (ThreadAbortException)
+                    {
+                        throw;  //pass up
+                    }
+                    catch (Exception e)
+                    {
+                        i += 1;
+                        if (i >= 5) break;
+                    }
+                }
                 IWebElement okElement;
                 if (version == "2013")
                 {
@@ -243,24 +259,26 @@ namespace ghosts.client.linux.handlers
             //select a file to delete
             try
             {
-                var targetElements = Driver.FindElements(By.CssSelector("td[class='ms-cellStyleNonEditable ms-vb-itmcbx ms-vb-imgFirstCell']"));
+                var targetElements = Driver.FindElements(By.XPath("//img[@draggable='true']"));
                 if (targetElements.Count > 0)
                 {
                     int docNum = _random.Next(0, targetElements.Count);
                     var targetElement = targetElements[docNum];
-                    MoveToElementAndClick(targetElement);
+                    string fname = targetElement.GetAttribute("title");
+                    //now find the chkbox element corresponding to this
+                    //get the element, then parent, then preceding sibling
+                    var checkBoxElement = Driver.FindElement(By.XPath($"//img[contains(@title,'{fname}')]//parent::td//preceding-sibling::td[contains(@class,'ms-vb-imgFirstCell')]"));
+                    MoveToElementAndClick(checkBoxElement);
+                   
 
-                    var checkboxElement = targetElements[docNum].FindElement(By.XPath(".//div[@role='checkbox']"));
-                    string fname = checkboxElement.GetAttribute("title");
-
-                    Thread.Sleep(1000);
+                    Thread.Sleep(5000);
                     //delete it
                     //somewhat weird, had to locate this element by the tooltip
                     targetElement = Driver.FindElement(By.CssSelector("a[aria-describedby='Ribbon.Documents.Manage.Delete_ToolTip'"));
                     actions = new Actions(Driver);
                     //deal with the popup
                     actions.MoveToElement(targetElement).Click().Perform();
-                    Thread.Sleep(1000);
+                    Thread.Sleep(5000);
                     Driver.SwitchTo().Alert().Accept();
                     Log.Trace($"Sharepoint:: Deleted file {fname} from site {site}.");
                     Thread.Sleep(1000);
