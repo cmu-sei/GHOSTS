@@ -14,6 +14,41 @@
 ///
 /// After this sequence is execution, no other action is taken until the RDP session window is detected
 ///
+/// For example, the following sequence was used for  a Windows 10 SHB host to login to a 
+/// Windows Server 2019 host (the // comments should not be included, they indicate what is going on). The delays were 
+/// needed for this work. The reason the default login does not work is because of the extra choice of 'Connect a smart card'
+/// that is not present in earlier Window Server OSes:
+///
+///        #DELAY3000        
+///        {TAB}         //move from password field to 'More choices' option
+///        #DELAY3000
+///        {ENTER}       //open 'More choices'
+///        #DELAY3000
+///        {TAB}         // go to 'Connect a smart card'
+///        #DELAY3000
+///        {TAB}         // go to Current user
+///        #DELAY3000
+///        {TAB}         // go to use different user
+///        #DELAY3000
+///        {ENTER}       // open different user
+///        #DELAY3000
+///        #USERNAME     // supply username
+///        #DELAY3000
+///        {TAB}         // go to password
+///        #PASSWORD     // supply password
+///        #DELAY3000
+///        {TAB}        //go to 'More choices' 
+///        #DELAY3000
+///        {TAB}        // go to 'Use a smartcard'
+///        #DELAY3000
+///        {TAB}        // go to Current user 
+///        #DELAY3000
+///        {TAB}        // go to use different user
+///        #DELAY3000
+///        {TAB}        // go to 'Ok'
+///        #DELAY3000
+///        {ENTER}      // select 'Ok' to log in
+///
 
 
 
