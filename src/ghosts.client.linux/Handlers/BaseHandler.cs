@@ -43,4 +43,5 @@ namespace ghosts.client.linux.handlers
             _timelineLog.Info($"TIMELINE|{DateTime.UtcNow}|{o}");
         }
     }
+       
 }

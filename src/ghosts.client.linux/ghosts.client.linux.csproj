@@ -45,6 +45,9 @@
     <None Update="config\email-content.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="config\email-reply.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <Content Include="config\emails-domain.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

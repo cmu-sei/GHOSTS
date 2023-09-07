@@ -32,12 +32,15 @@ namespace ghosts.client.linux.handlers
         public int JitterFactor { get; set; }  = 0;  //used with Jitter.JitterFactorDelay
         public bool SharePointAbort { get; set; } = false;  //will be set to True if unable to proceed with Handler execution
         public bool BlogAbort { get; set; } = false;  //will be set to True if unable to proceed with Handler execution
+        public bool OutlookAbort { get; set; } = false;  //will be set to True if unable to proceed with Handler execution
  
         private SharepointHelper _sharePointHelper = null;
 
         private BlogHelper _blogHelper = null;
 
         private PostContentManager _postHelper = null;
+
+        private OutlookHelper _outlookHelper = null;
         
         private Task LaunchThread(TimelineHandler handler, TimelineEvent timelineEvent, string site)
         {
@@ -85,6 +88,29 @@ namespace ghosts.client.linux.handlers
                                     i = 0;
                                 }
                             }
+                            break;
+                        case "outlook":
+                            if (!OutlookAbort)
+                            {
+                                if (_outlookHelper == null)
+                                {
+                                    _outlookHelper = OutlookHelper.MakeHelper(this, Driver, handler, _log);
+                                    if (_outlookHelper == null) OutlookAbort = true;
+                                }
+
+                                if (_outlookHelper != null)
+                                {
+                                    _outlookHelper.Execute(handler, timelineEvent);
+                                    this.Restart = _outlookHelper.RestartNeeded();
+                                    if (this.Restart)
+                                    {
+                                        _outlookHelper = null;  //remove the helper
+                                        _log.Trace($"WebOutlook:: Restart requested for {this.BrowserType.ToString()} , restarting...");
+                                        return;  //restart has been requested 
+                                    }
+                                } 
+                            }
+
                             break;
                         case "sharepoint":
                             if (!SharePointAbort)
