@@ -104,9 +104,16 @@ namespace ghosts.client.linux.handlers
                                     this.Restart = _outlookHelper.RestartNeeded();
                                     if (this.Restart)
                                     {
-                                        _outlookHelper = null;  //remove the helper
+                                        
                                         _log.Trace($"WebOutlook:: Restart requested for {this.BrowserType.ToString()} , restarting...");
-                                        return;  //restart has been requested 
+                                        if (_outlookHelper.LastException != null) 
+                                        {
+                                            throw(_outlookHelper.LastException); //restarts everything
+                                        } else 
+                                        {
+                                            _outlookHelper = null;  //remove the helper, this is soft reset
+                                            return;  //restart has been requested 
+                                        }
                                     }
                                 } 
                             }
@@ -230,6 +237,7 @@ namespace ghosts.client.linux.handlers
                     throw;
                 }
                 _log.Error(e);
+                if (this.Restart) throw;
             }
         }
 
