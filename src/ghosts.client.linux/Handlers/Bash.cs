@@ -123,8 +123,7 @@ namespace ghosts.client.linux.handlers
             }
 
             p.WaitForExit();
-
-            Report(HandlerType.Command.ToString(), escapedArgs, this.Result);
+            Report(new ReportItem {Handler = HandlerType.Command.ToString(), Command = escapedArgs, Result = this.Result});
         }
 
         private void OutputHandler(object sendingProcess, DataReceivedEventArgs outLine)

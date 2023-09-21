@@ -56,8 +56,7 @@ namespace ghosts.client.linux.handlers
             if (config.Uri.IsWellFormedOriginalString())
             {
                 MakeRequest(config);
-                Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(),
-                    timelineEvent.TrackableId);
+                Report(new ReportItem {Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = config.ToString(), Trackable = timelineEvent.TrackableId});
                 this._siteDepthCurrent += 1;
 
                 if (this._siteDepthCurrent >= this._siteDepthMax)
@@ -186,8 +185,7 @@ namespace ghosts.client.linux.handlers
                     return;
                 }
 
-                Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(),
-                    timelineEvent.TrackableId);
+                Report(new ReportItem {Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = config.ToString(), Trackable = timelineEvent.TrackableId});
 
                 // if this is the last step down, there is no reason to keep digging,
                 // but we don't increase the current depth count so as to allow peer

@@ -133,7 +133,7 @@ namespace ghosts.client.linux.handlers
                     this.Result += p.StandardOutput.ReadToEnd();
                 }
 
-                Report(HandlerType.Curl.ToString(), escapedArgs, this.Result);
+                Report(new ReportItem {Handler = HandlerType.Curl.ToString(), Command = escapedArgs, Result = this.Result});
                 this.DeepBrowse();
             }
             catch (Exception exc)
