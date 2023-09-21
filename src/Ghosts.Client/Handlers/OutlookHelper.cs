@@ -1,5 +1,5 @@
-﻿using ghosts.client.linux.Infrastructure;
-using ghosts.client.linux.Infrastructure.Email;
+﻿using Ghosts.Client.Infrastructure;
+using Ghosts.Client.Infrastructure.Email;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Newtonsoft.Json;
@@ -19,7 +19,7 @@ using NLog;
 
 
 
-namespace ghosts.client.linux.handlers
+namespace Ghosts.Client.Handlers
 {
 
     

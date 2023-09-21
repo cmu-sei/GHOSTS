@@ -679,44 +679,5 @@ namespace Ghosts.Client.Handlers
 
     }
 
-    public abstract class BrowserHelper
-    {
-        public static readonly Logger Log = LogManager.GetCurrentClassLogger();
-        internal static readonly Random _random = new Random();
-        public BaseBrowserHandler baseHandler = null;
-        public IWebDriver Driver = null;
-
-
-        /// <summary>
-        /// This is used when the element being moved to may be out of the viewport (ie, at the bottom of the page).
-        /// Chrome handles this OK, but Firefox throws an exception, have to manually
-        /// scroll to ensure the element is in view
-        /// </summary>
-        /// <param name="targetElement"></param>
-        public void MoveToElementAndClick(IWebElement targetElement)
-        {
-            BrowserHelperSupport.MoveToElementAndClick(Driver, targetElement);
-        }
-
-    }
-
-    public class BrowserHelperSupport
-    {
-        public static void MoveToElementAndClick(IWebDriver Driver, IWebElement targetElement)
-        {
-            Actions actions;
-
-            if (Driver is OpenQA.Selenium.Firefox.FirefoxDriver)
-            {
-                IJavaScriptExecutor je = (IJavaScriptExecutor)Driver;
-                //be safe and scroll to element
-                je.ExecuteScript("arguments[0].scrollIntoView()", targetElement);
-                Thread.Sleep(500);
-            }
-            actions = new Actions(Driver);
-            actions.MoveToElement(targetElement).Click().Perform();
-        }
-
-    }
 
     }
