@@ -244,9 +244,8 @@ public class WordHandler : BaseHandler
                             Log.Trace($"{handler.HandlerType} saving existing file: {document.FullName}");
                         }
 
-                        Report(handler.HandlerType.ToString(), timelineEvent.Command,
-                            timelineEvent.CommandArgs[0].ToString());
-                            
+                        Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = timelineEvent.CommandArgs[0].ToString(), Trackable = timelineEvent.TrackableId });
+
 
                         if (timelineEvent.CommandArgs.Contains("pdf"))
                         {
@@ -262,7 +261,7 @@ public class WordHandler : BaseHandler
                                 oMissing, oMissing, oMissing, oMissing,
                                 oMissing, oMissing, oMissing, oMissing);
                             // end save as pdf
-                            Report(handler.HandlerType.ToString(), timelineEvent.Command, "pdf");
+                            Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = "pdf", Trackable = timelineEvent.TrackableId });
                             FileListing.Add(outputFileName.ToString(), handler.HandlerType);
                         }
 

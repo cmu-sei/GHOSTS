@@ -19,6 +19,7 @@ using NPOI.SS.Formula.Functions;
 using Microsoft.AspNetCore.Mvc.Filters;
 using NPOI.OpenXmlFormats.Dml;
 using System.Runtime.InteropServices;
+using ReportItem = Ghosts.Domain.Code.ReportItem;
 
 namespace Ghosts.Client.Handlers;
 
@@ -248,7 +249,7 @@ public class Outlookv2 : BaseHandler
                             emailConfig = new EmailConfiguration(timelineEvent.CommandArgs);
                             if (SendEmailViaOutlook(emailConfig))
                             {
-                                Report(handler.HandlerType.ToString(), timelineEvent.Command, emailConfig.ToString());
+                                Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = emailConfig.ToString(), Trackable = timelineEvent.TrackableId });
                                 Log.Trace("Outlookv2:: Created email");
                                 _totalErrorCount = 0;  //zero on success
                             }
@@ -263,7 +264,7 @@ public class Outlookv2 : BaseHandler
                             emailConfig = new EmailConfiguration(timelineEvent.CommandArgs);
                             if (ReplyViaOutlook(emailConfig))
                             {
-                                Report(handler.HandlerType.ToString(), timelineEvent.Command, emailConfig.ToString());
+                                Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = emailConfig.ToString(), Trackable = timelineEvent.TrackableId });
                                 Log.Trace("Outlookv2:: Replied email");
                                 _totalErrorCount = 0;  //zero on success
                             }

@@ -4,6 +4,7 @@ using Ghosts.Domain;
 using System;
 using System.Diagnostics;
 using System.Threading;
+using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
 
 namespace Ghosts.Client.Handlers;
@@ -89,7 +90,7 @@ public class Print : BaseHandler
                     //
                 }
 
-                Report(handler.HandlerType.ToString(), command, "", timelineEvent.TrackableId);
+                Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = command, Trackable = timelineEvent.TrackableId });
             }
         }
         catch (Exception exception)

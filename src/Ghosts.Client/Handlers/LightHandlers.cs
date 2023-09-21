@@ -5,6 +5,7 @@ using Ghosts.Domain;
 using System;
 using System.IO;
 using System.Threading;
+using Ghosts.Domain.Code;
 
 namespace Ghosts.Client.Handlers;
 
@@ -110,8 +111,7 @@ public class LightHandlers : BaseHandler
                     }
                         
                     FileListing.Add(path, handler.HandlerType);
-                    Report(handler.HandlerType.ToString(), timelineEvent.Command,
-                        timelineEvent.CommandArgs[0].ToString());
+                    Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = timelineEvent.CommandArgs[0].ToString(), Trackable = timelineEvent.TrackableId });
                 }
             }
             catch (Exception e)
@@ -170,8 +170,7 @@ public class LightHandlers : BaseHandler
                     }
 
                     FileListing.Add(path, handler.HandlerType);
-                    Report(handler.HandlerType.ToString(), timelineEvent.Command,
-                        timelineEvent.CommandArgs[0].ToString());
+                    Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = timelineEvent.CommandArgs[0].ToString(), Trackable = timelineEvent.TrackableId });
                 }
             }
             catch (Exception e)

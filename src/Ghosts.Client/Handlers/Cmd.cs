@@ -113,7 +113,7 @@ namespace Ghosts.Client.Handlers
                     process.StandardInput.WriteLine(command);
                     process.StandardInput.Close(); // line added to stop process from hanging on ReadToEnd()
                     var outputString = process.StandardOutput.ReadToEnd();
-                    this.Report(handler.HandlerType.ToString(), command, outputString, timelineEvent.TrackableId);
+                    Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = command, Trackable = timelineEvent.TrackableId, Result = outputString});
                     process.Close();
                 }
             }
