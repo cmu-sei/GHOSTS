@@ -73,6 +73,8 @@ namespace Ghosts.Client.Handlers
         public string uploadDirectory { get; set; } = null;
 
         public System.Exception LastException;
+
+        public string AttachmentWindowTitle = "Open";  //this is for Chrome
         
 
         //public string EmailXpath { get; set; } = "//div[contains(@tempid,'emailslistview')]//child::div[contains(@id,'_ariaId_')]";
@@ -178,16 +180,43 @@ namespace Ghosts.Client.Handlers
 
         public void AttachFileWindows(string filename)
         {
-            //TODO
-            return;
+            IntPtr winHandle = Winuser.FindWindow(null, AttachmentWindowTitle);
+            if (winHandle == IntPtr.Zero)
+            {
+                Log.Trace($"WebOutlook:: Unable to find '{AttachmentWindowTitle}' window to upload file attachment.");
+                return;
+            }
+            Winuser.SetForegroundWindow(winHandle);
+            string s;
+            if (Driver is OpenQA.Selenium.Firefox.FirefoxDriver)
+            {
+                s = filename + "{TAB}{TAB}{ENTER}";
+            } else
+            {
+                s = filename + "{ENTER}";
+            }
+                
+            System.Windows.Forms.SendKeys.SendWait(s);
+            Thread.Sleep(200);
+            winHandle = Winuser.FindWindow(null, AttachmentWindowTitle);
+            if (winHandle == IntPtr.Zero)
+            { 
+                return;
+            }
+            // the window is still open. Grr. try closing it.
+            Winuser.SetForegroundWindow(winHandle);
+            System.Windows.Forms.SendKeys.SendWait("%{F4}");
+
+
         }
 
         public void AttachFileLinux(string filename)
         {
-            string cmd = $"xdotool search -name 'File Upload' windowfocus type '{filename}' ";
+            
+            string cmd = $"xdotool search -name '{AttachmentWindowTitle}' windowfocus type '{filename}' ";
             ExecuteBashCommand(cmd);
             Thread.Sleep(500);
-            cmd = $"xdotool search -name 'File Upload' windowfocus key KP_Enter";
+            cmd = $"xdotool search -name '{AttachmentWindowTitle}' windowfocus key KP_Enter";
             ExecuteBashCommand(cmd);
             Thread.Sleep(300);
             return;
@@ -207,18 +236,15 @@ namespace Ghosts.Client.Handlers
             {
                 var version = handler.HandlerArgs["exchange-version"].ToString();
                 //this needs to be extended in the future
-                if (version == "2013" || version == "2019") helper = new OutlookHelper2013(callingHandler, callingDriver, version);
-               
-
+                if (version == "2013") helper = new OutlookHelper2013(callingHandler, callingDriver, version);
                 if (helper == null)
                 {
-                    tlog.Trace($"WebOutlook:: Unsupported Exchange version {version} , outlook browser action will not be executed.");
+                    Log.Trace($"WebOutlook:: Unsupported Exchange version {version} , outlook browser action will not be executed.");
                 }
             }
             else
             {
-                Log.Trace($"WebOutlook:: Handler option 'exchange-version' must be specified, currently supported versions: '2013'. Sharepoint browser action will not be executed.");
-
+                Log.Trace($"WebOutlook:: Handler option 'exchange-version' must be specified, currently supported versions: '2013'. Outlook browser action will not be executed.");
             }
             return helper;
         }
@@ -1319,6 +1345,11 @@ namespace Ghosts.Client.Handlers
 
                         //at this point we are logged in, files tab selected, ready for action
                         _state = "execute";
+
+                        if (Driver is OpenQA.Selenium.Firefox.FirefoxDriver)
+                        {
+                            AttachmentWindowTitle = "File Upload";
+                        }
                         
                         foreach (var winname in Driver.WindowHandles) {
                             InitialWindows.Add(winname);
@@ -1397,9 +1428,9 @@ namespace Ghosts.Client.Handlers
             catch (System.Exception e)
             {
                 
-                errorCount = errorCount + 1;  
+                errorCount = errorThreshold + 1;  //an exception at this level means that we need to restart
                 LastException = e;  //save last exception so that it can be thrown up during restart
-                Log.Trace($"WebOutlook:: Error at top leve of execute loop.");
+                Log.Trace($"WebOutlook:: Error at top level of execute loop.");
                 Log.Error(e);
             }
 

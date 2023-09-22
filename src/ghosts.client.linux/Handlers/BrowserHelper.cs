@@ -78,13 +78,13 @@ namespace ghosts.client.linux.handlers
                     
                     if (count == 1)
                     {
-                        return new List<string>() { filteredFiles[_random.Next(0, filteredFiles.Count - 1)] };
+                        return new List<string>() { filteredFiles[_random.Next(0, filteredFiles.Count)] };
                     }
                     // need more than one, have to avoid duplicates, prune down
                     while (true)
                     {
                         if (filteredFiles.Count <= count) break;
-                        var index = _random.Next(0, filteredFiles.Count - 1);
+                        var index = _random.Next(0, filteredFiles.Count);
                         filteredFiles.RemoveAt(index);
                     }
 

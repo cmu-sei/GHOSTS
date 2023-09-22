@@ -73,6 +73,7 @@ namespace ghosts.client.linux.handlers
         public string uploadDirectory { get; set; } = null;
 
         public System.Exception LastException;
+        public string AttachmentWindowTitle = "Open"; //this is for chrome
         
 
         //public string EmailXpath { get; set; } = "//div[contains(@tempid,'emailslistview')]//child::div[contains(@id,'_ariaId_')]";
@@ -184,10 +185,10 @@ namespace ghosts.client.linux.handlers
 
         public void AttachFileLinux(string filename)
         {
-            string cmd = $"xdotool search -name 'File Upload' windowfocus type '{filename}' ";
+            string cmd = $"xdotool search -name '{AttachmentWindowTitle}' windowfocus type '{filename}' ";
             ExecuteBashCommand(cmd);
             Thread.Sleep(500);
-            cmd = $"xdotool search -name 'File Upload' windowfocus key KP_Enter";
+            cmd = $"xdotool search -name '{AttachmentWindowTitle}' windowfocus key KP_Enter";
             ExecuteBashCommand(cmd);
             Thread.Sleep(300);
             return;
@@ -207,17 +208,15 @@ namespace ghosts.client.linux.handlers
             {
                 var version = handler.HandlerArgs["exchange-version"].ToString();
                 //this needs to be extended in the future
-                if (version == "2013" || version == "2019") helper = new OutlookHelper2013(callingHandler, callingDriver, version);
-               
-
+                if (version == "2013") helper = new OutlookHelper2013(callingHandler, callingDriver, version);
                 if (helper == null)
                 {
-                    tlog.Trace($"WebOutlook:: Unsupported Exchange version {version} , outlook browser action will not be executed.");
+                    Log.Trace($"WebOutlook:: Unsupported Exchange version {version} , outlook browser action will not be executed.");
                 }
             }
             else
             {
-                Log.Trace($"WebOutlook:: Handler option 'exchange-version' must be specified, currently supported versions: '2013'. Sharepoint browser action will not be executed.");
+                Log.Trace($"WebOutlook:: Handler option 'exchange-version' must be specified, currently supported versions: '2013'. Outlook browser action will not be executed.");
 
             }
             return helper;
@@ -1319,6 +1318,11 @@ namespace ghosts.client.linux.handlers
 
                         //at this point we are logged in, files tab selected, ready for action
                         _state = "execute";
+
+                        if (Driver is OpenQA.Selenium.Firefox.FirefoxDriver)
+                        {
+                            AttachmentWindowTitle = "File Upload";
+                        }
                         
                         foreach (var winname in Driver.WindowHandles) {
                             InitialWindows.Add(winname);
@@ -1397,9 +1401,9 @@ namespace ghosts.client.linux.handlers
             catch (System.Exception e)
             {
                 
-                errorCount = errorCount + 1;  
+                errorCount = errorThreshold + 1;  // an exception at  this level needs a restart
                 LastException = e;  //save last exception so that it can be thrown up during restart
-                Log.Trace($"WebOutlook:: Error at top leve of execute loop.");
+                Log.Trace($"WebOutlook:: Error at top level of execute loop.");
                 Log.Error(e);
             }
 

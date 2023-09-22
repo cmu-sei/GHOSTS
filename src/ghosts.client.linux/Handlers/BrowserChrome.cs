@@ -74,7 +74,18 @@ namespace ghosts.client.linux.handlers
                     Driver.Dispose();
                 }
                 catch { }
+
+                if (this.Restart)
+                {
+                    DoRestart(handler);
+                }
             }
+        }
+
+        public virtual void DoRestart(TimelineHandler handler)
+        {
+            Thread.Sleep(2000);
+            _ = new BrowserChrome(handler);
         }
 
         internal static IWebDriver GetDriver(TimelineHandler handler)
@@ -132,6 +143,10 @@ namespace ghosts.client.linux.handlers
                 if (handler.HandlerArgs.ContainsKeyWithOption("blockscripts", "true"))
                 {
                     options.AddLocalStatePreference("profile.managed_default_content_settings.javascript", 1);
+                }
+                if (handler.HandlerArgs.ContainsKeyWithOption("accept-insecure-certificates", "true"))
+                {
+                    options.AddArguments("ignore-certificate-errors");
                 }
             }
 
