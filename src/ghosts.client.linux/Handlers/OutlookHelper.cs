@@ -714,6 +714,8 @@ namespace ghosts.client.linux.handlers
             }
         }
 
+        // Keep deleting elements until there are only 10 left in the folder
+        // if reach 500 deleted, then return and wait for next deletion cycle.
    
         public bool DeleteItemsInFolder(string FolderName, string FolderXpath, string EmailSearchPath, bool DeleteAll, out int NumDeleted)
         {
@@ -722,72 +724,79 @@ namespace ghosts.client.linux.handlers
                 Log.Trace($"WebOutlook:: Unable to select {FolderName} folder, deletion not done.");
                 return false;
             }
-            //select the first email from "ALL"
-            SelectEmail("All");
-            ReadOnlyCollection<IWebElement> emailElements = Driver.FindElements(By.XPath(EmailSearchPath));
-            if (emailElements == null || emailElements.Count == 0) return true; //nothing to delete
-            //there is no good way to determine the total number of emails in the inbox.
-            //just delete 15 emails per cycle if there are more than 15 
-            int MaxToDelete = 15;
-            if (emailElements.Count <= MaxToDelete) return true;
-            int count = 0;
-            var elementToDelete = emailElements[0];
-            while (count < MaxToDelete) {
-                //select the first email
-                BrowserHelperSupport.MoveToElementAndClick(Driver,elementToDelete);
-                Thread.Sleep(200);
+            
 
-                bool UseDeleteMenu = true;
-                //check for discard available. this will be for drafts
-                var DiscardElements = Driver.FindElements(By.XPath(DiscardXpath));
-                if (DiscardElements != null && DiscardElements.Count > 0)
-                {
-                    var DiscardElement = DiscardElements[0];
-                    var cattr = DiscardElement.GetAttribute("class");
-                    if (cattr != "hidden") 
-                    {
-                        UseDeleteMenu = false;
-                        //get the actual button
-                        DiscardElements = Driver.FindElements(By.XPath(DiscardButtonXpath));
-                        if (DiscardElements != null && DiscardElements.Count > 0)
-                        {
-                            BrowserHelperSupport.ElementClick(Driver,DiscardElements[0]);
-                            Thread.Sleep(500);
-                        }
+            while (true)
+            {
                 
-                    }
-                }
-
-                if (UseDeleteMenu)
-                {
-                    //get the delete menu
-                    var targetElement = Driver.FindElement(By.XPath(MoreActionsXpath));
-                    if (targetElement == null)
-                    {
-                        Log.Trace($"WebOutlook:: Unable to find MoreActions for current email, deletion not done.");
-                        return false;
-                    }
-                    // bring up the more actions menu
-                    BrowserHelperSupport.ElementClick(Driver,targetElement);
+                //select the first email from "ALL"
+                SelectEmail("All");
+                ReadOnlyCollection<IWebElement> emailElements = Driver.FindElements(By.XPath(EmailSearchPath));
+                if (emailElements == null || emailElements.Count == 0) return true; //nothing to delete
+                if (emailElements.Count <= 20) return true;   //quit when under 20
+                //there is no good way to determine the total number of emails in the inbox.
+                //just delete 15 emails per loop
+                int MaxToDelete = 15;
+                int count = 0;
+                var elementToDelete = emailElements[0];
+                while (count < MaxToDelete) {
+                    //select the first email
+                    BrowserHelperSupport.MoveToElementAndClick(Driver,elementToDelete);
                     Thread.Sleep(200);
-                    targetElement = Driver.FindElement(By.XPath(DeleteActionXpath));
-                    if (targetElement == null)
-                    {
-                        Log.Trace($"WebOutlook:: Unable to find Delete action for current email, deletion not done.");
-                        return false;
-                    }
-                    // delete the current email
-                    BrowserHelperSupport.ElementClick(Driver,targetElement);
-                    Thread.Sleep(500);
-                }
-                count = count + 1;
-                NumDeleted = NumDeleted + 1;
-                //get next one
-                emailElements = Driver.FindElements(By.XPath(EmailSearchPath));
-                if (emailElements == null || emailElements.Count == 0) return true; 
-                elementToDelete = emailElements[0];
-                
 
+                    bool UseDeleteMenu = true;
+                    //check for discard available. this will be for drafts
+                    var DiscardElements = Driver.FindElements(By.XPath(DiscardXpath));
+                    if (DiscardElements != null && DiscardElements.Count > 0)
+                    {
+                        var DiscardElement = DiscardElements[0];
+                        var cattr = DiscardElement.GetAttribute("class");
+                        if (cattr != "hidden") 
+                        {
+                            UseDeleteMenu = false;
+                            //get the actual button
+                            DiscardElements = Driver.FindElements(By.XPath(DiscardButtonXpath));
+                            if (DiscardElements != null && DiscardElements.Count > 0)
+                            {
+                                BrowserHelperSupport.ElementClick(Driver,DiscardElements[0]);
+                                Thread.Sleep(500);
+                            }
+                    
+                        }
+                    }
+
+                    if (UseDeleteMenu)
+                    {
+                        //get the delete menu
+                        var targetElement = Driver.FindElement(By.XPath(MoreActionsXpath));
+                        if (targetElement == null)
+                        {
+                            Log.Trace($"WebOutlook:: Unable to find MoreActions for current email, deletion not done.");
+                            return false;
+                        }
+                        // bring up the more actions menu
+                        BrowserHelperSupport.ElementClick(Driver,targetElement);
+                        Thread.Sleep(200);
+                        targetElement = Driver.FindElement(By.XPath(DeleteActionXpath));
+                        if (targetElement == null)
+                        {
+                            Log.Trace($"WebOutlook:: Unable to find Delete action for current email, deletion not done.");
+                            return false;
+                        }
+                        // delete the current email
+                        BrowserHelperSupport.ElementClick(Driver,targetElement);
+                        Thread.Sleep(500);
+                    }
+                    count = count + 1;
+                    NumDeleted = NumDeleted + 1;
+                    if (NumDeleted > 500) return true;  //stop after 500  
+                    //get next one
+                    emailElements = Driver.FindElements(By.XPath(EmailSearchPath));
+                    if (emailElements == null || emailElements.Count == 0) return true; 
+                    elementToDelete = emailElements[0];
+                    
+
+                }
             }
            
             return true;
@@ -847,6 +856,7 @@ namespace ghosts.client.linux.handlers
                 int NumDeleted = 0;
                 DeleteItemsInFolder("Inbox",InboxFolderXpath,EmailXpath,false,out NumDeleted);
                 if (NumDeleted > 0){
+                    Log.Trace($"WebOutlook:: Successfully deleted {NumDeleted} items from inbox. ");
                     // only do this if we had to delete something
                     EmptyFolder("Sent Items",SentFolderXpath);
                     EmptyFolder("Drafts",DraftsFolderXpath);
@@ -1107,6 +1117,9 @@ namespace ghosts.client.linux.handlers
 
                     case "initial":
                         //these are only parsed once, global for the handler as handler can only have one entry.
+
+
+
                         version = "2013";
                         if (handler.HandlerArgs.ContainsKey("exchange-version"))
                         {
@@ -1346,6 +1359,7 @@ namespace ghosts.client.linux.handlers
 
                         //determine what to do
                         string action = GetNextAction();
+                        
 
                         
                         if (action == null)
@@ -1387,6 +1401,8 @@ namespace ghosts.client.linux.handlers
                             Log.Trace($"WebOutlook:: Failed action: {action}.");
                             errorCount = errorCount + 1;  
                         }
+                        //DEBUG - force reset
+                        //throw new Exception("Force reset");
 
                         break;
 

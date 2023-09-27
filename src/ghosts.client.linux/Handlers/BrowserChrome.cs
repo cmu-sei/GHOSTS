@@ -74,6 +74,7 @@ namespace ghosts.client.linux.handlers
                     Driver.Dispose();
                 }
                 catch { }
+                KillBrowser();
 
                 if (this.Restart)
                 {
@@ -96,19 +97,27 @@ namespace ghosts.client.linux.handlers
             options.AddArguments("--disable-logging");
             options.AddArgument("--log-level=3");
             options.AddArgument("--silent");
-            if (handler.HandlerArgs.ContainsKey("command-line-args"))
-            {
-                foreach (var option in (JArray)handler.HandlerArgs["command-line-args"])
-                {
-                    options.AddArgument(option.Value<string>());
-                }
-            }
-
             options.AddLocalStatePreference("download.default_directory", @"~/downloads");
             options.AddLocalStatePreference("disable-popup-blocking", "true");
 
             if (handler.HandlerArgs != null)
             {
+                if (handler.HandlerArgs.ContainsKey("command-line-args"))
+                {
+                    foreach (var option in (JArray)handler.HandlerArgs["command-line-args"])
+                    {
+                        options.AddArgument(option.Value<string>());
+                    }
+                }
+                //used to kill process
+                if (handler.HandlerArgs.ContainsKey("browser-id") &&
+                    !string.IsNullOrEmpty(handler.HandlerArgs["browser-id"].ToString()))
+                {
+                    var s = handler.HandlerArgs["browser-id"].ToString();
+                    options.AddArgument($"--{s}");
+                }
+
+
                 if (handler.HandlerArgs.ContainsKey("executable-location") &&
                     !string.IsNullOrEmpty(handler.HandlerArgs["executable-location"].ToString()))
                 {

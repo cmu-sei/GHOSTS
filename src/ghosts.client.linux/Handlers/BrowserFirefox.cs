@@ -170,6 +170,7 @@ namespace ghosts.client.linux.handlers
                     Driver.Dispose();
                 }
                 catch { }
+                KillBrowser();
 
                 if (this.Restart)
                 {
@@ -196,18 +197,26 @@ namespace ghosts.client.linux.handlers
             options.AddArguments("--disable-infobars");
             options.AddArguments("--disable-extensions");
             options.AddArguments("--disable-notifications");
-            if (handler.HandlerArgs.ContainsKey("command-line-args"))
-            {
-                foreach (var option in (JArray)handler.HandlerArgs["command-line-args"])
-                {
-                    options.AddArgument(option.Value<string>());
-                }
-            }
-
             options.Profile = new FirefoxProfile();
 
             if (handler.HandlerArgs != null)
             {
+
+                if (handler.HandlerArgs.ContainsKey("command-line-args"))
+                {
+                    foreach (var option in (JArray)handler.HandlerArgs["command-line-args"])
+                    {
+                        options.AddArgument(option.Value<string>());
+                    }
+                }
+                //used to kill process
+                if (handler.HandlerArgs.ContainsKey("browser-id") &&
+                    !string.IsNullOrEmpty(handler.HandlerArgs["browser-id"].ToString()))
+                {
+                    var s = handler.HandlerArgs["browser-id"].ToString();
+                    options.AddArgument($"--{s}");
+                }
+
                 if (handler.HandlerArgs.ContainsKeyWithOption("isheadless", "true"))
                 {
                     options.AddArguments("--headless");

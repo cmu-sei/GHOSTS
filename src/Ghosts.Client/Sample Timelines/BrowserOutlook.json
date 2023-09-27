@@ -14,6 +14,16 @@
   the native OS window that opens when an attachment is added.
   'sudo apt-get install xdotool'
 
+  A 'delete' operation, once started, will delete all emails the Inbox until 20 or less remain,
+  and empty the other folders (such as deleted items, Drafts, etc). In Web Outlook, there is no easy way to bulk
+  delete a group of emails from the Inbox - it is either delete all, or delete one at a time.
+  This code deletes items one at a time from the Inbox, and if it contains several thousand,
+  can take a while. However, the other folders are emptied and that operation is fast.
+  While deleting items one at a time, if 500 emails are deleted the operation exits to allow
+  other actions (read, create, reply) to occur. So, it may take several delete cycles to
+  clear an inbox containing thousands of items.  An email backlog will only build up if
+  a node is offline for an extended period of time while other clients are sending it emails.
+
 */
 
 
@@ -31,6 +41,7 @@
       "HandlerArgs": {
         "isheadless": "false",
         "delay-jitter": 50, //%jitter to add to delayAfter, delayBefore
+        "browser-id": "ghosts-client-outlook", //This is only used in the Linux client to delete the Outlook browser process on restart as sometimes the normal Selenium shutdown fails to close the browser
         "outlook-credentials-file": "<path to credentials file>", //path to credentials files
         "outlook-delete-probability": 20, //probability that a delete operation will be done
         "outlook-read-probability": 30, //probability that an existing email will be read, unread is given preference
