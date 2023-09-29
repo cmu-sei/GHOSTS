@@ -297,12 +297,13 @@ namespace Ghosts.Client.Handlers
                 }
 
             }
-            catch (ThreadAbortException)
+            
+            catch (Exception e)
             {
-                throw;  //pass up
-            }
-            catch
-            {
+                if (e is ThreadAbortException || e is ThreadInterruptedException)
+                {
+                    throw e;
+                }
                 //ignore
             }
 
@@ -320,12 +321,12 @@ namespace Ghosts.Client.Handlers
                 }
 
             }
-            catch (ThreadAbortException)
+            catch (Exception e)
             {
-                throw;  //pass up
-            }
-            catch
-            {
+                if (e is ThreadAbortException || e is ThreadInterruptedException)
+                {
+                    throw e;
+                }
                 //ignore
             }
 
@@ -394,13 +395,12 @@ namespace Ghosts.Client.Handlers
                 Log.Trace($"WebOutlook:: Email reply successful.");
                 return true;
             }
-            catch (ThreadAbortException)
-            {
-                throw;  //pass up
-            }
             catch (System.Exception e)
             {
-
+                if (e is ThreadAbortException || e is ThreadInterruptedException)
+                {
+                    throw e;
+                }
                 Log.Error(e);
                 return false;
             }
@@ -426,11 +426,13 @@ namespace Ghosts.Client.Handlers
                 if (filelist.Length > 0) return filelist[_random.Next(0, filelist.Length)];
                 else return null;
             }
-            catch (ThreadAbortException)
+            catch (System.Exception e)
             {
-                throw;  //pass up
-            }
-            catch { } //ignore any errors
+                if (e is ThreadAbortException || e is ThreadInterruptedException)
+                {
+                    throw e;
+                }
+            } //ignore any errors
             return null;
         }
 
@@ -446,12 +448,12 @@ namespace Ghosts.Client.Handlers
             {
                 baseHandler.MakeRequest(config);
             }
-            catch (ThreadAbortException)
-            {
-                throw;  //pass up
-            }
             catch (System.Exception e)
             {
+                if (e is ThreadAbortException || e is ThreadInterruptedException)
+                {
+                    throw e;
+                }
                 Log.Trace($"WebOutlook:: Unable to parse site {site}, url may be malformed. Outlook browser action will not be executed.");
                 baseHandler.OutlookAbort = true;
                 Log.Error(e);
@@ -464,12 +466,12 @@ namespace Ghosts.Client.Handlers
             {
                 if (SelectFolder(InboxFolderXpath)) return true;   //if this works, already logged in
             }
-            catch (ThreadAbortException)
+            catch (System.Exception e)
             {
-                throw;  //pass up
-            }
-            catch
-            {
+                if (e is ThreadAbortException || e is ThreadInterruptedException)
+                {
+                    throw e;
+                }
                 //ignore this error and continue to try to login
 
             }
@@ -603,12 +605,12 @@ namespace Ghosts.Client.Handlers
                 }
 
             }
-            catch (ThreadAbortException)
-            {
-                throw;  //pass up
-            }
             catch (System.Exception e)
             {
+                if (e is ThreadAbortException || e is ThreadInterruptedException)
+                {
+                    throw e;
+                }
                 //log error but continue on
                 Log.Error(e);
 
@@ -746,12 +748,12 @@ namespace Ghosts.Client.Handlers
                 return true;
 
             }
-            catch (ThreadAbortException)
-            {
-                throw;  //pass up
-            }
             catch (System.Exception e)
             {
+                if (e is ThreadAbortException || e is ThreadInterruptedException)
+                {
+                    throw e;
+                }
                 //log error and  return false
                 Log.Error(e);
                 return false;
@@ -884,12 +886,12 @@ namespace Ghosts.Client.Handlers
                     BrowserHelperSupport.MoveToElementAndClick(Driver, anElement);
                     Thread.Sleep(300);
                 }
-                catch (ThreadAbortException)
-                {
-                    throw;  //pass up
-                }
                 catch (System.Exception e)
                 {
+                    if (e is ThreadAbortException || e is ThreadInterruptedException)
+                    {
+                        throw e;
+                    }
                     Log.Error(e);
                 }
 
@@ -915,12 +917,12 @@ namespace Ghosts.Client.Handlers
                 }
                 return true;
             }
-            catch (ThreadAbortException)
-            {
-                throw;  //pass up
-            }
             catch (System.Exception e)
             {
+                if (e is ThreadAbortException || e is ThreadInterruptedException)
+                {
+                    throw e;
+                }
                 Log.Error(e);
                 return false;
             }
@@ -947,12 +949,12 @@ namespace Ghosts.Client.Handlers
                     }
                 }
             }
-            catch (ThreadAbortException)
-            {
-                throw;  //pass up
-            }
             catch (System.Exception e)
             {
+                if (e is ThreadAbortException || e is ThreadInterruptedException)
+                {
+                    throw e;
+                }
                 Log.Trace($"WebOutlook:: Error selecting email filter {mailType}.");
                 Log.Error(e);
             }
@@ -982,12 +984,12 @@ namespace Ghosts.Client.Handlers
                 {
                     targetElement = Driver.FindElement(By.XPath(MarkAsReadXpath));
                 }
-                catch (ThreadAbortException)
+                catch (System.Exception e)
                 {
-                    throw;  //pass up
-                }
-                catch
-                {
+                    if (e is ThreadAbortException || e is ThreadInterruptedException)
+                    {
+                        throw e;
+                    }
                     //ignore may not be present
                 }
                 if (targetElement != null)
@@ -996,12 +998,12 @@ namespace Ghosts.Client.Handlers
                     Thread.Sleep(300);
                 }
             }
-            catch (ThreadAbortException)
-            {
-                throw;  //pass up
-            }
             catch (System.Exception e)
             {
+                if (e is ThreadAbortException || e is ThreadInterruptedException)
+                {
+                    throw e;
+                }
                 Log.Trace($"WebOutlook:: Error marking email as read.");
                 Log.Error(e);
             }
@@ -1018,12 +1020,12 @@ namespace Ghosts.Client.Handlers
                     {
                         targetElement = Driver.FindElement(By.XPath(FileDownloadAllXpath));
                     }
-                    catch (ThreadAbortException)
+                    catch (System.Exception e)
                     {
-                        throw;  //pass up
-                    }
-                    catch
-                    {
+                        if (e is ThreadAbortException || e is ThreadInterruptedException)
+                        {
+                            throw e;
+                        }
                         //ignore may not be present
                     }
 
@@ -1035,13 +1037,12 @@ namespace Ghosts.Client.Handlers
                     }
                 }
             }
-            catch (ThreadAbortException)
+            catch (System.Exception e)
             {
-                throw;  //pass up
-            }
-            catch
-            {
-
+                if (e is ThreadAbortException || e is ThreadInterruptedException)
+                {
+                    throw e;
+                }
                 //ignore button present but may not work
             }
         }
@@ -1093,13 +1094,12 @@ namespace Ghosts.Client.Handlers
                 Log.Trace($"WebOutlook:: Email read successful.");
                 return true;
             }
-            catch (ThreadAbortException)
-            {
-                throw;  //pass up
-            }
             catch (System.Exception e)
             {
-
+                if (e is ThreadAbortException || e is ThreadInterruptedException)
+                {
+                    throw e;
+                }
                 Log.Error(e);
                 return false;
             }
@@ -1459,22 +1459,19 @@ namespace Ghosts.Client.Handlers
                             Log.Trace($"WebOutlook:: Failed action: {action}.");
                             errorCount = errorCount + 1;
                         }
-                        //DEBUG - force reset
-                        //throw new Exception("Force reset");
-
+                        
                         break;
 
                 }
 
 
             }
-            catch (ThreadAbortException)
-            {
-                throw;  //pass up
-            }
             catch (System.Exception e)
             {
-
+                if (e is ThreadAbortException || e is ThreadInterruptedException)
+                {
+                    throw e;
+                }
                 errorCount = errorThreshold + 1;  // an exception at  this level needs a restart
                 LastException = e;  //save last exception so that it can be thrown up during restart
                 Log.Trace($"WebOutlook:: Error at top level of execute loop.");

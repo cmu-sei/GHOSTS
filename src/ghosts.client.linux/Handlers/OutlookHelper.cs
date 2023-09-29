@@ -22,8 +22,8 @@ using NLog;
 namespace ghosts.client.linux.handlers
 {
 
-    
-   
+
+
     /// <summary>
     /// Supports Email for Outlook 2013
     /// Xpath tutorial: lambdatest.com/blog/complete-guide-for-using-xpath-in-selenium-with-examples
@@ -37,8 +37,8 @@ namespace ghosts.client.linux.handlers
             base.Init(callingHandler, callingDriver, aversion);
 
         }
- 
-  
+
+
     }
 
     /// <summary>
@@ -48,7 +48,7 @@ namespace ghosts.client.linux.handlers
     public abstract class OutlookHelper : BrowserHelper
     {
 
-        
+
         private int _deleteProbability = -1;
         private int _readProbability = -1;
         private int _replyProbability = -1;
@@ -60,7 +60,7 @@ namespace ghosts.client.linux.handlers
         public int attachmentsMaxSize = 10;
 
         public int saveAttachmentProbability = 0;
-        
+
         private Credentials _credentials = null;
         private string _state = "initial";
         public int errorCount = 0;
@@ -74,7 +74,7 @@ namespace ghosts.client.linux.handlers
 
         public System.Exception LastException;
         public string AttachmentWindowTitle = "Open"; //this is for chrome
-        
+
 
         //public string EmailXpath { get; set; } = "//div[contains(@tempid,'emailslistview')]//child::div[contains(@id,'_ariaId_')]";
         public string EmailXpath { get; set; } = "//div[contains(@tempid,'emailslistview')]//child::div[contains(@role,'button')]";
@@ -82,14 +82,14 @@ namespace ghosts.client.linux.handlers
 
         public string EmailFiltersXpath { get; set; } = "//div[contains(@aria-label,'Email Filters')]//child::div//child::div[contains(@style,'inline-block')]//child::span[contains(@role,'menuitemradio')]";
         public string MarkAsReadXpath { get; set; } = "//div[contains(@tempid,'ItemHeaderView.Mouse')]//child::span[text()='Mark as read']//parent::button";
-        public string NewMailXpath{ get; set; } = "//div[@aria-label='Mail']//child::div//child::div//child::div//child::div//child::button//child::span[@role='presentation']//following-sibling::span[text()='New mail']//parent::button";
+        public string NewMailXpath { get; set; } = "//div[@aria-label='Mail']//child::div//child::div//child::div//child::div//child::button//child::span[@role='presentation']//following-sibling::span[text()='New mail']//parent::button";
         public string ToRecipientsXpath { get; set; } = "//input[contains(@aria-label,'To recipients.')]";
         public string CcRecipientsXpath { get; set; } = "//input[contains(@aria-label,'Cc recipients.')]";
         public string SubjectXpath { get; set; } = "//input[contains(@aria-labelledby,'MailCompose.SubjectWellLabel')]";
         public string EmailBodyXpath { get; set; } = "//div[contains(@id,'MicrosoftOWAEditorRegion')]";
-         
+
         public string SendButtonXpath { get; set; } = "//div[contains(@tempid,'mailcomposetoolbar')]//child::button[contains(@aria-label,'Send')]";
-        
+
         public string ReplyButtonXpath { get; set; } = "//span[@title='Reply']//parent::button";
 
         public string MessageBodyXpath { get; set; } = "//div[@id='Item.MessageUniqueBody']//child::p";
@@ -105,7 +105,7 @@ namespace ghosts.client.linux.handlers
         //these Xpaths are for selecting mail folders. They have to select by label, then go back up to the element that has the event on it.
         public string InboxFolderXpath { get; set; } = "//div[contains(@aria-label,'Folder Pane')]//child::span[contains(@title,'Inbox')]//parent::div//parent::span//parent::div[contains(@role,'treeitem')]";
         public string InboxCountXpath { get; set; } = "//div[contains(@aria-label,'Folder Pane')]//child::span[contains(@title,'Inbox')]//parent::div//parent::span//parent::div[contains(@role,'treeitem')]";
- 
+
         public string SentFolderXpath { get; set; } = "//div[contains(@aria-label,'Folder Pane')]//child::span[contains(@title,'Sent')]//parent::div//parent::span//parent::div[contains(@role,'treeitem')]";
         public string DeletedFolderXpath { get; set; } = "//div[contains(@aria-label,'Folder Pane')]//child::span[contains(@title,'Delete')]//parent::div//parent::span//parent::div[contains(@role,'treeitem')]";
         public string DraftsFolderXpath { get; set; } = "//div[contains(@aria-label,'Folder Pane')]//child::span[contains(@title,'Drafts')]//parent::div//parent::span//parent::div[contains(@role,'treeitem')]";
@@ -124,10 +124,10 @@ namespace ghosts.client.linux.handlers
 
         public string FileDownloadAllXpath { get; set; } = "//span[text()='Download all']/parent::button";
 
-        
 
 
-        public List<string> InitialWindows = new List<string> ();
+
+        public List<string> InitialWindows = new List<string>();
 
 
         private void OutputHandler(object sendingProcess, DataReceivedEventArgs outLine)
@@ -171,7 +171,8 @@ namespace ghosts.client.linux.handlers
             Log.Trace($"OutlookWeb:: Bash command output: {Result}");
         }
 
-        public static bool isWindowsOs(){
+        public static bool isWindowsOs()
+        {
             var OsName = System.Runtime.InteropServices.RuntimeInformation.OSDescription;
 
             return OsName.Contains("Windows");
@@ -179,8 +180,34 @@ namespace ghosts.client.linux.handlers
 
         public void AttachFileWindows(string filename)
         {
-            //TODO
-            return;
+            
+            //IntPtr winHandle = Winuser.FindWindow(null, AttachmentWindowTitle);
+            //if (winHandle == IntPtr.Zero)
+            //{
+            //    Log.Trace($"WebOutlook:: Unable to find '{AttachmentWindowTitle}' window to upload file attachment.");
+            //    return;
+            //}
+            //Winuser.SetForegroundWindow(winHandle);
+            //string s;
+            //if (Driver is OpenQA.Selenium.Firefox.FirefoxDriver)
+            //{
+            //    s = filename + "{TAB}{TAB}{ENTER}";
+            //}
+            //else
+            //{
+            //    s = filename + "{ENTER}";
+            //}
+
+            //System.Windows.Forms.SendKeys.SendWait(s);
+            //Thread.Sleep(200);
+            //winHandle = Winuser.FindWindow(null, AttachmentWindowTitle);
+            //if (winHandle == IntPtr.Zero)
+            //{
+            //    return;
+            //}
+            // the window is still open. Grr. try closing it.
+            //Winuser.SetForegroundWindow(winHandle);
+            //System.Windows.Forms.SendKeys.SendWait("%{F4}");
         }
 
         public void AttachFileLinux(string filename)
@@ -196,10 +223,10 @@ namespace ghosts.client.linux.handlers
 
         public void AttachFile(string filename)
         {
-           if (isWindowsOs()) AttachFileWindows(filename);
-           else AttachFileLinux(filename);
+            if (isWindowsOs()) AttachFileWindows(filename);
+            else AttachFileLinux(filename);
         }
-       
+
 
         public static OutlookHelper MakeHelper(BaseBrowserHandler callingHandler, IWebDriver callingDriver, TimelineHandler handler, Logger tlog)
         {
@@ -226,7 +253,7 @@ namespace ghosts.client.linux.handlers
         {
             return errorCount > errorThreshold;
         }
-        
+
 
         public void Init(BaseBrowserHandler callingHandler, IWebDriver currentDriver, string aversion)
         {
@@ -245,57 +272,62 @@ namespace ghosts.client.linux.handlers
             return true;
         }
 
-      private string GetRecipientString(List<string> targets) 
+        private string GetRecipientString(List<string> targets)
         {
-            
+
             string recipients = null;
             foreach (var a in targets)
             {
                 var target = a.Trim();
                 if (recipients == null) recipients = target;
                 else if (!recipients.Contains(target)) recipients = recipients + ";" + target;
-                
+
             }
             return recipients;
         }
 
-        private void HandleAttachmentReminder(){
-            try {
+        private void HandleAttachmentReminder()
+        {
+            try
+            {
                 var targetElement = Driver.FindElement(By.XPath(AlertAttachmentXpath));
-                if (targetElement != null) 
+                if (targetElement != null)
                 {
-                    BrowserHelperSupport.ElementClick(Driver,targetElement);
+                    BrowserHelperSupport.ElementClick(Driver, targetElement);
                     Thread.Sleep(500);
                 }
+
+            }
             
-            }
-            catch (ThreadAbortException)
+            catch (Exception e)
             {
-                throw;  //pass up
-            }
-            catch 
-            {
+                if (e is ThreadAbortException || e is ThreadInterruptedException)
+                {
+                    throw e;
+                }
                 //ignore
             }
 
         }
 
-        private void HandleSubjectReminder(){
-            try {
+        private void HandleSubjectReminder()
+        {
+            try
+            {
                 var targetElement = Driver.FindElement(By.XPath(AlertSubjectXpath));
-                if (targetElement != null) 
+                if (targetElement != null)
                 {
-                    BrowserHelperSupport.ElementClick(Driver,targetElement);
+                    BrowserHelperSupport.ElementClick(Driver, targetElement);
                     Thread.Sleep(500);
                 }
-            
+
             }
-            catch (ThreadAbortException)
+            catch (Exception e)
             {
-                throw;  //pass up
-            }
-            catch 
-            {
+                if (e is ThreadAbortException || e is ThreadInterruptedException)
+                {
+                    throw e;
+                }
                 //ignore
             }
 
@@ -310,27 +342,29 @@ namespace ghosts.client.linux.handlers
         /// <returns></returns>
         public bool DoReply(TimelineHandler handler)
         {
-            try 
+            try
             {
-                if (!SelectFolder(InboxFolderXpath)) {
+                if (!SelectFolder(InboxFolderXpath))
+                {
                     Log.Trace($"WebOutlook:: Unable to select inbox folder, reply will not be sent.");
                     return false;
                 }
                 //first, select an email, do not mark as read
-                if (!SelectOneEmail(false)) {
+                if (!SelectOneEmail(false))
+                {
                     Log.Trace($"WebOutlook:: Unable to select email, reply will not be sent.");
-                    return false; 
+                    return false;
                 }
-            
-                
+
+
                 //Hit the reply button, this marks the email as read
                 var targetElements = Driver.FindElements(By.XPath(ReplyButtonXpath));
-                if (targetElements == null) 
+                if (targetElements == null)
                 {
                     Log.Trace($"WebOutlook:: Unable to find reply button in current mail will not be sent.");
-                    return false; 
+                    return false;
                 }
-                BrowserHelperSupport.ElementClick(Driver,targetElements[0]);
+                BrowserHelperSupport.ElementClick(Driver, targetElements[0]);
                 Thread.Sleep(500);
 
                 //compose the message and send
@@ -338,10 +372,10 @@ namespace ghosts.client.linux.handlers
 
                 Driver.SwitchTo().Frame("EditorBody");
                 var targetElement = Driver.FindElement(By.XPath(EmailBodyXpath));
-                if (targetElement == null) 
+                if (targetElement == null)
                 {
                     Log.Trace($"WebOutlook:: Unable to find body field in reply email form, mail will not be sent.");
-                    return false; 
+                    return false;
                 }
                 targetElement.SendKeys(emailReply.Reply);
                 Thread.Sleep(500);
@@ -349,12 +383,12 @@ namespace ghosts.client.linux.handlers
                 Driver.SwitchTo().DefaultContent();
                 //send the email
                 targetElements = Driver.FindElements(By.XPath(SendButtonXpath));
-                if (targetElements == null) 
+                if (targetElements == null)
                 {
                     Log.Trace($"WebOutlook:: Unable to find send button in reply email form, mail will not be sent.");
-                    return false; 
+                    return false;
                 }
-                BrowserHelperSupport.ElementClick(Driver,targetElements[0]);
+                BrowserHelperSupport.ElementClick(Driver, targetElements[0]);
                 Thread.Sleep(500);
                 HandleAttachmentReminder();  //handle the attachment popup if present
                 HandleSubjectReminder();
@@ -362,13 +396,12 @@ namespace ghosts.client.linux.handlers
                 Log.Trace($"WebOutlook:: Email reply successful.");
                 return true;
             }
-            catch (ThreadAbortException)
-            {
-                throw;  //pass up
-            }
             catch (System.Exception e)
             {
-                
+                if (e is ThreadAbortException || e is ThreadInterruptedException)
+                {
+                    throw e;
+                }
                 Log.Error(e);
                 return false;
             }
@@ -380,9 +413,9 @@ namespace ghosts.client.linux.handlers
             if (emailElements != null && emailElements.Count > 0)
             {
                 //select one of the first 5
-                BrowserHelperSupport.MoveToElementAndClick(Driver,emailElements[0]);
+                BrowserHelperSupport.MoveToElementAndClick(Driver, emailElements[0]);
                 Thread.Sleep(500);
-                return true ;
+                return true;
             }
             return false;
         }
@@ -394,11 +427,13 @@ namespace ghosts.client.linux.handlers
                 if (filelist.Length > 0) return filelist[_random.Next(0, filelist.Length)];
                 else return null;
             }
-            catch (ThreadAbortException)
+            catch (System.Exception e)
             {
-                throw;  //pass up
-            }
-            catch { } //ignore any errors
+                if (e is ThreadAbortException || e is ThreadInterruptedException)
+                {
+                    throw e;
+                }
+            } //ignore any errors
             return null;
         }
 
@@ -408,18 +443,18 @@ namespace ghosts.client.linux.handlers
 
             //have the username, password
             RequestConfiguration config;
-            string target = site ;
+            string target = site;
             config = RequestConfiguration.Load(handler, target);
             try
             {
                 baseHandler.MakeRequest(config);
             }
-            catch (ThreadAbortException)
-            {
-                throw;  //pass up
-            }
             catch (System.Exception e)
             {
+                if (e is ThreadAbortException || e is ThreadInterruptedException)
+                {
+                    throw e;
+                }
                 Log.Trace($"WebOutlook:: Unable to parse site {site}, url may be malformed. Outlook browser action will not be executed.");
                 baseHandler.OutlookAbort = true;
                 Log.Error(e);
@@ -432,18 +467,19 @@ namespace ghosts.client.linux.handlers
             {
                 if (SelectFolder(InboxFolderXpath)) return true;   //if this works, already logged in
             }
-            catch (ThreadAbortException)
+            catch (System.Exception e)
             {
-                throw;  //pass up
-            }
-            catch 
-            {
+                if (e is ThreadAbortException || e is ThreadInterruptedException)
+                {
+                    throw e;
+                }
                 //ignore this error and continue to try to login
 
             }
 
 
-            if (handler.HandlerType == HandlerType.BrowserFirefox){
+            if (handler.HandlerType == HandlerType.BrowserFirefox)
+            {
                 //check for certificate 
                 var targetElements = Driver.FindElements(By.XPath("//*[@class='certerror']"));
                 if (targetElements != null && targetElements.Count > 0)
@@ -455,7 +491,8 @@ namespace ghosts.client.linux.handlers
 
 
             var targetElement = Driver.FindElement(By.XPath("//input[@id='username']"));
-            if (targetElement == null) {
+            if (targetElement == null)
+            {
                 Log.Trace($"WebOutlook:: Unable to find username field for login, outlook browser action will not be executed.");
                 baseHandler.OutlookAbort = true;
                 return false;
@@ -463,7 +500,8 @@ namespace ghosts.client.linux.handlers
             targetElement.SendKeys($"{domain}\\{user}");
             Thread.Sleep(1000);
             targetElement = Driver.FindElement(By.XPath("//input[@id='password']"));
-            if (targetElement == null) {
+            if (targetElement == null)
+            {
                 Log.Trace($"WebOutlook:: Unable to find password field for login, outlook browser action will not be executed.");
                 baseHandler.OutlookAbort = true;
                 return false;
@@ -471,7 +509,8 @@ namespace ghosts.client.linux.handlers
             targetElement.SendKeys(pw);
             Thread.Sleep(1000);
             targetElement = Driver.FindElement(By.XPath("//div[@class='signinbutton']"));
-            if (targetElement == null) {
+            if (targetElement == null)
+            {
                 Log.Trace($"WebOutlook:: Unable to find signin button for login, outlook browser action will not be executed.");
                 baseHandler.OutlookAbort = true;
                 return false;
@@ -487,7 +526,8 @@ namespace ghosts.client.linux.handlers
                 foreach (IWebElement te in optionElements)
                 {
                     string avalue = te.GetAttribute("value");
-                    if (avalue.Contains("Central Standard Time")) {
+                    if (avalue.Contains("Central Standard Time"))
+                    {
                         te.Click();
                         Thread.Sleep(500);
                         found = true;
@@ -498,7 +538,8 @@ namespace ghosts.client.linux.handlers
                 {
                     //click the save settings button
                     targetElement = Driver.FindElement(By.XPath("//div[@class='signInEnter']//child::div"));
-                    if (targetElement != null) {
+                    if (targetElement != null)
+                    {
                         Actions actions = new Actions(Driver);
                         actions.MoveToElement(targetElement).Click().Perform();
                         Thread.Sleep(500);
@@ -508,21 +549,23 @@ namespace ghosts.client.linux.handlers
             }
             // at this point, should be logged in. Check for main page
             var conductorElements = Driver.FindElements(By.XPath("//div[@class='conductorContent']"));
-            if (conductorElements != null && conductorElements.Count > 0 ){
+            if (conductorElements != null && conductorElements.Count > 0)
+            {
                 return true;
             }
             return false;
         }
 
- 
+
         public bool SelectFolder(string FolderXpath)
         {
             // select the folder
             var targetElement = Driver.FindElement(By.XPath(FolderXpath));
-            if (targetElement == null) {
+            if (targetElement == null)
+            {
                 return false;
             }
-            BrowserHelperSupport.MoveToElementAndClick(Driver,targetElement);
+            BrowserHelperSupport.MoveToElementAndClick(Driver, targetElement);
             Thread.Sleep(500);
             return true;
         }
@@ -546,13 +589,13 @@ namespace ghosts.client.linux.handlers
                             var insertElement = Driver.FindElement(By.XPath(InsertMenuXpath));
                             if (insertElement != null)
                             {
-                                BrowserHelperSupport.ElementClick(Driver,insertElement);
+                                BrowserHelperSupport.ElementClick(Driver, insertElement);
                                 Thread.Sleep(500);
                                 //now  click on the attachment choice
                                 insertElement = Driver.FindElement(By.XPath(InsertAttachmentXpath));
                                 if (insertElement != null)
                                 {
-                                    BrowserHelperSupport.ElementClick(Driver,insertElement);
+                                    BrowserHelperSupport.ElementClick(Driver, insertElement);
                                     Thread.Sleep(500);
                                     //filechoice window is open
                                     AttachFile(FileToAttach);
@@ -563,12 +606,12 @@ namespace ghosts.client.linux.handlers
                 }
 
             }
-            catch (ThreadAbortException)
-            {
-                throw;  //pass up
-            }
             catch (System.Exception e)
             {
+                if (e is ThreadAbortException || e is ThreadInterruptedException)
+                {
+                    throw e;
+                }
                 //log error but continue on
                 Log.Error(e);
 
@@ -576,15 +619,16 @@ namespace ghosts.client.linux.handlers
 
         }
 
-        
-        public bool DoCreate(TimelineHandler handler,EmailConfiguration emailConfig)
+
+        public bool DoCreate(TimelineHandler handler, EmailConfiguration emailConfig)
         {
-            
-            try 
+
+            try
             {
 
-            
-                if (!SelectFolder(InboxFolderXpath)) {
+
+                if (!SelectFolder(InboxFolderXpath))
+                {
                     Log.Trace($"WebOutlook:: Unable to select inbox folder, email will not be sent.");
                     return false;
                 }
@@ -610,37 +654,39 @@ namespace ghosts.client.linux.handlers
                 }
 
                 var targetElement = Driver.FindElement(By.XPath(NewMailXpath));
-                if (targetElement == null) {
+                if (targetElement == null)
+                {
                     Log.Trace($"WebOutlook:: Unable to find new mail button, mail will not be sent.");
                     return false;
                 }
-                BrowserHelperSupport.ElementClick(Driver,targetElement);
+                BrowserHelperSupport.ElementClick(Driver, targetElement);
                 Thread.Sleep(500);
 
                 //new mail form should be displayed
-                
-                if (attachmentProbability != 0 && _random.Next(0,100) <= attachmentProbability)
+
+                if (attachmentProbability != 0 && _random.Next(0, 100) <= attachmentProbability)
                 {
                     HandleFileAttachments();
                 }
-                
-                
+
+
                 targetElement = Driver.FindElement(By.XPath(ToRecipientsXpath));
-                if (targetElement == null) 
+                if (targetElement == null)
                 {
                     Log.Trace($"WebOutlook:: Unable to find To: field in new email form, mail will not be sent.");
-                    return false; 
+                    return false;
                 }
                 targetElement.SendKeys(ToRecipients);
                 Thread.Sleep(500);
                 Log.Trace($"WebOutlook:: Email To: field written");
 
-                if (CcRecipients != null){
+                if (CcRecipients != null)
+                {
                     targetElement = Driver.FindElement(By.XPath(CcRecipientsXpath));
-                    if (targetElement == null) 
+                    if (targetElement == null)
                     {
                         Log.Trace($"WebOutlook:: Unable to find To: field in new email form, mail will not be sent.");
-                        return false; 
+                        return false;
                     }
                     targetElement.SendKeys(CcRecipients);
                     Thread.Sleep(500);
@@ -649,23 +695,24 @@ namespace ghosts.client.linux.handlers
                 }
                 //Subject
                 targetElement = Driver.FindElement(By.XPath(SubjectXpath));
-                if (targetElement == null) 
+                if (targetElement == null)
                 {
                     Log.Trace($"WebOutlook:: Unable to find Subject: field in new email form, mail will not be sent.");
-                    return false; 
+                    return false;
                 }
                 if (emailConfig.Subject == null || emailConfig.Subject == "")
                 {
-                // do not have an empty subject
+                    // do not have an empty subject
                     targetElement.SendKeys("Attention All");
-                } else 
+                }
+                else
                 {
                     targetElement.SendKeys(emailConfig.Subject);
                 }
                 Log.Trace($"WebOutlook:: Email subject created.");
-                
+
                 Thread.Sleep(500);
-                
+
 
                 if (emailConfig.Body != null)
                 {
@@ -673,10 +720,10 @@ namespace ghosts.client.linux.handlers
 
                     Driver.SwitchTo().Frame("EditorBody");
                     targetElement = Driver.FindElement(By.XPath(EmailBodyXpath));
-                    if (targetElement == null) 
+                    if (targetElement == null)
                     {
                         Log.Trace($"WebOutlook:: Unable to find body field in new email form, mail will not be sent.");
-                        return false; 
+                        return false;
                     }
                     targetElement.SendKeys(emailConfig.Body);
                     Thread.Sleep(500);
@@ -688,26 +735,26 @@ namespace ghosts.client.linux.handlers
 
                 //send the email
                 var targetElements = Driver.FindElements(By.XPath(SendButtonXpath));
-                if (targetElements == null) 
+                if (targetElements == null)
                 {
                     Log.Trace($"WebOutlook:: Unable to find send button in new email form, mail will not be sent.");
-                    return false; 
+                    return false;
                 }
-                BrowserHelperSupport.ElementClick(Driver,targetElements[0]);
+                BrowserHelperSupport.ElementClick(Driver, targetElements[0]);
                 Thread.Sleep(500);
                 HandleAttachmentReminder();  //handle the attachment popup if present
                 HandleSubjectReminder();
 
                 Log.Trace($"WebOutlook:: Email sent successful.");
                 return true;
-                
-            }
-            catch (ThreadAbortException)
-            {
-                throw;  //pass up
+
             }
             catch (System.Exception e)
             {
+                if (e is ThreadAbortException || e is ThreadInterruptedException)
+                {
+                    throw e;
+                }
                 //log error and  return false
                 Log.Error(e);
                 return false;
@@ -716,19 +763,20 @@ namespace ghosts.client.linux.handlers
 
         // Keep deleting elements until there are only 10 left in the folder
         // if reach 500 deleted, then return and wait for next deletion cycle.
-   
+
         public bool DeleteItemsInFolder(string FolderName, string FolderXpath, string EmailSearchPath, bool DeleteAll, out int NumDeleted)
         {
             NumDeleted = 0;
-            if (!SelectFolder(FolderXpath)) {
+            if (!SelectFolder(FolderXpath))
+            {
                 Log.Trace($"WebOutlook:: Unable to select {FolderName} folder, deletion not done.");
                 return false;
             }
-            
+
 
             while (true)
             {
-                
+
                 //select the first email from "ALL"
                 SelectEmail("All");
                 ReadOnlyCollection<IWebElement> emailElements = Driver.FindElements(By.XPath(EmailSearchPath));
@@ -739,9 +787,10 @@ namespace ghosts.client.linux.handlers
                 int MaxToDelete = 15;
                 int count = 0;
                 var elementToDelete = emailElements[0];
-                while (count < MaxToDelete) {
+                while (count < MaxToDelete)
+                {
                     //select the first email
-                    BrowserHelperSupport.MoveToElementAndClick(Driver,elementToDelete);
+                    BrowserHelperSupport.MoveToElementAndClick(Driver, elementToDelete);
                     Thread.Sleep(200);
 
                     bool UseDeleteMenu = true;
@@ -751,17 +800,17 @@ namespace ghosts.client.linux.handlers
                     {
                         var DiscardElement = DiscardElements[0];
                         var cattr = DiscardElement.GetAttribute("class");
-                        if (cattr != "hidden") 
+                        if (cattr != "hidden")
                         {
                             UseDeleteMenu = false;
                             //get the actual button
                             DiscardElements = Driver.FindElements(By.XPath(DiscardButtonXpath));
                             if (DiscardElements != null && DiscardElements.Count > 0)
                             {
-                                BrowserHelperSupport.ElementClick(Driver,DiscardElements[0]);
+                                BrowserHelperSupport.ElementClick(Driver, DiscardElements[0]);
                                 Thread.Sleep(500);
                             }
-                    
+
                         }
                     }
 
@@ -775,7 +824,7 @@ namespace ghosts.client.linux.handlers
                             return false;
                         }
                         // bring up the more actions menu
-                        BrowserHelperSupport.ElementClick(Driver,targetElement);
+                        BrowserHelperSupport.ElementClick(Driver, targetElement);
                         Thread.Sleep(200);
                         targetElement = Driver.FindElement(By.XPath(DeleteActionXpath));
                         if (targetElement == null)
@@ -784,7 +833,7 @@ namespace ghosts.client.linux.handlers
                             return false;
                         }
                         // delete the current email
-                        BrowserHelperSupport.ElementClick(Driver,targetElement);
+                        BrowserHelperSupport.ElementClick(Driver, targetElement);
                         Thread.Sleep(500);
                     }
                     count = count + 1;
@@ -792,13 +841,13 @@ namespace ghosts.client.linux.handlers
                     if (NumDeleted > 500) return true;  //stop after 500  
                     //get next one
                     emailElements = Driver.FindElements(By.XPath(EmailSearchPath));
-                    if (emailElements == null || emailElements.Count == 0) return true; 
+                    if (emailElements == null || emailElements.Count == 0) return true;
                     elementToDelete = emailElements[0];
-                    
+
 
                 }
             }
-           
+
             return true;
         }
 
@@ -806,101 +855,107 @@ namespace ghosts.client.linux.handlers
         {
             // find the folder to empty
             var targetElement = Driver.FindElement(By.XPath(FolderXpath));
-            if (targetElement == null) {
+            if (targetElement == null)
+            {
                 Log.Trace($"WebOutlook:: Unable to find folder {FolderName} to empty, will not be emptied. ");
                 return false;
             }
             //open folder context menu
-            BrowserHelperSupport.MoveToElementAndContextMenu(Driver,targetElement);
+            BrowserHelperSupport.MoveToElementAndContextMenu(Driver, targetElement);
             Thread.Sleep(500);
 
             // select empty folder choice
             targetElement = Driver.FindElement(By.XPath(EmptyFolderActionXpath));
-            if (targetElement == null) {
+            if (targetElement == null)
+            {
                 Log.Trace($"WebOutlook:: Unable to select folder {FolderName} to empty, will not be emptied. ");
                 return false;
             }
-            BrowserHelperSupport.MoveToElementAndClick(Driver,targetElement);
+            BrowserHelperSupport.MoveToElementAndClick(Driver, targetElement);
             Thread.Sleep(1000);
             //click  OK button on popup
             var targetElements = Driver.FindElements(By.XPath(AlertOkXpath));
-            if (targetElements == null) {
+            if (targetElements == null)
+            {
                 return false;
             }
             //there can be more than one of these, only one is active
-            foreach (var anElement in targetElements) {
-                try 
+            foreach (var anElement in targetElements)
+            {
+                try
                 {
-                    BrowserHelperSupport.MoveToElementAndClick(Driver,anElement);
+                    BrowserHelperSupport.MoveToElementAndClick(Driver, anElement);
                     Thread.Sleep(300);
-                }
-                catch (ThreadAbortException)
-                {
-                    throw;  //pass up
                 }
                 catch (System.Exception e)
                 {
+                    if (e is ThreadAbortException || e is ThreadInterruptedException)
+                    {
+                        throw e;
+                    }
                     Log.Error(e);
                 }
 
             }
-            
-            
+
+
             return true;
         }
 
         public bool DoDelete(TimelineHandler handler)
         {
-            try 
+            try
             {
                 int NumDeleted = 0;
-                DeleteItemsInFolder("Inbox",InboxFolderXpath,EmailXpath,false,out NumDeleted);
-                if (NumDeleted > 0){
+                DeleteItemsInFolder("Inbox", InboxFolderXpath, EmailXpath, false, out NumDeleted);
+                if (NumDeleted > 0)
+                {
                     Log.Trace($"WebOutlook:: Successfully deleted {NumDeleted} items from inbox. ");
                     // only do this if we had to delete something
-                    EmptyFolder("Sent Items",SentFolderXpath);
-                    EmptyFolder("Drafts",DraftsFolderXpath);
-                    EmptyFolder("Deleted Items",DeletedFolderXpath);
+                    EmptyFolder("Sent Items", SentFolderXpath);
+                    EmptyFolder("Drafts", DraftsFolderXpath);
+                    EmptyFolder("Deleted Items", DeletedFolderXpath);
                 }
                 return true;
             }
-            catch (ThreadAbortException)
-            {
-                throw;  //pass up
-            }
             catch (System.Exception e)
             {
+                if (e is ThreadAbortException || e is ThreadInterruptedException)
+                {
+                    throw e;
+                }
                 Log.Error(e);
                 return false;
             }
         }
 
-       
 
-              
+
+
         public void SelectEmail(string mailType)
         {
-            try 
+            try
             {
                 var menuElements = Driver.FindElements(By.XPath(EmailFiltersXpath));
                 if (menuElements != null && menuElements.Count > 0)
                 {
-                    foreach (var menuElement in menuElements){
+                    foreach (var menuElement in menuElements)
+                    {
                         string menuText = menuElement.Text;
                         if (mailType == menuText)
                         {
-                            BrowserHelperSupport.ElementClick(Driver,menuElement);
+                            BrowserHelperSupport.ElementClick(Driver, menuElement);
                             break;
                         }
                     }
                 }
             }
-            catch (ThreadAbortException)
-            {
-                throw;  //pass up
-            }
             catch (System.Exception e)
             {
+                if (e is ThreadAbortException || e is ThreadInterruptedException)
+                {
+                    throw e;
+                }
                 Log.Trace($"WebOutlook:: Error selecting email filter {mailType}.");
                 Log.Error(e);
             }
@@ -923,32 +978,33 @@ namespace ghosts.client.linux.handlers
 
         public void MarkCurrentEmailAsRead()
         {
-            try 
+            try
             {
                 IWebElement targetElement = null;
-                try 
-                    {
-                        targetElement = Driver.FindElement(By.XPath(MarkAsReadXpath));
-                    }
-                    catch (ThreadAbortException)
-                    {
-                        throw;  //pass up
-                    }
-                    catch {
-                        //ignore may not be present
-                    }
-                if (targetElement != null) 
+                try
                 {
-                    BrowserHelperSupport.ElementClick(Driver,targetElement);
+                    targetElement = Driver.FindElement(By.XPath(MarkAsReadXpath));
+                }
+                catch (System.Exception e)
+                {
+                    if (e is ThreadAbortException || e is ThreadInterruptedException)
+                    {
+                        throw e;
+                    }
+                    //ignore may not be present
+                }
+                if (targetElement != null)
+                {
+                    BrowserHelperSupport.ElementClick(Driver, targetElement);
                     Thread.Sleep(300);
                 }
             }
-            catch (ThreadAbortException)
-            {
-                throw;  //pass up
-            }
             catch (System.Exception e)
             {
+                if (e is ThreadAbortException || e is ThreadInterruptedException)
+                {
+                    throw e;
+                }
                 Log.Trace($"WebOutlook:: Error marking email as read.");
                 Log.Error(e);
             }
@@ -956,38 +1012,38 @@ namespace ghosts.client.linux.handlers
 
         public void DownloadAttachmentsCurrentEmail()
         {
-            try 
+            try
             {
                 IWebElement targetElement = null;
-                if (saveAttachmentProbability > _random.Next(0,100))
+                if (saveAttachmentProbability > _random.Next(0, 100))
                 {
-                    try 
+                    try
                     {
                         targetElement = Driver.FindElement(By.XPath(FileDownloadAllXpath));
                     }
-                    catch (ThreadAbortException)
+                    catch (System.Exception e)
                     {
-                        throw;  //pass up
-                    }
-                    catch {
+                        if (e is ThreadAbortException || e is ThreadInterruptedException)
+                        {
+                            throw e;
+                        }
                         //ignore may not be present
                     }
 
-                    if (targetElement != null) 
+                    if (targetElement != null)
                     {
-                        BrowserHelperSupport.ElementClick(Driver,targetElement);
+                        BrowserHelperSupport.ElementClick(Driver, targetElement);
                         Thread.Sleep(300);
                         Log.Trace($"WebOutlook:: Attachments downloads successfull.");
                     }
                 }
             }
-            catch (ThreadAbortException)
+            catch (System.Exception e)
             {
-                throw;  //pass up
-            }
-            catch 
-            {
-                
+                if (e is ThreadAbortException || e is ThreadInterruptedException)
+                {
+                    throw e;
+                }
                 //ignore button present but may not work
             }
         }
@@ -997,28 +1053,28 @@ namespace ghosts.client.linux.handlers
             //select the Unread Email
             SelectEmail("Unread");
             var emailElement = GetOneEmailFromCurrentList();
-            if (emailElement != null) 
+            if (emailElement != null)
             {
                 //select this email
-                BrowserHelperSupport.MoveToElementAndClick(Driver,emailElement);
+                BrowserHelperSupport.MoveToElementAndClick(Driver, emailElement);
                 Thread.Sleep(500);
                 //this is an unread email that was just selected, mark as read
-                if (MarkAsRead) 
+                if (MarkAsRead)
                 {
                     // before marking as read, download the attachments
                     DownloadAttachmentsCurrentEmail();
                     MarkCurrentEmailAsRead();
-                    
+
                 }
                 return true;
             }
             // if we get here, no unread email
             SelectEmail("All");
             emailElement = GetOneEmailFromCurrentList();
-            if (emailElement != null) 
+            if (emailElement != null)
             {
                 //select this email
-                BrowserHelperSupport.MoveToElementAndClick(Driver,emailElement);
+                BrowserHelperSupport.MoveToElementAndClick(Driver, emailElement);
                 Thread.Sleep(500);
                 return true;
             }
@@ -1029,7 +1085,8 @@ namespace ghosts.client.linux.handlers
         {
             try
             {
-                if (!SelectFolder(InboxFolderXpath)) {
+                if (!SelectFolder(InboxFolderXpath))
+                {
                     Log.Trace($"WebOutlook:: Unable to select inbox folder, email will not be read.");
                     return false;
                 }
@@ -1038,13 +1095,12 @@ namespace ghosts.client.linux.handlers
                 Log.Trace($"WebOutlook:: Email read successful.");
                 return true;
             }
-            catch (ThreadAbortException)
-            {
-                throw;  //pass up
-            }
             catch (System.Exception e)
             {
-                
+                if (e is ThreadAbortException || e is ThreadInterruptedException)
+                {
+                    throw e;
+                }
                 Log.Error(e);
                 return false;
             }
@@ -1089,7 +1145,8 @@ namespace ghosts.client.linux.handlers
 
         }
 
-        private void setProbabilityDefaults () {
+        private void setProbabilityDefaults()
+        {
             _deleteProbability = 10;
             _readProbability = 30;
             _replyProbability = 30;
@@ -1108,7 +1165,7 @@ namespace ghosts.client.linux.handlers
             string credentialKey = null;
             EmailConfiguration emailConfig;
 
-            try 
+            try
             {
 
                 switch (_state)
@@ -1123,9 +1180,9 @@ namespace ghosts.client.linux.handlers
                         version = "2013";
                         if (handler.HandlerArgs.ContainsKey("exchange-version"))
                         {
-                        version = handler.HandlerArgs["exchange-version"].ToString();
+                            version = handler.HandlerArgs["exchange-version"].ToString();
                         }
-                        
+
                         if (handler.HandlerArgs.ContainsKey("outlook-uploads-directory"))
                         {
                             string targetDir = handler.HandlerArgs["outlook-uploads-directory"].ToString();
@@ -1145,7 +1202,7 @@ namespace ghosts.client.linux.handlers
                             uploadDirectory = KnownFolders.GetDownloadFolderPath();
                         }
 
-                        
+
                         if (_deleteProbability < 0 && handler.HandlerArgs.ContainsKey("outlook-delete-probability"))
                         {
                             int.TryParse(handler.HandlerArgs["outlook-delete-probability"].ToString(), out _deleteProbability);
@@ -1285,7 +1342,7 @@ namespace ghosts.client.linux.handlers
                         if (handler.HandlerArgs.ContainsKey("outlook-url"))
                         {
                             site = handler.HandlerArgs["outlook-url"].ToString();
-                        } 
+                        }
 
 
                         if (site == null)
@@ -1300,9 +1357,9 @@ namespace ghosts.client.linux.handlers
                         if (handler.HandlerArgs.ContainsKey("outlook-credential-key"))
                         {
                             credentialKey = handler.HandlerArgs["outlook-credential-key"].ToString();
-                        } 
-        
-                        
+                        }
+
+
                         if (credentialKey == null)
                         {
                             Log.Trace($"WebOutlook:: The handler args must specify a 'outlook-credential-key' value, outlook browser action will not be executed.");
@@ -1326,7 +1383,7 @@ namespace ghosts.client.linux.handlers
                         {
                             //login failed, keep trying every 5 minutes in case it is a server startup problem
                             Log.Trace($"WebOutlook:: Login failed, sleeping and trying again.");
-                            Thread.Sleep(300*1000); 
+                            Thread.Sleep(300 * 1000);
                         }
 
                         //at this point we are logged in, files tab selected, ready for action
@@ -1336,8 +1393,9 @@ namespace ghosts.client.linux.handlers
                         {
                             AttachmentWindowTitle = "File Upload";
                         }
-                        
-                        foreach (var winname in Driver.WindowHandles) {
+
+                        foreach (var winname in Driver.WindowHandles)
+                        {
                             InitialWindows.Add(winname);
                         }
 
@@ -1348,7 +1406,8 @@ namespace ghosts.client.linux.handlers
                     case "execute":
 
                         //close any windows not in initial window set
-                        foreach (var winname in Driver.WindowHandles) {
+                        foreach (var winname in Driver.WindowHandles)
+                        {
                             if (!InitialWindows.Contains(winname))
                             {
                                 Driver.SwitchTo().Window(winname).Close();
@@ -1359,16 +1418,16 @@ namespace ghosts.client.linux.handlers
 
                         //determine what to do
                         string action = GetNextAction();
-                        
 
-                        
+
+
                         if (action == null)
                         {
                             //nothing to do this cycle
                             Log.Trace($"WebOutlook:: Action is skipped for this cycle.");
                             return;
                         }
-                        
+
                         bool success = true;
 
                         Log.Trace($"WebOutlook:: Starting action: {action}.");
@@ -1391,32 +1450,29 @@ namespace ghosts.client.linux.handlers
                         {
                             success = DoReply(handler);
                         }
-                        if  (success)
+                        if (success)
                         {
                             errorCount = 0; //zero the error count
                             Log.Trace($"WebOutlook:: Completed action: {action}.");
                         }
-                        else 
+                        else
                         {
                             Log.Trace($"WebOutlook:: Failed action: {action}.");
-                            errorCount = errorCount + 1;  
+                            errorCount = errorCount + 1;
                         }
-                        //DEBUG - force reset
-                        //throw new Exception("Force reset");
-
+                        
                         break;
 
                 }
-                
-            
-            }
-            catch (ThreadAbortException)
-            {
-                throw;  //pass up
+
+
             }
             catch (System.Exception e)
             {
-                
+                if (e is ThreadAbortException || e is ThreadInterruptedException)
+                {
+                    throw e;
+                }
                 errorCount = errorThreshold + 1;  // an exception at  this level needs a restart
                 LastException = e;  //save last exception so that it can be thrown up during restart
                 Log.Trace($"WebOutlook:: Error at top level of execute loop.");
@@ -1424,10 +1480,10 @@ namespace ghosts.client.linux.handlers
             }
 
         }
-        
-    }
-
-    
-    
 
     }
+
+
+
+
+}
