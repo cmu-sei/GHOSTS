@@ -41,6 +41,31 @@ namespace ghosts.client.linux.handlers
 
     }
 
+    public class OutlookHelper2019 : OutlookHelper
+    {
+
+        public OutlookHelper2019(BaseBrowserHandler callingHandler, IWebDriver callingDriver, string aversion)
+        {
+
+            base.Init(callingHandler, callingDriver, aversion);
+            NewMailXpath = "/html/body/div[2]/div/div[3]/div[5]/div/div[1]/div/div[5]/div[1]/div/div[1]/div/div/div[1]/div/button[1]";
+
+            ToRecipientsXpath = "/html/body/div[2]/div/div[3]/div[5]/div/div[1]/div/div[5]/div[3]/div/div[5]/div[1]/div/div[3]/div[4]/div/div[1]/div[2]/div[2]/div[1]/div[1]/div[2]/div[2]/div[1]/div/div/div/span/div[1]/form/input";
+            CcRecipientsXpath = "/html/body/div[2]/div/div[3]/div[5]/div/div[1]/div/div[5]/div[3]/div/div[5]/div[1]/div/div[3]/div[4]/div/div[1]/div[2]/div[2]/div[1]/div[1]/div[2]/div[3]/div[1]/div/div/div/span/div[1]/form/input";
+            SubjectXpath = "/html/body/div[2]/div/div[3]/div[5]/div/div[1]/div/div[5]/div[3]/div/div[5]/div[1]/div/div[3]/div[4]/div/div[1]/div[2]/div[2]/div[1]/div[1]/div[2]/div[6]/div[2]/input";
+            EmailBodyXpath = "/html/body/div[2]/div/div[3]/div[5]/div/div[1]/div/div[5]/div[3]/div/div[5]/div[1]/div/div[3]/div[4]/div/div[1]/div[2]/div[2]/div[2]/div[3]/div/div[3]/div[1]/div[3]/div";
+            SendButtonXpath = "/html/body/div[2]/div/div[3]/div[5]/div/div[1]/div/div[5]/div[1]/div/div[1]/div/div/div[1]/div/button";
+            InsertAttachmentXpath = "/html/body/div[2]/div/div[3]/div[5]/div/div[1]/div/div[5]/div[1]/div/div[1]/div/div/div[2]/div/button";
+            EmailXpath = "//div[@aria-label='Mail list']//child::*[contains(@role,'listbox')]//child::div[contains(@id,'ariaId')]";
+            
+    
+        } 
+
+        
+
+    }
+
+
     /// <summary>
     /// Handles Outlook Web actions for base browser handler
     /// Base class methods are for Exchange Server 2013
@@ -75,14 +100,16 @@ namespace ghosts.client.linux.handlers
         public System.Exception LastException;
         public string AttachmentWindowTitle = "Open"; //this is for chrome
 
-
+        public string EmailReplySendXpath { get; set; } =  "//button[@title='Send' and @aria-label='Send']";
+        public string EmailReplyBodyXpath { get; set; } = "/html/body/div[2]/div/div[3]/div[5]/div/div[1]/div/div[5]/div[3]/div/div[5]/div[1]/div/div/div[3]/div[2]/div[2]/div[6]/div[1]/div[2]/div[1]/div[2]/div/div/div[1]/div[2]/div[2]/div[2]/div[3]/div/div[3]/div[1]/div[3]/div";
         //public string EmailXpath { get; set; } = "//div[contains(@tempid,'emailslistview')]//child::div[contains(@id,'_ariaId_')]";
         public string EmailXpath { get; set; } = "//div[contains(@tempid,'emailslistview')]//child::div[contains(@role,'button')]";
         public string EmailOtherXpath { get; set; } = "//div[contains(@aria-label,'Search completed')]//child::div[contains(@id,'_ariaId_')]";
+        public string NewMailXpath { get; set; } = "//div[@aria-label='Mail']//child::div//child::div//child::div//child::div//child::button//child::span[@role='presentation']//following-sibling::span[text()='New mail']//parent::button";
 
+        public string EmailFiltersMenu { get; set; } = "/html/body/div[2]/div/div[3]/div[5]/div/div[1]/div/div[5]/div[3]/div/div[2]/div/div/div/div[1]/div[2]/div[2]/div[2]/div/button";
         public string EmailFiltersXpath { get; set; } = "//div[contains(@aria-label,'Email Filters')]//child::div//child::div[contains(@style,'inline-block')]//child::span[contains(@role,'menuitemradio')]";
         public string MarkAsReadXpath { get; set; } = "//div[contains(@tempid,'ItemHeaderView.Mouse')]//child::span[text()='Mark as read']//parent::button";
-        public string NewMailXpath { get; set; } = "//div[@aria-label='Mail']//child::div//child::div//child::div//child::div//child::button//child::span[@role='presentation']//following-sibling::span[text()='New mail']//parent::button";
         public string ToRecipientsXpath { get; set; } = "//input[contains(@aria-label,'To recipients.')]";
         public string CcRecipientsXpath { get; set; } = "//input[contains(@aria-label,'Cc recipients.')]";
         public string SubjectXpath { get; set; } = "//input[contains(@aria-labelledby,'MailCompose.SubjectWellLabel')]";
@@ -235,7 +262,9 @@ namespace ghosts.client.linux.handlers
             {
                 var version = handler.HandlerArgs["exchange-version"].ToString();
                 //this needs to be extended in the future
-                if (version == "2013") helper = new OutlookHelper2013(callingHandler, callingDriver, version);
+                if (version == "2013" ) helper = new OutlookHelper2013(callingHandler, callingDriver, version);
+                else if (version == "2019" ) helper = new OutlookHelper2019(callingHandler, callingDriver, version);
+                else if (version == "2016" ) helper = new OutlookHelper2019(callingHandler, callingDriver, version);
                 if (helper == null)
                 {
                     Log.Trace($"WebOutlook:: Unsupported Exchange version {version} , outlook browser action will not be executed.");
@@ -358,38 +387,69 @@ namespace ghosts.client.linux.handlers
 
 
                 //Hit the reply button, this marks the email as read
-                var targetElements = Driver.FindElements(By.XPath(ReplyButtonXpath));
-                if (targetElements == null)
+                if (version == "2013")
                 {
-                    Log.Trace($"WebOutlook:: Unable to find reply button in current mail will not be sent.");
-                    return false;
+                    var emailListElements = Driver.FindElements(By.XPath(ReplyButtonXpath));
+                    if (emailListElements == null)
+                    {
+                        Log.Trace($"WebOutlook:: Unable to find reply button in current mail, replywill not be sent.");
+                        return false;
+                    }
+                    BrowserHelperSupport.ElementClick(Driver, emailListElements[0]);
+                    Thread.Sleep(500);
                 }
-                BrowserHelperSupport.ElementClick(Driver, targetElements[0]);
-                Thread.Sleep(500);
+                else 
+                {
+                    if (!DoCurrentEmailAction("Reply")) {
+                        Log.Trace($"WebOutlook:: Unable to find reply button in current mail, reply will not be sent.");
+                        return false;
+                    }
+                }
 
                 //compose the message and send
                 var emailReply = new EmailReplyManager();  //this has the reply
 
-                Driver.SwitchTo().Frame("EditorBody");
-                var targetElement = Driver.FindElement(By.XPath(EmailBodyXpath));
-                if (targetElement == null)
+                if (version == "2013") 
                 {
-                    Log.Trace($"WebOutlook:: Unable to find body field in reply email form, mail will not be sent.");
-                    return false;
+                    Driver.SwitchTo().Frame("EditorBody");
+                    var targetElement = Driver.FindElement(By.XPath(EmailBodyXpath));
+                    if (targetElement == null)
+                    {
+                        Log.Trace($"WebOutlook:: Unable to find body field in reply email form, mail will not be sent.");
+                        return false;
+                    }
+                    targetElement.SendKeys(emailReply.Reply);
+                    Thread.Sleep(500);
+                    //switch back to parent frame
+                    Driver.SwitchTo().DefaultContent();
+                     //send the email
+                    targetElement = Driver.FindElement(By.XPath(SendButtonXpath));
+                    if (targetElement == null)
+                    {
+                        Log.Trace($"WebOutlook:: Unable to find send button in reply email form, mail will not be sent.");
+                        return false;
+                    }
+                    BrowserHelperSupport.ElementClick(Driver, targetElement);
+                    Thread.Sleep(500);
+                } else {
+                    var targetElement = Driver.FindElement(By.XPath(EmailReplyBodyXpath));
+                    if (targetElement == null)
+                    {
+                        Log.Trace($"WebOutlook:: Unable to find body field in reply email form, mail will not be sent.");
+                        return false;
+                    }
+                    targetElement.SendKeys(emailReply.Reply);
+                    Thread.Sleep(500);
+                    targetElement = Driver.FindElement(By.XPath(EmailReplySendXpath));
+                    if (targetElement == null)
+                    {
+                        Log.Trace($"WebOutlook:: Unable to find send button in reply email form, mail will not be sent.");
+                        return false;
+                    }
+                    BrowserHelperSupport.ElementClick(Driver, targetElement);
+                    Thread.Sleep(500);
                 }
-                targetElement.SendKeys(emailReply.Reply);
-                Thread.Sleep(500);
-                //switch back to parent frame
-                Driver.SwitchTo().DefaultContent();
-                //send the email
-                targetElements = Driver.FindElements(By.XPath(SendButtonXpath));
-                if (targetElements == null)
-                {
-                    Log.Trace($"WebOutlook:: Unable to find send button in reply email form, mail will not be sent.");
-                    return false;
-                }
-                BrowserHelperSupport.ElementClick(Driver, targetElements[0]);
-                Thread.Sleep(500);
+               
                 HandleAttachmentReminder();  //handle the attachment popup if present
                 HandleSubjectReminder();
 
@@ -586,16 +646,28 @@ namespace ghosts.client.linux.handlers
                         //try adding these attachments
                         foreach (string FileToAttach in attachments)
                         {
-                            var insertElement = Driver.FindElement(By.XPath(InsertMenuXpath));
-                            if (insertElement != null)
+                            if (version == "2013")
                             {
-                                BrowserHelperSupport.ElementClick(Driver, insertElement);
-                                Thread.Sleep(500);
-                                //now  click on the attachment choice
-                                insertElement = Driver.FindElement(By.XPath(InsertAttachmentXpath));
+                                var insertElement = Driver.FindElement(By.XPath(InsertMenuXpath));
                                 if (insertElement != null)
                                 {
                                     BrowserHelperSupport.ElementClick(Driver, insertElement);
+                                    Thread.Sleep(500);
+                                    //now  click on the attachment choice
+                                    insertElement = Driver.FindElement(By.XPath(InsertAttachmentXpath));
+                                    if (insertElement != null)
+                                    {
+                                        BrowserHelperSupport.ElementClick(Driver, insertElement);
+                                        Thread.Sleep(500);
+                                        //filechoice window is open
+                                        AttachFile(FileToAttach);
+                                    }
+                                }
+                            } else {
+                                var insertAttachmentElement = Driver.FindElement(By.XPath(InsertAttachmentXpath));
+                                if (insertAttachmentElement  != null)
+                                {
+                                    BrowserHelperSupport.ElementClick(Driver, insertAttachmentElement);
                                     Thread.Sleep(500);
                                     //filechoice window is open
                                     AttachFile(FileToAttach);
@@ -718,7 +790,7 @@ namespace ghosts.client.linux.handlers
                 {
                     //to send the message, have to switch iframe
 
-                    Driver.SwitchTo().Frame("EditorBody");
+                    if (version == "2013") Driver.SwitchTo().Frame("EditorBody");
                     targetElement = Driver.FindElement(By.XPath(EmailBodyXpath));
                     if (targetElement == null)
                     {
@@ -728,7 +800,7 @@ namespace ghosts.client.linux.handlers
                     targetElement.SendKeys(emailConfig.Body);
                     Thread.Sleep(500);
                     //switch back to parent frame
-                    Driver.SwitchTo().DefaultContent();
+                    if (version == "2013")  Driver.SwitchTo().DefaultContent();
                     Thread.Sleep(300);
                     Log.Trace($"WebOutlook:: Email body created.");
                 }
@@ -930,23 +1002,86 @@ namespace ghosts.client.linux.handlers
         }
 
 
+        public void RemoveLastFilter()
+        {
+            try
+            {
+                string RemoveFilterXpath = "/html/body/div[2]/div/div[3]/div[5]/div/div[1]/div/div[5]/div[3]/div/div[2]/div/div/div/div[1]/div[2]/div[2]/div[2]/div/button";
+                var RemoveFilterElement =  Driver.FindElement(By.XPath(RemoveFilterXpath));
+                if (RemoveFilterElement != null)
+                {
+                    BrowserHelperSupport.ElementClick(Driver, RemoveFilterElement);
+                    Thread.Sleep(300);
+                }
+            }
+            catch (System.Exception e)
+            {
+                if (e is ThreadAbortException || e is ThreadInterruptedException)
+                {
+                    throw e;
+                }
+                //ignore this error as Filter may not be selected
+            }
+        }
+
+        public IWebElement GetFilterElement()
+        {
+            string  FilterXpath = "//span[text()='Filter']//parent::button";
+            try 
+            {
+                return Driver.FindElement(By.XPath(FilterXpath));
+            }
+            catch (System.Exception e)
+            {
+                if (e is ThreadAbortException || e is ThreadInterruptedException)
+                {
+                    throw e;
+                }
+                //ignore
+            }
+            return null;
+        }
 
 
         public void SelectEmail(string mailType)
         {
             try
             {
-                var menuElements = Driver.FindElements(By.XPath(EmailFiltersXpath));
-                if (menuElements != null && menuElements.Count > 0)
+                if (version == "2013")
                 {
-                    foreach (var menuElement in menuElements)
+                    var menuElements = Driver.FindElements(By.XPath(EmailFiltersXpath));
+                    if (menuElements != null && menuElements.Count > 0)
                     {
-                        string menuText = menuElement.Text;
-                        if (mailType == menuText)
+                        foreach (var menuElement in menuElements)
                         {
-                            BrowserHelperSupport.ElementClick(Driver, menuElement);
-                            break;
+                            string menuText = menuElement.Text;
+                            if (mailType == menuText)
+                            {
+                                BrowserHelperSupport.ElementClick(Driver, menuElement);
+                                break;
+                            }
                         }
+                    }
+                } else {
+                    //Try finding the menu 'Filter' element
+                    var MenuFilter = GetFilterElement();
+                    //if null, try removing last filter
+                    if (MenuFilter == null)
+                    {
+                        RemoveLastFilter();
+                        //try again
+                        MenuFilter = GetFilterElement();
+                    }
+                    if (MenuFilter != null) 
+                    {
+                        //click on the menu filter
+                        BrowserHelperSupport.ElementClick(Driver, MenuFilter);
+                        Thread.Sleep(300);
+                        //now select a menu item
+                        string MenuItemXpath = $"//div[@role='menu' and @iscontextmenu='1']//child::span[text()='{mailType}']//parent::div//parent::div//parent::button";
+                        var MenuItemElement = Driver.FindElement(By.XPath(MenuItemXpath));
+                        BrowserHelperSupport.ElementClick(Driver, MenuItemElement);
+                        Thread.Sleep(300);
                     }
                 }
             }
@@ -976,27 +1111,27 @@ namespace ghosts.client.linux.handlers
             return null;
         }
 
-        public void MarkCurrentEmailAsRead()
+        public bool DoCurrentEmailAction(string action)
         {
+            
+            string MenuMoreActionsXpath = "//button[@aria-label='More Actions']";
+            IWebElement targetElement = null;
             try
             {
-                IWebElement targetElement = null;
-                try
-                {
-                    targetElement = Driver.FindElement(By.XPath(MarkAsReadXpath));
-                }
-                catch (System.Exception e)
-                {
-                    if (e is ThreadAbortException || e is ThreadInterruptedException)
-                    {
-                        throw e;
-                    }
-                    //ignore may not be present
-                }
+                targetElement = Driver.FindElement(By.XPath(MenuMoreActionsXpath));
                 if (targetElement != null)
                 {
+                    //bring up the menu
                     BrowserHelperSupport.ElementClick(Driver, targetElement);
                     Thread.Sleep(300);
+                    var MenuItemXpath = $"//div[@role='menu' and @iscontextmenu='1']//child::span[text()='{action}']//parent::div//parent::button";
+                    targetElement = Driver.FindElement(By.XPath(MenuItemXpath));
+                    if (targetElement != null)
+                    {
+                        BrowserHelperSupport.ElementClick(Driver, targetElement);
+                        Thread.Sleep(300);
+                        return true;
+                    }
                 }
             }
             catch (System.Exception e)
@@ -1005,8 +1140,53 @@ namespace ghosts.client.linux.handlers
                 {
                     throw e;
                 }
-                Log.Trace($"WebOutlook:: Error marking email as read.");
+                Log.Trace($"WebOutlook:: Error performing current email action:  {action}.");
                 Log.Error(e);
+                return false;
+            }
+            return false;
+        }
+
+        
+
+        public bool MarkCurrentEmailAsRead()
+        {
+            if (version == "2013")
+            {
+                try
+                {
+                    IWebElement targetElement = null;
+                    try
+                    {
+                        targetElement = Driver.FindElement(By.XPath(MarkAsReadXpath));
+                    }
+                    catch (System.Exception e)
+                    {
+                        if (e is ThreadAbortException || e is ThreadInterruptedException)
+                        {
+                            throw e;
+                        }
+                        //ignore may not be present
+                    }
+                    if (targetElement != null)
+                    {
+                        BrowserHelperSupport.ElementClick(Driver, targetElement);
+                        Thread.Sleep(300);
+                        return true;
+                    }
+                }
+                catch (System.Exception e)
+                {
+                    if (e is ThreadAbortException || e is ThreadInterruptedException)
+                    {
+                        throw e;
+                    }
+                    Log.Trace($"WebOutlook:: Error marking email as read.");
+                    Log.Error(e);
+                }
+                return false;
+            } else {
+                return DoCurrentEmailAction("Mark as read");
             }
         }
 
