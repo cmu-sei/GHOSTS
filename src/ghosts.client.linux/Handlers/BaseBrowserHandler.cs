@@ -59,7 +59,7 @@ namespace ghosts.client.linux.handlers
                     !string.IsNullOrEmpty(handler.HandlerArgs["browser-id"].ToString()))
             {
                 var s = handler.HandlerArgs["browser-id"].ToString();
-                BrowserProcessTag = $"--{s}";
+                BrowserProcessTag = $"{s}";
             }
 
             try

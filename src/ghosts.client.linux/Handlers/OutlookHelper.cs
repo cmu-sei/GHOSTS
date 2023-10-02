@@ -41,6 +41,7 @@ namespace ghosts.client.linux.handlers
 
     }
 
+    // This is used for Exchange Server 2016 also
     public class OutlookHelper2019 : OutlookHelper
     {
 
@@ -48,16 +49,15 @@ namespace ghosts.client.linux.handlers
         {
 
             base.Init(callingHandler, callingDriver, aversion);
-            NewMailXpath = "/html/body/div[2]/div/div[3]/div[5]/div/div[1]/div/div[5]/div[1]/div/div[1]/div/div/div[1]/div/button[1]";
-
-            ToRecipientsXpath = "/html/body/div[2]/div/div[3]/div[5]/div/div[1]/div/div[5]/div[3]/div/div[5]/div[1]/div/div[3]/div[4]/div/div[1]/div[2]/div[2]/div[1]/div[1]/div[2]/div[2]/div[1]/div/div/div/span/div[1]/form/input";
-            CcRecipientsXpath = "/html/body/div[2]/div/div[3]/div[5]/div/div[1]/div/div[5]/div[3]/div/div[5]/div[1]/div/div[3]/div[4]/div/div[1]/div[2]/div[2]/div[1]/div[1]/div[2]/div[3]/div[1]/div/div/div/span/div[1]/form/input";
-            SubjectXpath = "/html/body/div[2]/div/div[3]/div[5]/div/div[1]/div/div[5]/div[3]/div/div[5]/div[1]/div/div[3]/div[4]/div/div[1]/div[2]/div[2]/div[1]/div[1]/div[2]/div[6]/div[2]/input";
-            EmailBodyXpath = "/html/body/div[2]/div/div[3]/div[5]/div/div[1]/div/div[5]/div[3]/div/div[5]/div[1]/div/div[3]/div[4]/div/div[1]/div[2]/div[2]/div[2]/div[3]/div/div[3]/div[1]/div[3]/div";
-            SendButtonXpath = "/html/body/div[2]/div/div[3]/div[5]/div/div[1]/div/div[5]/div[1]/div/div[1]/div/div/div[1]/div/button";
-            InsertAttachmentXpath = "/html/body/div[2]/div/div[3]/div[5]/div/div[1]/div/div[5]/div[1]/div/div[1]/div/div/div[2]/div/button";
+            NewMailXpath = "//span[text()='New']//parent::span//parent::button";
+            ToRecipientsXpath = "//span[text()='To']//parent::button//following::div//child::input";
+            CcRecipientsXpath = "//span[text()='Cc']//parent::button//following::div//child::input";
+            SubjectXpath = "//input[@placeholder='Add a subject']";
+            EmailBodyXpath = "//div[@aria-label='Message body']";
+            SendButtonXpath = "//button[@aria-label='Send']";
+            InsertAttachmentXpath = "//button[@aria-label='Attach']";
             EmailXpath = "//div[@aria-label='Mail list']//child::*[contains(@role,'listbox')]//child::div[contains(@id,'ariaId')]";
-            
+            EmptyFolderActionXpath = "//div[@role='menu' and @iscontextmenu='1']//child::span[text()='Empty folder']//parent::div//parent::div//parent::button";
     
         } 
 
@@ -100,14 +100,11 @@ namespace ghosts.client.linux.handlers
         public System.Exception LastException;
         public string AttachmentWindowTitle = "Open"; //this is for chrome
 
+        public string EmailDeleteXpath { get; set; } = "//span[text()='Delete']//parent::button";
         public string EmailReplySendXpath { get; set; } =  "//button[@title='Send' and @aria-label='Send']";
-        public string EmailReplyBodyXpath { get; set; } = "/html/body/div[2]/div/div[3]/div[5]/div/div[1]/div/div[5]/div[3]/div/div[5]/div[1]/div/div/div[3]/div[2]/div[2]/div[6]/div[1]/div[2]/div[1]/div[2]/div/div/div[1]/div[2]/div[2]/div[2]/div[3]/div/div[3]/div[1]/div[3]/div";
-        //public string EmailXpath { get; set; } = "//div[contains(@tempid,'emailslistview')]//child::div[contains(@id,'_ariaId_')]";
         public string EmailXpath { get; set; } = "//div[contains(@tempid,'emailslistview')]//child::div[contains(@role,'button')]";
         public string EmailOtherXpath { get; set; } = "//div[contains(@aria-label,'Search completed')]//child::div[contains(@id,'_ariaId_')]";
-        public string NewMailXpath { get; set; } = "//div[@aria-label='Mail']//child::div//child::div//child::div//child::div//child::button//child::span[@role='presentation']//following-sibling::span[text()='New mail']//parent::button";
-
-        public string EmailFiltersMenu { get; set; } = "/html/body/div[2]/div/div[3]/div[5]/div/div[1]/div/div[5]/div[3]/div/div[2]/div/div/div/div[1]/div[2]/div[2]/div[2]/div/button";
+        public string NewMailXpath { get; set; } = "//div[@aria-label='Mail']//child::div//child::div//child::div//child::div//child::button//child::span[@role='presentation']//following-sibling::span[text()='New mail']//parent::button";        
         public string EmailFiltersXpath { get; set; } = "//div[contains(@aria-label,'Email Filters')]//child::div//child::div[contains(@style,'inline-block')]//child::span[contains(@role,'menuitemradio')]";
         public string MarkAsReadXpath { get; set; } = "//div[contains(@tempid,'ItemHeaderView.Mouse')]//child::span[text()='Mark as read']//parent::button";
         public string ToRecipientsXpath { get; set; } = "//input[contains(@aria-label,'To recipients.')]";
@@ -263,8 +260,7 @@ namespace ghosts.client.linux.handlers
                 var version = handler.HandlerArgs["exchange-version"].ToString();
                 //this needs to be extended in the future
                 if (version == "2013" ) helper = new OutlookHelper2013(callingHandler, callingDriver, version);
-                else if (version == "2019" ) helper = new OutlookHelper2019(callingHandler, callingDriver, version);
-                else if (version == "2016" ) helper = new OutlookHelper2019(callingHandler, callingDriver, version);
+                else if (version == "2019" || version == "2016" ) helper = new OutlookHelper2019(callingHandler, callingDriver, version); 
                 if (helper == null)
                 {
                     Log.Trace($"WebOutlook:: Unsupported Exchange version {version} , outlook browser action will not be executed.");
@@ -418,6 +414,11 @@ namespace ghosts.client.linux.handlers
                         Log.Trace($"WebOutlook:: Unable to find body field in reply email form, mail will not be sent.");
                         return false;
                     }
+                    if (Driver is OpenQA.Selenium.Chrome.ChromeDriver)
+                    {
+                        BrowserHelperSupport.ElementClick(Driver, targetElement);  //needed for Chrome
+                        Thread.Sleep(300);
+                    }
                     targetElement.SendKeys(emailReply.Reply);
                     Thread.Sleep(500);
                     //switch back to parent frame
@@ -432,7 +433,7 @@ namespace ghosts.client.linux.handlers
                     BrowserHelperSupport.ElementClick(Driver, targetElement);
                     Thread.Sleep(500);
                 } else {
-                    var targetElement = Driver.FindElement(By.XPath(EmailReplyBodyXpath));
+                    var targetElement = Driver.FindElement(By.XPath(EmailBodyXpath));
                     if (targetElement == null)
                     {
                         Log.Trace($"WebOutlook:: Unable to find body field in reply email form, mail will not be sent.");
@@ -748,6 +749,11 @@ namespace ghosts.client.linux.handlers
                     Log.Trace($"WebOutlook:: Unable to find To: field in new email form, mail will not be sent.");
                     return false;
                 }
+                if (Driver is OpenQA.Selenium.Chrome.ChromeDriver)
+                {
+                    BrowserHelperSupport.ElementClick(Driver, targetElement);  //needed for Chrome
+                    Thread.Sleep(300);
+                }
                 targetElement.SendKeys(ToRecipients);
                 Thread.Sleep(500);
                 Log.Trace($"WebOutlook:: Email To: field written");
@@ -760,6 +766,11 @@ namespace ghosts.client.linux.handlers
                         Log.Trace($"WebOutlook:: Unable to find To: field in new email form, mail will not be sent.");
                         return false;
                     }
+                    if (Driver is OpenQA.Selenium.Chrome.ChromeDriver)
+                    {
+                        BrowserHelperSupport.ElementClick(Driver, targetElement);  //needed for Chrome
+                        Thread.Sleep(300);
+                    }
                     targetElement.SendKeys(CcRecipients);
                     Thread.Sleep(500);
                     Log.Trace($"WebOutlook:: Email Cc: field written");
@@ -771,6 +782,11 @@ namespace ghosts.client.linux.handlers
                 {
                     Log.Trace($"WebOutlook:: Unable to find Subject: field in new email form, mail will not be sent.");
                     return false;
+                }
+                if (Driver is OpenQA.Selenium.Chrome.ChromeDriver)
+                {
+                    BrowserHelperSupport.ElementClick(Driver, targetElement);  //needed for Chrome
+                    Thread.Sleep(300);
                 }
                 if (emailConfig.Subject == null || emailConfig.Subject == "")
                 {
@@ -797,6 +813,11 @@ namespace ghosts.client.linux.handlers
                         Log.Trace($"WebOutlook:: Unable to find body field in new email form, mail will not be sent.");
                         return false;
                     }
+                    if (Driver is OpenQA.Selenium.Chrome.ChromeDriver)
+                    {
+                        BrowserHelperSupport.ElementClick(Driver, targetElement);  //needed for Chrome
+                        Thread.Sleep(300);
+                    }
                     targetElement.SendKeys(emailConfig.Body);
                     Thread.Sleep(500);
                     //switch back to parent frame
@@ -806,13 +827,13 @@ namespace ghosts.client.linux.handlers
                 }
 
                 //send the email
-                var targetElements = Driver.FindElements(By.XPath(SendButtonXpath));
-                if (targetElements == null)
+                targetElement = Driver.FindElement(By.XPath(SendButtonXpath));
+                if (targetElement == null)
                 {
                     Log.Trace($"WebOutlook:: Unable to find send button in new email form, mail will not be sent.");
                     return false;
                 }
-                BrowserHelperSupport.ElementClick(Driver, targetElements[0]);
+                BrowserHelperSupport.ElementClick(Driver, targetElement);
                 Thread.Sleep(500);
                 HandleAttachmentReminder();  //handle the attachment popup if present
                 HandleSubjectReminder();
@@ -866,28 +887,33 @@ namespace ghosts.client.linux.handlers
                     Thread.Sleep(200);
 
                     bool UseDeleteMenu = true;
-                    //check for discard available. this will be for drafts
-                    var DiscardElements = Driver.FindElements(By.XPath(DiscardXpath));
-                    if (DiscardElements != null && DiscardElements.Count > 0)
+                    if (version== "2013")
                     {
-                        var DiscardElement = DiscardElements[0];
-                        var cattr = DiscardElement.GetAttribute("class");
-                        if (cattr != "hidden")
+                        //check for discard available. this will be for drafts
+                        var DiscardElements = Driver.FindElements(By.XPath(DiscardXpath));
+                        if (DiscardElements != null && DiscardElements.Count > 0)
                         {
-                            UseDeleteMenu = false;
-                            //get the actual button
-                            DiscardElements = Driver.FindElements(By.XPath(DiscardButtonXpath));
-                            if (DiscardElements != null && DiscardElements.Count > 0)
+                            var DiscardElement = DiscardElements[0];
+                            var cattr = DiscardElement.GetAttribute("class");
+                            if (cattr != "hidden")
                             {
-                                BrowserHelperSupport.ElementClick(Driver, DiscardElements[0]);
-                                Thread.Sleep(500);
-                            }
+                                UseDeleteMenu = false;
+                                //get the actual button
+                                DiscardElements = Driver.FindElements(By.XPath(DiscardButtonXpath));
+                                if (DiscardElements != null && DiscardElements.Count > 0)
+                                {
+                                    BrowserHelperSupport.ElementClick(Driver, DiscardElements[0]);
+                                    Thread.Sleep(500);
+                                }
 
+                            }
                         }
                     }
 
                     if (UseDeleteMenu)
                     {
+                        if (version == "2013")
+                        {
                         //get the delete menu
                         var targetElement = Driver.FindElement(By.XPath(MoreActionsXpath));
                         if (targetElement == null)
@@ -907,6 +933,20 @@ namespace ghosts.client.linux.handlers
                         // delete the current email
                         BrowserHelperSupport.ElementClick(Driver, targetElement);
                         Thread.Sleep(500);
+                        } 
+                        else 
+                        {
+                            // 2019, 2016 has a handy delete button that can be used
+                            var targetElement = Driver.FindElement(By.XPath(EmailDeleteXpath));
+                            if (targetElement == null)
+                            {
+                                Log.Trace($"WebOutlook:: Unable to find Delete action for current email, deletion not done.");
+                                return false;
+                            }
+                            // delete the current email
+                            BrowserHelperSupport.ElementClick(Driver, targetElement);
+                            Thread.Sleep(500);
+                        }
                     }
                     count = count + 1;
                     NumDeleted = NumDeleted + 1;
@@ -945,6 +985,8 @@ namespace ghosts.client.linux.handlers
             }
             BrowserHelperSupport.MoveToElementAndClick(Driver, targetElement);
             Thread.Sleep(1000);
+
+
             //click  OK button on popup
             var targetElements = Driver.FindElements(By.XPath(AlertOkXpath));
             if (targetElements == null)
@@ -1006,8 +1048,9 @@ namespace ghosts.client.linux.handlers
         {
             try
             {
-                string RemoveFilterXpath = "/html/body/div[2]/div/div[3]/div[5]/div/div[1]/div/div[5]/div[3]/div/div[2]/div/div/div/div[1]/div[2]/div[2]/div[2]/div/button";
+                string RemoveFilterXpath = "//div[contains(@class,'folderHeadContainer')]//child::span[contains(@class,'ms-Icon--x')]//parent::button";
                 var RemoveFilterElement =  Driver.FindElement(By.XPath(RemoveFilterXpath));
+                        
                 if (RemoveFilterElement != null)
                 {
                     BrowserHelperSupport.ElementClick(Driver, RemoveFilterElement);
