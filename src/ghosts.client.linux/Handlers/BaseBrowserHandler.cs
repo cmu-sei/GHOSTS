@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
+using System.Diagnostics;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
 using System.Collections.Generic;
@@ -20,6 +21,7 @@ namespace ghosts.client.linux.handlers
         public IJavaScriptExecutor JS { get; set; }
         public HandlerType BrowserType { get; set; }
         internal bool Restart { get; set; }
+        private string Result { get; set; }
         private int _stickiness;
         private int _depthMin = 1;
         private int _depthMax = 10;
@@ -27,17 +29,21 @@ namespace ghosts.client.linux.handlers
         private int _actionsBeforeRestart = -1;
         private LinkManager _linkManager;
         private int _actionsCount = 0;
+        public string BrowserProcessTag {get; set; } = null;  //used for killing Linux browser processes
 
         public int BrowseProbability = 100;
         public int JitterFactor { get; set; }  = 0;  //used with Jitter.JitterFactorDelay
         public bool SharePointAbort { get; set; } = false;  //will be set to True if unable to proceed with Handler execution
         public bool BlogAbort { get; set; } = false;  //will be set to True if unable to proceed with Handler execution
+        public bool OutlookAbort { get; set; } = false;  //will be set to True if unable to proceed with Handler execution
  
         private SharepointHelper _sharePointHelper = null;
 
         private BlogHelper _blogHelper = null;
 
         private PostContentManager _postHelper = null;
+
+        private OutlookHelper _outlookHelper = null;
         
         private Task LaunchThread(TimelineHandler handler, TimelineEvent timelineEvent, string site)
         {
@@ -47,6 +53,15 @@ namespace ghosts.client.linux.handlers
 
         public void ExecuteEvents(TimelineHandler handler)
         {
+
+            //need to reparse this and store it in local instance 
+            if (handler.HandlerArgs.ContainsKey("browser-id") &&
+                    !string.IsNullOrEmpty(handler.HandlerArgs["browser-id"].ToString()))
+            {
+                var s = handler.HandlerArgs["browser-id"].ToString();
+                BrowserProcessTag = $"{s}";
+            }
+
             try
             {
                 foreach (var timelineEvent in handler.TimeLineEvents)
@@ -85,6 +100,36 @@ namespace ghosts.client.linux.handlers
                                     i = 0;
                                 }
                             }
+                            break;
+                        case "outlook":
+                            if (!OutlookAbort)
+                            {
+                                if (_outlookHelper == null)
+                                {
+                                    _outlookHelper = OutlookHelper.MakeHelper(this, Driver, handler, _log);
+                                    if (_outlookHelper == null) OutlookAbort = true;
+                                }
+
+                                if (_outlookHelper != null)
+                                {
+                                    _outlookHelper.Execute(handler, timelineEvent);
+                                    this.Restart = _outlookHelper.RestartNeeded();
+                                    if (this.Restart)
+                                    {
+                                        
+                                        _log.Trace($"WebOutlook:: Restart requested for {this.BrowserType.ToString()} , restarting...");
+                                        if (_outlookHelper.LastException != null) 
+                                        {
+                                            throw(_outlookHelper.LastException); //restarts everything
+                                        } else 
+                                        {
+                                            _outlookHelper = null;  //remove the helper, this is soft reset
+                                            return;  //restart has been requested 
+                                        }
+                                    }
+                                } 
+                            }
+
                             break;
                         case "sharepoint":
                             if (!SharePointAbort)
@@ -203,6 +248,61 @@ namespace ghosts.client.linux.handlers
                     _log.Trace($"Thread aborted, {this.BrowserType.ToString()} closing...");
                     throw;
                 }
+                _log.Error(e);
+                if (this.Restart) throw;
+            }
+        }
+
+        private void OutputHandler(object sendingProcess, DataReceivedEventArgs outLine)
+        {
+            this.Result += outLine.Data;
+        }
+
+        private static void ErrorHandler(object sendingProcess, DataReceivedEventArgs outLine)
+        {
+            //* Do your stuff with the output (write to console/log/StringBuilder)
+            Console.WriteLine(outLine.Data);
+        }
+    
+
+        /// This is used to kill the browser process since the driver.Quit() method does not always do this
+        public void KillBrowser()
+        {
+            try
+            {
+                if (BrowserProcessTag == null) return;   //no process tag, don't know which browser(s) to kill
+
+                // this will kill all processes that have the BrowserProcessTag as part of their command string
+                string command  = $"ps -x -o pid,cmd | grep '{BrowserProcessTag}' | cut -f 2 -d ' ' | xargs kill";
+                
+                var p = new Process();
+                //p.EnableRaisingEvents = false;
+                p.StartInfo.FileName = "bash" ;
+                p.StartInfo.Arguments = $"-c \"{command}\"";
+                p.StartInfo.UseShellExecute = false;
+                p.StartInfo.RedirectStandardOutput = true;
+                p.StartInfo.RedirectStandardError = true;
+                //* Set your output and error (asynchronous) handlers
+                p.OutputDataReceived += OutputHandler;
+                p.ErrorDataReceived += ErrorHandler;
+                p.StartInfo.CreateNoWindow = true;
+                _log.Trace($"Spawning {p.StartInfo.FileName} with command {command}");
+                p.Start();
+
+                while (!p.StandardOutput.EndOfStream)
+                {
+                    this.Result += p.StandardOutput.ReadToEnd();
+                }
+
+                p.WaitForExit();
+            }
+            catch (ThreadAbortException)
+            {
+                throw;  //pass up
+            }
+            catch (System.Exception e)
+            {
+                _log.Trace("Exeception while trying to kill browser process.");
                 _log.Error(e);
             }
         }

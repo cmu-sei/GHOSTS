@@ -1,0 +1,81 @@
+/*
+  The 'outlook' command for a browser handler allows email via Exchange Outlook client.
+  Only Exchange Server 2013 OWA is currently supported
+  The credentials file format is the same as the WMI handler and requires  'domain' , 'username', 'password' keywords
+  The  Handler is somewhat fragile due to popup status windows randomly interfering with operations, so 
+  occasionally an operation (typically reply or create)  will fail. An error count is tracked and reset on
+  a successful operation. If the error count reaches 10, then a reset of the browser is done. 
+  Chrome seems less error prone than Firefox during operation.
+
+  The 'CommandArgs'  are the same as far the Outlookv2 handler. The HandlerArgs are styled after the Outlookv2 handler.
+
+  The Linux version has been tested under Ubuntu Desktop 20, windows version tested with Windows 10.
+  If email attachments are used under Linux, the  xdotool package must be installed, this is needed to automate
+  the native OS window that opens when an attachment is added.
+  'sudo apt-get install xdotool'
+
+  A 'delete' operation, once started, will delete all emails the Inbox until 20 or less remain,
+  and empty the other folders (such as deleted items, Drafts, etc). In Web Outlook, there is no easy way to bulk
+  delete a group of emails from the Inbox - it is either delete all, or delete one at a time.
+  This code deletes items one at a time from the Inbox, and if it contains several thousand,
+  can take a while. However, the other folders are emptied and that operation is fast.
+  While deleting items one at a time, if 500 emails are deleted the operation exits to allow
+  other actions (read, create, reply) to occur. So, it may take several delete cycles to
+  clear an inbox containing thousands of items.  An email backlog will only build up if
+  a node is offline for an extended period of time while other clients are sending it emails.
+
+*/
+
+
+
+
+{
+  "Id": "1d7921c4-aba2-4480-a101-a18fee94e9ff",
+  "Status": "Run",
+  "TimeLineHandlers": [
+    {
+      "HandlerType": "BrowserFirefox",
+      "Initial": "about:blank",
+      "UtcTimeOn": "00:00:00",
+      "UtcTimeOff": "24.00:00:00",
+      "HandlerArgs": {
+        "isheadless": "false",
+        "delay-jitter": 50, //%jitter to add to delayAfter, delayBefore
+        "browser-id": "ghosts-client-outlook", //This is only used in the Linux client to delete the Outlook browser process on restart as sometimes the normal Selenium shutdown fails to close the browser
+        "outlook-credentials-file": "<path to credentials file>", //path to credentials files
+        "outlook-delete-probability": 20, //probability that a delete operation will be done
+        "outlook-read-probability": 30, //probability that an existing email will be read, unread is given preference
+        "outlook-reply-probability": 20, //probability that a reply to an existing email is created
+        "outlook-create-probability": 30, //probability that a new email will be created
+        "outlook-attachment-probability": 100, //when creating a new email, probability that attachments are added
+        "outlook-save-attachment-probability": 100, //when reading a email, probability that emails are saved to disk
+        "outlook-min-attachments": 0, //when adding an attachment, min number of attachments
+        "outlook-max-attachments": 3, //when adding an attachment, max number of attachments
+        "outlook-max-attachments-size": 10, //in MB, total size of all attachments will not exceed this
+        "outlook-url": "https://enc01-exchg2013.sitea.com/owa", // URL to Exchange Outlook server
+        "outlook-credential-key": "<aCredentialKey>", //this key used to look up a username/password credential
+        "exchange-version": "2013", //Exchange Web server version, only 2013 is supported at this time
+        "outlook-uploads-directory": "<path to uploads file>" //path to directory contains files to be used for attachments
+      },
+      "Loop": true,
+      "TimeLineEvents": [
+        {
+          "TrackableId": null,
+          "Command": "outlook",
+          "CommandArgs": [
+            "CurrentUser",
+            "random",
+            "random",
+            "random",
+            "Random",
+            "Random",
+            "PlainText",
+            ""
+          ],
+          "DelayAfter": 10000,
+          "DelayBefore": 0
+        }
+      ]
+    }
+  ]
+}
