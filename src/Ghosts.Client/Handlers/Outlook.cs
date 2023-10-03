@@ -14,6 +14,7 @@ using System.Threading;
 using Ghosts.Domain.Code.Helpers;
 using Exception = System.Exception;
 using MAPIFolder = Microsoft.Office.Interop.Outlook.MAPIFolder;
+using ReportItem = Ghosts.Domain.Code.ReportItem;
 
 namespace Ghosts.Client.Handlers;
 
@@ -97,7 +98,7 @@ public class Outlook : BaseHandler
                             var emailConfig = new EmailConfiguration(timelineEvent.CommandArgs);
                             if (SendEmailViaOutlook(emailConfig))
                             {
-                                Report(handler.HandlerType.ToString(), timelineEvent.Command, emailConfig.ToString());
+                                Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = emailConfig.ToString(), Trackable = timelineEvent.TrackableId });
                             }
                         }
                         catch (Exception e)
@@ -112,7 +113,7 @@ public class Outlook : BaseHandler
                             var emailConfig = new EmailConfiguration(timelineEvent.CommandArgs);
                             if (ReplyViaOutlook(emailConfig))
                             {
-                                Report(handler.HandlerType.ToString(), timelineEvent.Command, emailConfig.ToString());
+                                Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = emailConfig.ToString(), Trackable = timelineEvent.TrackableId });
                             }
                         }
                         catch (Exception e)
@@ -125,7 +126,7 @@ public class Outlook : BaseHandler
                         {
                             if (Navigate(timelineEvent.CommandArgs))
                             {
-                                Report(handler.HandlerType.ToString(), timelineEvent.Command, string.Join(",", timelineEvent.CommandArgs));
+                                Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = string.Join(",", timelineEvent.CommandArgs), Trackable = timelineEvent.TrackableId });
                             }
                         }
                         catch (Exception e)
@@ -138,7 +139,7 @@ public class Outlook : BaseHandler
                         {
                             if (ClickRandomLink(timelineEvent))
                             {
-                                Report(handler.HandlerType.ToString(), timelineEvent.Command, string.Join(",", timelineEvent.CommandArgs));
+                                Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = string.Join(",", timelineEvent.CommandArgs), Trackable = timelineEvent.TrackableId });
                             }
                         }
                         catch (Exception e)

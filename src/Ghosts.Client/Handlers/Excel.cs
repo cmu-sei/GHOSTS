@@ -244,8 +244,7 @@ public class ExcelHandler : BaseHandler
                             Log.Trace($"{handler.HandlerType} saving existing file: {document.FullName}");
                         }
 
-                        Report(handler.HandlerType.ToString(), timelineEvent.Command,
-                            timelineEvent.CommandArgs[0].ToString());
+                        Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = timelineEvent.CommandArgs[0].ToString(), Trackable = timelineEvent.TrackableId });
 
                         if (timelineEvent.CommandArgs.Contains("pdf"))
                         {
@@ -256,7 +255,7 @@ public class ExcelHandler : BaseHandler
                             document.ExportAsFixedFormat(NetOffice.ExcelApi.Enums.XlFixedFormatType.xlTypePDF,
                                 pdfFileName);
                             // end save as pdf
-                            Report(handler.HandlerType.ToString(), timelineEvent.Command, "pdf");
+                            Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = "pdf", Trackable = timelineEvent.TrackableId });
                             FileListing.Add(pdfFileName, handler.HandlerType);
                         }
 

@@ -69,7 +69,7 @@ public class Clicks : BaseHandler
                     Log.Trace($"Click: {x}:{y}");
 
                     Thread.Sleep(Jitter.Randomize(timelineEvent.CommandArgs[0], timelineEvent.CommandArgs[1], timelineEvent.CommandArgs[2]));
-                    this.Report(handler.HandlerType.ToString(), timelineEvent.Command, "", timelineEvent.TrackableId, $"{x}:{y}");
+                    Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Trackable = timelineEvent.TrackableId, Result = $"{x}:{y}" });
                     break;
             }
 

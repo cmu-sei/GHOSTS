@@ -2,6 +2,7 @@
 
 using System;
 using Ghosts.Domain;
+using Ghosts.Domain.Code;
 using NLog;
 using Newtonsoft.Json;
 
@@ -18,26 +19,16 @@ namespace Ghosts.Client.Handlers
             Infrastructure.WorkingHours.Is(handler);
         }
 
-        public void Report(string handler, string command, string arg)
-        {
-            Report(handler, command, arg, null, null);
-        }
-
-        public void Report(string handler, string command, string arg, string trackable)
-        {
-            Report(handler, command, arg, trackable, null);
-        }
-
-        public void Report(string handler, string command, string arg, string trackable, string result)
+        public void Report(ReportItem report)
         {
             var record = new TimeLineRecord();
-            record.Handler = handler;
-            record.Command = command;
-            record.CommandArg = arg;
-            record.Result = result;
+            record.Handler = report.Handler;
+            record.Command = report.Command;
+            record.CommandArg = report.Arg;
+            record.Result = report.Result;
 
-            if (!string.IsNullOrEmpty(trackable))
-                record.TrackableId = trackable;
+            if (!string.IsNullOrEmpty(report.Trackable))
+                record.TrackableId = report.Trackable;
 
             var o = JsonConvert.SerializeObject(record,
                 Formatting.None,

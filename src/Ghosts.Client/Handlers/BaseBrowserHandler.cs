@@ -12,6 +12,7 @@ using OpenQA.Selenium;
 using Actions = OpenQA.Selenium.Interactions.Actions;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace Ghosts.Client.Handlers
 {
@@ -170,7 +171,7 @@ namespace Ghosts.Client.Handlers
                             if (config.Uri.IsWellFormedOriginalString())
                             {
                                 MakeRequest(config);
-                                Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId);
+                                Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = config.ToString(), Trackable = timelineEvent.TrackableId });
                             }
                             break;
                         case "download":
@@ -178,7 +179,7 @@ namespace Ghosts.Client.Handlers
                             {
                                 element = Driver.FindElement(By.XPath(timelineEvent.CommandArgs[0].ToString()));
                                 element.Click();
-                                Report(handler.HandlerType.ToString(), timelineEvent.Command, string.Join(",", timelineEvent.CommandArgs), timelineEvent.TrackableId);
+                                Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = string.Join(",", timelineEvent.CommandArgs), Trackable = timelineEvent.TrackableId });
                                 Thread.Sleep(1000);
                             }
                             break;
@@ -302,7 +303,7 @@ namespace Ghosts.Client.Handlers
                 {
                     this.LinkManager.SetCurrent(config.Uri);
                     MakeRequest(config);
-                    Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId);
+                    Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = config.ToString(), Trackable = timelineEvent.TrackableId });
                     Thread.Sleep(timelineEvent.DelayAfter);
 
                     if (this.Stickiness > 0)
@@ -329,7 +330,7 @@ namespace Ghosts.Client.Handlers
 
                                     Log.Trace($"Making request #{loopNumber+1}/{loops} to {config.Uri}");
                                     MakeRequest(config);
-                                    Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId);                                 
+                                    Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = config.ToString(), Trackable = timelineEvent.TrackableId });
                                 }
                                 catch (Exception e)
                                 {
@@ -646,7 +647,7 @@ namespace Ghosts.Client.Handlers
                     var urlDict = new Dictionary<string, int>();
                     var urlQueue = new LifoQueue<Uri>(VisitedRemember);
                     MakeRequest(config);
-                    Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId);
+                    Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = config.ToString(), Trackable = timelineEvent.TrackableId });
                     Thread.Sleep(timelineEvent.DelayAfter);
 
                     if (this.Stickiness > 0)
@@ -664,7 +665,7 @@ namespace Ghosts.Client.Handlers
                                     {
                                         if (!ClickRandomLink(config, urlDict, urlQueue)) break;  //break if no links found, reset to next choice
                                         Log.Trace($"Making request #{loopNumber + 1}/{loops} to {config.Uri}");
-                                        Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId);
+                                        Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = config.ToString(), Trackable = timelineEvent.TrackableId });
                                     } else
                                     {
                                         Log.Trace($"Request skipped due to browse probability for #{loopNumber + 1}/{loops} to {config.Uri}");
@@ -729,7 +730,7 @@ namespace Ghosts.Client.Handlers
         /// </summary>
         public void Close()
         {
-            Report(BrowserType.ToString(), "Close", string.Empty);
+            Report(new ReportItem { Handler = BrowserType.ToString(), Command = "Close" });
             Driver.Close();
         }
     }

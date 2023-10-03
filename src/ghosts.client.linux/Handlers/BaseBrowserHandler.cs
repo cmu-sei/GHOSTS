@@ -183,7 +183,7 @@ namespace ghosts.client.linux.handlers
                             if (config.Uri.IsWellFormedOriginalString())
                             {
                                 MakeRequest(config);
-                                Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId);
+                                Report(new ReportItem {Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = config.ToString(), Trackable = timelineEvent.TrackableId});
                             }
                             break;
                         case "download":
@@ -191,7 +191,7 @@ namespace ghosts.client.linux.handlers
                             {
                                 element = Driver.FindElement(By.XPath(timelineEvent.CommandArgs[0].ToString()));
                                 element.Click();
-                                Report(handler.HandlerType.ToString(), timelineEvent.Command, string.Join(",", timelineEvent.CommandArgs), timelineEvent.TrackableId);
+                                Report(new ReportItem {Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = string.Join(",", timelineEvent.CommandArgs), Trackable = timelineEvent.TrackableId});
                                 Thread.Sleep(1000);
                             }
                             break;
@@ -360,7 +360,7 @@ namespace ghosts.client.linux.handlers
                 {
                     this._linkManager.SetCurrent(config.Uri);
                     MakeRequest(config);
-                    Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId);
+                    Report(new ReportItem {Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = config.ToString(), Trackable = timelineEvent.TrackableId});
 
                     if (this._stickiness > 0)
                     {
@@ -386,7 +386,7 @@ namespace ghosts.client.linux.handlers
 
                                     _log.Trace($"Making request #{loopNumber+1}/{loops} to {config.Uri}");
                                     MakeRequest(config);
-                                    Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId);
+                                    Report(new ReportItem {Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = config.ToString(), Trackable = timelineEvent.TrackableId});
                                 }
                                 catch (Exception e)
                                 {
@@ -472,7 +472,7 @@ namespace ghosts.client.linux.handlers
                     var urlDict = new Dictionary<string, int>();
                     var urlQueue = new LifoQueue<Uri>(_visitedRemember);
                     MakeRequest(config);
-                    Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId);
+                    Report(new ReportItem {Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = config.ToString(), Trackable = timelineEvent.TrackableId});
                     Thread.Sleep(timelineEvent.DelayAfter);
 
                     if (this._stickiness > 0)
@@ -490,7 +490,7 @@ namespace ghosts.client.linux.handlers
                                     {
                                         if (!ClickRandomLink(config, urlDict, urlQueue)) break;  //break if no links found, reset to next choice
                                         _log.Trace($"Making request #{loopNumber + 1}/{loops} to {config.Uri}");
-                                        Report(handler.HandlerType.ToString(), timelineEvent.Command, config.ToString(), timelineEvent.TrackableId);
+                                        Report(new ReportItem {Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = config.ToString(), Trackable = timelineEvent.TrackableId});
                                     } else
                                     {
                                         _log.Trace($"Request skipped due to browse probability for #{loopNumber + 1}/{loops} to {config.Uri}");
@@ -785,13 +785,13 @@ namespace ghosts.client.linux.handlers
         /// </summary>
         public void Close()
         {
-            Report(BrowserType.ToString(), "Close", string.Empty);
+            Report(new ReportItem {Handler = BrowserType.ToString(), Command = "Close" });
             Driver.Close();
         }
 
         public void Stop()
         {
-            Report(BrowserType.ToString(), "Stop", string.Empty);
+            Report(new ReportItem {Handler = BrowserType.ToString(), Command = "Stop" });
             Close();
         }
     }

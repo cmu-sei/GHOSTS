@@ -34,7 +34,7 @@ GHOSTS clients simulate users on a machine doing "user-like" things. They can be
 
 ### Ghosts API Server
 
-The API server is a RESTful web service that provides a way for clients to interact with the GHOSTS system and its clients. It can:
+The API server provides a way for clients to interact with the GHOSTS system and its clients. It can:
 
 - Manage clients, add/remove them from groups, etc.
 - Get/manage information from clients regarding their previous or current activities, etc.

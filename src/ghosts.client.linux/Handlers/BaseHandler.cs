@@ -19,19 +19,16 @@ namespace ghosts.client.linux.handlers
             WorkingHours.Is(handler);
         }
 
-        protected static void Report(string handler, string command, string arg, string trackable = null)
+        protected static void Report(ReportItem reportItem)
         {
             var result = new TimeLineRecord
             {
-                Handler = handler,
-                Command = command,
-                CommandArg = arg
+                Handler = reportItem.Handler,
+                Command = reportItem.Command,
+                CommandArg = reportItem.Arg,
+                Result = reportItem.Result,
+                TrackableId = reportItem.Trackable
             };
-
-            if (!string.IsNullOrEmpty(trackable))
-            {
-                result.TrackableId = trackable;
-            }
 
             var o = JsonConvert.SerializeObject(result,
                 Formatting.None,

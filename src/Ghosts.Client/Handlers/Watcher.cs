@@ -6,6 +6,8 @@ using System.IO;
 using System.Threading;
 using System.Windows.Forms;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using Ghosts.Domain.Code;
 
 namespace Ghosts.Client.Handlers;
 
@@ -420,7 +422,7 @@ internal class FileWatcher : BaseHandler
                     }
                 }
                     
-                this.Report(_handler.HandlerType.ToString(), _command, _filePath, _timelineEvent.TrackableId, fileContents);
+                Report(new ReportItem { Handler = _handler.HandlerType.ToString(), Command = _command, Arg = _filePath, Trackable = _timelineEvent.TrackableId, Result = fileContents});
 
                 if (Program.IsDebug)
                     Console.WriteLine($"File: {e.FullPath} : {e.ChangeType} : {fileContents}");

@@ -7,7 +7,7 @@
     <Version>7.0.0.0</Version>
     <AssemblyVersion>7.0.0.0</AssemblyVersion>
     <ReleaseVersion>7.0.0.0</ReleaseVersion>
-    <FileVersion>7.0.1.0</FileVersion>
+    <FileVersion>7.0.220.0</FileVersion>
     <SynchReleaseVersion>false</SynchReleaseVersion>
         
     <Authors>Dustin Updyke for Carnegie Mellon University</Authors>
