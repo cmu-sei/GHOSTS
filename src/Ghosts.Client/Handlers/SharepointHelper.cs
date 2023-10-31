@@ -19,7 +19,7 @@ using System.Runtime.InteropServices.WindowsRuntime;
 namespace Ghosts.Client.Handlers
 {
 
-   
+
     /// <summary>
     /// Supports upload, download, deletion of documents
     /// download, deletion only done from the first page
@@ -57,12 +57,11 @@ namespace Ghosts.Client.Handlers
             catch (System.Exception e)
             {
                 Log.Trace($"Sharepoint:: Unable to parse site {site}, url may be malformed. Sharepoint browser action will not be executed.");
-                baseHandler.SharePointAbort = true;
                 Log.Error(e);
                 return false;
 
             }
-            if (version == "2013")  target = header + portal + "/Documents/Forms/Allitems.aspx";
+            if (version == "2013") target = header + portal + "/Documents/Forms/Allitems.aspx";
             else target = header + portal + "/Shared Documents/Forms/Allitems.aspx";
             config = RequestConfiguration.Load(handler, target);
             baseHandler.MakeRequest(config);
@@ -72,6 +71,21 @@ namespace Ghosts.Client.Handlers
             {
                 try
                 {
+                    // the screen may be small and the classic link hidden in the hamburger menu
+                    var targetElement = Driver.FindElement(By.Id("O365_MainLink_HamburgerButton"));
+                    targetElement.Click();
+                }
+                catch (ThreadAbortException)
+                {
+                    throw;  //pass up
+                }
+                catch
+                {
+                    //just ignore as if the screen is large, the menu is not present
+                }
+                try
+                {
+
 
                     var targetElement = Driver.FindElement(By.CssSelector("[aria-label=\"Click or enter to return to classic SharePoint\""));
 
@@ -80,6 +94,12 @@ namespace Ghosts.Client.Handlers
                 catch (ThreadAbortException)
                 {
                     throw;  //pass up
+                }
+                catch (System.Exception e)
+                {
+                    Log.Trace($"Sharepoint:: Unable to find classic sharepoint link, browser action will not be executed.");
+                    Log.Error(e);
+                    return false;
                 }
             }
 
@@ -96,7 +116,6 @@ namespace Ghosts.Client.Handlers
             catch (System.Exception e)
             {
                 Log.Trace($"Sharepoint:: Unable to find Sharepoint menu, login may have failed, check the credentials. Sharepoint browser action will not be executed.");
-                baseHandler.SharePointAbort = true;
                 Log.Error(e);
                 return false;
 
@@ -105,7 +124,7 @@ namespace Ghosts.Client.Handlers
             return true;
         }
 
-       
+
         public override bool DoDownload(TimelineHandler handler)
         {
 
@@ -225,7 +244,8 @@ namespace Ghosts.Client.Handlers
                 {
                     okElement = Driver.FindElement(By.Id("ctl00_PlaceHolderMain_ctl03_RptControls_btnOK"));
                 }
-                else { 
+                else
+                {
                     okElement = Driver.FindElement(By.XPath("//*[@value='OK']"));
                 }
                 actions = new Actions(Driver);
@@ -271,7 +291,7 @@ namespace Ghosts.Client.Handlers
                     //get the element, then parent, then preceding sibling
                     var checkBoxElement = Driver.FindElement(By.XPath($"//img[contains(@title,'{fname}')]//parent::td//preceding-sibling::td[contains(@class,'ms-vb-imgFirstCell')]"));
                     MoveToElementAndClick(checkBoxElement);
-                   
+
 
                     Thread.Sleep(5000);
                     //delete it
@@ -313,7 +333,7 @@ namespace Ghosts.Client.Handlers
     public abstract class SharepointHelper : BrowserHelper
     {
 
-        
+
         private int _deletionProbability = -1;
         private int _uploadProbability = -1;
         private int _downloadProbability = -1;
@@ -329,7 +349,7 @@ namespace Ghosts.Client.Handlers
         public string version { get; set; } = null;
         public string uploadDirectory { get; set; } = null;
 
-        
+
 
         public static SharepointHelper MakeHelper(BaseBrowserHandler callingHandler, IWebDriver callingDriver, TimelineHandler handler, Logger tlog)
         {
@@ -339,7 +359,7 @@ namespace Ghosts.Client.Handlers
                 var version = handler.HandlerArgs["sharepoint-version"].ToString();
                 //this needs to be extended in the future
                 if (version == "2013" || version == "2019") helper = new SharepointHelper2013_2019(callingHandler, callingDriver, version);
-               
+
 
                 if (helper == null)
                 {
@@ -358,7 +378,7 @@ namespace Ghosts.Client.Handlers
         {
             return errorCount > errorThreshold;
         }
-        
+
 
         public void Init(BaseBrowserHandler callingHandler, IWebDriver currentDriver, string aversion)
         {
@@ -622,12 +642,23 @@ namespace Ghosts.Client.Handlers
                         return;
                     }
 
+                    int count = 0;
                     //have username, password - do the initial login
                     while (!DoInitialLogin(handler, username, password))
                     {
-                        //login failed, keep trying every 5 minutes in case it is a server startup problem
-                        Log.Trace($"Sharepoint:: Login failed, sleeping and trying again.");
-                        Thread.Sleep(300*1000); 
+                        count += 1;
+                        if (count < 10)
+                        {
+                            //login failed, keep trying every 5 minutes in case it is a server startup problem
+                            Log.Trace($"Sharepoint:: Login failed, sleeping and trying again.");
+                            Thread.Sleep(300 * 1000);
+                        }
+                        else
+                        {
+                            Log.Trace($"Sharepoint:: Repeated login failed, aborting Sharepoint browsing.");
+                            baseHandler.SharePointAbort = true;
+                            break;
+                        }
                     }
 
 
@@ -675,9 +706,7 @@ namespace Ghosts.Client.Handlers
             }
 
         }
-
-
     }
 
 
-    }
+}

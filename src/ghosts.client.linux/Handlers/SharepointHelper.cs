@@ -55,7 +55,6 @@ namespace ghosts.client.linux.handlers
             catch (System.Exception e)
             {
                 Log.Trace($"Sharepoint:: Unable to parse site {site}, url may be malformed. Sharepoint browser action will not be executed.");
-                baseHandler.SharePointAbort = true;
                 Log.Error(e);
                 return false;
 
@@ -67,9 +66,24 @@ namespace ghosts.client.linux.handlers
 
             // check if there is a 'Return to classic Sharepoint link
             if (version != "2013")
-            {
+            {    
+                try 
+                {
+                    // the screen may be small and the classic link hidden in the hamburger menu
+                    var targetElement = Driver.FindElement(By.Id("O365_MainLink_HamburgerButton"));
+                    targetElement.Click();                  
+                }
+                catch (ThreadAbortException)
+                {
+                    throw;  //pass up
+                }
+                catch 
+                {
+                    //just ignore as if the screen is large, the menu is not present
+                }
                 try
                 {
+                    
 
                     var targetElement = Driver.FindElement(By.CssSelector("[aria-label=\"Click or enter to return to classic SharePoint\""));
 
@@ -78,6 +92,12 @@ namespace ghosts.client.linux.handlers
                 catch (ThreadAbortException)
                 {
                     throw;  //pass up
+                }
+                catch (System.Exception e)
+                {
+                    Log.Trace($"Sharepoint:: Unable to find classic sharepoint link, browser action will not be executed.");
+                    Log.Error(e);
+                    return false;
                 }
             }
 
@@ -94,7 +114,6 @@ namespace ghosts.client.linux.handlers
             catch (System.Exception e)
             {
                 Log.Trace($"Sharepoint:: Unable to find Sharepoint menu, login may have failed, check the credentials. Sharepoint browser action will not be executed.");
-                baseHandler.SharePointAbort = true;
                 Log.Error(e);
                 return false;
 
@@ -620,12 +639,21 @@ namespace ghosts.client.linux.handlers
                         return;
                     }
 
+                    int count = 0;
                     //have username, password - do the initial login
                     while (!DoInitialLogin(handler, username, password))
                     {
-                        //login failed, keep trying every 5 minutes in case it is a server startup problem
-                        Log.Trace($"Sharepoint:: Login failed, sleeping and trying again.");
-                        Thread.Sleep(300*1000); 
+                        count += 1;
+                        if (count < 10) 
+                        {
+                            //login failed, keep trying every 5 minutes in case it is a server startup problem
+                            Log.Trace($"Sharepoint:: Login failed, sleeping and trying again.");
+                            Thread.Sleep(300*1000); 
+                        } else {
+                            Log.Trace($"Sharepoint:: Repeated login failed, aborting Sharepoint browsing.");
+                            baseHandler.SharePointAbort = true;
+                            break;
+                        } 
                     }
 
 
