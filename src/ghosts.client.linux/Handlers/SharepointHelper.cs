@@ -67,11 +67,11 @@ namespace ghosts.client.linux.handlers
             // check if there is a 'Return to classic Sharepoint link
             if (version != "2013")
             {    
-                try 
+                bool inClassic = false;
+                try
                 {
-                    // the screen may be small and the classic link hidden in the hamburger menu
-                    var targetElement = Driver.FindElement(By.Id("O365_MainLink_HamburgerButton"));
-                    targetElement.Click();                  
+                    var targetElement =  Driver.FindElement(By.XPath("//a[contains(@onclick,'GoToModern(true)')]"));
+                    inClassic = true;
                 }
                 catch (ThreadAbortException)
                 {
@@ -81,23 +81,42 @@ namespace ghosts.client.linux.handlers
                 {
                     //just ignore as if the screen is large, the menu is not present
                 }
-                try
+                if (!inClassic)
                 {
-                    
+                    try 
+                    {
+                        // the screen may be small and the classic link hidden in the hamburger menu
+                        var targetElement = Driver.FindElement(By.Id("O365_MainLink_HamburgerButton"));
+                        targetElement.Click();
+                        Thread.Sleep(2000);                   
+                    }
+                    catch (ThreadAbortException)
+                    {
+                        throw;  //pass up
+                    }
+                    catch 
+                    {
+                        //just ignore as if the screen is large, the menu is not present
+                    }
+                    try
+                    {
+                        
 
-                    var targetElement = Driver.FindElement(By.CssSelector("[aria-label=\"Click or enter to return to classic SharePoint\""));
+                        var targetElement = Driver.FindElement(By.CssSelector("[aria-label=\"Click or enter to return to classic SharePoint\""));
 
-                    targetElement.Click();
-                }
-                catch (ThreadAbortException)
-                {
-                    throw;  //pass up
-                }
-                catch (System.Exception e)
-                {
-                    Log.Trace($"Sharepoint:: Unable to find classic sharepoint link, browser action will not be executed.");
-                    Log.Error(e);
-                    return false;
+                        targetElement.Click();
+                        Thread.Sleep(2000);
+                    }
+                    catch (ThreadAbortException)
+                    {
+                        throw;  //pass up
+                    }
+                    catch (System.Exception e)
+                    {
+                        Log.Trace($"Sharepoint:: Unable to find classic sharepoint link, browser action will not be executed.");
+                        Log.Error(e);
+                        return false;
+                    }
                 }
             }
 
