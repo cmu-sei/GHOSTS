@@ -1,12 +1,10 @@
 ﻿using System;
 using System.IO;
 using System.Threading;
-using Renci.SshNet;
 using Ghosts.Client.Infrastructure;
 using Ghosts.Domain;
 using Newtonsoft.Json;
 using Ghosts.Domain.Code;
-using WorkingHours = Ghosts.Client.Infrastructure.WorkingHours;
 using System.Net;
 
 namespace Ghosts.Client.Handlers

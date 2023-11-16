@@ -2,6 +2,7 @@
 
 using System.Threading;
 using Ghosts.Domain;
+using Ghosts.Domain.Code;
 
 namespace Ghosts.Client.Handlers;
 
@@ -11,7 +12,7 @@ public class Reboot : BaseHandler
     {
         foreach (var timelineEvent in handler.TimeLineEvents)
         {
-            Infrastructure.WorkingHours.Is(handler);
+            WorkingHours.Is(handler);
 
             if (timelineEvent.DelayBefore > 0)
                 Thread.Sleep(timelineEvent.DelayBefore);

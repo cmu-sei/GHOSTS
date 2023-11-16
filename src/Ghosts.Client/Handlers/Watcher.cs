@@ -37,7 +37,7 @@ internal class Watcher : BaseHandler
     {
         foreach (TimelineEvent timelineEvent in handler.TimeLineEvents)
         {
-            Infrastructure.WorkingHours.Is(handler);
+            WorkingHours.Is(handler);
 
             if (timelineEvent.DelayBefore > 0)
             {

@@ -4,7 +4,6 @@ using System.Threading;
 using Ghosts.Client.Infrastructure;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
-using WorkingHours = Ghosts.Client.Infrastructure.WorkingHours;
 using AutoItX3Lib;
 using System.Text;
 using Newtonsoft.Json;

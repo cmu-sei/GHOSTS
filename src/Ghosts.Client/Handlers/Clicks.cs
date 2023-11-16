@@ -51,7 +51,7 @@ public class Clicks : BaseHandler
     {
         foreach (var timelineEvent in handler.TimeLineEvents)
         {
-            Infrastructure.WorkingHours.Is(handler);
+            WorkingHours.Is(handler);
 
             if (timelineEvent.DelayBefore > 0)
                 Thread.Sleep(timelineEvent.DelayBefore);

@@ -12,8 +12,6 @@ using Ghosts.Domain.Code.Helpers;
 using NetOffice.ExcelApi.Enums;
 using Newtonsoft.Json;
 using Excel = NetOffice.ExcelApi;
-using WorkingHours = Ghosts.Client.Infrastructure.WorkingHours;
-
 namespace Ghosts.Client.Handlers;
 
 public class ExcelHandler : BaseHandler

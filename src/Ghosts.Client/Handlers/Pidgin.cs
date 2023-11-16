@@ -4,7 +4,6 @@ using Ghosts.Client.Infrastructure;
 using Ghosts.Domain;
 using System.Diagnostics;
 using Ghosts.Domain.Code;
-using WorkingHours = Ghosts.Client.Infrastructure.WorkingHours;
 using System;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;

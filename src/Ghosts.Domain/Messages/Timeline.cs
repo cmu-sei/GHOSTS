@@ -60,6 +60,7 @@ namespace Ghosts.Domain
 
         public TimeSpan UtcTimeOn { get; set; }
         public TimeSpan UtcTimeOff { get; set; }
+        public TimeSpan[] UtcTimeBlocks { get; set; }
 
         //not required currently (2.4)
         public Dictionary<string, object> HandlerArgs { get; set; }

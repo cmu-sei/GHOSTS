@@ -16,7 +16,7 @@ namespace Ghosts.Client.Handlers
 
         public void Init(TimelineHandler handler)
         {
-            Infrastructure.WorkingHours.Is(handler);
+            WorkingHours.Is(handler);
         }
 
         public void Report(ReportItem report)
