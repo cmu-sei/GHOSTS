@@ -6,7 +6,6 @@ using ghosts.client.linux.Infrastructure;
 using Ghosts.Domain;
 using Newtonsoft.Json;
 using Ghosts.Domain.Code;
-using WorkingHours = ghosts.client.linux.Infrastructure.WorkingHours;
 
 namespace ghosts.client.linux.handlers
 {

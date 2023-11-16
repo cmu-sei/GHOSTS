@@ -3,6 +3,7 @@
 using System;
 using System.Linq;
 using System.Threading;
+using Ghosts.Domain.Code.Helpers;
 using NLog;
 
 namespace Ghosts.Domain.Code
@@ -98,6 +99,7 @@ namespace Ghosts.Domain.Code
 
         private static void Sleep(TimelineHandler handler, TimeSpan sleep)
         {
+            // TODO: We need a way to kill this handler like handler.SafeKill();
             Sleep(handler, (int)sleep.TotalMilliseconds);
         }
     }

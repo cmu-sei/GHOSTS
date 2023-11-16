@@ -6,7 +6,6 @@ using ghosts.client.linux.Infrastructure;
 using Ghosts.Domain;
 using Newtonsoft.Json;
 using Ghosts.Domain.Code;
-using WorkingHours = ghosts.client.linux.Infrastructure.WorkingHours;
 
 /*
  * Used Package Renci.sshNet
@@ -28,7 +27,6 @@ namespace ghosts.client.linux.handlers
     /// </summary>
     public class Ssh : BaseHandler
     {
-
         private Credentials CurrentCreds = null;
         private SshSupport CurrentSshSupport = null;   //current SshSupport for this object
         public int jitterfactor = 0;
@@ -216,11 +214,5 @@ namespace ghosts.client.linux.handlers
             }
 
         }
-
-
-
-
-
     }
-
 }
