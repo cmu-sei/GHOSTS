@@ -65,6 +65,9 @@
   "Listener": {
     "Port": -1
   },
+  "AwsCli": {
+    "InstallFolder": "%USERPROFILE%\\Amazon\\AWSCLIV2"
+  },
   "EmailContent": {
     "conflict_1_capital": "",
     "conflict_1_name": "",

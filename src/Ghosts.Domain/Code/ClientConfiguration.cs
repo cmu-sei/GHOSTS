@@ -98,6 +98,13 @@ namespace Ghosts.Domain.Code
 
         public ResourceControlSettings ResourceControl { get; set; }
 
+        public AwsCliSettings AwsCli { get; set; }
+
+        public class AwsCliSettings
+        {
+            public string InstallFolder { get; set; }
+        }
+
         public class ContentSettings
         {
             public string EmailContent { get; set; }

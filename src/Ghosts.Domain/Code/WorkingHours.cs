@@ -46,47 +46,51 @@ namespace Ghosts.Domain.Code
             }
 
 
-            // there are time blocks set and at least two of them and in multiples of two
-            var isInTimeBlock = false;
-            for (var i = 0; i < handler.UtcTimeBlocks.Length; i += 2)
+            if (handler.UtcTimeBlocks != null)
             {
-                if (i + 1 >= handler.UtcTimeBlocks.Length) break;
-
-                var startTime = handler.UtcTimeBlocks[i];
-                var endTime = handler.UtcTimeBlocks[i + 1];
-
-                if (currentTime >= startTime && currentTime <= endTime)
+                // there are time blocks set and at least two of them and in multiples of two
+                var isInTimeBlock = false;
+                for (var i = 0; i < handler.UtcTimeBlocks.Length; i += 2)
                 {
-                    Console.WriteLine($"Current time is within the block: {startTime} to {endTime}");
-                    isInTimeBlock = true;
-                    break;
+                    if (i + 1 >= handler.UtcTimeBlocks.Length) break;
+
+                    var startTime = handler.UtcTimeBlocks[i];
+                    var endTime = handler.UtcTimeBlocks[i + 1];
+
+                    if (currentTime >= startTime && currentTime <= endTime)
+                    {
+                        Console.WriteLine($"Current time is within the block: {startTime} to {endTime}");
+                        isInTimeBlock = true;
+                        break;
+                    }
                 }
-            }
 
-            if (!isInTimeBlock)
-            {
-                // Find the next start time
-                TimeSpan? nextStartTime = handler.UtcTimeBlocks.Where(t => t > currentTime)
-                    .OrderBy(t => t)
-                    .FirstOrDefault();
-
-
-                // If there's a next start time, sleep until then
-                if (nextStartTime != TimeSpan.Zero)
+                if (!isInTimeBlock)
                 {
-                    var sleepDuration = nextStartTime - currentTime;
-                    Console.WriteLine($"Sleeping for {sleepDuration} until the next time block starts");
-                    Sleep(handler, sleepDuration.Value);
-                }
-                else
-                {
-                    // Calculate sleep time until the first time block of the next day
-                    var timeTillEndOfDay = TimeSpan.FromDays(1) - currentTime;
-                    var timeTillFirstBlockNextDay = handler.UtcTimeBlocks[0];
-                    var totalSleepTime = timeTillEndOfDay + timeTillFirstBlockNextDay;
+                    // Find the next start time
+                    TimeSpan? nextStartTime = handler.UtcTimeBlocks.Where(t => t > currentTime)
+                        .OrderBy(t => t)
+                        .FirstOrDefault();
 
-                    Console.WriteLine($"No more time blocks for today. Sleeping for {totalSleepTime} until the next time block starts");
-                    Sleep(handler, totalSleepTime);
+
+                    // If there's a next start time, sleep until then
+                    if (nextStartTime != TimeSpan.Zero)
+                    {
+                        var sleepDuration = nextStartTime - currentTime;
+                        Console.WriteLine($"Sleeping for {sleepDuration} until the next time block starts");
+                        Sleep(handler, sleepDuration.Value);
+                    }
+                    else
+                    {
+                        // Calculate sleep time until the first time block of the next day
+                        var timeTillEndOfDay = TimeSpan.FromDays(1) - currentTime;
+                        var timeTillFirstBlockNextDay = handler.UtcTimeBlocks[0];
+                        var totalSleepTime = timeTillEndOfDay + timeTillFirstBlockNextDay;
+
+                        Console.WriteLine(
+                            $"No more time blocks for today. Sleeping for {totalSleepTime} until the next time block starts");
+                        Sleep(handler, totalSleepTime);
+                    }
                 }
             }
         }
