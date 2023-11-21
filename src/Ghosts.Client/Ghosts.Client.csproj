@@ -150,6 +150,7 @@
     <Content Include="config\emails-footer.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Compile Include="Handlers\AwsCli.cs" />
     <Compile Include="Handlers\BaseBrowserHandler.cs" />
     <Compile Include="Handlers\BlogHelper.cs" />
     <Compile Include="Handlers\BlogHelperDrupal.cs" />

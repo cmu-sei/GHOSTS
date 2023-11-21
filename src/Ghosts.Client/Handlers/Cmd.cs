@@ -95,6 +95,12 @@ namespace Ghosts.Client.Handlers
 
         public void Command(TimelineHandler handler, TimelineEvent timelineEvent, string command)
         {
+            var results = Command(command);
+            Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = command, Trackable = timelineEvent.TrackableId, Result = results });
+        }
+
+        public static string Command(string command)
+        {
             Log.Trace($"Spawning cmd.exe with command {command}");
             var processStartInfo = new ProcessStartInfo("cmd.exe")
             {
@@ -103,18 +109,19 @@ namespace Ghosts.Client.Handlers
                 UseShellExecute = false
             };
 
-            using (var process = Process.Start(processStartInfo))
+            using var process = Process.Start(processStartInfo);
+            var outputString = string.Empty;
+            Thread.Sleep(1000);
+            
+            if (process != null)
             {
-                Thread.Sleep(1000);
-                if (process != null)
-                {
-                    process.StandardInput.WriteLine(command);
-                    process.StandardInput.Close(); // line added to stop process from hanging on ReadToEnd()
-                    var outputString = process.StandardOutput.ReadToEnd();
-                    Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = command, Trackable = timelineEvent.TrackableId, Result = outputString});
-                    process.Close();
-                }
+                process.StandardInput.WriteLine(command);
+                process.StandardInput.Close(); // line added to stop process from hanging on ReadToEnd()
+                outputString = process.StandardOutput.ReadToEnd();
+                process.Close();
             }
+
+            return outputString;
         }
     }
 }
