@@ -31,6 +31,18 @@ For a given web browser timeline (such as the sample for [FireFox](https://githu
 
 This event combined with loop being set to true will cause the timeline to randomly select a website from the list provided in CommandArgs and make a corresponding GET request to that site. The timeline will then wait for the number of seconds specified in the Delay property before selecting another random website from the list. Note that if stickiness is set, the next link may be selected from the same website as the previous link.
 
+An example of this setting is:
+
+```
+"TimeLineEvents": [
+                {
+                    "Command": "random",
+                    "CommandArgs": [
+                        "http://www.cmu.edu",
+                        "http://sei.cmu.edu"
+                        ...
+```
+
 - randomalt
 
 Similar to random but includes POST commands as well.
