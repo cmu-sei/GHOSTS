@@ -2,7 +2,7 @@ version: '3.6'
 
 services:
   socializer:
-    image: dustinupdyke/ghosts-socializer:0.2.6
+    image: dustinupdyke/ghosts-socializer:0.3.0
     container_name: socializer
     ports:
       - '8000:5000'
