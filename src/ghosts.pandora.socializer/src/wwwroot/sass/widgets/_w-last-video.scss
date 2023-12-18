@@ -1,0 +1,138 @@
+/*------------- #W-LAST-VIDEO --------------*/
+
+
+.w-last-video {
+  margin-bottom: 0;
+
+  li {
+	position: relative;
+	margin-bottom: 20px;
+	border-radius: 5px;
+	overflow: hidden;
+	display: inline-block;
+
+	 img {
+	  max-width: 100%;
+	  margin: 0 auto;
+	  display: block;
+	}
+
+	&:last-child {
+	  margin-bottom: 0;
+	}
+
+	&:hover {
+	  .overlay {
+		opacity: 1;
+	  }
+
+	  .video-content {
+		opacity: 1;
+		bottom: 12px;
+	  }
+
+	  .play-video {
+		margin-top: -20px;
+	  }
+
+	  &:after {
+		opacity: 1;
+	  }
+	}
+
+	&:after {
+	  content: '';
+	  display: block;
+	  position: absolute;
+	  top: 0;
+	  left: 0;
+	  width: 100%;
+	  height: 100%;
+	  box-shadow: inset 0px -120px 55px -30px rgba(0, 0, 0, 0.5);
+	  opacity: 0;
+	  transition: all .3s ease;
+	}
+  }
+
+  time {
+	font-size: 10px;
+  }
+
+  .video-content {
+	position: absolute;
+	bottom: -20px;
+	left: 12px;
+	color: #fff;
+	color: var(--olympus-white-color);
+	z-index: 5;
+	opacity: 0;
+	transition: all .3s ease;
+  }
+
+  .title {
+	font-size: 12px;
+	font-weight: 500;
+	line-height: 1;
+  }
+}
+
+.play-video {
+  width: 64px;
+  height: 64px;
+  line-height: 68px;
+  background-color: rgba(255,94,58,.7);
+  border: 4px solid #fff;
+  border: 4px solid var(--olympus-white-color);
+  border-radius: 100%;
+  text-align: center;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 5;
+  transition: all .3s ease;
+  outline: none;
+
+  svg {
+	fill: #fff;
+	fill: var(--olympus-white-color);
+	width: 18px;
+	height: 22px;
+	margin-right: -2px;
+  }
+}
+
+.play-video--small {
+  width: 52px;
+  height: 52px;
+  line-height: 58px;
+}
+
+.play-video--mobile {
+  width: 42px;
+  height: 42px;
+  line-height: 50px;
+  border-width: 2px;
+}
+
+.play-gif {
+  width: 64px;
+  height: 64px;
+  line-height: 62px;
+  position: absolute;
+  border: 2px dashed #fff;
+  border: 2px dashed var(--olympus-white-color);
+  background-color: rgba(255,94,58,.7);
+  font-size: 20px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #fff;
+  color: var(--olympus-white-color);
+  border-radius: 100%;
+  text-align: center;
+  z-index: 5;
+  transition: all .3s ease;
+  outline: none;
+  cursor: pointer;
+  text-decoration: none;
+}

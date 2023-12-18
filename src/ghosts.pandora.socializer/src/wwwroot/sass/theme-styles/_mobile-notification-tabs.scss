@@ -1,0 +1,125 @@
+/*------------- #Mobile APP --------------*/
+
+.about-olympus {
+  padding: 0 25px;
+  margin-bottom: 15px;
+
+  a {
+	padding: 7px 0;
+	font-size: 12px;
+	color: #515365;
+	color: var(--olympus-heading-color);
+	display: block;
+	font-weight: 700;
+
+	&:hover {
+	  color: #ff5e3a;
+	  color: var(--olympus-primary-color);
+	}
+  }
+}
+
+.mobile-notification-tabs {
+  background-color: #3f4257;
+  background-color: var(--olympus-secondary-color);
+  border-bottom-color: transparent;
+  justify-content: space-around;
+  align-items: center;
+  margin-bottom: 7px;
+  height: 50px;
+  padding: 0 13px;
+  position: relative;
+  width: 100%;
+
+  .nav-link {
+	height: 100%;
+	border-color: transparent;
+	padding: 0 20px;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	border-bottom: 3px solid transparent;
+
+	&:hover, &:focus {
+	  border-color: transparent;
+	}
+  }
+
+  .olymp-close-icon {
+	display: none;
+  }
+
+  .olymp-magnifying-glass-icon {
+	width: 18px;
+  }
+
+  .nav-link.active {
+	background-color: transparent;
+	border-color: transparent;
+	border-bottom-color: #ff5e3a;
+	border-bottom-color: var(--olympus-primary-color);
+
+	svg {
+	  fill: #fff;
+	  fill: var(--olympus-white-color);
+	}
+
+	.olymp-close-icon {
+	  display: block;
+	  width: 18px;
+	  height: 18px;
+	}
+
+	.olymp-magnifying-glass-icon {
+	  display: none;
+	  width: 18px;
+	}
+  }
+
+  .nav-item {
+	margin-bottom: 0;
+	height: 50px;
+  }
+
+  svg {
+	fill: #9a9fbf;
+	fill: var(--olympus-icon-color);
+	height: 20px;
+	width: 24px;
+  }
+
+  .control-icon {
+	position: relative;
+	margin-right: 0;
+	display: flex;
+  }
+
+}
+
+.nav-tabs .app-tabs-close {
+  position: absolute;
+  bottom: -55px;
+  left: 50%;
+  margin-left: -33px;
+  z-index: 20;
+
+  &:hover svg {
+	fill: #ff5e3a;
+	fill: var(--olympus-primary-color);
+  }
+}
+
+
+/*------------- Responsive mode styles --------------*/
+
+@media (max-width: 768px) {
+
+  .mobile-notification-tabs .nav-item {
+	width: auto;
+  }
+
+  .mobile-notification-tabs .nav-link {
+	padding: 0 5px;
+  }
+
+}

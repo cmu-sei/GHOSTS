@@ -1,0 +1,33 @@
+/*------------- #W-FAVED-PAGE --------------*/
+
+
+.w-faved-page {
+  overflow: hidden;
+  margin: 0 0 -8px -15px;
+
+  li {
+	margin: 0 0 8px 8px;
+	float: left;
+	width: 34px;
+	height: 34px;
+	border-radius: 100%;
+	overflow: hidden;
+  }
+}
+
+.all-users {
+  line-height: 34px;
+  text-align: center;
+  color: #fff;
+  color: var(--olympus-white-color);
+  background-color: #ff5e3a;
+  background-color: var(--olympus-primary-color);
+  font-size: 10px;
+  font-weight: 800;
+
+  a {
+	color: inherit;
+	display: block;
+  }
+
+}

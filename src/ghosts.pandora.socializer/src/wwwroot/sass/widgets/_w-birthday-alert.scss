@@ -1,0 +1,86 @@
+/*------------- #W-BIRTHDAY-ALERT --------------*/
+
+
+
+.w-birthday-alert {
+  background-image: url("../img/bg-birthdays.webp");
+  background-repeat: no-repeat;
+  background-size: cover;
+  padding: 25px;
+
+  .more {
+	float: right;
+	opacity: .7;
+	color: #fff;
+	color: var(--olympus-white-color);
+	fill: #fff;
+	fill: var(--olympus-white-color);
+  }
+
+  .icons-block {
+	margin-bottom: 35px;
+	fill: #fff;
+	fill: var(--olympus-white-color);
+	color: #fff;
+	color: var(--olympus-white-color);
+  }
+
+  .olymp-cupcake-icon {
+	width: 24px;
+	height: 20px;
+  }
+
+  .author-thumb img {
+	width: 28px;
+	height: 28px;
+	border: 2px solid #fff;
+	border: 2px solid var(--olympus-white-color);
+	margin-bottom: 12px;
+  }
+
+  .content {
+	color: #fff;
+	color: var(--olympus-white-color);
+
+	span {
+	  font-size: 10px;
+	  margin-bottom: 4px;
+	  display: block;
+	}
+
+	.title {
+	  line-height: 1.3;
+	  font-weight: 400;
+	  color: inherit;
+	  margin-bottom: 20px;
+	  font-size: 24px;
+	  display: block;
+	}
+
+	p {
+	  font-size: 12px;
+	}
+  }
+}
+
+.author-thumb {
+  display: inline-block;
+  position: relative;
+  vertical-align: middle;
+
+  img {
+	border-radius: 100%;
+	overflow: hidden;
+  }
+
+  .icon-status {
+	position: absolute;
+	margin-right: 0;
+	top: 0;
+	left: 0;
+	border: 1px solid #3f4257;
+	border: 1px solid var(--olympus-secondary-color);
+	width: 8px;
+	height: 8px;
+  }
+}

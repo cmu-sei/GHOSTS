@@ -1,0 +1,43 @@
+/*------------- #ROOT --------------*/
+
+
+:root {
+  // Colors
+  --olympus-primary-color: #{inspect($primary-color)};
+  --olympus-secondary-color: #{inspect($secondary-color)};
+  --olympus-placeholder-form-color: #{inspect($placeholder-form-color)};
+  --olympus-white-color: #{inspect($white-color)};
+  --olympus-heading-color: #{inspect($heading-color)};
+  --olympus-icon-color: #{inspect($icon-color)};
+  --olympus-body-bg: #{inspect($body-bg)};
+  --olympus-body-font-color: #{inspect($body-font-color)};
+  --olympus-body-bg-white: #{inspect($body-bg-white)};
+  --olympus-grey: #{inspect($grey)};
+  --olympus-grey-light: #{inspect($grey-light)};
+  --olympus-grey-lighter: #{inspect($grey-lighter)};
+  --olympus-purple: #{inspect($purple)};
+  --olympus-purple-dark: #{inspect($purple-dark)};
+  --olympus-blue: #{inspect($blue)};
+  --olympus-breez: #{inspect($breez)};
+  --olympus-breez-light: #{inspect($breez-light)};
+  --olympus-orange: #{inspect($orange)};
+  --olympus-yellow: #{inspect($yellow)};
+  --olympus-smoke: #{inspect($smoke)};
+  --olympus-green: #{inspect($green)};
+  --olympus-smoke-light: #{inspect($smoke-light)};
+  --olympus-blue-light: #{inspect($blue-light)};
+  --olympus-violet: #{inspect($violet)};
+
+  // Socials Colors
+  --olympus-c-facebook: #{inspect($c-facebook)};
+  --olympus-c-twitter: #{inspect($c-twitter)};
+  --olympus-c-dribbble: #{inspect($c-dribbble)};
+  --olympus-c-rss: #{inspect($c-rss)};
+  --olympus-c-spotify: #{inspect($c-spotify)};
+  --olympus-c-google: #{inspect($c-google)};
+
+  // Borders
+  --olympus-border-color: #{inspect($border-color)};
+
+  --olympus-headings-font-weight-h1-h4: #{inspect($headings-font-weight-h1-h4)};
+}

@@ -1,0 +1,44 @@
+/*------------- #OL-LISTS --------------*/
+
+
+
+ol {
+  counter-reset: list1;
+  margin: 0;
+  padding-left: 0;
+
+  li {
+	list-style: none;
+	transition: all .3s ease;
+  }
+
+} /* Init counter */
+
+ol li:before {
+  position:relative;
+  counter-increment: list1; /* Add "1" */
+  content: counter(list1) " "; /* Show count */
+  color: #888da8;
+  color: var(--olympus-body-font-color);
+  display: inline-block;
+  margin-right: 10px;
+  font-size: 10px;
+}
+
+ol li ul li:before {
+  display: none;
+}
+
+ol ol {
+  counter-reset: list2;
+  margin-top: 10px;
+}
+
+ol ol li:before {
+  counter-increment: list2;
+  content: counter(list1) "." counter(list2) ". ";
+}
+
+ol ol li {
+  padding-left: 40px;
+}

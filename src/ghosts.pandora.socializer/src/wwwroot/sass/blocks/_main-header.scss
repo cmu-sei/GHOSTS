@@ -1,0 +1,118 @@
+/*------------- #MAIN-HEADER --------------*/
+
+
+.main-header {
+  padding: 70px 0 70px 0;
+  margin: 0 auto 30px;
+  position: relative;
+  background-position: 50% 50%;
+
+  &.main-header-has-header-standard {
+    padding-top: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 5;
+  }
+}
+
+.img-bottom {
+  position: relative;
+  display: block;
+  margin: 20px auto 0;
+  margin-bottom: -70px;
+}
+
+.bg-account {
+  background-image: url("../img/top-header3.webp");
+}
+
+.bg-birthday {
+  background-image: url("../img/top-header6.webp");
+}
+
+.bg-badges {
+  background-image: url("../img/top-header4.webp");
+}
+
+.bg-events {
+  background-image: url("../img/top-header5.webp");
+}
+
+.bg-weather {
+  background-image: url("../img/top-header6.webp");
+}
+
+.bg-group {
+  background-image: url("../img/bg-group.webp");
+}
+
+.bg-music {
+  background-image: url("../img/top-header7.webp");
+}
+
+.bg-landing {
+  background-image: url("../img/landing-users.webp");
+}
+
+.bg-users {
+  background-image: url("../img/bg-users.webp");
+}
+
+.main-header-content {
+  color: #fff;
+  color: var(--olympus-white-color);
+  text-align: center;
+
+  & > * {
+	color: inherit;
+  }
+
+  & > *:first-child {
+	font-weight: 300;
+	margin-bottom: 20px;
+  }
+
+  p {
+	font-weight: 400;
+	margin-bottom: 0;
+  }
+}
+
+
+/*------------- Logout Content --------------*/
+
+.logout-content {
+  text-align: center;
+
+  .logout-icon {
+    font-weight: 900;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    border-radius: 100%;
+    font-size: 9px;
+    color: #fff;
+    color: var(--olympus-white-color);
+    fill: #fff;
+    fill: var(--olympus-white-color);
+    background-color: #3f4257;
+    background-color: var(--olympus-secondary-color);
+    margin: 0 auto 35px;
+
+    svg {
+      margin: auto;
+    }
+  }
+}
+
+
+
+/*------------- Responsive mode styles --------------*/
+
+@media (max-width: 768px) {
+  .main-header {
+    max-width: 100%;
+  }
+}

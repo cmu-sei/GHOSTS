@@ -1,0 +1,340 @@
+// Bootstrap overrides
+//
+// Copy variables from `_variables.scss` to this file to override default values
+// without modifying source files.
+
+// Variables
+//
+// Copy settings from this file into the provided `_custom.scss` to override
+// the Bootstrap defaults without modifying key, versioned files.
+
+
+// Table of Contents
+//
+// Colors
+// Options
+// Spacing
+// Body
+// Links
+// Grid breakpoints
+// Grid containers
+// Grid columns
+// Fonts
+// Components
+// Tables
+// Buttons
+// Forms
+// Dropdowns
+// Z-index master list
+// Navbar
+// Navs
+// Pagination
+// Jumbotron
+// Form states and alerts
+// Cards
+// Tooltips
+// Popovers
+// Badges
+// Modals
+// Alerts
+// Progress bars
+// List group
+// Image thumbnails
+// Figures
+// Breadcrumbs
+// Carousel
+// Close
+// Code
+
+
+
+// Replace `$search` with `$replace` in `$string`
+// @author Hugo Giraudel
+// @param {String} $string - Initial string
+// @param {String} $search - Substring to replace
+// @param {String} $replace ('') - New value
+// @return {String} - Updated string
+
+
+
+// General variable structure
+//
+// Variable format should follow the `$component-modifier-state-property` order.
+
+
+// Colors
+//
+// Grayscale and brand colors for use across Bootstrap.
+
+// Start with assigning color names to specific hex values.
+
+
+@import "mixins";
+
+
+// Create grayscale
+
+$blue: #ff5e3a;
+
+$secondary-color: 			#9a9fbf;
+$brand-primary:             $blue;
+$brand-success:             #08ddc1;
+$brand-danger:              #f92552;
+
+// Reassign color vars to semantic color scheme
+
+$colors: (
+	"blue":       $blue
+);
+
+$theme-colors: (
+	"primary": $blue,
+	"success": #08ddc1,
+	"danger": #f92552,
+	"secondary": $secondary-color
+);
+
+
+$input-focus-border-color:       lighten($blue, 25%);
+
+// Body
+//
+// Settings for the `<body>` element.
+
+$body-bg:       #edf2f6;
+$body-color:    #888da8;
+$body-bg-white: #ffffff;
+
+
+
+// Links
+//
+// Style anchor elements.
+
+$link-decoration:       none;
+$link-hover-color:      auto;
+$link-hover-decoration: none;
+$link-color:            $brand-primary;
+
+//
+// Button Sizes
+//
+
+$input-btn-padding-y-lg:    1rem;
+$input-btn-padding-x-lg:    5rem;
+$input-btn-line-height-lg:  1.5;
+
+$input-btn-padding-y-sm:    0.5rem;
+$input-btn-padding-x-sm:    1.7rem;
+
+$btn-transition: all .15s ease-in-out;
+
+$input-btn-focus-width: 0;
+
+$btn-active-box-shadow: none;
+
+$btn-focus-box-shadow: $input-btn-focus-box-shadow;
+
+$btn-font-size:               .812rem;
+$btn-font-size-sm: .688rem;
+
+
+
+// Grid breakpoints
+//
+// Define the minimum dimensions at which your layout will change,
+// adapting to different screen sizes, for use in media queries.
+
+$grid-breakpoints: (
+	xs: 0,
+	sm: 540px,
+	md: 800px,
+	lg: 1024px,
+	xl: 1199px,
+	xxl: 1400px
+);
+
+
+// Grid containers
+//
+// Define the maximum width of `.container` for different screen sizes.
+
+$container-max-widths: (
+	sm: 600px,
+	md: 680px,
+	lg: 900px,
+	xl: 1110px,
+	xxl: 1300px
+);
+
+
+// Fonts
+//
+// Font, line-height, and color for body text, headings, and more.
+
+$font-family-sans-serif: Roboto, -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+$font-family-base:       $font-family-sans-serif;
+
+
+$font-size-base: .812rem; // Assumes the browser default, typically `16px`
+$font-size-lg:   .875rem;
+$font-size-sm:   .688rem;
+$font-size-xs:   .6rem;
+
+
+$h4-font-size: 1.375rem;
+$h5-font-size: 1rem;
+$h6-font-size: .875rem;
+
+$headings-font-weight:   700;
+$headings-line-height:   1.3;
+$headings-color:         #515365;
+
+
+// Buttons
+//
+// For each of Bootstrap's buttons, define text, background and border color.
+
+
+$btn-font-weight:                $font-weight-bold;
+
+$btn-padding-x-sm:               1.7rem;
+$btn-padding-y-sm:               .5rem;
+
+$btn-padding-x-lg:               5rem;
+$btn-padding-y-lg:               1rem;
+
+$input-btn-font-size-lg:      $font-size-lg;
+$btn-font-size-lg:            $input-btn-font-size-lg;
+
+
+
+// Forms
+
+$input-btn-padding-y:       1.1rem;
+$input-btn-padding-x:       1.1rem;
+
+$input-padding-y:                       $input-btn-padding-y;
+$input-padding-x:                       $input-btn-padding-x;
+$input-line-height:                     $input-btn-line-height;
+
+$input-padding-y-sm:                    $input-btn-padding-y-sm;
+$input-padding-x-sm:                    $input-btn-padding-x-sm;
+
+$input-padding-y-lg:                    $input-btn-padding-y-lg;
+$input-padding-x-lg:                    $input-btn-padding-x-lg;
+$input-line-height-lg:                  $input-btn-line-height-lg;
+
+$custom-select-height:              $input-height;
+$input-height: auto;
+
+$input-border-color:             #e6ecf5;
+$input-placeholder-color:        #888da8;
+
+$input-focus-border-color:             lighten($brand-primary, 25%);
+$input-focus-bg:                 transparent;
+
+$custom-control-indicator-size:       1.2rem;
+$custom-control-indicator-bg:         #fff;
+
+$custom-control-description-disabled-color:  #888da8;
+
+$input-btn-focus-box-shadow: none;
+$btn-focus-box-shadow: none;
+$input-focus-box-shadow: none;
+
+$pagination-focus-box-shadow: none;
+
+$form-select-padding-y:             $input-btn-padding-y;
+$form-select-padding-x:             $input-btn-padding-x;
+$form-select-border-color:        $input-border-color;
+
+// Pagination
+
+$pagination-padding-x:                1.2rem;
+$pagination-padding-y:                .9rem;
+
+$pagination-color:                     #515365;
+$pagination-border-color:              #e6ecf5;
+
+$pagination-hover-color:               #fff;
+$pagination-hover-bg:                  $link-color;
+$pagination-hover-border:              $link-color;
+
+$pagination-disabled-color:            #515365;
+$pagination-disabled-border:           #e6ecf5;
+
+
+// Cards
+
+$card-border-color:        #e6ecf5;
+$card-cap-bg:              #fff;
+
+
+
+// Tooltips
+
+$tooltip-bg:                  #3f4257;
+$tooltip-padding-y:           5px;
+$tooltip-padding-x:           10px;
+$tooltip-arrow-color:         $tooltip-bg;
+
+// Popovers
+
+$popover-border-color:              #e6ecf5;
+$popover-arrow-outer-color:         #e6ecf5;
+$popover-body-color:                #888da8;
+
+
+// Dropdowns
+
+$dropdown-font-size:                $font-size-base;
+
+
+// Modals
+
+// Padding applied to the modal body
+
+$modal-dialog-margin:         30px;
+
+
+// Padding applied to the modal body
+$modal-inner-padding:         24px 23px 23px;
+
+$modal-content-border-color:     rgba(#e6ecf5, 1);
+$modal-header-border-color:   #e6ecf5;
+$modal-header-padding:        23px 25px 18px;
+
+html {
+  font-size: 16px;
+}
+
+@include media-breakpoint-up(xs) {
+  html {
+	font-size: 13px;
+  }
+}
+
+@include media-breakpoint-up(sm) {
+  html {
+	font-size: 13px;
+  }
+}
+
+@include media-breakpoint-up(md) {
+  html {
+	font-size: 13px;
+  }
+}
+
+@include media-breakpoint-up(lg) {
+  html {
+	font-size: 14px;
+  }
+}
+
+@include media-breakpoint-up(xl) {
+  html {
+	font-size: 16px;
+  }
+}

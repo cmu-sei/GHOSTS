@@ -1,0 +1,75 @@
+/*------------- #TABLE-CAREERS --------------*/
+
+
+.table-careers {
+  width: 100%;
+
+  li {
+	display: table;
+	width: 100%;
+	padding: 30px 35px;
+	border: 1px solid #e6ecf5;
+	border: 1px solid var(--olympus-border-color);
+	margin-top: 18px;
+	box-shadow: 0 0 34px 0 rgba(63, 66, 87, 0.1);
+	border-radius: 5px;
+	transition: background-color .3s ease;
+
+	&:hover {
+	  background-color: #e6ecf5;
+	  background-color: var(--olympus-border-color);
+	}
+  }
+
+  span {
+	display: table-cell;
+	vertical-align: middle;
+	width: 20%;
+
+	&.position, &.type {
+	  color: #515365;
+	  color: var(--olympus-heading-color);
+	}
+  }
+
+  .head {
+	border: none;
+	box-shadow: none;
+
+	span {
+	  font-size: 10px;
+	  text-transform: uppercase;
+	}
+
+	&:hover {
+	  background-color: transparent;
+	}
+  }
+
+  .btn {
+	margin: 0;
+  }
+}
+
+
+/*================= Responsive Mode ============*/
+
+
+@media (max-width: 768px) {
+  .table-careers li {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+  }
+
+  .table-careers span {
+	width: auto;
+	margin-bottom: 5px;
+  }
+}
+
+@media (max-width: 640px) {
+  .table-careers li {
+	padding: 15px;
+  }
+}

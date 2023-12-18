@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Posts Load More</title>
+</head>
+<body>
+
+<div class="col col-xl-4 col-lg-4 col-md-6 col-sm-6 col-12 sorting-item coffee-mugs">
+
+	
+	<!-- Product Item -->
+	
+	<div class="shop-product-item product-item-v2">
+		<div class="product-thumb">
+			<div class="block-title">
+				<a href="#" class="h5 title">White Enamel Mug</a>
+			</div>
+	
+			<div class="block-price">
+				<ul class="rait-stars">
+					<li>
+						<svg class="star-icon c-primary" width="10" height="10"><use xlink:href="#olymp-star-full"></use></svg>
+					</li>
+					<li>
+						<svg class="star-icon c-primary" width="10" height="10"><use xlink:href="#olymp-star-full"></use></svg>
+					</li>
+	
+					<li>
+						<svg class="star-icon c-primary" width="10" height="10"><use xlink:href="#olymp-star-full"></use></svg>
+					</li>
+					<li>
+						<svg class="star-icon c-primary" width="10" height="10"><use xlink:href="#olymp-star-full"></use></svg>
+					</li>
+					<li>
+						<svg class="star-icon" width="10" height="10"><use xlink:href="#olymp-star-null"></use></svg>
+					</li>
+				</ul>
+				<div class="product-price">$20</div>
+			</div>
+	
+			<img loading="lazy" src="img/shop-product1.webp" alt="product" width="230" height="218">
+	
+			<a href="#" class="btn btn-blue btn-md-2">Add to Cart</a>
+		</div>
+	</div>
+	
+	<!-- ... end Product Item -->
+
+</div>
+<div class="col col-xl-4 col-lg-4 col-md-6 col-sm-6 col-12 sorting-item clothing">
+
+	
+	<!-- Product Item -->
+	
+	<div class="shop-product-item product-item-v2">
+		<div class="product-thumb">
+			<div class="block-title">
+				<a href="#" class="h5 title">Olympus White Shirt</a>
+			</div>
+			<div class="block-price">
+				<ul class="rait-stars">
+					<li>
+						<svg class="star-icon c-primary" width="10" height="10"><use xlink:href="#olymp-star-full"></use></svg>
+					</li>
+					<li>
+						<svg class="star-icon c-primary" width="10" height="10"><use xlink:href="#olymp-star-full"></use></svg>
+					</li>
+	
+					<li>
+						<svg class="star-icon c-primary" width="10" height="10"><use xlink:href="#olymp-star-full"></use></svg>
+					</li>
+					<li>
+						<svg class="star-icon c-primary" width="10" height="10"><use xlink:href="#olymp-star-full"></use></svg>
+					</li>
+					<li>
+						<svg class="star-icon" width="10" height="10"><use xlink:href="#olymp-star-null"></use></svg>
+					</li>
+				</ul>
+				<div class="product-price">$20</div>
+			</div>
+			<img loading="lazy" src="img/shop-product2.webp" alt="product" width="240" height="336">
+			<a href="#" class="btn btn-blue btn-md-2">Add to Cart</a>
+		</div>
+	</div>
+	
+	<!-- ... end Product Item -->
+
+</div>
+<div class="col col-xl-4 col-lg-4 col-md-6 col-sm-6 col-12 sorting-item accesories">
+
+	
+	<!-- Product Item -->
+	
+	<div class="shop-product-item product-item-v2">
+		<div class="product-thumb">
+			<div class="block-title">
+				<a href="#" class="h5 title">Ringed Notepad</a>
+			</div>
+			<div class="block-price">
+				<ul class="rait-stars">
+					<li>
+						<svg class="star-icon c-primary" width="10" height="10"><use xlink:href="#olymp-star-full"></use></svg>
+					</li>
+					<li>
+						<svg class="star-icon c-primary" width="10" height="10"><use xlink:href="#olymp-star-full"></use></svg>
+					</li>
+	
+					<li>
+						<svg class="star-icon c-primary" width="10" height="10"><use xlink:href="#olymp-star-full"></use></svg>
+					</li>
+					<li>
+						<svg class="star-icon" width="10" height="10"><use xlink:href="#olymp-star-null"></use></svg>
+					</li>
+					<li>
+						<svg class="star-icon" width="10" height="10"><use xlink:href="#olymp-star-null"></use></svg>
+					</li>
+				</ul>
+				<div class="product-price">$16</div>
+	
+			</div>
+			<img loading="lazy" src="img/shop-product3.webp" alt="product" width="212" height="313">
+			<a href="#" class="btn btn-blue btn-md-2">Add to Cart</a>
+		</div>
+	</div>
+	
+	<!-- ... end Product Item -->
+
+</div>
+<div class="col col-xl-4 col-lg-4 col-md-6 col-sm-6 col-12 sorting-item clothing">
+
+	
+	<!-- Product Item -->
+	
+	<div class="shop-product-item product-item-v2">
+		<div class="product-thumb">
+			<div class="block-title">
+				<a href="#" class="h5 title">Olympus Orange Shirt</a>
+			</div>
+			<div class="block-price">
+				<ul class="rait-stars">
+					<li>
+						<svg class="star-icon c-primary" width="10" height="10"><use xlink:href="#olymp-star-full"></use></svg>
+					</li>
+					<li>
+						<svg class="star-icon c-primary" width="10" height="10"><use xlink:href="#olymp-star-full"></use></svg>
+					</li>
+	
+					<li>
+						<svg class="star-icon c-primary" width="10" height="10"><use xlink:href="#olymp-star-full"></use></svg>
+					</li>
+					<li>
+						<svg class="star-icon c-primary" width="10" height="10"><use xlink:href="#olymp-star-full"></use></svg>
+					</li>
+					<li>
+						<svg class="star-icon c-primary" width="10" height="10"><use xlink:href="#olymp-star-full"></use></svg>
+					</li>
+				</ul>
+				<div class="product-price">$42</div>
+			</div>
+			<img loading="lazy" src="img/shop-product4.webp" alt="product" width="232" height="335">
+			<a href="#" class="btn btn-blue btn-md-2">Add to Cart</a>
+		</div>
+	</div>
+	
+	<!-- ... end Product Item -->
+
+</div>
+<div class="col col-xl-4 col-lg-4 col-md-6 col-sm-6 col-12 sorting-item accesories">
+
+	
+	<!-- Product Item -->
+	
+	<div class="shop-product-item product-item-v2">
+		<div class="product-thumb">
+			<div class="block-title">
+				<a href="#" class="h5 title">White Tote Bag</a>
+			</div>
+			<div class="block-price">
+				<ul class="rait-stars">
+					<li>
+						<svg class="star-icon c-primary" width="10" height="10"><use xlink:href="#olymp-star-full"></use></svg>
+					</li>
+					<li>
+						<svg class="star-icon c-primary" width="10" height="10"><use xlink:href="#olymp-star-full"></use></svg>
+					</li>
+	
+					<li>
+						<svg class="star-icon c-primary" width="10" height="10"><use xlink:href="#olymp-star-full"></use></svg>
+					</li>
+					<li>
+						<svg class="star-icon c-primary" width="10" height="10"><use xlink:href="#olymp-star-full"></use></svg>
+					</li>
+					<li>
+						<svg class="star-icon" width="10" height="10"><use xlink:href="#olymp-star-null"></use></svg>
+					</li>
+				</ul>
+				<div class="product-price">$18</div>
+			</div>
+			<img loading="lazy" src="img/shop-product5.webp" alt="product" width="197" height="279">
+			<a href="#" class="btn btn-blue btn-md-2">Add to Cart</a>
+		</div>
+	</div>
+	
+	<!-- ... end Product Item -->
+
+</div>
+<div class="col col-xl-4 col-lg-4 col-md-6 col-sm-6 col-12 sorting-item coffee-mugs">
+
+	
+	<!-- Product Item -->
+	
+	<div class="shop-product-item product-item-v2">
+		<div class="product-thumb">
+			<div class="block-title">
+				<a href="#" class="h5 title">Orange Enamel Mug</a>
+			</div>
+			<div class="block-price">
+				<ul class="rait-stars">
+					<li>
+						<svg class="star-icon c-primary" width="10" height="10"><use xlink:href="#olymp-star-full"></use></svg>
+					</li>
+					<li>
+						<svg class="star-icon c-primary" width="10" height="10"><use xlink:href="#olymp-star-full"></use></svg>
+					</li>
+	
+					<li>
+						<svg class="star-icon c-primary" width="10" height="10"><use xlink:href="#olymp-star-full"></use></svg>
+					</li>
+					<li>
+						<svg class="star-icon c-primary" width="10" height="10"><use xlink:href="#olymp-star-full"></use></svg>
+					</li>
+					<li>
+						<svg class="star-icon" width="10" height="10"><use xlink:href="#olymp-star-null"></use></svg>
+					</li>
+				</ul>
+				<div class="product-price with-sale"><del>$16</del>$22</div>
+			</div>
+			<img loading="lazy" src="img/shop-product6.webp" alt="product" width="269" height="217">
+			<a href="#" class="btn btn-blue btn-md-2">Add to Cart</a>
+			<span class="onsale">Sale</span>
+		</div>
+	</div>
+	
+	<!-- ... end Product Item -->
+
+</div>
+<div class="col col-xl-4 col-lg-4 col-md-6 col-sm-6 col-12 sorting-item coffee-mugs">
+
+	
+	<!-- Product Item -->
+	
+	<div class="shop-product-item product-item-v2">
+		<div class="product-thumb">
+			<div class="block-title">
+				<a href="#" class="h5 title">White Coffee Mug</a>
+			</div>
+			<div class="block-price">
+				<ul class="rait-stars">
+					<li>
+						<svg class="star-icon c-primary" width="10" height="10"><use xlink:href="#olymp-star-full"></use></svg>
+					</li>
+					<li>
+						<svg class="star-icon c-primary" width="10" height="10"><use xlink:href="#olymp-star-full"></use></svg>
+					</li>
+	
+					<li>
+						<svg class="star-icon c-primary" width="10" height="10"><use xlink:href="#olymp-star-full"></use></svg>
+					</li>
+					<li>
+						<svg class="star-icon c-primary" width="10" height="10"><use xlink:href="#olymp-star-full"></use></svg>
+					</li>
+					<li>
+						<svg class="star-icon" width="10" height="10"><use xlink:href="#olymp-star-null"></use></svg>
+					</li>
+				</ul>
+				<div class="product-price">$28</div>
+	
+			</div>
+			<img loading="lazy" src="img/shop-product7.webp" alt="product" width="299" height="220">
+			<a href="#" class="btn btn-blue btn-md-2">Add to Cart</a>
+		</div>
+	</div>
+	
+	<!-- ... end Product Item -->
+
+</div>
+<div class="col col-xl-4 col-lg-4 col-md-6 col-sm-6 col-12 sorting-item accesories">
+
+	
+	<!-- Product Item -->
+	
+	<div class="shop-product-item product-item-v2">
+		<div class="product-thumb">
+			<div class="block-title">
+				<a href="#" class="h5 title">Olympus W Orange Shirt</a>
+			</div>
+			<div class="block-price">
+				<ul class="rait-stars">
+					<li>
+						<svg class="star-icon c-primary" width="10" height="10"><use xlink:href="#olymp-star-full"></use></svg>
+					</li>
+					<li>
+						<svg class="star-icon c-primary" width="10" height="10"><use xlink:href="#olymp-star-full"></use></svg>
+					</li>
+	
+					<li>
+						<svg class="star-icon c-primary" width="10" height="10"><use xlink:href="#olymp-star-full"></use></svg>
+					</li>
+					<li>
+						<svg class="star-icon c-primary" width="10" height="10"><use xlink:href="#olymp-star-full"></use></svg>
+					</li>
+					<li>
+						<svg class="star-icon c-primary" width="10" height="10"><use xlink:href="#olymp-star-full"></use></svg>
+					</li>
+				</ul>
+				<div class="product-price">$40</div>
+			</div>
+			<img loading="lazy" src="img/shop-product8.webp" alt="product" width="196" height="299">
+			<a href="#" class="btn btn-blue btn-md-2">Add to Cart</a>
+		</div>
+	</div>
+	
+	<!-- ... end Product Item -->
+
+</div>
+<div class="col col-xl-4 col-lg-4 col-md-6 col-sm-6 col-12 sorting-item clothing">
+
+	
+	<!-- Product Item -->
+	
+	<div class="shop-product-item product-item-v2">
+		<div class="product-thumb">
+			<div class="block-title">
+				<a href="#" class="h5 title">Olympus W White Shirt</a>
+			</div>
+			<div class="block-price">
+				<ul class="rait-stars">
+					<li>
+						<svg class="star-icon c-primary" width="10" height="10"><use xlink:href="#olymp-star-full"></use></svg>
+					</li>
+					<li>
+						<svg class="star-icon c-primary" width="10" height="10"><use xlink:href="#olymp-star-full"></use></svg>
+					</li>
+	
+					<li>
+						<svg class="star-icon c-primary" width="10" height="10"><use xlink:href="#olymp-star-full"></use></svg>
+					</li>
+					<li>
+						<svg class="star-icon" width="10" height="10"><use xlink:href="#olymp-star-null"></use></svg>
+					</li>
+					<li>
+						<svg class="star-icon" width="10" height="10"><use xlink:href="#olymp-star-null"></use></svg>
+					</li>
+				</ul>
+				<div class="product-price">$38</div>
+			</div>
+			<img loading="lazy" src="img/shop-product9.webp" alt="product" width="196" height="300">
+			<a href="#" class="btn btn-blue btn-md-2">Add to Cart</a>
+		</div>
+	</div>
+	
+	<!-- ... end Product Item -->
+
+</div>
+
+</body>
+</html>

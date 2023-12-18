@@ -1,0 +1,365 @@
+/*------------- #W-WEATHER --------------*/
+
+
+
+.w-weather {
+  background-image: url("../img/bg-wethear.webp");
+  background-repeat: no-repeat;
+  background-size: cover;
+  padding: 25px;
+  position: relative;
+  color: #fff;
+  color: var(--olympus-white-color);
+  text-align: center;
+  background-color: #38a9ff;
+  background-color: var(--olympus-blue);
+
+  .olymp-weather-partly-sunny-icon {
+	width: 64px;
+	height: 65px;
+  }
+
+  .weekly-forecast {
+	margin-right: -25px;
+	margin-left: -25px;
+	position: relative;
+	padding: 0 20px;
+
+	li {
+	  display: inline-block;
+	  vertical-align: top;
+	  padding: 15px 3px;
+	  text-transform: uppercase;
+	  font-size: 10px;
+	  font-weight: 700;
+
+	  & > * {
+		margin-bottom: 8px;
+
+		&:last-child {
+		  margin-bottom: 0;
+		}
+	  }
+
+	  svg {
+		height: 22px;
+		width: 22px;
+	  }
+
+	  .olymp-weather-partly-sunny-icon {
+		height: 22px;
+		width: 22px;
+	  }
+	}
+
+	&:before {
+	  content: '';
+	  display: block;
+	  position: absolute;
+	  top: 0;
+	  left: 0;
+	  right: 0;
+	  bottom: 0;
+	  background-color: #fff;
+	  background-color: var(--olympus-white-color);
+	  opacity: .1;
+	}
+  }
+
+  .more {
+	position: absolute;
+	right: 25px;
+	top: 20px;
+	opacity: .8;
+	color: #fff;
+	color: var(--olympus-white-color);
+	fill: #fff;
+	fill: var(--olympus-white-color);
+  }
+
+  .temperature-sensor {
+	font-size: 60px;
+	line-height: 1;
+  }
+
+  & > * {
+	margin-bottom: 25px;
+
+	&:last-child {
+	  margin-bottom: 0;
+	}
+  }
+
+  .max-min-temperature {
+	margin-right: 20px;
+
+	span {
+	  display: block;
+	}
+  }
+
+  svg {
+	fill: #fff;
+	fill: var(--olympus-white-color);
+  }
+
+  .climate {
+	font-size: 18px;
+  }
+
+  .wethear-now {
+	margin-top: 10px;
+  }
+
+  .wethear-now-description {
+
+	span {
+	  font-size: 11px;
+
+	  & > span {
+		font-weight: 500;
+	  }
+
+	  & + span {
+		margin-left: 15px;
+	  }
+	}
+  }
+
+  .date {
+	font-weight: 400;
+	color: #fff;
+	color: var(--olympus-white-color);
+	margin-bottom: 0;
+  }
+}
+
+.swiper-slide-weather {
+  border-bottom: 1px solid #e6ecf5;
+  border-bottom: 1px solid var(--olympus-border-color);
+}
+
+
+.day-wethear-item {
+  float: left;
+  padding: 25px 0 20px;
+  border-right: 1px solid #e6ecf5;
+  border-right: 1px solid var(--olympus-border-color);
+  text-align: center;
+  width: 16.5%;
+
+  &:last-child {
+	border-right: none;
+  }
+
+  .title {
+	font-size: 12px;
+	font-weight: 700;
+	color: #515365;
+	color: var(--olympus-heading-color);
+	margin-bottom: 40px;
+  }
+
+  .icon {
+	fill: #38a9ff;
+	fill: var(--olympus-blue);
+	margin-bottom: 30px;
+	min-height: 54px;
+	width: 55px;
+  }
+
+  .temperature-sensor {
+	font-size: 18px;
+	color: #515365;
+	color: var(--olympus-heading-color);
+	margin-bottom: 10px;
+  }
+
+  .wethear-now {
+	font-weight: 700;
+
+	span {
+	  font-size: 11px;
+	  color: #c5c8d8;
+
+	  & + span {
+		margin-left: 12px;
+	  }
+	}
+
+	.high {
+	  color: #888da8;
+	  color: var(--olympus-body-font-color);
+	}
+  }
+}
+
+.wethear-content {
+  color: #fff;
+  color: var(--olympus-white-color);
+  text-align: center;
+
+  .icon {
+	fill: #fff;
+	fill: var(--olympus-white-color);
+	margin-bottom: 20px;
+  }
+
+  .temperature-sensor {
+	font-size: 84px;
+	margin-bottom: 10px;
+	line-height: 1;
+  }
+
+  .wethear-now {
+	margin-bottom: 15px;
+
+	span {
+	  font-size: 13px;
+
+	  & + span {
+		margin-left: 12px;
+	  }
+	}
+  }
+
+  .climate {
+	font-size: 24px;
+	margin-bottom: 15px;
+  }
+
+  .wethear-now-description {
+	font-size: 12px;
+
+	& > * {
+	  display: inline-block;
+	  padding: 0 25px;
+	}
+
+	.icon {
+	  margin-bottom: 10px;
+	}
+
+	span {
+	  font-weight: 700;
+	}
+  }
+}
+
+.main-header-weather {
+  padding: 20px 30px 30px;
+
+  .img-bottom {
+	position: absolute;
+	bottom: 0;
+	left: 50%;
+	transform: translate(-50%, 0);
+	margin-bottom: 0;
+  }
+
+  .date-and-place {
+	position: absolute;
+	top: 40px;
+	left: 30px;
+	color: #fff;
+	color: var(--olympus-white-color);
+  }
+
+  .date {
+	font-size: 16px;
+  }
+
+  .place {
+	font-size: 11px;
+  }
+
+  .wethear-update {
+	position: absolute;
+	top: 40px;
+	right: 30px;
+	font-size: 10px;
+	color: #fff;
+	color: var(--olympus-white-color);
+	fill: #fff;
+	fill: var(--olympus-white-color);
+
+	svg {
+	  margin-left: 10px;
+	  width: 12px;
+	  height: 13px;
+	}
+  }
+
+  .olymp-weather-partly-sunny-icon {
+	width: 64px;
+	height: 65px;
+  }
+
+  .olymp-weather-wind-icon-header {
+	width: 47px;
+	height: 34px;
+  }
+
+  .olymp-weather-rain-drops-icon {
+	width: 47px;
+	height: 34px;
+  }
+
+  .olymp-weather-thermometer-icon {
+	width: 47px;
+	height: 34px;
+  }
+}
+
+
+
+/*------------- Responsive mode styles --------------*/
+
+@media (max-width: 1400px) {
+  .w-weather .weekly-forecast li {
+	padding: 15px 1px;
+  }
+}
+
+@media (max-width: 540px) {
+  .day-wethear-item {
+	width: 33%;
+  }
+
+}
+
+@media (max-width: 480px) {
+
+  .wethear-content {
+	margin-top: 100px;
+  }
+}
+
+@media (max-width: 360px) {
+  .day-wethear-item {
+	width: 49%;
+  }
+
+  .wethear-content .wethear-now-description > * {
+	padding: 0 5px;
+  }
+
+  .main-header-weather .date-and-place {
+	position: relative;
+	top: auto;
+	left: auto;
+	text-align: center;
+	margin-bottom: 20px;
+  }
+
+  .main-header-weather .wethear-update {
+	position: relative;
+	top: auto;
+	right: auto;
+	text-align: center;
+  }
+
+  .wethear-content {
+	margin-top: 20px;
+  }
+}

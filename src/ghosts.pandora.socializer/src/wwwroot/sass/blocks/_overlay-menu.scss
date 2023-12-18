@@ -1,0 +1,34 @@
+/*------------- #OVERLAY-MENU --------------*/
+
+
+
+body {
+  overflow-x: hidden;
+
+  &:before {
+	content: '';
+	display: block;
+	width: 100%;
+	height: 100%;
+	position: fixed;
+	top: 0;
+	left: 0;
+	background: rgba(43, 45, 59, .9);
+	opacity: 0;
+	transition: opacity .3s ease;
+	z-index: -999;
+  }
+
+  &.overlay-enable:before {
+	opacity: .8;
+	z-index: 500;
+  }
+
+  &.body--fixed {
+	position: fixed;
+	width: 100%;
+  }
+}
+
+
+

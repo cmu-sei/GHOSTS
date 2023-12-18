@@ -1,0 +1,53 @@
+/*------------- #TESTIMONIALS --------------*/
+
+
+
+.crumina-testimonial-item {
+	text-align: center;
+
+  .author-thumb {
+	height: 98px;
+	width: 98px;
+	min-height: 98px;
+	min-width: 98px;
+	margin: 0 auto 15px;
+
+	img {
+	  border: 4px solid #fff;
+	  border: 4px solid var(--olympus-white-color);
+	  display: block;
+	}
+  }
+
+  .rait-stars {
+	margin-bottom: 40px;
+
+	.star-icon {
+	  font-size: 11px;
+	  color: #ffce08;
+	}
+  }
+
+  .author-content {
+	margin-top: auto;
+	margin-bottom: 15px;
+  }
+
+  .testimonial-message {
+	margin-bottom: 70px;
+  }
+}
+
+.testimonial-header-thumb {
+  height: 90px;
+  overflow: hidden;
+  background-image: url("../img/testimonial-header.webp");
+  background-size: cover;
+}
+
+.testimonial-item-content {
+  margin-top: -49px;
+  padding: 0 30px 30px;
+  display: flex;
+  flex-direction: column;
+}

@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+	<title>Posts Load More V2</title>
+</head>
+<body>
+
+<div class="col col-xl-4 col-lg-4 col-md-6 col-sm-6 col-12 sorting-item community">
+	<div class="ui-block">
+
+		
+		<!-- Post -->
+		
+		<article class="hentry blog-post blog-post-v2">
+		
+			<div class="post-thumb">
+				<img loading="lazy" src="img/post1.webp" alt="photo" width="370" height="261">
+			</div>
+		
+			<div class="post-content">
+				<a href="#" class="post-category bg-transparent">THE COMMUNITY</a>
+				<a href="#" class="h4 post-title">Here’s the Featured Urban photo of August! </a>
+		
+				<div class="post__author author vcard inline-items">
+					<img loading="lazy" src="img/avatar83-sm.webp" alt="author" width="28" height="28">
+		
+					<div class="author-date not-uppercase">
+						<a class="h6 post__author-name fn" href="#">Maddy Simmons</a>
+						<div class="post__date">
+							<time class="published" datetime="2017-03-24T18:18">
+								7 hours ago
+							</time>
+						</div>
+					</div>
+		
+				</div>
+			</div>
+		
+		</article>
+		
+		<!-- ... end Post -->
+
+	</div>
+</div>
+<div class="col col-xl-4 col-lg-4 col-md-6 col-sm-6 col-12 sorting-item news">
+	<div class="ui-block">
+
+		
+		<!-- Post -->
+		
+		<article class="hentry blog-post blog-post-v2">
+		
+			<div class="post-thumb">
+				<img loading="lazy" src="img/post10.webp" alt="photo" width="368" height="560">
+			</div>
+		
+			<div class="post-content">
+				<a href="#" class="post-category bg-transparent">OLYMPUS NEWS</a>
+				<a href="#" class="h4 post-title">Olympus Network added new photo filters!</a>
+		
+				<div class="post__author author vcard inline-items">
+					<img loading="lazy" src="img/avatar84-sm.webp" alt="author" width="28" height="28">
+		
+					<div class="author-date not-uppercase">
+						<a class="h6 post__author-name fn" href="#">Jack Scorpio</a>
+						<div class="post__date">
+							<time class="published" datetime="2017-03-24T18:18">
+								12 hours ago
+							</time>
+						</div>
+					</div>
+				</div>
+			</div>
+		
+		</article>
+		
+		<!-- ... end Post -->
+
+	</div>
+</div>
+<div class="col col-xl-4 col-lg-4 col-md-6 col-sm-6 col-12 sorting-item inspiration">
+	<div class="ui-block">
+
+		
+		<!-- Post -->
+		
+		<article class="hentry blog-post blog-post-v2">
+		
+			<div class="post-thumb">
+				<img loading="lazy" src="img/post3.webp" alt="photo" width="370" height="261">
+			</div>
+		
+			<div class="post-content">
+				<a href="#" class="post-category bg-transparent">INSPIRATION</a>
+				<a href="#" class="h4 post-title">Take a look at these truly awesome worspaces</a>
+		
+				<div class="post__author author vcard inline-items">
+					<img loading="lazy" src="img/avatar83-sm.webp" alt="author" width="28" height="28">
+		
+					<div class="author-date not-uppercase">
+						<a class="h6 post__author-name fn" href="#">Maddy Simmons</a>
+						<div class="post__date">
+							<time class="published" datetime="2017-03-24T18:18">
+								2 days ago
+							</time>
+						</div>
+					</div>
+		
+				</div>
+			</div>
+		
+		</article>
+		
+		<!-- ... end Post -->
+
+	</div>
+</div>
+<div class="col col-xl-4 col-lg-4 col-md-6 col-sm-6 col-12 sorting-item inspiration">
+	<div class="ui-block">
+
+		
+		<!-- Post -->
+		
+		<article class="hentry blog-post blog-post-v2">
+		
+			<div class="post-thumb">
+				<img loading="lazy" src="img/post11.webp" alt="photo" width="368" height="501">
+			</div>
+		
+			<div class="post-content">
+				<a href="#" class="post-category bg-transparent">INSPIRATION</a>
+				<a href="#" class="h4 post-title">Take a look at these truly awesome worspaces</a>
+		
+				<div class="post__author author vcard inline-items">
+					<img loading="lazy" src="img/avatar84-sm.webp" alt="author" width="28" height="28">
+		
+					<div class="author-date not-uppercase">
+						<a class="h6 post__author-name fn" href="#">Jack Scorpio</a>
+						<div class="post__date">
+							<time class="published" datetime="2017-03-24T18:18">
+								20 days ago
+							</time>
+						</div>
+					</div>
+				</div>
+			</div>
+		
+		</article>
+		
+		<!-- ... end Post -->
+
+	</div>
+</div>
+<div class="col col-xl-4 col-lg-4 col-md-6 col-sm-6 col-12 sorting-item community">
+	<div class="ui-block">
+
+		
+		<!-- Post -->
+		
+		<article class="hentry blog-post blog-post-v2">
+		
+			<div class="post-thumb">
+				<img loading="lazy" src="img/post6.webp" alt="photo" width="369" height="261">
+			</div>
+		
+			<div class="post-content">
+				<a href="#" class="post-category bg-transparent">THE COMMUNITY</a>
+				<a href="#" class="h4 post-title">Olympians: Journal of my backpacking days</a>
+		
+				<div class="post__author author vcard inline-items">
+					<img loading="lazy" src="img/avatar84-sm.webp" alt="author" width="28" height="28">
+		
+					<div class="author-date not-uppercase">
+						<a class="h6 post__author-name fn" href="#">Jack Scorpio</a>
+						<div class="post__date">
+							<time class="published" datetime="2017-03-24T18:18">
+								1 month ago
+							</time>
+						</div>
+					</div>
+		
+				</div>
+			</div>
+		
+		</article>
+		
+		<!-- ... end Post -->
+	</div>
+</div>
+<div class="col col-xl-4 col-lg-4 col-md-6 col-sm-6 col-12 sorting-item community">
+	<div class="ui-block">
+
+		
+		<!-- Post -->
+		
+		<article class="hentry blog-post blog-post-v2">
+		
+			<div class="post-thumb">
+				<img loading="lazy" src="img/post5.webp" alt="photo" width="369" height="259">
+			</div>
+		
+			<div class="post-content">
+				<a href="#" class="post-category bg-transparent">THE COMMUNITY</a>
+				<a href="#" class="h4 post-title">Olympus’s family picnic was a success!</a>
+		
+				<div class="post__author author vcard inline-items">
+					<img loading="lazy" src="img/avatar84-sm.webp" alt="author" width="28" height="28">
+		
+					<div class="author-date not-uppercase">
+						<a class="h6 post__author-name fn" href="#">Jack Scorpio</a>
+						<div class="post__date">
+							<time class="published" datetime="2017-03-24T18:18">
+								1 month ago
+							</time>
+						</div>
+					</div>
+		
+				</div>
+			</div>
+		
+		</article>
+		
+		<!-- ... end Post -->
+
+	</div>
+</div>
+<div class="col col-xl-4 col-lg-4 col-md-6 col-sm-6 col-12 sorting-item inspiration">
+	<div class="ui-block">
+
+		
+		<!-- Post -->
+		
+		<article class="hentry blog-post blog-post-v2">
+		
+			<div class="post-thumb">
+				<img loading="lazy" src="img/post12.webp" alt="photo" width="368" height="520">
+			</div>
+		
+			<div class="post-content">
+				<a href="#" class="post-category bg-transparent">INSPIRATION</a>
+				<a href="#" class="h4 post-title">Check out this 10 yummy breakfast recipes</a>
+		
+				<div class="post__author author vcard inline-items">
+					<img loading="lazy" src="img/author-page.webp" width="36" height="36" alt="author">
+		
+					<div class="author-date not-uppercase">
+						<a class="h6 post__author-name fn" href="#">James Spiegel</a>
+						<div class="post__date">
+							<time class="published" datetime="2017-03-24T18:18">
+								2 months ago
+							</time>
+						</div>
+					</div>
+		
+				</div>
+			</div>
+		
+		</article>
+		
+		<!-- ... end Post -->
+
+	</div>
+</div>
+<div class="col col-xl-4 col-lg-4 col-md-6 col-sm-6 col-12 sorting-item community">
+	<div class="ui-block">
+
+		
+		<!-- Post -->
+		
+		<article class="hentry blog-post blog-post-v2">
+		
+			<div class="post-thumb">
+				<img loading="lazy" src="img/post7.webp" alt="photo" width="367" height="261">
+			</div>
+		
+			<div class="post-content">
+				<a href="#" class="post-category bg-transparent">THE COMMUNITY</a>
+				<a href="#" class="h4 post-title">Here are the best tattoos of our community</a>
+		
+				<div class="post__author author vcard inline-items">
+					<img loading="lazy" src="img/avatar84-sm.webp" alt="author" width="28" height="28">
+		
+					<div class="author-date not-uppercase">
+						<a class="h6 post__author-name fn" href="#">Jack Scorpio</a>
+						<div class="post__date">
+							<time class="published" datetime="2017-03-24T18:18">
+								2 months ago
+							</time>
+						</div>
+					</div>
+		
+				</div>
+			</div>
+		
+		</article>
+		
+		<!-- ... end Post -->
+
+	</div>
+</div>
+<div class="col col-xl-4 col-lg-4 col-md-6 col-sm-6 col-12 sorting-item inspiration">
+	<div class="ui-block">
+
+		
+		<!--Post -->
+		
+		<article class="hentry blog-post blog-post-v2">
+		
+			<div class="post-thumb">
+				<img loading="lazy" src="img/post8.webp" alt="photo" width="368" height="260">
+			</div>
+		
+			<div class="post-content">
+				<a href="#" class="post-category bg-transparent">INSPIRATION</a>
+				<a href="#" class="h4 post-title">Take a look to the coolest beaches of the world</a>
+		
+				<div class="post__author author vcard inline-items">
+					<img loading="lazy" src="img/avatar83-sm.webp" alt="author" width="28" height="28">
+					<div class="author-date not-uppercase">
+						<a class="h6 post__author-name fn" href="#">Maddy Simmons</a>
+						<div class="post__date">
+							<time class="published" datetime="2017-03-24T18:18">
+								2 months ago
+							</time>
+						</div>
+					</div>
+				</div>
+			</div>
+		
+		</article>
+		
+		<!-- ... end Post -->
+	</div>
+</div>
+
+</body>
+</html>

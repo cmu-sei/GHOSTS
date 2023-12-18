@@ -1,0 +1,30 @@
+/*------------- #W-ABOUT --------------*/
+
+
+
+.w-about {
+  .logo {
+	color: inherit;
+	overflow: hidden;
+	position: relative;
+	margin-bottom: 30px;
+	padding: 0;
+
+	.img-wrap {
+	  margin: 0;
+	}
+  }
+
+  ul {
+	margin-bottom: 0;
+  }
+
+  img {
+	margin-right: 17px;
+  }
+
+  .logo-title {
+	color: #515365;
+	color: var(--olympus-heading-color);
+  }
+}

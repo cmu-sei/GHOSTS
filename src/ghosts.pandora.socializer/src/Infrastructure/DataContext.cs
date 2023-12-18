@@ -34,3 +34,10 @@ public class Post
     public string Message { get; set; }
     public DateTime CreatedUtc { get; set; }
 }
+
+public class User
+{
+    public string Name { get; set; }
+    public string Avatar { get; set; }
+    public string Status { get; set; }
+}

@@ -1,0 +1,102 @@
+/*------------- #OPEN-TOPIC-TABLE --------------*/
+
+
+
+.open-topic-table {
+	width: 100%;
+
+  thead {
+	background-color: #38a9ff;
+	background-color: var(--olympus-blue);
+
+	th {
+	  font-size: 12px;
+	  font-weight: 700;
+	  padding: 15px 25px;
+	  color: #fff;
+	  color: var(--olympus-white-color);
+
+	  &.author {
+		text-align: left;
+	  }
+	}
+  }
+
+  td {
+	padding: 35px 25px;
+  }
+
+  tr {
+	border-bottom: 1px solid #e6ecf5;
+	border-bottom: 1px solid var(--olympus-border-color);
+	border-top: 1px solid #e6ecf5;
+	border-top: 1px solid var(--olympus-border-color);
+
+	&:last-child {
+	  border-bottom: none;
+	}
+  }
+
+  .topic-date {
+	padding: 10px 23px;
+	background-color: #fafbfd;
+	background-color: var(--olympus-smoke-light);
+	font-size: 11px;
+  }
+
+  .author {
+	text-align: center;
+  }
+
+  .author-thumb {
+	margin-bottom: 20px;
+
+	img {
+	  display: block;
+	  width: 80px;
+	  height: 80px;
+	}
+  }
+
+  .author-name {
+	display: block;
+	white-space: nowrap;
+
+	&:hover {
+	  color: #ff5e3a;
+	  color: var(--olympus-primary-color);
+	}
+  }
+
+  .country {
+	font-size: 11px;
+  }
+
+  .posts {
+	vertical-align: top;
+  }
+}
+
+.reply-topic {
+  float: right;
+  color: #ff5e3a;
+  color: var(--olympus-primary-color);
+  font-size: 11px;
+}
+
+
+/*------------- Responsive mode styles --------------*/
+
+
+@media (max-width: 640px) {
+
+  .open-topic-table thead th,
+  .open-topic-table td {
+	padding: 5px;
+  }
+
+  .open-topic-table .author-thumb img {
+	width: 40px;
+	height: 40px;
+  }
+}

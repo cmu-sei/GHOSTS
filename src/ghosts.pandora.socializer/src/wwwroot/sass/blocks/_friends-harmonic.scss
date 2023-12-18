@@ -1,0 +1,50 @@
+/*------------- #FRIENDS-HARMONIC --------------*/
+
+
+
+.friends-harmonic {
+  margin-bottom: 0;
+  display: flex;
+
+  a {
+	width: 28px;
+	height: 28px;
+	border-radius: 100%;
+	overflow: hidden;
+	border: 2px solid #fff;
+	border: 2px solid var(--olympus-white-color);
+	display: block;
+	margin-left: -12px;
+  }
+
+  li {
+
+	&:first-child a {
+	  margin-left: 0;
+	}
+  }
+
+  .with-text {
+	margin-top: 5px;
+	margin-left: 15px;
+  }
+
+  .all-users {
+	line-height: 26px;
+	opacity: .8;
+
+	&:hover {
+	  color: #fff;
+	  color: var(--olympus-white-color);
+	}
+  }
+}
+
+.friends-harmonic-wrap {
+  display: flex;
+  align-items: center;
+
+  & + .comments-shared {
+	margin-top: 15px;
+  }
+}

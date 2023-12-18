@@ -1,0 +1,19 @@
+/*------------- #W-BLOG-POSTS --------------*/
+
+
+
+.w-blog-posts {
+  margin-bottom: 0;
+
+  .post p {
+	margin: 10px 0 15px 0;
+  }
+
+  .post__date {
+	font-size: 12px;
+  }
+
+  li:last-child .post {
+	border-bottom: none;
+  }
+}

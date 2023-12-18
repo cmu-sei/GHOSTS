@@ -1,0 +1,358 @@
+/*------------- #BOOTSTRAP-CUSTOMIZATION --------------*/
+
+body {
+  color: #888da8;
+  color: var(--olympus-body-font-color);
+  background-color: #edf2f6;
+  background-color: var(--olympus-body-bg);
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+a {
+  transition: all .15s ease;
+
+  &:hover {
+    color: #ff5e3a;
+    color: var(--olympus-primary-color);
+  }
+}
+
+select,
+input,
+.form-control {
+  background-color: transparent;
+}
+
+select, input {
+  display: block;
+  width: 100%;
+  padding: 1.1rem 1.1rem;
+  font-size: .875rem;
+  line-height: 1.25;
+  color: #464a4c;
+  background-color: transparent;
+  background-image: none;
+  background-clip: padding-box;
+  border: 1px solid #e6ecf5;
+  border: 1px solid var(--olympus-border-color);
+  border-radius: 0.25rem;
+  transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+}
+
+p {
+  font-size: .875rem;
+}
+
+.h1, .h2, .h3, .h4, .h5, .h6 {
+  color: #515365;
+  color: var(--olympus-heading-color);
+}
+
+.nav-tabs .nav-item {
+  position: relative;
+}
+
+.form-group {
+  position: relative;
+  margin-bottom: 1.4rem;
+}
+
+.form-group textarea {
+  resize: none;
+}
+
+.form-group.label-floating label.control-label,
+.form-group.label-placeholder label.control-label {
+  top: 18px;
+  font-size: 14px;
+  line-height: 1.42857;
+  left: 20px;
+}
+
+.form-group.label-static label.control-label,
+.form-group.label-floating.is-focused label.control-label,
+.form-group.label-floating:not(.is-empty) label.control-label,
+.form-group.has-bootstrap-select label.control-label {
+  top: 10px;
+  font-size: 11px;
+  line-height: 1.07143;
+}
+
+.form-group.label-static label.control-label,
+.form-group.label-placeholder label.control-label,
+.form-group.label-floating label.control-label {
+  position: absolute;
+  pointer-events: none;
+  transition: 0.3s ease all;
+}
+
+.accordion-collapse {
+  border: none;
+}
+
+.accordion-button:not(.collapsed) {
+  color: #515365;
+  color: var(--olympus-heading-color);
+  background-color: transparent;
+}
+
+.accordion-button {
+  border: none;
+  font-weight: 700;
+
+  &:focus {
+	box-shadow: none;
+  }
+
+  &:after {
+    width: .8rem;
+    height: .8rem;
+    background-size: .8rem;
+  }
+
+  i, svg {
+    transition: all .3s ease;
+  }
+
+  &.collapsed i:not(.left-menu-icon),
+  &.collapsed svg:not(.left-menu-icon) {
+    transform: rotate(-90deg);
+  }
+
+  &.collapsed .event-status-icon i,
+  &.collapsed .event-status-icon svg {
+    transform: rotate(0);
+  }
+}
+
+blockquote {
+  margin: 3em 0;
+  padding: 15px 80px 15px 80px;
+  position: relative;
+
+  h6 {
+    font-size: 11px;
+    font-weight: 400;
+    color: #888da8;
+    color: var(--olympus-body-font-color);
+
+    span {
+      font-weight: 700;
+      display: block;
+      color: #515365;
+      color: var(--olympus-heading-color);
+    }
+  }
+
+  p {
+    margin: 0 0 15px !important;
+    font-size: 22px;
+    line-height: 1.3em;
+    font-weight: 300;
+    position: relative;
+    color: #515365;
+    color: var(--olympus-heading-color);
+
+    &:before {
+      content: "";
+      width: 4px;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: -80px;
+      display: block;
+      background-color: #ff5e3a;
+      background-color: var(--olympus-primary-color);
+    }
+
+    @media (max-width: 640px) {
+      font-size: 16px;
+    }
+  }
+}
+
+a > svg {
+  transition: all .15s ease;
+}
+
+svg {
+  transition: all .3s ease;
+  vertical-align: -.125em;
+}
+
+button {
+
+  &.btn {
+    padding: .5rem 1rem;
+  }
+
+  &.btn-md {
+    padding: 1rem 3.5rem;
+    font-size: 0.75rem;
+    border-radius: 0.3rem;
+  }
+
+  &.btn-md-2 {
+    padding: .8rem 2.1rem;
+    font-size: 0.688rem;
+    border-radius: 0.3rem;
+  }
+
+  &.btn-lg {
+    padding: 1rem 3rem;
+  }
+}
+
+.form-inline {
+
+  .btn {
+    margin-bottom: 0;
+  }
+
+  & > * + * {
+    margin-left: 16px;
+  }
+}
+
+.h1, .h2, .h3, .h4, h1, h2, h3, h4 {
+  font-weight: $headings-font-weight-h1-h4;
+}
+
+
+img {
+  vertical-align: unset;
+  max-width: 100%;
+  height: auto;
+  display: inline-block;
+}
+
+.modal-dialog {
+  pointer-events: auto;
+}
+
+.was-validated .form-control:valid ~ .invalid-feedback,
+.was-validated .form-control:valid ~ .invalid-tooltip {
+  display: none;
+}
+
+
+/*================= Styles for custom input type="number" ============*/
+
+
+.number-spinner.input-group {
+  .form-group {
+    margin-bottom: 0;
+  }
+
+  .form-control {
+    width: 100%;
+    height: 100%;
+    padding: .5rem 1.1rem;
+    max-width: 80px;
+    border-radius: 0;
+  }
+
+  .input-group-btn > .btn {
+    margin-bottom: 0;
+    height: 100%;
+    background-color: #ff5e3a;
+    background-color: var(--olympus-primary-color);
+    z-index: 5;
+    border: none;
+  }
+
+  .glyphicon {
+    position: relative;
+    top: -2px;
+    display: inline-block;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    color: #fff;
+    color: var(--olympus-white-color);
+
+    &:before {
+      content: "\2212";
+    }
+  }
+
+  .glyphicon-plus::before {
+    content: "\2b";
+  }
+
+  &.number-spinner--secondary {
+    .input-group-btn > .btn {
+      background-color: #3f4257;
+      background-color: var(--olympus-secondary-color);
+    }
+  }
+
+  &.number-spinner--breez {
+    .input-group-btn > .btn {
+      background-color: $breez;
+    }
+  }
+
+  &.number-spinner--green {
+    .input-group-btn > .btn {
+      background-color: #1ed760;
+      background-color: var(--olympus-green);
+    }
+  }
+}
+
+.btn-secondary:not([disabled]):not(.disabled):active {
+  background-color: #fff;
+  background-color: var(--olympus-white-color);
+  border-color: #e6ecf5;
+  border-color: var(--olympus-border-color);
+  color: #515365;
+  color: var(--olympus-heading-color);
+  box-shadow: none;
+}
+
+.modal-content {
+  display: flex !important;
+}
+
+.modal-header {
+  line-height: 1;
+
+  &  > * {
+	margin-bottom: 0;
+  }
+}
+
+/*================= Responsive Mode ============*/
+
+@media (max-width: 1024px) {
+  .form-group.label-floating label.control-label, .form-group.label-placeholder label.control-label {
+    left: 15px;
+  }
+}
+
+@media (max-width: 600px) {
+  .card-header a {
+    font-size: 18px;
+  }
+
+  .modal-dialog {
+    margin: 30px auto;
+  }
+}
+
+@media (max-width: 360px) {
+  .card-header a {
+    font-size: 14px;
+  }
+
+  .form-group.label-floating label.control-label, .form-group.label-placeholder label.control-label {
+    font-size: 12px;
+  }
+}

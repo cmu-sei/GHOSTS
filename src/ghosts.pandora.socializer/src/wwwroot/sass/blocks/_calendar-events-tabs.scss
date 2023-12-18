@@ -1,0 +1,325 @@
+/*------------- #CALENDAR-EVENTS-TABS --------------*/
+
+
+.calendar-events-tabs {
+  .nav-item {
+	display: inline-block;
+
+	& + .nav-item {
+	  margin-left: 60px;
+	}
+  }
+
+  &.nav-tabs {
+	border-bottom: none;
+
+	.nav-link {
+	  padding: 0;
+	  border: none;
+	  border-color: transparent;
+	  font-weight: 700;
+	  font-size: 14px;
+	  color: #888da8;
+	  color: var(--olympus-body-font-color);
+
+	  &.active {
+		color: #515365;
+		color: var(--olympus-heading-color);
+		background-color: transparent;
+	  }
+	}
+
+	.items-round-little {
+	  display: inline-block;
+	}
+  }
+}
+
+.calendar-block-events {
+  text-align: left;
+  margin: 10px -8px 0;
+}
+
+.calendar-block-events li {
+  font-size: 9px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.calendar-block-events .event-status {
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  margin-right: 6px;
+  border-radius: 100%;
+  margin-bottom: 2px;
+}
+
+.event-status.uncompleted {
+  background-color: #9a9fbf;
+  background-color: var(--olympus-icon-color);
+}
+
+.event-status.completed {
+  background-color: #08ddc1;
+  background-color: var(--olympus-breez);
+}
+
+.event-status.b-day {
+  background-color: #38a9ff;
+  background-color: var(--olympus-blue);
+}
+
+.fc-agendaDay-view .calendar-block-events {
+  margin: 4px 0 0 3px;
+}
+
+.fc-agendaWeek-view .calendar-block-events {
+  margin: 4px 0 0 3px;
+}
+
+.event-time {
+  margin-bottom: 20px;
+}
+
+.event-time .circle {
+  width: 8px;
+  height: 8px;
+  border: 2px solid #34eccd;
+  border-radius: 100%;
+  margin-right: 7px;
+  display: inline-block;
+}
+
+.event-time time {
+  font-size: 10px;
+  color: #515365;
+  color: var(--olympus-heading-color);
+  font-weight: bold;
+}
+
+.event-time .more svg {
+  float: none;
+  color: #e6ecf5;
+  color: var(--olympus-smoke);
+  margin-left: 5px;
+}
+
+.event-time .more {
+  display: inline-block;
+}
+
+.check-all {
+  padding: 20px;
+  background-color: #08ddc1;
+  background-color: var(--olympus-breez);
+  color: #fff;
+  color: var(--olympus-white-color);
+  font-size: 12px;
+  font-weight: bold;
+  display: block;
+  text-align: center;
+}
+
+
+/*------------- #FULL-CALENDAR-customization --------------*/
+
+
+.crumina-full-calendar {
+  .fc-button.fc-next-button,
+  .fc-button.fc-prev-button,
+  .fc-button.fc-dayGridMonth-button,
+  .fc-button.fc-timeGridWeek-button,
+  .fc-button.fc-timeGridDay-button {
+	background-color: transparent;
+	border: none;
+
+	.fc-icon {
+	  color: #888da8;
+	  color: var(--olympus-grey-light);
+
+	  &:hover {
+		color: #08ddc1;
+		color: var(--olympus-breez);
+	  }
+	}
+
+	&:focus {
+	  box-shadow: none;
+	}
+  }
+
+  .fc-button-primary:not(:disabled):active:focus,
+  .fc-button-primary:not(:disabled).fc-button-active:focus {
+	box-shadow: none;
+  }
+
+  .fc-toolbar.fc-header-toolbar {
+	margin-bottom: 0;
+  }
+
+  .fc-toolbar h2 {
+	font-weight: 700;
+	line-height: 1.3;
+	color: #515365;
+	color: var(--olympus-heading-color);
+	font-size: .875rem;
+  }
+
+  .fc-button.fc-dayGridMonth-button,
+  .fc-button.fc-timeGridWeek-button,
+  .fc-button.fc-timeGridDay-button {
+	width: 65px;
+	height: 65px;
+	border-left: 1px solid #e6ecf5;
+	border-left: 1px solid var(--olympus-border-color);
+	background-size: 20px;
+	background-position: center;
+	display: inline-block;
+	background-repeat: no-repeat;
+	vertical-align: middle;
+  }
+
+  .fc-button.fc-dayGridMonth-button {
+	background-image: url("./../svg-icons/month-calendar-icon.svg");
+  }
+
+  .fc-button.fc-timeGridWeek-button {
+	background-image: url("./../svg-icons/week-calendar-icon.svg");
+  }
+
+  .fc-button.fc-timeGridDay-button {
+	background-image: url("./../svg-icons/day-calendar-icon.svg");
+  }
+
+  .fc-button-primary:not(:disabled):active {
+	background-color: transparent;
+	border-color: transparent;
+  }
+
+  .fc-button-primary:not(:disabled).fc-button-active {
+	background-color: rgba($breez, .2);
+	border-color: rgba($breez, .2);
+  }
+
+  .fc-event,
+  .fc-event:hover {
+	background-color: transparent;
+	font-size: 9px;
+	font-weight: 500;
+	white-space: nowrap;
+	overflow: hidden;
+	cursor: pointer;
+	color: #888da8;
+	color: var(--olympus-body-font-color);
+	border: none;
+
+	&:before {
+	  content: '';
+	  display: inline-block;
+	  vertical-align: middle;
+	  width: 4px;
+	  height: 4px;
+	  margin-right: 6px;
+	  border-radius: 100%;
+	  margin-bottom: 2px;
+	  background-color: #08ddc1;
+	  background-color: var(--olympus-breez);
+	}
+  }
+
+  .fc-content {
+	display: inline-block;
+	vertical-align: middle;
+  }
+
+  .fc-day-grid-event {
+	margin: 1px 8px 0;
+  }
+
+  &.fc th {
+	text-align: center;
+	padding: 12px;
+	background-color: transparent;
+	font-size: 9px;
+	color: #888da8;
+	color: var(--olympus-body-font-color);
+	text-transform: uppercase;
+	border-right-width: 0;
+	border-left-width: 0;
+  }
+
+  &.fc-unthemed th,
+  &.fc-unthemed td,
+  &.fc-unthemed thead,
+  &.fc-unthemed tbody,
+  &.fc-unthemed .fc-divider,
+  &.fc-unthemed .fc-row,
+  &.fc-unthemed .fc-content,
+  &.fc-unthemed .fc-popover,
+  &.fc-unthemed .fc-list-view,
+  &.fc-unthemed .fc-list-heading td {
+	border-color: #e6ecf5;
+	border-color: var(--olympus-border-color);
+  }
+
+  .fc-dayGrid-view .fc-day-number {
+	text-align: center;
+	font-size: 12px;
+	margin: 10px 10px 0;
+	width: 30px;
+	height: 30px;
+	line-height: 30px;
+	border-radius: 100%;
+  }
+
+  .fc-dayGrid-view .fc-today .fc-day-number {
+	background-color: #08ddc1;
+	background-color: var(--olympus-breez);
+	color: #fff;
+	color: var(--olympus-white-color);
+  }
+
+  .fc-view-container {
+	& + .ui-block-title {
+	  border-top: none;
+	}
+  }
+
+  .fc-timeGrid-view .fc-day-grid .fc-row .fc-content-skeleton {
+	padding: 1em 0;
+  }
+
+  &.fc-unthemed td.fc-today {
+	background-color: #f5f5f5;
+  }
+}
+
+/*================= Responsive Mode ============*/
+
+
+@media (max-width: 768px) {
+  .calendar-events-tabs .nav-item + .nav-item {
+	margin-top: 10px;
+	margin-left: 0;
+  }
+
+  .crumina-full-calendar .fc-button.fc-dayGridMonth-button,
+  .crumina-full-calendar .fc-button.fc-timeGridWeek-button,
+  .crumina-full-calendar .fc-button.fc-timeGridDay-button {
+	width: 40px;
+	height: 40px;
+	background-size: 14px;
+  }
+
+  .crumina-full-calendar .fc-dayGrid-view .fc-day-number {
+	font-size: 8px;
+	margin: 5px 5px 0;
+	width: 12px;
+	height: 12px;
+	line-height: 12px;
+  }
+}

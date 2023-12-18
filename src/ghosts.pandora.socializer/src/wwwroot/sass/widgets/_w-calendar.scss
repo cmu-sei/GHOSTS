@@ -1,0 +1,115 @@
+/*------------- #W-CALENDAR --------------*/
+
+
+.calendar .card {
+  border-bottom: 1px solid #e6ecf5;
+  border-bottom: 1px solid var(--olympus-border-color);
+}
+
+.calendar .list {
+  border-radius: 0 0 5px 5px;
+  overflow: hidden;
+}
+
+.calendar .place {
+  font-size: 11px;
+  padding: 20px 0;
+}
+
+.calendar .more-dropdown {
+  right: auto;
+  left: 0;
+}
+
+.calendar .more-dropdown a {
+  font-size: 12px;
+}
+
+.calendar .more-dropdown a:hover {
+  color: #08ddc1;
+  color: var(--olympus-breez);
+}
+
+.calendar .card-header svg {
+  float: none;
+  margin-left: 10px;
+}
+
+.calendar .friends-harmonic {
+  padding: 0;
+}
+
+.calendar .place svg {
+  margin-right: 10px;
+  fill: #c6c9db;
+}
+
+.calendar .card:last-child {
+  border-bottom: none;
+}
+
+.calendar table {
+  width: 100%;
+  margin-top: 15px;
+}
+
+.calendar .card-header a {
+  font-size: 13px;
+}
+
+.calendar .card-header {
+  padding: 25px;
+}
+
+.calendar .card-body {
+  padding: 0 25px 25px;
+}
+
+.calendar .card-header {
+  border-bottom: none;
+}
+
+.calendar header {
+  position: relative;
+  padding: 25px;
+  border-bottom: 1px solid #e6ecf5;
+  border-bottom: 1px solid var(--olympus-border-color);
+}
+
+.calendar .month {
+  margin-bottom: 0;
+}
+
+.w-calendar {
+  .calendar {
+	text-align: center;
+	padding-bottom: 20px;
+
+	header {
+	  padding: 23px 25px 18px;
+	}
+
+	thead {
+	  font-weight: 600;
+	  text-transform: uppercase;
+	  font-size: 9px;
+	  color: #888da8;
+	  color: var(--olympus-body-font-color);
+	}
+
+	td {
+	  border: 2px solid transparent;
+	  display: inline-block;
+	  height: 40px;
+	  line-height: 40px;
+	  text-align: center;
+	  width: 30px;
+	  border-radius: 100%;
+	}
+
+	tbody {
+	  color: #4b4e65;
+	  font-size: 11px;
+	}
+  }
+}

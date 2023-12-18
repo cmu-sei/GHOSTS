@@ -1,0 +1,308 @@
+/*------------- #FRIENDS --------------*/
+
+
+.friend-header-thumb {
+  border-bottom: 1px solid #e6ecf5;
+  border-bottom: 1px solid var(--olympus-border-color);
+  overflow: hidden;
+
+  img {
+	width: 100%;
+	display: block;
+  }
+}
+
+.friend-item {
+  border-radius: 5px;
+
+  .control-block-button {
+	position: relative;
+  }
+
+  .swiper-container {
+	padding-bottom: 40px;
+  }
+
+  .btn-control {
+	margin-bottom: 0;
+	margin-right: 14px;
+  }
+
+  &.fav-page {
+	.friend-about {
+	  text-align: center;
+	}
+  }
+}
+
+.friend-item-content {
+  padding: 0 25px 25px 25px;
+  text-align: center;
+  position: relative;
+
+  .more {
+	z-index: 5;
+	position: absolute;
+	right: 15px;
+	top: 50px;
+	font-size: 16px;
+	padding: 10px;
+  }
+}
+
+.friend-avatar {
+  margin-top: -49px;
+  position: relative;
+  margin-bottom: 30px;
+
+  .author-thumb {
+	margin: 0 auto;
+	height: 98px;
+	width: 98px;
+	min-height: 98px;
+	min-width: 98px;
+	margin-bottom: 10px;
+
+	img {
+	  border: 4px solid #fff;
+	  border: 4px solid var(--olympus-white-color);
+	  display: block;
+	}
+  }
+}
+
+.friend-count {
+  margin-bottom: 35px;
+}
+
+.friend-count-item {
+  display: inline-block;
+  margin-right: 25px;
+
+  .title {
+	color: #888da8;
+	color: var(--olympus-body-font-color);
+  }
+
+  &:last-child {
+	margin-right: 0;
+  }
+}
+
+.friend-about {
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 13px;
+}
+
+.friend-since {
+  & > *:first-child {
+	font-size: 11px;
+  }
+}
+
+.more-dropdown {
+  display: block;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 180px;
+  /*border: 1px solid $border-color;*/
+  box-shadow: 0 0 34px 0 rgba(63, 66, 87, 0.1);
+  background-color: #fff;
+  background-color: var(--olympus-white-color);
+  border-radius: 4px;
+  visibility: hidden;
+  opacity: 0;
+  transition: visibility 0s linear 0.3s, opacity 0.3s linear;
+  text-align: left;
+  padding: 15px 20px;
+  z-index: 5;
+
+  ul {
+	padding: 15px 25px;
+	margin-bottom: 0;
+  }
+
+  li a {
+	& > * {
+	  display: inline-block;
+	  vertical-align: middle;
+	}
+  }
+
+  a {
+	padding: 7px 0;
+	font-size: 12px;
+	color: #515365;
+	color: var(--olympus-heading-color);
+	display: block;
+	font-weight: 700;
+
+	&.btn-sm {
+	  padding: 0.5rem 1.7rem;
+	  font-size: 0.688rem;
+	  line-height: 1.5;
+	  border-radius: 0.2rem;
+	}
+
+	&:hover {
+	  color: #ff5e3a;
+	  color: var(--olympus-primary-color);
+	}
+  }
+}
+
+.more:hover .more-dropdown {
+  visibility: visible;
+  opacity: 1;
+  transition-delay:0s;
+}
+
+.more {
+  position: relative;
+  transition: all .3s ease;
+  color: #888da8;
+  color: var(--olympus-body-font-color);
+  fill: #c0c4d8;
+
+  .more {
+	cursor: pointer;
+  }
+
+  & > svg {
+	cursor: pointer;
+  }
+}
+
+.more-with-triangle {
+  &:before {
+	position: absolute;
+	display: inline-block;
+	content: '';
+	top: -7px;
+	border-right: 7px solid transparent;
+	border-left: 7px solid transparent;
+	border-bottom: 7px solid #fff;
+	border-bottom: 7px solid var(--olympus-white-color);
+	right: 25px;
+  }
+
+  &.triangle-bottom-right {
+
+	&:before {
+	  top: auto;
+	  bottom: -7px;
+	  right: 15px;
+	  border-bottom: none;
+	  border-top: 7px solid #fff;
+	  border-top: 7px solid var(--olympus-white-color);
+	}
+  }
+
+  &.triangle-top-center {
+
+	&:before {
+	  margin-right: -3px;
+	  right: 50%;
+	}
+  }
+
+  &.triangle-top-left {
+
+	&:before {
+	  right: auto;
+	  left: 15px;
+	}
+  }
+}
+
+.friend-groups {
+
+  .friend-item-content {
+	padding: 25px;
+
+	.more {
+	  top: 0;
+	  right: 10px;
+	}
+  }
+
+  .friend-avatar {
+	margin-top: 0;
+
+	.author-thumb {
+	  width: 120px;
+	  height: 120px;
+	  border-radius: 100px;
+	  line-height: 120px;
+	  background-color: #e6ecf5;
+	  background-color: var(--olympus-smoke);
+	  margin-bottom: 20px;
+	  overflow: hidden;
+	  display: flex;
+
+	  img {
+		border: none;
+		display: block;
+		margin: auto;
+	  }
+	}
+
+  }
+
+  .country {
+	font-size: 11px;
+  }
+
+  .friends-harmonic {
+	display: inline-flex;
+	margin-bottom: 35px;
+  }
+
+  .control-block-button {
+	margin-bottom: 15px;
+  }
+}
+
+.create-group {
+  background-color: transparent;
+  border: 2px dashed #bbc0d5;
+  position: relative;
+
+  .content {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: 90%;
+	text-align: center;
+
+	.btn-control {
+	  margin-right: 0;
+	  margin-bottom: 15px;
+
+	  svg {
+		width: 20px;
+		height: 20px;
+	  }
+	}
+  }
+
+  .author-name {
+	font-size: 14px;
+  }
+}
+
+
+/*------------- Responsive mode styles --------------*/
+
+@media (max-width: 640px) {
+  .create-group .content {
+	position: relative;
+	transform: none;
+	top: auto;
+	left: auto;
+	margin: 30px auto;
+  }
+}

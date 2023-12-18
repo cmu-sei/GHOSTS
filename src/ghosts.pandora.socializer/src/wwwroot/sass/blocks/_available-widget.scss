@@ -1,0 +1,40 @@
+/*------------- #AVAILABLE-WIDGET --------------*/
+
+
+.available-widget {
+  padding: 16px 25px;
+  display: table;
+  width: 100%;
+
+  .custom-control-description {
+	color: #515365;
+	color: var(--olympus-heading-color);
+	font-weight: 700;
+  }
+
+  .form-group {
+	margin-bottom: 0;
+  }
+
+  .custom-control {
+	margin: 0;
+  }
+
+	&  > * {
+	  margin-bottom: 0;
+	  display: table-cell;
+	  vertical-align: middle;
+  }
+
+  .more {
+	font-size: 16px;
+	padding-left: 25px;
+	text-align: right;
+	width: 16px;
+  }
+}
+
+.empty-area {
+  border: 2px dashed #bbc0d5;
+  height: 50px;
+}

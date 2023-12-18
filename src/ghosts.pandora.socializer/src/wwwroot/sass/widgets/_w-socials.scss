@@ -1,0 +1,30 @@
+/*------------- #w-socials --------------*/
+
+
+.social-item {
+  font-size: 11px;
+  color: #fff;
+  color: var(--olympus-white-color);
+  padding: 7px 15px;
+  display: block;
+  border-radius: 3px;
+  margin-bottom: 15px;
+  text-align: center;
+
+  i, svg {
+	font-size: 12px;
+	margin-right: 10px;
+  }
+
+  &:hover {
+	color: #fff;
+	color: var(--olympus-white-color);
+	opacity: .9;
+  }
+}
+
+.w-socials {
+  .title {
+	margin-bottom: 20px;
+  }
+}

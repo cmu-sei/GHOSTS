@@ -1,0 +1,37 @@
+/*------------- #FOLLOW-INSTAGRAMM --------------*/
+
+
+.follow-instagram {
+  display: flex;
+  border-radius: 5px;
+  overflow: hidden;
+  position: relative;
+
+  img {
+	width: 20%;
+  }
+
+  .btn {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	display: inline-flex;
+  }
+
+  &:hover {
+	.overlay {
+	  opacity: 1;
+	}
+  }
+}
+
+
+/*================= Responsive Mode ============*/
+
+
+@media (max-width: 460px) {
+  .follow-instagram .btn {
+	width: 70%;
+  }
+}

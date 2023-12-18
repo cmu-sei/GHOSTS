@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+	<title>Components - Forms</title>
+
+	<!-- Required meta tags always come first -->
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="x-ua-compatible" content="ie=edge">
+
+
+	<!-- Theme Font -->
+	<link rel="preload" type="text/css" href="css/theme-font.min.css" as="style">
+
+	<!-- Bootstrap CSS -->
+	<link rel="stylesheet" type="text/css" href="Bootstrap/dist/css/bootstrap.css">
+
+	<!-- Main Styles CSS -->
+	<link rel="stylesheet" type="text/css" href="css/main.min.css">
+
+	<!-- Main RTL CSS -->
+	<!--<link rel="stylesheet" type="text/css" href="css/rtl.min.css">-->
+
+</head>
+<body>
+
+
+<!-- Preloader -->
+
+<div id="hellopreloader">
+	<div class="preloader">
+		<svg width="45" height="45" stroke="#fff">
+			<g fill="none" fill-rule="evenodd" stroke-width="2" transform="translate(1 1)">
+				<circle cx="22" cy="22" r="6" stroke="none">
+					<animate attributeName="r" begin="1.5s" calcMode="linear" dur="3s" repeatCount="indefinite" values="6;22"/>
+					<animate attributeName="stroke-opacity" begin="1.5s" calcMode="linear" dur="3s" repeatCount="indefinite" values="1;0"/>
+					<animate attributeName="stroke-width" begin="1.5s" calcMode="linear" dur="3s" repeatCount="indefinite" values="2;0"/>
+				</circle>
+				<circle cx="22" cy="22" r="6" stroke="none">
+					<animate attributeName="r" begin="3s" calcMode="linear" dur="3s" repeatCount="indefinite" values="6;22"/>
+					<animate attributeName="stroke-opacity" begin="3s" calcMode="linear" dur="3s" repeatCount="indefinite" values="1;0"/>
+					<animate attributeName="stroke-width" begin="3s" calcMode="linear" dur="3s" repeatCount="indefinite" values="2;0"/>
+				</circle>
+				<circle cx="22" cy="22" r="8">
+					<animate attributeName="r" begin="0s" calcMode="linear" dur="1.5s" repeatCount="indefinite" values="6;1;2;3;4;5;6"/>
+				</circle>
+			</g>
+		</svg>
+
+		<div class="text">Loading ...</div>
+	</div>
+</div>
+
+<!-- ... end Preloader -->
+<div class="container">
+	<div class="row">
+		<div class="col col-lg-12 col-md-12 col-sm-12 col-12">
+			<h2 class="presentation-margin">Form Elements</h2>
+
+			<div class="ui-block">
+
+				<div class="ui-block-content">
+					<div class="row">
+						<div class="col col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+							<div class="form-group label-floating is-empty">
+								<label class="control-label">Default Input</label>
+								<input class="form-control" type="text" placeholder="">
+							</div>
+							<div class="form-group label-floating has-success">
+								<label class="control-label">Success Input</label>
+								<input type="text" class="form-control form-control-success">
+							</div>
+							<div class="form-group label-floating has-error">
+								<label class="control-label">Error Input</label>
+								<input type="text" class="form-control form-control-danger">
+							</div>
+							<fieldset disabled>
+								<div class="form-group has-disabled">
+									<input type="text" class="form-control" placeholder="Disabled input">
+								</div>
+							</fieldset>
+
+							<label class="control-label">Dropdown Field</label>
+							<fieldset class="form-group">
+								<select class="form-select">
+									<option value="AL">Alabama</option>
+									<option value="2">Oklahoma</option>
+									<option value="WY">Wyoming</option>
+								</select>
+							</fieldset>
+
+							<h6>Completed Input V2</h6>
+							<div class="form-group">
+								<input class="form-control" type="text" placeholder="James Spiegel">
+							</div>
+
+							<div class="form-group with-icon label-floating is-empty">
+								<label class="control-label">Input with Icon</label>
+								<input class="form-control" type="text">
+								<svg class="c-facebook" width="20" height="20"><use xlink:href="#olymp-facebook-icon"></use></svg>
+							</div>
+
+
+							<label class="control-label">Calendar Field</label>
+							<div class="form-group date-time-picker">
+								<input type="text" name="datetimepicker" value="10/24/1984"/>
+								<span class="input-group-addon">
+									<svg class="olymp-month-calendar-icon icon"><use xlink:href="#olymp-month-calendar-icon"></use></svg>
+								</span>
+							</div>
+
+							<h6>Switch On</h6>
+							<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor.</p>
+
+							<div class="togglebutton">
+								<label>
+									<input type="checkbox" checked="">
+								</label>
+							</div>
+
+							<h6>Switch Off</h6>
+							<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor.</p>
+							<div class="togglebutton">
+								<label>
+									<input type="checkbox">
+								</label>
+							</div>
+
+						</div>
+					</div>
+					<div class="row">
+						<div class="col col-lg-4 col-md-4 col-sm-12 col-12">
+							<h6>Checkboxes</h6>
+							<div class="checkbox">
+								<label>
+									<input type="checkbox" name="optionsCheckboxes">
+									Unchecked
+								</label>
+							</div>
+							<div class="checkbox">
+								<label>
+									<input type="checkbox" name="optionsCheckboxes" checked>
+									Checked
+								</label>
+							</div>
+							<div class="checkbox">
+								<label>
+									<input type="checkbox" name="optionsCheckboxes" disabled>
+									Disabled Unchecked
+								</label>
+							</div>
+							<div class="checkbox">
+								<label>
+									<input type="checkbox" name="optionsCheckboxes" disabled checked>
+									Disabled Checked
+								</label>
+							</div>
+						</div>
+						<div class="col col-lg-4 col-md-4 col-sm-12 col-12">
+							<h6>Radio Buttons</h6>
+
+							<div class="radio">
+								<label>
+									<input type="radio" name="optionsRadios">
+									Radio is off
+								</label>
+							</div>
+							<div class="radio">
+								<label>
+									<input type="radio" name="optionsRadios" checked>
+									Radio is on
+								</label>
+							</div>
+							<div class="radio">
+								<label>
+									<input type="radio" name="optionsRadiosDisabled" disabled>
+									Disabled Radio is off
+								</label>
+							</div>
+							<div class="radio">
+								<label>
+									<input type="radio" name="optionsRadiosDisabled" checked disabled>
+									Disabled Radio is on
+								</label>
+							</div>
+
+						</div>
+
+						<div class="col col-lg-4 col-md-4 col-sm-12 col-12">
+
+							<h6>Tooltips</h6>
+							<button type="button" class="btn btn-secondary" data-bs-toggle="tooltip" data-bs-placement="top" title="Tooltip on top">
+								Tooltip on top
+							</button>
+							<button type="button" class="btn btn-secondary" data-bs-toggle="tooltip" data-bs-placement="right" title="Tooltip on right">
+								Tooltip on right
+							</button>
+							<button type="button" class="btn btn-secondary" data-bs-toggle="tooltip" data-bs-placement="left" title="Tooltip on left">
+								Tooltip on left
+							</button>
+							<button type="button" class="btn btn-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Tooltip on bottom">
+								Tooltip on bottom
+							</button>
+						</div>
+
+					</div>
+
+					<div class="row mb30">
+						<div class="col col-lg-12 col-12">
+							<h6>Upload Buttons</h6>
+						</div>
+						<div class="col col-lg-3 col-md-3 col-sm-12 col-12">
+							<div class="file-upload">
+								<label for="upload" class="file-upload__label">Upload Button</label>
+								<input id="upload" class="file-upload__input" type="file" name="file-upload">
+							</div>
+						</div>
+						<div class="col col-lg-3 col-md-3 col-sm-12 col-12">
+							<div class="file-upload">
+								<label for="upload" class="file-upload__label bg-blue">Upload Button</label>
+								<input id="upload3" class="file-upload__input" type="file" name="file-upload">
+							</div>
+						</div>
+						<div class="col col-lg-3 col-md-3 col-sm-12 col-12">
+							<div class="file-upload">
+								<label for="upload" class="file-upload__label bg-breez">Upload Button</label>
+								<input id="upload1" class="file-upload__input" type="file" name="file-upload">
+							</div>
+						</div>
+						<div class="col col-lg-3 col-md-3 col-sm-12 col-12">
+							<div class="file-upload">
+								<label for="upload" class="file-upload__label bg-green">Upload Button</label>
+								<input id="upload2" class="file-upload__input" type="file" name="file-upload">
+							</div>
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="col col-lg-12 col-12">
+							<h6>Quantity Input Field</h6>
+						</div>
+
+						<div class="col col-lg-3 col-md-6 col-sm-12 col-12 mb30">
+							<div class="input-group number-spinner">
+								<span class="input-group-btn data-dwn input-group-prepend">
+									<button class="btn btn-default btn-info" data-dir="dwn"><span class="glyphicon glyphicon-minus"></span></button>
+								</span>
+								<input type="text" class="form-control text-center" value="1" min="0" max="100">
+								<span class="input-group-btn data-up input-group-append">
+									<button class="btn btn-default btn-info" data-dir="up"><span class="glyphicon glyphicon-plus"></span></button>
+								</span>
+							</div>
+						</div>
+
+						<div class="col col-lg-3 col-md-6 col-sm-12 col-12 mb30">
+							<div class="input-group number-spinner number-spinner--secondary">
+								<span class="input-group-btn data-dwn input-group-prepend">
+									<button class="btn btn-default btn-info" data-dir="dwn"><span class="glyphicon glyphicon-minus"></span></button>
+								</span>
+								<input type="text" class="form-control text-center" value="-10" min="-50" max="50">
+								<span class="input-group-btn data-up input-group-append">
+									<button class="btn btn-default btn-info" data-dir="up"><span class="glyphicon glyphicon-plus"></span></button>
+								</span>
+							</div>
+						</div>
+
+						<div class="col col-lg-3 col-md-6 col-sm-12 col-12 mb30">
+							<div class="input-group number-spinner number-spinner--breez">
+								<span class="input-group-btn data-dwn input-group-prepend">
+									<button class="btn btn-default btn-info" data-dir="dwn"><span class="glyphicon glyphicon-minus"></span></button>
+								</span>
+								<input type="text" class="form-control text-center" value="10" min="-40" max="40">
+								<span class="input-group-btn data-up input-group-append">
+									<button class="btn btn-default btn-info" data-dir="up"><span class="glyphicon glyphicon-plus"></span></button>
+								</span>
+							</div>
+						</div>
+
+						<div class="col col-lg-3 col-md-6 col-sm-12 col-12 mb30">
+							<div class="input-group number-spinner number-spinner--green">
+								<span class="input-group-btn data-dwn input-group-prepend">
+									<button class="btn btn-default btn-info" data-dir="dwn"><span class="glyphicon glyphicon-minus"></span></button>
+								</span>
+								<input type="text" class="form-control text-center" value="5" min="0" max="10">
+								<span class="input-group-btn data-up input-group-append">
+									<button class="btn btn-default btn-info" data-dir="up"><span class="glyphicon glyphicon-plus"></span></button>
+								</span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="col col-xl-12 col-12">
+			<h2 class="presentation-margin">Registration Login Form</h2>
+		</div>
+
+		<div class="col col-lg-6 col-md-12 col-sm-12 col-12">
+
+			
+			<!-- Login-Registration Form  -->
+			
+			<div class="registration-login-form">
+
+				<!-- Nav tabs -->
+				<ul class="nav nav-tabs" id="registration-form-tabs" role="tablist">
+					<li class="nav-item" role="presentation">
+						<a class="nav-link active" id="login-tab" data-bs-toggle="tab" href="#login" role="tab" aria-controls="login" aria-selected="true">
+							<svg class="olymp-login-icon"><use xlink:href="#olymp-login-icon"></use></svg>
+						</a>
+					</li>
+					<li class="nav-item" role="presentation">
+						<a class="nav-link" id="profile-tab" data-bs-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">
+							<svg class="olymp-register-icon"><use xlink:href="#olymp-register-icon"></use></svg>
+						</a>
+					</li>
+				</ul>
+			
+				<!-- Tab panes -->
+				<div class="tab-content" id="registration-form-tabs-content">
+					<div class="tab-pane fade show active" id="login" role="tabpanel" aria-labelledby="login-tab">
+						<div class="title h6">Register to Olympus</div>
+						<form class="content">
+							<div class="row">
+								<div class="col col-12 col-xl-6 col-lg-6 col-md-6 col-sm-12">
+									<div class="form-group label-floating">
+										<label class="control-label">First Name</label>
+										<input class="form-control" placeholder="" type="text">
+									</div>
+								</div>
+								<div class="col col-12 col-xl-6 col-lg-6 col-md-6 col-sm-12">
+									<div class="form-group label-floating">
+										<label class="control-label">Last Name</label>
+										<input class="form-control" placeholder="" type="text">
+									</div>
+								</div>
+								<div class="col col-12 col-xl-12 col-lg-12 col-md-12 col-sm-12">
+									<div class="form-group label-floating">
+										<label class="control-label">Your Email</label>
+										<input class="form-control" placeholder="" type="email">
+									</div>
+									<div class="form-group label-floating">
+										<label class="control-label">Your Password</label>
+										<input class="form-control" placeholder="" type="password">
+									</div>
+			
+									<div class="form-group date-time-picker label-floating">
+										<label class="control-label">Your Birthday</label>
+										<input name="datetimepicker" value="10/24/1984" />
+										<span class="input-group-addon">
+														<svg class="olymp-calendar-icon"><use xlink:href="#olymp-calendar-icon"></use></svg>
+													</span>
+									</div>
+			
+									<div class="form-group label-floating is-select">
+										<label class="control-label">Your Gender</label>
+										<select class="form-select">
+											<option value="MA">Male</option>
+											<option value="FE">Female</option>
+										</select>
+									</div>
+			
+									<div class="remember">
+										<div class="checkbox">
+											<label>
+												<input name="optionsCheckboxes" type="checkbox">
+												I accept the <a href="#">Terms and Conditions</a> of the website
+											</label>
+										</div>
+									</div>
+			
+									<a href="#" class="btn btn-purple btn-lg full-width">Complete Registration!</a>
+								</div>
+							</div>
+						</form>
+					</div>
+			
+					<div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+						<div class="title h6">Login to your Account</div>
+						<form class="content">
+							<div class="row">
+								<div class="col col-12 col-xl-12 col-lg-12 col-md-12 col-sm-12">
+									<div class="form-group label-floating">
+										<label class="control-label">Your Email</label>
+										<input class="form-control" placeholder="" type="email">
+									</div>
+									<div class="form-group label-floating">
+										<label class="control-label">Your Password</label>
+										<input class="form-control" placeholder="" type="password">
+									</div>
+			
+									<div class="remember">
+			
+										<div class="checkbox">
+											<label>
+												<input name="optionsCheckboxes" type="checkbox">
+												Remember Me
+											</label>
+										</div>
+										<a href="#" class="forgot" data-bs-toggle="modal" data-bs-target="#restore-password">Forgot my Password</a>
+									</div>
+			
+									<a href="#" class="btn btn-lg btn-primary full-width">Login</a>
+			
+									<div class="or"></div>
+			
+									<a href="#" class="btn btn-lg bg-facebook full-width btn-icon-left"><svg width="16" height="16"><use xlink:href="#olymp-facebook-icon"></use></svg>Login with Facebook</a>
+			
+									<a href="#" class="btn btn-lg bg-twitter full-width btn-icon-left"><svg width="16" height="16"><use xlink:href="#olymp-twitter-icon"></use></svg>Login with Twitter</a>
+			
+			
+									<p>Don’t you have an account? <a href="#">Register Now!</a> it’s really simple and you can start enjoing all the benefits!</p>
+								</div>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+			
+			<!-- ... end Login-Registration Form  -->
+		</div>
+		<div class="col col-lg-6 col-md-12 col-sm-12 col-12">
+
+			
+			<!-- Login-Registration Form  -->
+
+			<div class="registration-login-form">
+
+				<!-- Nav tabs -->
+				<ul class="nav nav-tabs" id="registration-form-tabs2" role="tablist">
+					<li class="nav-item" role="presentation">
+						<a class="nav-link" id="login-tab2" data-bs-toggle="tab" href="#login2" role="tab" aria-controls="login2" aria-selected="false">
+							<svg class="olymp-login-icon"><use xlink:href="#olymp-login-icon"></use></svg>
+						</a>
+					</li>
+					<li class="nav-item" role="presentation">
+						<a class="nav-link active" id="profile-tab2" data-bs-toggle="tab" href="#profile2" role="tab" aria-controls="profile2" aria-selected="true">
+							<svg class="olymp-register-icon"><use xlink:href="#olymp-register-icon"></use></svg>
+						</a>
+					</li>
+				</ul>
+
+				<!-- Tab panes -->
+				<div class="tab-content" id="registration-form-tabs-content2">
+					<div class="tab-pane fade" id="login2" role="tabpanel" aria-labelledby="login2-tab">
+						<div class="title h6">Register to Olympus</div>
+						<form class="content">
+							<div class="row">
+								<div class="col col-12 col-xl-6 col-lg-6 col-md-6 col-sm-12">
+									<div class="form-group label-floating">
+										<label class="control-label">First Name</label>
+										<input class="form-control" placeholder="" type="text">
+									</div>
+								</div>
+								<div class="col col-12 col-xl-6 col-lg-6 col-md-6 col-sm-12">
+									<div class="form-group label-floating">
+										<label class="control-label">Last Name</label>
+										<input class="form-control" placeholder="" type="text">
+									</div>
+								</div>
+								<div class="col col-12 col-xl-12 col-lg-12 col-md-12 col-sm-12">
+									<div class="form-group label-floating">
+										<label class="control-label">Your Email</label>
+										<input class="form-control" placeholder="" type="email">
+									</div>
+									<div class="form-group label-floating">
+										<label class="control-label">Your Password</label>
+										<input class="form-control" placeholder="" type="password">
+									</div>
+
+									<div class="form-group date-time-picker label-floating">
+										<label class="control-label">Your Birthday</label>
+										<input name="datetimepicker" value="10/24/1984" />
+										<span class="input-group-addon">
+														<svg class="olymp-calendar-icon"><use xlink:href="#olymp-calendar-icon"></use></svg>
+													</span>
+									</div>
+
+									<div class="form-group label-floating is-select">
+										<label class="control-label">Your Gender</label>
+										<select class="form-select">
+											<option value="MA">Male</option>
+											<option value="FE">Female</option>
+										</select>
+									</div>
+
+									<div class="remember">
+										<div class="checkbox">
+											<label>
+												<input name="optionsCheckboxes" type="checkbox">
+												I accept the <a href="#">Terms and Conditions</a> of the website
+											</label>
+										</div>
+									</div>
+
+									<a href="#" class="btn btn-purple btn-lg full-width">Complete Registration!</a>
+								</div>
+							</div>
+						</form>
+					</div>
+
+					<div class="tab-pane fade show active" id="profile2" role="tabpanel" aria-labelledby="profile2-tab">
+						<div class="title h6">Login to your Account</div>
+						<form class="content">
+							<div class="row">
+								<div class="col col-12 col-xl-12 col-lg-12 col-md-12 col-sm-12">
+									<div class="form-group label-floating">
+										<label class="control-label">Your Email</label>
+										<input class="form-control" placeholder="" type="email">
+									</div>
+									<div class="form-group label-floating">
+										<label class="control-label">Your Password</label>
+										<input class="form-control" placeholder="" type="password">
+									</div>
+
+									<div class="remember">
+
+										<div class="checkbox">
+											<label>
+												<input name="optionsCheckboxes" type="checkbox">
+												Remember Me
+											</label>
+										</div>
+										<a href="#" class="forgot" data-bs-toggle="modal" data-bs-target="#restore-password">Forgot my Password</a>
+									</div>
+
+									<a href="#" class="btn btn-lg btn-primary full-width">Login</a>
+
+									<div class="or"></div>
+
+									<a href="#" class="btn btn-lg bg-facebook full-width btn-icon-left"><svg width="16" height="16"><use xlink:href="#olymp-facebook-icon"></use></svg>Login with Facebook</a>
+
+									<a href="#" class="btn btn-lg bg-twitter full-width btn-icon-left"><svg width="16" height="16"><use xlink:href="#olymp-twitter-icon"></use></svg>Login with Twitter</a>
+
+
+									<p>Don’t you have an account? <a href="#">Register Now!</a> it’s really simple and you can start enjoing all the benefits!</p>
+								</div>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+			
+			<!-- ... end Login-Registration Form  -->
+		</div>
+
+		<div class="col col-lg-12 col-md-12 col-sm-12 col-12">
+			<h2 class="presentation-margin">News feed form</h2>
+			<div class="ui-block">
+
+				
+				<!-- News Feed Form  -->
+				
+				<div class="news-feed-form">
+					<!-- Nav tabs -->
+					<ul class="nav nav-tabs" role="tablist">
+						<li class="nav-item">
+							<a class="nav-link active inline-items" data-bs-toggle="tab" href="#home-1" role="tab" aria-expanded="true">
+				
+								<svg class="olymp-status-icon"><use xlink:href="#olymp-status-icon"></use></svg>
+				
+								<span>Status</span>
+							</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link inline-items" data-bs-toggle="tab" href="#profile-1" role="tab" aria-expanded="false">
+				
+								<svg class="olymp-multimedia-icon"><use xlink:href="#olymp-multimedia-icon"></use></svg>
+				
+								<span>Multimedia</span>
+							</a>
+						</li>
+				
+						<li class="nav-item">
+							<a class="nav-link inline-items" data-bs-toggle="tab" href="#blog" role="tab" aria-expanded="false">
+								<svg class="olymp-blog-icon"><use xlink:href="#olymp-blog-icon"></use></svg>
+				
+								<span>Blog Post</span>
+							</a>
+						</li>
+					</ul>
+				
+					<!-- Tab panes -->
+					<div class="tab-content">
+						<div class="tab-pane fade active show" id="home-1" role="tabpanel" aria-expanded="true">
+							<form>
+								<div class="author-thumb">
+									<img loading="lazy" src="img/author-page.webp" width="36" height="36" alt="author">
+								</div>
+								<div class="form-group with-icon label-floating is-empty">
+									<label class="control-label">Share what you are thinking here...</label>
+									<textarea class="form-control" placeholder=""></textarea>
+								</div>
+								<div class="add-options-message">
+									<a href="#" class="options-message" data-bs-toggle="tooltip" data-bs-placement="top"   data-bs-original-title="ADD PHOTOS">
+										<svg class="olymp-camera-icon" data-bs-toggle="modal" data-bs-target="#update-header-photo"><use xlink:href="#olymp-camera-icon"></use></svg>
+									</a>
+									<a href="#" class="options-message" data-bs-toggle="tooltip" data-bs-placement="top"   data-bs-original-title="TAG YOUR FRIENDS">
+										<svg class="olymp-computer-icon"><use xlink:href="#olymp-computer-icon"></use></svg>
+									</a>
+				
+									<a href="#" class="options-message" data-bs-toggle="tooltip" data-bs-placement="top"   data-bs-original-title="ADD LOCATION">
+										<svg class="olymp-small-pin-icon"><use xlink:href="#olymp-small-pin-icon"></use></svg>
+									</a>
+				
+									<button class="btn btn-primary btn-md-2">Post Status</button>
+									<button   class="btn btn-md-2 btn-border-think btn-transparent c-grey">Preview</button>
+				
+								</div>
+				
+							</form>
+						</div>
+				
+						<div class="tab-pane fade" id="profile-1" role="tabpanel" aria-expanded="true">
+							<form>
+								<div class="author-thumb">
+									<img loading="lazy" src="img/author-page.webp" width="36" height="36" alt="author">
+								</div>
+								<div class="form-group with-icon label-floating is-empty">
+									<label class="control-label">Share what you are thinking here...</label>
+									<textarea class="form-control" placeholder=""  ></textarea>
+								</div>
+								<div class="add-options-message">
+									<a href="#" class="options-message" data-bs-toggle="tooltip" data-bs-placement="top"   data-bs-original-title="ADD PHOTOS">
+										<svg class="olymp-camera-icon" data-bs-toggle="modal" data-bs-target="#update-header-photo"><use xlink:href="#olymp-camera-icon"></use></svg>
+									</a>
+									<a href="#" class="options-message" data-bs-toggle="tooltip" data-bs-placement="top"   data-bs-original-title="TAG YOUR FRIENDS">
+										<svg class="olymp-computer-icon"><use xlink:href="#olymp-computer-icon"></use></svg>
+									</a>
+				
+									<a href="#" class="options-message" data-bs-toggle="tooltip" data-bs-placement="top"   data-bs-original-title="ADD LOCATION">
+										<svg class="olymp-small-pin-icon"><use xlink:href="#olymp-small-pin-icon"></use></svg>
+									</a>
+				
+									<button class="btn btn-primary btn-md-2">Post Multimedia</button>
+									<button   class="btn btn-md-2 btn-border-think btn-transparent c-grey">Preview</button>
+				
+								</div>
+				
+							</form>
+						</div>
+				
+						<div class="tab-pane fade" id="blog" role="tabpanel" aria-expanded="true">
+							<form>
+								<div class="author-thumb">
+									<img loading="lazy" src="img/author-page.webp" width="36" height="36" alt="author">
+								</div>
+								<div class="form-group with-icon label-floating is-empty">
+									<label class="control-label">Share what you are thinking here...</label>
+									<textarea class="form-control" placeholder=""  ></textarea>
+								</div>
+								<div class="add-options-message">
+									<a href="#" class="options-message" data-bs-toggle="tooltip" data-bs-placement="top"   data-bs-original-title="ADD PHOTOS">
+										<svg class="olymp-camera-icon" data-bs-toggle="modal" data-bs-target="#update-header-photo"><use xlink:href="#olymp-camera-icon"></use></svg>
+									</a>
+									<a href="#" class="options-message" data-bs-toggle="tooltip" data-bs-placement="top"   data-bs-original-title="TAG YOUR FRIENDS">
+										<svg class="olymp-computer-icon"><use xlink:href="#olymp-computer-icon"></use></svg>
+									</a>
+				
+									<a href="#" class="options-message" data-bs-toggle="tooltip" data-bs-placement="top"   data-bs-original-title="ADD LOCATION">
+										<svg class="olymp-small-pin-icon"><use xlink:href="#olymp-small-pin-icon"></use></svg>
+									</a>
+				
+									<button class="btn btn-primary btn-md-2">Post</button>
+									<button   class="btn btn-md-2 btn-border-think btn-transparent c-grey">Preview</button>
+				
+								</div>
+				
+							</form>
+						</div>
+					</div>
+				</div>
+				
+				<!-- ... end News Feed Form  -->
+			</div>
+		</div>
+
+		<div class="col col-lg-12 col-md-12 col-sm-12 col-12">
+			<h2 class="presentation-margin">Comments form</h2>
+			<div  class="ui-block">
+
+				
+				<!-- Comment Form  -->
+				
+				<form class="comment-form inline-items">
+				
+					<div class="post__author author vcard inline-items">
+						<img loading="lazy" src="img/author-page.webp" width="36" height="36" alt="author">
+				
+						<div class="form-group with-icon-right ">
+							<textarea class="form-control" placeholder=""></textarea>
+							<div class="add-options-message">
+								<a href="#" class="options-message" data-bs-toggle="modal" data-bs-target="#update-header-photo">
+									<svg class="olymp-camera-icon">
+										<use xlink:href="#olymp-camera-icon"></use>
+									</svg>
+								</a>
+							</div>
+						</div>
+					</div>
+				
+					<button class="btn btn-md-2 btn-primary">Post Comment</button>
+				
+					<button class="btn btn-md-2 btn-border-think c-grey btn-transparent custom-color">Cancel</button>
+				
+				</form>
+				
+				<!-- ... end Comment Form  -->
+			</div>
+		</div>
+
+		<div class="col col-lg-12 col-md-12 col-sm-12 col-12">
+			<h2 class="presentation-margin">Widget form</h2>
+			<div class="ui-block">
+				<div class="ui-block-content">
+
+					<form>
+						<div class="row">
+							<div class="col col-lg-6 col-md-6 col-sm-12 col-12">
+								<fieldset class="form-group label-floating is-select">
+									<label class="control-label">Country and Timezone</label>
+									<select class="form-select">
+										<option value="AL">United States (UTC-8)</option>
+										<option value="2">Ontario (UTC−6)</option>
+										<option value="WY">Alberta (UTC−6)</option>
+									</select>
+								</fieldset>
+
+								<fieldset class="form-group label-floating is-select">
+									<label class="control-label">Extended Forecast Days</label>
+									<select class="form-select">
+										<option value="AL">Show Next 7 days</option>
+										<option value="2">Show Next 10 days</option>
+										<option value="WY">Show Next 14 days</option>
+									</select>
+								</fieldset>
+
+								<a href="#" class="btn btn-secondary btn-md full-width">Restore all Attributes</a>
+							</div>
+
+							<div class="col col-lg-6 col-md-6 col-sm-12 col-12">
+								<fieldset class="form-group label-floating is-select">
+									<label class="control-label">Temperature Unit</label>
+									<select class="form-select">
+										<option value="AL">F° (Farenheit)</option>
+										<option value="2">C° (Celsius)</option>
+									</select>
+								</fieldset>
+
+								<div class="switcher-block">
+									<div class="h6 title">Show Extended Forecast on Widget</div>
+									<div class="togglebutton blue">
+										<label>
+											<input type="checkbox" checked="">
+										</label>
+									</div>
+								</div>
+
+								<a href="#" class="btn btn-blue btn-md full-width">Save all Changes</a>
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+
+	</div>
+</div>
+
+
+
+
+<a class="back-to-top" href="#">
+	<svg class="back-icon" width="14" height="18"><use xlink:href="#olymp-back-to-top"></use></svg>
+</a>
+
+
+<!-- Window-popup Restore Password -->
+
+<div class="modal fade" id="restore-password" tabindex="-1" role="dialog" aria-labelledby="restore-password" aria-hidden="true">
+	<div class="modal-dialog window-popup restore-password-popup" role="document">
+		<div class="modal-content">
+			<a href="#" class="close icon-close" data-bs-dismiss="modal" aria-label="Close">
+				<svg class="olymp-close-icon"><use xlink:href="#olymp-close-icon"></use></svg>
+			</a>
+
+			<div class="modal-header">
+				<h6 class="title">Restore your Password</h6>
+			</div>
+
+			<div class="modal-body">
+				<form  method="get">
+					<p>Enter your email and click the send code button. You’ll receive a code in your email. Please use that
+						code below to change the old password for a new one.
+					</p>
+					<div class="form-group label-floating">
+						<label class="control-label">Your Email</label>
+						<input class="form-control" placeholder="" type="email" value="james-spiegel@yourmail.com">
+					</div>
+					<button class="btn btn-purple btn-lg full-width">Send me the Code</button>
+					<div class="form-group label-floating">
+						<label class="control-label">Enter the Code</label>
+						<input class="form-control" placeholder="" type="text" value="">
+					</div>
+					<div class="form-group label-floating">
+						<label class="control-label">Your New Password</label>
+						<input class="form-control" placeholder="" type="password" value="olympus">
+					</div>
+					<button class="btn btn-primary btn-lg full-width">Change your Password!</button>
+				</form>
+
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- ... end Window-popup Restore Password -->
+
+
+<!-- JS Scripts -->
+<script src="js/jQuery/jquery-3.5.1.min.js"></script>
+
+<script src="js/libs/jquery.mousewheel.min.js"></script>
+<script src="js/libs/perfect-scrollbar.min.js"></script>
+<script src="js/libs/imagesloaded.pkgd.min.js"></script>
+<script src="js/libs/material.min.js"></script>
+<script src="js/libs/selectize.min.js"></script>
+<script src="js/libs/moment.min.js"></script>
+<script src="js/libs/daterangepicker.min.js"></script>
+<script src="js/libs/isotope.pkgd.min.js"></script>
+<script src="js/libs/ajax-pagination.min.js"></script>
+<script src="js/libs/jquery.magnific-popup.min.js"></script>
+
+<script src="js/main.js"></script>
+<script src="js/libs-init/libs-init.js"></script>
+
+<script src="Bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- SVG icons loader -->
+<script src="js/svg-loader.js"></script>
+<!-- /SVG icons loader -->
+
+</body>
+</html>

@@ -1,0 +1,37 @@
+/*------------- #W-ACTION --------------*/
+
+
+.w-action {
+  background-image: url('../img/landing-bg.webp');
+  padding: 50px 45px 40px;
+  text-align: center;
+  color: #fff;
+  color: var(--olympus-white-color);
+  border-radius: 5px;
+
+  img, i {
+	margin-bottom: 15px;
+	font-size: 35px;
+  }
+
+  .content {
+
+	span {
+	  font-size: 10px;
+	  margin-bottom: 25px;
+	  display: block;
+	  text-transform: uppercase;
+	}
+
+	.title {
+	  font-weight: 400;
+	  color: inherit;
+	  margin-bottom: 15px;
+	  font-size: 24px;
+	}
+  }
+
+  .btn {
+	margin-bottom: 0;
+  }
+}

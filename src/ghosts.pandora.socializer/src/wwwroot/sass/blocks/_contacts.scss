@@ -1,0 +1,66 @@
+/*------------- #CONTACTS --------------*/
+
+
+
+.contact-item-wrap {
+  margin-bottom: 30px;
+
+  &:hover {
+	.contact-title:after {
+	  width: 100%;
+	}
+  }
+}
+
+.contact-title {
+  position: relative;
+  padding-bottom: 35px;
+  margin-bottom: 50px;
+
+  &:after {
+	content: "";
+	display: block;
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	width: 15%;
+	height: 2px;
+	background-color: #ff5e3a;
+	background-color: var(--olympus-primary-color);
+	transition: width .3s ease-in-out;
+  }
+}
+
+.contact-item {
+
+  .sub-title {
+	font-weight: 400;
+  }
+
+  a {
+	color: #888da8;
+	color: var(--olympus-body-font-color);
+	display: block;
+
+	&:hover {
+	  color: #ff5e3a;
+	  color: var(--olympus-primary-color);
+	}
+  }
+
+  & + .contact-item {
+	margin-top: 30px;
+  }
+}
+
+
+@media (max-width: 768px) {
+  .contact-title {
+	padding-bottom: 20px;
+	margin-bottom: 20px;
+  }
+
+  .contact-item + .contact-item {
+	margin-top: 20px;
+  }
+}

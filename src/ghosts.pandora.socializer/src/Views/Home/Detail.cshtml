@@ -4,8 +4,7 @@
 @model Socializer.Infrastructure.Post
 
 <div class="row row-cols-1 row-cols-md-12" id="itemList">
-    @if (Model != null)
-    {
+    @{
         var post = Model;
         <div class="col" id="@post.Id">
             <div class="card h-100">
@@ -23,36 +22,3 @@
         </div>
     }
 </div>
-<br/>
-@* <div class="row"> *@
-@*     <div class="col-12"> *@
-@*         <hr/> *@
-@*     </div> *@
-@* </div> *@
-@* <div class="container"> *@
-@*     <div class="row">&nbsp;</div> *@
-@*     <div class="row"> *@
-@*         <div class="col-2">User</div> *@
-@*         <div class="col-4"> *@
-@*             <input type="text" id="userInput" class="form-control" value="@ViewBag.User"/> *@
-@*         </div> *@
-@*     </div> *@
-@*     <div class="row"> *@
-@*         <div class="col-2">Message</div> *@
-@*         <div class="col-4"> *@
-@*             <textarea type="text" id="messageInput" class="form-control"></textarea> *@
-@*         </div> *@
-@*     </div> *@
-@*     <div class="row">&nbsp;</div> *@
-@*     <div class="row"> *@
-@*         <div class="col-6"> *@
-@*             <input type="button" id="sendButton" value="Send Message"/> *@
-@*         </div> *@
-@*     </div> *@
-@* </div> *@
-<br/>
-<form method="post" enctype="multipart/form-data">
-    <input type="text" name="u" id="u"/> <input type="text" name="m" id="m"/> <input type="file" name="File"/> <input type="submit" name="submit" id="sendButton"/>
-</form>
-<script src="~/js/signalr/dist/browser/signalr.js"></script>
-<script src="~/js/posts.js" asp-append-version="true"></script>

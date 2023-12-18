@@ -24,7 +24,7 @@ public class HomeController : Controller
     {
         this._logger.LogTrace("{RequestScheme}://{RequestHost}{RequestPath}{RequestQueryString}|{RequestMethod}|", Request.Scheme, Request.Host, Request.Path, Request.QueryString, Request.Method);
         
-        var posts = _db.Posts.Take(Program.Configuration.DefaultDisplay).ToList();
+        var posts = _db.Posts.OrderByDescending(x=>x.CreatedUtc).Take(Program.Configuration.DefaultDisplay).ToList();
 
         if (Request.QueryString.HasValue && !string.IsNullOrEmpty(Request.Query["u"]))
             ViewBag.User = Request.Query["u"];
@@ -32,7 +32,7 @@ public class HomeController : Controller
     }
     
     [HttpGet("/u/{userId}")]
-    public IActionResult User(string userId)
+    public new virtual IActionResult User(string userId)
     {
         this._logger.LogTrace("{RequestScheme}://{RequestHost}{RequestPath}{RequestQueryString}|{RequestMethod}|", Request.Scheme, Request.Host, Request.Path, Request.QueryString, Request.Method);
         

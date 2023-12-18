@@ -1,0 +1,59 @@
+/*------------- #w-personal-info --------------*/
+
+
+.w-personal-info {
+  margin-bottom: 0;
+
+  li {
+	margin-bottom: 30px;
+
+	&:last-child {
+	  margin-bottom: 0;
+	}
+
+	.title {
+	  color: #515365;
+	  color: var(--olympus-heading-color);
+	  font-weight: 500;
+	  margin-right: 30px;
+	  float: left;
+	  width: 30%;
+	}
+
+	.text {
+	  color: #888da8;
+	  color: var(--olympus-body-font-color);
+	  display: block;
+	  overflow: hidden;
+	}
+
+	.date {
+	  display: block;
+	  font-size: 11px;
+	  color: #bdc0ce;
+	  font-weight: 500;
+	  margin-bottom: 15px;
+	}
+  }
+
+  a:hover {
+	color: #ff5e3a;
+	color: var(--olympus-primary-color);
+  }
+
+  &.item-block {
+	.title {
+	  margin-right: 0;
+	  float: none;
+	  width: auto;
+	}
+  }
+}
+
+.widget + .widget {
+  margin-top: 35px;
+}
+
+.widget p {
+  font-size: 13px;
+}

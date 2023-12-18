@@ -1,0 +1,139 @@
+/*------------- #SEARCH-HELP-RESULT --------------*/
+
+
+.search-help-result-title {
+  text-align: center;
+  margin-bottom: 100px;
+
+  .count-result {
+	color: #ff5e3a;
+	color: var(--olympus-primary-color);
+  }
+
+  .search-query {
+	font-style: italic;
+	color: #888da8;
+	color: var(--olympus-body-font-color);
+  }
+}
+
+.search-help-result-list {
+  li {
+	padding-bottom: 50px;
+	margin-bottom: 50px;
+	border-bottom: 1px solid #e6ecf5;
+	border-bottom: 1px solid var(--olympus-border-color);
+  }
+
+  .title {
+	margin-bottom: 40px;
+  }
+
+  .single-post-additional {
+	margin-bottom: 20px;
+  }
+
+  .single-post-additional > * + * {
+	border-left: none;
+	margin-left: 30px;
+  }
+
+  .single-post-additional > * {
+	padding: 20px 0;
+  }
+
+  .post__author img {
+	width: 26px;
+	height: 26px;
+  }
+}
+
+.user-raiting {
+  margin-top: 30px;
+  font-size: 12px;
+  color: #515365;
+  color: var(--olympus-heading-color);
+  font-weight: 700;
+
+  img {
+	margin-right: 20px;
+	vertical-align: middle;
+  }
+}
+
+.page-404-content {
+  text-align: center;
+
+  img {
+	margin-bottom: 70px;
+	display: block;
+  }
+}
+
+.page-500-content {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+}
+
+.page-500-sup-title {
+  font-size: 84px;
+}
+
+
+/*================= Responsive Mode ============*/
+
+
+@media (max-width: 1024px) {
+  .page-500-content {
+	text-align: center;
+
+	img {
+	  margin-bottom: 40px;
+	}
+  }
+}
+
+@media (max-width: 860px) {
+  .search-help-result-title {
+	margin-bottom: 40px;
+  }
+
+  .search-help-result-list li {
+	padding-bottom: 20px;
+	margin-bottom: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+
+  .page-404-content img {
+	margin-bottom: 30px;
+  }
+
+  .single-post-additional {
+	margin-bottom: 20px;
+  }
+}
+
+@media (max-width: 560px) {
+
+  .search-help-result-list .title {
+	margin-bottom: 20px;
+  }
+
+  .search-help-result-list .single-post-additional > * {
+	display: inline-block;
+  }
+}
+
+@media (max-width: 360px) {
+
+  .search-help-result-list .single-post-additional > * {
+	display: block;
+  }
+
+  .search-help-result-list .single-post-additional > * + * {
+	margin-left: 0;
+  }
+}

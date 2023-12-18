@@ -1,0 +1,54 @@
+/*------------- #W-FRIEND-PAGES-ADDED --------------*/
+
+
+
+.w-friend-pages-added {
+
+  li {
+	& > * {
+	  vertical-align: top;
+	}
+
+	&:hover {
+	  background-color: transparent;
+	}
+  }
+
+  .author-thumb {
+	width: auto;
+	height: auto;
+
+	img {
+	  display: inline-block;
+	}
+  }
+
+  .notification-event {
+	padding-left: 10px;
+  }
+
+  .notification-friend {
+	font-size: 13px;
+  }
+
+  .chat-message-item {
+	font-size: 11px;
+  }
+
+  .notification-icon {
+	svg {
+	  width: 20px;
+	  height: 20px;
+	}
+  }
+}
+
+
+
+/*------------- Responsive mode styles --------------*/
+
+@media (max-width: 768px) {
+  .w-friend-pages-added.notification-list.friend-requests .notification-icon {
+	float: right;
+  }
+}

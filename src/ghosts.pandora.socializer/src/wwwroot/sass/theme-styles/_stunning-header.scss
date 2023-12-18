@@ -1,0 +1,95 @@
+/*------------- #STUNNING-HEADER --------------*/
+
+
+.stunning-header {
+  padding-bottom: 120px;
+  position: relative;
+  color: #fff;
+  color: var(--olympus-white-color);
+
+  .stunning-header-title {
+	color: inherit;
+	font-size: 40px;
+  }
+
+  & + * {
+	margin-top: 40px;
+  }
+
+  .content-bg-wrap {
+	z-index: -1;
+  }
+}
+
+.stunning-header-content {
+  z-index: 5;
+  text-align: center;
+  position: relative;
+  padding: 0 10px;
+}
+
+.bg-primary-opacity {
+  background-color: rgba($primary-color, 0.95);
+}
+
+.bg-purple-dark-opacity {
+  background-color: rgba($purple-dark, 0.95);
+}
+
+.stunning-header-bg1 {
+  background-image: url("../img/landing-users.webp");
+}
+
+.breadcrumbs-item {
+  display: inline-block;
+  margin-bottom: 0;
+
+  a {
+	margin-right: 6px;
+	color: inherit;
+	opacity: .7;
+
+	&:hover {
+	  color: #fff;
+	  color: var(--olympus-white-color);
+	  opacity: 1;
+	}
+  }
+
+  &.active {
+	span {
+	  font-weight: 700;
+	}
+  }
+
+  .icon {
+	margin-right: 6px;
+  }
+
+  &:last-child {
+	.icon {
+	  display: none;
+	}
+  }
+}
+
+
+
+/*================= Responsive Mode ============*/
+
+
+@media (max-width: 768px) {
+  .stunning-header {
+	padding-bottom: 60px;
+  }
+
+  .stunning-header .stunning-header-title {
+	font-size: 24px;
+  }
+}
+
+@media (max-width: 460px) {
+  .stunning-header {
+	padding-bottom: 60px;
+  }
+}
