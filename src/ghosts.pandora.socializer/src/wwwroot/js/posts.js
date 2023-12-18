@@ -7,8 +7,8 @@ document.getElementById("sendButton").disabled;
 
 connection.on("SendMessage", function (id, user, message, created) {
     let d = document.createElement("div");
-    document.getElementById("itemList").prepend(d);
-    d.innerHTML = `<div class="col" id="${id}"><div class="card h-100"><div class="card-body"><p class="card-text">${message}</p><p class="card-text"><small class="text-muted">${user}</small></p><p class="created">${created}</p></div></div></div>`;
+    document.getElementById("newsfeed-items-grid").prepend(d);
+    d.innerHTML = `<div class="ui-block"><article class="hentry post"><div class="post__author author vcard inline-items"><img loading="lazy" src="/u/${user}/avatar" alt="author" width="42" height="42"><div class="author-date"><a class="h6 post__author-name fn" href="/u/${user}">${user}</a> shared a <a href="/${id}">link</a><div class="post__date"><time class="published" datetime="${created}">${created}</time></div></div></div>${message}</article></div>`;
 });
 
 connection.start().then(function () {

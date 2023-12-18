@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Net.Mime;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Hosting.Internal;
 using Socializer.Hubs;
 using Socializer.Infrastructure;
 
@@ -11,12 +13,14 @@ public class HomeController : Controller
     private readonly ILogger<HomeController> _logger;
     private readonly IHubContext<PostsHub> _hubContext;
     private readonly DataContext _db;
+    private readonly IWebHostEnvironment _env;
 
-    public HomeController(ILogger<HomeController> logger, IHubContext<PostsHub> hubContext, DataContext dbContext)
+    public HomeController(ILogger<HomeController> logger, IHubContext<PostsHub> hubContext, DataContext dbContext, IWebHostEnvironment env)
     {
         _logger = logger;
         _hubContext = hubContext;
         _db = dbContext;
+        _env = env;
     }
 
     [HttpGet]
@@ -43,6 +47,49 @@ public class HomeController : Controller
         return View("Index", posts);
     }
     
+    [HttpGet("/u/{userId}/avatar")]
+    public async Task<IActionResult> GetUserAvatar(string userId)
+    {
+        _logger.LogTrace("{RequestScheme}://{RequestHost}{RequestPath}{RequestQueryString}|{RequestMethod}|", Request.Scheme, Request.Host, Request.Path, Request.QueryString, Request.Method);
+        
+        if (string.IsNullOrEmpty(userId))
+        {
+            return PhysicalFile(Path.Combine(_env.WebRootPath,"img", "avatar1.webp"), "image/webp");
+        }
+
+        var imageDir = Path.Combine(_env.WebRootPath, "images", "u", userId);
+        var imagePath = Path.Combine(imageDir, "avatar.webp");
+
+        if (!System.IO.File.Exists(imagePath))
+        {
+            Directory.CreateDirectory(imageDir);
+        
+            var rnd = new Random();
+            var number = rnd.Next(1, 85);
+
+            var sourceImagePath = Path.Combine(_env.WebRootPath, "img", $"avatar{number}-sm.webp");
+            if (System.IO.File.Exists(sourceImagePath))
+            {
+                try
+                {
+                    System.IO.File.Copy(sourceImagePath, imagePath);
+                }
+                catch (IOException ex)
+                {
+                    _logger.LogError(ex, "Error copying file.");
+                    return StatusCode(500, "Internal Server Error");
+                }
+            }
+            else
+            {
+                _logger.LogWarning($"Source avatar image not found: {sourceImagePath}");
+                return NotFound("Avatar image not available.");
+            }
+        }
+
+        return PhysicalFile(imagePath, "image/webp");
+    }
+
     [HttpGet("/{id:guid}")]
     public IActionResult Detail(Guid id)
     {

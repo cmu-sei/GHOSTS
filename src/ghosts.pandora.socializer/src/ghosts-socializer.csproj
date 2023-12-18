@@ -28,4 +28,8 @@
       <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.0" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="wwwroot\images\u\" />
+    </ItemGroup>
+
 </Project>

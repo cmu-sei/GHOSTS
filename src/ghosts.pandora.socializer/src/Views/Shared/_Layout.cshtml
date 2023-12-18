@@ -6,8 +6,8 @@
     {
         var u = new Socializer.Infrastructure.User();
         var number = rnd.Next(1, 85);
-        u.Avatar = $"/img/avatar{number}-sm.webp";
         u.Name = Faker.Internet.UserName();
+        u.Avatar = $"/u/{u.Name}/avatar";
         if(rnd.Next(1, 3) > 1)
             u.Name = Faker.Name.FullName();
         u.Status = statusArray[rnd.Next(statusArray.Length)];
@@ -805,14 +805,14 @@
 <script src="/js/main.js"></script>
 <script src="/js/libs-init/libs-init.js"></script>
 
-<script src="Bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/Bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 
 <!-- SVG icons loader -->
 <script src="/js/svg-loader.js"></script>
 <!-- /SVG icons loader -->
 
 <script src="~/js/signalr.min.js"></script>
-<script src="~/js/posts.js" asp-append-version="true"></script>
+<script src="~/js/posts.js?@System.Guid.NewGuid()" asp-append-version="true"></script>
 
 @await RenderSectionAsync("Scripts", required: false)
 </body>
