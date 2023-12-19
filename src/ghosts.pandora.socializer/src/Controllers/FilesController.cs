@@ -1,23 +1,24 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using Socializer.Hubs;
+using Socializer.Infrastructure;
 
 namespace Socializer.Controllers;
 
 [Route("/images")]
 [Route("/files")]
-public class FilesController : Controller
+public class FilesController : BaseController
 {
-    private readonly ILogger<FilesController> _logger;
-    
-    public FilesController(ILogger<FilesController> logger)
+    public FilesController(ILogger logger, IHubContext<PostsHub> hubContext, DataContext dbContext) :
+        base(logger, hubContext, dbContext)
     {
-        _logger = logger;
     }
     
     [HttpPost]
     public async Task<IActionResult> UploadFile([FromForm] FileInputModel model)
     {
-        this._logger.LogTrace("{RequestScheme}://{RequestHost}{RequestPath}{RequestQueryString}|{RequestMethod}|{Join}", Request.Scheme, Request.Host, Request.Path, Request.QueryString, Request.Method, string.Join(",", Request.Form));
+        this.Logger.LogTrace("{RequestScheme}://{RequestHost}{RequestPath}{RequestQueryString}|{RequestMethod}|{Join}", Request.Scheme, Request.Host, Request.Path, Request.QueryString, Request.Method, string.Join(",", Request.Form));
 
         var guid = Guid.NewGuid().ToString();
         var savePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images");

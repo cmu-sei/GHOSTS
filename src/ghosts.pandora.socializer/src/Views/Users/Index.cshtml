@@ -1,0 +1,18 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+@model List<Socializer.Infrastructure.Post>
+
+<div id="newsfeed-items-grid">
+    @{
+        foreach (var post in Model)
+        {
+            await Html.RenderPartialAsync("_Post", post);
+        }
+    }
+</div>
+<a id="load-more-button" href="#" class="btn btn-control btn-more" data-load-link="items-to-load.html" data-container="newsfeed-items-grid">
+    <svg class="olymp-three-dots-icon">
+        <use xlink:href="#olymp-three-dots-icon"></use>
+    </svg>
+</a>

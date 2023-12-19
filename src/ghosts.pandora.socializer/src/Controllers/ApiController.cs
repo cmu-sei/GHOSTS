@@ -1,30 +1,23 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using Socializer.Hubs;
 using Socializer.Infrastructure;
 
 namespace Socializer.Controllers;
 
 [Route("/api")]
-public class DataController : Controller
+public class ApiController : BaseController
 {
-    private readonly ILogger<HomeController> _logger;
-    private readonly IHubContext<PostsHub> _hubContext;
-    private readonly DataContext _db;
-
-    public DataController(ILogger<HomeController> logger, IHubContext<PostsHub> hubContext, DataContext dbContext)
+    public ApiController(ILogger logger, IHubContext<PostsHub> hubContext, DataContext dbContext) :
+        base(logger, hubContext, dbContext)
     {
-        _logger = logger;
-        _hubContext = hubContext;
-        _db = dbContext;
     }
 
     [HttpGet]
     public IEnumerable<Post> Index()
     {
-        this._logger.LogTrace("{RequestScheme}://{RequestHost}{RequestPath}{RequestQueryString}|{RequestMethod}|", Request.Scheme, Request.Host, Request.Path, Request.QueryString, Request.Method);
-        
-        var posts = _db.Posts.OrderByDescending(x=>x.CreatedUtc).Take(Program.Configuration.DefaultDisplay).ToList();
+        var posts = Db.Posts.Include(x=>x.Likes).OrderByDescending(x=>x.CreatedUtc).Take(Program.Configuration.DefaultDisplay).ToList();
 
         if (Request.QueryString.HasValue && !string.IsNullOrEmpty(Request.Query["u"]))
             ViewBag.User = Request.Query["u"];
@@ -34,9 +27,7 @@ public class DataController : Controller
     [HttpGet("u/{userId}")]
     public new virtual IEnumerable<Post> User(string userId)
     {
-        this._logger.LogTrace("{RequestScheme}://{RequestHost}{RequestPath}{RequestQueryString}|{RequestMethod}|", Request.Scheme, Request.Host, Request.Path, Request.QueryString, Request.Method);
-        
-        var posts = _db.Posts.Where(x=>x.User.ToLower() == userId.ToLower()).OrderByDescending(x=>x.CreatedUtc).Take(Program.Configuration.DefaultDisplay).ToList();
+        var posts = Db.Posts.Include(x=>x.Likes).Where(x=>x.User.ToLower() == userId.ToLower()).OrderByDescending(x=>x.CreatedUtc).Take(Program.Configuration.DefaultDisplay).ToList();
 
         if (Request.QueryString.HasValue && !string.IsNullOrEmpty(Request.Query["u"]))
             ViewBag.User = Request.Query["u"];
@@ -46,9 +37,7 @@ public class DataController : Controller
     [HttpGet("{id:guid}")]
     public Post? Detail(Guid id)
     {
-        this._logger.LogTrace("{RequestScheme}://{RequestHost}{RequestPath}{RequestQueryString}|{RequestMethod}|", Request.Scheme, Request.Host, Request.Path, Request.QueryString, Request.Method);
-
-        var post = _db.Posts.FirstOrDefault(x => x.Id == id.ToString());
+        var post = Db.Posts.Include(x=>x.Likes).FirstOrDefault(x => x.Id == id.ToString());
 
         if (Request.QueryString.HasValue && !string.IsNullOrEmpty(Request.Query["u"]))
             ViewBag.User = Request.Query["u"];
@@ -58,16 +47,14 @@ public class DataController : Controller
     [HttpGet("/admin/delete")]
     public async Task<IActionResult> Delete()
     {
-        this._db.Posts.RemoveRange(this._db.Posts);
-        await this._db.SaveChangesAsync();
+        this.Db.Posts.RemoveRange(this.Db.Posts);
+        await this.Db.SaveChangesAsync();
         return NoContent();
     }
     
     [HttpGet("/admin/generate/{n}")]
     public async Task<IActionResult> Generate(int n)
     {
-        this._logger.LogTrace("{RequestScheme}://{RequestHost}{RequestPath}{RequestQueryString}|{RequestMethod}|", Request.Scheme, Request.Host, Request.Path, Request.QueryString, Request.Method);
-
         var r = new Random();
         for (var i = 0; i < n; i++)
         {
@@ -79,9 +66,9 @@ public class DataController : Controller
             post.CreatedUtc = DateTime.MinValue.Add(TimeSpan.FromTicks(min.Ticks + (long) (r.NextDouble()*(DateTime.Now.Ticks - min.Ticks))));
             post.User = Faker.Internet.UserName();
             post.Message = Faker.Lorem.Sentence(15);
-            this._db.Posts.Add(post);
+            this.Db.Posts.Add(post);
         }
-        await _db.SaveChangesAsync();
+        await Db.SaveChangesAsync();
 
         return NoContent();
     }
@@ -89,8 +76,6 @@ public class DataController : Controller
     [HttpPost]
     public async Task<IActionResult> Post([FromForm] FilesController.FileInputModel model)
     {
-        this._logger.LogTrace("{RequestScheme}://{RequestHost}{RequestPath}{RequestQueryString}|{RequestMethod}|{Join}", Request.Scheme, Request.Host, Request.Path, Request.QueryString, Request.Method, string.Join(",", Request.Form));
-        
         var post = new Post
         {
             Id = Guid.NewGuid().ToString(),
@@ -117,11 +102,11 @@ public class DataController : Controller
             return BadRequest("User and message are required.");
 
         // has the same user tried to post the same message within the past x minutes?
-        if (_db.Posts.Any(_ => _.Message.ToLower() == post.Message.ToLower()
+        if (Db.Posts.Any(_ => _.Message.ToLower() == post.Message.ToLower()
                                 && _.User.ToLower() == post.User.ToLower()
                                 && _.CreatedUtc > post.CreatedUtc.AddMinutes(-Program.Configuration.MinutesToCheckForDuplicatePost)))
         {
-            this._logger.LogInformation("Client is posting duplicates: {PostUser}", post.User);
+            this.Logger.LogInformation("Client is posting duplicates: {PostUser}", post.User);
             return NoContent();
         }
          
@@ -160,10 +145,12 @@ public class DataController : Controller
             post.Message = post.Message + $" <img src=\"{imagePath}\"/>";
         }
         
-        _db.Posts.Add(post);
-        await _db.SaveChangesAsync();
+        Db.Posts.Add(post);
+        await Db.SaveChangesAsync();
         
-        await _hubContext.Clients.All.SendAsync("SendMessage", post.Id, post.User, post.Message, post.CreatedUtc);
+        this.CookieWrite("userid", post.User);
+        
+        await HubContext.Clients.All.SendAsync("SendMessage", post.Id, post.User, post.Message, post.CreatedUtc);
 
         return NoContent();
     }

@@ -18,14 +18,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>@ViewData["Title"] - ghosts-socializer</title>
+    <title>@ViewBag.Title - ghosts-socializer</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <link rel="preload" type="text/css" href="/css/theme-font.min.css" as="style">
     <link rel="stylesheet" type="text/css" href="/Bootstrap/dist/css/bootstrap.css">
     <link rel="stylesheet" type="text/css" href="/css/main.min.css">
-    <!--<link rel="stylesheet" type="text/css" href="/css/rtl.min.css">-->
+    <style>
+        .post img {display: block;}
+    </style>
 </head>
 <body class="page-has-left-panels page-has-right-panels">
 
@@ -608,7 +610,7 @@
                         <label class="control-label">Share what you are thinking here...</label>
                         <textarea class="form-control" type="text" name="m" id="m"></textarea> 
                         <br/>
-                        <input type="text" name="u" id="u"/>
+                        <input type="text" name="u" id="u" value="@ViewBag.UserId" />
                         <br/>
                         <input type="file" name="File"/> 
                     </div>

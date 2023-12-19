@@ -1,0 +1,10 @@
+﻿@{
+    ViewData["Title"] = "Detail";
+}
+@model Socializer.Infrastructure.Post
+
+<div class="row row-cols-1 row-cols-md-12" id="itemList">
+    @{
+        await Html.RenderPartialAsync("_Post", Model);
+    }
+</div>
