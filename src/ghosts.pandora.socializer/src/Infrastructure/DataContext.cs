@@ -16,9 +16,10 @@ public class DataContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder options)
     {
+        Directory.CreateDirectory($"{AppContext.BaseDirectory}/db");
         // Console.WriteLine($"Database here: {AppContext.BaseDirectory}socializer.db");
         // in memory database used for simplicity, change to a real db for production applications
-        options.UseSqlite($"Data Source={AppContext.BaseDirectory}socializer.db");
+        options.UseSqlite($"Data Source={AppContext.BaseDirectory}/db/socializer.db");
     }
 
     public DbSet<Post> Posts { get; set; }
