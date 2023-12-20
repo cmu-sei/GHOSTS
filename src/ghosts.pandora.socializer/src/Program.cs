@@ -29,10 +29,10 @@ class Program
         var app = builder.Build();
 
         //app.UseHttpsRedirection();
-        app.UseAuthorization();
         app.UseStaticFiles();
         
         app.UseRouting();
+        app.UseAuthorization();
         app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         
         app.MapHub<PostsHub>("/hubs/posts");
