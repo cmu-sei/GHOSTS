@@ -2,6 +2,8 @@
 
 using System;
 using System.IO;
+using System.Net;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using NLog;
 
@@ -20,26 +22,46 @@ namespace Ghosts.Domain.Code
             return new FileInfo(TimelineFile);
         }
 
+        public static void CheckForUrlTimeline(WebClient client, string timelineConfig)
+        {
+            if (!timelineConfig.StartsWith("http")) return;
+
+            try
+            {
+                using (var stream = client.OpenRead(timelineConfig))
+                    if (stream != null)
+                        using (var reader = new StreamReader(stream))
+                        {
+                            var content = reader.ReadToEnd();
+                            if (string.IsNullOrEmpty(content))
+                                throw new Exception("Http timeline file could not be found, falling back to local");
+
+                            try
+                            {
+                                JsonConvert.DeserializeObject<Timeline>(content);
+                            }
+                            catch (Exception)
+                            {
+                                _log.Error($"Timeline fetched from {timelineConfig} is not in the correct format, falling back to local");
+                                throw;
+                            }
+
+                            File.WriteAllText(TimelineFile, content);
+                        }
+            }
+            catch (Exception e)
+            {
+                _log.Error($"Http timeline file could not be found, falling back to local: {e}");
+            }
+        }
+
         /// <summary>
         /// Get from local disk
         /// </summary>
         /// <returns>The local timeline to be executed</returns>
         public static Timeline GetLocalTimeline()
         {
-            _log.Trace($"Loading timeline config {TimelineFile }");
-
-            var raw = File.ReadAllText(TimelineFile);
-
-            var timeline = JsonConvert.DeserializeObject<Timeline>(raw);
-            if (timeline.Id == Guid.Empty)
-            {
-                timeline.Id = Guid.NewGuid();
-                SetLocalTimeline(TimelineFile, timeline);
-            }
-
-            _log.Debug($"Timeline {timeline.Id} loaded successfully");
-            
-            return timeline;
+            return GetLocalTimeline(TimelineFile);
         }
 
         public static Timeline GetLocalTimeline(string path)
@@ -54,7 +76,8 @@ namespace Ghosts.Domain.Code
                     timeline.Id = Guid.NewGuid();
                     SetLocalTimeline(path, timeline);
                 }
-
+                
+                _log.Debug($"Timeline {timeline.Id} loaded successfully");
                 return timeline;
             }
             catch

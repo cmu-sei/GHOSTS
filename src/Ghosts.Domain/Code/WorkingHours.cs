@@ -3,7 +3,6 @@
 using System;
 using System.Linq;
 using System.Threading;
-using Ghosts.Domain.Code.Helpers;
 using NLog;
 
 namespace Ghosts.Domain.Code

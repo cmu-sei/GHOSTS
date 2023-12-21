@@ -13,6 +13,7 @@ using CommandLine;
 using Ghosts.Client.Comms;
 using Ghosts.Client.Infrastructure;
 using Ghosts.Client.TimelineManager;
+using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Models;
 using NLog;
@@ -36,6 +37,7 @@ class Program
 
     internal static List<ThreadJob> ThreadJobs { get; set; }
     internal static ClientConfiguration Configuration { get; set; }
+    internal static DateTime LastChecked = DateTime.Now.AddHours(-1);
     internal static Options OptionFlags;
     internal static bool IsDebug;
     internal static IScheduler Scheduler;
@@ -133,8 +135,8 @@ class Program
             Console.ReadLine();
             return;
         }
-
-        Program.CheckId = new CheckId();
+        
+        Program.CheckId = new CheckId(true);
 
         DebugManager.Evaluate();
 
@@ -175,7 +177,7 @@ class Program
 
         //do we have client id? or is this first run?
         _log.Trace($"CheckID: {Program.CheckId.Id}");
-
+        
         //connect to command server for 1) client id 2) get updates and 3) sending logs/surveys
         Updates.Run();
 

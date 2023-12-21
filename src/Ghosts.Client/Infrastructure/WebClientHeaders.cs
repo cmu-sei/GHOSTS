@@ -1,6 +1,7 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System.Net;
+using System.Web.UI;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 
@@ -11,21 +12,11 @@ namespace Ghosts.Client.Infrastructure;
 /// </summary>
 public static class WebClientBuilder
 {
-    public static WebClient Build(ResultMachine machine)
-    {
-        return BuildEx(machine);
-    }
-
-    public static WebClient BuildNoId(ResultMachine machine)
-    {
-        return BuildEx(machine, false);
-    }
-
-    private static WebClient BuildEx(ResultMachine machine, bool hasId = true)
+    public static WebClient Build(ResultMachine machine, bool useId = true)
     {
         var client = new WebClient();
         client.Headers.Add(HttpRequestHeader.UserAgent, "Ghosts Client");
-        if (hasId)
+        if (Program.CheckId != null && !string.IsNullOrEmpty(Program.CheckId.Id) && useId)
         {
             client.Headers.Add("ghosts-id", Program.CheckId.Id);
         }

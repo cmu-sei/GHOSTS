@@ -98,8 +98,15 @@ namespace Ghosts.Domain.Code
 
         public ResourceControlSettings ResourceControl { get; set; }
 
+        public TimelineConf TimelineConfiguration { get; set; }
+
         public AwsCliSettings AwsCli { get; set; }
 
+        public class TimelineConf
+        {
+            public string Location { get; set; }
+        }
+        
         public class AwsCliSettings
         {
             public string InstallFolder { get; set; }

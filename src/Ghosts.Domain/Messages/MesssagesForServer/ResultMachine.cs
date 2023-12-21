@@ -1,6 +1,7 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
+using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
@@ -101,9 +102,7 @@ namespace Ghosts.Domain
                 if (NetworkInterface.GetIsNetworkAvailable())
                 {
                     var host = Dns.GetHostEntry(Dns.GetHostName());
-                    foreach (var ip in host.AddressList)
-                        if (ip.AddressFamily == AddressFamily.InterNetwork)
-                            return ip.ToString();
+                    return host.AddressList.FirstOrDefault(x=>x.AddressFamily == AddressFamily.InterNetwork)?.ToString();
                 }
             }
             catch
