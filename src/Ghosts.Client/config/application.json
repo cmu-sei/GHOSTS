@@ -27,8 +27,8 @@
     "PostUrl": "http://ghosts-api:52388/api/clientsurvey"
   },
   "TimelineConfiguration": {
-    "useThisForLocalLocation": "config/timeline.json",
-    "Location": "https://raw.githubusercontent.com/cmu-sei/GHOSTS/6e04885809dfdceb138fbf9cdf1a1f795ea907ef/src/Ghosts.Client/config/timeline.json"
+    "Location": "config/timeline.json",
+    "useThisToDownloadInitialTimelineFromALocation": "https://raw.githubusercontent.com/cmu-sei/GHOSTS/6e04885809dfdceb138fbf9cdf1a1f795ea907ef/src/Ghosts.Client/config/timeline.json"
   },
   "Content": {
     "EmailsMax":  20,
