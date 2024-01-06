@@ -10,7 +10,7 @@ theme:
     - navigation.indexes
     - toc.integrate
   logo: assets/img/ghosts.png
-  favicon: assets/img/ghosts.png
+  favicon: assets/img/ghosts_new.png
   palette:
     # Palette toggle for light mode
     - scheme: default
