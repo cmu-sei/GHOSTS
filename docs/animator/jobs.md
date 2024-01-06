@@ -85,9 +85,9 @@ The following is a quick start guide to getting LLM-driven GHOSTS NPCs up and ru
 
 The process to stand up and use Ollama is:
 
-1. Download and install Ollama. Get familiar with creating your own custom models.
-2. Create a model for the job you want to run. These are stored in [content-models within the Animator project](https://github.com/cmu-sei/GHOSTS-ANIMATOR/tree/master/content-models).
-3. Run the commands to create the applicable model (chat for example):
+- Download and install Ollama. Get familiar with creating your own custom models.
+- Create a model for the job you want to run. These are stored in [content-models within the Animator project](https://github.com/cmu-sei/GHOSTS-ANIMATOR/tree/master/content-models).
+- Run the commands to create the applicable model (chat for example):
 
 ```
 cd chat
@@ -95,9 +95,9 @@ ollama create chat
 ollama run chat
 ```
 
-4. You can test the model right in the terminal by interrogating it with quesitons that an NPC might generate.
-5. But also note that Ollama automatically creates an API enpoint for the LLM at http://localhost:11434. This is the endpoint Animator will call for content.
-6. Ensure your content settings for the applicable job reference your newly running model:
+- You can test the model right in the terminal by interrogating it with quesitons that an NPC might generate.
+- But also note that Ollama automatically creates an API enpoint for the LLM at http://localhost:11434. This is the endpoint Animator will call for content.
+- Ensure your content settings for the applicable job reference your newly running model:
 
 ```json
     "ContentEngine": {
@@ -107,4 +107,4 @@ ollama run chat
     }
 ```
 
-7. You can run multiple models at the same time, but this may be a performance issue. You can also run multiple models on different machines, and point the Animator content settings to the applicable machine.
+- You can run multiple models at the same time, but this may be a performance issue. You can also run multiple models on different machines, and point the Animator content settings to the applicable machine.
