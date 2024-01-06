@@ -33,6 +33,8 @@ curl https://github.com/cmu-sei/GHOSTS-ANIMATOR/blob/master/src/docker-compose.y
 docker compose up -d
 ```
 
+Note, most configuration that you may want to change is located in ./config, and so you can mount that directory to your local machine and make changes there.
+
 Now browse to <http://localhost:5000/>
 
 ## Using Animator to Create NPCs
