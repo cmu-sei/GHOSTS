@@ -79,3 +79,32 @@ This has agents get their next instruction directly from an LLM, based on who th
 
 Initial work in LLM-driven autonomous GHOSTS agents was documented in our technical report titled :material-file-document:[_Simulating Realistic Human Activity Using Large Language Model Directives_](https://insights.sei.cmu.edu/library/simulating-realistic-human-activity-using-large-language-model-directives/){:target="_blank"}.
 
+## Getting Started With LLM-Driven GHOSTS NPCs
+
+The following is a quick start guide to getting LLM-driven GHOSTS NPCs up and running. This guide assumes you have already installed the GHOSTS API and Animator, and have a working LLM. If you do not have an LLM, you might consider [Ollama](https://ollama.ai) — which is very easy to setup and run on Apple Silicon (and where most reasonable models run very fast).
+
+The process to stand up and use Ollama is:
+
+1. Download and install Ollama. Get familiar with creating your own custom models.
+2. Create a model for the job you want to run. These are stored in [content-models within the Animator project](https://github.com/cmu-sei/GHOSTS-ANIMATOR/tree/master/content-models).
+3. Run the commands to create the applicable model (chat for example):
+
+```
+cd chat
+ollama create chat
+ollama run chat
+```
+
+4. You can test the model right in the terminal by interrogating it with quesitons that an NPC might generate.
+5. But also note that Ollama automatically creates an API enpoint for the LLM at http://localhost:11434. This is the endpoint Animator will call for content.
+6. Ensure your content settings for the applicable job reference your newly running model:
+
+```json
+    "ContentEngine": {
+        "Source": "ollama",
+        "Host": "http://localhost:11434",
+        "Model": "chat"
+    }
+```
+
+7. You can run multiple models at the same time, but this may be a performance issue. You can also run multiple models on different machines, and point the Animator content settings to the applicable machine.
