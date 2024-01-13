@@ -5,7 +5,7 @@ on:
     branches: [ main ]
 
 jobs:    
-  build:
+  login:
     runs-on: ubuntu-latest
     steps:
       - name: Login to dockerhub
