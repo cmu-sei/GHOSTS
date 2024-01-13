@@ -100,6 +100,9 @@ namespace Ghosts.Api.Models
                    !string.IsNullOrEmpty(CurrentUsername);
         }
 
+        [NotMapped] 
+        public bool HadId { get; set; }
+
         public void AddHistoryHealth(HistoryHealth model)
         {
             HistoryHealth.Add(model);

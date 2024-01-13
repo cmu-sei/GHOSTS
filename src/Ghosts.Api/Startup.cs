@@ -3,6 +3,7 @@
 using System;
 using System.IO;
 using System.Reflection;
+using Ghosts.Api.Hubs;
 using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Api.Infrastructure.Extensions;
 using Ghosts.Api.Services;
@@ -77,6 +78,9 @@ namespace Ghosts.Api
             services.AddCors(options => options.UseConfiguredCors(Configuration.GetSection("CorsPolicy")));
             services.AddRouting(options => options.LowercaseUrls = true);
             services.AddMvc().AddNewtonsoftJson();
+            
+            services.AddSignalR();
+            // services.AddHostedService<HubHeartbeatService>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -84,7 +88,11 @@ namespace Ghosts.Api
             if (env.IsDevelopment()) app.UseDeveloperExceptionPage();
 
             app.UseRouting();
-            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+                endpoints.MapHub<ClientHub>("/clientHub");
+            });
             app.UseCors("default");
 
             app.UseSwagger();

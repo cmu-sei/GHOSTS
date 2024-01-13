@@ -16,8 +16,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ghosts.domain", "Ghosts.Dom
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ghosts.api", "Ghosts.Api\ghosts.api.csproj", "{D016B25C-5638-4668-BB54-4C5F179426DF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ghosts.api.migrations", "ghosts.api.migrations\ghosts.api.migrations.csproj", "{E53C07DC-B2FF-4F93-B2D3-93EDCA109B38}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,10 +30,6 @@ Global
 		{D016B25C-5638-4668-BB54-4C5F179426DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D016B25C-5638-4668-BB54-4C5F179426DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D016B25C-5638-4668-BB54-4C5F179426DF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E53C07DC-B2FF-4F93-B2D3-93EDCA109B38}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E53C07DC-B2FF-4F93-B2D3-93EDCA109B38}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E53C07DC-B2FF-4F93-B2D3-93EDCA109B38}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E53C07DC-B2FF-4F93-B2D3-93EDCA109B38}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

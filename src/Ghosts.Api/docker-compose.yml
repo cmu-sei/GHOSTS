@@ -46,7 +46,6 @@ services:
   grafana:
     image: grafana/grafana
     container_name: ghosts-grafana
-    user: root
     depends_on:
       - postgres
     ports:
@@ -56,5 +55,5 @@ services:
     restart: always
     volumes:
       - ./g_data:/var/lib/grafana
-      - ../../configuration/grafana/datasources:/etc/grafana/provisioning/datasources
-      - ../../configuration/grafana/dashboards:/etc/grafana/provisioning/dashboards
+    
+    
