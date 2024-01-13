@@ -42,4 +42,4 @@ jobs:
           tags: dustinupdyke/ghosts:${{ steps.tag_name.outputs.tag }}
           push: true
           context: src
-          file: src/Dockerfile-api
+          file: Dockerfile-api
