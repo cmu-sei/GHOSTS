@@ -7,23 +7,11 @@ on:
     types: [ "published" ]
 
 jobs:
-  login:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Login to dockerhub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
   build:
-    needs: login
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-
-      # Extract tag name based on event type
-      - name: Extract tag name
+      - name: Extract tag name # Extract tag name based on event type
         id: tag_name
         run: |
           if [[ $GITHUB_EVENT_NAME == 'release' ]]; then
@@ -33,12 +21,16 @@ jobs:
           fi
         shell: bash
 
-      - name: Build and push Docker images
-        uses: docker/build-push-action@v2
+      - name: Login to dockerhub
+        uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-          repository: dustinupdyke/ghosts
+
+      - name: Build and push Docker images
+        uses: docker/build-push-action@v2
+        with:
           tags: dustinupdyke/ghosts:${{ steps.tag_name.outputs.tag }}
           push: true
-          file: src/Dockerfile-api
+          context: src/.
+          file: ./src/Dockerfile-api
