@@ -1,6 +1,5 @@
 # docker-compose up -d
 # -f compose-api.yml (if you want a custom file)
-# The Grafana volume mounts assume the directory structure matches the git repository
 
 version: '3.2'
 networks:
@@ -55,5 +54,3 @@ services:
     restart: always
     volumes:
       - ./g_data:/var/lib/grafana
-    
-    
