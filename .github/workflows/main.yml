@@ -10,7 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       # Extract tag name
       - name: Extract tag name
@@ -25,28 +25,6 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
           repository: dustinupdyke/ghosts
           tags: dustinupdyke/ghosts:${{ steps.tag_name.outputs.tag }}
-          push: true
-          context: src
-          file: src/Dockerfile-api
-
-  buildcmusei:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-
-      # Extract tag name
-      - name: Extract tag name
-        id: tag_name
-        run: echo "##[set-output name=tag;]$(echo ${GITHUB_REF#refs/tags/})"
-        shell: bash
-
-      - name: Build and push Docker images
-        uses: docker/build-push-action@v2  # Updated to v2
-        with:
-          username: ${{ secrets.BOT_USERNAME }}
-          password: ${{ secrets.BOT_PASSWORD }}
-          repository: cmusei/ghosts
-          tags: cmusei/ghosts:${{ steps.tag_name.outputs.tag }}
           push: true
           context: src
           file: src/Dockerfile-api
