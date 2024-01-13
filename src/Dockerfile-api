@@ -1,11 +1,7 @@
 # Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
-# $ docker build -f Dockerfile-api  . -t ghosts/api
-
-#
-#multi-stage target: dev
-#
-FROM mcr.microsoft.com/dotnet/sdk:6.0-alpine AS dev
+# multi-stage target: dev
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS dev
 
 COPY Ghosts.Api/. /app/Ghosts.Api
 COPY Ghosts.Domain/. /app/Ghosts.Domain
@@ -14,10 +10,8 @@ WORKDIR /app/Ghosts.Api
 RUN dotnet publish -c Release -o /app/dist
 CMD ["dotnet", "run"]
 
-#
-#multi-stage target: prod
-#
-FROM mcr.microsoft.com/dotnet/aspnet:6.0-alpine AS prod
+# multi-stage target: prod
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS prod
 ARG commit
 ENV COMMIT=$commit
 COPY --from=dev /app/dist /app
