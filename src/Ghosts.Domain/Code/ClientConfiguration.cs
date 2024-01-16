@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 using Newtonsoft.Json;
 using NLog;
 
@@ -101,6 +102,15 @@ namespace Ghosts.Domain.Code
         public TimelineConf TimelineConfiguration { get; set; }
 
         public AwsCliSettings AwsCli { get; set; }
+
+        public SocketsConfiguration Sockets { get; set; }
+
+        public class SocketsConfiguration
+        {
+            public bool IsEnabled { get; set; }
+            public string Url { get; set; }
+            public int Heartbeat { get; set; }
+        }
 
         public class TimelineConf
         {

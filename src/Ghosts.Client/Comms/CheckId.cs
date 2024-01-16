@@ -133,19 +133,24 @@ public class CheckId
             _log.Error($"Cannot connect to API: {e.Message}");
         }
 
-        if (!string.IsNullOrEmpty(s))
+        WriteId(s);
+
+        return s;
+    }
+
+    public static void WriteId(string id)
+    {
+        if (!string.IsNullOrEmpty(id))
         {
-            s = s.Replace("\"", "");
+            id = id.Replace("\"", "");
 
             if (!Directory.Exists(ApplicationDetails.InstanceFiles.Path))
             {
                 Directory.CreateDirectory(ApplicationDetails.InstanceFiles.Path);
             }
-            
-            //save returned id
-            File.WriteAllText(IdFile, s);
-        }
 
-        return s;
+            //save returned id
+            File.WriteAllText(ApplicationDetails.InstanceFiles.Id, id);
+        }
     }
 }

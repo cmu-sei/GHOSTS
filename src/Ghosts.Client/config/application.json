@@ -51,6 +51,11 @@
   "FirefoxInstallLocation": "",
   "FirefoxMajorVersionMinimum": 48,
   "OfficeDocsMaxAgeInHours": 72,
+  "Sockets": {
+    "IsEnabled": true,
+    "Url": "http://ghosts-api:5000/clientHub",
+    "Heartbeat": 50000
+  }, 
   "Email": {
     "RecipientsToMin": 1,
     "RecipientsToMax": 3,
