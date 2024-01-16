@@ -17,9 +17,9 @@ public class Connection
     private HubConnection _connection;
     private readonly CancellationToken _ct = new();
     public readonly BackgroundTaskQueue Queue = new();
-    private readonly ClientConfiguration.SocketsConfiguration _options;
+    private readonly ClientConfiguration.SocketsSettings _options;
 
-    public Connection(ClientConfiguration.SocketsConfiguration options)
+    public Connection(ClientConfiguration.SocketsSettings options)
     {
         this._options = options;
     }

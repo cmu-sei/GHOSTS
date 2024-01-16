@@ -182,7 +182,7 @@ public static class Updates
 
         try
         {
-            postUrl = Program.Configuration.IdUrl.Replace("clientid", "clienttimeline");
+            postUrl = Program.Configuration.Id.Url.Replace("clientid", "clienttimeline");
         }
         catch
         {

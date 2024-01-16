@@ -1,10 +1,12 @@
 ﻿{
-  "IdEnabled": true,
-  "IdUrl": "http://ghosts-api:52388/api/clientid",
-  "IdFormat": "guestlocal",
-  "IdFormatKey": "guestinfo.id",
-  "IdFormatValue": "$formatkeyvalue$-$machinename$",
-  "VMWareToolsLocation": "C:\\progra~1\\VMware\\VMware Tools\\vmtoolsd.exe",
+  "Id": {
+    "IsEnabled": true,
+    "Url": "http://ghosts-api:52388/api/clientid",
+    "Format": "guestlocal",
+    "FormatKey": "guestinfo.id",
+    "FormatValue": "$formatkeyvalue$-$machinename$",
+    "VMWareToolsLocation": "C:\\progra~1\\VMware\\VMware Tools\\vmtoolsd.exe"
+  }, 
   "AllowMultipleInstances": false,
   "EncodeHeaders": true,
   "ClientResults": {
@@ -31,7 +33,7 @@
     "useThisToDownloadInitialTimelineFromALocation": "https://raw.githubusercontent.com/cmu-sei/GHOSTS/6e04885809dfdceb138fbf9cdf1a1f795ea907ef/src/Ghosts.Client/config/timeline.json"
   },
   "Content": {
-    "EmailsMax":  20,
+    "EmailsMax": 20,
     "EmailContent": "",
     "EmailReply": "",
     "EmailDomain": "",
@@ -55,7 +57,7 @@
     "IsEnabled": true,
     "Url": "http://ghosts-api:5000/clientHub",
     "Heartbeat": 50000
-  }, 
+  },
   "Email": {
     "RecipientsToMin": 1,
     "RecipientsToMax": 3,

@@ -96,7 +96,7 @@ public class CheckId
 
         var s = string.Empty;
 
-        if (!Program.Configuration.IdEnabled)
+        if (!Program.Configuration.Id.IsEnabled)
         {
             return s;
         }
@@ -108,7 +108,7 @@ public class CheckId
             //call home
             try
             {
-                using var reader = new StreamReader(client.OpenRead(Program.Configuration.IdUrl) ?? throw new InvalidOperationException("CheckID client is null"));
+                using var reader = new StreamReader(client.OpenRead(Program.Configuration.Id.Url) ?? throw new InvalidOperationException("CheckID client is null"));
                 s = reader.ReadToEnd();
                 _log.Debug("ID Received");
             }
