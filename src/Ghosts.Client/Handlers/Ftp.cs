@@ -133,10 +133,10 @@ namespace Ghosts.Client.Handlers
             {
                 WorkingHours.Is(handler);
 
-                if (timelineEvent.DelayBefore > 0)
-                    Thread.Sleep(timelineEvent.DelayBefore);
+                if (timelineEvent.DelayBeforeActual > 0)
+                    Thread.Sleep(timelineEvent.DelayBeforeActual);
 
-                Log.Trace($"Ftp Command: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfter}");
+                Log.Trace($"Ftp Command: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfterActual}");
                 int[] probabilityList = { this.CurrentFtpSupport.uploadProbability, this.CurrentFtpSupport.downloadProbability, this.CurrentFtpSupport.deletionProbability };
                 string[] actionList = { "upload", "download", "delete" };
 
@@ -151,12 +151,12 @@ namespace Ghosts.Client.Handlers
                                 var action = SelectActionFromProbabilities(probabilityList, actionList);
                                 this.Command(handler, timelineEvent, cmd.ToString(), action);
                             }
-                            Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, jitterfactor)); ;
+                            Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, jitterfactor)); ;
                         }
                 }
 
-                if (timelineEvent.DelayAfter > 0)
-                    Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, jitterfactor)); ;
+                if (timelineEvent.DelayAfterActual > 0)
+                    Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, jitterfactor)); ;
             }
         }
 

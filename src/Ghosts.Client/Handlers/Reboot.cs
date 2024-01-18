@@ -14,10 +14,10 @@ public class Reboot : BaseHandler
         {
             WorkingHours.Is(handler);
 
-            if (timelineEvent.DelayBefore > 0)
-                Thread.Sleep(timelineEvent.DelayBefore);
+            if (timelineEvent.DelayBeforeActual > 0)
+                Thread.Sleep(timelineEvent.DelayBeforeActual);
 
-            Log.Trace($"Reboot: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfter}");
+            Log.Trace($"Reboot: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfterActual}");
 
             switch (timelineEvent.Command)
             {

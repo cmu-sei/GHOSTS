@@ -99,8 +99,7 @@ public static class Updates
                         case UpdateClientConfig.UpdateType.TimelinePartial:
                             try
                             {
-                                var timeline = JsonConvert.DeserializeObject<Timeline>(update.Update.ToString());
-
+                                var timeline = TimelineBuilder.GetTimelineFromString(update.Update.ToString(), null);
                                 foreach (var timelineHandler in timeline.TimeLineHandlers)
                                 {
                                     _log.Trace($"PartialTimeline found: {timelineHandler.HandlerType}");

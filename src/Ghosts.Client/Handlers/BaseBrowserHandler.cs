@@ -56,9 +56,9 @@ namespace Ghosts.Client.Handlers
                 {
                     WorkingHours.Is(handler);
 
-                    if (timelineEvent.DelayBefore > 0)
+                    if (timelineEvent.DelayBeforeActual > 0)
                     {
-                        Thread.Sleep(timelineEvent.DelayBefore);
+                        Thread.Sleep(timelineEvent.DelayBeforeActual);
                     }
 
                     RequestConfiguration config;
@@ -227,9 +227,9 @@ namespace Ghosts.Client.Handlers
                             break;
                     }
 
-                    if (timelineEvent.DelayAfter > 0)
+                    if (timelineEvent.DelayAfterActual > 0)
                     {
-                        Thread.Sleep(timelineEvent.DelayAfter);
+                        Thread.Sleep(timelineEvent.DelayAfterActual);
                     }
                 }
             }
@@ -304,7 +304,7 @@ namespace Ghosts.Client.Handlers
                     this.LinkManager.SetCurrent(config.Uri);
                     MakeRequest(config);
                     Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = config.ToString(), Trackable = timelineEvent.TrackableId });
-                    Thread.Sleep(timelineEvent.DelayAfter);
+                    Thread.Sleep(timelineEvent.DelayAfterActual);
 
                     if (this.Stickiness > 0)
                     {
@@ -357,7 +357,7 @@ namespace Ghosts.Client.Handlers
                                     }
                                 }
 
-                                Thread.Sleep(timelineEvent.DelayAfter);
+                                Thread.Sleep(timelineEvent.DelayAfterActual);
                             }
                         }
                     }
@@ -377,7 +377,7 @@ namespace Ghosts.Client.Handlers
                     }
                 }
                 
-                Thread.Sleep(timelineEvent.DelayAfter);
+                Thread.Sleep(timelineEvent.DelayAfterActual);
 
             }
         }
@@ -639,7 +639,7 @@ namespace Ghosts.Client.Handlers
                 if (BrowseProbability < _random.Next(0, 100)) {
                     //skipping this link
                     Log.Trace($"Timeline choice skipped due to browse probability");
-                    Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter,JitterFactor));
+                    Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, JitterFactor));
                     continue;
                 }
                 if (config.Uri != null && config.Uri.IsWellFormedOriginalString())
@@ -648,7 +648,7 @@ namespace Ghosts.Client.Handlers
                     var urlQueue = new LifoQueue<Uri>(VisitedRemember);
                     MakeRequest(config);
                     Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = config.ToString(), Trackable = timelineEvent.TrackableId });
-                    Thread.Sleep(timelineEvent.DelayAfter);
+                    Thread.Sleep(timelineEvent.DelayAfterActual);
 
                     if (this.Stickiness > 0)
                     {
@@ -696,7 +696,7 @@ namespace Ghosts.Client.Handlers
                                     }
                                 }
 
-                                Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, JitterFactor));
+                                Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, JitterFactor));
                             }
                         }
                     }
@@ -716,7 +716,7 @@ namespace Ghosts.Client.Handlers
                     }
                 }
 
-                Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, JitterFactor));
+                Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, JitterFactor));
             }
         }
         

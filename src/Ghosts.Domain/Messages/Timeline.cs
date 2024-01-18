@@ -12,23 +12,23 @@ namespace Ghosts.Domain
     /// </summary>
     public class Timeline
     {
+        public Timeline()
+        {
+            TimeLineHandlers = new List<TimelineHandler>();
+        }
+        
         /// <summary>
         /// Useful for tracking where activity on a client originated
         /// </summary>
         public Guid Id { get; set; }
-        
+
         [JsonConverter(typeof(StringEnumConverter))]
         public enum TimelineStatus
         {
             Run,
             Stop
         }
-
-        public Timeline()
-        {
-            TimeLineHandlers = new List<TimelineHandler>();
-        }
-
+        
         /// <summary>
         /// Run or Stop
         /// </summary>
@@ -136,12 +136,17 @@ namespace Ghosts.Domain
         /// <summary>
         /// In milliseconds
         /// </summary>
-        public int DelayAfter { get; set; }
+        public object DelayAfter { get; set; }
 
         /// <summary>
         /// In milliseconds
         /// </summary>
-        public int DelayBefore { get; set; }
+        public object DelayBefore { get; set; }
+
+        [JsonIgnore]
+        public int DelayAfterActual { get; set; }
+        [JsonIgnore]
+        public int DelayBeforeActual { get; set;}
     }
 
     /// <summary>
@@ -154,5 +159,17 @@ namespace Ghosts.Domain
         public string CommandArg { get; set; }
         public string TrackableId { get; set; }
         public string Result { get; set; }
+    }
+
+    public class DelayRandom
+    {
+        [JsonProperty("random")]
+        public bool Random { get; set; }
+
+        [JsonProperty("min")]
+        public int Min { get; set; }
+
+        [JsonProperty("max")]
+        public int Max { get; set; }
     }
 }

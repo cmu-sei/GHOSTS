@@ -231,10 +231,10 @@ public class Outlookv2 : BaseHandler
                     WorkingHours.Is(handler);
 
 
-                    if (timelineEvent.DelayBefore > 0)
+                    if (timelineEvent.DelayBeforeActual > 0)
                     {
-                        Log.Trace($"DelayBefore sleeping for {timelineEvent.DelayBefore} ms");
-                        Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayBefore, _jitterfactor));
+                        Log.Trace($"DelayBefore sleeping for {timelineEvent.DelayBeforeActual} ms");
+                        Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayBeforeActual, _jitterfactor));
                     }
 
                     Log.Trace($"Outlookv2:: Performing action {action} .");
@@ -303,10 +303,10 @@ public class Outlookv2 : BaseHandler
 
                     }
 
-                    if (timelineEvent.DelayAfter > 0)
+                    if (timelineEvent.DelayAfterActual > 0)
                     {
-                        Log.Trace($"DelayAfter sleeping for {timelineEvent.DelayAfter} ms");
-                        Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, _jitterfactor));
+                        Log.Trace($"DelayAfter sleeping for {timelineEvent.DelayAfterActual} ms");
+                        Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, _jitterfactor));
                         
                     }
                 }

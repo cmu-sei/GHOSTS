@@ -85,10 +85,7 @@ public class DirectoryListener
         {
             try
             {
-                var raw = File.ReadAllText(e.FullPath);
-
-                var timeline = JsonConvert.DeserializeObject<Timeline>(raw);
-
+                var timeline = TimelineBuilder.GetTimeline(e.FullPath);
                 if (timeline is null)
                     return;
 

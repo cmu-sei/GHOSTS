@@ -84,10 +84,10 @@ public class Outlook : BaseHandler
             {
                 WorkingHours.Is(handler);
 
-                if (timelineEvent.DelayBefore > 0)
+                if (timelineEvent.DelayBeforeActual > 0)
                 {
-                    Log.Trace($"DelayBefore sleeping for {timelineEvent.DelayBefore} ms");
-                    Thread.Sleep(timelineEvent.DelayBefore);
+                    Log.Trace($"DelayBefore sleeping for {timelineEvent.DelayBeforeActual} ms");
+                    Thread.Sleep(timelineEvent.DelayBeforeActual);
                 }
 
                 switch (timelineEvent.Command.ToUpper())
@@ -149,10 +149,10 @@ public class Outlook : BaseHandler
                         break;
                 }
 
-                if (timelineEvent.DelayAfter > 0)
+                if (timelineEvent.DelayAfterActual > 0)
                 {
-                    Log.Trace($"DelayAfter sleeping for {timelineEvent.DelayAfter} ms");
-                    Thread.Sleep(timelineEvent.DelayAfter);
+                    Log.Trace($"DelayAfter sleeping for {timelineEvent.DelayAfterActual} ms");
+                    Thread.Sleep(timelineEvent.DelayAfterActual);
                 }
             }
         }

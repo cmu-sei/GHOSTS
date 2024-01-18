@@ -86,8 +86,8 @@ namespace Ghosts.Client.Handlers
                 foreach (var timelineEvent in handler.TimeLineEvents)
                 {
                     WorkingHours.Is(handler);
-                    if (timelineEvent.DelayBefore > 0)
-                        Thread.Sleep(timelineEvent.DelayBefore);
+                    if (timelineEvent.DelayBeforeActual > 0)
+                        Thread.Sleep(timelineEvent.DelayBeforeActual);
                     switch (timelineEvent.Command)
                     {
                         case "random":
@@ -115,8 +115,8 @@ namespace Ghosts.Client.Handlers
                                 {
                                     action = "create"; //no txt files to delete
                                 }
-                                if (timelineEvent.DelayBefore > 0)
-                                    Thread.Sleep(timelineEvent.DelayBefore);
+                                if (timelineEvent.DelayBeforeActual > 0)
+                                    Thread.Sleep(timelineEvent.DelayBeforeActual);
 
                                 switch (action)
                                 {
@@ -148,8 +148,8 @@ namespace Ghosts.Client.Handlers
 
                                 }
                             }
-                            if (timelineEvent.DelayAfter > 0)
-                                Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, JitterFactor));
+                            if (timelineEvent.DelayAfterActual > 0)
+                                Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, JitterFactor));
                             CloseNotePad();  //closes notepad if it is open. New notepad will be opened on next cycle if needed
 
                             break;

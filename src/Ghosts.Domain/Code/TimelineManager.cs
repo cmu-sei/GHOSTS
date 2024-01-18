@@ -12,7 +12,7 @@ namespace Ghosts.Domain.Code
             var timelines = new List<Timeline> 
             {
                 // get default timeline
-                TimelineBuilder.GetLocalTimeline()
+                TimelineBuilder.GetTimeline()
             };
             
             var placesToLook = new List<string>
@@ -31,7 +31,7 @@ namespace Ghosts.Domain.Code
                     // is this a timeline file?
                     try
                     {
-                        var t = TimelineBuilder.GetLocalTimeline(file.FullName);
+                        var t = TimelineBuilder.GetTimeline(file.FullName);
                         if (t != null)
                         {
                             timelines.Add(t);

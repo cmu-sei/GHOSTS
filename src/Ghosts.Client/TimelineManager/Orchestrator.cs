@@ -43,7 +43,7 @@ namespace Ghosts.Client.TimelineManager
         {
             try
             {
-                _defaultTimeline = TimelineBuilder.GetLocalTimeline();
+                _defaultTimeline = TimelineBuilder.GetTimeline();
 
                 if (_isSafetyNetRunning != true) //checking if safetynet has already been started
                 {

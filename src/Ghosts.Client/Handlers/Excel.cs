@@ -87,17 +87,17 @@ public class ExcelHandler : BaseHandler
                     Log.Trace($"Excel event - {timelineEvent}");
                     WorkingHours.Is(handler);
 
-                    if (timelineEvent.DelayBefore > 0)
+                    if (timelineEvent.DelayBeforeActual > 0)
                     {
                         if (jitterFactor > 0)
                         {
-                            Log.Trace($"DelayBefore, Sleeping with jitterfactor of {jitterFactor}% {timelineEvent.DelayBefore}");
-                            Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayBefore, jitterFactor));
+                            Log.Trace($"DelayBefore, Sleeping with jitterfactor of {jitterFactor}% {timelineEvent.DelayBeforeActual}");
+                            Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayBeforeActual, jitterFactor));
                         }
                         else
                         {
-                            Log.Trace($"DelayBefore, Sleeping {timelineEvent.DelayBefore}");
-                            Thread.Sleep(timelineEvent.DelayBefore);
+                            Log.Trace($"DelayBefore, Sleeping {timelineEvent.DelayBeforeActual}");
+                            Thread.Sleep(timelineEvent.DelayBeforeActual);
                         }
                     }
 
@@ -260,11 +260,11 @@ public class ExcelHandler : BaseHandler
                         if (_random.Next(100) < 50)
                             document.Close();
 
-                        if (timelineEvent.DelayAfter > 0 && jitterFactor < 1)
+                        if (timelineEvent.DelayAfterActual > 0 && jitterFactor < 1)
                         {
                             //sleep and leave the app open
-                            Log.Trace($"Sleep after for {timelineEvent.DelayAfter}");
-                            Thread.Sleep(timelineEvent.DelayAfter - writeSleep);
+                            Log.Trace($"Sleep after for {timelineEvent.DelayAfterActual}");
+                            Thread.Sleep(timelineEvent.DelayAfterActual - writeSleep);
                         }
 
                         workSheet.Dispose();
@@ -317,12 +317,12 @@ public class ExcelHandler : BaseHandler
                 }
                 finally
                 {
-                    if (timelineEvent.DelayAfter > 0 && jitterFactor > 0)
+                    if (timelineEvent.DelayAfterActual > 0 && jitterFactor > 0)
                     {
                         //sleep and leave the app open
-                        Log.Trace($"Sleep after for {timelineEvent.DelayAfter} with jitter");
-                        // Thread.Sleep(timelineEvent.DelayAfter - writeSleep);
-                        Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, jitterFactor));
+                        Log.Trace($"Sleep after for {timelineEvent.DelayAfterActual} with jitter");
+                        // Thread.Sleep(timelineEvent.DelayAfterActual - writeSleep);
+                        Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, jitterFactor));
                     }
                     else
                     {
