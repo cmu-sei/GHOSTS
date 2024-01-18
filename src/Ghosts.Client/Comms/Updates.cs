@@ -62,12 +62,10 @@ public static class Updates
                 {
                     try
                     {
-                        using (var reader =
-                               new StreamReader(client.OpenRead(Program.Configuration.ClientUpdates.PostUrl)))
-                        {
-                            s = reader.ReadToEnd();
-                            _log.Debug($"{DateTime.Now} - Received new configuration");
-                        }
+                        using var reader =
+                            new StreamReader(client.OpenRead(Program.Configuration.ClientUpdates.PostUrl));
+                        s = reader.ReadToEnd();
+                        _log.Debug($"{DateTime.Now} - Received new configuration");
                     }
                     catch (WebException wex)
                     {
@@ -320,10 +318,8 @@ public static class Updates
         {
             using (var s = new FileStream(tempFile, FileMode.Open, FileAccess.Read, FileShare.None))
             {
-                using (var tr = new StreamReader(s))
-                {
-                    rawLogContents = tr.ReadToEnd();
-                }
+                using var tr = new StreamReader(s);
+                rawLogContents = tr.ReadToEnd();
             }
 
             var r = new TransferLogDump { Log = rawLogContents };
@@ -338,11 +334,9 @@ public static class Updates
                 payload = JsonConvert.SerializeObject(p);
             }
 
-            using (var client = WebClientBuilder.Build(machine))
-            {
-                client.Headers[HttpRequestHeader.ContentType] = "application/json";
-                client.UploadString(postUrl, payload);
-            }
+            using var client = WebClientBuilder.Build(machine);
+            client.Headers[HttpRequestHeader.ContentType] = "application/json";
+            client.UploadString(postUrl, payload);
         }
         catch (Exception e)
         {

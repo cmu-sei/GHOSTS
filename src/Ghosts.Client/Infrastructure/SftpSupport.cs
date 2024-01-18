@@ -245,12 +245,12 @@ namespace Ghosts.Client.Infrastructure
                 }
             }
             //at this point, localFilePath, remoteFilePath are set
-            if (System.IO.File.Exists(localFilePath))
+            if (File.Exists(localFilePath))
             {
                 try
                 {
                     //delete the file if exists locally
-                    System.IO.File.Delete(localFilePath);
+                    File.Delete(localFilePath);
                 }
                 catch (ThreadAbortException)
                 {
@@ -265,12 +265,10 @@ namespace Ghosts.Client.Infrastructure
             //now download the file
             try
             {
-                using (var fileStream = System.IO.File.OpenWrite(localFilePath))
-                {
-                    client.DownloadFile(remoteFilePath, fileStream);
-                    Log.Trace($"Sftp:: Success, Downloaded remote file {remoteFilePath},host {this.HostIp}  to file {localFilePath},  ");
-                    fileStream.Close();
-                }
+                using var fileStream = File.OpenWrite(localFilePath);
+                client.DownloadFile(remoteFilePath, fileStream);
+                Log.Trace($"Sftp:: Success, Downloaded remote file {remoteFilePath},host {this.HostIp}  to file {localFilePath},  ");
+                fileStream.Close();
             }
             catch (ThreadAbortException)
             {

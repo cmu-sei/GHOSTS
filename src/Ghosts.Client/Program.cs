@@ -169,8 +169,10 @@ class Program
 
         if (Configuration.ResourceControl == null)
         {
-            Configuration.ResourceControl = new ClientConfiguration.ResourceControlSettings();
-            Configuration.ResourceControl.ManageProcesses = true;
+            Configuration.ResourceControl = new ClientConfiguration.ResourceControlSettings
+            {
+                ManageProcesses = true
+            };
         }
 
         _log.Trace($"Configuration.ResourceControl.ManageProcesses = {Configuration.ResourceControl.ManageProcesses}");

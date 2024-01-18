@@ -36,7 +36,7 @@ public class CheckId
                 TimelineBuilder.CheckForUrlTimeline(client, Program.Configuration.TimelineConfiguration.Location);
             }
         }
-        catch (Exception e)
+        catch
         {
             _log.Error("configuration doesn't have timeline location, update your application.json to latest please");
         }
