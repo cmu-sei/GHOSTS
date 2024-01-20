@@ -504,7 +504,7 @@
       <Version>4.3.1</Version>
     </PackageReference>
     <PackageReference Include="System.Data.SqlClient">
-      <Version>4.8.5</Version>
+      <Version>4.8.6</Version>
     </PackageReference>
     <PackageReference Include="System.Diagnostics.Contracts">
       <Version>4.3.0</Version>
