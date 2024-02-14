@@ -26,13 +26,14 @@ public class Connection
 
     public async Task Run()
     {
-        Console.WriteLine($"Connecting to {_options.Url}...");
+        var url = Program.ConfigurationUrls.Socket;
+        Console.WriteLine($"Connecting to {url}...");
         while (_connection == null)
         {
-            await EstablishConnection(_options.Url);
+            await EstablishConnection(url);
         }
 
-        Console.WriteLine($"Connected to {_options.Url}");
+        Console.WriteLine($"Connected to {url}");
 
         _ = new Timer(_ => { Task.Run(async () =>  { await ClientHeartbeat();
             }, _ct).ContinueWith(task => { if (task.Exception != null) {
@@ -128,7 +129,7 @@ public class Connection
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"An error occurred at {_options.Url} while connecting: {ex.Message}");
+            Console.WriteLine($"An error occurred at {url} while connecting: {ex.Message}");
         }
     }
 

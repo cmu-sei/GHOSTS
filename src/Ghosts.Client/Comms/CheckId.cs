@@ -108,7 +108,7 @@ public class CheckId
             //call home
             try
             {
-                using var reader = new StreamReader(client.OpenRead(Program.Configuration.Id.Url) ?? throw new InvalidOperationException("CheckID client is null"));
+                using var reader = new StreamReader(client.OpenRead(Program.ConfigurationUrls.Id) ?? throw new InvalidOperationException("CheckID client is null"));
                 s = reader.ReadToEnd();
                 _log.Debug("ID Received");
             }

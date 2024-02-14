@@ -173,5 +173,21 @@ namespace Ghosts.Domain.Code
 
             public static string ClientUpdates => Clean(Path + "clientupdates.log");
         }
+
+        public class ConfigurationUrls
+        {
+            public ConfigurationUrls(string rootUrl)
+            {
+                this._root = rootUrl;
+            }
+
+            private string _root;
+            public string Id => $"{this._root}/clientid";
+            public string Timeline => $"{this._root}/clienttimeline";
+            public string Results => $"{this._root}/clientresults";
+            public string Updates => $"{this._root}/clientupdates";
+            public string Survey => $"{this._root}/clientsurvey";
+            public string Socket => $"{this._root}/clientHub";
+        }
     }
 }

@@ -1,23 +1,21 @@
 ﻿{
+  "ApiRootUrl": "http://ghosts-api:52388/api",
   "Id": {
     "IsEnabled": true,
-    "Url": "http://ghosts-api:52388/api/clientid",
     "Format": "guestlocal",
     "FormatKey": "guestinfo.id",
     "FormatValue": "$formatkeyvalue$-$machinename$",
     "VMWareToolsLocation": "C:\\progra~1\\VMware\\VMware Tools\\vmtoolsd.exe"
-  }, 
+  },
   "AllowMultipleInstances": false,
   "EncodeHeaders": true,
   "ClientResults": {
     "IsEnabled": true,
     "IsSecure": false,
-    "PostUrl": "http://ghosts-api:52388/api/clientresults",
     "CycleSleep": 300000
   },
   "ClientUpdates": {
     "IsEnabled": true,
-    "PostUrl": "http://ghosts-api:52388/api/clientupdates",
     "CycleSleep": 300000
   },
   "Survey": {
@@ -26,7 +24,6 @@
     "Frequency": "once",
     "CycleSleepMinutes": 5,
     "OutputFormat": "indent",
-    "PostUrl": "http://ghosts-api:52388/api/clientsurvey"
   },
   "TimelineConfiguration": {
     "Location": "config/timeline.json"
@@ -54,7 +51,6 @@
   "OfficeDocsMaxAgeInHours": 72,
   "Sockets": {
     "IsEnabled": true,
-    "Url": "http://ghosts-api:52388/clientHub",
     "Heartbeat": 50000
   },
   "Email": {

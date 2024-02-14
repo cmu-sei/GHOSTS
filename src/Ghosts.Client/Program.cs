@@ -37,6 +37,7 @@ class Program
 
     internal static List<ThreadJob> ThreadJobs { get; set; }
     internal static ClientConfiguration Configuration { get; set; }
+    internal static ApplicationDetails.ConfigurationUrls ConfigurationUrls { get; set; }
     internal static DateTime LastChecked = DateTime.Now.AddHours(-1);
     internal static Options OptionFlags;
     internal static bool IsDebug;
@@ -126,6 +127,7 @@ class Program
         try
         {
             Configuration = ClientConfigurationLoader.Config;
+            ConfigurationUrls = new ApplicationDetails.ConfigurationUrls(Configuration.ApiRootUrl);
         }
         catch (Exception e)
         {

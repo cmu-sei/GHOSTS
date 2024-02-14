@@ -63,7 +63,7 @@ public static class Updates
                     try
                     {
                         using var reader =
-                            new StreamReader(client.OpenRead(Program.Configuration.ClientUpdates.PostUrl));
+                            new StreamReader(client.OpenRead(Program.ConfigurationUrls.Updates));
                         s = reader.ReadToEnd();
                         _log.Debug($"{DateTime.Now} - Received new configuration");
                     }
@@ -179,7 +179,7 @@ public static class Updates
 
         try
         {
-            postUrl = Program.Configuration.Id.Url.Replace("clientid", "clienttimeline");
+            postUrl = Program.ConfigurationUrls.Timeline;
         }
         catch
         {
@@ -222,7 +222,7 @@ public static class Updates
         ServicePointManager.ServerCertificateValidationCallback += (_, _, _, _) => true;
 
         var fileName = ApplicationDetails.LogFiles.ClientUpdates;
-        var postUrl = Program.Configuration.ClientResults.PostUrl;
+        var postUrl = Program.ConfigurationUrls.Results;
 
         var machine = new ResultMachine();
 
@@ -371,7 +371,7 @@ public static class Updates
 
         try
         {
-            postUrl = Program.Configuration.Survey.PostUrl;
+            postUrl = Program.ConfigurationUrls.Survey;
         }
         catch
         {
@@ -416,7 +416,7 @@ public static class Updates
         }
         catch (Exception e)
         {
-            _log.Debug($"Problem posting logs to server from { ApplicationDetails.InstanceFiles.SurveyResults } to { Program.Configuration.Survey.PostUrl }");
+            _log.Debug($"Problem posting logs to server from { ApplicationDetails.InstanceFiles.SurveyResults } to { Program.ConfigurationUrls.Survey}");
             _log.Error(e);
         }
     }
