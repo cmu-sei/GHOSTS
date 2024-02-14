@@ -21,12 +21,11 @@
       "Initial": "",
       "UtcTimeOn": "00:00:00",
       "UtcTimeOff": "24:00:00",
-      "Loop": "True",
+      "Loop": "False",
       "TimeLineEvents": [
         {
-          "Command": "DIR /P /Q /R /S /W /4 \\\\file-server\\reports",
+          "Command": "DIR c:\\",
           "CommandArgs": [
-            "exit"
           ],
           "DelayAfter": 900000,
           "DelayBefore": 0

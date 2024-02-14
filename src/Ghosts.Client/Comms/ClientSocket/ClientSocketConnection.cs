@@ -42,7 +42,7 @@ public class Connection
         }, null, TimeSpan.Zero, TimeSpan.FromSeconds(_options.Heartbeat));
         
         // Send a message to the server
-        while (_connection != null)
+        while (_connection.State == HubConnectionState.Connected)
         {
             while (true)
             {

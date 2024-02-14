@@ -102,26 +102,22 @@ namespace Ghosts.Client.Handlers
         public static string Command(string command)
         {
             Log.Trace($"Spawning cmd.exe with command {command}");
-            var processStartInfo = new ProcessStartInfo("cmd.exe")
-            {
-                RedirectStandardInput = true,
-                RedirectStandardOutput = true,
-                UseShellExecute = false
-            };
 
-            using var process = Process.Start(processStartInfo);
-            var outputString = string.Empty;
+            var processStartInfo = new ProcessStartInfo("cmd", "/c " + command);
+            processStartInfo.RedirectStandardOutput = true;
+            processStartInfo.UseShellExecute = false;
+            processStartInfo.CreateNoWindow = false;
+            
+            var process = new Process();
+            process.StartInfo = processStartInfo;
+            process.Start();
+            
+            var output = process.StandardOutput.ReadToEnd();
+            process.WaitForExit();
+            // Console.Write(output);
             Thread.Sleep(1000);
             
-            if (process != null)
-            {
-                process.StandardInput.WriteLine(command);
-                process.StandardInput.Close(); // line added to stop process from hanging on ReadToEnd()
-                outputString = process.StandardOutput.ReadToEnd();
-                process.Close();
-            }
-
-            return outputString;
+            return output;
         }
     }
 }
