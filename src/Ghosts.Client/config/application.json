@@ -1,5 +1,9 @@
 ﻿{
   "ApiRootUrl": "http://ghosts-api:52388/api",
+  "Sockets": {
+    "IsEnabled": true,
+    "Heartbeat": 50000
+  },
   "Id": {
     "IsEnabled": true,
     "Format": "guestlocal",
@@ -23,9 +27,9 @@
     "IsSecure": false,
     "Frequency": "once",
     "CycleSleepMinutes": 5,
-    "OutputFormat": "indent",
+    "OutputFormat": "indent"
   },
-  "TimelineConfiguration": {
+  "Timeline": {
     "Location": "config/timeline.json"
   },
   "Content": {
@@ -49,10 +53,6 @@
   "FirefoxInstallLocation": "",
   "FirefoxMajorVersionMinimum": 48,
   "OfficeDocsMaxAgeInHours": 72,
-  "Sockets": {
-    "IsEnabled": true,
-    "Heartbeat": 50000
-  },
   "Email": {
     "RecipientsToMin": 1,
     "RecipientsToMax": 3,

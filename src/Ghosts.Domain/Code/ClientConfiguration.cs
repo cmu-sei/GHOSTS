@@ -74,7 +74,7 @@ namespace Ghosts.Domain.Code
 
         public ResourceControlSettings ResourceControl { get; set; }
 
-        public TimelineConf TimelineConfiguration { get; set; }
+        public TimelineConf Timeline{ get; set; }
 
         public AwsCliSettings AwsCli { get; set; }
 

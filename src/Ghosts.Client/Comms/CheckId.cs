@@ -33,7 +33,7 @@ public class CheckId
             if (checkInitialTimeline)
             {
                 using var client = GetClient();
-                TimelineBuilder.CheckForUrlTimeline(client, Program.Configuration.TimelineConfiguration.Location);
+                TimelineBuilder.CheckForUrlTimeline(client, Program.Configuration.Timeline.Location);
             }
         }
         catch
