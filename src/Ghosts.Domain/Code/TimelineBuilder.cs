@@ -141,6 +141,20 @@ namespace Ghosts.Domain.Code
             }
         }
         
+        public static Timeline StringToTimeline(string raw)
+        {
+            try
+            {
+                var timeline = JsonConvert.DeserializeObject<Timeline>(raw);
+                return timeline;
+            }
+            catch
+            {
+                _log.Debug($"String is not a timeline: {raw}");
+                return null;
+            }
+        }
+        
         public static string TimelineToString(Timeline timeline)
         {
             try
