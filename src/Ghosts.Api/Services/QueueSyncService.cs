@@ -324,7 +324,7 @@ namespace Ghosts.Api.Services
                 {
                     var i = await context.SaveChangesAsync();
                     if (i > 0)
-                        log.Info($"Queue: {i} (machines: {machines.Count}");
+                        log.Trace($"Queue: {i} (machines: {machines.Count}");
                 }
                 catch (Exception e)
                 {
@@ -339,7 +339,7 @@ namespace Ghosts.Api.Services
                 {
                     var i = await context.SaveChangesAsync();
                     if (i > 0)
-                        log.Info($"Queue: {i} (Trackables: {trackables.Count})");
+                        log.Trace($"Queue: {i} (Trackables: {trackables.Count})");
                 }
                 catch (Exception e)
                 {
@@ -354,7 +354,7 @@ namespace Ghosts.Api.Services
                 {
                     var i = await context.SaveChangesAsync();
                     if (i > 0)
-                        log.Info($"Queue: {i} (Health: {health.Count})");
+                        log.Trace($"Queue: {i} (Health: {health.Count})");
                 }
                 catch (Exception e)
                 {
@@ -369,7 +369,7 @@ namespace Ghosts.Api.Services
                 {
                     var i = await context.SaveChangesAsync();
                     if (i > 0)
-                        log.Info($"Queue: {i} (Timeline: {timelines.Count})");
+                        log.Trace($"Queue: {i} (Timeline: {timelines.Count})");
                 }
                 catch (Exception e)
                 {
@@ -384,7 +384,7 @@ namespace Ghosts.Api.Services
                 {
                     var i = await context.SaveChangesAsync();
                     if (i > 0)
-                        log.Info($"Queue: {i} (History: {histories.Count}");
+                        log.Trace($"Queue: {i} (History: {histories.Count}");
                 }
                 catch (Exception e)
                 {
@@ -399,7 +399,7 @@ namespace Ghosts.Api.Services
                 {
                     var i = await context.SaveChangesAsync();
                     if (i > 0)
-                        log.Info($"Queue: {i} (Webhooks: {webhooks.Count}");
+                        log.Trace($"Queue: {i} (Webhooks: {webhooks.Count}");
                 }
                 catch (Exception e)
                 {

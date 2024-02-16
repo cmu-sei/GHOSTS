@@ -92,6 +92,7 @@ namespace Ghosts.Api
             {
                 endpoints.MapControllers();
                 endpoints.MapHub<ClientHub>("/clientHub");
+                endpoints.MapHub<ClientHub>("/api/clientHub");
             });
             app.UseCors("default");
 
