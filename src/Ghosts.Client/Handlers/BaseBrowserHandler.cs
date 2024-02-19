@@ -30,13 +30,13 @@ namespace Ghosts.Client.Handlers
         public LinkManager LinkManager;
         public int ActionsCount = 0;
         public int BrowseProbability = 100;
-        public int JitterFactor { get; set; }  = 0;  //used with Jitter.JitterFactorDelay
+        public int JitterFactor { get; set; } = 0;  //used with Jitter.JitterFactorDelay
 
         public bool SharePointAbort { get; set; } = false;  //will be set to True if unable to proceed with Handler execution
         public bool OutlookAbort { get; set; } = false;  //will be set to True if unable to proceed with Handler execution
         public bool BlogAbort { get; set; } = false;  //will be set to True if unable to proceed with Handler execution
         public string UserAgentString { get; set; }
-        
+
         private SharepointHelper _sharePointHelper = null;
         private BlogHelper _blogHelper = null;
         private PostContentManager _postHelper = null;
@@ -139,16 +139,16 @@ namespace Ghosts.Client.Handlers
                                         Log.Trace($"Sharepoint:: Restart requested for {this.BrowserType.ToString()} , restarting...");
                                         return;  //restart has been requested 
                                     }
-                                } 
+                                }
                             }
                             break;
-                       case "blog":
+                        case "blog":
                             if (!BlogAbort)
                             {
                                 if (_blogHelper == null)
                                 {
                                     _blogHelper = BlogHelper.MakeHelper(this, Driver, handler, Log);
-                                    if  (_blogHelper == null) BlogAbort = true;  //failed to create a helper
+                                    if (_blogHelper == null) BlogAbort = true;  //failed to create a helper
                                 }
                                 if (_blogHelper != null) _blogHelper.Execute(handler, timelineEvent);
                             }
@@ -286,9 +286,9 @@ namespace Ghosts.Client.Handlers
             throw new NotImplementedException();
         }
 
-            public void DoRandomCommand(TimelineHandler handler, TimelineEvent timelineEvent)
+        public void DoRandomCommand(TimelineHandler handler, TimelineEvent timelineEvent)
         {
-            
+
             this.LinkManager = new LinkManager(VisitedRemember);
 
             while (true)
@@ -302,8 +302,8 @@ namespace Ghosts.Client.Handlers
                 if (config.Uri != null && config.Uri.IsWellFormedOriginalString())
                 {
                     this.LinkManager.SetCurrent(config.Uri);
-                    MakeRequest(config);
-                    Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = config.ToString(), Trackable = timelineEvent.TrackableId });
+                    var s = MakeRequest(config);
+                    Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = config.ToString(), Trackable = timelineEvent.TrackableId, Result = s});
                     Thread.Sleep(timelineEvent.DelayAfterActual);
 
                     if (this.Stickiness > 0)
@@ -328,7 +328,7 @@ namespace Ghosts.Client.Handlers
                                     config.Method = "GET";
                                     config.Uri = link.Url;
 
-                                    Log.Trace($"Making request #{loopNumber+1}/{loops} to {config.Uri}");
+                                    Log.Trace($"Making request #{loopNumber + 1}/{loops} to {config.Uri}");
                                     MakeRequest(config);
                                     Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = config.ToString(), Trackable = timelineEvent.TrackableId });
                                 }
@@ -376,7 +376,7 @@ namespace Ghosts.Client.Handlers
                         return;
                     }
                 }
-                
+
                 Thread.Sleep(timelineEvent.DelayAfterActual);
 
             }
@@ -456,6 +456,11 @@ namespace Ghosts.Client.Handlers
                     throw;
                 }
 
+                if (e is WebDriverException && e.Message.StartsWith("Reached error page:"))
+                {
+                    return "404";
+                }
+
                 Log.Trace(e.Message);
                 HandleBrowserException(e);
 
@@ -466,7 +471,7 @@ namespace Ghosts.Client.Handlers
         private string GetInputElementText(IWebElement targetElement)
         {
             var attr = targetElement.GetAttribute("type");
-            if (attr == "email") return _postHelper.Email ;
+            if (attr == "email") return _postHelper.Email;
             else
             {
                 attr = targetElement.GetAttribute("id");
@@ -484,18 +489,18 @@ namespace Ghosts.Client.Handlers
 
         private void HandleInputElement(IWebElement targetElement)
         {
-            
+
             var text = GetInputElementText(targetElement);
             if (text != null) targetElement.SendKeys(text);
         }
 
         private void HandleTextareaElement(IWebElement targetElement)
         {
-            
+
             targetElement.SendKeys(_postHelper.Body);
         }
 
-        private bool HandleFormSubmit(RequestConfiguration config,IWebElement gfElement)
+        private bool HandleFormSubmit(RequestConfiguration config, IWebElement gfElement)
         {
 
             var inputElements = gfElement.FindElements(By.XPath(".//input"));
@@ -537,7 +542,7 @@ namespace Ghosts.Client.Handlers
                 //up another page. Just reject it, as it is the only link on the page, and we will
                 //pop back up to the top and try again
                 Log.Trace($"Rejected link {linkText}");
-                return false;  
+                return false;
             }
             return true;
         }
@@ -635,8 +640,9 @@ namespace Ghosts.Client.Handlers
                 }
 
                 var config = RequestConfiguration.Load(handler, timelineEvent.CommandArgs[_random.Next(0, timelineEvent.CommandArgs.Count)]);
-                
-                if (BrowseProbability < _random.Next(0, 100)) {
+
+                if (BrowseProbability < _random.Next(0, 100))
+                {
                     //skipping this link
                     Log.Trace($"Timeline choice skipped due to browse probability");
                     Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, JitterFactor));
@@ -666,7 +672,8 @@ namespace Ghosts.Client.Handlers
                                         if (!ClickRandomLink(config, urlDict, urlQueue)) break;  //break if no links found, reset to next choice
                                         Log.Trace($"Making request #{loopNumber + 1}/{loops} to {config.Uri}");
                                         Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = config.ToString(), Trackable = timelineEvent.TrackableId });
-                                    } else
+                                    }
+                                    else
                                     {
                                         Log.Trace($"Request skipped due to browse probability for #{loopNumber + 1}/{loops} to {config.Uri}");
                                     }
@@ -719,12 +726,12 @@ namespace Ghosts.Client.Handlers
                 Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, JitterFactor));
             }
         }
-        
+
         public virtual void HandleBrowserException(Exception e)
         {
             // ignore
         }
-        
+
         /// <summary>
         /// Close browser entirely
         /// </summary>
