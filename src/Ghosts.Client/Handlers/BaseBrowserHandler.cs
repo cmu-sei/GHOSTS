@@ -429,6 +429,15 @@ namespace Ghosts.Client.Handlers
                 {
                     case "GET":
                         Driver.Navigate().GoToUrl(config.Uri);
+                        var source = Driver.PageSource.ToLower();
+                        if (source.Contains("404 error") || source.Contains("404 not"))
+                        {
+                            throw new WebDriverException("404");
+                        }
+                        if (source.Contains("500 internal server"))
+                        {
+                            throw new WebDriverException("500");
+                        }
                         break;
                     case "POST":
                     case "PUT":
@@ -456,11 +465,16 @@ namespace Ghosts.Client.Handlers
                     throw;
                 }
 
-                if (e is WebDriverException && e.Message.StartsWith("Reached error page:"))
+                if (e is WebDriverException && (e.Message.Contains("e=dnsNotFound") || e.Message.Contains("404") || e.Message.Contains("ERR_NAME_NOT_RESOLVED")))
                 {
                     return "404";
                 }
 
+                if (e is WebDriverException && e.Message.Contains("500"))
+                {
+                    return "500";
+                }
+                
                 Log.Trace(e.Message);
                 HandleBrowserException(e);
 
