@@ -35,16 +35,21 @@ public class Connection
 
         Console.WriteLine($"Connected to {url}");
 
-        _ = new Timer(_ => { Task.Run(async () =>  { await ClientHeartbeat();
-            }, _ct).ContinueWith(task => { if (task.Exception != null) {
-                // Log or handle the exception
-                Console.WriteLine($"Exception in ClientHeartbeat: {task.Exception}");
-            }}, _ct);
-        }, null, TimeSpan.Zero, TimeSpan.FromSeconds(_options.Heartbeat));
-        
         // Send a message to the server
         while (_connection.State == HubConnectionState.Connected)
         {
+            _ = new Timer(_ => {
+                Task.Run(async () => {
+                    await ClientHeartbeat();
+                }, _ct).ContinueWith(task => {
+                    if (task.Exception != null)
+                    {
+                        // Log or handle the exception
+                        Console.WriteLine($"Exception in ClientHeartbeat: {task.Exception}");
+                    }
+                }, _ct);
+            }, null, TimeSpan.Zero, TimeSpan.FromSeconds(_options.Heartbeat));
+
             while (true)
             {
                 Console.WriteLine("Peeking into queue...");

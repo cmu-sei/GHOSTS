@@ -3,6 +3,7 @@
 using System;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
+using Ghosts.Domain.Code.Helpers;
 using NLog;
 using Newtonsoft.Json;
 
@@ -25,7 +26,7 @@ namespace Ghosts.Client.Handlers
             record.Handler = report.Handler;
             record.Command = report.Command;
             record.CommandArg = report.Arg;
-            record.Result = report.Result;
+            record.Result = report.Result.RemoveNonAscii(); //added this because some people using non-en OS'es have logged non-recoverable errors w/o thiss
 
             if (!string.IsNullOrEmpty(report.Trackable))
                 record.TrackableId = report.Trackable;

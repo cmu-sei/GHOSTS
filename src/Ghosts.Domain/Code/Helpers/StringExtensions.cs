@@ -14,6 +14,18 @@ namespace Ghosts.Domain.Code.Helpers
             return o.Split(new[] { splitString }, StringSplitOptions.None);
         }
 
+        /// <summary>
+        /// Regex to keep only ASCII printable characters and newlines
+        /// </summary>
+        public static string RemoveNonAscii(this string input)
+        {
+            if (!string.IsNullOrEmpty(input))
+            {
+                input = Regex.Replace(input, @"[^\x20-\x7E\r\n]", string.Empty);
+            }
+            return input;
+        }
+
         public static string GetTextBetweenQuotes(this string o)
         {
             var result = Regex.Match(o, "\"([^\"]*)\"").ToString();
