@@ -1,24 +1,36 @@
 ﻿{
-  "IdEnabled": true,
-  "IdUrl": "http://ghosts-api:52388/api/clientid",
+  "ApiRootUrl": "http://localhost:5000/api",
+  "Sockets": {
+    "IsEnabled": true,
+    "Heartbeat": 50000
+  },
+  "Id": {
+    "IsEnabled": true,
+    "Format": "guestlocal",
+    "FormatKey": "guestinfo.id",
+    "FormatValue": "$formatkeyvalue$-$machinename$",
+    "VMWareToolsLocation": "C:\\progra~1\\VMware\\VMware Tools\\vmtoolsd.exe"
+  },
+  "AllowMultipleInstances": false,
+  "EncodeHeaders": true,
   "ClientResults": {
     "IsEnabled": true,
     "IsSecure": false,
-    "PostUrl": "http://ghosts-api:52388/api/clientresults",
-    "CycleSleep": 90000
+    "CycleSleep": 300000
   },
   "ClientUpdates": {
     "IsEnabled": true,
-    "PostUrl": "http://ghosts-api:52388/api/clientupdates",
-    "CycleSleep": 90000
+    "CycleSleep": 300000
   },
   "Survey": {
     "IsEnabled": false,
     "IsSecure": false,
     "Frequency": "once",
-    "CycleSleepMinutes": 35,
-    "OutputFormat": "indent",
-    "PostUrl": "http://ghosts-api:52388/api/clientsurvey"
+    "CycleSleepMinutes": 5,
+    "OutputFormat": "indent"
+  },
+  "Timeline": {
+    "Location": "config/timeline.json"
   },
   "Content": {
     "EmailsMax": 20,
@@ -31,12 +43,16 @@
     "FileNames": "",
     "Dictionary": ""
   },
+  "ResourceControl": {
+    "ManageProcesses": true
+  },
   "HealthIsEnabled": false,
   "HandlersIsEnabled": true,
+  "DisableStartup": false,
   "ChromeExtensions": "",
   "FirefoxInstallLocation": "",
   "FirefoxMajorVersionMinimum": 48,
-  "OfficeDocsMaxAgeInHours": 6,
+  "OfficeDocsMaxAgeInHours": 72,
   "Email": {
     "RecipientsToMin": 1,
     "RecipientsToMax": 3,
@@ -48,12 +64,15 @@
     "RecipientsOutsideMax": 1,
     "SetAccountFromConfig": false,
     "SetAccountFromLocal": false,
-    "SetForcedSendReceive": false,
+    "SetForcedSendReceive": true,
     "SaveToOutbox": false,
     "EmailDomainSearchString": "Get-ADUser -filter * -searchbase \"CN=USERS,DC=JRSS,DC=GOV\" -properties UserPrincipalName | select -expand UserPrincipalName"
   },
   "Listener": {
-    "Port": 8443
+    "Port": -1
+  },
+  "AwsCli": {
+    "InstallFolder": "%USERPROFILE%\\Amazon\\AWSCLIV2"
   },
   "EmailContent": {
     "conflict_1_capital": "",

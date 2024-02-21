@@ -68,8 +68,8 @@ namespace ghosts.client.linux.handlers
             {
                 WorkingHours.Is(_handler);
 
-                if (timelineEvent.DelayBefore > 0)
-                    Thread.Sleep(timelineEvent.DelayBefore);
+                if (timelineEvent.DelayBeforeActual > 0)
+                    Thread.Sleep(timelineEvent.DelayBeforeActual);
 
                 switch (timelineEvent.Command)
                 {
@@ -84,10 +84,10 @@ namespace ghosts.client.linux.handlers
                         break;
                 }
 
-                if (timelineEvent.DelayAfter <= 0) continue;
+                if (timelineEvent.DelayAfterActual <= 0) continue;
                 
-                _wait = timelineEvent.DelayAfter;
-                Thread.Sleep(timelineEvent.DelayAfter);
+                _wait = timelineEvent.DelayAfterActual;
+                Thread.Sleep(timelineEvent.DelayAfterActual);
             }
         }
 

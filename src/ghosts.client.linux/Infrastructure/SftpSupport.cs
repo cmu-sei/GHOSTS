@@ -26,7 +26,7 @@ namespace ghosts.client.linux.Infrastructure
 
             try
             {
-                var remoteFiles = client.ListDirectory(".").ToList<SftpFile>();
+                var remoteFiles = client.ListDirectory(".").OfType<SftpFile>().ToList();
                 List<SftpFile> normalFiles = new List<SftpFile>();
                 foreach (var f in remoteFiles)
                 {
@@ -55,7 +55,7 @@ namespace ghosts.client.linux.Infrastructure
 
             try
             {
-                var remoteFiles = client.ListDirectory(".").ToList<SftpFile>();
+                var remoteFiles = client.ListDirectory(".").OfType<SftpFile>().ToList();
                 List<SftpFile> normalFiles = new List<SftpFile>();
                 foreach (var f in remoteFiles)
                 {
@@ -84,7 +84,7 @@ namespace ghosts.client.linux.Infrastructure
 
             try
             {
-                var remoteFiles = client.ListDirectory(".").ToList<SftpFile>();
+                var remoteFiles = client.ListDirectory(".").OfType<SftpFile>().ToList();
                 List<SftpFile> normalFiles = new List<SftpFile>();
                 foreach (var f in remoteFiles)
                 {
@@ -377,7 +377,7 @@ namespace ghosts.client.linux.Infrastructure
 
             try
             {
-                var remoteFiles = client.ListDirectory(dirName).ToList<SftpFile>();
+                var remoteFiles = client.ListDirectory(dirName).OfType<SftpFile>().ToList();
                 Log.Trace($"Sftp:: Success, Found {remoteFiles.Count} in directory {dirName} on remote host {this.HostIp}.");
             }
             catch (ThreadAbortException)
