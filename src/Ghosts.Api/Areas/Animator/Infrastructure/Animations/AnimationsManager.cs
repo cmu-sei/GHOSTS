@@ -1,6 +1,9 @@
 // Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Ghosts.Api;
@@ -24,6 +27,8 @@ public interface IManageableHostedService : IHostedService
 
     Task StartJob(AnimationConfiguration config, CancellationToken cancellationToken);
     Task StopJob(string jobId);
+
+    IEnumerable<JobInfo> GetRunningJobs();
 }
 
 public class AnimationConfiguration
@@ -31,6 +36,14 @@ public class AnimationConfiguration
     public string JobId { get; set; }
     public string JobConfiguration { get; set; }
 }
+
+public class JobInfo
+{
+    public string Id { get; set; }
+    public string Name { get; set; }
+    public DateTime StartTime { get; set; }
+}
+
 
 public class AnimationsManager : IManageableHostedService
 {
@@ -53,11 +66,11 @@ public class AnimationsManager : IManageableHostedService
     private CancellationTokenSource _fullAutonomyCancellationTokenSource = new CancellationTokenSource();
     
     private readonly IHubContext<ActivityHub> _activityHubContext;
+    private readonly ConcurrentDictionary<string, JobInfo> _jobs = new ConcurrentDictionary<string, JobInfo>();
 
     public AnimationsManager(IHubContext<ActivityHub> activityHubContext, IServiceScopeFactory scopeFactory)
     {
         _scopeFactory = scopeFactory;
-        // ReSharper disable once ConvertToPrimaryConstructor
         using var scope = _scopeFactory.CreateScope();
         this._context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         this._random = Random.Shared;
@@ -79,6 +92,7 @@ public class AnimationsManager : IManageableHostedService
         {
             this._socialGraphJobCancellationTokenSource.Cancel();
             this._socialGraphJobThread?.Join();
+            this.RemoveJob("SOCIALGRAPH");
         }
         catch
         {
@@ -89,6 +103,7 @@ public class AnimationsManager : IManageableHostedService
         {
             this._socialSharingJobCancellationTokenSource.Cancel();
             this._socialSharingJobThread?.Join();
+            this.RemoveJob("SOCIALSHARING");
         }
         catch
         {
@@ -99,6 +114,7 @@ public class AnimationsManager : IManageableHostedService
         {
             this._socialSharingJobCancellationTokenSource.Cancel();
             this._socialBeliefsJobThread?.Join();
+            this.RemoveJob("SOCIALBELIEF");
         }
         catch
         {
@@ -109,6 +125,7 @@ public class AnimationsManager : IManageableHostedService
         {
             this._chatJobJobCancellationTokenSource.Cancel();
             this._chatJobThread?.Join();
+            this.RemoveJob("CHAT");
         }
         catch
         {
@@ -119,12 +136,13 @@ public class AnimationsManager : IManageableHostedService
         {
             this._fullAutonomyCancellationTokenSource.Cancel();
             this._fullAutonomyJobThread?.Join();
+            this.RemoveJob("FULLAUTONOMY");
         }
         catch
         {
             // ignore
         }
-
+        
         _log.Info("Animations stopped.");
         
         return Task.CompletedTask;
@@ -132,7 +150,6 @@ public class AnimationsManager : IManageableHostedService
 
     public Task StartJob(AnimationConfiguration config, CancellationToken cancellationToken)
     {
-        var jobId = Guid.NewGuid().ToString();
         _log.Info("Animations Manager initializing...");
         Run(config);
         return Task.CompletedTask;
@@ -166,6 +183,8 @@ public class AnimationsManager : IManageableHostedService
                     this._fullAutonomyJobThread?.Join();
                     break;
             }
+
+            this.RemoveJob(jobId.ToUpper());
         }
         catch
         {
@@ -175,11 +194,34 @@ public class AnimationsManager : IManageableHostedService
         _log.Info($"Animation {jobId} stopped.");
         return Task.CompletedTask;
     }
+    
+    public IEnumerable<JobInfo> GetRunningJobs()
+    {
+        return _jobs.Values.ToArray();
+    }
+
+    private void AddJob(string jobName)
+    {
+        var jobInfo = new JobInfo
+        {
+            Id = Guid.NewGuid().ToString(),
+            Name = jobName,
+            StartTime = DateTime.UtcNow,
+        };
+        _jobs.TryAdd(jobInfo.Name, jobInfo);
+    }
+    
+    private bool RemoveJob(string jobName)
+    {
+        return _jobs.TryRemove(jobName, out _);
+    }
 
     private void Run(AnimationConfiguration animationConfiguration)
     {
         _log.Info($"Attempting to start {animationConfiguration.JobId}...");
         var settings = _configuration;
+        
+        this.AddJob(animationConfiguration.JobId.ToUpper());
         
         switch (animationConfiguration.JobId.ToUpper())
         {
@@ -300,6 +342,8 @@ public class AnimationsManager : IManageableHostedService
                 {
                     _socialGraphJobThread = new Thread(() =>
                     {
+                        this.AddJob("SOCIALGRAPH");
+                        
                         Thread.CurrentThread.IsBackground = true;
                         _ = new SocialGraphJob(this._configuration, this._context, this._random, this._activityHubContext, this._socialGraphJobCancellationTokenSource.Token);
                     });
@@ -327,6 +371,8 @@ public class AnimationsManager : IManageableHostedService
                 _log.Info($"Starting SocialBelief...");
                 if (this._configuration.AnimatorSettings.Animations.SocialBelief.IsMultiThreaded)
                 {
+                    this.AddJob("SOCIALBELIEF");
+                    
                     _socialBeliefsJobThread = new Thread(() =>
                     {
                         Thread.CurrentThread.IsBackground = true;
@@ -356,6 +402,8 @@ public class AnimationsManager : IManageableHostedService
                 _log.Info($"Starting chat job...");
                 if (this._configuration.AnimatorSettings.Animations.Chat.IsMultiThreaded)
                 {
+                    this.AddJob("CHAT");
+                    
                     _chatJobThread = new Thread(() =>
                     {
                         Thread.CurrentThread.IsBackground = true;
@@ -385,6 +433,8 @@ public class AnimationsManager : IManageableHostedService
                 _log.Info($"Starting SocialSharing...");
                 if (this._configuration.AnimatorSettings.Animations.SocialSharing.IsMultiThreaded)
                 {
+                    this.AddJob("SOCIALSHARING");
+                    
                     _socialSharingJobThread = new Thread(() =>
                     {
                         Thread.CurrentThread.IsBackground = true;
@@ -414,6 +464,8 @@ public class AnimationsManager : IManageableHostedService
                 _log.Info($"Starting FullAutonomy...");
                 if (this._configuration.AnimatorSettings.Animations.FullAutonomy.IsMultiThreaded)
                 {
+                    this.AddJob("FULLAUTONOMY");
+                    
                     _fullAutonomyJobThread = new Thread(() =>
                     {
                         Thread.CurrentThread.IsBackground = true;

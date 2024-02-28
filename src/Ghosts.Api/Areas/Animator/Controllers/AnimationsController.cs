@@ -4,6 +4,7 @@ using ghosts.api.Areas.Animator.Infrastructure.Animations;
 using ghosts.api.Areas.Animator.Infrastructure.Models;
 using Ghosts.Api.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
 using NLog;
 
@@ -32,7 +33,8 @@ public class AnimationsController : Controller
         ViewBag.SocialBelief = JsonConvert.SerializeObject(_configuration.AnimatorSettings.Animations.SocialBelief);
         ViewBag.Chat = JsonConvert.SerializeObject(_configuration.AnimatorSettings.Animations.Chat);
         ViewBag.SocialGraph = JsonConvert.SerializeObject(_configuration.AnimatorSettings.Animations.SocialGraph);
-        
+
+        ViewBag.RunningJobs = _animationsManager.GetRunningJobs();
         return View(new AnimationConfiguration());
     }
     
