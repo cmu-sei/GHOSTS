@@ -1,0 +1,164 @@
+{
+  "RankDegreeProbabilities": [
+    {
+      "Rank": "E1",
+      "AssociatesProbability": 0,
+      "BachelorsProbability": 0,
+      "MastersProbability": 0,
+      "DoctorateProbability": 0,
+      "ProfessionalProbability": 0
+    },
+    {
+      "Rank": "E2",
+      "AssociatesProbability": 0.01,
+      "BachelorsProbability": 0,
+      "MastersProbability": 0,
+      "DoctorateProbability": 0,
+      "ProfessionalProbability": 0
+    },
+    {
+      "Rank": "E3",
+      "AssociatesProbability": 0.1,
+      "BachelorsProbability": 0.01,
+      "MastersProbability": 0,
+      "DoctorateProbability": 0,
+      "ProfessionalProbability": 0
+    },
+    {
+      "Rank": "E4",
+      "AssociatesProbability": 0.4,
+      "BachelorsProbability": 0.1,
+      "MastersProbability": 0.001,
+      "DoctorateProbability": 0,
+      "ProfessionalProbability": 0
+    },
+    {
+      "Rank": "E5",
+      "AssociatesProbability": 0.8,
+      "BachelorsProbability": 0.2,
+      "MastersProbability": 0.01,
+      "DoctorateProbability": 0,
+      "ProfessionalProbability": 0
+    },
+    {
+      "Rank": "E6",
+      "AssociatesProbability": 0.9,
+      "BachelorsProbability": 0.3,
+      "MastersProbability": 0.1,
+      "DoctorateProbability": 0.001,
+      "ProfessionalProbability": 0
+    },
+    {
+      "Rank": "E7",
+      "AssociatesProbability": 1,
+      "BachelorsProbability": 0.4,
+      "MastersProbability": 0.2,
+      "DoctorateProbability": 0.001,
+      "ProfessionalProbability": 0
+    },
+    {
+      "Rank": "E8",
+      "AssociatesProbability": 1,
+      "BachelorsProbability": 0.9,
+      "MastersProbability": 0.5,
+      "DoctorateProbability": 0.001,
+      "ProfessionalProbability": 0
+    },
+    {
+      "Rank": "E9",
+      "AssociatesProbability": 1,
+      "BachelorsProbability": 1,
+      "MastersProbability": 0.6,
+      "DoctorateProbability": 0.001,
+      "ProfessionalProbability": 0
+    },
+    {
+      "Rank": "W1",
+      "AssociatesProbability": 0.5,
+      "BachelorsProbability": 0.8,
+      "MastersProbability": 0.05,
+      "DoctorateProbability": 0.001,
+      "ProfessionalProbability": 0
+    },
+    {
+      "Rank": "W2",
+      "AssociatesProbability": 0.5,
+      "BachelorsProbability": 0.9,
+      "MastersProbability": 0.05,
+      "DoctorateProbability": 0.001,
+      "ProfessionalProbability": 0
+    },
+    {
+      "Rank": "W3",
+      "AssociatesProbability": 0.5,
+      "BachelorsProbability": 1,
+      "MastersProbability": 0.1,
+      "DoctorateProbability": 0.001,
+      "ProfessionalProbability": 0
+    },
+    {
+      "Rank": "W4",
+      "AssociatesProbability": 0.5,
+      "BachelorsProbability": 1,
+      "MastersProbability": 0.2,
+      "DoctorateProbability": 0.001,
+      "ProfessionalProbability": 0
+    },
+    {
+      "Rank": "O1",
+      "AssociatesProbability": 0.2,
+      "BachelorsProbability": 1,
+      "MastersProbability": 0.2,
+      "DoctorateProbability": 0.001,
+      "ProfessionalProbability": 0
+    },
+    {
+      "Rank": "O2",
+      "AssociatesProbability": 0.2,
+      "BachelorsProbability": 1,
+      "MastersProbability": 0.3,
+      "DoctorateProbability": 0.001,
+      "ProfessionalProbability": 0
+    },
+    {
+      "Rank": "O3",
+      "AssociatesProbability": 0.2,
+      "BachelorsProbability": 1,
+      "MastersProbability": 0.4,
+      "DoctorateProbability": 0.001,
+      "ProfessionalProbability": 0.1
+    },
+    {
+      "Rank": "O4",
+      "AssociatesProbability": 0.2,
+      "BachelorsProbability": 1,
+      "MastersProbability": 0.5,
+      "DoctorateProbability": 0.001,
+      "ProfessionalProbability": 0.1
+    },
+    {
+      "Rank": "O5",
+      "AssociatesProbability": 0.2,
+      "BachelorsProbability": 1,
+      "MastersProbability": 0.6,
+      "DoctorateProbability": 0.001,
+      "ProfessionalProbability": 0.1
+    },
+    {
+      "Rank": "O6",
+      "AssociatesProbability": 0.2,
+      "BachelorsProbability": 1,
+      "MastersProbability": 0.9,
+      "DoctorateProbability": 0.001,
+      "ProfessionalProbability": 0.1
+    },
+    {
+      "Rank": "O7",
+      "AssociatesProbability": 0.2,
+      "BachelorsProbability": 1,
+      "MastersProbability": 1,
+      "DoctorateProbability": 0.001,
+      "ProfessionalProbability": 0.1
+    }
+  ]
+}

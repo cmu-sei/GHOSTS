@@ -1,0 +1,591 @@
+{
+  "CorrectiveActions": [
+    {
+      "Name": "Verbal warning",
+      "Probability": 0.5
+    },
+    {
+      "Name": "Written warning",
+      "Probability": 0.3
+    },
+    {
+      "Name": "Sent home for the day",
+      "Probability": 0.2
+    },
+    {
+      "Name": "Suspended",
+      "Probability": 0.15
+    },
+    {
+      "Name": "Suspended Without Pay",
+      "Probability": 0.1
+    },
+    {
+      "Name": "Pay Garnishment",
+      "Probability": 0.1
+    },
+    {
+      "Name": "Termination",
+      "Probability": 0.05
+    }
+  ],
+  "Profiles": [
+    {
+      "Name": "AccessProfile",
+      "Items": []
+    },
+    {
+      "Name": "CriminalViolentOrAbusiveConductProfile",
+      "Items": [
+        {
+          "Name": "Criminal Violent Behavior To Include Sexual Assault And Domestic Violence Or Other Criminal Behavior",
+          "Violation": false
+        },
+        {
+          "Name": "Exhibiting Violence At Work Directed Against Property Or Persons",
+          "Violation": false
+        },
+        {
+          "Name": "Threatening Violence",
+          "Violation": false
+        },
+        {
+          "Name": "Possessing Unauthorized Weapon",
+          "Violation": false
+        },
+        {
+          "Name": "Authorized Weapon At An Unauthorized Time Or Location",
+          "Violation": false
+        },
+        {
+          "Name": "Weapon Mishandling",
+          "Violation": false
+        },
+        {
+          "Name": "Criminal Behavior Involving Weapons",
+          "Violation": false
+        },
+        {
+          "Name": "Failure To Follow Court Order",
+          "Violation": false
+        },
+        {
+          "Name": "Parole Or Probation Or Violation Thereof",
+          "Violation": false
+        },
+        {
+          "Name": "Criminal Affiliations",
+          "Violation": false
+        },
+        {
+          "Name": "Self Harm Suicidal Ideation Or Attempting Suicide",
+          "Violation": false
+        }
+      ]
+    },
+    {
+      "Name": "FinancialConsiderationsProfile",
+      "Items": [
+        {
+          "Name": "Voluntary admission of financial crime",
+          "Violation": false
+        },
+        {
+          "Name": "Substantiated report or arrest",
+          "Violation": false
+        },
+        {
+          "Name": "Criminal proceeding (charge or conviction)",
+          "Violation": false
+        },
+        {
+          "Name": "Adverse changes to financial status",
+          "Violation": false
+        },
+        {
+          "Name": "Foreclosure or repossession",
+          "Violation": false
+        },
+        {
+          "Name": "Loan default",
+          "Violation": false
+        },
+        {
+          "Name": "Involuntary lien or unfavorable judgement",
+          "Violation": false
+        },
+
+        {
+          "Name": "Delinquent debts",
+          "Violation": false
+        },
+        {
+          "Name": "High debt-to-income ratio",
+          "Violation": false
+        },
+        {
+          "Name": "Failure to file tax returns",
+          "Violation": false
+        },
+        {
+          "Name": "Pay garnishment",
+          "Violation": false
+        },
+        {
+          "Name": "Displaying signs of unexplained affluence",
+          "Violation": false
+        },
+        {
+          "Name": "Experienced gambling problem",
+          "Violation": false
+        }
+      ]
+    },
+    {
+      "Name": "ForeignConsiderationsProfile",
+      "Items": [
+        {
+          "Name": "Foreign Citizenship (Threat or non-threat country – past/present)",
+          "Violation": false
+        },
+        {
+          "Name": "Foreign travel to countries of concern (Official or Non-Official)",
+          "Violation": false
+        },
+        {
+          "Name": "Frequent foreign travel (excluding official travel)",
+          "Violation": false
+        },
+        {
+          "Name": "Other foreign travel",
+          "Violation": false
+        },
+        {
+          "Name": "Service in foreign military or government",
+          "Violation": false
+        },
+        {
+          "Name": "Possessing foreign passport",
+          "Violation": false
+        },
+        {
+          "Name": "Voting in foreign election",
+          "Violation": false
+        },
+        {
+          "Name": "Possession of foreign assets",
+          "Violation": false
+        },
+        {
+          "Name": "Foreign residency",
+          "Violation": false
+        },
+        {
+          "Name": "Foreign business or political interest",
+          "Violation": false
+        },
+        {
+          "Name": "Receiving benefits from a foreign nation",
+          "Violation": false
+        },
+        {
+          "Name": "Foreign citizenship - spouse or cohabitant",
+          "Violation": false
+        },
+        {
+          "Name": "Foreign citizenship - immediate family member",
+          "Violation": false
+        },
+        {
+          "Name": "Living with foreign national",
+          "Violation": false
+        },
+        {
+          "Name": "Foreign national contact",
+          "Violation": false
+        },
+        {
+          "Name": "Unauthorized contact with an officer or agent of a foreign intelligence entity (FIE)",
+          "Violation": false
+        },
+        {
+          "Name": "Enabling or facilitating an officer, agent, or member of a FIE",
+          "Violation": false
+        }
+      ]
+    },
+    {
+      "Name": "JudgementCharacterAndPsychologicalConditionsProfile",
+      "Items": [
+        {
+          "Name": "Falsifying Hiring Information",
+          "Violation": true
+        },
+        {
+          "Name": "Falsifying Data At Place Of Work",
+          "Violation": true
+        },
+        {
+          "Name": "Subject To Judgement In Civil Litigation",
+          "Violation": false
+        },
+        {
+          "Name": "Expressing Ill Will Towards USG Or Employing Organization",
+          "Violation": false
+        },
+        {
+          "Name": "Communicating Extremist Views",
+          "Violation": false
+        },
+        {
+          "Name": "Associating With Extremist Or Terrorist Groups",
+          "Violation": false
+        },
+        {
+          "Name": "Enabling Or Facilitating An Extremist Or Terrorist Group",
+          "Violation": false
+        },
+        {
+          "Name": "Admission To Inpatient Mental Health Facility",
+          "Violation": false
+        },
+        {
+          "Name": "Insanity Plea In A Criminal Case",
+          "Violation": false
+        },
+        {
+          "Name": "Anti Social Or Compulsive Behavior",
+          "Violation": false
+        },
+        {
+          "Name": "Mental Instability",
+          "Violation": false
+        },
+        {
+          "Name": "Past Untruthfulness Including Voluntary Admission Including During Polygraph Or Investigation",
+          "Violation": false
+        },
+        {
+          "Name": "Failure To Successfully Complete A Polygraph",
+          "Violation": false
+        },
+        {
+          "Name": "Communicating Endorsement Of Workplace Violence",
+          "Violation": false
+        },
+        {
+          "Name": "Other Psychiatric Or Psychological Condition",
+          "Violation": false
+        }
+      ]
+    },
+    {
+      "Name": "ProfessionalLifecycleAndPerformanceProfile",
+      "Items": [
+        {
+          "Name": "Employee was insubordinate to their boss",
+          "Violation": true
+        },
+        {
+          "Name": "Employee missed work without notice",
+          "Violation": true
+        },
+        {
+          "Name": "Employee violated IP policy",
+          "Violation": true
+        },
+        {
+          "Name": "Demoted",
+          "Violation": false
+        },
+        {
+          "Name": "Missed raise",
+          "Violation": false
+        },
+        {
+          "Name": "Team layoffs",
+          "Violation": false
+        },
+        {
+          "Name": "Notified of termination",
+          "Violation": false
+        },
+        {
+          "Name": "Announces Termination",
+          "Violation": false
+        },
+        {
+          "Name": "Announces Resignation",
+          "Violation": false
+        },
+        {
+          "Name": "Missed Promotion",
+          "Violation": false
+        },
+        {
+          "Name": "EAP Referral",
+          "Violation": false
+        },
+        {
+          "Name": "Access Revoked",
+          "Violation": false  
+        },
+        {
+          "Name": "Financial Problems",
+          "Violation": false
+        },
+        {
+          "Name": "Arrest Record",
+          "Violation": false
+        },
+        {
+          "Name": "Gambling History",
+          "Violation": false
+        },
+        {
+          "Name": "Solicited by Competitor",
+          "Violation": false
+        },
+        {
+          "Name": "After Hours Login",
+          "Violation": false
+        },
+        {
+          "Name": "Information Sale Attempt",
+          "Violation": false
+        },
+        {
+          "Name": "Email to Conspirator",
+          "Violation": false
+        },
+        {
+          "Name": "Declining Performance Ratings",
+          "Violation": false
+        },
+        {
+          "Name": "Poor Performance Rating",
+          "Violation": false
+        },
+        {
+          "Name": "Reprimand by Superior",
+          "Violation": false
+        },
+        {
+          "Name": "Human Resource Complaint",
+          "Violation": false
+        }
+      ]
+    },
+    {
+      "Name": "SecurityAndComplianceIncidentsProfile",
+      "Items": [
+        {
+          "Name": "Employee kept old account credentials and used access without authorization",
+          "Violation": true
+        },
+        {
+          "Name": "Employee copied sensitive information without permission",
+          "Violation": true
+        },
+        {
+          "Name": "Employee altered document markings without permission",
+          "Violation": true
+        },
+        {
+          "Name": "Employee took screenshots without permission",
+          "Violation": true
+        },
+        {
+          "Name": "Employee scanned files without permission",
+          "Violation": true
+        },
+        {
+          "Name": "Employee printed sensitive files without permission",
+          "Violation": true
+        },
+        {
+          "Name": "Employee sent company files via their personal email account without permission",
+          "Violation": true
+        },
+        {
+          "Name": "Employee deleted files without permission",
+          "Violation": true
+        },
+        {
+          "Name": "Employee violated company IT policy",
+          "Violation": true
+        },
+        {
+          "Name": "Employee concealed actions",
+          "Violation": true
+        },
+        {
+          "Name": "Compliance Violation",
+          "Violation": true
+        },
+        {
+          "Name": "Security Infraction",
+          "Violation": true
+        },
+        {
+          "Name": "Security Violation",
+          "Violation": true
+        },
+        {
+          "Name": "Non-Compliance With Training Requirements",
+          "Violation": true
+        },
+        {
+          "Name": "Delinquent Government Travel Charge Card",
+          "Violation": true
+        },
+        {
+          "Name": "Misuse Of DoD Purchase Card Or Expense Violation",
+          "Violation": true
+        },
+        {
+          "Name": "Time Entry Violation",
+          "Violation": true
+        },
+        {
+          "Name": "Security Clearance Denial Suspension Or Revocation",
+          "Violation": true
+        },
+        {
+          "Name": "Misusing Privileged Function",
+          "Violation": true
+        },
+        {
+          "Name": "Physical Access Anomaly",
+          "Violation": true
+        },
+        {
+          "Name": "Virtual Access Anomaly",
+          "Violation": true
+        },
+        {
+          "Name": "Accessing DoD Physical Facilities At Off Hours",
+          "Violation": true
+        },
+        {
+          "Name": "Accessing DoD Systems And Applications At Off Hours",
+          "Violation": true
+        },
+        {
+          "Name": "Attempts To Obtain National Security Information Without Proper Clearance",
+          "Violation": true
+        },
+        {
+          "Name": "Attempts To Obtain National Security Information Without Need To Know",
+          "Violation": true
+        },
+        {
+          "Name": "Outside Employment Not In Accordance With Official Guidelines",
+          "Violation": true
+        },
+        {
+          "Name": "Failure To Self Report Required Information Associated Withholding A Security Clearance",
+          "Violation": true
+        }
+      ]
+    },
+    {
+      "Name": "SubstanceAbuseAndAddictiveBehaviorsProfile",
+      "Items": [
+        {
+          "Name": "Employee brought alcohol to work",
+          "Violation": true
+        },
+        {
+          "Name": "Employee caught browsing gambling websites",
+          "Violation": true
+        },
+        {
+          "Name": "Employee threatened coworker",
+          "Violation": true
+        },
+        {
+          "Name": "Employee was insubordinate to their boss",
+          "Violation": true
+        },
+        {
+          "Name": "Employee was hostile towards coworker",
+          "Violation": true
+        },
+        {
+          "Name": "Illegal Substance Use Or Trafficking",
+          "Violation": false
+        },
+        {
+          "Name": "Legal Substance Abuse Or Trafficking",
+          "Violation": false
+        },
+        {
+          "Name": "Voluntary Or Involuntary Treatment For Abuse Of Drugs Alcohol Or Controlled Substances",
+          "Violation": false
+        }
+      ]
+    },
+    {
+      "Name": "TechnicalActivityProfile",
+      "Items": [
+        {
+          "Name": "Employee made unauthorized changes to a code base",
+          "Violation": true
+        },
+        {
+          "Name": "Employee made unauthorized changes to access",
+          "Violation": true
+        },
+        {
+          "Name": "Employee modified file extension without permission",
+          "Violation": true
+        },
+        {
+          "Name": "Employee modified file header without permission",
+          "Violation": true
+        },
+        {
+          "Name": "Employee compressed files without permission",
+          "Violation": true
+        },
+        {
+          "Name": "Employee encrypted files without permission",
+          "Violation": true
+        },
+        {
+          "Name": "Employee deleted files without permission",
+          "Violation": true
+        },
+        {
+          "Name": "Employee used service account without permission",
+          "Violation": true
+        },
+        {
+          "Name": "Employee used backdoor account",
+          "Violation": true
+        },
+        {
+          "Name": "Employee used steganography tool without permission",
+          "Violation": true
+        },
+        {
+          "Name": "Employee deleted logs without permission",
+          "Violation": true
+        },
+        {
+          "Name": "Employee used a removable media device without permission",
+          "Violation": true
+        },
+        {
+          "Name": "Employee stored files in a cloud storage service without permission",
+          "Violation": true
+        },
+        {
+          "Name": "Employee downloaded a dns exfiltration tool",
+          "Violation": true
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1715 @@
+{
+	"Branches": [
+		{
+			"Branch": "USAF",
+			"Heights": [
+				{
+					"Height": 58,
+					"MinWeight": 91,
+					"MaxWeight": 131
+				},
+				{
+					"Height": 59,
+					"MinWeight": 94,
+					"MaxWeight": 136
+				},
+				{
+					"Height": 60,
+					"MinWeight": 97,
+					"MaxWeight": 141
+				},
+				{
+					"Height": 61,
+					"MinWeight": 100,
+					"MaxWeight": 145
+				},
+				{
+					"Height": 62,
+					"MinWeight": 104,
+					"MaxWeight": 150
+				},
+				{
+					"Height": 63,
+					"MinWeight": 107,
+					"MaxWeight": 155
+				},
+				{
+					"Height": 64,
+					"MinWeight": 110,
+					"MaxWeight": 160
+				},
+				{
+					"Height": 65,
+					"MinWeight": 114,
+					"MaxWeight": 165
+				},
+				{
+					"Height": 66,
+					"MinWeight": 117,
+					"MaxWeight": 170
+				},
+				{
+					"Height": 67,
+					"MinWeight": 121,
+					"MaxWeight": 175
+				},
+				{
+					"Height": 68,
+					"MinWeight": 125,
+					"MaxWeight": 180
+				},
+				{
+					"Height": 69,
+					"MinWeight": 128,
+					"MaxWeight": 186
+				},
+				{
+					"Height": 70,
+					"MinWeight": 132,
+					"MaxWeight": 191
+				},
+				{
+					"Height": 71,
+					"MinWeight": 136,
+					"MaxWeight": 197
+				},
+				{
+					"Height": 72,
+					"MinWeight": 140,
+					"MaxWeight": 202
+				},
+				{
+					"Height": 73,
+					"MinWeight": 144,
+					"MaxWeight": 208
+				},
+				{
+					"Height": 74,
+					"MinWeight": 148,
+					"MaxWeight": 214
+				},
+				{
+					"Height": 75,
+					"MinWeight": 152,
+					"MaxWeight": 220
+				},
+				{
+					"Height": 76,
+					"MinWeight": 156,
+					"MaxWeight": 225
+				},
+				{
+					"Height": 77,
+					"MinWeight": 160,
+					"MaxWeight": 231
+				},
+				{
+					"Height": 78,
+					"MinWeight": 164,
+					"MaxWeight": 237
+				},
+				{
+					"Height": 79,
+					"MinWeight": 168,
+					"MaxWeight": 244
+				},
+				{
+					"Height": 80,
+					"MinWeight": 173,
+					"MaxWeight": 250
+				}
+			]
+		},
+		{
+			"Branch": "USMC",
+			"Sexes": [
+				{
+					"Sex": "Male",
+					"Heights": [
+						{
+							"Height": 56,
+							"MinWeight": 85,
+							"MaxWeight": 122
+						},
+						{
+							"Height": 57,
+							"MinWeight": 88,
+							"MaxWeight": 127
+						},
+						{
+							"Height": 58,
+							"MinWeight": 91,
+							"MaxWeight": 131
+						},
+						{
+							"Height": 59,
+							"MinWeight": 94,
+							"MaxWeight": 136
+						},
+						{
+							"Height": 60,
+							"MinWeight": 97,
+							"MaxWeight": 141
+						},
+						{
+							"Height": 61,
+							"MinWeight": 100,
+							"MaxWeight": 145
+						},
+						{
+							"Height": 62,
+							"MinWeight": 104,
+							"MaxWeight": 150
+						},
+						{
+							"Height": 63,
+							"MinWeight": 107,
+							"MaxWeight": 155
+						},
+						{
+							"Height": 64,
+							"MinWeight": 110,
+							"MaxWeight": 160
+						},
+						{
+							"Height": 65,
+							"MinWeight": 114,
+							"MaxWeight": 165
+						},
+						{
+							"Height": 66,
+							"MinWeight": 117,
+							"MaxWeight": 170
+						},
+						{
+							"Height": 67,
+							"MinWeight": 121,
+							"MaxWeight": 175
+						},
+						{
+							"Height": 68,
+							"MinWeight": 125,
+							"MaxWeight": 180
+						},
+						{
+							"Height": 69,
+							"MinWeight": 128,
+							"MaxWeight": 186
+						},
+						{
+							"Height": 70,
+							"MinWeight": 132,
+							"MaxWeight": 191
+						},
+						{
+							"Height": 71,
+							"MinWeight": 136,
+							"MaxWeight": 197
+						},
+						{
+							"Height": 72,
+							"MinWeight": 140,
+							"MaxWeight": 202
+						},
+						{
+							"Height": 73,
+							"MinWeight": 144,
+							"MaxWeight": 208
+						},
+						{
+							"Height": 74,
+							"MinWeight": 148,
+							"MaxWeight": 214
+						},
+						{
+							"Height": 75,
+							"MinWeight": 152,
+							"MaxWeight": 220
+						},
+						{
+							"Height": 76,
+							"MinWeight": 156,
+							"MaxWeight": 225
+						},
+						{
+							"Height": 77,
+							"MinWeight": 160,
+							"MaxWeight": 231
+						},
+						{
+							"Height": 78,
+							"MinWeight": 164,
+							"MaxWeight": 237
+						},
+						{
+							"Height": 79,
+							"MinWeight": 168,
+							"MaxWeight": 244
+						},
+						{
+							"Height": 80,
+							"MinWeight": 173,
+							"MaxWeight": 250
+						},
+						{
+							"Height": 81,
+							"MinWeight": 177,
+							"MaxWeight": 256
+						},
+						{
+							"Height": 82,
+							"MinWeight": 182,
+							"MaxWeight": 263
+						}
+					]
+				},
+
+				{
+					"Sex": "Female",
+					"Heights": [
+						{
+							"Height": 56,
+							"MinWeight": 85,
+							"MaxWeight": 115
+						},
+						{
+							"Height": 57,
+							"MinWeight": 88,
+							"MaxWeight": 120
+						},
+						{
+							"Height": 58,
+							"MinWeight": 91,
+							"MaxWeight": 124
+						},
+						{
+							"Height": 59,
+							"MinWeight": 94,
+							"MaxWeight": 129
+						},
+						{
+							"Height": 60,
+							"MinWeight": 97,
+							"MaxWeight": 133
+						},
+						{
+							"Height": 61,
+							"MinWeight": 100,
+							"MaxWeight": 137
+						},
+						{
+							"Height": 62,
+							"MinWeight": 104,
+							"MaxWeight": 142
+						},
+						{
+							"Height": 63,
+							"MinWeight": 107,
+							"MaxWeight": 146
+						},
+						{
+							"Height": 64,
+							"MinWeight": 110,
+							"MaxWeight": 151
+						},
+						{
+							"Height": 65,
+							"MinWeight": 114,
+							"MaxWeight": 156
+						},
+						{
+							"Height": 66,
+							"MinWeight": 117,
+							"MaxWeight": 155
+						},
+						{
+							"Height": 67,
+							"MinWeight": 121,
+							"MaxWeight": 161
+						},
+						{
+							"Height": 68,
+							"MinWeight": 125,
+							"MaxWeight": 171
+						},
+						{
+							"Height": 69,
+							"MinWeight": 128,
+							"MaxWeight": 176
+						},
+						{
+							"Height": 70,
+							"MinWeight": 132,
+							"MaxWeight": 181
+						},
+						{
+							"Height": 71,
+							"MinWeight": 136,
+							"MaxWeight": 186
+						},
+						{
+							"Height": 72,
+							"MinWeight": 140,
+							"MaxWeight": 191
+						},
+						{
+							"Height": 73,
+							"MinWeight": 144,
+							"MaxWeight": 197
+						},
+						{
+							"Height": 74,
+							"MinWeight": 148,
+							"MaxWeight": 202
+						},
+						{
+							"Height": 75,
+							"MinWeight": 152,
+							"MaxWeight": 208
+						},
+						{
+							"Height": 76,
+							"MinWeight": 156,
+							"MaxWeight": 213
+						},
+						{
+							"Height": 77,
+							"MinWeight": 160,
+							"MaxWeight": 219
+						},
+						{
+							"Height": 78,
+							"MinWeight": 164,
+							"MaxWeight": 225
+						},
+						{
+							"Height": 79,
+							"MinWeight": 168,
+							"MaxWeight": 230
+						},
+						{
+							"Height": 80,
+							"MinWeight": 173,
+							"MaxWeight": 236
+						},
+						{
+							"Height": 81,
+							"MinWeight": 177,
+							"MaxWeight": 242
+						},
+						{
+							"Height": 82,
+							"MinWeight": 182,
+							"MaxWeight": 248
+						}
+					]
+				}
+			]
+		},
+		{
+			"Branch": "USN",
+			"Sexes": [
+				{
+					"Sex": "Male",
+					"Heights": [
+						{
+							"Height": 58,
+							"MinWeight": 91,
+							"MaxWeight": 131
+						},
+						{
+							"Height": 59,
+							"MinWeight": 94,
+							"MaxWeight": 136
+						},
+						{
+							"Height": 60,
+							"MinWeight": 97,
+							"MaxWeight": 141
+						},
+						{
+							"Height": 61,
+							"MinWeight": 100,
+							"MaxWeight": 145
+						},
+						{
+							"Height": 62,
+							"MinWeight": 104,
+							"MaxWeight": 150
+						},
+						{
+							"Height": 63,
+							"MinWeight": 107,
+							"MaxWeight": 155
+						},
+						{
+							"Height": 64,
+							"MinWeight": 110,
+							"MaxWeight": 160
+						},
+						{
+							"Height": 65,
+							"MinWeight": 114,
+							"MaxWeight": 165
+						},
+						{
+							"Height": 66,
+							"MinWeight": 118,
+							"MaxWeight": 170
+						},
+						{
+							"Height": 67,
+							"MinWeight": 121,
+							"MaxWeight": 175
+						},
+						{
+							"Height": 68,
+							"MinWeight": 125,
+							"MaxWeight": 181
+						},
+						{
+							"Height": 69,
+							"MinWeight": 128,
+							"MaxWeight": 186
+						},
+						{
+							"Height": 70,
+							"MinWeight": 132,
+							"MaxWeight": 191
+						},
+						{
+							"Height": 71,
+							"MinWeight": 136,
+							"MaxWeight": 196
+						},
+						{
+							"Height": 72,
+							"MinWeight": 140,
+							"MaxWeight": 201
+						},
+						{
+							"Height": 73,
+							"MinWeight": 144,
+							"MaxWeight": 206
+						},
+						{
+							"Height": 74,
+							"MinWeight": 148,
+							"MaxWeight": 211
+						},
+						{
+							"Height": 75,
+							"MinWeight": 152,
+							"MaxWeight": 216
+						},
+						{
+							"Height": 76,
+							"MinWeight": 156,
+							"MaxWeight": 221
+						},
+						{
+							"Height": 77,
+							"MinWeight": 160,
+							"MaxWeight": 226
+						},
+						{
+							"Height": 78,
+							"MinWeight": 164,
+							"MaxWeight": 231
+						},
+						{
+							"Height": 79,
+							"MinWeight": 168,
+							"MaxWeight": 236
+						},
+						{
+							"Height": 80,
+							"MinWeight": 172,
+							"MaxWeight": 241
+						}
+
+					]
+
+				},
+				{
+					"Sex": "Female",
+					"Heights": [
+
+						{
+							"Height": 58,
+							"MinWeight": 84,
+							"MaxWeight": 131
+						},
+						{
+							"Height": 59,
+							"MinWeight": 87,
+							"MaxWeight": 136
+						},
+						{
+							"Height": 60,
+							"MinWeight": 90,
+							"MaxWeight": 141
+						},
+						{
+							"Height": 61,
+							"MinWeight": 92,
+							"MaxWeight": 145
+						},
+						{
+							"Height": 62,
+							"MinWeight": 95,
+							"MaxWeight": 149
+						},
+						{
+							"Height": 63,
+							"MinWeight": 98,
+							"MaxWeight": 152
+						},
+						{
+							"Height": 64,
+							"MinWeight": 102,
+							"MaxWeight": 156
+						},
+						{
+							"Height": 65,
+							"MinWeight": 105,
+							"MaxWeight": 160
+						},
+						{
+							"Height": 66,
+							"MinWeight": 108,
+							"MaxWeight": 163
+						},
+						{
+							"Height": 67,
+							"MinWeight": 112,
+							"MaxWeight": 167
+						},
+						{
+							"Height": 68,
+							"MinWeight": 115,
+							"MaxWeight": 170
+						},
+						{
+							"Height": 69,
+							"MinWeight": 119,
+							"MaxWeight": 174
+						},
+						{
+							"Height": 70,
+							"MinWeight": 122,
+							"MaxWeight": 177
+						},
+						{
+							"Height": 71,
+							"MinWeight": 125,
+							"MaxWeight": 181
+						},
+						{
+							"Height": 72,
+							"MinWeight": 129,
+							"MaxWeight": 185
+						},
+						{
+							"Height": 73,
+							"MinWeight": 132,
+							"MaxWeight": 189
+						},
+						{
+							"Height": 74,
+							"MinWeight": 136,
+							"MaxWeight": 194
+						},
+						{
+							"Height": 75,
+							"MinWeight": 140,
+							"MaxWeight": 200
+						},
+						{
+							"Height": 76,
+							"MinWeight": 144,
+							"MaxWeight": 205
+						},
+						{
+							"Height": 77,
+							"MinWeight": 147,
+							"MaxWeight": 211
+						},
+						{
+							"Height": 78,
+							"MinWeight": 151,
+							"MaxWeight": 216
+						},
+						{
+							"Height": 79,
+							"MinWeight": 154,
+							"MaxWeight": 222
+						},
+						{
+							"Height": 80,
+							"MinWeight": 157,
+							"MaxWeight": 227
+						}
+					]
+
+				}
+			]
+		},
+		{
+			"Branch": "USCG",
+			"Heights": [
+				{
+					"Height": 58,
+					"MinWeight": 91,
+					"MaxWeight": 131
+				},
+				{
+					"Height": 59,
+					"MinWeight": 94,
+					"MaxWeight": 136
+				},
+				{
+					"Height": 60,
+					"MinWeight": 97,
+					"MaxWeight": 141
+				},
+				{
+					"Height": 61,
+					"MinWeight": 100,
+					"MaxWeight": 145
+				},
+				{
+					"Height": 62,
+					"MinWeight": 104,
+					"MaxWeight": 150
+				},
+				{
+					"Height": 63,
+					"MinWeight": 107,
+					"MaxWeight": 155
+				},
+				{
+					"Height": 64,
+					"MinWeight": 110,
+					"MaxWeight": 160
+				},
+				{
+					"Height": 65,
+					"MinWeight": 114,
+					"MaxWeight": 165
+				},
+				{
+					"Height": 66,
+					"MinWeight": 117,
+					"MaxWeight": 170
+				},
+				{
+					"Height": 67,
+					"MinWeight": 121,
+					"MaxWeight": 175
+				},
+				{
+					"Height": 68,
+					"MinWeight": 125,
+					"MaxWeight": 180
+				},
+				{
+					"Height": 69,
+					"MinWeight": 128,
+					"MaxWeight": 186
+				},
+				{
+					"Height": 70,
+					"MinWeight": 132,
+					"MaxWeight": 191
+				},
+				{
+					"Height": 71,
+					"MinWeight": 136,
+					"MaxWeight": 197
+				},
+				{
+					"Height": 72,
+					"MinWeight": 140,
+					"MaxWeight": 202
+				},
+				{
+					"Height": 73,
+					"MinWeight": 144,
+					"MaxWeight": 208
+				},
+				{
+					"Height": 74,
+					"MinWeight": 148,
+					"MaxWeight": 214
+				},
+				{
+					"Height": 75,
+					"MinWeight": 152,
+					"MaxWeight": 220
+				},
+				{
+					"Height": 76,
+					"MinWeight": 156,
+					"MaxWeight": 225
+				},
+				{
+					"Height": 77,
+					"MinWeight": 160,
+					"MaxWeight": 231
+				},
+				{
+					"Height": 78,
+					"MinWeight": 164,
+					"MaxWeight": 237
+				},
+				{
+					"Height": 79,
+					"MinWeight": 168,
+					"MaxWeight": 244
+				},
+				{
+					"Height": 80,
+					"MinWeight": 173,
+					"MaxWeight": 250
+				}
+			]
+		},
+		{
+			"Branch": "USARMY",
+			"Sexes": [
+				{
+					"Sex": "Male",
+					"Ages": [
+						{
+							"Age": 17,
+							"Heights": [
+								{
+									"Height": 60,
+									"MinWeight": 97,
+									"MaxWeight": 132
+								},
+								{
+									"Height": 61,
+									"MinWeight": 100,
+									"MaxWeight": 136
+								},
+								{
+									"Height": 62,
+									"MinWeight": 104,
+									"MaxWeight": 141
+								},
+								{
+									"Height": 63,
+									"MinWeight": 107,
+									"MaxWeight": 145
+								},
+								{
+									"Height": 64,
+									"MinWeight": 110,
+									"MaxWeight": 150
+								},
+								{
+									"Height": 65,
+									"MinWeight": 114,
+									"MaxWeight": 155
+								},
+								{
+									"Height": 66,
+									"MinWeight": 117,
+									"MaxWeight": 160
+								},
+								{
+									"Height": 67,
+									"MinWeight": 121,
+									"MaxWeight": 165
+								},
+								{
+									"Height": 68,
+									"MinWeight": 125,
+									"MaxWeight": 170
+								},
+								{
+									"Height": 69,
+									"MinWeight": 128,
+									"MaxWeight": 175
+								},
+								{
+									"Height": 70,
+									"MinWeight": 132,
+									"MaxWeight": 180
+								},
+								{
+									"Height": 71,
+									"MinWeight": 136,
+									"MaxWeight": 185
+								},
+								{
+									"Height": 72,
+									"MinWeight": 140,
+									"MaxWeight": 190
+								},
+								{
+									"Height": 73,
+									"MinWeight": 144,
+									"MaxWeight": 195
+								},
+								{
+									"Height": 74,
+									"MinWeight": 148,
+									"MaxWeight": 201
+								},
+								{
+									"Height": 75,
+									"MinWeight": 152,
+									"MaxWeight": 206
+								},
+								{
+									"Height": 76,
+									"MinWeight": 156,
+									"MaxWeight": 212
+								},
+								{
+									"Height": 77,
+									"MinWeight": 160,
+									"MaxWeight": 218
+								},
+								{
+									"Height": 78,
+									"MinWeight": 164,
+									"MaxWeight": 223
+								},
+								{
+									"Height": 79,
+									"MinWeight": 168,
+									"MaxWeight": 229
+								},
+								{
+									"Height": 80,
+									"MinWeight": 173,
+									"MaxWeight": 234
+								}
+							]
+						},
+						{
+							"Age": 21,
+							"Heights": [
+								{
+									"Height": 60,
+									"MinWeight": 97,
+									"MaxWeight": 136
+								},
+								{
+									"Height": 61,
+									"MinWeight": 100,
+									"MaxWeight": 140
+								},
+								{
+									"Height": 62,
+									"MinWeight": 104,
+									"MaxWeight": 144
+								},
+								{
+									"Height": 63,
+									"MinWeight": 107,
+									"MaxWeight": 149
+								},
+								{
+									"Height": 64,
+									"MinWeight": 110,
+									"MaxWeight": 154
+								},
+								{
+									"Height": 65,
+									"MinWeight": 114,
+									"MaxWeight": 159
+								},
+								{
+									"Height": 66,
+									"MinWeight": 117,
+									"MaxWeight": 163
+								},
+								{
+									"Height": 67,
+									"MinWeight": 121,
+									"MaxWeight": 169
+								},
+								{
+									"Height": 68,
+									"MinWeight": 125,
+									"MaxWeight": 174
+								},
+								{
+									"Height": 69,
+									"MinWeight": 128,
+									"MaxWeight": 179
+								},
+								{
+									"Height": 70,
+									"MinWeight": 132,
+									"MaxWeight": 185
+								},
+								{
+									"Height": 71,
+									"MinWeight": 136,
+									"MaxWeight": 189
+								},
+								{
+									"Height": 72,
+									"MinWeight": 140,
+									"MaxWeight": 195
+								},
+								{
+									"Height": 73,
+									"MinWeight": 144,
+									"MaxWeight": 200
+								},
+								{
+									"Height": 74,
+									"MinWeight": 148,
+									"MaxWeight": 206
+								},
+								{
+									"Height": 75,
+									"MinWeight": 152,
+									"MaxWeight": 212
+								},
+								{
+									"Height": 76,
+									"MinWeight": 156,
+									"MaxWeight": 217
+								},
+								{
+									"Height": 77,
+									"MinWeight": 160,
+									"MaxWeight": 223
+								},
+								{
+									"Height": 78,
+									"MinWeight": 164,
+									"MaxWeight": 229
+								},
+								{
+									"Height": 79,
+									"MinWeight": 168,
+									"MaxWeight": 235
+								},
+								{
+									"Height": 80,
+									"MinWeight": 173,
+									"MaxWeight": 240
+								}
+							]
+						},
+						{
+							"Age": 28,
+							"Heights": [
+								{
+									"Height": 60,
+									"MinWeight": 97,
+									"MaxWeight": 139
+								},
+								{
+									"Height": 61,
+									"MinWeight": 100,
+									"MaxWeight": 144
+								},
+								{
+									"Height": 62,
+									"MinWeight": 104,
+									"MaxWeight": 148
+								},
+								{
+									"Height": 63,
+									"MinWeight": 107,
+									"MaxWeight": 153
+								},
+								{
+									"Height": 64,
+									"MinWeight": 110,
+									"MaxWeight": 158
+								},
+								{
+									"Height": 65,
+									"MinWeight": 114,
+									"MaxWeight": 163
+								},
+								{
+									"Height": 66,
+									"MinWeight": 117,
+									"MaxWeight": 168
+								},
+								{
+									"Height": 67,
+									"MinWeight": 121,
+									"MaxWeight": 174
+								},
+								{
+									"Height": 68,
+									"MinWeight": 125,
+									"MaxWeight": 179
+								},
+								{
+									"Height": 69,
+									"MinWeight": 128,
+									"MaxWeight": 184
+								},
+								{
+									"Height": 70,
+									"MinWeight": 132,
+									"MaxWeight": 189
+								},
+								{
+									"Height": 71,
+									"MinWeight": 136,
+									"MaxWeight": 194
+								},
+								{
+									"Height": 72,
+									"MinWeight": 140,
+									"MaxWeight": 200
+								},
+								{
+									"Height": 73,
+									"MinWeight": 144,
+									"MaxWeight": 205
+								},
+								{
+									"Height": 74,
+									"MinWeight": 148,
+									"MaxWeight": 211
+								},
+								{
+									"Height": 75,
+									"MinWeight": 152,
+									"MaxWeight": 217
+								},
+								{
+									"Height": 76,
+									"MinWeight": 156,
+									"MaxWeight": 223
+								},
+								{
+									"Height": 77,
+									"MinWeight": 160,
+									"MaxWeight": 229
+								},
+								{
+									"Height": 78,
+									"MinWeight": 164,
+									"MaxWeight": 235
+								},
+								{
+									"Height": 79,
+									"MinWeight": 168,
+									"MaxWeight": 241
+								},
+								{
+									"Height": 80,
+									"MinWeight": 173,
+									"MaxWeight": 247
+								}
+							]
+						},
+						{
+							"Age": 40,
+							"Heights": [
+								{
+									"Height": 60,
+									"MinWeight": 97,
+									"MaxWeight": 141
+								},
+								{
+									"Height": 61,
+									"MinWeight": 100,
+									"MaxWeight": 146
+								},
+								{
+									"Height": 62,
+									"MinWeight": 104,
+									"MaxWeight": 150
+								},
+								{
+									"Height": 63,
+									"MinWeight": 107,
+									"MaxWeight": 155
+								},
+								{
+									"Height": 64,
+									"MinWeight": 110,
+									"MaxWeight": 160
+								},
+								{
+									"Height": 65,
+									"MinWeight": 114,
+									"MaxWeight": 165
+								},
+								{
+									"Height": 66,
+									"MinWeight": 117,
+									"MaxWeight": 170
+								},
+								{
+									"Height": 67,
+									"MinWeight": 121,
+									"MaxWeight": 176
+								},
+								{
+									"Height": 68,
+									"MinWeight": 125,
+									"MaxWeight": 181
+								},
+								{
+									"Height": 69,
+									"MinWeight": 128,
+									"MaxWeight": 186
+								},
+								{
+									"Height": 70,
+									"MinWeight": 132,
+									"MaxWeight": 192
+								},
+								{
+									"Height": 71,
+									"MinWeight": 136,
+									"MaxWeight": 197
+								},
+								{
+									"Height": 72,
+									"MinWeight": 140,
+									"MaxWeight": 203
+								},
+								{
+									"Height": 73,
+									"MinWeight": 144,
+									"MaxWeight": 208
+								},
+								{
+									"Height": 74,
+									"MinWeight": 148,
+									"MaxWeight": 214
+								},
+								{
+									"Height": 75,
+									"MinWeight": 152,
+									"MaxWeight": 220
+								},
+								{
+									"Height": 76,
+									"MinWeight": 156,
+									"MaxWeight": 226
+								},
+								{
+									"Height": 77,
+									"MinWeight": 160,
+									"MaxWeight": 232
+								},
+								{
+									"Height": 78,
+									"MinWeight": 164,
+									"MaxWeight": 238
+								},
+								{
+									"Height": 79,
+									"MinWeight": 168,
+									"MaxWeight": 244
+								},
+								{
+									"Height": 80,
+									"MinWeight": 173,
+									"MaxWeight": 250
+								}
+							]
+						}
+					]
+				},
+				{
+					"Sex": "Female",
+					"Ages": [
+						{
+							"Age": 17,
+							"Heights": [
+								{
+									"Height": 58,
+									"MinWeight": 91,
+									"MaxWeight": 119
+								},
+								{
+									"Height": 59,
+									"MinWeight": 94,
+									"MaxWeight": 124
+								},
+								{
+									"Height": 60,
+									"MinWeight": 97,
+									"MaxWeight": 128
+								},
+								{
+									"Height": 61,
+									"MinWeight": 100,
+									"MaxWeight": 132
+								},
+								{
+									"Height": 62,
+									"MinWeight": 104,
+									"MaxWeight": 136
+								},
+								{
+									"Height": 63,
+									"MinWeight": 107,
+									"MaxWeight": 141
+								},
+								{
+									"Height": 64,
+									"MinWeight": 110,
+									"MaxWeight": 145
+								},
+								{
+									"Height": 65,
+									"MinWeight": 114,
+									"MaxWeight": 150
+								},
+								{
+									"Height": 66,
+									"MinWeight": 117,
+									"MaxWeight": 155
+								},
+								{
+									"Height": 67,
+									"MinWeight": 121,
+									"MaxWeight": 159
+								},
+								{
+									"Height": 68,
+									"MinWeight": 125,
+									"MaxWeight": 164
+								},
+								{
+									"Height": 69,
+									"MinWeight": 128,
+									"MaxWeight": 169
+								},
+								{
+									"Height": 70,
+									"MinWeight": 132,
+									"MaxWeight": 174
+								},
+								{
+									"Height": 71,
+									"MinWeight": 136,
+									"MaxWeight": 179
+								},
+								{
+									"Height": 72,
+									"MinWeight": 140,
+									"MaxWeight": 184
+								},
+								{
+									"Height": 73,
+									"MinWeight": 144,
+									"MaxWeight": 189
+								},
+								{
+									"Height": 74,
+									"MinWeight": 148,
+									"MaxWeight": 194
+								},
+								{
+									"Height": 75,
+									"MinWeight": 152,
+									"MaxWeight": 200
+								},
+								{
+									"Height": 76,
+									"MinWeight": 156,
+									"MaxWeight": 205
+								},
+								{
+									"Height": 77,
+									"MinWeight": 160,
+									"MaxWeight": 210
+								},
+								{
+									"Height": 78,
+									"MinWeight": 164,
+									"MaxWeight": 216
+								},
+								{
+									"Height": 79,
+									"MinWeight": 168,
+									"MaxWeight": 221
+								},
+								{
+									"Height": 80,
+									"MinWeight": 173,
+									"MaxWeight": 227
+								}
+							]
+						},
+						{
+							"Age": 21,
+							"Heights": [
+								{
+									"Height": 58,
+									"MinWeight": 91,
+									"MaxWeight": 121
+								},
+								{
+									"Height": 59,
+									"MinWeight": 94,
+									"MaxWeight": 125
+								},
+								{
+									"Height": 60,
+									"MinWeight": 97,
+									"MaxWeight": 129
+								},
+								{
+									"Height": 61,
+									"MinWeight": 100,
+									"MaxWeight": 134
+								},
+								{
+									"Height": 62,
+									"MinWeight": 104,
+									"MaxWeight": 138
+								},
+								{
+									"Height": 63,
+									"MinWeight": 107,
+									"MaxWeight": 143
+								},
+								{
+									"Height": 64,
+									"MinWeight": 110,
+									"MaxWeight": 147
+								},
+								{
+									"Height": 65,
+									"MinWeight": 114,
+									"MaxWeight": 152
+								},
+								{
+									"Height": 66,
+									"MinWeight": 117,
+									"MaxWeight": 156
+								},
+								{
+									"Height": 67,
+									"MinWeight": 121,
+									"MaxWeight": 161
+								},
+								{
+									"Height": 68,
+									"MinWeight": 125,
+									"MaxWeight": 166
+								},
+								{
+									"Height": 69,
+									"MinWeight": 128,
+									"MaxWeight": 171
+								},
+								{
+									"Height": 70,
+									"MinWeight": 132,
+									"MaxWeight": 176
+								},
+								{
+									"Height": 71,
+									"MinWeight": 136,
+									"MaxWeight": 181
+								},
+								{
+									"Height": 72,
+									"MinWeight": 140,
+									"MaxWeight": 186
+								},
+								{
+									"Height": 73,
+									"MinWeight": 144,
+									"MaxWeight": 191
+								},
+								{
+									"Height": 74,
+									"MinWeight": 148,
+									"MaxWeight": 197
+								},
+								{
+									"Height": 75,
+									"MinWeight": 152,
+									"MaxWeight": 202
+								},
+								{
+									"Height": 76,
+									"MinWeight": 156,
+									"MaxWeight": 207
+								},
+								{
+									"Height": 77,
+									"MinWeight": 160,
+									"MaxWeight": 213
+								},
+								{
+									"Height": 78,
+									"MinWeight": 164,
+									"MaxWeight": 218
+								},
+								{
+									"Height": 79,
+									"MinWeight": 168,
+									"MaxWeight": 224
+								},
+								{
+									"Height": 80,
+									"MinWeight": 173,
+									"MaxWeight": 230
+								}
+							]
+						},
+						{
+							"Age": 28,
+							"Heights": [
+								{
+									"Height": 58,
+									"MinWeight": 91,
+									"MaxWeight": 122
+								},
+								{
+									"Height": 59,
+									"MinWeight": 94,
+									"MaxWeight": 126
+								},
+								{
+									"Height": 60,
+									"MinWeight": 97,
+									"MaxWeight": 131
+								},
+								{
+									"Height": 61,
+									"MinWeight": 100,
+									"MaxWeight": 135
+								},
+								{
+									"Height": 62,
+									"MinWeight": 104,
+									"MaxWeight": 140
+								},
+								{
+									"Height": 63,
+									"MinWeight": 107,
+									"MaxWeight": 144
+								},
+								{
+									"Height": 64,
+									"MinWeight": 110,
+									"MaxWeight": 149
+								},
+								{
+									"Height": 65,
+									"MinWeight": 114,
+									"MaxWeight": 154
+								},
+								{
+									"Height": 66,
+									"MinWeight": 117,
+									"MaxWeight": 158
+								},
+								{
+									"Height": 67,
+									"MinWeight": 121,
+									"MaxWeight": 163
+								},
+								{
+									"Height": 68,
+									"MinWeight": 125,
+									"MaxWeight": 168
+								},
+								{
+									"Height": 69,
+									"MinWeight": 128,
+									"MaxWeight": 173
+								},
+								{
+									"Height": 70,
+									"MinWeight": 132,
+									"MaxWeight": 178
+								},
+								{
+									"Height": 71,
+									"MinWeight": 136,
+									"MaxWeight": 183
+								},
+								{
+									"Height": 72,
+									"MinWeight": 140,
+									"MaxWeight": 188
+								},
+								{
+									"Height": 73,
+									"MinWeight": 144,
+									"MaxWeight": 194
+								},
+								{
+									"Height": 74,
+									"MinWeight": 148,
+									"MaxWeight": 199
+								},
+								{
+									"Height": 75,
+									"MinWeight": 152,
+									"MaxWeight": 204
+								},
+								{
+									"Height": 76,
+									"MinWeight": 156,
+									"MaxWeight": 210
+								},
+								{
+									"Height": 77,
+									"MinWeight": 160,
+									"MaxWeight": 215
+								},
+								{
+									"Height": 78,
+									"MinWeight": 164,
+									"MaxWeight": 221
+								},
+								{
+									"Height": 79,
+									"MinWeight": 168,
+									"MaxWeight": 227
+								},
+								{
+									"Height": 80,
+									"MinWeight": 173,
+									"MaxWeight": 233
+								}
+							]
+						},
+						{
+							"Age": 40,
+							"Heights": [
+								{
+									"Height": 58,
+									"MinWeight": 91,
+									"MaxWeight": 124
+								},
+								{
+									"Height": 59,
+									"MinWeight": 94,
+									"MaxWeight": 128
+								},
+								{
+									"Height": 60,
+									"MinWeight": 97,
+									"MaxWeight": 133
+								},
+								{
+									"Height": 61,
+									"MinWeight": 100,
+									"MaxWeight": 137
+								},
+								{
+									"Height": 62,
+									"MinWeight": 104,
+									"MaxWeight": 142
+								},
+								{
+									"Height": 63,
+									"MinWeight": 107,
+									"MaxWeight": 146
+								},
+								{
+									"Height": 64,
+									"MinWeight": 110,
+									"MaxWeight": 151
+								},
+								{
+									"Height": 65,
+									"MinWeight": 114,
+									"MaxWeight": 156
+								},
+								{
+									"Height": 66,
+									"MinWeight": 117,
+									"MaxWeight": 161
+								},
+								{
+									"Height": 67,
+									"MinWeight": 121,
+									"MaxWeight": 166
+								},
+								{
+									"Height": 68,
+									"MinWeight": 125,
+									"MaxWeight": 171
+								},
+								{
+									"Height": 69,
+									"MinWeight": 128,
+									"MaxWeight": 176
+								},
+								{
+									"Height": 70,
+									"MinWeight": 132,
+									"MaxWeight": 181
+								},
+								{
+									"Height": 71,
+									"MinWeight": 136,
+									"MaxWeight": 186
+								},
+								{
+									"Height": 72,
+									"MinWeight": 140,
+									"MaxWeight": 191
+								},
+								{
+									"Height": 73,
+									"MinWeight": 144,
+									"MaxWeight": 197
+								},
+								{
+									"Height": 74,
+									"MinWeight": 148,
+									"MaxWeight": 202
+								},
+								{
+									"Height": 75,
+									"MinWeight": 152,
+									"MaxWeight": 208
+								},
+								{
+									"Height": 76,
+									"MinWeight": 156,
+									"MaxWeight": 213
+								},
+								{
+									"Height": 77,
+									"MinWeight": 160,
+									"MaxWeight": 219
+								},
+								{
+									"Height": 78,
+									"MinWeight": 164,
+									"MaxWeight": 225
+								},
+								{
+									"Height": 79,
+									"MinWeight": 168,
+									"MaxWeight": 230
+								},
+								{
+									"Height": 80,
+									"MinWeight": 173,
+									"MaxWeight": 236
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}
+    

@@ -1,0 +1,64 @@
+@using System.Net.Mime
+@using Ghosts.Domain.Code
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- // Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms. //-->
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
+    <link type="text/css" href="/bootstrap/css/bootstrap.css" rel="stylesheet" id="bootstrap-css"/>
+    <script src="/bootstrap/js/bootstrap.js"></script>
+    <script src="/bootstrap/js/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/lib/fontawesome/css/all.css"/>
+    <link rel="stylesheet" href="/flags/flags.css"/>
+    <style>.nav-link {color: blue}</style>
+    <title>GHOSTS</title>
+    @await RenderSectionAsync("header", false)
+</head>
+<body>
+<header class="p-3 mb-3 border-bottom">
+    <div class="container">
+        <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+            <a href="@Url.Action("Index", "Home", new { area = "" })?" class="me-lg-3 nav-link">GHOSTS</a>
+
+            <ul class="nav">
+                <li class="nav-item">
+                    <a href="/swagger" class="nav-link" target="_blank">API Swagger</a>
+                </li>
+                <li class="nav-item">
+                    @Html.ActionLink("Activities", "Index", "ViewActivities", new { Area = "Animator" }, new { @class = "nav-link" })
+                </li>
+                <li class="nav-item">
+                    @Html.ActionLink("Animations", "Index", "Animations", new { Area = "Animator" }, new { @class = "nav-link" })
+                </li>
+                <li class="nav-item">
+                    @Html.ActionLink("Relationships", "Index", "ViewRelationships", new { Area = "Animator" }, new { @class = "nav-link" })
+                </li>
+                <li class="nav-item">
+                    @Html.ActionLink("Social Graph", "Index", "ViewSocial", new { Area = "Animator" }, new { @class = "nav-link" })
+                </li>
+            </ul>
+        </div>
+    </div>
+</header>
+<div class="container">
+    @RenderBody()
+</div>
+<footer class="py-3 my-4 border-top text-muted small">
+    <div class="container text-center text-md-start">
+        <div class="row justify-content-between">
+            <div class="col-md-3 col-lg-4 col-xl-3">
+                <p>CERT © 2017. All rights reserved.</p>
+            </div>
+            <div class="col-md-4 col-lg-3 col-xl-3 mb-md-0 text-md-end">
+                <p>
+                    GHOSTS v<span>@ApplicationDetails.Version</span> (@ApplicationDetails.VersionFile) | <a href="https://github.com/cmu-sei/GHOSTS" target="_blank" class="link-secondary">GitHub</a> | <a href="https://cmu-sei.github.io/GHOSTS/" target="_blank" class="link-secondary">Docs</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+@await RenderSectionAsync("scripts", false)
+</body>
+</html>

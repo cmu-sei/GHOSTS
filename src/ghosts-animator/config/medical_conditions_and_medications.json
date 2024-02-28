@@ -1,0 +1,1809 @@
+[
+  {
+    "Condition": "Acid Indigestion and Upset Stomach",
+    "Medications": [
+      "OTC Antacid",
+      "Bismuth Subsalicylate",
+      "Histamine H2 Receptor Antagonist",
+      "Hyoscyamine",
+      "SimethiconeSodium Bicarbonate"
+    ]
+  },
+  {
+    "Condition": "Actinic Keratoses",
+    "Medications": [
+      "Fluorouracil",
+      "Masoprocol"
+    ]
+  },
+  {
+    "Condition": "Addison's Disease",
+    "Medications": [
+      "Adrenocorticoid"
+    ]
+  },
+  {
+    "Condition": "AIDS and HIV Infection",
+    "Medications": [
+      "Fusion Inhibitors",
+      "Non-Nucleoside Reverse Transcriptase Inhibitor",
+      "Nucleoside Reverse Transcriptase Inhibitor",
+      "Nucleotide Reverse Transcriptase Inhibitor",
+      "Protease Inhibitor"
+    ]
+  },
+  {
+    "Condition": "Alcohol Withdrawal",
+    "Medications": [
+      "Benzodiazepines",
+      "Beta Adrenergic Blocking Agents",
+      "Carbamazepine",
+      "Disulfiram",
+      "Hydroxyzine",
+      "Lithium",
+      "Naltrexone",
+      "Thiamine",
+      "Phenobarbital"
+    ]
+  },
+  {
+    "Condition": "Allergies and Allergic Reactions",
+    "Medications": [
+      "Adrenocorticoids (Nasal Inhalation, Oral Inhalation, Systemic)",
+      "Antihistamine",
+      "Azelastine",
+      "Cromolyn",
+      "Decongestants (Ophthalmic)",
+      "Ephedrine",
+      "Hydroxyzine"
+    ]
+  },
+  {
+    "Condition": "Alopecia",
+    "Medications": [
+      "Dutasteride",
+      "Finasteride",
+      "Minoxidil"
+    ]
+  },
+  {
+    "Condition": "Altitube Illness",
+    "Medications": [
+      "Carbonic Anhydrase Inhibitors"
+    ]
+  },
+  {
+    "Condition": "Alzheimer's Disease",
+    "Medications": [
+      "Cholinesterase Inhibitors",
+      "Memantine"
+    ]
+  },
+  {
+    "Condition": "Amebiasis",
+    "Medications": [
+      "Chloroquine",
+      "Iodoquinol",
+      "Metronidazole"
+    ]
+  },
+  {
+    "Condition": "Amenorrhea",
+    "Medications": [
+      "Bromocriptine",
+      "Progestins"
+    ]
+  },
+  {
+    "Condition": "Amyotrophic Lateral Sclerosis (ALS)",
+    "Medications": [
+      "Riluzole"
+    ]
+  },
+  {
+    "Condition": "Anemia",
+    "Medications": [
+      "Adrenocorticoids (Systemic)",
+      "Androgens",
+      "Cyclosporine",
+      "Folic Acid",
+      "Iron Supplements",
+      "Leucovorin",
+      "Vitamin B-12"
+    ]
+  },
+  {
+    "Condition": "Angina",
+    "Medications": [
+      "Antiplatelet Agents",
+      "Beta Adrenergic Blocking Agents",
+      "Calcium Channel Blockers",
+      "Ranolazine",
+      "Nitrates"
+    ]
+  },
+  {
+    "Condition": "Anorexia",
+    "Medications": [
+      "Calcium Carbonate",
+      "Calcium Gluconate",
+      "Potassium Chloride",
+      "Antidepressants, Tricyclic",
+      "Progestins",
+      "Fluoxetine"
+    ]
+  },
+  {
+    "Condition": "Anxiety",
+    "Medications": [
+      "Antidepressants (Tricyclic, SSRIs, SNRIs)",
+      "Barbiturates",
+      "Benzodiazepines",
+      "Beta Adrenergic Blocking Agents",
+      "Buspirone",
+      "Ergotamine, Beladonna and Phenobarbital",
+      "Haloperidol",
+      "Hydroxyzine",
+      "Loxapine",
+      "Meprobamate",
+      "Phenothiazines",
+      "Thiothixene"
+    ]
+  },
+  {
+    "Condition": "Appetite Stimulant",
+    "Medications": [
+      "Antihistamines",
+      "Dronabinol",
+      "Megestrol"
+    ]
+  },
+  {
+    "Condition": "Arthritis (Osteoarthritis, Rheumatoid Arthritis)",
+    "Medications": [
+      "Acetaminophen",
+      "Adrenocorticoids (Oral Inhalation, Systemic)",
+      "Anakinra",
+      "Antihistamines, Non-sedating",
+      "COX-2 Inhibitors",
+      "NSAIDs",
+      "Aspirin",
+      "Azathioprine",
+      "Bronchodilators, Adrenergic",
+      "Bronchodilators, Xanthine",
+      "Capsaicin",
+      "Chloroquine",
+      "Cyclosporine",
+      "Gold Compounds",
+      "Hydroxychloroquine",
+      "Leukotriene Modifiers",
+      "Methotrexate",
+      "Tumor Necrosis Factor Blockers"
+    ]
+  },
+  {
+    "Condition": "Asthma",
+    "Medications": [
+      "Adrenocorticoids (Nasal Inhalation, Oral Inhalation, Systemic)",
+      "Bronchodilators, Adrenergic",
+      "Bronchodilators, Xanthine",
+      "Cromolyn",
+      "Ephedrine",
+      "Ipratropium",
+      "Leukotriene Modifiers",
+      "Nedocromil",
+      "Theophylline"
+    ]
+  },
+  {
+    "Condition": "Attention Deficit Hyperactivity Disorder (ADHD)",
+    "Medications": [
+      "Amphetamines",
+      "Atomoxetine",
+      "Dexmethylphenidate",
+      "Methylphenidate",
+      "Pemoline",
+      "Guanfacine",
+      "Clonidine"
+    ]
+  },
+  {
+    "Condition": "Autism",
+    "Medications": [
+      "Haloperidol"
+    ]
+  },
+  {
+    "Condition": "Bacterial Infections",
+    "Medications": [
+      "Acetohydroxamic Acid (AHA)",
+      "Antibiotics See List of Antibiotics"
+    ]
+  },
+  {
+    "Condition": "Benign Prostate Hyperplasia (BPH)",
+    "Medications": [
+      "Alpha Adrenergic Receptor Blockers",
+      "Dutasteride",
+      "Finasteride"
+    ]
+  },
+  {
+    "Condition": "Bipolar Disorder",
+    "Medications": [
+      "Antipsychotics (Quetiapine, Olanzapine, Risperidone, Ziprasidone, Haloperidol)",
+      "Anticonvulsants (Carbamazepine, Divalproex, Valproate Acid)",
+      "Lithium"
+    ]
+  },
+  {
+    "Condition": "Bladder Inflammation",
+    "Medications": [
+      "Dimethyl Sulfoxide"
+    ]
+  },
+  {
+    "Condition": "Bladder Spasms",
+    "Medications": [
+      "Clidinium",
+      "Propantheline",
+      "Oxybutynin"
+    ]
+  },
+  {
+    "Condition": "Bleeding",
+    "Medications": [
+      "Antifibrinolytic Agents",
+      "Vitamin K"
+    ]
+  },
+  {
+    "Condition": "Blood Circulation",
+    "Medications": [
+      "Cyclandelate",
+      "Intermittent Claudication Agents",
+      "Isoxsuprine",
+      "Vitamin E"
+    ]
+  },
+  {
+    "Condition": "Blood Clots",
+    "Medications": [
+      "Anticoagulants (Oral)",
+      "Antiplatelets (Clopidogrel, Dipyridamole, Ticlopidine)",
+      "Aspirin"
+    ]
+  },
+  {
+    "Condition": "Bronchial Spasms",
+    "Medications": [
+      "Anticholinergics",
+      "Bronchodilators, Adrenergic"
+    ]
+  },
+  {
+    "Condition": "Bronchitis",
+    "Medications": [
+      "Bronchodilators, Xanthine",
+      "Dextromethorphan",
+      "Ipratropium",
+      "Cephalosporins",
+      "Fluoroquinolones",
+      "Macrolides",
+      "Sulfonamides",
+      "Tetracyclines"
+    ]
+  },
+  {
+    "Condition": "Bulimia",
+    "Medications": [
+      "Antidepressants, Tricyclic",
+      "Lithium",
+      "Selective Serotonin Reuptake Inhibitors (SSRIs)"
+    ]
+  },
+  {
+    "Condition": "Burns",
+    "Medications": [
+      "Anesthetics (Topical)",
+      "Zinc Supplements",
+      "Silver Sulfadiazine",
+      "Neomycin/Polymyxin B/Bacitracin topical"
+    ]
+  },
+  {
+    "Condition": "Bursitis",
+    "Medications": [
+      "Adrenocorticoids (Systemic)",
+      "NSAIDs",
+      "Aspirin"
+    ]
+  },
+  {
+    "Condition": "Cancer",
+    "Medications": [
+      "Adrenocorticoids (Systemic)",
+      "Aminoglutethimide",
+      "Androgens",
+      "Antiandrogens, Nonsteroidal",
+      "Antifungals, Azoles",
+      "Busulfan",
+      "Capecitabine",
+      "Cholarmbucil",
+      "Cyclophosphamide",
+      "Estramustine",
+      "Estrogens",
+      "Etoposide",
+      "Flutamide",
+      "Hydroxyurea",
+      "Imatinib",
+      "Levamisole",
+      "Lomustine",
+      "Melphalan",
+      "Mercaptopurine",
+      "Methotrexate",
+      "Mitotane",
+      "Paclitaxel",
+      "Procarbazine",
+      "Progestins",
+      "Tamoxifen",
+      "Testolactone",
+      "Thioguanine",
+      "Thyroid Hormones",
+      "Toremifene"
+    ]
+  },
+  {
+    "Condition": "Cancer Of The Skin",
+    "Medications": [
+      "Fluorouracil",
+      "Masoprocol",
+      "Mechlorethamine (Topical)"
+    ]
+  },
+  {
+    "Condition": "Canker Sores (Aphthous Ulcers)",
+    "Medications": [
+      "Amlexanox",
+      "Bioadherent",
+      "Anesthetics (Mucosal-Local)",
+      "Corticosteroids"
+    ]
+  },
+  {
+    "Condition": "Chickenpox",
+    "Medications": [
+      "Acyclovir",
+      "Acetaminophen",
+      "Antihistamines"
+    ]
+  },
+  {
+    "Condition": "Cholesterol, High",
+    "Medications": [
+      "Cholestyramine",
+      "Colestipol",
+      "Ezetimibe",
+      "Gemfibrozil",
+      "HMG-CoA Reductase Inhibitors",
+      "Neomycin (Oral)",
+      "Niacin",
+      "Raloxifene"
+    ]
+  },
+  {
+    "Condition": "Chronic Obstructive Pulmonary Disease (COPD)",
+    "Medications": [
+      "Adrenocorticoids (Systemic)",
+      "Bronchodilators, Adrenergic",
+      "Bronchodilators, Xanthine",
+      "Ipratropium",
+      "Tiotropium"
+    ]
+  },
+  {
+    "Condition": "Cirrhosis",
+    "Medications": [
+      "Colchicine",
+      "Cyclosporine",
+      "Thiamine (Vitamin B-1)"
+    ]
+  },
+  {
+    "Condition": "Colds and Cough",
+    "Medications": [
+      "Acetaminophen",
+      "Anticholinergics",
+      "Antihistamines",
+      "Antihistamines, Non-sedating",
+      "NSAIDs",
+      "Aspirin",
+      "Dextromethorphan",
+      "Ephedrine",
+      "Guaifenesin",
+      "Phenylephrine",
+      "Phenylephrine (Ophthalmic)",
+      "Pseudoephedrine"
+    ]
+  },
+  {
+    "Condition": "Colic",
+    "Medications": [
+      "Hyoscyamine",
+      "Simethicone"
+    ]
+  },
+  {
+    "Condition": "Congestion",
+    "Medications": [
+      "Bronchodilators, Adrenergic",
+      "Ephedrine",
+      "Oxymetazoline",
+      "Phenylephrine",
+      "Pseudoephedrine",
+      "Xylometazoline"
+    ]
+  },
+  {
+    "Condition": "Congestive Heart Failure",
+    "Medications": [
+      "Angiotensin-Converting Enzyme (ACE) Inhibitors",
+      "Digitalis Preparations",
+      "Beta-Adrenergic Blocking Agents",
+      "Beta-Adrenergic Blocking Agents and Thiazide",
+      "Diuretics, Loop",
+      "Diuretics, Potassium-Sparing",
+      "Diuretics, Potassium-Sparing and Hydrochlorothiazide",
+      "Diuretics, Thiazide",
+      "Nitrates"
+    ]
+  },
+  {
+    "Condition": "Conjunctivitis (Pink Eye)",
+    "Medications": [
+      "Antibacterials (Ophthalmic)",
+      "Antivirals (Ophthalmic)"
+    ]
+  },
+  {
+    "Condition": "Conjunctivitis, Seasonal Allergic",
+    "Medications": [
+      "NSAIDs (Ophthalmic)",
+      "Antiallergic Agents (Ophthalmic)"
+    ]
+  },
+  {
+    "Condition": "Constipation",
+    "Medications": [
+      "Laxatives, Bulk-Forming (Psyllium)",
+      "Laxatives, Osmotic (Lactulose)",
+      "Laxatives, Softener/Lubricant",
+      "Laxatives, Stimulant (Senna, Bisacodyl, Cascara Sagrada)",
+      "Lubiprostone, Linaclotide",
+      "Tegaserod"
+    ]
+  },
+  {
+    "Condition": "Contraception (Birth Control)",
+    "Medications": [
+      "Contraceptives, Oral and Skin",
+      "Contraceptives, Vaginal",
+      "Contraceptives, Vaginal (Spermicides)"
+    ]
+  },
+  {
+    "Condition": "Convulsions (Epilepsy, Seizures)",
+    "Medications": [
+      "Anticonvulsants, Hydantoin",
+      "Anticonvulsants, Succinimide",
+      "Barbiturates",
+      "Benzodiazepines",
+      "Carbamazepine",
+      "Divalproex",
+      "Felbamate",
+      "Gabapentin",
+      "Lamotrigine",
+      "Levetiracetam",
+      "Oxcarbazepine",
+      "Primidone",
+      "Topiramate",
+      "Valproic Acid",
+      "Zonisamide"
+    ]
+  },
+  {
+    "Condition": "Corneal Ulcers",
+    "Medications": [
+      "Antibacterials (Ophthalmic)"
+    ]
+  },
+  {
+    "Condition": "Cushing's Disease",
+    "Medications": [
+      "Adrenocorticoids (Systemic)",
+      "Aminoglutethimide",
+      "Antifungals, Azoles",
+      "Metyrapone",
+      "Mitotane",
+      "Trilostane"
+    ]
+  },
+  {
+    "Condition": "Cystitis",
+    "Medications": [
+      "Phenazopyridine",
+      "Sulfonamides and Phenazopyridine",
+      "Nitrofurantoin",
+      "Fosfomycin",
+      "Fluoroquinolones",
+      "Cephalosporins",
+      "Penicillins"
+    ]
+  },
+  {
+    "Condition": "Dandruff",
+    "Medications": [
+      "Antifungals (Topical)",
+      "Antiseborrheics",
+      "Coal Tar"
+    ]
+  },
+  {
+    "Condition": "Dementia",
+    "Medications": [
+      "Buspirone",
+      "Cholinesterase Inhibitors",
+      "Ergoloid Mesylates",
+      "Memantine",
+      "Haloperidol"
+    ]
+  },
+  {
+    "Condition": "Depression",
+    "Medications": [
+      "Antidepressants",
+      "See List of Antidepressants",
+      "Ergoloid Mesylates",
+      "Loxapine",
+      "Maprotiline",
+      "Methylphenidate",
+      "Selegiline"
+    ]
+  },
+  {
+    "Condition": "Dermatitis",
+    "Medications": [
+      "Adrenocorticoids (Systemic)",
+      "Adrenocorticoids (Topical)",
+      "Anesthetics (Topical)",
+      "Antiseborrheics",
+      "Coal Tar",
+      "Colchicine",
+      "Dapsone",
+      "Keratolytics"
+    ]
+  },
+  {
+    "Condition": "Dermatomyositis",
+    "Medications": [
+      "Aminobenzoate Potassium"
+    ]
+  },
+  {
+    "Condition": "Diabetes",
+    "Medications": [
+      "Antidiabetic Agents",
+      "See List of Antidiabetic Agents"
+    ]
+  },
+  {
+    "Condition": "Diarrhea",
+    "Medications": [
+      "Attapulgite",
+      "Bismuth Subsalicylate",
+      "Charcoal Activated",
+      "Difenoxin and Atropine",
+      "Diphenoxylate and Atropine",
+      "Kaolin and Pectin",
+      "Kaolin, Pectin, Belladonna and Opium",
+      "Loperamide",
+      "Nitazoxanide",
+      "Paregoric"
+    ]
+  },
+  {
+    "Condition": "Dietary Supplements",
+    "Medications": [
+      "Calcium Supplements",
+      "Iron Supplements",
+      "Niacin",
+      "Vitamin A",
+      "Vitamin B-12",
+      "Vitamin C",
+      "Vitamin D",
+      "Vitamin E",
+      "Vitamin K"
+    ]
+  },
+  {
+    "Condition": "Digestive Spasms",
+    "Medications": [
+      "Clidinium",
+      "Difenoxin and Atropine",
+      "Dicyclomine",
+      "Hyoscyamine",
+      "Propantheline"
+    ]
+  },
+  {
+    "Condition": "Diverticulitis",
+    "Medications": [
+      "See Antibiotics for Diverticulitis"
+    ]
+  },
+  {
+    "Condition": "Drowsiness",
+    "Medications": [
+      "Caffeine",
+      "Orphenadrine, Aspirin and Caffeine"
+    ]
+  },
+  {
+    "Condition": "Dry Eyes",
+    "Medications": [
+      "Protectant (Ophthalmic)"
+    ]
+  },
+  {
+    "Condition": "Ear Allergies",
+    "Medications": [
+      "Anti-Inflammatory Drugs, Steroidal (Otic)"
+    ]
+  },
+  {
+    "Condition": "Ear Infections (Otitis Media)",
+    "Medications": [
+      "Antibiotics for Otitis Media",
+      "Antibacterials (Otic)",
+      "Anti-Inflammatory Drugs, Steroidal (Otic)",
+      "Antipyrine",
+      "Phenylephrine"
+    ]
+  },
+  {
+    "Condition": "Ear Wax",
+    "Medications": [
+      "Antipyrine and Benzocaine (Otic)"
+    ]
+  },
+  {
+    "Condition": "Eczema",
+    "Medications": [
+      "Adrenocorticoids (Topical)",
+      "Antibacterials, Antifungals (Topical)",
+      "Coal Tar",
+      "Doxepin (Topical)",
+      "Keratolytics"
+    ]
+  },
+  {
+    "Condition": "Emphysema",
+    "Medications": [
+      "Adrenocorticoids (Systemic)",
+      "Bronchodilators, Adrenergic",
+      "Bronchodilators, Xanthine",
+      "Ipratropium",
+      "Tiotropium"
+    ]
+  },
+  {
+    "Condition": "Endometriosis",
+    "Medications": [
+      "Danazol",
+      "Nafarelin",
+      "Goserelin",
+      "Leuprolide",
+      "Oral Contraceptives"
+    ]
+  },
+  {
+    "Condition": "Erectile Dysfunction (Impotence)",
+    "Medications": [
+      "Alprostadil",
+      "Erectile Dysfunction Agents",
+      "Papaverine",
+      "Yohimbe"
+    ]
+  },
+  {
+    "Condition": "Esophagitis",
+    "Medications": [
+      "Histamine H2 Receptor Antagonists",
+      "Metoclopramide",
+      "Proton Pump Inhibitors"
+    ]
+  },
+  {
+    "Condition": "Estrogen Deficiency",
+    "Medications": [
+      "Estrogen"
+    ]
+  },
+  {
+    "Condition": "Eye Allergies",
+    "Medications": [
+      "Antiallergic Agents (Ophthalmic)"
+    ]
+  },
+  {
+    "Condition": "Eye Conditions",
+    "Medications": [
+      "Antibacterials (Ophthalmic)",
+      "Cromolyn",
+      "Cycloplegic, Mydriatic (Ophthalmic)",
+      "Cyclopentolate (Ophthalmic)",
+      "Decongestants (Ophthalmic)",
+      "Natamycin (Ophthalmic)",
+      "Phenylephrine (Ophthalmic)"
+    ]
+  },
+  {
+    "Condition": "Fatigue",
+    "Medications": [
+      "Caffeine"
+    ]
+  },
+  {
+    "Condition": "Fever",
+    "Medications": [
+      "Acetaminophen",
+      "NSAIDs",
+      "Aspirin",
+      "Barbiturates, Aspirin and Codeine",
+      "Chlorzoxazone and Acetaminophen",
+      "Narcotic Analgesics and Aspirin",
+      "Salicylates"
+    ]
+  },
+  {
+    "Condition": "Fibrocystic Breast Disease",
+    "Medications": [
+      "Danazol",
+      "Vitamin E"
+    ]
+  },
+  {
+    "Condition": "Fluid Retention (Edema, Swelling)",
+    "Medications": [
+      "Angiotensin Converting Enzyme (ACE) Inhibitors and Hydrochlorothiazide",
+      "Carbonic Anhydrase Inhibitors",
+      "Clonidine and Chlorthalidone",
+      "Diuretics, Loop",
+      "Diuretics, Potassium-Sparing",
+      "Diuretics, Thiazide",
+      "Guanethidine and Hydrochlorothiazide",
+      "Hydralazine and Hydrochlorothiazide",
+      "Indapamide",
+      "Methyldopa and Thiazide Diuretics",
+      "Reserpine, Hydralazine and Hydrochlorothiazide"
+    ]
+  },
+  {
+    "Condition": "Fungal Infections (Ringworm)",
+    "Medications": [
+      "Antifungals, Azoles",
+      "Antifungals, Topical",
+      "Griseofulvin",
+      "Nystatin"
+    ]
+  },
+  {
+    "Condition": "Gallstones",
+    "Medications": [
+      "Ursodiol"
+    ]
+  },
+  {
+    "Condition": "Gastroesophageal Reflux",
+    "Medications": [
+      "Histamine H2 Receptor Antagonists",
+      "Proton Pump Inhibitors",
+      "Sucralfate"
+    ]
+  },
+  {
+    "Condition": "Genital Warts (Condyloma Acuminatum)",
+    "Medications": [
+      "Podofilox",
+      "Imiquimod",
+      "Papillomavirus Vaccines"
+    ]
+  },
+  {
+    "Condition": "Giardiasis",
+    "Medications": [
+      "Furazolidone, Quinacrine, Metronidazole, Nitazoxanide, Tinidazole"
+    ]
+  },
+  {
+    "Condition": "Gingivitis and Gum Disease",
+    "Medications": [
+      "Chlorhexidine",
+      "Erythromycins",
+      "Penicillins",
+      "Tetracyclines"
+    ]
+  },
+  {
+    "Condition": "Glaucoma",
+    "Medications": [
+      "Antiglaucoma, Adrenergic Antagonists",
+      "Antiglaucoma, Anticholinesterases",
+      "Antiglaucoma, Beta Blockers",
+      "Antiglaucoma, Carbonic Anhydrase Inhibitors",
+      "Antiglaucoma, Cholinergic Agonists",
+      "Antiglaucoma, Prostaglandins",
+      "Carbonic Anhydrase Inhibitors"
+    ]
+  },
+  {
+    "Condition": "Gonorrhea",
+    "Medications": [
+      "Cephalosporins",
+      "Erythromycins",
+      "Fluoroquinolones",
+      "Macrolide Antibiotics",
+      "Penicillins",
+      "Tetracyclines"
+    ]
+  },
+  {
+    "Condition": "Gout",
+    "Medications": [
+      "Adrenocorticoids (Systemic)",
+      "Allopurinol",
+      "NSAIDs",
+      "Colchicine",
+      "Meloxicam",
+      "Probenecid",
+      "Probenecid and Colchicine",
+      "Sulfinpyrazone"
+    ]
+  },
+  {
+    "Condition": "Headache (Cluster, Migraine, Sinus, Tension, Vascular)",
+    "Medications": [
+      "Acetaminophen, Fioricet",
+      "Antidepressants, Tricyclic",
+      "Antihistamines",
+      "NSAIDs",
+      "Aspirin",
+      "Barbiturates, Aspirin and Codeine",
+      "Beta Adrenergic Blocking Agents",
+      "Buspirone",
+      "Butorphanol",
+      "Caffeine",
+      "Calcium Channel Blockers",
+      "Clonidine",
+      "Divalproex",
+      "Ergotamine",
+      "Ergotamine, Belladonna and Phenobarbital",
+      "Isometheptene, Dichloralphenazone and Acetaminophen",
+      "Lithium",
+      "Methysergide",
+      "Monoamine Oxidase Inhibitors",
+      "Triptans"
+    ]
+  },
+  {
+    "Condition": "Heart Rhythm Disorders (Irregular Heartbeat)",
+    "Medications": [
+      "Amiodarone",
+      "Beta-Adrenergic Blocking Agents",
+      "Calcium Channel Blockers",
+      "Digitalis Preparations",
+      "Disopyramide",
+      "Dofetilide",
+      "Flecainide Acetate",
+      "Mexiletine",
+      "Moricizine",
+      "Procainamide",
+      "Propafenone",
+      "Quinidine",
+      "Tocainide"
+    ]
+  },
+  {
+    "Condition": "Hemorrhoids",
+    "Medications": [
+      "Adrenocorticoids (Topical)",
+      "Anesthetics (Rectal)"
+    ]
+  },
+  {
+    "Condition": "Herpes",
+    "Medications": [
+      "Antivirals (Topical)",
+      "Antivirals for Herpes Virus"
+    ]
+  },
+  {
+    "Condition": "Hives (Urticaria)",
+    "Medications": [
+      "Antihistamines",
+      "Antihistamines, Non-sedating",
+      "Antihistamines, Phenothiazine-Derivative",
+      "Hydroxyzine"
+    ]
+  },
+  {
+    "Condition": "Huntington's",
+    "Medications": [
+      "Haloperidol"
+    ]
+  },
+  {
+    "Condition": "Hypercalcemia",
+    "Medications": [
+      "Colesevelam",
+      "Colestipol",
+      "Dextrothyroxine",
+      "HMG-CoA Reductase Inhibitors"
+    ]
+  },
+  {
+    "Condition": "Hyperglycemia",
+    "Medications": [
+      "Acarbose",
+      "Metformin"
+    ]
+  },
+  {
+    "Condition": "Hypertension (High Blood Pressure)",
+    "Medications": [
+      "See High Blood Pressure Medications List"
+    ]
+  },
+  {
+    "Condition": "Hyperthyroidism",
+    "Medications": [
+      "Antithyroid Drugs"
+    ]
+  },
+  {
+    "Condition": "Hypertriglyceridemia",
+    "Medications": [
+      "Fibrates",
+      "Gemfibrozil"
+    ]
+  },
+  {
+    "Condition": "Hypoglycemia",
+    "Medications": [
+      "Glucagon",
+      "Miglitol"
+    ]
+  },
+  {
+    "Condition": "Hypothyroidism",
+    "Medications": [
+      "Dextrothyroxine",
+      "Thyroid Hormones"
+    ]
+  },
+  {
+    "Condition": "Incontinence",
+    "Medications": [
+      "Tolterodine"
+    ]
+  },
+  {
+    "Condition": "Infertility",
+    "Medications": [
+      "Bromocriptine",
+      "Clomiphene",
+      "Danazol",
+      "Progestins"
+    ]
+  },
+  {
+    "Condition": "Inflammation",
+    "Medications": [
+      "Acetaminophen and Salicylates",
+      "NSAIDs",
+      "COX-2 Inhibitors",
+      "Aspirin",
+      "Mesalamine",
+      "Narcotic Analgesics and Aspirin",
+      "Salicylates"
+    ]
+  },
+  {
+    "Condition": "Inflammatory Bowel Disease (Colitis, Crohn's Disease)",
+    "Medications": [
+      "Adrenocorticoids (Systemic)",
+      "Cyclosporine",
+      "Mesalamine",
+      "Metronidazole",
+      "Olsalazine"
+    ]
+  },
+  {
+    "Condition": "Influenza (Flu)",
+    "Medications": [
+      "Antivirals for Influenza",
+      "Antivirals for Influenza, Neuraminidase Inhibitors",
+      "Ribavirin"
+    ]
+  },
+  {
+    "Condition": "Insomnia",
+    "Medications": [
+      "Belladonna Alkaloids and Barbiturates",
+      "Chloral Hydrate",
+      "Melatonin",
+      "Meprobamate",
+      "See Insomnia Medications List"
+    ]
+  },
+  {
+    "Condition": "Intermittent Claudication",
+    "Medications": [
+      "Intermittent Claudication Agents"
+    ]
+  },
+  {
+    "Condition": "Irritable Bowel Syndrome",
+    "Medications": [
+      "Tegaserod"
+    ]
+  },
+  {
+    "Condition": "Joint Pain",
+    "Medications": [
+      "NSAIDs",
+      "COX-2 Inhibitors",
+      "Aspirin",
+      "Probenecid and Colchicine"
+    ]
+  },
+  {
+    "Condition": "Kidney Stones",
+    "Medications": [
+      "Allopurinol",
+      "Cellulose Sodium Phosphate",
+      "Citrates",
+      "Diuretics, Thiazide",
+      "Penicillamine",
+      "Sodium Bicarbonate",
+      "Tiopronin"
+    ]
+  },
+  {
+    "Condition": "Labyrinthitis",
+    "Medications": [
+      "Antihistamines, Phenothiazine-Derivatives",
+      "Benzodiazepines",
+      "Meclizine"
+    ]
+  },
+  {
+    "Condition": "Leg Pain or Cramps",
+    "Medications": [
+      "Cyclandelate",
+      "Intermittent Claudication Agents",
+      "Orphenadrine",
+      "Pentoxifylline",
+      "Quinine"
+    ]
+  },
+  {
+    "Condition": "Leukemia",
+    "Medications": [
+      "Imatinib",
+      "Thioguanine"
+    ]
+  },
+  {
+    "Condition": "Lice",
+    "Medications": [
+      "Pediculicides"
+    ]
+  },
+  {
+    "Condition": "Lupus (Skin and Systemic)",
+    "Medications": [
+      "NSAIDs",
+      "COX-2 Inhibitors",
+      "Adrenocorticoids (Systemic)",
+      "Adrenocorticoids (Topical)",
+      "Hydroxychloroquine",
+      "Methotrexate",
+      "Quinacrine"
+    ]
+  },
+  {
+    "Condition": "Lyme Disease",
+    "Medications": [
+      "Cephalosporins",
+      "Erythromycins",
+      "Macrolide Antibiotics",
+      "Penicillins",
+      "Tetracyclines"
+    ]
+  },
+  {
+    "Condition": "Malaria",
+    "Medications": [
+      "Antimalarial",
+      "Atovaquone",
+      "Chloroquine",
+      "Hydroxychloroquine",
+      "Primaquine",
+      "Proguanil",
+      "Quinidine",
+      "Quinine",
+      "Sulfadoxine and Pyrimethamine"
+    ]
+  },
+  {
+    "Condition": "Male Hormone Deficiency",
+    "Medications": [
+      "Androgens"
+    ]
+  },
+  {
+    "Condition": "Melanoma",
+    "Medications": [
+      "Hydroxyurea",
+      "Levamisole",
+      "Melphalan"
+    ]
+  },
+  {
+    "Condition": "Meniere's Disease",
+    "Medications": [
+      "Antihistamines",
+      "Benzodiazepines",
+      "Meclizine",
+      "Scopolamine (Hyoscine)"
+    ]
+  },
+  {
+    "Condition": "Menopause",
+    "Medications": [
+      "Estrogens",
+      "Progestins"
+    ]
+  },
+  {
+    "Condition": "Menstruation, Excessive (Menorrhagia)",
+    "Medications": [
+      "Contraceptives, Oral",
+      "Danazol",
+      "Estrogens",
+      "Progestins"
+    ]
+  },
+  {
+    "Condition": "Mental and Emotional Disturbances",
+    "Medications": [
+      "Loxapine",
+      "Molindone",
+      "Rauwolfia Alkaloids",
+      "Risperidone"
+    ]
+  },
+  {
+    "Condition": "Multiple Sclerosis",
+    "Medications": [
+      "Adrenocorticoids (Systemic)",
+      "Baclofen",
+      "Tizanidine"
+    ]
+  },
+  {
+    "Condition": "Muscle Cramp, Spasm, Strain",
+    "Medications": [
+      "Baclofen",
+      "Chlorzoxazone and Acetaminophen",
+      "Dantrolene",
+      "Muscle Relaxants, Skeletal (Cyclobenzaprine, Carisoprodol, Orphenadrine, Tizanidine)",
+      "Aspirin and Caffeine",
+      "Quinine"
+    ]
+  },
+  {
+    "Condition": "Myasthenia Gravis",
+    "Medications": [
+      "Adrenocorticoids (Systemic)",
+      "Antimyasthenics",
+      "Azathioprine",
+      "Cyclosporine"
+    ]
+  },
+  {
+    "Condition": "Narcolepsy",
+    "Medications": [
+      "Amphetamines",
+      "Methylphenidate",
+      "Modafinil"
+    ]
+  },
+  {
+    "Condition": "Narcotic Withdrawal",
+    "Medications": [
+      "Buprenorphine and Naloxone"
+    ]
+  },
+  {
+    "Condition": "Nasal Allergy",
+    "Medications": [
+      "Adrenocorticoids (Nasal Inhalation)"
+    ]
+  },
+  {
+    "Condition": "Nausea and Vomiting",
+    "Medications": [
+      "Antihistamines Phenothiazine-Derivative",
+      "Bismuth Subsalicylate",
+      "Diphenidol",
+      "Dronabinol",
+      "Hydroxyzine",
+      "Metoclopramide",
+      "Nabilone",
+      "Phenothiazines",
+      "Scopolamine",
+      "Trimethobenzamide"
+    ]
+  },
+  {
+    "Condition": "Neural Tube Defects (prevention)",
+    "Medications": [
+      "Folic Acid"
+    ]
+  },
+  {
+    "Condition": "Obesity",
+    "Medications": [
+      "Appetite Suppressants",
+      "Lorcaserin",
+      "Phentermine",
+      "Orlistat",
+      "Liraglutide",
+      "Bupropion and Naltrexone"
+    ]
+  },
+  {
+    "Condition": "Obsessive Compulsive Disorder",
+    "Medications": [
+      "Antidepressants, Tricyclic",
+      "Selective Serotonin Reuptake Inhibitors (SSRIs)"
+    ]
+  },
+  {
+    "Condition": "Ocular Hypertension",
+    "Medications": [
+      "Beta Adrenergic Blocking Agents (Ophthalmic)",
+      "Dorzolamide"
+    ]
+  },
+  {
+    "Condition": "Osteoporosis",
+    "Medications": [
+      "Alendronate",
+      "Bone Formation Agents",
+      "Calcitonin",
+      "Calcium Supplements",
+      "Estrogens",
+      "Raloxifene",
+      "Sodium Fluoride",
+      "Vitamin D"
+    ]
+  },
+  {
+    "Condition": "Overactive Bladder",
+    "Medications": [
+      "Tolterodine, Oxybutynin, Trospium, Darifenacin, Solifenacin",
+      "TCA (Imipramine, Doxepin)",
+      "Mirabegron"
+    ]
+  },
+  {
+    "Condition": "Overdose",
+    "Medications": [
+      "Ipecac"
+    ]
+  },
+  {
+    "Condition": "Paget's Disease",
+    "Medications": [
+      "Alendronate",
+      "Colchicine",
+      "Etidronate"
+    ]
+  },
+  {
+    "Condition": "Pain",
+    "Medications": [
+      "See Pain Medications List",
+      "Adjuvant Analgesics"
+    ]
+  },
+  {
+    "Condition": "Panic Disorder",
+    "Medications": [
+      "Antidepressants, Tricyclic",
+      "Benzodiazepines",
+      "Monoamine Oxidase Inhibitors"
+    ]
+  },
+  {
+    "Condition": "Parasites",
+    "Medications": [
+      "Anthelmintics",
+      "Pentamidine"
+    ]
+  },
+  {
+    "Condition": "Parkinson's Disease",
+    "Medications": [
+      "Antidyskinetics",
+      "Antihistamines",
+      "Antivirals for Influenza",
+      "Bromocriptine",
+      "Carbidopa and Levodopa",
+      "Levodopa",
+      "Orphenadrine",
+      "Pergolide",
+      "Selegiline",
+      "Tolcapone"
+    ]
+  },
+  {
+    "Condition": "Parkinson's Tremors",
+    "Medications": [
+      "Antihistamines",
+      "Niacin",
+      "Pellagra"
+    ]
+  },
+  {
+    "Condition": "Peyronie's Disease",
+    "Medications": [
+      "Aminobenzoate Potassium"
+    ]
+  },
+  {
+    "Condition": "Poisoning",
+    "Medications": [
+      "Charcoal Activated",
+      "Ipecac"
+    ]
+  },
+  {
+    "Condition": "Potassium Deficiency",
+    "Medications": [
+      "Potassium Supplements"
+    ]
+  },
+  {
+    "Condition": "Premature Labor",
+    "Medications": [
+      "Isoxsuprine",
+      "Ritodrine"
+    ]
+  },
+  {
+    "Condition": "Premenstrual Syndrome (PMS)",
+    "Medications": [
+      "Antidepressants, Tricyclic",
+      "NSAIDs",
+      "Buspirone",
+      "Calcium Supplements",
+      "Contraceptives, Oral and Skin",
+      "Danazol",
+      "Pyridoxine (Vitamin B-6)",
+      "Selective Serotonin Reuptake Inhibitors (SSRIs)",
+      "Vitamin E"
+    ]
+  },
+  {
+    "Condition": "Pressure Sores",
+    "Medications": [
+      "Benzoyl Peroxide"
+    ]
+  },
+  {
+    "Condition": "Psoriasis",
+    "Medications": [
+      "Adrenocorticoids (Topical)",
+      "Anthralin",
+      "Biologics for Psoriasis",
+      "Calcipotriene",
+      "Coal Tar",
+      "Cyclosporine",
+      "Keratolytics",
+      "Methotrexate",
+      "Psoralens",
+      "Retinoids (Oral)",
+      "Retinoids (Topical)"
+    ]
+  },
+  {
+    "Condition": "Psychosis",
+    "Medications": [
+      "Thiothixene"
+    ]
+  },
+  {
+    "Condition": "Psychotic Disorders",
+    "Medications": [
+      "Aripiprazole",
+      "Carbamazepine",
+      "Clozapine",
+      "Haloperidol",
+      "Loxapine",
+      "Molindone",
+      "Olanzapine",
+      "Phenothiazines",
+      "Quetiapine",
+      "Risperidone",
+      "Thiothixene",
+      "Ziprasidone"
+    ]
+  },
+  {
+    "Condition": "Rectal Fissures",
+    "Medications": [
+      "Anesthetics (Rectal)"
+    ]
+  },
+  {
+    "Condition": "Respiratory Syncytial Virus (RSV)",
+    "Medications": [
+      "Ribavirin"
+    ]
+  },
+  {
+    "Condition": "Rickets",
+    "Medications": [
+      "Vitamin D"
+    ]
+  },
+  {
+    "Condition": "Rosacea",
+    "Medications": [
+      "Antibacterials (Topical)",
+      "Metronidazole",
+      "Azelaic Acid",
+      "Tetracyclines"
+    ]
+  },
+  {
+    "Condition": "Scabies",
+    "Medications": [
+      "Pediculicides"
+    ]
+  },
+  {
+    "Condition": "Schizophrenia",
+    "Medications": [
+      "Aripiprazole",
+      "Carbamazepine",
+      "Clozapine",
+      "Haloperidol",
+      "Molindone",
+      "Olanzapine",
+      "Phenothiazines",
+      "Quetiapine",
+      "Risperidone"
+    ]
+  },
+  {
+    "Condition": "Scleroderma",
+    "Medications": [
+      "Aminobenzoate Potassium"
+    ]
+  },
+  {
+    "Condition": "Shingles",
+    "Medications": [
+      "Antivirals (Topical)",
+      "Antivirals for Herpes Virus",
+      "Capsaicin"
+    ]
+  },
+  {
+    "Condition": "Sickle Cell Disease",
+    "Medications": [
+      "Hydroxyurea"
+    ]
+  },
+  {
+    "Condition": "Sinusitis",
+    "Medications": [
+      "Cephalosporins",
+      "Macrolide Antibiotics",
+      "Penicillins",
+      "Penicillins and Beta Lactamase Inhibitors",
+      "Sulfonamides",
+      "Tetracyclines",
+      "Trimethoprim",
+      "Xylometazoline"
+    ]
+  },
+  {
+    "Condition": "Skin Disorders (Rashes)",
+    "Medications": [
+      "Antibacterials (Topical)",
+      "Antibacterials, Antifungals (Topical)",
+      "Anesthetics (Topical)",
+      "Cyclophosphamide",
+      "Isotretinoin",
+      "Neomycin (Topical)",
+      "Retinoids (Topical)"
+    ]
+  },
+  {
+    "Condition": "Skin Lines and Wrinkles",
+    "Medications": [
+      "Botulinum Toxin (Type A)"
+    ]
+  },
+  {
+    "Condition": "Sleep Apnea",
+    "Medications": [
+      "Antidepressants, Tricyclic",
+      "Modafinil",
+      "Armodafinil",
+      "Progestins",
+      "Theophylline"
+    ]
+  },
+  {
+    "Condition": "Smoking Cessation",
+    "Medications": [
+      "Varenicline",
+      "Bupropion",
+      "Clonidine",
+      "Nicotine Transdermal Systems"
+    ]
+  },
+  {
+    "Condition": "Sore Throat",
+    "Medications": [
+      "Anesthetics (Mucosal-Local)",
+      "Medicated Lozenges, Sprays, Gargles"
+    ]
+  },
+  {
+    "Condition": "Stroke Prevention",
+    "Medications": [
+      "Platelet Inhibitors"
+    ]
+  },
+  {
+    "Condition": "Sunburn",
+    "Medications": [
+      "Adrenocorticoids (Topical)",
+      "Anesthetics (Topical)"
+    ]
+  },
+  {
+    "Condition": "Tonsillitis",
+    "Medications": [
+      "Cephalosporins",
+      "Macrolide Antibiotics"
+    ]
+  },
+  {
+    "Condition": "Tourette's Syndrome",
+    "Medications": [
+      "Antidyskinetics",
+      "Haloperidol"
+    ]
+  },
+  {
+    "Condition": "Toxoplasmosis",
+    "Medications": [
+      "Pyrimethamine",
+      "Leucovorin",
+      "Atovaquone, Dapsone"
+    ]
+  },
+  {
+    "Condition": "Transplantation, Organ (Antirejection)",
+    "Medications": [
+      "Azathioprine",
+      "Cyclosporine",
+      "Immunosuppressive Agents"
+    ]
+  },
+  {
+    "Condition": "Tremors",
+    "Medications": [
+      "Benzodiazepines",
+      "Beta-Adrenergic Blocking Agents"
+    ]
+  },
+  {
+    "Condition": "Trigeminal Neuralgia",
+    "Medications": [
+      "Baclofen",
+      "Carbamazepine",
+      "Lamotrigine"
+    ]
+  },
+  {
+    "Condition": "Tuberculosis",
+    "Medications": [
+      "Cycloserine",
+      "Ethionamide",
+      "Isoniazid",
+      "Rifamycins"
+    ]
+  },
+  {
+    "Condition": "Ulcers",
+    "Medications": [
+      "Antacids",
+      "Anticholinergics",
+      "Bismuth Subsalicylate",
+      "Glycopyrrolate",
+      "Histamine H2 Receptor Antagonists",
+      "Metronidazole",
+      "Proton Pump Inhibitors",
+      "Sodium Bicarbonate",
+      "Sucralfate",
+      "Tetracyclines"
+    ]
+  },
+  {
+    "Condition": "Ulcerative Colitis",
+    "Medications": [
+      "Olsalazine",
+      "Sulfasalazine"
+    ]
+  },
+  {
+    "Condition": "Urethra Spasms",
+    "Medications": [
+      "Clidinium",
+      "Propantheline"
+    ]
+  },
+  {
+    "Condition": "Urethritis",
+    "Medications": [
+      "Erythromycins",
+      "Fluoroquinolones",
+      "Macrolide Antibiotics",
+      "Phenazopyridine",
+      "Sulfonamides and Phenazopyridine",
+      "Tetracyclines"
+    ]
+  },
+  {
+    "Condition": "Urinary Frequency",
+    "Medications": [
+      "Oxybutynin",
+      "Tolterodine"
+    ]
+  },
+  {
+    "Condition": "Urinary Retention",
+    "Medications": [
+      "Antimyasthenics",
+      "Bethanechol"
+    ]
+  },
+  {
+    "Condition": "Urinary Tract Infection",
+    "Medications": [
+      "Acetohydroxamic Acid",
+      "Atropine, Hyoscyamine, Methenamine",
+      "Cephalosporins",
+      "Cinoxacin",
+      "Cycloserine",
+      "Flavoxate",
+      "Fluoroquinolones",
+      "Loracarbef",
+      "Methenamine",
+      "Penicillins",
+      "Penicillins and Beta Lactamase Inhibitors",
+      "Phenazopyridine",
+      "Sulfonamides",
+      "Trimethoprim",
+      "Tetracyclines"
+    ]
+  },
+  {
+    "Condition": "Urine Acidity",
+    "Medications": [
+      "Citrates",
+      "Vitamin C"
+    ]
+  },
+  {
+    "Condition": "Uveitis",
+    "Medications": [
+      "Anti-Inflammatory Drugs, Steroidal (Ophthalmic)"
+    ]
+  },
+  {
+    "Condition": "Vaginal Infections or Irritation",
+    "Medications": [
+      "Clindamycin",
+      "Estrogens",
+      "Metronidazole",
+      "Progestins"
+    ]
+  },
+  {
+    "Condition": "Vaginal Yeast Infections",
+    "Medications": [
+      "Antifungals (Vaginal)"
+    ]
+  },
+  {
+    "Condition": "Vertigo",
+    "Medications": [
+      "Meclizine",
+      "Niacin"
+    ]
+  },
+  {
+    "Condition": "Virus Infections Of The Eye",
+    "Medications": [
+      "Antivirals (Ophthalmic)"
+    ]
+  },
+  {
+    "Condition": "Vitamin Deficiency",
+    "Medications": [
+      "Pantothenic Acid",
+      "Riboflavin",
+      "Vitamin A",
+      "Vitamin B-12",
+      "Vitamin C",
+      "Vitamin D",
+      "Vitamin E",
+      "Vitamin K"
+    ]
+  },
+  {
+    "Condition": "Vitiligo",
+    "Medications": [
+      "Psoralens (Methoxsalen)",
+      "Corticosteroids",
+      "Tacrolimus"
+    ]
+  },
+  {
+    "Condition": "Warts",
+    "Medications": [
+      "Keratolytics",
+      "Retinoids (Topical)"
+    ]
+  },
+  {
+    "Condition": "Wilson's Disease",
+    "Medications": [
+      "Penicillamine",
+      "Zinc Supplements"
+    ]
+  },
+  {
+    "Condition": "Worms",
+    "Medications": [
+      "Anthelmintics"
+    ]
+  },
+  {
+    "Condition": "Zinc Deficiency",
+    "Medications": [
+      "Zinc Supplements"
+    ]
+  }
+]

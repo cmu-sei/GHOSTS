@@ -63,7 +63,7 @@ namespace Ghosts.Api.Services
 
                 log.Trace("Ending sync loop");
 
-                await Task.Delay(new TimeSpan(0, 0, Program.ClientConfig.QueueSyncDelayInSeconds));
+                await Task.Delay(new TimeSpan(0, 0, Program.ApplicationSettings.QueueSyncDelayInSeconds));
             }
         }
 

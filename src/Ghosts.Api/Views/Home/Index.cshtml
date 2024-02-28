@@ -1,0 +1,35 @@
+<div class="row">
+    <div class="col-sm-6">
+        <img src="/img/ghosts.png" alt="ghosts logo" style="width:150px"/>
+        <p>Welcome to GHOSTS.</p>
+        <p>GHOSTS clients simulates what anyone might do at a computer, creating documents, browsing websites, 
+            and downloading files. Plus, GHOSTS drives all sorts of popular applications on many versions of 
+            Windows and Linux machines. Whether you're a friendly administrator or a powerful cyber 
+            adversary, GHOSTS can replicate that agent's expected behavior.</p>
+    </div>
+    <div class="col-sm-1"></div>
+    <div class="col-sm-5">
+        <div style="height:30px"></div>
+        <p>Current server status:</p>
+        <pre style="border:1px solid grey; padding:20px" id="status"></pre>
+    </div>
+</div>
+
+@section scripts
+{
+    <script>
+    fetch('test') // Replace with your target URL
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json();
+          })
+          .then(data => {
+            console.log(data); // For debugging purposes: see the data in the console
+            document.getElementById('status').textContent = JSON.stringify(data, null, 2);
+          })
+          .catch(error => console.error('There was a problem with your fetch operation:', error));
+
+    </script>
+}

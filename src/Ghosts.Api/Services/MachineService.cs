@@ -33,7 +33,7 @@ namespace Ghosts.Api.Services
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
         private readonly ApplicationDbContext _context;
-        private readonly int _lookBack = Program.ClientConfig.LookbackRecords;
+        private readonly int _lookBack = Program.ApplicationSettings.LookbackRecords;
 
         public MachineService(ApplicationDbContext context)
         {
@@ -93,7 +93,7 @@ namespace Ghosts.Api.Services
 
         private async Task<Machine> FindByValue(Machine machine, CancellationToken ct)
         {
-            if (string.IsNullOrEmpty(Program.ClientConfig.MatchMachinesBy))
+            if (string.IsNullOrEmpty(Program.ApplicationSettings.MatchMachinesBy))
             {
                 return await _context.Machines.FirstOrDefaultAsync(o => o.Name.ToLower().Contains(machine.Name)
                                                                         || o.FQDN.ToLower().Contains(machine.FQDN.ToLower())
@@ -102,7 +102,7 @@ namespace Ghosts.Api.Services
             }
             else
             {
-                return Program.ClientConfig.MatchMachinesBy.ToLower() switch
+                return Program.ApplicationSettings.MatchMachinesBy.ToLower() switch
                 {
                     "name" => await _context.Machines.FirstOrDefaultAsync(o => o.Name.ToLower().Contains(machine.Name.ToLower()), ct),
                     "fqdn" => await _context.Machines.FirstOrDefaultAsync(o => o.FQDN.ToLower().Contains(machine.FQDN.ToLower()), ct),

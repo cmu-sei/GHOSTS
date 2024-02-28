@@ -22,7 +22,7 @@ namespace Ghosts.Api.Services
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
         private readonly ApplicationDbContext _context;
-        private readonly int _lookBack = Program.ClientConfig.LookbackRecords;
+        private readonly int _lookBack = Program.ApplicationSettings.LookbackRecords;
 
         public TrackableService(ApplicationDbContext context)
         {

@@ -1,0 +1,4623 @@
+{
+  "Country": "US",
+  "Branches": [
+    {
+      "Name": "USMC",
+      "MOS": [
+        {
+          "Type": "Personnel & Administration",
+          "Items": [
+            {
+              "Code": "0100",
+              "Name": "Basic Administrative Marine",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "0111",
+              "Name": "Administrative Specialist",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "0147",
+              "Name": "Equal Opportunity Advisor (EOA) (FMOS)",
+              "High": "E-9",
+              "Low": "E-6"
+            },
+            {
+              "Code": "0149",
+              "Name": "Substance Abuse Control Specialist (FMOS)",
+              "High": "E-9",
+              "Low": "E-6"
+            },
+            {
+              "Code": "0161",
+              "Name": "Postal Clerk",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "0171",
+              "Name": "Manpower Information Systems (MIS) Analyst (NMOS)",
+              "High": "E-9",
+              "Low": "E-4"
+            },
+            {
+              "Code": "0101",
+              "Name": "Basic Manpower Officer",
+              "High": "O-5",
+              "Low": "O-1"
+            },
+            {
+              "Code": "0102",
+              "Name": "Manpower Officer",
+              "High": "O-5",
+              "Low": "O-1"
+            },
+            {
+              "Code": "0149",
+              "Name": "Substance Abuse Control Officer (SACO) (FMOS)",
+              "High": "O-10",
+              "Low": "O-1"
+            },
+            {
+              "Code": "0160",
+              "Name": "Postal Officer",
+              "High": "W-5",
+              "Low": "W-1"
+            },
+            {
+              "Code": "0170",
+              "Name": "Personnel Officer",
+              "High": "W-5",
+              "Low": "W-1"
+            }
+          ]
+        },
+        {
+          "Type": "Intelligence",
+          "Items": [
+            {
+              "Code": "0200",
+              "Name": "Basic Intelligence Marine",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "0211",
+              "Name": "Counterintelligence/Human Intelligence (CI/HUMINT) Specialist",
+              "High": "O-8",
+              "Low": "E-4"
+            },
+            {
+              "Code": "0212",
+              "Name": "Technical Surveillance Countermeasures (TSCM) Specialist (NMOS)",
+              "High": "O-8",
+              "Low": "E-5"
+            },
+            {
+              "Code": "0231",
+              "Name": "Intelligence Specialist",
+              "High": "O-8",
+              "Low": "E-1"
+            },
+            {
+              "Code": "0239",
+              "Name": "Intelligence Analyst",
+              "High": "E-9",
+              "Low": "E-4"
+            },
+            {
+              "Code": "0241",
+              "Name": "Imagery Analysis Specialist",
+              "High": "O-8",
+              "Low": "Sgt (recently open to entry level marines)"
+            },
+            {
+              "Code": "0261",
+              "Name": "Geographic Intelligence Specialist",
+              "High": "O-8",
+              "Low": "E-1"
+            },
+            {
+              "Code": "0282",
+              "Name": "Tactical Debriefer (FMOS)"
+            },
+            {
+              "Code": "0283",
+              "Name": "Advanced Foreign Counterintelligence Specialist"
+            },
+            {
+              "Code": "0287",
+              "Name": "Military Source Operations Specialist (FMOS)"
+            },
+            {
+              "Code": "0289",
+              "Name": "Strategic Debriefing Specialist (FMOS)"
+            },
+            {
+              "Code": "0291",
+              "Name": "Intelligence Chief (FMOS)",
+              "High": "E-9"
+            },
+            {
+              "Code": "0202",
+              "Name": "Marine Air-Ground Task Force (MAGTF) Intelligence Officer",
+              "High": "O-5",
+              "Low": "O-3"
+            },
+            {
+              "Code": "0203",
+              "Name": "Ground Intelligence Officer[k]",
+              "High": "O-3",
+              "Low": "O-1"
+            },
+            {
+              "Code": "0204",
+              "Name": "Counter Intelligence/Human Source Intelligence (CI/HUMINT) Officer",
+              "High": "O-3",
+              "Low": "O-1"
+            },
+            {
+              "Code": "0206",
+              "Name": "Signals Intelligence/Ground Electronic Warfare Officer",
+              "High": "O-3",
+              "Low": "O-1"
+            },
+            {
+              "Code": "0207",
+              "Name": "Air Intelligence Officer",
+              "High": "O-3",
+              "Low": "O-1"
+            },
+            {
+              "Code": "0210",
+              "Name": "Counterintelligence/Human Source Intelligence (CI/HUMINT) Operations Officer",
+              "High": "W-5",
+              "Low": "W-1"
+            },
+            {
+              "Code": "0233",
+              "Name": "Intelligence Tactics Instructor (NMOS)",
+              "High": "O-5,W-5",
+              "Low": "O-1,W-1"
+            },
+            {
+              "Code": "0277",
+              "Name": "Weapons and Tactics Instructor (WTI) Intelligence Officer (NMOS)",
+              "High": "O-5,W-5",
+              "Low": "O-1,W-1"
+            },
+            {
+              "Code": "0284",
+              "Name": "Advanced Foreign Counterintelligence Officer"
+            },
+            {
+              "Code": "0286",
+              "Name": "Advanced Military Source Operations Officer"
+            },
+            {
+              "Code": "0288",
+              "Name": "Military Source Operations Officer"
+            },
+            {
+              "Code": "0290",
+              "Name": "Strategic Debriefing Officer"
+            }
+          ]
+        },
+        {
+          "Type": "Infantry",
+          "Items": [
+            {
+              "Code": "0300",
+              "Name": "Basic Infantry Marine",
+              "High": "E-5",
+              "Low": "E-1"
+            },
+            {
+              "Code": "0311",
+              "Name": "Rifleman[m]",
+              "High": "E-5",
+              "Low": "E-1"
+            },
+            {
+              "Code": "0312",
+              "Name": "Riverine Assault Craft (RAC) Marine",
+              "High": "E-7",
+              "Low": "E-2"
+            },
+            {
+              "Code": "0313",
+              "Name": "Light Armor Vehicle Marine",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "0314",
+              "Name": "Rigid Raiding Craft (RRC)/Rigid Hull Inflatable Boat (RHIB) Coxswain",
+              "High": "E-6",
+              "Low": "E-2"
+            },
+            {
+              "Code": "0316",
+              "Name": "Combat Rubber Reconnaissance Craft (CRRC) Coxswain",
+              "High": "E-6",
+              "Low": "E-2"
+            },
+            {
+              "Code": "0317",
+              "Name": "Scout Sniper",
+              "High": "E-9",
+              "Low": "E-3"
+            },
+            {
+              "Code": "0321",
+              "Name": "Reconnaissance Marine",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "0323",
+              "Name": "Reconnaissance Marine, Parachute Qualified",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "0324",
+              "Name": "Reconnaissance Marine, Combatant Diver Qualified",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "0326",
+              "Name": "Reconnaissance Marine, Parachute and Combatant Diver Qualified",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "0331",
+              "Name": "Machine Gunner[m]",
+              "High": "E-5",
+              "Low": "E-1"
+            },
+            {
+              "Code": "0341",
+              "Name": "Mortarman[m]",
+              "High": "E-5",
+              "Low": "E-1"
+            },
+            {
+              "Code": "0351",
+              "Name": "Infantry Assault Marine[m]",
+              "High": "E-5",
+              "Low": "E-1"
+            },
+            {
+              "Code": "0352",
+              "Name": "Antitank Missile Gunner[m]",
+              "High": "E-5",
+              "Low": "E-1"
+            },
+            {
+              "Code": "0365",
+              "Name": "Infantry Squad Leader",
+              "High": "E-5",
+              "Low": "E-4"
+            },
+            {
+              "Code": "0369",
+              "Name": "Infantry Unit Leader",
+              "High": "E-7",
+              "Low": "E-6"
+            },
+            {
+              "Code": "0372",
+              "Name": "Critical Skills Operator (CSO)",
+              "High": "E-9",
+              "Low": "E-5"
+            },
+            {
+              "Code": "0399",
+              "Name": "Operations Chief",
+              "High": "E-9",
+              "Low": "O-8"
+            },
+            {
+              "Code": "0301",
+              "Name": "Basic Infantry Officer"
+            },
+            {
+              "Code": "0302",
+              "Name": "Infantry Officer",
+              "High": "O-5",
+              "Low": "O-1"
+            },
+            {
+              "Code": "0303",
+              "Name": "Light-Armored Reconnaissance (LAR) Officer (NMOS)[n]",
+              "High": "O-5",
+              "Low": "O-1"
+            },
+            {
+              "Code": "0306",
+              "Name": "Infantry Weapons Officer",
+              "High": "W-5",
+              "Low": "W-2"
+            },
+            {
+              "Code": "0307",
+              "Name": "Expeditionary Ground Reconnaissance (EGR) Officer (NMOS)",
+              "High": "O-5",
+              "Low": "O-1"
+            },
+            {
+              "Code": "0370",
+              "Name": "Special Operations Officer[7][p]",
+              "High": "O-5",
+              "Low": "O-3"
+            }
+          ]
+        },
+        {
+          "Type": "Logistics",
+          "Items": [
+            {
+              "Code": "0400",
+              "Name": "Basic Logistics Marine",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "0411",
+              "Name": "Maintenance Management Specialist",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "0431",
+              "Name": "Logistics/Embarkation Specialist[q]",
+              "High": "E-6",
+              "Low": "E-1"
+            },
+            {
+              "Code": "0451",
+              "Name": "Airborne and Air Delivery Specialist",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "0471",
+              "Name": "Personnel Retrieval and Processing Specialist[q]",
+              "High": "E-6",
+              "Low": "E-1"
+            },
+            {
+              "Code": "0472",
+              "Name": "Personnel Retrieval and Processing Technician[q]",
+              "High": "E-6",
+              "Low": "E-1"
+            },
+            {
+              "Code": "0477",
+              "Name": "Expeditionary Logistics Instructor (ELI) (NMOS)",
+              "High": "E-9",
+              "Low": "E-7"
+            },
+            {
+              "Code": "0481",
+              "Name": "Landing Support Specialist[q]",
+              "High": "E-6",
+              "Low": "E-1"
+            },
+            {
+              "Code": "0491",
+              "Name": "Logistics/Mobility Chief",
+              "High": "E-9",
+              "Low": "E-7"
+            },
+            {
+              "Code": "0401",
+              "Name": "Basic Logistics Officer"
+            },
+            {
+              "Code": "0402",
+              "Name": "Logistics Officer",
+              "High": "O-5",
+              "Low": "O-1"
+            },
+            {
+              "Code": "0405",
+              "Name": "Aerial Delivery Officer (NMOS)[r]",
+              "High": "O-3",
+              "Low": "O-1"
+            },
+            {
+              "Code": "0407",
+              "Name": "Personnel Retrieval and Processing Officer (FMOS)",
+              "High": "O-3",
+              "Low": "O-1"
+            },
+            {
+              "Code": "0430",
+              "Name": "Mobility Officer[b]",
+              "High": "O-5,W-5",
+              "Low": "O-3,W-1"
+            },
+            {
+              "Code": "0477",
+              "Name": "Expeditionary Logistics Instructor (NMOS)[s]",
+              "High": "O-5",
+              "Low": "O-3"
+            }
+          ]
+        },
+        {
+          "Type": "Marine Air",
+          "Name": "Ground Task Force (MAGTF) Plans",
+          "Items": [
+            {
+              "Code": "0500",
+              "Name": "Basic MAGTF Marine",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "0511",
+              "Name": "MAGTF Planning Specialist",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "0521",
+              "Name": "Military Information Support Operations (MISO) Noncommissioned Officer",
+              "High": "E-7",
+              "Low": "E-4"
+            },
+            {
+              "Code": "0531",
+              "Name": "Civil Affairs Noncommissioned Officer",
+              "High": "E-7",
+              "Low": "E-4"
+            },
+            {
+              "Code": "0551",
+              "Name": "Information Operations Specialist (NMOS)",
+              "High": "E-9",
+              "Low": "E-4"
+            },
+            {
+              "Code": "0570",
+              "Name": "Foreign Security Forces Advisor (FMOS)[8]",
+              "High": "E-9",
+              "Low": "E-9"
+            },
+            {
+              "Code": "0571",
+              "Name": "Advanced Foreign Security Forces Advisor (FMOS)[8]",
+              "High": "E-9",
+              "Low": "E-5"
+            },
+            {
+              "Code": "0501",
+              "Name": "Basic MAGTF Officer"
+            },
+            {
+              "Code": "0502",
+              "Name": "Force Deployment Planning and Execution (FDP&E) Officer (FMOS)",
+              "High": "O-5",
+              "Low": "O-4"
+            },
+            {
+              "Code": "0505",
+              "Name": "Marine Air Ground Task Force (MAGTF) Planners (FMOS)",
+              "High": "O-5",
+              "Low": "O-4"
+            },
+            {
+              "Code": "0506",
+              "Name": "Red Team Member (FMOS)",
+              "High": "O-6",
+              "Low": "O-3"
+            },
+            {
+              "Code": "0510",
+              "Name": "Basic Information Operations Staff Officer (FMOS)",
+              "High": "O-5",
+              "Low": "O-1"
+            },
+            {
+              "Code": "0520",
+              "Name": "Military Information Support Operations (MISO) Officer (FMOS)[t]",
+              "High": "O-5",
+              "Low": "O-1"
+            },
+            {
+              "Code": "0530",
+              "Name": "Civil Affairs Officer (FMOS)",
+              "High": "O-10",
+              "Low": "O-1"
+            },
+            {
+              "Code": "0535",
+              "Name": "Civil-Military Operations (CMO) Planner (FMOS)",
+              "High": "O-5",
+              "Low": "O-4"
+            },
+            {
+              "Code": "0540",
+              "Name": "Space Operations Staff Officer (FMOS)",
+              "High": "O-5",
+              "Low": "O-1"
+            },
+            {
+              "Code": "0550",
+              "Name": "Advanced Information Operations (IO) Planner (FMOS)",
+              "High": "O-5",
+              "Low": "O-2"
+            },
+            {
+              "Code": "0570",
+              "Name": "Foreign Security Forces Advisor (FMOS)[8]",
+              "High": "O-6,W-5",
+              "Low": "O-2,W-1"
+            },
+            {
+              "Code": "0571",
+              "Name": "Advanced Foreign Security Forces Advisor (FMOS)[8]",
+              "High": "O-6,W-5",
+              "Low": "O-2,W-1"
+            },
+            {
+              "Code": "0577",
+              "Name": "Operations and Tactics Instructor (NMOS)[u]",
+              "High": "O-5,W-5",
+              "Low": "O-3,W-2"
+            }
+          ]
+        },
+        {
+          "Type": "Communications",
+          "Items": [
+            {
+              "Code": "0600",
+              "Name": "Basic Communications Marine"
+            },
+            {
+              "Code": "0612",
+              "Name": "Tactical Switching Operator[v]",
+              "High": "E-5",
+              "Low": "E-1"
+            },
+            {
+              "Code": "0613",
+              "Name": "Construction Wiremen"
+            },
+            {
+              "Code": "0619",
+              "Name": "Telecommunications Systems Chief",
+              "High": "E-7",
+              "Low": "E-6"
+            },
+            {
+              "Code": "0621",
+              "Name": "Transmission Systems Operator",
+              "High": "E-5",
+              "Low": "E-1"
+            },
+            {
+              "Code": "0622",
+              "Name": "Digital Multi-channel Wideband Transmission Equipment Operator (NMOS)",
+              "High": "E-5",
+              "Low": "E-1"
+            },
+            {
+              "Code": "0623",
+              "Name": "Tropospheric Scatter Transmissions System Operator (NMOS)",
+              "High": "E-5",
+              "Low": "E-1"
+            },
+            {
+              "Code": "0627",
+              "Name": "Satellite Communications Operator (NMOS)",
+              "High": "E-5",
+              "Low": "E-1"
+            },
+            {
+              "Code": "0629",
+              "Name": "Transmissions Chief",
+              "High": "E-7",
+              "Low": "E-6"
+            },
+            {
+              "Code": "0631",
+              "Name": "Network Administrator[9]",
+              "High": "E-5",
+              "Low": "E-1"
+            },
+            {
+              "Code": "0633",
+              "Name": "Network Transport Technician (NMOS)",
+              "High": "E-5",
+              "Low": "E-1"
+            },
+            {
+              "Code": "0639",
+              "Name": "Network Chief",
+              "High": "E-7",
+              "Low": "E-6"
+            },
+            {
+              "Code": "0648",
+              "Name": "Spectrum Manager",
+              "High": "O-8",
+              "Low": "E-5"
+            },
+            {
+              "Code": "0651",
+              "Name": "Cyber Network Operator[x]",
+              "High": "E-5",
+              "Low": "E-1"
+            },
+            {
+              "Code": "0659",
+              "Name": "Cyber Network Systems Chief[y]",
+              "High": "E-7",
+              "Low": "E-6"
+            },
+            {
+              "Code": "0671",
+              "Name": "Data Systems Administrator",
+              "High": "E-5",
+              "Low": "E-1"
+            },
+            {
+              "Code": "0673",
+              "Name": "Applications Developer (NMOS)",
+              "High": "E-7",
+              "Low": "E-5"
+            },
+            {
+              "Code": "0679",
+              "Name": "Data Systems Chief",
+              "High": "E-7",
+              "Low": "E-6"
+            },
+            {
+              "Code": "0681",
+              "Name": "Information Security Technician",
+              "High": "E-9",
+              "Low": "E-6"
+            },
+            {
+              "Code": "0688",
+              "Name": "Cyber Security Technician[z]",
+              "High": "E-7",
+              "Low": "E-5"
+            },
+            {
+              "Code": "0689",
+              "Name": "Cybersecurity Chief",
+              "High": "E-9",
+              "Low": "O-8"
+            },
+            {
+              "Code": "0691",
+              "Name": "Communications Training Instructor (NMOS)",
+              "High": "E-9",
+              "Low": "E-6"
+            },
+            {
+              "Code": "0699",
+              "Name": "Communications Chief",
+              "High": "E-9",
+              "Low": "O-8"
+            },
+            {
+              "Code": "0601",
+              "Name": "Basic Communications Officer"
+            },
+            {
+              "Code": "0602",
+              "Name": "Communications Officer",
+              "High": "O-5",
+              "Low": "O-1"
+            },
+            {
+              "Code": "0603",
+              "Name": "Marine Air-Ground Task Force (MAGTF) Communications Planner (NMOS)",
+              "High": "O-5",
+              "Low": "O-3"
+            },
+            {
+              "Code": "0605",
+              "Name": "Cyber Network Operations Officer[b]",
+              "High": "O-5",
+              "Low": "O-3"
+            },
+            {
+              "Code": "0610",
+              "Name": "Telecommunications Systems Engineering Officer[aa]",
+              "High": "W-5",
+              "Low": "W-1"
+            },
+            {
+              "Code": "0620",
+              "Name": "Tactical Communications Planning and Engineer Officer",
+              "High": "W-5",
+              "Low": "W-1"
+            },
+            {
+              "Code": "0620",
+              "Name": "Space and Waveform Integration Officer ",
+              "High": "W-5",
+              "Low": "W-1"
+            },
+            {
+              "Code": "0630",
+              "Name": "Network Engineering Officer",
+              "High": "W-5",
+              "Low": "W-1"
+            },
+            {
+              "Code": "0640",
+              "Name": "Strategic Electromagnetic Spectrum Officer",
+              "High": "W-5",
+              "Low": "W-1"
+            },
+            {
+              "Code": "0650",
+              "Name": "Cyber Network Operations Engineer[ab]",
+              "High": "W-5",
+              "Low": "W-1"
+            },
+            {
+              "Code": "0670",
+              "Name": "Data Systems Engineering Officer",
+              "High": "W-5",
+              "Low": "W-1"
+            },
+            {
+              "Code": "0691",
+              "Name": "Communications Training Instructor (NMOS)",
+              "High": "O-5,W-5",
+              "Low": "O-3,W-1"
+            }
+          ]
+        },
+        {
+          "Type": "Artillery",
+          "Items": [
+            {
+              "Code": "0800",
+              "Name": "Basic Field Artillery Marine",
+              "High": "E-5",
+              "Low": "E-1"
+            },
+            {
+              "Code": "0811",
+              "Name": "Field Artillery Cannoneer",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "0814",
+              "Name": "High Mobility Artillery Rocket System (HIMARS) Operator",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "0842",
+              "Name": "Field Artillery Radar Operator",
+              "High": "E-5",
+              "Low": "E-1"
+            },
+            {
+              "Code": "0844",
+              "Name": "Field Artillery FDC (Fire Direction Control) Marine",
+              "High": "E-5",
+              "Low": "E-1"
+            },
+            {
+              "Code": "0847",
+              "Name": "Field Artillery Sensor Support Marine",
+              "High": "E-5",
+              "Low": "E-1"
+            },
+            {
+              "Code": "0848",
+              "Name": "Field Artillery FDC Operations Chief",
+              "High": "E-9",
+              "Low": "E-6"
+            },
+            {
+              "Code": "0861",
+              "Name": "Field Artillery Scout Observer Marine",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "0801",
+              "Name": "Basic Field Artillery Officer"
+            },
+            {
+              "Code": "0802",
+              "Name": "Field Artillery Officer",
+              "High": "O-5",
+              "Low": "O-1"
+            },
+            {
+              "Code": "0803",
+              "Name": "Target Acquisition Officer",
+              "High": "W-5",
+              "Low": "W-1"
+            },
+            {
+              "Code": "0840",
+              "Name": "Naval Surface Fire Support Planner",
+              "High": "O-10",
+              "Low": "O-1"
+            }
+          ]
+        },
+        {
+          "Type": "Training",
+          "Items": [
+            {
+              "Code": "0911",
+              "Name": "Marine Corps Drill Instructor",
+              "High": "E-7",
+              "Low": "E-5"
+            },
+            {
+              "Code": "0913",
+              "Name": "Marine Combat Instructor",
+              "High": "E-4",
+              "Low": "E-7"
+            },
+            {
+              "Code": "0916",
+              "Name": "Martial Arts Instructor",
+              "High": "E-9",
+              "Low": "E-4"
+            },
+            {
+              "Code": "0917",
+              "Name": "Martial Arts Instructor-Trainer",
+              "High": "E-9",
+              "Low": "E-5"
+            },
+            {
+              "Code": "0919",
+              "Name": "Force Fitness Instructor"
+            },
+            {
+              "Code": "0918",
+              "Name": "Water Safety/Survival Instructor",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "0931",
+              "Name": "Marksmanship Instructor",
+              "High": "E-9",
+              "Low": "E-5"
+            },
+            {
+              "Code": "0932",
+              "Name": "Small Arms Weapons Instructor",
+              "High": "E-9",
+              "Low": "E-5"
+            },
+            {
+              "Code": "0933",
+              "Name": "Marksmanship Coach",
+              "High": "E-5",
+              "Low": "E-2"
+            },
+            {
+              "Code": "0930",
+              "Name": "Range Officer: CWO5",
+              "High": "W-1"
+            }
+          ]
+        },
+        {
+          "Type": "Utilities",
+          "Items": [
+            {
+              "Code": "1100",
+              "Name": "Basic Utilities Marine",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "1141",
+              "Name": "Electrician",
+              "High": "E-6",
+              "Low": "E-1"
+            },
+            {
+              "Code": "1142",
+              "Name": "Electrical Equipment Repair Specialist",
+              "High": "E-6",
+              "Low": "E-1"
+            },
+            {
+              "Code": "1161",
+              "Name": "Refrigeration and Air Conditioning Technician",
+              "High": "E-6",
+              "Low": "E-1"
+            },
+            {
+              "Code": "1169",
+              "Name": "Utilities Chief",
+              "High": "E-9",
+              "Low": "E-7"
+            },
+            {
+              "Code": "1171",
+              "Name": "Water Support Technician",
+              "High": "E-6",
+              "Low": "E-1"
+            },
+            {
+              "Code": "1181",
+              "Name": "Fabric repair specialist"
+            },
+            {
+              "Code": "1120",
+              "Name": "Utilities Officer",
+              "High": "W-5",
+              "Low": "W-1"
+            }
+          ]
+        },
+        {
+          "Type": "Engineer, Construction, Facilities, & Equipment",
+          "Items": [
+            {
+              "Code": "1300",
+              "Name": "Basic Engineer, Construction, Facilities, & Equipment Marine",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "1316",
+              "Name": "Metal Worker",
+              "High": "E-6",
+              "Low": "E-1"
+            },
+            {
+              "Code": "1341",
+              "Name": "Engineer Equipment Mechanic",
+              "High": "E-6",
+              "Low": "E-1"
+            },
+            {
+              "Code": "1342",
+              "Name": "Small Craft Mechanic",
+              "High": "E-6",
+              "Low": "E-3"
+            },
+            {
+              "Code": "1343",
+              "Name": "Assault Breacher Vehicle Mechanic",
+              "High": "E-6",
+              "Low": "E-3"
+            },
+            {
+              "Code": "1345",
+              "Name": "Engineer Equipment Operator",
+              "High": "E-6",
+              "Low": "E-1"
+            },
+            {
+              "Code": "1349",
+              "Name": "Engineer Equipment Chief",
+              "High": "E-9",
+              "Low": "E-7"
+            },
+            {
+              "Code": "1361",
+              "Name": "Engineer Assistant",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "1371",
+              "Name": "Combat Engineer",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "1372",
+              "Name": "Assault Breacher Vehicle Operator",
+              "High": "E-9",
+              "Low": "E-2"
+            },
+            {
+              "Code": "1391",
+              "Name": "Bulk Fuel Specialist",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "1301",
+              "Name": "Basic Combat Engineer Officer"
+            },
+            {
+              "Code": "1302",
+              "Name": "Combat Engineer Officer",
+              "High": "O-5",
+              "Low": "O-1"
+            },
+            {
+              "Code": "1310",
+              "Name": "Engineer Equipment Officer",
+              "High": "W-5",
+              "Low": "W-1"
+            },
+            {
+              "Code": "1330",
+              "Name": "Facilities Management Officer",
+              "High": "O-10",
+              "Low": "O-1"
+            },
+            {
+              "Code": "1390",
+              "Name": "Bulk Fuel Officer",
+              "High": "W-5",
+              "Low": "W-1"
+            }
+          ]
+        },
+        {
+          "Type": "Cyberspace Operations",
+          "Items": [
+            {
+              "Code": "1711",
+              "Name": "Cyberspace Exploitation Operator",
+              "High": "E-7",
+              "Low": "E-6"
+            },
+            {
+              "Code": "1721",
+              "Name": "Cyberspace Defensive Operator",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "1799",
+              "Name": "Cyberspace Operations Chief",
+              "High": "E-9",
+              "Low": "O-8"
+            },
+            {
+              "Code": "1702",
+              "Name": "Cyberspace Officer"
+            },
+            {
+              "Code": "1705",
+              "Name": "Cyberspace Warfare Development Officer[b]",
+              "High": "O-5",
+              "Low": "O-3"
+            },
+            {
+              "Code": "1710",
+              "Name": "Offensive Cyberspace Weapons Officer",
+              "High": "W-5",
+              "Low": "W-1"
+            },
+            {
+              "Code": "1720",
+              "Name": "Defensive Cyberspace Weapons Officer",
+              "High": "W-5",
+              "Low": "W-1"
+            }
+          ]
+        },
+        {
+          "Type": "Tank and Assault Amphibious Vehicle",
+          "Items": [
+            {
+              "Code": "1800",
+              "Name": "Basic Tank and Assault Amphibious Vehicle (AAV) Marine",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "1812",
+              "Name": "M1A1 Tank Crewman",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "1833",
+              "Name": "Assault Amphibious Vehicle (AAV) Marine",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "1834",
+              "Name": "ACV Marine",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "1801",
+              "Name": "Basic Tank and Amphibious Assault Vehicle Officer"
+            },
+            {
+              "Code": "1802",
+              "Name": "Tank Officer",
+              "High": "O-5",
+              "Low": "O-1"
+            },
+            {
+              "Code": "1803",
+              "Name": "Assault Amphibious Vehicle (AAV) Officer",
+              "High": "O-5",
+              "Low": "O-1"
+            }
+          ]
+        },
+        {
+          "Type": "Ground Ordnance Maintenance",
+          "Items": [
+            {
+              "Code": "2100",
+              "Name": "Basic Ground Ordnance Maintenance Marine: GySgt",
+              "High": "E-7",
+              "Low": "E-7"
+            },
+            {
+              "Code": "2111",
+              "Name": "Small Arms Repairer/Technician: GySgt",
+              "High": "E-7",
+              "Low": "E-7"
+            },
+            {
+              "Code": "2112",
+              "Name": "Precision Weapons Repairer:[11] GySgt",
+              "High": "E-7",
+              "Low": "E-7"
+            },
+            {
+              "Code": "2131",
+              "Name": "Towed Artillery Systems Technician: GySgt",
+              "High": "E-7",
+              "Low": "E-7"
+            },
+            {
+              "Code": "2141",
+              "Name": "Assault Amphibious Vehicle (AAV) Repairer/Technician: GySgt",
+              "High": "E-7",
+              "Low": "E-7"
+            },
+            {
+              "Code": "2146",
+              "Name": "Main battle tank (MBT) Repairer/Technician: GySgt",
+              "High": "E-7",
+              "Low": "E-7"
+            },
+            {
+              "Code": "2147",
+              "Name": "Light Armored Vehicle (LAV) Repairer/Technician: GySgt",
+              "High": "E-7",
+              "Low": "E-7"
+            },
+            {
+              "Code": "2148",
+              "Name": "Expeditionary Fighting Vehicle (EFV) Repairer/Technician: GySgt",
+              "High": "E-7",
+              "Low": "E-7"
+            },
+            {
+              "Code": "2149",
+              "Name": "Ordnance Vehicle Maintenance Chief: MGySgt",
+              "High": "E-9",
+              "Low": "E-9"
+            },
+            {
+              "Code": "2161",
+              "Name": "Machinist: GySgt",
+              "High": "E-7",
+              "Low": "E-7"
+            },
+            {
+              "Code": "2171",
+              "Name": "Electro-Optical Ordnance Repairer/Technician: GySgt",
+              "High": "E-7",
+              "Low": "E-7"
+            },
+            {
+              "Code": "2181",
+              "Name": "Senior Ground Ordnance Weapons Chief: MGySgt",
+              "High": "E-9",
+              "Low": "E-9"
+            },
+            {
+              "Code": "2102",
+              "Name": "Ordnance Officer"
+            },
+            {
+              "Code": "2110",
+              "Name": "Ordnance Vehicle Maintenance Officer"
+            },
+            {
+              "Code": "2120",
+              "Name": "Weapons Repair Officer"
+            },
+            {
+              "Code": "2125",
+              "Name": "Electro",
+              "Low": "Optic Instrument Repair Officer"
+            }
+          ]
+        },
+        {
+          "Type": "Ammunition and Explosive Ordnance Disposal",
+          "Items": [
+            {
+              "Code": "300 Basic Ammunition and Explosive Ordnance Disposal (EOD) Marine",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "2311",
+              "Name": "Ammunition Technician",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "2336",
+              "Name": "Explosive Ordnance Disposal (EOD) Technician",
+              "High": "E-9",
+              "Low": "E-4"
+            },
+            {
+              "Code": "2305",
+              "Name": "Explosive Ordnance Disposal Officer"
+            },
+            {
+              "Code": "2340",
+              "Name": "Ammunition Officer"
+            }
+          ]
+        },
+        {
+          "Type": "Signals Intelligence/Ground Electronic Warfare",
+          "Items": [
+            {
+              "Code": "2600",
+              "Name": "Basic Signals Intelligence/Ground Electronic Warfare Operator",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "2611",
+              "Name": "Cryptologic Digital Network Operator/Analyst",
+              "High": "E-9",
+              "Low": "E-4"
+            },
+            {
+              "Code": "2621",
+              "Name": "Special Communications Signals Collection Operator/Analyst",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "2623",
+              "Name": "Radio Reconnaissance Man-BRC, Jump, and SERE qualified",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "2629",
+              "Name": "Signals Intelligence Analyst",
+              "High": "E-9",
+              "Low": "E-4"
+            },
+            {
+              "Code": "2631",
+              "Name": "Electronic Intelligence (ELINT) Intercept Operator/Analyst",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "2641",
+              "Name": "Cryptologic Linguist Operator Analyst",
+              "High": "E-5",
+              "Low": "E-1"
+            },
+            {
+              "Code": "2642",
+              "Name": "Advanced Cryptologic Linguist Operator Analyst (NMOS)",
+              "High": "E-5",
+              "Low": "E-1"
+            },
+            {
+              "Code": "2649",
+              "Name": "Cryptanalyst",
+              "High": "E-9",
+              "Low": "E-4"
+            },
+            {
+              "Code": "2651",
+              "Name": "Special Intelligence System Administrator/Communicator",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "2671",
+              "Name": "Middle East Cryptologic Linguist",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "2673",
+              "Name": "Asia Pacific Cryptologic Linguist",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "2674",
+              "Name": "European Cryptologic Linguist",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "2676",
+              "Name": "Central Asian Cryptologic Linguist",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "2691",
+              "Name": "Signals Intelligence/Electronic Warfare (SIGINT/EW) Chief",
+              "High": "E-9",
+              "Low": "O-8"
+            },
+            {
+              "Code": "2602",
+              "Name": "Signals Intelligence/Electronic Warfare (SIGINT/EW) Officer"
+            },
+            {
+              "Code": "2611",
+              "Name": "Cryptologic Digital Network Technician/Analyst (Officer)"
+            }
+          ]
+        },
+        {
+          "Type": "Linguist",
+          "Items": [
+            {
+              "Code": "2711",
+              "Name": "Pakistani Pashtu"
+            },
+            {
+              "Code": "2712",
+              "Name": "Arabic (Modern Standard)"
+            },
+            {
+              "Code": "2713",
+              "Name": "Arabic (Egyptian)"
+            },
+            {
+              "Code": "2714",
+              "Name": "Arabic (Syrian)"
+            },
+            {
+              "Code": "2716",
+              "Name": "Amharic"
+            },
+            {
+              "Code": "2717",
+              "Name": "Bengali"
+            },
+            {
+              "Code": "2718",
+              "Name": "Hebrew"
+            },
+            {
+              "Code": "2719",
+              "Name": "Hindi"
+            },
+            {
+              "Code": "2721",
+              "Name": "Kurdish"
+            },
+            {
+              "Code": "2722",
+              "Name": "Persian"
+            },
+            {
+              "Code": "2723",
+              "Name": "Somali"
+            },
+            {
+              "Code": "2724",
+              "Name": "Swahili"
+            },
+            {
+              "Code": "2726",
+              "Name": "Turkish"
+            },
+            {
+              "Code": "2727",
+              "Name": "Urdu"
+            },
+            {
+              "Code": "Asia",
+              "Name": "Pacific"
+            },
+            {
+              "Code": "2733",
+              "Name": "Burmese"
+            },
+            {
+              "Code": "2734",
+              "Name": "Cambodian"
+            },
+            {
+              "Code": "2736",
+              "Name": "Cantonese"
+            },
+            {
+              "Code": "2737",
+              "Name": "Chinese (Mandarin)"
+            },
+            {
+              "Code": "2738",
+              "Name": "Indonesian"
+            },
+            {
+              "Code": "2741",
+              "Name": "Korean"
+            },
+            {
+              "Code": "2746",
+              "Name": "Thai"
+            },
+            {
+              "Code": "2747",
+              "Name": "Vietnamese"
+            },
+            {
+              "Code": "European I (West)"
+            },
+            {
+              "Code": "2754",
+              "Name": "Dutch"
+            },
+            {
+              "Code": "2756",
+              "Name": "Finnish"
+            },
+            {
+              "Code": "2757",
+              "Name": "French"
+            },
+            {
+              "Code": "2758",
+              "Name": "German"
+            },
+            {
+              "Code": "2759",
+              "Name": "Greek"
+            },
+            {
+              "Code": "2761",
+              "Name": "Haitian"
+            },
+            {
+              "Code": "2762",
+              "Name": "Icelandic"
+            },
+            {
+              "Code": "2763",
+              "Name": "Italian"
+            },
+            {
+              "Code": "2764",
+              "Name": "Norwegian"
+            },
+            {
+              "Code": "2766",
+              "Name": "Portuguese (BR)"
+            },
+            {
+              "Code": "2767",
+              "Name": "Portuguese (EU)"
+            },
+            {
+              "Code": "2768",
+              "Name": "Spanish"
+            },
+            {
+              "Code": "2769",
+              "Name": "Swedish"
+            }
+          ]
+        },
+        {
+          "Type": "Ground Electronics Maintenance",
+          "Items": [
+            {
+              "Code": "2800",
+              "Name": "Basic Data/Communications Maintenance Marine",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "2811",
+              "Name": "Telephone Technician",
+              "High": "E-5",
+              "Low": "E-1"
+            },
+            {
+              "Code": "2813",
+              "Name": "Cable Systems Technician"
+            },
+            {
+              "Code": "2818",
+              "Name": "Personal Computer/Tactical Office Machine Repairer"
+            },
+            {
+              "Code": "2821",
+              "Name": "Technical Controller Marine",
+              "High": "E-5",
+              "Low": "E-1"
+            },
+            {
+              "Code": "2822",
+              "Name": "Electronic Switching Equipment Technician"
+            },
+            {
+              "Code": "2823",
+              "Name": "Technical Control Chief",
+              "High": "E-9",
+              "Low": "E-6"
+            },
+            {
+              "Code": "2826",
+              "Name": "AN/MSC",
+              "Low": "63A Maintenance Technician"
+            },
+            {
+              "Code": "2827",
+              "Name": "Tactical Electronic Reconnaissance Process/Evaluation Systems (TERPES) Technician"
+            },
+            {
+              "Code": "2831",
+              "Name": "Digital Wideband Systems Maintainer",
+              "High": "E-5",
+              "Low": "E-1"
+            },
+            {
+              "Code": "2832",
+              "Name": "AN/TRC",
+              "Low": "170 Technician"
+            },
+            {
+              "Code": "2833",
+              "Name": "Fleet Satellite Terminal Technician"
+            },
+            {
+              "Code": "2834",
+              "Name": "Satellite Communications (SATCOM) Technician"
+            },
+            {
+              "Code": "2841",
+              "Name": "Ground Electronics Transmission Systems Maintainer",
+              "High": "E-5",
+              "Low": "E-1"
+            },
+            {
+              "Code": "2842",
+              "Name": "Enhanced Position Location Reporting System (EPLRS) System Specialist"
+            },
+            {
+              "Code": "2843",
+              "Name": "PLRS Support Maintenance Technician"
+            },
+            {
+              "Code": "2844",
+              "Name": "Ground Communications Organizational Repairer"
+            },
+            {
+              "Code": "2846",
+              "Name": "Ground Radio Intermediate Repairer"
+            },
+            {
+              "Code": "2847",
+              "Name": "Telephone Systems/Personal Computer Repairer"
+            },
+            {
+              "Code": "2848",
+              "Name": "Tactical Remote Sensor System (TRSS) Maintainer",
+              "High": "E-7",
+              "Low": "E-3"
+            },
+            {
+              "Code": "2855",
+              "Name": "Tactical Electronic Reconnaissance Process/Evaluations System (TERPES) Technician"
+            },
+            {
+              "Code": "2861",
+              "Name": "Radio Technician"
+            },
+            {
+              "Code": "2862",
+              "Name": "Electronics Maintenance Technician",
+              "High": "E-7",
+              "Low": "E-5"
+            },
+            {
+              "Code": "2867",
+              "Name": "AN/TSC",
+              "Low": "120 Radio Technician"
+            },
+            {
+              "Code": "2871",
+              "Name": "Calibrations Technician",
+              "High": "E-5",
+              "Low": "E-1"
+            },
+            {
+              "Code": "2874",
+              "Name": "Metrology Technician",
+              "High": "E-9",
+              "Low": "E-5"
+            },
+            {
+              "Code": "2877",
+              "Name": "Radiac Instrument Technician"
+            },
+            {
+              "Code": "2881",
+              "Name": "2M/ATE Technician (Pvt",
+              "Low": "E-7"
+            },
+            {
+              "Code": "2884",
+              "Name": "Ground Radar Repairer"
+            },
+            {
+              "Code": "2887",
+              "Name": "Artillery Electronics Technician",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "2889",
+              "Name": "Ground Radar Technicia"
+            },
+            {
+              "Code": "2891",
+              "Name": "Ground Electronics Systems Maintenance Chief",
+              "High": "E-9",
+              "Low": "O-8"
+            },
+            {
+              "Code": "2801",
+              "Name": "Basic Ground Electronics Maintenance Officer"
+            },
+            {
+              "Code": "2802",
+              "Name": "Electronics Maintenance Officer (Ground) (II) ",
+              "High": "O-5",
+              "Low": "O-3"
+            },
+            {
+              "Code": "2805",
+              "Name": "Electronics Maintenance Officer (Ground) (III) ",
+              "High": "W-5",
+              "Low": "W-1"
+            },
+            {
+              "Code": "2810",
+              "Name": "Telephone Systems Officer ",
+              "High": "W-5",
+              "Low": "W-1"
+            },
+            {
+              "Code": "2830",
+              "Name": "Ground Radar Maintenance Officer"
+            }
+          ]
+        },
+        {
+          "Type": " Supply Administration and Operations",
+          "Items": [
+            {
+              "Code": "3000",
+              "Name": "Basic Supply Administration and Operations Marine",
+              "High": "E-5",
+              "Low": "E-1"
+            },
+            {
+              "Code": "3043",
+              "Name": "Supply Administration and Operations Specialist",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "3044",
+              "Name": "Basic Contingency Contract Specialist",
+              "High": "E-9",
+              "Low": "E-5"
+            },
+            {
+              "Code": "3051",
+              "Name": "Warehouse Clerk",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "3052",
+              "Name": "Packaging Specialist",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "3072",
+              "Name": "Aviation Supply Clerk",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "3001",
+              "Name": "Basic Supply Administration and Operations Officer"
+            },
+            {
+              "Code": "3002",
+              "Name": "Ground Supply Officer ",
+              "High": "O-5",
+              "Low": "O-1"
+            },
+            {
+              "Code": "3006",
+              "Name": "Contracting Officer ",
+              "High": "O-5",
+              "Low": "O-3"
+            },
+            {
+              "Code": "3010",
+              "Name": "Ground Supply Operations Officer ",
+              "High": "W-5",
+              "Low": "W-1"
+            }
+          ]
+        },
+        {
+          "Type": "Distribution Management",
+          "Items": [
+            {
+              "Code": "3100",
+              "Name": "Basic Distribution Management Marine",
+              "High": "E-6",
+              "Low": "E-1"
+            },
+            {
+              "Code": "3112",
+              "Name": "Distribution Management Specialist",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "3101",
+              "Name": "Basic Distribution Management Officer"
+            },
+            {
+              "Code": "3102",
+              "Name": "Distribution Management Officer (II/III)"
+            }
+          ]
+        },
+        {
+          "Type": "Food Service",
+          "Items": [
+            {
+              "Code": "3300",
+              "Name": "Basic Food Service Marine"
+            },
+            {
+              "Code": "3361",
+              "Name": "Subsistence Supply Clerk"
+            },
+            {
+              "Code": "3372",
+              "Name": "Marine Aide"
+            },
+            {
+              "Code": "3381",
+              "Name": "Food Service Specialist",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "3301",
+              "Name": "Basic Food Service Officer"
+            },
+            {
+              "Code": "3302",
+              "Name": "Food Service Officer (II/III)"
+            }
+          ]
+        },
+        {
+          "Type": "Financial Management",
+          "Items": [
+            {
+              "Code": "3400",
+              "Name": "Basic Financial Management Marine",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "3432",
+              "Name": "Finance Technician",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "3441",
+              "Name": "Non-appropriated fund (NAF) Audit Technician",
+              "High": "E-9",
+              "Low": "E-5"
+            },
+            {
+              "Code": "3451",
+              "Name": "Fiscal/Budget Technician",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "3401",
+              "Name": "Basic Financial Management Officer"
+            },
+            {
+              "Code": "3402",
+              "Name": "Finance Officer (III)"
+            },
+            {
+              "Code": "3404",
+              "Name": "Financial Management Officer (I)"
+            },
+            {
+              "Code": "3406",
+              "Name": "Financial Accounting Officer"
+            },
+            {
+              "Code": "3408",
+              "Name": "Financial Management Resource Officer"
+            },
+            {
+              "Code": "3410",
+              "Name": "Non-appropriated fund (NAF) Auditing Officer(II/III)"
+            },
+            {
+              "Code": "3450",
+              "Name": "Planning, Programming, and Budgeting System (PPBS) Officer"
+            }
+          ]
+        },
+        {
+          "Type": "Motor Transport",
+          "Items": [
+            {
+              "Code": "3500",
+              "Name": "Basic Motor Transport Marine",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "3513",
+              "Name": "Body Repair Mechanic"
+            },
+            {
+              "Code": "3521",
+              "Name": "Automotive Organizational Technician",
+              "High": "E-5",
+              "Low": "E-1"
+            },
+            {
+              "Code": "3522",
+              "Name": "Automotive Intermediate Mechanic",
+              "High": "E-5",
+              "Low": "E-3"
+            },
+            {
+              "Code": "3523",
+              "Name": "Vehicle Recovery Mechanic",
+              "High": "E-5",
+              "Low": "E-2"
+            },
+            {
+              "Code": "3524",
+              "Name": "Fuel and Electrical Systems Mechanic",
+              "High": "E-5",
+              "Low": "E-3"
+            },
+            {
+              "Code": "3525",
+              "Name": "Crash/Fire/Rescue Vehicle Mechanic",
+              "High": "E-7",
+              "Low": "E-3"
+            },
+            {
+              "Code": "3529",
+              "Name": "Motor Transport Maintenance Chief",
+              "High": "E-9",
+              "Low": "E-6"
+            },
+            {
+              "Code": "3531",
+              "Name": "Motor Vehicle Operator",
+              "High": "E-5",
+              "Low": "E-1"
+            },
+            {
+              "Code": "3533",
+              "Name": "Logistics Vehicle Systems Operator",
+              "High": "E-5",
+              "Low": "E-1"
+            },
+            {
+              "Code": "3534",
+              "Name": "Semitrailer Refueler Operator",
+              "High": "E-5",
+              "Low": "E-3"
+            },
+            {
+              "Code": "3536",
+              "Name": "Vehicle Recovery Operator",
+              "High": "E-5",
+              "Low": "E-1"
+            },
+            {
+              "Code": "3537",
+              "Name": "Motor Transport Operations Chief",
+              "High": "E-9",
+              "Low": "E-6"
+            },
+            {
+              "Code": "3538",
+              "Name": "Licensing Examiner",
+              "High": "E-7",
+              "Low": "E-5"
+            },
+            {
+              "Code": "3501",
+              "Name": "Basic Motor Transport Officer"
+            },
+            {
+              "Code": "3502",
+              "Name": "Motor Transport Officer"
+            },
+            {
+              "Code": "3510",
+              "Name": "Motor Transport Maintenance Officer(III)"
+            }
+          ]
+        },
+        {
+          "Type": "Morale Welfare and Recreation",
+          "Items": [
+            {
+              "Code": "4100",
+              "Name": "Basic Marine Corps Community Services Marine",
+              "High": "E-6",
+              "Low": "E-5"
+            },
+            {
+              "Code": "4133",
+              "Name": "Morale, Welfare, Recreation (MWR) Specialist",
+              "High": "E-9",
+              "Low": "E-5"
+            },
+            {
+              "Code": "4101",
+              "Name": "Basic Marine Corps Community Services Officer"
+            },
+            {
+              "Code": "4130",
+              "Name": "Marine Corps Community Services (MCCS) Officer (III)"
+            }
+          ]
+        },
+        {
+          "Type": "Public Affairs",
+          "Items": [
+            {
+              "Code": "4300",
+              "Name": "Basic Combat Correspondent",
+              "High": "E-3",
+              "Low": "E-1"
+            },
+            {
+              "Code": "4312",
+              "Name": "Basic Military Journalism",
+              "High": "E-5",
+              "Low": "E-1"
+            },
+            {
+              "Code": "4313",
+              "Name": "Broadcast Journalist",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "4341",
+              "Name": "Combat Correspondent",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "4330",
+              "Name": "Historical Officer"
+            }
+          ]
+        },
+        {
+          "Type": "Legal Services",
+          "Items": [
+            {
+              "Code": "4400",
+              "Name": "Basic Legal Services Marine",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "4421",
+              "Name": "Legal Services Specialist",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "4429",
+              "Name": "Legal Services Reporter (Voice Recognition)",
+              "High": "E-9",
+              "Low": "E-4"
+            },
+            {
+              "Code": "4401",
+              "Name": "Student Judge Advocate"
+            },
+            {
+              "Code": "4402",
+              "Name": "Judge Advocate",
+              "High": "O-6",
+              "Low": "O-1"
+            },
+            {
+              "Code": "4405",
+              "Name": "Master of International Law (NMOS)",
+              "High": "O-5",
+              "Low": "O-4"
+            },
+            {
+              "Code": "4406",
+              "Name": "Master of Environmental Law (NMOS)",
+              "High": "O-5",
+              "Low": "O-4"
+            },
+            {
+              "Code": "4407",
+              "Name": "Master of Labor Law (NMOS)",
+              "High": "O-5",
+              "Low": "O-4"
+            },
+            {
+              "Code": "4408",
+              "Name": "Master of Procurement Law (NMOS)",
+              "High": "O-4"
+            },
+            {
+              "Code": "4409",
+              "Name": "Master of Criminal Law (NMOS)",
+              "High": "O-6",
+              "Low": "O-4"
+            },
+            {
+              "Code": "4410",
+              "Name": "Master of Law (General) (NMOS)",
+              "High": "O-5",
+              "Low": "O-4"
+            },
+            {
+              "Code": "4417",
+              "Name": "Master of Cyber, Intelligence, and Information Law (NMOS)",
+              "High": "O-5",
+              "Low": "O-4"
+            },
+            {
+              "Code": "4430",
+              "Name": "Legal Administrative Officer",
+              "High": "W-5",
+              "Low": "W-1"
+            }
+          ]
+        },
+        {
+          "Type": "Communication Strategy and Operations",
+          "Items": [
+            {
+              "Code": "4500",
+              "Name": "Basic Communication Strategy & Operations Marine",
+              "High": "E-5",
+              "Low": "E-1"
+            },
+            {
+              "Code": "4512",
+              "Name": "Combat Graphics Specialist",
+              "High": "E-5",
+              "Low": "E-1"
+            },
+            {
+              "Code": "4531",
+              "Name": "Combat Mass Communicator",
+              "High": "E-5",
+              "Low": "E-1"
+            },
+            {
+              "Code": "4541",
+              "Name": "Combat Photographer",
+              "High": "E-5",
+              "Low": "E-1"
+            },
+            {
+              "Code": "4571",
+              "Name": "Combat Videographer",
+              "High": "E-5",
+              "Low": "E-1"
+            },
+            {
+              "Code": "4591",
+              "Name": "Communication and Strategy Operations Chief",
+              "High": "E-9",
+              "Low": "E-6"
+            },
+            {
+              "Code": "4502",
+              "Name": "Communication Strategy & Operations Officer (PMOS) — LtCol",
+              "Low": "O-1"
+            },
+            {
+              "Code": "4503",
+              "Name": "Visual Information Officer (PMOS)",
+              "High": "O-3",
+              "Low": "W-1"
+            }
+          ]
+        },
+        {
+          "Type": "Combat Camera (COMCAM)",
+          "Items": [
+            {
+              "Code": "4600",
+              "Name": "Basic Combat Camera Marine",
+              "High": "E-6",
+              "Low": "E-1"
+            },
+            {
+              "Code": "4612",
+              "Name": "Production Specialist",
+              "High": "E-6",
+              "Low": "E-1"
+            },
+            {
+              "Code": "4616",
+              "Name": "Reproduction Equipment Repairman",
+              "High": "E-6",
+              "Low": "E-4"
+            },
+            {
+              "Code": "4641",
+              "Name": "Combat Photographer",
+              "High": "E-6",
+              "Low": "E-1"
+            },
+            {
+              "Code": "4671",
+              "Name": "Combat Videographer",
+              "High": "E-6",
+              "Low": "E-1"
+            },
+            {
+              "Code": "4691",
+              "Name": "Combat Camera Chief"
+            }
+          ]
+        },
+        {
+          "Type": "Recruiting and Retention Specialist",
+          "Items": [
+            {
+              "Code": "4821",
+              "Name": "Career Retention Specialist (PMOS)",
+              "High": "E-9",
+              "Low": "E-5"
+            },
+            {
+              "Code": "4801",
+              "Name": "Recruiting Officer Marine Corps Total Force Expert FMOS"
+            },
+            {
+              "Code": "4802",
+              "Name": "Recruiting Officer Operational Expert FMOS"
+            },
+            {
+              "Code": "4803",
+              "Name": "Recruiting Officer Procurement Expert FMOS"
+            },
+            {
+              "Code": "4804",
+              "Name": "Recruiting Officer Multiple Tour Expert FMOS"
+            },
+            {
+              "Code": "4810",
+              "Name": "Recruiting Officer (Ill) PMOS",
+              "High": "W-5",
+              "Low": "W-1"
+            }
+          ]
+        },
+        {
+          "Type": "Music",
+          "Items": [
+            {
+              "Code": "5500",
+              "Name": "Basic Musician",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "5511",
+              "Name": "Member, The President's Own, United States Marine Band (PMOS)"
+            },
+            {
+              "Code": "5512",
+              "Name": "Member, The Commandant's Own, United States Marine Drum and Bugle Corps (PMOS)"
+            },
+            {
+              "Code": "5519",
+              "Name": "Enlisted Conductor",
+              "High": "E-7",
+              "Low": "E-6"
+            },
+            {
+              "Code": "5521",
+              "Name": "Drum Major",
+              "High": "E-7",
+              "Low": "E-6"
+            },
+            {
+              "Code": "5522",
+              "Name": "Small Ensemble Leader",
+              "High": "E-7",
+              "Low": "E-6"
+            },
+            {
+              "Code": "5523",
+              "Name": "Instrument Repair Technician",
+              "High": "E-9",
+              "Low": "E-6"
+            },
+            {
+              "Code": "5524",
+              "Name": "Musician",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "5505",
+              "Name": "Director/Assistant Director, The President's Own, U.S. Marine Band[b] (PMOS) COL",
+              "Low": "O-2"
+            },
+            {
+              "Code": "5506",
+              "Name": "Staff Officer, The President's Own, U.S. Marine Band[b] (PMOS) LtCol,CWO5",
+              "Low": "O-3,W-1"
+            },
+            {
+              "Code": "5507",
+              "Name": "U.S. Marine Drum and Bugle Corps Officer[b] (PMOS)"
+            }
+          ]
+        },
+        {
+          "Type": "Chemical, Biological, Radiological, and Nuclear (CBRN) Defense",
+          "Items": [
+            {
+              "Code": "5700",
+              "Name": "Basic Chemical, Biological, Radiological, and Nuclear (CBRN) Defense Marine",
+              "High": "E-6",
+              "Low": "E-1"
+            },
+            {
+              "Code": "5711",
+              "Name": "Chemical, Biological, Radiological, and Nuclear (CBRN) Defense Specialist",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "5769",
+              "Name": "Chemical, Biological, Radiological, and Nuclear (CBRN) Defense Chief",
+              "High": "E-9",
+              "Low": "E-6"
+            },
+            {
+              "Code": "5702",
+              "Name": "Chemical, Biological, Radiological, and Nuclear (CBRN) Defense Officer"
+            }
+          ]
+        },
+        {
+          "Type": "Military Police and Corrections",
+          "Items": [
+            {
+              "Code": "5811",
+              "Name": "Military Police",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "5812",
+              "Name": "Working Dog Handler",
+              "High": "E-6",
+              "Low": "E-1"
+            },
+            {
+              "Code": "5813",
+              "Name": "Accident Investigator",
+              "High": "E-7",
+              "Low": "E-4"
+            },
+            {
+              "Code": "5814",
+              "Name": "Physical Security Specialist",
+              "High": "E-7",
+              "Low": "E-4"
+            },
+            {
+              "Code": "5815",
+              "Name": "Special Reaction Team (SRT) Member",
+              "High": "E-7",
+              "Low": "E-4"
+            },
+            {
+              "Code": "5819",
+              "Name": "Military Police Investigator",
+              "High": "E-7",
+              "Low": "E-4"
+            },
+            {
+              "Code": "5821",
+              "Name": "Criminal Investigator CID Agent",
+              "High": "E-9",
+              "Low": "E-5"
+            },
+            {
+              "Code": "5822",
+              "Name": "Forensic Psycho-physiologist (Polygraph Examiner)",
+              "High": "E-9",
+              "Low": "E-6"
+            },
+            {
+              "Code": "5831",
+              "Name": "Correctional Specialist",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "5832",
+              "Name": "Correctional Counselor",
+              "High": "E-9",
+              "Low": "E-5"
+            },
+            {
+              "Code": "5801",
+              "Name": "Basic Military Police and Corrections Officer"
+            },
+            {
+              "Code": "5803",
+              "Name": "Military Police Officer(I)",
+              "High": "O-5",
+              "Low": "O-1"
+            },
+            {
+              "Code": "5804",
+              "Name": "Corrections Officer(III)",
+              "High": "W-5",
+              "Low": "W-1"
+            },
+            {
+              "Code": "5805",
+              "Name": "Criminal Investigation Officer.",
+              "High": "W-5",
+              "Low": "W-1"
+            }
+          ]
+        },
+        {
+          "Type": "Electronics Maintenance",
+          "Items": [
+            {
+              "Code": "5900",
+              "Name": "Basic Electronics Maintenance Marine"
+            },
+            {
+              "Code": "5912",
+              "Name": "Avenger System Maintainer",
+              "High": "O-8",
+              "Low": "E-1"
+            },
+            {
+              "Code": "5939",
+              "Name": "Aviation Communication Systems Technician",
+              "High": "O-8",
+              "Low": "E-1"
+            },
+            {
+              "Code": "5941",
+              "Name": "Aviation Primary Surveillance Radar Repair Man",
+              "High": "O-8",
+              "Low": "E-1"
+            },
+            {
+              "Code": "5948",
+              "Name": "Aviation Radar Technician",
+              "High": "O-8",
+              "Low": "E-5"
+            },
+            {
+              "Code": "5951",
+              "Name": "Aviation Meteorological Equipment Technician, OMA/IMA"
+            },
+            {
+              "Code": "5952",
+              "Name": "Air Traffic Control Navigational Aids Technician",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "5953",
+              "Name": "Air Traffic Control Radar Technician",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "5954",
+              "Name": "Air Traffic Control Communications Technician",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "5959",
+              "Name": "Air Traffic Control Systems Maintenance Chief",
+              "High": "E-9",
+              "Low": "O-8"
+            },
+            {
+              "Code": "5962",
+              "Name": "Tactical Data Systems Equipment (TDSE) Repairer",
+              "High": "E-5",
+              "Low": "E-1"
+            },
+            {
+              "Code": "5974",
+              "Name": "Tactical Data Systems Administrator (TDSA)",
+              "High": "O-8",
+              "Low": "E-1"
+            },
+            {
+              "Code": "5979",
+              "Name": "Tactical Air Operations Module/Air Defense Technician",
+              "High": "O-8",
+              "Low": "E-1"
+            },
+            {
+              "Code": "5993",
+              "Name": "Electronics Maintenance Chief"
+            },
+            {
+              "Code": "5902",
+              "Name": "Electronics Maintenance Officer (Aviation)"
+            },
+            {
+              "Code": "5910",
+              "Name": "Aviation Radar Maintenance Officer"
+            },
+            {
+              "Code": "5950",
+              "Name": "Air Traffic Control Systems Maintenance Officer"
+            },
+            {
+              "Code": "5970",
+              "Name": "Data Systems Maintenance Officer"
+            }
+          ]
+        },
+        {
+          "Type": "Aircraft Maintenance",
+          "Items": [
+            {
+              "Code": "3215",
+              "Name": "Basic Aircraft Maintenance Marine",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6012",
+              "Name": "Aviation Maintenance Controller/Production Controller",
+              "High": "E-7",
+              "Low": "E-5"
+            },
+            {
+              "Code": "6016",
+              "Name": "Collateral Duty Inspector (CDI)",
+              "High": "E-9",
+              "Low": "E-4"
+            },
+            {
+              "Code": "6018",
+              "Name": "Aviation Quality Assurance Representative (QAR) Inspector",
+              "High": "E-9",
+              "Low": "E-4"
+            },
+            {
+              "Code": "6019",
+              "Name": "Aircraft Maintenance Chief",
+              "High": "E-9",
+              "Low": "O-8"
+            },
+            {
+              "Code": "6023",
+              "Name": "Aircraft Power Plants Test Cell Operator",
+              "High": "E-7",
+              "Low": "E-4"
+            },
+            {
+              "Code": "6033",
+              "Name": "Aircraft Nondestructive Inspection Technician",
+              "High": "E-7",
+              "Low": "E-4"
+            },
+            {
+              "Code": "6042",
+              "Name": "Individual Material Readiness List (IMRL) Asset Manager",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6043",
+              "Name": "Aircraft Welder",
+              "High": "E-7",
+              "Low": "E-3"
+            },
+            {
+              "Code": "6046",
+              "Name": "Aircraft Maintenance Administration Specialist",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6049",
+              "Name": "NALCOMIS Application Administrator/Analyst",
+              "High": "E-9",
+              "Low": "E-5"
+            },
+            {
+              "Code": "6061",
+              "Name": "Aircraft Intermediate Level Hydraulic/Pneumatic Mechanic-Trainee",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6062",
+              "Name": "Aircraft Intermediate Level Hydraulic/Pneumatic Mechanic",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6071",
+              "Name": "Aircraft Maintenance Support Equipment (SE) Mechanic-Trainee",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6072",
+              "Name": "Aircraft Maintenance Support Equipment (SE) Hydraulic/Pneumatic/Structures Mechanic",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6073",
+              "Name": "Aircraft Maintenance Support Equipment (SE) Electrician/Refrigeration Mechanic",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6074",
+              "Name": "Cryogenics Equipment Operator",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6091",
+              "Name": "Aircraft Intermediate Level Structures Mechanic-Trainee",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6092",
+              "Name": "Aircraft Intermediate Level Structures Mechanic",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6100",
+              "Name": "Helicopter/Tiltrotor Mechanic-Trainee",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6112",
+              "Name": "Helicopter Mechanic, CH-46",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6113",
+              "Name": "Helicopter Mechanic, CH-53",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6114",
+              "Name": "Helicopter Mechanic, UH/AH-1",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6116",
+              "Name": "Tiltrotor Mechanic, MV-22",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6122",
+              "Name": "Helicopter Power Plants Mechanic, T-58",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6123",
+              "Name": "Helicopter Power Plants Mechanic, T-64",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6124",
+              "Name": "Helicopter Power Plants Mechanic, T-400/T-700",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6132",
+              "Name": "Helicopter/Tiltrotor Dynamic Components Mechanic",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6151",
+              "Name": "Helicopter/Tiltrotor Airframe Mechanic-Trainee",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6152",
+              "Name": "Helicopter Airframe Mechanic, CH-46",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6153",
+              "Name": "Helicopter Airframe Mechanic, CH-53",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6154",
+              "Name": "Helicopter Airframe Mechanic, UH/AH-1",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6156",
+              "Name": "Tiltrotor Airframe Mechanic, MV-22",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6162",
+              "Name": "Presidential Support Specialist",
+              "High": "E-9",
+              "Low": "E-3"
+            },
+            {
+              "Code": "6172",
+              "Name": "Helicopter Crew Chief, CH-46",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6173",
+              "Name": "Helicopter Crew Chief, CH-53",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6174",
+              "Name": "Helicopter Crew Chief, UH-1N/Y",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6176",
+              "Name": "Tiltrotor Crew Chief, MV-22",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6177",
+              "Name": "Weapons and Tactics Crew Chief Instructor",
+              "High": "E-9",
+              "Low": "E-3"
+            },
+            {
+              "Code": "6178",
+              "Name": "VH-60N Presidential Helicopter Crew Chief",
+              "High": "E-9",
+              "Low": "E-3"
+            },
+            {
+              "Code": "6179",
+              "Name": "VH-3D Presidential Helicopter Crew Chief",
+              "High": "E-9",
+              "Low": "E-3"
+            },
+            {
+              "Code": "6199",
+              "Name": "Enlisted Aircrew/Aerial Observer/Gunner",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6211",
+              "Name": "Fixed-wing Aircraft MechanicTrainee",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6212",
+              "Name": "Fixed-Wing Aircraft Mechanic, AV-8/TAV-8",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6213",
+              "Name": "Fixed-Wing Aircraft Mechanic, EA-6",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6214",
+              "Name": "Unmanned Aerial Vehicle (UAV) Mechanic",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6216",
+              "Name": "Fixed-Wing Aircraft Mechanic, KC-130",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6217",
+              "Name": "Fixed-Wing Aircraft Mechanic, F/A-18",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6218",
+              "Name": "Fixed-Wing Aircraft Mechanic, F35B",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6222",
+              "Name": "Fixed-Wing Aircraft Power Plants Mechanic, F-402",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6223",
+              "Name": "Fixed-Wing Aircraft Power Plants Mechanic, J-52",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6226",
+              "Name": "Fixed-Wing Aircraft Power Plants Mechanic, T-56",
+              "High": "E-7",
+              "Low": "E-3"
+            },
+            {
+              "Code": "6227",
+              "Name": "Fixed-Wing Aircraft Power Plants Mechanic, F-404",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6242",
+              "Name": "Fixed-Wing Aircraft Flight Engineer, KC-130",
+              "High": "E-9",
+              "Low": "E-5"
+            },
+            {
+              "Code": "6243",
+              "Name": "Fixed-Wing Transport Aircraft Specialist, C-9",
+              "High": "E-9",
+              "Low": "E-3"
+            },
+            {
+              "Code": "6244",
+              "Name": "Fixed-Wing Transport Aircraft Specialist, C-12",
+              "High": "E-9",
+              "Low": "E-2"
+            },
+            {
+              "Code": "6246",
+              "Name": "Fixed-Wing Transport Aircraft Specialist, C-20",
+              "High": "E-9",
+              "Low": "E-3"
+            },
+            {
+              "Code": "6247",
+              "Name": "Fixed-Wing Transport Aircraft Specialist, UC-35",
+              "High": "E-9",
+              "Low": "E-3"
+            },
+            {
+              "Code": "6251",
+              "Name": "Fixed-Wing Aircraft Airframe MechanicTrainee",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6252",
+              "Name": "Fixed-Wing Aircraft Airframe Mechanic, AV-8/TAV-8",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6253",
+              "Name": "Fixed-Wing Aircraft Airframe Mechanic, EA-6",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6256",
+              "Name": "Fixed-Wing Aircraft Airframe Mechanic, KC-130",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6257",
+              "Name": "Fixed-Wing Aircraft Airframe Mechanic, F/A-18",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6258",
+              "Name": "Fixed-Wing Aircraft Airframe Mechanic, F-35B",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6276",
+              "Name": "Fixed-Wing Aircraft Crew Master, KC-130",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6281",
+              "Name": "Fixed-Wing Aircraft Safety Equipment Mechanic-Trainee",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6282",
+              "Name": "Fixed-Wing Aircraft Safety Equipment Mechanic, AV-8/TAV-8",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6283",
+              "Name": "Fixed-Wing Aircraft Safety Equipment Mechanic, EA-6",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6286",
+              "Name": "Fixed-Wing Aircraft Safety Equipment Mechanic, KC-130",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6287",
+              "Name": "Fixed-Wing Aircraft Safety Equipment Mechanic, F/A-18",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6002",
+              "Name": "Aircraft Maintenance Officer"
+            },
+            {
+              "Code": "6004",
+              "Name": "Aircraft Maintenance Engineer Officer"
+            }
+          ]
+        },
+        {
+          "Type": "Avionics",
+          "Items": [
+            {
+              "Code": "6311",
+              "Name": "Aircraft Communications/Navigation/Electrical/Weapon Systems Technician-Trainee, OMA"
+            },
+            {
+              "Code": "6313",
+              "Name": "Aircraft Communications/Navigation/Radar Systems Technician, EA"
+            },
+            {
+              "Code": "6314",
+              "Name": "Unmanned Aerial Vehicle (UAV) Avionics Technician"
+            },
+            {
+              "Code": "6316",
+              "Name": "Aircraft Communications/Navigation Systems Technician, KC"
+            },
+            {
+              "Code": "6317",
+              "Name": "Aircraft Communications/Navigation Systems Technician, F/A"
+            },
+            {
+              "Code": "6322",
+              "Name": "Aircraft Communications/Navigation/Electrical Systems Technician, CH"
+            },
+            {
+              "Code": "6323",
+              "Name": "Aircraft Communications/Navigation/Electrical Systems Technician, CH"
+            },
+            {
+              "Code": "6324",
+              "Name": "Aircraft Communications/Navigation/Electrical/Weapon Systems Technician, U/AH"
+            },
+            {
+              "Code": "6326",
+              "Name": "Aircraft Communications/Navigation/Electrical/Weapon Systems Technician, V"
+            },
+            {
+              "Code": "6331",
+              "Name": "Aircraft Electrical Systems Technician"
+            },
+            {
+              "Code": "6332",
+              "Name": "Aircraft Electrical Systems Technician, AV"
+            },
+            {
+              "Code": "6333",
+              "Name": "Aircraft Electrical Systems Technician, EA"
+            },
+            {
+              "Code": "6336",
+              "Name": "Aircraft Electrical Systems Technician, KC"
+            },
+            {
+              "Code": "6337",
+              "Name": "Aircraft Electrical Systems Technician, F/A"
+            },
+            {
+              "Code": "6338",
+              "Name": "Aircraft Avionics Technician, F"
+            },
+            {
+              "Code": "6344",
+              "Name": "Aircraft Electric Systems Technician, UH-1N/AH-1T"
+            },
+            {
+              "Code": "6365",
+              "Name": "Aircraft Communications/Navigation/DECM/Radar Systems Technician, EA"
+            },
+            {
+              "Code": "6386",
+              "Name": "Aircraft Electronic Countermeasures Systems Technician, EA"
+            },
+            {
+              "Code": "6391",
+              "Name": "Avionics Maintenance Chief"
+            },
+            {
+              "Code": "6411",
+              "Name": "Aircraft Communications/Navigation Systems Technician Trainee, IMA"
+            },
+            {
+              "Code": "6412",
+              "Name": "Aircraft Communications Systems Technician, IMA"
+            },
+            {
+              "Code": "6413",
+              "Name": "Aircraft Navigation Systems Technician, IFF/RADAR/TACAN, IMA"
+            },
+            {
+              "Code": "6422",
+              "Name": "Aircraft Cryptographic Systems Technician, IMA"
+            },
+            {
+              "Code": "6423",
+              "Name": "Aviation Electronic Microminiature/Instrument and Cable Repair Technician, IMA"
+            },
+            {
+              "Code": "6431",
+              "Name": "Aircraft Electrical Systems Technician Trainee"
+            },
+            {
+              "Code": "6432",
+              "Name": "Aircraft Electrical/Instrument/Flight Control Systems Technician, Fixed Wing, IMA"
+            },
+            {
+              "Code": "6434",
+              "Name": "Advanced Aircraft Electrical/Instrument/Flight Control Systems Technician, IMA"
+            },
+            {
+              "Code": "6461",
+              "Name": "Hybrid Test Set Technician, IMA"
+            },
+            {
+              "Code": "6462",
+              "Name": "Avionics Test Set (ATS) Technician, IMA"
+            },
+            {
+              "Code": "6463",
+              "Name": "Radar Test Station (RTS)/Radar Systems Test Station (RSTS) Technician, IMA"
+            },
+            {
+              "Code": "6464",
+              "Name": "Aircraft Inertial Navigation System Technician, IMA"
+            },
+            {
+              "Code": "6466",
+              "Name": "Aircraft Forward Looking Infrared/Electro-Optical Technician, IMA"
+            },
+            {
+              "Code": "6467",
+              "Name": "Consolidated Automatic Support System (CASS) Technician, IMA"
+            },
+            {
+              "Code": "6468",
+              "Name": "Aircraft Electrical Equipment Test Set (EETS)/Mobile Electronic Test Set (METS) Technician"
+            },
+            {
+              "Code": "6469",
+              "Name": "Advanced Automatic Test Equipment Technician, IMA"
+            },
+            {
+              "Code": "6482",
+              "Name": "Aircraft Electronic Countermeasures Systems Technician, Fixed Wing, IMA"
+            },
+            {
+              "Code": "6483",
+              "Name": "Aircraft Electronic Countermeasures Systems Technician, Helicopter, IMA"
+            },
+            {
+              "Code": "6484",
+              "Name": "Aircraft Electronic Countermeasures Systems/RADCOM/CAT IIID Technician, IMA"
+            },
+            {
+              "Code": "6486",
+              "Name": "Advanced Aircraft Electronic Countermeasures Technician, IMA"
+            },
+            {
+              "Code": "6491",
+              "Name": "Aviation Precision Measurement Equipment (PME) Chief"
+            },
+            {
+              "Code": "6492",
+              "Name": "Aviation Precision Measurement Equipment/Calibration and Repair Technician, IMA"
+            },
+            {
+              "Code": "6499",
+              "Name": "Mobile Facilities Technician",
+              "High": "E-7",
+              "Low": "E-4"
+            },
+            {
+              "Code": "6302",
+              "Name": "Avionics Officer"
+            }
+          ]
+        },
+        {
+          "Type": "Aviation Ordnance",
+          "Items": [
+            {
+              "Code": "6500",
+              "Name": "Basic Aviation Ordnance Marine"
+            },
+            {
+              "Code": "6511",
+              "Name": "Aviation Ordnance TechnicianTrainee"
+            },
+            {
+              "Code": "6521",
+              "Name": "Aviation Ordnance Munitions Technician, IMA"
+            },
+            {
+              "Code": "6531",
+              "Name": "Aircraft Ordnance Technician",
+              "High": "E-6",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6541",
+              "Name": "Aviation Ordnance Systems Technician",
+              "High": "E-6",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6591",
+              "Name": "Aviation Ordnance Chief",
+              "High": "E-9",
+              "Low": "E-7"
+            },
+            {
+              "Code": "6501",
+              "Name": "Basic Aviation Ordnance Officer"
+            },
+            {
+              "Code": "6502",
+              "Name": "Aviation Ordnance Officer(II/III)"
+            }
+          ]
+        },
+        {
+          "Type": "Aviation Logistics",
+          "Items": [
+            {
+              "Code": "6600",
+              "Name": "Basic Aviation Supply Marine"
+            },
+            {
+              "Code": "6613",
+              "Name": "Radio Communication and Navigation Systems Technician on Utility Aircraft"
+            },
+            {
+              "Code": "6617",
+              "Name": "Enlisted Aviation Logistician",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6672",
+              "Name": "Aviation Supply Specialist",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6673",
+              "Name": "Automated Information Systems (AIS) Computer Operator"
+            },
+            {
+              "Code": "6694",
+              "Name": "Aviation Logistics Information Management and Support Specialists",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6601",
+              "Name": "Basic Aviation Logistics Officer"
+            },
+            {
+              "Code": "6602",
+              "Name": "Aviation Supply Officer(I)"
+            },
+            {
+              "Code": "6604",
+              "Name": "Aviation Supply Operations Officer(III)"
+            },
+            {
+              "Code": "6607",
+              "Name": "Aviation Logistician"
+            },
+            {
+              "Code": "6677",
+              "Name": "Weapons and Tactics Instructor-Aviation Logistician"
+            }
+          ]
+        },
+        {
+          "Type": "Meteorological and Oceanographic (METOC)",
+          "Items": [
+            {
+              "Code": "6800",
+              "Name": "Basic Meteorology & Oceanography (METOC) Marine"
+            },
+            {
+              "Code": "6842",
+              "Name": "METOC Analyst Forecaster",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "6852",
+              "Name": "METOC Impact Analyst",
+              "High": "E-9",
+              "Low": "E-4"
+            },
+            {
+              "Code": "6801",
+              "Name": "Basic Meteorology & Oceanography (METOC) Officer"
+            },
+            {
+              "Code": "6802",
+              "Name": "Meteorological and Oceanographic (METOC) Officer(II/III)"
+            },
+            {
+              "Code": "6877",
+              "Name": "Weapons and Tactics Instructor-METOC"
+            }
+          ]
+        },
+        {
+          "Type": "Airfield Services",
+          "Items": [
+            {
+              "Code": "7000",
+              "Name": "Basic Airfield Services Marine",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "7011",
+              "Name": "Expeditionary Airfield Systems Technician",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "7041",
+              "Name": "Aviation Operations Specialist",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "7051",
+              "Name": "Aircraft Rescue and Firefighting Specialist",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "7001",
+              "Name": "Basic Airfield Services Officer (CWO5",
+              "Low": "WO)"
+            },
+            {
+              "Code": "7002",
+              "Name": "Expeditionary Airfield and Emergency Services Officer (III)"
+            },
+            {
+              "Code": "7077",
+              "Name": "Weapons and Tactics Instructor-Aviation Ground Support"
+            }
+          ]
+        },
+        {
+          "Type": "Air Control/Air Support/Anti-air Warfare/Air Traffic Control",
+          "Items": [
+            {
+              "Code": "7200",
+              "Name": "Basic Air Control/Air Support/Antiair Warfare/Air Traffic Control Marine"
+            },
+            {
+              "Code": "72X1 Air Control/Air Support/Anti-Air Warfare Trainee"
+            },
+            {
+              "Code": "7212",
+              "Name": "Low Altitude Air Defense Gunner"
+            },
+            {
+              "Code": "7222",
+              "Name": "Hawk Missile Operator"
+            },
+            {
+              "Code": "7236",
+              "Name": "Tactical Air Defense Controller"
+            },
+            {
+              "Code": "7242",
+              "Name": "Air Support Operations Operator"
+            },
+            {
+              "Code": "7251",
+              "Name": "Air Traffic Controller-Trainee"
+            },
+            {
+              "Code": "7252",
+              "Name": "Air Traffic Controller-Tower"
+            },
+            {
+              "Code": "7253",
+              "Name": "Air Traffic Controller-Radar Arrival/Departure Controller"
+            },
+            {
+              "Code": "7254",
+              "Name": "Air Traffic Controller-Radar Approach Controller (NMOS)",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "7257",
+              "Name": "Air Traffic Controller",
+              "High": "E-6",
+              "Low": "E-1"
+            },
+            {
+              "Code": "7291",
+              "Name": "Senior Air Traffic Controller",
+              "High": "E-9",
+              "Low": "E-7"
+            },
+            {
+              "Code": "7201",
+              "Name": "Basic Air Control/Air Support/Antiair Warfare/Air Traffic Control Officer"
+            },
+            {
+              "Code": "7202",
+              "Name": "Air Command and Control Officer"
+            },
+            {
+              "Code": "7204",
+              "Name": "Low Altitude Air Defense Officer"
+            },
+            {
+              "Code": "7207",
+              "Name": "Forward Air Controller/Air Officer"
+            },
+            {
+              "Code": "7208",
+              "Name": "Air Support Control Officer"
+            },
+            {
+              "Code": "7210",
+              "Name": "Air Defense Control Officer"
+            },
+            {
+              "Code": "7220",
+              "Name": "Air Traffic Control Officer"
+            },
+            {
+              "Code": "7277",
+              "Name": "Weapons and Tactics Instructor-Air Control"
+            }
+          ]
+        },
+        {
+          "Type": "Navigation Officer/Enlisted Flight Crews",
+          "Items": [
+            {
+              "Code": "7300",
+              "Name": "Basic Enlisted Flight Crew Marine",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "73X1 Air Traffic Control & Enlisted Flight Crews Trainee"
+            },
+            {
+              "Code": "7313",
+              "Name": "Helicopter Specialist, AH-1Z/UH-1Y",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "7314",
+              "Name": "Unmanned Aerial Vehicle (UAV) Air Vehicle Operator",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "7371",
+              "Name": "Tactical Systems Operator-Trainee"
+            },
+            {
+              "Code": "7372",
+              "Name": "Tactical Systems Operator/Mission Specialist"
+            },
+            {
+              "Code": "7381",
+              "Name": "Airborne Radio Operator / In-flight Refueling Observer / Loadmaster Trainee (ARO / IRO / LM)"
+            },
+            {
+              "Code": "7382",
+              "Name": "Airborne Radio Operator/In-flight Refueling Observer/Loadmaster"
+            },
+            {
+              "Code": "7301",
+              "Name": "Basic Navigation Officer"
+            },
+            {
+              "Code": "7315",
+              "Name": "Unmanned Aircraft System (UAS) MAGTF Electronic Warfare Officer (EWO)"
+            },
+            {
+              "Code": "7380",
+              "Name": "Tactical Systems Officer/Mission Specialist(III)"
+            }
+          ]
+        },
+        {
+          "Type": "Pilots/Naval Flight Officers",
+          "Items": [
+            {
+              "Code": "7500",
+              "Name": "Pilot VMA, FRS Basic A-4M"
+            },
+            {
+              "Code": "7501",
+              "Name": "Pilot VMA, A-4 Qualified"
+            },
+            {
+              "Code": "7502",
+              "Name": "Forward Air Controller/Air Officer (FMOS)",
+              "High": "O-6",
+              "Low": "O-1"
+            },
+            {
+              "Code": "7503",
+              "Name": "Billet Designator-Fixed-Wing Pilot (FMOS)",
+              "High": "O-5",
+              "Low": "O-1"
+            },
+            {
+              "Code": "7504",
+              "Name": "Billet Designator-Naval Flight Officer (FMOS)",
+              "High": "O-5",
+              "Low": "O-1"
+            },
+            {
+              "Code": "7505",
+              "Name": "Billet Designator-Helicopter Pilot (FMOS)",
+              "High": "O-5",
+              "Low": "O-1"
+            },
+            {
+              "Code": "7506",
+              "Name": "Billet Designator-Any Pilot/Naval Flight Officer (FMOS)",
+              "High": "O-5",
+              "Low": "O-1"
+            },
+            {
+              "Code": "7507",
+              "Name": "Pilot VMA FRS Basic AV-8B Pilot"
+            },
+            {
+              "Code": "7508",
+              "Name": "Pilot VMA, AV-8A/C Qualified"
+            },
+            {
+              "Code": "7509",
+              "Name": "Pilot VMA AV-8B Qualified"
+            },
+            {
+              "Code": "7510",
+              "Name": "Pilot VMA (AW), A-6E FRS Basic"
+            },
+            {
+              "Code": "7511",
+              "Name": "Pilot VMA (AW), A-6E Qualified"
+            },
+            {
+              "Code": "7513",
+              "Name": "Pilot Helicopter AH-1Z/UH-1Y[17] (NMOS)",
+              "High": "O-5",
+              "Low": "O-1"
+            },
+            {
+              "Code": "7516",
+              "Name": "Pilot VMFA FRS Basic F-35B Pilot",
+              "High": "O-5",
+              "Low": "O-1"
+            },
+            {
+              "Code": "7517",
+              "Name": "VH-92, Presidential Helicopter Pilot (NMOS)",
+              "High": "O-6",
+              "Low": "O-3"
+            },
+            {
+              "Code": "7518",
+              "Name": "Pilot VMFA, F-35 Qualified"
+            },
+            {
+              "Code": "7521",
+              "Name": "Pilot VMFA, F-4B Qualified, F/A-18 FRS Basic"
+            },
+            {
+              "Code": "7522",
+              "Name": "Pilot VMFA, F-4S Qualified"
+            },
+            {
+              "Code": "7523",
+              "Name": "Pilot VMFA, F/A-18 Qualified"
+            },
+            {
+              "Code": "7524",
+              "Name": "Weapons Systems Officer (WSO), F/A-18D FRS Basic"
+            },
+            {
+              "Code": "7525",
+              "Name": "Weapons Systems Officer (WSO), F/A-18D Qualified"
+            },
+            {
+              "Code": "7527",
+              "Name": "Pilot VMFA, F/A-18D Qualified"
+            },
+            {
+              "Code": "7531",
+              "Name": "Pilot VMM, V-22 FRS Basic"
+            },
+            {
+              "Code": "7532",
+              "Name": "Pilot VMM, V-22 Qualified"
+            },
+            {
+              "Code": "7541",
+              "Name": "Pilot VMAQ/VMFP, EA-6B FRS Basic"
+            },
+            {
+              "Code": "7542",
+              "Name": "Pilot VMAQ/VMFP, EA-6A Qualified"
+            },
+            {
+              "Code": "7543",
+              "Name": "Pilot VMAQ/VMFP, EA-6B Qualified"
+            },
+            {
+              "Code": "7545",
+              "Name": "Pilot VMAQ/VMFP, RF-4B Qualified"
+            },
+            {
+              "Code": "7550",
+              "Name": "Pilot VMGR, Maritime Advance (NATC)"
+            },
+            {
+              "Code": "7551",
+              "Name": "Pilot VMGR, C-9 Qualified"
+            },
+            {
+              "Code": "7552",
+              "Name": "Pilot VMGR, TC-4C Qualified"
+            },
+            {
+              "Code": "7553",
+              "Name": "Pilot, C-20 Qualified"
+            },
+            {
+              "Code": "7554",
+              "Name": "Pilot VMGR, UC-35 Qualified"
+            },
+            {
+              "Code": "7555",
+              "Name": "Pilot VMGR, UC-12B Qualified"
+            },
+            {
+              "Code": "7556",
+              "Name": "Pilot VMGR, KC-130 Co-Pilot (T2P/T3P)"
+            },
+            {
+              "Code": "7557",
+              "Name": "Pilot VMGR, KC-130 Aircraft Commander"
+            },
+            {
+              "Code": "7558",
+              "Name": "Pilot HMH/M/L/A, CH-53D FRS Basic"
+            },
+            {
+              "Code": "7559",
+              "Name": "Pilot VMGR, CT-39 Qualified"
+            },
+            {
+              "Code": "7560",
+              "Name": "Pilot HMH/M/L/A, CH-53E FRS Basic"
+            },
+            {
+              "Code": "7561",
+              "Name": "Pilot HMH/M/L/A, CH-46 FRS Basic"
+            },
+            {
+              "Code": "7562",
+              "Name": "Pilot HMH/M/L/A, CH-46 Qualified"
+            },
+            {
+              "Code": "7563",
+              "Name": "Pilot HMH/M/L/A, UH-1 Qualified"
+            },
+            {
+              "Code": "7564",
+              "Name": "Pilot HMH/M/L/A, CH-53 A/D Qualified"
+            },
+            {
+              "Code": "7565",
+              "Name": "Pilot HMH/M/L/A, AH-1 Qualified"
+            },
+            {
+              "Code": "7566",
+              "Name": "Pilot HMH/M/L/A, CH-53E Qualified"
+            },
+            {
+              "Code": "7567",
+              "Name": "Pilot HMH/M/L/A, UH-1N FRS Basic"
+            },
+            {
+              "Code": "7568",
+              "Name": "Pilot HMH/M/L/A, AH-1 FRS Basic"
+            },
+            {
+              "Code": "7574",
+              "Name": "Qualified Supporting Arms Coordinator (Airborne)."
+            },
+            {
+              "Code": "7576",
+              "Name": "Pilot VMO"
+            },
+            {
+              "Code": "7577",
+              "Name": "Weapons and Tactics Instructor"
+            },
+            {
+              "Code": "7578",
+              "Name": "Student, Naval Flight Officer (NFO)"
+            },
+            {
+              "Code": "7580",
+              "Name": "Student, Tactical Navigator Flight"
+            },
+            {
+              "Code": "7582",
+              "Name": "Electronic Warfare Officer (EWO), EA-6B FRS Basic"
+            },
+            {
+              "Code": "7583",
+              "Name": "Bombardier/Navigator, A-6E Qualified"
+            },
+            {
+              "Code": "7584",
+              "Name": "Electronic Warfare Officer (EWO), EA-6A Qualified"
+            },
+            {
+              "Code": "7585",
+              "Name": "Airborne Reconnaissance Officer (ARO) Qualified RF-4B"
+            },
+            {
+              "Code": "7587",
+              "Name": "Radar Intercept Officer (RIO), F-4S"
+            },
+            {
+              "Code": "7588",
+              "Name": "Electronic Warfare Officer (EWO), EA-6B Qualified"
+            },
+            {
+              "Code": "7589",
+              "Name": "V/STOL Landing Signal Officer (LSO)"
+            },
+            {
+              "Code": "7590",
+              "Name": "Landing Signal Officer Trainee"
+            },
+            {
+              "Code": "7591",
+              "Name": "Naval Flight Officer (VMAW)"
+            },
+            {
+              "Code": "7592",
+              "Name": "Pilot VMAW"
+            },
+            {
+              "Code": "7593",
+              "Name": "Landing Signal Officer, Phase I/II Qualified"
+            },
+            {
+              "Code": "7594",
+              "Name": "Landing Signal Officer, Phase III Qualified"
+            },
+            {
+              "Code": "7595",
+              "Name": "Test Pilot/Flight Test Project Officer"
+            },
+            {
+              "Code": "7596",
+              "Name": "Aviation Safety Officer (ASO)"
+            },
+            {
+              "Code": "7597",
+              "Name": "Pilot, Rotary Wing, Basic"
+            },
+            {
+              "Code": "7598",
+              "Name": "Pilot, Fixed Wing, Basic"
+            },
+            {
+              "Code": "7599",
+              "Name": "Student Naval Aviator"
+            }
+          ]
+        },
+        {
+          "Type": "Miscellaneous MOS's (Category II)",
+          "Items": [
+            {
+              "Code": "8001",
+              "Name": "Basic Officer"
+            },
+            {
+              "Code": "8002",
+              "Name": "Joint Terminal Attack Controller (EMOS)"
+            },
+            {
+              "Code": "8003",
+              "Name": "General Officer (PMOS)",
+              "High": "O-10",
+              "Low": "O-7"
+            },
+            {
+              "Code": "8005",
+              "Name": "Special Assignment Officer (FMOS)"
+            },
+            {
+              "Code": "8006",
+              "Name": "Billet Designator—Unrestricted Officer (FMOS)"
+            },
+            {
+              "Code": "8007",
+              "Name": "Billet Designator—Unrestricted Ground Officer (FMOS)"
+            },
+            {
+              "Code": "8009",
+              "Name": "Billet Designator—Air Control/Antiair Warfare Officer (FMOS)"
+            },
+            {
+              "Code": "8010",
+              "Name": "Billet Designator",
+              "Low": "Warrant Officer"
+            },
+            {
+              "Code": "8012",
+              "Name": "Ground Safety Officer (Officer FMOS)"
+            },
+            {
+              "Code": "8016",
+              "Name": "Special Technical Operations (Officer FMOS)"
+            },
+            {
+              "Code": "8023",
+              "Name": "Parachute Officer (NMOS)"
+            },
+            {
+              "Code": "8024",
+              "Name": "Combatant Diver Officer (NMOS)"
+            },
+            {
+              "Code": "8026",
+              "Name": "Parachute/Combatant Diver Officer (NMOS)"
+            },
+            {
+              "Code": "8040",
+              "Name": "Colonel, Logistician (PMOS)",
+              "High": "O-6"
+            },
+            {
+              "Code": "8041",
+              "Name": "Colonel, Ground (PMOS)",
+              "High": "O-6"
+            },
+            {
+              "Code": "8042",
+              "Name": "Colonel, Naval Aviator/Naval Flight Officer (PMOS)",
+              "High": "O-6"
+            },
+            {
+              "Code": "8051",
+              "Name": "Operations Research Specialist (FMOS)"
+            },
+            {
+              "Code": "8055",
+              "Name": "Information Management Officer (FMOS)"
+            },
+            {
+              "Code": "8156",
+              "Name": "Hazardous Material/Hazardous Waste (Officer) (FMOS)"
+            },
+            {
+              "Code": "8057",
+              "Name": "Acquisition Professional Candidate (FMOS)"
+            },
+            {
+              "Code": "8058",
+              "Name": "Acquisition Manager (Acquisition Core Member) (FMOS)"
+            },
+            {
+              "Code": "8059",
+              "Name": "Aviation Acquisition Management Professional (PMOS)",
+              "High": "O-8",
+              "Low": "O-4"
+            },
+            {
+              "Code": "8060",
+              "Name": "Acquisition Specialist (FMOS)"
+            },
+            {
+              "Code": "8061",
+              "Name": "Acquisition Management Professional (PMOS)",
+              "High": "O-8",
+              "Low": "O-4"
+            },
+            {
+              "Code": "8077",
+              "Name": "Weapons And Tactics Instructor Air Officer (FMOS)"
+            },
+            {
+              "Code": "8220",
+              "Name": "Billet Designator—Political Military Officer (FMOS*)"
+            },
+            {
+              "Code": "8221",
+              "Name": "Regional Affairs Officer, Latin America (FMOS)"
+            },
+            {
+              "Code": "8222",
+              "Name": "Regional Affairs Officer, Former Soviet Union (FMOS)"
+            },
+            {
+              "Code": "8223",
+              "Name": "Regional Affairs Officer, Northeast Asia (FMOS)"
+            },
+            {
+              "Code": "8224",
+              "Name": "Regional Affairs Officer, Middle East/North Africa (FMOS)"
+            },
+            {
+              "Code": "8225",
+              "Name": "Regional Affairs Officer, Sub-Saharan Africa (FMOS)"
+            },
+            {
+              "Code": "8226",
+              "Name": "Regional Affairs Officer, Southwest Asia (FMOS)"
+            },
+            {
+              "Code": "8227",
+              "Name": "Regional Affairs Officer, Western Europe (FMOS)"
+            },
+            {
+              "Code": "8228",
+              "Name": "Regional Affairs Officer, Eastern Asia (Excluding People's Republic of China) (FMOS)"
+            },
+            {
+              "Code": "8229",
+              "Name": "Regional Affairs Officer, Eastern Europe (Excluding Former Soviet Union) (FMOS)"
+            },
+            {
+              "Code": "8240",
+              "Name": "Basic Foreign Area officer (FAO) (FMOS)"
+            },
+            {
+              "Code": "8241",
+              "Name": "Foreign Area Officer, Latin America (FMOS)"
+            },
+            {
+              "Code": "8242",
+              "Name": "Foreign Area Officer, Former Soviet Union (FMOS)"
+            },
+            {
+              "Code": "8243",
+              "Name": "Foreign Area Officer, People's Republic of China (PRC) (FMOS)"
+            },
+            {
+              "Code": "8244",
+              "Name": "Foreign Area Officer, Middle East/North Africa (FMOS)"
+            },
+            {
+              "Code": "8245",
+              "Name": "Foreign Area Officer, Sub-Saharan Africa (FMOS)"
+            },
+            {
+              "Code": "8246",
+              "Name": "Foreign Area Officer, Southwest Asia (FMOS)"
+            },
+            {
+              "Code": "8247",
+              "Name": "Foreign Area Officer, Western Europe (FMOS)"
+            },
+            {
+              "Code": "8248",
+              "Name": "Foreign Area Officer, East Asia (Excluding PRC) (FMOS)"
+            },
+            {
+              "Code": "8249",
+              "Name": "Foreign Area Officer, Eastern Europe (Excluding Former Soviet Union) (FMOS)"
+            },
+            {
+              "Code": "8802",
+              "Name": "Education Officer (FMOS)"
+            },
+            {
+              "Code": "8803",
+              "Name": "Leadership Development Specialist (FMOS)"
+            },
+            {
+              "Code": "8820",
+              "Name": "Aeronautical Engineer (FMOS)"
+            },
+            {
+              "Code": "8824",
+              "Name": "Electronics Engineer (FMOS)"
+            },
+            {
+              "Code": "8825",
+              "Name": "Modeling and Simulation Officer (FMOS)"
+            },
+            {
+              "Code": "8826",
+              "Name": "Ordnance Systems Engineer (FMOS)"
+            },
+            {
+              "Code": "8831",
+              "Name": "Environmental Engineering Management Officer (FMOS)"
+            },
+            {
+              "Code": "8832",
+              "Name": "Nuclear Engineer (FMOS)"
+            },
+            {
+              "Code": "8834",
+              "Name": "Technical Information Operation Officer (FMOS)"
+            },
+            {
+              "Code": "8840",
+              "Name": "Manpower Management Officer (FMOS)"
+            },
+            {
+              "Code": "8844",
+              "Name": "Financial Management Specialist (FMOS)"
+            },
+            {
+              "Code": "8846",
+              "Name": "Data Systems Specialist (FMOS)"
+            },
+            {
+              "Code": "8848",
+              "Name": "Management, Data Systems Officer (FMOS)"
+            },
+            {
+              "Code": "8850",
+              "Name": "Operations Analyst (FMOS)"
+            },
+            {
+              "Code": "8852",
+              "Name": "Defense Systems Analyst (FMOS)"
+            },
+            {
+              "Code": "8858",
+              "Name": "Command, Control, Communications, Computers and Intelligence (C41) (FMOS)"
+            },
+            {
+              "Code": "8862",
+              "Name": "Material Management Officer (FMOS)"
+            },
+            {
+              "Code": "8866",
+              "Name": "Space Operations Officer (FMOS)"
+            },
+            {
+              "Code": "8878",
+              "Name": "Historian (FMOS)"
+            },
+            {
+              "Code": "8000",
+              "Name": "General Service Marine (BASIC MOS)",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "8002",
+              "Name": "Joint Terminal Attack Controller (FMOS)[ad]",
+              "High": "E-9",
+              "Low": "E-5"
+            },
+            {
+              "Code": "8011",
+              "Name": "Basic Marine with Enlistment Guarantee (BASIC MOS)",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "8013",
+              "Name": "Special Assignment—Enlisted (FMOS)",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "8014",
+              "Name": "Billet Designator—Enlisted (FMOS*)",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "8015",
+              "Name": "College Degree—Enlisted (EMOS)",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "8023",
+              "Name": "Parachutist (Enlisted) (NMOS)",
+              "High": "SgtMaj",
+              "Low": "E-1"
+            },
+            {
+              "Code": "8024",
+              "Name": "Combatant Diver Marine (Enlisted) (NMOS)",
+              "High": "SgtMaj/MGySgt",
+              "Low": "E-1"
+            },
+            {
+              "Code": "8026",
+              "Name": "Parachutist/Combatant Diver Marine (NMOS)",
+              "High": "SgtMaj/MGySgt",
+              "Low": "E-1"
+            },
+            {
+              "Code": "8028",
+              "Name": "MECEP Participant (FMOS)",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "8033",
+              "Name": "Quality Assurance Technician (Subsistence)"
+            },
+            {
+              "Code": "8056",
+              "Name": "Hazardous Material/Hazardous Waste Staff NCO/NCO (FMOS)",
+              "High": "E-9",
+              "Low": "E-3"
+            },
+            {
+              "Code": "8060",
+              "Name": "Acquisition Specialist (Enlisted) (FMOS)",
+              "High": "E-9",
+              "Low": "E-6"
+            },
+            {
+              "Code": "8071",
+              "Name": "Special Operations Capabilities Specialist (SOCS) (NMOS)",
+              "High": "E-9",
+              "Low": "E-5"
+            },
+            {
+              "Code": "8151",
+              "Name": "Marine Security Guard (MSG) (FMOS*)",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "8152",
+              "Name": "Marine Corps Security Force (MCSF) Guard (EMOS)",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "8153",
+              "Name": "Marine Corps Security Force (MCSF) Cadre Trainer (EMOS)",
+              "High": "E-7",
+              "Low": "E-4"
+            },
+            {
+              "Code": "8154",
+              "Name": "Marine Corps Security Force Close Quarters Battle Team Member (FMOS*)",
+              "High": "E-6",
+              "Low": "E-3"
+            },
+            {
+              "Code": "8156",
+              "Name": "Marine Security Guard (MSG) (FMOS)",
+              "High": "E-9",
+              "Low": "E-2"
+            },
+            {
+              "Code": "8411",
+              "Name": "Recruiter (EMOS)",
+              "High": "E-7",
+              "Low": "E-5"
+            },
+            {
+              "Code": "8412",
+              "Name": "Career Recruiter (PMOS)",
+              "High": "E-9",
+              "Low": "E-7"
+            },
+            {
+              "Code": "8621",
+              "Name": "Surveillance Sensor Operator (NMOS)",
+              "High": "O-8",
+              "Low": "E-1"
+            },
+            {
+              "Code": "8623",
+              "Name": "Small Unmanned Aircraft System Specialist (FMOS)",
+              "High": "E-9",
+              "Low": "E-3"
+            },
+            {
+              "Code": "8641",
+              "Name": "Microminiature Repairer",
+              "High": "E-7",
+              "Low": "E-3"
+            },
+            {
+              "Code": "8711",
+              "Name": "Ground Operations Systems Operator (EMOS)[ae]",
+              "High": "E-5",
+              "Low": "E-3"
+            },
+            {
+              "Code": "8910",
+              "Name": "GCE Marine (FMOS)",
+              "High": "E-9",
+              "Low": "E-1"
+            },
+            {
+              "Code": "8911",
+              "Name": "Billet Designator—Barracks and Grounds Marine (FMOS*)",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "8972",
+              "Name": "Aircrew Trainee (PMOS)[ag]",
+              "High": "E-7",
+              "Low": "E-1"
+            },
+            {
+              "Code": "8991",
+              "Name": "Sergeant Major of the Marine Corps (PMOS)",
+              "High": "SgtMaj"
+            },
+            {
+              "Code": "8999",
+              "Name": "Sergeant Major/First Sergeant (PMOS)",
+              "High": "SgtMaj",
+              "Low": "1stSgt"
+            }
+          ]
+        },
+        {
+          "Type": "Reporting MOS's (Category III)",
+          "Items": [
+            {
+              "Code": "9701",
+              "Name": "Joint Qualified Officer Nominee (FMOS)",
+              "High": "O-6",
+              "Low": "O-3"
+            },
+            {
+              "Code": "9702",
+              "Name": "Joint Qualified Officer (JQO) (FMOS)",
+              "High": "O-6",
+              "Low": "O-4"
+            },
+            {
+              "Code": "9860",
+              "Name": "Human Resources Management Officer (FMOS) (redesignated FMOS 8840, Manpower Management Officer)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Name": "USN",
+      "Url": "https://en.wikipedia.org/wiki/List_of_United_States_Navy_ratings, https://en.wikipedia.org/wiki/List_of_Naval_Officer_Designators",
+      "MOS": [
+        {
+          "Type": "Aviation",
+          "Items": [
+            {
+              "Code": "ABE",
+              "Name": "Aviation Boatswain's Mate - Launching and Recovery"
+            },
+            {
+              "Code": "ABF",
+              "Name": "Aviation Boatswain's Mate - Fuels"
+            },
+            {
+              "Code": "ABH",
+              "Name": "Aviation Boatswain's Mate - Aircraft Handling"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Name": "USARMY",
+      "Url": "https://en.wikipedia.org/wiki/List_of_United_States_Army_careers",
+      "MOS": [
+        {
+          "Type": "General",
+          "Items": [
+            {
+              "Code": "09L",
+              "Name": "Interpreter/Translator"
+            }
+          ]
+        },
+        {
+          "Type": "Infantry",
+          "Items": [
+            {"Code": "11B", "Name": "Infantryman"},
+            {"Code": "11C", "Name": "Indirect Fire Infantryman"},
+            {"Code": "11Z", "Name": "Infantry Senior Sergeant", "Low": "E-8" ,"High": "E-9"}
+          ]
+        },
+        {
+          "Type": "Engineer Corps",
+          "Items": [
+            {"Code": "12A", "Name": "Engineer Senior Sergeant","Low": "E-8" ,"High": "E-9"},
+            {"Code": "12B", "Name": "Combat Engineer"},
+            {"Code": "12C", "Name": "Bridge Crewmember"},
+            {"Code": "12D", "Name": "Diver"},
+            {"Code": "12G", "Name": "Quarrying Specialist (Rc)"},
+            {"Code": "12H", "Name": "Construction Engineering Supervisor"},
+            {"Code": "12K", "Name": "Plumber"},
+            {"Code": "12M", "Name": "Firefighter"},
+            {"Code": "12N", "Name": "Horizontal Construction Engineer"},
+            {"Code": "12P", "Name": "Prime Power Production Specialist"},
+            {"Code": "12Q", "Name": "Power Line Distribution Specialist (Rc)"},
+            {"Code": "12R", "Name": "Interior Electrician"},
+            {"Code": "12T", "Name": "Technical Engineer"},
+            {"Code": "12V", "Name": "Concrete And Asphalt Equipment Operator"},
+            {"Code": "12P", "Name": "Carpentry And Masonry Specialist"},
+            {"Code": "12X", "Name": "General Engineering Supervisor"},
+            {"Code": "12Y", "Name": "Geospatial Engineer"},
+            {"Code": "12Z", "Name": "Combat Engineering Senior Sergeant","Low": "E-8" ,"High": "E-9"}
+          ]
+        },
+        {
+          "Type": "Field Artillery",
+          "Items": [
+            {"Code": "13B", "Name": "Cannon Crewmember"},
+            {"Code": "13D", "Name": "Field Artillery Automated Tactical Data System Specialist"},
+            {"Code": "13F", "Name": "Fire Support Specialist"},
+            {"Code": "13M", "Name": "Multiple Launch Rocket System (Mlrs)/High Mobility Artillery Rocket System (Himars) Crewmember"},
+            {"Code": "13P", "Name": "Multiple Launch Rocket System (Mlrs) Operational Fire Direction Specialist"},
+            {"Code": "13R", "Name": "Field Artillery Firefinder Radar Operator"},
+            {"Code": "13T", "Name": "Field Artillery Surveyor/Meteorological Crewmember"},
+            {"Code": "13Z", "Name": "Field Artillery Senior Sergeant","Low": "E-8" ,"High": "E-9"}
+          ]
+        },
+        {
+          "Type": "Air Defense Artillery",
+          "Items": [
+            {"Code": "14E", "Name": "Patriot Fire Control Enhanced Operator/Maintainer"},
+            {"Code": "14G", "Name": "Air Defense Battle Management System Operator"},
+            {"Code": "14H", "Name": "Air Defense Enhanced Early Warning Operator"},
+            {"Code": "14J", "Name": "Air Defense C41 Tactical Operations Center Enhanced Operator-Maintainer"},
+            {"Code": "14S", "Name": "Air And Missile Defense (Amd) Crewmember"},
+            {"Code": "14T", "Name": "Patriot Launching Station Enhanced Operator/Maintainer"},
+            {"Code": "14Z", "Name": "Air Defense Artillery Senior Sergeant","Low": "E-8" ,"High": "E-9"}
+          ]
+        },
+        {
+          "Type": "Aviation",
+          "Items": [
+            {"Code": "15B", "Name": "Aircraft Powerplant Repairer"},
+            {"Code": "15D", "Name": "Aircraft Powertrain Repairer"},
+            {"Code": "15E", "Name": "Unmanned Aircraft Systems Repairer"},
+            {"Code": "15F", "Name": "Aircraft Electrician"},
+            {"Code": "15G", "Name": "Aircraft Structural Repairer"},
+            {"Code": "15H", "Name": "Aircraft Pneudraulics Repairer"},
+            {"Code": "15J", "Name": "OH-58D Armament/Electrical/Avionics Systems Repairer"},
+            {"Code": "15K", "Name": "Aircraft Components Repair Supervisor"},
+            {"Code": "15M", "Name": "UH-1 Helicopter Repairer (Rc) (Del 1310 / 1210 - 30)"},
+            {"Code": "15N", "Name": "Avionic Mechanic"},
+            {"Code": "15P", "Name": "Aviation Operations Specialist","Low": "W-1" ,"High": "W-5"},
+            {"Code": "15Q", "Name": "Air Traffic Control Operator"},
+            {"Code": "15R", "Name": "AH-64 Attack Helicopter Repairer"},
+            {"Code": "15S", "Name": "OH-58D Helicopter Repairer"},
+            {"Code": "15T", "Name": "UH-60 Helicopter Repairer"},
+            {"Code": "15U", "Name": "CH-47 Helicopter Repairer"},
+            {"Code": "15V", "Name": "Observation/Scout Helicopter Repairer (Rc)"},
+            {"Code": "15W", "Name": "Unmanned Aerial Vehicle Operator"},
+            {"Code": "15X", "Name": "AH-64A Armament/Electrical/Avionics Systems Repairer"},
+            {"Code": "15Y", "Name": "AH-64D Armament/Electrical/Avionic Systems Repairer"},
+            {"Code": "15Z", "Name": "Aircraft Maintenance Senior Sergeant","Low": "E-8" ,"High": "E-9"}
+          ]
+        },
+        {
+          "Type": "Special Forces",
+          "Items": [
+            {"Code": "18B", "Name": "Special Forces Weapons Sergeant","Low": "E-5" ,"High": "E-9"},
+            {"Code": "18C", "Name": "Special Forces Engineer Sergeant","Low": "E-5" ,"High": "E-9"},
+            {"Code": "18D", "Name": "Special Forces Medical Sergeant","Low": "E-5" ,"High": "E-9"},
+            {"Code": "18E", "Name": "Special Forces Communications Sergeant","Low": "E-5" ,"High": "E-9"},
+            {"Code": "18F", "Name": "Special Forces Assistant Operations And Intelligence Sergeant","Low": "E-5" ,"High": "E-9"},
+            {"Code": "18Z", "Name": "Special Forces Senior Sergeant","Low": "E-8" ,"High": "E-9"}
+          ]
+        },
+        {
+          "Type": "Armor",
+          "Items": [
+            {"Code": "19D", "Name": "Cavalry Scout"},
+            {"Code": "19K", "Name": "M1 Armor Crewman"},
+            {"Code": "19Z", "Name": "Armor Senior Sergeant","Low": "E-8" ,"High": "E-9"}
+          ]
+        },
+        {
+          "Type": "Signal Corps",
+          "Items": [
+            {"Code": "25B", "Name": "Information Technology Specialist","Low": "W-1" ,"High": "W-5"},
+            {"Code": "25C", "Name": "Radio Operator-Maintainer"},
+            {"Code": "25E", "Name": "Electromagnetic Spectrum Manager"},
+            {"Code": "25F", "Name": "Network Switching Systems Operator-Maintainer (Del 1310 / 1110 - 21)"},
+            {"Code": "25L", "Name": "Cable Systems Installer-Maintainer"},
+            {"Code": "25M", "Name": "Multimedia Illustrator"},
+            {"Code": "25N", "Name": "Nodal Network Systems Operator-Maintainer"},
+            {"Code": "25P", "Name": "Microwave Systems Operator-Maintainer"},
+            {"Code": "25Q", "Name": "Multichannel Transmission Systems Operator-Maintainer"},
+            {"Code": "25R", "Name": "Visual Information Equipment Operator-Maintainer"},
+            {"Code": "25S", "Name": "Satellite Communication Systems Operator-Maintainer"},
+            {"Code": "25T", "Name": "Satellite/Microwave Systems Chief","Low": "E-5" ,"High": "E-9"},
+            {"Code": "25U", "Name": "Signal Support Systems Specialist","Low": "W-1" ,"High": "W-5"},
+            {"Code": "25V", "Name": "Combat Documentation/Production Specialist","Low": "W-1" ,"High": "W-5"},
+            {"Code": "25W", "Name": "Telecommunications Operations Chief","Low": "E-5" ,"High": "E-9"},
+            {"Code": "25X", "Name": "Chief Signal Nco","Low": "E-5" ,"High": "E-9"},
+            {"Code": "25Z", "Name": "Visual Information Operations Chief","Low": "E-5" ,"High": "E-9"}
+          ]
+        },
+        {
+          "Type": "Judge Advocate General's Corps",
+          "Items": [
+            {"Code": "27D", "Name": "Paralegal Specialist","Low": "W-1" ,"High": "W-5"}
+          ]
+        },
+        {
+          "Type": "Electronic Warfare",
+          "Items": [
+            {"Code": "29E", "Name": "Electronic Warfare Specialist","Low": "W-1" ,"High": "W-5"}
+          ]
+        },
+        {
+          "Type": "Military Police",
+          "Items": [
+            {"Code": "31B", "Name": "Military Police"},
+            {"Code": "31D", "Name": "CID Special Agent"},
+            {"Code": "31E", "Name": "Internment/Resettlement Specialist","Low": "W-1" ,"High": "W-5"},
+            {"Code": "31K", "Name": "Working Dog Handler"}
+          ]
+        },
+        {
+          "Type": "Military Intelligence",
+          "Items": [
+            {"Code": "35F", "Name": "Intelligence Analyst"},
+            {"Code": "35G", "Name": "Geospatial Intelligence Imagery Analyst"},
+            {"Code": "35L", "Name": "Counter Intelligence Agent"},
+            {"Code": "35M", "Name": "Human Intelligence Collector"},
+            {"Code": "35N", "Name": "Signals Intelligence Analyst"},
+            {"Code": "35P", "Name": "Cryptologic Linguist"},
+            {"Code": "35Q", "Name": "Cryptologic Network Warfare Specialist","Low": "W-1" ,"High": "W-5"},
+            {"Code": "35S", "Name": "Signals Collector/Analyst"},
+            {"Code": "35T", "Name": "Military Intelligence Systems Maintainer/Integrator"},
+            {"Code": "35V", "Name": "Signals Intelligence (Sigint) Senior Sergeant/Sigint Chief (Add 1404 / 1210 - 05)"},
+            {"Code": "35X", "Name": "Intelligence Senior Sergeant/Chief Intelligence Sergeant","Low": "E-5" ,"High": "E-9"},
+            {"Code": "35Y", "Name": "Chief Counter Intelligence/Human Intelligence Sergeant","Low": "E-5" ,"High": "E-9"},
+            {"Code": "35Z", "Name": "Signals Intelligence (Sigint) Senior Sergeant/Sigint Chief (Del 1410 / 1210 - 05)","Low": "E-8" ,"High": "E-9"}
+          ]
+        },
+        {
+          "Type": "Financial Management",
+          "Items": [
+            {"Code": "36B", "Name": "Financial Management Technician"}
+          ]
+        },
+        {
+          "Type": "Psychological Operations",
+          "Items": [
+            {"Code": "37F", "Name": "Psychological Operations Specialist","Low": "W-1" ,"High": "W-5"}
+          ]
+        },
+        {
+          "Type": "Civil Affairs",
+          "Items": [
+            {"Code": "38B", "Name": "Civil Affairs Specialist","Low": "W-1" ,"High": "W-5"}
+          ]
+        },
+        {
+          "Type": "Adjutant General's Corps",
+          "Items": [
+            {"Code": "42A", "Name": "Human Resources Specialist"},
+            {"Code": "42R", "Name": "Musician"},
+            {"Code": "42S", "Name": "Special Band Musician"}
+          ]
+        },
+        {
+          "Type": "Public Affairs",
+          "Items": [
+            {"Code": "46Q", "Name": "Public Affairs Specialist"},
+            {"Code": "46R", "Name": "Public Affairs Broadcast Specialist"},
+            {"Code": "46Z", "Name": "Chief Public Affairs Nco","Low": "E-5" ,"High": "E-9"}
+          ]
+        },
+        {
+          "Type": "Army Acquisition Corps",
+          "Items": [
+            {"Code": "51C", "Name": "Acquisition, Logistics & Technology (Al&T) Contracting Nco","Low": "E-5" ,"High": "E-9"}
+          ]
+        },
+        {
+          "Type": "Chaplain",
+          "Items": [
+            {"Code": "56M", "Name": "Chaplain Assistant"}
+          ]
+        },
+        {
+          "Type": "Medical",
+          "Items": [
+            {"Code": "68A", "Name": "Biomedical Equipment Specialist"},
+            {"Code": "68B", "Name": "Orthopedic Specialist (Add 1304 / 1110 - 04)"},
+            {"Code": "68C", "Name": "Practical Nursing Specialist (Add 1304 / 1110 - 04)"},
+            {"Code": "68D", "Name": "Operating Room Specialist"},
+            {"Code": "68E", "Name": "Dental Specialist"},
+            {"Code": "68F", "Name": "Physical Therapy Specialist (Add 1304 / 1110 - 04)"},
+            {"Code": "68G", "Name": "Patient Administration Specialist"},
+            {"Code": "68H", "Name": "Optical Laboratory Specialist"},
+            {"Code": "68J", "Name": "Medical Logistics Specialist"},
+            {"Code": "68K", "Name": "Medical Laboratory Specialist"},
+            {"Code": "68L", "Name": "Occupational Therapy Specialist (Add 1304 / 1110 - 04)"},
+            {"Code": "68M", "Name": "Nutrition Care Specialist"},
+            {"Code": "68N", "Name": "Cardiovascular Specialist (Add 1304 / 1110 - 04)"},
+            {"Code": "68P", "Name": "Radiology Specialist"},
+            {"Code": "68Q", "Name": "Pharmacy Specialist"},
+            {"Code": "68R", "Name": "Veterinary Food Inspection Specialist"},
+            {"Code": "68S", "Name": "Preventive Medicine Specialist"},
+            {"Code": "68T", "Name": "Animal Care Specialist"},
+            {"Code": "68U", "Name": "Ear, Nose And Throat (Ent) Specialist (Add 1304 / 1110 - 04)"},
+            {"Code": "68V", "Name": "Respiratory Specialist"},
+            {"Code": "68W", "Name": "Health Care Specialist"},
+            {"Code": "68X", "Name": "Behavioral Health Specialist"},
+            {"Code": "68Y", "Name": "Eye Specialist (Add 1304 / 1110 - 04)"},
+            {"Code": "68Z", "Name": "Chief Medical Nco","Low": "E-8" ,"High": "E-9"}
+          ]
+        },
+        {
+          "Type": "Chemical",
+          "Items": [
+            {"Code": "74D", "Name": "Chemical, Biological, Radiological, And Nuclear (Cbrn) Specialist"}
+          ]
+        },
+        {
+          "Type": "Recruiting And Retention",
+          "Items": [
+            {"Code": "79R", "Name": "Recruiter"},
+            {"Code": "79S", "Name": "Career Counselor"},
+            {"Code": "79T", "Name": "Recruiting And Retention Nco (Army National Guard Of The United States)","Low": "E-5" ,"High": "E-9"},
+            {"Code": "79V", "Name": "Retention And Transition Nco, Usar","Low": "E-5" ,"High": "E-9"}
+          ]
+        },
+        {
+          "Type": "Transportation",
+          "Items": [
+            {"Code": "88H", "Name": "Cargo Specialist"},
+            {"Code": "88K", "Name": "Watercraft Operator"},
+            {"Code": "88L", "Name": "Watercraft Engineer"},
+            {"Code": "88M", "Name": "Motor Transport Operator"},
+            {"Code": "88N", "Name": "Transportation Management Coordinator"},
+            {"Code": "88P", "Name": "Railway Equipment Repairer (Rc)"},
+            {"Code": "88T", "Name": "Railway Section Repairer (Rc)"},
+            {"Code": "88U", "Name": "Railway Operations Crewmember (Rc)"},
+            {"Code": "88Z", "Name": "Transportation Senior Sergeant","Low": "E-8" ,"High": "E-9"}
+          ]
+        },
+        {
+          "Type": "Ammunition, Mechanical Maintenance, And Ordnance",
+          "Items": [
+            {"Code": "89A", "Name": "Ammunition Stock Control And Accounting Specialist"},
+            {"Code": "89B", "Name": "Ammunition Specialist"},
+            {"Code": "89D", "Name": "Explosive Ordnance Disposal Specialist"}
+          ]
+        },
+        {
+          "Type": "Mechanics And Equipment Maintenance",
+          "Items": [
+            {"Code": "91A", "Name": "M1 Abrams Tank System Maintainer"},
+            {"Code": "91B", "Name": "Wheeled Vehicle Mechanic"},
+            {"Code": "91C", "Name": "Utilities Equipment Repairer"},
+            {"Code": "91D", "Name": "Power-Generation Equipment Repairer"},
+            {"Code": "91E", "Name": "Allied Trades Specialist"},
+            {"Code": "91F", "Name": "Small Arms/Artillery Repairer"},
+            {"Code": "91G", "Name": "Fire Control Repairer"},
+            {"Code": "91H", "Name": "Track Vehicle Repairer"},
+            {"Code": "91J", "Name": "Quartermaster And Chemical Equipment Repairer"},
+            {"Code": "91K", "Name": "Armament Repairer (Del 1310 / 1110 - 28)"},
+            {"Code": "91L", "Name": "Construction Equipment Repairer"},
+            {"Code": "91M", "Name": "Bradley Fighting Vehicle System Maintainer"},
+            {"Code": "91P", "Name": "Artillery Mechanic"},
+            {"Code": "91S", "Name": "Stryker Systems Maintainer"},
+            {"Code": "91X", "Name": "Maintenance Supervisor","Low": "E-5" ,"High": "E-9"},
+            {"Code": "91Z", "Name": "Mechanical Maintenance Supervisor","Low": "E-5" ,"High": "E-9"}
+          ]
+        },
+        {
+          "Type": "Combat Electronic Systems Repair / Maintenance",
+          "Items": [
+            {"Code": "94A", "Name": "Land Combat Electronic Missile System Repairer"},
+            {"Code": "94D", "Name": "Air Traffic Control Equipment Repairer"},
+            {"Code": "94E", "Name": "Radio And Communications Security (Comsec) Repairer"},
+            {"Code": "94F", "Name": "Computer Detection Systems Repairer"},
+            {"Code": "94H", "Name": "Test, Measurement, And Diagnostic Equipment (Tmde) Maintenance Support Specialist"},
+            {"Code": "94L", "Name": "Avionic Communications Equipment Repairer"},
+            {"Code": "94M", "Name": "Radar Repairer"},
+            {"Code": "94P", "Name": "Multiple Launch Rocket System Repairer"},
+            {"Code": "94R", "Name": "Avionic And Survivability Equipment Repairer"},
+            {"Code": "94S", "Name": "Patriot System Repairer"},
+            {"Code": "94T", "Name": "Avenger System Repairer"},
+            {"Code": "94W", "Name": "Electronic Maintenance Chief"},
+            {"Code": "94X", "Name": "Senior Missile Systems Maintainer"},
+            {"Code": "94Y", "Name": "Integrated Family Of Test Equipment (Ifte) Operator And Maintainer"},
+            {"Code": "94Z", "Name": "Senior Electronic Maintenance Chief","Low": "E-8" ,"High": "E-9"}
+          ]
+        },
+        {
+          "Type": "Quartermaster Corps",
+          "Items": [
+            {"Code": "92A", "Name": "Automated Logistical Specialist"},
+            {"Code": "92F", "Name": "Petroleum Supply Specialist"},
+            {"Code": "92G", "Name": "Food Service Specialist"},
+            {"Code": "92L", "Name": "Petroleum Laboratory Specialist"},
+            {"Code": "92M", "Name": "Mortuary Affairs Specialist"},
+            {"Code": "92R", "Name": "Parachute Rigger"},
+            {"Code": "92S", "Name": "Shower/Laundry And Clothing Repair Specialist"},
+            {"Code": "92W", "Name": "Water Treatment Specialist"},
+            {"Code": "92Y", "Name": "Unit Supply Specialist"},
+            {"Code": "92Z", "Name": "Senior Noncommissioned Logistician","Low": "E-8" ,"High": "E-9"}
+          ]
+        }
+
+      ]
+    },
+    {
+      "Name": "USAF",
+      "Url": "https://en.wikipedia.org/wiki/Air_Force_Specialty_Code",
+      "MOS": []
+    },
+    {
+      "Name": "USCG",
+      "Url": "https://en.wikipedia.org/wiki/List_of_United_States_Coast_Guard_ratings",
+      "MOS": []
+    }
+  ]
+}
+    

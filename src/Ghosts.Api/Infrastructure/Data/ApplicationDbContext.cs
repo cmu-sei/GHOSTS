@@ -2,6 +2,7 @@
 
 using System;
 using System.IO;
+using ghosts.api.Areas.Animator.Infrastructure.Models;
 using Ghosts.Api.Infrastructure.Extensions;
 using Ghosts.Api.Models;
 using Ghosts.Domain.Messages.MesssagesForServer;
@@ -40,12 +41,19 @@ namespace Ghosts.Api.Infrastructure.Data
         public DbSet<Survey.LocalProcess> Processes { get; set; }
         public DbSet<Survey.LocalUser> LocalUsers { get; set; }
         public DbSet<Survey.Port> Ports { get; set; }
+        
+        public DbSet<NpcRecord> Npcs { get; set; }
+        public DbSet<NPCIpAddress> NpcIps { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
             // Add your customizations after calling base.OnModelCreating(modelBuilder);
-
+            
+            modelBuilder.Entity<NpcRecord>()
+                .Property(e => e.NpcProfile)
+                .HasColumnType("jsonb");
+            
             modelBuilder.Entity<Machine>().HasIndex(o => new {o.CreatedUtc});
             modelBuilder.Entity<Machine>().HasIndex(o => new {o.Status});
             modelBuilder.Entity<Machine>().HasIndex(o => new {o.LastReportedUtc});

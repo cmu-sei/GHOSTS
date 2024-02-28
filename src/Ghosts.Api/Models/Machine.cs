@@ -79,7 +79,7 @@ namespace Ghosts.Api.Models
                 if ((StatusUp == UpDownStatus.Up ||
                      StatusUp == UpDownStatus.UpWithErrors ||
                      StatusUp == UpDownStatus.Unknown)
-                    && LastReportedUtc < DateTime.UtcNow.AddMinutes(-Program.ClientConfig.OfflineAfterMinutes))
+                    && LastReportedUtc < DateTime.UtcNow.AddMinutes(-Program.ApplicationSettings.OfflineAfterMinutes))
                     StatusUp = UpDownStatus.Down;
 
                 return $"{Status} & {StatusUp}";
@@ -165,7 +165,7 @@ namespace Ghosts.Api.Models
                     var h = History.OrderBy(o => o.CreatedUtc).Last();
                     if (h != null)
                     {
-                        isUp = h.CreatedUtc.AddMinutes(Program.ClientConfig.OfflineAfterMinutes) > DateTime.UtcNow;
+                        isUp = h.CreatedUtc.AddMinutes(Program.ApplicationSettings.OfflineAfterMinutes) > DateTime.UtcNow;
                         LastReportedUtc = h.CreatedUtc;
                     }
                 }
@@ -175,7 +175,7 @@ namespace Ghosts.Api.Models
                     var h = HistoryHealth.OrderBy(o => o.CreatedUtc).Last();
                     if (h != null)
                     {
-                        isUp = h.CreatedUtc.AddMinutes(Program.ClientConfig.OfflineAfterMinutes) > DateTime.UtcNow;
+                        isUp = h.CreatedUtc.AddMinutes(Program.ApplicationSettings.OfflineAfterMinutes) > DateTime.UtcNow;
                         if (h.CreatedUtc > LastReportedUtc)
                             LastReportedUtc = h.CreatedUtc;
                     }
@@ -186,7 +186,7 @@ namespace Ghosts.Api.Models
                     var h = HistoryTimeline.OrderBy(o => o.CreatedUtc).Last();
                     if (h != null)
                     {
-                        isUp = h.CreatedUtc.AddMinutes(Program.ClientConfig.OfflineAfterMinutes) > DateTime.UtcNow;
+                        isUp = h.CreatedUtc.AddMinutes(Program.ApplicationSettings.OfflineAfterMinutes) > DateTime.UtcNow;
                         if (h.CreatedUtc > LastReportedUtc)
                             LastReportedUtc = h.CreatedUtc;
                     }

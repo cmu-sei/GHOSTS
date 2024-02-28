@@ -306,7 +306,5 @@ ghosts.tools.emailgenerator/config/email-content - Copy.csv
 # Ghosts.Client/config/email-content.csv
 vtunnel.exe
 
-db_data/
-g_data
-*/_data
-spectre_data
+_db/
+_g/
