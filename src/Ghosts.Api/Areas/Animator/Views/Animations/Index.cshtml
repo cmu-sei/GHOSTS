@@ -27,23 +27,6 @@
             <button type="submit" class="btn btn-primary">Submit</button>
         </form>
 
-        <br/>
-        <br/>
-
-        <form action="animations/stop" method="post">
-            <label for="JobId">Job Id:</label>
-            <select id="JobId" name="JobId" class="form-control">
-                <option value="">Choose a job to stop...</option>
-                <option value="SOCIALGRAPH">SOCIALGRAPH</option>
-                <option value="SOCIALSHARING">SOCIALSHARING</option>
-                <option value="SOCIALBELIEF">SOCIALBELIEF</option>
-                <option value="CHAT">CHAT</option>
-                <option value="FULLAUTONOMY">FULLAUTONOMY</option>
-            </select>
-            <br/>
-            <button type="submit" class="btn btn-primary">Submit</button>
-        </form>
-
     </div>
     <div class="col-sm-6">
         <h3>Currently Running Animations</h3>
@@ -51,18 +34,39 @@
         {
             <div>All is quiet. There are currently no running animations.</div>
         }
-        @foreach (JobInfo job in ViewBag.RunningJobs)
+        else
         {
-            <div>@job.Name (Started at: @job.StartTime)</div>
+            <table class="table table-striped table-sm">
+                <tr>
+                    <td>Job</td>
+                    <td>Started</td>
+                    <td></td>
+                </tr>
+
+                @foreach (JobInfo job in ViewBag.RunningJobs)
+                {
+                    <tr>
+                        <td>@job.Name</td>
+                        <td>@job.StartTime</td>
+                        <td>
+                            <form action="animations/stop" method="post">
+                                <input type="hidden" id="JobId" name="JobId" value="@job.Name"/>
+                                <button type="submit" class="btn btn-primary btn-sm">Stop Job</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </table>
         }
+
     </div>
 </div>
 
-<input type="hidden" id="d_FULLAUTONOMY" value="@ViewBag.FullAutonomy" />
-<input type="hidden" id="d_SOCIALSHARING" value="@ViewBag.SocialSharing" />
-<input type="hidden" id="d_SOCIALBELIEF" value="@ViewBag.SocialBelief" />
-<input type="hidden" id="d_CHAT" value="@ViewBag.Chat" />
-<input type="hidden" id="d_SOCIALGRAPH" value="@ViewBag.SocialGraph" />
+<input type="hidden" id="d_FULLAUTONOMY" value="@ViewBag.FullAutonomy"/>
+<input type="hidden" id="d_SOCIALSHARING" value="@ViewBag.SocialSharing"/>
+<input type="hidden" id="d_SOCIALBELIEF" value="@ViewBag.SocialBelief"/>
+<input type="hidden" id="d_CHAT" value="@ViewBag.Chat"/>
+<input type="hidden" id="d_SOCIALGRAPH" value="@ViewBag.SocialGraph"/>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {

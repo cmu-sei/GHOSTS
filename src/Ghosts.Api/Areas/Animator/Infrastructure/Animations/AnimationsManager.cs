@@ -44,6 +44,14 @@ public class JobInfo
     public DateTime StartTime { get; set; }
 }
 
+public enum AnimationJobTypes
+{
+    SOCIALGRAPH,
+    SOCIALSHARING,
+    SOCIALBELIEF,
+    CHAT,
+    FULLAUTONOMY
+}
 
 public class AnimationsManager : IManageableHostedService
 {
@@ -51,7 +59,6 @@ public class AnimationsManager : IManageableHostedService
     private readonly IServiceScopeFactory _scopeFactory;
 
     private readonly ApplicationSettings _configuration;
-    private readonly ApplicationDbContext _context;
     private readonly Random _random;
     private Thread _socialSharingJobThread;
     private Thread _socialGraphJobThread;
@@ -71,8 +78,6 @@ public class AnimationsManager : IManageableHostedService
     public AnimationsManager(IHubContext<ActivityHub> activityHubContext, IServiceScopeFactory scopeFactory)
     {
         _scopeFactory = scopeFactory;
-        using var scope = _scopeFactory.CreateScope();
-        this._context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         this._random = Random.Shared;
         this._activityHubContext = activityHubContext;
         this._configuration = Program.ApplicationSettings;
@@ -218,10 +223,15 @@ public class AnimationsManager : IManageableHostedService
 
     private void Run(AnimationConfiguration animationConfiguration)
     {
+        if(string.IsNullOrEmpty(animationConfiguration.JobId)) return;
+        
         _log.Info($"Attempting to start {animationConfiguration.JobId}...");
         var settings = _configuration;
         
         this.AddJob(animationConfiguration.JobId.ToUpper());
+        
+        using var scope = _scopeFactory.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         
         switch (animationConfiguration.JobId.ToUpper())
         {
@@ -234,13 +244,15 @@ public class AnimationsManager : IManageableHostedService
                     _socialGraphJobThread = new Thread(() =>
                     {
                         Thread.CurrentThread.IsBackground = true;
-                        _ = new SocialGraphJob(settings, this._context, this._random, this._activityHubContext, this._socialGraphJobCancellationTokenSource.Token);
+                        using var innerScope = _scopeFactory.CreateScope();
+                        context = innerScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                        _ = new SocialGraphJob(settings, context, this._random, this._activityHubContext, this._socialGraphJobCancellationTokenSource.Token);
                     });
                     _socialGraphJobThread.Start();
                 }
                 else
                 {
-                    _ = new SocialGraphJob(settings, this._context, this._random, this._activityHubContext, this._socialGraphJobCancellationTokenSource.Token);
+                    _ = new SocialGraphJob(settings, context, this._random, this._activityHubContext, this._socialGraphJobCancellationTokenSource.Token);
                 }
                 
                 break;
@@ -253,13 +265,15 @@ public class AnimationsManager : IManageableHostedService
                     _socialSharingJobThread = new Thread(() =>
                     {
                         Thread.CurrentThread.IsBackground = true;
-                        _ = new SocialSharingJob(settings, this._context, this._random, this._activityHubContext, this._socialSharingJobCancellationTokenSource.Token);
+                        using var innerScope = _scopeFactory.CreateScope();
+                        context = innerScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                        _ = new SocialSharingJob(settings, context, this._random, this._activityHubContext, this._socialSharingJobCancellationTokenSource.Token);
                     });
                     _socialSharingJobThread.Start();
                 }
                 else
                 {
-                    _ = new SocialSharingJob(settings, this._context, this._random, this._activityHubContext, this._socialSharingJobCancellationTokenSource.Token);
+                    _ = new SocialSharingJob(settings, context, this._random, this._activityHubContext, this._socialSharingJobCancellationTokenSource.Token);
                 }
                 
                 break;
@@ -272,13 +286,15 @@ public class AnimationsManager : IManageableHostedService
                     _socialBeliefsJobThread = new Thread(() =>
                     {
                         Thread.CurrentThread.IsBackground = true;
-                        _ = new SocialBeliefJob(settings, this._context, this._random, this._activityHubContext, this._socialBeliefsJobCancellationTokenSource.Token);
+                        using var innerScope = _scopeFactory.CreateScope();
+                        context = innerScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                        _ = new SocialBeliefJob(settings, context, this._random, this._activityHubContext, this._socialBeliefsJobCancellationTokenSource.Token);
                     });
                     _socialBeliefsJobThread.Start();
                 }
                 else
                 {
-                    _ = new SocialBeliefJob(settings, this._context, this._random, this._activityHubContext, this._socialBeliefsJobCancellationTokenSource.Token);
+                    _ = new SocialBeliefJob(settings, context, this._random, this._activityHubContext, this._socialBeliefsJobCancellationTokenSource.Token);
                 }
                 
                 break;
@@ -291,13 +307,15 @@ public class AnimationsManager : IManageableHostedService
                     _chatJobThread = new Thread(() =>
                     {
                         Thread.CurrentThread.IsBackground = true;
-                        _ = new ChatJob(settings, this._context, this._random, this._activityHubContext, this._chatJobJobCancellationTokenSource.Token);
+                        using var innerScope = _scopeFactory.CreateScope();
+                        context = innerScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                        _ = new ChatJob(settings, context, this._random, this._activityHubContext, this._chatJobJobCancellationTokenSource.Token);
                     });
                     _chatJobThread.Start();
                 }
                 else
                 {
-                    _ = new ChatJob(settings, this._context, this._random, this._activityHubContext, this._chatJobJobCancellationTokenSource.Token);
+                    _ = new ChatJob(settings, context, this._random, this._activityHubContext, this._chatJobJobCancellationTokenSource.Token);
                 }
                 
                 break;
@@ -310,13 +328,15 @@ public class AnimationsManager : IManageableHostedService
                     _fullAutonomyJobThread = new Thread(() =>
                     {
                         Thread.CurrentThread.IsBackground = true;
-                        _ = new FullAutonomyJob(settings, this._context, this._random, this._activityHubContext, this._fullAutonomyCancellationTokenSource.Token);
+                        using var innerScope = _scopeFactory.CreateScope();
+                        context = innerScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                        _ = new FullAutonomyJob(settings, context, this._random, this._activityHubContext, this._fullAutonomyCancellationTokenSource.Token);
                     });
                     _fullAutonomyJobThread.Start();
                 }
                 else
                 {
-                    _ = new FullAutonomyJob(settings, this._context, this._random, this._activityHubContext, this._fullAutonomyCancellationTokenSource.Token);
+                    _ = new FullAutonomyJob(settings, context, this._random, this._activityHubContext, this._fullAutonomyCancellationTokenSource.Token);
                 }
                 
                 break;
@@ -333,6 +353,9 @@ public class AnimationsManager : IManageableHostedService
 
         _log.Info($"Animations are enabled, starting up...");
 
+        using var scope = _scopeFactory.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        
         try
         {
             if (this._configuration.AnimatorSettings.Animations.SocialGraph.IsEnabled && this._configuration.AnimatorSettings.Animations.SocialGraph.IsInteracting)
@@ -345,13 +368,15 @@ public class AnimationsManager : IManageableHostedService
                         this.AddJob("SOCIALGRAPH");
                         
                         Thread.CurrentThread.IsBackground = true;
-                        _ = new SocialGraphJob(this._configuration, this._context, this._random, this._activityHubContext, this._socialGraphJobCancellationTokenSource.Token);
+                        using var innerScope = _scopeFactory.CreateScope();
+                        context = innerScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                        _ = new SocialGraphJob(this._configuration, context, this._random, this._activityHubContext, this._socialGraphJobCancellationTokenSource.Token);
                     });
                     _socialGraphJobThread.Start();
                 }
                 else
                 {
-                    _ = new SocialGraphJob(this._configuration, this._context, this._random, this._activityHubContext, this._socialGraphJobCancellationTokenSource.Token);
+                    _ = new SocialGraphJob(this._configuration, context, this._random, this._activityHubContext, this._socialGraphJobCancellationTokenSource.Token);
                 }
             }
             else
@@ -376,13 +401,15 @@ public class AnimationsManager : IManageableHostedService
                     _socialBeliefsJobThread = new Thread(() =>
                     {
                         Thread.CurrentThread.IsBackground = true;
-                        _ = new SocialBeliefJob(this._configuration, this._context, this._random, this._activityHubContext, this._socialBeliefsJobCancellationTokenSource.Token);
+                        using var innerScope = _scopeFactory.CreateScope();
+                        context = innerScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                        _ = new SocialBeliefJob(this._configuration, context, this._random, this._activityHubContext, this._socialBeliefsJobCancellationTokenSource.Token);
                     });
                     _socialBeliefsJobThread.Start();
                 }
                 else
                 {
-                    _ = new SocialBeliefJob(this._configuration, this._context, this._random, this._activityHubContext, this._socialBeliefsJobCancellationTokenSource.Token);
+                    _ = new SocialBeliefJob(this._configuration, context, this._random, this._activityHubContext, this._socialBeliefsJobCancellationTokenSource.Token);
                 }
             }
             else
@@ -407,13 +434,15 @@ public class AnimationsManager : IManageableHostedService
                     _chatJobThread = new Thread(() =>
                     {
                         Thread.CurrentThread.IsBackground = true;
-                        _ = new ChatJob(this._configuration, this._context, this._random, this._activityHubContext, this._chatJobJobCancellationTokenSource.Token);
+                        using var innerScope = _scopeFactory.CreateScope();
+                        context = innerScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                        _ = new ChatJob(this._configuration, context, this._random, this._activityHubContext, this._chatJobJobCancellationTokenSource.Token);
                     });
                     _chatJobThread.Start();
                 }
                 else
                 {
-                    _ = new ChatJob(this._configuration, this._context, this._random, this._activityHubContext, this._chatJobJobCancellationTokenSource.Token);
+                    _ = new ChatJob(this._configuration, context, this._random, this._activityHubContext, this._chatJobJobCancellationTokenSource.Token);
                 }
             }
             else
@@ -438,13 +467,15 @@ public class AnimationsManager : IManageableHostedService
                     _socialSharingJobThread = new Thread(() =>
                     {
                         Thread.CurrentThread.IsBackground = true;
-                        _ = new SocialSharingJob(this._configuration, this._context, this._random, this._activityHubContext, this._socialSharingJobCancellationTokenSource.Token);
+                        using var innerScope = _scopeFactory.CreateScope();
+                        context = innerScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                        _ = new SocialSharingJob(this._configuration, context, this._random, this._activityHubContext, this._socialSharingJobCancellationTokenSource.Token);
                     });
                     _socialSharingJobThread.Start();
                 }
                 else
                 {
-                    _ = new SocialSharingJob(this._configuration, this._context, this._random, this._activityHubContext, this._socialSharingJobCancellationTokenSource.Token);
+                    _ = new SocialSharingJob(this._configuration, context, this._random, this._activityHubContext, this._socialSharingJobCancellationTokenSource.Token);
                 }
             }
             else
@@ -469,13 +500,15 @@ public class AnimationsManager : IManageableHostedService
                     _fullAutonomyJobThread = new Thread(() =>
                     {
                         Thread.CurrentThread.IsBackground = true;
-                        _ = new FullAutonomyJob(this._configuration, this._context, this._random, this._activityHubContext, this._fullAutonomyCancellationTokenSource.Token);
+                        using var innerScope = _scopeFactory.CreateScope();
+                        context = innerScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                        _ = new FullAutonomyJob(this._configuration, context, this._random, this._activityHubContext, this._fullAutonomyCancellationTokenSource.Token);
                     });
                     _fullAutonomyJobThread.Start();
                 }
                 else
                 {
-                    _ = new FullAutonomyJob(this._configuration, this._context, this._random, this._activityHubContext, this._fullAutonomyCancellationTokenSource.Token);
+                    _ = new FullAutonomyJob(this._configuration, context, this._random, this._activityHubContext, this._fullAutonomyCancellationTokenSource.Token);
                 }
             }
             else

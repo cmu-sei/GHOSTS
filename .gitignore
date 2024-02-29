@@ -308,3 +308,17 @@ vtunnel.exe
 
 _db/
 _g/
+
+_data/
+_data/*
+*_data/*
+
+_config/
+_config/*
+*_config/*
+
+_output/
+_output/*
+*_output/*
+
+output/
