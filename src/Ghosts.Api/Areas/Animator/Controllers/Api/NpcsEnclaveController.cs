@@ -20,11 +20,11 @@ namespace ghosts.api.Areas.Animator.Controllers.Api;
 [ApiController]
 [Produces("application/json")]
 [Route("api/[controller]/{campaign}/{enclave}")]
-public class NpcEnclaveController : ControllerBase
+public class NpcsEnclaveController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
 
-    public NpcEnclaveController(ApplicationDbContext context)
+    public NpcsEnclaveController(ApplicationDbContext context)
     {
         _context = context;
     }

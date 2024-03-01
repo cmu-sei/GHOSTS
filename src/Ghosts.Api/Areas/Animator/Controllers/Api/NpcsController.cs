@@ -18,11 +18,11 @@ namespace ghosts.api.Areas.Animator.Controllers.Api;
 [ApiController]
 [Produces("application/json")]
 [Route("api/[controller]")]
-public class NpcController : ControllerBase
+public class NpcsController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
 
-    public NpcController(ApplicationDbContext context)
+    public NpcsController(ApplicationDbContext context)
     {
         _context = context;
     }

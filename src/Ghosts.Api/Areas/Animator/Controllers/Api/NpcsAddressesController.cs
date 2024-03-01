@@ -9,7 +9,7 @@ namespace ghosts.api.Areas.Animator.Controllers.Api
     [ApiController]
     [Produces("application/json")]
     [Route("api/[controller]")]
-    public class NpcAddressesController: ControllerBase
+    public class NpcsAddressesController: ControllerBase
     {
         /// <summary>
         /// Get random addressProfile

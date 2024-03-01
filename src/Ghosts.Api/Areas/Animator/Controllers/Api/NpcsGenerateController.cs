@@ -24,12 +24,12 @@ namespace ghosts.api.Areas.Animator.Controllers.Api;
 [ApiController]
 [Produces("application/json")]
 [Route("api/[controller]")]
-public class NpcGenerateController : ControllerBase
+public class NpcsGenerateController : ControllerBase
 {
     private static readonly Logger _log = LogManager.GetCurrentClassLogger();
     private readonly ApplicationDbContext _context;
 
-    public NpcGenerateController(ApplicationDbContext context)
+    public NpcsGenerateController(ApplicationDbContext context)
     {
         _context = context;
     }

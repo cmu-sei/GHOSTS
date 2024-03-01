@@ -22,11 +22,11 @@ namespace ghosts.api.Areas.Animator.Controllers.Api;
 [ApiController]
 [Produces("application/json")]
 [Route("api/[controller]")]
-public class NpcInsiderThreatController : ControllerBase
+public class NpcsInsiderThreatController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
         
-    public NpcInsiderThreatController(ApplicationDbContext context)
+    public NpcsInsiderThreatController(ApplicationDbContext context)
     {
         this._context = context;
     }
