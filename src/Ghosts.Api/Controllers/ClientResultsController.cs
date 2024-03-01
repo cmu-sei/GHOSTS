@@ -90,7 +90,7 @@ namespace Ghosts.Api.Controllers
                     return StatusCode(StatusCodes.Status401Unauthorized, "Invalid machine request");
             }
 
-            if (!string.IsNullOrEmpty(value.Log))
+            if (value is not null && !string.IsNullOrEmpty(value.Log))
             {
                 log.Trace($"payload received: {value.Log}");
 

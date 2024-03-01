@@ -137,6 +137,9 @@ class Program
 
                 var r = new TransferLogDump();
 
+                if (!File.Exists(Options.UpdatesFile))
+                    File.Create(Options.UpdatesFile);
+                
                 var data = File.ReadLines(Options.UpdatesFile);
 
                 var sb = new StringBuilder();

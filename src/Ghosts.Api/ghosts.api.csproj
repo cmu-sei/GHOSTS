@@ -101,6 +101,7 @@
     <_ContentIncludedByDefault Remove="Areas\Animator\config\timelines\Word.json" />
     <_ContentIncludedByDefault Remove="Areas\Animator\config\universities.json" />
     <_ContentIncludedByDefault Remove="Areas\Animator\config\us_population_data.json" />
+    <_ContentIncludedByDefault Remove="output\socialgraph\social_graph.json" />
   </ItemGroup>
 
   <ItemGroup>

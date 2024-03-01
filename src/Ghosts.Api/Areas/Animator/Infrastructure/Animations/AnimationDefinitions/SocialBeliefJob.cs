@@ -9,7 +9,6 @@ using System.Text;
 using System.Threading;
 using Ghosts.Animator.Extensions;
 using ghosts.api.Areas.Animator.Hubs;
-using ghosts.api.Areas.Animator.Infrastructure.Models;
 using Ghosts.Api.Infrastructure;
 using Ghosts.Api.Infrastructure.Data;
 using Microsoft.AspNetCore.SignalR;
@@ -28,7 +27,7 @@ public class SocialBeliefJob
     private bool _isEnabled = true;
     private CancellationToken _cancellationToken;
 
-    private const string SavePath = "output/socialbelief/";
+    private const string SavePath = "_output/socialbelief/";
     private const string SocialGraphFile = "social_belief.json";
     private readonly IHubContext<ActivityHub> _activityHubContext;
 

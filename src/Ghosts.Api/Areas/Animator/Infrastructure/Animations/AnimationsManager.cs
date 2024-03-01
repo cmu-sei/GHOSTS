@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 using Ghosts.Api;
 using ghosts.api.Areas.Animator.Hubs;
 using ghosts.api.Areas.Animator.Infrastructure.Animations.AnimationDefinitions;
-using ghosts.api.Areas.Animator.Infrastructure.Models;
 using Ghosts.Api.Infrastructure;
 using Ghosts.Api.Infrastructure.Data;
+using Ghosts.Api.Services;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -260,6 +260,7 @@ public class AnimationsManager : IManageableHostedService
                 var socialSettings = JsonConvert.DeserializeObject<ApplicationSettings.AnimatorSettingsDetail.AnimationsSettings.SocialSharingSettings>(animationConfiguration
                     .JobConfiguration);
                 settings.AnimatorSettings.Animations.SocialSharing = socialSettings;
+                var machineUpdate = scope.ServiceProvider.GetRequiredService<IMachineUpdateService>();
                 if (socialSettings.IsMultiThreaded)
                 {
                     _socialSharingJobThread = new Thread(() =>
@@ -267,13 +268,14 @@ public class AnimationsManager : IManageableHostedService
                         Thread.CurrentThread.IsBackground = true;
                         using var innerScope = _scopeFactory.CreateScope();
                         context = innerScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                        _ = new SocialSharingJob(settings, context, this._random, this._activityHubContext, this._socialSharingJobCancellationTokenSource.Token);
+                        machineUpdate = innerScope.ServiceProvider.GetRequiredService<IMachineUpdateService>();
+                        _ = new SocialSharingJob(settings, context, this._random, this._activityHubContext, machineUpdate, this._socialSharingJobCancellationTokenSource.Token);
                     });
                     _socialSharingJobThread.Start();
                 }
                 else
                 {
-                    _ = new SocialSharingJob(settings, context, this._random, this._activityHubContext, this._socialSharingJobCancellationTokenSource.Token);
+                    _ = new SocialSharingJob(settings, context, this._random, this._activityHubContext, machineUpdate, this._socialSharingJobCancellationTokenSource.Token);
                 }
                 
                 break;
@@ -460,6 +462,7 @@ public class AnimationsManager : IManageableHostedService
             if (this._configuration.AnimatorSettings.Animations.SocialSharing.IsEnabled && this._configuration.AnimatorSettings.Animations.SocialSharing.IsInteracting)
             {
                 _log.Info($"Starting SocialSharing...");
+                var machineUpdate = scope.ServiceProvider.GetRequiredService<IMachineUpdateService>();
                 if (this._configuration.AnimatorSettings.Animations.SocialSharing.IsMultiThreaded)
                 {
                     this.AddJob("SOCIALSHARING");
@@ -469,13 +472,14 @@ public class AnimationsManager : IManageableHostedService
                         Thread.CurrentThread.IsBackground = true;
                         using var innerScope = _scopeFactory.CreateScope();
                         context = innerScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                        _ = new SocialSharingJob(this._configuration, context, this._random, this._activityHubContext, this._socialSharingJobCancellationTokenSource.Token);
+                        machineUpdate = innerScope.ServiceProvider.GetRequiredService<IMachineUpdateService>();
+                        _ = new SocialSharingJob(this._configuration, context, this._random, this._activityHubContext, machineUpdate, this._socialSharingJobCancellationTokenSource.Token);
                     });
                     _socialSharingJobThread.Start();
                 }
                 else
                 {
-                    _ = new SocialSharingJob(this._configuration, context, this._random, this._activityHubContext, this._socialSharingJobCancellationTokenSource.Token);
+                    _ = new SocialSharingJob(this._configuration, context, this._random, this._activityHubContext, machineUpdate, this._socialSharingJobCancellationTokenSource.Token);
                 }
             }
             else
