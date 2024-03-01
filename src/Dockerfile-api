@@ -5,6 +5,7 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS dev
 
 COPY Ghosts.Api/. /app/Ghosts.Api
 COPY Ghosts.Domain/. /app/Ghosts.Domain
+COPY ghosts-animator/. /app/ghosts-animator
 
 WORKDIR /app/Ghosts.Api
 RUN dotnet publish -c Release -o /app/dist
