@@ -1,10 +1,8 @@
 using System.Threading;
 using Ghosts.Api;
 using ghosts.api.Areas.Animator.Infrastructure.Animations;
-using ghosts.api.Areas.Animator.Infrastructure.Models;
 using Ghosts.Api.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
 using NLog;
 

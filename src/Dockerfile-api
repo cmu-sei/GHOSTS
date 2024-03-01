@@ -9,6 +9,7 @@ COPY ghosts-animator/. /app/ghosts-animator
 
 WORKDIR /app/Ghosts.Api
 RUN dotnet publish -c Release -o /app/dist
+COPY ghosts-animator/config/photos /app/dist/config/photos
 CMD ["dotnet", "run"]
 
 # multi-stage target: prod
