@@ -9,7 +9,7 @@ using ghosts.api.Areas.Animator.Infrastructure.Animations;
 using Ghosts.Api.Hubs;
 using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Api.Infrastructure.Extensions;
-using Ghosts.Api.Services;
+using ghosts.api.Infrastructure.Services;
 using Ghosts.Domain.Code;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;

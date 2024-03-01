@@ -5,11 +5,11 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS dev
 
 COPY Ghosts.Api/. /app/Ghosts.Api
 COPY Ghosts.Domain/. /app/Ghosts.Domain
-COPY ghosts-animator/. /app/ghosts-animator
+COPY Ghosts.Animator/. /app/Ghosts.Animator
 
 WORKDIR /app/Ghosts.Api
 RUN dotnet publish -c Release -o /app/dist
-COPY ghosts-animator/config/photos /app/dist/config/photos
+COPY Ghosts.Api/config /app/dist/config
 CMD ["dotnet", "run"]
 
 # multi-stage target: prod
@@ -20,7 +20,7 @@ COPY --from=dev /app/dist /app
 WORKDIR /app
 
 LABEL "product"="GHOSTS API"
-LABEL "maintainer"="Dustin Updyke <ddupdyke[@]sei.cmu.edu>"
+LABEL "maintainer"="Dustin Updyke <ddupdyke[-@-]sei.cmu.edu>"
 LABEL "version"="Browse to /swagger"
 
 EXPOSE 5000

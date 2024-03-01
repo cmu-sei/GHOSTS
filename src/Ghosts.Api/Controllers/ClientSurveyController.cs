@@ -3,8 +3,8 @@
 using System;
 using System.Threading;
 using Ghosts.Api.Infrastructure;
-using Ghosts.Api.Models;
-using Ghosts.Api.Services;
+using ghosts.api.Infrastructure.Models;
+using ghosts.api.Infrastructure.Services;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Messages.MesssagesForServer;
 using Microsoft.AspNetCore.Http;

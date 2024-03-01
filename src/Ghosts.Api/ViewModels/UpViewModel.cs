@@ -1,7 +1,7 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System.Collections.Generic;
-using Ghosts.Api.Models;
+using ghosts.api.Infrastructure.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 

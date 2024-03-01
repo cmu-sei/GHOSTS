@@ -4,7 +4,7 @@ using System;
 using System.IO;
 using ghosts.api.Areas.Animator.Infrastructure.Models;
 using Ghosts.Api.Infrastructure.Extensions;
-using Ghosts.Api.Models;
+using ghosts.api.Infrastructure.Models;
 using Ghosts.Domain.Messages.MesssagesForServer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
