@@ -80,7 +80,7 @@ namespace ghosts.api.Controllers
         /// <summary>
         /// Send a new timeline to an entire group of machines
         /// </summary>
-        /// <param name="groupId">Group Guid</param>
+        /// <param name="groupId">Group Id</param>
         /// <param name="machineUpdate">The update to send</param>
         /// <param name="ct">Cancellation token</param>
         /// <returns>204 No content</returns>
