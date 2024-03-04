@@ -298,6 +298,9 @@
     <None Include="Sample Timelines\Rdp.json" />
     <None Include="Sample Timelines\Reboot.json" />
     <None Include="Sample Timelines\BrowserOutlook.json" />
+    <None Include="Sample Timelines\timeline.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Sample Timelines\Wmi.json" />
     <None Include="Sample Timelines\Sftp.json" />
     <None Include="Sample Timelines\Ssh.json" />

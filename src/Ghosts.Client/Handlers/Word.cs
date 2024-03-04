@@ -310,10 +310,12 @@ public class WordHandler : BaseHandler
 
                     GC.Collect();
                 }
-                catch (ThreadAbortException)
+                catch (ThreadAbortException e)
                 {
+                    Log.Error(e);
+                    Log.Trace("Word closing abnormally...");
                     KillApp();
-                    Log.Trace("Word closing...");
+                    
                 }
                 catch (Exception e)
                 {
@@ -335,9 +337,9 @@ public class WordHandler : BaseHandler
                 }
             }
         }
-        catch (ThreadAbortException)
+        catch (ThreadAbortException e)
         {
-            //ignore
+            Log.Error(e);
         }
         catch (Exception e)
         {
@@ -345,8 +347,8 @@ public class WordHandler : BaseHandler
         }
         finally
         {
+            Log.Trace("Word closing normally...");
             KillApp();
-            Log.Trace("Word closing...");
         }
     }
     

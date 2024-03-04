@@ -296,10 +296,11 @@ public class PowerPointHandler : BaseHandler
 
                     GC.Collect();
                 }
-                catch (ThreadAbortException)
+                catch (ThreadAbortException e)
                 {
+                    Log.Error(e);
+                    Log.Trace("Powerpoint closing abnormally...");
                     KillApp();
-                    Log.Trace("Powerpoint closing...");
                 }
                 catch (Exception e)
                 {
@@ -321,9 +322,9 @@ public class PowerPointHandler : BaseHandler
                 }
             }
         }
-        catch (ThreadAbortException)
+        catch (ThreadAbortException e)
         {
-            //ignore
+            Log.Error(e);
         }
         catch (Exception e)
         {
@@ -331,8 +332,8 @@ public class PowerPointHandler : BaseHandler
         }
         finally
         {
+            Log.Trace("PowerPoint closing normally...");
             KillApp();
-            Log.Trace("PowerPoint closing...");
         }
     }
 }

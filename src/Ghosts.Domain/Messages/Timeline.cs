@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using Ghosts.Domain.Code;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
@@ -145,9 +146,10 @@ namespace Ghosts.Domain
         public object DelayBefore { get; set; }
 
         [JsonIgnore]
-        public int DelayAfterActual { get; set; }
+        public int DelayAfterActual => DelayAfter.GetDelay();
+
         [JsonIgnore]
-        public int DelayBeforeActual { get; set;}
+        public int DelayBeforeActual => DelayAfter.GetDelay();
     }
 
     /// <summary>

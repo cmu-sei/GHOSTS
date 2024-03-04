@@ -84,45 +84,6 @@ namespace Ghosts.Domain.Code
             try
             {
                 var timeline = JsonConvert.DeserializeObject<Timeline>(raw);
-                foreach (var handler in timeline.TimeLineHandlers)
-                {
-                    foreach (var ev in handler.TimeLineEvents)
-                    {
-                        var delay = 0;
-
-                        if (ev.DelayBefore is JObject d)
-                        {
-                            // DelayAfter is an object, check for randomization
-                            var randomDelay = d.ToObject<DelayRandom>();
-                            if (randomDelay != null && randomDelay.Random)
-                            {
-                                delay = rnd.Next(randomDelay.Min, randomDelay.Max);
-                            }
-                        }
-                        else if (ev.DelayBefore is int i)
-                        {
-                            delay = i;
-                        }
-
-                        ev.DelayBeforeActual = delay;
-
-                        delay = 0;
-                        if (ev.DelayAfter is JObject d2)
-                        {
-                            var randomDelay = d2.ToObject<DelayRandom>();
-                            if (randomDelay != null && randomDelay.Random)
-                            {
-                                delay = rnd.Next(randomDelay.Min, randomDelay.Max);
-                            }
-                        }
-                        else if (ev.DelayAfter is int i)
-                        {
-                            delay = i;
-                        }
-
-                        ev.DelayAfterActual = delay;
-                    }
-                }
                 if (timeline.Id == Guid.Empty)
                 {
                     timeline.Id = Guid.NewGuid();

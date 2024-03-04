@@ -306,10 +306,11 @@ public class ExcelHandler : BaseHandler
 
                     GC.Collect();
                 }
-                catch (ThreadAbortException)
+                catch (ThreadAbortException e)
                 {
+                    Log.Error(e);
+                    Log.Trace("Excel closing abnormally...");
                     KillApp();
-                    Log.Trace("Excel closing...");
                 }
                 catch (Exception e)
                 {
@@ -331,9 +332,9 @@ public class ExcelHandler : BaseHandler
                 }
             }
         }
-        catch (ThreadAbortException)
+        catch (ThreadAbortException e)
         {
-            //ignore
+            Log.Error(e);
         }
         catch (Exception e)
         {
@@ -341,8 +342,8 @@ public class ExcelHandler : BaseHandler
         }
         finally
         {
+            Log.Trace("Excel closing normally...");
             KillApp();
-            Log.Trace("Excel closing...");
         }
     }
 
