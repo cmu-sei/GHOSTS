@@ -183,6 +183,7 @@
     <Compile Include="Infrastructure\ClientConfigurationResolver.cs" />
     <Compile Include="Infrastructure\KnownFolders.cs" />
     <Compile Include="Infrastructure\OfficeHelpers.cs" />
+    <Compile Include="Infrastructure\PowerShellCommands.cs" />
     <Compile Include="Infrastructure\SftpSupport.cs" />
     <Compile Include="Infrastructure\SshSupport.cs" />
     <Compile Include="Infrastructure\TempFiles.cs" />
@@ -200,7 +201,7 @@
     <Compile Include="Infrastructure\Email\Registrar.cs" />
     <Compile Include="Infrastructure\FileListing.cs" />
     <Compile Include="Infrastructure\ProcessManager.cs" />
-    <Compile Include="Infrastructure\PowerShellCommands.cs" />
+    <Compile Include="Handlers\PowerShell.cs" />
     <Compile Include="Infrastructure\RandomFilename.cs" />
     <Compile Include="Infrastructure\RandomText.cs" />
     <Compile Include="Infrastructure\Trackables.cs" />

@@ -103,6 +103,7 @@ namespace Ghosts.Domain
         LightWord = 31,
         LightExcel = 32,
         LightPowerPoint = 33,
+        PowerShell = 39,
         Bash = 40,
         Print = 45,
         Ssh = 100,
