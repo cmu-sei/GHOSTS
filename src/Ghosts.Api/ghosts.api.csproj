@@ -43,7 +43,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ghosts-animator\ghosts-animator.csproj" />
+    <ProjectReference Include="..\Ghosts.Animator\ghosts.animator.csproj" />
     <ProjectReference Include="..\Ghosts.Domain\ghosts.domain.csproj" />
   </ItemGroup>
 
@@ -101,11 +101,39 @@
     <_ContentIncludedByDefault Remove="Areas\Animator\config\timelines\Word.json" />
     <_ContentIncludedByDefault Remove="Areas\Animator\config\universities.json" />
     <_ContentIncludedByDefault Remove="Areas\Animator\config\us_population_data.json" />
+    <_ContentIncludedByDefault Remove="output\socialgraph\social_graph.json" />
   </ItemGroup>
 
   <ItemGroup>
     <AdditionalFiles Include="Views\Home\Index.cshtml" />
     <AdditionalFiles Include="Views\Shared\_Layout.cshtml" />
     <AdditionalFiles Include="Views\_ViewStart.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="config\countries.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="config\luke_mode_names.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="config\meal_preferences.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="config\names_female.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="config\names_last.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="config\names_male.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="config\supplies.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="config\usernames.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>

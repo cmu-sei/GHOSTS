@@ -14,6 +14,8 @@ public class NpcRecord
 {
     [Key]
     public Guid Id { get; set; }
+    
+    public Guid? MachineId { get; set; }
 
     /// <summary>
     /// Used for grouping NPCs together, e.g. 2020, 2021

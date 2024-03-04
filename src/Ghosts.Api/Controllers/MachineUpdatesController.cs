@@ -2,8 +2,8 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using Ghosts.Api.Models;
-using Ghosts.Api.Services;
+using ghosts.api.Infrastructure.Models;
+using ghosts.api.Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;
 using NLog;
 

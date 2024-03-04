@@ -23,7 +23,7 @@ public class FullAutonomyJob
     private readonly ApplicationSettings _configuration;
     private readonly ApplicationDbContext _context;
     private readonly Random _random;
-    private const string SavePath = "output/fullautonomy/";
+    private const string SavePath = "_output/fullautonomy/";
     private readonly string _historyFile = $"{SavePath}/history.txt";
     private readonly List<string> _history;
     private readonly int _currentStep;

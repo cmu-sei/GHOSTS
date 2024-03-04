@@ -328,7 +328,7 @@
         },
         {
           "Name": "Access Revoked",
-          "Violation": false
+          "Violation": false  
         },
         {
           "Name": "Financial Problems",
@@ -531,6 +531,10 @@
       "Items": [
         {
           "Name": "Employee made unauthorized changes to a code base",
+          "Violation": true
+        },
+        {
+          "Name": "Employee made unauthorized changes to access",
           "Violation": true
         },
         {

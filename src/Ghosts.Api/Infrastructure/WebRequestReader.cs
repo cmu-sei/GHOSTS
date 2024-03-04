@@ -2,7 +2,7 @@
 
 using System;
 using System.Text.RegularExpressions;
-using Ghosts.Api.Models;
+using ghosts.api.Infrastructure.Models;
 using Ghosts.Domain.Code;
 using Microsoft.AspNetCore.Http;
 

@@ -7,9 +7,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Ghosts.Animator.Extensions;
 using ghosts.api.Areas.Animator.Hubs;
-using ghosts.api.Areas.Animator.Infrastructure.Models;
 using Ghosts.Api.Infrastructure;
 using Ghosts.Api.Infrastructure.Data;
 using Microsoft.AspNetCore.SignalR;
@@ -31,7 +31,7 @@ public class SocialGraphJob
     private bool _isEnabled = true;
     private CancellationToken _cancellationToken;
 
-    private const string SavePath = "output/socialgraph/";
+    private const string SavePath = "_output/socialgraph/";
     private const string SocialGraphFile = "social_graph.json";
     private readonly IHubContext<ActivityHub> _activityHubContext;
 
@@ -136,7 +136,7 @@ public class SocialGraphJob
     // (c) each step, n interactions may take place, picking from social_graph.json and interacting
     // (d) This interaction may affect knowledge (the existing preferences key/value pair —
     //      the interaction could create new knowledge, or increase an existing one by some value
-    private void Step(SocialGraph graph)
+    private async Task Step(SocialGraph graph)
     {
         if (graph.CurrentStep > _configuration.AnimatorSettings.Animations.SocialGraph.MaximumSteps)
         {
@@ -198,14 +198,14 @@ public class SocialGraphJob
                     {
                         connection.RelationshipStatus++;
 
-                        var npcTo = this._context.Npcs.Include(npcProfile => npcProfile.NpcProfile.Name).FirstOrDefault(x => x.Id == learning.To);
-                        var npcFrom = this._context.Npcs.Include(npcProfile => npcProfile.NpcProfile.Name).FirstOrDefault(x => x.Id == learning.From);
+                        var npcTo = this._context.Npcs.Include(x => x.NpcProfile.Name).FirstOrDefault(x => x.Id == learning.To);
+                        var npcFrom = this._context.Npcs.Include(x => x.NpcProfile.Name).FirstOrDefault(x => x.Id == learning.From);
 
                         var o = $"{graph.CurrentStep}: {npcFrom.NpcProfile.Name}'s relationship improved with {npcTo.NpcProfile.Name}...";
                         _log.Trace(o);
 
                         //post to hub
-                        this._activityHubContext.Clients.All.SendAsync("show",
+                        await this._activityHubContext.Clients.All.SendAsync("show",
                             graph.CurrentStep,
                             agent.Id,
                             "relationship",

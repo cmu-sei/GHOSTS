@@ -3,8 +3,8 @@
 using System;
 using System.Threading;
 using Ghosts.Api.Infrastructure;
-using Ghosts.Api.Models;
-using Ghosts.Api.Services;
+using ghosts.api.Infrastructure.Models;
+using ghosts.api.Infrastructure.Services;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Messages.MesssagesForServer;
@@ -90,7 +90,7 @@ namespace Ghosts.Api.Controllers
                     return StatusCode(StatusCodes.Status401Unauthorized, "Invalid machine request");
             }
 
-            if (!string.IsNullOrEmpty(value.Log))
+            if (value is not null && !string.IsNullOrEmpty(value.Log))
             {
                 log.Trace($"payload received: {value.Log}");
 

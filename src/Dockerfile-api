@@ -5,9 +5,22 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS dev
 
 COPY Ghosts.Api/. /app/Ghosts.Api
 COPY Ghosts.Domain/. /app/Ghosts.Domain
+COPY Ghosts.Animator/. /app/Ghosts.Animator
 
 WORKDIR /app/Ghosts.Api
 RUN dotnet publish -c Release -o /app/dist
+COPY Ghosts.Api/config /app/dist/config
+
+# copy in binaries
+RUN mkdir -p /app/dist/config/binaries/windows/x64
+RUN mkdir -p /app/dist/config/binaries/windows/x32
+RUN mkdir -p /app/dist/config/binaries/linux
+
+# 7.2 download version binaries from box TODO:// update these for v8
+RUN ["wget", "-O", "/app/dist/config/binaries/windows/x64/ghosts-client-x64-v7.2.0.zip", "https://cmu.box.com/shared/static/ogkq3qx3nwvyd6x7nxo71pi015memgqc.zip"]
+RUN ["wget", "-O", "/app/dist/config/binaries/windows/x32/ghosts-client-x32-v7.2.0.zip", "https://cmu.box.com/shared/static/z3qked2uq0s866w9cggncibtkwk796a5.zip"]
+RUN ["wget", "-O", "/app/dist/config/binaries/linux/ghosts-client-linux-v7.0.0.zip", "https://cmu.box.com/shared/static/0dwyx2nvxefm1ka8ejkvgmi92bns1ryc.zip"]
+
 CMD ["dotnet", "run"]
 
 # multi-stage target: prod
@@ -18,7 +31,7 @@ COPY --from=dev /app/dist /app
 WORKDIR /app
 
 LABEL "product"="GHOSTS API"
-LABEL "maintainer"="Dustin Updyke <ddupdyke[@]sei.cmu.edu>"
+LABEL "maintainer"="Dustin Updyke <ddupdyke[-@-]sei.cmu.edu>"
 LABEL "version"="Browse to /swagger"
 
 EXPOSE 5000

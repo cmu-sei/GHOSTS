@@ -29,27 +29,25 @@ services:
     networks:
       - ghosts-network
     restart: always
-
-#  ghosts-api:
-#    image: dustinupdyke/ghosts:8.0.0
-#    container_name: ghosts-api
-#    depends_on:
-#      - postgres
-#    ports:
-#      - '5000:5000'
-#    networks:
-#      - ghosts-network
-#    restart: always
-#
-#  grafana:
-#    image: grafana/grafana
-#    container_name: ghosts-grafana
-#    depends_on:
-#      - postgres
-#    ports:
-#      - '3000:3000'
-#    networks:
-#      - ghosts-network
-#    restart: always
-#    volumes:
-#      - ./_g:/var/lib/grafana
+  ghosts-api:
+    image: dustinupdyke/ghosts:8.0.0
+    container_name: ghosts-api
+    depends_on:
+      - postgres
+    ports:
+      - '5000:5000'
+    networks:
+      - ghosts-network
+    restart: always
+  grafana:
+    image: grafana/grafana
+    container_name: ghosts-grafana
+    depends_on:
+      - postgres
+    ports:
+      - '3000:3000'
+    networks:
+      - ghosts-network
+    restart: always
+    volumes:
+      - ./_g:/var/lib/grafana

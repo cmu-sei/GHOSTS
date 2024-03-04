@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Ghosts.Api.Models;
+using ghosts.api.Infrastructure.Models;
 using NLog;
 
 namespace Ghosts.Api.Infrastructure

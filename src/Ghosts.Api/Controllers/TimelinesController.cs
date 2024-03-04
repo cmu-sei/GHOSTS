@@ -3,8 +3,8 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Ghosts.Api.Models;
-using Ghosts.Api.Services;
+using ghosts.api.Infrastructure.Models;
+using ghosts.api.Infrastructure.Services;
 using Ghosts.Api.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -80,7 +80,7 @@ namespace ghosts.api.Controllers
         /// <summary>
         /// Send a new timeline to an entire group of machines
         /// </summary>
-        /// <param name="groupId">Group Guid</param>
+        /// <param name="groupId">Group Id</param>
         /// <param name="machineUpdate">The update to send</param>
         /// <param name="ct">Cancellation token</param>
         /// <returns>204 No content</returns>
