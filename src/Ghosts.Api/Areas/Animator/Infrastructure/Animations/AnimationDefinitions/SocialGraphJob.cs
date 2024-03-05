@@ -138,6 +138,8 @@ public class SocialGraphJob
     //      the interaction could create new knowledge, or increase an existing one by some value
     private async Task Step(SocialGraph graph)
     {
+        _log.Trace("Social graph step proceeding...");
+        
         if (graph.CurrentStep > _configuration.AnimatorSettings.Animations.SocialGraph.MaximumSteps)
         {
             _log.Trace($"Maximum steps met: {graph.CurrentStep - 1}. Social graph is exiting...");
@@ -167,9 +169,6 @@ public class SocialGraphJob
             var interactingWith = graph.Connections.FirstOrDefault(x => x.Id == agent.Id);
             interactingWith?.Interactions.Add(interaction);
 
-            // var npc = _mongo.Find(x => x.Id == graph.Id).FirstOrDefault();
-            // npc.MentalHealth.HappyQuotient
-
             //knowledge transferred?
             var topic = CalculateLearning(graph);
             if (topic is not null)
@@ -178,12 +177,13 @@ public class SocialGraphJob
                 graph.Knowledge.Add(learning);
 
                 //post to hub
-                this._activityHubContext.Clients.All.SendAsync("show",
+                await this._activityHubContext.Clients.All.SendAsync("show",
                     graph.CurrentStep,
                     agent.Id,
                     "knowledge",
                     $"learned more about {learning.Topic} ({learning.Value})",
-                    DateTime.Now.ToString(CultureInfo.InvariantCulture)
+                    DateTime.Now.ToString(CultureInfo.InvariantCulture), 
+                    new CancellationToken()
                 );
 
                 Thread.Sleep(_configuration.AnimatorSettings.Animations.SocialGraph.TurnLength);
@@ -221,12 +221,13 @@ public class SocialGraphJob
                 _log.Trace(o);
 
                 //post to hub
-                this._activityHubContext.Clients.All.SendAsync("show",
+                await this._activityHubContext.Clients.All.SendAsync("show",
                     graph.CurrentStep,
                     agent.Id,
                     "relationship",
                     o,
-                    DateTime.Now.ToString(CultureInfo.InvariantCulture)
+                    DateTime.Now.ToString(CultureInfo.InvariantCulture), 
+                    new CancellationToken()
                 );
             }
         }
@@ -251,12 +252,13 @@ public class SocialGraphJob
                             graph.Knowledge.Add(learning);
 
                             //post to hub
-                            this._activityHubContext.Clients.All.SendAsync("show",
+                            await this._activityHubContext.Clients.All.SendAsync("show",
                                 graph.CurrentStep,
                                 graph.Id,
                                 "knowledge",
                                 $"had knowledge decay in {k.Topic} occur",
-                                DateTime.Now.ToString(CultureInfo.InvariantCulture)
+                                DateTime.Now.ToString(CultureInfo.InvariantCulture),
+                                new CancellationToken()
                             );
 
                             break;
@@ -278,12 +280,13 @@ public class SocialGraphJob
                     c.Interactions.Add(interaction);
 
                     //post to hub
-                    this._activityHubContext.Clients.All.SendAsync("show",
+                    await this._activityHubContext.Clients.All.SendAsync("show",
                         graph.CurrentStep,
                         graph.Id,
                         "relationship",
                         $"Experienced general relationship decay",
-                        DateTime.Now.ToString(CultureInfo.InvariantCulture)
+                        DateTime.Now.ToString(CultureInfo.InvariantCulture),
+                        new CancellationToken()
                     );
                 }
             }

@@ -78,8 +78,7 @@ public class NpcsController : ControllerBase
     [HttpDelete("{id:guid}")]
     public async Task DeleteById(Guid id)
     {
-        //_mongo.Find(x => x.Id == id).FirstOrDefault();
-        var o = this._context.Npcs.Find(id);
+        var o = await this._context.Npcs.FindAsync(id);
         this._context.Npcs.Remove(o);
         await this._context.SaveChangesAsync();
     }

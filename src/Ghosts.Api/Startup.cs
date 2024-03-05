@@ -42,6 +42,7 @@ namespace Ghosts.Api
 
             //services.AddDbContext<ApplicationDbContext>(opt => opt.UseInMemoryDatabase("ghosts"));
             services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
+            
             services.TryAddTransient<IHttpContextAccessor, HttpContextAccessor>();
             services.AddCors(options => options.UseConfiguredCors(Configuration.GetSection("CorsPolicy")));
 

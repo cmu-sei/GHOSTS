@@ -7,7 +7,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using ghosts.api.Areas.Animator.Infrastructure.Models;
 using Ghosts.Api.Infrastructure;
 using Newtonsoft.Json;
 using NLog;
@@ -84,7 +83,7 @@ public class OllamaConnectorService
         }
         catch (Exception ex)
         {
-            _log.Error($"Ollama threw an exception: {ex.Message}: {ex.StackTrace}");
+            _log.Error($"Ollama threw an exception: {ex.Message}: {ex.StackTrace} on configuration {_configuration.Host} {_configuration.Model}");
             return null;
         }
     }

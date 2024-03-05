@@ -30,7 +30,7 @@ public class SocialSharingJob
     private const string SavePath = "_output/socialsharing/";
     private readonly int _currentStep;
     private readonly IHubContext<ActivityHub> _activityHubContext;
-    private CancellationToken _cancellationToken;
+    private readonly CancellationToken _cancellationToken;
     private readonly ApplicationDbContext _context;
     private readonly IMachineUpdateService _updateService;
 
@@ -46,7 +46,11 @@ public class SocialSharingJob
             this._cancellationToken = cancellationToken;
             this._updateService = updateService;
 
-            if (!_configuration.AnimatorSettings.Animations.SocialSharing.IsInteracting) return;
+            if (!_configuration.AnimatorSettings.Animations.SocialSharing.IsInteracting)
+            {
+                _log.Trace($"Social sharing is not interacting. Exiting...");
+                return;
+            }
 
             if (!Directory.Exists(SavePath))
             {
@@ -66,18 +70,22 @@ public class SocialSharingJob
                 this._currentStep++;
             }
         }
-        catch (ThreadInterruptedException)
+        catch (ThreadInterruptedException e)
         {
-            // continue
+            _log.Info("Social sharing thread interrupted!");
+            _log.Error(e);
         }
         catch (Exception e)
         {
             _log.Error(e);
         }
+        _log.Info("Social sharing job complete. Exiting...");
     }
 
     private async void Step()
     {
+        _log.Trace("Social sharing step proceeding...");
+        
         var contentService =
             new ContentCreationService(_configuration.AnimatorSettings.Animations.SocialSharing.ContentEngine);
 
@@ -86,7 +94,7 @@ public class SocialSharingJob
         var rawAgents = this._context.Npcs.ToList();
         if (!rawAgents.Any())
         {
-            _log.Warn("No NPCs found in Mongo. Is this correct?");
+            _log.Warn("No NPCs found. Is this correct?");
             return;
         }
 
@@ -110,7 +118,7 @@ public class SocialSharingJob
                 var client = new RestClient(_configuration.AnimatorSettings.Animations.SocialSharing.PostUrl);
                 var request = new RestRequest("/", Method.Post)
                 {
-                    RequestFormat = RestSharp.DataFormat.Json
+                    RequestFormat = DataFormat.Json
                 };
                 request.AddParameter(userFormValue, agent.NpcProfile.Name.ToString());
                 request.AddParameter(messageFormValue, tweetText);
@@ -168,8 +176,8 @@ public class SocialSharingJob
                 agent.Id.ToString(),
                 "social",
                 tweetText,
-                DateTime.Now.ToString(CultureInfo.InvariantCulture)
-            );
+                DateTime.Now.ToString(CultureInfo.InvariantCulture), 
+                cancellationToken: _cancellationToken);
         }
 
         await File.AppendAllTextAsync($"{SavePath}tweets.csv", lines.ToString());
