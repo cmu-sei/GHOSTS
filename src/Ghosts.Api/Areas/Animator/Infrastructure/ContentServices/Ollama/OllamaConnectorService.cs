@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Ghosts.Api.Infrastructure;
+using ghosts.api.Infrastructure.Extensions;
 using Newtonsoft.Json;
 using NLog;
 using JsonSerializer = System.Text.Json.JsonSerializer;
@@ -36,10 +37,11 @@ public class OllamaConnectorService
     public async Task<string> ExecuteQuery(string modelName, string prompt, string system = null,
         string template = null, string context = null, string options = null, Action<string> callback = null)
     {
+        Dictionary<string, string> payload = null;
         try
         {
             var url = $"{_configuration.Host}/api/generate";
-            var payload = new Dictionary<string, string>
+            payload = new Dictionary<string, string>
             {
                 { "model", modelName },
                 { "prompt", prompt },
@@ -83,7 +85,7 @@ public class OllamaConnectorService
         }
         catch (Exception ex)
         {
-            _log.Error($"Ollama threw an exception: {ex.Message}: {ex.StackTrace} on configuration {_configuration.Host} {_configuration.Model}");
+            _log.Error($"Ollama threw an exception: {ex.Message}: {ex.StackTrace} on configuration {_configuration.Host} {_configuration.Model} with payload {payload.ToSafeString()}");
             return null;
         }
     }
