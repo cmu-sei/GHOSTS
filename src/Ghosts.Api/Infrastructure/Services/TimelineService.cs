@@ -2,14 +2,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Ghosts.Api.Infrastructure.Data;
 using ghosts.api.Infrastructure.Models;
 using Ghosts.Api.ViewModels;
 using Ghosts.Domain;
-using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
 namespace ghosts.api.Infrastructure.Services
@@ -17,7 +15,6 @@ namespace ghosts.api.Infrastructure.Services
     public interface ITimelineService
     {
         Task UpdateAsync(MachineUpdateViewModel machineUpdate, CancellationToken ct);
-        Task UpdateGroupAsync(int groupId, MachineUpdateViewModel machineUpdate, CancellationToken ct);
         Task StopAsync(Guid machineId, Guid timelineId, CancellationToken ct);
     }
 
@@ -35,24 +32,6 @@ namespace ghosts.api.Infrastructure.Services
             var machineUpdate = machineUpdateViewModel.ToMachineUpdate();
 
             _context.MachineUpdates.Add(machineUpdate);
-            await _context.SaveChangesAsync(ct);
-        }
-
-        public async Task UpdateGroupAsync(int groupId, MachineUpdateViewModel machineUpdateViewModel, CancellationToken ct)
-        {
-            var machineUpdate = machineUpdateViewModel.ToMachineUpdate();
-
-            var group = _context.Groups.Include(o => o.GroupMachines).FirstOrDefault(x => x.Id == groupId);
-
-            if (group == null)
-                return;
-
-            foreach (var machineMapping in group.GroupMachines)
-            {
-                machineUpdate.MachineId = machineMapping.MachineId;
-                _context.MachineUpdates.Add(machineUpdate);
-            }
-
             await _context.SaveChangesAsync(ct);
         }
 

@@ -39,6 +39,13 @@ namespace ghosts.api.Controllers
             return Ok(await _machineTimelinesService.GetByMachineIdAsync(machineId, ct));
         }
         
+        [ProducesResponseType(typeof(MachineTimeline), 200)]
+        [HttpGet("timelines/updates")]
+        public async Task<IActionResult> TimelineUpdates([FromRoute] Guid machineId, CancellationToken ct)
+        {
+            return Ok(await _machineTimelinesService.GetByMachineIdAsync(machineId, ct));
+        }
+        
         /// <summary>
         /// This returns a specific timeline for a requested machine. If the timeline is not available,
         /// a MachineUpdate request can be made to retrieve the machine timeline   
@@ -74,22 +81,6 @@ namespace ghosts.api.Controllers
         public async Task<IActionResult> Timeline([FromRoute] Guid machineId, [FromRoute] Guid timelineId, CancellationToken ct)
         {
             await _timelineService.StopAsync(machineId, timelineId, ct);
-            return NoContent();
-        }
-
-        /// <summary>
-        /// Send a new timeline to an entire group of machines
-        /// </summary>
-        /// <param name="groupId">Group Id</param>
-        /// <param name="machineUpdate">The update to send</param>
-        /// <param name="ct">Cancellation token</param>
-        /// <returns>204 No content</returns>
-        [HttpPost("timelines/bygroup/{groupId}")]
-        // [ProducesResponseType(typeof(Task<IActionResult>), (int) HttpStatusCode.NoContent)] Swagger hates this
-        [SwaggerOperation(OperationId = "createTimelineForGroup")]
-        public async Task<IActionResult> GroupTimeline([FromRoute] int groupId, [FromBody] MachineUpdateViewModel machineUpdate, CancellationToken ct)
-        {
-            await _timelineService.UpdateGroupAsync(groupId, machineUpdate, ct);
             return NoContent();
         }
     }

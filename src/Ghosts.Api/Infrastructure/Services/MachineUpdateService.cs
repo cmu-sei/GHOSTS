@@ -1,10 +1,14 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Ghosts.Api.Infrastructure.Data;
 using ghosts.api.Infrastructure.Models;
+using Ghosts.Api.ViewModels;
+using Ghosts.Domain;
 using Microsoft.EntityFrameworkCore;
 using NLog;
 
@@ -17,6 +21,16 @@ namespace ghosts.api.Infrastructure.Services
         Task<MachineUpdate> CreateAsync(MachineUpdate model, CancellationToken ct);
         //Task<Machine> UpdateAsync(Machine model, CancellationToken ct);
         Task<int> DeleteAsync(int id, Guid machineId, CancellationToken ct);
+        
+        Task UpdateGroupAsync(int groupId, MachineUpdateViewModel machineUpdate, CancellationToken ct);
+
+        Task<MachineUpdate> GetById(int updateId, CancellationToken ct);
+
+        Task<IEnumerable<MachineUpdate>> GetByMachineId(Guid machineId, CancellationToken ct);
+
+        Task<IEnumerable<MachineUpdate>> GetByStatus(StatusType status, CancellationToken ct);
+
+        Task<IEnumerable<MachineUpdate>> GetByType(UpdateClientConfig.UpdateType type, CancellationToken ct);
     }
 
     public class MachineUpdateService : IMachineUpdateService
@@ -27,6 +41,24 @@ namespace ghosts.api.Infrastructure.Services
         public MachineUpdateService(ApplicationDbContext context)
         {
             _context = context;
+        }
+        
+        public async Task UpdateGroupAsync(int groupId, MachineUpdateViewModel machineUpdateViewModel, CancellationToken ct)
+        {
+            var machineUpdate = machineUpdateViewModel.ToMachineUpdate();
+
+            var group = _context.Groups.Include(o => o.GroupMachines).FirstOrDefault(x => x.Id == groupId);
+
+            if (group == null)
+                return;
+
+            foreach (var machineMapping in group.GroupMachines)
+            {
+                machineUpdate.MachineId = machineMapping.MachineId;
+                _context.MachineUpdates.Add(machineUpdate);
+            }
+
+            await _context.SaveChangesAsync(ct);
         }
 
         public async Task<MachineUpdate> GetAsync(Guid machineId, string currentUsername, CancellationToken ct)
@@ -55,6 +87,26 @@ namespace ghosts.api.Infrastructure.Services
             }
 
             return update;
+        }
+
+        public async Task<MachineUpdate> GetById(int updateId, CancellationToken ct)
+        {
+            return await _context.MachineUpdates.FirstOrDefaultAsync(x => x.Id == updateId, ct);
+        }
+
+        public async Task<IEnumerable<MachineUpdate>> GetByMachineId(Guid machineId, CancellationToken ct)
+        {
+            return await _context.MachineUpdates.Where(x => x.MachineId == machineId).ToListAsync(ct);
+        }
+
+        public async Task<IEnumerable<MachineUpdate>> GetByType(UpdateClientConfig.UpdateType type, CancellationToken ct)
+        {
+            return await _context.MachineUpdates.Where(x => x.Type == type).ToListAsync(ct);
+        }
+        
+        public async Task<IEnumerable<MachineUpdate>> GetByStatus(StatusType status, CancellationToken ct)
+        {
+            return await _context.MachineUpdates.Where(x => x.Status == status).ToListAsync(ct);
         }
 
         public async Task<MachineUpdate> CreateAsync(MachineUpdate model, CancellationToken ct)
