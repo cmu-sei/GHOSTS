@@ -19,7 +19,6 @@ namespace ghosts.api.Infrastructure.Services
         Task<MachineUpdate> GetAsync(Guid id, string currentUsername, CancellationToken ct);
 
         Task<MachineUpdate> CreateAsync(MachineUpdate model, CancellationToken ct);
-        //Task<Machine> UpdateAsync(Machine model, CancellationToken ct);
         Task<int> DeleteAsync(int id, Guid machineId, CancellationToken ct);
         
         Task UpdateGroupAsync(int groupId, MachineUpdateViewModel machineUpdate, CancellationToken ct);
@@ -35,7 +34,7 @@ namespace ghosts.api.Infrastructure.Services
 
     public class MachineUpdateService : IMachineUpdateService
     {
-        private static readonly Logger log = LogManager.GetCurrentClassLogger();
+        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
         private readonly ApplicationDbContext _context;
 
         public MachineUpdateService(ApplicationDbContext context)
@@ -63,11 +62,14 @@ namespace ghosts.api.Infrastructure.Services
 
         public async Task<MachineUpdate> GetAsync(Guid machineId, string currentUsername, CancellationToken ct)
         {
-            var update = new MachineUpdate();
-            if (!string.IsNullOrEmpty(currentUsername))
+            // try to find an update by machine
+            var update = await _context.MachineUpdates
+                .FirstOrDefaultAsync(m => (m.MachineId == machineId) && m.ActiveUtc < DateTime.UtcNow && m.Status == StatusType.Active, ct);
+            
+            if (update != null && !string.IsNullOrEmpty(update.Update))
             {
                 // if the username is there, but the machine id is not
-                if (machineId == Guid.Empty)
+                if (!string.IsNullOrEmpty(currentUsername) && machineId == Guid.Empty)
                 {
                     update = await _context.MachineUpdates
                         .FirstOrDefaultAsync(m => (m.Username.ToLower().StartsWith(currentUsername.ToLower())) && m.ActiveUtc < DateTime.UtcNow && m.Status == StatusType.Active, ct);
@@ -80,12 +82,7 @@ namespace ghosts.api.Infrastructure.Services
                                  m.ActiveUtc < DateTime.UtcNow && m.Status == StatusType.Active, ct);
                 }
             }
-            else // just search for machine id
-            {
-                update = await _context.MachineUpdates
-                    .FirstOrDefaultAsync(m => (m.MachineId == machineId) && m.ActiveUtc < DateTime.UtcNow && m.Status == StatusType.Active, ct);
-            }
-
+            
             return update;
         }
 
@@ -121,7 +118,7 @@ namespace ghosts.api.Infrastructure.Services
             var model = await _context.MachineUpdates.FirstOrDefaultAsync(o => o.Id == id, ct);
             if (model == null)
             {
-                log.Error($"Machine update not found for id: {id}");
+                _log.Error($"Machine update not found for id: {id}");
                 throw new InvalidOperationException("Machine Update not found");
             }
 
@@ -131,7 +128,7 @@ namespace ghosts.api.Infrastructure.Services
             var operation = await _context.SaveChangesAsync(ct);
             if (operation >= 1) return id;
             
-            log.Error($"Could not delete machine update: {operation}");
+            _log.Error($"Could not delete machine update: {operation}");
             throw new InvalidOperationException("Could not delete Machine Update");
         }
     }
