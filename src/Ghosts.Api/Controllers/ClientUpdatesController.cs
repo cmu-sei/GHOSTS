@@ -20,7 +20,7 @@ namespace Ghosts.Api.Controllers
     [Route("api/[controller]")]
     public class ClientUpdatesController : Controller
     {
-        private static readonly Logger log = LogManager.GetCurrentClassLogger();
+        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
         private readonly IBackgroundQueue _queue;
         private readonly IMachineUpdateService _updateService;
         private readonly IMachineService _machineService;
@@ -47,7 +47,7 @@ namespace Ghosts.Api.Controllers
         public async Task<IActionResult> Index(CancellationToken ct)
         {
             var id = Request.Headers["ghosts-id"];
-            log.Trace($"Request by {id}");
+            _log.Trace($"Request by {id}");
             
             var findMachineResponse = await this._machineService.FindOrCreate(HttpContext, ct);
             if (!findMachineResponse.IsValid())
@@ -74,7 +74,7 @@ namespace Ghosts.Api.Controllers
             var u = await _updateService.GetAsync(m.Id, m.CurrentUsername, ct);
             if (u == null) return NotFound();
 
-            log.Trace($"Update sent to {m.Id} {m.FQDN} {u.Id} {u.Username} {u.Update}");
+            _log.Trace($"Update sent to {m.Id} {m.FQDN} {u.Id} {u.Username} {u.Update}");
             
             var update = new UpdateClientConfig { Type = u.Type, Update = u.Update };
 
