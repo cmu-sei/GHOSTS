@@ -161,9 +161,12 @@ public class SocialSharingJob
                 postPayload = postPayload.Replace("{now}", DateTime.Now.ToString(CultureInfo.InvariantCulture));
                 
                 var machineUpdate = new MachineUpdate();
+                if (agent.MachineId.HasValue)
+                {
+                    machineUpdate.MachineId = agent.MachineId.Value;
+                }
                 machineUpdate.Update = postPayload;
                 machineUpdate.Username = agent.NpcProfile.Email;
-                //machineUpdate.MachineId = agent
                 machineUpdate.Status = StatusType.Active;
                 machineUpdate.Type = UpdateClientConfig.UpdateType.TimelinePartial;
 
