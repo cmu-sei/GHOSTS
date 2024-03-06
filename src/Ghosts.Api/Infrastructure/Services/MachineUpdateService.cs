@@ -66,7 +66,7 @@ namespace ghosts.api.Infrastructure.Services
             var update = await _context.MachineUpdates
                 .FirstOrDefaultAsync(m => (m.MachineId == machineId) && m.ActiveUtc < DateTime.UtcNow && m.Status == StatusType.Active, ct);
             
-            _log.Trace($"Update by machine id {machineId} is {update == null}");
+            _log.Trace($"Update by machine id {machineId} is {update != null}");
             
             if (update != null && !string.IsNullOrEmpty(update.Update))
             {
@@ -75,7 +75,7 @@ namespace ghosts.api.Infrastructure.Services
                 {
                     update = await _context.MachineUpdates
                         .FirstOrDefaultAsync(m => (m.Username.ToLower().StartsWith(currentUsername.ToLower())) && m.ActiveUtc < DateTime.UtcNow && m.Status == StatusType.Active, ct);
-                    _log.Trace($"Update by username {currentUsername} is {update == null}");
+                    _log.Trace($"Update by username {currentUsername} is {update != null}");
                 }
                 else // pick either
                 {
@@ -83,7 +83,7 @@ namespace ghosts.api.Infrastructure.Services
                         .FirstOrDefaultAsync(
                             m => (m.MachineId == machineId || m.Username.ToLower().StartsWith(currentUsername.ToLower())) &&
                                  m.ActiveUtc < DateTime.UtcNow && m.Status == StatusType.Active, ct);
-                    _log.Trace($"Update by either {machineId} or {currentUsername} is {update == null}");
+                    _log.Trace($"Update by either {machineId} or {currentUsername} is {update != null}");
                 }
             }
             

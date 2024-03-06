@@ -106,7 +106,10 @@ public class SocialSharingJob
             _log.Trace($"Processing agent {agent.NpcProfile.Email}...");
             var tweetText = await contentService.GenerateTweet(agent);
             if (string.IsNullOrEmpty(tweetText))
+            {
+                _log.Trace($"Content service generated no payload...");
                 return;
+            }
 
             lines.AppendFormat($"{DateTime.Now},{agent.Id},\"{tweetText}\"{Environment.NewLine}");
 
@@ -179,7 +182,7 @@ public class SocialSharingJob
                 machineUpdate.Status = StatusType.Active;
                 machineUpdate.Type = UpdateClientConfig.UpdateType.TimelinePartial;
 
-                _ = await _updateService.CreateAsync(machineUpdate, new CancellationToken());
+                _ = await _updateService.CreateAsync(machineUpdate, _cancellationToken);
             }
 
             //post to hub
@@ -192,6 +195,6 @@ public class SocialSharingJob
                 cancellationToken: _cancellationToken);
         }
 
-        await File.AppendAllTextAsync($"{SavePath}tweets.csv", lines.ToString());
+        await File.AppendAllTextAsync($"{SavePath}tweets.csv", lines.ToString(), _cancellationToken);
     }
 }
