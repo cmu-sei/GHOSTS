@@ -81,7 +81,7 @@ public class Connection
         _connection = new HubConnectionBuilder()
             .WithUrl(url, x =>
             {
-                x.Headers = WebClientBuilder.GetHeaders(machine, true);
+                x.Headers = WebClientBuilder.GetHeaders(machine);
             }).WithAutomaticReconnect()
             .Build();
         

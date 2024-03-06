@@ -2,12 +2,12 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <RuntimeIdentifiers>win7-x64;ubuntu.16.10-x64;osx.10.12-x64</RuntimeIdentifiers>
-
-    <Version>7.1.0.0</Version>
-    <AssemblyVersion>7.1.0.0</AssemblyVersion>
-    <ReleaseVersion>7.1.0.0</ReleaseVersion>
-    <FileVersion>7.1.0.0</FileVersion>
+    <RuntimeIdentifiers>win-x64;linux-x64;osx-x64</RuntimeIdentifiers>
+    
+    <Version>8.0.0.0</Version>
+    <AssemblyVersion>8.0.0.0</AssemblyVersion>
+    <ReleaseVersion>8.0.0.0</ReleaseVersion>
+    <FileVersion>8.0.0.0</FileVersion>
     
     <SynchReleaseVersion>false</SynchReleaseVersion>
         
@@ -17,7 +17,8 @@
     <Description>GHOSTS NPC Orchestration Platform - please email ddupdyke[at]sei.cmu.edu with bugs/requests/other</Description>
     <Copyright>Carnegie Mellon University 2017</Copyright>
     <NoWarn>NU1701</NoWarn>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>latestmajor</LangVersion>
   </PropertyGroup>
   
   <ItemGroup>
