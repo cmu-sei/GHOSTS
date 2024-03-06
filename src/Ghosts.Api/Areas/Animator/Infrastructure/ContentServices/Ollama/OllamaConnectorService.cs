@@ -53,9 +53,8 @@ public class OllamaConnectorService
 
             payload = payload.Where(kv => kv.Value != null).ToDictionary(kv => kv.Key, kv => kv.Value);
             using var client = new HttpClient();
-            client.Timeout = client.Timeout * 20;
-            using var response = await client.PostAsync(url,
-                new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json"));
+            client.Timeout = new TimeSpan(0,0,60);
+            using var response = await client.PostAsync(url, new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json"));
             response.EnsureSuccessStatusCode();
 
             var fullResponse = new StringBuilder();
