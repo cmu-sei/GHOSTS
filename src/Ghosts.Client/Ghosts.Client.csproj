@@ -442,19 +442,10 @@
     <PackageReference Include="NetOfficeFw.Excel">
       <Version>1.7.4.11</Version>
     </PackageReference>
-    <PackageReference Include="NetOfficeFw.Excel.Net45">
-      <Version>1.7.4.11</Version>
-    </PackageReference>
     <PackageReference Include="NetOfficeFw.PowerPoint">
       <Version>1.7.4.11</Version>
     </PackageReference>
-    <PackageReference Include="NetOfficeFw.PowerPoint.Net45">
-      <Version>1.7.4.11</Version>
-    </PackageReference>
     <PackageReference Include="NetOfficeFw.Word">
-      <Version>1.7.4.11</Version>
-    </PackageReference>
-    <PackageReference Include="NetOfficeFw.Word.Net45">
       <Version>1.7.4.11</Version>
     </PackageReference>
     <PackageReference Include="NETStandard.Library">
