@@ -97,10 +97,13 @@ public class SocialSharingJob
             _log.Warn("No NPCs found. Is this correct?");
             return;
         }
+        _log.Trace($"Found {rawAgents.Count()} raw agents...");
 
-        var agents = rawAgents.Shuffle(_random).Take(_random.Next(5, 20));
+        var agents = rawAgents.Shuffle(_random).Take(_random.Next(5, 20)).ToList();
+        _log.Trace($"Processing {agents.Count()} agents...");
         foreach (var agent in agents)
         {
+            _log.Trace($"Processing agent {agent.NpcProfile.Email}...");
             var tweetText = await contentService.GenerateTweet(agent);
             if (string.IsNullOrEmpty(tweetText))
                 return;
