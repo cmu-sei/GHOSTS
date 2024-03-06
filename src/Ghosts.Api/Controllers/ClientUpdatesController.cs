@@ -74,7 +74,7 @@ namespace Ghosts.Api.Controllers
             var u = await _updateService.GetAsync(m.Id, m.CurrentUsername, ct);
             if (u == null) return NotFound();
 
-            _log.Trace($"Update sent to {m.Id} {m.FQDN} {u.Id} {u.Username} {u.Update}");
+            _log.Trace($"Update {u.Id} sent to {m.Id} {m.Name}({m.FQDN}) {u.Id} {u.Username} {u.Update}");
             
             var update = new UpdateClientConfig { Type = u.Type, Update = u.Update };
 
