@@ -224,7 +224,7 @@ namespace ghosts.api.Infrastructure.Services
                             data = JsonConvert.DeserializeObject(array[1]);
                         }
 
-                        log.Trace($"Processing {type} with {data}");
+                        // log.Trace($"Processing {type} with {data}");
 
                         if (isReady)
                             switch (type)

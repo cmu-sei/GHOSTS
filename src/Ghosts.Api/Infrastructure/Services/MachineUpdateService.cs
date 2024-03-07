@@ -19,7 +19,7 @@ namespace ghosts.api.Infrastructure.Services
         Task<MachineUpdate> GetAsync(Guid id, string currentUsername, CancellationToken ct);
 
         Task<MachineUpdate> CreateAsync(MachineUpdate model, CancellationToken ct);
-        Task<int> DeleteAsync(int id, Guid machineId, CancellationToken ct);
+        Task<int> MarkAsDeletedAsync(int id, Guid machineId, CancellationToken ct);
         
         Task UpdateGroupAsync(int groupId, MachineUpdateViewModel machineUpdate, CancellationToken ct);
 
@@ -62,31 +62,23 @@ namespace ghosts.api.Infrastructure.Services
 
         public async Task<MachineUpdate> GetAsync(Guid machineId, string currentUsername, CancellationToken ct)
         {
-            // try to find an update by machine
-            var update = await _context.MachineUpdates
-                .FirstOrDefaultAsync(m => (m.MachineId == machineId) && m.ActiveUtc < DateTime.UtcNow && m.Status == StatusType.Active, ct);
-            
-            _log.Trace($"Update by machine id {machineId} is {update != null}");
-            
-            if (update != null && !string.IsNullOrEmpty(update.Update))
+            // Build the base query with conditions that are always true
+            var query = _context.MachineUpdates
+                .Where(m => m.ActiveUtc < DateTime.UtcNow && m.Status == StatusType.Active);
+    
+            // Adjust the query based on the provided arguments
+            if (machineId != Guid.Empty)
             {
-                // if the username is there, but the machine id is not
-                if (!string.IsNullOrEmpty(currentUsername) && machineId == Guid.Empty)
-                {
-                    update = await _context.MachineUpdates
-                        .FirstOrDefaultAsync(m => (m.Username.ToLower().StartsWith(currentUsername.ToLower())) && m.ActiveUtc < DateTime.UtcNow && m.Status == StatusType.Active, ct);
-                    _log.Trace($"Update by username {currentUsername} is {update != null}");
-                }
-                else // pick either
-                {
-                    update = await _context.MachineUpdates
-                        .FirstOrDefaultAsync(
-                            m => (m.MachineId == machineId || m.Username.ToLower().StartsWith(currentUsername.ToLower())) &&
-                                 m.ActiveUtc < DateTime.UtcNow && m.Status == StatusType.Active, ct);
-                    _log.Trace($"Update by either {machineId} or {currentUsername} is {update != null}");
-                }
+                query = query.Where(m => m.MachineId == machineId);
             }
-            
+    
+            if (!string.IsNullOrEmpty(currentUsername))
+            {
+                var usernameLower = currentUsername.ToLower();
+                query = query.Where(m => m.Username.ToLower().StartsWith(usernameLower));
+            }
+    
+            var update = await query.FirstOrDefaultAsync(ct);
             return update;
         }
 
@@ -117,7 +109,7 @@ namespace ghosts.api.Infrastructure.Services
             return model;
         }
 
-        public async Task<int> DeleteAsync(int id, Guid machineId, CancellationToken ct)
+        public async Task<int> MarkAsDeletedAsync(int id, Guid machineId, CancellationToken ct)
         {
             var model = await _context.MachineUpdates.FirstOrDefaultAsync(o => o.Id == id, ct);
             if (model == null)
@@ -128,11 +120,16 @@ namespace ghosts.api.Infrastructure.Services
 
             model.Status = StatusType.Deleted;
             model.MachineId = machineId;
+            _log.Info($"Marking machine update {id} as deleted.");
 
             var operation = await _context.SaveChangesAsync(ct);
-            if (operation >= 1) return id;
-            
-            _log.Error($"Could not delete machine update: {operation}");
+            if (operation >= 1)
+            {
+                _log.Info($"Machine update {id} marked as deleted successfully.");
+                return id;
+            }
+    
+            _log.Error($"Could not mark machine update {id} as deleted: {operation}");
             throw new InvalidOperationException("Could not delete Machine Update");
         }
     }

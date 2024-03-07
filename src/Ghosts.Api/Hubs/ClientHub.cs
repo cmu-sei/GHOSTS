@@ -95,7 +95,7 @@ namespace Ghosts.Api.Hubs
             
             var update = new UpdateClientConfig { Type = u.Type, Update = u.Update };
 
-            await _updateService.DeleteAsync(u.Id, m.Id, this._ct);
+            await _updateService.MarkAsDeletedAsync(u.Id, m.Id, this._ct);
 
             // integrators want to know that a timeline was actually delivered
             // (the service only guarantees that the update was received)

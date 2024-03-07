@@ -1,9 +1,11 @@
 // Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using System.Text.Json;
 using AutoMapper;
 using Ghosts.Animator.Models;
 
@@ -35,7 +37,11 @@ public class NpcRecord
     /// </summary>
     public string Team { get; set; }
     
+    // this is also currently jsonb
     public NpcProfile NpcProfile { get; set; }
+    
+    public IEnumerable<Preference> Preferences { get; set; }
+    
     public static NpcRecord TransformToNpc(NpcProfile o)
     {
         var n = new NpcRecord

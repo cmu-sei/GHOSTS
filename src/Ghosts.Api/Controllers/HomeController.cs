@@ -1,7 +1,9 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using ghosts.api.Areas.Animator.Infrastructure.Models;
 using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Domain.Code;
 using Microsoft.AspNetCore.Mvc;

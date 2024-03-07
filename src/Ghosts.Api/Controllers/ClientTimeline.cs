@@ -17,6 +17,7 @@ namespace ghosts.api.Controllers
     /// GHOSTS CLIENT CONTROLLER
     /// These endpoints are typically only used by GHOSTS Clients installed and configured to use the GHOSTS C2
     /// </summary>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Produces("application/json")]
     [Route("api/[controller]")]
     public class ClientTimelineController : Controller

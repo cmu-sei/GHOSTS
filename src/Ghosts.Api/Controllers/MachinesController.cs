@@ -138,5 +138,21 @@ namespace Ghosts.Api.Controllers
                 return Json(exc);
             }
         }
+        
+        /// <summary>
+        /// Gets the health for a particular machine
+        /// </summary>
+        /// <param name="id">Machine Guid</param>
+        /// <param name="ct">Cancellation Token</param>
+        /// <returns>Health records for the machine</returns>
+        [HttpGet("{id}/health")]
+        public async Task<IActionResult> Health([FromRoute] Guid id, CancellationToken ct)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var list = await _service.GetMachineHistoryHealth(id, ct);
+
+            return Ok(list);
+        }
     }
 }

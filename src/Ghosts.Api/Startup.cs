@@ -81,7 +81,7 @@ namespace Ghosts.Api
             services.AddScoped<IMachineTimelinesService, MachineTimelinesService>();
             services.AddScoped<ITrackableService, TrackableService>();
             services.AddScoped<ISurveyService, SurveyService>();
-
+            
             services.AddSingleton<IBackgroundQueue, BackgroundQueue>();
             services.AddSingleton<IHostedService, QueueSyncService>();
 

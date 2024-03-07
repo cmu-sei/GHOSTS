@@ -16,6 +16,7 @@ namespace Ghosts.Api.Controllers
     /// GHOSTS CLIENT CONTROLLER
     /// These endpoints are typically only used by GHOSTS Clients installed and configured to use the GHOSTS C2
     /// </summary>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Produces("application/json")]
     [Route("api/[controller]")]
     public class ClientUpdatesController : Controller
@@ -78,7 +79,7 @@ namespace Ghosts.Api.Controllers
             
             var update = new UpdateClientConfig { Type = u.Type, Update = u.Update };
 
-            await _updateService.DeleteAsync(u.Id, m.Id, ct);
+            await _updateService.MarkAsDeletedAsync(u.Id, m.Id, ct);
 
             // integrators want to know that a timeline was actually delivered
             // (the service only guarantees that the update was received)
