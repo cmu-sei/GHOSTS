@@ -32,6 +32,8 @@ public class ContentCreationService
             _openAiFormatterService = new OpenAiFormatterService();
         else if (_configuration.Source.ToLower() == "ollama")
             _ollamaFormatterService = new OllamaFormatterService(_configuration);
+        
+        _log.Trace($"Content service configured for {_configuration.Source} on {_configuration.Host} running {_configuration.Model}");
     }
 
     public async Task<string> GenerateNextAction(NpcRecord agent, string history)

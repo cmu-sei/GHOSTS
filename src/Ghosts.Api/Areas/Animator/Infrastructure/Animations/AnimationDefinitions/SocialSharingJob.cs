@@ -97,13 +97,19 @@ public class SocialSharingJob
             _log.Warn("No NPCs found. Is this correct?");
             return;
         }
+        _log.Trace($"Found {rawAgents.Count()} raw agents...");
 
-        var agents = rawAgents.Shuffle(_random).Take(_random.Next(5, 20));
+        var agents = rawAgents.Shuffle(_random).Take(_random.Next(5, 20)).ToList();
+        _log.Trace($"Processing {agents.Count()} agents...");
         foreach (var agent in agents)
         {
+            _log.Trace($"Processing agent {agent.NpcProfile.Email}...");
             var tweetText = await contentService.GenerateTweet(agent);
             if (string.IsNullOrEmpty(tweetText))
+            {
+                _log.Trace($"Content service generated no payload...");
                 return;
+            }
 
             lines.AppendFormat($"{DateTime.Now},{agent.Id},\"{tweetText}\"{Environment.NewLine}");
 
@@ -153,7 +159,7 @@ public class SocialSharingJob
                 }
                 formValues.Append('}');
 
-                var postPayload = await File.ReadAllTextAsync("config/socializer_post.json");
+                var postPayload = await File.ReadAllTextAsync("config/socializer_post.json", _cancellationToken);
                 postPayload = postPayload.Replace("{id}", Guid.NewGuid().ToString());
                 postPayload = postPayload.Replace("{user}", agent.NpcProfile.Email);
                 postPayload = postPayload.Replace("{payload}", formValues.ToString());
@@ -161,13 +167,22 @@ public class SocialSharingJob
                 postPayload = postPayload.Replace("{now}", DateTime.Now.ToString(CultureInfo.InvariantCulture));
                 
                 var machineUpdate = new MachineUpdate();
+                if (agent.MachineId.HasValue)
+                {
+                    postPayload = postPayload.Replace("{machineId}", agent.MachineId.Value.ToString());
+                    machineUpdate.MachineId = agent.MachineId.Value;
+                }
+                else
+                {
+                    postPayload = postPayload.Replace("{machineId}", Guid.Empty.ToString());
+                }
+                
                 machineUpdate.Update = postPayload;
                 machineUpdate.Username = agent.NpcProfile.Email;
-                //machineUpdate.MachineId = agent
                 machineUpdate.Status = StatusType.Active;
                 machineUpdate.Type = UpdateClientConfig.UpdateType.TimelinePartial;
 
-                _ = await _updateService.CreateAsync(machineUpdate, new CancellationToken());
+                _ = await _updateService.CreateAsync(machineUpdate, _cancellationToken);
             }
 
             //post to hub
@@ -180,6 +195,6 @@ public class SocialSharingJob
                 cancellationToken: _cancellationToken);
         }
 
-        await File.AppendAllTextAsync($"{SavePath}tweets.csv", lines.ToString());
+        await File.AppendAllTextAsync($"{SavePath}tweets.csv", lines.ToString(), _cancellationToken);
     }
 }

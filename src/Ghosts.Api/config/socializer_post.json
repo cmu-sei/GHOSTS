@@ -1,6 +1,6 @@
 {
-  "id":0,
-  "machineId": "00000000-0000-0000-0000-000000000000",
+  "id": "{id}",
+  "machineId": "{machineId}",
   "type": 10,
   "username": "{user}",
   "activeUtc": "{now}",

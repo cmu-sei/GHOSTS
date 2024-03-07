@@ -21,7 +21,7 @@ namespace Ghosts.Api.Controllers
     [Route("api/[controller]")]
     public class MachineUpdatesController : Controller
     {
-        private static readonly Logger log = LogManager.GetCurrentClassLogger();
+        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
         private readonly IBackgroundQueue _queue;
         private readonly IMachineUpdateService _updateService;
 
