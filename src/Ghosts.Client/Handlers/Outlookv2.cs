@@ -15,10 +15,6 @@ using Ghosts.Domain.Code.Helpers;
 using Exception = System.Exception;
 using MAPIFolder = Microsoft.Office.Interop.Outlook.MAPIFolder;
 using Ghosts.Client.Infrastructure;
-using NPOI.SS.Formula.Functions;
-using Microsoft.AspNetCore.Mvc.Filters;
-using NPOI.OpenXmlFormats.Dml;
-using System.Runtime.InteropServices;
 using ReportItem = Ghosts.Domain.Code.ReportItem;
 
 namespace Ghosts.Client.Handlers;

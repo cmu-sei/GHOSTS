@@ -70,13 +70,13 @@ namespace Ghosts.Domain
 
         public List<TimelineEvent> TimeLineEvents { get; set; }
 
-        [JsonConverter(typeof(StringEnumConverter))]
         public enum TimelineScheduleType
         {
             Other,
             Cron
         }
 
+        [JsonConverter(typeof(StringEnumConverter))]
         public TimelineScheduleType ScheduleType { get; set; }
         public string Schedule { get; set; }
     }
@@ -86,8 +86,8 @@ namespace Ghosts.Domain
     /// </summary>
     public enum HandlerType
     {
-        [Obsolete("Unsupported going forward (as of v6)", false)]
-        BrowserIE = 0,
+        //[Obsolete("Unsupported going forward (as of v6)", false)]
+        //BrowserIE = 0,
         BrowserFirefox = 1,
         BrowserChrome = 2,
         Command = 3,

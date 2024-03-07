@@ -2,7 +2,7 @@
   "ApiRootUrl": "http://ghosts-api:5000/api",
   "Sockets": {
     "IsEnabled": true,
-    "Heartbeat": 50000
+    "Heartbeat": 500000
   },
   "Id": {
     "IsEnabled": true,
@@ -20,7 +20,7 @@
   },
   "ClientUpdates": {
     "IsEnabled": true,
-    "CycleSleep": 30000
+    "CycleSleep": 300000
   },
   "Survey": {
     "IsEnabled": false,
