@@ -21,11 +21,10 @@ namespace Ghosts.Api
 
         public static void Main(string[] args)
         {
-            var msg = $"GHOSTS API {ApplicationDetails.Version} ({ApplicationDetails.VersionFile}) coming online...";
             Console.WriteLine(ApplicationDetails.Header);
-            Console.WriteLine(msg);
             
-            _log.Info(ApplicationDetails.Header);
+            var msg = $"GHOSTS API {ApplicationDetails.Version} ({ApplicationDetails.VersionFile}) coming online...";
+            Console.WriteLine(msg);
             _log.Info(msg);
 
             ApiDetails.LoadConfiguration();
