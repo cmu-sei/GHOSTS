@@ -68,7 +68,7 @@ namespace ghosts.api.Controllers
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                _log.Error(e);
                 return StatusCode(StatusCodes.Status400BadRequest, "Invalid timeline file");
             }
 

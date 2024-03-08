@@ -259,11 +259,11 @@ namespace Ghosts.Domain.Code
                 
                 File.WriteAllText(filePath, JsonConvert.SerializeObject(conf, Formatting.Indented));
 
-                Console.WriteLine($"Updating base configuration... BASE_URL is: {baseurl}");
+                _log.Trace($"Updating base configuration... BASE_URL is: {baseurl}");
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Exception updating config with env vars: {e}");
+                _log.Error($"Exception updating config with env vars: {e}");
             }   
         }
     }

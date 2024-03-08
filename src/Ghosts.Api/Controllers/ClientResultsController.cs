@@ -24,7 +24,7 @@ namespace Ghosts.Api.Controllers
     [Route("api/[controller]")]
     public class ClientResultsController : Controller
     {
-        private static readonly Logger log = LogManager.GetCurrentClassLogger();
+        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
         private readonly IBackgroundQueue _service;
 
         public ClientResultsController(IBackgroundQueue service)
@@ -52,7 +52,7 @@ namespace Ghosts.Api.Controllers
             }
             catch (Exception exc)
             {
-                log.Trace(exc);
+                _log.Trace(exc);
                 throw new Exception("Malformed data");
             }
 
@@ -93,7 +93,7 @@ namespace Ghosts.Api.Controllers
 
             if (value is not null && !string.IsNullOrEmpty(value.Log))
             {
-                log.Trace($"payload received: {value.Log}");
+                _log.Trace($"payload received: {value.Log}");
 
                 _service.Enqueue(
                     new QueueEntry

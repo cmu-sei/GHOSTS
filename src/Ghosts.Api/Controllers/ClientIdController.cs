@@ -18,7 +18,7 @@ namespace Ghosts.Api.Controllers
     [Route("api/[controller]")]
     public class ClientIdController : Controller
     {
-        private static readonly Logger log = LogManager.GetCurrentClassLogger();
+        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
         private readonly IMachineService _service;
 
         public ClientIdController(IMachineService service)
@@ -35,7 +35,7 @@ namespace Ghosts.Api.Controllers
         public async Task<IActionResult> Index(CancellationToken ct)
         {
             var id = Request.Headers["ghosts-id"];
-            log.Trace($"Request by {id}");
+            _log.Trace($"Request by {id}");
 
             var findMachineResponse = await this._service.FindOrCreate(HttpContext, ct);
             if (!findMachineResponse.IsValid())

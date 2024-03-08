@@ -25,7 +25,7 @@ namespace ghosts.api.Infrastructure.Services
 {
     public class QueueSyncService : IHostedService
     {
-        private static readonly Logger log = LogManager.GetCurrentClassLogger();
+        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
         private readonly IServiceScopeFactory _scopeFactory;
 
         public QueueSyncService(IServiceScopeFactory scopeFactory, IBackgroundQueue queue)
@@ -51,7 +51,7 @@ namespace ghosts.api.Infrastructure.Services
         {
             while (true)
             {
-                log.Trace("Beginning sync loop...");
+                _log.Trace("Beginning sync loop...");
 
                 try
                 {
@@ -59,10 +59,10 @@ namespace ghosts.api.Infrastructure.Services
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex);
+                    _log.Error(ex);
                 }
 
-                log.Trace("Ending sync loop");
+                _log.Trace("Ending sync loop");
 
                 await Task.Delay(new TimeSpan(0, 0, Program.ApplicationSettings.QueueSyncDelayInSeconds));
             }
@@ -101,7 +101,7 @@ namespace ghosts.api.Infrastructure.Services
             }
             catch (Exception e)
             {
-                log.Trace($"Error in item {e} - {item}");
+                _log.Trace($"Error in item {e} - {item}");
             }
         }
 
@@ -111,7 +111,7 @@ namespace ghosts.api.Infrastructure.Services
 
             try
             {
-                log.Trace($"Attempting find for {item}");
+                _log.Trace($"Attempting find for {item}");
 
                 foreach (var webhook in webhooks)
                 {
@@ -124,7 +124,7 @@ namespace ghosts.api.Infrastructure.Services
             }
             catch (Exception e)
             {
-                log.Trace($"Error in item {e} - {item}");
+                _log.Trace($"Error in item {e} - {item}");
             }
         }
 
@@ -132,7 +132,7 @@ namespace ghosts.api.Infrastructure.Services
         {
             var service = scope.ServiceProvider.GetRequiredService<IMachineService>();
 
-            log.Trace("Scope and context created");
+            _log.Trace("Scope and context created");
 
             var machines = new List<Machine>();
             var histories = new List<Machine.MachineHistoryItem>();
@@ -143,9 +143,9 @@ namespace ghosts.api.Infrastructure.Services
             //clients can send up a "create webhook" payload
             var webhooks = new List<Webhook>();
 
-            log.Trace("Beginning item processing...");
+            _log.Trace("Beginning item processing...");
 
-            log.Trace($"Attempting find for {item.Machine.Id}");
+            _log.Trace($"Attempting find for {item.Machine.Id}");
             Machine machine = null;
 
             if (item.Machine.Id != Guid.Empty)
@@ -153,16 +153,16 @@ namespace ghosts.api.Infrastructure.Services
 
             if (machine == null)
             {
-                log.Trace("Machine not found by id");
+                _log.Trace("Machine not found by id");
                 if (!string.IsNullOrEmpty(item.Machine.Name))
                 {
-                    log.Trace($"Searching for machine by name {item.Machine.Name}");
+                    _log.Trace($"Searching for machine by name {item.Machine.Name}");
                     machine = context.Machines.FirstOrDefault(o => o.Name == item.Machine.Name);
                 }
 
                 if (machine == null)
                 {
-                    log.Trace("Machine is still null, so attempting another create");
+                    _log.Trace("Machine is still null, so attempting another create");
                     if (item.Machine.Id == Guid.Empty)
                         item.Machine.Id = Guid.NewGuid();
                     item.Machine.LastReportedUtc = DateTime.UtcNow;
@@ -187,12 +187,12 @@ namespace ghosts.api.Infrastructure.Services
                 CreatedUtc = DateTime.UtcNow
             });
 
-            log.Trace($"Proc history type: {item.HistoryType}");
+            _log.Trace($"Proc history type: {item.HistoryType}");
 
             if (item.HistoryType == Machine.MachineHistoryItem.HistoryType.PostedResults)
             {
                 if (item.LogDump.Log.Length > 0)
-                    log.Trace(item.LogDump.Log);
+                    _log.Trace(item.LogDump.Log);
 
                 var lines = item.LogDump.Log.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
                 foreach (var line in lines)
@@ -297,14 +297,14 @@ namespace ghosts.api.Infrastructure.Services
                                 case "WEBHOOKCREATE":
                                     try
                                     {
-                                        log.Info("processing webhookcreate...");
+                                        _log.Info("processing webhookcreate...");
                                         var hook = JsonConvert.DeserializeObject<WebhookViewModel>(data.ToString());
                                         var h = new Webhook(hook);
                                         webhooks.Add(h);
                                     }
                                     catch (Exception e)
                                     {
-                                        log.Info($"serializing hook failed: {data} : {e})");
+                                        _log.Info($"serializing hook failed: {data} : {e})");
                                     }
 
                                     break;
@@ -312,7 +312,7 @@ namespace ghosts.api.Infrastructure.Services
                     }
                     catch (Exception e)
                     {
-                        log.Trace($"Bad line: {e} - {line}");
+                        _log.Trace($"Bad line: {e} - {line}");
                     }
             } //endif posted results
 
@@ -325,11 +325,11 @@ namespace ghosts.api.Infrastructure.Services
                 {
                     var i = await context.SaveChangesAsync();
                     if (i > 0)
-                        log.Trace($"Queue: {i} (machines: {machines.Count}");
+                        _log.Trace($"Queue: {i} (machines: {machines.Count}");
                 }
                 catch (Exception e)
                 {
-                    log.Error(e);
+                    _log.Error(e);
                 }
             }
 
@@ -340,11 +340,11 @@ namespace ghosts.api.Infrastructure.Services
                 {
                     var i = await context.SaveChangesAsync();
                     if (i > 0)
-                        log.Trace($"Queue: {i} (Trackables: {trackables.Count})");
+                        _log.Trace($"Queue: {i} (Trackables: {trackables.Count})");
                 }
                 catch (Exception e)
                 {
-                    log.Error(e);
+                    _log.Error(e);
                 }
             }
 
@@ -355,11 +355,11 @@ namespace ghosts.api.Infrastructure.Services
                 {
                     var i = await context.SaveChangesAsync();
                     if (i > 0)
-                        log.Trace($"Queue: {i} (Health: {health.Count})");
+                        _log.Trace($"Queue: {i} (Health: {health.Count})");
                 }
                 catch (Exception e)
                 {
-                    log.Error(e);
+                    _log.Error(e);
                 }
             }
 
@@ -370,11 +370,11 @@ namespace ghosts.api.Infrastructure.Services
                 {
                     var i = await context.SaveChangesAsync();
                     if (i > 0)
-                        log.Trace($"Queue: {i} (Timeline: {timelines.Count})");
+                        _log.Trace($"Queue: {i} (Timeline: {timelines.Count})");
                 }
                 catch (Exception e)
                 {
-                    log.Error(e);
+                    _log.Error(e);
                 }
             }
 
@@ -385,11 +385,11 @@ namespace ghosts.api.Infrastructure.Services
                 {
                     var i = await context.SaveChangesAsync();
                     if (i > 0)
-                        log.Trace($"Queue: {i} (History: {histories.Count}");
+                        _log.Trace($"Queue: {i} (History: {histories.Count}");
                 }
                 catch (Exception e)
                 {
-                    log.Error(e);
+                    _log.Error(e);
                 }
             }
 
@@ -400,11 +400,11 @@ namespace ghosts.api.Infrastructure.Services
                 {
                     var i = await context.SaveChangesAsync();
                     if (i > 0)
-                        log.Trace($"Queue: {i} (Webhooks: {webhooks.Count}");
+                        _log.Trace($"Queue: {i} (Webhooks: {webhooks.Count}");
                 }
                 catch (Exception e)
                 {
-                    log.Error(e);
+                    _log.Error(e);
                 }
             }
         }
@@ -454,7 +454,7 @@ namespace ghosts.api.Infrastructure.Services
 
                 if (!isValid)
                 {
-                    log.Trace("Webhook has no payload, exiting");
+                    _log.Trace("Webhook has no payload, exiting");
                     return;
                 }
             }
@@ -473,19 +473,19 @@ namespace ghosts.api.Infrastructure.Services
                     _ => throw new ArgumentException("webhook configuration encountered unspecified postback method")
                 };
 
-                log.Trace($"Webhook response {webhook.PostbackUrl} {webhook.PostbackMethod} {httpResponse.StatusCode}");
+                _log.Trace($"Webhook response {webhook.PostbackUrl} {webhook.PostbackMethod} {httpResponse.StatusCode}");
 
                 // If the response contains content we want to read it!
                 if (httpResponse.Content != null)
                 {
                     var responseContent = await httpResponse.Content.ReadAsStringAsync();
-                    log.Trace($"Webhook notification sent with {responseContent}");
+                    _log.Trace($"Webhook notification sent with {responseContent}");
                     // From here on you could deserialize the ResponseContent back again to a concrete C# type using Json.Net
                 }
             }
             catch (Exception e)
             {
-                log.Trace($"Webhook failed response {webhook.PostbackUrl} {webhook.PostbackMethod} - {e}");
+                _log.Trace($"Webhook failed response {webhook.PostbackUrl} {webhook.PostbackMethod} - {e}");
             }
         }
     }

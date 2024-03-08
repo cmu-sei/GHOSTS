@@ -1,25 +1,19 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using ghosts.api.Areas.Animator.Infrastructure.Models;
 using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Domain.Code;
 using Microsoft.AspNetCore.Mvc;
+using NLog;
 
 namespace Ghosts.Api.Controllers
 {
     [Route("/")]
-    public class HomeController : Controller
+    public class HomeController(ApplicationDbContext context) : Controller
     {
-        private readonly ApplicationDbContext _context;
-
-        public HomeController(ApplicationDbContext context)
-        {
-            _context = context;
-        }
-
+        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
+        
         [HttpGet]
         [ApiExplorerSettings(IgnoreApi = true)]
         public IActionResult Index()
@@ -46,13 +40,13 @@ namespace Ghosts.Api.Controllers
 
             try
             {
-                s.Machines = _context.Machines.Count();
-                s.Groups = _context.Groups.Count();
-                s.Npcs = _context.Npcs.Count();
+                s.Machines = context.Machines.Count();
+                s.Groups = context.Groups.Count();
+                s.Npcs = context.Npcs.Count();
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                _log.Error(e);
                 throw;
             }
 

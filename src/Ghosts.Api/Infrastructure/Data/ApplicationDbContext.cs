@@ -1,6 +1,5 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
-using System;
 using System.IO;
 using ghosts.api.Areas.Animator.Infrastructure.Models;
 using Ghosts.Api.Infrastructure.Extensions;
@@ -9,6 +8,7 @@ using Ghosts.Domain.Messages.MesssagesForServer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
+using NLog;
 
 namespace Ghosts.Api.Infrastructure.Data
 {
@@ -102,10 +102,11 @@ namespace Ghosts.Api.Infrastructure.Data
     
     public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<ApplicationDbContext>
     {
+        private static readonly Logger _log = LogManager.GetCurrentClassLogger();        
         public ApplicationDbContext CreateDbContext(string[] args)
         {
             var path = $"{Directory.GetCurrentDirectory()}/../ghosts.api/";
-            Console.WriteLine(path);
+            _log.Trace(path);
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(path)
                 .AddJsonFile("appsettings.json")
