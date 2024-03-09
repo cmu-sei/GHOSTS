@@ -78,11 +78,12 @@ public class NpcsGenerateController : ControllerBase
                 {
                     var last = t.ElapsedMilliseconds;
                     var branch = team.Npcs.Configuration?.Branch ?? MilitaryUnits.GetServiceBranch();
-                    var npc = NpcRecord.TransformToNpc(Npc.Generate(branch));
+                    var npc = NpcRecord.TransformToNpc(Npc.Generate(new NpcGenerationConfiguration { Branch = branch, PreferenceSettings = team.PreferenceSettings }));
                     npc.Id = npc.NpcProfile.Id;
                     npc.Team = team.Name;
                     npc.Campaign = config.Campaign;
                     npc.Enclave = enclave.Name;
+                    
                     this._context.Npcs.Add(npc);
                     createdNpcs.Add(npc);
                     _log.Trace($"{i} generated in {t.ElapsedMilliseconds - last} ms");

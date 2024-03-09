@@ -1,4 +1,4 @@
-namespace ghosts.api.Areas.Animator.Infrastructure.Models;
+namespace Ghosts.Animator;
 
 public class Preference
 {

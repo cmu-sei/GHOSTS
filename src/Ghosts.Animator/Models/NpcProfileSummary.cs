@@ -34,5 +34,6 @@ namespace Ghosts.Animator.Models
         public IEnumerable<AccountsProfile.Account> Accounts { get; set; }
         public MotivationalProfile MotivationalProfile { get; set; } = new();
         public DateTime Created { get; set; } = DateTime.UtcNow;
+        public IEnumerable<Preference> Preferences { get; set; } = new List<Preference>();
     }
 }

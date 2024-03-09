@@ -1,6 +1,7 @@
 // Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
+using System.Collections.Generic;
 using Ghosts.Animator.Models;
 using Ghosts.Animator.Services;
 using Newtonsoft.Json;
@@ -23,10 +24,10 @@ namespace Ghosts.Animator
         
         public static NpcProfile Generate(Enums.MilitaryBranch branch, string username)
         {
-            return Generate(new NpcGenerationConfiguration { Branch = branch}, username);
+            return Generate(new NpcGenerationConfiguration { Branch = branch, Username = username });
         }
         
-        public static NpcProfile Generate(NpcGenerationConfiguration config, string username = null)
+        public static NpcProfile Generate(NpcGenerationConfiguration config)
         {
             if(!config.Branch.HasValue)
                 config.Branch = MilitaryUnits.GetServiceBranch();
@@ -46,10 +47,10 @@ namespace Ghosts.Animator
             
             NpcProfile.Address.Add(Address.GetHomeAddress());
 
-            if(string.IsNullOrEmpty(username))
+            if(string.IsNullOrEmpty(config.Username))
                 NpcProfile.Name = Name.GetName();
             else
-                NpcProfile.SetName(username);
+                NpcProfile.SetName(config.Username);
 
             NpcProfile.Email = Internet.GetMilEmail(NpcProfile.Name.ToString());
             NpcProfile.Password = Internet.GetPassword();
@@ -87,7 +88,19 @@ namespace Ghosts.Animator
             NpcProfile.Attributes = AttributesService.GetAttributes();
 
             NpcProfile.MotivationalProfile = MotivationalProfile.GetNew();
-                
+
+            var preferences = new List<Preference>();
+            var i = 0;
+            foreach (var p in config.PreferenceSettings)
+            {
+                var score = p.Score;
+                if (p.ScoreLow > -1 && p.ScoreHigh > p.ScoreLow)
+                    score = AnimatorRandom.Rand.Next(p.ScoreLow, p.ScoreHigh);
+                preferences.Add(new Preference { Id = i, Name = p.Name, Meta = p.Meta, Score = score});
+                i++;
+            }
+            NpcProfile.Preferences = preferences;
+            
             return NpcProfile;
         }
 

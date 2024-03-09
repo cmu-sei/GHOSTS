@@ -17,6 +17,8 @@ namespace Ghosts.Animator.Models
         public string Password { get; set; }
         public string HomePhone { get; set; }
         public string CellPhone { get; set; }
+        
+        public IEnumerable<Preference> Preferences { get; set; }
         public MilitaryUnit Unit { get; set; }
         public MilitaryRank.Branch.Rank Rank { get; set; }
 

@@ -40,8 +40,6 @@ public class NpcRecord
     // this is also currently jsonb
     public NpcProfile NpcProfile { get; set; }
     
-    public IEnumerable<Preference> Preferences { get; set; }
-    
     public static NpcRecord TransformToNpc(NpcProfile o)
     {
         var n = new NpcRecord

@@ -31,6 +31,8 @@ public class TeamConfiguration
     public string Name { get; set; }
     public string MachineNameTemplate { get; set; }
     public string DomainTemplate { get; set; }
+    
+    public IEnumerable<PreferenceOption> PreferenceSettings { get; set; }
 }
 
 /// <summary>

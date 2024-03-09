@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using Ghosts.Animator.Enums;
+using Newtonsoft.Json;
 
 namespace Ghosts.Animator.Models
 {
@@ -23,6 +24,19 @@ namespace Ghosts.Animator.Models
         /// Set this to generate NPCs that are all part of the same service branch unit
         /// </summary>
         public string Unit { get; set; }
+        
+        public string Username { get; set; }
+        
+        public IEnumerable<PreferenceOption> PreferenceSettings { get; set; }
+    }
+    
+    public class PreferenceOption
+    {
+        public int Score { get; set; }
+        public int ScoreHigh { get; set; }
+        public int ScoreLow { get; set; }
+        public string Name { get; set; }
+        public string Meta { get; set; }
     }
 
     public class RankDistribution
