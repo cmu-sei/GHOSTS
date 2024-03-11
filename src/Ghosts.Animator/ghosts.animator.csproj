@@ -16,8 +16,7 @@
         <Description>GHOSTS ANIMATOR - please email ddupdyke at sei.cmu.edu with bugs/requests/other</Description>
         <Copyright>Carnegie Mellon University 2020</Copyright>
         <NoWarn>NU1701</NoWarn>
-        <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
-
+        
         <LangVersion>7.3</LangVersion>
         <Platforms>AnyCPU;x64;x86</Platforms>
     </PropertyGroup>
