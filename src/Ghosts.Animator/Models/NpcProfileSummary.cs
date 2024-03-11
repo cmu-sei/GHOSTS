@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using Ghosts.Animator.Enums;
 using Ghosts.Animator.Models.InsiderThreat;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace Ghosts.Animator.Models
 {
@@ -20,6 +22,7 @@ namespace Ghosts.Animator.Models
         public MilitaryRank.Branch.Rank Rank { get; set; } = new MilitaryRank.Branch.Rank();
         public EducationProfile Education { get; set; } = new EducationProfile();
         public EmploymentProfile Employment { get; set; } = new EmploymentProfile();
+        [JsonConverter(typeof(StringEnumConverter))]
         public BiologicalSex BiologicalSex { get; set; }
         public DateTime Birthdate { get; set; }
         public HealthProfile Health { get; set; } = new HealthProfile();

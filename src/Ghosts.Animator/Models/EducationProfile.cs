@@ -2,6 +2,8 @@
 
 using Ghosts.Animator.Enums;
 using System.Collections.Generic;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace Ghosts.Animator.Models
 {
@@ -9,6 +11,7 @@ namespace Ghosts.Animator.Models
     {
         public class Degree
         {
+            [JsonConverter(typeof(StringEnumConverter))]
             public DegreeLevel Level { get; set; }
             public string DegreeType { get; set; }
 

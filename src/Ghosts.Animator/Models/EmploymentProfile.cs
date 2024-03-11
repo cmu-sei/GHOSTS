@@ -31,9 +31,10 @@ namespace Ghosts.Animator.Models
             public string Email { get; set; }
             public AddressProfiles.AddressProfile Address { get; set; }
             public string Phone { get; set; }
-            public EmploymentStatuses EmploymentStatus { get; set; }
 
             [JsonConverter(typeof(StringEnumConverter))]
+            public EmploymentStatuses EmploymentStatus { get; set; }
+
             public enum EmploymentStatuses
             {
                 FullTime = 0,

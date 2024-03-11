@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using Ghosts.Animator.Enums;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace Ghosts.Animator.Models
 {
@@ -15,6 +16,8 @@ namespace Ghosts.Animator.Models
         /// <summary>
         /// Set this if a specific service branch is needed
         /// </summary>
+        
+        [JsonConverter(typeof(StringEnumConverter))]
         public MilitaryBranch? Branch { get; set; }
         /// <summary>
         /// Set this to ensure specific ranks and their number are generated

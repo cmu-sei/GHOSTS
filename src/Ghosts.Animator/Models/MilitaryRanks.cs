@@ -2,6 +2,8 @@
 
 using System.Collections.Generic;
 using Ghosts.Animator.Enums;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace Ghosts.Animator.Models
 {
@@ -17,6 +19,7 @@ namespace Ghosts.Animator.Models
 
             public class Rank
             {
+                [JsonConverter(typeof(StringEnumConverter))]
                 public MilitaryBranch Branch { get; set; }
                 public string Pay { get; set; }
                 public string Name { get; set; }
