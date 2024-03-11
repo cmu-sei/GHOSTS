@@ -17,7 +17,9 @@
         <Copyright>Carnegie Mellon University 2020</Copyright>
         <NoWarn>NU1701</NoWarn>
         <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
-        <LangVersion>12</LangVersion>
+
+        <LangVersion>7.3</LangVersion>
+        <Platforms>AnyCPU;x64;x86</Platforms>
     </PropertyGroup>
 
     <ItemGroup>
