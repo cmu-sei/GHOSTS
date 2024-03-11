@@ -47,7 +47,7 @@ namespace Ghosts.Api
                 }
                 catch (Exception ex)
                 {
-                    _log.Fatal(ex, "An error occurred while seeding the GHOSTS database");
+                    _log.Fatal(ex);
                 }
             }
 
