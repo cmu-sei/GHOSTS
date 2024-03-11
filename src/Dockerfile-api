@@ -24,7 +24,7 @@ RUN ["wget", "-O", "/app/dist/config/binaries/linux/ghosts-client-linux-v8.0.0.z
 CMD ["dotnet", "run"]
 
 # multi-stage target: prod
-FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS prod
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS prod
 ARG commit
 ENV COMMIT=$commit
 COPY --from=dev /app/dist /app
