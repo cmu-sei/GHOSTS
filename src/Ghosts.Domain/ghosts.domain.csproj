@@ -12,10 +12,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Content Include="nlog.config" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<PackageReference Include="DotNetCore.NPOI" Version="1.2.3" />
 		<PackageReference Include="HtmlAgilityPack" Version="1.11.59" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
