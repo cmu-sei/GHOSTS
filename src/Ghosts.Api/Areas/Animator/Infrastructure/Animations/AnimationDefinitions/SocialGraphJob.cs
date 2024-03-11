@@ -107,14 +107,14 @@ public class SocialGraphJob
                 //need to build a list of connections for every npc
                 var graph = new SocialGraph
                 {
-                    Id = item.Id,
+                    Id = item.NpcProfile.Id,
                     Name = item.NpcProfile.Name.ToString()
                 };
                 foreach (var connection in from sub in list
                          where sub.Id != item.Id
                          select new SocialGraph.SocialConnection
                          {
-                             Id = sub.Id,
+                             Id = sub.NpcProfile.Id,
                              Name = sub.NpcProfile.Name.ToString()
                          })
                 {
