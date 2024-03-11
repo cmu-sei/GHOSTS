@@ -70,6 +70,7 @@ namespace Ghosts.Domain
 
         public List<TimelineEvent> TimeLineEvents { get; set; }
 
+        [JsonConverter(typeof(StringEnumConverter))]
         public enum TimelineScheduleType
         {
             Other,
@@ -84,6 +85,7 @@ namespace Ghosts.Domain
     /// <summary>
     /// handlers map to applications
     /// </summary>
+    [JsonConverter(typeof(StringEnumConverter))]
     public enum HandlerType
     {
         //[Obsolete("Unsupported going forward (as of v6)", false)]

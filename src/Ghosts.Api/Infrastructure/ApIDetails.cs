@@ -2,11 +2,14 @@
 
 using System.IO;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace Ghosts.Api.Infrastructure
 {
     public static class ApiDetails
     {
+        [JsonConverter(typeof(StringEnumConverter))]
         public enum Roles
         {
             Admin = 0

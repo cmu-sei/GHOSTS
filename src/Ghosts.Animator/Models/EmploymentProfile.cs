@@ -35,6 +35,7 @@ namespace Ghosts.Animator.Models
             [JsonConverter(typeof(StringEnumConverter))]
             public EmploymentStatuses EmploymentStatus { get; set; }
 
+            [JsonConverter(typeof(StringEnumConverter))]
             public enum EmploymentStatuses
             {
                 FullTime = 0,

@@ -12,6 +12,7 @@ namespace ghosts.api.Infrastructure.Models
     [Table("webhooks")]
     public class Webhook
     {
+        [JsonConverter(typeof(StringEnumConverter))]
         public enum WebhookMethod
         {
             GET = 0,

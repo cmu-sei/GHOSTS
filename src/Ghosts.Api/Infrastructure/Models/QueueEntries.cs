@@ -1,12 +1,15 @@
 // Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using Ghosts.Domain;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 
 namespace ghosts.api.Infrastructure.Models
 {
     public class QueueEntry
     {
+        [JsonConverter(typeof(StringEnumConverter))]
         public enum Types
         {
             Notification,
@@ -27,6 +30,7 @@ namespace ghosts.api.Infrastructure.Models
 
     public class NotificationQueueEntry
     {
+        [JsonConverter(typeof(StringEnumConverter))]
         public enum NotificationType
         {
             Timeline = 0,

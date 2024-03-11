@@ -30,6 +30,7 @@ namespace ghosts.api.Infrastructure.Models
     [Table("machines")]
     public class Machine
     {
+        [JsonConverter(typeof(StringEnumConverter))]
         public enum UpDownStatus
         {
             Unknown = 0,
@@ -205,6 +206,7 @@ namespace ghosts.api.Infrastructure.Models
         [Table("history_machine")]
         public class MachineHistoryItem
         {
+            [JsonConverter(typeof(StringEnumConverter))]
             public enum HistoryType
             {
                 Created = 0,

@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using NLog;
 
 namespace ghosts.api.Areas.Animator.Infrastructure.Animations;
@@ -44,6 +45,7 @@ public class JobInfo
     public DateTime StartTime { get; set; }
 }
 
+[JsonConverter(typeof(StringEnumConverter))]
 public enum AnimationJobTypes
 {
     SOCIALGRAPH,
