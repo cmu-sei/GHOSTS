@@ -91,16 +91,21 @@ namespace Ghosts.Animator
 
             var preferences = new List<Preference>();
             var i = 0;
-            foreach (var p in config.PreferenceSettings)
+
+            if (config.PreferenceSettings != null)
             {
-                var score = p.Score;
-                if (p.ScoreLow > -1 && p.ScoreHigh > p.ScoreLow)
-                    score = AnimatorRandom.Rand.Next(p.ScoreLow, p.ScoreHigh);
-                preferences.Add(new Preference { Id = i, Name = p.Name, Meta = p.Meta, Score = score});
-                i++;
+                foreach (var p in config.PreferenceSettings)
+                {
+                    var score = p.Score;
+                    if (p.ScoreLow > -1 && p.ScoreHigh > p.ScoreLow)
+                        score = AnimatorRandom.Rand.Next(p.ScoreLow, p.ScoreHigh);
+                    preferences.Add(new Preference { Id = i, Name = p.Name, Meta = p.Meta, Score = score });
+                    i++;
+                }
+
+                NpcProfile.Preferences = preferences;
             }
-            NpcProfile.Preferences = preferences;
-            
+
             return NpcProfile;
         }
 
