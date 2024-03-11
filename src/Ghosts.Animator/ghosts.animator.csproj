@@ -4,11 +4,8 @@
         <RootNamespace>Ghosts.Animator</RootNamespace>
         <AssemblyName>ghosts.animator</AssemblyName>
 
-        <Version>1.1.1.0</Version>
         <AssemblyVersion>1.1.1.0</AssemblyVersion>
         <FileVersion>1.1.1.0</FileVersion>
-        <ReleaseVersion>1.1.1.0</ReleaseVersion>
-        <SynchReleaseVersion>false</SynchReleaseVersion>
 
         <Authors>GHOSTS Development Team @ Carnegie Mellon University</Authors>
         <Company>Carnegie Mellon University</Company>
