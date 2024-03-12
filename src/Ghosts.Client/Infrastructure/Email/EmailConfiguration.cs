@@ -203,7 +203,7 @@ public class EmailConfiguration
                 var emails = EmailListManager.GetDomainList();
                 _log.Trace($"Building domain email list: {emails.Count}...");
 
-                for (var i = 0; i < numberOfRecipients; i++)
+                for (var i = 0; i <= numberOfRecipients; i++)
                     list.Add(emails.PickRandom());
 
                 //add outside
@@ -212,7 +212,7 @@ public class EmailConfiguration
                     
                 var outsideEmails = EmailListManager.GetOutsideList();
                 _log.Trace($"Building outside email list: {outsideEmails.Count}...");
-                for (var i = 0; i < x; i++)
+                for (var i = 0; i <= x; i++)
                     list.Add(outsideEmails.PickRandom());
             }
         }
