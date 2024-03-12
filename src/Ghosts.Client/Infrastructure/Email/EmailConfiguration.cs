@@ -169,6 +169,7 @@ public class EmailConfiguration
 
     private static List<string> ParseEmail(string raw, int min, int max)
     {
+        _log.Trace($"Parsing email - raw {raw} min {min} max {max}");
         var list = new List<string>();
         if (string.IsNullOrEmpty(raw)) return list;
 
@@ -176,16 +177,22 @@ public class EmailConfiguration
         var numberOfRecipients = rnd.Next(min, max);
 
         if (numberOfRecipients < 1)
+        {
+            _log.Trace("numberOfRecipients was less than 1, exiting...");
             return list;
+        }
 
         if (raw.StartsWith("random", StringComparison.InvariantCultureIgnoreCase))
         {
             var o = raw.Split(Convert.ToChar(":"));
+            _log.Trace($"Randomizing email addresses o.boundary: {o.GetUpperBound(0)}...");
 
             if (o.GetUpperBound(0) > 0) //supplied list
             {
                 var l = o[1];
                 var emails = l.Split(Convert.ToChar(","));
+
+                _log.Trace($"l: {l} and then split {emails.Length}...");
 
                 for (var i = 0; i < numberOfRecipients; i++)
                     list.Add(emails.PickRandom());
@@ -194,6 +201,7 @@ public class EmailConfiguration
             {
                 //add domain
                 var emails = EmailListManager.GetDomainList();
+                _log.Trace($"Building domain email list: {emails.Count}...");
 
                 for (var i = 0; i < numberOfRecipients; i++)
                     list.Add(emails.PickRandom());
@@ -203,6 +211,7 @@ public class EmailConfiguration
                 if (x < 1) return list;
                     
                 var outsideEmails = EmailListManager.GetOutsideList();
+                _log.Trace($"Building outside email list: {outsideEmails.Count}...");
                 for (var i = 0; i < x; i++)
                     list.Add(outsideEmails.PickRandom());
             }
@@ -210,6 +219,7 @@ public class EmailConfiguration
         else
         {
             var a = raw.Split(Convert.ToChar(","));
+            _log.Trace($"Building non-random list: {a.Length}...");
             list.AddRange(a.Where(IsValidEmail));
         }
         return list;
@@ -224,6 +234,7 @@ public class EmailConfiguration
         }
         catch
         {
+            _log.Trace($"Invalid email address: {email}...");
             return false;
         }
     }

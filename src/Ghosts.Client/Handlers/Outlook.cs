@@ -38,8 +38,12 @@ public class Outlook : BaseHandler
             var currentDir = new FileInfo(GetType().Assembly.Location).Directory;
             RedemptionLoader.DllLocation64Bit = Path.GetFullPath(currentDir + @"\lib\redemption64.dll");
             RedemptionLoader.DllLocation32Bit = Path.GetFullPath(currentDir + @"\lib\redemption.dll");
+
+            Log.Trace("Redemption64 loaded from " + Path.GetFullPath(currentDir + @"\lib\redemption64.dll"));
+            Log.Trace("Redemption loaded from " + Path.GetFullPath(currentDir + @"\lib\redemption.dll"));
+
             //Create a Redemption object and use it
-            Log.Trace("Creating new RDO session");
+            Log.Trace("Creating new RDO session...");
             var session = RedemptionLoader.new_RDOSession();
             Log.Trace("Attempting RDO session logon...");
             session.Logon(Missing.Value, Missing.Value, Missing.Value, Missing.Value, Missing.Value, Missing.Value);
@@ -55,7 +59,7 @@ public class Outlook : BaseHandler
             _oMapiNamespace = _app.GetNamespace("MAPI");
             _folderInbox = _oMapiNamespace.GetDefaultFolder(OlDefaultFolders.olFolderInbox);
             _folderOutbox = _oMapiNamespace.GetDefaultFolder(OlDefaultFolders.olFolderOutbox);
-            Log.Trace("Launching Outlook");
+            Log.Trace("Launching Outlook...");
             _folderInbox.Display();
 
             if (handler.Loop)
@@ -354,8 +358,8 @@ public class Outlook : BaseHandler
 
     private bool SendEmailViaOutlook(EmailConfiguration emailConfig)
     {
-        ClientConfiguration.EmailSettings config = Program.Configuration.Email;
-        bool wasSuccessful = false;
+        var config = Program.Configuration.Email;
+        var wasSuccessful = false;
 
         try
         {
@@ -438,13 +442,6 @@ public class Outlook : BaseHandler
                 }
             }
                 
-            if (config.SaveToOutbox)
-            {
-                Log.Trace("Saving mailItem to outbox...");
-                mailItem.Move(_folderOutbox);
-                mailItem.Save();
-            }
-                
             Log.Trace("Attempting new Redemtion SafeMailItem...");
             var rdoMail = new SafeMailItem
             {
@@ -501,6 +498,13 @@ public class Outlook : BaseHandler
             }
                 
             rdoMail.Recipients.ResolveAll();
+
+            if (config.SaveToOutbox)
+            {
+                Log.Trace("Saving mailItem to outbox...");
+                mailItem.Move(_folderOutbox);
+                mailItem.Save();
+            }
 
             Log.Trace("Attempting to send Redemtion SafeMailItem...");
             rdoMail.Send();
