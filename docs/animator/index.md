@@ -1,7 +1,9 @@
 # GHOSTS ANIMATOR Overview
 
 ???+ info "GHOSTS ANIMATOR Source Code"
-    The [GHOSTS ANIMATOR Source Code Repository](https://github.com/cmu-sei/GHOSTS-ANIMATOR) is hosted on GitHub
+    The [GHOSTS ANIMATOR Source Code Repository](https://github.com/cmu-sei/GHOSTS-ANIMATOR) is hosted on GitHub, but has been archived.
+
+    Animator has been baked into the main GHOSTS API. Any development on features listed here will be done in the main GHOSTS repository.
 
 Animator brings NPCs to life in two ways:
 

@@ -40,7 +40,7 @@ The GHOSTS client should typically be run as a specific user, and not as an admi
 
 ### :material-linux: Linux Client
 
-1. Your client Linux machine will need to have the latest [Microsoft dotnetcore runtime](https://dotnet.microsoft.com/download){:target="_blank"} installed (Note that for the GHOSTS client, there are versions for dotnetcoreapp3.1 - this will eventually go away — and dotnet6.0, which is LTS and should stick around for a while). Again, note that you only need the runtime installed, not the full SDK.
+1. Your client Linux machine will need to have the latest [Microsoft dotnetcore runtime](https://dotnet.microsoft.com/download){:target="_blank"} installed. Again, note that you only need the runtime installed, not the full SDK.
 2. [Download the latest Linux client](https://github.com/cmu-sei/GHOSTS/releases/latest){:target="_blank"} zip file. Unzip to a folder such as ~/ghosts for the user that you want GHOSTS to run as.
 
 Note that on Linux machines running the client as root and utilizing web browsing may result in failures due to Gecko/Chromedriver display issues.

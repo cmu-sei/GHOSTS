@@ -2,24 +2,25 @@
 
 using System;
 using System.Linq;
-using Ghosts.Api.Infrastructure;
 using Ghosts.Api.Infrastructure.Data;
+using Ghosts.Domain.Code;
 using Microsoft.AspNetCore.Mvc;
+using NLog;
 
 namespace Ghosts.Api.Controllers
 {
-    [Produces("application/json")]
-    [Route("api/home")]
-    [ResponseCache(Duration = 60)]
-    public class HomeController : Controller
+    [Route("/")]
+    public class HomeController(ApplicationDbContext context) : Controller
     {
-        private readonly ApplicationDbContext _context;
-
-        public HomeController(ApplicationDbContext context)
+        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
+        
+        [HttpGet]
+        [ApiExplorerSettings(IgnoreApi = true)]
+        public IActionResult Index()
         {
-            _context = context;
+            return View();
         }
-
+        
         /// <summary>
         /// API Home, often used to verify API is working correctly
         /// </summary>
@@ -27,21 +28,25 @@ namespace Ghosts.Api.Controllers
         /// Basic check information including version number,
         /// and a simple database connection counting machines and groups
         /// </returns>
-        [HttpGet]
-        public IActionResult Index()
+        [HttpGet("test")]
+        [Produces("application/json")]
+        [ResponseCache(Duration = 60)]
+        public IActionResult Test()
         {
             var s = new Status();
-            s.Version = ApiDetails.Version;
+            s.Version = ApplicationDetails.Version;
+            s.VersionFile = ApplicationDetails.VersionFile;
             s.Created = DateTime.UtcNow;
 
             try
             {
-                s.Machines = _context.Machines.Count();
-                s.Groups = _context.Groups.Count();
+                s.Machines = context.Machines.Count();
+                s.Groups = context.Groups.Count();
+                s.Npcs = context.Npcs.Count();
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                _log.Error(e);
                 throw;
             }
 
@@ -51,8 +56,10 @@ namespace Ghosts.Api.Controllers
         public class Status
         {
             public string Version { get; set; }
+            public string VersionFile { get; set; }
             public int Machines { get; set; }
             public int Groups { get; set; }
+            public int Npcs { get; set; }
             public DateTime Created { get; set; }
         }
     }

@@ -92,10 +92,10 @@ namespace Ghosts.Client.Handlers
             {
                 WorkingHours.Is(handler);
 
-                if (timelineEvent.DelayBefore > 0)
-                    Thread.Sleep(timelineEvent.DelayBefore);
+                if (timelineEvent.DelayBeforeActual > 0)
+                    Thread.Sleep(timelineEvent.DelayBeforeActual);
 
-                Log.Trace($"Wmi Command: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfter}");
+                Log.Trace($"Wmi Command: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfterActual}");
 
                 switch (timelineEvent.Command)
                 {
@@ -107,12 +107,12 @@ namespace Ghosts.Client.Handlers
                             {
                                 this.Command(handler, timelineEvent, cmd.ToString());
                             }
-                            Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, jitterfactor)); ;
+                            Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, jitterfactor)); ;
                         }
                 }
 
-                if (timelineEvent.DelayAfter > 0)
-                    Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, jitterfactor)); ;
+                if (timelineEvent.DelayAfterActual > 0)
+                    Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, jitterfactor)); ;
             }
         }
 

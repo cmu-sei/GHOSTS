@@ -53,10 +53,10 @@ public class Clicks : BaseHandler
         {
             WorkingHours.Is(handler);
 
-            if (timelineEvent.DelayBefore > 0)
-                Thread.Sleep(timelineEvent.DelayBefore);
+            if (timelineEvent.DelayBeforeActual > 0)
+                Thread.Sleep(timelineEvent.DelayBeforeActual);
 
-            Log.Trace($"Click: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfter}");
+            Log.Trace($"Click: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfterActual}");
 
             switch (timelineEvent.Command)
             {
@@ -73,8 +73,8 @@ public class Clicks : BaseHandler
                     break;
             }
 
-            if (timelineEvent.DelayAfter > 0)
-                Thread.Sleep(timelineEvent.DelayAfter);
+            if (timelineEvent.DelayAfterActual > 0)
+                Thread.Sleep(timelineEvent.DelayAfterActual);
         }
     }
 

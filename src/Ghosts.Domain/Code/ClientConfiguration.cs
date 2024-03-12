@@ -10,33 +10,9 @@ namespace Ghosts.Domain.Code
 {
     public class ClientConfiguration
     {
-        /// <summary>
-        /// Should each instance generate and use its own ID to identify with server?
-        /// </summary>
-        public bool IdEnabled { get; set; }
-
-        /// <summary>
-        /// API URL for client to get its instance ID
-        /// </summary>
-        public string IdUrl { get; set; }
-
-        /// <summary>
-        /// guest|guestinfo
-        /// </summary>
-        public string IdFormat { get; set; }
-
-        /// <summary>
-        /// if using guestinfo, the key to query for the value to use as hostname
-        /// </summary>
-        public string IdFormatKey { get; set; }
-
-        public string IdFormatValue { get; set; }
-
-        /// <summary>
-        /// Where is vmtools?
-        /// </summary>
-        // ReSharper disable once InconsistentNaming
-        public string VMWareToolsLocation { get; set; }
+        public string ApiRootUrl { get; set; }
+        
+        public IdSettings Id { get; set; }
 
         /// <summary>
         /// Are client health checks enabled?
@@ -98,9 +74,43 @@ namespace Ghosts.Domain.Code
 
         public ResourceControlSettings ResourceControl { get; set; }
 
-        public TimelineConf TimelineConfiguration { get; set; }
+        public TimelineConf Timeline{ get; set; }
 
         public AwsCliSettings AwsCli { get; set; }
+
+        public SocketsSettings Sockets { get; set; }
+
+        public class IdSettings
+        {
+            /// <summary>
+            /// Should each instance generate and use its own ID to identify with server?
+            /// </summary>
+            public bool IsEnabled { get; set; }
+
+            /// <summary>
+            /// guest|guestinfo
+            /// </summary>
+            public string Format { get; set; }
+
+            /// <summary>
+            /// if using guestinfo, the key to query for the value to use as hostname
+            /// </summary>
+            public string FormatKey { get; set; }
+
+            public string FormatValue { get; set; }
+
+            /// <summary>
+            /// Where is vmtools?
+            /// </summary>
+            // ReSharper disable once InconsistentNaming
+            public string VMWareToolsLocation { get; set; }
+        }
+        
+        public class SocketsSettings
+        {
+            public bool IsEnabled { get; set; }
+            public int Heartbeat { get; set; }
+        }
 
         public class TimelineConf
         {
@@ -141,11 +151,6 @@ namespace Ghosts.Domain.Code
             public bool IsSecure { get; set; }
 
             /// <summary>
-            /// API URL for client to post activity results, like timeline, health, etc.
-            /// </summary>
-            public string PostUrl { get; set; }
-
-            /// <summary>
             /// How often should client post results? (this number is the ms sleep between cycles)
             /// </summary>
             public int CycleSleep { get; set; }
@@ -157,11 +162,6 @@ namespace Ghosts.Domain.Code
             /// Is client attempting to pull down updates from server?
             /// </summary>
             public bool IsEnabled { get; set; }
-
-            /// <summary>
-            /// API URL for client to get updates like timeline, health, etc.
-            /// </summary>
-            public string PostUrl { get; set; }
 
             /// <summary>
             /// How often should client poll for updates? (this number is the ms sleep between cycles)
@@ -179,7 +179,6 @@ namespace Ghosts.Domain.Code
             public string Frequency { get; set; }
             public string OutputFormat { get; set; }
             public int CycleSleepMinutes { get; set; }
-            public string PostUrl { get; set; }
         }
 
         public class EmailSettings
@@ -256,25 +255,15 @@ namespace Ghosts.Domain.Code
                 var raw = File.ReadAllText(filePath);
                 var conf = JsonConvert.DeserializeObject<ClientConfiguration>(raw);
 
-                var uri = new Uri(Config.IdUrl);
-                conf.IdUrl = $"{baseurl}{uri.AbsolutePath}";
-
-                uri = new Uri(Config.ClientResults.PostUrl);
-                conf.ClientResults.PostUrl = $"{baseurl}{uri.AbsolutePath}";
-
-                uri = new Uri(Config.Survey.PostUrl);
-                conf.Survey.PostUrl = $"{baseurl}{uri.AbsolutePath}";
-
-                uri = new Uri(Config.ClientUpdates.PostUrl);
-                conf.ClientUpdates.PostUrl = $"{baseurl}{uri.AbsolutePath}";
-
+                conf.ApiRootUrl = baseurl;
+                
                 File.WriteAllText(filePath, JsonConvert.SerializeObject(conf, Formatting.Indented));
 
-                Console.WriteLine($"Updating base configuration... BASE_URL is: {baseurl}");
+                _log.Trace($"Updating base configuration... BASE_URL is: {baseurl}");
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Exception updating config with env vars: {e}");
+                _log.Error($"Exception updating config with env vars: {e}");
             }   
         }
     }

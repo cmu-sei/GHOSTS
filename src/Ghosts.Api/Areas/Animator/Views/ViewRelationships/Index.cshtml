@@ -1,0 +1,23 @@
+@{
+    //Layout = null;
+}
+
+@section header
+{
+    <link rel="stylesheet" type="text/css" href="/view-relationships/inspector.css"/>
+}
+
+<div>
+    <h1 id="animator-build-relationship">Animator Relationships</h1>
+    <p>A view of related NPCs generated within GHOSTS ON @DateTime.UtcNow.ToString("D").</p>
+</div>
+
+@section scripts
+{
+    <script type="module">
+        import define from '/view-relationships/index.js';
+        import { Runtime, Inspector } from '/view-relationships/runtime.js';
+        const runtime = new Runtime();
+        const main = runtime.module(define, Inspector.into(document.body));
+    </script>
+}

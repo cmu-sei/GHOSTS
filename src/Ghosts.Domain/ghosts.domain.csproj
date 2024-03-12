@@ -4,20 +4,16 @@
 		<TargetFramework>netstandard2.0</TargetFramework>
 		<RootNamespace>Ghosts.Domain</RootNamespace>
 
-		<AssemblyVersion>7.2.0.0</AssemblyVersion>
-		<FileVersion>7.2.0.0</FileVersion>
+		<AssemblyVersion>8.0.0.0</AssemblyVersion>
+		<FileVersion>8.0.0.0</FileVersion>
 
 		<LangVersion>7.3</LangVersion>
 		<Platforms>AnyCPU;x64;x86</Platforms>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Content Include="nlog.config" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<PackageReference Include="DotNetCore.NPOI" Version="1.2.3" />
-		<PackageReference Include="HtmlAgilityPack" Version="1.11.57" />
+		<PackageReference Include="HtmlAgilityPack" Version="1.11.59" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 		<PackageReference Include="NLog" Version="5.2.8" />
 		<PackageReference Include="System.ComponentModel" Version="4.3.0" />

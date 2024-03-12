@@ -16,9 +16,9 @@ public class LightHandlers : BaseHandler
         Log.Trace($"{cls} event - {timelineEvent}");
         WorkingHours.Is(handler);
 
-        if (timelineEvent.DelayBefore > 0)
+        if (timelineEvent.DelayBeforeActual > 0)
         {
-            Thread.Sleep(timelineEvent.DelayBefore);
+            Thread.Sleep(timelineEvent.DelayBeforeActual);
         }
 
         Thread.Sleep(3000);

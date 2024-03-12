@@ -17,8 +17,7 @@ public class UsersController(ILogger logger, IHubContext<PostsHub> hubContext, D
         var posts = Db.Posts.Include(x=>x.Likes).Where(x => x.User.ToLower() == userId.ToLower()).OrderByDescending(x => x.CreatedUtc)
             .Take(Program.Configuration.DefaultDisplay).ToList();
 
-        if (Request.QueryString.HasValue && !string.IsNullOrEmpty(Request.Query["u"]))
-            ViewBag.User = Request.Query["u"];
+        ViewBag.User = userId;
         return View("Index", posts);
     }
 

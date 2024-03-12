@@ -1,0 +1,5943 @@
+{
+  "UniversityTypes": [
+    {
+      "Type": "University",
+      "Schools": [
+        {
+          "Name": "Harvard University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Stanford University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Massachusetts Institute of Technology",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Cambridge",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "University of Oxford",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Columbia University",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of California, Berkeley",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Chicago",
+          "Location": "USA"
+        },
+        {
+          "Name": "Princeton University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Cornell University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Yale University",
+          "Location": "USA"
+        },
+        {
+          "Name": "California Institute of Technology",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Tokyo",
+          "Location": "Japan"
+        },
+        {
+          "Name": "University of Pennsylvania",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of California, Los Angeles",
+          "Location": "USA"
+        },
+        {
+          "Name": "Johns Hopkins University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Kyoto University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "New York University",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Michigan, Ann Arbor",
+          "Location": "USA"
+        },
+        {
+          "Name": "Swiss Federal Institute of Technology in Zurich",
+          "Location": "Switzerland"
+        },
+        {
+          "Name": "University of California, San Diego",
+          "Location": "USA"
+        },
+        {
+          "Name": "Northwestern University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Hebrew University of Jerusalem",
+          "Location": "Israel"
+        },
+        {
+          "Name": "Seoul National University",
+          "Location": "South Korea"
+        },
+        {
+          "Name": "University of Wisconsin - Madison",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of California, San Francisco",
+          "Location": "USA"
+        },
+        {
+          "Name": "University College London",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Duke University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Rockefeller University",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Texas at Austin",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Washington - Seattle",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Toronto",
+          "Location": "Canada"
+        },
+        {
+          "Name": "University of Illinois at Urbana - Champaign",
+          "Location": "USA"
+        },
+        {
+          "Name": "Keio University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "Imperial College London",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Ecole Polytechnique",
+          "Location": "France"
+        },
+        {
+          "Name": "Ecole normale superieure - Paris",
+          "Location": "France"
+        },
+        {
+          "Name": "Waseda University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "Weizmann Institute of Science",
+          "Location": "Israel"
+        },
+        {
+          "Name": "University of North Carolina at Chapel Hill",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Virginia",
+          "Location": "USA"
+        },
+        {
+          "Name": "McGill University",
+          "Location": "Canada"
+        },
+        {
+          "Name": "Purdue University, West Lafayette",
+          "Location": "USA"
+        },
+        {
+          "Name": "Dartmouth College",
+          "Location": "USA"
+        },
+        {
+          "Name": "Osaka University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "University of Pittsburgh - Pittsburgh Campus",
+          "Location": "USA"
+        },
+        {
+          "Name": "Pennsylvania State University, University Park",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Minnesota, Twin Cities",
+          "Location": "USA"
+        },
+        {
+          "Name": "Ohio State University, Columbus",
+          "Location": "USA"
+        },
+        {
+          "Name": "Rutgers University-New Brunswick",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Southern California",
+          "Location": "USA"
+        },
+        {
+          "Name": "Washington University in St. Louis",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of California, Davis",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Colorado Boulder",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Edinburgh",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Peking University",
+          "Location": "China"
+        },
+        {
+          "Name": "National Taiwan University",
+          "Location": "Taiwan"
+        },
+        {
+          "Name": "University of Paris-Sud",
+          "Location": "France"
+        },
+        {
+          "Name": "Lomonosov Moscow State University",
+          "Location": "Russia"
+        },
+        {
+          "Name": "University of Florida",
+          "Location": "USA"
+        },
+        {
+          "Name": "Carnegie Mellon University",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of British Columbia",
+          "Location": "Canada"
+        },
+        {
+          "Name": "Pierre-and-Marie-Curie University",
+          "Location": "France"
+        },
+        {
+          "Name": "University of California, Santa Barbara",
+          "Location": "USA"
+        },
+        {
+          "Name": "National University of Singapore",
+          "Location": "Singapore"
+        },
+        {
+          "Name": "Boston University",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Manchester",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "University of Arizona",
+          "Location": "USA"
+        },
+        {
+          "Name": "Vanderbilt University",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Utah",
+          "Location": "USA"
+        },
+        {
+          "Name": "Karolinska Institute",
+          "Location": "Sweden"
+        },
+        {
+          "Name": "University of Maryland, College Park",
+          "Location": "USA"
+        },
+        {
+          "Name": "Tohoku University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "University of Copenhagen",
+          "Location": "Denmark"
+        },
+        {
+          "Name": "University of Texas Southwestern Medical Center",
+          "Location": "USA"
+        },
+        {
+          "Name": "Ruprecht Karl University of Heidelberg",
+          "Location": "Germany"
+        },
+        {
+          "Name": "University of Notre Dame",
+          "Location": "USA"
+        },
+        {
+          "Name": "Tsinghua University",
+          "Location": "China"
+        },
+        {
+          "Name": "Ludwig Maximilian University of Munich",
+          "Location": "Germany"
+        },
+        {
+          "Name": "Georgia Institute of Technology",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Rochester",
+          "Location": "USA"
+        },
+        {
+          "Name": "Katholieke Universiteit Leuven",
+          "Location": "Belgium"
+        },
+        {
+          "Name": "Brown University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Emory University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Erasmus University Rotterdam",
+          "Location": "Netherlands"
+        },
+        {
+          "Name": "Tel Aviv University",
+          "Location": "Israel"
+        },
+        {
+          "Name": "Utrecht University",
+          "Location": "Netherlands"
+        },
+        {
+          "Name": "University of Sydney",
+          "Location": "Australia"
+        },
+        {
+          "Name": "University of California, Irvine",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Texas MD Anderson Cancer Center",
+          "Location": "USA"
+        },
+        {
+          "Name": "Swiss Federal Institute of Technology in Lausanne",
+          "Location": "Switzerland"
+        },
+        {
+          "Name": "University of Geneva",
+          "Location": "Switzerland"
+        },
+        {
+          "Name": "University of Melbourne",
+          "Location": "Australia"
+        },
+        {
+          "Name": "King's College London",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Tufts University",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Zurich",
+          "Location": "Switzerland"
+        },
+        {
+          "Name": "Arizona State University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Yonsei University",
+          "Location": "South Korea"
+        },
+        {
+          "Name": "University of Oslo",
+          "Location": "Norway"
+        },
+        {
+          "Name": "Kyushu University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "Technical University of Munich",
+          "Location": "Germany"
+        },
+        {
+          "Name": "Texas A&M University, College Station",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Queensland",
+          "Location": "Australia"
+        },
+        {
+          "Name": "Mines ParisTech",
+          "Location": "France"
+        },
+        {
+          "Name": "Case Western Reserve University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Indiana University - Bloomington",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Alberta",
+          "Location": "Canada"
+        },
+        {
+          "Name": "Leiden University",
+          "Location": "Netherlands"
+        },
+        {
+          "Name": "Tokyo Institute of Technology",
+          "Location": "Japan"
+        },
+        {
+          "Name": "University of Groningen",
+          "Location": "Netherlands"
+        },
+        {
+          "Name": "University of Helsinki",
+          "Location": "Finland"
+        },
+        {
+          "Name": "Sapienza University of Rome",
+          "Location": "Italy"
+        },
+        {
+          "Name": "Georgetown University",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Amsterdam",
+          "Location": "Netherlands"
+        },
+        {
+          "Name": "Korea University",
+          "Location": "South Korea"
+        },
+        {
+          "Name": "University of Barcelona",
+          "Location": "Spain"
+        },
+        {
+          "Name": "Lund University",
+          "Location": "Sweden"
+        },
+        {
+          "Name": "Michigan State University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Ghent University",
+          "Location": "Belgium"
+        },
+        {
+          "Name": "Rice University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Baylor College of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Aarhus University",
+          "Location": "Denmark"
+        },
+        {
+          "Name": "University of Bristol",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Uppsala University",
+          "Location": "Sweden"
+        },
+        {
+          "Name": "Nagoya University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "Royal Institute of Technology",
+          "Location": "Sweden"
+        },
+        {
+          "Name": "University of Colorado Denver",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Glasgow",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "VU University Amsterdam",
+          "Location": "Netherlands"
+        },
+        {
+          "Name": "University of New South Wales",
+          "Location": "Australia"
+        },
+        {
+          "Name": "Paris Diderot University - Paris 7",
+          "Location": "France"
+        },
+        {
+          "Name": "University of Sao Paulo",
+          "Location": "Brazil"
+        },
+        {
+          "Name": "Western University (The University of Western Ontario)",
+          "Location": "Canada"
+        },
+        {
+          "Name": "Radboud University Nijmegen",
+          "Location": "Netherlands"
+        },
+        {
+          "Name": "Nanyang Technological University",
+          "Location": "Singapore"
+        },
+        {
+          "Name": "Technion - Israel Institute of Technology",
+          "Location": "Israel"
+        },
+        {
+          "Name": "University of Miami",
+          "Location": "USA"
+        },
+        {
+          "Name": "Stony Brook University",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Texas at Dallas",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Nottingham",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "University of Iowa",
+          "Location": "USA"
+        },
+        {
+          "Name": "Southern Methodist University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Icahn School of Medicine at Mount Sinai",
+          "Location": "USA"
+        },
+        {
+          "Name": "Korea Advanced Institute of Science and Technology (KAIST)",
+          "Location": "South Korea"
+        },
+        {
+          "Name": "Monash University",
+          "Location": "Australia"
+        },
+        {
+          "Name": "University of Alabama at Birmingham",
+          "Location": "USA"
+        },
+        {
+          "Name": "Free University of Berlin",
+          "Location": "Germany"
+        },
+        {
+          "Name": "University of Southampton",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "University of the Witwatersrand",
+          "Location": "South Africa"
+        },
+        {
+          "Name": "McMaster University",
+          "Location": "Canada"
+        },
+        {
+          "Name": "University of Montreal",
+          "Location": "Canada"
+        },
+        {
+          "Name": "University of Birmingham",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Humboldt University of Berlin",
+          "Location": "Germany"
+        },
+        {
+          "Name": "University of California, Santa Cruz",
+          "Location": "USA"
+        },
+        {
+          "Name": "Albert Ludwig University of Freiburg",
+          "Location": "Germany"
+        },
+        {
+          "Name": "University of Tubingen",
+          "Location": "Germany"
+        },
+        {
+          "Name": "University of Cincinnati",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Bonn",
+          "Location": "Germany"
+        },
+        {
+          "Name": "Wake Forest University",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Basel",
+          "Location": "Switzerland"
+        },
+        {
+          "Name": "University of Leeds",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "University of Hamburg",
+          "Location": "Germany"
+        },
+        {
+          "Name": "Universite libre de Bruxelles",
+          "Location": "Belgium"
+        },
+        {
+          "Name": "Indiana University-Purdue University Indianapolis",
+          "Location": "USA"
+        },
+        {
+          "Name": "Pohang University of Science and Technology",
+          "Location": "South Korea"
+        },
+        {
+          "Name": "Oregon Health & Science University",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Calgary",
+          "Location": "Canada"
+        },
+        {
+          "Name": "Stockholm University",
+          "Location": "Sweden"
+        },
+        {
+          "Name": "University of Padua",
+          "Location": "Italy"
+        },
+        {
+          "Name": "University of Hong Kong",
+          "Location": "Hong Kong"
+        },
+        {
+          "Name": "Yeshiva University",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Milan",
+          "Location": "Italy"
+        },
+        {
+          "Name": "University of Sheffield",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Technical University of Denmark",
+          "Location": "Denmark"
+        },
+        {
+          "Name": "University of Maryland, Baltimore",
+          "Location": "USA"
+        },
+        {
+          "Name": "Goethe University Frankfurt",
+          "Location": "Germany"
+        },
+        {
+          "Name": "University of Gottingen",
+          "Location": "Germany"
+        },
+        {
+          "Name": "Hokkaido University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "Australian National University",
+          "Location": "Australia"
+        },
+        {
+          "Name": "Shanghai Jiao Tong University",
+          "Location": "China"
+        },
+        {
+          "Name": "University of New Mexico",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Strasbourg",
+          "Location": "France"
+        },
+        {
+          "Name": "University of Massachusetts Medical School",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Houston",
+          "Location": "USA"
+        },
+        {
+          "Name": "Trinity College, Dublin",
+          "Location": "Ireland"
+        },
+        {
+          "Name": "University of Lausanne",
+          "Location": "Switzerland"
+        },
+        {
+          "Name": "Iowa State University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Joseph Fourier University",
+          "Location": "France"
+        },
+        {
+          "Name": "Wayne State University",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of South Florida - Tampa",
+          "Location": "USA"
+        },
+        {
+          "Name": "Zhejiang University",
+          "Location": "China"
+        },
+        {
+          "Name": "Hanyang University",
+          "Location": "South Korea"
+        },
+        {
+          "Name": "University of Ottawa",
+          "Location": "Canada"
+        },
+        {
+          "Name": "University of Missouri Columbia",
+          "Location": "USA"
+        },
+        {
+          "Name": "Fudan University",
+          "Location": "China"
+        },
+        {
+          "Name": "University of Kansas",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Cologne",
+          "Location": "Germany"
+        },
+        {
+          "Name": "University of Georgia",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Liverpool",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "University of Bern",
+          "Location": "Switzerland"
+        },
+        {
+          "Name": "Cardiff University",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "George Washington University",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Illinois at Chicago",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Erlangen-Nuremberg",
+          "Location": "Germany"
+        },
+        {
+          "Name": "University of Munster",
+          "Location": "Germany"
+        },
+        {
+          "Name": "Aix-Marseille University",
+          "Location": "France"
+        },
+        {
+          "Name": "Claude Bernard University Lyon 1",
+          "Location": "France"
+        },
+        {
+          "Name": "University of Bologna",
+          "Location": "Italy"
+        },
+        {
+          "Name": "Queen Mary University of London",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Dresden University of Technology",
+          "Location": "Germany"
+        },
+        {
+          "Name": "Sungkyunkwan University",
+          "Location": "South Korea"
+        },
+        {
+          "Name": "Newcastle University",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Karlsruhe Institute of Technology",
+          "Location": "Germany"
+        },
+        {
+          "Name": "University of California, Riverside",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Kiel",
+          "Location": "Germany"
+        },
+        {
+          "Name": "University of Western Australia",
+          "Location": "Australia"
+        },
+        {
+          "Name": "Paris Descartes University",
+          "Location": "France"
+        },
+        {
+          "Name": "University of Connecticut",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Massachusetts Amherst",
+          "Location": "USA"
+        },
+        {
+          "Name": "Chinese University of Hong Kong",
+          "Location": "Hong Kong"
+        },
+        {
+          "Name": "University of Turin",
+          "Location": "Italy"
+        },
+        {
+          "Name": "University of Manitoba",
+          "Location": "Canada"
+        },
+        {
+          "Name": "University of Vienna",
+          "Location": "Austria"
+        },
+        {
+          "Name": "University of Montpellier",
+          "Location": "France"
+        },
+        {
+          "Name": "Maastricht University",
+          "Location": "Netherlands"
+        },
+        {
+          "Name": "National Cheng Kung University",
+          "Location": "Taiwan"
+        },
+        {
+          "Name": "University of Tennessee, Knoxville",
+          "Location": "USA"
+        },
+        {
+          "Name": "Complutense University of Madrid",
+          "Location": "Spain"
+        },
+        {
+          "Name": "Laval University",
+          "Location": "Canada"
+        },
+        {
+          "Name": "RWTH Aachen University",
+          "Location": "Germany"
+        },
+        {
+          "Name": "Universite catholique de Louvain",
+          "Location": "Belgium"
+        },
+        {
+          "Name": "North Carolina State University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Johannes Gutenberg University of Mainz",
+          "Location": "Germany"
+        },
+        {
+          "Name": "University of Texas Health Science Center at San Antonio",
+          "Location": "USA"
+        },
+        {
+          "Name": "Julius-Maximilian's University of Wurzburg",
+          "Location": "Germany"
+        },
+        {
+          "Name": "Paul Sabatier University - Toulouse III",
+          "Location": "France"
+        },
+        {
+          "Name": "University of Gothenburg",
+          "Location": "Sweden"
+        },
+        {
+          "Name": "University College Dublin",
+          "Location": "Ireland"
+        },
+        {
+          "Name": "University of Science and Technology of China",
+          "Location": "China"
+        },
+        {
+          "Name": "University of Leicester",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Autonomous University of Barcelona",
+          "Location": "Spain"
+        },
+        {
+          "Name": "University of Dundee",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Norwegian University of Science and Technology",
+          "Location": "Norway"
+        },
+        {
+          "Name": "Nanjing University",
+          "Location": "China"
+        },
+        {
+          "Name": "Okayama University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "London School of Hygiene & Tropical Medicine",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "University of Florence",
+          "Location": "Italy"
+        },
+        {
+          "Name": "University of Cape Town",
+          "Location": "South Africa"
+        },
+        {
+          "Name": "University of Texas Health Science Center at Houston",
+          "Location": "USA"
+        },
+        {
+          "Name": "Moscow Institute of Physics and Technology",
+          "Location": "Russia"
+        },
+        {
+          "Name": "University of Dusseldorf",
+          "Location": "Germany"
+        },
+        {
+          "Name": "Florida State University",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Sussex",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Thomas Jefferson University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Delft University of Technology",
+          "Location": "Netherlands"
+        },
+        {
+          "Name": "Virginia Polytechnic Institute and State University",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Lisbon",
+          "Location": "Portugal"
+        },
+        {
+          "Name": "Drexel University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Virginia Commonwealth University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Oregon State University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Durham University",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "University of Tsukuba",
+          "Location": "Japan"
+        },
+        {
+          "Name": "University of Reading",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Lehigh University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Medical University of Vienna",
+          "Location": "Austria"
+        },
+        {
+          "Name": "University of Auckland",
+          "Location": "New Zealand"
+        },
+        {
+          "Name": "University of Kentucky",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Naples Federico II",
+          "Location": "Italy"
+        },
+        {
+          "Name": "University of Waterloo",
+          "Location": "Canada"
+        },
+        {
+          "Name": "Charles University in Prague",
+          "Location": "Czech Republic"
+        },
+        {
+          "Name": "Colorado State University - Fort Collins",
+          "Location": "USA"
+        },
+        {
+          "Name": "Tulane University",
+          "Location": "USA"
+        },
+        {
+          "Name": "University at Buffalo, The State University of New York",
+          "Location": "USA"
+        },
+        {
+          "Name": "Brandeis University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Northeastern University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Wageningen University and Research Centre",
+          "Location": "Netherlands"
+        },
+        {
+          "Name": "Sun Yat-sen University",
+          "Location": "China"
+        },
+        {
+          "Name": "University of Ulm",
+          "Location": "Germany"
+        },
+        {
+          "Name": "London School of Economics",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Vrije Universiteit Brussel",
+          "Location": "Belgium"
+        },
+        {
+          "Name": "University of Delaware",
+          "Location": "USA"
+        },
+        {
+          "Name": "Rensselaer Polytechnic Institute",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Bergen",
+          "Location": "Norway"
+        },
+        {
+          "Name": "Queen's University",
+          "Location": "Canada"
+        },
+        {
+          "Name": "University of Aberdeen",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Dalhousie University",
+          "Location": "Canada"
+        },
+        {
+          "Name": "Umea University",
+          "Location": "Sweden"
+        },
+        {
+          "Name": "University of Duisburg-Essen",
+          "Location": "Germany"
+        },
+        {
+          "Name": "City College of New York",
+          "Location": "USA"
+        },
+        {
+          "Name": "Hiroshima University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "University of Texas at San Antonio",
+          "Location": "USA"
+        },
+        {
+          "Name": "Hannover Medical School",
+          "Location": "Germany"
+        },
+        {
+          "Name": "University of Warwick",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "University of Valencia",
+          "Location": "Spain"
+        },
+        {
+          "Name": "University of Pisa",
+          "Location": "Italy"
+        },
+        {
+          "Name": "Ruhr University Bochum",
+          "Location": "Germany"
+        },
+        {
+          "Name": "Medical College of Wisconsin",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Louisville",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Bordeaux",
+          "Location": "France"
+        },
+        {
+          "Name": "University of South Carolina - Columbia",
+          "Location": "USA"
+        },
+        {
+          "Name": "National and Kapodistrian University of Athens",
+          "Location": "Greece"
+        },
+        {
+          "Name": "Leipzig University",
+          "Location": "Germany"
+        },
+        {
+          "Name": "Medical University of South Carolina",
+          "Location": "USA"
+        },
+        {
+          "Name": "Autonomous University of Madrid",
+          "Location": "Spain"
+        },
+        {
+          "Name": "Dalian University of Technology",
+          "Location": "China"
+        },
+        {
+          "Name": "Stellenbosch University",
+          "Location": "South Africa"
+        },
+        {
+          "Name": "Kyungpook National University",
+          "Location": "South Korea"
+        },
+        {
+          "Name": "University of Porto",
+          "Location": "Portugal"
+        },
+        {
+          "Name": "University of St Andrews",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Gwangju Institute of Science and Technology",
+          "Location": "South Korea"
+        },
+        {
+          "Name": "Chulalongkorn University",
+          "Location": "Thailand"
+        },
+        {
+          "Name": "University of Antwerp",
+          "Location": "Belgium"
+        },
+        {
+          "Name": "Xiamen University",
+          "Location": "China"
+        },
+        {
+          "Name": "University of Nebraska-Lincoln",
+          "Location": "USA"
+        },
+        {
+          "Name": "Nankai University",
+          "Location": "China"
+        },
+        {
+          "Name": "University of Stuttgart",
+          "Location": "Germany"
+        },
+        {
+          "Name": "University of Rome Tor Vergata",
+          "Location": "Italy"
+        },
+        {
+          "Name": "University of Regensburg",
+          "Location": "Germany"
+        },
+        {
+          "Name": "Hong Kong University of Science and Technology",
+          "Location": "Hong Kong"
+        },
+        {
+          "Name": "Kobe University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "University of Liege",
+          "Location": "Belgium"
+        },
+        {
+          "Name": "Federal University of Rio de Janeiro",
+          "Location": "Brazil"
+        },
+        {
+          "Name": "Rush University",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Vermont",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of York",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Boston College",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Pavia",
+          "Location": "Italy"
+        },
+        {
+          "Name": "University of Jena",
+          "Location": "Germany"
+        },
+        {
+          "Name": "Vita-Salute San Raffaele University",
+          "Location": "Italy"
+        },
+        {
+          "Name": "University of Genoa",
+          "Location": "Italy"
+        },
+        {
+          "Name": "Tianjin University",
+          "Location": "China"
+        },
+        {
+          "Name": "Louisiana State University - Baton Rouge",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Exeter",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "National Autonomous University of Mexico",
+          "Location": "Mexico"
+        },
+        {
+          "Name": "University of Adelaide",
+          "Location": "Australia"
+        },
+        {
+          "Name": "University of East Anglia",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "York University",
+          "Location": "Canada"
+        },
+        {
+          "Name": "University of Navarra",
+          "Location": "Spain"
+        },
+        {
+          "Name": "University of Oregon",
+          "Location": "USA"
+        },
+        {
+          "Name": "St George's, University of London",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Indian Institute of Technology Delhi",
+          "Location": "India"
+        },
+        {
+          "Name": "University of Trieste",
+          "Location": "Italy"
+        },
+        {
+          "Name": "Queen's University Belfast",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "University of Perugia",
+          "Location": "Italy"
+        },
+        {
+          "Name": "Technical University of Berlin",
+          "Location": "Germany"
+        },
+        {
+          "Name": "University of Marburg",
+          "Location": "Germany"
+        },
+        {
+          "Name": "University of Innsbruck",
+          "Location": "Austria"
+        },
+        {
+          "Name": "Eindhoven University of Technology",
+          "Location": "Netherlands"
+        },
+        {
+          "Name": "Ben-Gurion University of the Negev",
+          "Location": "Israel"
+        },
+        {
+          "Name": "University of Oklahoma - Norman Campus",
+          "Location": "USA"
+        },
+        {
+          "Name": "Wesleyan University",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Victoria",
+          "Location": "Canada"
+        },
+        {
+          "Name": "Kansas State University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Hong Kong Polytechnic University",
+          "Location": "Hong Kong"
+        },
+        {
+          "Name": "Linkoping University",
+          "Location": "Sweden"
+        },
+        {
+          "Name": "University of Southern Denmark",
+          "Location": "Denmark"
+        },
+        {
+          "Name": "University of Otago",
+          "Location": "New Zealand"
+        },
+        {
+          "Name": "Justus Liebig University Giessen",
+          "Location": "Germany"
+        },
+        {
+          "Name": "University of New Hampshire",
+          "Location": "USA"
+        },
+        {
+          "Name": "College of William and Mary",
+          "Location": "USA"
+        },
+        {
+          "Name": "San Diego State University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Simon Fraser University",
+          "Location": "Canada"
+        },
+        {
+          "Name": "University of Santiago de Compostela",
+          "Location": "Spain"
+        },
+        {
+          "Name": "Saint Louis University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Colorado School of Mines",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Eastern Finland",
+          "Location": "Finland"
+        },
+        {
+          "Name": "University of Buenos Aires",
+          "Location": "Argentina"
+        },
+        {
+          "Name": "University of Guelph",
+          "Location": "Canada"
+        },
+        {
+          "Name": "University of Ferrara",
+          "Location": "Italy"
+        },
+        {
+          "Name": "Polytechnic University of Catalonia",
+          "Location": "Spain"
+        },
+        {
+          "Name": "Versailles Saint-Quentin-en-Yvelines University",
+          "Location": "France"
+        },
+        {
+          "Name": "Saarland University",
+          "Location": "Germany"
+        },
+        {
+          "Name": "City University of Hong Kong",
+          "Location": "Hong Kong"
+        },
+        {
+          "Name": "Darmstadt University of Technology",
+          "Location": "Germany"
+        },
+        {
+          "Name": "Pompeu Fabra University",
+          "Location": "Spain"
+        },
+        {
+          "Name": "Pontifical Catholic University of Chile",
+          "Location": "Chile"
+        },
+        {
+          "Name": "University of Bari Aldo Moro",
+          "Location": "Italy"
+        },
+        {
+          "Name": "University of Texas Medical Branch at Galveston",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Delhi",
+          "Location": "India"
+        },
+        {
+          "Name": "Washington State University, Pullman",
+          "Location": "USA"
+        },
+        {
+          "Name": "Temple University",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Milan - Bicocca",
+          "Location": "Italy"
+        },
+        {
+          "Name": "University of Turku",
+          "Location": "Finland"
+        },
+        {
+          "Name": "Chonnam National University",
+          "Location": "South Korea"
+        },
+        {
+          "Name": "University of Lorraine",
+          "Location": "France"
+        },
+        {
+          "Name": "National Chiao Tung University",
+          "Location": "Taiwan"
+        },
+        {
+          "Name": "Catholic University of the Sacred Heart",
+          "Location": "Italy"
+        },
+        {
+          "Name": "University at Albany, SUNY",
+          "Location": "USA"
+        },
+        {
+          "Name": "Xi'an Jiaotong University",
+          "Location": "China"
+        },
+        {
+          "Name": "Ewha Womans University",
+          "Location": "South Korea"
+        },
+        {
+          "Name": "Jilin University",
+          "Location": "China"
+        },
+        {
+          "Name": "Tokyo Medical and Dental University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "Scuola Normale Superiore di Pisa",
+          "Location": "Italy"
+        },
+        {
+          "Name": "University of Central Florida",
+          "Location": "USA"
+        },
+        {
+          "Name": "Innsbruck Medical University",
+          "Location": "Austria"
+        },
+        {
+          "Name": "Beijing Normal University",
+          "Location": "China"
+        },
+        {
+          "Name": "Polytechnic University of Milan",
+          "Location": "Italy"
+        },
+        {
+          "Name": "University of Seville",
+          "Location": "Spain"
+        },
+        {
+          "Name": "University of Nebraska Medical Center",
+          "Location": "USA"
+        },
+        {
+          "Name": "Huazhong University of Science and Technology",
+          "Location": "China"
+        },
+        {
+          "Name": "Kyung Hee University",
+          "Location": "South Korea"
+        },
+        {
+          "Name": "Chalmers University of Technology",
+          "Location": "Sweden"
+        },
+        {
+          "Name": "Brigham Young University",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Campinas",
+          "Location": "Brazil"
+        },
+        {
+          "Name": "University of Bath",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Saint Petersburg State University",
+          "Location": "Russia"
+        },
+        {
+          "Name": "National Tsing Hua University",
+          "Location": "Taiwan"
+        },
+        {
+          "Name": "University of Twente",
+          "Location": "Netherlands"
+        },
+        {
+          "Name": "University of Alabama - Tuscaloosa",
+          "Location": "USA"
+        },
+        {
+          "Name": "Harbin Institute of Technology",
+          "Location": "China"
+        },
+        {
+          "Name": "University of Verona",
+          "Location": "Italy"
+        },
+        {
+          "Name": "Oklahoma State University - Stillwater",
+          "Location": "USA"
+        },
+        {
+          "Name": "Shandong University",
+          "Location": "China"
+        },
+        {
+          "Name": "George Mason University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Wuhan University",
+          "Location": "China"
+        },
+        {
+          "Name": "Swedish University of Agricultural Sciences",
+          "Location": "Sweden"
+        },
+        {
+          "Name": "Concordia University",
+          "Location": "Canada"
+        },
+        {
+          "Name": "Chiba University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "Kumamoto University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "Tongji University",
+          "Location": "China"
+        },
+        {
+          "Name": "Aalto University",
+          "Location": "Finland"
+        },
+        {
+          "Name": "Chonbuk National University",
+          "Location": "South Korea"
+        },
+        {
+          "Name": "Peking Union Medical College",
+          "Location": "China"
+        },
+        {
+          "Name": "Georgia Regents University",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Chile",
+          "Location": "Chile"
+        },
+        {
+          "Name": "Lancaster University",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Vienna University of Technology",
+          "Location": "Austria"
+        },
+        {
+          "Name": "University of Denver",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Arkansas for Medical Sciences",
+          "Location": "USA"
+        },
+        {
+          "Name": "Grenoble Institute of Technology",
+          "Location": "France"
+        },
+        {
+          "Name": "University of Granada",
+          "Location": "Spain"
+        },
+        {
+          "Name": "University of Modena and Reggio Emilia",
+          "Location": "Italy"
+        },
+        {
+          "Name": "Ajou University",
+          "Location": "South Korea"
+        },
+        {
+          "Name": "Gyeongsang National University",
+          "Location": "South Korea"
+        },
+        {
+          "Name": "Technical University of Madrid",
+          "Location": "Spain"
+        },
+        {
+          "Name": "University College Cork",
+          "Location": "Ireland"
+        },
+        {
+          "Name": "Loyola University Chicago",
+          "Location": "USA"
+        },
+        {
+          "Name": "Central South University",
+          "Location": "China"
+        },
+        {
+          "Name": "South China University of Technology",
+          "Location": "China"
+        },
+        {
+          "Name": "Polytechnic University of Valencia",
+          "Location": "Spain"
+        },
+        {
+          "Name": "West Virginia University",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Tampere",
+          "Location": "Finland"
+        },
+        {
+          "Name": "Southeast University",
+          "Location": "China"
+        },
+        {
+          "Name": "Miami University",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Dayton",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Siena",
+          "Location": "Italy"
+        },
+        {
+          "Name": "University of Oulu",
+          "Location": "Finland"
+        },
+        {
+          "Name": "Indian Institute of Science",
+          "Location": "India"
+        },
+        {
+          "Name": "Macquarie University",
+          "Location": "Australia"
+        },
+        {
+          "Name": "University of Rostock",
+          "Location": "Germany"
+        },
+        {
+          "Name": "Jagiellonian University",
+          "Location": "Poland"
+        },
+        {
+          "Name": "Pusan National University",
+          "Location": "South Korea"
+        },
+        {
+          "Name": "University of Strathclyde",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "University of Nevada, Reno",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Saskatchewan",
+          "Location": "Canada"
+        },
+        {
+          "Name": "University of Parma",
+          "Location": "Italy"
+        },
+        {
+          "Name": "Kanazawa University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "Eotvos Lorand University",
+          "Location": "Hungary"
+        },
+        {
+          "Name": "Aristotle University of Thessaloniki",
+          "Location": "Greece"
+        },
+        {
+          "Name": "Ohio University",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Iceland",
+          "Location": "Iceland"
+        },
+        {
+          "Name": "University of Warsaw",
+          "Location": "Poland"
+        },
+        {
+          "Name": "Syracuse University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Bielefeld University",
+          "Location": "Germany"
+        },
+        {
+          "Name": "Juntendo University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "University of Wyoming",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Wollongong",
+          "Location": "Australia"
+        },
+        {
+          "Name": "Niigata University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "Texas Tech University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Middle East Technical University",
+          "Location": "Turkey"
+        },
+        {
+          "Name": "Ecole normale superieure de Lyon",
+          "Location": "France"
+        },
+        {
+          "Name": "Brunel University",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Nihon University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "Osaka City University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "University of Rennes 1",
+          "Location": "France"
+        },
+        {
+          "Name": "University of Oklahoma Health Sciences Center",
+          "Location": "USA"
+        },
+        {
+          "Name": "East China University of Science and Technology",
+          "Location": "China"
+        },
+        {
+          "Name": "University of KwaZulu-Natal",
+          "Location": "South Africa"
+        },
+        {
+          "Name": "Sichuan University",
+          "Location": "China"
+        },
+        {
+          "Name": "Illinois Institute of Technology",
+          "Location": "USA"
+        },
+        {
+          "Name": "Tokyo University of Science",
+          "Location": "Japan"
+        },
+        {
+          "Name": "University of Science, Malaysia",
+          "Location": "Malaysia"
+        },
+        {
+          "Name": "Clemson University",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Zaragoza",
+          "Location": "Spain"
+        },
+        {
+          "Name": "University of the Basque Country",
+          "Location": "Spain"
+        },
+        {
+          "Name": "Nagasaki University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "Technical University of Dortmund",
+          "Location": "Germany"
+        },
+        {
+          "Name": "University of Hawaii at Manoa",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Nebraska Omaha",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Konstanz",
+          "Location": "Germany"
+        },
+        {
+          "Name": "Panjab University",
+          "Location": "India"
+        },
+        {
+          "Name": "University of Hanover",
+          "Location": "Germany"
+        },
+        {
+          "Name": "University of Maryland, Baltimore County",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Newcastle",
+          "Location": "Australia"
+        },
+        {
+          "Name": "University of Ulsan",
+          "Location": "South Korea"
+        },
+        {
+          "Name": "Renmin University of China",
+          "Location": "China"
+        },
+        {
+          "Name": "Martin Luther University of Halle-Wittenberg",
+          "Location": "Germany"
+        },
+        {
+          "Name": "University of Malaya",
+          "Location": "Malaysia"
+        },
+        {
+          "Name": "University of Savoy",
+          "Location": "France"
+        },
+        {
+          "Name": "University of Udine",
+          "Location": "Italy"
+        },
+        {
+          "Name": "Tokyo Metropolitan University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "University of Sherbrooke",
+          "Location": "Canada"
+        },
+        {
+          "Name": "University of Brescia",
+          "Location": "Italy"
+        },
+        {
+          "Name": "University of Ljubljana",
+          "Location": "Slovenia"
+        },
+        {
+          "Name": "University of Nice Sophia Antipolis",
+          "Location": "France"
+        },
+        {
+          "Name": "University of Hull",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "University of Coimbra",
+          "Location": "Portugal"
+        },
+        {
+          "Name": "Creighton University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Georgia State University",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Wisconsin - Milwaukee",
+          "Location": "USA"
+        },
+        {
+          "Name": "Catholic University of Korea",
+          "Location": "South Korea"
+        },
+        {
+          "Name": "University of Tokushima",
+          "Location": "Japan"
+        },
+        {
+          "Name": "Yokohama City University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "Lanzhou University",
+          "Location": "China"
+        },
+        {
+          "Name": "University of Crete",
+          "Location": "Greece"
+        },
+        {
+          "Name": "SUNY Downstate Medical Center",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Potsdam",
+          "Location": "Germany"
+        },
+        {
+          "Name": "Yokohama National University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "New Mexico State University",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Bayreuth",
+          "Location": "Germany"
+        },
+        {
+          "Name": "Bar-Ilan University",
+          "Location": "Israel"
+        },
+        {
+          "Name": "University of Mississippi - Oxford Campus",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Tasmania",
+          "Location": "Australia"
+        },
+        {
+          "Name": "Graduate University for Advanced Studies",
+          "Location": "Japan"
+        },
+        {
+          "Name": "University of Surrey",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Federal University of Minas Gerais",
+          "Location": "Brazil"
+        },
+        {
+          "Name": "University of Tromso¸ - The Arctic University of Norway",
+          "Location": "Norway"
+        },
+        {
+          "Name": "University of Palermo",
+          "Location": "Italy"
+        },
+        {
+          "Name": "Shinshu University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "University of Science and Technology Beijing",
+          "Location": "China"
+        },
+        {
+          "Name": "University of Catania",
+          "Location": "Italy"
+        },
+        {
+          "Name": "Mahidol University",
+          "Location": "Thailand"
+        },
+        {
+          "Name": "University of Canterbury",
+          "Location": "New Zealand"
+        },
+        {
+          "Name": "Indian Institute of Technology Madras",
+          "Location": "India"
+        },
+        {
+          "Name": "University of Bremen",
+          "Location": "Germany"
+        },
+        {
+          "Name": "Otto-von-Guericke University Magdeburg",
+          "Location": "Germany"
+        },
+        {
+          "Name": "University of Tartu",
+          "Location": "Estonia"
+        },
+        {
+          "Name": "University of Windsor",
+          "Location": "Canada"
+        },
+        {
+          "Name": "University of Nantes",
+          "Location": "France"
+        },
+        {
+          "Name": "Royal Holloway, University of London",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "James Cook University",
+          "Location": "Australia"
+        },
+        {
+          "Name": "National Yang-Ming University",
+          "Location": "Taiwan"
+        },
+        {
+          "Name": "University of Akron",
+          "Location": "USA"
+        },
+        {
+          "Name": "National Chung Hsing University",
+          "Location": "Taiwan"
+        },
+        {
+          "Name": "City University London",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "New York Medical College",
+          "Location": "USA"
+        },
+        {
+          "Name": "Nara Institute of Science and Technology",
+          "Location": "Japan"
+        },
+        {
+          "Name": "Ecole Centrale Paris",
+          "Location": "France"
+        },
+        {
+          "Name": "Auburn University",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Arkansas - Fayetteville",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Zagreb",
+          "Location": "Croatia"
+        },
+        {
+          "Name": "University of Labeck",
+          "Location": "Germany"
+        },
+        {
+          "Name": "Hunan University",
+          "Location": "China"
+        },
+        {
+          "Name": "University of Missouri - Kansas City",
+          "Location": "USA"
+        },
+        {
+          "Name": "Tokyo Women's Medical University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "Montana State University - Bozeman",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Aveiro",
+          "Location": "Portugal"
+        },
+        {
+          "Name": "National University of Ireland, Galway",
+          "Location": "Ireland"
+        },
+        {
+          "Name": "University of Oviedo",
+          "Location": "Spain"
+        },
+        {
+          "Name": "Dongguk University",
+          "Location": "South Korea"
+        },
+        {
+          "Name": "University of Trento",
+          "Location": "Italy"
+        },
+        {
+          "Name": "University Lille 1: Sciences and Technologies",
+          "Location": "France"
+        },
+        {
+          "Name": "Chang Gung University",
+          "Location": "Taiwan"
+        },
+        {
+          "Name": "National Central University",
+          "Location": "Taiwan"
+        },
+        {
+          "Name": "Aalborg University",
+          "Location": "Denmark"
+        },
+        {
+          "Name": "Utah State University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Baylor University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Bangor University",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "King Saud University",
+          "Location": "Saudi Arabia"
+        },
+        {
+          "Name": "University of Cagliari",
+          "Location": "Italy"
+        },
+        {
+          "Name": "Kent State University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Central China Normal University",
+          "Location": "China"
+        },
+        {
+          "Name": "University of Fribourg",
+          "Location": "Switzerland"
+        },
+        {
+          "Name": "Medical University of Graz",
+          "Location": "Austria"
+        },
+        {
+          "Name": "Second University of Naples",
+          "Location": "Italy"
+        },
+        {
+          "Name": "International School for Advanced Studies",
+          "Location": "Italy"
+        },
+        {
+          "Name": "Tampere University of Technology",
+          "Location": "Finland"
+        },
+        {
+          "Name": "Inha University",
+          "Location": "South Korea"
+        },
+        {
+          "Name": "Deakin University",
+          "Location": "Australia"
+        },
+        {
+          "Name": "National Polytechnic Institute of Toulouse",
+          "Location": "France"
+        },
+        {
+          "Name": "Sogang University",
+          "Location": "South Korea"
+        },
+        {
+          "Name": "University of Ioannina",
+          "Location": "Greece"
+        },
+        {
+          "Name": "Federal University of Rio Grande do Sul",
+          "Location": "Brazil"
+        },
+        {
+          "Name": "University of Graz",
+          "Location": "Austria"
+        },
+        {
+          "Name": "University of Montana - Missoula",
+          "Location": "USA"
+        },
+        {
+          "Name": "East China Normal University",
+          "Location": "China"
+        },
+        {
+          "Name": "Plymouth University",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Victoria University of Wellington",
+          "Location": "New Zealand"
+        },
+        {
+          "Name": "Federal University of Sao Paulo",
+          "Location": "Brazil"
+        },
+        {
+          "Name": "Southern Illinois University Carbondale",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Alaska Fairbanks",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Toledo",
+          "Location": "USA"
+        },
+        {
+          "Name": "Carleton University",
+          "Location": "Canada"
+        },
+        {
+          "Name": "Cranfield University",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Curtin University",
+          "Location": "Australia"
+        },
+        {
+          "Name": "Indian Institute of Technology Bombay",
+          "Location": "India"
+        },
+        {
+          "Name": "University of Portsmouth",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Osaka Prefecture University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "Nagoya City University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "LSU Health Sciences Center New Orleans",
+          "Location": "USA"
+        },
+        {
+          "Name": "Tata Institute of Fundamental Research",
+          "Location": "India"
+        },
+        {
+          "Name": "Konkuk University",
+          "Location": "South Korea"
+        },
+        {
+          "Name": "University of La Laguna",
+          "Location": "Spain"
+        },
+        {
+          "Name": "University of Hertfordshire",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Florida International University",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Rhode Island",
+          "Location": "USA"
+        },
+        {
+          "Name": "Mississippi State University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Gunma University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "University of New Orleans",
+          "Location": "USA"
+        },
+        {
+          "Name": "Putra University, Malaysia",
+          "Location": "Malaysia"
+        },
+        {
+          "Name": "Memorial University of Newfoundland",
+          "Location": "Canada"
+        },
+        {
+          "Name": "Universidade Nova de Lisboa",
+          "Location": "Portugal"
+        },
+        {
+          "Name": "Griffith University",
+          "Location": "Australia"
+        },
+        {
+          "Name": "Indian Institute of Technology Kharagpur",
+          "Location": "India"
+        },
+        {
+          "Name": "Soochow University (Suzhou)",
+          "Location": "China"
+        },
+        {
+          "Name": "Texas A&M Health Science Center",
+          "Location": "USA"
+        },
+        {
+          "Name": "Semmelweis University",
+          "Location": "Hungary"
+        },
+        {
+          "Name": "Lille 2 University of Health and Law",
+          "Location": "France"
+        },
+        {
+          "Name": "Kagoshima University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "Flinders University",
+          "Location": "Australia"
+        },
+        {
+          "Name": "Queensland University of Technology",
+          "Location": "Australia"
+        },
+        {
+          "Name": "Tokai University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "Istanbul University",
+          "Location": "Turkey"
+        },
+        {
+          "Name": "Tokyo University of Agriculture and Technology",
+          "Location": "Japan"
+        },
+        {
+          "Name": "Louisiana Tech University",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Texas at Arlington",
+          "Location": "USA"
+        },
+        {
+          "Name": "China Agricultural University",
+          "Location": "China"
+        },
+        {
+          "Name": "Chungnam National University",
+          "Location": "South Korea"
+        },
+        {
+          "Name": "University of Minho",
+          "Location": "Portugal"
+        },
+        {
+          "Name": "University of Eastern Piedmont Amedeo Avogadro",
+          "Location": "Italy"
+        },
+        {
+          "Name": "Open University (UK)",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "University of Essex",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Paris-Est Creteil Val-de-Marne University",
+          "Location": "France"
+        },
+        {
+          "Name": "Hacettepe University",
+          "Location": "Turkey"
+        },
+        {
+          "Name": "State University of New York Upstate Medical University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Braunschweig University of Technology",
+          "Location": "Germany"
+        },
+        {
+          "Name": "University of Salamanca",
+          "Location": "Spain"
+        },
+        {
+          "Name": "Indian Institute of Technology Roorkee",
+          "Location": "India"
+        },
+        {
+          "Name": "Orebro University",
+          "Location": "Sweden"
+        },
+        {
+          "Name": "Northeast Normal University",
+          "Location": "China"
+        },
+        {
+          "Name": "University of Patras",
+          "Location": "Greece"
+        },
+        {
+          "Name": "Beijing University of Chemical Technology",
+          "Location": "China"
+        },
+        {
+          "Name": "Northern Illinois University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Rovira i Virgili University",
+          "Location": "Spain"
+        },
+        {
+          "Name": "La Trobe University",
+          "Location": "Australia"
+        },
+        {
+          "Name": "Warsaw University of Technology",
+          "Location": "Poland"
+        },
+        {
+          "Name": "Binghamton University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Shizuoka University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "Hong Kong Baptist University",
+          "Location": "Hong Kong"
+        },
+        {
+          "Name": "Albany Medical College",
+          "Location": "USA"
+        },
+        {
+          "Name": "Ehime University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "University of Los Andes (Colombia)",
+          "Location": "Colombia"
+        },
+        {
+          "Name": "Polytechnic University of Turin",
+          "Location": "Italy"
+        },
+        {
+          "Name": "University of Burgundy",
+          "Location": "France"
+        },
+        {
+          "Name": "University of Idaho",
+          "Location": "USA"
+        },
+        {
+          "Name": "Old Dominion University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Yamaguchi University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "Massey University",
+          "Location": "New Zealand"
+        },
+        {
+          "Name": "Donghua University",
+          "Location": "China"
+        },
+        {
+          "Name": "University of the Balearic Islands",
+          "Location": "Spain"
+        },
+        {
+          "Name": "Portland State University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Marche Polytechnic University",
+          "Location": "Italy"
+        },
+        {
+          "Name": "University of Quebec at Montreal",
+          "Location": "Canada"
+        },
+        {
+          "Name": "UNESP, Sao Paulo State University",
+          "Location": "Brazil"
+        },
+        {
+          "Name": "Loma Linda University",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Toyama",
+          "Location": "Japan"
+        },
+        {
+          "Name": "University of Debrecen",
+          "Location": "Hungary"
+        },
+        {
+          "Name": "University of Maine, Orono",
+          "Location": "USA"
+        },
+        {
+          "Name": "Graz University of Technology",
+          "Location": "Austria"
+        },
+        {
+          "Name": "Gifu University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "University of Jyvaskyla",
+          "Location": "Finland"
+        },
+        {
+          "Name": "University of Paris 13",
+          "Location": "France"
+        },
+        {
+          "Name": "University of Girona",
+          "Location": "Spain"
+        },
+        {
+          "Name": "Keele University",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "University of Poitiers",
+          "Location": "France"
+        },
+        {
+          "Name": "University of Insubria",
+          "Location": "Italy"
+        },
+        {
+          "Name": "Wuhan University of Technology",
+          "Location": "China"
+        },
+        {
+          "Name": "University of Pretoria",
+          "Location": "South Africa"
+        },
+        {
+          "Name": "Banaras Hindu University",
+          "Location": "India"
+        },
+        {
+          "Name": "University of L'Aquila",
+          "Location": "Italy"
+        },
+        {
+          "Name": "University of Alicante",
+          "Location": "Spain"
+        },
+        {
+          "Name": "American University of Beirut",
+          "Location": "Lebanon"
+        },
+        {
+          "Name": "University of Ulster",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Shanghai University",
+          "Location": "China"
+        },
+        {
+          "Name": "Comenius University in Bratislava",
+          "Location": "Slovak Republic"
+        },
+        {
+          "Name": "University of Vigo",
+          "Location": "Spain"
+        },
+        {
+          "Name": "University of Nevada, Las Vegas",
+          "Location": "USA"
+        },
+        {
+          "Name": "Swinburne University of Technology",
+          "Location": "Australia"
+        },
+        {
+          "Name": "Tilburg University",
+          "Location": "Netherlands"
+        },
+        {
+          "Name": "University of Messina",
+          "Location": "Italy"
+        },
+        {
+          "Name": "Kaiserslautern University of Technology",
+          "Location": "Germany"
+        },
+        {
+          "Name": "University of Kent",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "University of Malaga",
+          "Location": "Spain"
+        },
+        {
+          "Name": "Loughborough University",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "National Technical University of Athens",
+          "Location": "Greece"
+        },
+        {
+          "Name": "Liverpool John Moores University",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Sharif University of Technology",
+          "Location": "Iran"
+        },
+        {
+          "Name": "Birkbeck, University of London",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "University Francois Rabelais, Tours",
+          "Location": "France"
+        },
+        {
+          "Name": "University of Haifa",
+          "Location": "Israel"
+        },
+        {
+          "Name": "Roma Tre University",
+          "Location": "Italy"
+        },
+        {
+          "Name": "Masaryk University",
+          "Location": "Czech Republic"
+        },
+        {
+          "Name": "University of Salerno",
+          "Location": "Italy"
+        },
+        {
+          "Name": "King Abdullah University of Science and Technology",
+          "Location": "Saudi Arabia"
+        },
+        {
+          "Name": "Beihang University",
+          "Location": "China"
+        },
+        {
+          "Name": "Fuzhou University",
+          "Location": "China"
+        },
+        {
+          "Name": "Heriot-Watt University",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "China Medical University (Taiwan)",
+          "Location": "Taiwan"
+        },
+        {
+          "Name": "University of Cantabria",
+          "Location": "Spain"
+        },
+        {
+          "Name": "Rochester Institute of Technology",
+          "Location": "USA"
+        },
+        {
+          "Name": "Royal College of Surgeons in Ireland",
+          "Location": "Ireland"
+        },
+        {
+          "Name": "San Francisco State University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Sapporo Medical University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "Indian Institute of Technology Kanpur",
+          "Location": "India"
+        },
+        {
+          "Name": "Johannes Kepler University of Linz",
+          "Location": "Austria"
+        },
+        {
+          "Name": "Czech Technical University in Prague",
+          "Location": "Czech Republic"
+        },
+        {
+          "Name": "Marquette University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Missouri University of Science and Technology",
+          "Location": "USA"
+        },
+        {
+          "Name": "Howard University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Aston University",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Ecole normale superieure de Cachan",
+          "Location": "France"
+        },
+        {
+          "Name": "Jichi Medical University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "Rutgers, The State University of New Jersey - Newark",
+          "Location": "USA"
+        },
+        {
+          "Name": "Palacky University, Olomouc",
+          "Location": "Czech Republic"
+        },
+        {
+          "Name": "Ankara University",
+          "Location": "Turkey"
+        },
+        {
+          "Name": "University of Belgrade",
+          "Location": "Serbia"
+        },
+        {
+          "Name": "Toho University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "Kyoto Prefectural University of Medicine",
+          "Location": "Japan"
+        },
+        {
+          "Name": "Swansea University",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Universite de Namur",
+          "Location": "Belgium"
+        },
+        {
+          "Name": "University of Szeged",
+          "Location": "Hungary"
+        },
+        {
+          "Name": "Kitasato University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "Hasselt University",
+          "Location": "Belgium"
+        },
+        {
+          "Name": "University of Cordoba (Spain)",
+          "Location": "Spain"
+        },
+        {
+          "Name": "Abo Akademi University",
+          "Location": "Finland"
+        },
+        {
+          "Name": "Tottori University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "Kindai University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "University of Castilla-La Mancha",
+          "Location": "Spain"
+        },
+        {
+          "Name": "University of Augsburg",
+          "Location": "Germany"
+        },
+        {
+          "Name": "Paul Valery University, Montpellier III",
+          "Location": "France"
+        },
+        {
+          "Name": "University of Mons",
+          "Location": "Belgium"
+        },
+        {
+          "Name": "Istanbul Technical University",
+          "Location": "Turkey"
+        },
+        {
+          "Name": "University of Natural Resources and Life Sciences, Vienna",
+          "Location": "Austria"
+        },
+        {
+          "Name": "National University of La Plata",
+          "Location": "Argentina"
+        },
+        {
+          "Name": "University of Calabria",
+          "Location": "Italy"
+        },
+        {
+          "Name": "University of Memphis",
+          "Location": "USA"
+        },
+        {
+          "Name": "G. d'Annunzio University, Chieti-Pescara",
+          "Location": "Italy"
+        },
+        {
+          "Name": "University of Missouri - St. Louis",
+          "Location": "USA"
+        },
+        {
+          "Name": "Beijing Institute of Technology",
+          "Location": "China"
+        },
+        {
+          "Name": "University of Evry Val d'Essonne",
+          "Location": "France"
+        },
+        {
+          "Name": "University of South Australia",
+          "Location": "Australia"
+        },
+        {
+          "Name": "University of Alabama in Huntsville",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Salzburg",
+          "Location": "Austria"
+        },
+        {
+          "Name": "University of Mississippi Medical Center",
+          "Location": "USA"
+        },
+        {
+          "Name": "National Research Nuclear University MEPhI",
+          "Location": "Russia"
+        },
+        {
+          "Name": "Chung-Ang University",
+          "Location": "South Korea"
+        },
+        {
+          "Name": "Kaohsiung Medical University",
+          "Location": "Taiwan"
+        },
+        {
+          "Name": "University of Neuchatel",
+          "Location": "Switzerland"
+        },
+        {
+          "Name": "University of Yamanashi",
+          "Location": "Japan"
+        },
+        {
+          "Name": "Yamagata University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "New Jersey Institute of Technology",
+          "Location": "USA"
+        },
+        {
+          "Name": "East Carolina University",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Hyogo",
+          "Location": "Japan"
+        },
+        {
+          "Name": "University of Picardie Jules Verne",
+          "Location": "France"
+        },
+        {
+          "Name": "University of Salento",
+          "Location": "Italy"
+        },
+        {
+          "Name": "Northern Arizona University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Miguel Hernandez University of Elche",
+          "Location": "Spain"
+        },
+        {
+          "Name": "University of Tehran",
+          "Location": "Iran"
+        },
+        {
+          "Name": "Blaise Pascal University",
+          "Location": "France"
+        },
+        {
+          "Name": "Yeungnam University",
+          "Location": "South Korea"
+        },
+        {
+          "Name": "Kurume University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "Institut national des sciences Appliquees de Lyon",
+          "Location": "France"
+        },
+        {
+          "Name": "Saga University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "Chongqing University",
+          "Location": "China"
+        },
+        {
+          "Name": "Jikei University School of Medicine",
+          "Location": "Japan"
+        },
+        {
+          "Name": "Second Military Medical University",
+          "Location": "China"
+        },
+        {
+          "Name": "Jawaharlal Nehru Centre for Advanced Scientific Research",
+          "Location": "India"
+        },
+        {
+          "Name": "University of North Texas, Denton",
+          "Location": "USA"
+        },
+        {
+          "Name": "Ege University",
+          "Location": "Turkey"
+        },
+        {
+          "Name": "Mie University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "Polytechnique Montreal",
+          "Location": "Canada"
+        },
+        {
+          "Name": "AGH University of Science and Technology",
+          "Location": "Poland"
+        },
+        {
+          "Name": "University of Electronic Science and Technology of China",
+          "Location": "China"
+        },
+        {
+          "Name": "University of Stirling",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "University of Greifswald",
+          "Location": "Germany"
+        },
+        {
+          "Name": "National Polytechnic Institute",
+          "Location": "Mexico"
+        },
+        {
+          "Name": "Jacobs University Bremen",
+          "Location": "Germany"
+        },
+        {
+          "Name": "Capital Medical University",
+          "Location": "China"
+        },
+        {
+          "Name": "Norwegian University of Life Sciences",
+          "Location": "Norway"
+        },
+        {
+          "Name": "Michigan Technological University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Vilnius University",
+          "Location": "Lithuania"
+        },
+        {
+          "Name": "North Dakota State University - Main Campus",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Hohenheim",
+          "Location": "Germany"
+        },
+        {
+          "Name": "University of North Carolina at Charlotte",
+          "Location": "USA"
+        },
+        {
+          "Name": "Zhengzhou University",
+          "Location": "China"
+        },
+        {
+          "Name": "Cairo University",
+          "Location": "Egypt"
+        },
+        {
+          "Name": "University of Caen Lower Normandy",
+          "Location": "France"
+        },
+        {
+          "Name": "Saitama Medical University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "University of Murcia",
+          "Location": "Spain"
+        },
+        {
+          "Name": "Showa University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "University of Oldenburg",
+          "Location": "Germany"
+        },
+        {
+          "Name": "Magna Graecia University of Catanzaro",
+          "Location": "Italy"
+        },
+        {
+          "Name": "National Sun Yat-sen University",
+          "Location": "Taiwan"
+        },
+        {
+          "Name": "Nanjing University of Science and Technology",
+          "Location": "China"
+        },
+        {
+          "Name": "University of Concepcion",
+          "Location": "Chile"
+        },
+        {
+          "Name": "Chungbuk National University",
+          "Location": "South Korea"
+        },
+        {
+          "Name": "Taipei Medical University",
+          "Location": "Taiwan"
+        },
+        {
+          "Name": "Jaume I University",
+          "Location": "Spain"
+        },
+        {
+          "Name": "Bowling Green State University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Nanjing University of Technology",
+          "Location": "China"
+        },
+        {
+          "Name": "University of New England (Australia)",
+          "Location": "Australia"
+        },
+        {
+          "Name": "Kangwon National University",
+          "Location": "South Korea"
+        },
+        {
+          "Name": "Inje University",
+          "Location": "South Korea"
+        },
+        {
+          "Name": "Aberystwyth University",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "University of Technology, Sydney",
+          "Location": "Australia"
+        },
+        {
+          "Name": "University of Franche-Comte",
+          "Location": "France"
+        },
+        {
+          "Name": "University of Sassari",
+          "Location": "Italy"
+        },
+        {
+          "Name": "Chiang Mai University",
+          "Location": "Thailand"
+        },
+        {
+          "Name": "Budapest University of Technology and Economics",
+          "Location": "Hungary"
+        },
+        {
+          "Name": "University of Maribor",
+          "Location": "Slovenia"
+        },
+        {
+          "Name": "University of Bradford",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "University of Perpignan Via Domitia",
+          "Location": "France"
+        },
+        {
+          "Name": "Florida Institute of Technology",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Brighton",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "University of Massachusetts Boston",
+          "Location": "USA"
+        },
+        {
+          "Name": "Rio de Janeiro State University",
+          "Location": "Brazil"
+        },
+        {
+          "Name": "Nagoya Institute of Technology",
+          "Location": "Japan"
+        },
+        {
+          "Name": "Jiangnan University",
+          "Location": "China"
+        },
+        {
+          "Name": "Murdoch University",
+          "Location": "Australia"
+        },
+        {
+          "Name": "University of Wales, Trinity Saint David",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "University of Rouen",
+          "Location": "France"
+        },
+        {
+          "Name": "The Catholic University of America",
+          "Location": "USA"
+        },
+        {
+          "Name": "Wright State University - Dayton",
+          "Location": "USA"
+        },
+        {
+          "Name": "Dankook University",
+          "Location": "South Korea"
+        },
+        {
+          "Name": "Clarkson University",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Regina",
+          "Location": "Canada"
+        },
+        {
+          "Name": "Bogazici University",
+          "Location": "Turkey"
+        },
+        {
+          "Name": "Kochi University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "University of Miyazaki",
+          "Location": "Japan"
+        },
+        {
+          "Name": "University of Electro-Communications",
+          "Location": "Japan"
+        },
+        {
+          "Name": "University of Valladolid",
+          "Location": "Spain"
+        },
+        {
+          "Name": "Bilkent University",
+          "Location": "Turkey"
+        },
+        {
+          "Name": "Dublin City University",
+          "Location": "Ireland"
+        },
+        {
+          "Name": "University of South Alabama",
+          "Location": "USA"
+        },
+        {
+          "Name": "Sofia University",
+          "Location": "Bulgaria"
+        },
+        {
+          "Name": "Ocean University of China",
+          "Location": "China"
+        },
+        {
+          "Name": "King Fahd University of Petroleum and Minerals",
+          "Location": "Saudi Arabia"
+        },
+        {
+          "Name": "University of Veterinary Medicine Vienna",
+          "Location": "Austria"
+        },
+        {
+          "Name": "University of Alcala",
+          "Location": "Spain"
+        },
+        {
+          "Name": "Hunter College",
+          "Location": "USA"
+        },
+        {
+          "Name": "All India Institute of Medical Sciences, New Delhi",
+          "Location": "India"
+        },
+        {
+          "Name": "Gazi University",
+          "Location": "Turkey"
+        },
+        {
+          "Name": "National University of Ireland, Maynooth",
+          "Location": "Ireland"
+        },
+        {
+          "Name": "Tehran University of Medical Sciences",
+          "Location": "Iran"
+        },
+        {
+          "Name": "University of the Ryukyus",
+          "Location": "Japan"
+        },
+        {
+          "Name": "Florida Atlantic University",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Siegen",
+          "Location": "Germany"
+        },
+        {
+          "Name": "Huazhong Agricultural University",
+          "Location": "China"
+        },
+        {
+          "Name": "University of Angers",
+          "Location": "France"
+        },
+        {
+          "Name": "University of Seoul",
+          "Location": "South Korea"
+        },
+        {
+          "Name": "Brock University",
+          "Location": "Canada"
+        },
+        {
+          "Name": "Fukuoka University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "Hamamatsu University School of Medicine",
+          "Location": "Japan"
+        },
+        {
+          "Name": "Nanjing Normal University",
+          "Location": "China"
+        },
+        {
+          "Name": "National Chung Cheng University",
+          "Location": "Taiwan"
+        },
+        {
+          "Name": "Nanjing Agricultural University",
+          "Location": "China"
+        },
+        {
+          "Name": "University of the Republic (Uruguay)",
+          "Location": "Uruguay"
+        },
+        {
+          "Name": "Sejong University",
+          "Location": "South Korea"
+        },
+        {
+          "Name": "Makerere University",
+          "Location": "Uganda"
+        },
+        {
+          "Name": "University of New Brunswick",
+          "Location": "Canada"
+        },
+        {
+          "Name": "Northeastern University (China)",
+          "Location": "China"
+        },
+        {
+          "Name": "University of Extremadura",
+          "Location": "Spain"
+        },
+        {
+          "Name": "RMIT University",
+          "Location": "Australia"
+        },
+        {
+          "Name": "Royal Veterinary College, University of London",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Chung Yuan Christian University",
+          "Location": "Taiwan"
+        },
+        {
+          "Name": "University of Osnabruck",
+          "Location": "Germany"
+        },
+        {
+          "Name": "Northwest University (China)",
+          "Location": "China"
+        },
+        {
+          "Name": "Chosun University",
+          "Location": "South Korea"
+        },
+        {
+          "Name": "University of Orleans",
+          "Location": "France"
+        },
+        {
+          "Name": "Jean Monnet University",
+          "Location": "France"
+        },
+        {
+          "Name": "Ecole centrale de Lyon",
+          "Location": "France"
+        },
+        {
+          "Name": "University of Western Sydney",
+          "Location": "Australia"
+        },
+        {
+          "Name": "Hefei University of Technology",
+          "Location": "China"
+        },
+        {
+          "Name": "University of Massachusetts Lowell",
+          "Location": "USA"
+        },
+        {
+          "Name": "Manchester Metropolitan University",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Nanjing Medical University",
+          "Location": "China"
+        },
+        {
+          "Name": "Kyoto Institute of Technology",
+          "Location": "Japan"
+        },
+        {
+          "Name": "Shanghai Normal University",
+          "Location": "China"
+        },
+        {
+          "Name": "Southwest University",
+          "Location": "China"
+        },
+        {
+          "Name": "Adam Mickiewicz University in Poznan",
+          "Location": "Poland"
+        },
+        {
+          "Name": "University of Calcutta",
+          "Location": "India"
+        },
+        {
+          "Name": "University of Pecs",
+          "Location": "Hungary"
+        },
+        {
+          "Name": "Queens College, City University of New York",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Lleida",
+          "Location": "Spain"
+        },
+        {
+          "Name": "Nanjing University of Aeronautics and Astronautics",
+          "Location": "China"
+        },
+        {
+          "Name": "University of Western Brittany",
+          "Location": "France"
+        },
+        {
+          "Name": "University of North Carolina at Greensboro",
+          "Location": "USA"
+        },
+        {
+          "Name": "Pukyong National University",
+          "Location": "South Korea"
+        },
+        {
+          "Name": "Fourth Military Medical University",
+          "Location": "China"
+        },
+        {
+          "Name": "University of Fukui",
+          "Location": "Japan"
+        },
+        {
+          "Name": "University of Southern Mississippi",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Mannheim",
+          "Location": "Germany"
+        },
+        {
+          "Name": "Shimane University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "China University of Geosciences (Wuhan)",
+          "Location": "China"
+        },
+        {
+          "Name": "University of Thessaly",
+          "Location": "Greece"
+        },
+        {
+          "Name": "Oakland University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Wilfrid Laurier University",
+          "Location": "Canada"
+        },
+        {
+          "Name": "Teikyo University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "Saitama University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "Trent University",
+          "Location": "Canada"
+        },
+        {
+          "Name": "Nicolaus Copernicus University in Torun",
+          "Location": "Poland"
+        },
+        {
+          "Name": "Tarbiat Modares University",
+          "Location": "Iran"
+        },
+        {
+          "Name": "University of North Dakota",
+          "Location": "USA"
+        },
+        {
+          "Name": "Isfahan University of Technology",
+          "Location": "Iran"
+        },
+        {
+          "Name": "Fluminense Federal University",
+          "Location": "Brazil"
+        },
+        {
+          "Name": "National Taiwan University of Science and Technology",
+          "Location": "Taiwan"
+        },
+        {
+          "Name": "University of Lethbridge",
+          "Location": "Canada"
+        },
+        {
+          "Name": "Federal University of Santa Catarina",
+          "Location": "Brazil"
+        },
+        {
+          "Name": "University of Camerino",
+          "Location": "Italy"
+        },
+        {
+          "Name": "University of Brasilia",
+          "Location": "Brazil"
+        },
+        {
+          "Name": "University of Wroclaw",
+          "Location": "Poland"
+        },
+        {
+          "Name": "University of Basilicata",
+          "Location": "Italy"
+        },
+        {
+          "Name": "Jadavpur University",
+          "Location": "India"
+        },
+        {
+          "Name": "South China Normal University",
+          "Location": "China"
+        },
+        {
+          "Name": "University of Hyderabad",
+          "Location": "India"
+        },
+        {
+          "Name": "Ritsumeikan University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "Carlos III University of Madrid",
+          "Location": "Spain"
+        },
+        {
+          "Name": "University of Cyprus",
+          "Location": "Cyprus"
+        },
+        {
+          "Name": "University of Texas at El Paso",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Cadiz",
+          "Location": "Spain"
+        },
+        {
+          "Name": "Shahid Beheshti University of Medical Sciences",
+          "Location": "Iran"
+        },
+        {
+          "Name": "National Taiwan Normal University",
+          "Location": "Taiwan"
+        },
+        {
+          "Name": "National University of Cordoba",
+          "Location": "Argentina"
+        },
+        {
+          "Name": "Federal University of Parana",
+          "Location": "Brazil"
+        },
+        {
+          "Name": "University of Jaen",
+          "Location": "Spain"
+        },
+        {
+          "Name": "University of California, Merced",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Waikato",
+          "Location": "New Zealand"
+        },
+        {
+          "Name": "University of Central Lancashire",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Federal University of Pernambuco",
+          "Location": "Brazil"
+        },
+        {
+          "Name": "University of Almeri­a",
+          "Location": "Spain"
+        },
+        {
+          "Name": "Federal University of Sao Carlos",
+          "Location": "Brazil"
+        },
+        {
+          "Name": "Charles Darwin University",
+          "Location": "Australia"
+        },
+        {
+          "Name": "Yangzhou University",
+          "Location": "China"
+        },
+        {
+          "Name": "Wroclaw University of Technology",
+          "Location": "Poland"
+        },
+        {
+          "Name": "Hirosaki University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "National Taiwan Ocean University",
+          "Location": "Taiwan"
+        },
+        {
+          "Name": "Jiangsu University",
+          "Location": "China"
+        },
+        {
+          "Name": "Northwestern Polytechnical University",
+          "Location": "China"
+        },
+        {
+          "Name": "Xiangtan University",
+          "Location": "China"
+        },
+        {
+          "Name": "United Arab Emirates University",
+          "Location": "United Arab Emirates"
+        },
+        {
+          "Name": "Gachon University",
+          "Location": "South Korea"
+        },
+        {
+          "Name": "Hallym University",
+          "Location": "South Korea"
+        },
+        {
+          "Name": "Harbin Engineering University",
+          "Location": "China"
+        },
+        {
+          "Name": "Dokuz Eylul University",
+          "Location": "Turkey"
+        },
+        {
+          "Name": "Jinan University",
+          "Location": "China"
+        },
+        {
+          "Name": "Shiraz University",
+          "Location": "Iran"
+        },
+        {
+          "Name": "Third Military Medical University",
+          "Location": "China"
+        },
+        {
+          "Name": "Amirkabir University of Technology",
+          "Location": "Iran"
+        },
+        {
+          "Name": "Public University of Navarre",
+          "Location": "Spain"
+        },
+        {
+          "Name": "Federico Santa Maria Technical University",
+          "Location": "Chile"
+        },
+        {
+          "Name": "Federal University of ABC",
+          "Location": "Brazil"
+        },
+        {
+          "Name": "University of Puerto Rico at Mayaguez",
+          "Location": "Puerto Rico"
+        },
+        {
+          "Name": "Southern Medical University",
+          "Location": "China"
+        },
+        {
+          "Name": "University of Silesia",
+          "Location": "Poland"
+        },
+        {
+          "Name": "Ain Shams University",
+          "Location": "Egypt"
+        },
+        {
+          "Name": "University of Valenciennes and Hainaut-Cambresis",
+          "Location": "France"
+        },
+        {
+          "Name": "Chung Shan Medical University",
+          "Location": "Taiwan"
+        },
+        {
+          "Name": "National University of Colombia",
+          "Location": "Colombia"
+        },
+        {
+          "Name": "South China Agricultural University",
+          "Location": "China"
+        },
+        {
+          "Name": "Ibaraki University",
+          "Location": "Japan"
+        },
+        {
+          "Name": "Fu Jen Catholic University",
+          "Location": "Taiwan"
+        },
+        {
+          "Name": "Hunan Normal University",
+          "Location": "China"
+        },
+        {
+          "Name": "Ulsan National Institute of Science and Technology",
+          "Location": "South Korea"
+        },
+        {
+          "Name": "Federal University of Santa Maria",
+          "Location": "Brazil"
+        },
+        {
+          "Name": "Shenzhen University",
+          "Location": "China"
+        },
+        {
+          "Name": "Tianjin Medical University",
+          "Location": "China"
+        },
+        {
+          "Name": "Beijing University of Technology",
+          "Location": "China"
+        },
+        {
+          "Name": "University of Reims Champagne-Ardenne",
+          "Location": "France"
+        },
+        {
+          "Name": "Yuan Ze University",
+          "Location": "Taiwan"
+        },
+        {
+          "Name": "University of Chemistry and Technology, Prague",
+          "Location": "Czech Republic"
+        },
+        {
+          "Name": "University of Limerick",
+          "Location": "Ireland"
+        },
+        {
+          "Name": "China Medical University (PRC)",
+          "Location": "China"
+        },
+        {
+          "Name": "Feng Chia University",
+          "Location": "Taiwan"
+        },
+        {
+          "Name": "Zhejiang University of Technology",
+          "Location": "China"
+        },
+        {
+          "Name": "Novosibirsk State University",
+          "Location": "Russia"
+        },
+        {
+          "Name": "University of Bucharest",
+          "Location": "Romania"
+        },
+        {
+          "Name": "Babes-Bolyai University",
+          "Location": "Romania"
+        },
+        {
+          "Name": "Mansoura University",
+          "Location": "Egypt"
+        },
+        {
+          "Name": "University of Pau and Pays de l'Adour",
+          "Location": "France"
+        },
+        {
+          "Name": "Henan Normal University",
+          "Location": "China"
+        },
+        {
+          "Name": "Xidian University",
+          "Location": "China"
+        },
+        {
+          "Name": "Federal University of Bahia",
+          "Location": "Brazil"
+        },
+        {
+          "Name": "Southwest Jiaotong University",
+          "Location": "China"
+        },
+        {
+          "Name": "Ryerson University",
+          "Location": "Canada"
+        },
+        {
+          "Name": "King Abdulaziz University",
+          "Location": "Saudi Arabia"
+        },
+        {
+          "Name": "University of the Algarve",
+          "Location": "Portugal"
+        },
+        {
+          "Name": "Alexandria University",
+          "Location": "Egypt"
+        },
+        {
+          "Name": "Federal University of Ceara",
+          "Location": "Brazil"
+        },
+        {
+          "Name": "University of A Coruna",
+          "Location": "Spain"
+        },
+        {
+          "Name": "China Pharmaceutical University",
+          "Location": "China"
+        }
+      ]
+    },
+    {
+      "Type": "Medical School",
+      "Schools": [
+        {
+          "Name": "A.T. Still University Kirksville College of Osteopathic Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "A.T. Still University School of Osteopathic Medicine in Arizona",
+          "Location": "USA"
+        },
+        {
+          "Name": "Alabama College of Osteopathic Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Albany Medical College",
+          "Location": "USA"
+        },
+        {
+          "Name": "Albert Einstein College of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Arkansas College of Osteopathic Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Baylor College of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Boston University School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Brody School of Medicine at East Carolina University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Burrell College of Osteopathic Medicine at New Mexico State University",
+          "Location": "USA"
+        },
+        {
+          "Name": "California Northstate University College of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "California University of Science and Medicine School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Campbell University Jerry M. Wallace School of Osteopathic Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Carle Illinois College of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Case Western Reserve University School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Central Michigan University College of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Charles E. Schmidt College of Medicine at Florida Atlantic University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Chicago Medical School, Rosalind Franklin University of Medicine & Science",
+          "Location": "USA"
+        },
+        {
+          "Name": "Columbia University Vagelos College of Physicians and Surgeons",
+          "Location": "USA"
+        },
+        {
+          "Name": "Cooper Medical School of Rowan University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Creighton University School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "CUNY School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "David Geffen School of Medicine at UCLA",
+          "Location": "USA"
+        },
+        {
+          "Name": "Dell Medical School at the University of Texas at Austin",
+          "Location": "USA"
+        },
+        {
+          "Name": "Des Moines University College of Osteopathic Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Donald and Barbara Zucker School of Medicine at Hofstra/Northwell",
+          "Location": "USA"
+        },
+        {
+          "Name": "Dr. Kiran C. Patel College of Allopathic Medicine, Nova Southeastern University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Dr. Kiran C. Patel College of Osteopathic Medicine, Nova Southeastern University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Drexel University College of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Duke University School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Eastern Virginia Medical School",
+          "Location": "USA"
+        },
+        {
+          "Name": "Edward Via College of Osteopathic Medicine, Auburn Campus",
+          "Location": "USA"
+        },
+        {
+          "Name": "Edward Via College of Osteopathic Medicine, Carolinas Campus",
+          "Location": "USA"
+        },
+        {
+          "Name": "Edward Via College of Osteopathic Medicine, Virginia Campus",
+          "Location": "USA"
+        },
+        {
+          "Name": "Elson S. Floyd College of Medicine, Washington State University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Emory University School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Escuela de Medicina San Juan Bautista",
+          "Location": "USA"
+        },
+        {
+          "Name": "F. Edward Hébert School of Medicine, Uniformed Services University of the Health Sciences",
+          "Location": "USA"
+        },
+        {
+          "Name": "FIU Herbert Wertheim College of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Florida State University College of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Frank H. Netter MD School of Medicine at Quinnipiac University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Geisel School of Medicine at Dartmouth",
+          "Location": "USA"
+        },
+        {
+          "Name": "Geisinger Commonwealth School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "George Washington University School of Medicine and Health Sciences",
+          "Location": "USA"
+        },
+        {
+          "Name": "Georgetown University School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Hackensack Meridian School of Medicine at Seton Hall University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Harvard Medical School",
+          "Location": "USA"
+        },
+        {
+          "Name": "Howard University College of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Icahn School of Medicine at Mount Sinai",
+          "Location": "USA"
+        },
+        {
+          "Name": "Idaho College of Osteopathic Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Indiana University School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Jacobs School of Medicine and Biomedical Sciences, University at Buffalo",
+          "Location": "USA"
+        },
+        {
+          "Name": "Joan C. Edwards School of Medicine at Marshall University",
+          "Location": "USA"
+        },
+        {
+          "Name": "John A. Burns School of Medicine, University of Hawaii at Manoa",
+          "Location": "USA"
+        },
+        {
+          "Name": "Johns Hopkins University School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Kansas City University of Medicine & Biosciences College of Osteopathic Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Keck School of Medicine of the University of Southern California",
+          "Location": "USA"
+        },
+        {
+          "Name": "Lake Erie College of Osteopathic Medicine - Bradenton",
+          "Location": "USA"
+        },
+        {
+          "Name": "Lake Erie College of Osteopathic Medicine - Erie",
+          "Location": "USA"
+        },
+        {
+          "Name": "Lewis Katz School of Medicine at Temple University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Liberty University College of Osteopathic Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Lincoln Memorial University DeBusk College of Osteopathic Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Loma Linda University School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Louisiana State University School of Medicine in New Orleans",
+          "Location": "USA"
+        },
+        {
+          "Name": "Louisiana State University School of Medicine in Shreveport",
+          "Location": "USA"
+        },
+        {
+          "Name": "Marian University College of Osteopathic Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Mayo Clinic Alix School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "McGovern Medical School at The University of Texas Health Science Center at Houston",
+          "Location": "USA"
+        },
+        {
+          "Name": "Medical College of Georgia",
+          "Location": "USA"
+        },
+        {
+          "Name": "Medical College of Wisconsin",
+          "Location": "USA"
+        },
+        {
+          "Name": "Medical University of South Carolina",
+          "Location": "USA"
+        },
+        {
+          "Name": "Meharry Medical College School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Mercer University School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Michigan State University College of Human Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Michigan State University College of Osteopathic Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Midwestern University Arizona College of Osteopathic Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Midwestern University Chicago College of Osteopathic Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Morehouse School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "New York Institute of Technology College of Osteopathic Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "New York Medical College",
+          "Location": "USA"
+        },
+        {
+          "Name": "Northeast Ohio Medical University (NEOMED)",
+          "Location": "USA"
+        },
+        {
+          "Name": "Northwestern University Feinberg School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "NYU Grossman School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Oakland University William Beaumont School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Ohio University Heritage College of Osteopathic Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Oklahoma State University Center for Health Sciences College of Osteopathic Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Oregon Health and Science University School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Pacific Northwest University of Health Sciences College of Osteopathic Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Paul L. Foster School of Medicine, Texas Tech University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Penn State University College of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Perelman School of Medicine at University of Pennsylvania",
+          "Location": "USA"
+        },
+        {
+          "Name": "Philadelphia College of Osteopathic Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Philadelphia College of Osteopathic Medicine, Georgia Campus",
+          "Location": "USA"
+        },
+        {
+          "Name": "Ponce Health Sciences University School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Quillen College of Medicine, East Tennessee State University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Renaissance School of Medicine at Stony Brook University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Rocky Vista University College of Osteopathic Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Rowan University School of Osteopathic Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Rush Medical College of Rush University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Rutgers New Jersey Medical School",
+          "Location": "USA"
+        },
+        {
+          "Name": "Rutgers Robert Wood Johnson Medical School",
+          "Location": "USA"
+        },
+        {
+          "Name": "Saint Louis University School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Sanford School of Medicine of the University of South Dakota",
+          "Location": "USA"
+        },
+        {
+          "Name": "Sidney Kimmel Medical College at Thomas Jefferson University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Southern Illinois University School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Stanford School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Stritch School of Medicine, Loyola University of Chicago",
+          "Location": "USA"
+        },
+        {
+          "Name": "SUNY Downstate Medical Center College of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "SUNY Upstate Medical University College of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "TCU and UNTHSC School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Texas A&M University System Health Science Center College of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Texas Tech University Health Sciences Center School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "The Ohio State University College of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Touro College of Osteopathic Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Touro University College of Osteopathic Medicine, California",
+          "Location": "USA"
+        },
+        {
+          "Name": "Touro University Nevada College of Osteopathic Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Tufts University School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Tulane University School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "UC Davis School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "UC Riverside School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "UC San Diego School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Universidad Central del Caribe School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Alabama School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Arizona College of Medicine Phoenix",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Arizona College of Medicine Tucson",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Arkansas for Medical Sciences College of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of California, Irvine, School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of California, San Francisco, School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Central Florida College of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Chicago Pritzker School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Cincinnati College of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Colorado School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Connecticut School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Florida College of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Illinois College of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Iowa Carver College of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Kansas School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Kentucky College of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Louisville School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Maryland School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Massachusetts Medical School",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Miami Miller School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Michigan Medical School",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Minnesota Medical School",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Mississippi School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Missouri Kansas City School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Missouri School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Nebraska College of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Nevada Las Vegas School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Nevada School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of New England College of Osteopathic Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of New Mexico School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of North Carolina School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of North Dakota School of Medicine and Health Sciences",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of North Texas Health Science Center Texas College of Osteopathic Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Oklahoma College of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Pikeville Kentucky College of Osteopathic Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Pittsburgh School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Puerto Rico School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Rochester School of Medicine and Dentistry",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of South Alabama College of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of South Carolina School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of South Carolina School of Medicine Greenville",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Tennessee Health Science Center College of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Texas Medical Branch School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Texas Medical School at San Antonio",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Texas Rio Grande Valley School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Texas Southwestern Medical School",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of the Incarnate Word School of Osteopathic Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Toledo College of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Utah School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Vermont Larner College of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Virginia School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Washington School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Wisconsin School of Medicine and Public Health",
+          "Location": "USA"
+        },
+        {
+          "Name": "USF Health Morsani College of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Vanderbilt University School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Virginia Commonwealth University School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Virginia Tech Carilion School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Wake Forest University School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Warren Alpert Medical School of Brown University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Washington University School of Medicine in St. Louis",
+          "Location": "USA"
+        },
+        {
+          "Name": "Wayne State University School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Weill Cornell Medical College",
+          "Location": "USA"
+        },
+        {
+          "Name": "West Virginia School of Osteopathic Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "West Virginia University School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Western Michigan University Homer Stryker M.D. School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Western University of Health Sciences College of Osteopathic Medicine of the Pacific",
+          "Location": "USA"
+        },
+        {
+          "Name": "William Carey University College of Osteopathic Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Wright State University Boonshoft School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "Yale School of Medicine",
+          "Location": "USA"
+        },
+        {
+          "Name": "St. Matthew's University School of Medicine (Grand Cayman)",
+          "Location": "Cayman Islands"
+        },
+        {
+          "Name": "University of Science, Arts & Technology (USAT) Faculty of Medicine",
+          "Location": "Montserrat"
+        },
+        {
+          "Name": "Vanguard University School of Medicine",
+          "Location": "Montserrat"
+        },
+        {
+          "Name": "Anglia Ruskin University School of Medicine",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Aston Medical School",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Barts and the London School of Medicine and Dentistry",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Brighton and Sussex Medical School",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Bristol Medical School, University of Bristol",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Cardiff University School of Medicine",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Edinburgh Medical School, College of Medicine and Veterinary Medicine, University of Edinburgh",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Hull York Medical School",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Imperial College London Faculty of Medicine",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Keele University School of Medicine",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "King's College London GKT School of Medicine",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Lancaster University Medical School",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Leicester Medical School, University of Leicester",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Manchester Medical School",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Newcastle University Faculty of Medical Sciences",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Norwich Medical School, University of East Anglia",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Peninsula Medical School, University of Plymouth",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Queen's University Belfast School of Medicine, Dentistry and Biomedical Sciences",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Sheffield University School of Medicine and Biomedical Sciences",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "St. George's University of London",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Swansea University Medical School",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "UCL Medical School",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "University of Aberdeen School of Medicine, Medical Sciences and Nutrition",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "University of Birmingham College of Medical and Dental Sciences",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "University of Buckingham Medical School",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "University of Cambridge School of Clinical Medicine",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "University of Central Lancashire School of Medicine",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "University of Dundee School of Medicine",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "University of Exeter College of Medicine and Health",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "University of Glasgow School of Medicine, Dentistry and Nursing",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "University of Leeds School of Medicine",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "University of Liverpool School of Medicine",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "University of Nottingham School of Medicine",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "University of Oxford Medical Sciences Division",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "University of Southampton Faculty of Medicine",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "University of St. Andrews School of Medicine",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Warwick Medical School",
+          "Location": "United Kingdom"
+        },
+        {
+          "Name": "Karolinska Institute Faculty of Medicine",
+          "Location": "Sweden"
+        }
+      ]
+    },
+    {
+      "Type": "Law School",
+      "Schools": [
+        {
+          "Name": "Birmingham School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Cumberland School of Law, Samford University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Miles Law School",
+          "Location": "USA"
+        },
+        {
+          "Name": "Thomas Goode Jones School of Law, Faulkner University",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Alabama School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Sandra Day O'Connor College of Law, Arizona State University",
+          "Location": "USA"
+        },
+        {
+          "Name": "James E. Rogers College of Law, University of Arizona",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Arkansas School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "William H. Bowen School of Law, University of Arkansas at Little Rock",
+          "Location": "USA"
+        },
+        {
+          "Name": "Abraham Lincoln University School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "American Heritage University School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "American International School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "California Desert Trial Academy College of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Cal Northern School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "California School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "California Southern Law School",
+          "Location": "USA"
+        },
+        {
+          "Name": "California Southern University",
+          "Location": "USA"
+        },
+        {
+          "Name": "California Western School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Chapman University School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Pacific West College of Law ",
+          "Location": "USA"
+        },
+        {
+          "Name": "Empire College School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Glendale University College of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Golden Gate University School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "International Pacific School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Irvine University College of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "John F. Kennedy University College of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Larry H. Layton School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Laurence Drivon School of Law, Humphreys College",
+          "Location": "USA"
+        },
+        {
+          "Name": "Lincoln Law School of Sacramento",
+          "Location": "USA"
+        },
+        {
+          "Name": "Lincoln Law School of San Jose",
+          "Location": "USA"
+        },
+        {
+          "Name": "Loyola Law School, Loyola Marymount University",
+          "Location": "USA"
+        },
+        {
+          "Name": "McGeorge School of Law, University of the Pacific",
+          "Location": "USA"
+        },
+        {
+          "Name": "McMillan Academy of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Monterey College of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Northwestern California University School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Oak Brook College of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Pacific Coast University School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Pacific West College of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Peoples College of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Pepperdine University School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Pinnacles School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "San Francisco Law School",
+          "Location": "USA"
+        },
+        {
+          "Name": "San Joaquin College of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Santa Barbara College of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "St. Francis School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Santa Clara University School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Southern California Institute of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Southwestern University School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Stanford Law School",
+          "Location": "USA"
+        },
+        {
+          "Name": "Thomas Jefferson School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Trinity Law School, Trinity International University",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of California, Berkeley School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of California, Davis School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Western State College of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of California, Hastings College of the Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of California, Irvine School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of California, Los Angeles School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Honolulu School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of La Verne College of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of San Diego School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of San Francisco School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of San Luis Obispo School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Silicon Valley Law School",
+          "Location": "USA"
+        },
+        {
+          "Name": "Gould School of Law, University of Southern California",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of West Los Angeles School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Ventura College of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Western Sierra Law School",
+          "Location": "USA"
+        },
+        {
+          "Name": "Taft Law School, William Howard Taft University",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Colorado School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Sturm College of Law, University of Denver",
+          "Location": "USA"
+        },
+        {
+          "Name": "Quinnipiac University School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Connecticut School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Yale Law School",
+          "Location": "USA"
+        },
+        {
+          "Name": "Delaware Law School",
+          "Location": "USA"
+        },
+        {
+          "Name": "Columbus School of Law, The Catholic University of America",
+          "Location": "USA"
+        },
+        {
+          "Name": "David A. Clarke School of Law, University of the District of Columbia",
+          "Location": "USA"
+        },
+        {
+          "Name": "The George Washington University Law School",
+          "Location": "USA"
+        },
+        {
+          "Name": "Georgetown University Law Center",
+          "Location": "USA"
+        },
+        {
+          "Name": "Howard University School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Washington College of Law, American University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Dwayne O. Andreas School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Florida A&M University College of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Florida International University College of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Florida State University College of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Florida Levin College of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Shepard Broad Law Center, Nova Southeastern University",
+          "Location": "USA"
+        },
+        {
+          "Name": "St. Thomas University School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Diamond Graduate Law School LLM Online Program",
+          "Location": "USA"
+        },
+        {
+          "Name": "Stetson University College of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Miami School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Ave Maria School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Western Michigan University Thomas M. Cooley Law School",
+          "Location": "USA"
+        },
+        {
+          "Name": "Emory University School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Georgia State University College of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Georgia School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Walter F. George School of Law, Mercer University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Savannah Law School",
+          "Location": "USA"
+        },
+        {
+          "Name": "William S. Richardson School of Law, University of Hawaii",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Idaho College of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Chicago-Kent College of Law, Illinois Institute of Technology",
+          "Location": "USA"
+        },
+        {
+          "Name": "DePaul University College of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Illinois College of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "UIC John Marshall Law School",
+          "Location": "USA"
+        },
+        {
+          "Name": "Loyola University Chicago School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Northern Illinois University College of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Northwestern University School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Southern Illinois University School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Chicago Law School",
+          "Location": "USA"
+        },
+        {
+          "Name": "Maurer School of Law, Indiana University Bloomington",
+          "Location": "USA"
+        },
+        {
+          "Name": "Indiana University Robert H. McKinney School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Notre Dame Law School",
+          "Location": "USA"
+        },
+        {
+          "Name": "Valparaiso University School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Drake University Law School",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Iowa College of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Kansas School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Washburn University School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Salmon P. Chase College of Law, Northern Kentucky University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Louis D. Brandeis School of Law, University of Louisville",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Kentucky College of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Paul M. Hebert Law Center, Louisiana State University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Loyola University New Orleans College of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Southern University Law Center",
+          "Location": "USA"
+        },
+        {
+          "Name": "Tulane University School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Maine School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Baltimore School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Maryland School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Boston College Law School",
+          "Location": "USA"
+        },
+        {
+          "Name": "Boston University School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Harvard Law School",
+          "Location": "USA"
+        },
+        {
+          "Name": "Massachusetts School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "New England School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Northeastern University School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Suffolk University Law School",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Massachusetts School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Western New England University School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Michigan State University College of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Western Michigan University Thomas M. Cooley Law School",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Detroit Mercy School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Michigan Law School",
+          "Location": "USA"
+        },
+        {
+          "Name": "Wayne State University Law School",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Minnesota Law School",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of St. Thomas School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Mitchell Hamline School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Mississippi College School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Mississippi School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Saint Louis University School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Missouri School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Missouri – Kansas City School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Washington University School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Montana School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Creighton University School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Nebraska–Lincoln College of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "William S. Boyd School of Law, University of Nevada, Las Vegas",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of New Hampshire School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Rutgers Law School, Rutgers University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Rutgers Law School, Rutgers University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Seton Hall University School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of New Mexico School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Albany Law School, Union University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Benjamin N. Cardozo School of Law, Yeshiva University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Brooklyn Law School",
+          "Location": "USA"
+        },
+        {
+          "Name": "University at Buffalo Law School, SUNY",
+          "Location": "USA"
+        },
+        {
+          "Name": "Columbia Law School",
+          "Location": "USA"
+        },
+        {
+          "Name": "Cornell Law School",
+          "Location": "USA"
+        },
+        {
+          "Name": "City University of New York School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Fordham University School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Hofstra University School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Touro College Jacob D. Fuchsberg Law Center",
+          "Location": "USA"
+        },
+        {
+          "Name": "New York Law School",
+          "Location": "USA"
+        },
+        {
+          "Name": "New York University School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Pace University School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "St. John's University School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Syracuse University College of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Duke University School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Elon University School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "North Carolina Central University School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Norman Adrian Wiggins School of Law, Campbell University",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of North Carolina School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Wake Forest University School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of North Dakota School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Cleveland-Marshall College of Law, Cleveland State University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Michael E. Moritz College of Law, Ohio State University",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Cincinnati College of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Case Western Reserve University School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Capital University Law School",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Dayton School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Toledo College of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Ohio Northern University, Pettit College of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Akron School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Oklahoma City University School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Oklahoma College of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Tulsa College of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Oregon School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Willamette University College of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Lewis & Clark Law School",
+          "Location": "USA"
+        },
+        {
+          "Name": "Drexel University School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Duquesne University School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Beasley School of Law, Temple University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Dickinson School of Law, Penn State University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Penn State Law, Penn State University",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Pennsylvania Law School",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Pittsburgh School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Villanova University School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Widener University Commonwealth Law School",
+          "Location": "USA"
+        },
+        {
+          "Name": "Interamerican University of Puerto Rico School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Pontifical Catholic University of Puerto Rico School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Puerto Rico School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Roger Williams University School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of South Carolina School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of South Dakota School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Belmont University College of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Cecil C. Humphreys School of Law, University of Memphis",
+          "Location": "USA"
+        },
+        {
+          "Name": "Duncan School of Law, Lincoln Memorial University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Nashville School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Tennessee College of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Vanderbilt University Law School",
+          "Location": "USA"
+        },
+        {
+          "Name": "Baylor Law School, Baylor University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Dedman School of Law, Southern Methodist University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Thurgood Marshall School of Law, Texas Southern University",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Houston Law Center",
+          "Location": "USA"
+        },
+        {
+          "Name": "South Texas College of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Texas Tech University School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Texas School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Texas A&M University School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "St. Mary's University School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "J. Reuben Clark Law School, Brigham Young University",
+          "Location": "USA"
+        },
+        {
+          "Name": "S.J. Quinney College of Law, University of Utah",
+          "Location": "USA"
+        },
+        {
+          "Name": "Vermont Law School",
+          "Location": "USA"
+        },
+        {
+          "Name": "Appalachian School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Antonin Scalia Law School, George Mason University",
+          "Location": "USA"
+        },
+        {
+          "Name": "Liberty University School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Regent University School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Washington and Lee University School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Marshall-Wythe School of Law, The College of William and Mary",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Richmond School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Virginia School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "The Judge Advocate General's Legal Center and School",
+          "Location": "USA"
+        },
+        {
+          "Name": "Gonzaga University School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Seattle University School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Washington School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "West Virginia University College of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Marquette University Law School",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Wisconsin Law School",
+          "Location": "USA"
+        },
+        {
+          "Name": "University of Wyoming College of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Concord Law School, Purdue University Global",
+          "Location": "USA"
+        },
+        {
+          "Name": "Florida Coastal School of Law, InfiLaw System",
+          "Location": "USA"
+        },
+        {
+          "Name": "John Marshall Law School",
+          "Location": "USA"
+        },
+        {
+          "Name": "Charleston School of Law",
+          "Location": "USA"
+        },
+        {
+          "Name": "Duncan School of Law, Lincoln Memorial University",
+          "Location": "USA"
+        }
+      ]
+    }
+  ]
+}

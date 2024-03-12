@@ -15,10 +15,6 @@ using Ghosts.Domain.Code.Helpers;
 using Exception = System.Exception;
 using MAPIFolder = Microsoft.Office.Interop.Outlook.MAPIFolder;
 using Ghosts.Client.Infrastructure;
-using NPOI.SS.Formula.Functions;
-using Microsoft.AspNetCore.Mvc.Filters;
-using NPOI.OpenXmlFormats.Dml;
-using System.Runtime.InteropServices;
 using ReportItem = Ghosts.Domain.Code.ReportItem;
 
 namespace Ghosts.Client.Handlers;
@@ -231,10 +227,10 @@ public class Outlookv2 : BaseHandler
                     WorkingHours.Is(handler);
 
 
-                    if (timelineEvent.DelayBefore > 0)
+                    if (timelineEvent.DelayBeforeActual > 0)
                     {
-                        Log.Trace($"DelayBefore sleeping for {timelineEvent.DelayBefore} ms");
-                        Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayBefore, _jitterfactor));
+                        Log.Trace($"DelayBefore sleeping for {timelineEvent.DelayBeforeActual} ms");
+                        Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayBeforeActual, _jitterfactor));
                     }
 
                     Log.Trace($"Outlookv2:: Performing action {action} .");
@@ -303,10 +299,10 @@ public class Outlookv2 : BaseHandler
 
                     }
 
-                    if (timelineEvent.DelayAfter > 0)
+                    if (timelineEvent.DelayAfterActual > 0)
                     {
-                        Log.Trace($"DelayAfter sleeping for {timelineEvent.DelayAfter} ms");
-                        Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, _jitterfactor));
+                        Log.Trace($"DelayAfter sleeping for {timelineEvent.DelayAfterActual} ms");
+                        Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, _jitterfactor));
                         
                     }
                 }

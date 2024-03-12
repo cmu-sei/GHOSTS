@@ -10,11 +10,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = ../README.md
 		compose-api.yml = Ghosts.Api/docker-compose.yml
 		Dockerfile-api = Dockerfile-api
+		Ghosts.Api\nlog.config = Ghosts.Api\nlog.config
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ghosts.domain", "Ghosts.Domain\ghosts.domain.csproj", "{3BCAE63E-7914-4BD3-A751-BF69820FF1BE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ghosts.api", "Ghosts.Api\ghosts.api.csproj", "{D016B25C-5638-4668-BB54-4C5F179426DF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ghosts.animator", "Ghosts.Animator\ghosts.animator.csproj", "{8C6382F4-AE80-4AE0-9D52-4A399BED54A6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -30,6 +33,10 @@ Global
 		{D016B25C-5638-4668-BB54-4C5F179426DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D016B25C-5638-4668-BB54-4C5F179426DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D016B25C-5638-4668-BB54-4C5F179426DF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8C6382F4-AE80-4AE0-9D52-4A399BED54A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C6382F4-AE80-4AE0-9D52-4A399BED54A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C6382F4-AE80-4AE0-9D52-4A399BED54A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C6382F4-AE80-4AE0-9D52-4A399BED54A6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

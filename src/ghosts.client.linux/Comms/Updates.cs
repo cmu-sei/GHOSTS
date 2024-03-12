@@ -28,17 +28,17 @@ namespace ghosts.client.linux.Comms
         /// </summary>
         public static void Run()
         {
-            new Thread(() =>
-            {
-                Thread.CurrentThread.IsBackground = true;
+            // new Thread(() =>
+            // {
+            //     Thread.CurrentThread.IsBackground = true;
                 GetServerUpdates();
-            }).Start();
+            // }).Start();
 
-            new Thread(() =>
-            {
-                Thread.CurrentThread.IsBackground = true;
+            // new Thread(() =>
+            // {
+            //     Thread.CurrentThread.IsBackground = true;
                 PostClientResults();
-            }).Start();
+            // }).Start();
         }
 
         private static void GetServerUpdates()
@@ -51,7 +51,7 @@ namespace ghosts.client.linux.Comms
 
             var machine = new ResultMachine();
 
-            Thread.Sleep(Jitter.Basic(Program.Configuration.ClientUpdates.CycleSleep));
+            //Thread.Sleep(Jitter.Basic(Program.Configuration.ClientUpdates.CycleSleep));
 
             while (true)
             {
@@ -63,7 +63,7 @@ namespace ghosts.client.linux.Comms
                         try
                         {
                             using (var reader =
-                                new StreamReader(client.OpenRead(Program.Configuration.ClientUpdates.PostUrl)))
+                                new StreamReader(client.OpenRead(Program.ConfigurationUrls.Updates)))
                             {
                                 s = reader.ReadToEnd();
                                 _log.Debug($"{DateTime.Now} - Received new configuration");
@@ -182,7 +182,7 @@ namespace ghosts.client.linux.Comms
 
             try
             {
-                postUrl = Program.Configuration.IdUrl.Replace("clientid", "clienttimeline");
+                postUrl = Program.ConfigurationUrls.Timeline;
             }
             catch
             {
@@ -225,7 +225,7 @@ namespace ghosts.client.linux.Comms
             ServicePointManager.ServerCertificateValidationCallback += (_, _, _, _) => true;
 
             var fileName = ApplicationDetails.LogFiles.ClientUpdates;
-            var postUrl = Program.Configuration.ClientResults.PostUrl;
+            var postUrl = Program.ConfigurationUrls.Results;
 
             var machine = new ResultMachine();
 
@@ -378,7 +378,7 @@ namespace ghosts.client.linux.Comms
 
             try
             {
-                postUrl = Program.Configuration.Survey.PostUrl;
+                postUrl = Program.ConfigurationUrls.Survey;
             }
             catch
             {
@@ -423,7 +423,7 @@ namespace ghosts.client.linux.Comms
             }
             catch (Exception e)
             {
-                _log.Debug($"Problem posting logs to server from { ApplicationDetails.InstanceFiles.SurveyResults } to { Program.Configuration.Survey.PostUrl }");
+                _log.Debug($"Problem posting logs to server from { ApplicationDetails.InstanceFiles.SurveyResults } to { Program.ConfigurationUrls.Survey }");
                 _log.Error(e);
             }
         }

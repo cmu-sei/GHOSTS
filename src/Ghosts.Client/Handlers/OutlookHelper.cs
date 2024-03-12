@@ -961,8 +961,6 @@ namespace Ghosts.Client.Handlers
 
                 }
             }
-
-            return true;
         }
 
         public bool EmptyFolder(string FolderName, string FolderXpath)

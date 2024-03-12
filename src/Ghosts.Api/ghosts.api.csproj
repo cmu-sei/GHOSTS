@@ -3,11 +3,9 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <AssemblyName>ghosts.api</AssemblyName>
-    <ReleaseVersion>7.3.0.0</ReleaseVersion>
-    <Version>7.3.0.0</Version>
-    <AssemblyVersion>7.3.0.0</AssemblyVersion>
-    <FileVersion>7.3.0</FileVersion>
-    <SynchReleaseVersion>false</SynchReleaseVersion>
+
+    <AssemblyVersion>8.0.0.0</AssemblyVersion>
+    <FileVersion>8.0.5.5</FileVersion>
     
     <Authors>Dustin Updyke for Carnegie Mellon University</Authors>
     <Company>Carnegie Mellon University</Company>
@@ -20,22 +18,30 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.1" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.1" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.1">
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="8.0.2" />
     <PackageReference Include="NLog" Version="5.2.8" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.0" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.2" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.Design" Version="1.1.1" />
     <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.5.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="6.5.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.5.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.5.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="8.0.1" />
+    <PackageReference Include="Faker.Net" Version="2.0.163" />
+    <PackageReference Include="AutoMapper" Version="13.0.1" />
+    <PackageReference Include="FileHelpers" Version="3.5.2" />
+    <PackageReference Include="RestSharp" Version="110.2.0" />
+    <PackageReference Include="Betalgo.OpenAI" Version="7.4.6" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Ghosts.Animator\ghosts.animator.csproj" />
     <ProjectReference Include="..\Ghosts.Domain\ghosts.domain.csproj" />
   </ItemGroup>
 
@@ -43,5 +49,91 @@
     <Content Update="nlog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Areas\Animator\" />
+    <Folder Include="_output\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="Areas\Animator\config\address_international_cities.json" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\config\bmi.json" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\config\chat.json" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\config\employment_jobtitles.json" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\config\insider_threat.json" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\config\majors.json" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\config\medical_conditions_and_medications.json" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\config\military_bases.json" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\config\military_billet.json" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\config\military_education.json" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\config\military_height_weight.json" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\config\military_mos.json" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\config\military_rank.json" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\config\military_unit.json" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\config\socializer_post.json" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\config\timelines\Browser Crawl.json" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\config\timelines\Browser upload.json" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\config\timelines\BrowserChrome.json" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\config\timelines\BrowserChromeBlogDrupal.json" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\config\timelines\BrowserChromeSharepoint.json" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\config\timelines\BrowserFirefox.json" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\config\timelines\Clicks.json" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\config\timelines\Command.json" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\config\timelines\Cron.json" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\config\timelines\Excel.json" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\config\timelines\Ftp.json" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\config\timelines\Notepad.json" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\config\timelines\NpcSystem.json" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\config\timelines\Outlook.json" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\config\timelines\Outlookv2.json" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\config\timelines\Pidgin.json" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\config\timelines\PowerPoint.json" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\config\timelines\Print.json" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\config\timelines\Rdp.json" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\config\timelines\Reboot.json" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\config\timelines\Sftp.json" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\config\timelines\Ssh.json" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\config\timelines\trackables timeline.json" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\config\timelines\Watcher.json" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\config\timelines\Wmi.json" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\config\timelines\Word.json" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\config\universities.json" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\config\us_population_data.json" />
+    <_ContentIncludedByDefault Remove="output\socialgraph\social_graph.json" />
+    <_ContentIncludedByDefault Remove="_output\socialgraph\social_graph.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="Views\Home\Index.cshtml" />
+    <AdditionalFiles Include="Views\Shared\_Layout.cshtml" />
+    <AdditionalFiles Include="Views\_ViewStart.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="config\countries.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="config\luke_mode_names.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="config\meal_preferences.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="config\names_female.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="config\names_last.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="config\names_male.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="config\supplies.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="config\usernames.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>

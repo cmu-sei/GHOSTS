@@ -3,8 +3,8 @@
 using System;
 using System.IO;
 using System.Net;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using NLog;
 
 namespace Ghosts.Domain.Code
@@ -38,7 +38,7 @@ namespace Ghosts.Domain.Code
 
                             try
                             {
-                                JsonConvert.DeserializeObject<Timeline>(content);
+                                GetTimelineFromString(content, null);
                             }
                             catch (Exception)
                             {
@@ -59,24 +59,40 @@ namespace Ghosts.Domain.Code
         /// Get from local disk
         /// </summary>
         /// <returns>The local timeline to be executed</returns>
-        public static Timeline GetLocalTimeline()
+        public static Timeline GetTimeline()
         {
-            return GetLocalTimeline(TimelineFile);
+            return GetTimeline(TimelineFile);
         }
 
-        public static Timeline GetLocalTimeline(string path)
+        public static Timeline GetTimeline(string path)
         {
             try
             {
                 var raw = File.ReadAllText(path);
+                return GetTimelineFromString(raw, path);
+            }
+            catch
+            {
+                return null;
+            }
+        }
 
+        public static Timeline GetTimelineFromString(string raw, string path)
+        {
+            var rnd = new Random();
+
+            try
+            {
                 var timeline = JsonConvert.DeserializeObject<Timeline>(raw);
                 if (timeline.Id == Guid.Empty)
                 {
                     timeline.Id = Guid.NewGuid();
-                    SetLocalTimeline(path, timeline);
+                    if (!string.IsNullOrEmpty(path))
+                    {
+                        SetLocalTimeline(path, timeline);
+                    }
                 }
-                
+
                 _log.Debug($"Timeline {timeline.Id} loaded successfully");
                 return timeline;
             }
@@ -85,7 +101,7 @@ namespace Ghosts.Domain.Code
                 return null;
             }
         }
-
+        
         public static Timeline StringToTimeline(string raw)
         {
             try
@@ -99,7 +115,7 @@ namespace Ghosts.Domain.Code
                 return null;
             }
         }
-
+        
         public static string TimelineToString(Timeline timeline)
         {
             try
@@ -119,7 +135,7 @@ namespace Ghosts.Domain.Code
         /// <param name="timelineString">Raw timeline string (to be converted to `Timeline` type)</param>
         public static void SetLocalTimeline(string timelineString)
         {
-            var timelineObject = JsonConvert.DeserializeObject<Timeline>(timelineString);
+            var timelineObject = GetTimelineFromString(timelineString, null);
             SetLocalTimeline(timelineObject);
         }
         

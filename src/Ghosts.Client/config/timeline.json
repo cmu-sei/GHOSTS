@@ -21,12 +21,11 @@
       "Initial": "",
       "UtcTimeOn": "00:00:00",
       "UtcTimeOff": "24:00:00",
-      "Loop": "True",
+      "Loop": "False",
       "TimeLineEvents": [
         {
-          "Command": "DIR /P /Q /R /S /W /4 \\\\file-server\\reports",
+          "Command": "DIR c:\\",
           "CommandArgs": [
-            "exit"
           ],
           "DelayAfter": 900000,
           "DelayBefore": 0
@@ -95,7 +94,7 @@
         "stickiness": "65",
         "stickiness-depth-min": "3",
         "stickiness-depth-max": "15",
-        "incognito": "true",
+        "incognito": "false",
         "javascript-enable": "true",
         "visited-remember": "10",
         "actions-before-restart": 100,
@@ -635,43 +634,11 @@
               "Method": "DELETE"
             }
           ],
-          "DelayAfter": 300000,
-          "DelayBefore": 0
-        }
-      ]
-    },
-    {
-      "HandlerType": "BrowserChrome",
-      "HandlerArgs": {
-        "isheadless": "false",
-        "blockimages": "true",
-        "blockstyles": "true",
-        "blockflash": "true",
-        "blockscripts": "true",
-        "stickiness": 75,
-        "stickiness-depth-min": 5,
-        "stickiness-depth-max": 10000,
-        "incognito": "true",
-        "blog-credentials-file": "c:\\ghosts_data\\sharepoint_creds.json",
-        "blog-deletion-probability": 0,
-        "blog-upload-probability": 0,
-        "blog-browse-probability": 0,
-        "blog-reply-probability": 100,
-        "blog-version": "drupal"
-
-      },
-      "Initial": "about:blank",
-      "UtcTimeOn": "00:00:00",
-      "UtcTimeOff": "24:00:00",
-      "Loop": "True",
-      "TimeLineEvents": [
-        {
-          "Command": "blog",
-          "CommandArgs": [
-            "site:http://www.netexhsv.com:8080",
-            "credentialKey:credkey1"
-          ],
-          "DelayAfter": 10000,
+          "DelayAfter": {
+            "random": true,
+            "min": 5000,
+            "max": 3000000
+          },
           "DelayBefore": 0
         }
       ]

@@ -5,8 +5,8 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Ghosts.Api.Infrastructure;
-using Ghosts.Api.Models;
-using Ghosts.Api.Services;
+using ghosts.api.Infrastructure.Models;
+using ghosts.api.Infrastructure.Services;
 using Ghosts.Domain;
 using Ghosts.Domain.Messages.MesssagesForServer;
 using Microsoft.AspNetCore.SignalR;
@@ -40,7 +40,7 @@ namespace Ghosts.Api.Hubs
         public override async Task OnDisconnectedAsync(Exception exception)
         {
             var m = await FindMachine();
-            Console.WriteLine($"{m.Name} {m.Id} ({Context.ConnectionId}) - Disconnecting...");
+            _log.Trace($"{m.Name} {m.Id} ({Context.ConnectionId}) - Disconnecting...");
             await base.OnDisconnectedAsync(exception);
         }
         
@@ -51,7 +51,7 @@ namespace Ghosts.Api.Hubs
             id = m.Id.ToString();
             
             //client saves this for future calls
-            Console.WriteLine($"{m.Name} {m.Id} ({Context.ConnectionId}) - ReceiveId");
+            _log.Trace($"{m.Name} {m.Id} ({Context.ConnectionId}) - ReceiveId");
             await Clients.Caller.SendAsync("ReceiveId", id, this._ct);
         }
         
@@ -95,7 +95,7 @@ namespace Ghosts.Api.Hubs
             
             var update = new UpdateClientConfig { Type = u.Type, Update = u.Update };
 
-            await _updateService.DeleteAsync(u.Id, m.Id, this._ct);
+            await _updateService.MarkAsDeletedAsync(u.Id, m.Id, this._ct);
 
             // integrators want to know that a timeline was actually delivered
             // (the service only guarantees that the update was received)
@@ -113,7 +113,7 @@ namespace Ghosts.Api.Hubs
 
             message = JsonSerializer.Serialize(update);
 
-            Console.WriteLine($"{m.Name} {m.Id} ({Context.ConnectionId}) - ReceiveUpdates");
+            _log.Trace($"{m.Name} {m.Id} ({Context.ConnectionId}) - ReceiveUpdates");
             await Clients.Caller.SendAsync("ReceiveUpdates", message, this._ct);
         }
         
@@ -126,21 +126,21 @@ namespace Ghosts.Api.Hubs
         public async Task SendHeartbeat(string message)
         {
             var m = await FindMachine();
-            Console.WriteLine($"{m.Name} {m.Id} ({Context.ConnectionId}) - ReceiveHeartbeat");
+            _log.Trace($"{m.Name} {m.Id} ({Context.ConnectionId}) - ReceiveHeartbeat");
             await Clients.Caller.SendAsync("ReceiveHeartbeat", DateTime.UtcNow, this._ct);
         }
         
         public async Task SendMessage(string message)
         {
             var m = await FindMachine();
-            Console.WriteLine($"{m.Name} {m.Id} ({Context.ConnectionId}) - ReceiveMessage");
+            _log.Trace($"{m.Name} {m.Id} ({Context.ConnectionId}) - ReceiveMessage");
             await Clients.All.SendAsync("ReceiveMessage", $"{message} {DateTime.UtcNow}", this._ct);
         }
     
         public async Task SendSpecificMessage(string message)
         {
             var m = await FindMachine();
-            Console.WriteLine($"{m.Name} {m.Id} ({Context.ConnectionId}) - ReceiveSpecificMessage");
+            _log.Trace($"{m.Name} {m.Id} ({Context.ConnectionId}) - ReceiveSpecificMessage");
             await Clients.Caller.SendAsync("ReceiveSpecificMessage", message, this._ct);
         }
 

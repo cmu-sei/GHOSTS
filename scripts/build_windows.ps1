@@ -1,3 +1,10 @@
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory=$false)]
+    [string]
+    $config
+)
+
 $configuration = "release" # release || debug
 
 # release version is determined by the project file release version parameter
@@ -29,6 +36,11 @@ $c = (Invoke-Expression "& '..\src\Ghosts.Client\bin\$configuration\chromedriver
 Write-Host "  x32 build completed. Preparing package..." -ForegroundColor Green
 Write-Host "    $g" -ForegroundColor Green
 Write-Host "    $c" -ForegroundColor Green
+if (-not [string]::IsNullOrWhiteSpace($config)) {
+    Write-Host "  Copying external config for ..\src\Ghosts.Client\bin\$configuration\config..." -ForegroundColor Green
+    Remove-Item -Path "..\src\Ghosts.Client\bin\$configuration\config" -Recurse -Force -Confirm:$false
+    Copy-Item -Path $config -Destination "..\src\Ghosts.Client\bin\$configuration\config" -Recurse -Force
+}
 Rename-Item -Path "..\src\Ghosts.Client\bin\$configuration" -NewName "ghosts-client-x32-v$release_version"
 Compress-Archive -Path "..\src\Ghosts.Client\bin\ghosts-client-x32-v$release_version" -DestinationPath "..\src\Ghosts.Client\bin\ghosts-client-x32-v$release_version.zip"
 Write-Host "  x32 package complete..." -ForegroundColor Green
@@ -39,6 +51,11 @@ Invoke-Expression $build
 Write-Host "  x64 build completed. Preparing package..." -ForegroundColor Green
 Write-Host "    $g" -ForegroundColor Green
 Write-Host "    $c" -ForegroundColor Green
+if (-not [string]::IsNullOrWhiteSpace($config)) {
+    Write-Host "  Copying external config for ..\src\Ghosts.Client\bin\x64\$configuration\config..." -ForegroundColor Green
+    Remove-Item -Path "..\src\Ghosts.Client\bin\x64\$configuration\config" -Recurse -Force -Confirm:$false
+    Copy-Item -Path $config -Destination "..\src\Ghosts.Client\bin\x64\$configuration\config" -Recurse -Force
+}
 Rename-Item -Path "..\src\Ghosts.Client\bin\x64\$configuration" -NewName "ghosts-client-x64-v$release_version"
 Compress-Archive -Path "..\src\Ghosts.Client\bin\x64\ghosts-client-x64-v$release_version" -DestinationPath "..\src\Ghosts.Client\bin\ghosts-client-x64-v$release_version.zip"
 

@@ -1,0 +1,50 @@
+﻿{
+    "TimeLineHandlers": [
+        {
+            "HandlerType": "BrowserChrome",
+            "HandlerArgs": {
+                "executable-location": "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
+                "isheadless": "false",
+                "blockimages": "true",
+                "blockstyles": "true",
+                "blockflash": "true",
+                "blockscripts": "true",
+                "stickiness": 75,
+                "stickiness-depth-min": 5,
+                "stickiness-depth-max": 10000,
+                "incognito": "true"
+            },
+            "Initial": "about:blank",
+            "UtcTimeOn": "00:00:00",
+            "UtcTimeOff": "24:00:00",
+            "Loop": "True",
+            "TimeLineEvents": [
+                {
+                    "Command": "browse",
+                    "CommandArgs": [
+                        "httpw://www.google.com"
+                    ],
+                    "DelayAfter": 900000,
+                    "DelayBefore": 0
+                },
+                {
+                    "Command": "type",
+                    "CommandArgs": [
+                        "q",
+                        "test search string"
+                    ],
+                    "DelayAfter": 900000,
+                    "DelayBefore": 0
+                },
+                {
+                    "Command": "click",
+                    "CommandArgs": [
+                        "btnK"
+                    ],
+                    "DelayAfter": 900000,
+                    "DelayBefore": 0
+                }
+            ]
+        }
+    ]
+}

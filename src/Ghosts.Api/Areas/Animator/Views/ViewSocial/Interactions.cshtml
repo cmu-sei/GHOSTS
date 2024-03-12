@@ -1,0 +1,23 @@
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Interactions</title>
+    <link rel="stylesheet" type="text/css" href="/view-social/inspector.css">
+</head>
+<body>
+<h1>Interactions</h1>
+<input type="hidden" id="id" name="id" value="@ViewBag.Id" />
+<script type="module">
+        import define from "/view-social/index.js?@Guid.NewGuid()";
+        import {Runtime, Library, Inspector} from "/view-social/runtime.js?@Guid.NewGuid()";
+   
+        const runtime = new Runtime();
+        const main = runtime.module(define, Inspector.into(document.body));
+    </script>
+</body>
+</html>

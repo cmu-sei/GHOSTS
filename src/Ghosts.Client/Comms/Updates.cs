@@ -62,12 +62,10 @@ public static class Updates
                 {
                     try
                     {
-                        using (var reader =
-                               new StreamReader(client.OpenRead(Program.Configuration.ClientUpdates.PostUrl)))
-                        {
-                            s = reader.ReadToEnd();
-                            _log.Debug($"{DateTime.Now} - Received new configuration");
-                        }
+                        using var reader =
+                            new StreamReader(client.OpenRead(Program.ConfigurationUrls.Updates));
+                        s = reader.ReadToEnd();
+                        _log.Debug($"{DateTime.Now} - Received new configuration");
                     }
                     catch (WebException wex)
                     {
@@ -101,8 +99,7 @@ public static class Updates
                         case UpdateClientConfig.UpdateType.TimelinePartial:
                             try
                             {
-                                var timeline = JsonConvert.DeserializeObject<Timeline>(update.Update.ToString());
-
+                                var timeline = TimelineBuilder.GetTimelineFromString(update.Update.ToString(), null);
                                 foreach (var timelineHandler in timeline.TimeLineHandlers)
                                 {
                                     _log.Trace($"PartialTimeline found: {timelineHandler.HandlerType}");
@@ -182,7 +179,7 @@ public static class Updates
 
         try
         {
-            postUrl = Program.Configuration.IdUrl.Replace("clientid", "clienttimeline");
+            postUrl = Program.ConfigurationUrls.Timeline;
         }
         catch
         {
@@ -225,7 +222,7 @@ public static class Updates
         ServicePointManager.ServerCertificateValidationCallback += (_, _, _, _) => true;
 
         var fileName = ApplicationDetails.LogFiles.ClientUpdates;
-        var postUrl = Program.Configuration.ClientResults.PostUrl;
+        var postUrl = Program.ConfigurationUrls.Results;
 
         var machine = new ResultMachine();
 
@@ -320,10 +317,8 @@ public static class Updates
         {
             using (var s = new FileStream(tempFile, FileMode.Open, FileAccess.Read, FileShare.None))
             {
-                using (var tr = new StreamReader(s))
-                {
-                    rawLogContents = tr.ReadToEnd();
-                }
+                using var tr = new StreamReader(s);
+                rawLogContents = tr.ReadToEnd();
             }
 
             var r = new TransferLogDump { Log = rawLogContents };
@@ -338,11 +333,9 @@ public static class Updates
                 payload = JsonConvert.SerializeObject(p);
             }
 
-            using (var client = WebClientBuilder.Build(machine))
-            {
-                client.Headers[HttpRequestHeader.ContentType] = "application/json";
-                client.UploadString(postUrl, payload);
-            }
+            using var client = WebClientBuilder.Build(machine);
+            client.Headers[HttpRequestHeader.ContentType] = "application/json";
+            client.UploadString(postUrl, payload);
         }
         catch (Exception e)
         {
@@ -378,7 +371,7 @@ public static class Updates
 
         try
         {
-            postUrl = Program.Configuration.Survey.PostUrl;
+            postUrl = Program.ConfigurationUrls.Survey;
         }
         catch
         {
@@ -423,7 +416,7 @@ public static class Updates
         }
         catch (Exception e)
         {
-            _log.Debug($"Problem posting logs to server from { ApplicationDetails.InstanceFiles.SurveyResults } to { Program.Configuration.Survey.PostUrl }");
+            _log.Debug($"Problem posting logs to server from { ApplicationDetails.InstanceFiles.SurveyResults } to { Program.ConfigurationUrls.Survey}");
             _log.Error(e);
         }
     }

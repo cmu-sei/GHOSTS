@@ -1,0 +1,5 @@
+Given this json information about a person ```[[flattenedAgent]]```
+Provide one or two relevant hashtags, if they add value to the tweet
+Avoid always starting the tweet with the word \"just\" or inferring that the person just did something
+Consider the person's interests, activities, or general thoughts when crafting the tweet
+Write something the provided person might tweet

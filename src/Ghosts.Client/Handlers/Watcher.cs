@@ -39,12 +39,12 @@ internal class Watcher : BaseHandler
         {
             WorkingHours.Is(handler);
 
-            if (timelineEvent.DelayBefore > 0)
+            if (timelineEvent.DelayBeforeActual > 0)
             {
-                Thread.Sleep(timelineEvent.DelayBefore);
+                Thread.Sleep(timelineEvent.DelayBeforeActual);
             }
 
-            Log.Trace($"Watcher: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfter}");
+            Log.Trace($"Watcher: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfterActual}");
 
             switch (timelineEvent.Command)
             {
@@ -58,9 +58,9 @@ internal class Watcher : BaseHandler
                     break;
             }
 
-            if (timelineEvent.DelayAfter > 0)
+            if (timelineEvent.DelayAfterActual > 0)
             {
-                Thread.Sleep(timelineEvent.DelayAfter);
+                Thread.Sleep(timelineEvent.DelayAfterActual);
             }
         }
     }

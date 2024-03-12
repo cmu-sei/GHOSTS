@@ -33,10 +33,10 @@ public class CheckId
             if (checkInitialTimeline)
             {
                 using var client = GetClient();
-                TimelineBuilder.CheckForUrlTimeline(client, Program.Configuration.TimelineConfiguration.Location);
+                TimelineBuilder.CheckForUrlTimeline(client, Program.Configuration.Timeline.Location);
             }
         }
-        catch (Exception e)
+        catch
         {
             _log.Error("configuration doesn't have timeline location, update your application.json to latest please");
         }
@@ -96,7 +96,7 @@ public class CheckId
 
         var s = string.Empty;
 
-        if (!Program.Configuration.IdEnabled)
+        if (!Program.Configuration.Id.IsEnabled)
         {
             return s;
         }
@@ -108,7 +108,7 @@ public class CheckId
             //call home
             try
             {
-                using var reader = new StreamReader(client.OpenRead(Program.Configuration.IdUrl) ?? throw new InvalidOperationException("CheckID client is null"));
+                using var reader = new StreamReader(client.OpenRead(Program.ConfigurationUrls.Id) ?? throw new InvalidOperationException("CheckID client is null"));
                 s = reader.ReadToEnd();
                 _log.Debug("ID Received");
             }
@@ -133,19 +133,24 @@ public class CheckId
             _log.Error($"Cannot connect to API: {e.Message}");
         }
 
-        if (!string.IsNullOrEmpty(s))
+        WriteId(s);
+
+        return s;
+    }
+
+    public static void WriteId(string id)
+    {
+        if (!string.IsNullOrEmpty(id))
         {
-            s = s.Replace("\"", "");
+            id = id.Replace("\"", "");
 
             if (!Directory.Exists(ApplicationDetails.InstanceFiles.Path))
             {
                 Directory.CreateDirectory(ApplicationDetails.InstanceFiles.Path);
             }
-            
-            //save returned id
-            File.WriteAllText(IdFile, s);
-        }
 
-        return s;
+            //save returned id
+            File.WriteAllText(ApplicationDetails.InstanceFiles.Id, id);
+        }
     }
 }

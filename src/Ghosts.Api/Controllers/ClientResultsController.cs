@@ -3,8 +3,8 @@
 using System;
 using System.Threading;
 using Ghosts.Api.Infrastructure;
-using Ghosts.Api.Models;
-using Ghosts.Api.Services;
+using ghosts.api.Infrastructure.Models;
+using ghosts.api.Infrastructure.Services;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Messages.MesssagesForServer;
@@ -19,11 +19,12 @@ namespace Ghosts.Api.Controllers
     /// GHOSTS CLIENT CONTROLLER
     /// These endpoints are typically only used by GHOSTS Clients installed and configured to use the GHOSTS C2
     /// </summary>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Produces("application/json")]
     [Route("api/[controller]")]
     public class ClientResultsController : Controller
     {
-        private static readonly Logger log = LogManager.GetCurrentClassLogger();
+        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
         private readonly IBackgroundQueue _service;
 
         public ClientResultsController(IBackgroundQueue service)
@@ -51,7 +52,7 @@ namespace Ghosts.Api.Controllers
             }
             catch (Exception exc)
             {
-                log.Trace(exc);
+                _log.Trace(exc);
                 throw new Exception("Malformed data");
             }
 
@@ -90,9 +91,9 @@ namespace Ghosts.Api.Controllers
                     return StatusCode(StatusCodes.Status401Unauthorized, "Invalid machine request");
             }
 
-            if (!string.IsNullOrEmpty(value.Log))
+            if (value is not null && !string.IsNullOrEmpty(value.Log))
             {
-                log.Trace($"payload received: {value.Log}");
+                _log.Trace($"payload received: {value.Log}");
 
                 _service.Enqueue(
                     new QueueEntry

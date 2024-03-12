@@ -5,20 +5,33 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS dev
 
 COPY Ghosts.Api/. /app/Ghosts.Api
 COPY Ghosts.Domain/. /app/Ghosts.Domain
+COPY Ghosts.Animator/. /app/Ghosts.Animator
 
 WORKDIR /app/Ghosts.Api
 RUN dotnet publish -c Release -o /app/dist
+COPY Ghosts.Api/config /app/dist/config
+
+# copy in binaries
+RUN mkdir -p /app/dist/config/binaries/windows/x64
+RUN mkdir -p /app/dist/config/binaries/windows/x32
+RUN mkdir -p /app/dist/config/binaries/linux
+
+# 7.2 download version binaries from box
+RUN ["wget", "-O", "/app/dist/config/binaries/windows/x64/ghosts-client-x64-v8.0.0.zip",    "https://cmu.box.com/shared/static/kqo5cl7f5f2v22xgud6o2fd26xrrwtpq.zip"]
+RUN ["wget", "-O", "/app/dist/config/binaries/windows/x32/ghosts-client-x32-v8.0.0.zip",    "https://cmu.box.com/shared/static/9oxugvdbiixbs1dtt98s609nbpbmpj7h.zip"]
+RUN ["wget", "-O", "/app/dist/config/binaries/linux/ghosts-client-linux-v8.0.0.zip",        "https://cmu.box.com/shared/static/tdozbmmdyvajubohwtnon1huyfqjuwrz.zip"]
+
 CMD ["dotnet", "run"]
 
 # multi-stage target: prod
-FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS prod
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS prod
 ARG commit
 ENV COMMIT=$commit
 COPY --from=dev /app/dist /app
 WORKDIR /app
 
 LABEL "product"="GHOSTS API"
-LABEL "maintainer"="Dustin Updyke <ddupdyke[@]sei.cmu.edu>"
+LABEL "maintainer"="Dustin Updyke <ddupdyke[-@-]sei.cmu.edu>"
 LABEL "version"="Browse to /swagger"
 
 EXPOSE 5000

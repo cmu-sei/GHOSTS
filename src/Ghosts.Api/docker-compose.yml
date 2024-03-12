@@ -14,8 +14,7 @@ services:
       POSTGRES_USER: ghosts
       POSTGRES_PASSWORD: scotty@1
     volumes:
-      - ./db_data:/var/lib/postgresql/data
-      - ./spectre_data:/tmp
+      - ./_db:/var/lib/postgresql/data
     logging:
       options:
         max-size: '100m'
@@ -30,9 +29,8 @@ services:
     networks:
       - ghosts-network
     restart: always
-
   ghosts-api:
-    image: dustinupdyke/ghosts:7.0.40
+    image: dustinupdyke/ghosts:latest
     container_name: ghosts-api
     depends_on:
       - postgres
@@ -41,7 +39,6 @@ services:
     networks:
       - ghosts-network
     restart: always
-
   grafana:
     image: grafana/grafana
     container_name: ghosts-grafana
@@ -53,4 +50,4 @@ services:
       - ghosts-network
     restart: always
     volumes:
-      - ./g_data:/var/lib/grafana
+      - ./_g:/var/lib/grafana

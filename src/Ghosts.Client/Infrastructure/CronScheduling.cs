@@ -68,7 +68,7 @@ namespace Ghosts.Client.Infrastructure
                     }
                     catch
                     {
-                        _log.Trace("could not schedule cron job, deserialization failed");
+                        _log.Trace("Could not schedule cron job, deserialization failed");
                     }
                 }
             }

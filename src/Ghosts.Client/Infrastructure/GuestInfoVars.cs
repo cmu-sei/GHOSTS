@@ -16,7 +16,7 @@ public static class GuestInfoVars
         //if configured, try to set machine.name based on some vmtools.exe value
         try
         {
-            if (Program.Configuration.IdFormat.Equals("guestinfo", StringComparison.InvariantCultureIgnoreCase))
+            if (Program.Configuration.Id.Format.Equals("guestinfo", StringComparison.InvariantCultureIgnoreCase))
             {
                 var p = new Process
                 {
@@ -24,8 +24,8 @@ public static class GuestInfoVars
                     {
                         UseShellExecute = false,
                         RedirectStandardOutput = true,
-                        FileName = $"{Program.Configuration.VMWareToolsLocation}",
-                        Arguments = $"--cmd \"info-get {Program.Configuration.IdFormatKey}\""
+                        FileName = $"{Program.Configuration.Id.VMWareToolsLocation}",
+                        Arguments = $"--cmd \"info-get {Program.Configuration.Id.FormatKey}\""
                     }
                 };
                     
@@ -36,7 +36,7 @@ public static class GuestInfoVars
 
                 if (!string.IsNullOrEmpty(output))
                 {
-                    var o = Program.Configuration.IdFormatValue;
+                    var o = Program.Configuration.Id.FormatValue;
                     o = o.Replace("$formatkeyvalue$", output);
                     o = o.Replace("$machinename$", machine.Name);
 

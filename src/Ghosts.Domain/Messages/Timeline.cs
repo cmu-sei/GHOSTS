@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using Ghosts.Domain.Code;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
@@ -12,23 +13,23 @@ namespace Ghosts.Domain
     /// </summary>
     public class Timeline
     {
+        public Timeline()
+        {
+            TimeLineHandlers = new List<TimelineHandler>();
+        }
+        
         /// <summary>
         /// Useful for tracking where activity on a client originated
         /// </summary>
         public Guid Id { get; set; }
-        
+
         [JsonConverter(typeof(StringEnumConverter))]
         public enum TimelineStatus
         {
             Run,
             Stop
         }
-
-        public Timeline()
-        {
-            TimeLineHandlers = new List<TimelineHandler>();
-        }
-
+        
         /// <summary>
         /// Run or Stop
         /// </summary>
@@ -76,6 +77,7 @@ namespace Ghosts.Domain
             Cron
         }
 
+        [JsonConverter(typeof(StringEnumConverter))]
         public TimelineScheduleType ScheduleType { get; set; }
         public string Schedule { get; set; }
     }
@@ -83,10 +85,11 @@ namespace Ghosts.Domain
     /// <summary>
     /// handlers map to applications
     /// </summary>
+    [JsonConverter(typeof(StringEnumConverter))]
     public enum HandlerType
     {
-        [Obsolete("Unsupported going forward (as of v6)", false)]
-        BrowserIE = 0,
+        //[Obsolete("Unsupported going forward (as of v6)", false)]
+        //BrowserIE = 0,
         BrowserFirefox = 1,
         BrowserChrome = 2,
         Command = 3,
@@ -103,6 +106,7 @@ namespace Ghosts.Domain
         LightWord = 31,
         LightExcel = 32,
         LightPowerPoint = 33,
+        PowerShell = 39,
         Bash = 40,
         Print = 45,
         Ssh = 100,
@@ -136,12 +140,18 @@ namespace Ghosts.Domain
         /// <summary>
         /// In milliseconds
         /// </summary>
-        public int DelayAfter { get; set; }
+        public object DelayAfter { get; set; }
 
         /// <summary>
         /// In milliseconds
         /// </summary>
-        public int DelayBefore { get; set; }
+        public object DelayBefore { get; set; }
+
+        [JsonIgnore]
+        public int DelayAfterActual => DelayAfter.GetDelay();
+
+        [JsonIgnore]
+        public int DelayBeforeActual => DelayAfter.GetDelay();
     }
 
     /// <summary>
@@ -154,5 +164,17 @@ namespace Ghosts.Domain
         public string CommandArg { get; set; }
         public string TrackableId { get; set; }
         public string Result { get; set; }
+    }
+
+    public class DelayRandom
+    {
+        [JsonProperty("random")]
+        public bool Random { get; set; }
+
+        [JsonProperty("min")]
+        public int Min { get; set; }
+
+        [JsonProperty("max")]
+        public int Max { get; set; }
     }
 }

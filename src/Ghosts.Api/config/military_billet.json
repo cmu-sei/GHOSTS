@@ -1,0 +1,44 @@
+{
+  "Country": "US",
+  "Branches": [
+    {
+      "Name": "USMC",
+      "Billets": [
+        { "Pay": "E-1", "Roles": ["Plt Member"]},
+        { "Pay": "E-2", "Roles": ["Plt Member"]},
+        { "Pay": "E-3", "Roles": ["Plt Member", "Fireteam Leader"]},
+        { "Pay": "E-4", "Roles": ["Fireteam Leader", "Squad Leader"]},
+        { "Pay": "E-5", "Roles": ["Squad Leader", "Platoon Sergeant"]},
+        { "Pay": "E-6", "Roles": ["Platoon Sergeant"]},
+        { "Pay": "E-7", "Roles": ["Company Gunnery Sergeant", "Company First Sergeant"]},
+        { "Pay": "E-8", "Roles": ["Technical Master Sergeant", "Administrative Master Sergeant"]},
+        { "Pay": "E-9", "Roles": []}
+      ]
+    },
+    {
+      "Name": "USN",
+      "Billets": [
+        {"Pay": "E-1", "Roles": ["Plt Corpsman", "General Duty Corpsman"]},
+        {"Pay": "E-2", "Roles": ["Plt Corpsman", "General Duty Corpsman"]},
+        {"Pay": "E-3", "Roles": ["Plt Corpsman", "General Duty Corpsman", "Senior Line Corpsman"]},
+        {"Pay": "E-4", "Roles": ["Plt Corpsman", "Senior Line Corpsman", "Aid Station Commodity"]},
+        {"Pay": "E-5", "Roles": ["Senior Line Corpsman", "Administration PO", "ALPO"]},
+        {"Pay": "E-6", "Roles": ["Administration", "LPO"]},
+        {"Pay": "E-7", "Roles": ["Chief Hospital Corpsman"]},
+        {"Pay": "E-8", "Roles": ["Senior Chief Hospital Corpsman"]}
+      ]
+    },
+    {
+      "Name": "USARMY",
+      "Billets": []
+    },
+    {
+      "Name": "USAF",
+      "Billets": []
+    },
+    {
+      "Name": "USCG",
+      "Billets": []
+    }
+  ]
+}

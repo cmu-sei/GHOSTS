@@ -59,10 +59,10 @@ namespace ghosts.client.linux.handlers
             {
                 WorkingHours.Is(handler);
 
-                if (timelineEvent.DelayBefore > 0)
-                    Thread.Sleep(timelineEvent.DelayBefore);
+                if (timelineEvent.DelayBeforeActual > 0)
+                    Thread.Sleep(timelineEvent.DelayBeforeActual);
 
-                _log.Trace($"Command line: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfter}");
+                _log.Trace($"Command line: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfterActual}");
 
                 switch (timelineEvent.Command)
                 {
@@ -73,7 +73,7 @@ namespace ghosts.client.linux.handlers
                             {
                                 //skipping this command
                                 _log.Trace($"Command choice skipped due to execution probability");
-                                Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, jitterfactor));
+                                Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, jitterfactor));
                                 continue;
                             }
                             var cmd = timelineEvent.CommandArgs[_random.Next(0, timelineEvent.CommandArgs.Count)];
@@ -81,7 +81,7 @@ namespace ghosts.client.linux.handlers
                             {
                                 this.Command(handler.Initial, cmd.ToString());
                             }
-                            Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, jitterfactor));
+                            Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, jitterfactor));
                         }
                     default:
 
@@ -94,8 +94,8 @@ namespace ghosts.client.linux.handlers
                         break;
                 }
 
-                if (timelineEvent.DelayAfter > 0)
-                    Thread.Sleep(timelineEvent.DelayAfter);
+                if (timelineEvent.DelayAfterActual > 0)
+                    Thread.Sleep(timelineEvent.DelayAfterActual);
             }
         }
 

@@ -9,11 +9,11 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Client.ClientSocket;
 using CommandLine;
 using Ghosts.Client.Comms;
 using Ghosts.Client.Infrastructure;
 using Ghosts.Client.TimelineManager;
-using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Models;
 using NLog;
@@ -37,10 +37,12 @@ class Program
 
     internal static List<ThreadJob> ThreadJobs { get; set; }
     internal static ClientConfiguration Configuration { get; set; }
+    internal static ApplicationDetails.ConfigurationUrls ConfigurationUrls { get; set; }
     internal static DateTime LastChecked = DateTime.Now.AddHours(-1);
     internal static Options OptionFlags;
     internal static bool IsDebug;
     internal static IScheduler Scheduler;
+    internal static BackgroundTaskQueue Queue;
 
     public static CheckId CheckId { get; set; }
 
@@ -83,14 +85,14 @@ class Program
     }
 
     [STAThread]
-    static void Main(string[] args)
+    static async Task Main(string[] args)
     {
         MinimizeFootprint();
         MinimizeMemory();
             
         try
         {
-            Run(args);
+            await Run(args);
         }
         catch (Exception e)
         {
@@ -105,7 +107,7 @@ class Program
         }
     }
 
-    private static void Run(string[] args)
+    private static async Task Run(string[] args)
     {
         // ignore all certs
         ServicePointManager.ServerCertificateValidationCallback += (_, _, _, _) => true;
@@ -125,6 +127,7 @@ class Program
         try
         {
             Configuration = ClientConfigurationLoader.Config;
+            ConfigurationUrls = new ApplicationDetails.ConfigurationUrls(Configuration.ApiRootUrl);
         }
         catch (Exception e)
         {
@@ -135,7 +138,22 @@ class Program
             Console.ReadLine();
             return;
         }
-        
+
+        if (Configuration.Sockets.IsEnabled)
+        {
+            _log.Trace("Sockets enabled. Connecting...");
+            var c = new Comms.ClientSocket.Connection(Configuration.Sockets);
+
+            async void Start()
+            {
+                await c.Run();
+            }
+
+            var connectionThread = new Thread(Start) { IsBackground = true };
+            connectionThread.Start();
+            Queue = c.Queue;
+        }
+
         Program.CheckId = new CheckId(true);
 
         DebugManager.Evaluate();
@@ -153,8 +171,10 @@ class Program
 
         if (Configuration.ResourceControl == null)
         {
-            Configuration.ResourceControl = new ClientConfiguration.ResourceControlSettings();
-            Configuration.ResourceControl.ManageProcesses = true;
+            Configuration.ResourceControl = new ClientConfiguration.ResourceControlSettings
+            {
+                ManageProcesses = true
+            };
         }
 
         _log.Trace($"Configuration.ResourceControl.ManageProcesses = {Configuration.ResourceControl.ManageProcesses}");
@@ -170,7 +190,7 @@ class Program
         // Setup Quartz Scheduler
         var factory = new StdSchedulerFactory();
         Scheduler = factory.GetScheduler().Result;
-        Scheduler.Start();
+        await Scheduler.Start();
         
         //add file watch to handle ad hoc commands
         ListenerManager.Run();

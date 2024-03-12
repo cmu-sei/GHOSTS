@@ -1,0 +1,94 @@
+﻿{
+    "TimeLineHandlers": [
+        {
+            "HandlerType": "Outlook",
+            "Initial": "",
+            "UtcTimeOn": "00:00:00",
+            "UtcTimeOff": "24:00:00",
+            "Loop": "True",
+            "TimeLineEvents": [
+                {
+                    "Command": "create",
+                    "CommandArgs": [
+                        "CurrentUser",
+                        "Random|Other:string ToEmailAddress - comma separate multiples",
+                        "Random|Other:string CcEmailAddress - comma separate multiples",
+                        "Random|Other:string BccEmailAddress - comma separate multiples",
+                        "Random|Other:string Subject",
+                        "Random|Other:string Body",
+                        "PlainText|RTF|HTML enum BodyType",
+                        "string Attachments - comma separate multiples"
+                    ],
+                    "DelayAfter": 900000,
+                    "DelayBefore": 0
+                },
+              {
+                "Command": "reply",
+                "CommandArgs": [
+                  "CurrentUser",
+                  "All - reply to all",
+                  "All",
+                  "All",
+                  "Parent - format is 'RE: <original message/>'",
+                  "Random+Parent - format is reply then original message",
+                  "Parent - format of original message",
+                  ""
+                ],
+                "DelayAfter": 900000,
+                "DelayBefore": 0
+              },
+              {
+                "Command": "clickrandomlink",
+                "CommandArgs": [],
+                "DelayAfter": 900000,
+                "DelayBefore": 0
+              }
+            ]
+        },
+        {
+            "HandlerType": "Outlook",
+            "Initial": "",
+            "UtcTimeOn": "00:00:00",
+            "UtcTimeOff": "24:00:00",
+            "Loop": "True",
+            "TimeLineEvents": [
+                {
+                    "Command": "create",
+                    "CommandArgs": [
+                        "CurrentUser",
+                        "random",
+                        "random",
+                        "random",
+                        "Random",
+                        "Random",
+                        "PlainText",
+                        ""
+                    ],
+                    "DelayAfter": 900000,
+                    "DelayBefore": 0
+                },
+              {
+                "Command": "reply",
+                "CommandArgs": [
+                  "CurrentUser",
+                  "All",
+                  "All",
+                  "All",
+                  "Parent",
+                  "Parent+Random",
+                  "Parent",
+                  ""
+                ],
+                "DelayAfter": 900000,
+                "DelayBefore": 0
+              },
+              {
+                "Command": "clickrandomlink",
+                "CommandArgs": [],
+                "DelayAfter": 900000,
+                "DelayBefore": 0
+              }
+            ]
+        }
+    ]
+}

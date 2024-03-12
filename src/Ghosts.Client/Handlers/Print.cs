@@ -42,18 +42,18 @@ public class Print : BaseHandler
         {
             WorkingHours.Is(handler);
 
-            if (timelineEvent.DelayBefore > 0)
+            if (timelineEvent.DelayBeforeActual > 0)
             {
-                Thread.Sleep(timelineEvent.DelayBefore);
+                Thread.Sleep(timelineEvent.DelayBeforeActual);
             }
 
-            Log.Trace($"Print Job: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfter}");
+            Log.Trace($"Print Job: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfterActual}");
 
             Command(handler, timelineEvent, timelineEvent.Command);
 
-            if (timelineEvent.DelayAfter > 0)
+            if (timelineEvent.DelayAfterActual > 0)
             {
-                Thread.Sleep(timelineEvent.DelayAfter);
+                Thread.Sleep(timelineEvent.DelayAfterActual);
             }
         }
     }

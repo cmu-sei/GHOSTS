@@ -1,0 +1,10 @@
+{
+  "id": "{id}",
+  "machineId": "{machineId}",
+  "type": 10,
+  "username": "{user}",
+  "activeUtc": "{now}",
+  "createdUtc": "{now}",
+  "status": 0,
+  "update": "{\"id\":\"{id}\",\"timeLineHandlers\":[{\"HandlerType\":\"BrowserFirefox\",\"Initial\":\"about:blank\",\"UtcTimeOn\":\"00:00:00\",\"UtcTimeOff\":\"24.00:00:00\",\"HandlerArgs\":{},\"Loop\":false,\"TimeLineEvents\":[{\"Command\":\"random\",\"CommandArgs\":[{\"Uri\":\"{url}\",\"Method\":\"POST\",\"FormValues\":{payload}\"}}],\"DelayAfter\":60000,\"DelayBefore\":0}]}]}"
+}

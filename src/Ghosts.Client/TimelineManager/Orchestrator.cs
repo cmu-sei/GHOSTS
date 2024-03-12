@@ -43,7 +43,7 @@ namespace Ghosts.Client.TimelineManager
         {
             try
             {
-                _defaultTimeline = TimelineBuilder.GetLocalTimeline();
+                _defaultTimeline = TimelineBuilder.GetTimeline();
 
                 if (_isSafetyNetRunning != true) //checking if safetynet has already been started
                 {
@@ -494,6 +494,13 @@ namespace Ghosts.Client.TimelineManager
                         t = new Thread(() =>
                         {
                             _ = new LightHandlers.LightExcelHandler(handler);
+                        });
+                        break;
+                        break;
+                    case HandlerType.PowerShell:
+                        t = new Thread(() =>
+                        {
+                            _ = new PowerShell(handler);
                         });
                         break;
                 }

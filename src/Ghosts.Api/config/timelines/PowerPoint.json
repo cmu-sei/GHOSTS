@@ -1,0 +1,25 @@
+{
+    "TimeLineHandlers": [
+      {
+        "HandlerType": "PowerPoint",
+        "Initial": "",
+        "UtcTimeOn": "00:00:00",
+        "UtcTimeOff": "24:00:00",
+        "HandlerArgs": {
+          "workingset": {
+            "max": 20,
+            "max-age-in-hours": 72
+          }
+        },
+        "Loop": true,
+        "TimeLineEvents": [
+          {
+            "Command": "create",
+            "CommandArgs": [ "%homedrive%%homepath%\\Documents", "pdf", "pdf-vary-filenames", "save-array:['c:\\tmp','c:\\tmp\\path2','c:\\tmp\\path3']" ],
+            "DelayAfter": 900000,
+            "DelayBefore": 0
+          }
+        ]
+      }
+    ]
+}
