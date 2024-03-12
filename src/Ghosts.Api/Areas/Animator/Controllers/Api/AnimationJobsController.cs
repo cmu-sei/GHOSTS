@@ -14,9 +14,14 @@ namespace ghosts.api.Areas.Animator.Controllers.Api;
 [Route("animations")]
 [Controller]
 [Produces("application/json")]
-public class AnimationJobsController(IServiceProvider serviceProvider) : Controller
+public class AnimationJobsController : Controller
 {
-    private readonly AnimationsManager _animationsManager = serviceProvider.GetRequiredService<IManageableHostedService>() as AnimationsManager;
+    private readonly AnimationsManager _animationsManager;
+
+    public AnimationJobsController(IServiceProvider serviceProvider)
+    {
+        _animationsManager = serviceProvider.GetRequiredService<IManageableHostedService>() as AnimationsManager;
+    }
 
     [SwaggerOperation("animationsStart")]
     [HttpGet("start")]

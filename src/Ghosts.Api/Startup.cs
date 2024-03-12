@@ -38,8 +38,6 @@ namespace Ghosts.Api
 
         public void ConfigureServices(IServiceCollection services)
         {
-            NpgsqlConnection.GlobalTypeMapper.EnableDynamicJson(); // need this for NPCs being in a json postgres field
-
             //services.AddDbContext<ApplicationDbContext>(opt => opt.UseInMemoryDatabase("ghosts"));
             services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
             

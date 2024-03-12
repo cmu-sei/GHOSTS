@@ -10,10 +10,16 @@ using NLog;
 namespace Ghosts.Api.Controllers
 {
     [Route("/")]
-    public class HomeController(ApplicationDbContext context) : Controller
+    public class HomeController : Controller
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        
+        private readonly ApplicationDbContext _context;
+
+        public HomeController(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
         [HttpGet]
         [ApiExplorerSettings(IgnoreApi = true)]
         public IActionResult Index()
@@ -40,9 +46,9 @@ namespace Ghosts.Api.Controllers
 
             try
             {
-                s.Machines = context.Machines.Count();
-                s.Groups = context.Groups.Count();
-                s.Npcs = context.Npcs.Count();
+                s.Machines = _context.Machines.Count();
+                s.Groups = _context.Groups.Count();
+                s.Npcs = _context.Npcs.Count();
             }
             catch (Exception e)
             {
