@@ -4,7 +4,19 @@ GHOSTS simulates what anyone might do at a computer, creating documents, browsin
 
 GHOSTS has many use cases in cyber training and exercises, most notably for bringing non-player characters (NPCs) to life, but GHOSTS can be used for many other purposes where realistic activity on a computer is needed as well.
 
-**Version 8 is under heavy development and testing.** It has absorbed the other modules of the GHOSTS framework, [ANIMATOR (now archived)](https://github.com/cmu-sei/GHOSTS-ANIMATOR) and [SPECTRE (now archived)](https://github.com/cmu-sei/GHOSTS-SPECTRE). This was done in order to greatly simplify installation, configuration, and the administration of a GHOSTS instance, but also to bring further capability to the core agents by more tightly combining information segregated into separate databases and systems until now.
+---
+
+**Version 8 is here (with breaking changes!).** It has absorbed the other modules of the GHOSTS framework, [ANIMATOR (now archived)](https://github.com/cmu-sei/GHOSTS-ANIMATOR) and [SPECTRE (now archived)](https://github.com/cmu-sei/GHOSTS-SPECTRE). This was done in order to greatly simplify installation, configuration, and the administration of a GHOSTS instance, but also to bring further capability to the core agents by more tightly combining information segregated into separate databases and systems until now.
+
+The breaking changes are:
+
+1. Configuration file changes
+2. Database changes
+3. API endpoint changes
+
+Sorry, but there is no upgrade path from previous versions — install a fresh instance to get rolling with V8.
+
+---
 
 There is a [short demonstration video available on YouTube](https://www.youtube.com/watch?v=EkwK-cqwjjA) (3:03).
 
