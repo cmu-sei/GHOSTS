@@ -5,12 +5,10 @@ using System.Collections.Generic;
 using System.DirectoryServices.AccountManagement;
 using System.IO;
 using System.Linq;
-using System.Security.Principal;
-using System.Threading;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
+using Newtonsoft.Json;
 using NLog;
-// ReSharper disable InconsistentNaming
 
 namespace Ghosts.Client.Infrastructure.Email;
 
@@ -56,6 +54,8 @@ public class EmailConfiguration
 
     public EmailConfiguration(IList<object> args)
     {
+        _log.Trace($"Building email configuration from timeline {JsonConvert.SerializeObject(args)}...");
+
         var settings = Program.Configuration.Email;
         var emailConfigArray = args;
         if (emailConfigArray.Count != 8)
@@ -71,7 +71,7 @@ public class EmailConfiguration
         this.Attachments = new List<string>();
 
         this.From = emailConfigArray[0].ToString();
-            
+
         // just use the first account we find already registered in outlook
         //if (this.From.Equals("CurrentUser", StringComparison.CurrentCultureIgnoreCase))
         //{
@@ -81,7 +81,7 @@ public class EmailConfiguration
         this.To = ParseEmail(emailConfigArray[1].ToString(), settings.RecipientsToMin, settings.RecipientsToMax);
         this.Cc = ParseEmail(emailConfigArray[2].ToString(), settings.RecipientsCcMin, settings.RecipientsCcMax);
         this.Bcc = ParseEmail(emailConfigArray[3].ToString(), settings.RecipientsBccMin, settings.RecipientsBccMax);
-            
+
         var emailContent = new EmailContentManager();
 
         this.Subject = emailConfigArray[4].ToString();
@@ -122,6 +122,8 @@ public class EmailConfiguration
                     _log.Debug($"Can't add attachment {o} - file was not found");
             }
         }
+
+        _log.Trace($"Built email configuration from timeline {JsonConvert.SerializeObject(this)}...");
     }
 
     private string GetFooter()
@@ -149,7 +151,7 @@ public class EmailConfiguration
         {
             _log.Trace($"Can't get current userprinciple for the email footer, skipping... {e}");
         }
-        
+
         var f = File.ReadAllText(ApplicationDetails.ConfigurationFiles.EmailsFooter);
         f = f.Replace("{{from}}", this.From);
         f = f.Replace("{{now}}", DateTime.Now.ToLongDateString());
@@ -171,10 +173,10 @@ public class EmailConfiguration
     {
         _log.Trace($"Parsing email - raw {raw} min {min} max {max}");
         var list = new List<string>();
-        if (string.IsNullOrEmpty(raw)) return list;
+        if (string.IsNullOrEmpty(raw)) raw = "";
 
         var rnd = new Random();
-        var numberOfRecipients = rnd.Next(min, max);
+        var numberOfRecipients = rnd.Next(min, max + 1);
 
         if (numberOfRecipients < 1)
         {
@@ -184,37 +186,19 @@ public class EmailConfiguration
 
         if (raw.StartsWith("random", StringComparison.InvariantCultureIgnoreCase))
         {
-            var o = raw.Split(Convert.ToChar(":"));
-            _log.Trace($"Randomizing email addresses o.boundary: {o.GetUpperBound(0)}...");
+            //add domain
+            var emails = EmailListManager.GetDomainList();
+            _log.Trace($"Building domain email list: {emails.Count}...");
 
-            if (o.GetUpperBound(0) > 0) //supplied list
-            {
-                var l = o[1];
-                var emails = l.Split(Convert.ToChar(","));
+            for (var i = 0; i <= numberOfRecipients; i++)
+                list.Add(emails.PickRandom());
 
-                _log.Trace($"l: {l} and then split {emails.Length}...");
-
-                for (var i = 0; i < numberOfRecipients; i++)
-                    list.Add(emails.PickRandom());
-            }
-            else //build list
-            {
-                //add domain
-                var emails = EmailListManager.GetDomainList();
-                _log.Trace($"Building domain email list: {emails.Count}...");
-
-                for (var i = 0; i <= numberOfRecipients; i++)
-                    list.Add(emails.PickRandom());
-
-                //add outside
-                var x = rnd.Next(Program.Configuration.Email.RecipientsOutsideMin, Program.Configuration.Email.RecipientsOutsideMax + 1);
-                if (x < 1) return list;
-                    
-                var outsideEmails = EmailListManager.GetOutsideList();
-                _log.Trace($"Building outside email list: {outsideEmails.Count}...");
-                for (var i = 0; i <= x; i++)
-                    list.Add(outsideEmails.PickRandom());
-            }
+            //add outside
+            var numberOfOutsideRecipients = rnd.Next(Program.Configuration.Email.RecipientsOutsideMin, Program.Configuration.Email.RecipientsOutsideMax + 1);
+            var outsideEmails = EmailListManager.GetOutsideList();
+            _log.Trace($"Building outside email list: {outsideEmails.Count}...");
+            for (var i = 0; i <= numberOfOutsideRecipients; i++)
+                list.Add(outsideEmails.PickRandom());
         }
         else
         {
@@ -222,6 +206,8 @@ public class EmailConfiguration
             _log.Trace($"Building non-random list: {a.Length}...");
             list.AddRange(a.Where(IsValidEmail));
         }
+
+        _log.Trace($"List generated: {list.Count}...");
         return list;
     }
 

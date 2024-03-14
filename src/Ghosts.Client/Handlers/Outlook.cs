@@ -15,6 +15,7 @@ using Ghosts.Domain.Code.Helpers;
 using Exception = System.Exception;
 using MAPIFolder = Microsoft.Office.Interop.Outlook.MAPIFolder;
 using ReportItem = Ghosts.Domain.Code.ReportItem;
+using Newtonsoft.Json;
 
 namespace Ghosts.Client.Handlers;
 
@@ -398,7 +399,7 @@ public class Outlook : BaseHandler
             if (emailConfig.Attachments.Count > 0)
             {
                 //Add attachments
-                foreach (string path in emailConfig.Attachments)
+                foreach (var path in emailConfig.Attachments)
                 {
                     mailItem.Attachments.Add(path);
                     Log.Trace($"Adding attachment from: {path}");
@@ -441,18 +442,25 @@ public class Outlook : BaseHandler
                     mailItem.SendUsingAccount = acc;
                 }
             }
-                
+
+            if (config.SaveToOutbox)
+            {
+                Log.Trace("Saving mailItem to outbox...");
+                mailItem.Move(_folderOutbox);
+                mailItem.Save();
+            }
+
             Log.Trace("Attempting new Redemtion SafeMailItem...");
             var rdoMail = new SafeMailItem
             {
                 Item = mailItem
             };
 
-            //Parse To
-            if (emailConfig.To.Count > 0)
+            Log.Trace($"Email configuration from timeline is currently: {JsonConvert.SerializeObject(emailConfig)}...");
+            Log.Trace($"Attempting add of To addresses...");
+            if (emailConfig.To.Any())
             {
-                var list = emailConfig.To.Distinct();
-                foreach (var a in list)
+                foreach (var a in emailConfig.To)
                 {
                     var r = rdoMail.Recipients.AddEx(a.Trim());
                     r.Resolve();
@@ -464,48 +472,33 @@ public class Outlook : BaseHandler
                 throw new Exception("Must specify to-address");
             }
 
-            //Parse Cc
-            if (emailConfig.Cc.Count > 0)
+            foreach (var a in emailConfig.Cc)
             {
-                var list = emailConfig.Cc.Distinct();
-                foreach (var a in list)
+                var r = rdoMail.Recipients.AddEx(a.Trim());
+                r.Resolve();
+                if (r.Resolved)
                 {
-                    var r = rdoMail.Recipients.AddEx(a.Trim());
-                    r.Resolve();
-                    if (r.Resolved)
-                    {
-                        r.Type = 2; //CC
-                    }
-
-                    Log.Trace($"RdoMail CC {a.Trim()}");
+                    r.Type = 2; //CC
                 }
-            }
 
-            if (emailConfig.Bcc.Count > 0)
+                Log.Trace($"RdoMail CC {a.Trim()}");
+            }
+        
+            foreach (var a in emailConfig.Bcc)
             {
-                var list = emailConfig.Bcc.Distinct();
-                foreach (var a in list)
+                var r = rdoMail.Recipients.AddEx(a.Trim());
+                r.Resolve();
+                if (r.Resolved)
                 {
-                    var r = rdoMail.Recipients.AddEx(a.Trim());
-                    r.Resolve();
-                    if (r.Resolved)
-                    {
-                        r.Type = 3; //BCC
-                    }
-
-                    Log.Trace($"RdoMail BCC {a.Trim()}");
+                    r.Type = 3; //BCC
                 }
+
+                Log.Trace($"RdoMail BCC {a.Trim()}");
             }
+        
                 
             rdoMail.Recipients.ResolveAll();
-
-            if (config.SaveToOutbox)
-            {
-                Log.Trace("Saving mailItem to outbox...");
-                mailItem.Move(_folderOutbox);
-                mailItem.Save();
-            }
-
+            
             Log.Trace("Attempting to send Redemtion SafeMailItem...");
             rdoMail.Send();
 
