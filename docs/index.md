@@ -1,6 +1,6 @@
 # The GHOSTS NPC Framework
 
-Developed by Carnegie Mellon University's Software Engineering Institute (SEI), The GHOSTS Framework is an open-source (OSS) software framework that enables creating, deploying, and orchestrating complex non-player character (NPC) activity within training, exercise, simulation, and educational environments. Within GHOSTS there are several systems and applications, all of which are modular and extendable to fit a wide array of use cases and needs.
+Developed by Carnegie Mellon University's Software Engineering Institute (SEI), The GHOSTS Framework is an open-source (OSS) software framework that enables creating, deploying, and orchestrating complex non-player character (NPC) activity within training, exercise, simulation, and educational environments.
 
 If you've never seen GHOSTS in action, watch this quick three-minute introductory video on YouTube:
 
@@ -12,9 +12,9 @@ This is the [GHOSTS documentation site](https://cmu-sei.github.io/GHOSTS/) for t
 
 ## :material-cog: Cyber Ranges and Crucible
 
-GHOSTS is typically run on machines within a virtualized network, often referred to as "the range". This network can be as simple or as complex as required for training and exercise purposes.
+GHOSTS is typically run on machines within a virtualized network, often referred to as "the range". This network can be as simple or as complex as required for training, exercise, modeling, or simulation purposes.
 
-CERT's Cyber Workforce Development (CWD) team has a great deal of experience in building cyber ranges for training and exercise, captured in our technical report :material-file-document:[_Foundation of Cyber Ranges_](https://resources.sei.cmu.edu/library/asset-view.cfm?assetid=734198){:target="_blank"}. The report details the design considerations and execution plan for building high-fidelity, realistic virtual cyber ranges that deliver maximum training and exercise value for cyberwarfare participants.
+CERT's Cyber Mission Readiness (CMR) team has a great deal of experience in building cyber ranges for training, exercise, and simulation — captured in our technical report :material-file-document:[_Foundation of Cyber Ranges_](https://resources.sei.cmu.edu/library/asset-view.cfm?assetid=734198){:target="_blank"}. The report details the design considerations and execution plan for building high-fidelity, realistic virtual cyber ranges that deliver maximum training and exercise value for cyberwarfare participants.
 
 ???+ tip "Run GHOSTS on the Crucible Framework"
     ![Crucible Logo](assets/img/crucible-icon-c-alpha.svg)
@@ -26,7 +26,7 @@ CERT's Cyber Workforce Development (CWD) team has a great deal of experience in 
 
 GHOSTS evolved in our quest to create more realistic NPCs within cyberwarfare training and exercise. In 2018, we outlined our thoughts in a technical report entitled [_GHOSTS in the Machine: A Framework for Cyber-Warfare Exercise NPC Simulation_](https://resources.sei.cmu.edu/library/asset-view.cfm?assetid=534316){:target="_blank"}.[^1] In that report, we outline how the GHOSTS framework accomplishes the creation of simulations in which NPCs realistically represent a vast array of possible encounters and outcomes. We have continued to follow our initial path since. The litmus has always been that if we looked over someone's shoulder while they were using a computer, that is what GHOSTS should look like.[^2]
 
-Since then the framework has expanded to include tools that [serve content in simulated environments](content/index.md), [create NPCs with details about them that we can programmatically use to drive their decision-making](animator/index.md), and [machine learning agent preference engines](spectre/index.md). If it is related to replicating human behavior within a cyber training or exercise scenario, we are interested in how GHOSTS can contribute within that space.
+Since then the framework has expanded to include tools that [serve content in simulated environments](content/index.md), [create NPCs with details about them that we can programmatically use to drive their decision-making](animator/index.md), and [machine learning agent preference engines](spectre/index.md). If it is related to replicating human behavior in terms of computing, we are interested in how GHOSTS can contribute within that space. Although these efforts listed here began separately, they are now all part of the GHOSTS framework proper.
 
 ## :material-bug: Reporting Bugs
 
