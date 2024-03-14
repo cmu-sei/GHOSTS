@@ -65,7 +65,7 @@
     "SetAccountFromConfig": false,
     "SetAccountFromLocal": false,
     "SetForcedSendReceive": true,
-    "SaveToOutbox": false,
+    "SaveToOutbox": true,
     "EmailDomainSearchString": "Get-ADUser -filter * -searchbase \"CN=USERS,DC=JRSS,DC=GOV\" -properties UserPrincipalName | select -expand UserPrincipalName"
   },
   "Listener": {
