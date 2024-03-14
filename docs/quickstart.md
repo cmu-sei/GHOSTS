@@ -20,7 +20,7 @@ Easy installation requires:
     docker-compose up -d
     ```
 
-4. Once the command completes, if you open [http://localhost:5000/api/home](http://localhost:5000/api/home){:target="_blank"} in your browser, you should see the initial API page outlining the version of the install, and a few test machine entries. If this page renders, your API is up, running, and available. If the page does not render, follow the advice in the [API troubleshooting section](core/api.md#troubleshooting).
+4. Once the command completes, if you open [http://localhost:5000/](http://localhost:5000/){:target="_blank"} in your browser, you should see the initial API page outlining the version of the install, and a few test machine entries. If this page renders, your API is up, running, and available. If the page does not render, follow the advice in the [API troubleshooting section](core/api.md#troubleshooting).
 
 [You will still need to set up Grafana](core/api.md#configuring-grafana). Beware that you must often `chown g_data`, which is the host location for the Graphana container as listed in the docker-compose file. Otherwise, the Grafana container will just continually restart in error due to insufficient permissions (detailed in [API troubleshooting](core/api.md#troubleshooting)).
 
@@ -40,7 +40,7 @@ The GHOSTS client should typically be run as a specific user, and not as an admi
 
 ### :material-linux: Linux Client
 
-1. Your client Linux machine will need to have the latest [Microsoft dotnetcore runtime](https://dotnet.microsoft.com/download){:target="_blank"} installed. Again, note that you only need the runtime installed, not the full SDK.
+1. Your client Linux machine will need to have version 6 of the [Microsoft dotnetcore runtime](https://dotnet.microsoft.com/download){:target="_blank"} installed. Again, note that you only need the runtime installed, not the full SDK.
 2. [Download the latest Linux client](https://github.com/cmu-sei/GHOSTS/releases/latest){:target="_blank"} zip file. Unzip to a folder such as ~/ghosts for the user that you want GHOSTS to run as.
 
 Note that on Linux machines running the client as root and utilizing web browsing may result in failures due to Gecko/Chromedriver display issues.

@@ -1,4 +1,4 @@
-# GHOSTS Core Client Overview
+# GHOSTS Client Overview
 
 ???+ info "GHOSTS Source Code"
     The [GHOSTS Source Code Repository](https://github.com/cmu-sei/GHOSTS) is hosted on GitHub.
@@ -69,28 +69,58 @@ Beyond this initial step of verifying that the client will run, there are two fi
 
 In this file, often all we need to change are the URLs for the API, IdUrl, ClientResultsUrl, ClientUpdatesUrl, and the like. Change the hostname to your installed API location, and GHOSTS should check in as expected.
 
-```javascript
+```json
 {
-    "IdEnabled": true,                                                      //enabled in order to command and control from api (C2) server
-    "IdUrl": "http://yourapiurl.com/api/clientid",                          //url for API endpoint to get clientid
-    "ClientResultsEnabled": true,                                           //enabled to report results to C2
-    "ClientResultsUrl": "http://yourapiurl.com/api/clientresults",          //url for API endpoint to report results
-    "ClientResultsCycleSleep": 90,                                          //report results every x ms
-    "ClientUpdatesEnabled": true,                                           //enabled to get updates from C2
-    "ClientUpdatesUrl": "http://yourapiurl.com/api/clientupdates",          //url for API endpoint to get updates
-    "ClientUpdatesCycleSleep": 90,                                          //check for updates every x ms
-    "Survey": {                                                             //survey is a local report of processes running, etc.
-        "IsEnabled": true,                                                  //on/off
-        "Frequency": "once",                                                //how often to survey
-        "MaxAgeInHours": 168,                                               //how long to wait until new survey
-        "OutputFormat": "indent"                                            //compact/fancy(indent)
-    },
-    "HealthIsEnabled": true,                                                //enable local health checks
-    "HandlersIsEnabled": true,                                              //enable local timeline activity
-    "ChromeExtensions": "",                                                 //comma separated local extensions (used for injects in the past)
-    "FirefoxInstallLocation": "",                                           //geckodriver needs this for non-standard installs (is pesky)
-    "FirefoxMajorVersionMinimum": 48,                                       //geckodriver is picky about versions
-    "OfficeDocsMaxAgeInHours": 6,                                           //cleanup kills docs in the documents folder older than this setting
+  "ApiRootUrl": "http://localhost:5000/api",    // there is now just one api url to change in order to point where you've hosted your api
+  "Sockets": {                                  // this is the new websockets configuration, turn it off if you're not using it
+    "IsEnabled": true,
+    "Heartbeat": 50000
+  },
+  "Id": {
+    "IsEnabled": true,
+    "Format": "guestlocal",
+    "FormatKey": "guestinfo.id",
+    "FormatValue": "$formatkeyvalue$-$machinename$",
+    "VMWareToolsLocation": "C:\\progra~1\\VMware\\VMware Tools\\vmtoolsd.exe"
+  },
+  "AllowMultipleInstances": false,
+  "EncodeHeaders": true,
+  "ClientResults": {
+    "IsEnabled": true,
+    "IsSecure": false,
+    "CycleSleep": 300000
+  },
+  "ClientUpdates": {
+    "IsEnabled": true,
+    "CycleSleep": 300000
+  },
+  "Survey": {
+    "IsEnabled": false,
+    "IsSecure": false,
+    "Frequency": "once",
+    "CycleSleepMinutes": 5,
+    "OutputFormat": "indent"
+  },
+  "Timeline": {
+    "Location": "config/timeline.json"
+  },
+  "Content": {
+    "EmailsMax": 20,
+    "EmailContent": "",
+    "EmailReply": "",
+    "EmailDomain": "",
+    "EmailOutside": "",
+    "BlogContent": "",
+    "BlogReply": "",
+    "FileNames": "",
+    "Dictionary": ""
+  },
+  "ResourceControl": {
+    "ManageProcesses": true
+  },
+  "HealthIsEnabled": false,
+  "HandlersIsEnabled": true,
+  "DisableStartup": false
 }
 ```
 
@@ -104,7 +134,7 @@ The primary item is the HandlerType. This tells GHOSTS to run a command (Command
 - UtcTimeOn | UtcTimeOff: "00:00:00": "24:00:00" to not shut off. Otherwise, enter an on and an off time to simulate things such as office hours of 9-5, etc. There are 30 minutes of jitter plus or minus from the time entered.
 - Loop: Set this to true to continue to execute this same command on a loop, or false to execute something just one time.
 
-```javascript
+```json
 {
    "HandlerType": "Command",
    "Initial": "",
@@ -137,7 +167,7 @@ Chrome
 
 We have to pass the browser window an initial value. If we don't want it to go anywhere at start, we could pass about:blank, otherwise we'd pass a url. These can be http or https.
 
-```javascript
+```json
 {
    "HandlerType": "BrowserChrome",
    "Initial": "http://google.com",
@@ -160,7 +190,7 @@ We have to pass the browser window an initial value. If we don't want it to go a
 
 Excel, PowerPoint, Word
 
-```javascript
+```json
 {
    "HandlerType": "Word",
    "Initial": "",
@@ -182,7 +212,7 @@ Excel, PowerPoint, Word
 
 For specific Timeline Events where the outcome is needed to be tracked, like for example, a client machine spawned inject, use a Trackable (via TrackableId in the following example):
 
-```javascript
+```json
 {
     "TimeLineHandlers": [
         {
