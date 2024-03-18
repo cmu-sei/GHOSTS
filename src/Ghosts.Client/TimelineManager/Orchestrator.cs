@@ -14,6 +14,7 @@ using System.Threading;
 using System.Security.Permissions;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Models;
+using Microsoft.VisualBasic.Logging;
 using Quartz;
 // ReSharper disable RedundantAssignment
 
@@ -442,7 +443,14 @@ namespace Ghosts.Client.TimelineManager
                         _log.Trace("Launching thread for outlook - note we're not checking if outlook installed, just going for it");
                         t = new Thread(() =>
                         {
-                            _ = new Outlook(handler);
+                            try
+                            {
+                                _ = new Outlook(handler);
+                            }
+                            catch (Exception e)
+                            {
+                                _log.Error("Outlook thread error:", e);
+                            }
                         });
                         break;
                     case HandlerType.Outlookv2:
