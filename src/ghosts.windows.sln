@@ -1,15 +1,12 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28010.2036
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33414.496
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ghosts.Domain", "Ghosts.Domain\Ghosts.Domain.csproj", "{2667ECE7-34FA-456A-8877-BB9EEB40E9F7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ghosts.Client", "Ghosts.Client\Ghosts.Client.csproj", "{9B185127-C1A8-479C-B48F-3BC51B97023D}"
 EndProject
 Global
-	GlobalSection(Performance) = preSolution
-		HasPerformanceSessions = true
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|x64 = Debug|x64
@@ -19,8 +16,8 @@ Global
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{2667ECE7-34FA-456A-8877-BB9EEB40E9F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2667ECE7-34FA-456A-8877-BB9EEB40E9F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2667ECE7-34FA-456A-8877-BB9EEB40E9F7}.Debug|x64.ActiveCfg = Debug|x64
-		{2667ECE7-34FA-456A-8877-BB9EEB40E9F7}.Debug|x64.Build.0 = Debug|x64
+		{2667ECE7-34FA-456A-8877-BB9EEB40E9F7}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{2667ECE7-34FA-456A-8877-BB9EEB40E9F7}.Debug|x64.Build.0 = Debug|Any CPU
 		{2667ECE7-34FA-456A-8877-BB9EEB40E9F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2667ECE7-34FA-456A-8877-BB9EEB40E9F7}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2667ECE7-34FA-456A-8877-BB9EEB40E9F7}.Release|x64.ActiveCfg = Release|x64
@@ -39,6 +36,9 @@ Global
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {134981C4-1105-4A7B-AAC3-84157DC1B456}
+	EndGlobalSection
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
 	EndGlobalSection
 	GlobalSection(Performance) = preSolution
 		HasPerformanceSessions = true

@@ -451,10 +451,19 @@ public class Outlook : BaseHandler
             }
 
             Log.Trace("Attempting new Redemtion SafeMailItem...");
-            var rdoMail = new SafeMailItem
+
+            SafeMailItem rdoMail = new SafeMailItem();
+
+            Log.Trace($"Redemtion SafeMailItem {rdoMail.Version} instance created, now loading the outlook email into the safemailitem...");
+
+            try
             {
-                Item = mailItem
-            };
+                rdoMail.Item = mailItem;
+            }
+            catch (Exception e)
+            {
+                Log.Error(e);
+            }
 
             Log.Trace($"Email configuration from timeline is currently: {JsonConvert.SerializeObject(emailConfig)}...");
             Log.Trace($"Attempting add of To addresses...");
