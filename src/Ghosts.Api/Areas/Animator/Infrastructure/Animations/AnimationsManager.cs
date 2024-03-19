@@ -11,6 +11,7 @@ using ghosts.api.Areas.Animator.Hubs;
 using ghosts.api.Areas.Animator.Infrastructure.Animations.AnimationDefinitions;
 using Ghosts.Api.Infrastructure;
 using Ghosts.Api.Infrastructure.Data;
+using ghosts.api.Infrastructure.Extensions;
 using ghosts.api.Infrastructure.Services;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,6 +31,8 @@ public interface IManageableHostedService : IHostedService
     Task StopJob(string jobId);
 
     IEnumerable<JobInfo> GetRunningJobs();
+
+    string GetOutput(AnimationJobTypes job);
 }
 
 public class AnimationConfiguration
@@ -83,6 +86,14 @@ public class AnimationsManager : IManageableHostedService
         this._random = Random.Shared;
         this._activityHubContext = activityHubContext;
         this._configuration = Program.ApplicationSettings;
+    }
+
+    public string GetOutput(AnimationJobTypes job)
+    {
+        var path = $"_output/{job.ToString().ToLower()}/";
+        var outputZipFilePath = $"_output/{job.ToString().ToLower()}.zip";
+        path.ZipDirectoryContents(outputZipFilePath);
+        return outputZipFilePath;
     }
     
     public Task StartAsync(CancellationToken cancellationToken)
