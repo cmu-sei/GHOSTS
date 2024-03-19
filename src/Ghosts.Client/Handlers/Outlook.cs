@@ -371,7 +371,7 @@ public class Outlook : BaseHandler
             //Add subject
             if (!string.IsNullOrWhiteSpace(emailConfig.Subject))
             {
-                mailItem.Subject = emailConfig.Subject;
+                mailItem.Subject = emailConfig.Subject.GetTextBetweenQuotes();
             }
 
             Log.Trace($"Setting message subject to: {mailItem.Subject}");

@@ -30,7 +30,7 @@ namespace Ghosts.Domain.Code.Helpers
         {
             var result = Regex.Match(o, "\"([^\"]*)\"").ToString();
             if (!string.IsNullOrEmpty(result))
-                result = result.TrimStart('"').TrimEnd('"');
+                result = result.Trim().TrimStart('"').TrimEnd('"');
             return result;
         }
 
