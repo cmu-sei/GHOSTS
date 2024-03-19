@@ -5,7 +5,7 @@
     <AssemblyName>ghosts.api</AssemblyName>
 
     <AssemblyVersion>8.0.0.0</AssemblyVersion>
-    <FileVersion>8.0.6.65</FileVersion>
+    <FileVersion>8.0.6.68</FileVersion>
     
     <Authors>Dustin Updyke for Carnegie Mellon University</Authors>
     <Company>Carnegie Mellon University</Company>
