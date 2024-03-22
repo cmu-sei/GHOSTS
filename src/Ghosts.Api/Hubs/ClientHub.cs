@@ -125,8 +125,11 @@ namespace Ghosts.Api.Hubs
         
         public async Task SendHeartbeat(string message)
         {
-            var m = await FindMachine();
-            _log.Trace($"{m.Name} {m.Id} ({Context.ConnectionId}) - ReceiveHeartbeat");
+            var m = GetMachine();
+
+            _log.Trace(m.Id != Guid.Empty
+                ? $"{m.Name} {m.Id} ({Context.ConnectionId}) - ReceiveHeartbeat"
+                : $"New machine — ({Context.ConnectionId}) - ReceiveHeartbeat");
             await Clients.Caller.SendAsync("ReceiveHeartbeat", DateTime.UtcNow, this._ct);
         }
         
@@ -144,10 +147,16 @@ namespace Ghosts.Api.Hubs
             await Clients.Caller.SendAsync("ReceiveSpecificMessage", message, this._ct);
         }
 
-        private async Task<Machine> FindMachine()
+        private Machine GetMachine()
         {
             var machineResponse = new FindMachineResponse();
             var m = WebRequestReader.GetMachine(Context.GetHttpContext());
+            return m;
+        }
+
+        private async Task<Machine> FindMachine()
+        {
+            var m = GetMachine();
 
             if (m.Id == Guid.Empty)
             {
