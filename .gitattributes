@@ -6,7 +6,10 @@ configuration/** linguist-generated=true
 static/** linguist-generated=true
 wwwroot/** linguist-vendored=true
 config/** linguist-generated=true
+
 *.cshtml linguist-generated=true
 *.html linguist-generated=true
 *.js linguist-generated=true
 *.json linguist-generated=true
+*.scss linguist-generated=true
+*.css linguist-generated=true
