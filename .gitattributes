@@ -1,9 +1,9 @@
-docs/* linguist-documentation=true
-
-src/Ghosts.Client/lib/* linguist-vendored=true
-
-configuration/* linguist-generated=true
-src/Ghosts.Client/config/* linguist-generated=true
-src/Ghosts.Api/config/* linguist-generated=true
-src/ghosts.pandora.socializer/src/wwwroot/* linguist-generated=true
+assets/** linguist-documentation=true
+docs/** linguist-documentation=true
+src/Ghosts.Client/lib/** linguist-vendored=true
+configuration/** linguist-generated=true
+configuration/** linguist-generated=true
+static/** linguist-generated=true
+wwwroot/** linguist-vendored=true
+config/** linguist-generated=true
 *.cshtml linguist-generated=true
