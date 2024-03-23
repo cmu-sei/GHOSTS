@@ -63,7 +63,7 @@ namespace Ghosts.Api.ViewModels
                             {
                                 new TimelineEvent
                                 {
-                                    Command = "Navigate",
+                                    Command = "browse",
                                     CommandArgs = new List<object> { "https://sei.cmu.edu" },
                                     DelayAfter = 30000,
                                     DelayBefore = 0
