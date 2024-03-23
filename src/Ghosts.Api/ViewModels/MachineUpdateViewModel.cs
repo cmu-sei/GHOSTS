@@ -52,16 +52,16 @@ namespace Ghosts.Api.ViewModels
                     Status = Timeline.TimelineStatus.Run,
                     TimeLineHandlers = new List<TimelineHandler>
                     {
-                        new TimelineHandler
+                        new()
                         {
                             HandlerType = HandlerType.BrowserFirefox,
                             Initial = "https://cmu.edu",
-                            UtcTimeOn = TimeSpan.FromHours(0),
-                            UtcTimeOff = TimeSpan.FromHours(24),
+                            UtcTimeOn = TimeSpan.Parse("0000:00"),
+                            UtcTimeOff = TimeSpan.Parse("23:59:59"),
                             Loop = true,
                             TimeLineEvents = new List<TimelineEvent>
                             {
-                                new TimelineEvent
+                                new()
                                 {
                                     Command = "browse",
                                     CommandArgs = new List<object> { "https://sei.cmu.edu" },
