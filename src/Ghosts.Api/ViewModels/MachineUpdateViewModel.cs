@@ -1,9 +1,11 @@
 // Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
+using System.Collections.Generic;
 using ghosts.api.Infrastructure.Models;
 using Ghosts.Domain;
 using Newtonsoft.Json;
+using Swashbuckle.AspNetCore.Filters;
 
 namespace Ghosts.Api.ViewModels
 {
@@ -31,6 +33,46 @@ namespace Ghosts.Api.ViewModels
                 ActiveUtc = ActiveUtc
             };
             return machineUpdate;
+        }
+    }
+    
+    public class MachineUpdateViewModelExample : IExamplesProvider<MachineUpdateViewModel>
+    {
+        public MachineUpdateViewModel GetExamples()
+        {
+            return new MachineUpdateViewModel
+            {
+                MachineId = Guid.NewGuid(),
+                Type = UpdateClientConfig.UpdateType.TimelinePartial,
+                ActiveUtc = DateTime.UtcNow,
+                Status = StatusType.Active,
+                Update = new Timeline
+                {
+                    Id = Guid.NewGuid(),
+                    Status = Timeline.TimelineStatus.Run,
+                    TimeLineHandlers = new List<TimelineHandler>
+                    {
+                        new TimelineHandler
+                        {
+                            HandlerType = HandlerType.BrowserFirefox,
+                            Initial = "https://cmu.edu",
+                            UtcTimeOn = TimeSpan.FromHours(0),
+                            UtcTimeOff = TimeSpan.FromHours(24),
+                            Loop = true,
+                            TimeLineEvents = new List<TimelineEvent>
+                            {
+                                new TimelineEvent
+                                {
+                                    Command = "Navigate",
+                                    CommandArgs = new List<object> { "https://sei.cmu.edu" },
+                                    DelayAfter = 30000,
+                                    DelayBefore = 0
+                                }
+                            }
+                        }
+                    }
+                }
+            };
         }
     }
 }

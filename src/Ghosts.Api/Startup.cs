@@ -10,6 +10,7 @@ using Ghosts.Api.Hubs;
 using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Api.Infrastructure.Extensions;
 using ghosts.api.Infrastructure.Services;
+using Ghosts.Api.ViewModels;
 using Ghosts.Domain.Code;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -20,7 +21,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
-using Npgsql;
 using Swashbuckle.AspNetCore.Filters;
 
 namespace Ghosts.Api
@@ -70,6 +70,8 @@ namespace Ghosts.Api
                 c.ExampleFilters();
             });
             services.AddSwaggerExamplesFromAssemblies(Assembly.GetEntryAssembly());
+            services.AddSwaggerExamplesFromAssemblyOf<MachineUpdateViewModelExample>();
+
 
             // Add application services.
             services.AddScoped<IMachineService, MachineService>();

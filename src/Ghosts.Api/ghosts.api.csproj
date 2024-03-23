@@ -5,9 +5,9 @@
     <AssemblyName>ghosts.api</AssemblyName>
 
     <AssemblyVersion>8.0.0.0</AssemblyVersion>
-    <FileVersion>8.0.7.0</FileVersion>
+    <FileVersion>8.0.7.25</FileVersion>
     
-    <Authors>Dustin Updyke for CERT > Software Engineering Institute > Carnegie Mellon University</Authors>
+    <Authors>GHOSTS Development Squad for CERT > Software Engineering Institute > Carnegie Mellon University</Authors>
     <Company>Carnegie Mellon University</Company>
     <Product>GHOSTS</Product>
     <Description>GHOSTS NPC Platform - please email ddupdyke[-at-]sei.cmu.edu with bugs/requests/other</Description>
