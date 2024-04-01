@@ -45,7 +45,7 @@
   },
   "ResourceControl": {
     "ManageProcesses": true,
-    "NagScreenResolver": true
+    "NagScreenResolver": false
   },
   "HealthIsEnabled": false,
   "HandlersIsEnabled": true,
