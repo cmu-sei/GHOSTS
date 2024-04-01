@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using Ghosts.Client.Infrastructure;
 using Ghosts.Domain.Code.Helpers;
 using Exception = System.Exception;
 using MAPIFolder = Microsoft.Office.Interop.Outlook.MAPIFolder;
@@ -25,7 +26,7 @@ public class Outlook : BaseHandler
     private readonly NameSpace _oMapiNamespace;
     private readonly MAPIFolder _folderOutbox;
     private readonly MAPIFolder _folderInbox;
-
+    
     public Outlook(TimelineHandler handler)
     {
         try
@@ -40,14 +41,19 @@ public class Outlook : BaseHandler
             RedemptionLoader.DllLocation64Bit = Path.GetFullPath(currentDir + @"\lib\redemption64.dll");
             RedemptionLoader.DllLocation32Bit = Path.GetFullPath(currentDir + @"\lib\redemption.dll");
 
+            var watcherThread = new Thread(NagScreenResolver.Resolve);
+            watcherThread.Start();
+
             Log.Trace("Redemption64 loaded from " + Path.GetFullPath(currentDir + @"\lib\redemption64.dll"));
             Log.Trace("Redemption loaded from " + Path.GetFullPath(currentDir + @"\lib\redemption.dll"));
-
+            
             //Create a Redemption object and use it
             Log.Trace("Creating new RDO session...");
             var session = RedemptionLoader.new_RDOSession();
             Log.Trace("Attempting RDO session logon...");
             session.Logon(Missing.Value, Missing.Value, Missing.Value, Missing.Value, Missing.Value, Missing.Value);
+
+            watcherThread.Join(500);
         }
         catch (Exception e)
         {

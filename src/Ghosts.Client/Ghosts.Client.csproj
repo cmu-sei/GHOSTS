@@ -182,6 +182,7 @@
     <Compile Include="Infrastructure\CommandLineFlagManager.cs" />
     <Compile Include="Infrastructure\ClientConfigurationResolver.cs" />
     <Compile Include="Infrastructure\KnownFolders.cs" />
+    <Compile Include="Infrastructure\NagScreenResolver.cs" />
     <Compile Include="Infrastructure\OfficeHelpers.cs" />
     <Compile Include="Infrastructure\PowerShellCommands.cs" />
     <Compile Include="Infrastructure\SftpSupport.cs" />
