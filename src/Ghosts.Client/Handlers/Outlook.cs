@@ -41,8 +41,12 @@ public class Outlook : BaseHandler
             RedemptionLoader.DllLocation64Bit = Path.GetFullPath(currentDir + @"\lib\redemption64.dll");
             RedemptionLoader.DllLocation32Bit = Path.GetFullPath(currentDir + @"\lib\redemption.dll");
 
-            var watcherThread = new Thread(NagScreenResolver.Resolve);
-            watcherThread.Start();
+            Thread watcherThread = null;
+            if (Program.Configuration.ResourceControl.NagScreenResolver)
+            {
+                watcherThread = new Thread(NagScreenResolver.Resolve);
+                watcherThread.Start();
+            }
 
             Log.Trace("Redemption64 loaded from " + Path.GetFullPath(currentDir + @"\lib\redemption64.dll"));
             Log.Trace("Redemption loaded from " + Path.GetFullPath(currentDir + @"\lib\redemption.dll"));
@@ -53,7 +57,10 @@ public class Outlook : BaseHandler
             Log.Trace("Attempting RDO session logon...");
             session.Logon(Missing.Value, Missing.Value, Missing.Value, Missing.Value, Missing.Value, Missing.Value);
 
-            watcherThread.Join(500);
+            if (Program.Configuration.ResourceControl.NagScreenResolver && watcherThread != null)
+            {
+                watcherThread.Join(500);
+            }
         }
         catch (Exception e)
         {
