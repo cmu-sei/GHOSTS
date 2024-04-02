@@ -5,7 +5,7 @@
     <AssemblyName>ghosts.api</AssemblyName>
 
     <AssemblyVersion>8.0.0.0</AssemblyVersion>
-    <FileVersion>8.0.7.50</FileVersion>
+    <FileVersion>8.0.7.65</FileVersion>
     
     <Authors>GHOSTS Development Squad for CERT > Software Engineering Institute > Carnegie Mellon University</Authors>
     <Company>Carnegie Mellon University</Company>
