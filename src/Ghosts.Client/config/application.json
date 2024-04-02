@@ -44,7 +44,8 @@
     "Dictionary": ""
   },
   "ResourceControl": {
-    "ManageProcesses": true
+    "ManageProcesses": true,
+    "NagScreenResolver": false
   },
   "HealthIsEnabled": false,
   "HandlersIsEnabled": true,

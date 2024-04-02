@@ -210,6 +210,7 @@ namespace Ghosts.Domain.Code
         public class ResourceControlSettings
         {
             public bool ManageProcesses { get; set; }
+            public bool NagScreenResolver { get; set; }
 
             public ResourceControlSettings()
             {
