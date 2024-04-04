@@ -1,8 +1,8 @@
 name: Build linux binary
 
 on:
-  push:
-    branches: [ "master" ]
+  workflow_dispatch:
+    branches: [ main ]
   
 jobs:
   build:
