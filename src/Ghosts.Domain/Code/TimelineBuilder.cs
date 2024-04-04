@@ -136,7 +136,14 @@ namespace Ghosts.Domain.Code
         public static void SetLocalTimeline(string timelineString)
         {
             var timelineObject = GetTimelineFromString(timelineString, null);
-            SetLocalTimeline(timelineObject);
+            if (timelineObject != null)
+            {
+                SetLocalTimeline(timelineObject);
+            }
+            else
+            {
+                _log.Error("Attempt to write null timeline to disk...");
+            }
         }
         
         /// <summary>

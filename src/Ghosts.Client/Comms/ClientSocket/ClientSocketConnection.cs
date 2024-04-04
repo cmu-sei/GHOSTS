@@ -14,6 +14,7 @@ namespace Ghosts.Client.Comms.ClientSocket;
 
 public class Connection
 {
+    private int _attempts = 0;
     private HubConnection _connection;
     private readonly CancellationToken _ct = new();
     public readonly BackgroundTaskQueue Queue = new();
@@ -31,6 +32,7 @@ public class Connection
         while (_connection == null)
         {
             await EstablishConnection(url);
+            _attempts++;
         }
 
         Console.WriteLine($"Connected to {url}");
@@ -134,7 +136,8 @@ public class Connection
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"An error occurred at {url} while connecting: {ex.Message}");
+            if(_attempts > 1)
+                Console.WriteLine($"An error occurred at {url} while connecting: {ex.Message}");
         }
     }
 
