@@ -51,8 +51,6 @@ namespace ghosts.api.Infrastructure.Services
         {
             while (true)
             {
-                _log.Trace("Beginning sync loop...");
-
                 try
                 {
                     await Sync();
@@ -61,8 +59,6 @@ namespace ghosts.api.Infrastructure.Services
                 {
                     _log.Error(ex);
                 }
-
-                _log.Trace("Ending sync loop");
 
                 await Task.Delay(new TimeSpan(0, 0, Program.ApplicationSettings.QueueSyncDelayInSeconds));
             }
@@ -111,8 +107,6 @@ namespace ghosts.api.Infrastructure.Services
 
             try
             {
-                _log.Trace($"Attempting find for {item}");
-
                 foreach (var webhook in webhooks)
                 {
                     var t = new Thread(() => { HandleWebhook(webhook, item); }) { IsBackground = true };
@@ -132,8 +126,6 @@ namespace ghosts.api.Infrastructure.Services
         {
             var service = scope.ServiceProvider.GetRequiredService<IMachineService>();
 
-            _log.Trace("Scope and context created");
-
             var machines = new List<Machine>();
             var histories = new List<Machine.MachineHistoryItem>();
             var timelines = new List<HistoryTimeline>();
@@ -142,10 +134,6 @@ namespace ghosts.api.Infrastructure.Services
 
             //clients can send up a "create webhook" payload
             var webhooks = new List<Webhook>();
-
-            _log.Trace("Beginning item processing...");
-
-            _log.Trace($"Attempting find for {item.Machine.Id}");
             Machine machine = null;
 
             if (item.Machine.Id != Guid.Empty)
@@ -153,16 +141,13 @@ namespace ghosts.api.Infrastructure.Services
 
             if (machine == null)
             {
-                _log.Trace("Machine not found by id");
                 if (!string.IsNullOrEmpty(item.Machine.Name))
                 {
-                    _log.Trace($"Searching for machine by name {item.Machine.Name}");
                     machine = context.Machines.FirstOrDefault(o => o.Name == item.Machine.Name);
                 }
 
                 if (machine == null)
                 {
-                    _log.Trace("Machine is still null, so attempting another create");
                     if (item.Machine.Id == Guid.Empty)
                         item.Machine.Id = Guid.NewGuid();
                     item.Machine.LastReportedUtc = DateTime.UtcNow;
@@ -186,8 +171,6 @@ namespace ghosts.api.Infrastructure.Services
                 Type = item.HistoryType,
                 CreatedUtc = DateTime.UtcNow
             });
-
-            _log.Trace($"Proc history type: {item.HistoryType}");
 
             if (item.HistoryType == Machine.MachineHistoryItem.HistoryType.PostedResults)
             {
