@@ -280,7 +280,6 @@ namespace ghosts.api.Infrastructure.Services
                                 case "WEBHOOKCREATE":
                                     try
                                     {
-                                        _log.Info("processing webhookcreate...");
                                         var hook = JsonConvert.DeserializeObject<WebhookViewModel>(data.ToString());
                                         var h = new Webhook(hook);
                                         webhooks.Add(h);
@@ -306,9 +305,7 @@ namespace ghosts.api.Infrastructure.Services
                 context.Machines.UpdateRange(machines);
                 try
                 {
-                    var i = await context.SaveChangesAsync();
-                    if (i > 0)
-                        _log.Trace($"Queue: {i} (machines: {machines.Count}");
+                    await context.SaveChangesAsync();
                 }
                 catch (Exception e)
                 {
@@ -321,9 +318,7 @@ namespace ghosts.api.Infrastructure.Services
                 await context.HistoryTrackables.AddRangeAsync(trackables);
                 try
                 {
-                    var i = await context.SaveChangesAsync();
-                    if (i > 0)
-                        _log.Trace($"Queue: {i} (Trackables: {trackables.Count})");
+                    await context.SaveChangesAsync();
                 }
                 catch (Exception e)
                 {
@@ -336,9 +331,7 @@ namespace ghosts.api.Infrastructure.Services
                 await context.HistoryHealth.AddRangeAsync(health);
                 try
                 {
-                    var i = await context.SaveChangesAsync();
-                    if (i > 0)
-                        _log.Trace($"Queue: {i} (Health: {health.Count})");
+                    await context.SaveChangesAsync();
                 }
                 catch (Exception e)
                 {
@@ -351,9 +344,7 @@ namespace ghosts.api.Infrastructure.Services
                 await context.HistoryTimeline.AddRangeAsync(timelines);
                 try
                 {
-                    var i = await context.SaveChangesAsync();
-                    if (i > 0)
-                        _log.Trace($"Queue: {i} (Timeline: {timelines.Count})");
+                    await context.SaveChangesAsync();
                 }
                 catch (Exception e)
                 {
@@ -366,9 +357,7 @@ namespace ghosts.api.Infrastructure.Services
                 await context.HistoryMachine.AddRangeAsync(histories);
                 try
                 {
-                    var i = await context.SaveChangesAsync();
-                    if (i > 0)
-                        _log.Trace($"Queue: {i} (History: {histories.Count}");
+                    await context.SaveChangesAsync();
                 }
                 catch (Exception e)
                 {
@@ -381,15 +370,15 @@ namespace ghosts.api.Infrastructure.Services
                 await context.Webhooks.AddRangeAsync(webhooks);
                 try
                 {
-                    var i = await context.SaveChangesAsync();
-                    if (i > 0)
-                        _log.Trace($"Queue: {i} (Webhooks: {webhooks.Count}");
+                    await context.SaveChangesAsync();
                 }
                 catch (Exception e)
                 {
                     _log.Error(e);
                 }
             }
+            
+            _log.Trace($"Queue Processed — Machines: {machines.Count}, Histories: {histories.Count}, Timeline: {timelines.Count}, Health: {health.Count}, Trackables: {trackables.Count}, Webhooks: {webhooks.Count}");
         }
 
         internal static async void HandleWebhook(Webhook webhook, NotificationQueueEntry payload)
