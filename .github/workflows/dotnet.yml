@@ -16,7 +16,7 @@ jobs:
         dotnet-version: '8.0.x' # Use 'x' to automatically get the latest patch version
     
     - name: Restore dependencies for Ghosts.Domain
-      run: dotnet restore src/Ghosts.Domain/Ghosts.Domain.csproj
+      run: dotnet restore src/Ghosts.Domain/ghosts.domain.csproj
     
     - name: Restore dependencies for ghosts.client.linux
       run: dotnet restore src/ghosts.client.linux/ghosts.client.linux.csproj
