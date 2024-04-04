@@ -1,0 +1,42 @@
+name: Build linux binary
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x' # Use 'x' to automatically get the latest patch version
+    
+    - name: Restore dependencies for Ghosts.Domain
+      run: dotnet restore src/Ghosts.Domain/Ghosts.Domain.csproj
+    
+    - name: Restore dependencies for ghosts.client.linux
+      run: dotnet restore src/ghosts.client.linux/ghosts.client.linux.csproj
+    
+    - name: Build Ghosts.Domain
+      run: dotnet build --no-restore src/Ghosts.Domain/Ghosts.Domain.csproj
+    
+    - name: Build ghosts.client.linux
+      run: dotnet build --no-restore src/ghosts.client.linux/ghosts.client.linux.csproj --configuration Release -o build_output/
+      
+    - name: Zip build output
+      run: zip -r ghosts-client-linux-v8.0.0.zip build_output/
+            
+    - name: Upload ZIP to Box
+      run: |
+        curl -X POST https://upload.box.com/api/2.0/files/content \
+        -H "Authorization: Bearer ${{ secrets.BOX_DEVELOPER_TOKEN }}" \
+        -F attributes='{"name":"ghosts-client-linux-v8.0.0.zip", "parent":{"id":"73019905332"}}' \
+        -F file=@ghosts-client-linux-v8.0.0.zip
+      env:
+        BOX_DEVELOPER_TOKEN: ${{ secrets.BOX_DEVELOPER_TOKEN }}
