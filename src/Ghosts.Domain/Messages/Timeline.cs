@@ -61,6 +61,8 @@ namespace Ghosts.Domain
 
         public TimeSpan UtcTimeOn { get; set; }
         public TimeSpan UtcTimeOff { get; set; }
+
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public TimeSpan[] UtcTimeBlocks { get; set; }
 
         //not required currently (2.4)
@@ -79,6 +81,8 @@ namespace Ghosts.Domain
 
         [JsonConverter(typeof(StringEnumConverter))]
         public TimelineScheduleType ScheduleType { get; set; }
+
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string Schedule { get; set; }
     }
 
@@ -132,6 +136,7 @@ namespace Ghosts.Domain
         /// <summary>
         /// AlertIds trace back to an alert that monitors specific activity executed within a timeline
         /// </summary>
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string TrackableId { get; set; }
 
         public string Command { get; set; }

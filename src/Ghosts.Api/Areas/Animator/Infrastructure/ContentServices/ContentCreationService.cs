@@ -94,6 +94,8 @@ public class ContentCreationService
 
             tweetText = tweetText.ReplaceDoubleQuotesWithSingleQuotes(); // else breaks csv file, //TODO should replace this with a proper csv library
 
+            tweetText = Clean(tweetText);
+
             _log.Info($"{agent.NpcProfile.Name} said: {tweetText}");
         }
         catch (Exception e)
@@ -101,5 +103,13 @@ public class ContentCreationService
             _log.Info(e);
         }
         return tweetText;
+    }
+
+    private string Clean(string raw)
+    {
+        raw = raw.Replace("`", "");
+        raw = raw.Replace("\"", "");
+        raw = raw.Replace("'", "");
+        return raw;
     }
 }

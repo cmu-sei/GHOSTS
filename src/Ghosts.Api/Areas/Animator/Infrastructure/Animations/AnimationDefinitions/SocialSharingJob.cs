@@ -1,6 +1,7 @@
 // Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -17,7 +18,9 @@ using ghosts.api.Infrastructure.Models;
 using ghosts.api.Infrastructure.Services;
 using Ghosts.Domain;
 using Microsoft.AspNetCore.SignalR;
+using Newtonsoft.Json;
 using NLog;
+using Npgsql.Internal.TypeHandlers.DateTimeHandlers;
 using RestSharp;
 
 namespace ghosts.api.Areas.Animator.Infrastructure.Animations.AnimationDefinitions;
@@ -147,37 +150,49 @@ public class SocialSharingJob
 
             if (_configuration.AnimatorSettings.Animations.SocialSharing.IsSendingTimelinesToGhostsApi)
             {
-                var formValues = new StringBuilder();
-                formValues.Append('{')
-                    .Append("\\\"").Append(userFormValue).Append("\\\":\\\"").Append(agent.NpcProfile.Email).Append("\\\"")
-                    .Append(",\\\"").Append(messageFormValue).Append("\\\":\\\"").Append(tweetText).Append("\\\"");
-                for (var i = 0; i < AnimatorRandom.Rand.Next(0, 6); i++)
+                var payload = new 
                 {
-                    formValues
-                        .Append(",\\\"").Append(Lorem.GetWord().ToLower()).Append("\\\":\\\"")
-                        .Append(AnimatorRandom.Rand.NextDouble()).Append("\\\"");
-                }
-                formValues.Append('}');
+                    Uri = _configuration.AnimatorSettings.Animations.SocialSharing.PostUrl,
+                    Category = "social",
+                    Method = "POST",
+                    Headers = new Dictionary<string, string>
+                    {
+                        { "u", agent.NpcProfile.Email }
+                    },
+                    FormValues = new Dictionary<string, string>
+                    {
+                        { userFormValue, agent.NpcProfile.Email },
+                        { messageFormValue, tweetText }
+                    }
+                };
 
-                var postPayload = await File.ReadAllTextAsync("config/socializer_post.json", _cancellationToken);
-                postPayload = postPayload.Replace("{id}", Guid.NewGuid().ToString());
-                postPayload = postPayload.Replace("{user}", agent.NpcProfile.Email);
-                postPayload = postPayload.Replace("{payload}", formValues.ToString());
-                postPayload = postPayload.Replace("{url}", _configuration.AnimatorSettings.Animations.SocialSharing.PostUrl);
-                postPayload = postPayload.Replace("{now}", DateTime.Now.ToString(CultureInfo.InvariantCulture));
+                var t = new Timeline();
+                t.Id = Guid.NewGuid();
+                t.Status = Timeline.TimelineStatus.Run;
+                var th = new TimelineHandler();
+                th.HandlerType = HandlerType.BrowserFirefox;
+                th.Initial = "about:blank";
+                th.UtcTimeOn = new TimeSpan(0, 0, 0);
+                th.UtcTimeOff = new TimeSpan(23, 59, 59);
+                th.HandlerArgs = new Dictionary<string, object>();
+                th.HandlerArgs.Add("isheadless", "false");
+                th.Loop = false;
+                var te = new TimelineEvent();
+                te.Command = "browse";
+                te.CommandArgs = new List<object>();
+                te.CommandArgs.Add(JsonConvert.SerializeObject(payload));
+                te.DelayAfter = 0;
+                te.DelayBefore = 0;
+                th.TimeLineEvents.Add(te);
+                t.TimeLineHandlers.Add(th);
                 
                 var machineUpdate = new MachineUpdate();
                 if (agent.MachineId.HasValue)
                 {
-                    postPayload = postPayload.Replace("{machineId}", agent.MachineId.Value.ToString());
                     machineUpdate.MachineId = agent.MachineId.Value;
                 }
-                else
-                {
-                    postPayload = postPayload.Replace("{machineId}", Guid.Empty.ToString());
-                }
                 
-                machineUpdate.Update = postPayload;
+                machineUpdate.Update = JsonConvert.SerializeObject(t);
                 machineUpdate.Username = agent.NpcProfile.Email;
                 machineUpdate.Status = StatusType.Active;
                 machineUpdate.Type = UpdateClientConfig.UpdateType.TimelinePartial;

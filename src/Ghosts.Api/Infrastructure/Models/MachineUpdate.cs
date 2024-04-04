@@ -26,5 +26,12 @@ namespace ghosts.api.Infrastructure.Models
         public StatusType Status { get; set; }
 
         public string Update { get; set; }
+        
+        public MachineUpdate()
+        {
+            var now = DateTime.UtcNow;
+            this.ActiveUtc = now;
+            this.CreatedUtc = now;
+        }
     }
 }
