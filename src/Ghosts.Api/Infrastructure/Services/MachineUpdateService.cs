@@ -62,20 +62,25 @@ namespace ghosts.api.Infrastructure.Services
 
         public async Task<MachineUpdate> GetAsync(Guid machineId, string currentUsername, CancellationToken ct)
         {
+            if (machineId == Guid.Empty && string.IsNullOrEmpty(currentUsername))
+                return new MachineUpdate();
+            
             // Build the base query with conditions that are always true
             var query = _context.MachineUpdates
-                .Where(m => m.ActiveUtc < DateTime.UtcNow && m.Status == StatusType.Active);
+                .Where(m => m.ActiveUtc <= DateTime.UtcNow && m.Status == StatusType.Active);
     
             // Adjust the query based on the provided arguments
             if (machineId != Guid.Empty)
             {
                 query = query.Where(m => m.MachineId == machineId);
             }
-    
-            if (!string.IsNullOrEmpty(currentUsername))
+            else
             {
-                var usernameLower = currentUsername.ToLower();
-                query = query.Where(m => m.Username.ToLower().StartsWith(usernameLower));
+                if (!string.IsNullOrEmpty(currentUsername))
+                {
+                    var usernameLower = currentUsername.ToLower();
+                    query = query.Where(m => m.Username.ToLower().StartsWith(usernameLower));
+                }
             }
     
             var update = await query.FirstOrDefaultAsync(ct);

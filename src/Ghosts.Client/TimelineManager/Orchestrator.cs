@@ -14,8 +14,6 @@ using System.Threading;
 using System.Security.Permissions;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Models;
-using Microsoft.VisualBasic.Logging;
-using Quartz;
 // ReSharper disable RedundantAssignment
 
 namespace Ghosts.Client.TimelineManager
@@ -74,11 +72,9 @@ namespace Ghosts.Client.TimelineManager
                 }
                 if (_stopfileWatcher == null && dirName != null)
                 {
-
                     _log.Trace("Stopfile watcher is starting");
                     _stopfileWatcher = new FileSystemWatcher(dirName);
-                    var stopFile = "stop.txt";
-                    _stopfileWatcher.Filter = stopFile;
+                    _stopfileWatcher.Filter = "stop.txt";
                     _stopfileWatcher.EnableRaisingEvents = true;
                     _stopfileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Attributes;
                     _stopfileWatcher.Changed += StopFileChanged;
@@ -244,17 +240,15 @@ namespace Ghosts.Client.TimelineManager
                 {
                     try
                     {
-                        using (var proc = Process.GetCurrentProcess())
-                        {
-                            Console.WriteLine($"Minimizing footprint and memory. Current is {proc.PrivateMemorySize64 / (1024 * 1024)}...");
-                            Program.MinimizeFootprint();
-                            Program.MinimizeMemory();
-                            Console.WriteLine($"Minimized footprint and memory.  Current is {proc.PrivateMemorySize64 / (1024 * 1024)}...");
-                        }
+                        using var proc = Process.GetCurrentProcess();
+                        var was = proc.PrivateMemorySize64 / (1024 * 1024);
+                        Program.MinimizeFootprint();
+                        Program.MinimizeMemory();
+                        _log.Trace($"Minimized footprint and memory. Was: {was}. Current: {proc.PrivateMemorySize64 / (1024 * 1024)}");
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine(e);
+                        _log.Trace(e);
                     }
 
 

@@ -127,9 +127,12 @@ public class ExcelHandler : BaseHandler
                         {
                             document = excelApplication.Workbooks.Add();
                             Log.Trace($"{handler.HandlerType} adding new...");
+
                         }
-                            
-                        Log.Trace("Excel adding worksheet");
+
+                        for(var i = 0; i < _random.Next(1,8); i++)
+                            document.Worksheets.Add(Type.Missing, document.Worksheets[document.Worksheets.Count]);
+
                         var workSheet = (Excel.Worksheet)document.Worksheets[1];
 
                         for (var i = 2; i < 10; i++)
@@ -264,7 +267,7 @@ public class ExcelHandler : BaseHandler
                         {
                             //sleep and leave the app open
                             Log.Trace($"Sleep after for {timelineEvent.DelayAfterActual}");
-                            Thread.Sleep(timelineEvent.DelayAfterActual - writeSleep);
+                            Thread.Sleep(timelineEvent.DelayAfterActual.GetSafeSleepTime(writeSleep));
                         }
 
                         workSheet.Dispose();

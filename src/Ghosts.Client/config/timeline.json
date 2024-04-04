@@ -2,21 +2,6 @@
   "Status": "Run",
   "TimeLineHandlers": [
     {
-      "HandlerType": "Watcher",
-      "Initial": "",
-      "UtcTimeOn": "00:00:00",
-      "UtcTimeOff": "24:00:00",
-      "Loop": true,
-      "TimeLineEvents": [
-        {
-          "Command": "folder",
-          "CommandArgs": [ "path:%HOMEDRIVE%%HOMEPATH%\\Downloads", "size:2000", "deletionApproach:oldest" ],
-          "DelayAfter": 0,
-          "DelayBefore": 0
-        }
-      ]
-    },
-    {
       "HandlerType": "Command",
       "Initial": "",
       "UtcTimeOn": "00:00:00",
@@ -109,7 +94,7 @@
       "Initial": "about:blank",
       "UtcTimeOn": "00:00:00",
       "UtcTimeOff": "24:00:00",
-      "UtcTimeBlocks": [ "14:00:00", "17:00:00", "18:00:00", "22:00:00" ],
+      "UtcTimeBlocks": [ "00:00:00", "23:59:00" ],
       "Loop": "True",
       "TimeLineEvents": [
         {
