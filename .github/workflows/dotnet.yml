@@ -24,7 +24,7 @@ jobs:
       run: dotnet restore src/ghosts.client.linux/ghosts.client.linux.csproj
     
     - name: Build Ghosts.Domain
-      run: dotnet build --no-restore src/Ghosts.Domain/Ghosts.Domain.csproj
+      run: dotnet build --no-restore src/Ghosts.Domain/ghosts.domain.csproj
     
     - name: Build ghosts.client.linux
       run: dotnet build --no-restore src/ghosts.client.linux/ghosts.client.linux.csproj --configuration Release -o build_output/
