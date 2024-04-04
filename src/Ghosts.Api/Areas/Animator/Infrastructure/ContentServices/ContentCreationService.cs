@@ -71,7 +71,14 @@ public class ContentCreationService
             }
             else if (_configuration.Source.ToLower() == "ollama")
             {
-                tweetText = await this._ollamaFormatterService.GenerateTweet(agent);
+                var tries = 0;
+                while (string.IsNullOrEmpty(tweetText))
+                {
+                    tweetText = await this._ollamaFormatterService.GenerateTweet(agent);
+                    tries++;
+                    if (tries > 5)
+                        return null;
+                }
                 
                 var regArray = new [] {"\"activities\": \\[\"([^\"]+)\"", "\"activity\": \"([^\"]+)\"", "'activities': \\['([^\\']+)'\\]", "\"activities\": \\[\"([^\\']+)'\\]"} ;
 
