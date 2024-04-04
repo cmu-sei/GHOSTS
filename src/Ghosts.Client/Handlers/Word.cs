@@ -272,7 +272,7 @@ public class WordHandler : BaseHandler
                         {
                             //sleep and leave the app open
                             Log.Trace($"Sleep after for {timelineEvent.DelayAfterActual}");
-                            Thread.Sleep(timelineEvent.DelayAfterActual - writeSleep);
+                            Thread.Sleep(timelineEvent.DelayAfterActual.GetSafeSleepTime(writeSleep));
                         }
 
                         document.Dispose();

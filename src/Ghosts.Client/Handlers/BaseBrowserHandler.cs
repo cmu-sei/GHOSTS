@@ -449,7 +449,7 @@ namespace Ghosts.Client.Handlers
                         script += "xhr.onload = function() {";
                         script += "document.write(this.responseText);";
                         script += "};";
-                        script += $"xhr.send('{config.FormValues.ToFormValueString()}');";
+                        script += $"xhr.send('{config.FormValues.ToFormValueString().Replace("'", "").Replace("\"", "")}');";
 
                         var javaScriptExecutor = (IJavaScriptExecutor)Driver;
                         javaScriptExecutor.ExecuteScript(script);
