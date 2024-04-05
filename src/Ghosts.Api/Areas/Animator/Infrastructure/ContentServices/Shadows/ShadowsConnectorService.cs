@@ -13,19 +13,19 @@ using Newtonsoft.Json;
 using NLog;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
-namespace ghosts.api.Areas.Animator.Infrastructure.ContentServices.Ollama;
+namespace ghosts.api.Areas.Animator.Infrastructure.ContentServices.Shadows;
 
-public class OllamaConnectorService
+public class ShadowsConnectorService
 {
     private static readonly Logger _log = LogManager.GetCurrentClassLogger();
     private readonly ApplicationSettings.AnimatorSettingsDetail.ContentEngineSettings _configuration;
     
-    public OllamaConnectorService(ApplicationSettings.AnimatorSettingsDetail.ContentEngineSettings configuration)
+    public ShadowsConnectorService(ApplicationSettings.AnimatorSettingsDetail.ContentEngineSettings configuration)
     {
         _configuration = configuration;
-        _configuration.Host = Environment.GetEnvironmentVariable("OLLAMA_HOST") ??
+        _configuration.Host = Environment.GetEnvironmentVariable("GHOSTS_SHADOWS_HOST") ??
                               configuration.Host;
-        _configuration.Model = Environment.GetEnvironmentVariable("OLLAMA_MODEL") ??
+        _configuration.Model = Environment.GetEnvironmentVariable("GHOSTS_SHADOWS_MODEL") ??
                                configuration.Model;
     }
     
@@ -40,15 +40,10 @@ public class OllamaConnectorService
         Dictionary<string, string> payload = null;
         try
         {
-            var url = $"{_configuration.Host}/api/generate";
+            var url = $"{_configuration.Host}/{_configuration.Model}";
             payload = new Dictionary<string, string>
             {
-                { "model", modelName },
-                { "prompt", prompt },
-                { "system", system },
-                { "template", template },
-                { "context", context },
-                { "options", options }
+                { "query", prompt }
             };
 
             payload = payload.Where(kv => kv.Value != null).ToDictionary(kv => kv.Key, kv => kv.Value);
@@ -74,7 +69,7 @@ public class OllamaConnectorService
                     }
                     catch (Exception e)
                     {
-                        _log.Info($"Ollama response was malformed: {e}");
+                        _log.Info($"Shadows response was malformed: {e}");
                         fullResponse.Append(line);
                     }
                 }
@@ -84,7 +79,7 @@ public class OllamaConnectorService
         }
         catch (Exception ex)
         {
-            _log.Error($"Ollama threw an exception: {ex.Message}: {ex.StackTrace} on configuration {_configuration.Host} {_configuration.Model} with payload {payload.ToSafeString()}");
+            _log.Error($"Shadows threw an exception: {ex.Message}: {ex.StackTrace} on configuration {_configuration.Host} {_configuration.Model} with payload {payload.ToSafeString()}");
             return null;
         }
     }
