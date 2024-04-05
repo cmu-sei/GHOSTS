@@ -1,0 +1,7 @@
+Given this json information about me ```[[flattenedAgent]]```
+And that I've recently done the following: ```[[history]]```
+And that I can use any program on a computer.
+What should I do? Make the response very short and actionable. 
+Do not say anything about the data I send you, and get straight to the point, don't say based on this, or blah blah.
+Never use my name. 
+Just give the action and reason and absolutely nothing else. 

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using ghosts.api.Areas.Animator.Infrastructure.ContentServices.Native;
 using ghosts.api.Areas.Animator.Infrastructure.ContentServices.Ollama;
 using ghosts.api.Areas.Animator.Infrastructure.ContentServices.OpenAi;
+using ghosts.api.Areas.Animator.Infrastructure.ContentServices.Shadows;
 using ghosts.api.Areas.Animator.Infrastructure.Models;
 using Ghosts.Api.Infrastructure;
 using Ghosts.Api.Infrastructure.Extensions;
@@ -19,6 +20,7 @@ public class ContentCreationService
     private readonly ApplicationSettings.AnimatorSettingsDetail.ContentEngineSettings _configuration;
     private OpenAiFormatterService _openAiFormatterService;
     private OllamaFormatterService _ollamaFormatterService;
+    private ShadowsFormatterService _shadowsFormatterService;
 
     public ContentCreationService(ApplicationSettings.AnimatorSettingsDetail.ContentEngineSettings configuration)
     {
@@ -32,6 +34,8 @@ public class ContentCreationService
             _openAiFormatterService = new OpenAiFormatterService();
         else if (_configuration.Source.ToLower() == "ollama")
             _ollamaFormatterService = new OllamaFormatterService(_configuration);
+        else if (_configuration.Source.ToLower() == "shadows")
+            _shadowsFormatterService = new ShadowsFormatterService(_configuration);
         
         _log.Trace($"Content service configured for {_configuration.Source} on {_configuration.Host} running {_configuration.Model}");
     }
@@ -48,6 +52,10 @@ public class ContentCreationService
             else if (_configuration.Source.ToLower() == "ollama")
             {
                 nextAction = await this._ollamaFormatterService.GenerateNextAction(agent, history);
+            }
+            else if (_configuration.Source.ToLower() == "shadows")
+            {
+                nextAction = await this._shadowsFormatterService.GenerateNextAction(agent, history);
             }
 
             _log.Info($"{agent.NpcProfile.Name}'s next action is: {nextAction}");
@@ -75,6 +83,30 @@ public class ContentCreationService
                 while (string.IsNullOrEmpty(tweetText))
                 {
                     tweetText = await this._ollamaFormatterService.GenerateTweet(agent);
+                    tries++;
+                    if (tries > 5)
+                        return null;
+                }
+                
+                var regArray = new [] {"\"activities\": \\[\"([^\"]+)\"", "\"activity\": \"([^\"]+)\"", "'activities': \\['([^\\']+)'\\]", "\"activities\": \\[\"([^\\']+)'\\]"} ;
+
+                foreach (var reg in regArray)
+                {
+                    var match = Regex.Match(tweetText,reg);
+                    if (match.Success)
+                    {
+                        // Extract the activity
+                        tweetText = match.Groups[1].Value;
+                        break;
+                    }
+                }
+            }
+            else if (_configuration.Source.ToLower() == "shadows")
+            {
+                var tries = 0;
+                while (string.IsNullOrEmpty(tweetText))
+                {
+                    tweetText = await this._shadowsFormatterService.GenerateTweet(agent);
                     tries++;
                     if (tries > 5)
                         return null;
