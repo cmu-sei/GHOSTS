@@ -1,0 +1,52 @@
+/*------------- #POST-VIDEO --------------*/
+
+
+
+.post-video {
+  border: 1px solid #e6ecf5;
+  border: 1px solid var(--olympus-border-color);
+  border-radius: 3px;
+  overflow: hidden;
+  margin: 20px 0;
+
+  .video-content {
+	padding: 20px;
+	overflow: hidden;
+
+	.title {
+	  display: block;
+	}
+
+	p {
+	  margin: 10px 0;
+	  font-size: 13px;
+	}
+
+	.link-site {
+	  font-size: 10px;
+	  color: #9a9fbf;
+	  color: var(--olympus-grey-lighter);
+
+	  &:hover {
+		color: #ff5e3a;
+		color: var(--olympus-primary-color);
+	  }
+	}
+  }
+}
+
+.video-thumb {
+  position: relative;
+  float: left;
+  text-align: center;
+}
+
+
+/*------------- Responsive mode styles --------------*/
+
+@media (max-width: 480px) {
+  .video-thumb {
+	float: none;
+  }
+}
+

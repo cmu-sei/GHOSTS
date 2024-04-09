@@ -1,0 +1,58 @@
+/*------------- #SERACH-RESULTS --------------*/
+
+.searches-item {
+  .country {
+	font-size: 12px;
+  }
+
+  .names-people-likes a {
+	display: block;
+  }
+
+  .post-additional-info {
+	display: flex;
+	align-items: center;
+
+	& > *:last-child {
+	  margin-left: auto;
+	}
+  }
+
+  .friend-count {
+	margin-bottom: 0;
+  }
+
+  .friend-count-item {
+	margin-right: 50px;
+
+	&:last-child {
+	  margin-right: 0;
+	}
+
+	.h6 {
+	  margin-bottom: 0;
+	  line-height: 1;
+	  font-size: 12px;
+	}
+
+	.title {
+	  font-size: 12px;
+	  line-height: 1;
+	}
+  }
+}
+
+.user-description {
+  font-size: 13px;
+  padding: 25px 0;
+  border-top: 1px solid #e6ecf5;
+  border-top: 1px solid var(--olympus-border-color);
+  border-bottom: 1px solid #e6ecf5;
+  border-bottom: 1px solid var(--olympus-border-color);
+
+  .title {
+	font-weight: 500;
+	color: #515365;
+	color: var(--olympus-heading-color);
+  }
+}

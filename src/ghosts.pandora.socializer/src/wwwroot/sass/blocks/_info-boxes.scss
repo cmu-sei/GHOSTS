@@ -1,0 +1,57 @@
+/*------------- #INFO-BOXES --------------*/
+
+
+
+.crumina-info-box {
+  text-align: center;
+}
+
+.info-box-image {
+  margin-bottom: 50px;
+}
+
+.info-box-wrap {
+  .crumina-info-box {
+	margin-bottom: 90px;
+  }
+}
+
+.info-box-title {
+  margin-bottom: 40px;
+}
+
+.crumina-info-box--thumb-left {
+  text-align: left;
+  display: flex;
+
+  .info-box-image {
+    margin-bottom: 0;
+    margin-right: 30px;
+  }
+
+  .info-box-title {
+    margin-bottom: 30px;
+  }
+}
+
+
+/*------------- Responsive mode styles --------------*/
+
+
+@media (max-width: 768px) {
+  .info-box-image {
+    margin-bottom: 20px;
+  }
+
+  .info-box-title {
+    margin-bottom: 20px;
+  }
+
+  .info-box-wrap .crumina-info-box {
+    margin-bottom: 30px;
+  }
+
+  .crumina-info-box--thumb-left .info-box-title {
+    margin-bottom: 10px;
+  }
+}

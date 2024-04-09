@@ -2,8 +2,8 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using Ghosts.Api.Models;
-using Ghosts.Api.Services;
+using ghosts.api.Infrastructure.Models;
+using ghosts.api.Infrastructure.Services;
 using Ghosts.Domain;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -16,11 +16,12 @@ namespace Ghosts.Api.Controllers
     /// GHOSTS CLIENT CONTROLLER
     /// These endpoints are typically only used by GHOSTS Clients installed and configured to use the GHOSTS C2
     /// </summary>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Produces("application/json")]
     [Route("api/[controller]")]
     public class ClientUpdatesController : Controller
     {
-        private static readonly Logger log = LogManager.GetCurrentClassLogger();
+        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
         private readonly IBackgroundQueue _queue;
         private readonly IMachineUpdateService _updateService;
         private readonly IMachineService _machineService;
@@ -47,7 +48,7 @@ namespace Ghosts.Api.Controllers
         public async Task<IActionResult> Index(CancellationToken ct)
         {
             var id = Request.Headers["ghosts-id"];
-            log.Trace($"Request by {id}");
+            _log.Trace($"Request by {id}");
             
             var findMachineResponse = await this._machineService.FindOrCreate(HttpContext, ct);
             if (!findMachineResponse.IsValid())
@@ -74,11 +75,11 @@ namespace Ghosts.Api.Controllers
             var u = await _updateService.GetAsync(m.Id, m.CurrentUsername, ct);
             if (u == null) return NotFound();
 
-            log.Trace($"Update sent to {m.Id} {m.FQDN} {u.Id} {u.Username} {u.Update}");
+            _log.Trace($"Update {u.Id} sent to {m.Id} {m.Name}({m.FQDN}) {u.Id} {u.Username} {u.Update}");
             
             var update = new UpdateClientConfig { Type = u.Type, Update = u.Update };
 
-            await _updateService.DeleteAsync(u.Id, m.Id, ct);
+            await _updateService.MarkAsDeletedAsync(u.Id, m.Id, ct);
 
             // integrators want to know that a timeline was actually delivered
             // (the service only guarantees that the update was received)

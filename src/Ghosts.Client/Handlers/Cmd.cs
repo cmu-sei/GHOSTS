@@ -3,10 +3,8 @@
 using System;
 using System.Diagnostics;
 using System.Threading;
-using Ghosts.Client.Infrastructure;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
-using WorkingHours = Ghosts.Client.Infrastructure.WorkingHours;
 
 namespace Ghosts.Client.Handlers
 {
@@ -57,10 +55,10 @@ namespace Ghosts.Client.Handlers
             {
                 WorkingHours.Is(handler);
 
-                if (timelineEvent.DelayBefore > 0)
-                    Thread.Sleep(timelineEvent.DelayBefore);
+                if (timelineEvent.DelayBeforeActual > 0)
+                    Thread.Sleep(timelineEvent.DelayBeforeActual);
 
-                Log.Trace($"Command line: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfter}");
+                Log.Trace($"Command line: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfterActual}");
 
                 switch (timelineEvent.Command)
                 {
@@ -71,7 +69,7 @@ namespace Ghosts.Client.Handlers
                             {
                                 //skipping this command
                                 Log.Trace($"Command choice skipped due to execution probability");
-                                Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, jitterfactor));
+                                Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, jitterfactor));
                                 continue;
                             }
                             var cmd = timelineEvent.CommandArgs[_random.Next(0, timelineEvent.CommandArgs.Count)];
@@ -79,7 +77,7 @@ namespace Ghosts.Client.Handlers
                             {
                                 this.Command(handler, timelineEvent, cmd.ToString());
                             }
-                            Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, jitterfactor));
+                            Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, jitterfactor));
                         }
                     default:
                         this.Command(handler, timelineEvent, timelineEvent.Command);
@@ -90,33 +88,36 @@ namespace Ghosts.Client.Handlers
                         break;
                 }
 
-                if (timelineEvent.DelayAfter > 0)
-                    Thread.Sleep(timelineEvent.DelayAfter);
+                if (timelineEvent.DelayAfterActual > 0)
+                    Thread.Sleep(timelineEvent.DelayAfterActual);
             }
         }
 
         public void Command(TimelineHandler handler, TimelineEvent timelineEvent, string command)
         {
-            Log.Trace($"Spawning cmd.exe with command {command}");
-            var processStartInfo = new ProcessStartInfo("cmd.exe")
-            {
-                RedirectStandardInput = true,
-                RedirectStandardOutput = true,
-                UseShellExecute = false
-            };
+            var results = Command(command);
+            Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = command, Trackable = timelineEvent.TrackableId, Result = results });
+        }
 
-            using (var process = Process.Start(processStartInfo))
-            {
-                Thread.Sleep(1000);
-                if (process != null)
-                {
-                    process.StandardInput.WriteLine(command);
-                    process.StandardInput.Close(); // line added to stop process from hanging on ReadToEnd()
-                    var outputString = process.StandardOutput.ReadToEnd();
-                    Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = command, Trackable = timelineEvent.TrackableId, Result = outputString});
-                    process.Close();
-                }
-            }
+        public static string Command(string command)
+        {
+            Log.Trace($"Spawning cmd.exe with command {command}");
+
+            var processStartInfo = new ProcessStartInfo("cmd", "/c " + command);
+            processStartInfo.RedirectStandardOutput = true;
+            processStartInfo.UseShellExecute = false;
+            processStartInfo.CreateNoWindow = false;
+            
+            var process = new Process();
+            process.StartInfo = processStartInfo;
+            process.Start();
+            
+            var output = process.StandardOutput.ReadToEnd();
+            process.WaitForExit();
+            // Console.Write(output);
+            Thread.Sleep(1000);
+            
+            return output;
         }
     }
 }

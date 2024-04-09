@@ -1,0 +1,31 @@
+{
+  "TimeLineHandlers": [
+    {
+      "HandlerType": "Command",
+      "Initial": "",
+      "UtcTimeOn": "00:00:00",
+      "UtcTimeOff": "24:00:00",
+      "Loop": false,
+      "TimeLineEvents": [
+        {
+          "Command": "cd %homedrive%%homepath%\\Downloads",
+          "CommandArgs": [
+            "powershell expand-archive -Path italian_breakfast.zip -destinationpath x",
+            "cd x",
+            "dir"
+          ],
+          "DelayAfter": 10,
+          "DelayBefore": 10000
+        },
+        {
+          "Command": "echo 'sleeping for 500...'",
+          "CommandArgs": [
+            "dir"
+          ],
+          "DelayAfter": 10,
+          "DelayBefore": 10000
+        }
+      ]
+    }
+  ]
+}

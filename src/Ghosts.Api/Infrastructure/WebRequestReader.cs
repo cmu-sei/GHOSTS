@@ -2,14 +2,16 @@
 
 using System;
 using System.Text.RegularExpressions;
-using Ghosts.Api.Models;
+using ghosts.api.Infrastructure.Models;
 using Ghosts.Domain.Code;
 using Microsoft.AspNetCore.Http;
+using NLog;
 
 namespace Ghosts.Api.Infrastructure
 {
     public static class WebRequestReader
     {
+        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
         public static Machine GetMachine(HttpContext context)
         {
             try
@@ -37,7 +39,7 @@ namespace Ghosts.Api.Infrastructure
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                _log.Error(e);
                 throw;
             }
         }

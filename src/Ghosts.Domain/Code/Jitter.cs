@@ -1,7 +1,6 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
-using System.Runtime.InteropServices;
 
 namespace Ghosts.Domain.Code
 {
@@ -12,6 +11,11 @@ namespace Ghosts.Domain.Code
     public static class Jitter
     {
         private static readonly Random _random = new Random();
+
+        public static int GetSafeSleepTime(this int x, int y)
+        {
+            return x - y < 0 ? 0 : x - y;
+        }
 
         public static int Randomize(object baseSleepValue, object lowJitter, object highJitter)
         {

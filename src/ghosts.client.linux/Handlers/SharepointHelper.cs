@@ -250,7 +250,7 @@ namespace ghosts.client.linux.handlers
                     {
                         throw;  //pass up
                     }
-                    catch (Exception e)
+                    catch (Exception)
                     {
                         i += 1;
                         if (i >= 5) break;

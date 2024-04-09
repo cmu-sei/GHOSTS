@@ -1,21 +1,25 @@
 ﻿{
-  "IdEnabled": true,
-  "IdUrl": "http://ghosts-api:52388/api/clientid",
-  "IdFormat": "guestlocal",
-  "IdFormatKey": "guestinfo.id",
-  "IdFormatValue": "$formatkeyvalue$-$machinename$",
-  "VMWareToolsLocation": "C:\\progra~1\\VMware\\VMware Tools\\vmtoolsd.exe",
+  "ApiRootUrl": "http://ghosts-api:5000/api",
+  "Sockets": {
+    "IsEnabled": true,
+    "Heartbeat": 500000
+  },
+  "Id": {
+    "IsEnabled": true,
+    "Format": "guestinfo",
+    "FormatKey": "guestinfo.rangename",
+    "FormatValue": "$formatkeyvalue$-$machinename$",
+    "VMWareToolsLocation": "C:\\progra~1\\VMware\\VMware Tools\\vmtoolsd.exe"
+  },
   "AllowMultipleInstances": false,
   "EncodeHeaders": true,
   "ClientResults": {
     "IsEnabled": true,
     "IsSecure": false,
-    "PostUrl": "http://ghosts-api:52388/api/clientresults",
     "CycleSleep": 300000
   },
   "ClientUpdates": {
     "IsEnabled": true,
-    "PostUrl": "http://ghosts-api:52388/api/clientupdates",
     "CycleSleep": 300000
   },
   "Survey": {
@@ -23,11 +27,13 @@
     "IsSecure": false,
     "Frequency": "once",
     "CycleSleepMinutes": 5,
-    "OutputFormat": "indent",
-    "PostUrl": "http://ghosts-api:52388/api/clientsurvey"
+    "OutputFormat": "indent"
+  },
+  "Timeline": {
+    "Location": "config/timeline.json"
   },
   "Content": {
-    "EmailsMax":  20,
+    "EmailsMax": 20,
     "EmailContent": "",
     "EmailReply": "",
     "EmailDomain": "",
@@ -38,7 +44,8 @@
     "Dictionary": ""
   },
   "ResourceControl": {
-    "ManageProcesses": true
+    "ManageProcesses": true,
+    "NagScreenResolver": false
   },
   "HealthIsEnabled": false,
   "HandlersIsEnabled": true,
@@ -59,11 +66,14 @@
     "SetAccountFromConfig": false,
     "SetAccountFromLocal": false,
     "SetForcedSendReceive": true,
-    "SaveToOutbox": false,
+    "SaveToOutbox": true,
     "EmailDomainSearchString": "Get-ADUser -filter * -searchbase \"CN=USERS,DC=JRSS,DC=GOV\" -properties UserPrincipalName | select -expand UserPrincipalName"
   },
   "Listener": {
     "Port": -1
+  },
+  "AwsCli": {
+    "InstallFolder": "%USERPROFILE%\\Amazon\\AWSCLIV2"
   },
   "EmailContent": {
     "conflict_1_capital": "",

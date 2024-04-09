@@ -3,8 +3,8 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Ghosts.Api.Models;
-using Ghosts.Api.Services;
+using ghosts.api.Infrastructure.Models;
+using ghosts.api.Infrastructure.Services;
 using Ghosts.Api.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -35,6 +35,13 @@ namespace ghosts.api.Controllers
         [ProducesResponseType(typeof(MachineTimeline), 200)]
         [HttpGet("timelines/{machineId}")]
         public async Task<IActionResult> Timeline([FromRoute] Guid machineId, CancellationToken ct)
+        {
+            return Ok(await _machineTimelinesService.GetByMachineIdAsync(machineId, ct));
+        }
+        
+        [ProducesResponseType(typeof(MachineTimeline), 200)]
+        [HttpGet("timelines/updates")]
+        public async Task<IActionResult> TimelineUpdates([FromRoute] Guid machineId, CancellationToken ct)
         {
             return Ok(await _machineTimelinesService.GetByMachineIdAsync(machineId, ct));
         }
@@ -74,22 +81,6 @@ namespace ghosts.api.Controllers
         public async Task<IActionResult> Timeline([FromRoute] Guid machineId, [FromRoute] Guid timelineId, CancellationToken ct)
         {
             await _timelineService.StopAsync(machineId, timelineId, ct);
-            return NoContent();
-        }
-
-        /// <summary>
-        /// Send a new timeline to an entire group of machines
-        /// </summary>
-        /// <param name="groupId">Group Guid</param>
-        /// <param name="machineUpdate">The update to send</param>
-        /// <param name="ct">Cancellation token</param>
-        /// <returns>204 No content</returns>
-        [HttpPost("timelines/bygroup/{groupId}")]
-        // [ProducesResponseType(typeof(Task<IActionResult>), (int) HttpStatusCode.NoContent)] Swagger hates this
-        [SwaggerOperation(OperationId = "createTimelineForGroup")]
-        public async Task<IActionResult> GroupTimeline([FromRoute] int groupId, [FromBody] MachineUpdateViewModel machineUpdate, CancellationToken ct)
-        {
-            await _timelineService.UpdateGroupAsync(groupId, machineUpdate, ct);
             return NoContent();
         }
     }

@@ -1,0 +1,47 @@
+/*------------- #SOCIAL MENU TABS --------------*/
+
+
+.social-menu-tabs {
+  border-bottom: none;
+  justify-content: center;
+
+  &.nav-tabs .nav-link.active {
+	color: #ff5e3a;
+	color: var(--olympus-primary-color);
+	border-bottom-color: #ff5e3a;
+	border-bottom-color: var(--olympus-primary-color);
+  }
+
+  &.nav-tabs .nav-link {
+	display: flex;
+	align-items: center;
+	padding: 25px;
+	border: none;
+	border-bottom: 3px solid transparent;
+	border-right: 1px solid #e6ecf5;
+	border-right: 1px solid var(--olympus-border-color);
+	font-weight: 700;
+	color: #515365;
+	color: var(--olympus-heading-color);
+
+	svg {
+	  fill: #9a9fbf;
+	  fill: var(--olympus-icon-color);
+	  margin-right: 10px;
+	}
+  }
+
+  &.nav-tabs .nav-item:first-child .nav-link {
+	border-left: 1px solid #e6ecf5;
+	border-left: 1px solid var(--olympus-border-color);
+  }
+}
+
+
+/*------------- Responsive mode styles --------------*/
+
+@media (max-width: 768px) {
+  .social-menu-tabs.nav-tabs .nav-link {
+	padding: 15px;
+  }
+}

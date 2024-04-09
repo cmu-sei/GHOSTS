@@ -1,0 +1,30 @@
+/*------------- #W-POOL --------------*/
+
+
+
+.w-pool {
+  margin-bottom: 40px;
+
+  .skills-item-info {
+	margin-bottom: 0;
+  }
+
+  .radio {
+	color: #515365;
+	color: var(--olympus-heading-color);
+	display: inline-block;
+	margin-bottom: 5px;
+
+	label {
+	  padding-left: 30px;
+
+	  span {
+		left: 0;
+	  }
+	}
+  }
+
+  .counter-friends {
+	margin: 10px 0;
+  }
+}

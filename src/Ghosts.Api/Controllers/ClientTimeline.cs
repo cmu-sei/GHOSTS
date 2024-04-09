@@ -4,7 +4,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Ghosts.Api.Infrastructure;
-using Ghosts.Api.Services;
+using ghosts.api.Infrastructure.Services;
 using Ghosts.Domain;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -17,6 +17,7 @@ namespace ghosts.api.Controllers
     /// GHOSTS CLIENT CONTROLLER
     /// These endpoints are typically only used by GHOSTS Clients installed and configured to use the GHOSTS C2
     /// </summary>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Produces("application/json")]
     [Route("api/[controller]")]
     public class ClientTimelineController : Controller
@@ -67,7 +68,7 @@ namespace ghosts.api.Controllers
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                _log.Error(e);
                 return StatusCode(StatusCodes.Status400BadRequest, "Invalid timeline file");
             }
 

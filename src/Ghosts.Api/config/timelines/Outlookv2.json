@@ -1,0 +1,63 @@
+/*
+
+  This Outlook handler relies on HandlerArgs probabilities to perform timeline events.
+  The commmand args are used for formatting emails, the probabilities decide the email action.
+  Delete + Create + Read + Reply <= 100
+  For the delete operation, the application.json file should have a "EmailsMax" field that
+  specifies that maximum number of Emails to keep in the Inbox, Sent Items folder.
+  When a delete operation is done, the Inbox, Sent Items folders are pruned to this amount,
+  and all emails in the Deleted Items folder are deleted.
+
+  
+  */
+
+
+
+{
+  "Id": "c5d8bfb6-488a-4d9f-9a84-657769d83e8c",
+  "Status": "Run",
+  "TimeLineHandlers": [
+
+    {
+      "HandlerType": "Outlookv2",
+      "Initial": "",
+      "UtcTimeOn": "00:00:00",
+      "UtcTimeOff": "24.00:00:00",
+      "HandlerArgs": {
+        "delay-jitter": 50, //%jitter to add to delayAfter, delayBefore
+        "delete-probability": 0, //probability that a delete operation will be done
+        "create-probability": 0, //probability that a new email will be created
+        "read-probability": 100, //probability that an existing email will be read, unread is given preference
+        "reply-probability": 0, //probability that a reply to an existing email is created
+        "click-probability": 35, //TODO, not implemented yet
+        "attachment-probability": 100, //when creating a new email, probability that attachments are added
+        "save-attachment-probability": 100, //when reading a email, probability that emails are saved to disk
+        "min-attachments": 5, //when adding an attachment, min number of attachments
+        "max-attachments": 5, //when adding an attachment, max number of attachments
+        "input-directory": "C:\\ghosts_data\\uploads", // source directory for attachments
+        "output-directory": "C:\\ghosts_data\\downloads" // target directory for saved attachments, created if does not exist
+      },
+      "Loop": true,
+      "TimeLineEvents": [
+        {
+          "TrackableId": null,
+          "Command": "",
+          "CommandArgs": [
+            "CurrentUser",
+            "random",
+            "random",
+            "random",
+            "Random",
+            "Random",
+            "PlainText",
+            ""
+          ],
+          "DelayAfter": 10000,
+          "DelayBefore": 0
+        }
+      ]
+    }
+
+
+  ]
+}

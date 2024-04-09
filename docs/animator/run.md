@@ -5,41 +5,97 @@ Animator is a simulation of a population of agents. Animator runs in cycles, and
 ## Setup
 
 - Get the Animator API up and running as outlined [here](index.md)
-- Edit the `appsettings.json` file to enable Animations:
+- The `appsettings.json` file points to Animator-specific configuration, which by default is in `./config/config.json`:
 
 ```json
-"ApplicationSettings": {
-    "GhostsApiUrl": "http://localhost:52388/",        // this should be root url of your ghosts API server
-    "Animations": {
-      "IsEnabled": false,                             // set this to true to enable animation jobs
-      "SocialGraph": {
-        "IsEnabled": false,                           // set this to true to enable the entire module (inc. web gui access)
-        "IsInteracting": false,                       // set this to true to actually run the interactions
-        "MaximumSteps": 4000,                         // animator stops when it reaches this many steps 
-        "TurnLength": 900,                            // by default, a step is a cpu cycle, the higher this number, the slower the simulation 
-        "ChanceOfKnowledgeTransfer": 0.3,
-        "Decay": {
-          "StepsTo": 10,
-          "ChanceOf": 0.05
+  {
+    "ApplicationDatabaseSettings": {
+      "ConnectionString": "mongodb://ghosts-mongo:32770",
+      "DatabaseName": "AnimatorDb"
+    },
+    "ApplicationSettings": {
+      "GhostsApiUrl": "http://localhost:52388/", //the root url of the Ghosts API
+      "Proxy": "",
+      "Animations": {
+        "IsEnabled": false, //if false, then all animations are disbled
+        "SocialGraph": {
+          "IsEnabled": false, //if false, just this animation is disabled
+          "IsMultiThreaded": true, //helpful to set to false for debugging purposes
+          "IsInteracting": true, //means new agent interactions are being generated
+          "MaximumSteps": 4000, //max steps to execute
+          "TurnLength": 9000, //ms per step
+          "ChanceOfKnowledgeTransfer": 0.3, //chance that an agent will share knowledge with another agent
+          "Decay": {
+            "StepsTo": 10, //min steps to execute before an agent begins forgetting things
+            "ChanceOf": 0.05
+          }
+        },
+        "SocialBelief": {
+          "IsEnabled": false,
+          "IsMultiThreaded": true,
+          "IsInteracting": true,
+          "MaximumSteps": 300,
+          "TurnLength": 9000
+        },
+        "SocialSharing": {
+          "IsEnabled": false,
+          "IsMultiThreaded": true,
+          "IsInteracting": true,
+          "IsSendingTimelinesToGhostsApi": false,
+          "IsSendingTimelinesDirectToSocializer": true,
+          "PostUrl": "http://localhost:8000",
+          "MaximumSteps": 100,
+          "TurnLength": 9000,
+          "ContentEngine": {
+            "Source": "ollama",
+            "Host": "http://localhost:11434",
+            "Model": "chat"
+          }
+        },
+        "Chat": {
+          "IsEnabled": false,
+          "IsMultiThreaded": true,
+          "IsInteracting": true,
+          "MaximumSteps": 300,
+          "TurnLength": 9000,
+          "IsSendingTimelinesToGhostsApi": false,
+          "PostUrl": "http://localhost:8065",
+          "ContentEngine": {
+            "Source": "ollama",
+            "Host": "http://localhost:11434",
+            "Model": "chat"
+          }
+        },
+        "FullAutonomy": {
+          "IsEnabled": false,
+          "IsMultiThreaded": true,
+          "IsInteracting": true,
+          "IsSendingTimelinesToGhostsApi": false,
+          "MaximumSteps": 10000,
+          "TurnLength": 9000,
+          "ContentEngine": {
+            "Source": "ollama",
+            "Host": "http://localhost:11434",
+            "Model": "activity"
+          }
         }
-      },
-      "SocialSharing": {
-        "IsEnabled": false,                          // set this to true to enable the entire module (inc. web gui access)
-        "IsInteracting": false,                      // set this to true to actually run the interactions
-        "IsSendingTimelinesToGhostsApi": false,      // set this to true to actually send the timeline commands to the ghosts API
-        "IsChatGptEnabled": false,                   // this is still under development, here be dragons
-        "SocializerUrl": "http://socializer.com",    // change this to the root url of your in-game social server
-        "MaximumSteps": 14000,
-        "TurnLength": 9000                           // by default, a step is a cpu cycle, the higher this number, the slower the simulation 
-      },
-      "SocialBelief": {
-        "IsEnabled": false,                         // set this to true to enable the entire module (inc. web gui access)
-        "IsInteracting": false,                     // set this to true to actually run the interactions
-        "MaximumSteps": 14000,
-        "TurnLength": 9000
       }
+    },
+    "AllowedHosts": "*",
+    "ClientSettings": {
+    },
+    "CorsPolicy": {
+      "Origins": [
+        "http://localhost:4200"
+      ],
+      "Methods": [],
+      "Headers": [],
+      "AllowAnyOrigin": false,
+      "AllowAnyMethod": true,
+      "AllowAnyHeader": true,
+      "SupportsCredentials": true
     }
-  },
+  }
   ...
 ```
 

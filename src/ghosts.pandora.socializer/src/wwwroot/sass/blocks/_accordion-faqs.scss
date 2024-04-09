@@ -1,0 +1,104 @@
+/*------------- #ACCORDION-FAQS --------------*/
+
+
+
+.accordion-faqs {
+  .icons-wrap {
+	display: inline-block;
+	position: relative;
+	margin-left: 20px;
+
+	svg {
+	  fill: #ff5e3a;
+	  fill: var(--olympus-primary-color);
+	  transition: all .3s ease;
+	  vertical-align: middle;
+	}
+
+	.olymp-accordion-close-icon {
+	  position: absolute;
+	  top: 16px;
+	  left: 0;
+	  opacity: 0;
+	}
+  }
+
+  .accordion-body {
+	padding: 0;
+  }
+
+  .accordion-collapse {
+	border: none;
+	margin-bottom: 60px;
+  }
+
+  .accordion-button:not(.collapsed) {
+	color: #ff5e3a;
+	color: var(--olympus-primary-color);
+	background-color: transparent;
+
+	.olymp-accordion-close-icon {
+	  opacity: 1;
+	}
+
+	.olymp-plus-icon {
+	  opacity: 0;
+	}
+  }
+
+  .accordion-button {
+	display: flex;
+	align-items: baseline;
+	padding: 60px 0;
+	border: none;
+	font-size: 28px;
+	color: #515365;
+	color: var(--olympus-heading-color);
+	font-weight: 300;
+
+	&:focus {
+	  border: none;
+	  box-shadow: none;
+	}
+
+	&:after {
+	  display: none;
+	}
+  }
+
+  .accordion-item {
+	border-top: 1px solid #e6ecf5;
+	border-top: 1px solid var(--olympus-border-color);
+
+	&:first-child {
+	  border: none;
+	}
+  }
+
+  svg {
+	width: 12px;
+	height: 12px;
+  }
+}
+
+
+
+/*================= Responsive Mode ============*/
+
+
+@media (max-width: 600px) {
+
+  .accordion-faqs .accordion-button {
+	padding: 30px 0;
+	font-size: 22px;
+  }
+
+  .accordion-faqs .collapse {
+	margin-bottom: 20px;
+  }
+
+  .accordion-faqs .icons-wrap .olymp-accordion-close-icon {
+	top: 10px;
+  }
+
+}

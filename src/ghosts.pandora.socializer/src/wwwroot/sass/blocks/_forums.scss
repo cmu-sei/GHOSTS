@@ -1,0 +1,184 @@
+/*------------- #FORUMS --------------*/
+
+
+
+.forums-table {
+  width: 100%;
+  border-radius: 5px;
+  overflow: hidden;
+
+  thead {
+	background-color: #38a9ff;
+	background-color: var(--olympus-blue);
+
+	th {
+	  font-size: 12px;
+	  font-weight: 700;
+	  padding: 15px 25px;
+	  color: #fff;
+	  color: var(--olympus-white-color);
+	  text-align: center;
+
+	  &.forum {
+		text-align: left;
+	  }
+	}
+  }
+
+  td {
+	padding: 35px 25px;
+	text-align: center;
+
+	&.forum {
+	  text-align: left;
+	}
+  }
+
+  tr {
+	border-bottom: 1px solid #e6ecf5;
+	border-bottom: 1px solid var(--olympus-border-color);
+	border-top: 1px solid #e6ecf5;
+	border-top: 1px solid var(--olympus-border-color);
+
+	&:last-child {
+	  border-bottom: none;
+	}
+  }
+
+  .count {
+	font-size: 12px;
+
+	&:hover {
+	  color: #ff5e3a;
+	  color: var(--olympus-primary-color);
+	}
+  }
+}
+
+.forum-item {
+  img {
+	float: left;
+	margin-right: 15px;
+  }
+
+  .content {
+	overflow: hidden;
+  }
+
+  .title {
+	&:hover {
+	  color: #ff5e3a;
+	  color: var(--olympus-primary-color);
+	}
+  }
+
+  .text {
+	margin-bottom: 0;
+	font-size: 13px;
+  }
+
+  .icon {
+	font-size: 15px;
+	color: #ffdc1b;
+	color: var(--olympus-yellow);
+	margin-right: 10px;
+	float: left;
+  }
+}
+
+.author-freshness {
+  .author-thumb {
+	display: inline-block;
+	margin-bottom: 10px;
+
+	img {
+	  width: 26px;
+	  height: 26px;
+	  display: block;
+	}
+  }
+
+  .title {
+	display: block;
+	font-size: 12px;
+	margin-bottom: 0;
+
+	&:hover {
+	  color: #ff5e3a;
+	  color: var(--olympus-primary-color);
+	}
+  }
+
+  time {
+	font-size: 11px;
+  }
+}
+
+.sub-forums {
+  margin-bottom: 0;
+  padding: 5px 0;
+  margin-top: 15px;
+  display: inline-block;
+
+  a {
+	font-size: 12px;
+	padding: 5px 13px;
+	display: block;
+	margin-bottom: 0;
+
+	&:hover {
+	  color: #ff5e3a;
+	  color: var(--olympus-primary-color);
+	}
+  }
+
+  border-left: 1px solid #e6ecf5;
+  border-left: 1px solid var(--olympus-border-color);
+}
+
+.author-started {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+
+  & > * + * {
+	margin-left: 8px;
+  }
+
+  span {
+	font-size: 12px;
+  }
+
+  .title {
+	margin-bottom: 0;
+	font-size: 12px;
+  }
+
+  .author-thumb img {
+	width: 18px;
+	height: 18px;
+	margin-right: 0;
+	display: block;
+  }
+}
+
+
+/*------------- Responsive mode styles --------------*/
+
+
+@media (max-width: 560px) {
+  .forum-item  {
+	text-align: center;
+
+	img {
+	  float: none;
+	  margin-right: 0;
+	  margin-bottom: 15px;
+	}
+  }
+
+  .forums-table thead th,
+  .forums-table td {
+	padding: 5px;
+  }
+}

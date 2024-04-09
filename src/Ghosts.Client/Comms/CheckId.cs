@@ -22,13 +22,33 @@ public class CheckId
     /// </summary>
     public string IdFile = ApplicationDetails.InstanceFiles.Id;
 
-    private DateTime _lastChecked = DateTime.Now;
     private string _id = string.Empty;
 
-    public CheckId()
+    public CheckId(bool checkInitialTimeline = false)
     {
         _log.Trace($"CheckId instantiated with ID: {Id}");
+
+        try
+        {
+            if (checkInitialTimeline)
+            {
+                using var client = GetClient();
+                TimelineBuilder.CheckForUrlTimeline(client, Program.Configuration.Timeline.Location);
+            }
+        }
+        catch
+        {
+            _log.Error("configuration doesn't have timeline location, update your application.json to latest please");
+        }
     }
+
+    private WebClient GetClient()
+    {
+        var machine = new ResultMachine();
+        GuestInfoVars.Load(machine);
+        return WebClientBuilder.Build(machine, !string.IsNullOrEmpty(_id));
+    }
+
 
     /// <summary>
     /// Gets the agent's current id from local instance, and if it does not exist, gets an id from the server and saves it locally
@@ -44,13 +64,13 @@ public class CheckId
             {
                 if (!File.Exists(IdFile))
                 {
-                    if (DateTime.Now > _lastChecked.AddMinutes(5))
+                    if (DateTime.Now < Program.LastChecked.AddMinutes(5))
                     {
                         _log.Error("Skipping Check for ID from server, too many requests in a short amount of time...");
                         return string.Empty;
                     }
 
-                    _lastChecked = DateTime.Now;
+                    Program.LastChecked = DateTime.Now;
                     return Run();
                 }
                 Id = File.ReadAllText(IdFile);
@@ -76,21 +96,19 @@ public class CheckId
 
         var s = string.Empty;
 
-        if (!Program.Configuration.IdEnabled)
+        if (!Program.Configuration.Id.IsEnabled)
         {
             return s;
         }
 
-        var machine = new ResultMachine();
-        GuestInfoVars.Load(machine);
+        using var client = GetClient();
 
         try
         {
             //call home
-            using var client = WebClientBuilder.BuildNoId(machine);
             try
             {
-                using var reader = new StreamReader(client.OpenRead(Program.Configuration.IdUrl) ?? throw new InvalidOperationException("CheckID client is null"));
+                using var reader = new StreamReader(client.OpenRead(Program.ConfigurationUrls.Id) ?? throw new InvalidOperationException("CheckID client is null"));
                 s = reader.ReadToEnd();
                 _log.Debug("ID Received");
             }
@@ -113,23 +131,26 @@ public class CheckId
         catch (Exception e)
         {
             _log.Error($"Cannot connect to API: {e.Message}");
-            return string.Empty;
         }
 
-        s = s.Replace("\"", "");
+        WriteId(s);
 
-        if (!Directory.Exists(ApplicationDetails.InstanceFiles.Path))
-        {
-            Directory.CreateDirectory(ApplicationDetails.InstanceFiles.Path);
-        }
-
-        if (string.IsNullOrEmpty(s))
-        {
-            return string.Empty;
-        }
-
-        //save returned id
-        File.WriteAllText(IdFile, s);
         return s;
+    }
+
+    public static void WriteId(string id)
+    {
+        if (!string.IsNullOrEmpty(id))
+        {
+            id = id.Replace("\"", "");
+
+            if (!Directory.Exists(ApplicationDetails.InstanceFiles.Path))
+            {
+                Directory.CreateDirectory(ApplicationDetails.InstanceFiles.Path);
+            }
+
+            //save returned id
+            File.WriteAllText(ApplicationDetails.InstanceFiles.Id, id);
+        }
     }
 }

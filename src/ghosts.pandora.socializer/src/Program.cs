@@ -19,46 +19,26 @@ class Program
         builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
         builder.Services.AddControllersWithViews();
         builder.Services.AddSignalR();
+        
+        var logger = LoggerFactory.Create(config =>
+        {
+            config.AddConsole();
+        }).CreateLogger("Program");
+        builder.Services.AddSingleton(typeof(ILogger), logger);
 
         var app = builder.Build();
 
         //app.UseHttpsRedirection();
         app.UseStaticFiles();
+        
         app.UseRouting();
         app.UseAuthorization();
-
-        app.UseEndpoints(endpoints =>
-        {
-            endpoints.MapControllerRoute(
-                name: "images",
-                pattern: "/images/{id?}",
-                defaults: new { controller = "Files", action = "UploadFile" });
-            
-            endpoints.MapControllerRoute(
-                name: "files",
-                pattern: "/files/{id?}",
-                defaults: new { controller = "Files", action = "UploadFile" });
-            
-            endpoints.MapControllerRoute(
-                name: "detail",
-                pattern: "/{id?}",
-                defaults: new { controller = "Home", action = "Detail" });
-
-            endpoints.MapControllerRoute(
-                name: "other",
-                pattern: "{*catchall}",
-                defaults: new { controller = "Home", action = "Index" });
-        });
+        app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         
         app.MapHub<PostsHub>("/hubs/posts");
 
         Configuration = ApplicationConfigurationLoader.Load();
-
-        var logger = LoggerFactory.Create(config =>
-        {
-            config.AddConsole();
-        }).CreateLogger("Program");
-
+        
         logger.LogInformation(ApplicationDetails.Header);
         logger.LogInformation("GHOSTS SOCIALIZER {Version} ({VersionFile}) coming online...", ApplicationDetails.Version, ApplicationDetails.VersionFile);
         

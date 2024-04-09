@@ -4,7 +4,6 @@ using Ghosts.Client.Infrastructure;
 using Ghosts.Domain;
 using System.Diagnostics;
 using Ghosts.Domain.Code;
-using WorkingHours = Ghosts.Client.Infrastructure.WorkingHours;
 using System;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
@@ -261,10 +260,10 @@ namespace Ghosts.Client.Handlers
             {
                 WorkingHours.Is(handler);
 
-                if (timelineEvent.DelayBefore > 0)
-                    Thread.Sleep(timelineEvent.DelayBefore);
+                if (timelineEvent.DelayBeforeActual > 0)
+                    Thread.Sleep(timelineEvent.DelayBeforeActual);
 
-                Log.Trace($"Pidgin::  Command {timelineEvent.Command} with delay after of {timelineEvent.DelayAfter}");
+                Log.Trace($"Pidgin::  Command {timelineEvent.Command} with delay after of {timelineEvent.DelayAfterActual}");
 
                 switch (timelineEvent.Command)
                 {
@@ -277,12 +276,12 @@ namespace Ghosts.Client.Handlers
                                 if (!this.Command(handler, timelineEvent, cmd.ToString())) return;
 
                             }
-                            Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, jitterfactor)); ;
+                            Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, jitterfactor)); ;
                         }
                 }
 
-                if (timelineEvent.DelayAfter > 0)
-                    Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, jitterfactor)); ;
+                if (timelineEvent.DelayAfterActual > 0)
+                    Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, jitterfactor)); ;
             }
         }
 

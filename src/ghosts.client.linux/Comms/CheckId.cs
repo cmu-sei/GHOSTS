@@ -76,7 +76,7 @@ namespace ghosts.client.linux.Comms
 
             var s = string.Empty;
 
-            if (!Program.Configuration.IdEnabled)
+            if (!Program.Configuration.Id.IsEnabled)
             {
                 return s;
             }
@@ -86,12 +86,12 @@ namespace ghosts.client.linux.Comms
             try
             {
                 //call home
-                using (var client = WebClientBuilder.BuildNoId(machine))
+                using (var client = WebClientBuilder.Build(machine))
                 {
                     try
                     {
                         using (var reader =
-                            new StreamReader(client.OpenRead(Program.Configuration.IdUrl) ?? throw new InvalidOperationException("CheckID client is null")))
+                            new StreamReader(client.OpenRead(Program.ConfigurationUrls.Id) ?? throw new InvalidOperationException("CheckID client is null")))
                         {
                             s = reader.ReadToEnd();
                             _log.Debug("ID Received");
@@ -135,6 +135,22 @@ namespace ghosts.client.linux.Comms
             //save returned id
             File.WriteAllText(IdFile, s);
             return s;
+        }
+        
+        public static void WriteId(string id)
+        {
+            if (!string.IsNullOrEmpty(id))
+            {
+                id = id.Replace("\"", "");
+
+                if (!Directory.Exists(ApplicationDetails.InstanceFiles.Path))
+                {
+                    Directory.CreateDirectory(ApplicationDetails.InstanceFiles.Path);
+                }
+
+                //save returned id
+                File.WriteAllText(ApplicationDetails.InstanceFiles.Id, id);
+            }
         }
     }
 }

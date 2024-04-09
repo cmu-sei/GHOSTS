@@ -1,0 +1,49 @@
+/*------------- #W-BUILD-FAV --------------*/
+
+
+.w-build-fav {
+  padding: 25px;
+  color: #fff;
+  color: var(--olympus-white-color);
+  position: relative;
+  background: url(../img/bg-birthdays.webp) no-repeat;
+  background-size: cover;
+  border-radius: 5px;
+
+  .more {
+	position: absolute;
+	right: 25px;
+	top: 20px;
+  }
+
+  .widget-thumb {
+	margin: 20px auto 30px;
+	text-align: center;
+  }
+
+  .content {
+	* > span {
+	  font-size: 10px;
+	  margin-bottom: 4px;
+	  display: block;
+	}
+
+	.title {
+	  line-height: 1.3;
+	  font-weight: 400;
+	  color: inherit;
+	  margin-bottom: 20px;
+	  font-size: 24px;
+	  display: block;
+	}
+
+	p {
+	  font-size: 12px;
+
+	  a {
+		color: #fff;
+		color: var(--olympus-white-color);
+	  }
+	}
+  }
+}

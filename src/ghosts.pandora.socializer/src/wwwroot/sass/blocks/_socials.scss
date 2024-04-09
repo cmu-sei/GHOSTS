@@ -1,0 +1,242 @@
+/*------------- #SOCIALS --------------*/
+
+
+
+
+.socials {
+  i, svg {
+	font-size: 15px;
+	transition: all .3s ease;
+  }
+
+  li {
+	display: inline-block;
+
+	a {
+	  fill: #9a9fbf;
+	  fill: var(--olympus-icon-color);
+
+	  &:hover {
+		color: #ff5e3a;
+		color: var(--olympus-primary-color);
+	  }
+	}
+
+	& + li {
+	  margin-left: 20px;
+	}
+  }
+}
+
+.socials--round {
+  .social-item {
+	width: 34px;
+	height: 34px;
+	border-radius: 100%;
+	fill: #fff;
+	fill: var(--olympus-white-color);
+	display: block;
+	position: relative;
+	opacity: .9;
+
+	&:hover {
+	  opacity: 1;
+	}
+
+	&.olympus {
+	  background-color: #ff5e3a;
+	  background-color: var(--olympus-primary-color);
+	}
+
+	&.rss {
+	  background-color: #f4b459;
+	}
+
+	&.mail {
+	  background:#996DD1;
+	}
+
+	&.pinterest {
+	  background:#cc2127;
+	}
+
+	&.googleplus {
+	  background:#dd4b39;
+	}
+
+	&.google {
+	  background:#dd4b39;
+	}
+
+	&.facebook {
+	  background:#3b5998;
+	}
+
+	&.twitter {
+	  background:#55acee;
+	}
+
+	&.amazon {
+	  background-color: #F69B06;
+	}
+
+	&.behance {
+	  background-color: #2D2D2D;
+	}
+
+	&.bing {
+	  background-color: #FFA616;
+	}
+
+	&.creative-market {
+	  background-color: #8DA741;
+	}
+
+	&.deviantart {
+	  background-color: #1B1B1B;
+	}
+
+	&.dribble {
+	  background-color: #f74881;
+	}
+
+	&.dropbox {
+	  background-color: #0BA4E0;
+	}
+
+	&.envato {
+	  background-color: #6D9C3E;
+	}
+
+	&.flickr {
+	  background-color: #26A9E1;
+	}
+
+	&.instagram {
+	  background-color: #E75351;
+	}
+
+	&.kickstarter {
+	  background-color: #14E06E;
+	}
+
+	&.linkedin {
+	  background-color: #4A8F9E;
+	}
+
+	&.medium {
+	  background-color: #00E56B;
+	}
+
+	&.periscope {
+	  background-color: #3FA4C4;
+	}
+
+	&.quora {
+	  background-color: #F85F62;
+	}
+
+	&.reddit {
+	  background-color: #F05825;
+	}
+
+	&.shutterstock {
+	  background-color: #008EC0;
+	}
+
+	&.skype {
+	  background-color: #00AAF1;
+	}
+
+	&.snapchat {
+	  background-color: #FFED45;
+	}
+
+	&.soundcloud {
+	  background-color: #FF3300;
+	}
+
+	&.spotify {
+	  background-color: #1ED760;
+	}
+
+	&.trello {
+	  background-color: #0079BF;
+	}
+
+	&.tumblr {
+	  background-color: #36465D;
+	}
+
+	&.vimeo {
+	  background-color: #1AB7EA;
+	}
+
+	&.vk {
+	  background-color: #6383A8;
+	}
+
+	&.whatsapp {
+	  background-color: #25D366;
+	}
+
+	&.wikipedia {
+	  background-color: #000000;
+	}
+
+	&.wordpress {
+	  background-color: #21759B;
+	}
+
+	&.youtube {
+	  background-color: #CD201F;
+	}
+
+  }
+
+  svg {
+	height: 15px;
+	width: 15px;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+  }
+}
+
+.socials-shared {
+  display: flex;
+  justify-content: center;
+  padding: 60px;
+
+  .social-item {
+	width: 100%;
+	padding: 15px 30px;
+	margin-bottom: 0;
+
+	i, svg {
+	  font-size: 15px;
+	  margin-right: 0;
+	}
+
+	& + .social-item {
+	  margin-left: 15px;
+	}
+  }
+}
+
+
+
+/*================= Responsive Mode ============*/
+
+@media (max-width: 768px) {
+  .socials-shared .social-item {
+	padding: 10px 30px;
+  }
+}
+
+@media (max-width: 560px) {
+  .socials-shared {
+	padding: 20px;
+  }
+}

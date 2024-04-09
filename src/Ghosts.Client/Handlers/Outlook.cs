@@ -11,10 +11,12 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using Ghosts.Client.Infrastructure;
 using Ghosts.Domain.Code.Helpers;
 using Exception = System.Exception;
 using MAPIFolder = Microsoft.Office.Interop.Outlook.MAPIFolder;
 using ReportItem = Ghosts.Domain.Code.ReportItem;
+using Newtonsoft.Json;
 
 namespace Ghosts.Client.Handlers;
 
@@ -24,7 +26,7 @@ public class Outlook : BaseHandler
     private readonly NameSpace _oMapiNamespace;
     private readonly MAPIFolder _folderOutbox;
     private readonly MAPIFolder _folderInbox;
-
+    
     public Outlook(TimelineHandler handler)
     {
         try
@@ -38,11 +40,27 @@ public class Outlook : BaseHandler
             var currentDir = new FileInfo(GetType().Assembly.Location).Directory;
             RedemptionLoader.DllLocation64Bit = Path.GetFullPath(currentDir + @"\lib\redemption64.dll");
             RedemptionLoader.DllLocation32Bit = Path.GetFullPath(currentDir + @"\lib\redemption.dll");
+
+            Thread watcherThread = null;
+            if (Program.Configuration.ResourceControl.NagScreenResolver)
+            {
+                watcherThread = new Thread(NagScreenResolver.Resolve);
+                watcherThread.Start();
+            }
+
+            Log.Trace("Redemption64 loaded from " + Path.GetFullPath(currentDir + @"\lib\redemption64.dll"));
+            Log.Trace("Redemption loaded from " + Path.GetFullPath(currentDir + @"\lib\redemption.dll"));
+            
             //Create a Redemption object and use it
-            Log.Trace("Creating new RDO session");
+            Log.Trace("Creating new RDO session...");
             var session = RedemptionLoader.new_RDOSession();
             Log.Trace("Attempting RDO session logon...");
             session.Logon(Missing.Value, Missing.Value, Missing.Value, Missing.Value, Missing.Value, Missing.Value);
+
+            if (Program.Configuration.ResourceControl.NagScreenResolver && watcherThread != null)
+            {
+                watcherThread.Join(500);
+            }
         }
         catch (Exception e)
         {
@@ -55,7 +73,7 @@ public class Outlook : BaseHandler
             _oMapiNamespace = _app.GetNamespace("MAPI");
             _folderInbox = _oMapiNamespace.GetDefaultFolder(OlDefaultFolders.olFolderInbox);
             _folderOutbox = _oMapiNamespace.GetDefaultFolder(OlDefaultFolders.olFolderOutbox);
-            Log.Trace("Launching Outlook");
+            Log.Trace("Launching Outlook...");
             _folderInbox.Display();
 
             if (handler.Loop)
@@ -82,12 +100,12 @@ public class Outlook : BaseHandler
         {
             foreach (var timelineEvent in handler.TimeLineEvents)
             {
-                Infrastructure.WorkingHours.Is(handler);
+                WorkingHours.Is(handler);
 
-                if (timelineEvent.DelayBefore > 0)
+                if (timelineEvent.DelayBeforeActual > 0)
                 {
-                    Log.Trace($"DelayBefore sleeping for {timelineEvent.DelayBefore} ms");
-                    Thread.Sleep(timelineEvent.DelayBefore);
+                    Log.Trace($"DelayBefore sleeping for {timelineEvent.DelayBeforeActual} ms");
+                    Thread.Sleep(timelineEvent.DelayBeforeActual);
                 }
 
                 switch (timelineEvent.Command.ToUpper())
@@ -149,10 +167,10 @@ public class Outlook : BaseHandler
                         break;
                 }
 
-                if (timelineEvent.DelayAfter > 0)
+                if (timelineEvent.DelayAfterActual > 0)
                 {
-                    Log.Trace($"DelayAfter sleeping for {timelineEvent.DelayAfter} ms");
-                    Thread.Sleep(timelineEvent.DelayAfter);
+                    Log.Trace($"DelayAfter sleeping for {timelineEvent.DelayAfterActual} ms");
+                    Thread.Sleep(timelineEvent.DelayAfterActual);
                 }
             }
         }
@@ -354,8 +372,8 @@ public class Outlook : BaseHandler
 
     private bool SendEmailViaOutlook(EmailConfiguration emailConfig)
     {
-        ClientConfiguration.EmailSettings config = Program.Configuration.Email;
-        bool wasSuccessful = false;
+        var config = Program.Configuration.Email;
+        var wasSuccessful = false;
 
         try
         {
@@ -366,7 +384,7 @@ public class Outlook : BaseHandler
             //Add subject
             if (!string.IsNullOrWhiteSpace(emailConfig.Subject))
             {
-                mailItem.Subject = emailConfig.Subject;
+                mailItem.Subject = emailConfig.Subject.GetTextBetweenQuotes();
             }
 
             Log.Trace($"Setting message subject to: {mailItem.Subject}");
@@ -394,7 +412,7 @@ public class Outlook : BaseHandler
             if (emailConfig.Attachments.Count > 0)
             {
                 //Add attachments
-                foreach (string path in emailConfig.Attachments)
+                foreach (var path in emailConfig.Attachments)
                 {
                     mailItem.Attachments.Add(path);
                     Log.Trace($"Adding attachment from: {path}");
@@ -437,25 +455,34 @@ public class Outlook : BaseHandler
                     mailItem.SendUsingAccount = acc;
                 }
             }
-                
+
             if (config.SaveToOutbox)
             {
                 Log.Trace("Saving mailItem to outbox...");
                 mailItem.Move(_folderOutbox);
                 mailItem.Save();
             }
-                
-            Log.Trace("Attempting new Redemtion SafeMailItem...");
-            var rdoMail = new SafeMailItem
-            {
-                Item = mailItem
-            };
 
-            //Parse To
-            if (emailConfig.To.Count > 0)
+            Log.Trace("Attempting new Redemtion SafeMailItem...");
+
+            SafeMailItem rdoMail = new SafeMailItem();
+
+            Log.Trace($"Redemtion SafeMailItem {rdoMail.Version} instance created, now loading the outlook email into the safemailitem...");
+
+            try
             {
-                var list = emailConfig.To.Distinct();
-                foreach (var a in list)
+                rdoMail.Item = mailItem;
+            }
+            catch (Exception e)
+            {
+                Log.Error(e);
+            }
+
+            Log.Trace($"Email configuration from timeline is currently: {JsonConvert.SerializeObject(emailConfig)}...");
+            Log.Trace($"Attempting add of To addresses...");
+            if (emailConfig.To.Any())
+            {
+                foreach (var a in emailConfig.To)
                 {
                     var r = rdoMail.Recipients.AddEx(a.Trim());
                     r.Resolve();
@@ -467,41 +494,33 @@ public class Outlook : BaseHandler
                 throw new Exception("Must specify to-address");
             }
 
-            //Parse Cc
-            if (emailConfig.Cc.Count > 0)
+            foreach (var a in emailConfig.Cc)
             {
-                var list = emailConfig.Cc.Distinct();
-                foreach (var a in list)
+                var r = rdoMail.Recipients.AddEx(a.Trim());
+                r.Resolve();
+                if (r.Resolved)
                 {
-                    var r = rdoMail.Recipients.AddEx(a.Trim());
-                    r.Resolve();
-                    if (r.Resolved)
-                    {
-                        r.Type = 2; //CC
-                    }
-
-                    Log.Trace($"RdoMail CC {a.Trim()}");
+                    r.Type = 2; //CC
                 }
-            }
 
-            if (emailConfig.Bcc.Count > 0)
+                Log.Trace($"RdoMail CC {a.Trim()}");
+            }
+        
+            foreach (var a in emailConfig.Bcc)
             {
-                var list = emailConfig.Bcc.Distinct();
-                foreach (var a in list)
+                var r = rdoMail.Recipients.AddEx(a.Trim());
+                r.Resolve();
+                if (r.Resolved)
                 {
-                    var r = rdoMail.Recipients.AddEx(a.Trim());
-                    r.Resolve();
-                    if (r.Resolved)
-                    {
-                        r.Type = 3; //BCC
-                    }
-
-                    Log.Trace($"RdoMail BCC {a.Trim()}");
+                    r.Type = 3; //BCC
                 }
+
+                Log.Trace($"RdoMail BCC {a.Trim()}");
             }
+        
                 
             rdoMail.Recipients.ResolveAll();
-
+            
             Log.Trace("Attempting to send Redemtion SafeMailItem...");
             rdoMail.Send();
 

@@ -1,0 +1,154 @@
+/*------------- #LANDING --------------*/
+
+
+.landing-content {
+  color: #fff;
+  color: var(--olympus-white-color);
+  margin-bottom: 30px;
+
+  & > *:first-child {
+	font-weight: 300;
+  }
+
+  & > *:last-child {
+	margin-bottom: 0;
+  }
+
+  & > * {
+	color: inherit;
+	margin-bottom: 45px;
+  }
+}
+
+.main-header.main-header-fullwidth {
+  width: 100%;
+  max-width: 100%;
+}
+
+.main-header.main-landing {
+  width: 100%;
+  max-width: 100%;
+
+  h1 {
+	font-size: 36px;
+	font-weight: 300;
+	margin-bottom: 40px;
+  }
+
+  p {
+	margin-bottom: 60px;
+  }
+}
+
+.img-rocket {
+  position: absolute;
+  bottom: 160px;
+  right: 10%;
+}
+
+.landing-item {
+  text-align: center;
+  margin-bottom: 50px;
+  position: relative;
+  z-index: 1;
+
+  .title {
+	font-weight: 700;
+  }
+
+  .full-block {
+	z-index: 999;
+  }
+
+  .landing-item-thumb {
+	position: relative;
+	margin-bottom: 25px;
+	box-shadow: 0 0 34px 0 rgba(63, 66, 87, 0.3);
+	display: inline-block;
+
+	img {
+	  width: 100%;
+	  display: block;
+	}
+
+	.btn {
+	  margin-bottom: 0;
+	  position: absolute;
+	  opacity: 0;
+	  top: 50%;
+	  left: 50%;
+	  transform: translate(-50%, -50%);
+	  max-width: 90%;
+	}
+
+	.new {
+	  display: block;
+	  position: absolute;
+	  right: 5px;
+	  top: 5px;
+	  width: 50px;
+	  height: 50px;
+	  border-radius: 100%;
+	  background-color: #ff5e3a;
+	  background-color: var(--olympus-primary-color);
+	  color: #fff;
+	  color: var(--olympus-white-color);
+	  line-height: 50px;
+	  text-align: center;
+	  text-transform: uppercase;
+	  font-size: 14px;
+	  font-weight: 700;
+	}
+  }
+
+  &:hover {
+	.overlay {
+	  opacity: 1;
+	}
+
+	.btn {
+	  opacity: 1;
+	}
+  }
+}
+
+.landing-main-content {
+  text-align: center;
+  margin: 80px 0;
+
+  svg {
+	fill: #ff5e3a;
+	fill: var(--olympus-primary-color);
+	margin-bottom: 30px;
+  }
+
+  .btn {
+	margin: 40px 0;
+  }
+
+  .title {
+	font-weight: 300;
+	margin-bottom: 30px;
+  }
+}
+
+
+
+/*------------- Responsive mode styles --------------*/
+
+@media (max-width: 800px) {
+  .img-rocket {
+	right: 5px;
+	width: 40px;
+  }
+
+  .landing-content > * {
+	margin-bottom: 20px;
+  }
+}
+
+@media (max-width: 420px) {
+  .img-rocket {
+	bottom: 60px;
+  }
+}

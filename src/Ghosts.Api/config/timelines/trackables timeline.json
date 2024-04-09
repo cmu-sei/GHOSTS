@@ -1,0 +1,46 @@
+{
+    "TimeLineHandlers": [
+        {
+            "HandlerType": "BrowserChrome",
+            "Initial": "about:blank",
+            "UtcTimeOn": "00:00:00",
+            "UtcTimeOff": "24:00:00",
+            "Loop": false,
+            "TimeLineEvents": [
+                {
+                    "Command": "browse",
+                    "CommandArgs": [ "https://dl.dafont.com/dl/?f=italian_breakfast" ],
+                    "DelayAfter": 0,
+                    "DelayBefore": 0
+                },
+                {
+                    "Command": "download",
+                    "CommandArgs": [ "//a[contains(@class, 'dl')]" ],
+                    "TrackableId": "<guid id from trackables table/>",
+                    "DelayAfter": 0,
+                    "DelayBefore": 0
+                }
+            ]
+        },
+        {
+            "HandlerType": "Command",
+            "Initial": "",
+            "UtcTimeOn": "00:00:00",
+            "UtcTimeOff": "24:00:00",
+            "Loop": false,
+            "TimeLineEvents": [
+                {
+                    "Command": "cd %homedrive%%homepath%\\Downloads",
+                    "CommandArgs": [
+                        "powershell expand-archive -Path italian_breakfast.zip -destinationpath x",
+                        "cd x",
+                        "dir"
+                    ],
+                    "TrackableId": "<guid id from trackables table/>",
+                    "DelayAfter": 10,
+                    "DelayBefore": 10000
+                }
+            ]
+        }
+    ]
+}

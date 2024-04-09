@@ -24,7 +24,7 @@ public class NpcSystem : BaseHandler
             switch (timelineEvent.Command.ToLower())
             {
                 case "start":
-                    t = TimelineBuilder.GetLocalTimeline();
+                    t = TimelineBuilder.GetTimeline();
                     t.Status = Timeline.TimelineStatus.Run;
                     TimelineBuilder.SetLocalTimeline(t);
                     break;
@@ -36,7 +36,7 @@ public class NpcSystem : BaseHandler
                     }
                     else
                     {
-                        t = TimelineBuilder.GetLocalTimeline();
+                        t = TimelineBuilder.GetTimeline();
                         t.Status = Timeline.TimelineStatus.Stop;
                         StartupTasks.CleanupProcesses();
                         TimelineBuilder.SetLocalTimeline(t);

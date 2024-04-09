@@ -1,0 +1,74 @@
+/*------------- #TEAMMEMBERS --------------*/
+
+
+
+.crumina-teammembers-item {
+  text-align: center;
+
+  &:hover {
+	img {
+
+	  &.hover {
+		top: 0;
+		left: 0;
+		transform: scale(2) translate(0, 0);
+		opacity: 0;
+		filter: grayscale(0);
+		visibility: hidden;
+	  }
+
+	  &.main {
+		filter: grayscale(0);
+	  }
+	}
+  }
+}
+
+.teammembers-item-prof {
+  font-size: 10px;
+  font-weight: 700;
+  margin-bottom: 30px;
+}
+
+.teammembers-item-name {
+  margin-bottom: 10px;
+  display: block;
+  font-size: 18px;
+}
+
+.teammembers-thumb {
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 30px;
+  display: inline-block;
+
+  img {
+	transition: all 1s ease-out;
+	filter: grayscale(100%);
+	display: block;
+	margin: 0 auto;
+
+	&.hover {
+	  position: absolute;
+	  left: 50%;
+	  top: 50%;
+	  transform: translate(-50%, -50%);
+	}
+  }
+}
+
+.teammembers-wrap {
+  .crumina-teammembers-item {
+	margin-bottom: 60px;
+  }
+}
+
+
+
+/*------------- Responsive mode styles --------------*/
+
+@media (max-width: 768px) {
+  .teammembers-wrap .crumina-teammembers-item {
+	margin-bottom: 30px;
+  }
+}

@@ -49,6 +49,17 @@ internal static class DebugManager
         Write($"Machine.IpAddress = {machine.IpAddress}");
         Write($"Machine.ResolvedHost = {machine.ResolvedHost}");
         Write("------------------");
+        //if (Program.IsDebug)
+        //{
+            Write($"Configured API Base = {Program.Configuration.ApiRootUrl}");
+            Write($"Configured API Id = {Program.ConfigurationUrls.Id}");
+            Write($"Configured API Survey = {Program.ConfigurationUrls.Survey}");
+            Write($"Configured API Socket = {Program.ConfigurationUrls.Socket}");
+            Write($"Configured API Timeline = {Program.ConfigurationUrls.Timeline}");
+            Write($"Configured API Results = {Program.ConfigurationUrls.Results}");
+            Write($"Configured API Updates = {Program.ConfigurationUrls.Updates}");
+            Write("------------------");
+        //}
     }
 
     private static void Write(string line)

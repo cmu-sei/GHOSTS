@@ -14,11 +14,11 @@ public class LightHandlers : BaseHandler
     private static string GetSavePath(Type cls, TimelineHandler handler, TimelineEvent timelineEvent, string fileExtension)
     {
         Log.Trace($"{cls} event - {timelineEvent}");
-        Infrastructure.WorkingHours.Is(handler);
+        WorkingHours.Is(handler);
 
-        if (timelineEvent.DelayBefore > 0)
+        if (timelineEvent.DelayBeforeActual > 0)
         {
-            Thread.Sleep(timelineEvent.DelayBefore);
+            Thread.Sleep(timelineEvent.DelayBeforeActual);
         }
 
         Thread.Sleep(3000);

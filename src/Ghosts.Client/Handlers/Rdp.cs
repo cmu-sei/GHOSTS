@@ -4,7 +4,6 @@ using System.Threading;
 using Ghosts.Client.Infrastructure;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
-using WorkingHours = Ghosts.Client.Infrastructure.WorkingHours;
 using AutoItX3Lib;
 using System.Text;
 using Newtonsoft.Json;
@@ -139,17 +138,17 @@ namespace Ghosts.Client.Handlers
                             {
                                 //skipping this command
                                 Log.Trace($"RDP choice skipped due to execution probability");
-                                Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, JitterFactor));
+                                Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, JitterFactor));
                                 continue;
                             }
-                            if (timelineEvent.DelayBefore > 0)
-                                Thread.Sleep(timelineEvent.DelayBefore);
+                            if (timelineEvent.DelayBeforeActual > 0)
+                                Thread.Sleep(timelineEvent.DelayBeforeActual);
                             var choice = timelineEvent.CommandArgs[_random.Next(0, timelineEvent.CommandArgs.Count)];
                             if (!string.IsNullOrEmpty(choice.ToString()))
                             {
                                 this.RdpEx(handler, timelineEvent, choice.ToString(), au);
                             }
-                            Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, JitterFactor));
+                            Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, JitterFactor));
                             break;
 
                     }

@@ -1,0 +1,430 @@
+{
+  "Departments": [
+    {
+      "Department": "Finance",
+      "Probability": 0.03,
+      "Roles": [
+        {
+          "Title": "Accountant I",
+          "Probability": 0.04,
+          "SalaryLow": 32000,
+          "SalaryHigh": 42000,
+          "Level": 1
+        },
+        {
+          "Title": "Accountant II",
+          "Probability": 0.03,
+          "SalaryLow": 42000,
+          "SalaryHigh": 48000,
+          "Level": 2
+        },
+        {
+          "Title": "Accountant III",
+          "Probability": 0.02,
+          "SalaryLow": 48000,
+          "SalaryHigh": 52000,
+          "Level": 3
+        },
+        {
+          "Title": "Accountant IV",
+          "Probability": 0.01,
+          "SalaryLow": 52000,
+          "SalaryHigh": 92000,
+          "Level": 4
+        },
+        {
+          "Title": "Financial  Officer I",
+          "Probability": 0.01,
+          "SalaryLow": 92000,
+          "SalaryHigh": 110000,
+          "Level": 4
+        },
+        {
+          "Title": "Financial  Officer II",
+          "Probability": 0.001,
+          "SalaryLow": 110000,
+          "SalaryHigh": 130000,
+          "Level": 5
+        },
+        {
+          "Title": "Financial  Officer III",
+          "Probability": 0.0001,
+          "SalaryLow": 130000,
+          "SalaryHigh": 250000,
+          "Level": 6
+        }
+      ]
+    },
+    {
+      "Department": "Administration",
+      "Probability": 0.07,
+      "Roles": [
+        {
+          "Title": "Admin Support I",
+          "Probability": 0.05,
+          "SalaryLow": 32000,
+          "SalaryHigh": 42000,
+          "Level": 1
+        },
+        {
+          "Title": "Admin Support II",
+          "Probability": 0.04,
+          "SalaryLow": 42000,
+          "SalaryHigh": 48000,
+          "Level": 2
+        },
+        {
+          "Title": "Admin Support III",
+          "Probability": 0.03,
+          "SalaryLow": 48000,
+          "SalaryHigh": 52000,
+          "Level": 3
+        },
+        {
+          "Title": "Administrative Support IV",
+          "Probability": 0.02,
+          "SalaryLow": 52000,
+          "SalaryHigh": 62000,
+          "Level": 4
+        },
+        {
+          "Title": "Administrative Support V",
+          "Probability": 0.01,
+          "SalaryLow": 62000,
+          "SalaryHigh": 72000,
+          "Level": 5
+        }
+      ]
+    },
+    {
+      "Department": "Buildings And Facilities",
+      "Probability": 0.03,
+      "Roles": [
+        {
+          "Title": "Facilities I",
+          "Probability": 0.04,
+          "SalaryLow": 32000,
+          "SalaryHigh": 42000,
+          "Level": 1
+        },
+        {
+          "Title": "Facilities II",
+          "Probability": 0.03,
+          "SalaryLow": 42000,
+          "SalaryHigh": 52000,
+          "Level": 2
+        },
+        {
+          "Title": "Facilities III",
+          "Probability": 0.02,
+          "SalaryLow": 52000,
+          "SalaryHigh": 62000,
+          "Level": 3
+        },
+        {
+          "Title": "Facilities IV",
+          "Probability": 0.01,
+          "SalaryLow": 62000,
+          "SalaryHigh": 72000,
+          "Level": 4
+        },
+        {
+          "Title": "Maintenance Services I",
+          "Probability": 0.04,
+          "SalaryLow": 22000,
+          "SalaryHigh": 32000,
+          "Level": 1
+        },
+        {
+          "Title": "Maintenance Services II",
+          "Probability": 0.03,
+          "SalaryLow": 32000,
+          "SalaryHigh": 42000,
+          "Level": 2
+        },
+        {
+          "Title": "Maintenance Services III",
+          "Probability": 0.02,
+          "SalaryLow": 42000,
+          "SalaryHigh": 52000,
+          "Level": 3
+        },
+        {
+          "Title": "Maintenance Services IV",
+          "Probability": 0.01,
+          "SalaryLow": 52000,
+          "SalaryHigh": 62000,
+          "Level": 4
+        }
+      ]
+    },
+    {
+      "Department": "Purchasing",
+      "Probability": 0.03,
+      "Roles": [
+        {
+          "Title": "Buyer I",
+          "Probability": 0.03,
+          "SalaryLow": 32000,
+          "SalaryHigh": 40000,
+          "Level": 3
+        },
+        {
+          "Title": "Buyer II,",
+          "Probability": 0.02,
+          "SalaryLow": 40000,
+          "SalaryHigh": 50000,
+          "Level": 4
+        },
+        {
+          "Title": "Buyer III,",
+          "Probability": 0.01,
+          "SalaryLow": 50000,
+          "SalaryHigh": 60000,
+          "Level": 5
+        },
+        {
+          "Title": "Buyer IV,",
+          "Probability": 0.01,
+          "SalaryLow": 60000,
+          "SalaryHigh": 70000,
+          "Level": 6
+        },
+        {
+          "Title": "Cashier I,",
+          "Probability": 0.03,
+          "SalaryLow": 10000,
+          "SalaryHigh": 20000,
+          "Level": 1
+        },
+        {
+          "Title": "Cashier II,",
+          "Probability": 0.02,
+          "SalaryLow": 20000,
+          "SalaryHigh": 30000,
+          "Level": 2
+        },
+        {
+          "Title": "Cashier III,",
+          "Probability": 0.01,
+          "SalaryLow": 40000,
+          "SalaryHigh": 50000,
+          "Level": 3
+        }
+      ]
+    },
+    {
+      "Department": "Communications and Media",
+      "Probability": 0.02,
+      "Roles": [
+        {
+          "Title": "Communications I",
+          "Probability": 0.03,
+          "SalaryLow": 20000,
+          "SalaryHigh": 30000,
+          "Level": 1
+        },
+        {
+          "Title": "Communications II",
+          "Probability": 0.02,
+          "SalaryLow": 30000,
+          "SalaryHigh": 40000,
+          "Level": 2
+        },
+        {
+          "Title": "Communications III",
+          "Probability": 0.01,
+          "SalaryLow": 40000,
+          "SalaryHigh": 50000,
+          "Level": 3
+        },
+        {
+          "Title": "Photographer  I",
+          "Probability": 0.04,
+          "SalaryLow": 10000,
+          "SalaryHigh": 20000,
+          "Level": 1
+        },
+        {
+          "Title": "Photographer II",
+          "Probability": 0.03,
+          "SalaryLow": 20000,
+          "SalaryHigh": 30000,
+          "Level": 2
+        },
+        {
+          "Title": "Photographer III",
+          "Probability": 0.02,
+          "SalaryLow": 30000,
+          "SalaryHigh": 40000,
+          "Level": 3
+        },
+        {
+          "Title": "Photographer IV",
+          "Probability": 0.01,
+          "SalaryLow": 50000,
+          "SalaryHigh": 150000,
+          "Level": 4
+        },
+        {
+          "Title": "Printing II",
+          "Probability": 0.03,
+          "SalaryLow": 20000,
+          "SalaryHigh": 30000,
+          "Level": 2
+        },
+        {
+          "Title": "Printing III",
+          "Probability": 0.02,
+          "SalaryLow": 30000,
+          "SalaryHigh": 40000,
+          "Level": 3
+        },
+        {
+          "Title": "Printing IV",
+          "Probability": 0.01,
+          "SalaryLow": 40000,
+          "SalaryHigh": 50000,
+          "Level": 4
+        }
+      ]
+    },
+    {
+      "Department": "Corporate Research",
+      "Probability": 0.02,
+      "Roles": [
+        {
+          "Title": "Data Scientist",
+          "Probability": 0.01,
+          "SalaryLow": 120000,
+          "SalaryHigh": 160000,
+          "Level": 5
+        },
+        {
+          "Title": "Research  Analyst I",
+          "Probability": 0.05,
+          "SalaryLow": 40000,
+          "SalaryHigh": 50000,
+          "Level": 1
+        },
+        {
+          "Title": "Research  Analyst II",
+          "Probability": 0.04,
+          "SalaryLow": 50000,
+          "SalaryHigh": 80000,
+          "Level": 2
+        },
+        {
+          "Title": "Research  Analyst III",
+          "Probability": 0.03,
+          "SalaryLow": 80000,
+          "SalaryHigh": 150000,
+          "Level": 3
+        },
+        {
+          "Title": "Research  Analyst IV",
+          "Probability": 0.01,
+          "SalaryLow": 140000,
+          "SalaryHigh": 170000,
+          "Level": 4
+        }
+      ]
+    },
+    {
+      "Department": "Human Resources",
+      "Probability": 0.07,
+      "Roles": [
+        {
+          "Title": "Human Resources I",
+          "Probability": 0.05,
+          "SalaryLow": 40000,
+          "SalaryHigh": 50000,
+          "Level": 1
+        },
+        {
+          "Title": "Human Resources II",
+          "Probability": 0.02,
+          "SalaryLow": 50000,
+          "SalaryHigh": 60000,
+          "Level": 2
+        },
+        {
+          "Title": "Human Resources III",
+          "Probability": 0.01,
+          "SalaryLow": 60000,
+          "SalaryHigh": 80000,
+          "Level": 3
+        }
+      ]
+    },
+    {
+      "Department": "IT",
+      "Probability": 0.07,
+      "Roles": [
+        {
+          "Title": "Systems Analyst I",
+          "Probability": 0.07,
+          "SalaryLow": 40000,
+          "SalaryHigh": 50000,
+          "Level": 1
+        },
+        {
+          "Title": "Systems Analyst II",
+          "Probability": 0.05,
+          "SalaryLow": 50000,
+          "SalaryHigh": 60000,
+          "Level": 2
+        },
+        {
+          "Title": "Systems Analyst III",
+          "Probability": 0.03,
+          "SalaryLow": 60000,
+          "SalaryHigh": 80000,
+          "Level": 3
+        },
+        {
+          "Title": "Systems Analyst IV",
+          "Probability": 0.02,
+          "SalaryLow": 80000,
+          "SalaryHigh": 150000,
+          "Level": 4
+        },
+        {
+          "Title": "Systems Analyst V",
+          "Probability": 0.01,
+          "SalaryLow": 140000,
+          "SalaryHigh": 180000,
+          "Level": 5
+        },
+        {
+          "Title": "Programmer I",
+          "Probability": 0.025,
+          "SalaryLow": 40000,
+          "SalaryHigh": 50000,
+          "Level": 2
+        },
+        {
+          "Title": "Programmer II",
+          "Probability": 0.02,
+          "SalaryLow": 50000,
+          "SalaryHigh": 70000,
+          "Level": 2
+        },
+        {
+          "Title": "Programmer III",
+          "Probability": 0.025,
+          "SalaryLow": 70000,
+          "SalaryHigh": 130000,
+          "Level": 3
+        },
+        {
+          "Title": "Programmer IV",
+          "Probability": 0.01,
+          "SalaryLow": 130000,
+          "SalaryHigh": 150000,
+          "Level": 4
+        }
+      ]
+    }
+  ]
+}

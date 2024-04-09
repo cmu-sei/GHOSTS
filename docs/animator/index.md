@@ -1,7 +1,9 @@
 # GHOSTS ANIMATOR Overview
 
 ???+ info "GHOSTS ANIMATOR Source Code"
-    The [GHOSTS ANIMATOR Source Code Repository](https://github.com/cmu-sei/GHOSTS-ANIMATOR) is hosted on GitHub
+    The [GHOSTS ANIMATOR Source Code Repository](https://github.com/cmu-sei/GHOSTS-ANIMATOR) is hosted on GitHub, but has been archived.
+
+    Animator has been baked into the main GHOSTS API. Any development on features listed here will be done in the main GHOSTS repository.
 
 Animator brings NPCs to life in two ways:
 
@@ -32,6 +34,8 @@ cd ghosts-animator
 curl https://github.com/cmu-sei/GHOSTS-ANIMATOR/blob/master/src/docker-compose.yml -o docker-compose.yml
 docker compose up -d
 ```
+
+Note, most configuration that you may want to change is located in ./config, and so you can mount that directory to your local machine and make changes there.
 
 Now browse to <http://localhost:5000/>
 

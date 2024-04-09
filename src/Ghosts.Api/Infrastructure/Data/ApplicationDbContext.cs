@@ -1,13 +1,14 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
-using System;
 using System.IO;
+using ghosts.api.Areas.Animator.Infrastructure.Models;
 using Ghosts.Api.Infrastructure.Extensions;
-using Ghosts.Api.Models;
+using ghosts.api.Infrastructure.Models;
 using Ghosts.Domain.Messages.MesssagesForServer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
+using NLog;
 
 namespace Ghosts.Api.Infrastructure.Data
 {
@@ -40,12 +41,17 @@ namespace Ghosts.Api.Infrastructure.Data
         public DbSet<Survey.LocalProcess> Processes { get; set; }
         public DbSet<Survey.LocalUser> LocalUsers { get; set; }
         public DbSet<Survey.Port> Ports { get; set; }
+        
+        public DbSet<NpcRecord> Npcs { get; set; }
+        public DbSet<NPCIpAddress> NpcIps { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
             // Add your customizations after calling base.OnModelCreating(modelBuilder);
-
+            
+            modelBuilder.Entity<NpcRecord>().Property(o => o.NpcProfile).HasColumnType("jsonb");
+            
             modelBuilder.Entity<Machine>().HasIndex(o => new {o.CreatedUtc});
             modelBuilder.Entity<Machine>().HasIndex(o => new {o.Status});
             modelBuilder.Entity<Machine>().HasIndex(o => new {o.LastReportedUtc});
@@ -95,10 +101,11 @@ namespace Ghosts.Api.Infrastructure.Data
     
     public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<ApplicationDbContext>
     {
+        private static readonly Logger _log = LogManager.GetCurrentClassLogger();        
         public ApplicationDbContext CreateDbContext(string[] args)
         {
             var path = $"{Directory.GetCurrentDirectory()}/../ghosts.api/";
-            Console.WriteLine(path);
+            _log.Trace(path);
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(path)
                 .AddJsonFile("appsettings.json")

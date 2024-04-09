@@ -1,0 +1,50 @@
+/*------------- #CLIENTS --------------*/
+
+
+
+.crumina-clients {
+  padding: 85px 0;
+  text-align: center;
+}
+
+.clients-item {
+  position: relative;
+  display: inline-block;
+
+  &:hover {
+	img {
+	  opacity: 1;
+	  filter: grayscale(0);
+	}
+  }
+
+  img {
+	transition: all .3s linear;
+	transform-style: preserve-3d;
+	opacity: 0.3;
+	filter: grayscale(100%);
+	max-width: 100%;
+	display: block;
+  }
+
+  .clients-images {
+	position: relative;
+	display: block;
+	margin: auto;
+  }
+}
+
+
+
+/*================= Responsive Mode ============*/
+
+
+@media (max-width: 1200px) {
+  .crumina-clients {
+	padding: 40px 0;
+  }
+
+  .clients-item {
+	margin-bottom: 20px;
+  }
+}

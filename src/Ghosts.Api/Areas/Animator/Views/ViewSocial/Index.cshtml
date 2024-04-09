@@ -1,0 +1,70 @@
+@model List<ghosts.api.Areas.Animator.Infrastructure.Animations.SocialGraph>
+
+@{
+    string GetStyle(int count)
+    {
+        return count switch
+        {
+            >= 90 => "z9",
+            >= 80 => "z8",
+            >= 70 => "z7",
+            >= 60 => "z6",
+            >= 50 => "z5",
+            >= 40 => "z4",
+            >= 30 => "z3",
+            >= 20 => "z2",
+            >= 10 => "z1",
+            _ => "z0"
+            };
+    }
+}
+
+
+<style>
+    .f {margin-right: 4px;}
+    .z0 {color: oldlace;}
+    .z1 {color: #F8F8F8; }
+    .z2 {color: #E0E0E0; }
+    .z3 {color: #C8C8C8; }
+    .z4 {color: #888888; }
+    .z5 {color: #707070; }
+    .z6 {color: #505050; }
+    .z7 {color: #383838; }
+    .z8 {color: #282828; }
+    .z9 {color: #101010; }
+    .f:hover {background: aliceblue;cursor:pointer}
+</style>
+
+<div>
+    <h1>Agents Social Graph</h1>
+    <p></p>
+</div>
+
+
+<div class="row">
+    <div class="col-sm-12">
+        @if (!ViewBag.IsEnabled || Model == null)
+        {
+            <p>Sorry, but social graph does not appear to be enabled or has not been loaded.</p>
+        }
+        else
+        {
+            <ul class="list-group">
+                @foreach (var agent in Model)
+                {
+                    <li class="list-group-item">
+                        <img src="/api/npcs/@agent.Id/photo" height="16" width="16" alt="Profile thumbnail"/>
+                        @agent.Name / <a href="view-relationships/profile/@agent.Id">Profile</a> / <a href="view-social/@agent.Id">Social Graph</a>
+                        <div class="d-flex flex-wrap small">
+                            @foreach (var learning in agent.Knowledge.GroupBy(x => x.Topic).OrderBy(x => x.Key))
+                            {
+                                var total = learning.Sum(x => x.Value);
+                                <div class="hover f @GetStyle(total)">@learning.Key @total</div>
+                            }
+                        </div>
+                    </li>
+                }
+            </ul>
+        }
+    </div>
+</div>

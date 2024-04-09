@@ -2,7 +2,9 @@
 
 using System;
 using System.IO;
+using System.Net;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using NLog;
 
 namespace Ghosts.Domain.Code
@@ -20,42 +22,54 @@ namespace Ghosts.Domain.Code
             return new FileInfo(TimelineFile);
         }
 
+        public static void CheckForUrlTimeline(WebClient client, string timelineConfig)
+        {
+            if (!timelineConfig.StartsWith("http")) return;
+
+            try
+            {
+                using (var stream = client.OpenRead(timelineConfig))
+                    if (stream != null)
+                        using (var reader = new StreamReader(stream))
+                        {
+                            var content = reader.ReadToEnd();
+                            if (string.IsNullOrEmpty(content))
+                                throw new Exception("Http timeline file could not be found, falling back to local");
+
+                            try
+                            {
+                                GetTimelineFromString(content, null);
+                            }
+                            catch (Exception)
+                            {
+                                _log.Error($"Timeline fetched from {timelineConfig} is not in the correct format, falling back to local");
+                                throw;
+                            }
+
+                            File.WriteAllText(TimelineFile, content);
+                        }
+            }
+            catch (Exception e)
+            {
+                _log.Error($"Http timeline file could not be found, falling back to local: {e}");
+            }
+        }
+
         /// <summary>
         /// Get from local disk
         /// </summary>
         /// <returns>The local timeline to be executed</returns>
-        public static Timeline GetLocalTimeline()
+        public static Timeline GetTimeline()
         {
-            _log.Trace($"Loading timeline config {TimelineFile }");
-
-            var raw = File.ReadAllText(TimelineFile);
-
-            var timeline = JsonConvert.DeserializeObject<Timeline>(raw);
-            if (timeline.Id == Guid.Empty)
-            {
-                timeline.Id = Guid.NewGuid();
-                SetLocalTimeline(TimelineFile, timeline);
-            }
-
-            _log.Debug($"Timeline {timeline.Id} loaded successfully");
-            
-            return timeline;
+            return GetTimeline(TimelineFile);
         }
 
-        public static Timeline GetLocalTimeline(string path)
+        public static Timeline GetTimeline(string path)
         {
             try
             {
                 var raw = File.ReadAllText(path);
-
-                var timeline = JsonConvert.DeserializeObject<Timeline>(raw);
-                if (timeline.Id == Guid.Empty)
-                {
-                    timeline.Id = Guid.NewGuid();
-                    SetLocalTimeline(path, timeline);
-                }
-
-                return timeline;
+                return GetTimelineFromString(raw, path);
             }
             catch
             {
@@ -63,6 +77,31 @@ namespace Ghosts.Domain.Code
             }
         }
 
+        public static Timeline GetTimelineFromString(string raw, string path)
+        {
+            var rnd = new Random();
+
+            try
+            {
+                var timeline = JsonConvert.DeserializeObject<Timeline>(raw);
+                if (timeline.Id == Guid.Empty)
+                {
+                    timeline.Id = Guid.NewGuid();
+                    if (!string.IsNullOrEmpty(path))
+                    {
+                        SetLocalTimeline(path, timeline);
+                    }
+                }
+
+                _log.Debug($"Timeline {timeline.Id} loaded successfully");
+                return timeline;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+        
         public static Timeline StringToTimeline(string raw)
         {
             try
@@ -76,7 +115,7 @@ namespace Ghosts.Domain.Code
                 return null;
             }
         }
-
+        
         public static string TimelineToString(Timeline timeline)
         {
             try
@@ -96,8 +135,15 @@ namespace Ghosts.Domain.Code
         /// <param name="timelineString">Raw timeline string (to be converted to `Timeline` type)</param>
         public static void SetLocalTimeline(string timelineString)
         {
-            var timelineObject = JsonConvert.DeserializeObject<Timeline>(timelineString);
-            SetLocalTimeline(timelineObject);
+            var timelineObject = GetTimelineFromString(timelineString, null);
+            if (timelineObject != null)
+            {
+                SetLocalTimeline(timelineObject);
+            }
+            else
+            {
+                _log.Error("Attempt to write null timeline to disk...");
+            }
         }
         
         /// <summary>

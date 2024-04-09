@@ -1,0 +1,219 @@
+/*------------- #TODAY-EVENTS --------------*/
+
+
+.today-events {
+
+  .accordion-button {
+	padding: 0;
+	text-align: left;
+	display: block;
+	padding-right: 40px;
+
+	&:after {
+	  display: none;
+	}
+  }
+
+  .control-block-button {
+	right: 25px;
+	top: -25px;
+	z-index: 5;
+
+	svg {
+	  width: 20px;
+	  height: 20px;
+	}
+
+	.olymp-dropdown-arrow-icon {
+	  width: 6px;
+	  height: 4px;
+	}
+  }
+
+  .day-event {
+	display: block !important;
+	border-top: none;
+
+	.accordion-button i, .accordion-button svg {
+	  margin-top: 3px;
+	  margin-left: 7px;
+	  float: none;
+	}
+  }
+
+  .card.checked {
+	.event-time {
+	  &:before {
+		border-color: #38a9ff;
+		border-color: var(--olympus-blue);
+	  }
+	}
+  }
+
+  .event-time {
+	position: relative;
+
+	&:before {
+	  content:'';
+	  width: 9px;
+	  height: 9px;
+	  border: 2px solid #08ddc1;
+	  border: 2px solid var(--olympus-breez);
+	  border-radius: 100%;
+	  display: block;
+	  position: absolute;
+	  left: -29px;
+	  top: 5px;
+	  background-color: #fff;
+	  background-color: var(--olympus-white-color);
+	  box-sizing: border-box;
+	}
+  }
+
+  .title {
+	position: relative;
+	padding-right: 30px;
+  }
+
+  .event-status-icon {
+	position: absolute;
+	top: 0;
+	right: 0;
+	fill: #888da8;
+	fill: var(--olympus-body-font-color);
+
+	&.completed {
+	  fill: #08ddc1;
+	  fill: var(--olympus-breez);
+	}
+
+	&.checked {
+	  fill: #38a9ff;
+	  fill: var(--olympus-blue);
+	}
+  }
+
+  .event-time {
+	margin-bottom: 10px;
+
+	time {
+	  font-size: 12px;
+	}
+  }
+
+  &.calendar {
+	.list {
+	  margin-top: 0;
+	  position: relative;
+	  overflow: visible;
+	}
+
+	.accordion-item {
+	  border-bottom: none;
+	  padding-left: 25px;
+
+	  &:before {
+		display: block;
+		content: '';
+		width: 1px;
+		height: 100%;
+		background-color: #e6ecf5;
+		background-color: var(--olympus-border-color);
+		position: absolute;
+		left: 25px;
+		top: 0;
+	  }
+
+	  &:last-child {
+
+		&:before {
+		  height: 25px;
+		}
+
+		.accordion-header {
+		  padding-bottom: 25px;
+		}
+	  }
+
+	  &:first-child {
+
+		.accordion-header {
+		  padding-top: 25px;
+		}
+	  }
+	}
+
+	.day-event .accordion-header .event-status-icon {
+	  i, svg {
+		margin-top: 0;
+		margin-left: 0;
+		width: 20px;
+		height: 20px;
+	  }
+	}
+
+	.accordion-header {
+	  padding: 15px 25px;
+	  font-size: 14px;
+
+
+	  .more-dropdown {
+		right: auto;
+		left: 0;
+
+		a {
+		  font-size: 12px;
+		  &:hover {
+			color: #08ddc1;
+			color: var(--olympus-breez);
+		  }
+		}
+	  }
+
+	  .olymp-dropdown-arrow-icon {
+		width: 6px;
+		height: 4px;
+		margin-left: 5px;
+	  }
+
+	  .olymp-three-dots-icon {
+		width: 16px;
+		height: 4px;
+		margin-left: 7px;
+	  }
+
+	}
+  }
+
+}
+
+.today-events-thumb {
+  position: relative;
+  background-image: url("../img/bg-event-day.webp");
+  text-align: center;
+  padding: 25px;
+  color: #fff;
+  color: var(--olympus-white-color);
+
+  .day-number {
+	font-size: 80px;
+	line-height: 1;
+	margin-bottom: 5px;
+  }
+
+  .day-week {
+	font-size: 24px;
+	margin-bottom: 5px;
+  }
+
+  .month-year {
+	font-size: 12px;
+	color: #888da8;
+	color: var(--olympus-body-font-color);
+  }
+}
+
+.accordion-button .olymp-dropdown-arrow-icon {
+  width: 6px;
+  height: 4px;
+}

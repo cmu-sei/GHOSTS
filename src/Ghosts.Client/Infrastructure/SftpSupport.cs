@@ -6,7 +6,6 @@ using System.Threading;
 using Renci.SshNet;
 using Renci.SshNet.Sftp;
 
-
 namespace Ghosts.Client.Infrastructure
 {
     public class SftpSupport : SshSftpSupport
@@ -26,9 +25,9 @@ namespace Ghosts.Client.Infrastructure
 
             try
             {
-                var remoteFiles = client.ListDirectory(".").ToList<SftpFile>();
+                var remoteFiles = client.ListDirectory(".");
                 List<SftpFile> normalFiles = new List<SftpFile>();
-                foreach (var f in remoteFiles)
+                foreach (SftpFile f in remoteFiles)
                 {
                     if (f.IsDirectory || f.IsSymbolicLink) continue;
                     if (f.IsRegularFile) normalFiles.Add(f);
@@ -55,9 +54,9 @@ namespace Ghosts.Client.Infrastructure
 
             try
             {
-                var remoteFiles = client.ListDirectory(".").ToList<SftpFile>();
+                var remoteFiles = client.ListDirectory(".");
                 List<SftpFile> normalFiles = new List<SftpFile>();
-                foreach (var f in remoteFiles)
+                foreach (SftpFile f in remoteFiles)
                 {
                     if (f.IsRegularFile || f.IsSymbolicLink) continue;
                     if (f.IsDirectory) normalFiles.Add(f);
@@ -84,12 +83,12 @@ namespace Ghosts.Client.Infrastructure
 
             try
             {
-                var remoteFiles = client.ListDirectory(".").ToList<SftpFile>();
+                var remoteFiles = client.ListDirectory(".");
                 List<SftpFile> normalFiles = new List<SftpFile>();
                 foreach (var f in remoteFiles)
                 {
                     if (f.IsRegularFile || f.IsSymbolicLink) continue;
-                    if (f.IsDirectory && f.Name == targetdir) return f;
+                    if (f.IsDirectory && f.Name == targetdir) return (SftpFile)f;
                 }
             }
             catch (ThreadAbortException)
@@ -246,12 +245,12 @@ namespace Ghosts.Client.Infrastructure
                 }
             }
             //at this point, localFilePath, remoteFilePath are set
-            if (System.IO.File.Exists(localFilePath))
+            if (File.Exists(localFilePath))
             {
                 try
                 {
                     //delete the file if exists locally
-                    System.IO.File.Delete(localFilePath);
+                    File.Delete(localFilePath);
                 }
                 catch (ThreadAbortException)
                 {
@@ -266,12 +265,10 @@ namespace Ghosts.Client.Infrastructure
             //now download the file
             try
             {
-                using (var fileStream = System.IO.File.OpenWrite(localFilePath))
-                {
-                    client.DownloadFile(remoteFilePath, fileStream);
-                    Log.Trace($"Sftp:: Success, Downloaded remote file {remoteFilePath},host {this.HostIp}  to file {localFilePath},  ");
-                    fileStream.Close();
-                }
+                using var fileStream = File.OpenWrite(localFilePath);
+                client.DownloadFile(remoteFilePath, fileStream);
+                Log.Trace($"Sftp:: Success, Downloaded remote file {remoteFilePath},host {this.HostIp}  to file {localFilePath},  ");
+                fileStream.Close();
             }
             catch (ThreadAbortException)
             {
@@ -377,8 +374,8 @@ namespace Ghosts.Client.Infrastructure
 
             try
             {
-                var remoteFiles = client.ListDirectory(dirName).ToList<SftpFile>();
-                Log.Trace($"Sftp:: Success, Found {remoteFiles.Count} in directory {dirName} on remote host {this.HostIp}.");
+                var remoteFiles = client.ListDirectory(dirName);
+                Log.Trace($"Sftp:: Success, Found {remoteFiles.Count()} in directory {dirName} on remote host {this.HostIp}.");
             }
             catch (ThreadAbortException)
             {

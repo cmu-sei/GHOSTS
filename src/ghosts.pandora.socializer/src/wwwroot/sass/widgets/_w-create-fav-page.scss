@@ -1,0 +1,90 @@
+/*------------- #W-CREATE-FAV-PAGE --------------*/
+
+
+
+.w-create-fav-page {
+  padding: 25px;
+  background-color: #ff5e3a;
+  background-color: var(--olympus-primary-color);
+
+  svg {
+	fill: #fff;
+	fill: var(--olympus-white-color);
+  }
+
+  .olymp-star-icon {
+	width: 20px;
+	height: 20px;
+  }
+
+  .more {
+	float: right;
+	color: #ffbfb0;
+	fill: #ffbfb0;
+  }
+
+  .icons-block {
+	margin-bottom: 80px;
+  }
+
+  .content {
+	color: #fff;
+	color: var(--olympus-white-color);
+
+	span {
+	  font-size: 10px;
+	}
+
+	.title {
+	  line-height: 1.1;
+	  font-weight: 400;
+	  color: inherit;
+	  margin-bottom: 20px;
+	}
+  }
+
+  .btn {
+	margin-bottom: 0;
+  }
+}
+
+.page-description {
+  border: 1px solid #e6ecf5;
+  border: 1px solid var(--olympus-border-color);
+  background-color: #fff;
+  background-color: var(--olympus-white-color);
+  margin-bottom: 25px;
+  border-radius: 5px;
+  overflow: hidden;
+  display: flex;
+
+  .icon {
+	padding: 15px 18px;
+	fill: #fff;
+	fill: var(--olympus-white-color);
+	background-color: #9a9fbf;
+	background-color: var(--olympus-grey-lighter);
+	border-right: 1px solid #e6ecf5;
+	border-right: 1px solid var(--olympus-border-color);
+
+	svg {
+	  width: 20px;
+	  height: 20px;
+	  display: block;
+	}
+  }
+
+  span {
+	padding: 15px 25px;
+  }
+}
+
+/*------------- Responsive mode styles --------------*/
+
+@media (max-width: 768px) {
+  .page-description {
+	span {
+	  padding: 10px 15px;
+	}
+  }
+}

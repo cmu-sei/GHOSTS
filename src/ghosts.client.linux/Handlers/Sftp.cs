@@ -6,7 +6,6 @@ using ghosts.client.linux.Infrastructure;
 using Ghosts.Domain;
 using Newtonsoft.Json;
 using Ghosts.Domain.Code;
-using WorkingHours = ghosts.client.linux.Infrastructure.WorkingHours;
 
 namespace ghosts.client.linux.handlers
 {
@@ -127,8 +126,8 @@ namespace ghosts.client.linux.handlers
             {
                 WorkingHours.Is(handler);
 
-                if (timelineEvent.DelayBefore > 0)
-                    Thread.Sleep(timelineEvent.DelayBefore);
+                if (timelineEvent.DelayBeforeActual > 0)
+                    Thread.Sleep(timelineEvent.DelayBeforeActual);
 
                 _log.Trace($"Sftp Command: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfter}");
 
@@ -142,12 +141,12 @@ namespace ghosts.client.linux.handlers
                             {
                                 this.Command(handler, timelineEvent, cmd.ToString());
                             }
-                            Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, jitterfactor)); ;
+                            Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, jitterfactor)); ;
                         }
                 }
 
-                if (timelineEvent.DelayAfter > 0)
-                    Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, jitterfactor)); ;
+                if (timelineEvent.DelayAfterActual > 0)
+                    Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, jitterfactor)); ;
             }
         }
 

@@ -1,0 +1,20 @@
+{
+    "TimeLineHandlers": [
+        {
+            "HandlerType": "Clicks",
+            "Initial": "",
+            "UtcTimeOn": "00:00:00",
+            "UtcTimeOff": "24:00:00",
+            "Loop": true,
+            "TimeLineEvents": [
+                {
+                    "Command": "Clicks",
+                    "CommandArgs": [],
+                    "TrackableId": "",
+                    "DelayAfter": 10000,
+                    "DelayBefore": 0
+                }
+            ]
+        }
+    ]
+}

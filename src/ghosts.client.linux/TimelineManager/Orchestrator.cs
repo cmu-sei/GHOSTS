@@ -25,7 +25,7 @@ namespace ghosts.client.linux.timelineManager
         {
             try
             {
-                var timeline = TimelineBuilder.GetLocalTimeline();
+                var timeline = TimelineBuilder.GetTimeline();
 
                 var dirName = TimelineBuilder.TimelineFilePath().DirectoryName;
 

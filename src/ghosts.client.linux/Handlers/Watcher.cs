@@ -78,7 +78,7 @@ internal class Watcher : BaseHandler
                 Thread.Sleep(2000); //default
             }
         }
-        catch (Exception e){
+        catch (Exception){
             throw;  //will be logged at next level
         }
         finally  {

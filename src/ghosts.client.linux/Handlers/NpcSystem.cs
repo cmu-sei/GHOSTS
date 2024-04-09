@@ -22,7 +22,7 @@ namespace ghosts.client.linux.handlers
                 switch (timelineEvent.Command.ToLower())
                 {
                     case "start":
-                        t = TimelineBuilder.GetLocalTimeline();
+                        t = TimelineBuilder.GetTimeline();
                         t.Status = Timeline.TimelineStatus.Run;
                         TimelineBuilder.SetLocalTimeline(t);
                         break;
@@ -33,7 +33,7 @@ namespace ghosts.client.linux.handlers
                         }
                         else
                         {
-                            t = TimelineBuilder.GetLocalTimeline();
+                            t = TimelineBuilder.GetTimeline();
                             t.Status = Timeline.TimelineStatus.Stop;
                             StartupTasks.CleanupProcesses();
                             TimelineBuilder.SetLocalTimeline(t);

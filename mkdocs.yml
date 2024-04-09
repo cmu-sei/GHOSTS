@@ -9,22 +9,22 @@ theme:
     - navigation.sections
     - navigation.indexes
     - toc.integrate
-  logo: assets/img/ghosts.png
-  favicon: assets/img/ghosts.png
+  logo: assets/img/ghosts_new.png
+  favicon: assets/img/ghosts_new.png
   palette:
     # Palette toggle for light mode
     - scheme: default
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
-      primary: green
+      primary: purple
 
     # Palette toggle for dark mode
     - scheme: slate
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
-      primary: green
+      primary: purple
 markdown_extensions:
   # Python Markdown
   - abbr
@@ -65,7 +65,7 @@ nav:
   - Home: index.md
   - What's New: new.md
   - Quick Start: quickstart.md
-  - Core Client: 
+  - Client: 
     - core/client.md
     - Client Handlers:
       - Basic Configuration: core/handlers.md
@@ -90,15 +90,14 @@ nav:
         - Blogs/Drupal: core/handlers/blog_helper.md
         - Sharepoint: core/handlers/sharepoint_helper.md
       - Wmi: core/handlers/wmi.md
-  - Core API: 
+  - API: 
       - core/api.md
       - Capabilities:
         - Managing Timelines: core/api/timelines.md
-  - Animator: 
+  - Animations:
     - animator/index.md
     - Animation Jobs: animator/jobs.md
     - Running Animations: animator/run.md
-  - Spectre: spectre/index.md
   - Content Servers: 
     - content/index.md
     - Pandora: content/pandora.md

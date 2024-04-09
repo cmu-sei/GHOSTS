@@ -1,9 +1,11 @@
 # GHOSTS SPECTRE Overview
 
 ???+ info "GHOSTS SPECTRE Source Code"
-    The [GHOSTS SPECTRE Source Code Repository](https://github.com/cmu-sei/GHOSTS-SPECTRE) is hosted on GitHub
+    The [GHOSTS SPECTRE Source Code Repository](https://github.com/cmu-sei/GHOSTS-SPECTRE) is hosted on GitHub, but is now archived.
 
-SPECTRE is our attempt to reduce that agent browsing patterns appear as "computer random".[^1] This module modifies user web browser timelines so that they more closely match that agent's preferences over time. We expect this simple model of ML to be used for other types of agent activity in the future.
+    Any development on SPECTRE will be done in the main GHOSTS repository.
+
+SPECTRE was our attempt to reduce that agent browsing patterns appear as "computer random".[^1] This module modifies user web browser timelines so that they more closely match that agent's preferences over time. We expect this simple model of ML to be used for other types of agent activity in the future.
 
 Agent browsing patterns are no longer random and match different types of users on a network. These patterns improve over time.
 

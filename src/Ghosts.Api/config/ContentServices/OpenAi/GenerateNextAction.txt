@@ -1,0 +1,11 @@
+Given this json information about a person ```[[flattenedAgent]]```
+And that they've recently done the following: ```[[history]]```
+And that they can use any program on a computer.
+What might they do—given who they are, what role they play within the organization, and what a realistic representation of this person might actually do?
+People do a wide array of activities in a day, and we want to mimic that.
+People sometimes do irrational things, and we need to account for this.
+Consider that 14 times a year there is a full moon, and we need to account for this.
+Consider that periodically someone will do something on their computer that is not allowed by company policy—they will do this by mistake or intentionally.
+Consider that people often do things off-line that influence their online actions.
+Just tell me what they do, there is no need to tell me about what data I sent you, just reply with the action and why you chose that action IN ONE SENTENCE.
+Do not use word, or excel. what would this person do?

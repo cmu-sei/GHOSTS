@@ -37,6 +37,9 @@ public static class ProcessManager
             case HandlerType.Command:
                 KillProcessAndChildrenByName("cmd");
                 break;
+            case HandlerType.PowerShell:
+                KillProcessAndChildrenByName("powershell");
+                break;
             case HandlerType.Word:
                 KillProcessAndChildrenByName("winword");
                 break;

@@ -253,7 +253,7 @@ namespace Ghosts.Client.Handlers
                     {
                         throw;  //pass up
                     }
-                    catch (Exception e)
+                    catch
                     {
                         i += 1;
                         if (i >= 5) break;

@@ -44,7 +44,7 @@ public static class StartupTasks
         {
             var cleanupList = new List<string>();
 
-            var timeline = TimelineBuilder.GetLocalTimeline();
+            var timeline = TimelineBuilder.GetTimeline();
             foreach (var handler in timeline.TimeLineHandlers)
             {
                 switch (handler.HandlerType)

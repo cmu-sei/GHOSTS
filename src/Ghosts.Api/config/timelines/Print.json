@@ -1,0 +1,21 @@
+﻿{
+    "TimeLineHandlers": [
+        {
+            "HandlerType": "Print",
+            "Initial": "",
+            "UtcTimeOn": "00:00:00",
+            "UtcTimeOff": "24:00:00",
+            "Loop": "False",
+            "TimeLineEvents": [
+                {
+                    "Command": "MyPrinter",
+                    "CommandArgs": [
+                        "C:\\Temp\\print_test.txt"
+                    ],
+                    "DelayAfter": 900000,
+                    "DelayBefore": 0
+                }
+            ]
+        }
+    ]
+}

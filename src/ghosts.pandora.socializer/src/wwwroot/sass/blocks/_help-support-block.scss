@@ -1,0 +1,182 @@
+/*------------- #HELP-SUPPORT-BLOCK --------------*/
+
+
+
+.help-support-block {
+  margin-bottom: 60px;
+
+  .title {
+	margin-bottom: 60px;
+	display: flex;
+	align-items: center;
+
+	.total-topic {
+	  margin-left: 15px;
+	}
+
+	&:hover {
+	  .total-topic {
+		background-color: #7c5ac2;
+		background-color: var(--olympus-purple);
+		color: #fff;
+		color: var(--olympus-white-color);
+	  }
+	}
+  }
+}
+
+.total-topic {
+  font-size: 10px;
+  border-radius: 100%;
+  font-weight: 900;
+  width: 30px;
+  height: 30px;
+  background-color: #ebecf2;
+  text-align: center;
+  line-height: 30px;
+  display: block;
+  color: #515365;
+  color: var(--olympus-heading-color);
+}
+
+.help-support-list {
+  li {
+	display: flex;
+	align-items: flex-start;
+
+	svg {
+	  margin-right: 20px;
+	  min-width: 14px;
+	  min-height: 14px;
+	  max-width: 14px;
+	  max-height: 14px;
+	  fill: #9a9fbf;
+	  fill: var(--olympus-icon-color);
+	  position: relative;
+	  top: 3px;
+	}
+
+	a {
+	  font-size: 14px;
+	  color: #888da8;
+	  color: var(--olympus-body-font-color);
+	}
+
+	& + li {
+	  margin-top: 20px;
+	}
+
+	&:hover {
+	  a {
+		color: #515365;
+		color: var(--olympus-heading-color);
+	  }
+
+	  svg {
+		fill: #ff5e3a;
+		fill: var(--olympus-primary-color);
+	  }
+	}
+  }
+}
+
+.help-main-topic {
+
+  .title {
+	margin-bottom: 20px;
+  }
+
+  .help-image {
+	margin: 40px auto;
+  }
+
+  .single-post-additional {
+	margin-bottom: 20px;
+  }
+
+  .single-post-additional > * + * {
+	border-left: none;
+	margin-left: 30px;
+  }
+
+  .single-post-additional > * {
+	padding: 20px 0;
+  }
+}
+
+.user-raiting-choice {
+  padding: 35px 0;
+  border-top: 1px solid #e6ecf5;
+  border-top: 1px solid var(--olympus-border-color);
+  border-bottom: 1px solid #e6ecf5;
+  border-bottom: 1px solid var(--olympus-border-color);
+  margin-top: 40px;
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+
+  b {
+	margin-left: 5px;
+  }
+
+  a {
+	margin-left: 15px;
+	opacity: .8;
+	display: inline-block;
+	vertical-align: middle;
+
+	&:hover {
+	  opacity: 1;
+	}
+  }
+
+  span {
+	color: #515365;
+	color: var(--olympus-heading-color);
+	margin-left: auto;
+	font-weight: 700;
+  }
+}
+
+
+
+/*================= Responsive Mode ============*/
+
+
+@media (max-width: 860px) {
+
+  .help-support-block .title {
+	margin-bottom: 20px;
+  }
+}
+
+@media (max-width: 560px) {
+
+  .help-main-topic {
+	.single-post-additional > * {
+	  display: inline-block;
+	}
+  }
+
+  .user-raiting-choice {
+	display: block;
+	padding: 15px 0;
+	margin-top: 20px;
+
+	span {
+	  display: block;
+	  margin-top: 15px;
+	}
+  }
+}
+
+@media (max-width: 360px) {
+
+  .help-main-topic .single-post-additional > * {
+	display: block;
+  }
+
+  .help-main-topic .single-post-additional > * + * {
+	margin-left: 0;
+  }
+}

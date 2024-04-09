@@ -1,0 +1,116 @@
+/*------------- #FOOTER --------------*/
+
+
+
+.footer {
+  width: 100%;
+  margin: 0 auto;
+  padding: 70px 55px 0;
+  background-color: #fff;
+  background-color: var(--olympus-white-color);
+  box-shadow: 0 0 34px 0 rgba(63, 66, 87, 0.1);
+  position: relative;
+
+  .widget .title {
+	margin-bottom: 25px;
+  }
+
+  &.footer-full-width {
+	width: 100%;
+  }
+
+  &.has-not-copyright {
+	padding: 70px 55px;
+  }
+}
+
+.footer--dark {
+  background-color: #3f4257;
+  background-color: var(--olympus-secondary-color);
+
+  .w-about .logo {
+	color: #fff;
+	color: var(--olympus-white-color);
+
+	.logo-title {
+	  color: #fff;
+	  color: var(--olympus-white-color);
+	}
+
+	&:hover {
+	  color: #fff;
+	  color: var(--olympus-white-color);
+	}
+  }
+
+  .widget .title {
+	color: #fff;
+	color: var(--olympus-white-color);
+  }
+
+  .socials {
+
+	i, svg {
+	  color: #fff;
+	  color: var(--olympus-white-color);
+
+	  &:hover {
+		color: #ff5e3a;
+		color: var(--olympus-primary-color);
+	  }
+	}
+  }
+}
+
+.sub-footer-copyright {
+  padding: 40px 0;
+  text-align: center;
+  border-top: 1px solid #e6ecf5;
+  border-top: 1px solid var(--olympus-border-color);
+  margin-top: 60px;
+
+  span {
+	font-size: 12px;
+  }
+
+  a {
+	color: #ff5e3a;
+	color: var(--olympus-primary-color);
+	opacity: .7;
+	font-weight: 500;
+
+	&:hover {
+	  opacity: 1;
+	}
+  }
+}
+
+
+/*------------- Responsive mode styles --------------*/
+
+@media (max-width: 1024px) {
+  .footer .widget {
+	margin-bottom: 40px;
+  }
+
+  .footer {
+	padding: 40px 15px;
+	width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .footer {
+	text-align: center;
+  }
+
+  .footer .w-about .logo {
+	display: inline-flex;
+	margin-bottom: 10px;
+  }
+
+  .sub-footer-copyright {
+	margin-top: 0;
+	padding-bottom: 0;
+  }
+}

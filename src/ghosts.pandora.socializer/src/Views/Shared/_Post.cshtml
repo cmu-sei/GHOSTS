@@ -1,0 +1,88 @@
+@model Socializer.Infrastructure.Post
+
+@{
+    var rnd = new Random();
+    var post = Model;
+
+    <div class="ui-block">
+        <article class="hentry post">
+        <div class="post__author author vcard inline-items">
+            <img loading="lazy" src="/u/@post.User/avatar" alt="author" width="42" height="42">
+            <div class="author-date">
+                <a class="h6 post__author-name fn" href="/u/@post.User">@post.User</a> shared a <a href="/posts/@post.Id">link</a>
+                <div class="post__date">
+                <time class="published" datetime="@post.CreatedUtc">
+                    @post.CreatedUtc
+                </time>
+            </div>
+        </div>
+    </div>
+
+    @Html.Raw(post.Message)
+
+    <div class="post-additional-info inline-items">
+        <a href="#" class="post-add-icon inline-items">
+            <svg class="olymp-heart-icon">
+                <use xlink:href="#olymp-heart-icon"></use>
+            </svg>
+            <span>18</span>
+        </a>
+        <ul class="friends-harmonic">
+            @{
+                for (var i = 1; i < rnd.Next(2, 16); i++)
+                {
+                    var img = $"/img/friend-harmonic{i}.webp";
+                    <li>
+                        <a href="#">
+                            <img loading="lazy" src="@img" alt="friend" width="28" height="28">
+                        </a>
+                    </li>
+                }
+            }
+        </ul>
+        <div class="names-people-likes">
+            @{
+                foreach (var like in post.Likes)
+                {
+                    <span><a href="/u/@like.UserId">@like.UserId</a> and <br/>@post.Likes.Count more liked this</span>
+                    break;
+                }
+            }
+        </div>
+        <div class="comments-shared">
+            <a href="#" class="post-add-icon inline-items">
+                <svg class="olymp-speech-balloon-icon">
+                    <use xlink:href="#olymp-speech-balloon-icon"></use>
+                </svg>
+
+                <span>0</span>
+            </a>
+            <a href="#" class="post-add-icon inline-items">
+                <svg class="olymp-share-icon">
+                    <use xlink:href="#olymp-share-icon"></use>
+                </svg>
+
+                <span>16</span>
+            </a>
+        </div>
+    </div>
+    <div class="control-block-button post-control-button">
+        <a href="#" class="btn btn-control like-it" data-id="@post.Id">
+            <svg class="olymp-like-post-icon">
+                <use xlink:href="#olymp-like-post-icon"></use>
+            </svg>
+        </a>
+        <a href="#" class="btn btn-control">
+            <svg class="olymp-comments-post-icon">
+                <use xlink:href="#olymp-comments-post-icon"></use>
+            </svg>
+        </a>
+        <a href="#" class="btn btn-control">
+            <svg class="olymp-share-icon">
+                <use xlink:href="#olymp-share-icon"></use>
+            </svg>
+        </a>
+    </div>
+    </article>
+    </div>
+}

@@ -1,0 +1,21 @@
+/*------------- #W-LATEST-PHOTO --------------*/
+
+
+
+.w-last-photo {
+  margin-bottom: 0;
+  overflow: hidden;
+
+	li {
+	  width: 33.33%;
+	  float: left;
+	  padding: 0 4px 4px 0;
+	  overflow: hidden;
+	}
+
+  img {
+	width: 100%;
+	border-radius: 3px;
+	display: block;
+  }
+}

@@ -12,8 +12,6 @@ using Ghosts.Domain.Code.Helpers;
 using NetOffice.ExcelApi.Enums;
 using Newtonsoft.Json;
 using Excel = NetOffice.ExcelApi;
-using WorkingHours = Ghosts.Client.Infrastructure.WorkingHours;
-
 namespace Ghosts.Client.Handlers;
 
 public class ExcelHandler : BaseHandler
@@ -89,17 +87,17 @@ public class ExcelHandler : BaseHandler
                     Log.Trace($"Excel event - {timelineEvent}");
                     WorkingHours.Is(handler);
 
-                    if (timelineEvent.DelayBefore > 0)
+                    if (timelineEvent.DelayBeforeActual > 0)
                     {
                         if (jitterFactor > 0)
                         {
-                            Log.Trace($"DelayBefore, Sleeping with jitterfactor of {jitterFactor}% {timelineEvent.DelayBefore}");
-                            Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayBefore, jitterFactor));
+                            Log.Trace($"DelayBefore, Sleeping with jitterfactor of {jitterFactor}% {timelineEvent.DelayBeforeActual}");
+                            Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayBeforeActual, jitterFactor));
                         }
                         else
                         {
-                            Log.Trace($"DelayBefore, Sleeping {timelineEvent.DelayBefore}");
-                            Thread.Sleep(timelineEvent.DelayBefore);
+                            Log.Trace($"DelayBefore, Sleeping {timelineEvent.DelayBeforeActual}");
+                            Thread.Sleep(timelineEvent.DelayBeforeActual);
                         }
                     }
 
@@ -129,9 +127,12 @@ public class ExcelHandler : BaseHandler
                         {
                             document = excelApplication.Workbooks.Add();
                             Log.Trace($"{handler.HandlerType} adding new...");
+
                         }
-                            
-                        Log.Trace("Excel adding worksheet");
+
+                        for(var i = 0; i < _random.Next(1,8); i++)
+                            document.Worksheets.Add(Type.Missing, document.Worksheets[document.Worksheets.Count]);
+
                         var workSheet = (Excel.Worksheet)document.Worksheets[1];
 
                         for (var i = 2; i < 10; i++)
@@ -262,11 +263,11 @@ public class ExcelHandler : BaseHandler
                         if (_random.Next(100) < 50)
                             document.Close();
 
-                        if (timelineEvent.DelayAfter > 0 && jitterFactor < 1)
+                        if (timelineEvent.DelayAfterActual > 0 && jitterFactor < 1)
                         {
                             //sleep and leave the app open
-                            Log.Trace($"Sleep after for {timelineEvent.DelayAfter}");
-                            Thread.Sleep(timelineEvent.DelayAfter - writeSleep);
+                            Log.Trace($"Sleep after for {timelineEvent.DelayAfterActual}");
+                            Thread.Sleep(timelineEvent.DelayAfterActual.GetSafeSleepTime(writeSleep));
                         }
 
                         workSheet.Dispose();
@@ -308,10 +309,11 @@ public class ExcelHandler : BaseHandler
 
                     GC.Collect();
                 }
-                catch (ThreadAbortException)
+                catch (ThreadAbortException e)
                 {
+                    Log.Error(e);
+                    Log.Trace("Excel closing abnormally...");
                     KillApp();
-                    Log.Trace("Excel closing...");
                 }
                 catch (Exception e)
                 {
@@ -319,12 +321,12 @@ public class ExcelHandler : BaseHandler
                 }
                 finally
                 {
-                    if (timelineEvent.DelayAfter > 0 && jitterFactor > 0)
+                    if (timelineEvent.DelayAfterActual > 0 && jitterFactor > 0)
                     {
                         //sleep and leave the app open
-                        Log.Trace($"Sleep after for {timelineEvent.DelayAfter} with jitter");
-                        // Thread.Sleep(timelineEvent.DelayAfter - writeSleep);
-                        Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfter, jitterFactor));
+                        Log.Trace($"Sleep after for {timelineEvent.DelayAfterActual} with jitter");
+                        // Thread.Sleep(timelineEvent.DelayAfterActual - writeSleep);
+                        Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, jitterFactor));
                     }
                     else
                     {
@@ -333,9 +335,9 @@ public class ExcelHandler : BaseHandler
                 }
             }
         }
-        catch (ThreadAbortException)
+        catch (ThreadAbortException e)
         {
-            //ignore
+            Log.Error(e);
         }
         catch (Exception e)
         {
@@ -343,8 +345,8 @@ public class ExcelHandler : BaseHandler
         }
         finally
         {
+            Log.Trace("Excel closing normally...");
             KillApp();
-            Log.Trace("Excel closing...");
         }
     }
 

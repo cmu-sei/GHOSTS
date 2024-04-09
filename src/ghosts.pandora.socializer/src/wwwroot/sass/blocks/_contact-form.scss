@@ -1,0 +1,95 @@
+/*------------- #CONTACT-FORM --------------*/
+
+
+
+.contact-form-wrap {
+  position: relative;
+  background-color: #fff;
+  background-color: var(--olympus-white-color);
+  border: 1px solid #e6ecf5;
+  border: 1px solid var(--olympus-border-color);
+  border-radius: 5px;
+  box-shadow: 0 0 34px 0 rgba(63, 66, 87, 0.1);
+  display: flex;
+  z-index: 2;
+  overflow: hidden;
+
+  .contact-form {
+	width: 60%;
+  }
+}
+
+.contact-form-thumb {
+  position: relative;
+  padding: 50px 40px;
+  color: #fff;
+  color: var(--olympus-white-color);
+  background-image: url("../img/contact-bg.webp");
+  background-size: cover;
+  background-repeat: no-repeat;
+  width: 40%;
+
+  .title {
+	color: inherit;
+	font-size: 34px;
+	margin-bottom: 40px;
+	line-height: 1;
+
+	span {
+	  font-size: 64px;
+	  display: block;
+	}
+  }
+}
+
+.contact-form {
+  padding: 50px 40px 30px;
+
+  .btn {
+	margin-bottom: 0;
+  }
+}
+
+
+/*================= Responsive Mode ============*/
+
+
+@media (max-width: 1200px) {
+
+  .contact-form-thumb .title span {
+	font-size: 34px;
+  }
+
+  .contact-form-thumb .title {
+	margin-bottom: 20px;
+  }
+
+  .contact-form-thumb {
+	padding: 30px;
+  }
+
+  .contact-form-wrap .contact-form {
+	padding: 30px;
+  }
+}
+
+@media (max-width: 860px) {
+
+  .contact-form-thumb .title, .contact-form-thumb .title span {
+	font-size: 22px;
+  }
+}
+
+@media (max-width: 600px) {
+  .contact-form-wrap {
+	flex-direction: column;
+  }
+
+  .contact-form-thumb {
+	width: 100%;
+  }
+
+  .contact-form-wrap .contact-form {
+	width: 100%;
+  }
+}
