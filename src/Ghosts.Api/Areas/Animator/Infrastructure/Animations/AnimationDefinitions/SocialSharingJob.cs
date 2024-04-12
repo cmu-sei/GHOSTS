@@ -8,7 +8,6 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
-using Ghosts.Animator;
 using Ghosts.Animator.Extensions;
 using ghosts.api.Areas.Animator.Hubs;
 using ghosts.api.Areas.Animator.Infrastructure.ContentServices;
@@ -20,7 +19,6 @@ using Ghosts.Domain;
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
 using NLog;
-using Npgsql.Internal.TypeHandlers.DateTimeHandlers;
 using RestSharp;
 
 namespace ghosts.api.Areas.Animator.Infrastructure.Animations.AnimationDefinitions;
