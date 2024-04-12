@@ -28,17 +28,17 @@ namespace ghosts.client.linux.Comms
         /// </summary>
         public static void Run()
         {
-            // new Thread(() =>
-            // {
-            //     Thread.CurrentThread.IsBackground = true;
+            new Thread(() =>
+            {
+                Thread.CurrentThread.IsBackground = true;
                 GetServerUpdates();
-            // }).Start();
+            }).Start();
 
-            // new Thread(() =>
-            // {
-            //     Thread.CurrentThread.IsBackground = true;
+            new Thread(() =>
+            {
+                Thread.CurrentThread.IsBackground = true;
                 PostClientResults();
-            // }).Start();
+            }).Start();
         }
 
         private static void GetServerUpdates()
@@ -63,7 +63,7 @@ namespace ghosts.client.linux.Comms
                         try
                         {
                             using (var reader =
-                                new StreamReader(client.OpenRead(Program.ConfigurationUrls.Updates)))
+                                   new StreamReader(client.OpenRead(Program.ConfigurationUrls.Updates)))
                             {
                                 s = reader.ReadToEnd();
                                 _log.Debug($"{DateTime.Now} - Received new configuration");
@@ -125,17 +125,17 @@ namespace ghosts.client.linux.Comms
 
                                 break;
                             case UpdateClientConfig.UpdateType.Health:
+                            {
+                                var newTimeline = JsonConvert.DeserializeObject<ResultHealth>(update.Update.ToString());
+                                //save to local disk
+                                using (var file = File.CreateText(ApplicationDetails.ConfigurationFiles.Health))
                                 {
-                                    var newTimeline = JsonConvert.DeserializeObject<ResultHealth>(update.Update.ToString());
-                                    //save to local disk
-                                    using (var file = File.CreateText(ApplicationDetails.ConfigurationFiles.Health))
-                                    {
-                                        var serializer = new JsonSerializer { Formatting = Formatting.Indented };
-                                        serializer.Serialize(file, newTimeline);
-                                    }
-
-                                    break;
+                                    var serializer = new JsonSerializer { Formatting = Formatting.Indented };
+                                    serializer.Serialize(file, newTimeline);
                                 }
+
+                                break;
+                            }
                             default:
                                 _log.Debug($"Update {update.Type} has no handler, ignoring...");
                                 break;
@@ -258,7 +258,9 @@ namespace ghosts.client.linux.Comms
                 // look for other result files that have not been posted
                 try
                 {
-                    var files = Directory.GetFiles(Path.GetDirectoryName(fileName) ?? throw new InvalidOperationException("Path declaration failed"), "*.log");
+                    var files = Directory.GetFiles(
+                        Path.GetDirectoryName(fileName) ??
+                        throw new InvalidOperationException("Path declaration failed"), "*.log");
                     foreach (var file in files)
                     {
                         if (!file.EndsWith("app.log") && file != fileName)
@@ -306,6 +308,7 @@ namespace ghosts.client.linux.Comms
                     {
                         throw;
                     }
+
                     Thread.Sleep(1000);
                 }
 
@@ -313,7 +316,7 @@ namespace ghosts.client.linux.Comms
             }
 
             Thread.Sleep(2000);
-            
+
             string rawLogContents = null;
 
             try
@@ -351,7 +354,9 @@ namespace ghosts.client.linux.Comms
                     try
                     {
                         //put the temp file contents back
-                        var backupFile = ApplicationDetails.LogFiles.ClientUpdates.Replace("clientupdates.log", "clientupdates_not_posted.log" );
+                        var backupFile =
+                            ApplicationDetails.LogFiles.ClientUpdates.Replace("clientupdates.log",
+                                "clientupdates_not_posted.log");
                         File.AppendAllText(backupFile, rawLogContents);
                         File.Delete(tempFile);
                     }
@@ -363,7 +368,7 @@ namespace ghosts.client.linux.Comms
 
                 throw;
             }
-            
+
             //delete the temp file we used for reading
             File.Delete(tempFile);
             _log.Trace($"{DateTime.Now} - {fileName} posted to server successfully");
@@ -395,7 +400,9 @@ namespace ghosts.client.linux.Comms
                 if (!File.Exists(ApplicationDetails.InstanceFiles.SurveyResults))
                     return;
 
-                var survey = JsonConvert.DeserializeObject<Ghosts.Domain.Messages.MesssagesForServer.Survey>(File.ReadAllText(ApplicationDetails.InstanceFiles.SurveyResults));
+                var survey =
+                    JsonConvert.DeserializeObject<Ghosts.Domain.Messages.MesssagesForServer.Survey>(
+                        File.ReadAllText(ApplicationDetails.InstanceFiles.SurveyResults));
 
                 var payload = JsonConvert.SerializeObject(survey);
 
@@ -423,7 +430,8 @@ namespace ghosts.client.linux.Comms
             }
             catch (Exception e)
             {
-                _log.Debug($"Problem posting logs to server from { ApplicationDetails.InstanceFiles.SurveyResults } to { Program.ConfigurationUrls.Survey }");
+                _log.Debug(
+                    $"Problem posting logs to server from {ApplicationDetails.InstanceFiles.SurveyResults} to {Program.ConfigurationUrls.Survey}");
                 _log.Error(e);
             }
         }
