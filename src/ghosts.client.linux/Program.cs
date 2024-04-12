@@ -78,7 +78,7 @@ namespace ghosts.client.linux
             if (Configuration.Sockets.IsEnabled)
             {
                 _log.Trace("Sockets enabled. Connecting...");
-                var c = new Comms.ClientSocket.Connection(Configuration.Sockets);
+                var c = new Connection(Configuration.Sockets);
 
                 async void Start()
                 {
