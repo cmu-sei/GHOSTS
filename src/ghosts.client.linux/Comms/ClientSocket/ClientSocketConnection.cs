@@ -13,6 +13,7 @@ namespace ghosts.client.linux.Comms.ClientSocket;
 
 public class Connection
 {
+    private int _attempts = 0;
     private HubConnection _connection;
     private readonly CancellationToken _ct = new();
     public readonly BackgroundTaskQueue Queue = new();
@@ -30,20 +31,26 @@ public class Connection
         while (_connection == null)
         {
             await EstablishConnection(url);
+            _attempts++;
         }
 
         Console.WriteLine($"Connected to {url}");
 
-        _ = new Timer(_ => { Task.Run(async () =>  { await ClientHeartbeat();
-            }, _ct).ContinueWith(task => { if (task.Exception != null) {
-                // Log or handle the exception
-                Console.WriteLine($"Exception in ClientHeartbeat: {task.Exception}");
-            }}, _ct);
-        }, null, TimeSpan.Zero, TimeSpan.FromSeconds(_options.Heartbeat));
-        
         // Send a message to the server
         while (_connection.State == HubConnectionState.Connected)
         {
+            _ = new Timer(_ => {
+                Task.Run(async () => {
+                    await ClientHeartbeat();
+                }, _ct).ContinueWith(task => {
+                    if (task.Exception != null)
+                    {
+                        // Log or handle the exception
+                        Console.WriteLine($"Exception in ClientHeartbeat: {task.Exception}");
+                    }
+                }, _ct);
+            }, null, TimeSpan.Zero, TimeSpan.FromSeconds(_options.Heartbeat));
+
             while (true)
             {
                 Console.WriteLine("Peeking into queue...");
@@ -77,11 +84,12 @@ public class Connection
         }
 
         var machine = new ResultMachine();
-        
+        //GuestInfoVars.Load(machine);
+
         _connection = new HubConnectionBuilder()
             .WithUrl(url, x =>
             {
-                x.Headers = WebClientBuilder.GetHeaders(machine);
+                x.Headers = WebClientBuilder.GetHeaders(machine, true);
             }).WithAutomaticReconnect()
             .Build();
         
@@ -127,7 +135,8 @@ public class Connection
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"An error occurred at {url} while connecting: {ex.Message}");
+            if(_attempts > 1)
+                Console.WriteLine($"An error occurred at {url} while connecting: {ex.Message}");
         }
     }
 
