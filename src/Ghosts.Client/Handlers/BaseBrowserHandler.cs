@@ -12,7 +12,7 @@ using OpenQA.Selenium;
 using Actions = OpenQA.Selenium.Interactions.Actions;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
+using Remotion.Linq.Parsing.Structure.IntermediateModel;
 
 namespace Ghosts.Client.Handlers
 {
@@ -170,8 +170,8 @@ namespace Ghosts.Client.Handlers
                             config = RequestConfiguration.Load(handler, timelineEvent.CommandArgs[0]);
                             if (config.Uri.IsWellFormedOriginalString())
                             {
-                                MakeRequest(config);
-                                Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = config.ToString(), Trackable = timelineEvent.TrackableId });
+                                var r = FilterWebResponse(MakeRequest(config));
+                                Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = config.ToString(), Trackable = timelineEvent.TrackableId, Result = r});
                             }
                             break;
                         case "download":
@@ -302,8 +302,8 @@ namespace Ghosts.Client.Handlers
                 if (config.Uri != null && config.Uri.IsWellFormedOriginalString())
                 {
                     this.LinkManager.SetCurrent(config.Uri);
-                    var s = MakeRequest(config);
-                    Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = config.ToString(), Trackable = timelineEvent.TrackableId, Result = s});
+                    var r = FilterWebResponse(MakeRequest(config));
+                    Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = config.ToString(), Trackable = timelineEvent.TrackableId, Result = r});
                     Thread.Sleep(timelineEvent.DelayAfterActual);
 
                     if (this.Stickiness > 0)
@@ -329,8 +329,8 @@ namespace Ghosts.Client.Handlers
                                     config.Uri = link.Url;
 
                                     Log.Trace($"Making request #{loopNumber + 1}/{loops} to {config.Uri}");
-                                    MakeRequest(config);
-                                    Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = config.ToString(), Trackable = timelineEvent.TrackableId });
+                                    r = FilterWebResponse(MakeRequest(config));
+                                    Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = config.ToString(), Trackable = timelineEvent.TrackableId, Result = r});
                                 }
                                 catch (Exception e)
                                 {
@@ -666,8 +666,8 @@ namespace Ghosts.Client.Handlers
                 {
                     var urlDict = new Dictionary<string, int>();
                     var urlQueue = new LifoQueue<Uri>(VisitedRemember);
-                    MakeRequest(config);
-                    Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = config.ToString(), Trackable = timelineEvent.TrackableId });
+                    var r = FilterWebResponse(MakeRequest(config));
+                    Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = config.ToString(), Trackable = timelineEvent.TrackableId, Result = r});
                     Thread.Sleep(timelineEvent.DelayAfterActual);
 
                     if (this.Stickiness > 0)
@@ -753,6 +753,12 @@ namespace Ghosts.Client.Handlers
         {
             Report(new ReportItem { Handler = BrowserType.ToString(), Command = "Close" });
             Driver.Close();
+        }
+
+        public string FilterWebResponse(string rawResponse)
+        {
+            string[] s = { "404", "500" };
+            return s.Contains(rawResponse) ? rawResponse : "";
         }
     }
 }
