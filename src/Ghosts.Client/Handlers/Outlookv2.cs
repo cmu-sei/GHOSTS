@@ -245,7 +245,6 @@ public class Outlookv2 : BaseHandler
                             emailConfig = new EmailConfiguration(timelineEvent.CommandArgs);
                             if (SendEmailViaOutlook(emailConfig))
                             {
-                                Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = emailConfig.ToString(), Trackable = timelineEvent.TrackableId });
                                 Log.Trace("Outlookv2:: Created email");
                                 _totalErrorCount = 0;  //zero on success
                             }
@@ -260,7 +259,7 @@ public class Outlookv2 : BaseHandler
                             emailConfig = new EmailConfiguration(timelineEvent.CommandArgs);
                             if (ReplyViaOutlook(emailConfig))
                             {
-                                Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = emailConfig.ToString(), Trackable = timelineEvent.TrackableId });
+                                
                                 Log.Trace("Outlookv2:: Replied email");
                                 _totalErrorCount = 0;  //zero on success
                             }
@@ -298,7 +297,7 @@ public class Outlookv2 : BaseHandler
                             break;
 
                     }
-
+                    Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = action, Arg = "", Trackable = timelineEvent.TrackableId });
                     if (timelineEvent.DelayAfterActual > 0)
                     {
                         Log.Trace($"DelayAfter sleeping for {timelineEvent.DelayAfterActual} ms");

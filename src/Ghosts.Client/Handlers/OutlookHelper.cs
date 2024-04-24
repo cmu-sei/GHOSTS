@@ -1688,6 +1688,8 @@ namespace Ghosts.Client.Handlers
                             errorCount = errorCount + 1;
                         }
 
+                        this.baseHandler.Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = $"WebOutlook: {action}", Trackable = timelineEvent.TrackableId });
+
                         break;
 
                 }

@@ -370,6 +370,8 @@ namespace ghosts.client.linux.handlers
                             return;
                         }
                     }
+                    this.baseHandler.Report(new ReportItem {Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = blogAction, Trackable = timelineEvent.TrackableId});
+
 
                     break;
 

@@ -1678,6 +1678,8 @@ namespace ghosts.client.linux.handlers
                             Log.Trace($"WebOutlook:: Failed action: {action}.");
                             errorCount = errorCount + 1;
                         }
+                        this.baseHandler.Report(new ReportItem {Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = $"WebOutlook: {action}", Trackable = timelineEvent.TrackableId});
+
                         
                         break;
 

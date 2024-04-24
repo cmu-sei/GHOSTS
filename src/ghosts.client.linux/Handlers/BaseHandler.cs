@@ -19,7 +19,7 @@ namespace ghosts.client.linux.handlers
             WorkingHours.Is(handler);
         }
 
-        protected static void Report(ReportItem reportItem)
+        public void Report(ReportItem reportItem)
         {
             var result = new TimeLineRecord
             {

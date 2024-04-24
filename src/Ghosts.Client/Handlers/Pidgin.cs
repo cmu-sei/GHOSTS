@@ -338,6 +338,7 @@ namespace Ghosts.Client.Handlers
                     {
                         sendChatMessage(imWindowTitle, thisTarget);
                         Thread.Sleep(_random.Next(TimeBetweenMessagesMin, TimeBetweenMessagesMax));
+                        Report(new ReportItem { Handler = "Pidgin", Command = thisTarget, Arg = "chat", Trackable = timelineEvent.TrackableId });
                         if (closeWindows(ErrorWindowTitles))
                         {
                             //an error window popped up. Mark this chat as bad, and close it
