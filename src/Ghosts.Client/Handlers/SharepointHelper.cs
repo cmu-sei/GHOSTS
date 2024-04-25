@@ -720,8 +720,8 @@ namespace Ghosts.Client.Handlers
                             return;
                         }
                     }
-
-                    this.baseHandler.Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = sharepointAction, Trackable = timelineEvent.TrackableId });
+                    
+                    this.baseHandler.Report(new ReportItem { Handler = $"Sharepoint{version}: {handler.HandlerType.ToString()}", Command = sharepointAction, Arg = "", Trackable = timelineEvent.TrackableId });
                     break;
 
 
