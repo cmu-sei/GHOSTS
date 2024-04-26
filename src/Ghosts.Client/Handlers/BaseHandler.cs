@@ -38,7 +38,8 @@ namespace Ghosts.Client.Handlers
                     NullValueHandling = NullValueHandling.Ignore
                 });
 
-            _timelineLog.Info($"TIMELINE|{DateTime.UtcNow}|{o}");
+            _timelineLog.Info($"TIMELINE|{DateTime.UtcNow:MM/dd/yyyy hh:mm:ss tt}|{o}");
+
         }
 
         public void WebhookCreate(string payload)
@@ -46,7 +47,7 @@ namespace Ghosts.Client.Handlers
             if (payload != null)
             {
                 payload = payload.Replace(Environment.NewLine, string.Empty);
-                _timelineLog.Info($"WEBHOOKCREATE|{DateTime.UtcNow}|{payload}");
+                _timelineLog.Info($"WEBHOOKCREATE|{DateTime.UtcNow:MM/dd/yyyy hh:mm:ss tt}|{payload}");
             }
         }
 

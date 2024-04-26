@@ -38,6 +38,9 @@ namespace Ghosts.Client.Handlers
             // -- this _would_ require admin
             // setx PATH "%PATH%;%USERPROFILE%\Amazon\AWSCLIV2" /M
             // % USERPROFILE%\Amazon\AWSCLIV2\aws --version
+            //
+            // Azure CLI
+            // https://aka.ms/installazurecliwindowsx64
 
             IsInstalled = System.IO.Directory.Exists(InstalledFolder);
             

@@ -508,7 +508,7 @@ namespace Ghosts.Client.TimelineManager
                 }
 
                 if (t == null) return;
-
+                t.Name = $"{handler.HandlerType}_{Guid.NewGuid()}";
                 t.IsBackground = true;
                 t.Start();
                 if (AddToThreadJobs)

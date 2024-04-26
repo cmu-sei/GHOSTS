@@ -156,7 +156,7 @@ namespace Ghosts.Domain
         public int DelayAfterActual => DelayAfter.GetDelay();
 
         [JsonIgnore]
-        public int DelayBeforeActual => DelayAfter.GetDelay();
+        public int DelayBeforeActual => DelayBefore.GetDelay();
     }
 
     /// <summary>
