@@ -370,6 +370,7 @@ namespace Ghosts.Client.Handlers
                             return;
                         }
                     }
+                    this.baseHandler.Report(new ReportItem { Handler = $"Blog: {handler.HandlerType.ToString()}", Command = blogAction, Arg = "", Trackable = timelineEvent.TrackableId });
 
                     break;
 

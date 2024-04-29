@@ -11,6 +11,7 @@ using System.IO;
 using NPOI.SS.Formula.Functions;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 using System.ComponentModel.Composition;
+using System.Runtime.InteropServices;
 
 namespace Ghosts.Client.Handlers
 {
@@ -149,6 +150,7 @@ namespace Ghosts.Client.Handlers
                                 this.RdpEx(handler, timelineEvent, choice.ToString(), au);
                             }
                             Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, JitterFactor));
+                            
                             break;
 
                     }
@@ -249,7 +251,7 @@ namespace Ghosts.Client.Handlers
                         //try again for another 3 minutes to find
                         if (findRdpWindow(target, 3))
                         {
-                            doMouseLoop(caption, target, au);
+                            doMouseLoop(caption, target, au, timelineEvent);
                         }
                         else
                         {
@@ -293,7 +295,7 @@ namespace Ghosts.Client.Handlers
             return winHandle != IntPtr.Zero;
         }
 
-        public void doMouseLoop(string caption, string target, AutoItX3 au)
+        public void doMouseLoop(string caption, string target, AutoItX3 au, TimelineEvent timelineEvent)
         {
             
             var winHandle = Winuser.FindWindow("TscShellContainerClass", caption);
@@ -314,6 +316,7 @@ namespace Ghosts.Client.Handlers
                     au.MouseMove(rc.Left, rc.Top, 30);
                     au.MouseMove(_random.Next(rc.Left, rc.Right), _random.Next(rc.Top, rc.Bottom), 30);
                     Winuser.SetForegroundWindow(winHandle);
+                    Report(new ReportItem { Handler = "RDP", Command = CurrentTarget, Arg = "mouseloop", Trackable = timelineEvent.TrackableId });
                 }
                 //close the window
                 Log.Trace($"RDP:: Finished activity loop for {target}.");

@@ -209,7 +209,7 @@ namespace ghosts.client.linux.handlers
                     }
                     client.Disconnect();
                     client.Dispose();
-                    //this.Report(handler.HandlerType.ToString(), command, "", timelineEvent.TrackableId);
+                    Report(new ReportItem {Handler = handler.HandlerType.ToString(), Command= hostIp, Arg = cmdArgs[2], Trackable = timelineEvent.TrackableId });
                 }
             }
 

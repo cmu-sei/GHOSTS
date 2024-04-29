@@ -192,7 +192,7 @@ namespace Ghosts.Client.Handlers
                     {
                         Log.Error(e); //some error occurred during this command, try the next one
                     }
-                    
+                    Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = hostIp, Arg = action, Trackable = timelineEvent.TrackableId });
 
                 }
                 catch (ThreadAbortException)

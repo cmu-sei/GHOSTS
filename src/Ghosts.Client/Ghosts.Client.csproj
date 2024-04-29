@@ -340,7 +340,7 @@
       <Version>3.5.2</Version>
     </PackageReference>
     <PackageReference Include="HtmlAgilityPack">
-      <Version>1.11.57</Version>
+      <Version>1.11.59</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.AspNetCore.Authorization">
       <Version>8.0.1</Version>

@@ -321,7 +321,7 @@ namespace ghosts.client.linux.Comms
 
             try
             {
-                using (var s = new FileStream(tempFile, FileMode.Open, FileAccess.Read, FileShare.None))
+                using (var s = new FileStream(tempFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 {
                     using (var tr = new StreamReader(s))
                     {
@@ -349,6 +349,7 @@ namespace ghosts.client.linux.Comms
             }
             catch (Exception e)
             {
+                _log.Trace($"Client results report failed: {e}");
                 if (!string.IsNullOrEmpty(rawLogContents))
                 {
                     try

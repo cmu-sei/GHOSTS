@@ -199,7 +199,7 @@ namespace Ghosts.Client.Handlers
                     }
                     client.Disconnect();
                     client.Dispose();
-                    Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = command, Trackable = timelineEvent.TrackableId });
+                    Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = hostIp, Arg = cmdArgs[2], Trackable = timelineEvent.TrackableId });
                 }
             }
         }

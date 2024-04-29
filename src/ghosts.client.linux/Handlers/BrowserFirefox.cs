@@ -209,13 +209,19 @@ namespace ghosts.client.linux.handlers
                         options.AddArgument(option.Value<string>());
                     }
                 }
-                //used to kill process
+                //used to kill process as Selenium driver sometimes fails
+                string browserId;
                 if (handler.HandlerArgs.ContainsKey("browser-id") &&
                     !string.IsNullOrEmpty(handler.HandlerArgs["browser-id"].ToString()))
                 {
-                    var s = handler.HandlerArgs["browser-id"].ToString();
-                    options.AddArgument($"--{s}");
+                    browserId = handler.HandlerArgs["browser-id"].ToString();
+                } else {
+                    // always generate this, and save
+                    browserId = Guid.NewGuid().ToString();
+                    handler.HandlerArgs["browser-id"] = browserId;
                 }
+                options.AddArgument($"--{browserId}");
+                
 
                 if (handler.HandlerArgs.ContainsKeyWithOption("isheadless", "true"))
                 {
