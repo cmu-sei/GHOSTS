@@ -64,7 +64,7 @@ public class NpcsGenerateController : ControllerBase
     [SwaggerResponse((int) HttpStatusCode.OK, Type = typeof(IEnumerable<NpcProfile>))]
     [SwaggerOperation("createBuild")]
     [HttpPost]
-    public IEnumerable<NpcRecord> Create(GenerationConfiguration config, CancellationToken ct)
+    public async Task<IEnumerable<NpcRecord>> Create(GenerationConfiguration config, CancellationToken ct)
     {
         var t = new Stopwatch();
         t.Start();
@@ -90,7 +90,7 @@ public class NpcsGenerateController : ControllerBase
                 }
             }
         }
-        this._context.SaveChanges();
+        await this._context.SaveChangesAsync(ct);
             
         t.Stop();
         _log.Trace($"{createdNpcs.Count} NPCs generated in {t.ElapsedMilliseconds} ms");
@@ -125,20 +125,25 @@ public class NpcsGenerateController : ControllerBase
     [HttpPost("syncWithMachineUsernames")]
     public async Task SyncWithMachineUsernames()
     {
-        var machineUsers = this._context.Machines.ToList();
-        var list = this._context.Npcs.ToArray();
+        var machines = this._context.Machines.ToList();
+        var npcs = this._context.Npcs.ToArray();
         
-        foreach (var machineUser in machineUsers)
+        foreach (var machine in machines)
         {
-            if (list.Any(x => string.Equals(x.NpcProfile.Name.ToString()?.Replace(" ", "."),
-                    machineUser.CurrentUsername, StringComparison.InvariantCultureIgnoreCase)))
+            if (npcs.Any(x => x.MachineId == machine.Id))
+                continue;
+            if (npcs.Any(x => string.Equals(x.NpcProfile.Name.ToString()?.Replace(" ", "."),
+                    machine.CurrentUsername, StringComparison.InvariantCultureIgnoreCase)))
                 continue;            
             
-            var npc = NpcRecord.TransformToNpc(Npc.Generate(MilitaryUnits.GetServiceBranch(), machineUser.CurrentUsername));
+            var npc = NpcRecord.TransformToNpc(Npc.Generate(MilitaryUnits.GetServiceBranch(), machine.CurrentUsername));
+            
+            //todo: need to be sure user is aligned with the machine currentusername
+            
             npc.Id = npc.NpcProfile.Id;
-            npc.MachineId = machineUser.Id; 
+            npc.MachineId = machine.Id; 
             this._context.Npcs.Add(npc);
-            _log.Trace($"NPC created for {machineUser.CurrentUsername}...");
+            _log.Trace($"NPC created for {machine.CurrentUsername}...");
         }
         await this._context.SaveChangesAsync();
         _log.Trace($"NPCs created for each username in machines");
