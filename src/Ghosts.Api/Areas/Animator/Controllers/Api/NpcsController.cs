@@ -13,6 +13,7 @@ using Ghosts.Animator;
 using Ghosts.Animator.Extensions;
 using Ghosts.Animator.Models;
 using ghosts.api.Areas.Animator.Infrastructure.Models;
+using ghosts.api.Areas.Animator.Infrastructure.Services;
 using Ghosts.Api.Infrastructure.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -27,23 +28,25 @@ namespace ghosts.api.Areas.Animator.Controllers.Api;
 public class NpcsController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
+    private readonly INpcService _service;
 
-    public NpcsController(ApplicationDbContext context)
+    public NpcsController(ApplicationDbContext context, INpcService service)
     {
-        _context = context;
+        this._context = context;
+        this._service = service;
     }
 
     /// <summary>
-    /// Returns all generated NPCs in the system (caution, could return a large amount of data)
+    /// Returns all generated NPCs in the system (caution, could return a very large amount of data)
     /// </summary>
     /// <returns>IEnumerable&lt;NpcProfile&gt;</returns>
     [ProducesResponseType(typeof(IEnumerable<NpcRecord>), (int)HttpStatusCode.OK)]
     [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(IEnumerable<NpcRecord>))]
     [SwaggerOperation("getNPCs")]
     [HttpGet]
-    public IEnumerable<NpcRecord> Get()
+    public async Task<IEnumerable<NpcRecord>> Get()
     {
-        return this._context.Npcs.ToList();
+        return await this._service.GetAll();
     }
 
     /// <summary>
@@ -54,10 +57,9 @@ public class NpcsController : ControllerBase
     [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(IEnumerable<NpcNameId>))]
     [SwaggerOperation("getNPCList")]
     [HttpGet("list")]
-    public IEnumerable<NpcNameId> List()
+    public async Task<IEnumerable<NpcNameId>> List()
     {
-        return this._context.Npcs.Select(item => new NpcNameId()
-            { Id = item.Id, Name = item.NpcProfile.Name.First + " " + item.NpcProfile.Name.Last }).ToList();
+        return await this._service.GetListAsync();
     }
 
     /// <summary>
@@ -69,9 +71,9 @@ public class NpcsController : ControllerBase
     [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(NpcRecord))]
     [SwaggerOperation("getNPCById")]
     [HttpGet("{id:guid}")]
-    public NpcRecord GetById(Guid id)
+    public async Task<NpcRecord> GetById(Guid id)
     {
-        return this._context.Npcs.FirstOrDefault(x => x.Id == id);
+        return await this._service.GetById(id);
     }
 
     /// <summary>
@@ -85,9 +87,7 @@ public class NpcsController : ControllerBase
     [HttpDelete("{id:guid}")]
     public async Task DeleteById(Guid id)
     {
-        var o = await this._context.Npcs.FindAsync(id);
-        this._context.Npcs.Remove(o);
-        await this._context.SaveChangesAsync();
+        await this._service.DeleteById(id);
     }
 
     /// <summary>
@@ -99,14 +99,14 @@ public class NpcsController : ControllerBase
     [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(IActionResult))]
     [SwaggerOperation("getNpcAvatarById")]
     [HttpGet("{id:guid}/photo")]
-    public IActionResult GetPhotoById(Guid id)
+    public async Task<IActionResult> GetPhotoById(Guid id)
     {
         //get npc and find image
-        var npc = this._context.Npcs.FirstOrDefault(x => x.Id == id);
+        var npc = await this._service.GetById(id);
         if (npc == null) return NotFound();
         //load image as stream
         var stream = new FileStream(npc.NpcProfile.PhotoLink, FileMode.Open);
-        return File(stream, "image/jpg", $"{npc.NpcProfile.Name.ToString().Replace(" ", "_")}.jpg");
+        return File(stream, "image/jpg", $"{npc.NpcProfile.Name.ToString()!.Replace(" ", "_")}.jpg");
     }
 
     /// <summary>
@@ -147,9 +147,11 @@ public class NpcsController : ControllerBase
     /// <param name="fieldsToReturn"></param>
     /// <returns></returns>
     [HttpPost("npc/{npcId:guid}")]
-    public object GetNpcReduced(Guid npcId, [FromBody] string[] fieldsToReturn)
+    [Obsolete("Obsolete")]
+    public async Task<object> GetNpcReduced(Guid npcId, [FromBody] string[] fieldsToReturn)
     {
-        var npc = this._context.Npcs.FirstOrDefault(x => x.Id == npcId);
+        var npc = await this._service.GetById(npcId);
+        if (npc == null) return null;
         return new NPCReduced(fieldsToReturn, npc).PropertySelection;
     }
 
@@ -163,9 +165,9 @@ public class NpcsController : ControllerBase
     [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(IEnumerable<NpcRecord>))]
     [SwaggerOperation("getEnclave")]
     [HttpGet("{campaign}/{enclave}")]
-    public IEnumerable<NpcRecord> GetEnclave(string campaign, string enclave)
+    public async Task<IEnumerable<NpcRecord>> GetEnclave(string campaign, string enclave)
     {
-        return _context.Npcs.Where(x => x.Campaign == campaign && x.Enclave == enclave).ToList();
+        return await _service.GetEnclave(campaign, enclave);
     }
 
     /// <summary>
@@ -178,17 +180,17 @@ public class NpcsController : ControllerBase
     [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(IActionResult))]
     [SwaggerOperation("getEnclaveCsv")]
     [HttpGet("{campaign}/{enclave}/csv")]
-    public IActionResult GetAsCsv(string campaign, string enclave)
+    public async Task<IActionResult> GetAsCsv(string campaign, string enclave)
     {
         var engine = new FileHelperEngine<NPCToCsv>();
-        var list = GetEnclave(campaign, enclave);
+        var list = await GetEnclave(campaign, enclave);
 
         var filteredList = list.Select(n => new NPCToCsv { Id = n.Id, Email = n.NpcProfile.Email }).ToList();
 
         var stream = new MemoryStream();
         TextWriter streamWriter = new StreamWriter(stream);
         engine.WriteStream(streamWriter, filteredList);
-        streamWriter.Flush();
+        await streamWriter.FlushAsync();
         stream.Seek(0, SeekOrigin.Begin);
 
         return File(stream, "text/csv", $"{Guid.NewGuid()}.csv");
@@ -206,7 +208,7 @@ public class NpcsController : ControllerBase
     [HttpDelete("{campaign}/{enclave}")]
     public async Task DeleteEnclave(string campaign, string enclave)
     {
-        var list = GetEnclave(campaign, enclave);
+        var list = await GetEnclave(campaign, enclave);
         this._context.Npcs.RemoveRange(list);
         await this._context.SaveChangesAsync();
     }
@@ -219,9 +221,10 @@ public class NpcsController : ControllerBase
     /// <param name="fieldsToReturn"></param>
     /// <returns></returns>
     [HttpPost("{campaign}/{enclave}/custom")]
-    public IActionResult GetReducedNpcs(string campaign, string enclave, [FromBody] string[] fieldsToReturn)
+    [Obsolete("Obsolete")]
+    public async Task<IActionResult> GetReducedNpcs(string campaign, string enclave, [FromBody] string[] fieldsToReturn)
     {
-        var npcList = GetEnclave(campaign, enclave);
+        var npcList = await GetEnclave(campaign, enclave);
         var npcDetails = new Dictionary<string, Dictionary<string, string>>();
 
         foreach (var npc in npcList)
@@ -235,8 +238,8 @@ public class NpcsController : ControllerBase
         var enclaveCsv = new EnclaveReducedCsv(fieldsToReturn, npcDetails);
         var stream = new MemoryStream();
         var streamWriter = new StreamWriter(stream);
-        streamWriter.Write(enclaveCsv.CsvData);
-        streamWriter.Flush();
+        await streamWriter.WriteAsync(enclaveCsv.CsvData);
+        await streamWriter.FlushAsync();
         stream.Seek(0, SeekOrigin.Begin);
         return File(stream, "text/csv", $"{Guid.NewGuid()}.csv");
     }
@@ -252,9 +255,9 @@ public class NpcsController : ControllerBase
     [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(IEnumerable<NpcRecord>))]
     [SwaggerOperation("getTeam")]
     [HttpGet("{campaign}/{enclave}/{team}")]
-    public IEnumerable<NpcRecord> GetTeam(string campaign, string enclave, string team)
+    public async Task<IEnumerable<NpcRecord>> GetTeam(string campaign, string enclave, string team)
     {
-        return this._context.Npcs.Where(x => x.Campaign == campaign && x.Enclave == enclave && x.Team == team).ToList();
+        return await this._service.GetTeam(campaign, enclave, team);
     }
 
     /// <summary>
@@ -268,17 +271,17 @@ public class NpcsController : ControllerBase
     [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(IActionResult))]
     [SwaggerOperation("getTeamCsv")]
     [HttpGet("{campaign}/{enclave}/{team}/csv")]
-    public IActionResult GetAsCsv(string campaign, string enclave, string team)
+    public async Task<IActionResult> GetAsCsv(string campaign, string enclave, string team)
     {
         var engine = new FileHelperEngine<NPCToCsv>();
-        var list = this.GetTeam(team, enclave, campaign).ToList();
+        var list = await this.GetTeam(team, enclave, campaign);
 
         var filteredList = list.Select(n => new NPCToCsv { Id = n.Id, Email = n.NpcProfile.Email }).ToList();
 
         var stream = new MemoryStream();
         var streamWriter = new StreamWriter(stream);
         engine.WriteStream(streamWriter, filteredList);
-        streamWriter.Flush();
+        await streamWriter.FlushAsync();
         stream.Seek(0, SeekOrigin.Begin);
 
         return File(stream, "text/csv", $"{Guid.NewGuid()}.csv");
@@ -293,17 +296,17 @@ public class NpcsController : ControllerBase
     [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(IActionResult))]
     [SwaggerOperation("getBuildTfVars")]
     [HttpPost("tfvars")]
-    public IActionResult GetTeamAsTfVars(TfVarsConfiguration configuration)
+    public async Task<IActionResult> GetTeamAsTfVars(TfVarsConfiguration configuration)
     {
         var s = new StringBuilder("users = {").Append(Environment.NewLine);
-        var list = this.GetTeam(configuration.Campaign, configuration.Enclave, configuration.Team).ToList();
+        var list = await this.GetTeam(configuration.Campaign, configuration.Enclave, configuration.Team);
 
         var pool = configuration.GetIpPool();
         foreach (var item in pool)
             if (this._context.NpcIps.Any(o => o.IpAddress == item && o.Enclave == configuration.Enclave))
                 pool.Remove(item);
 
-        if (pool.Count < list.Count)
+        if (pool.Count < list.Count())
         {
             throw new ArgumentException("There are not enough unused ip addresses for the number of NPCs selected");
         }
@@ -348,33 +351,6 @@ public class NpcsController : ControllerBase
     }
 
     /// <summary>
-    /// Delete All NPCs in a specific team
-    /// </summary>
-    /// <param name="team"></param>
-    /// <param name="enclave"></param>
-    /// <param name="campaign"></param>
-    /// <returns></returns>
-    [ProducesResponseType((int)HttpStatusCode.OK)]
-    [SwaggerResponse((int)HttpStatusCode.OK)]
-    [SwaggerOperation("deleteTeam")]
-    [HttpDelete("{campaign}/{enclave}/{team}")]
-    public void DeleteTeam(string campaign, string enclave, string team)
-    {
-        throw new NotImplementedException();
-
-        // var list = this.GetTeam(campaign, enclave, team).ToList();
-        // foreach (var ipFilter in list.Select(npc => npc.Id).Select(npcId => Builders<NPCIpAddress>.Filter.And(
-        //              Builders<NPCIpAddress>.Filter.Eq("NpcId", npcId),
-        //              Builders<NPCIpAddress>.Filter.Eq("Enclave", enclave))))
-        // {
-        //     _mongoIps.DeleteMany(ipFilter);
-        // }
-        //
-        // var npcFilter = BuildTeamFilter(campaign, enclave, team);
-        // _mongo.DeleteMany(npcFilter);
-    }
-
-    /// <summary>
     /// Create an insider threat specific NPC build
     /// </summary>
     /// <param name="config"></param>
@@ -386,7 +362,7 @@ public class NpcsController : ControllerBase
         typeof(InsiderThreatGenerationConfigurationExample))]
     [SwaggerOperation("createInsiderThreatBuild")]
     [HttpPost("insiderThreat")]
-    public IEnumerable<NpcRecord> Create(InsiderThreatGenerationConfiguration config, CancellationToken ct)
+    public async Task<IEnumerable<NpcRecord>> Create(InsiderThreatGenerationConfiguration config, CancellationToken ct)
     {
         var createdNpcs = new List<NpcRecord>();
         foreach (var enclave in config.Enclaves)
@@ -427,7 +403,7 @@ public class NpcsController : ControllerBase
         }
 
         this._context.Npcs.AddRange(createdNpcs);
-        this._context.SaveChanges();
+        await this._context.SaveChangesAsync(ct);
         return createdNpcs;
     }
 

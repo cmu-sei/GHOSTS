@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text.Json.Serialization;
 using ghosts.api.Areas.Animator.Hubs;
 using ghosts.api.Areas.Animator.Infrastructure.Animations;
+using ghosts.api.Areas.Animator.Infrastructure.Services;
 using Ghosts.Api.Hubs;
 using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Api.Infrastructure.Extensions;
@@ -81,6 +82,7 @@ namespace Ghosts.Api
             services.AddScoped<IMachineTimelinesService, MachineTimelinesService>();
             services.AddScoped<ITrackableService, TrackableService>();
             services.AddScoped<ISurveyService, SurveyService>();
+            services.AddScoped<INpcService, NpcService>();
             
             services.AddSingleton<IBackgroundQueue, BackgroundQueue>();
             services.AddSingleton<IHostedService, QueueSyncService>();
