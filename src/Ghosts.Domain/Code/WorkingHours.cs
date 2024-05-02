@@ -13,87 +13,65 @@ namespace Ghosts.Domain.Code
 
         public static void Is(TimelineHandler handler)
         {
-            var timeOn = handler.UtcTimeOn;
-            var timeOff = handler.UtcTimeOff;
-            var defaultTimespan = new TimeSpan(0, 0, 0);
-            var currentTime = DateTime.UtcNow.TimeOfDay;
+            var utcNow = DateTime.UtcNow;
+            var today = utcNow.Date;
+            var timeOnUtc = today.Add(handler.UtcTimeOn);
+            var timeOffUtc = today.Add(handler.UtcTimeOff);
+            var isOvernight = timeOffUtc < timeOnUtc;
 
-
-            if (timeOn == defaultTimespan && timeOff == defaultTimespan) //ignore timelines that are unset (00:00:00)
+            if (handler.UtcTimeOn == TimeSpan.Zero && handler.UtcTimeOff == TimeSpan.Zero) // ignore timelines that are unset
                 return;
 
-            var isOvernight = timeOff < timeOn;
+            _log.Debug($"For {handler.HandlerType}: Current UTC: {utcNow} On: {timeOnUtc} Off: {timeOffUtc} Overnight? {isOvernight}");
 
-            _log.Debug($"For {handler.HandlerType}: Local time: {currentTime} UTC: {currentTime} On: {timeOn} Off: {timeOff} Overnight? {isOvernight}");
-
-            if (isOvernight)
+            // Adjust times for overnight schedules
+            if (isOvernight && utcNow > timeOffUtc)
             {
-                while (currentTime < timeOn)
-                {
-                    var sleep = Math.Abs((timeOn - currentTime).TotalMilliseconds);
-                    if (sleep > 300000)
-                        sleep = 300000;
-                    Sleep(handler, Convert.ToInt32(sleep));
-                }
-            }
-            else
-            {
-                while (currentTime < timeOn || currentTime > timeOff)
-                {
-                    Sleep(handler, 60000);
-                }
+                timeOnUtc = timeOnUtc.AddDays(1);
+                timeOffUtc = timeOffUtc.AddDays(1);
             }
 
+            // Determine next action time
+            var nextActionTime = (utcNow < timeOnUtc) ? timeOnUtc : (utcNow > timeOffUtc && !isOvernight) ? timeOnUtc.AddDays(1) : DateTime.MaxValue;
 
-            if (handler.UtcTimeBlocks != null)
+            // Handle custom time blocks
+            if (handler.UtcTimeBlocks != null && handler.UtcTimeBlocks.Length >= 2)
             {
-                // there are time blocks set and at least two of them and in multiples of two
                 var isInTimeBlock = false;
                 for (var i = 0; i < handler.UtcTimeBlocks.Length; i += 2)
                 {
                     if (i + 1 >= handler.UtcTimeBlocks.Length) break;
 
-                    var startTime = handler.UtcTimeBlocks[i];
-                    var endTime = handler.UtcTimeBlocks[i + 1];
+                    var startTime = today.Add(handler.UtcTimeBlocks[i]);
+                    var endTime = today.Add(handler.UtcTimeBlocks[i + 1]);
 
-                    if (currentTime >= startTime && currentTime <= endTime)
+                    if (utcNow >= startTime && utcNow <= endTime)
                     {
                         Console.WriteLine($"Current time is within the block: {startTime} to {endTime}");
                         isInTimeBlock = true;
                         break;
                     }
+
+                    if (startTime > utcNow && startTime < nextActionTime)
+                    {
+                        nextActionTime = startTime;
+                    }
                 }
 
-                if (!isInTimeBlock)
+                if (!isInTimeBlock &&  nextActionTime == DateTime.MaxValue) // If not in a block and no next action time was found
                 {
-                    // Find the next start time
-                    TimeSpan? nextStartTime = handler.UtcTimeBlocks.Where(t => t > currentTime)
-                        .OrderBy(t => t)
-                        .FirstOrDefault();
-
-
-                    // If there's a next start time, sleep until then
-                    if (nextStartTime != TimeSpan.Zero)
-                    {
-                        var sleepDuration = nextStartTime - currentTime;
-                        Console.WriteLine($"Sleeping for {sleepDuration} until the next time block starts");
-                        Sleep(handler, sleepDuration.Value);
-                    }
-                    else
-                    {
-                        // Calculate sleep time until the first time block of the next day
-                        var timeTillEndOfDay = TimeSpan.FromDays(1) - currentTime;
-                        var timeTillFirstBlockNextDay = handler.UtcTimeBlocks[0];
-                        var totalSleepTime = timeTillEndOfDay + timeTillFirstBlockNextDay;
-
-                        Console.WriteLine(
-                            $"No more time blocks for today. Sleeping for {totalSleepTime} until the next time block starts");
-                        Sleep(handler, totalSleepTime);
-                    }
+                    var nextStartTime = handler.UtcTimeBlocks.Where(t => today.Add(t) > utcNow).Min();
+                    nextActionTime = today.Add(nextStartTime);
                 }
             }
+
+            // Calculate sleep duration if needed
+            if (nextActionTime == DateTime.MaxValue) return;
+            var sleepDuration = (int)(nextActionTime - utcNow).TotalMilliseconds;
+            Console.WriteLine($"Sleeping for {sleepDuration} milliseconds until the next action time.");
+            Sleep(handler, sleepDuration);
         }
-        
+
         private static void Sleep(TimelineHandler handler, int msToSleep)
         {
             _log.Trace($"{handler} sleeping for {msToSleep} ms");
