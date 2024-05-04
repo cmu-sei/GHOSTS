@@ -498,7 +498,6 @@ namespace Ghosts.Client.TimelineManager
                             _ = new LightHandlers.LightExcelHandler(handler);
                         });
                         break;
-                        break;
                     case HandlerType.PowerShell:
                         t = new Thread(() =>
                         {
