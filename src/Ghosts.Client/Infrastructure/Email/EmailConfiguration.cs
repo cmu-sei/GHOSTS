@@ -190,14 +190,14 @@ public class EmailConfiguration
             var emails = EmailListManager.GetDomainList();
             _log.Trace($"Building domain email list: {emails.Count}...");
 
-            for (var i = 0; i <= numberOfRecipients; i++)
+            for (var i = 0; i < numberOfRecipients; i++)
                 list.Add(emails.PickRandom());
 
             //add outside
             var numberOfOutsideRecipients = rnd.Next(Program.Configuration.Email.RecipientsOutsideMin, Program.Configuration.Email.RecipientsOutsideMax + 1);
             var outsideEmails = EmailListManager.GetOutsideList();
             _log.Trace($"Building outside email list: {outsideEmails.Count}...");
-            for (var i = 0; i <= numberOfOutsideRecipients; i++)
+            for (var i = 0; i < numberOfOutsideRecipients; i++)
                 list.Add(outsideEmails.PickRandom());
         }
         else
