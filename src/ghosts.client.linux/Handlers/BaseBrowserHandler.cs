@@ -36,8 +36,12 @@ namespace ghosts.client.linux.handlers
         public bool SharePointAbort { get; set; } = false;  //will be set to True if unable to proceed with Handler execution
         public bool BlogAbort { get; set; } = false;  //will be set to True if unable to proceed with Handler execution
         public bool OutlookAbort { get; set; } = false;  //will be set to True if unable to proceed with Handler execution
+
+        public bool SocialAbort { get; set; } = false;  //will be set to True if unable to proceed with Handler execution
  
         private SharepointHelper _sharePointHelper = null;
+
+        private SocialHelper _socialHelper = null;
 
         private BlogHelper _blogHelper = null;
 
@@ -131,6 +135,28 @@ namespace ghosts.client.linux.handlers
                             }
 
                             break;
+                        case "social":
+                            if (!SocialAbort)
+                                {
+                                    if (_socialHelper == null)
+                                    {
+                                        _socialHelper = SocialHelper.MakeHelper(this, Driver, handler, _log);
+                                        if (_socialHelper == null) SocialAbort = true;
+                                    }
+
+                                    if (_socialHelper != null)
+                                    {
+                                        _socialHelper.Execute(handler, timelineEvent);
+                                        this.Restart = _socialHelper.RestartNeeded();
+                                        if (this.Restart)
+                                        {
+                                            _socialHelper = null;  //remove the helper
+                                            _log.Trace($"Social:: Restart requested for {this.BrowserType.ToString()} , restarting...");
+                                            return;  //restart has been requested 
+                                        }
+                                    } 
+                                }
+                                break;
                         case "sharepoint":
                             if (!SharePointAbort)
                             {
@@ -237,7 +263,7 @@ namespace ghosts.client.linux.handlers
 
                     if (timelineEvent.DelayAfterActual > 0)
                     {
-                        Thread.Sleep(timelineEvent.DelayAfterActual);
+                        Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual,JitterFactor));
                     }
                 }
             }
