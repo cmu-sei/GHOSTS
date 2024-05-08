@@ -4,6 +4,23 @@ public class ApplicationConfiguration
 {
     public int DefaultDisplay { get; set; }
     public int MinutesToCheckForDuplicatePost { get; set; }
+    
+    public CleanupJobConfig CleanupJob { get; set; }
+    public CleanupAgeConfig CleanupAge { get; set; }
+    
+    public class CleanupJobConfig
+    {
+        public int Hours { get; set; }
+        public int Minutes { get; set; }
+        public int Seconds { get; set; }
+    }
+
+    public class CleanupAgeConfig
+    {
+        public int Days { get; set; }
+        public int Hours { get; set; }
+        public int Minutes { get; set; }
+    }
 }
 
 public static class ApplicationConfigurationLoader
