@@ -1,4 +1,4 @@
-name: Make API Container
+name: Make Socializer Container
 
 on:
   workflow_dispatch:
