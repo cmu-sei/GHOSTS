@@ -21,5 +21,5 @@ jobs:
         with:
           tags: dustinupdyke/ghosts-socializer
           push: true
-          context: src/ghosts.pandora.socializer/src/.
+          context: src/ghosts.pandora.socializer/src/
           file: ./src/ghosts.pandora.socializer/src/Dockerfile
