@@ -1,5 +1,4 @@
-﻿using ghosts.client.linux.Infrastructure;
-using Ghosts.Domain;
+﻿using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Newtonsoft.Json;
 using OpenQA.Selenium.Support.UI;
@@ -15,10 +14,11 @@ using System.Web;
 using System.Diagnostics;
 using System.Linq;
 using System.Collections.Generic;
+using Ghosts.Client.Infrastructure;
 
 
 
-namespace ghosts.client.linux.handlers
+namespace Ghosts.Client.Handlers
 {
 
    
@@ -141,7 +141,7 @@ namespace ghosts.client.linux.handlers
                 Actions actions = new Actions(Driver);
                 actions.MoveToElement(targetElement).Click().Perform();
                 Thread.Sleep(500);
-                Log.Trace($"Social:: Successfully added post on site {site}.");
+                Log.Trace($"Social:: Successfully added post to site {site}.");
                 postCount += 1;
                 
 
@@ -192,8 +192,6 @@ namespace ghosts.client.linux.handlers
 
         public string AttachmentWindowTitle = "Open"; //this is for chrome
 
-        private LinuxSupport linuxHelper = null;
-
         private void OutputHandler(object sendingProcess, DataReceivedEventArgs outLine)
         {
             Log.Trace($"Social:: STDOUT from bash process: {outLine.Data}");
@@ -236,7 +234,6 @@ namespace ghosts.client.linux.handlers
             baseHandler = callingHandler;
             Driver = currentDriver;
             version = aversion;
-            linuxHelper = new LinuxSupport(Log);
         }
 
         private bool CheckProbabilityVar(string name, int value)
@@ -315,22 +312,40 @@ namespace ghosts.client.linux.handlers
 
         public void AttachFileWindows(string filename)
         {
-            
+            IntPtr winHandle = Winuser.FindWindow(null, AttachmentWindowTitle);
+            if (winHandle == IntPtr.Zero)
+            {
+                Log.Trace($"WebOutlook:: Unable to find '{AttachmentWindowTitle}' window to upload file attachment.");
+                return;
+            }
+            Winuser.SetForegroundWindow(winHandle);
+            string s;
+            if (Driver is OpenQA.Selenium.Firefox.FirefoxDriver)
+            {
+                s = filename + "{TAB}{TAB}{ENTER}";
+            }
+            else
+            {
+                s = filename + "{ENTER}";
+            }
+
+            System.Windows.Forms.SendKeys.SendWait(s);
+            Thread.Sleep(200);
+            winHandle = Winuser.FindWindow(null, AttachmentWindowTitle);
+            if (winHandle == IntPtr.Zero)
+            {
+                return;
+            }
+            // the window is still open. Grr. try closing it.
+            Winuser.SetForegroundWindow(winHandle);
+            System.Windows.Forms.SendKeys.SendWait("%{F4}");
+
         }
 
-        public void AttachFileLinux(string filename)
-        {
-            var status = linuxHelper.AttachFileUsingThread("Social", filename, AttachmentWindowTitle, 30, 2);
-            if (!status){
-                //force a restart
-                errorCount = errorThreshold + 1; 
-            }
-        }
 
         public void AttachFile(string filename)
         {
-            if (isWindowsOs()) AttachFileWindows(filename);
-            else AttachFileLinux(filename);
+            AttachFileWindows(filename);
         }
 
 

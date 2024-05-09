@@ -152,7 +152,8 @@ namespace ghosts.client.linux.handlers
                                         {
                                             _socialHelper = null;  //remove the helper
                                             _log.Trace($"Social:: Restart requested for {this.BrowserType.ToString()} , restarting...");
-                                            return;  //restart has been requested 
+                                            // do a hard restart
+                                            throw new Exception("Restarting Social Browser");
                                         }
                                     } 
                                 }

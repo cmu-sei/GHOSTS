@@ -148,52 +148,11 @@ namespace ghosts.client.linux.handlers
 
         public string FileDownloadAllXpath { get; set; } = "//span[text()='Download all']/parent::button";
 
-
+        private LinuxSupport linuxHelper = null;
 
 
         public List<string> InitialWindows = new List<string>();
 
-
-        private void OutputHandler(object sendingProcess, DataReceivedEventArgs outLine)
-        {
-            Log.Trace($"OutlookWeb:: STDOUT from bash process: {outLine.Data}");
-            return;
-        }
-
-        private static void ErrorHandler(object sendingProcess, DataReceivedEventArgs outLine)
-        {
-            Log.Trace($"OutlookWeb:: STDERR output from bash process: {outLine.Data}");
-            return;
-        }
-
-        private void ExecuteBashCommand(string command)
-        {
-            var escapedArgs = command.Replace("\"", "\\\"");
-
-
-            var p = new Process();
-            //p.EnableRaisingEvents = false;
-            p.StartInfo.FileName = "bash";
-            p.StartInfo.Arguments = $"-c \"{escapedArgs}\"";
-            p.StartInfo.UseShellExecute = false;
-            p.StartInfo.RedirectStandardOutput = true;
-            p.StartInfo.RedirectStandardError = true;
-            //* Set your output and error (asynchronous) handlers
-            p.OutputDataReceived += OutputHandler;
-            p.ErrorDataReceived += ErrorHandler;
-            p.StartInfo.CreateNoWindow = true;
-            Log.Trace($"OutlookWeb:: Spawning {p.StartInfo.FileName} with command {escapedArgs}");
-            p.Start();
-
-            string Result = "";
-            while (!p.StandardOutput.EndOfStream)
-            {
-                Result += p.StandardOutput.ReadToEnd();
-            }
-
-            p.WaitForExit();
-            Log.Trace($"OutlookWeb:: Bash command output: {Result}");
-        }
 
         public static bool isWindowsOs()
         {
@@ -234,15 +193,14 @@ namespace ghosts.client.linux.handlers
             //System.Windows.Forms.SendKeys.SendWait("%{F4}");
         }
 
+
         public void AttachFileLinux(string filename)
         {
-            string cmd = $"xdotool search -name '{AttachmentWindowTitle}' windowfocus type '{filename}' ";
-            ExecuteBashCommand(cmd);
-            Thread.Sleep(500);
-            cmd = $"xdotool search -name '{AttachmentWindowTitle}' windowfocus key KP_Enter";
-            ExecuteBashCommand(cmd);
-            Thread.Sleep(300);
-            return;
+            var status = linuxHelper.AttachFileUsingThread("WebOutlook", filename, AttachmentWindowTitle, 30, 2);
+            if (!status){
+                //force a restart
+                errorCount = errorThreshold + 1; 
+            }
         }
 
         public void AttachFile(string filename)
@@ -285,6 +243,7 @@ namespace ghosts.client.linux.handlers
             baseHandler = callingHandler;
             Driver = currentDriver;
             version = aversion;
+            linuxHelper = new LinuxSupport(Log);
         }
 
         private bool CheckProbabilityVar(string name, int value)

@@ -34,6 +34,7 @@ namespace Ghosts.Client.Handlers
 
         public bool SharePointAbort { get; set; } = false;  //will be set to True if unable to proceed with Handler execution
         public bool OutlookAbort { get; set; } = false;  //will be set to True if unable to proceed with Handler execution
+        public bool SocialAbort { get; set; } = false;  //will be set to True if unable to proceed with Handler execution
         public bool BlogAbort { get; set; } = false;  //will be set to True if unable to proceed with Handler execution
         public string UserAgentString { get; set; }
 
@@ -41,6 +42,7 @@ namespace Ghosts.Client.Handlers
         private BlogHelper _blogHelper = null;
         private PostContentManager _postHelper = null;
         private OutlookHelper _outlookHelper = null;
+        private SocialHelper _socialHelper = null;
 
         private Task LaunchThread(TimelineHandler handler, TimelineEvent timelineEvent, string site)
         {
@@ -119,6 +121,29 @@ namespace Ghosts.Client.Handlers
                                 }
                             }
 
+                            break;
+                        case "social":
+                            if (!SocialAbort)
+                            {
+                                if (_socialHelper == null)
+                                {
+                                    _socialHelper = SocialHelper.MakeHelper(this, Driver, handler, Log);
+                                    if (_socialHelper == null) SocialAbort = true;
+                                }
+
+                                if (_socialHelper != null)
+                                {
+                                    _socialHelper.Execute(handler, timelineEvent);
+                                    this.Restart = _socialHelper.RestartNeeded();
+                                    if (this.Restart)
+                                    {
+                                        _socialHelper = null;  //remove the helper
+                                        Log.Trace($"Social:: Restart requested for {this.BrowserType.ToString()} , restarting...");
+                                        // do a hard restart
+                                        throw new Exception("Restarting Social Browser");
+                                    }
+                                }
+                            }
                             break;
                         case "sharepoint":
                             if (!SharePointAbort)
@@ -229,7 +254,7 @@ namespace Ghosts.Client.Handlers
 
                     if (timelineEvent.DelayAfterActual > 0)
                     {
-                        Thread.Sleep(timelineEvent.DelayAfterActual);
+                        Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, JitterFactor));
                     }
                 }
             }
