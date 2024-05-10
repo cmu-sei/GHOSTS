@@ -141,15 +141,13 @@ namespace Ghosts.Client.Handlers
                 switch (timelineEvent.Command)
                 {
                     case "random":
-                        while (true)
+                        var cmd = timelineEvent.CommandArgs[_random.Next(0, timelineEvent.CommandArgs.Count)];
+                        if (!string.IsNullOrEmpty(cmd.ToString()))
                         {
-                            var cmd = timelineEvent.CommandArgs[_random.Next(0, timelineEvent.CommandArgs.Count)];
-                            if (!string.IsNullOrEmpty(cmd.ToString()))
-                            {
-                                this.Command(handler, timelineEvent, cmd.ToString());
-                            }
-                            Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, jitterfactor)); ;
+                            this.Command(handler, timelineEvent, cmd.ToString());
                         }
+                        Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, jitterfactor));
+                        break;
                 }
 
                 if (timelineEvent.DelayAfterActual > 0)
