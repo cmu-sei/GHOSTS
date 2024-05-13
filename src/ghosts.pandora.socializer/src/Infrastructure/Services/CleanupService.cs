@@ -43,7 +43,7 @@ public class CleanupService(ILogger logger, IServiceProvider serviceProvider) : 
         foreach (DriveInfo d in allDrives)
         {
             if (d.Name == "/" && d.DriveFormat == "overlay") {
-                double utilFloat = 100.0 - ((double)(d.AvailableFreeSpace)*100.0)/(double)d.TotalFreeSpace;
+                double utilFloat = 100.0 - ((double)(d.AvailableFreeSpace)*100.0)/(double)d.TotalSize;
                 return (int)utilFloat;
             }
         }

@@ -51,8 +51,13 @@ public class UsersController(ILogger logger, IHubContext<PostsHub> hubContext, D
                 }
                 catch (IOException ex)
                 {
-                    Logger.LogError(ex, "Error copying file.");
-                    return StatusCode(500, "Internal Server Error");
+                    // with multiple writers this can exist even though existance previously checked
+                    // so do not error on already exists
+                    if (!ex.ToString().Contains("already exists")) 
+                    {
+                        Logger.LogError(ex, "Error copying file.");
+                        return StatusCode(500, "Internal Server Error");
+                    }
                 }
             }
             else
