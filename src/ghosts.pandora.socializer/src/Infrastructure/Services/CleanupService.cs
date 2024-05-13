@@ -65,7 +65,7 @@ public class CleanupService(ILogger logger, IServiceProvider serviceProvider) : 
     {
         var diskUtil = GetDiskUtil();
         var targetUtilization = Program.Configuration.CleanupDiskUtilThreshold; 
-        logger.LogInformation($"Cleanup Service: Disk Utilization {diskUtil}, CleanupDiskUtilThreashhold {targetUtilization}");
+        logger.LogInformation($"Cleanup Service: Disk Utilization {diskUtil}, CleanupDiskUtilThreshold {targetUtilization}");
 
         // set actual targetUtilization 10% lower of specified value so that we are not constantly tripping the cleanup
         if (targetUtilization > 0) {
