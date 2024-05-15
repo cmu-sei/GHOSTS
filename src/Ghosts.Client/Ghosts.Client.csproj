@@ -272,6 +272,7 @@
     <None Include="kill-ghosts.bat">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Sample Timelines\BrowserFirefoxSocial.json" />
     <None Include="Sample Timelines\Cron.json" />
     <None Include="Sample Timelines\Administrative Commands.json" />
     <None Include="Sample Timelines\BrowserChrome.json" />

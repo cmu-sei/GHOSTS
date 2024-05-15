@@ -7,6 +7,11 @@
   specifies that maximum number of Emails to keep in the Inbox, Sent Items folder.
   When a delete operation is done, the Inbox, Sent Items folders are pruned to this amount,
   and all emails in the Deleted Items folder are deleted.
+
+  application.json/Email/EmailNoReply - this is a comma delimited list of strings that is used to filter emails
+  chosen for a reply - if the reply recipient contains one of these strings, then that email is not chosen for
+  a reply (ie. an email from 'outlook' indicates an undeliverable email and should not be reponded to)
+
 */
 
 {
