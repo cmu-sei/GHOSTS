@@ -1,0 +1,251 @@
+contentgen:
+  products:
+    '1':
+      prompt: 'Write a facebook post about I have a used car for sale, feel free to
+        make an offer.
+
+        '
+    '10':
+      prompt: 'Write a facebook post about Can someone suggest the best type of car
+        for a family of four?
+
+        '
+    '11':
+      prompt: 'Write a facebook post about I''m considering leasing a car instead
+        of buying one, any thoughts?
+
+        '
+    '12':
+      prompt: 'Write a facebook post about Where can I find genuine parts for my car
+        model?
+
+        '
+    '13':
+      prompt: 'Write a facebook post about Has anyone tried the new self-driving features
+        in modern cars?
+
+        '
+    '14':
+      prompt: 'Write a facebook post about I need a car with enough space to transport
+        large items, what would you recommend?
+
+        '
+    '15':
+      prompt: 'Write a facebook post about How do I maintain my car''s value over
+        time?
+
+        '
+    '16':
+      prompt: 'Write a facebook post about Can someone guide me through the process
+        of registering a new car?
+
+        '
+    '17':
+      prompt: 'Write a facebook post about I heard boats can be rented for weekend
+        trips, where can I find one nearby?
+
+        '
+    '18':
+      prompt: 'Write a facebook post about Is a boat a practical purchase for someone
+        who loves water activities?
+
+        '
+    '19':
+      prompt: 'Write a facebook post about What are the best types of boats for fishing
+        trips?
+
+        '
+    '2':
+      prompt: 'Write a facebook post about The car is out of my budget, do you know
+        of any more affordable models?
+
+        '
+    '20':
+      prompt: 'Write a facebook post about Where can I buy a second-hand boat that''s
+        in good condition?
+
+        '
+    '21':
+      prompt: 'Write a facebook post about Can anyone share their experience with
+        maintaining a boat during the off-season?
+
+        '
+    '22':
+      prompt: 'Write a facebook post about I''m looking for an eco-friendly boat,
+        any suggestions?
+
+        '
+    '23':
+      prompt: 'Write a facebook post about How do I store my boat properly to extend
+        its lifespan?
+
+        '
+    '24':
+      prompt: 'Write a facebook post about Can someone recommend a reputable marina
+        for keeping a boat?
+
+        '
+    '25':
+      prompt: 'Write a facebook post about I need a sturdy boat for long-distance
+        sailing, what models would you advise?
+
+        '
+    '26':
+      prompt: 'Write a facebook post about Is it cheaper to buy or rent a boat for
+        occasional use?
+
+        '
+    '27':
+      prompt: 'Write a facebook post about Where can I find detailed specifications
+        on different types of boats?
+
+        '
+    '28':
+      prompt: 'Write a facebook post about Has anyone tried the new inflatable boats
+        for easy transport?
+
+        '
+    '29':
+      prompt: 'Write a facebook post about I''m considering buying a houseboat, any
+        advice?
+
+        '
+    '3':
+      prompt: 'Write a facebook post about How much does it cost to insure a car each
+        month on average?
+
+        '
+    '30':
+      prompt: 'Write a facebook post about What are the advantages of living in a
+        home near the water?
+
+        '
+    '31':
+      prompt: 'Write a facebook post about Can someone suggest a reliable landscaping
+        company for my home?
+
+        '
+    '32':
+      prompt: 'Write a facebook post about I''m looking for a lawn mower that can
+        handle large gardens, which brand should I buy?
+
+        '
+    '33':
+      prompt: 'Write a facebook post about Where can I find electric lawn mowers that
+        are environmentally friendly?
+
+        '
+    '34':
+      prompt: 'Write a facebook post about How often should I service my lawn mower
+        to keep it running smoothly?
+
+        '
+    '35':
+      prompt: 'Write a facebook post about Can anyone recommend the best type of lawn
+        mower for hilly terrain?
+
+        '
+    '36':
+      prompt: 'Write a facebook post about I need a quiet lawn mower for residential
+        use, what options do I have?
+
+        '
+    '37':
+      prompt: 'Write a facebook post about Where can I buy a durable push lawn mower
+        that won''t break the bank?
+
+        '
+    '38':
+      prompt: 'Write a facebook post about Has anyone used a robotic lawn mower and
+        found it to be worth the investment?
+
+        '
+    '39':
+      prompt: 'Write a facebook post about I''m looking for a gas-powered lawn mower
+        with a large cutting deck, any recommendations?
+
+        '
+    '4':
+      prompt: 'Write a facebook post about Can anyone recommend a reliable car mechanic
+        in the area?
+
+        '
+    '40':
+      prompt: 'Write a facebook post about What are the best safety practices when
+        using a lawn mower?
+
+        '
+    '41':
+      prompt: 'Write a facebook post about Can someone suggest a lawn mower repair
+        service that offers house calls?
+
+        '
+    '42':
+      prompt: 'Write a facebook post about I want to convert my lawn into an eco-friendly
+        garden, where do I start?
+
+        '
+    '43':
+      prompt: 'Write a facebook post about Are there any local regulations regarding
+        noise levels for lawn maintenance?
+
+        '
+    '44':
+      prompt: 'Write a facebook post about How can I effectively maintain my lawn
+        through different seasons?
+
+        '
+    '45':
+      prompt: 'Write a facebook post about Can someone guide me on the best type of
+        lawn mower for a sloped yard?
+
+        '
+    '46':
+      prompt: 'Write a facebook post about I''m interested in a zero-turn radius lawn
+        mower, are they easier to maneuver?
+
+        '
+    '47':
+      prompt: 'Write a facebook post about Where can I find a used lawn mower that
+        has been well taken care of?
+
+        '
+    '48':
+      prompt: 'Write a facebook post about Has anyone tried the new solar-powered
+        lawn mowers yet?
+
+        '
+    '49':
+      prompt: 'Write a facebook post about I need a lawn mower with a bagging system,
+        which brands offer this feature?
+
+        '
+    '5':
+      prompt: 'Write a facebook post about I''m looking for a fuel-efficient car that''s
+        good for city driving.
+
+        '
+    '50':
+      prompt: Write a facebook post about Can someone recommend a lawn mower that's
+        known for its durability and long-lasting performance?
+    '6':
+      prompt: 'Write a facebook post about Where can I buy a car with low mileage
+        and a good track record?
+
+        '
+    '7':
+      prompt: 'Write a facebook post about Are there any electric cars available for
+        purchase this year?
+
+        '
+    '8':
+      prompt: 'Write a facebook post about I need feedback on my new car''s performance
+        in different weather conditions.
+
+        '
+    '9':
+      prompt: 'Write a facebook post about Is it worth investing in a high-end sound
+        system for my car?
+
+        '
+datadir: social_content

@@ -62,7 +62,7 @@
     "RecipientsBccMax": 2,
     "RecipientsOutsideMin": 0,
     "RecipientsOutsideMax": 1,
-    "EmailNoReply": "",
+    "EmailNoReply": "outlook",
     "SetAccountFromConfig": false,
     "SetAccountFromLocal": false,
     "SetForcedSendReceive": true,
