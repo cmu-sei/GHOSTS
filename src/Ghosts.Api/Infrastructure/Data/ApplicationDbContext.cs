@@ -44,6 +44,8 @@ namespace Ghosts.Api.Infrastructure.Data
         
         public DbSet<NpcRecord> Npcs { get; set; }
         public DbSet<NPCIpAddress> NpcIps { get; set; }
+        
+        public DbSet<NpcActivity> NpcActivities { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -51,6 +53,7 @@ namespace Ghosts.Api.Infrastructure.Data
             // Add your customizations after calling base.OnModelCreating(modelBuilder);
             
             modelBuilder.Entity<NpcRecord>().Property(o => o.NpcProfile).HasColumnType("jsonb");
+            modelBuilder.Entity<NpcRecord>().Property(o => o.NpcSocialGraph).HasColumnType("jsonb");
             
             modelBuilder.Entity<Machine>().HasIndex(o => new {o.CreatedUtc});
             modelBuilder.Entity<Machine>().HasIndex(o => new {o.Status});

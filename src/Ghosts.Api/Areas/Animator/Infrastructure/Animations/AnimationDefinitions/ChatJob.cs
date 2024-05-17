@@ -13,6 +13,7 @@ using ghosts.api.Areas.Animator.Infrastructure.Models;
 using Ghosts.Api.Infrastructure;
 using Ghosts.Api.Infrastructure.Data;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.DependencyInjection;
 using NLog;
 
 namespace ghosts.api.Areas.Animator.Infrastructure.Animations.AnimationDefinitions;
@@ -27,14 +28,17 @@ public class ChatJob
     private readonly int _currentStep;
     private CancellationToken _cancellationToken;
     
-    public ChatJob(ApplicationSettings configuration, ApplicationDbContext context, Random random,
+    public ChatJob(ApplicationSettings configuration, IServiceScopeFactory scopeFactory, Random random,
         IHubContext<ActivityHub> activityHubContext, CancellationToken cancellationToken)
     {
         //todo: post results to activityHubContext for "top" reporting
         
         this._configuration = configuration;
         this._random = random;
-        this._context = context;
+        
+        using var innerScope = scopeFactory.CreateScope();
+        this._context = innerScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        
         this._cancellationToken = cancellationToken;
 
         var chatConfiguration = JsonSerializer.Deserialize<ChatJobConfiguration>(File.ReadAllText("config/chat.json"),

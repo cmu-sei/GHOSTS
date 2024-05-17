@@ -9,32 +9,25 @@ using System.Text;
 using System.Threading;
 using Ghosts.Animator.Extensions;
 using ghosts.api.Areas.Animator.Hubs;
+using ghosts.api.Areas.Animator.Infrastructure.Models;
 using Ghosts.Api.Infrastructure;
 using Ghosts.Api.Infrastructure.Data;
 using Microsoft.AspNetCore.SignalR;
-using Newtonsoft.Json;
+using Microsoft.Extensions.DependencyInjection;
 using NLog;
 
 namespace ghosts.api.Areas.Animator.Infrastructure.Animations.AnimationDefinitions;
 
-public class SocialBeliefJob
+public class SocialBeliefJob 
 {
     private static readonly Logger _log = LogManager.GetCurrentClassLogger();
     private readonly ApplicationSettings _configuration;
     private readonly ApplicationDbContext _context;
-    private List<SocialGraph> _socialGraphs;
     private readonly Random _random;
     private bool _isEnabled = true;
     private CancellationToken _cancellationToken;
 
-    private const string SavePath = "_output/socialbelief/";
-    private const string SocialGraphFile = "social_belief.json";
     private readonly IHubContext<ActivityHub> _activityHubContext;
-
-    public static string GetSocialGraphFile()
-    {
-        return SavePath + SocialGraphFile;
-    }
 
     public static string[] Beliefs =
     {
@@ -47,7 +40,7 @@ public class SocialBeliefJob
         "Dark web is a breeding ground.", "DDoS attacks disrupt services.", "Hacktivists promote causes."
     };
 
-    public SocialBeliefJob(ApplicationSettings configuration, ApplicationDbContext context, Random random,
+    public SocialBeliefJob(ApplicationSettings configuration, IServiceScopeFactory scopeFactory, Random random,
         IHubContext<ActivityHub> activityHubContext, CancellationToken cancellationToken)
     {
         try
@@ -55,30 +48,29 @@ public class SocialBeliefJob
             this._activityHubContext = activityHubContext;
             this._configuration = configuration;
             this._random = random;
-            this._context = context;
+            
+            using var innerScope = scopeFactory.CreateScope();
+            this._context = innerScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
             this._cancellationToken = cancellationToken;
 
-            this.LoadSocialBeliefs();
-
-            if (this._socialGraphs.Count > 0 &&
-                this._socialGraphs[0].CurrentStep > _configuration.AnimatorSettings.Animations.SocialGraph.MaximumSteps)
-            {
-                _log.Trace("SocialBelief has exceed maximum steps. Sleeping...");
-                return;
-            }
+            // if (this._socialGraphs.Count > 0 &&
+            //     this._socialGraphs[0].CurrentStep > _configuration.AnimatorSettings.Animations.SocialGraph.MaximumSteps)
+            // {
+            //     _log.Trace("SocialBelief has exceed maximum steps. Sleeping...");
+            //     return;
+            // }
+            
+            var npcs = this._context.Npcs.RandPick(10).ToList();
 
             _log.Info("SocialBelief loaded, running steps...");
             while (this._isEnabled && !this._cancellationToken.IsCancellationRequested)
             {
-                foreach (var graph in this._socialGraphs)
+                foreach (var npc in npcs)
                 {
-                    this.Step(graph);
+                    this.Step(npc);
                 }
 
-                // post-step activities: saving results and reporting on them
-                File.WriteAllText(GetSocialGraphFile(),
-                    JsonConvert.SerializeObject(this._socialGraphs, Formatting.None));
-                this.Report();
                 _log.Info($"Step complete, sleeping for {this._configuration.AnimatorSettings.Animations.SocialGraph.TurnLength}ms");
                 Thread.Sleep(this._configuration.AnimatorSettings.Animations.SocialBelief.TurnLength);
             }
@@ -93,51 +85,33 @@ public class SocialBeliefJob
         }
     }
 
-    private void LoadSocialBeliefs()
+    private void Step(NpcRecord npc)
     {
-        var graphs = new List<SocialGraph>();
-        var path = SavePath;
-        if (!Directory.Exists(path))
-            Directory.CreateDirectory(path);
-        path += SocialGraphFile;
-        if (File.Exists(path))
+        var graph = npc.NpcSocialGraph;
+        if (graph == null)
         {
-            graphs = JsonConvert.DeserializeObject<List<SocialGraph>>(File.ReadAllText(path));
-            _log.Info("SocialBelief loaded from disk...");
-        }
-        else
-        {
-            var list = this._context.Npcs.ToList().OrderBy(o => o.Enclave).ThenBy(o => o.Team).Take(10).ToList();
-            foreach (var item in list)
+            //need to build a list of connections for every npc
+            graph = new NpcSocialGraph
             {
-                //need to build a list of connections for every npc
-                var graph = new SocialGraph
-                {
-                    Id = item.Id,
-                    Name = item.NpcProfile.Name.ToString()
-                };
-                foreach (var connection in from sub in list
-                         where sub.Id != item.Id
-                         select new SocialGraph.SocialConnection
-                         {
-                             Id = sub.Id,
-                             Name = sub.NpcProfile.Name.ToString()
-                         })
-                {
-                    graph.Connections.Add(connection);
-                }
+                Id = npc.Id,
+                Name = npc.NpcProfile.Name.ToString()
+            };
 
-                graphs.Add(graph);
+            var connections = this._context.Npcs.ToList().OrderBy(o => o.Enclave).ThenBy(o => o.Team).Take(10).ToList();
+            foreach (var connection in connections)
+            {
+                graph.Connections.Add(new NpcSocialGraph.SocialConnection
+                {
+                    Id = connection.NpcProfile.Id,
+                    Name = connection.NpcProfile.Name.ToString()
+                });
             }
 
-            _log.Info("SocialBelief created from DB...");
+            npc.NpcSocialGraph = graph;
+            this._context.SaveChanges();
+            _log.Trace($"Social graph saved for {npc.NpcProfile.Name}...");
         }
-
-        this._socialGraphs = graphs;
-    }
-
-    private void Step(SocialGraph graph)
-    {
+        
         if (graph.CurrentStep > this._configuration.AnimatorSettings.Animations.SocialBelief.MaximumSteps)
         {
             _log.Trace($"Maximum steps met: {graph.CurrentStep - 1}. SocialBelief is exiting...");
@@ -147,7 +121,7 @@ public class SocialBeliefJob
 
         graph.CurrentStep++;
 
-        SocialGraph.Belief belief = null;
+        NpcSocialGraph.Belief belief = null;
 
         if (graph.Beliefs != null)
         {
@@ -155,19 +129,19 @@ public class SocialBeliefJob
         }
         else
         {
-            graph.Beliefs = new List<SocialGraph.Belief>();
+            graph.Beliefs = new List<NpcSocialGraph.Belief>();
         }
 
         if (belief == null)
         {
             var l = Convert.ToDecimal(this._random.NextDouble() * (0.75 - 0.25) + 0.25);
-            belief = new SocialGraph.Belief(graph.Id, graph.Id, Beliefs.RandomFromStringArray(), graph.CurrentStep, l,
+            belief = new NpcSocialGraph.Belief(graph.Id, graph.Id, Beliefs.RandomFromStringArray(), graph.CurrentStep, l,
                 (decimal)0.5);
         }
 
         var bayes = new Bayes(graph.CurrentStep, belief.Likelihood, belief.Posterior, 1 - belief.Likelihood,
             1 - belief.Posterior);
-        var newBelief = new SocialGraph.Belief(graph.Id, graph.Id, Beliefs.RandomFromStringArray(), graph.CurrentStep,
+        var newBelief = new NpcSocialGraph.Belief(graph.Id, graph.Id, Beliefs.RandomFromStringArray(), graph.CurrentStep,
             belief.Likelihood, bayes.PosteriorH1);
         graph.Beliefs.Add(newBelief);
 
@@ -179,32 +153,7 @@ public class SocialBeliefJob
             $"{graph.Name} has deeper belief in {newBelief.Name}",
             DateTime.Now.ToString(CultureInfo.InvariantCulture)
         );
-    }
 
-    private void Report()
-    {
-        var line = new StringBuilder();
-
-        //write header
-        line.Append(SocialGraph.Belief.ToHeader())
-            .Append(Environment.NewLine);
-
-        //now write each person
-        foreach (var npc in this._socialGraphs)
-        {
-            line.Append(npc.Id).Append(',').Append(npc.Name).Append(",H_1,,,")
-                .Append(Environment.NewLine);
-
-            foreach (var belief in npc.Beliefs)
-            {
-                line.Append(",,,").Append(belief.Step).Append(',').Append(belief.Likelihood).Append(',')
-                    .Append(belief.Posterior)
-                    .Append(Environment.NewLine);
-            }
-        }
-
-        _log.Trace(line.ToString().TrimEnd(','));
-
-        File.WriteAllText($"{SavePath}social_beliefs.csv", line.ToString().TrimEnd(',') + Environment.NewLine);
+        this._context.SaveChanges();
     }
 }
