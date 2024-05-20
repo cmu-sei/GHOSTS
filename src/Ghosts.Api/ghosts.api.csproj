@@ -53,7 +53,6 @@
 
   <ItemGroup>
     <Folder Include="Areas\Animator\" />
-    <Folder Include="_output\" />
   </ItemGroup>
 
   <ItemGroup>

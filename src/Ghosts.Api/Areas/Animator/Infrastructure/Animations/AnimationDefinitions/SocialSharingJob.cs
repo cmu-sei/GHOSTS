@@ -206,5 +206,7 @@ public class SocialSharingJob
         }
 
         await this._context.NpcActivities.AddRangeAsync(activities, _cancellationToken);
+        await this._context.SaveChangesAsync(this._cancellationToken);
     }
+   
 }

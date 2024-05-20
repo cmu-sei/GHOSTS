@@ -3,9 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using Ghosts.Animator.Extensions;
 using ghosts.api.Areas.Animator.Hubs;
