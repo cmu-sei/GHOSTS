@@ -57,11 +57,11 @@ namespace ghosts.client.linux.handlers
             SendButtonXpath = "//button[@aria-label='Send']";
             InsertAttachmentXpath = "//button[@aria-label='Attach']";
             EmailXpath = "//div[@aria-label='Mail list']//child::*[contains(@role,'listbox')]//child::div[contains(@id,'ariaId')]";
+            EmailXpathSender = ".//span[contains(@class,'lvHighlightFromClass')]";
             EmptyFolderActionXpath = "//div[@role='menu' and @iscontextmenu='1']//child::span[text()='Empty folder']//parent::div//parent::div//parent::button";
     
         } 
 
-        
 
     }
 
@@ -103,6 +103,9 @@ namespace ghosts.client.linux.handlers
         public string EmailDeleteXpath { get; set; } = "//span[text()='Delete']//parent::button";
         public string EmailReplySendXpath { get; set; } =  "//button[@title='Send' and @aria-label='Send']";
         public string EmailXpath { get; set; } = "//div[contains(@tempid,'emailslistview')]//child::div[contains(@role,'button')]";
+        public string EmailXpathSender { get; set; } = ".//span[contains(@class,'lvHighlightFromClass')]";
+
+        
         public string EmailOtherXpath { get; set; } = "//div[contains(@aria-label,'Search completed')]//child::div[contains(@id,'_ariaId_')]";
         public string NewMailXpath { get; set; } = "//div[@aria-label='Mail']//child::div//child::div//child::div//child::div//child::button//child::span[@role='presentation']//following-sibling::span[text()='New mail']//parent::button";        
         public string EmailFiltersXpath { get; set; } = "//div[contains(@aria-label,'Email Filters')]//child::div//child::div[contains(@style,'inline-block')]//child::span[contains(@role,'menuitemradio')]";
@@ -111,6 +114,7 @@ namespace ghosts.client.linux.handlers
         public string CcRecipientsXpath { get; set; } = "//input[contains(@aria-label,'Cc recipients.')]";
         public string SubjectXpath { get; set; } = "//input[contains(@aria-labelledby,'MailCompose.SubjectWellLabel')]";
         public string EmailBodyXpath { get; set; } = "//div[contains(@id,'MicrosoftOWAEditorRegion')]";
+        
 
         public string SendButtonXpath { get; set; } = "//div[contains(@tempid,'mailcomposetoolbar')]//child::button[contains(@aria-label,'Send')]";
 
@@ -148,52 +152,11 @@ namespace ghosts.client.linux.handlers
 
         public string FileDownloadAllXpath { get; set; } = "//span[text()='Download all']/parent::button";
 
-
+        private LinuxSupport linuxHelper = null;
 
 
         public List<string> InitialWindows = new List<string>();
 
-
-        private void OutputHandler(object sendingProcess, DataReceivedEventArgs outLine)
-        {
-            Log.Trace($"OutlookWeb:: STDOUT from bash process: {outLine.Data}");
-            return;
-        }
-
-        private static void ErrorHandler(object sendingProcess, DataReceivedEventArgs outLine)
-        {
-            Log.Trace($"OutlookWeb:: STDERR output from bash process: {outLine.Data}");
-            return;
-        }
-
-        private void ExecuteBashCommand(string command)
-        {
-            var escapedArgs = command.Replace("\"", "\\\"");
-
-
-            var p = new Process();
-            //p.EnableRaisingEvents = false;
-            p.StartInfo.FileName = "bash";
-            p.StartInfo.Arguments = $"-c \"{escapedArgs}\"";
-            p.StartInfo.UseShellExecute = false;
-            p.StartInfo.RedirectStandardOutput = true;
-            p.StartInfo.RedirectStandardError = true;
-            //* Set your output and error (asynchronous) handlers
-            p.OutputDataReceived += OutputHandler;
-            p.ErrorDataReceived += ErrorHandler;
-            p.StartInfo.CreateNoWindow = true;
-            Log.Trace($"OutlookWeb:: Spawning {p.StartInfo.FileName} with command {escapedArgs}");
-            p.Start();
-
-            string Result = "";
-            while (!p.StandardOutput.EndOfStream)
-            {
-                Result += p.StandardOutput.ReadToEnd();
-            }
-
-            p.WaitForExit();
-            Log.Trace($"OutlookWeb:: Bash command output: {Result}");
-        }
 
         public static bool isWindowsOs()
         {
@@ -234,15 +197,14 @@ namespace ghosts.client.linux.handlers
             //System.Windows.Forms.SendKeys.SendWait("%{F4}");
         }
 
+
         public void AttachFileLinux(string filename)
         {
-            string cmd = $"xdotool search -name '{AttachmentWindowTitle}' windowfocus type '{filename}' ";
-            ExecuteBashCommand(cmd);
-            Thread.Sleep(500);
-            cmd = $"xdotool search -name '{AttachmentWindowTitle}' windowfocus key KP_Enter";
-            ExecuteBashCommand(cmd);
-            Thread.Sleep(300);
-            return;
+            var status = linuxHelper.AttachFileUsingThread("WebOutlook", filename, AttachmentWindowTitle, 30, 2);
+            if (!status){
+                //force a restart
+                errorCount = errorThreshold + 1; 
+            }
         }
 
         public void AttachFile(string filename)
@@ -285,6 +247,7 @@ namespace ghosts.client.linux.handlers
             baseHandler = callingHandler;
             Driver = currentDriver;
             version = aversion;
+            linuxHelper = new LinuxSupport(Log);
         }
 
         private bool CheckProbabilityVar(string name, int value)
@@ -1137,15 +1100,75 @@ namespace ghosts.client.linux.handlers
 
         public IWebElement GetOneEmailFromCurrentList()
         {
+            
+            var settings = Program.Configuration.Email;
+            string[] EmailNoReply = null;
+            if (settings.EmailNoReply != null && settings.EmailNoReply != "") {
+                EmailNoReply = settings.EmailNoReply.ToLower().Split(',');
+            }
             ReadOnlyCollection<IWebElement> emailElements = Driver.FindElements(By.XPath(EmailXpath));
             if (emailElements != null && emailElements.Count > 0)
             {
-                //select one of the first 5
-                int max = emailElements.Count;
-                if (max > 5) max = 5;
-                int choice = _random.Next(0, max);
-                return emailElements[choice];
+                if (EmailNoReply == null) 
+                {
+                    // no filtering based on reply address
+                    //select one of the first 5
+                    int max = emailElements.Count;
+                    if (max > 5) max = 5;
+                    int choice = _random.Next(0, max);
+                    return emailElements[choice];
+                } else {
+                    // have to work harder, filter by return address
+                    List<IWebElement> targetEmails = new List<IWebElement>();
+                    var count = 0;
+                    foreach (IWebElement emailElement in emailElements) {
+                        try 
+                        {
+                            var replyElement = emailElement.FindElement(By.XPath(EmailXpathSender));
+                            if (replyElement != null) 
+                            {
+                                var sender = replyElement.Text.ToLower();
+                                // check if this sender is ok
+                                bool reject = false;
+                                foreach (string target in EmailNoReply) {
+                                    if (sender.Contains(target)) {
+                                        reject = true;
+                                        break;
+                                    }
+                                }
+                                if (!reject) {
+                                    targetEmails.Add(emailElement);
+                                    if (targetEmails.Count > 5) break;
+                                }
+                                count += 1;
+                                if (count > 50) break;
+                            }
+                            
+                        } 
+                        catch (Exception e)
+                        {
+                            //ignore any exceptions
+                        }
+
+                    }
+
+                    // filtering is done
+                    if (targetEmails.Count == 0) {
+                        Log.Trace($"WebOutlook:: Unable to find valid email to reply to because of EmailNoReply filter..");
+                        return null; //unable to find valid email
+                    }
+                    else  {
+                        //return a random one out of the list
+                        int choice = _random.Next(0, targetEmails.Count+1);
+                        return targetEmails[choice];
+                    }
+
+                }
             }
+
+
+            
+            
             return null;
         }
 

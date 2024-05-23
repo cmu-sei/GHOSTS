@@ -1,0 +1,153 @@
+contentgen:
+  movies:
+    '1':
+      prompt: Write a facebook post about Which movie features more breathtaking visuals,
+        TRICKSTER or SPACE ODYSSEY?
+    '10':
+      prompt: Write a facebook post about Which movie offers a more thrilling experience,
+        THE PURGE or THE TERMINATOR?
+    '11':
+      prompt: Write a facebook post about Which film has a more impactful opening
+        scene, THE DARK KNIGHT or THE INVISIBLE MAN?
+    '12':
+      prompt: Write a facebook post about Which movie features more realistic special
+        effects, AVATAR or THE PLANET OF THE APES?
+    '13':
+      prompt: Write a facebook post about Which movie tackles the theme of redemption
+        more effectively, Gladiator or THE KING'S SPEECH?
+    '14':
+      prompt: Write a facebook post about Which film offers a more heartwarming story,
+        UP or THE HOUND?
+    '15':
+      prompt: Write a facebook post about Which movie features more compelling dialogue,
+        THE SOCIAL NETWORK or THE KING'S SPEECH?
+    '16':
+      prompt: Write a facebook post about Which movie is more suspenseful, GONE GIRL
+        or THE SILENCE OF THE LAMBS?
+    '17':
+      prompt: Write a facebook post about Which film has a more nuanced antagonist,
+        THE DARK KNIGHT or INception?
+    '18':
+      prompt: Write a facebook post about Which movie offers a more profound experience,
+        WALL-E or THE BLACK HOLE?
+    '19':
+      prompt: Write a facebook post about Which movie features more breathtaking cinematography,
+        AMANTISSIMA or THE CLOUD ATLAS?
+    '2':
+      prompt: Write a facebook post about Which film boasts a more nuanced protagonist,
+        INFERNO or THE DARKEST HOUR?
+    '20':
+      prompt: Write a facebook post about Which film boasts a more relatable protagonist,
+        THE CROOKED or THE BANDIT?
+    '21':
+      prompt: Write a facebook post about Which movie tackles the theme of family
+        more effectively, UP or THE GRIFT?
+    '22':
+      prompt: Write a facebook post about Which film has a more realistic setting,
+        THE TERMINATOR or Blade Runner?
+    '23':
+      prompt: Write a facebook post about Which movie features more captivating side
+        characters, THE LORD OF THE RINGS or THE HARRY POTTER SERIES?
+    '24':
+      prompt: Write a facebook post about Which movie offers a more thrilling experience,
+        THE HOUND or THE RAID?
+    '25':
+      prompt: Write a facebook post about Which film has a more impactful opening
+        scene, THE MATRIX or THE TERMINATOR?
+    '26':
+      prompt: Write a facebook post about Which movie features more realistic special
+        effects, THE AVATAR or THE WOLVERINE?
+    '27':
+      prompt: Write a facebook post about Which movie tackles the theme of identity
+        more effectively, BLACK PANTHER or IN PURSUIT?
+    '28':
+      prompt: Write a facebook post about Which film offers a more profound experience,
+        THE Shawshank Redemption or THE DARK Knight?
+    '29':
+      prompt: Write a facebook post about Which movie features more breathtaking visuals,
+        THE BLACK PANTHER or THE WOLVERINE?
+    '3':
+      prompt: Write a facebook post about Which movie tackles the theme of identity
+        more effectively, THE MATRIX or BLADE RUNNER?
+    '30':
+      prompt: Write a facebook post about Which film boasts a more nuanced protagonist,
+        THE SHINING or THE DARK Knight?
+    '31':
+      prompt: Write a facebook post about Which movie is more thought-provoking, Parasite
+        or The Farewell?
+    '32':
+      prompt: Write a facebook post about Which film has a more realistic setting,
+        The Farewell or Titanic?
+    '33':
+      prompt: Write a facebook post about Which movie features more captivating side
+        characters, Toy Story or The Lion King?
+    '34':
+      prompt: Write a facebook post about Which movie offers a more thrilling experience,
+        The Conjuring or The Ring?
+    '35':
+      prompt: Write a facebook post about Which film has a more impactful opening
+        scene, The Farewell or The Martian?
+    '36':
+      prompt: 'Write a facebook post about Which movie features more realistic special
+        effects, Avengers: Endgame or The Force Awakens?'
+    '37':
+      prompt: Write a facebook post about Which movie tackles the theme of redemption
+        more effectively, The Green Mile or Gladiator?
+    '38':
+      prompt: Write a facebook post about Which film offers a more heartwarming story,
+        Toy Story or Spirited Away?
+    '39':
+      prompt: Write a facebook post about Which movie features more compelling dialogue,
+        Parasite or The Farewell?
+    '4':
+      prompt: Write a facebook post about Which movie has a more emotionally resonant
+        soundtrack, AMANTISSIMA or THE SOUND OF MUSIC?
+    '40':
+      prompt: Write a facebook post about Which movie is more suspenseful, The Silence
+        of the Lambs or Gone Girl?
+    '41':
+      prompt: Write a facebook post about Which film has a more nuanced antagonist,
+        The Avengers or The Dark Knight?
+    '42':
+      prompt: Write a facebook post about Which movie offers a more profound experience,
+        Parasite or The Farewell?
+    '43':
+      prompt: Write a facebook post about Which movie features more breathtaking visuals,
+        The Lord of the Rings or The Martian?
+    '44':
+      prompt: Write a facebook post about Which film boasts a more nuanced protagonist,
+        The Martian or The Farewell?
+    '45':
+      prompt: Write a facebook post about Which movie is more thought-provoking, Parasite
+        or The Farewell?
+    '46':
+      prompt: Write a facebook post about Which film has a more realistic setting,
+        Parasite or Titanic?
+    '47':
+      prompt: Write a facebook post about Which movie features more captivating side
+        characters, Toy Story or The Lion King?
+    '48':
+      prompt: Write a facebook post about Which movie offers a more thrilling experience,
+        The Conjuring or The Ring?
+    '49':
+      prompt: Write a facebook post about Which film has a more impactful opening
+        scene, Parasite or The Martian?
+    '5':
+      prompt: Write a facebook post about Which film offers a more satisfying resolution,
+        THE GODFATHER or THE LION KING?
+    '50':
+      prompt: 'Write a facebook post about Which movie features more realistic special
+        effects, Avengers: Endgame or The Force Awakens?'
+    '6':
+      prompt: Write a facebook post about Which movie features more captivating side
+        characters, JURASSIC PARK or CASINO?
+    '7':
+      prompt: Write a facebook post about Which movie is more thought-provoking, THE
+        KILLING OF A Mockingbird or THE TWILIGHT ZONE?
+    '8':
+      prompt: Write a facebook post about Which film has a more realistic setting,
+        THE SOCIAL NETWORK or THE AVIATOR?
+    '9':
+      prompt: Write a facebook post about Which movie features more realistic characters,
+        THE SOUND OF MUSIC or TITANIC?
+datadir: social_content

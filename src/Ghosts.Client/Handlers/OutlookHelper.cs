@@ -55,6 +55,7 @@ namespace Ghosts.Client.Handlers
             SendButtonXpath = "//button[@aria-label='Send']";
             InsertAttachmentXpath = "//button[@aria-label='Attach']";
             EmailXpath = "//div[@aria-label='Mail list']//child::*[contains(@role,'listbox')]//child::div[contains(@id,'ariaId')]";
+            EmailXpathSender = ".//span[contains(@class,'lvHighlightFromClass')]";
             EmptyFolderActionXpath = "//div[@role='menu' and @iscontextmenu='1']//child::span[text()='Empty folder']//parent::div//parent::div//parent::button";
 
         }
@@ -101,6 +102,7 @@ namespace Ghosts.Client.Handlers
         public string EmailDeleteXpath { get; set; } = "//span[text()='Delete']//parent::button";
         public string EmailReplySendXpath { get; set; } = "//button[@title='Send' and @aria-label='Send']";
         public string EmailXpath { get; set; } = "//div[contains(@tempid,'emailslistview')]//child::div[contains(@role,'button')]";
+        public string EmailXpathSender { get; set; } = ".//span[contains(@class,'lvHighlightFromClass')]";
         public string EmailOtherXpath { get; set; } = "//div[contains(@aria-label,'Search completed')]//child::div[contains(@id,'_ariaId_')]";
         public string NewMailXpath { get; set; } = "//div[@aria-label='Mail']//child::div//child::div//child::div//child::div//child::button//child::span[@role='presentation']//following-sibling::span[text()='New mail']//parent::button";
         public string EmailFiltersXpath { get; set; } = "//div[contains(@aria-label,'Email Filters')]//child::div//child::div[contains(@style,'inline-block')]//child::span[contains(@role,'menuitemradio')]";
@@ -467,37 +469,6 @@ namespace Ghosts.Client.Handlers
                 return false;
             }
         }
-
-        public bool SelectFirstEmailFromCurrentList()
-        {
-            ReadOnlyCollection<IWebElement> emailElements = Driver.FindElements(By.XPath(EmailXpath));
-            if (emailElements != null && emailElements.Count > 0)
-            {
-                //select one of the first 5
-                BrowserHelperSupport.MoveToElementAndClick(Driver, emailElements[0]);
-                Thread.Sleep(500);
-                return true;
-            }
-            return false;
-        }
-        public string GetUploadFile()
-        {
-            try
-            {
-                string[] filelist = Directory.GetFiles(uploadDirectory, "*");
-                if (filelist.Length > 0) return filelist[_random.Next(0, filelist.Length)];
-                else return null;
-            }
-            catch (System.Exception e)
-            {
-                if (e is ThreadAbortException || e is ThreadInterruptedException)
-                {
-                    throw e;
-                }
-            } //ignore any errors
-            return null;
-        }
-
 
         public bool DoInitialLogin(TimelineHandler handler, string user, string pw, string domain)
         {
@@ -1144,15 +1115,81 @@ namespace Ghosts.Client.Handlers
 
         public IWebElement GetOneEmailFromCurrentList()
         {
+
+            var settings = Program.Configuration.Email;
+            string[] EmailNoReply = null;
+            if (settings.EmailNoReply != null && settings.EmailNoReply != "")
+            {
+                EmailNoReply = settings.EmailNoReply.ToLower().Split(',');
+            }
             ReadOnlyCollection<IWebElement> emailElements = Driver.FindElements(By.XPath(EmailXpath));
             if (emailElements != null && emailElements.Count > 0)
             {
-                //select one of the first 5
-                int max = emailElements.Count;
-                if (max > 5) max = 5;
-                int choice = _random.Next(0, max);
-                return emailElements[choice];
+                if (EmailNoReply == null)
+                {
+                    // no filtering based on reply address
+                    //select one of the first 5
+                    int max = emailElements.Count;
+                    if (max > 5) max = 5;
+                    int choice = _random.Next(0, max);
+                    return emailElements[choice];
+                }
+                else
+                {
+                    // have to work harder, filter by return address
+                    List<IWebElement> targetEmails = new List<IWebElement>();
+                    var count = 0;
+                    foreach (IWebElement emailElement in emailElements)
+                    {
+                        try
+                        {
+                            var replyElement = emailElement.FindElement(By.XPath(EmailXpathSender));
+                            if (replyElement != null)
+                            {
+                                var sender = replyElement.Text.ToLower();
+                                // check if this sender is ok
+                                bool reject = false;
+                                foreach (string target in EmailNoReply)
+                                {
+                                    if (sender.Contains(target))
+                                    {
+                                        reject = true;
+                                        break;
+                                    }
+                                }
+                                if (!reject)
+                                {
+                                    targetEmails.Add(emailElement);
+                                    if (targetEmails.Count > 5) break;
+                                }
+                                count += 1;
+                                if (count > 50) break;
+                            }
+
+                        }
+                        catch (Exception e)
+                        {
+                            //ignore any exceptions
+                        }
+
+                    }
+
+                    // filtering is done
+                    if (targetEmails.Count == 0)
+                    {
+                        Log.Trace($"WebOutlook:: Unable to find valid email to reply to because of EmailNoReply filter..");
+                        return null; //unable to find valid email
+                    }
+                    else
+                    {
+                        //return a random one out of the list
+                        int choice = _random.Next(0, targetEmails.Count + 1);
+                        return targetEmails[choice];
+                    }
+
+                }
             }
+
             return null;
         }
 
