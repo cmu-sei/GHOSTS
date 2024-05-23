@@ -7,6 +7,8 @@ public class ApplicationConfiguration
     
     public CleanupJobConfig CleanupJob { get; set; }
     public CleanupAgeConfig CleanupAge { get; set; }
+
+    public int CleanupDiskUtilThreshold { get; set; }
     
     public class CleanupJobConfig
     {
