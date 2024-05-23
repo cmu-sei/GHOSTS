@@ -1,0 +1,12 @@
+{
+  "chat": {
+    "baseUrl": "http://localhost:8065/",
+    "adminUsername": "admin@scotty.com",
+    "adminPassword": "scotty@1",
+    "defaultUserPassword": "scotty@1",
+    "agentsPerBatch": 10
+  }  ,
+  "replacements": [],
+  "drops": ["As an AI"],
+  "prompts": []
+}
