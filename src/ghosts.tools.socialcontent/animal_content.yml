@@ -1,0 +1,153 @@
+contentgen:
+  animals:
+    '1':
+      prompt: Write a facebook post about I encountered a lost golden retriever on
+        my way home; where should I take it?
+    '10':
+      prompt: Write a facebook post about Which species of frog is known for its calming
+        presence in a home environment?
+    '11':
+      prompt: Write a facebook post about I need advice on how to care for a pet turtle
+        through the winter months.
+    '12':
+      prompt: Write a facebook post about What are the best practices for adopting
+        a stray dog from the city shelters?
+    '13':
+      prompt: Write a facebook post about Which domesticated breed of bear has the
+        gentlest temperament?
+    '14':
+      prompt: Write a facebook post about Are there any specific regulations for keeping
+        a pet cobra in an urban setting?
+    '15':
+      prompt: Write a facebook post about What kind of sheep is best suited for a
+        small hobby farm?
+    '16':
+      prompt: Write a facebook post about I'm interested in rescuing a horse; what
+        should I know about the care and commitment involved?
+    '17':
+      prompt: Write a facebook post about Can a frog make a good pet for someone living
+        in an apartment?
+    '18':
+      prompt: Write a facebook post about What are the most common health issues in
+        domestic cats?
+    '19':
+      prompt: Write a facebook post about Is it ethical to keep a tiger as a pet,
+        even if it's a domesticated breed?
+    '2':
+      prompt: Write a facebook post about The local wildlife center is looking for
+        volunteers to help with a trapped marmot.
+    '20':
+      prompt: Write a facebook post about How do I go about reporting a lost bull
+        in the neighborhood?
+    '21':
+      prompt: Write a facebook post about Which dog breed is known for its ability
+        to learn and perform complex tasks?
+    '22':
+      prompt: Write a facebook post about What is the process for adopting a wild
+        marmot that has become habituated to humans?
+    '23':
+      prompt: Write a facebook post about Can wolves be domesticated to live with
+        humans as pets?
+    '24':
+      prompt: Write a facebook post about I found an abandoned calf on my property;
+        what steps should I take?
+    '25':
+      prompt: Write a facebook post about Which breed of dog is known for its loyalty
+        and protective nature?
+    '26':
+      prompt: Write a facebook post about What kind of habitat do turtles need to
+        thrive in captivity?
+    '27':
+      prompt: Write a facebook post about Is it legal to keep a pet cobra, and if
+        so, what are the legal requirements?
+    '28':
+      prompt: Write a facebook post about How can I help a lost sheep find its way
+        home?
+    '29':
+      prompt: Write a facebook post about What are some of the less common but domesticated
+        breeds of horses?
+    '3':
+      prompt: Write a facebook post about Which breed of wolf is known for its friendly
+        disposition towards humans?
+    '30':
+      prompt: Write a facebook post about Can a domesticated cat adapt to living in
+        a farm environment with other animals?
+    '31':
+      prompt: Write a facebook post about What is the best way to introduce a new
+        dog into a household with existing pets?
+    '32':
+      prompt: Write a facebook post about Is it possible to train an elephant to be
+        a pet, and what considerations should I keep in mind?
+    '33':
+      prompt: Write a facebook post about What are the challenges of keeping a Marmot
+        as a pet indoors?
+    '34':
+      prompt: Write a facebook post about Are there any breeds of dogs that are particularly
+        good for allergy sufferers?
+    '35':
+      prompt: Write a facebook post about How can I determine if a horse is healthy
+        and well-cared for before adopting it?
+    '36':
+      prompt: Write a facebook post about What should I consider before getting a
+        pet frog, especially in terms of its environment and diet?
+    '37':
+      prompt: Write a facebook post about Can a domesticated wolf be a good family
+        pet, and what are the potential challenges?
+    '38':
+      prompt: Write a facebook post about What is the best way to care for a bull
+        during different seasons?
+    '39':
+      prompt: Write a facebook post about Which breeds of dogs are considered the
+        most affectionate towards their owners?
+    '4':
+      prompt: Write a facebook post about Is the Siberian tiger an appropriate pet
+        for a family with young children?
+    '40':
+      prompt: Write a facebook post about Is it safe to keep a turtle with young children
+        in the home?
+    '41':
+      prompt: Write a facebook post about What are the common behaviors and needs
+        of a domesticated bear?
+    '42':
+      prompt: Write a facebook post about How can I report a stray marmot that seems
+        to be in need of assistance?
+    '43':
+      prompt: Write a facebook post about What is the most hypoallergenic breed of
+        dog?
+    '44':
+      prompt: Write a facebook post about Can a person legally keep a pet tiger, and
+        what are the implications of doing so?
+    '45':
+      prompt: Write a facebook post about What kind of socialization and training
+        do sheep require when kept as pets?
+    '46':
+      prompt: Write a facebook post about Is it advisable to have a cobra as a pet
+        in an urban environment?
+    '47':
+      prompt: Write a facebook post about Which breeds of cats are known for their
+        independence and self-sufficiency?
+    '48':
+      prompt: Write a facebook post about What are the most important factors to consider
+        before adopting a horse from a rescue organization?
+    '49':
+      prompt: Write a facebook post about Can a domesticated marmot be trained to
+        use a litter box, making it suitable for indoor living?
+    '5':
+      prompt: Write a facebook post about Can anyone recommend a reliable veterinarian
+        for treating elephants in this area?
+    '50':
+      prompt: Write a facebook post about What are the implications of keeping a pet
+        wolf in an area with strict wildlife laws?
+    '6':
+      prompt: Write a facebook post about I found an injured cobra in my garden; who
+        should I call for help?
+    '7':
+      prompt: Write a facebook post about What is considered the most intelligent
+        breed of cow?
+    '8':
+      prompt: Write a facebook post about How can I attract more sheep to my farm
+        for breeding purposes?
+    '9':
+      prompt: Write a facebook post about I'm looking for a horse that is good with
+        beginners; which breed should I consider?
+datadir: social_content

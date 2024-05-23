@@ -24,6 +24,10 @@
   clear an inbox containing thousands of items.  An email backlog will only build up if
   a node is offline for an extended period of time while other clients are sending it emails.
 
+  application.json/Email/EmailNoReply - this is a comma delimited list of strings that is used to filter emails
+  chosen for a reply - if the reply recipient contains one of these strings, then that email is not chosen for
+  a reply (ie. an email from 'outlook' indicates an undeliverable email and should not be reponded to)
+
 */
 
 

@@ -168,6 +168,7 @@
     <Compile Include="Handlers\Rdp.cs" />
     <Compile Include="Handlers\Sftp.cs" />
     <Compile Include="Handlers\SharepointHelper.cs" />
+    <Compile Include="Handlers\SocialHelper.cs" />
     <Compile Include="Handlers\Ssh.cs" />
     <Compile Include="Handlers\Wmi.cs" />
     <Compile Include="Infrastructure\Browser\BlogContent.cs" />
@@ -271,6 +272,7 @@
     <None Include="kill-ghosts.bat">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Sample Timelines\BrowserFirefoxSocial.json" />
     <None Include="Sample Timelines\Cron.json" />
     <None Include="Sample Timelines\Administrative Commands.json" />
     <None Include="Sample Timelines\BrowserChrome.json" />

@@ -924,6 +924,14 @@ public class Outlookv2 : BaseHandler
     private bool ReplyViaOutlook(EmailConfiguration emailConfig)
     {
         var config = Program.Configuration.Email;
+        var settings = Program.Configuration.Email;
+        string[] EmailNoReply = null;
+        if (settings.EmailNoReply != null && settings.EmailNoReply != "")
+        {
+            EmailNoReply = settings.EmailNoReply.ToLower().Split(',');
+        }
+
+
 
         try
         {
@@ -936,6 +944,25 @@ public class Outlookv2 : BaseHandler
                 {
                     folderItem = item as MailItem;
                     if (folderItem == null) continue;
+                    bool reject = false;
+                    var targetEmail = folderItem.SenderEmailAddress.ToLower();
+                    if (EmailNoReply != null && EmailNoReply.Length > 0)
+                    {
+                        foreach (string target in EmailNoReply)
+                        {
+                            if (targetEmail.Contains(target))
+                            {
+                                reject = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (reject)
+                    {
+                        Log.Trace($"Rejecting reply to address: {targetEmail} as it matches one of: {settings.EmailNoReply} ");
+                        continue;
+                    }
+
                     replyStarted = true;
                     var emailReply = new EmailReplyManager();
                     var replyMail = folderItem.Reply();

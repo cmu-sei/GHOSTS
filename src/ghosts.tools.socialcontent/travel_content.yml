@@ -1,0 +1,150 @@
+contentgen:
+  travel:
+    '1':
+      prompt: Write a facebook post about We enjoyed our vacation in the vibrant
+        city of Tokyo.
+    '10':
+      prompt: Write a facebook post about What are the best shopping areas in the
+        fashionable city of Milan?
+    '11':
+      prompt: Write a facebook post about We spent a week exploring the wonders of
+        the ancient city of Cairo.
+    '12':
+      prompt: Write a facebook post about I'd recommend the city of Amsterdam for
+        art and history lovers.
+    '13':
+      prompt: Write a facebook post about The city of Capetown offers breathtaking
+        views of the ocean.
+    '14':
+      prompt: Write a facebook post about What are some popular tourist activities
+        in the exciting city of Seoul?
+    '15':
+      prompt: Write a facebook post about We had a fantastic time in the colorful
+        city of Rio de Janeiro.
+    '16':
+      prompt: Write a facebook post about I'd love to try the local cuisine in the
+        tasty city of Florence.
+    '17':
+      prompt: Write a facebook post about The city of Budapest is famous for its thermal
+        baths.
+    '18':
+      prompt: Write a facebook post about What are some free things to do in the budget-friendly
+        city of Bogota?
+    '19':
+      prompt: Write a facebook post about We had a great time exploring the natural
+        beauty of the city of Quebec.
+    '2':
+      prompt: Write a facebook post about I'm planning a trip to the historical city
+        of Rome.
+    '20':
+      prompt: Write a facebook post about I'd recommend the city of Helsinki for nature
+        lovers.
+    '21':
+      prompt: Write a facebook post about The city of Melbourne is known for its street
+        art and cafes.
+    '22':
+      prompt: Write a facebook post about What are some popular festivals in the lively
+        city of Mumbai?
+    '23':
+      prompt: Write a facebook post about We spent a day exploring the markets in
+        the bustling city of Istanbul.
+    '24':
+      prompt: Write a facebook post about I'd love to visit the peaceful city of Luang
+        Prabang.
+    '25':
+      prompt: Write a facebook post about The city of Vienna is famous for its music
+        and coffee houses.
+    '26':
+      prompt: Write a facebook post about What are some popular day trips from the
+        picturesque city of Bruges?
+    '27':
+      prompt: Write a facebook post about We had a wonderful time in the vibrant city
+        of Sao Paulo.
+    '28':
+      prompt: Write a facebook post about I'd recommend the city of Tel Aviv for foodies.
+    '29':
+      prompt: Write a facebook post about The city of Reykjavik offers unique natural
+        experiences.
+    '3':
+      prompt: Write a facebook post about Have you been to the beautiful city of Paris?
+    '30':
+      prompt: Write a facebook post about What are some popular hiking trails in the
+        scenic city of Banff?
+    '31':
+      prompt: Write a facebook post about We had an unforgettable experience in the
+        magical city of Salzburg.
+    '32':
+      prompt: Write a facebook post about I'd love to explore the history of the city
+        of Krakow.
+    '33':
+      prompt: Write a facebook post about The city of Bucharest is known for its beautiful
+        architecture.
+    '34':
+      prompt: Write a facebook post about What are some popular nightlife spots in
+        the lively city of Bangkok?
+    '35':
+      prompt: Write a facebook post about We spent a day exploring the temples in
+        the spiritual city of Chiang Mai.
+    '36':
+      prompt: Write a facebook post about I'd recommend the city of Lisbon for history
+        buffs.
+    '37':
+      prompt: Write a facebook post about The city of Beijing is famous for its landmarks
+        and history.
+    '38':
+      prompt: Write a facebook post about What are some popular activities for families
+        in the kid-friendly city of Orlando?
+    '39':
+      prompt: Write a facebook post about We had a great time exploring the museums
+        in the intellectual city of Boston.
+    '4':
+      prompt: Write a facebook post about What are the top things to do in the bustling
+        city of Bangkok?
+    '40':
+      prompt: Write a facebook post about I'd love to visit the beautiful city of
+        Hangzhou.
+    '41':
+      prompt: Write a facebook post about The city of Antwerp is known for its diamond
+        industry.
+    '42':
+      prompt: Write a facebook post about What are some popular water sports in the
+        adventurous city of Gold Coast?
+    '43':
+      prompt: Write a facebook post about We spent a day exploring the gardens in
+        the scenic city of Cambridge.
+    '44':
+      prompt: Write a facebook post about I'd recommend the city of Oslo for art lovers.
+    '45':
+      prompt: Write a facebook post about The city of Florence is famous for its Renaissance
+        art.
+    '46':
+      prompt: Write a facebook post about What are some popular festivals in the cultural
+        city of New Orleans?
+    '47':
+      prompt: Write a facebook post about We had a great time exploring the street
+        art in the creative city of Wroclaw.
+    '48':
+      prompt: Write a facebook post about I'd love to try the local street food in
+        the vibrant city of Ho Chi Minh City.
+    '49':
+      prompt: Write a facebook post about The city of Copenhagen is known for its
+        design and architecture.
+    '5':
+      prompt: Write a facebook post about The city of Sydney is famous for its stunning
+        beaches.
+    '50':
+      prompt: Write a facebook post about What are some popular activities for couples
+        in the romantic city of Venice?
+    '6':
+      prompt: Write a facebook post about We had an amazing experience in the cultural
+        city of Marrakech.
+    '7':
+      prompt: Write a facebook post about What are some must-try dishes in the delicious
+        city of Barcelona?
+    '8':
+      prompt: Write a facebook post about I'd love to visit the enchanting city of
+        Prague someday.
+    '9':
+      prompt: Write a facebook post about The city of Dubai is known for its impressive
+        architecture.
+datadir: social_content

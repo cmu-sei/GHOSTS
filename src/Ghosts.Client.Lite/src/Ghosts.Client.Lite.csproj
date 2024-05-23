@@ -1,0 +1,49 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
+        <RootNamespace>Ghosts.Client.Lite</RootNamespace>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+
+        <Authors>GHOSTS Team for Carnegie Mellon University</Authors>
+        <Company>Carnegie Mellon University</Company>
+        <Product>GHOSTS</Product>
+        <Description>GHOSTS NPC Orchestration Platform - please email ddupdyke[at]sei.cmu.edu with bugs/requests/other</Description>
+        <Copyright>Carnegie Mellon University 2017</Copyright>
+
+        <Version>0.1.0.0</Version>
+        <AssemblyVersion>0.1.0.0</AssemblyVersion>
+        <ReleaseVersion>0.1.0.0</ReleaseVersion>
+        <FileVersion>0.1.14.0</FileVersion>
+
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="HtmlAgilityPack" Version="1.11.61"/>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.3"/>
+        <PackageReference Include="NLog" Version="5.3.2"/>
+        <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.1"/>
+        <PackageReference Include="Quartz" Version="3.9.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Content Include="config\application.json">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+        <None Update="config\timeline.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="nlog.config">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="ghosts.domain">
+        <HintPath>..\lib\ghosts.domain.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
+</Project>

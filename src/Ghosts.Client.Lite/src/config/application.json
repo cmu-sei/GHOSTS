@@ -1,0 +1,25 @@
+{
+  "ApiRootUrl": "http://telemetry.exercise.mil/api",
+  "Sockets": {
+    "IsEnabled": true,
+    "Heartbeat": 50000
+  },
+  "Id": {
+    "IsEnabled": true,
+    "Format": "guestlocal",
+    "FormatKey": "guestinfo.id",
+    "FormatValue": "$formatkeyvalue$-$machinename$",
+    "VMWareToolsLocation": "C:\\progra~1\\VMware\\VMware Tools\\vmtoolsd.exe"
+  },
+  "AllowMultipleInstances": false,
+  "EncodeHeaders": true,
+  "ClientResults": {
+    "IsEnabled": true,
+    "IsSecure": false,
+    "CycleSleep": 300000
+  },
+  "ClientUpdates": {
+    "IsEnabled": true,
+    "CycleSleep": 300000
+  }
+}
