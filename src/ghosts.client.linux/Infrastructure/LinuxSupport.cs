@@ -70,13 +70,22 @@ namespace ghosts.client.linux.Infrastructure
 
         public void AttachFile()
         {
-            string cmd = $"xdotool search -name '{windowTitle}' windowfocus type '{filename}' ";
-            ExecuteBashCommand(id, cmd);
-            Thread.Sleep(500);
-            cmd = $"xdotool search -name '{windowTitle}' windowfocus key KP_Enter";
-            ExecuteBashCommand(id, cmd);
-            Thread.Sleep(300);
-            return;
+            try {
+                string cmd = $"xdotool search -name '{windowTitle}' windowfocus type '{filename}' ";
+                ExecuteBashCommand(id, cmd);
+                Thread.Sleep(800);
+                cmd = $"xdotool search -name '{windowTitle}' windowfocus key KP_Enter";
+                ExecuteBashCommand(id, cmd);
+                Thread.Sleep(500);
+                // send this close in case the previous commands failed. If the window is closed will have no effect
+                cmd = $"xdotool search -name '{windowTitle}' windowfocus key alt+c";
+                ExecuteBashCommand(id, cmd);
+                Thread.Sleep(500);
+                return;
+            } 
+            catch (Exception e) {
+                Log.Error(e);
+            }
         }
 
 
