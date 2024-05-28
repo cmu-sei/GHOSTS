@@ -5,7 +5,7 @@
     <AssemblyName>ghosts.api</AssemblyName>
 
     <AssemblyVersion>8.0.0.0</AssemblyVersion>
-    <FileVersion>8.0.10.0</FileVersion>
+    <FileVersion>8.0.51.50</FileVersion>
     
     <Authors>GHOSTS Development Team for CERT > Software Engineering Institute > Carnegie Mellon University</Authors>
     <Company>Carnegie Mellon University</Company>
@@ -25,7 +25,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="6.0.28" />
-    <PackageReference Include="NLog" Version="5.2.8" />
+    <PackageReference Include="NLog" Version="5.3.2" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.22" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.Design" Version="1.1.1" />
     <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.5.0" />
@@ -53,7 +53,6 @@
 
   <ItemGroup>
     <Folder Include="Areas\Animator\" />
-    <Folder Include="_output\" />
   </ItemGroup>
 
   <ItemGroup>

@@ -40,6 +40,10 @@ public class NpcRecord
     // this is also currently jsonb
     public NpcProfile NpcProfile { get; set; }
     
+    // jsonb
+    
+    public NpcSocialGraph NpcSocialGraph { get; set; }
+    
     public static NpcRecord TransformToNpc(NpcProfile o)
     {
         var n = new NpcRecord

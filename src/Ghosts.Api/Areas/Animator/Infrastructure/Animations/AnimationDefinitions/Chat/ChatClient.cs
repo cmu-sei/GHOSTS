@@ -14,6 +14,7 @@ using ghosts.api.Areas.Animator.Infrastructure.ContentServices.Ollama;
 using ghosts.api.Areas.Animator.Infrastructure.Extensions;
 using ghosts.api.Areas.Animator.Infrastructure.Models;
 using Ghosts.Api.Infrastructure.Extensions;
+using Ghosts.Domain.Code.Helpers;
 using NLog;
 
 namespace ghosts.api.Areas.Animator.Infrastructure.Animations.AnimationDefinitions.Chat;
@@ -25,7 +26,7 @@ public class ChatClient
     private readonly string _baseUrl;
     private readonly HttpClient _client;
     private string _token;
-    public string UserId { get; private set; }
+    private string UserId { get; set; }
 
     public ChatClient(ChatJobConfiguration config)
     {
@@ -34,17 +35,20 @@ public class ChatClient
         this._client = new HttpClient();
     }
 
-    public async Task<User> AdminLogin()
+    private async Task<User> AdminLogin()
     {
         return await this.Login(this._configuration.Chat.AdminUsername,
             this._configuration.Chat.AdminPassword);
     }
 
-    public async Task<User> Login(string username, string password)
+    private async Task<User> Login(string username, string password)
     {
+        var url = $"{_baseUrl}api/v4/users/login";
+        _log.Trace($"Using login url: {url}");
+        
         try
         {
-            var request = new HttpRequestMessage(HttpMethod.Post, $"{_baseUrl}users/login");
+            var request = new HttpRequestMessage(HttpMethod.Post, url);
             var content = new StringContent($"{{\"login_id\":\"{username}\",\"password\":\"{password}\"}}", null,
                 "application/json");
             request.Content = content;
@@ -73,17 +77,20 @@ public class ChatClient
         catch (Exception e)
         {
             _log.Error(e);
-            throw;
+            return null;
         }
     }
 
-    public async Task<IEnumerable<Team>> GetMyTeams()
+    private async Task<IEnumerable<Team>> GetMyTeams(User user)
     {
-        var request = new HttpRequestMessage(HttpMethod.Get, $"{_baseUrl}users/me/teams");
-        var content = await ExecuteRequest(request);
-
+        var url = $"{_baseUrl}api/v4/users/{user.Id}/teams";
+        _log.Trace($"Using get teams url: {url}");
+        
         try
         {
+            var request = new HttpRequestMessage(HttpMethod.Get, url);
+            var content = await ExecuteRequest(request);
+            
             var response = JsonSerializer.Deserialize<IEnumerable<Team>>(content,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             return response;
@@ -95,13 +102,16 @@ public class ChatClient
         }
     }
 
-    public async Task<IEnumerable<Channel>> GetMyChannels()
+    private async Task<IEnumerable<Channel>> GetMyChannels(User user)
     {
-        var request = new HttpRequestMessage(HttpMethod.Get, $"{_baseUrl}users/me/channels");
-        var content = await ExecuteRequest(request);
-
+        var url = $"{_baseUrl}api/v4/users/{user.Id}/channels";
+        _log.Trace($"Using get channels url: {url}");
+        
         try
         {
+            var request = new HttpRequestMessage(HttpMethod.Get, url);
+            var content = await ExecuteRequest(request);
+            
             var response = JsonSerializer.Deserialize<IEnumerable<Channel>>(content,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             return response;
@@ -113,91 +123,171 @@ public class ChatClient
         }
     }
 
-    public async Task CreateUser(UserCreate create)
+    private async Task CreateUser(UserCreate create)
     {
-        var jsonPayload = JsonSerializer.Serialize(create.ToObject());
-        var request = new HttpRequestMessage(HttpMethod.Post, $"{_baseUrl}users")
+        var url = $"{_baseUrl}api/v4/users";
+        _log.Trace($"Using create user url: {url}");
+        
+        try
         {
-            Content = new StringContent(jsonPayload, Encoding.UTF8, "application/json")
-        };
-        await ExecuteRequest(request);
+            var jsonPayload = JsonSerializer.Serialize(create.ToObject());
+            var request = new HttpRequestMessage(HttpMethod.Post, url)
+            {
+                Content = new StringContent(jsonPayload, Encoding.UTF8, "application/json")
+            };
+            await ExecuteRequest(request);
+        }
+        catch (Exception e)
+        {
+            _log.Error($"Create user failed {e}");
+        }
     }
 
-    public async Task<IEnumerable<User>> GetUsers()
+    private async Task<IEnumerable<User>> GetUsers()
     {
-        var request = new HttpRequestMessage(HttpMethod.Get, $"{_baseUrl}users?");
-        var content = await ExecuteRequest(request);
+        var url = $"{_baseUrl}api/v4/users";
+        _log.Trace($"Using get users url: {url}");
+        
+        try
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, url);
+            var content = await ExecuteRequest(request);
 
-        var response = JsonSerializer.Deserialize<IEnumerable<User>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-        return response;
+            var response = JsonSerializer.Deserialize<IEnumerable<User>>(content,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            return response;
+        }
+        catch (Exception e)
+        {
+            _log.Error($"Get users failed {e}");
+            return new List<User>();
+        }
     }
 
-    public async Task<User> GetUserByUsername(string username)
+    private async Task<User> GetUserByUsername(string username)
     {
-        var request = new HttpRequestMessage(HttpMethod.Get, $"{_baseUrl}users/username/{username}");
-        var content = await ExecuteRequest(request);
+        var url = $"{_baseUrl}api/v4/users/username/{username}";
+        _log.Trace($"Using get user by username url: {url}");
+        
+        try
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, url);
+            var content = await ExecuteRequest(request);
 
-        var response = JsonSerializer.Deserialize<User>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-        return response;
+            var response = JsonSerializer.Deserialize<User>(content,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            return response;
+        }
+        catch (Exception e)
+        {
+            _log.Error($"Get user by username failed {e}");
+            return new User();
+        }
     }
-    
-    public async Task<User> GetUserById(string id)
+
+    private async Task<User> GetUserById(string id)
     {
-        var request = new HttpRequestMessage(HttpMethod.Get, $"{_baseUrl}users/{id}");
-        var content = await ExecuteRequest(request);
+        var url = $"{_baseUrl}api/v4/users/{id}";
+        _log.Trace($"Using get user by id url: {url}");
+        
+        try
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, url);
+            var content = await ExecuteRequest(request);
 
-        var response = JsonSerializer.Deserialize<User>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-        return response;
+            var response = JsonSerializer.Deserialize<User>(content,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            return response;
+        }
+        catch (Exception e)
+        {
+            _log.Error($"Get user by id failed {e}");
+            return new User();
+        }
     }
 
-    public async Task JoinTeam(string userId, string teamId)
+    private async Task JoinTeam(string userId, string teamId)
     {
         var payload = new
         {
             team_id = teamId,
             user_id = userId
         };
+        
+        var url = $"{_baseUrl}api/v4/teams/{teamId}/members";
+        _log.Trace($"Using join team url: {url}");
 
-        var jsonPayload = JsonSerializer.Serialize(payload);
-        var request = new HttpRequestMessage(HttpMethod.Post, $"{_baseUrl}teams/{teamId}/members")
+        try
         {
-            Content = new StringContent(jsonPayload, Encoding.UTF8, "application/json")
-        };
-        await ExecuteRequest(request);
+            var jsonPayload = JsonSerializer.Serialize(payload);
+            var request = new HttpRequestMessage(HttpMethod.Post, url)
+            {
+                Content = new StringContent(jsonPayload, Encoding.UTF8, "application/json")
+            };
+            await ExecuteRequest(request);
+        }
+        catch (Exception e)
+        {
+            _log.Error($"Join team failed {e}");
+        }
     }
 
-    public async Task JoinChannel(string userId, string channelId)
+    private async Task JoinChannel(string userId, string channelId)
     {
         var payload = new
         {
             user_id = userId
         };
-
-        var jsonPayload = JsonSerializer.Serialize(payload);
-        var request = new HttpRequestMessage(HttpMethod.Post, $"{_baseUrl}channels/{channelId}/members")
-        {
-            Content = new StringContent(jsonPayload, Encoding.UTF8, "application/json")
-        };
-        await ExecuteRequest(request);
-    }
-
-    public async Task<IEnumerable<Team>> GetTeams()
-    {
-        var request = new HttpRequestMessage(HttpMethod.Get, $"{_baseUrl}teams");
-        var content = await ExecuteRequest(request);
-
-        var response = JsonSerializer.Deserialize<IEnumerable<Team>>(content,
-            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-        return response;
-    }
-
-    public async Task<IEnumerable<Channel>> GetChannelsByTeam(string teamId)
-    {
-        var request = new HttpRequestMessage(HttpMethod.Get, $"{_baseUrl}teams/{teamId}/channels");
-        var content = await ExecuteRequest(request);
+        
+        var url = $"{_baseUrl}api/v4/channels/{channelId}/members";
+        _log.Trace($"Using join channel url: {url}");
 
         try
         {
+            var jsonPayload = JsonSerializer.Serialize(payload);
+            var request = new HttpRequestMessage(HttpMethod.Post, url)
+            {
+                Content = new StringContent(jsonPayload, Encoding.UTF8, "application/json")
+            };
+            await ExecuteRequest(request);
+        }
+        catch (Exception e)
+        {
+            _log.Error($"Join channel failed {e}");
+        }
+    }
+
+    private async Task<IEnumerable<Team>> GetTeams()
+    {
+        var url = $"{_baseUrl}api/v4/teams";
+        _log.Trace($"Using get teams url: {url}");
+        
+        try
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, url);
+            var content = await ExecuteRequest(request);
+
+            var response = JsonSerializer.Deserialize<IEnumerable<Team>>(content,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            return response;
+        }
+        catch (Exception e)
+        {
+            _log.Error($"Get teams failed {e}");
+            return new List<Team>();
+        }
+    }
+
+    private async Task<IEnumerable<Channel>> GetChannelsByTeam(string teamId)
+    {
+        var url = $"{_baseUrl}api/v4/teams/{teamId}/channels";
+        _log.Trace($"Using get channels url: {url}");
+        
+        try
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, url);
+            var content = await ExecuteRequest(request);
+            
             var response = JsonSerializer.Deserialize<IEnumerable<Channel>>(content,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             return response;
@@ -223,47 +313,68 @@ public class ChatClient
     //     //TODO
     // }
 
-    public async Task<PostResponse> GetPostsByChannel(string channelId, string afterPostId = "")
+    private async Task<PostResponse> GetPostsByChannel(string channelId, string afterPostId = "")
     {
-        var request =
-            new HttpRequestMessage(HttpMethod.Get, $"{_baseUrl}channels/{channelId}/posts?after={afterPostId}");
-        var content = await ExecuteRequest(request);
+        var url = $"{_baseUrl}api/v4/channels/{channelId}/posts?after={afterPostId}";
+        _log.Trace($"Using get posts by channel url: {url}");
+        
+        try
+        {
+            var request =
+                new HttpRequestMessage(HttpMethod.Get, url);
+            var content = await ExecuteRequest(request);
 
-        var response = JsonSerializer.Deserialize<PostResponse>(content,
-            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-        return response;
+            var response = JsonSerializer.Deserialize<PostResponse>(content,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            return response;
+        }
+        catch (Exception e)
+        {
+            _log.Error($"No posts found {e}");
+            return new PostResponse();
+        }
     }
 
 
     private async Task<Post> CreatePost(string channelId, string m)
     {
-        // JSON payload
-        var payload = new
+        if (!string.IsNullOrEmpty(channelId))
         {
-            channel_id = channelId,
-            message = m
-        };
-
-        // Serialize the payload to JSON
-        var jsonPayload = JsonSerializer.Serialize(payload);
-        var request = new HttpRequestMessage(HttpMethod.Post, $"{_baseUrl}posts?set_online=true")
-        {
-            Content = new StringContent(jsonPayload, Encoding.UTF8, "application/json")
-        };
-
-        var content = await ExecuteRequest(request);
-        if (!string.IsNullOrEmpty(content))
-        {
-            try
+            // JSON payload
+            var payload = new
             {
-                var response =
-                    JsonSerializer.Deserialize<Post>(content,
-                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                return response;
+                channel_id = channelId,
+                message = m
+            };
+
+            var url = $"{_baseUrl}api/v4/posts";
+            _log.Trace($"Using create post url: {url}");
+
+            // Serialize the payload to JSON
+            var jsonPayload = JsonSerializer.Serialize(payload);
+            var request = new HttpRequestMessage(HttpMethod.Post, url)
+            {
+                Content = new StringContent(jsonPayload, Encoding.UTF8, "application/json")
+            };
+
+            var content = await ExecuteRequest(request);
+            if (string.IsNullOrEmpty(content))
+            {
+                _log.Trace("content was empty!");
             }
-            catch (Exception e)
+            else
             {
-                _log.Error(e);
+                try
+                {
+                    var response =
+                        JsonSerializer.Deserialize<Post>(content,
+                            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    return response;
+                }
+                catch (Exception e)
+                {
+                    _log.Error(e);
+                }
             }
         }
 
@@ -289,7 +400,7 @@ public class ChatClient
         catch (Exception e)
         {
             _log.Error(request.RequestUri != null
-                ? $"Error with {request.Method} request {request.RequestUri.ToString()} : {e}"
+                ? $"Error with {request.Method} request {request.RequestUri} : {e}"
                 : $"Error with {request.Method} request to null uri : {e}");
             return string.Empty;
         }
@@ -312,9 +423,9 @@ public class ChatClient
                     Email = agent.NpcProfile.Email, FirstName = agent.NpcProfile.Name.First, LastName = agent.NpcProfile.Name.Last,
                     Nickname = agent.NpcProfile.Name.ToString() ?? string.Empty, Password = _configuration.Chat.DefaultUserPassword, Username =  username
                 });
-                
-                await this.StepEx(llm, random, username, _configuration.Chat.DefaultUserPassword);
             }
+            
+            await this.StepEx(llm, random, username, _configuration.Chat.DefaultUserPassword);
         }
     }
 
@@ -339,8 +450,8 @@ public class ChatClient
         {
             while (true)
             {
-                var myTeams = await this.GetMyTeams();
-                var myChannels = await this.GetMyChannels();
+                var myTeams = await this.GetMyTeams(me);
+                var myChannels = await this.GetMyChannels(me);
                 var myChannelsList = myChannels as Channel[] ?? myChannels.ToArray();
 
                 var teams = await this.GetTeams();
@@ -395,7 +506,7 @@ public class ChatClient
                         }
                     }
                 }
-
+                
                 var feelings = this._configuration.Prompts.GetRandom(random);
                 _log.Trace($"{username} looking at posts...");
 
@@ -406,8 +517,20 @@ public class ChatClient
                 }
 
                 var randomChannelToPostTo = channelHistory.Select(x => x.ChannelId).ToArray().GetRandom(random);
+                if (string.IsNullOrEmpty(randomChannelToPostTo))
+                {
+                    if (myChannelsList.Any())
+                    {
+                        randomChannelToPostTo = myChannelsList.PickRandom().Id;
+                    }
+                    else
+                    {
+                        _log.Trace($"User somehow has no channels. Is server configured correctly? {username}");
+                        continue;
+                    }
+                }
+                
                 var history = channelHistory.Where(x => x.ChannelId == randomChannelToPostTo && x.UserId != me.Username).MaxBy(x => x.Created);
-
                 var historyString = history is { Message.Length: >= 100 } ? history.Message[..100] : history?.Message;
 
                 var prompt = $"Write my update to the chat system that {feelings}";

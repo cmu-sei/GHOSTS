@@ -3,9 +3,9 @@
 using System;
 using System.Collections.Generic;
 
-namespace ghosts.api.Areas.Animator.Infrastructure.Animations;
+namespace ghosts.api.Areas.Animator.Infrastructure.Models;
 
-public class SocialGraph
+public class NpcSocialGraph
 {
     public Guid Id { get; set; }
     public string Name { get; set; }
@@ -14,7 +14,7 @@ public class SocialGraph
     public IList<Belief> Beliefs { get; set; }
     public long CurrentStep { get; set; }
 
-    public SocialGraph()
+    public NpcSocialGraph()
     {
         this.Connections = new List<SocialConnection>();
         this.Knowledge = new List<Learning>();

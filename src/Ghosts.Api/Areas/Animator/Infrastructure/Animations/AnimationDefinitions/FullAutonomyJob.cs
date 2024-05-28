@@ -13,6 +13,7 @@ using ghosts.api.Areas.Animator.Infrastructure.Models;
 using Ghosts.Api.Infrastructure;
 using Ghosts.Api.Infrastructure.Data;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.DependencyInjection;
 using NLog;
 
 namespace ghosts.api.Areas.Animator.Infrastructure.Animations.AnimationDefinitions;
@@ -30,7 +31,7 @@ public class FullAutonomyJob
     private readonly IHubContext<ActivityHub> _activityHubContext;
     private CancellationToken _cancellationToken;
 
-    public FullAutonomyJob(ApplicationSettings configuration, ApplicationDbContext context, Random random,
+    public FullAutonomyJob(ApplicationSettings configuration, IServiceScopeFactory scopeFactory, Random random,
         IHubContext<ActivityHub> activityHubContext, CancellationToken cancellationToken)
     {
         try
@@ -38,7 +39,10 @@ public class FullAutonomyJob
             this._activityHubContext = activityHubContext;
             this._configuration = configuration;
             this._random = random;
-            this._context = context;
+            
+            using var innerScope = scopeFactory.CreateScope();
+            this._context = innerScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            
             this._cancellationToken = cancellationToken;
 
             this._history = File.Exists(this._historyFile)

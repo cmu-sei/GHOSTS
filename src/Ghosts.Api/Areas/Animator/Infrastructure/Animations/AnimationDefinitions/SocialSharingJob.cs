@@ -3,20 +3,20 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Threading;
 using Ghosts.Animator.Extensions;
 using ghosts.api.Areas.Animator.Hubs;
 using ghosts.api.Areas.Animator.Infrastructure.ContentServices;
+using ghosts.api.Areas.Animator.Infrastructure.Models;
 using Ghosts.Api.Infrastructure;
 using Ghosts.Api.Infrastructure.Data;
 using ghosts.api.Infrastructure.Models;
 using ghosts.api.Infrastructure.Services;
 using Ghosts.Domain;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using NLog;
 using RestSharp;
@@ -28,34 +28,31 @@ public class SocialSharingJob
     private static readonly Logger _log = LogManager.GetCurrentClassLogger();
     private readonly ApplicationSettings _configuration;
     private readonly Random _random;
-    private const string SavePath = "_output/socialsharing/";
     private readonly int _currentStep;
     private readonly IHubContext<ActivityHub> _activityHubContext;
     private readonly CancellationToken _cancellationToken;
     private readonly ApplicationDbContext _context;
     private readonly IMachineUpdateService _updateService;
 
-    public SocialSharingJob(ApplicationSettings configuration, ApplicationDbContext context, Random random,
-        IHubContext<ActivityHub> activityHubContext, IMachineUpdateService updateService, CancellationToken cancellationToken)
+    public SocialSharingJob(ApplicationSettings configuration, IServiceScopeFactory scopeFactory, Random random,
+        IHubContext<ActivityHub> activityHubContext, CancellationToken cancellationToken)
     {
         try
         {
             this._activityHubContext = activityHubContext;
             this._configuration = configuration;
             this._random = random;
-            this._context = context;
+            
+            using var innerScope = scopeFactory.CreateScope();
+            this._context = innerScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            
             this._cancellationToken = cancellationToken;
-            this._updateService = updateService;
+            this._updateService = innerScope.ServiceProvider.GetRequiredService<IMachineUpdateService>();
 
             if (!_configuration.AnimatorSettings.Animations.SocialSharing.IsInteracting)
             {
                 _log.Trace($"Social sharing is not interacting. Exiting...");
                 return;
-            }
-
-            if (!Directory.Exists(SavePath))
-            {
-                Directory.CreateDirectory(SavePath);
             }
 
             while (!this._cancellationToken.IsCancellationRequested)
@@ -91,7 +88,7 @@ public class SocialSharingJob
             new ContentCreationService(_configuration.AnimatorSettings.Animations.SocialSharing.ContentEngine);
 
         //take some random NPCs
-        var lines = new StringBuilder();
+        var activities = new List<NpcActivity>();
         var rawAgents = this._context.Npcs.ToList();
         if (!rawAgents.Any())
         {
@@ -112,8 +109,8 @@ public class SocialSharingJob
                 return;
             }
 
-            lines.AppendFormat($"{DateTime.Now},{agent.Id},\"{tweetText}\"{Environment.NewLine}");
-
+            activities.Add(new NpcActivity {ActivityType = NpcActivity.ActivityTypes.SocialMediaPost, NpcId = agent.Id, CreatedUtc = DateTime.UtcNow, Detail = tweetText});
+            
             // the payloads to socializer are a bit randomized
             var userFormValue = new[] { "user", "usr", "u", "uid", "user_id", "u_id" }.RandomFromStringArray();
             var messageFormValue =
@@ -208,6 +205,8 @@ public class SocialSharingJob
                 cancellationToken: _cancellationToken);
         }
 
-        await File.AppendAllTextAsync($"{SavePath}tweets.csv", lines.ToString(), _cancellationToken);
+        await this._context.NpcActivities.AddRangeAsync(activities, _cancellationToken);
+        await this._context.SaveChangesAsync(this._cancellationToken);
     }
+   
 }
