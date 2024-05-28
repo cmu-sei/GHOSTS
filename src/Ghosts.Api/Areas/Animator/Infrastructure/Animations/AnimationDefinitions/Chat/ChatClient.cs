@@ -10,6 +10,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using ghosts.api.Areas.Animator.Infrastructure.Animations.AnimationDefinitions.Chat.Mattermost;
+using ghosts.api.Areas.Animator.Infrastructure.ContentServices;
 using ghosts.api.Areas.Animator.Infrastructure.ContentServices.Ollama;
 using ghosts.api.Areas.Animator.Infrastructure.Extensions;
 using ghosts.api.Areas.Animator.Infrastructure.Models;
@@ -27,12 +28,14 @@ public class ChatClient
     private readonly HttpClient _client;
     private string _token;
     private string UserId { get; set; }
+    private IFormatterService _formatterService;
 
-    public ChatClient(ChatJobConfiguration config)
+    public ChatClient(ChatJobConfiguration config, IFormatterService formatterService)
     {
         _configuration = config;
         this._baseUrl = _configuration.Chat.BaseUrl;
         this._client = new HttpClient();
+        this._formatterService = formatterService;
     }
 
     private async Task<User> AdminLogin()
@@ -406,7 +409,7 @@ public class ChatClient
         }
     }
 
-    public async Task Step(OllamaConnectorService llm, Random random, IEnumerable<NpcRecord> agents)
+    public async Task Step(Random random, IEnumerable<NpcRecord> agents)
     {
         await this.AdminLogin();
         
@@ -425,11 +428,11 @@ public class ChatClient
                 });
             }
             
-            await this.StepEx(llm, random, username, _configuration.Chat.DefaultUserPassword);
+            await this.StepEx(random, username, _configuration.Chat.DefaultUserPassword);
         }
     }
 
-    private async Task StepEx(OllamaConnectorService llm, Random random, string username, string password)
+    private async Task StepEx(Random random, string username, string password)
     {
         _log.Trace($"Managing {username}...");
 
@@ -542,7 +545,7 @@ public class ChatClient
                     respondingTo = history.UserName;
                 }
 
-                var message = await llm.ExecuteQuery(prompt);
+                var message = await this._formatterService.ExecuteQuery(prompt);
 
                 message = message.Clean(this._configuration.Replacements, random);
                 if (!string.IsNullOrEmpty(respondingTo))

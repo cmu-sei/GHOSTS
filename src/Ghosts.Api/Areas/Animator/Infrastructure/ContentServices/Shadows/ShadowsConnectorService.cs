@@ -15,7 +15,7 @@ using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace ghosts.api.Areas.Animator.Infrastructure.ContentServices.Shadows;
 
-public class ShadowsConnectorService
+public class ShadowsConnectorService : IContentService
 {
     private static readonly Logger _log = LogManager.GetCurrentClassLogger();
     private readonly ApplicationSettings.AnimatorSettingsDetail.ContentEngineSettings _configuration;
@@ -34,7 +34,7 @@ public class ShadowsConnectorService
         return await ExecuteQuery(_configuration.Model, prompt);
     }
 
-    public async Task<string> ExecuteQuery(string modelName, string prompt, string system = null,
+    private async Task<string> ExecuteQuery(string modelName, string prompt, string system = null,
         string template = null, string context = null, string options = null, Action<string> callback = null)
     {
         Dictionary<string, string> payload = null;

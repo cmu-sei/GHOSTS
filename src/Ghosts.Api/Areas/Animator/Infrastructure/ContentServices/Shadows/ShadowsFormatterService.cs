@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using ghosts.api.Areas.Animator.Infrastructure.Models;
 using Ghosts.Api.Infrastructure;
@@ -8,7 +9,7 @@ using NLog;
 
 namespace ghosts.api.Areas.Animator.Infrastructure.ContentServices.Shadows;
 
-public class ShadowsFormatterService
+public class ShadowsFormatterService : IFormatterService
 {
     private static readonly Logger _log = LogManager.GetCurrentClassLogger();
     private readonly ApplicationSettings.AnimatorSettingsDetail.ContentEngineSettings _configuration;
@@ -25,6 +26,11 @@ public class ShadowsFormatterService
         _connectorService = new ShadowsConnectorService(_configuration);
     }
 
+    public async Task<string> ExecuteQuery(string prompt)
+    {
+        return await this._connectorService.ExecuteQuery(prompt);
+    }
+
     public async Task<string> GenerateTweet(NpcRecord npc)
     {
         var flattenedAgent = GenericContentHelpers.GetFlattenedNpc(npc);
@@ -37,7 +43,31 @@ public class ShadowsFormatterService
             messages.Append(s);    
         }
         
-        return await _connectorService.ExecuteQuery(messages.ToString());
+        var tweetText = await _connectorService.ExecuteQuery(messages.ToString());
+        
+        var tries = 0;
+        while (string.IsNullOrEmpty(tweetText))
+        {
+            tweetText = await GenerateTweet(npc);
+            tries++;
+            if (tries > 5)
+                return null;
+        }
+                
+        var regArray = new [] {"\"activities\": \\[\"([^\"]+)\"", "\"activity\": \"([^\"]+)\"", "'activities': \\['([^\\']+)'\\]", "\"activities\": \\[\"([^\\']+)'\\]"} ;
+
+        foreach (var reg in regArray)
+        {
+            var match = Regex.Match(tweetText,reg);
+            if (match.Success)
+            {
+                // Extract the activity
+                tweetText = match.Groups[1].Value;
+                break;
+            }
+        }
+
+        return tweetText;
     }
 
     public async Task<string> GenerateNextAction(NpcRecord npc, string history)

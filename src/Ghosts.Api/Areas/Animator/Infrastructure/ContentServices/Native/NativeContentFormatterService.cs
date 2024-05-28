@@ -1,36 +1,48 @@
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Ghosts.Animator;
 using Ghosts.Animator.Extensions;
 using Ghosts.Animator.Models;
 using ghosts.api.Areas.Animator.Infrastructure.Models;
 using NLog;
-using Npgsql.EntityFrameworkCore.PostgreSQL.ValueGeneration.Internal;
 
 namespace ghosts.api.Areas.Animator.Infrastructure.ContentServices.Native;
 
-public static class NativeContentFormatterService
+public class NativeContentFormatterService : IFormatterService
 {
     private static readonly Logger _log = LogManager.GetCurrentClassLogger();
+
+    public async Task<string> GenerateNextAction(NpcRecord npc, string history)
+    {
+        //TODO
+        return string.Empty;
+    }
     
-    public static string GenerateTweet(NpcRecord agent)
+    public async Task<string> ExecuteQuery(string prompt)
+    {
+        //TODO
+        return string.Empty;
+    }
+    
+    public async Task<string> GenerateTweet(NpcRecord npc)
     {
         string tweetText;
         
-        if (agent.NpcProfile.Birthdate.Date.DayOfYear == DateTime.Now.Date.DayOfYear)
+        if (npc.NpcProfile.Birthdate.Date.DayOfYear == DateTime.Now.Date.DayOfYear)
         {
-            tweetText = ProcessBirthday(agent.NpcProfile);
+            tweetText = ProcessBirthday(npc.NpcProfile);
         }
         else
         {
             var i = AnimatorRandom.Rand.Next(0, 15);
             tweetText = i switch
             {
-                0 => ProcessAddress(agent.NpcProfile),
-                1 => ProcessFamily(agent.NpcProfile),
-                2 => ProcessEmployment(agent.NpcProfile),
-                3 => ProcessEducation(agent.NpcProfile),
-                4 => ProcessAccount(agent.NpcProfile),
+                0 => ProcessAddress(npc.NpcProfile),
+                1 => ProcessFamily(npc.NpcProfile),
+                2 => ProcessEmployment(npc.NpcProfile),
+                3 => ProcessEducation(npc.NpcProfile),
+                4 => ProcessAccount(npc.NpcProfile),
                 _ => Faker.Lorem.Sentence() //default is just text, no personal information
             };
         }

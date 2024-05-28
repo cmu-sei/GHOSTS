@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using ghosts.api.Areas.Animator.Infrastructure.Models;
 using Ghosts.Api.Infrastructure;
@@ -8,11 +9,11 @@ using NLog;
 
 namespace ghosts.api.Areas.Animator.Infrastructure.ContentServices.Ollama;
 
-public class OllamaFormatterService
+public class OllamaFormatterService : IFormatterService
 {
     private static readonly Logger _log = LogManager.GetCurrentClassLogger();
     private readonly ApplicationSettings.AnimatorSettingsDetail.ContentEngineSettings _configuration;
-    private OllamaConnectorService _ollamaConnectorService;
+    private OllamaConnectorService _connectorService;
 
     public OllamaFormatterService(ApplicationSettings.AnimatorSettingsDetail.ContentEngineSettings configuration)
     {
@@ -22,7 +23,12 @@ public class OllamaFormatterService
         _configuration.Model = Environment.GetEnvironmentVariable("OLLAMA_MODEL") ??
                                configuration.Model;
 
-        _ollamaConnectorService = new OllamaConnectorService(_configuration);
+        _connectorService = new OllamaConnectorService(_configuration);
+    }
+    
+    public async Task<string> ExecuteQuery(string prompt)
+    {
+        return await this._connectorService.ExecuteQuery(prompt);
     }
 
     public async Task<string> GenerateTweet(NpcRecord npc)
@@ -37,7 +43,30 @@ public class OllamaFormatterService
             messages.Append(s);    
         }
         
-        return await _ollamaConnectorService.ExecuteQuery(messages.ToString());
+        var tweetText = await _connectorService.ExecuteQuery(messages.ToString());
+        var tries = 0;
+        while (string.IsNullOrEmpty(tweetText))
+        {
+            tweetText = await _connectorService.ExecuteQuery(messages.ToString());
+            tries++;
+            if (tries > 5)
+                return null;
+        }
+                
+        var regArray = new [] {"\"activities\": \\[\"([^\"]+)\"", "\"activity\": \"([^\"]+)\"", "'activities': \\['([^\\']+)'\\]", "\"activities\": \\[\"([^\\']+)'\\]"} ;
+
+        foreach (var reg in regArray)
+        {
+            var match = Regex.Match(tweetText,reg);
+            if (match.Success)
+            {
+                // Extract the activity
+                tweetText = match.Groups[1].Value;
+                break;
+            }
+        }
+
+        return tweetText;
     }
 
     public async Task<string> GenerateNextAction(NpcRecord npc, string history)
@@ -62,6 +91,6 @@ public class OllamaFormatterService
 
         // _log.Trace(messages.ToString());
         
-        return await _ollamaConnectorService.ExecuteQuery(messages.ToString());
+        return await _connectorService.ExecuteQuery(messages.ToString());
     }
 }

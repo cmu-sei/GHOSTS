@@ -11,7 +11,7 @@ using OpenAI.ObjectModels.RequestModels;
 
 namespace ghosts.api.Areas.Animator.Infrastructure.ContentServices.OpenAi;
 
-public class OpenAiConnectorService
+public class OpenAiConnectorService : IContentService
 {
     private static readonly Logger _log = LogManager.GetCurrentClassLogger();
     private readonly OpenAIService _service;
@@ -52,6 +52,15 @@ public class OpenAiConnectorService
         }, client);
 
         this.IsReady = true;
+    }
+
+    public async Task<string> ExecuteQuery(string prompt)
+    {
+        var messages = new List<ChatMessage>
+        {
+            ChatMessage.FromSystem(prompt)
+        };
+        return await this.ExecuteQuery(messages);
     }
 
     //TODO: shouldn't this method save off every request and response somewhere?

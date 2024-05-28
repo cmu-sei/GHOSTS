@@ -7,17 +7,22 @@ using OpenAI.ObjectModels.RequestModels;
 
 namespace ghosts.api.Areas.Animator.Infrastructure.ContentServices.OpenAi;
 
-public class OpenAiFormatterService
+public class OpenAiFormatterService : IFormatterService
 {
     private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-    private readonly OpenAiConnectorService _openAiConnectorService;
+    private readonly OpenAiConnectorService _connectorService;
     
     public bool IsReady { get; set; }
     
     public OpenAiFormatterService()
     {
-        _openAiConnectorService = new OpenAiConnectorService();
-        this.IsReady = _openAiConnectorService.IsReady;
+        _connectorService = new OpenAiConnectorService();
+        this.IsReady = _connectorService.IsReady;
+    }
+    
+    public async Task<string> ExecuteQuery(string prompt)
+    {
+        return await this._connectorService.ExecuteQuery(prompt);
     }
 
     public async Task<string> GenerateTweet(NpcRecord npc)
@@ -34,7 +39,7 @@ public class OpenAiFormatterService
             messages.Add(ChatMessage.FromSystem(s));
         }
         
-        return await _openAiConnectorService.ExecuteQuery(messages);
+        return await _connectorService.ExecuteQuery(messages);
     }
 
     public async Task<string> GenerateNextAction(NpcRecord npc, string history)
@@ -53,7 +58,7 @@ public class OpenAiFormatterService
             messages.Add(ChatMessage.FromSystem(s));    
         }
 
-        return await _openAiConnectorService.ExecuteQuery(messages);
+        return await _connectorService.ExecuteQuery(messages);
     }
     
     public async Task<string> GeneratePowershellScript(NpcRecord npc)
@@ -66,7 +71,7 @@ public class OpenAiFormatterService
             ChatMessage.FromSystem("Generate a relevant powershell script for this person to execute on their windows computer")
         };
 
-        return await _openAiConnectorService.ExecuteQuery(messages);
+        return await _connectorService.ExecuteQuery(messages);
     }
 
     public async Task<string> GenerateCommand(NpcRecord npc)
@@ -79,7 +84,7 @@ public class OpenAiFormatterService
             ChatMessage.FromSystem("Generate a relevant command-line command for this person to execute on their windows computer")
         };
 
-        return await _openAiConnectorService.ExecuteQuery(messages);
+        return await _connectorService.ExecuteQuery(messages);
     }
     
     //public async Task<string> GenerateDocumentContent(NPC npc)
