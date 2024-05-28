@@ -109,6 +109,7 @@ public class AnimationsManager : IManageableHostedService
             this._socialGraphJobCancellationTokenSource.Cancel();
             this._socialGraphJobThread?.Join();
             this.RemoveJob("SOCIALGRAPH");
+            this._socialGraphJobCancellationTokenSource = new CancellationTokenSource();
         }
         catch
         {
@@ -120,6 +121,7 @@ public class AnimationsManager : IManageableHostedService
             this._socialSharingJobCancellationTokenSource.Cancel();
             this._socialSharingJobThread?.Join();
             this.RemoveJob("SOCIALSHARING");
+            this._socialGraphJobCancellationTokenSource = new CancellationTokenSource();
         }
         catch
         {
@@ -131,6 +133,7 @@ public class AnimationsManager : IManageableHostedService
             this._socialSharingJobCancellationTokenSource.Cancel();
             this._socialBeliefsJobThread?.Join();
             this.RemoveJob("SOCIALBELIEF");
+            this._socialGraphJobCancellationTokenSource = new CancellationTokenSource();
         }
         catch
         {
@@ -142,6 +145,7 @@ public class AnimationsManager : IManageableHostedService
             this._chatJobJobCancellationTokenSource.Cancel();
             this._chatJobThread?.Join();
             this.RemoveJob("CHAT");
+            this._socialGraphJobCancellationTokenSource = new CancellationTokenSource();
         }
         catch
         {
@@ -153,6 +157,7 @@ public class AnimationsManager : IManageableHostedService
             this._fullAutonomyCancellationTokenSource.Cancel();
             this._fullAutonomyJobThread?.Join();
             this.RemoveJob("FULLAUTONOMY");
+            this._socialGraphJobCancellationTokenSource = new CancellationTokenSource();
         }
         catch
         {
@@ -181,22 +186,27 @@ public class AnimationsManager : IManageableHostedService
                 case "SOCIALGRAPH":
                     this._socialGraphJobCancellationTokenSource.Cancel();
                     this._socialGraphJobThread?.Join();
+                    this._socialGraphJobCancellationTokenSource = new CancellationTokenSource();
                     break;
                 case "SOCIALSHARING":
                     this._socialSharingJobCancellationTokenSource.Cancel();
                     this._socialSharingJobThread?.Join();
+                    this._socialSharingJobCancellationTokenSource = new CancellationTokenSource();
                     break;
                 case "SOCIALBELIEFS":
                     this._socialSharingJobCancellationTokenSource.Cancel();
                     this._socialBeliefsJobThread?.Join();
+                    this._socialSharingJobCancellationTokenSource = new CancellationTokenSource();
                     break;
                 case "CHAT":
                     this._chatJobJobCancellationTokenSource.Cancel();
                     this._chatJobThread?.Join();
+                    this._chatJobJobCancellationTokenSource = new CancellationTokenSource();
                     break;
                 case "FULLAUTONOMY":
                     this._fullAutonomyCancellationTokenSource.Cancel();
                     this._fullAutonomyJobThread?.Join();
+                    this._chatJobJobCancellationTokenSource = new CancellationTokenSource();
                     break;
             }
 

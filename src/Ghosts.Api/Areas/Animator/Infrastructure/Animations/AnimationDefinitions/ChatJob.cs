@@ -8,6 +8,7 @@ using System.Threading;
 using Ghosts.Animator.Extensions;
 using ghosts.api.Areas.Animator.Hubs;
 using ghosts.api.Areas.Animator.Infrastructure.Animations.AnimationDefinitions.Chat;
+using ghosts.api.Areas.Animator.Infrastructure.ContentServices;
 using ghosts.api.Areas.Animator.Infrastructure.ContentServices.Ollama;
 using ghosts.api.Areas.Animator.Infrastructure.Models;
 using Ghosts.Api.Infrastructure;
@@ -27,6 +28,7 @@ public class ChatJob
     private readonly ChatClient _chatClient;
     private readonly int _currentStep;
     private CancellationToken _cancellationToken;
+    private IFormatterService _formatterService;
     
     public ChatJob(ApplicationSettings configuration, IServiceScopeFactory scopeFactory, Random random,
         IHubContext<ActivityHub> activityHubContext, CancellationToken cancellationToken)
@@ -44,8 +46,10 @@ public class ChatJob
         var chatConfiguration = JsonSerializer.Deserialize<ChatJobConfiguration>(File.ReadAllText("config/chat.json"),
             new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? throw new InvalidOperationException();
 
-        var llm = new OllamaConnectorService(_configuration.AnimatorSettings.Animations.Chat.ContentEngine);
-        this._chatClient = new ChatClient(chatConfiguration);
+        this._formatterService =
+            new ContentCreationService(_configuration.AnimatorSettings.Animations.Chat.ContentEngine).FormatterService;
+        
+        this._chatClient = new ChatClient(chatConfiguration, this._formatterService);
         
         while (!_cancellationToken.IsCancellationRequested)
         {
@@ -55,17 +59,17 @@ public class ChatJob
                 return;
             }
 
-            this.Step(llm, random, chatConfiguration);
-            Thread.Sleep(this._configuration.AnimatorSettings.Animations.SocialSharing.TurnLength);
+            this.Step(random, chatConfiguration);
+            Thread.Sleep(this._configuration.AnimatorSettings.Animations.Chat.TurnLength);
 
             this._currentStep++;
         }
     }
 
-    private async void Step(OllamaConnectorService llm, Random random, ChatJobConfiguration chatConfiguration)
+    private async void Step(Random random, ChatJobConfiguration chatConfiguration)
     {
         _log.Trace("Executing a chat step...");
         var agents = this._context.Npcs.ToList().Shuffle(_random).Take(chatConfiguration.Chat.AgentsPerBatch);
-        await this._chatClient.Step(llm, random, agents);
+        await this._chatClient.Step(random, agents);
     }
 }

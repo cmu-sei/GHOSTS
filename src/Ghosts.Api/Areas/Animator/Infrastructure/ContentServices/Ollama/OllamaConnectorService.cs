@@ -15,7 +15,7 @@ using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace ghosts.api.Areas.Animator.Infrastructure.ContentServices.Ollama;
 
-public class OllamaConnectorService
+public class OllamaConnectorService : IContentService
 {
     private static readonly Logger _log = LogManager.GetCurrentClassLogger();
     private readonly ApplicationSettings.AnimatorSettingsDetail.ContentEngineSettings _configuration;

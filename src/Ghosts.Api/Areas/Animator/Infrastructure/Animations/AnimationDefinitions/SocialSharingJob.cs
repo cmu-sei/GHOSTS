@@ -33,6 +33,7 @@ public class SocialSharingJob
     private readonly CancellationToken _cancellationToken;
     private readonly ApplicationDbContext _context;
     private readonly IMachineUpdateService _updateService;
+    private readonly IFormatterService _formatterService;
 
     public SocialSharingJob(ApplicationSettings configuration, IServiceScopeFactory scopeFactory, Random random,
         IHubContext<ActivityHub> activityHubContext, CancellationToken cancellationToken)
@@ -48,6 +49,9 @@ public class SocialSharingJob
             
             this._cancellationToken = cancellationToken;
             this._updateService = innerScope.ServiceProvider.GetRequiredService<IMachineUpdateService>();
+            
+            _formatterService =
+                new ContentCreationService(_configuration.AnimatorSettings.Animations.Chat.ContentEngine).FormatterService;
 
             if (!_configuration.AnimatorSettings.Animations.SocialSharing.IsInteracting)
             {
@@ -84,9 +88,6 @@ public class SocialSharingJob
     {
         _log.Trace("Social sharing step proceeding...");
         
-        var contentService =
-            new ContentCreationService(_configuration.AnimatorSettings.Animations.SocialSharing.ContentEngine);
-
         //take some random NPCs
         var activities = new List<NpcActivity>();
         var rawAgents = this._context.Npcs.ToList();
@@ -102,7 +103,7 @@ public class SocialSharingJob
         foreach (var agent in agents)
         {
             _log.Trace($"Processing agent {agent.NpcProfile.Email}...");
-            var tweetText = await contentService.GenerateTweet(agent);
+            var tweetText = await this._formatterService.GenerateTweet(agent);
             if (string.IsNullOrEmpty(tweetText))
             {
                 _log.Trace($"Content service generated no payload...");
