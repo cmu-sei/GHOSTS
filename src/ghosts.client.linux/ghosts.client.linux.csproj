@@ -23,7 +23,7 @@
   
   <ItemGroup>
     <PackageReference Include="CommandLineParser" Version="2.9.1" />
-    <PackageReference Include="HtmlAgilityPack" Version="1.11.59" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.61" />
     <PackageReference Include="NLog" Version="5.2.8" />
     <PackageReference Include="FileHelpers" Version="3.5.2" />
     <PackageReference Include="Selenium.Firefox.WebDriver" Version="0.27.0" />
