@@ -39,12 +39,15 @@ namespace Ghosts.Animator.Extensions
 
         public static string ToAccountSafeString(this string o)
         {
+            if (string.IsNullOrEmpty(o)) return string.Empty;
             o = Regex.Replace(o, @"[^0-9a-zA-Z\._]", "");
             return o;
         }
 
         public static string After(this string value, string a)
         {
+            if (string.IsNullOrEmpty(value) || string.IsNullOrEmpty(a)) return string.Empty;
+            
             var posA = value.LastIndexOf(a, StringComparison.InvariantCultureIgnoreCase);
             if (posA == -1)
             {

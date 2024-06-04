@@ -41,6 +41,10 @@ namespace Ghosts.Animator
             {
                 choice.Unit.Address = GetBaseAddress(branch, hq.MilUnit.Address.Name);                
             }
+            else
+            {
+                choice.Unit.Address = new AddressProfiles.AddressProfile();
+            }
             
             return choice.Unit;
         }

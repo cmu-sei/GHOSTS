@@ -1,18 +1,17 @@
-// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
-
 using System;
 using System.IO;
 using System.Reflection;
 using System.Text.Json.Serialization;
 using ghosts.api.Areas.Animator.Hubs;
 using ghosts.api.Areas.Animator.Infrastructure.Animations;
-using ghosts.api.Areas.Animator.Infrastructure.Services;
 using Ghosts.Api.Hubs;
 using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Api.Infrastructure.Extensions;
+using Ghosts.Api.Infrastructure.Filters;
 using ghosts.api.Infrastructure.Services;
 using Ghosts.Api.ViewModels;
 using Ghosts.Domain.Code;
+using Ghosts.Domain.Code.Helpers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -22,7 +21,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using Newtonsoft.Json.Converters;
 using Swashbuckle.AspNetCore.Filters;
+using Swashbuckle.AspNetCore.Newtonsoft;
 
 namespace Ghosts.Api
 {
@@ -39,7 +40,6 @@ namespace Ghosts.Api
 
         public void ConfigureServices(IServiceCollection services)
         {
-            //services.AddDbContext<ApplicationDbContext>(opt => opt.UseInMemoryDatabase("ghosts"));
             services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
             
             services.TryAddTransient<IHttpContextAccessor, HttpContextAccessor>();
@@ -63,16 +63,16 @@ namespace Ghosts.Api
                         Name = "Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms"
                     }
                 });
-                
+
                 // Set the comments path for the Swagger JSON and UI.
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                c.DocumentFilter<CustomDocumentFilter>();
                 c.IncludeXmlComments(xmlPath);
                 c.ExampleFilters();
             });
+            services.AddSwaggerGenNewtonsoftSupport(); // explicit opt-in - needs to be placed after AddSwaggerGen()
             services.AddSwaggerExamplesFromAssemblies(Assembly.GetEntryAssembly());
-            services.AddSwaggerExamplesFromAssemblyOf<MachineUpdateViewModelExample>();
-
 
             // Add application services.
             services.AddScoped<IMachineService, MachineService>();
@@ -91,7 +91,11 @@ namespace Ghosts.Api
             
             services.AddControllers().AddJsonOptions(options => 
                 options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
-            services.AddMvc().AddNewtonsoftJson();
+            services.AddMvc().AddNewtonsoftJson(options =>
+            {
+                options.SerializerSettings.Converters.Add(new TimeSpanConverter());
+                options.SerializerSettings.Converters.Add(new StringEnumConverter());
+            });
             
             services.AddSignalR();
             services.AddControllersWithViews().AddRazorRuntimeCompilation();

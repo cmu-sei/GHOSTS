@@ -34,17 +34,7 @@ namespace ghosts.api.Infrastructure.Services
 
         public async Task<List<Group>> GetAsync(string q, CancellationToken ct)
         {
-            var list = await _context.Groups.Include(o => o.GroupMachines).ToListAsync(ct);
-            foreach (var group in list)
-            foreach (var machineMapping in group.GroupMachines)
-            {
-                var machine = await _context.Machines.FirstOrDefaultAsync(m => m.Id == machineMapping.MachineId && m.Status == StatusType.Active, ct);
-                if (machine == null)
-                    continue;
-                group.Machines.Add(machine);
-            }
-
-            return list;
+            return await _context.Groups.Include(o => o.GroupMachines).ToListAsync(ct);
         }
 
         public async Task<Group> GetAsync(int id, CancellationToken ct)
@@ -76,7 +66,7 @@ namespace ghosts.api.Infrastructure.Services
                 this._context.GroupMachines.Remove(g);
             }
 
-            if (model.GroupMachines.Count > 0)
+            if (model.GroupMachines != null && model.GroupMachines.Count > 0)
             {
                 // Add new GroupMachines from the model
                 foreach (var g in model.GroupMachines)
@@ -87,10 +77,6 @@ namespace ghosts.api.Infrastructure.Services
                         this._context.GroupMachines.Add(g);
                     }
                 }
-            }
-            else
-            {
-                originalRecord.Machines.Clear();
             }
 
             // Update properties of the original record to match those of the model
@@ -125,18 +111,26 @@ namespace ghosts.api.Infrastructure.Services
 
         public async Task<List<HistoryTimeline>> GetActivity(int id, int skip, int take, CancellationToken ct)
         {
+            if (take < 1)
+                take = 20;
+            
             var machineGroup = await _context.Groups.Include(o => o.GroupMachines).FirstOrDefaultAsync(o => o.Id == id, ct);
+            if (machineGroup ==  null) return new List<HistoryTimeline>();
+            
             var machineIds = machineGroup.GroupMachines.Select(m => m.MachineId).ToList();
-
+            if (machineIds.Count < 1) return new List<HistoryTimeline>();
+            
             try
             {
-                return (from o in _context.HistoryTimeline where machineIds.Contains(o.MachineId) select o).Skip(skip).Take(take).ToList();
+                return (from o in _context.HistoryTimeline where machineIds.Contains(o.MachineId) select o)
+                    .OrderByDescending(x => x.CreatedUtc).Skip(skip).Take(take).ToList();
             }
             catch (Exception e)
             {
-                _log.Debug(e);
-                throw;
+                _log.Error(e);
             }
+
+            return new List<HistoryTimeline>();
         }
     }
 }

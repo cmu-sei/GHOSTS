@@ -47,13 +47,14 @@ namespace Ghosts.Animator
 
         public static string GetUserName(string name = null)
         {
-            //% have a random username not associated with their own name
+            // 67% chance to get a random username from the file
             if (AnimatorRandom.Rand.Next(0, 3) > 1)
             {
-                var file = $"config/usernames.txt";
+                var file = "config/usernames.txt";
                 return file.GetRandomFromFile();
             }
-            
+    
+            // If name is null, generate a new name
             if (name == null)
             {
                 switch (AnimatorRandom.Rand.Next(2))
@@ -62,20 +63,35 @@ namespace Ghosts.Animator
                         name = new Regex(@"\W").Replace(Name.GetFirstName(), "").ToLower();
                         break;
                     default:
-                        name = new[] {Name.GetFirstName(), Name.GetLastName()}.Select(n => new Regex(@"\W").Replace(n, ""))
-                            .Join(new[] {".", "_"}.RandomElement()).ToLower();
+                        name = new[]
+                        {
+                            new Regex(@"\W").Replace(Name.GetFirstName(), ""),
+                            new Regex(@"\W").Replace(Name.GetLastName(), "")
+                        }.Join(new[] { ".", "_" }.RandomElement()).ToLower();
                         break;
                 }
             }
 
+            // Convert the name to an account-safe string
             name = name.ToAccountSafeString();
-            name = name.Split(' ').Join(new[] {".", "_"}.RandomElement()).ToLower();
+    
+            // Split and join the name using a random delimiter if there are spaces
+            name = name.Split(' ').Join(new[] { ".", "_" }.RandomElement()).ToLower();
 
-            if (AnimatorRandom.Rand.Next(0,4) > 0)
-                name = name.Substring(0, AnimatorRandom.Rand.Next(1, name.Length - 1));
+            // Randomly shorten the name
+            if (AnimatorRandom.Rand.Next(0, 4) > 0)
+            {
+                if (name.Length > 1)
+                {
+                    name = name.Substring(0, AnimatorRandom.Rand.Next(1, name.Length));
+                }
+            }
 
-            if (AnimatorRandom.Rand.Next(0,4) > 0)
-                name += AnimatorRandom.Rand.Next(0, 9999);
+            // Randomly append a number
+            if (AnimatorRandom.Rand.Next(0, 4) > 0)
+            {
+                name += AnimatorRandom.Rand.Next(0, 10000); // Range 0 to 9999
+            }
 
             return name;
         }
@@ -157,8 +173,11 @@ namespace Ghosts.Animator
             return o;
         }
 
-        public static IEnumerable<AccountsProfile.Account> GetAccounts(string name = null)
+        public static IEnumerable<AccountsProfile.Account> GetAccounts(string name)
         {
+            if (string.IsNullOrEmpty(name))
+                return new List<AccountsProfile.Account>();
+            
             var o = new List<AccountsProfile.Account>();
 
             var numberOfAccounts = AnimatorRandom.Rand.Next(0, 15);

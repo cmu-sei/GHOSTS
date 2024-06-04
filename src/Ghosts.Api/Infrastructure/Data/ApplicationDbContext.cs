@@ -52,6 +52,9 @@ namespace Ghosts.Api.Infrastructure.Data
             base.OnModelCreating(modelBuilder);
             // Add your customizations after calling base.OnModelCreating(modelBuilder);
             
+            modelBuilder.ApplyConfiguration(new MachineUpdateConfiguration());
+
+            
             modelBuilder.Entity<NpcRecord>().Property(o => o.NpcProfile).HasColumnType("jsonb");
             modelBuilder.Entity<NpcRecord>().Property(o => o.NpcSocialGraph).HasColumnType("jsonb");
             

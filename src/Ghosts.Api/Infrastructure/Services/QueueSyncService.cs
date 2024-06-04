@@ -383,6 +383,8 @@ namespace ghosts.api.Infrastructure.Services
 
         internal static async void HandleWebhook(Webhook webhook, NotificationQueueEntry payload)
         {
+            if (webhook == null || payload == null) return;
+            
             string formattedResponse;
             if (payload.Type == NotificationQueueEntry.NotificationType.TimelineDelivered)
             {
@@ -394,6 +396,7 @@ namespace ghosts.api.Infrastructure.Services
                 // Serialize our concrete class into a JSON String
 
                 formattedResponse = webhook.PostbackFormat;
+                if(string.IsNullOrEmpty(formattedResponse)) return;
 
                 var isValid = false;
                 var reg = new Regex(@"\[(.*?)\]");

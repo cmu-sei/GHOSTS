@@ -5,6 +5,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using ghosts.api.Areas.Animator.Infrastructure.Extensions;
+using Newtonsoft.Json;
+using NPOI.SS.Formula.Functions;
+using Match = System.Text.RegularExpressions.Match;
 
 namespace Ghosts.Api.Infrastructure.Extensions
 {
@@ -65,6 +68,7 @@ namespace Ghosts.Api.Infrastructure.Extensions
 
         public static string CreateUsernameFromEmail(this string email)
         {
+            if (string.IsNullOrEmpty(email)) return string.Empty;
             return email.Split('@')[0].Replace(".mil", "").Replace(".civ", "").Replace(".ctr", "");
         }
 
