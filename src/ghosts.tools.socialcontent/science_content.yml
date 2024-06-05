@@ -1,0 +1,205 @@
+contentgen:
+  science:
+    '1':
+      prompt: Write a facebook post about In biology, the process of natural selection
+        was first described by Charles Darwin and Alfred Russel Wallace, profoundly
+        impacting the field of evolutionary science.
+    '10':
+      prompt: Write a facebook post about Electricity is the flow of charge, and it's
+        the basis for a myriad of technologies ranging from simple flashlights to
+        complex power grids.
+    '11':
+      prompt: Write a facebook post about Geology studies the Earth, its materials,
+        structures, processes, and history, providing insights into natural hazards
+        like earthquakes and volcanic eruptions.
+    '12':
+      prompt: Write a facebook post about Meteorology is the scientific study of the
+        atmosphere and its phenomena, including weather and climate patterns, which
+        are crucial for understanding global environmental trends.
+    '13':
+      prompt: Write a facebook post about Ecologists examine the complex interactions
+        between organisms and their environment, highlighting the importance of biodiversity
+        for ecosystem stability.
+    '14':
+      prompt: Write a facebook post about Mathematics is the universal language of
+        science, offering a framework to formulate and solve problems with precision
+        and logic.
+    '15':
+      prompt: Write a facebook post about Aeronautics combines principles from physics,
+        engineering, and fluid dynamics to design aircraft capable of flying efficiently
+        through the Earth's atmosphere.
+    '16':
+      prompt: Write a facebook post about Anthropology explores the behavior, cultures,
+        and physical characteristics of humankind, providing a broader understanding
+        of human evolution and social dynamics.
+    '17':
+      prompt: Write a facebook post about Oceanography is the study of Earth's oceans,
+        which covers a wide range of scientific disciplines, including biology, chemistry,
+        physics, and geology.
+    '18':
+      prompt: Write a facebook post about Agronomy involves the science and technology
+        of producing and using renewable resources, particularly plant cultivation
+        and soil management.
+    '19':
+      prompt: Write a facebook post about Genetics is the study of genes, genetic
+        information, and heredity, which has led to breakthroughs in understanding
+        diseases like cystic fibrosis and cancer.
+    '2':
+      prompt: Write a facebook post about Chemistry's periodic table is a tabular
+        arrangement of the chemical elements, organized primarily by their atomic
+        number, which indicates the number of protons in their nuclei.
+    '20':
+      prompt: Write a facebook post about Astrobiology seeks to understand the origin,
+        evolution, distribution, and future of life in the universe and the requirements
+        for life to develop and thrive.
+    '21':
+      prompt: Write a facebook post about The field of quantum computing leverages
+        the principles of quantum mechanics to process information on quantum bits,
+        or qubits, potentially solving problems beyond classical computation's reach.
+    '22':
+      prompt: Write a facebook post about Cryptography uses mathematics and computer
+        science to secure communication in the digital age, ensuring privacy and data
+        integrity through encryption algorithms.
+    '23':
+      prompt: Write a facebook post about The study of plasma, a state of matter similar
+        to gas but with sufficiently high-energy particles to dominate parameteres
+        like electric conductivity and optical properties, is central to fields like
+        astrophysics and fusion energy.
+    '24':
+      prompt: Write a facebook post about Seismology is the scientific study of earthquakes
+        and the propagation of elastic waves through the Earth or other planet-like
+        bodies, which helps in predicting and mitigating natural disasters.
+    '25':
+      prompt: Write a facebook post about Paleontology, the study of fossils, provides
+        a window into the history of life on Earth and has been instrumental in understanding
+        past ecosystems and the evolutionary history of species, including humans.
+    '26':
+      prompt: Write a facebook post about The concept of entropy in thermodynamics
+        explains why processes occur in a certain direction and is fundamental to
+        understanding the behavior of matter and energy systems.
+    '27':
+      prompt: Write a facebook post about Hydroponics is a method of growing plants
+        without soil, using mineral nutrient solutions in an aqueous solvent, which
+        is particularly useful in space exploration and urban farming.
+    '28':
+      prompt: Write a facebook post about The study of climate change involves analyzing
+        variations in Earth's climate system, including atmospheric, oceanic, ice
+        sheet, and biospheric metrics.
+    '29':
+      prompt: Write a facebook post about GIS (Geographic Information Systems) technology
+        allows for the visualization and analysis of georeferenced data, revolutionizing
+        fields like urban planning and environmental conservation.
+    '3':
+      prompt: Write a facebook post about Physics has shown us that Einstein's theory
+        of relativity revolutionized our understanding of space and time, leading
+        to new concepts like spacetime and the equivalence principle.
+    '30':
+      prompt: Write a facebook post about The discovery of DNA's double helix structure
+        by James Watson and Francis Crick in 1953 was a pivotal moment in biology,
+        elucidating the molecular basis of heredity.
+    '31':
+      prompt: Write a facebook post about The theory of plate tectonics explains the
+        large-scale motion of Earth's lithosphere and has significantly improved our
+        understanding of volcanic activity and seismicity.
+    '32':
+      prompt: Write a facebook post about The science of nanotechnology deals with
+        dimensions and tolerances of less than 100 nanometers, offering potential
+        applications ranging from medicine to electronics.
+    '33':
+      prompt: Write a facebook post about Bioinformatics is an interdisciplinary field
+        that combines biology, computer science, mathematics, and statistics to analyze
+        biological data, particularly genomic information.
+    '34':
+      prompt: Write a facebook post about The study of renewable energy sources like
+        solar and wind power is critical in addressing climate change concerns and
+        transitioning towards a more sustainable energy future.
+    '35':
+      prompt: Write a facebook post about Nuclear physics explores the nuclei of atoms
+        and their interactions, leading to advancements in medicine (like cancer treatment)
+        and energy production.
+    '36':
+      prompt: Write a facebook post about The science of epidemiology investigates
+        the distribution and determinants of diseases within human populations, playing
+        a key role in public health and disease prevention.
+    '37':
+      prompt: Write a facebook post about Cryogenics is the study of physical phenomena
+        at low temperatures, which has applications ranging from superconducting materials
+        to the preservation of biological samples.
+    '38':
+      prompt: Write a facebook post about The field of behavioral economics combines
+        insights from psychology and economics to understand how people make decisions,
+        often revealing deviations from rational choice theory.
+    '39':
+      prompt: Write a facebook post about The science of exoplanet detection, through
+        methods like transit photometry and radial velocity measurements, is expanding
+        our understanding of planets beyond our solar system.
+    '4':
+      prompt: Write a facebook post about Astronomers believe that dark matter makes
+        up about 85% of all matter in the universe, but its precise nature remains
+        one of the biggest mysteries in science.
+    '40':
+      prompt: Write a facebook post about The study of human genomics has led to personalized
+        medicine, where treatments are tailored to an individual's genetic makeup
+        for more effective healthcare outcomes.
+    '41':
+      prompt: Write a facebook post about The concept of the greenhouse effect in
+        climate science explains how gases in Earth's atmosphere trap heat and is
+        a key component in discussions about global warming.
+    '42':
+      prompt: Write a facebook post about The field of materials science deals with
+        the discovery, design, and fabrication of new materials to fulfill specific
+        functions or perform specific tasks.
+    '43':
+      prompt: Write a facebook post about The study of ocean currents helps meteorologists
+        understand and predict weather patterns and climate change impacts on a global
+        scale.
+    '44':
+      prompt: Write a facebook post about The science of robotics combines computer
+        science, engineering, and artificial intelligence to create machines that
+        can perform tasks autonomously or semi-autonomously.
+    '45':
+      prompt: Write a facebook post about The principles of quantum mechanics underpin
+        the field of quantum computing, which promises to solve complex problems much
+        faster than classical computers.
+    '46':
+      prompt: Write a facebook post about Paleoclimatology examines ancient climate
+        conditions by analyzing physical evidence, such as ice cores, tree rings,
+        and sediment layers, to understand past climate variability.
+    '47':
+      prompt: Write a facebook post about The science of evolutionary biology explores
+        the processes that govern changes in organisms over time, providing insight
+        into biodiversity and adaptation.
+    '48':
+      prompt: Write a facebook post about The field of synthetic biology seeks to
+        design and construct new biological parts, devices, and systems, or to redesign
+        existing, natural biological systems for useful purposes.
+    '49':
+      prompt: Write a facebook post about Seismic reflection is a technique used in
+        geophysics to examine subsurface sedimentary and rock formations by sending
+        sound waves into the ground and analyzing their echoes.
+    '5':
+      prompt: Write a facebook post about In computer science, the concept of Turing
+        completeness describes a system capable of performing computations that can
+        be described algorithmically and are not intrinsically bound to the particular
+        form of the computation.
+    '50':
+      prompt: Write a facebook post about The study of dark matter in cosmology has
+        led to the development of advanced telescopes and detectors, such as the Large
+        Hadron Collider (LHC), to probe beyond the observable universe's matter content.
+    '6':
+      prompt: Write a facebook post about Artificial intelligence has made significant
+        strides with machine learning, enabling computers to learn from data without
+        being explicitly programmed for specific tasks.
+    '7':
+      prompt: Write a facebook post about Programming languages like Python have gained
+        popularity due to their readability, flexibility, and vast array of libraries
+        and frameworks.
+    '8':
+      prompt: Write a facebook post about Computer design has evolved from mechanical
+        calculators to quantum computers, with each generation offering exponentially
+        more power and capacity.
+    '9':
+      prompt: Write a facebook post about Magnetism is a fundamental force of nature,
+        arising from the interactions between electric charges, and it's the principle
+        behind everything from compasses to hard drives.
+datadir: social_content

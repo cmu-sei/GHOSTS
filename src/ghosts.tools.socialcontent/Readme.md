@@ -7,13 +7,15 @@ repo due to the size of the content, and the ability to easily generate your own
 
 The Social browser helper expects a directory tree of static content that is used to make posts to Socializer.
 The format of the social content directory is assumed as:
-   `<social-content-directory>/ topicdirs(multiple) / postdirs (mulitple) / post.txt, image*.png`
+   `<social-content-directory>/ topicdirs(multiple) / postdirs (mulitple) / post.txt, image*.png or image*.jpg` 
 
-When the Social Browser, various `ollama` LLMs were used to generate text, and Stable Diffusion AI was used to
+When the Social Browser, various `ollama` LLMs were used to generate text, and Stable Diffusion AI and Dalle3 was used to
 generate images.
 
 You will need to install `ollama` and Python+ollama library to generate the text files.
 You will need to install the Stable Diffusion AI tool on your local PC in order to generate images.
+You will need to have an OpenAI account and ($$) to use dall-e-3 (this gives better images than Stable AI
+but is more restrictive in its prompts and costs $$ for each image)
 
 There was not a lot of effort expended on these scripts, they were done in one weekend so feel free to 
 improve to your particular needs!
@@ -29,15 +31,17 @@ LLM name and post number to distinguish when different LLMs are used for the sam
 cleaning up posts to know what LLM was used to generate the post.
 
 2. Use the `gen_social_posts.py` script to read a topic YML file - this reads each topic prompt, feed its to a LLM, captures
-the output, and saves the output as a post file. There are variables in `gen_soical_posts.py` script to specifiy which LLMs to
+the output, and saves the output as a post file. There are variables in `gen_socoal_posts.py` script to specifiy which LLMs to
 use to generate the post topics. The `gen_social_posts.py` script includes a function named `gen_prompts` from the
 `gen_topics_common.py` file to do the work of generating the post, and also attempts to clean up the post a bit after
 it is generated.
 
 
-## Generating Images
+## Generating Images/Stable AI
 
-Images are optional, they are only posted if avaiable. 
+Images are optional, they are only posted if avaiable. The default format that is generated is .PNG,
+but this should be converted to a JPG after the fact to save disk space (the script convert_all_images.py
+can be used to do this).
 
 This assumes that the Stable Diffusion AI is running on the local host and can be accessed at the 
 standard port of `127.0.0.1:7860`. 
@@ -60,19 +64,43 @@ Stable AI and you can modify some of the parameters
 The quality of the images is not very good but should ok for traffic gen and laughs.
 
 
+## Generating Images/Dall-e-3
+
+To generate images with dall-e-3 you will need an Open AI account, and put some $$ into your account in order
+to generate an image. You will also need to generate an API key on your account - you can use the 
+the `dall3_test.py` script to test out your API key and image gen.
+
+Once you have an API key working, you will need to add it in to `gen_topics_common.py` file in the `gen_dalle3_images`
+function.  The script `gen_dalle3_prompts.py` can be used to generate prompts, and the `gen_dalle3_image.py` script
+to generate images from the prompts. Dall-e-3 generates better looking images than Stable AI but does
+not allow style guidance (ie, 'in the style of SoandSo') and is in general more restrictive over what can be used in a prompt. 
+
+
 ## Suggested Steps
 
 First, just try creating 50 posts using the `gen_social_posts.py` script and  `animal_content.yml` data file.
 Then try creating images for these posts using the  `gen_stable_ai_images.py` script.
 
 Once you get familar with this flow, you can change the LLM used in the `gen_social_posts.py` script and generate
-50 more posts about animals using a different LLM.
+50 more posts about animals using a different LLM. 
 
-Or, you can try making a content file for a different topic - currently there are four content/prompt generator files:
+For images, it is best to stick with one LLM for generating prompts - gemma seemed to be the best.
+For post content, you can use different LLMs but different LLMs end up sticking different extraneous stuff
+in the post that has to filtered out. Sticking with one LLM for post content makes it easier, but then the posts
+end up looking the same.
+
+Or, you can try making a content file for a different topic - currently there are 11 content/prompt generator files:
 1. animal_content.yml (prompt generator is `gen_animal_topics.py`)
 1. movie_content.yml (prompt generator is `gen_movie_topics.py`)
 1. product_content.yml (prompt generator is `gen_product_topics.py`)
 1. travel_content.yml (prompt generator is `gen_travel_topics.py`)
+1. anime_content.yml (prompt generator is `gen_anime_topics.py`)
+1. astronomy_content.yml (prompt generator is `gen_astronomy_topics.py`)
+1. music_content.yml (prompt generator is `gen_music_topics.py`)
+1. paranormal_content.yml (prompt generator is `gen_paranormal_topics.py`)
+1. science_content.yml (prompt generator is `gen_science_topics.py`)
+1. history_content.yml (prompt generator is `gen_history_topics.py`)
+1. sports_content.yml (prompt generator is `gen_sports_topics.py`)
 
 
 You should be able to easily generate enough static content to satisfy traffic generator needs.
@@ -91,6 +119,10 @@ Here are links on various topics:
 1. Ollama Python library - https://github.com/ollama/ollama-python
 1. Ollama LLM Model list - https://ollama.com/library
 2. Stable Diffusion AI API Guide -  https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/API#api-guide-by-kilvoctu
+3. Open AI Python library: https://github.com/openai/openai-python
+4. Open AI playground: https://platform.openai.com/
+
+
 
 
 

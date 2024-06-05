@@ -4,12 +4,22 @@ import yaml
 import posixpath
 import os
 
-llm_list = ['gemma','llama3', 'wizardlm2']
+#llm_list = ['gemma','llama3', 'wizardlm2']
+llm_list = ['wizardlm2']
 datadir = "D:/circadence/ollama_dev/content_gen"
 #content_file = 'movie_content.yml'
 #content_file = 'travel_content.yml'
 #content_file = 'product_content.yml'
-content_file = 'animal_content.yml'
+#content_file = 'animal_content.yml'
+#content_file = 'paranormal_content.yml'
+#content_file = 'astronomy_content.yml'
+#content_file = 'sports_content.yml'
+#content_file = 'health_content.yml'
+#content_file = 'science_content.yml'
+#content_file = 'history_content.yml'
+content_file = 'anime_content.yml'
+
+
 with open(posixpath.join(datadir,content_file), 'r') as f:
     data = yaml.load(f, Loader=yaml.SafeLoader)
 
