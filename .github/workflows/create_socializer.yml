@@ -1,4 +1,4 @@
-name: Make Socializer Container
+name: Create Container Socializer
 
 on:
   workflow_dispatch:
