@@ -15,6 +15,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Collections.Generic;
 using Ghosts.Client.Infrastructure;
+using System.Web.UI.WebControls;
 
 
 
@@ -118,9 +119,32 @@ namespace Ghosts.Client.Handlers
                 Thread.Sleep(500);
                 if (action == "postWimage"){
                     // get the image file
-                    string[] imageFiles = Directory.GetFiles(postDirectory, "image*.png");
-                    if (imageFiles.Length > 0){
-                        string imageFile = imageFiles[(_random.Next(0, imageFiles.Length))];
+                    string[] imageFilesPng = Directory.GetFiles(postDirectory, "image*.png");
+                    string[] imageFilesJpg = Directory.GetFiles(postDirectory, "image*.jpg");
+                    
+                    if ((imageFilesPng.Length + imageFilesJpg.Length) > 0){
+                        
+                        string imageFile = null;
+                        if (imageFilesPng.Length > 0 && imageFilesJpg.Length > 0)
+                        {
+                            int total = imageFilesPng.Length + imageFilesJpg.Length;
+                            int index = _random.Next(0, total);
+                            if (index >= imageFilesPng.Length)
+                            {
+                                imageFile = imageFilesJpg[index - imageFilesPng.Length];
+                            } else
+                            {
+                                imageFile = imageFilesPng[index];
+                            }
+
+                        } else if (imageFilesJpg.Length > 0)
+                        {
+                            imageFile = imageFilesJpg[(_random.Next(0, imageFilesJpg.Length))];
+                        }
+                        else
+                        {
+                            imageFile = imageFilesPng[(_random.Next(0, imageFilesPng.Length))];
+                        }
                         // click the browse button
                         targetElement =  Driver.FindElement(By.XPath("//label[text()='Share what you are thinking here...']//following-sibling::input[@type='file']"));
                         if (targetElement != null)

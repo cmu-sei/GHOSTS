@@ -271,6 +271,16 @@ For specific Timeline Events where the outcome is needed to be tracked, like for
 - Does it report anything to the windows application event logs?
 - What's in `logs/app.log`?
 - Is the ghosts executable set to execute automatically when the machine restarts?
+- Does the nlog.config contain these lines?
+
+```
+AutoLoadExtensions="true"
+internalLogToConsole="true"
+internalLogFile="logs\nlog-internal.log"
+internalLogLevel="Error"
+``` 
+
+If so, be sure this one exists! `internalLogFile="logs\nlog-internal.log"`
 
 > Clients aren't reporting their activity to the API
 

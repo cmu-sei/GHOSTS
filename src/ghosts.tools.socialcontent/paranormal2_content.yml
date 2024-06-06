@@ -1,0 +1,18 @@
+contentgen:
+  paranormal2:
+    '1':
+       prompt: Write a facebook post about The Mothman Prophecies suggested that the
+        creature's appearance was a harbinger of impending disaster, a notion that
+        still resonates today.
+    '2':
+      prompt: Write a facebook post about Vampire folklore varies widely across cultures,
+        with some traditions emphasizing the cursed undead and others focusing on
+        the ritualistic prevention of vampirism.
+    '3':
+      prompt: Write a facebook post about Werewolves have been used as metaphors in
+        literature and film to explore themes of human nature, transformation, and
+        societal norms.
+    '4':
+      prompt: Write a facebook post about Unicorns, once thought to be mythical creatures,
+        have been reimagined in modern times as majestic and gentle beings.
+datadir: social_content

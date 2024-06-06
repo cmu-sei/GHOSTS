@@ -6,6 +6,8 @@ import os
 import re
 import requests
 import base64
+from openai import OpenAI
+import time
 
 # This file generates a file named movie_content.yml that will have prompts
 # for social media posts. This file can be fed to the 'gen_social_posts.py'
@@ -98,14 +100,71 @@ def gen_prompts(llm, topic, prompt,yamlOutputFilename, response_file=None):
     yaml.dump(topdict,ofile)
     ofile.close()
 
+def dalle3PromptFilter(outputFilename):
+    newLines = []
+    (head,tail) = posixpath.split(outputFilename)
+    saveFile = posixpath.join(head,"org_%s" % tail)
+    wordCount = 0
+    with open(outputFilename, 'r',encoding='Latin-1') as f:
+        lines = f.readlines()
+        with open(saveFile, 'w',encoding='Latin-1') as outf:
+            outf.writelines(lines)
 
-def gen_stable_diffusion_prompts(datadir, llmList, contentFile,stableAiPromptTemplateFile):
+
+        for line in lines:
+            line = line.replace("**Keyword Prompt Area:**","")
+            line = line.replace("**Keyword Prompt:**","")
+            if re.match("^\*\*keyword prompt.*", line.lower()):
+                continue
+            if re.match("## stable diffusion.*", line.lower()):
+                continue
+            if re.match("##.*prompt.*", line.lower()):
+                continue
+            if re.search("inspired.*", line.lower()):
+                temp = line.split("Inspired", 1)
+                if len(temp) == 1:
+                    temp = line.split("inspired", 1)
+                words = temp[0].split()
+                if len(words) > 5:
+                    line = temp[0]
+            if re.search(", by .*", line.lower()):
+                temp = line.split(", By", 1)
+                if len(temp) == 1:
+                    temp = line.split(", by", 1)
+                words = temp[0].split()
+                if len(words) > 5:
+                    line = temp[0]
+            if re.search(", style of .*", line.lower()):
+                temp = line.split(", By", 1)
+                if len(temp) == 1:
+                    temp = line.split(", by", 1)
+                words = temp[0].split()
+                if len(words) > 5:
+                    line = temp[0]
+            if re.match("^\*\*negative keyword.*", line.lower()):
+                break
+            newLines.append(line)
+            wordCount += len(line.split())
+
+    if (wordCount == 0):
+        print("ERROR: new output file will be empty: %s" % outputFilename)
+    else:
+        with open(outputFilename, 'w') as f:
+            f.writelines(newLines)
+            f.write("\n")
+    return
+
+
+
+def gen_image_prompts(datadir, llm, contentDirs, contentFile,promptTemplateFile, outputFilename, filterResultFunc):
     """
 
     :param datadir:
-    :param llmList: list of LLMs
+    :param llm: llm to use to generate the prompt
+    :param contentDirs: list of contentDir prefixes
     :param contentFile: ie 'animal_content.yml'
-    :param stableAiPromptTemplateFile: template used to generate the AI prmpt
+    :param promptTemplateFile template used to generate the AI prompt
+    :param outputFilename file name for output
     :return:
     """
 
@@ -114,7 +173,7 @@ def gen_stable_diffusion_prompts(datadir, llmList, contentFile,stableAiPromptTem
         data = yaml.load(f, Loader=yaml.SafeLoader)
 
     # read the AI prompt file
-    with open(posixpath.join(datadir, 'image_prompt_template.txt'), 'r') as f:
+    with open(posixpath.join(datadir, promptTemplateFile), 'r') as f:
         imageTemplate = f.read()
 
     contentDict = data['contentgen']
@@ -134,14 +193,7 @@ def gen_stable_diffusion_prompts(datadir, llmList, contentFile,stableAiPromptTem
         if (not posixpath.isdir(topicDir)):
             os.mkdir(topicDir)
         for postKey in sorted(topicDict.keys()):
-            for llm in llmList:
-                if isinstance(llm,list):
-                    # first is actual llm use, second is directory name
-                    contentDir = llm[1]
-                    llm = llm[0]
-                else:
-                    contentDir = llm
-
+            for contentDir in contentDirs:
                 postDir = posixpath.join(topicDir, "%s_%s" % (contentDir, postKey))
                 if (not posixpath.isdir(postDir)):
                     os.mkdir(postDir)
@@ -157,12 +209,15 @@ def gen_stable_diffusion_prompts(datadir, llmList, contentFile,stableAiPromptTem
                     stream=True,
                 )
 
-                outputPromptFile = posixpath.join(postDir, "stable_ai_prompt.txt")
-                print("Generatng file: %s" % (outputPromptFile))
+                outputPromptFile = posixpath.join(postDir, outputFilename)
+                print("Generating file: %s" % (outputPromptFile))
                 ofile = open(outputPromptFile, 'w', encoding='utf-8')
                 for chunk in stream:
                    #output += chunk['message']['content']
                    print(chunk['message']['content'], file=ofile, end='', flush=True)
+                ofile.close()
+                if filterResultFunc:
+                    filterResultFunc(outputPromptFile)
 
 
 def gen_stable_diffusion_images(datadir, llmList, contentFile, checkOnly=False):
@@ -408,6 +463,74 @@ def gen_stable_diffusion_images(datadir, llmList, contentFile, checkOnly=False):
 
                 with open(imageFileName, 'wb') as f:
                     f.write(base64.b64decode(r['images'][0]))
+
+
+
+def gen_dalle3_images(datadir, llmList, contentFile, promptFileName, checkOnly=False):
+
+    with open(posixpath.join(datadir, contentFile), 'r') as f:
+        data = yaml.load(f, Loader=yaml.SafeLoader)
+
+    contentDict = data['contentgen']
+    rootdir = posixpath.join(datadir, data['datadir'])
+
+    if posixpath.isdir(rootdir):
+        print("Rootdir exists!")
+    else:
+        print("making dir: %s" % (rootdir))
+        os.mkdir(rootdir)
+
+    for topicKey in sorted(contentDict.keys()):
+        topicDict = contentDict[topicKey]
+        topicDir = posixpath.join(rootdir, topicKey)
+        if (not posixpath.isdir(topicDir)):
+            os.mkdir(topicDir)
+        for postKey in sorted(topicDict.keys()):
+            for llm in llmList:
+                postDir = posixpath.join(topicDir, "%s_%s" % (llm, postKey))
+                if (not posixpath.isdir(postDir)):
+                    os.mkdir(postDir)
+                imageFileName = posixpath.join(postDir, "image_dalle3.png")
+                if (posixpath.isfile(imageFileName)):
+                    print("Image file: %s already exists, skipping" % (imageFileName))
+                    continue
+                promptFile = posixpath.join(postDir, promptFileName)
+                if not posixpath.isfile(promptFile):
+                    print("WARNING: Dalle3 prompt file does not exist, expected: %s" % (promptFile))
+                imagePrompt = ""
+                with open(promptFile, 'r') as f:
+                    lines = f.readlines()
+                    imagePrompt = "".join(lines)
+
+                print("Found good prompt, generating image for: %s"  % (promptFile))
+                if checkOnly:
+                    continue
+
+
+
+                client = OpenAI(api_key="THIS_NEEDS_TO_BE_A_VALID_API_KEY")
+                print("Generating image file: %s" % imageFileName)
+
+                response = client.images.generate(
+                    model="dall-e-3",
+                    prompt=imagePrompt,
+                    size="1024x1024",
+                    quality="standard",
+                    response_format="b64_json",
+                    n=1,
+                )
+
+                image_data = response.data[0].b64_json
+
+
+                with open(imageFileName, 'wb') as f:
+                    f.write(base64.b64decode(image_data))
+
+                print("Wrote image file: %s" % imageFileName)
+                print("Sleeping for 15 seconds")
+                time.sleep(15)
+
+
 
 
 
