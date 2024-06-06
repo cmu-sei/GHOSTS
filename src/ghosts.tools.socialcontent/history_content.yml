@@ -1,0 +1,210 @@
+contentgen:
+  history:
+    '1':
+      prompt: Write a facebook post about During the Jurassic Period, a diverse array
+        of dinosaurs thrived, including the gigantic Sauropods and the agile Theropods,
+        which roamed the Earth millions of years ago.
+    '10':
+      prompt: Write a facebook post about The Industrial Revolution, which began in
+        the 18th century, transformed societies from agrarian economies to industrialized
+        ones through technological innovation and urbanization.
+    '11':
+      prompt: Write a facebook post about The Women's Suffrage Movement, culminating
+        in the 20th century, was a decades-long fight for women's right to vote, which
+        varied by region but ultimately led to universal suffrage in many countries.
+    '12':
+      prompt: Write a facebook post about The Great Depression of the 1930s was a
+        severe worldwide economic downturn that affected every country, leading to
+        unprecedented social and economic change.
+    '13':
+      prompt: Write a facebook post about The Bronze Age was characterized by the
+        widespread use of bronze and saw significant advancements in metallurgy, trade,
+        and the arts across various cultures.
+    '14':
+      prompt: Write a facebook post about The medieval period, spanning from the 5th
+        to the late 15th century, was marked by feudalism, the rise of powerful monarchies,
+        and a flourishing of art and culture in Europe.
+    '15':
+      prompt: Write a facebook post about The Renaissance was a period of great cultural
+        and artistic rebirth that spanned from the 14th to the 17th century, beginning
+        in Italy and spreading across Europe.
+    '16':
+      prompt: Write a facebook post about The atomic age began with the Manhattan
+        Project and the first deployment of nuclear weapons, ushering in an era of
+        unprecedented power and the potential for mass destruction.
+    '17':
+      prompt: Write a facebook post about The Battle of Thermopylae in 480 BC, where
+        a small force of Greeks held back a much larger Persian army, is one of the
+        most iconic battles in ancient history.
+    '18':
+      prompt: Write a facebook post about The Battle of Waterloo in 1815 ended Napoleon's
+        rule over Europe and solidified the dominance of the British Empire on the
+        continent.
+    '19':
+      prompt: Write a facebook post about The Hundred Years' War (1337-1453) significantly
+        influenced English culture and language, as well as shaping the political
+        boundaries of Western Europe.
+    '2':
+      prompt: Write a facebook post about The Ice Age, spanning from 2.6 million to
+        11,700 years ago, drastically altered the planet's landscape, shaping what
+        would later become fertile ground for human civilization.
+    '20':
+      prompt: Write a facebook post about The fall of Constantinople in 1453 to the
+        Ottoman Turks marked the end of the Byzantine Empire and a significant shift
+        in the balance of power in Europe and the Near East.
+    '21':
+      prompt: Write a facebook post about The D-Day landing on June 6, 1944, was the
+        largest seaborne invasion in history and a turning point in World War II.
+    '22':
+      prompt: Write a facebook post about The Battle of Stalingrad from August 1942
+        to February 1943 was one of the most significant battles of World War II,
+        marking a pivotal moment when the tide began to turn against the Axis powers.
+    '23':
+      prompt: Write a facebook post about The Opium Wars (1839-1842 and 1856-1860)
+        were a series of conflicts between Britain and Qing dynasty China, which had
+        profound implications for Chinese society and its relationship with the West.
+    '24':
+      prompt: Write a facebook post about The invention and subsequent development
+        of the airplane by the Wright brothers in 1903 revolutionized transportation,
+        warfare, and global exploration.
+    '25':
+      prompt: Write a facebook post about The Battle of Trafalgar in 1805 was a naval
+        engagement between the British Royal Navy and the combined fleets of the French
+        and Spanish navies, resulting in one of history's most decisive naval victories.
+    '26':
+      prompt: Write a facebook post about The Industrial Revolution brought about
+        significant improvements in agricultural productivity, which supported population
+        growth and contributed to the end of the Malthusian cycle of famine, poverty,
+        and population stagnation or decline.
+    '27':
+      prompt: Write a facebook post about The Seneca Falls Convention in 1848 was
+        a historic event that launched the Women's Suffrage Movement in the United
+        States, advocating for women's right to vote and equal rights under the law.
+    '28':
+      prompt: Write a facebook post about The Great Depression saw the rise of social
+        welfare programs like Social Security and unemployment insurance, which have
+        since become integral to the social safety nets of many countries.
+    '29':
+      prompt: Write a facebook post about The reign of Augustus Caesar marked the
+        transition from the chaotic end of the Roman Republic to the stable Pax Romana,
+        a period of peace and stability that lasted for about two centuries.
+    '3':
+      prompt: Write a facebook post about The Treaty of Versailles in 1919 ended World
+        War I and imposed harsh conditions on Germany, setting the stage for future
+        conflicts and tensions across Europe.
+    '30':
+      prompt: Write a facebook post about The Battle of Cannae in 216 BC, where Hannibal
+        inflicted a devastating defeat upon the Romans, is considered one of history's
+        greatest military victories.
+    '31':
+      prompt: Write a facebook post about The discovery of the New World by Christopher
+        Columbus in 1492 led to the Columbian Exchange, which had profound impacts
+        on both the Old and New Worlds, including the introduction of new crops, diseases,
+        and cultural exchanges.
+    '32':
+      prompt: Write a facebook post about The fall of Constantinople to the Fourth
+        Crusade in 1204 AD was a significant blow to the Byzantine Empire, leading
+        to a period of Latin rule before its eventual recovery.
+    '33':
+      prompt: Write a facebook post about The Treaty of Versailles, which ended World
+        War I, was also designed to prevent future conflicts by imposing strict territorial
+        and economic restrictions on Germany, a policy that would ultimately fail.
+    '34':
+      prompt: Write a facebook post about The fall of Singapore in 1942 to the Japanese
+        was a strategic defeat for the Allies in World War II, leading to a reevaluation
+        of their military strategies in the Pacific Theater.
+    '35':
+      prompt: Write a facebook post about The Battle of Agincourt in 1415, where the
+        English army under Henry V defeated a significantly larger French force, is
+        one of the most famous battles of the Hundred Years' War.
+    '36':
+      prompt: Write a facebook post about The Industrial Revolution led to the development
+        of modern economic theory and the rise of capitalism, which reshaped global
+        trade and power dynamics.
+    '37':
+      prompt: Write a facebook post about The Women's Suffrage Movement saw significant
+        milestones like the 1918 Representation of the People Act in the UK, which
+        granted votes to women over the age of 30 who met certain property qualifications.
+    '38':
+      prompt: Write a facebook post about The Great Depression led to the rise of
+        populist movements and politicians across the globe, including figures like
+        Franklin D. Roosevelt and Adolf Hitler, who capitalized on widespread discontent.
+    '39':
+      prompt: Write a facebook post about The Bronze Age collapse, around 1200 BCE,
+        was a period of significant cultural upheaval, leading to the decline of several
+        civilizations, such as the Mycenaean Greeks and the Hittites.
+    '4':
+      prompt: Write a facebook post about The bombing of Pearl Harbor on December
+        7, 1941, by Japan led to the United States' entry into World War II, galvanizing
+        global efforts against the Axis powers.
+    '40':
+      prompt: Write a facebook post about The medieval period saw the rise of powerful
+        monarchies and the establishment of feudal systems, which structured the social,
+        economic, and military organization of Europe.
+    '41':
+      prompt: Write a facebook post about The Renaissance brought about a renewed
+        interest in classical antiquity, leading to the revival of learning and the
+        arts that would influence the course of Western civilization.
+    '42':
+      prompt: Write a facebook post about The Manhattan Project, the code name for
+        the development of the atomic bomb during World War II, was one of the most
+        secretive and scientifically ambitious projects in history.
+    '43':
+      prompt: Write a facebook post about The Battle of Marathon in 490 BC, where
+        Athenian forces defeated a vastly larger Persian army, is one of the most
+        celebrated battles in ancient Greek history.
+    '44':
+      prompt: Write a facebook post about The fall of Constantinople to the Ottoman
+        Turks in 1453 marked the end of the Byzantine Empire and the beginning of
+        a new era in Eastern Europe.
+    '45':
+      prompt: Write a facebook post about The D-Day landings marked the beginning
+        of the liberation of Western Europe from Nazi German occupation during World
+        War II.
+    '46':
+      prompt: Write a facebook post about The Battle of Trafalgar was not only a decisive
+        naval victory but also the culmination of British naval supremacy and the
+        beginning of Britain's dominance over global maritime trade routes.
+    '47':
+      prompt: Write a facebook post about The Industrial Revolution led to rapid urbanization,
+        as people moved from rural areas to cities in search of work in factories,
+        which transformed the social fabric of nations.
+    '48':
+      prompt: Write a facebook post about The Women's Suffrage Movement culminated
+        in the 19th Amendment to the United States Constitution in 1920, granting
+        women the right to vote nationwide.
+    '49':
+      prompt: Write a facebook post about The Great Depression highlighted the importance
+        of government intervention in the economy and led to the development of Keynesian
+        economics, which advocates for government spending to counteract economic
+        downturns.
+    '5':
+      prompt: Write a facebook post about The Battle of Gettysburg in July 1863 was
+        the deadliest battle of the American Civil War and one of the costliest battles
+        in American history.
+    '50':
+      prompt: Write a facebook post about The Bronze Age saw significant advancements
+        in metalwork, trade, and civilization, setting the stage for the rise of the
+        great city-states and empires of ancient history.
+    '6':
+      prompt: Write a facebook post about The Vietnam War, spanning from 1955 to 1975,
+        was a highly controversial conflict that deeply divided public opinion in
+        the United States and had long-lasting effects on both Vietnamese and American
+        societies.
+    '7':
+      prompt: Write a facebook post about The Gulf War (1990-1991) saw a coalition
+        of countries led by the United States successfully expel Iraqi forces from
+        Kuwait after Iraq's invasion.
+    '8':
+      prompt: Write a facebook post about Ancient Greece was a cradle of Western civilization,
+        giving rise to democracy, philosophy, and the foundational texts of Western
+        literature.
+    '9':
+      prompt: Write a facebook post about The Roman Empire expanded rapidly across
+        Europe, Africa, and Asia, becoming one of the largest empires in history before
+        its eventual division into the Eastern and Western Roman Empires.
+    These:
+      prompt: Write a facebook post about historical events and developments have
+        shaped the course of human civilization in profound ways, influencing the
+        social, political, economic, and cultural landscapes across the globe.
+datadir: social_content

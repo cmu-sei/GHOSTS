@@ -1,0 +1,154 @@
+contentgen:
+  music:
+    '1':
+      prompt: Write a facebook post about Who do you think had the most impactful
+        musical journey of The Beatles or Queen?
+    '10':
+      prompt: Write a facebook post about Are Metallica and Megadeth both touring
+        this year, or has one of them taken a break?
+    '11':
+      prompt: Write a facebook post about What is the standout track from Adele's
+        "21" that you always come back to?
+    '12':
+      prompt: Write a facebook post about I believe that Bruce Springsteen's storytelling
+        in his songs is unmatched by Tom Petty.
+    '13':
+      prompt: Write a facebook post about How did Taylor Swift manage to reinvent
+        herself with each album release?
+    '14':
+      prompt: Write a facebook post about What is your favorite song from Queen's
+        "A Night at the Opera"?
+    '15':
+      prompt: Write a facebook post about Are Maroon 5 and Adam Levine still actively
+        making music together today?
+    '16':
+      prompt: "Write a facebook post about I think that Beyonc\xE9's \"Lemonade\"\
+        \ was a more significant cultural statement than Rihanna's \"Anti\"."
+    '17':
+      prompt: Write a facebook post about How did Eminem's lyrics evolve from his
+        earlier work to his more recent releases?
+    '18':
+      prompt: Write a facebook post about What is your go-to song when you need a
+        boost of energy from Daft Punk?
+    '19':
+      prompt: Write a facebook post about I believe that The Eagles' harmonies are
+        more refined than those of Creedence Clearwater Revival.
+    '2':
+      prompt: Write a facebook post about How did fans manage to secure tickets for
+        Pink Floyd's epic live performances back in the day?
+    '20':
+      prompt: Write a facebook post about Are Bruno Mars and Mark Ronson still creating
+        hits together, or have they each embarked on solo ventures?
+    '21':
+      prompt: Write a facebook post about What is your favorite song from Elton John's
+        "Goodbye Yellow Brick Road"?
+    '22':
+      prompt: Write a facebook post about I think that The Who's album "Who's Next"
+        is more influential than their earlier work "The Who Sell Out".
+    '23':
+      prompt: Write a facebook post about How did Ed Sheeran and Snow Patrol's collaboration
+        on "All of the Stars" come about?
+    '24':
+      prompt: Write a facebook post about What is your favorite song from Bruce Springsteen's
+        "Born to Run"?
+    '25':
+      prompt: Write a facebook post about I believe that Lady Gaga's pop artistry
+        is more groundbreaking than Katy Perry's catchy anthems.
+    '26':
+      prompt: Write a facebook post about What is the defining hit from Michael Jackson's
+        "Off the Wall" that showcases his versatility?
+    '27':
+      prompt: Write a facebook post about I think that AC/DC's raw energy is more
+        enduring than the polished sound of Foreigner.
+    '28':
+      prompt: Write a facebook post about How did Justin Timberlake's solo career
+        evolve after his time with 'N Sync?
+    '29':
+      prompt: Write a facebook post about What is your favorite song from Fleetwood
+        Mac's "Rumours"?
+    '3':
+      prompt: Write a facebook post about What is your favorite song from The Beatles'
+        "Yesterday"?
+    '30':
+      prompt: Write a facebook post about I believe that Radiohead's experimental
+        nature is more significant than Coldplay's accessible sound.
+    '31':
+      prompt: Write a facebook post about Are Avril Lavigne and Jonas Brothers both
+        still making music, or have they taken different paths?
+    '32':
+      prompt: Write a facebook post about What iconic song by The Beach Boys perfectly
+        captures the essence of the California sound?
+    '33':
+      prompt: "Write a facebook post about I think that Beyonc\xE9's \"Lemonade\"\
+        \ is a more profound artistic statement than Rihanna's \"Anti\"."
+    '34':
+      prompt: Write a facebook post about How did Green Day manage to bridge the gap
+        between their punk roots and mainstream success with "American Idiot"?
+    '35':
+      prompt: Write a facebook post about What is your favorite song from Eminem's
+        "The Marshall Mathers LP"?
+    '36':
+      prompt: Write a facebook post about I believe that Adele's emotional delivery
+        surpasses the technical prowess of Celine Dion.
+    '37':
+      prompt: Write a facebook post about Are John Legend and Chrissy Teigen both
+        involved in music projects, or has one of them shifted focus to other areas?
+    '38':
+      prompt: Write a facebook post about What is your favorite song from The Beach
+        Boys' "Pet Sounds"?
+    '39':
+      prompt: Write a facebook post about I think that The Killers' "Mr. Brightside"
+        has a more lasting impact than their later hits.
+    '4':
+      prompt: Write a facebook post about I believe that Led Zeppelin's musical innovation
+        far surpasses that of Deep Purple and here are my reasons why.
+    '40':
+      prompt: Write a facebook post about How did Bob Marley and The Wailers influence
+        the development of reggae music?
+    '41':
+      prompt: Write a facebook post about What is your favorite song from Michael
+        Jackson's "Thriller"?
+    '42':
+      prompt: Write a facebook post about I believe that Taylor Swift's narrative
+        in her albums is more compelling than the thematic approach of Ariana Grande.
+    '43':
+      prompt: Write a facebook post about Are Demi Lovato and Nick Jonas both still
+        active as solo artists, or have they each explored different creative outlets?
+    '44':
+      prompt: Write a facebook post about What is your favorite song from Queen's
+        "Hot Space"?
+    '45':
+      prompt: Write a facebook post about I think that Drake's "Started From the Bottom"
+        is a more powerful statement than Kendrick Lamar's "m.A.A.d. city".
+    '46':
+      prompt: Write a facebook post about How did Whitney Houston's voice transform
+        the sound of pop and R&B?
+    '47':
+      prompt: Write a facebook post about What is your favorite song from The Rolling
+        Stones' "Sticky Fingers"?
+    '48':
+      prompt: Write a facebook post about I believe that Elton John's "Candle in the
+        Wind 1973/The Ballad of Ronnie" is more emotionally resonant than many of
+        his upbeat hits.
+    '49':
+      prompt: Write a facebook post about Are Dave Grohl and Krist Novoselic still
+        making music with Foo Fighters, or has their focus shifted?
+    '5':
+      prompt: Write a facebook post about Is Lady Gaga still collaborating with Tony
+        Bennett, or have they each pursued separate projects?
+    '50':
+      prompt: Write a facebook post about What is your favorite song from Nirvana's
+        "Nevermind"?
+    '6':
+      prompt: Write a facebook post about What classic song by The Rolling Stones
+        do you think perfectly encapsulates their early sound?
+    '7':
+      prompt: Write a facebook post about How did Nirvana's unique style influence
+        the alternative rock genre of the '90s?
+    '8':
+      prompt: Write a facebook post about I think that Coldplay's melodic approach
+        is more appealing than Radiohead's experimental style.
+    '9':
+      prompt: Write a facebook post about Which album by Michael Jackson do you believe
+        showcases his genius best, "Thriller" or "Bad"?
+datadir: social_content

@@ -1,0 +1,201 @@
+contentgen:
+  anime:
+    '1':
+      prompt: Write a facebook post about The anime fandom has grown exponentially
+        over the years, with fans from all walks of life celebrating their favorite
+        series at conventions around the globe.
+    '10':
+      prompt: 'Write a facebook post about Tanjiro Kamado''s journey in "Demon Slayer:
+        Kimetsu no Yaiba" is not only a tale of bravery and sacrifice but also an
+        exploration of family bonds and perseverance against all odds.'
+    '11':
+      prompt: Write a facebook post about The "Ouran High School Host Club" offers
+        a comedic look at gender roles and societal expectations, wrapped in the luxurious
+        setting of a high school for the elite.
+    '12':
+      prompt: Write a facebook post about "Attack on Titan" has become an international
+        phenomenon with its dark storyline and the desperate struggle of humanity
+        against the titans that threaten their survival.
+    '13':
+      prompt: Write a facebook post about "Death Note" presents a chilling narrative
+        about morality, power, and the consequences of one's actions through the story
+        of Light Yagami and his encounter with a supernatural notebook.
+    '14':
+      prompt: Write a facebook post about Naruto Uzumaki's character development from
+        an outcast to a respected shinobi in "Naruto Shippuden" is a testament to
+        the power of perseverance and friendship.
+    '15':
+      prompt: Write a facebook post about "Jojo's Bizarre Adventure" is a wild ride
+        through generations of the Joestar family, each member battling their own
+        unique Stand with a flair that is distinctly Jojo.
+    '16':
+      prompt: Write a facebook post about The time-traveling adventures in "Dragon
+        Ball Z" have made it one of the most iconic anime series, with its epic battles
+        and the heroism of Goku capturing the hearts of fans worldwide.
+    '17':
+      prompt: Write a facebook post about "Trigun" takes place in a post-apocalyptic
+        world where Vash the Stampede's quest for redemption and peace is contrasted
+        with the chaotic world around him.
+    '18':
+      prompt: Write a facebook post about "Gurren Lagann" inspires viewers with its
+        themes of never giving up and its protagonist's journey from a digger to a
+        galactic hero.
+    '19':
+      prompt: Write a facebook post about "Hunter x Hunter" showcases the journey
+        of Gon Freecss as he seeks to become a Hunter, revealing the complexities
+        of the world and the bonds of friendship.
+    '2':
+      prompt: Write a facebook post about Anime conventions are a hub for cosplayers
+        to showcase their craftsmanship and creativity by bringing beloved characters
+        like Edward Elric from "Fullmetal Alchemist" to life.
+    '20':
+      prompt: Write a facebook post about "Fruits Basket" tells a heartwarming story
+        of growth and overcoming curses, with Tohru Honda's kindness impacting those
+        around her.
+    '21':
+      prompt: Write a facebook post about "My Neighbor Totoro" is a gentle and wholesome
+        story that captures the beauty of nature and the innocence of childhood through
+        the eyes of two sisters exploring the countryside.
+    '22':
+      prompt: "Write a facebook post about \"Nausica\xE4 of the Valley of the Wind\"\
+        \ introduced Hayao Miyazaki's unique vision to the world, blending environmental\
+        \ themes with adventure and fantasy."
+    '23':
+      prompt: Write a facebook post about "Spirited Away" is a magical tale that delves
+        into themes of identity, bravery, and the importance of protecting one's true
+        self.
+    '24':
+      prompt: Write a facebook post about "Howl's Moving Castle" is a visually stunning
+        film that weaves together romance, adventure, and the power of imagination,
+        with the enchanting world brought to life by Studio Ghibli.
+    '25':
+      prompt: Write a facebook post about The anime fandom's passion for their favorite
+        series often spills over into fan art, fan fiction, and even music, creating
+        a vibrant community of creators and enthusiasts.
+    '26':
+      prompt: Write a facebook post about Anime conventions are not just about cosplay
+        and merchandise; they also offer panels on the industry, workshops, and opportunities
+        to meet voice actors and creators.
+    '27':
+      prompt: Write a facebook post about "Fullmetal Alchemist" explores the consequences
+        of human ambition and the quest for knowledge through the Elric brothers'
+        alchemical experiments.
+    '28':
+      prompt: Write a facebook post about The soundtracks of anime like "Cowboy Bebop"
+        have influenced various genres of music, with its iconic jazz scores setting
+        a standard for anime music.
+    '29':
+      prompt: Write a facebook post about "One Piece" holds the Guinness World Record
+        for 'Largest Fan Club,' reflecting the massive global following that the series
+        has amassed.
+    '3':
+      prompt: Write a facebook post about Cosplayers often spend months perfecting
+        their costumes, ensuring every detail is accurate, right down to the last
+        button on a Cowboy Bebop character's jacket.
+    '30':
+      prompt: Write a facebook post about "Monster" features a protagonist, Dr. Kenzo
+        Tenma, whose life becomes intertwined with a former serial killer, raising
+        ethical questions about fate and destiny.
+    '31':
+      prompt: Write a facebook post about "Neon Genesis Evangelion" has been widely
+        analyzed and discussed for its psychological undertones and its impact on
+        the mecha genre.
+    '32':
+      prompt: Write a facebook post about "Samurai Champloo" uses the Edo period as
+        a backdrop to explore themes of destiny, with Mugen and Jin's wandering journey
+        reflecting a search for meaning in life.
+    '33':
+      prompt: Write a facebook post about "Code Geass" examines the nature of power
+        through its antagonist, Zero, who seeks to reshape the world based on his
+        own ideals.
+    '34':
+      prompt: 'Write a facebook post about "Demon Slayer: Kimetsu no Yaiba" has inspired
+        an Oscar-winning animated film that brought the series'' visceral action and
+        emotional depth to a wider audience.'
+    '35':
+      prompt: Write a facebook post about The "Ouran High School Host Club" has also
+        been adapted into live-action dramas, capturing the essence of its characters
+        and humor for new audiences.
+    '36':
+      prompt: Write a facebook post about "Attack on Titan" concluded with an epic
+        finale that satisfied fans worldwide with its long-awaited answers and character
+        arcs.
+    '37':
+      prompt: Write a facebook post about "Death Note's" exploration of justice and
+        morality has sparked philosophical debates among viewers about the nature
+        of good and evil.
+    '38':
+      prompt: Write a facebook post about The trials and tribulations of Naruto Uzumaki
+        in "Naruto Shippuden" have made him an iconic character, symbolizing resilience
+        and the power of dreams.
+    '39':
+      prompt: Write a facebook post about "Jojo's Bizarre Adventure" has spanned multiple
+        generations, with each member of the Joestar family bringing their unique
+        style to the series' ongoing saga.
+    '4':
+      prompt: Write a facebook post about "Cowboy Bebop" itself is renowned for its
+        blend of space Western themes with complex characters and a soundtrack that
+        has left an indelible mark on popular culture.
+    '40':
+      prompt: Write a facebook post about The epic battles in "Dragon Ball Z" have
+        set a standard for action animation and have influenced many other animated
+        series.
+    '41':
+      prompt: Write a facebook post about "Trigun" explores themes of redemption and
+        what it means to be a hero, with Vash the Stampede's journey being one of
+        self-discovery and sacrifice.
+    '42':
+      prompt: Write a facebook post about "Gurren Lagann" encourages viewers to believe
+        in themselves and never to give up, no matter how dire the situation may seem.
+    '43':
+      prompt: Write a facebook post about "Hunter x Hunter" is praised for its well-crafted
+        antagonists and complex story arcs that keep audiences engaged from beginning
+        to end.
+    '44':
+      prompt: Write a facebook post about "Fruits Basket" has a dedicated fan base
+        that continues to support the series, even years after its initial release,
+        due to its relatable characters and compelling narrative.
+    '45':
+      prompt: Write a facebook post about "My Neighbor Totoro" is often credited with
+        introducing the works of Studio Ghibli to international audiences, setting
+        the stage for future classics like "Spirited Away."
+    '46':
+      prompt: "Write a facebook post about The environmental themes present in \"\
+        Nausica\xE4 of the Valley of the Wind\" remain relevant today, offering a\
+        \ timeless message about coexisting with nature."
+    '47':
+      prompt: Write a facebook post about "Spirited Away" is one of Hayao Miyazaki's
+        most celebrated works, earning widespread acclaim for its imaginative storytelling
+        and captivating visuals.
+    '48':
+      prompt: Write a facebook post about "Howl's Moving Castle" is a tale of love
+        and self-discovery, with Sophie and Howl overcoming their personal challenges
+        through perseverance and the support of friends.
+    '49':
+      prompt: Write a facebook post about The anime community often organizes charity
+        events and fundraisers, showcasing the positive impact that fans can have
+        when they come together for a cause.
+    '5':
+      prompt: Write a facebook post about The "One Piece" franchise has captivated
+        audiences for decades, with its vast world and the mysterious quest of Monkey
+        D. Luffy to find the legendary treasure, One Piece.
+    '50':
+      prompt: Write a facebook post about Anime conventions are not just about the
+        present; they also celebrate the history of anime and its evolution over the
+        decades, paying tribute to classic series and timeless characters.
+    '6':
+      prompt: Write a facebook post about Fans of "Monster" admire its intricate storyline
+        and the moral questions it raises about humanity and ethics in medicine.
+    '7':
+      prompt: Write a facebook post about "Neon Genesis Evangelion" broke new ground
+        with its psychological depth and exploration of mecha-based combat against
+        enigmatic beings known as Angels.
+    '8':
+      prompt: Write a facebook post about "Samurai Champloo" blends traditional Japanese
+        elements with hip-hop culture, creating a unique and stylish anime that resonates
+        with a wide audience.
+    '9':
+      prompt: Write a facebook post about "Code Geass" delves into themes of power,
+        identity, and morality through the story of its protagonist, Lelouch Lamperouge,
+        who gains the ability to command people with a mask.
+datadir: social_content

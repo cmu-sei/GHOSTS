@@ -1,0 +1,153 @@
+contentgen:
+  sports:
+    '1':
+      prompt: Write a facebook post about I'm always fascinated by the strategies
+        employed in basketball, especially by the Chicago Bulls.
+    '10':
+      prompt: Write a facebook post about I think that the Golden State Warriors from
+        basketball should consider a new strategy.
+    '11':
+      prompt: Write a facebook post about Which NBA team do you believe has the best
+        record in history?
+    '12':
+      prompt: Write a facebook post about The precision of a rifle shot in biathlon
+        is something I admire greatly in winter sports.
+    '13':
+      prompt: Write a facebook post about The Toronto Maple Leafs have been playing
+        hockey incredibly well this season.
+    '14':
+      prompt: Write a facebook post about I love watching Cristiano Ronaldo play football;
+        his skills are unmatched.
+    '15':
+      prompt: Write a facebook post about The sheer intensity of a NASCAR race always
+        gets my adrenaline pumping.
+    '16':
+      prompt: Write a facebook post about The New York Yankees' legacy in baseball
+        is something every fan should appreciate.
+    '17':
+      prompt: Write a facebook post about Roger Federer's backhand in tennis has to
+        be one of the best ever seen on the courts.
+    '18':
+      prompt: Write a facebook post about I believe that the 1992 Dream Team from
+        basketball is the most dominant team in sports history.
+    '19':
+      prompt: Write a facebook post about The technicality of table tennis is so complex;
+        it's my favorite sport to watch and play.
+    '2':
+      prompt: Write a facebook post about The agility of a gymnast in track and field
+        is something I can never get enough of.
+    '20':
+      prompt: Write a facebook post about The Boston Celtics have a storied history
+        in American basketball, full of incredible moments.
+    '21':
+      prompt: Write a facebook post about The tactics used by the New Zealand All
+        Blacks in rugby are always fascinating to analyze.
+    '22':
+      prompt: Write a facebook post about Watching Usain Bolt dominate track and field
+        events is like watching art in motion.
+    '23':
+      prompt: Write a facebook post about I think that LeBron James from basketball
+        should be the MVP this year.
+    '24':
+      prompt: Write a facebook post about The precision of a curling stone in curling
+        is something that requires an incredible amount of skill.
+    '25':
+      prompt: Write a facebook post about The New England Patriots' comeback against
+        the Atlanta Falcons was one for the history books in football.
+    '26':
+      prompt: Write a facebook post about I've been a lifelong fan of the Chicago
+        Bulls and their legacy in basketball is something special.
+    '27':
+      prompt: Write a facebook post about The speed and agility of a sprinter in track
+        and field are truly impressive to watch.
+    '28':
+      prompt: Write a facebook post about The rivalry between Lionel Messi and Cristiano
+        Ronaldo has elevated football to new heights.
+    '29':
+      prompt: Write a facebook post about The precision and coordination required
+        for synchronized swimming are something I've always admired.
+    '3':
+      prompt: Write a facebook post about Have you seen the latest match between FC
+        Barcelona and Real Madrid in football? It was an incredible game!
+    '30':
+      prompt: Write a facebook post about The Boston Red Sox versus the New York Yankees
+        is one of the greatest rivalries in baseball history.
+    '31':
+      prompt: Write a facebook post about The tactical battles in chess can be as
+        intense and exciting as any other sport.
+    '32':
+      prompt: Write a facebook post about The Montreal Canadiens have a rich tradition
+        in hockey, with numerous Stanley Cup victories.
+    '33':
+      prompt: Write a facebook post about The skill and precision of a professional
+        volleyball player are truly mesmerizing to watch.
+    '34':
+      prompt: Write a facebook post about I think that the Los Angeles Lakers from
+        basketball should consider a different approach this season.
+    '35':
+      prompt: Write a facebook post about The endurance of a marathon runner in track
+        and field is something that inspires me.
+    '36':
+      prompt: Write a facebook post about The Chicago Bears have had some iconic moments
+        in American football history.
+    '37':
+      prompt: Write a facebook post about The precision of a javelin thrower in athletics
+        is like watching art in the form of a sport.
+    '38':
+      prompt: Write a facebook post about The New York Giants' unexpected Super Bowl
+        wins are some of the most memorable moments in football history.
+    '39':
+      prompt: Write a facebook post about The tactical depth of a coach in basketball,
+        like Gregg Popovich, is something I admire greatly.
+    '4':
+      prompt: Write a facebook post about I've been following Lewis Hamilton since
+        his F1 debut; his performances in indy car racing are unparalleled.
+    '40':
+      prompt: Write a facebook post about The raw power and athleticism of an NFL
+        running back are a sight to behold on the gridiron.
+    '41':
+      prompt: Write a facebook post about The precision and focus required for archery
+        in the Olympics are truly impressive.
+    '42':
+      prompt: Write a facebook post about The New York Knicks have had their ups and
+        downs, but they're my favorite team in basketball.
+    '43':
+      prompt: Write a facebook post about The excitement of an Indy 500 race is something
+        every motorsport enthusiast should experience.
+    '44':
+      prompt: Write a facebook post about The teamwork and coordination of a water
+        polo team are something that can inspire unity.
+    '45':
+      prompt: Write a facebook post about The legacy of the Brazilian football team,
+        with their passionate fans and numerous World Cup victories, is unmatched.
+    '46':
+      prompt: Write a facebook post about The strategic depth of a coach in American
+        football, like Bill Belichick, is something to be respected.
+    '47':
+      prompt: Write a facebook post about The precision and technicality of a professional
+        squash player are truly awe-inspiring.
+    '48':
+      prompt: Write a facebook post about The New Orleans Saints have come a long
+        way since their inception in football.
+    '49':
+      prompt: Write a facebook post about The grace and power of a figure skater in
+        winter sports are captivating to watch.
+    '5':
+      prompt: Write a facebook post about The Boston Red Sox have had quite a run
+        in baseball this season, don't you think?
+    '50':
+      prompt: Write a facebook post about The competitive spirit of a collegiate basketball
+        team is something that can ignite the passion for sports in young viewers.
+    '6':
+      prompt: Write a facebook post about Serena Williams' dominance on the tennis
+        court is truly a sight to behold.
+    '7':
+      prompt: Write a facebook post about I really don't understand the offside rule
+        in football; could someone explain it to me?
+    '8':
+      prompt: Write a facebook post about The New England Patriots have always been
+        my favorite team in American football.
+    '9':
+      prompt: Write a facebook post about Could someone recommend a skilled coach
+        for young swimmers looking to compete seriously?
+datadir: social_content

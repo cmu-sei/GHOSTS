@@ -1,0 +1,192 @@
+contentgen:
+  astronomy:
+    '1':
+      prompt: Write a facebook post about Jupiter's Great Red Spot is a giant storm
+        larger than Earth that has been raging for at least 400 years.
+    '10':
+      prompt: Write a facebook post about The Pioneer and Voyager spacecraft have
+        carried golden records with sounds and images representing Earth's life forms,
+        as they journey into interstellar space.
+    '11':
+      prompt: Write a facebook post about Space colonization on Mars could provide
+        a solution to overpopulation on Earth and offer a new frontier for human exploration
+        and settlement.
+    '12':
+      prompt: Write a facebook post about The constellation Orion is easily identifiable
+        in the night sky and contains several bright stars, including Rigel and Betelgeuse.
+    '13':
+      prompt: Write a facebook post about Nebulas are vast clouds of gas, dust, and
+        stars that play a crucial role in the life cycle of stars and the formation
+        of new stars and planetary systems.
+    '14':
+      prompt: Write a facebook post about The event horizon of a black hole is the
+        point of no return, beyond which nothing, not even light, can escape.
+    '15':
+      prompt: Write a facebook post about Stars are born from giant molecular clouds
+        found in nebulae, where gravity causes them to collapse under their own weight.
+    '16':
+      prompt: Write a facebook post about The Hubble Space Telescope has significantly
+        advanced our understanding of the universe by capturing stunning images of
+        distant galaxies and stars.
+    '17':
+      prompt: Write a facebook post about The Parker Solar Probe is designed to study
+        the Sun's outer corona and the solar wind, approaching closer to the Sun than
+        any previous human-made object.
+    '18':
+      prompt: Write a facebook post about Interstellar space travel would require
+        immense distances between stars, with the closest star systems being four
+        light-years away at a minimum.
+    '19':
+      prompt: Write a facebook post about The concept of a Dyson sphere represents
+        a hypothetical megastructure that encircles a star to capture most of its
+        power output.
+    '2':
+      prompt: Write a facebook post about The rings of Saturn are made up of billions
+        of individual ice particles, remnants of comets and asteroids that have collided
+        with the planet over time.
+    '20':
+      prompt: Write a facebook post about The OSIRIS-REx mission aims to collect samples
+        from the asteroid Bennu and return them to Earth for detailed analysis.
+    '21':
+      prompt: Write a facebook post about The Vela pulsar, resulting from a supernova
+        explosion, is one of the youngest known neutron stars and spins 11.56 times
+        per second.
+    '22':
+      prompt: Write a facebook post about The concept of a Kuiper Belt analog extends
+        beyond our solar system, suggesting similar belts of icy bodies may exist
+        around other stars.
+    '23':
+      prompt: Write a facebook post about Dark matter remains an enigma, its presence
+        inferred by its gravitational effects on visible matter but yet to be directly
+        detected.
+    '24':
+      prompt: Write a facebook post about The term "exoplanet" refers to a planet
+        orbiting a star outside our solar system, and thousands have been discovered
+        to date.
+    '25':
+      prompt: Write a facebook post about The James Webb Space Telescope is set to
+        succeed the Hubble Space Telescope, with the potential to observe the universe
+        in greater detail.
+    '26':
+      prompt: Write a facebook post about A black hole's singularity is the point
+        where all the matter within it is thought to be packed together in a finite
+        space, forming a single point.
+    '27':
+      prompt: Write a facebook post about The concept of a multiverse posits that
+        our universe may be just one of many universes that exist simultaneously,
+        possibly with different physical laws.
+    '28':
+      prompt: Write a facebook post about The Andromeda Strain was a novel and a film
+        that dramatized the potential threat of a mysterious microorganism from outer
+        space.
+    '29':
+      prompt: Write a facebook post about The term "light-year" is used to measure
+        distances in space, representing the distance light travels in one year, approximately
+        5.88 trillion miles.
+    '3':
+      prompt: Write a facebook post about Comet Halley, visible to the naked eye from
+        Earth, has been observed since ancient times and is scheduled to return in
+        2061.
+    '30':
+      prompt: Write a facebook post about The discovery of gravitational waves by
+        LIGO and Virgo has provided direct evidence for the existence of black holes
+        and confirmed a major prediction of Einstein's general theory of relativity.
+    '31':
+      prompt: Write a facebook post about The phenomenon of tidal locking can occur
+        when an orbiting body's orbital period around its star becomes equal to the
+        body's rotational period, as seen with our Moon.
+    '32':
+      prompt: Write a facebook post about The term "redshift" describes the phenomenon
+        where light from distant galaxies is stretched into longer wavelengths due
+        to the expansion of the universe.
+    '33':
+      prompt: Write a facebook post about The Voyager Golden Records contain a variety
+        of human-made sounds, images, and scientific information meant to communicate
+        the origin of the spacecraft to extraterrestrial life.
+    '34':
+      prompt: Write a facebook post about A supernova is the explosive death of a
+        massive star, resulting in a bright burst of light and radiation, and can
+        outshine entire galaxies for a short period.
+    '35':
+      prompt: Write a facebook post about The concept of a Stellar STEP (Systematic
+        Exploration of Planets) could involve sending robotic spacecraft to survey
+        planets around nearby stars.
+    '36':
+      prompt: Write a facebook post about The Earth's atmosphere shields us from cosmic
+        rays, which are high-energy radiation originating from outside the solar system.
+    '37':
+      prompt: Write a facebook post about The discovery of gravitational lensing provided
+        evidence for dark matter, as it explains the bending of light around massive
+        objects in space.
+    '38':
+      prompt: Write a facebook post about The term "cosmic microwave background radiation"
+        refers to the afterglow of the Big Bang, a faint radiation that fills the
+        universe and is observed today.
+    '39':
+      prompt: Write a facebook post about The discovery of exoplanets within the habitable
+        zone of their stars raises the possibility of extraterrestrial life and other
+        Earth-like worlds.
+    '4':
+      prompt: Write a facebook post about The Milky Way galaxy is one of billions
+        of galaxies in the observable universe, a vast collection of stars, gas, dust,
+        and dark matter.
+    '40':
+      prompt: Write a facebook post about The term "cosmic web" describes the large-scale
+        structure of the universe, composed of filaments of galaxies and dark matter
+        that form a honeycomb-like structure in an expanding universe.
+    '41':
+      prompt: Write a facebook post about The Parker Solar Probe's seventh flyby of
+        the Sun will bring it within 3.83 million miles of the solar surface, setting
+        a new record for closest solar approach.
+    '42':
+      prompt: Write a facebook post about The term "active galactic nucleus" (AGN)
+        refers to the center of a galaxy where stars form and are born at an incredibly
+        high rate.
+    '43':
+      prompt: Write a facebook post about The concept of terraforming involves making
+        an inhospitable world habitable for humans by altering its climate, atmosphere,
+        and soil.
+    '44':
+      prompt: Write a facebook post about The term "extragalactic" refers to anything
+        that is beyond the boundaries of our own Milky Way galaxy.
+    '45':
+      prompt: Write a facebook post about The discovery of gravitational waves has
+        opened a new window into the universe, allowing us to detect events that were
+        previously invisible.
+    '46':
+      prompt: Write a facebook post about The term "cosmic inflation" describes the
+        rapid expansion of the universe in its early moments, which smoothed out irregularities
+        and set the stage for the formation of galaxies and stars.
+    '47':
+      prompt: Write a facebook post about The term "cosmic age" refers to the age
+        of the universe, estimated to be around 13.8 billion years old, based on observations
+        of the cosmic microwave background radiation.
+    '48':
+      prompt: Write a facebook post about The term "event horizon" in the context
+        of a black hole is the boundary at which no signal or particle can escape
+        due to the escape velocity exceeding the speed of light.
+    '49':
+      prompt: Write a facebook post about The discovery of Proxima Centauri b has
+        sparked excitement as it is the closest known exoplanet potentially located
+        within its star's habitable zone.
+    '5':
+      prompt: Write a facebook post about Quasars are extremely luminous active galactic
+        nuclei that are powered by supermassive black holes at their centers.
+    '50':
+      prompt: Write a facebook post about The term "space-time" refers to the concept
+        in Einstein's theory of relativity that combines three dimensions of space
+        and one dimension of time into a single four-dimensional continuum.
+    '6':
+      prompt: Write a facebook post about The Oort Cloud is a hypothesized spherical
+        shell believed to be the source of long-period comets that orbit the Sun.
+    '7':
+      prompt: Write a facebook post about Andromeda Galaxy, our closest galactic neighbor,
+        is about 2.537 million light-years away and is on a collision course with
+        the Milky Way.
+    '8':
+      prompt: Write a facebook post about A quasar named 3C 273 was discovered to
+        be moving at a speed of approximately 16% of the speed of light.
+    '9':
+      prompt: Write a facebook post about The universe began as a singularity roughly
+        13.8 billion years ago in an event known as the Big Bang.
+datadir: social_content

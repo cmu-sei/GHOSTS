@@ -3,7 +3,7 @@ import ollama
 import yaml
 import posixpath
 import os
-from gen_topics_common import gen_stable_diffusion_prompts
+from gen_topics_common import gen_image_prompts
 
 # This file generates a file named movie_content.yml that will have prompts
 # for social media posts. This file can be fed to the 'gen_social_posts.py'
@@ -19,11 +19,12 @@ stableAiTemplate = 'image_prompt_template.txt'
 
 #gemma appears to be the best, use Gemma but put results in wizardlm2 directory
 #llmList = ['gemma','llama3']
-llmList = [['gemma','wizardlm2']]
+llm = 'gemma'
+dirList = ['wizardlm2']
 datadir = "D:/circadence/ollama_dev/content_gen"
 
 for content_file in content_files:
-    gen_stable_diffusion_prompts(datadir, llmList, content_file,stableAiTemplate)
+    gen_image_prompts(datadir, llm, dirList, content_file, stableAiTemplate, "stable_ai_prompt.txt",None)
 
 
 

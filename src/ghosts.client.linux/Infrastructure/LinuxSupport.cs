@@ -39,7 +39,7 @@ namespace ghosts.client.linux.Infrastructure
             return;
         }
 
-        private void ExecuteBashCommand(string id, string command)
+        private string ExecuteBashCommand(string id, string command)
         {
             var escapedArgs = command.Replace("\"", "\\\"");
 
@@ -66,17 +66,32 @@ namespace ghosts.client.linux.Infrastructure
 
             p.WaitForExit();
             Log.Trace($"Social:: Bash command output: {Result}");
+            return Result;
         }
 
         public void AttachFile()
         {
-            string cmd = $"xdotool search -name '{windowTitle}' windowfocus type '{filename}' ";
-            ExecuteBashCommand(id, cmd);
-            Thread.Sleep(500);
-            cmd = $"xdotool search -name '{windowTitle}' windowfocus key KP_Enter";
-            ExecuteBashCommand(id, cmd);
-            Thread.Sleep(300);
-            return;
+            try {
+                string cmd = $"xdotool search -name '{windowTitle}' windowfocus type '{filename}' ";
+                ExecuteBashCommand(id, cmd);
+                Thread.Sleep(2000);
+                cmd = $"xdotool search -name '{windowTitle}' windowfocus key KP_Enter";
+                ExecuteBashCommand(id, cmd);
+                Thread.Sleep(2000);
+                // Check if the window has closed
+                cmd = $"xdotool search -name '{windowTitle}'";
+                string result = ExecuteBashCommand(id, cmd);
+                if (result != "") {
+                    // close the window
+                    cmd = $"xdotool search -name '{windowTitle}' windowfocus key alt+c";
+                    ExecuteBashCommand(id, cmd);
+                    Thread.Sleep(500);
+                }
+                return;
+            } 
+            catch (Exception e) {
+                Log.Error(e);
+            }
         }
 
 
