@@ -27,7 +27,7 @@ namespace Ghosts.Api.ViewModels
             {
                 CreatedUtc = DateTime.UtcNow,
                 Status = Status,
-                Update = JsonConvert.SerializeObject(Update),
+                Update = Update, //JsonConvert.SerializeObject(Update),
                 MachineId = MachineId,
                 Type = Type,
                 ActiveUtc = ActiveUtc
@@ -56,7 +56,7 @@ namespace Ghosts.Api.ViewModels
                         {
                             HandlerType = HandlerType.BrowserFirefox,
                             Initial = "https://cmu.edu",
-                            UtcTimeOn = TimeSpan.Parse("0000:00"),
+                            UtcTimeOn = TimeSpan.Parse("00:00:00"),
                             UtcTimeOff = TimeSpan.Parse("23:59:59"),
                             Loop = true,
                             TimeLineEvents = new List<TimelineEvent>

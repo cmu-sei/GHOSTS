@@ -1,0 +1,86 @@
+@using ghosts.api.Infrastructure.Animations
+@model ghosts.api.Infrastructure.Animations.AnimationConfiguration
+
+<div>
+    <h1 id="animator-build-relationship">GHOSTS Animations</h1>
+    <p>Launch and manage ABM simulations. Experience the complexities of agent interactions through animation jobs designed to mimic and explore diverse systems and behaviors.</p>
+    <br/>
+</div>
+
+<div class="row">
+    <div class="col-sm-4 pe-sm-5">
+        <h3>Start a new Animation</h3>
+        <form action="animations/start" method="post">
+            <label for="JobId">Job Id:</label>
+            <select id="JobId" name="JobId" class="form-control">
+                <option value="">Choose a job to start...</option>
+                <option value="SOCIALGRAPH">SOCIALGRAPH</option>
+                <option value="SOCIALSHARING">SOCIALSHARING</option>
+                <option value="SOCIALBELIEF">SOCIALBELIEF</option>
+                <option value="CHAT">CHAT</option>
+                <option value="FULLAUTONOMY">FULLAUTONOMY</option>
+            </select>
+            <br/>
+            <label for="JobConfiguration">Job Configuration:</label>
+            <textarea style="height:200px" id="JobConfiguration" name="JobConfiguration" class="form-control">@Model.JobConfiguration</textarea>
+            <br/>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+
+    </div>
+    <div class="col-sm-6">
+        <h3>Currently Running Animations</h3>
+        @if (ViewBag.RunningJobs.Length < 1)
+        {
+            <div>All is quiet. There are currently no running animations.</div>
+        }
+        else
+        {
+            <table class="table table-striped table-sm">
+                <tr>
+                    <td>Job</td>
+                    <td>Started</td>
+                    <td></td>
+                </tr>
+
+                @foreach (JobInfo job in ViewBag.RunningJobs)
+                {
+                    <tr>
+                        <td>@job.Name</td>
+                        <td>@job.StartTime</td>
+                        <td>
+                            <form action="animations/stop" method="post">
+                                <input type="hidden" id="JobId" name="JobId" value="@job.Name"/>
+                                <button type="submit" class="btn btn-primary btn-sm">Stop Job</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </table>
+        }
+
+    </div>
+</div>
+
+<input type="hidden" id="d_FULLAUTONOMY" value="@ViewBag.FullAutonomy"/>
+<input type="hidden" id="d_SOCIALSHARING" value="@ViewBag.SocialSharing"/>
+<input type="hidden" id="d_SOCIALBELIEF" value="@ViewBag.SocialBelief"/>
+<input type="hidden" id="d_CHAT" value="@ViewBag.Chat"/>
+<input type="hidden" id="d_SOCIALGRAPH" value="@ViewBag.SocialGraph"/>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const jobIdSelect = document.getElementById('JobId');
+    const jobConfigurationTextarea = document.getElementById('JobConfiguration');
+
+    jobIdSelect.addEventListener('change', function() {
+        const selectedJobId = this.value;
+        if (selectedJobId !== "") {
+            const selectedJobValue = document.getElementById('d_' + selectedJobId).value;
+            jobConfigurationTextarea.value = selectedJobValue;
+        } else {
+            jobConfigurationTextarea.value = ''; // Clear the textarea if no job is selected
+        }
+    });
+});
+</script>

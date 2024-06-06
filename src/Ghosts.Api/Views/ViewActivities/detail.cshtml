@@ -1,0 +1,119 @@
+@model ghosts.api.Infrastructure.Models.NpcRecord
+
+<style>
+    .active {outline: solid 3px grey;}
+    table * {border: none;}
+</style>
+
+<div>
+    <h1 id="animator-build-relationship">Animator Activities</h1>
+    <p></p>
+</div>
+
+<div class="row">
+    <div class="col-sm-12">
+        <br/>
+        <table class="table table-sm">
+            @{
+                var npc = Model.NpcProfile;
+                <tr>
+                    <td style="width:1px;">
+                        <img id="@npc.Id-img" src="/api/npcs/@npc.Id/photo" class="rounded-circle" style="height: 27px;"/>
+                    </td>
+
+                    <td style="width:200px;">
+                        <a href="../view-relationships/profile/@npc.Id">@npc.Name.ToString()</a>
+                    </td>
+
+                    <td id="@npc.Id-msg">
+                        <i class="fa-solid fa-moon"></i>
+                    </td>
+                    <td align="right">
+                        <button class="btn" data-id="@npc.Id">click</button>
+                    </td>
+                </tr>
+            }
+        </table>
+    </div>
+</div>
+
+@section scripts {
+    <script src="~/lib/signalr/dist/browser/signalr.js"></script>
+    <script>
+        $(function () {
+            function b(npcId, icon, message){
+                $("#" + npcId + "-msg").append("<div>" + icon + " " + message.split("\n").join("<br />") + "</div>");
+                $("#" + npcId + "-img").removeClass("active");
+            }
+            
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl("/hubs/activities")
+                .configureLogging(signalR.LogLevel.Information)
+                .build();
+                                   
+            connection.on("show", function (eventId, npcId, type, message, time) {
+                console.log(eventId, npcId, type, message, time);
+                $("#" + npcId + "-img").addClass("active");
+                                
+                $("#" + npcId + "-msg").html('<i class="fa-solid fa-ellipsis"></i>');
+                
+                var icon = "<i class='fa-brands fa-twitter' style='color:#1DA1F2'></i>";
+                if (type === "belief")
+                    icon = "<i class='fa-solid fa-cloud-bolt' style='color:gold'></i>";
+                else if (type === "knowledge")
+                    icon = "<i class='fa-solid fa-graduation-cap' style='color:green'></i>";
+                else if (type === "relationship")
+                    icon = "<i class='fa-solid fa-user-group' style='color:purple'></i>";
+                                
+                setTimeout(b, 1000, npcId, icon, message);
+            });
+                        
+            connection.start().catch(err => console.error(err.toString()));
+            
+             $('.btn').click(function(event){
+                connection.invoke("Show", Number(1), $(this).data('id'), "", "", "");
+            });
+             
+            let npcId ="d071f38b-48a6-4d2d-bd63-5e337ba44c7e"; 
+            setTimeout(b, 2000, npcId, '<i class="fa-sharp fa-solid fa-bolt" style="color:orange"></i>', 'client receives timeline to create a document...');
+            
+            setTimeout(b, 3000, npcId, '<i class="fa-solid fa-arrow-up" style="color:blue"></i>', 'client queries gpt to determine what kind of document to create...');
+            
+            setTimeout(b, 6000, npcId, '<i class="fa-solid fa-arrow-down" style="color:blue"></i>', `GPT responds to create document named "Engineering Team Plan.docx with the contents:
+            
+            Title: Exercise Season 2023 - Brigade Leuschke-Cole Engineering Team Plan
+            
+            1. Introduction
+            Briefly describe the purpose of the document, outlining the overall goals and objectives for the Exercise Season 2023 campaign and the Engineering Team's role within Brigade Leuschke-Cole.
+            
+            2. Team Members and Responsibilities
+            List all team members, including Vick Hoyt Schluter, with their designated roles and responsibilities.
+            
+            3. Communication and Coordination
+            Outline the communication channels and protocols to ensure smooth coordination within the Engineering Team and with other teams in Brigade Leuschke-Cole.`);
+            
+            setTimeout(b, 8000, npcId, '<i class="fa-sharp fa-solid fa-bolt" style="color:orange"></i>', 'client creates document at C:\\Users\\vick.hoyt\\Documents\\Engineering Team Plan.docx...');
+            setTimeout(b, 9500, npcId, '<i class="fa-solid fa-arrow-up" style="color:blue"></i>', 'client queries gpt to determine what kind of web sites to browse based on this document...');
+            setTimeout(b, 14100, npcId, '<i class="fa-solid fa-arrow-down" style="color:blue"></i>', `const relatedLinks = [<div style='margin:0 20px;'>'https://www.engineering.com/', // General engineering news and articles
+                                                                                                            'https://www.team-building-activities.org/', // Team-building activities and resources
+                                                                                                            'https://www.pmi.org/', // Project Management Institute (PMI)
+                                                                                                            'https://www.scrum.org/', // Scrum framework for Agile project management
+                                                                                                            'https://www.agilealliance.org/', // Agile Alliance, promoting Agile methodologies
+                                                                                                            'https://www.asme.org/', // American Society of Mechanical Engineers (ASME)
+                                                                                                            'https://www.asee.org/', // American Society for Engineering Education (ASEE)
+                                                                                                            'https://www.engineeringtoolbox.com/', // Engineering resources and tools
+                                                                                                     ];
+                                                                                                     Please note that these links are based on the document's context and are not specific to "Brigade Leuschke-Cole Engineering Team." You can use these links as a starting point to gather more information and resources relevant to your team's plan.</div>`);
+            setTimeout(b, 16000, npcId, '<i class="fa-sharp fa-solid fa-bolt" style="color:orange"></i>', 'client browses https://www.asee.org/');
+            setTimeout(b, 18000, npcId, '<i class="fa-sharp fa-solid fa-bolt" style="color:orange"></i>', 'client learns about knowledge area: "Resources" (+1)');
+            setTimeout(b, 20500, npcId, "<i class='fa-brands fa-twitter' style='color:#1DA1F2'></i>", 'Explored the fascinating world of #engineering education and research at https://www.asee.org/ 🎓🔧 Learned about cutting-edge innovations, upcoming conferences, and valuable resources for both students and professionals. #EngineeringFuture #ASEE');
+            
+            
+            
+            
+            
+            
+
+        });
+    </script>
+}

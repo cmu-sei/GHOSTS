@@ -30,7 +30,7 @@ namespace ghosts.client.linux.Health
             try
             {
                 // now watch that file for changes
-                var watcher = new FileSystemWatcher(ApplicationDetails.ConfigurationFiles.Path);
+                var watcher = new FileSystemWatcher(ApplicationDetails.ConfigurationFiles.InstallPath);
                 watcher.Filter = Path.GetFileName(ApplicationDetails.ConfigurationFiles.Health);
                 _log.Trace($"watching {watcher.Path}");
                 watcher.NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.FileName | NotifyFilters.Size;

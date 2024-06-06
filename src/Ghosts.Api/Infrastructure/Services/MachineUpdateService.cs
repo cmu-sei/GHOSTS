@@ -109,6 +109,12 @@ namespace ghosts.api.Infrastructure.Services
 
         public async Task<MachineUpdate> CreateAsync(MachineUpdate model, CancellationToken ct)
         {
+            var machineUpdate = await this.GetById(model.Id, ct);
+            if (machineUpdate != null)
+                return machineUpdate;
+
+            model.Update.Id = Guid.NewGuid();
+            
             _context.MachineUpdates.Add(model);
             await _context.SaveChangesAsync(ct);
             return model;

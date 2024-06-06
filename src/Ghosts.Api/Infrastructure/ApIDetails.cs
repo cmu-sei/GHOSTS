@@ -29,7 +29,6 @@ namespace Ghosts.Api.Infrastructure
             config.GetSection("InitSettings").Bind(initConfig);
 
             Program.ApplicationSettings = appConfig;
-            Program.InitSettings = initConfig;
         }
     }
 }

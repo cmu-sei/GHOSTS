@@ -15,10 +15,11 @@ namespace ghosts.api.Infrastructure.Models
         public Group()
         {
             GroupMachines = new List<GroupMachine>();
-            Machines = new List<Machine>();
         }
 
-        [Key] public int Id { get; set; }
+        [Key] 
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; set; }
 
         [Required] public string Name { get; set; }
 
@@ -26,13 +27,13 @@ namespace ghosts.api.Infrastructure.Models
 
         [JsonConverter(typeof(StringEnumConverter))]
         public StatusType Status { get; set; }
-
-        [NotMapped] public IList<Machine> Machines { get; set; }
     }
 
     [Table("group_machines")]
     public class GroupMachine
     {
+        [Key] 
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
         [ForeignKey("GroupId")] public int GroupId { get; set; }

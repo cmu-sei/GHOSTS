@@ -29,6 +29,8 @@ namespace ghosts.api.Infrastructure.Services
 
         public async Task UpdateAsync(MachineUpdateViewModel machineUpdateViewModel, CancellationToken ct)
         {
+            if (machineUpdateViewModel == null) return;
+            
             var machineUpdate = machineUpdateViewModel.ToMachineUpdate();
 
             _context.MachineUpdates.Add(machineUpdate);
@@ -61,7 +63,7 @@ namespace ghosts.api.Infrastructure.Services
             var o = new MachineUpdate
             {
                 Status = StatusType.Active,
-                Update = JsonConvert.SerializeObject(timeline),
+                Update = timeline,
                 ActiveUtc = DateTime.UtcNow,
                 CreatedUtc = DateTime.UtcNow,
                 MachineId = machineId,

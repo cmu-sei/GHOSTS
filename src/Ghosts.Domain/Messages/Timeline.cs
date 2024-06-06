@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using Ghosts.Domain.Code;
+using Ghosts.Domain.Code.Helpers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
@@ -59,10 +60,16 @@ namespace Ghosts.Domain
         /// </summary>
         public string Initial { get; set; }
 
+        [JsonConverter(typeof(TimeSpanConverter))]
+        [JsonProperty(TypeNameHandling = TypeNameHandling.All)]
         public TimeSpan UtcTimeOn { get; set; }
+        
+        [JsonConverter(typeof(TimeSpanConverter))]
+        [JsonProperty(TypeNameHandling = TypeNameHandling.All)]
         public TimeSpan UtcTimeOff { get; set; }
 
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        [JsonConverter(typeof(TimeSpanArrayConverter))]
+        [JsonProperty(TypeNameHandling = TypeNameHandling.All, NullValueHandling = NullValueHandling.Ignore)]
         public TimeSpan[] UtcTimeBlocks { get; set; }
 
         //not required currently (2.4)

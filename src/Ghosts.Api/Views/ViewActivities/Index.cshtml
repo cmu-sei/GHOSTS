@@ -1,0 +1,75 @@
+@model IEnumerable<ghosts.api.Infrastructure.Models.NpcRecord>
+
+<style>
+    .active {outline: solid 3px grey;}
+    table * {border: none;}
+</style>
+
+<div>
+    <h1 id="animator-build-relationship">Activities</h1>
+    <p></p>
+</div>
+
+<div class="row">
+    <div class="col-sm-12">
+        <br/>
+        <table class="table table-sm">
+            @foreach (var x in Model)
+            {
+                var npc = x.NpcProfile;
+                <tr>
+                    <td style="width:1px;">
+                        <a href="view-relationships/profile/@npc.Id">
+                            <img id="@npc.Id-img" src="/api/npcs/@npc.Id/photo" class="rounded-circle" style="height: 27px;"/>
+                        </a>
+                    </td>
+                    <td style="width:200px;">
+                        <a href="view-activities/@npc.Id">@npc.Name.ToString()</a>
+                    </td>
+                    <td id="@npc.Id-msg">
+                        <i class="fa-solid fa-moon"></i>
+                    </td>
+                </tr>
+            }
+        </table>
+    </div>
+</div>
+
+@section scripts {
+    <script src="~/lib/signalr/dist/browser/signalr.js"></script>
+    <script>
+        $(function () {
+            function b(npcId, icon, message){
+                $("#" + npcId + "-msg").html(icon + " " + message);
+                $("#" + npcId + "-img").removeClass("active");
+            }
+            
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl("/hubs/activities")
+                .configureLogging(signalR.LogLevel.Information)
+                .build();
+                                   
+            connection.on("show", function (eventId, npcId, type, message, time) {
+                console.log(eventId, npcId, type, message, time);
+                $("#" + npcId + "-img").addClass("active");
+                                
+                $("#" + npcId + "-msg").html('<i class="fa-solid fa-ellipsis"></i>');
+                
+                var icon = "<i class='fa-brands fa-twitter' style='color:#1DA1F2'></i>";
+                if (type === "belief")
+                    icon = "<i class='fa-solid fa-cloud-bolt' style='color:gold'></i>";
+                else if (type === "chat")
+                    icon = "<i class='fa-solid fa-comment' style='color:pink'></i>";
+                else if (type === "knowledge")
+                    icon = "<i class='fa-solid fa-graduation-cap' style='color:green'></i>";
+                else if (type === "relationship")
+                    icon = "<i class='fa-solid fa-user-group' style='color:purple'></i>";
+                                
+                setTimeout(b, 1000, npcId, icon, message);
+                
+            });
+                        
+            connection.start().catch(err => console.error(err.toString()));
+        });
+    </script>
+}

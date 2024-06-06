@@ -1,0 +1,91 @@
+@model ghosts.api.Infrastructure.Models.NpcSocialGraph
+
+@{
+    string FormatClass(int x)
+    {
+        if (x<0)
+            return "darr";
+        return x == 0 ? "harr" : "uarr";
+    }
+    
+    string FormatValue(int x)
+    {
+        if (x<0)
+            return $"&darr;{x}";
+        return x == 0 ? "&harr;0" : $"&uarr;+{x}";
+    }
+
+    double GetConnectionScore(int count, int current)
+    {
+        var r = (double) current / count;
+        if (r < 0)
+            r = 0;
+        return r;
+    }
+}
+
+<style>
+    .darr {color: red;}
+    .uarr {color: green;}
+    .harr {color: goldenrod;} 
+    .bump {margin:0px 0px 20px 20px;}
+</style>
+<div class="container">
+    <div class="row">
+        <div class="col-sm-12">
+            <h1 id="animator-build-relationship">Social Graph Agent Detail</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <br/>
+            <img src="/api/npcs/@Model.Id/photo" height="16" width="16" alt="profile thumbnail" />
+            Connections for <strong title="@Model.Id">@Model.Name</strong>
+            <ul>
+                <br/>
+                <table class="table">
+                @foreach (var connection in Model.Connections)
+                {
+                    <tr>
+                        <td width="65%">
+                            <img src="/api/npcs/@connection.Id/photo" height="16" width="16" alt="profile thumbnail"/>
+                            <strong><a href="/view-relationships/profile/@connection.Id">@connection.Name</a></strong>
+                        </td>
+                        <td><a href="@connection.Id">Detail</a></td>
+                        <td><a href="@connection.Id/interactions" target="interactions">Interactions</a></td>
+                        <td>@connection.Interactions.Count/@connection.Interactions.Sum(x => x.Value)</td>
+                        <td>@($"{GetConnectionScore(connection.Interactions.Count, connection.Interactions.Sum(x => x.Value)):P}")</td>
+                        <td><a data-bs-toggle="collapse" href="#interactions_@connection.Id" role="button" aria-expanded="false" aria-controls="interactions_@connection.Id">+/-</a></td>
+                    </tr>
+                    <tr class="collapse" id="interactions_@connection.Id">
+                        <td colspan="5">
+                        <ul class="bump">
+                                @foreach (var interaction in connection.Interactions.OrderBy(x => x.Step))
+                                {
+                                    <li>Step @interaction.Step Relationship: <span class="@Html.Raw(FormatClass(interaction.Value))">(@Html.Raw(FormatValue(interaction.Value)))</span></li>
+                                    <ul>
+                                        @foreach (var k in Model.Knowledge.Where(x => x.From == connection.Id && x.Step == interaction.Step))
+                                        {
+                                            var v = FormatValue(k.Value);
+                                            <li>Knowledge Transfer: <span class="@Html.Raw(FormatClass(k.Value))">@k.Topic (@Html.Raw(v))</span></li>
+                                        }
+                                    </ul>
+                                }
+                        </ul>
+                    </td>
+                        </tr>
+                }
+                </table>
+                <strong>Knowledge Decay <a data-bs-toggle="collapse" href="#decay" role="button" aria-expanded="false" aria-controls="decay">+/-</a></strong>
+                <ul class="collapse" id="decay">
+                    @foreach (var k in Model.Knowledge.Where(x => x.From == Model.Id && x.Value < 0))
+                    {
+                        var v = FormatValue(k.Value);
+                        <li>Step @k.Step <span class="@Html.Raw(FormatClass(k.Value))">@k.Topic (@Html.Raw(v))</span></li>
+                    }
+                </ul>
+                
+            </ul>
+        </div>
+    </div>
+</div>

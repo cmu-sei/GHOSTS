@@ -5,12 +5,12 @@
     <AssemblyName>ghosts.api</AssemblyName>
 
     <AssemblyVersion>8.0.0.0</AssemblyVersion>
-    <FileVersion>8.0.51.50</FileVersion>
+    <FileVersion>8.1.0.0</FileVersion>
     
     <Authors>GHOSTS Development Team for CERT > Software Engineering Institute > Carnegie Mellon University</Authors>
     <Company>Carnegie Mellon University</Company>
     <Product>GHOSTS</Product>
-    <Description>GHOSTS NPC Platform - please email ddupdyke[-at-]sei.cmu.edu with bugs/requests/other</Description>
+    <Description>GHOSTS NPC Platform - please email ddupdyke[-at*]sei.cmu.edu with bugs/requests/other</Description>
     <Copyright>Carnegie Mellon University 2017</Copyright>
     <NoWarn>$(NoWarn);1591</NoWarn>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -28,16 +28,17 @@
     <PackageReference Include="NLog" Version="5.3.2" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.22" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.Design" Version="1.1.1" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.5.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="6.5.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.5.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.5.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="6.1.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.6.2" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" Version="6.6.2" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="6.6.2" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.6.2" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.6.2" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="8.0.2" />
     <PackageReference Include="Faker.Net" Version="2.0.163" />
     <PackageReference Include="AutoMapper" Version="13.0.1" />
     <PackageReference Include="FileHelpers" Version="3.5.2" />
-    <PackageReference Include="RestSharp" Version="110.2.0" />
-    <PackageReference Include="Betalgo.OpenAI" Version="7.4.6" />
+    <PackageReference Include="RestSharp" Version="111.2.0" />
+    <PackageReference Include="Betalgo.OpenAI" Version="8.2.2" />
   </ItemGroup>
 
   <ItemGroup>
@@ -49,10 +50,6 @@
     <Content Update="nlog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Areas\Animator\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -101,11 +98,29 @@
     <_ContentIncludedByDefault Remove="Areas\Animator\config\us_population_data.json" />
     <_ContentIncludedByDefault Remove="output\socialgraph\social_graph.json" />
     <_ContentIncludedByDefault Remove="_output\socialgraph\social_graph.json" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\Views\ViewActivities\detail.cshtml" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\Views\ViewActivities\Index.cshtml" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\Views\ViewRelationships\Index.cshtml" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\Views\ViewRelationships\Profile.cshtml" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\Views\ViewSocial\Detail.cshtml" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\Views\ViewSocial\Index.cshtml" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\Views\ViewSocial\Interactions.cshtml" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\Views\Home\Index.cshtml" />
+    <_ContentIncludedByDefault Remove="Areas\Animator\Views\_ViewStart.cshtml" />
   </ItemGroup>
 
   <ItemGroup>
+    <AdditionalFiles Include="Views\Animations\Index.cshtml" />
+    <AdditionalFiles Include="Views\Animations\Started.cshtml" />
     <AdditionalFiles Include="Views\Home\Index.cshtml" />
     <AdditionalFiles Include="Views\Shared\_Layout.cshtml" />
+    <AdditionalFiles Include="Views\ViewActivities\detail.cshtml" />
+    <AdditionalFiles Include="Views\ViewActivities\Index.cshtml" />
+    <AdditionalFiles Include="Views\ViewRelationships\Index.cshtml" />
+    <AdditionalFiles Include="Views\ViewRelationships\Profile.cshtml" />
+    <AdditionalFiles Include="Views\ViewSocial\Detail.cshtml" />
+    <AdditionalFiles Include="Views\ViewSocial\Index.cshtml" />
+    <AdditionalFiles Include="Views\ViewSocial\Interactions.cshtml" />
     <AdditionalFiles Include="Views\_ViewStart.cshtml" />
   </ItemGroup>
 
@@ -132,6 +147,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="config\usernames.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="config\photos\default.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

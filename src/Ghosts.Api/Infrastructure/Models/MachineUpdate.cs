@@ -3,6 +3,8 @@
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using Ghosts.Domain;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
@@ -16,22 +18,36 @@ namespace ghosts.api.Infrastructure.Models
         public Guid MachineId { get; set; }
 
         public string Username { get; set; }
-        
+
         [JsonConverter(typeof(StringEnumConverter))]
         public UpdateClientConfig.UpdateType Type { get; set; }
 
         public DateTime ActiveUtc { get; set; }
         public DateTime CreatedUtc { get; set; }
 
+        [JsonConverter(typeof(StringEnumConverter))]
         public StatusType Status { get; set; }
 
-        public string Update { get; set; }
-        
+        public Timeline Update { get; set; }
+
         public MachineUpdate()
         {
             var now = DateTime.UtcNow;
             this.ActiveUtc = now;
             this.CreatedUtc = now;
+        }
+    }
+    
+    public class MachineUpdateConfiguration : IEntityTypeConfiguration<MachineUpdate>
+    {
+        public void Configure(EntityTypeBuilder<MachineUpdate> builder)
+        {
+            // Configure the Update property to be stored as JSON in the database
+            builder.Property(e => e.Update)
+                .HasConversion(
+                    v => JsonConvert.SerializeObject(v, Formatting.None),
+                    v => JsonConvert.DeserializeObject<Timeline>(v))
+                .HasColumnName("update");
         }
     }
 }

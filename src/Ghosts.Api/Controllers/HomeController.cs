@@ -6,6 +6,7 @@ using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Domain.Code;
 using Microsoft.AspNetCore.Mvc;
 using NLog;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Ghosts.Api.Controllers
 {
@@ -34,29 +35,32 @@ namespace Ghosts.Api.Controllers
         /// Basic check information including version number,
         /// and a simple database connection counting machines and groups
         /// </returns>
-        [HttpGet("test")]
         [Produces("application/json")]
         [ResponseCache(Duration = 60)]
+        [SwaggerOperation("HomeTestApi")]
+        [HttpGet("test")]
         public IActionResult Test()
         {
-            var s = new Status();
-            s.Version = ApplicationDetails.Version;
-            s.VersionFile = ApplicationDetails.VersionFile;
-            s.Created = DateTime.UtcNow;
+            var status = new Status
+            {
+                Version = ApplicationDetails.Version,
+                VersionFile = ApplicationDetails.VersionFile,
+                Created = DateTime.UtcNow
+            };
 
             try
             {
-                s.Machines = _context.Machines.Count();
-                s.Groups = _context.Groups.Count();
-                s.Npcs = _context.Npcs.Count();
+                status.Machines = _context.Machines.Count();
+                status.Groups = _context.Groups.Count();
+                status.Npcs = _context.Npcs.Count();
             }
             catch (Exception e)
             {
-                _log.Error(e);
-                throw;
+                _log.Error(e, "An error occurred while counting database entities.");
+                return StatusCode(500, "Internal server error");
             }
 
-            return Json(s);
+            return Json(status);
         }
 
         public class Status

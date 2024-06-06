@@ -250,6 +250,9 @@ namespace ghosts.api.Infrastructure.Services
 
         public async Task<List<HistoryTimeline>> GetActivity(Guid id, int skip, int take, CancellationToken ct)
         {
+            if (take < 1)
+                take = 25;
+            
             var machine = await _context.Machines.FirstOrDefaultAsync(o => o.Id == id, ct);
             if (machine == null)
             {

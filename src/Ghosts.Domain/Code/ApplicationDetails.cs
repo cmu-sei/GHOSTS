@@ -3,6 +3,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using NLog;
@@ -100,14 +101,15 @@ namespace Ghosts.Domain.Code
         /// </summary>
         public static class ConfigurationFiles
         {
-            public static string Path => InstalledPath + $"{System.IO.Path.DirectorySeparatorChar}config{System.IO.Path.DirectorySeparatorChar}";
+            public static string InstallPath => InstalledPath + $"{System.IO.Path.DirectorySeparatorChar}config{System.IO.Path.DirectorySeparatorChar}";
 
-            public static string Application => Clean(Path + "application.json");
-            public static string Health => Clean(Path + "health.json");
-            public static string Timeline => Clean(Path + "timeline.json");
+            public static string DefaultNpcImage => Clean(Path.Combine(InstallPath, "photos", "default.png"));
+            public static string Application => Clean(InstallPath + "application.json");
+            public static string Health => Clean(InstallPath + "health.json");
+            public static string Timeline => Clean(InstallPath + "timeline.json");
 
-            public static string DenyList => Clean(Path + "denylist.txt");
-            public static string EmailsFooter => Clean(Path + "emails-footer.txt");
+            public static string DenyList => Clean(InstallPath + "denylist.txt");
+            public static string EmailsFooter => Clean(InstallPath + "emails-footer.txt");
 
             public static string EmailContent(string raw) => Determine(raw, "email-content.csv");
             public static string EmailReply(string raw) => Determine(raw, "email-reply.csv");
@@ -129,7 +131,7 @@ namespace Ghosts.Domain.Code
 
             private static string Determine(string raw, string defaultValue)
             {
-                return !string.IsNullOrEmpty(raw) ? raw : Clean(Path + defaultValue);
+                return !string.IsNullOrEmpty(raw) ? raw : Clean(InstallPath + defaultValue);
             }
         }
 

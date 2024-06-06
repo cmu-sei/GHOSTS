@@ -1,0 +1,46 @@
+@model ghosts.api.Infrastructure.Animations.AnimationConfiguration
+<div class="row">
+    <div class="col-sm-6">
+        <p>Animations!</p>
+        <form action="animations/start" method="post">
+            <label for="JobId">Job Id:</label>
+            <select id="JobId" name="JobId" class="form-control">
+                <option value="">Choose a job to start...</option>
+                <option value="SOCIALGRAPH">SOCIALGRAPH</option>
+                <option value="SOCIALSHARING">SOCIALSHARING</option>
+                <option value="SOCIALBELIEF">SOCIALBELIEF</option>
+                <option value="CHAT">CHAT</option>
+                <option value="FULLAUTONOMY">FULLAUTONOMY</option>
+            </select>
+            <br/>
+            <label for="JobConfiguration">Job Configuration:</label>
+            <textarea style="height:150px" id="JobConfiguration" name="JobConfiguration" class="form-control">@Model.JobConfiguration</textarea>
+            <br/>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+       
+    </div>
+</div>
+
+<input type="hidden" id="d_FULLAUTONOMY" value="@ViewBag.FullAutonomy" />
+<input type="hidden" id="d_SOCIALSHARING" value="@ViewBag.SocialSharing" />
+<input type="hidden" id="d_SOCIALBELIEF" value="@ViewBag.SocialBelief" />
+<input type="hidden" id="d_CHAT" value="@ViewBag.Chat" />
+<input type="hidden" id="d_SOCIALGRAPH" value="@ViewBag.SocialGraph" />
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const jobIdSelect = document.getElementById('JobId');
+    const jobConfigurationTextarea = document.getElementById('JobConfiguration');
+
+    jobIdSelect.addEventListener('change', function() {
+        const selectedJobId = this.value;
+        if (selectedJobId !== "") {
+            const selectedJobValue = document.getElementById('d_' + selectedJobId).value;
+            jobConfigurationTextarea.value = selectedJobValue;
+        } else {
+            jobConfigurationTextarea.value = ''; // Clear the textarea if no job is selected
+        }
+    });
+});
+</script>

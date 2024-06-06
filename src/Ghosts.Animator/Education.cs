@@ -378,7 +378,7 @@ namespace Ghosts.Animator
                     }
                 }
             }
-            else if (rank.Branch == MilitaryBranch.USAF && rank.Pay[0] == 'O')
+            else if (rank.Branch == MilitaryBranch.USAF && rank.Pay != null && rank.Pay[0] == 'O')
             {
                 //check MOS
                 //Engineer: 32EX, 61DX, 62EX, 62EX*
