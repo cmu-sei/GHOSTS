@@ -22,7 +22,7 @@ jobs:
       - name: Build and push Docker images
         uses: docker/build-push-action@v2
         with:
-          tags: dustinupdyke/ghosts-pandora
+          tags: dustinupdyke/ghosts-pandora:latest
           push: true
-          context: src/ghosts.pandora/app/
-          file: src/ghosts.pandora/Dockerfile
+          context: ./src/ghosts.pandora/app/
+          file: ./src/ghosts.pandora/Dockerfile
