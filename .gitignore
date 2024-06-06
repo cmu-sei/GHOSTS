@@ -321,3 +321,6 @@ _output/
 _output/*
 *_output/*
 output/
+
+**/.vscode/
+*.vscode*
