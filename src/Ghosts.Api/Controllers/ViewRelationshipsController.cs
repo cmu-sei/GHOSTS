@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using ghosts.api.Areas.Animator.Infrastructure.Models;
 using Ghosts.Api.Infrastructure.Data;
+using ghosts.api.Infrastructure.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ghosts.api.Controllers;

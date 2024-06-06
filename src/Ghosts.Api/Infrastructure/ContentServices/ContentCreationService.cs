@@ -2,14 +2,14 @@
 
 using System;
 using System.Threading.Tasks;
-using ghosts.api.Areas.Animator.Infrastructure.ContentServices.Ollama;
-using ghosts.api.Areas.Animator.Infrastructure.ContentServices.OpenAi;
-using ghosts.api.Areas.Animator.Infrastructure.ContentServices.Shadows;
-using ghosts.api.Areas.Animator.Infrastructure.Models;
 using Ghosts.Api.Infrastructure;
+using ghosts.api.Infrastructure.ContentServices.Ollama;
+using ghosts.api.Infrastructure.ContentServices.OpenAi;
+using ghosts.api.Infrastructure.ContentServices.Shadows;
+using ghosts.api.Infrastructure.Models;
 using NLog;
 
-namespace ghosts.api.Areas.Animator.Infrastructure.ContentServices;
+namespace ghosts.api.Infrastructure.ContentServices;
 
 public class ContentCreationService
 {

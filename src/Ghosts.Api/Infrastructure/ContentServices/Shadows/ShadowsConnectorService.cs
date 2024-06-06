@@ -13,7 +13,7 @@ using Newtonsoft.Json;
 using NLog;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
-namespace ghosts.api.Areas.Animator.Infrastructure.ContentServices.Shadows;
+namespace ghosts.api.Infrastructure.ContentServices.Shadows;
 
 public class ShadowsConnectorService : IContentService
 {

@@ -7,16 +7,15 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using Ghosts.Animator.Extensions;
-using ghosts.api.Areas.Animator.Hubs;
-using ghosts.api.Areas.Animator.Infrastructure.ContentServices;
-using ghosts.api.Areas.Animator.Infrastructure.Models;
+using ghosts.api.Hubs;
 using Ghosts.Api.Infrastructure;
+using ghosts.api.Infrastructure.ContentServices;
 using Ghosts.Api.Infrastructure.Data;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
 
-namespace ghosts.api.Areas.Animator.Infrastructure.Animations.AnimationDefinitions;
+namespace ghosts.api.Infrastructure.Animations.AnimationDefinitions;
 
 public class FullAutonomyJob
 {

@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace ghosts.api.Areas.Animator.Infrastructure.Models;
+namespace ghosts.api.Infrastructure.Models;
 
 public class EnclaveReducedCsv
 {

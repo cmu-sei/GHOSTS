@@ -8,6 +8,7 @@ using Ghosts.Animator;
 using Ghosts.Animator.Models;
 using ghosts.api.Areas.Animator.Infrastructure.Models;
 using Ghosts.Api.Infrastructure.Data;
+using ghosts.api.Infrastructure.Models;
 using Microsoft.EntityFrameworkCore;
 using NLog;
 

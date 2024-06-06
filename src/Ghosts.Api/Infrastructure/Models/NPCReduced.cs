@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace ghosts.api.Areas.Animator.Infrastructure.Models;
+namespace ghosts.api.Infrastructure.Models;
 
 [Obsolete("This will move to an Automapper map from NPC to NpcProfileSummary class")]
 public class NPCReduced

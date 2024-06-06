@@ -3,6 +3,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using ghosts.api.Infrastructure;
 using ghosts.api.Infrastructure.Models;
 using ghosts.api.Infrastructure.Services;
 using Ghosts.Api.ViewModels;
@@ -10,6 +11,7 @@ using Ghosts.Domain;
 using Microsoft.AspNetCore.Mvc;
 using NLog;
 using Swashbuckle.AspNetCore.Annotations;
+using Swashbuckle.AspNetCore.Filters;
 
 namespace ghosts.api.Controllers.Api
 {
@@ -37,6 +39,7 @@ namespace ghosts.api.Controllers.Api
         [ProducesResponseType(200)]
         [ProducesResponseType(401)]
         [ProducesResponseType(404)]
+        [SwaggerRequestExample(typeof(MachineUpdate), typeof(MachineUpdateExample))]
         [SwaggerOperation("MachineUpdatesCreate")]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] MachineUpdate machineUpdate, CancellationToken ct)

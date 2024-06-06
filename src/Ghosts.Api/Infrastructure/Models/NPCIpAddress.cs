@@ -4,7 +4,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ghosts.api.Areas.Animator.Infrastructure.Models;
+namespace ghosts.api.Infrastructure.Models;
 
 [Table("ips")]
 public class NPCIpAddress

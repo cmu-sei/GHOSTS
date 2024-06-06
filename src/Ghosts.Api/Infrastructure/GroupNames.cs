@@ -11,7 +11,7 @@ namespace Ghosts.Api.Infrastructure
 {
     public static class GroupNames
     {
-        private static readonly Logger log = LogManager.GetCurrentClassLogger();
+        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
 
         private static string FormatToken(List<char> delimeters, ApplicationSettings.GroupingOptions.GroupingDefinitionOption d, string o)
         {
@@ -84,7 +84,7 @@ namespace Ghosts.Api.Infrastructure
             }
             catch (Exception e)
             {
-                log.Trace(e);
+                _log.Trace(e);
             }
 
             return list;

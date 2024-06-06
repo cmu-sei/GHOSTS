@@ -1,7 +1,9 @@
+// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
+
 using System.Threading;
 using Ghosts.Api;
-using ghosts.api.Areas.Animator.Infrastructure.Animations;
 using Ghosts.Api.Infrastructure;
+using ghosts.api.Infrastructure.Animations;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using NLog;

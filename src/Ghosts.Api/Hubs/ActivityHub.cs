@@ -1,3 +1,5 @@
+// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
+
 using System;
 using System.Globalization;
 using System.Threading.Tasks;
@@ -5,7 +7,7 @@ using Ghosts.Animator.Extensions;
 using Microsoft.AspNetCore.SignalR;
 using NLog;
 
-namespace ghosts.api.Areas.Animator.Hubs;
+namespace ghosts.api.Hubs;
 
 public class ActivityHub : Hub
 {

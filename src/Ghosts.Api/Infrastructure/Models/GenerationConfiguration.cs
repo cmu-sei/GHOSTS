@@ -6,7 +6,7 @@ using Ghosts.Animator.Enums;
 using Ghosts.Animator.Models;
 using Swashbuckle.AspNetCore.Filters;
 
-namespace ghosts.api.Areas.Animator.Infrastructure.Models;
+namespace ghosts.api.Infrastructure.Models;
 
 /// <summary>
 /// The configuration for generating a large number of NPCs for your scenario

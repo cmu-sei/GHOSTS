@@ -26,7 +26,7 @@ namespace Ghosts.Api.Infrastructure
                     HostIp = context.Request.Headers["ghosts-ip"],
                     CurrentUsername = CheckIfBase64Encoded(context.Request.Headers["ghosts-user"]),
                     ClientVersion = context.Request.Headers["ghosts-version"],
-                    IPAddress = context.Connection.RemoteIpAddress.ToString(),
+                    IPAddress = context.Connection.RemoteIpAddress?.ToString(),
                     StatusUp = Machine.UpDownStatus.Up
                 };
 

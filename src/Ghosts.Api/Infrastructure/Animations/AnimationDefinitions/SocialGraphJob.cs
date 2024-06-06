@@ -9,17 +9,17 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Ghosts.Animator.Extensions;
-using ghosts.api.Areas.Animator.Hubs;
-using ghosts.api.Areas.Animator.Infrastructure.Models;
+using ghosts.api.Hubs;
 using Ghosts.Api.Infrastructure;
 using Ghosts.Api.Infrastructure.Data;
+using ghosts.api.Infrastructure.Models;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using Weighted_Randomizer;
 
-namespace ghosts.api.Areas.Animator.Infrastructure.Animations.AnimationDefinitions;
+namespace ghosts.api.Infrastructure.Animations.AnimationDefinitions;
 
 public class SocialGraphJob
 {

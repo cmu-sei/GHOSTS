@@ -2,7 +2,7 @@
 
 using System.Collections.Generic;
 
-namespace ghosts.api.Areas.Animator.Infrastructure.Animations.AnimationDefinitions.Chat;
+namespace ghosts.api.Infrastructure.Animations.AnimationDefinitions.Chat;
 
 public class ChatJobConfiguration
 {

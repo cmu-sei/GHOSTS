@@ -1,13 +1,15 @@
+// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
+
 using System;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using ghosts.api.Areas.Animator.Infrastructure.Models;
 using Ghosts.Api.Infrastructure;
+using ghosts.api.Infrastructure.Models;
 using NLog;
 
-namespace ghosts.api.Areas.Animator.Infrastructure.ContentServices.Shadows;
+namespace ghosts.api.Infrastructure.ContentServices.Shadows;
 
 public class ShadowsFormatterService : IFormatterService
 {

@@ -7,9 +7,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Ghosts.Api;
-using ghosts.api.Areas.Animator.Hubs;
-using ghosts.api.Areas.Animator.Infrastructure.Animations.AnimationDefinitions;
+using ghosts.api.Hubs;
 using Ghosts.Api.Infrastructure;
+using ghosts.api.Infrastructure.Animations.AnimationDefinitions;
 using ghosts.api.Infrastructure.Extensions;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,7 +18,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using NLog;
 
-namespace ghosts.api.Areas.Animator.Infrastructure.Animations;
+namespace ghosts.api.Infrastructure.Animations;
 
 public interface IManageableHostedService : IHostedService
 {

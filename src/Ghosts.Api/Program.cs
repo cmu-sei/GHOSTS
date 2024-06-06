@@ -17,8 +17,7 @@ namespace Ghosts.Api
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
 
         public static ApplicationSettings ApplicationSettings { get; set; }
-        public static InitOptions InitSettings { get; set; }
-
+        
         public static void Main(string[] args)
         {
             Console.WriteLine(ApplicationDetails.Header);

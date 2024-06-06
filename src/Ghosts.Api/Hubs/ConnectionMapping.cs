@@ -1,7 +1,9 @@
+// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
+
 using System.Collections.Generic;
 using System.Linq;
 
-namespace ghosts.api.Areas.Animator.Hubs;
+namespace ghosts.api.Hubs;
 
 public class ConnectionMapping<T>
 {

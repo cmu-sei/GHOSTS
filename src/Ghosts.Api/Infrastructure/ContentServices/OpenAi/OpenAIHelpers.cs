@@ -1,6 +1,8 @@
+// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
+
 using System;
 
-namespace ghosts.api.Areas.Animator.Infrastructure.ContentServices.OpenAi;
+namespace ghosts.api.Infrastructure.ContentServices.OpenAi;
 
 public static class OpenAiHelpers
 {

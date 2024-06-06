@@ -1,15 +1,14 @@
 // Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
-using System.Text.Json;
 using AutoMapper;
 using Ghosts.Animator.Models;
+using ghosts.api.Areas.Animator.Infrastructure.Models;
 
-namespace ghosts.api.Areas.Animator.Infrastructure.Models;
+namespace ghosts.api.Infrastructure.Models;
 
 [Table("npcs")]
 public class NpcRecord

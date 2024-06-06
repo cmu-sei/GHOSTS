@@ -2,7 +2,7 @@
 
 using System.Text.Json.Serialization;
 
-namespace ghosts.api.Areas.Animator.Infrastructure.Animations.AnimationDefinitions.Chat.Mattermost;
+namespace ghosts.api.Infrastructure.Animations.AnimationDefinitions.Chat.Mattermost;
 
 public class User
 {

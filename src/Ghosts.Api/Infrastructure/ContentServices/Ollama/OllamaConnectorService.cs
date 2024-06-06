@@ -13,7 +13,7 @@ using Newtonsoft.Json;
 using NLog;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
-namespace ghosts.api.Areas.Animator.Infrastructure.ContentServices.Ollama;
+namespace ghosts.api.Infrastructure.ContentServices.Ollama;
 
 public class OllamaConnectorService : IContentService
 {

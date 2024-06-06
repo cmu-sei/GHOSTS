@@ -5,11 +5,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Ghosts.Api;
 using Ghosts.Api.Infrastructure.Data;
 using ghosts.api.Infrastructure.Models;
 using Microsoft.EntityFrameworkCore;
-using NLog;
 
 namespace ghosts.api.Infrastructure.Services
 {
@@ -21,9 +19,7 @@ namespace ghosts.api.Infrastructure.Services
 
     public class TrackableService : ITrackableService
     {
-        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
         private readonly ApplicationDbContext _context;
-        private readonly int _lookBack = Program.ApplicationSettings.LookbackRecords;
 
         public TrackableService(ApplicationDbContext context)
         {

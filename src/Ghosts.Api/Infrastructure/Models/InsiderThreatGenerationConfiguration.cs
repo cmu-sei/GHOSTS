@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using Ghosts.Animator.Enums;
 using Ghosts.Animator.Models;
+using ghosts.api.Infrastructure.Models;
 using Swashbuckle.AspNetCore.Filters;
 
 namespace ghosts.api.Areas.Animator.Infrastructure.Models;

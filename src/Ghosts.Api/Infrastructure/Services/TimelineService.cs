@@ -63,7 +63,7 @@ namespace ghosts.api.Infrastructure.Services
             var o = new MachineUpdate
             {
                 Status = StatusType.Active,
-                Update = timeline, //JsonConvert.SerializeObject(timeline),
+                Update = timeline,
                 ActiveUtc = DateTime.UtcNow,
                 CreatedUtc = DateTime.UtcNow,
                 MachineId = machineId,

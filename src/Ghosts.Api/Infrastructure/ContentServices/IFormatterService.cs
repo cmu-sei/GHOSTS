@@ -1,7 +1,9 @@
-using System.Threading.Tasks;
-using ghosts.api.Areas.Animator.Infrastructure.Models;
+// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
-namespace ghosts.api.Areas.Animator.Infrastructure.ContentServices;
+using System.Threading.Tasks;
+using ghosts.api.Infrastructure.Models;
+
+namespace ghosts.api.Infrastructure.ContentServices;
 
 public interface IFormatterService
 {

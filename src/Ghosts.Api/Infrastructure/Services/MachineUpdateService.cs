@@ -11,7 +11,6 @@ using Ghosts.Api.ViewModels;
 using Ghosts.Domain;
 using Microsoft.EntityFrameworkCore;
 using NLog;
-using NPOI.OpenXmlFormats.Wordprocessing;
 
 namespace ghosts.api.Infrastructure.Services
 {

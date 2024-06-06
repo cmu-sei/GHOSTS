@@ -1,7 +1,9 @@
+// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
+
 using System;
 using System.Collections.Generic;
 
-namespace ghosts.api.Areas.Animator.Infrastructure.Extensions;
+namespace ghosts.api.Infrastructure.Extensions;
 
 public static class EnumeratorExtensions
 {

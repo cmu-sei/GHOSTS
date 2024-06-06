@@ -1,15 +1,17 @@
+// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
+
 using System;
 using System.IO;
 using System.Reflection;
 using System.Text.Json.Serialization;
-using ghosts.api.Areas.Animator.Hubs;
-using ghosts.api.Areas.Animator.Infrastructure.Animations;
+using ghosts.api.Hubs;
 using Ghosts.Api.Hubs;
+using ghosts.api.Infrastructure;
+using ghosts.api.Infrastructure.Animations;
 using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Api.Infrastructure.Extensions;
 using Ghosts.Api.Infrastructure.Filters;
 using ghosts.api.Infrastructure.Services;
-using Ghosts.Api.ViewModels;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
 using Microsoft.AspNetCore.Builder;
@@ -23,7 +25,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Converters;
 using Swashbuckle.AspNetCore.Filters;
-using Swashbuckle.AspNetCore.Newtonsoft;
 
 namespace Ghosts.Api
 {
@@ -84,6 +85,9 @@ namespace Ghosts.Api
             services.AddScoped<ISurveyService, SurveyService>();
             services.AddScoped<INpcService, NpcService>();
             
+            services.AddScoped<MachineUpdateExample>();
+            services.AddSwaggerExamplesFromAssemblyOf<MachineUpdateExample>();
+            
             services.AddSingleton<IBackgroundQueue, BackgroundQueue>();
             services.AddSingleton<IHostedService, QueueSyncService>();
 
@@ -132,7 +136,6 @@ namespace Ghosts.Api
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint($"/swagger/v{ApiVersion}/swagger.json", $"GHOSTS API v{ApiVersion}");
-                // c.RoutePrefix = string.Empty; // this places the swagger file at the site root
             });
         }
     }

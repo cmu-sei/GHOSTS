@@ -1,11 +1,13 @@
+// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
+
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using ghosts.api.Areas.Animator.Infrastructure.Models;
+using ghosts.api.Infrastructure.Models;
 using NLog;
 using OpenAI.ObjectModels.RequestModels;
 
-namespace ghosts.api.Areas.Animator.Infrastructure.ContentServices.OpenAi;
+namespace ghosts.api.Infrastructure.ContentServices.OpenAi;
 
 public class OpenAiFormatterService : IFormatterService
 {

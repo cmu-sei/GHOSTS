@@ -1,7 +1,7 @@
 // Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
-using ghosts.api.Areas.Animator.Infrastructure.Animations;
+using ghosts.api.Infrastructure.Animations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 

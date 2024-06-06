@@ -9,7 +9,7 @@ using Ghosts.Animator;
 using Ghosts.Animator.Extensions;
 using Ghosts.Animator.Models.InsiderThreat;
 
-namespace ghosts.api.Areas.Animator.Infrastructure.Models;
+namespace ghosts.api.Infrastructure.Models;
 
 [DelimitedRecord(",")]
 public class NPCToInsiderThreatCsv

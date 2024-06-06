@@ -5,6 +5,7 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using ghosts.api.Areas.Animator.Infrastructure.Models;
+using ghosts.api.Infrastructure.Models;
 using ghosts.api.Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;
 using NLog;

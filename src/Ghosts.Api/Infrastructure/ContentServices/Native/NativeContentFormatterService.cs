@@ -1,13 +1,15 @@
+// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
+
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Ghosts.Animator;
 using Ghosts.Animator.Extensions;
 using Ghosts.Animator.Models;
-using ghosts.api.Areas.Animator.Infrastructure.Models;
+using ghosts.api.Infrastructure.Models;
 using NLog;
 
-namespace ghosts.api.Areas.Animator.Infrastructure.ContentServices.Native;
+namespace ghosts.api.Infrastructure.ContentServices.Native;
 
 public class NativeContentFormatterService : IFormatterService
 {

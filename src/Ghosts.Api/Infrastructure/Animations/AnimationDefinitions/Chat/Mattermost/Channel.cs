@@ -4,13 +4,13 @@ using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace ghosts.api.Areas.Animator.Infrastructure.Animations.AnimationDefinitions.Chat.Mattermost;
+namespace ghosts.api.Infrastructure.Animations.AnimationDefinitions.Chat.Mattermost;
 
 public class Channel
 {
     [JsonPropertyName("id")] public string Id { get; set; }
-    [JsonPropertyName("create_at")] public object CreateAt { get; set; }
-    [JsonPropertyName("update_at")] public object UpdateAt { get; set; }
+    [JsonPropertyName("create_at")] public long CreateAt { get; set; }
+    [JsonPropertyName("update_at")] public long UpdateAt { get; set; }
     [JsonPropertyName("delete_at")] public int DeleteAt { get; set; }
     [JsonPropertyName("team_id")] public string TeamId { get; set; }
     [JsonPropertyName("type")] public string Type { get; set; }
@@ -18,31 +18,20 @@ public class Channel
     [JsonPropertyName("name")] public string Name { get; set; }
     [JsonPropertyName("header")] public string Header { get; set; }
     [JsonPropertyName("purpose")] public string Purpose { get; set; }
-    [JsonPropertyName("last_post_at")] public object LastPostAt { get; set; }
+    [JsonPropertyName("last_post_at")] public long LastPostAt { get; set; }
     [JsonPropertyName("total_msg_count")] public int TotalMsgCount { get; set; }
     [JsonPropertyName("extra_update_at")] public int ExtraUpdateAt { get; set; }
     [JsonPropertyName("creator_id")] public string CreatorId { get; set; }
     [JsonPropertyName("scheme_id")] public string SchemeId { get; set; }
     [JsonPropertyName("props")] public object Props { get; set; }
-
-    [JsonPropertyName("group_constrained")]
-    public bool? GroupConstrained { get; set; }
-
+    [JsonPropertyName("group_constrained")] public bool? GroupConstrained { get; set; }
     [JsonPropertyName("shared")] public object Shared { get; set; }
-
-    [JsonPropertyName("total_msg_count_root")]
-    public int TotalMsgCountRoot { get; set; }
-
+    [JsonPropertyName("total_msg_count_root")] public int TotalMsgCountRoot { get; set; }
     [JsonPropertyName("policy_id")] public object PolicyId { get; set; }
-
-    [JsonPropertyName("last_root_post_at")]
-    public object LastRootPostAt { get; set; }
-
-    [JsonPropertyName("team_display_name")]
-    public string TeamDisplayName { get; set; }
-
+    [JsonPropertyName("last_root_post_at")] public long LastRootPostAt { get; set; }
+    [JsonPropertyName("team_display_name")] public string TeamDisplayName { get; set; }
     [JsonPropertyName("team_name")] public string TeamName { get; set; }
-    [JsonPropertyName("team_update_at")] public object TeamUpdateAt { get; set; }
+    [JsonPropertyName("team_update_at")] public long TeamUpdateAt { get; set; }
 }
 
 public class ChannelHistory
