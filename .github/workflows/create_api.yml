@@ -1,4 +1,4 @@
-name: Make API Container
+name: Create API Container
 
 on:
   workflow_dispatch:
