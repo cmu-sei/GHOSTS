@@ -14,8 +14,8 @@ generate images.
 
 You will need to install `ollama` and Python+ollama library to generate the text files.
 You will need to install the Stable Diffusion AI tool on your local PC in order to generate images.
-You will need to have an OpenAI account and ($$) to use dall-e-3 (this gives better images than Stable AI
-but is more restrictive in its prompts and costs $$ for each image)
+You will need to have an OpenAI account and ($$) to use dall-e-3 -- this gives better images than Stable AI
+but is more restrictive in its prompts and costs $$ for each image.
 
 There was not a lot of effort expended on these scripts, they were done in one weekend so feel free to 
 improve to your particular needs!
