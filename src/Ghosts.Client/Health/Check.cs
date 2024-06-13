@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
-using Ghosts.Client.Infrastructure;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Newtonsoft.Json;
@@ -29,7 +28,7 @@ public class Check
     public void Run()
     {
         // now watch that file for changes
-        _watcher = new FileSystemWatcher(ApplicationDetails.ConfigurationFiles.Path);
+        _watcher = new FileSystemWatcher(ApplicationDetails.ConfigurationFiles.InstallPath);
         _watcher.Filter = Path.GetFileName(ApplicationDetails.ConfigurationFiles.Health);
         _log.Trace($"watching {_watcher.Path}");
         _watcher.NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.FileName | NotifyFilters.Size;

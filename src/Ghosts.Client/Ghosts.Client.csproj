@@ -154,7 +154,8 @@
     <Compile Include="Comms\ClientSocket\BackgroundTaskQueue.cs" />
     <Compile Include="Comms\ClientSocket\ClientSocketConnection.cs" />
     <Compile Include="Comms\ClientSocket\QueueEntry.cs" />
-    <Compile Include="Handlers\AwsCli.cs" />
+    <Compile Include="Handlers\Aws.cs" />
+    <Compile Include="Handlers\Azure.cs" />
     <Compile Include="Handlers\BaseBrowserHandler.cs" />
     <Compile Include="Handlers\BlogHelper.cs" />
     <Compile Include="Handlers\BlogHelperDrupal.cs" />
@@ -272,6 +273,9 @@
     <None Include="kill-ghosts.bat">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Sample Timelines\Aws.json" />
+    <None Include="Sample Timelines\Browser Crawl.json" />
+    <None Include="Sample Timelines\Browser upload.json" />
     <None Include="Sample Timelines\BrowserFirefoxSocial.json" />
     <None Include="Sample Timelines\Cron.json" />
     <None Include="Sample Timelines\Administrative Commands.json" />
@@ -293,6 +297,7 @@
     <Compile Include="TimelineManager\Orchestrator.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <None Include="Sample Timelines\NpcSystem.json" />
     <None Include="Sample Timelines\outlook.json" />
     <None Include="Sample Timelines\Outlookv2.json" />
     <None Include="Sample Timelines\Pidgin.json" />
