@@ -2,10 +2,10 @@
 
 using System;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
+using Ghosts.Domain.Code.Helpers;
 
 namespace ghosts.client.linux.handlers
 {
@@ -35,9 +35,10 @@ namespace ghosts.client.linux.handlers
                 _log.Error(e);
             }
         }
-
+        
         private void Ex()
         {
+            var handlerArgs = BuildHandlerArgVariables.BuildHandlerArgs(_handler);
             foreach (var timelineEvent in _handler.TimeLineEvents)
             {
                 WorkingHours.Is(_handler);
@@ -48,9 +49,14 @@ namespace ghosts.client.linux.handlers
                 switch (timelineEvent.Command)
                 {
                     default:
-                        foreach (var cmd in timelineEvent.CommandArgs.Where(cmd => !string.IsNullOrEmpty(cmd.ToString())))
+                        foreach (var cmdObj in timelineEvent.CommandArgs)
                         {
-                            this.Command(cmd.ToString());
+                            var cmd = cmdObj?.ToString();
+                            if (!string.IsNullOrEmpty(cmd))
+                            {
+                                cmd = BuildHandlerArgVariables.ReplaceCommandVariables(cmd, handlerArgs);
+                                this.Command(cmd);
+                            }
                         }
 
                         break;
@@ -62,8 +68,8 @@ namespace ghosts.client.linux.handlers
 
         private void Command(string command)
         {
-            command = $"{command} --no-verify";
-            
+            this.Result = string.Empty;
+
             try
             {
                 var p = new Process
@@ -75,6 +81,7 @@ namespace ghosts.client.linux.handlers
                         Arguments = command,
                         UseShellExecute = false,
                         RedirectStandardOutput = true,
+                        RedirectStandardError = true,
                         CreateNoWindow = true
                     }
                 };
@@ -85,6 +92,16 @@ namespace ghosts.client.linux.handlers
                     this.Result += p.StandardOutput.ReadToEnd();
                 }
 
+                var err = string.Empty;
+                while (!p.StandardError.EndOfStream)
+                { 
+                    err += p.StandardError.ReadToEnd();
+                }
+                if (err.Length > 0)
+                {
+                    _log.Error($"{err} on {command}");
+                }
+                
                 Report(new ReportItem {Handler = HandlerType.Azure.ToString(), Command = command, Result = this.Result});
             }
             catch (Exception exc)
