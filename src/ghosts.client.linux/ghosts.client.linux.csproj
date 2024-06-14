@@ -7,7 +7,7 @@
     <Version>8.0.0.0</Version>
     <AssemblyVersion>8.0.0.0</AssemblyVersion>
     <ReleaseVersion>8.0.0.0</ReleaseVersion>
-    <FileVersion>8.0.51.50</FileVersion>
+    <FileVersion>8.1.0.0</FileVersion>
     
     <SynchReleaseVersion>false</SynchReleaseVersion>
         
@@ -79,6 +79,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="nlog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="config\Aws.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

@@ -215,6 +215,18 @@ namespace ghosts.client.linux.timelineManager
                             o = new Watcher(handler);
                         });
                         break;
+                    case HandlerType.Aws:
+                        t = new Thread(() =>
+                        {
+                            o = new Aws(handler);
+                        });
+                        break;
+                    case HandlerType.Azure:
+                        t = new Thread(() =>
+                        {
+                            o = new Azure(handler);
+                        });
+                        break;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }

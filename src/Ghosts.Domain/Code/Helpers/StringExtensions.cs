@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Ghosts.Domain.Code.Helpers
@@ -83,6 +84,33 @@ namespace Ghosts.Domain.Code.Helpers
             return $"{adjustedSize:n} {SizeSuffixes[mag]}";
         }
 
+        public static string RemoveTextBetweenMarkers(this string input, string startMarker, string endMarker)
+        {
+            if (string.IsNullOrEmpty(input) || string.IsNullOrEmpty(startMarker) || string.IsNullOrEmpty(endMarker))
+            {
+                return input;
+            }
+
+            input = input.TrimEnd('.');
+
+            var result = new StringBuilder(input);
+            var startIndex = 0;
+
+            while ((startIndex = result.ToString().IndexOf(startMarker, startIndex, StringComparison.OrdinalIgnoreCase)) != -1)
+            {
+                var endIndex = result.ToString().IndexOf(endMarker, startIndex, StringComparison.OrdinalIgnoreCase);
+                if (endIndex == -1)
+                {
+                    break;
+                }
+                endIndex += endMarker.Length;
+
+                // Remove the substring from startIndex to endIndex
+                result.Remove(startIndex, endIndex - startIndex);
+            }
+
+            return result.ToString().Replace("\n", "");
+        }
     }
 
 }

@@ -96,8 +96,9 @@ namespace Ghosts.Domain.Code
                 _log.Debug($"Timeline {timeline.Id} loaded successfully");
                 return timeline;
             }
-            catch
+            catch(Exception ex)
             {
+                _log.Error(ex);
                 return null;
             }
         }

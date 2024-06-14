@@ -333,10 +333,16 @@ namespace Ghosts.Client.TimelineManager
                             _ = new Cmd(handler);
                         });
                         break;
-                    case HandlerType.AwsCli:
+                    case HandlerType.Aws:
                         t = new Thread(() =>
                         {
-                            _ = new AwsCli(handler);
+                            _ = new Aws(handler);
+                        });
+                        break;
+                    case HandlerType.Azure:
+                        t = new Thread(() =>
+                        {
+                            _ = new Handlers.Azure(handler);
                         });
                         break;
                     case HandlerType.Rdp:
