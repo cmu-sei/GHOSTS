@@ -81,6 +81,7 @@ public class ApplicationSettings
                 public int TurnLength { get; set; }
                 public int MaximumSteps { get; set; }
                 public bool IsSendingTimelinesToGhostsApi { get; set; }
+                public int PercentReplyVsNew { get; set; }
                 public string PostUrl { get; set; }
                 public ContentEngineSettings ContentEngine { get; set; }
             }

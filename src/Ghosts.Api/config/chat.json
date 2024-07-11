@@ -5,8 +5,33 @@
     "adminPassword": "scotty@1",
     "defaultUserPassword": "scotty@1",
     "agentsPerBatch": 10
-  }  ,
+  },
   "replacements": [],
-  "drops": ["As an AI"],
-  "prompts": []
+  "drops": [
+    "As an AI",
+    "super secret",
+    "secret chat"
+  ],
+  "prompts": [
+    "portrays me as a fearless leader in battle",
+    "emphasizes my strategic brilliance in combat",
+    "depicts me as a master tactician",
+    "highlights my unyielding courage under fire",
+    "shows my exceptional ability to lead troops",
+    "underscores my unwavering discipline and resolve",
+    "paints me as a heroic figure on the battlefield",
+    "reflects my deep knowledge of military tactics",
+    "demonstrates my unparalleled battlefield awareness",
+    "conveys my ability to inspire soldiers",
+    "illustrates my remarkable physical fitness and endurance",
+    "captures my determination to achieve mission objectives",
+    "sheds light on my extensive experience in military operations",
+    "showcases my impressive marksmanship skills",
+    "reveals my proficiency in handling complex equipment",
+    "accentuates my commanding presence",
+    "presents me as a decisive and effective commander",
+    "underscores my quick decision-making under pressure",
+    "highlights my ability to execute flawless maneuvers",
+    "portrays me as a symbol of strength and leadership"
+  ]
 }
