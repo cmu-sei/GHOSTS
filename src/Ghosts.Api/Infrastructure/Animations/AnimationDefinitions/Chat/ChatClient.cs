@@ -10,6 +10,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Ghosts.Api;
 using ghosts.api.Hubs;
 using ghosts.api.Infrastructure.Animations.AnimationDefinitions.Chat.Mattermost;
 using ghosts.api.Infrastructure.ContentServices;
@@ -444,6 +445,12 @@ public class ChatClient
     {
         _log.Trace($"Managing {username}...");
 
+        if (username.Contains("admin"))
+        {
+            _log.Trace($"Skipping user {username}...");
+            return;
+        }
+
         try
         {
             await this.Login(username, password);
@@ -518,7 +525,7 @@ public class ChatClient
                     }
                 }
                 
-                var feelings = this._configuration.Prompts.GetRandom(random);
+                var subPrompts = this._configuration.Prompts.GetRandom(random);
                 _log.Trace($"{username} looking at posts...");
 
                 if (random.Next(0, 100) > 50)
@@ -541,12 +548,13 @@ public class ChatClient
                     }
                 }
                 
-                var history = channelHistory.Where(x => x.ChannelId == randomChannelToPostTo && x.UserId != me.Username).MaxBy(x => x.Created);
-                var historyString = history is { Message.Length: >= 100 } ? history.Message[..100] : history?.Message;
-
-                var prompt = $"Write my update to the chat system that {feelings}";
+                var history = channelHistory.Where(x => x.ChannelId == randomChannelToPostTo && x.UserName != me.Username).MaxBy(x => x.Created);
+                //var historyString = history is { Message.Length: >= 100 } ? history.Message[..100] : history?.Message;
+                var historyString = history.Message;
+                
+                var prompt = $"Write my update to the chat system that {subPrompts}";
                 var respondingTo = string.Empty;
-                if (random.Next(0, 99) > 50 && !string.IsNullOrEmpty(historyString) && history.UserId != me.Id)
+                if (random.Next(0, 99) < Program.ApplicationSettings.AnimatorSettings.Animations.Chat.PercentReplyVsNew && !string.IsNullOrEmpty(historyString) && history.UserId != me.Id)
                 {
                     prompt =
                         $"How do I respond to this? {historyString}";
@@ -554,11 +562,18 @@ public class ChatClient
                 }
 
                 var message = await this._formatterService.ExecuteQuery(prompt);
-
                 message = message.Clean(this._configuration.Replacements, random);
+                if (string.IsNullOrEmpty(message))
+                {
+                    _log.Trace($"Empty message for {me.Username} {prompt}. Continuing..");
+                    return;
+                }
+                
                 if (!string.IsNullOrEmpty(respondingTo))
                 {
+                    var f = $"{historyString} | {respondingTo} | {message}";
                     message = $"> {historyString.Replace(">", "")}{Environment.NewLine}{Environment.NewLine}@{respondingTo} {message}";
+                    _log.Trace($"{historyString} | {respondingTo} | {message}{Environment.NewLine}{f}");
                 }
                 
                 if (message.ShouldSend(this._configuration.Drops))
