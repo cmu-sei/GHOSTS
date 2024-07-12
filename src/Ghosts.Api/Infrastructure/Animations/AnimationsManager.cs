@@ -319,13 +319,13 @@ public class AnimationsManager : IManageableHostedService
                     _chatJobThread = new Thread(() =>
                     {
                         Thread.CurrentThread.IsBackground = true;
-                        _ = new ChatJob(settings, _scopeFactory, this._random, this._activityHubContext, this._chatJobJobCancellationTokenSource.Token);
+                        _ = new ChatJob(chatSettings, _scopeFactory, this._random, this._activityHubContext, this._chatJobJobCancellationTokenSource.Token);
                     });
                     _chatJobThread.Start();
                 }
                 else
                 {
-                    _ = new ChatJob(settings, _scopeFactory, this._random, this._activityHubContext, this._chatJobJobCancellationTokenSource.Token);
+                    _ = new ChatJob(chatSettings, _scopeFactory, this._random, this._activityHubContext, this._chatJobJobCancellationTokenSource.Token);
                 }
                 
                 break;
@@ -435,13 +435,13 @@ public class AnimationsManager : IManageableHostedService
                     _chatJobThread = new Thread(() =>
                     {
                         Thread.CurrentThread.IsBackground = true;
-                        _ = new ChatJob(this._configuration, _scopeFactory, this._random, this._activityHubContext, this._chatJobJobCancellationTokenSource.Token);
+                        _ = new ChatJob(this._configuration.AnimatorSettings.Animations.Chat, _scopeFactory, this._random, this._activityHubContext, this._chatJobJobCancellationTokenSource.Token);
                     });
                     _chatJobThread.Start();
                 }
                 else
                 {
-                    _ = new ChatJob(this._configuration, _scopeFactory, this._random, this._activityHubContext, this._chatJobJobCancellationTokenSource.Token);
+                    _ = new ChatJob(this._configuration.AnimatorSettings.Animations.Chat, _scopeFactory, this._random, this._activityHubContext, this._chatJobJobCancellationTokenSource.Token);
                 }
             }
             else

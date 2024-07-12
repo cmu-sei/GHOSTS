@@ -10,8 +10,8 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Ghosts.Api;
 using ghosts.api.Hubs;
+using Ghosts.Api.Infrastructure;
 using ghosts.api.Infrastructure.Animations.AnimationDefinitions.Chat.Mattermost;
 using ghosts.api.Infrastructure.ContentServices;
 using Ghosts.Api.Infrastructure.Data;
@@ -28,6 +28,7 @@ public class ChatClient
 {
     private static readonly Logger _log = LogManager.GetCurrentClassLogger();
     private readonly ChatJobConfiguration _configuration;
+    private readonly ApplicationSettings.AnimatorSettingsDetail.AnimationsSettings.ChatSettings _chatSettings;
     private readonly string _baseUrl;
     private readonly HttpClient _client;
     private string _token;
@@ -37,9 +38,10 @@ public class ChatClient
     private readonly ApplicationDbContext _context;
     private IHubContext<ActivityHub> _activityHubContext;
 
-    public ChatClient(ChatJobConfiguration config, IFormatterService formatterService, IHubContext<ActivityHub> activityHubContext, ApplicationDbContext context)
+    public ChatClient(ApplicationSettings.AnimatorSettingsDetail.AnimationsSettings.ChatSettings chatSettings, ChatJobConfiguration config, IFormatterService formatterService, IHubContext<ActivityHub> activityHubContext, ApplicationDbContext context)
     {
         _configuration = config;
+        _chatSettings = chatSettings;
         this._baseUrl = _configuration.Chat.BaseUrl;
         this._client = new HttpClient();
         this._formatterService = formatterService;
@@ -88,8 +90,8 @@ public class ChatClient
         }
         catch (Exception e)
         {
-            _log.Error(e);
-            return null;
+            _log.Error($"Cannot login {username}:{password} with error {e.Message}|{e.StackTrace}");
+            throw;
         }
     }
 
@@ -130,7 +132,7 @@ public class ChatClient
         }
         catch (Exception e)
         {
-            _log.Error($"No channels found {e}");
+            _log.Trace($"No channels found {e}");
             return new List<Channel>();
         }
     }
@@ -503,24 +505,41 @@ public class ChatClient
                         if (lastPost != null)
                             postId = lastPost.PostId;
                         var posts = await this.GetPostsByChannel(channel.Id, postId);
-                        foreach (var post in posts.Posts.Where(x => x.Value.Type == ""))
+                        try
                         {
-                            var user = await this.GetUserById(post.Value.UserId);
-                            if (user == null)
+                            if (posts?.Posts != null)
                             {
-                                const string email = "some.one@user.com";
-                                user = new User
-                                    { FirstName = "some", LastName = "one", Email = email, Username = email.CreateUsernameFromEmail() };
-                            }
+                                foreach (var post in posts.Posts.Where(x => x.Value?.Type == ""))
+                                {
+                                    var user = await this.GetUserById(post.Value.UserId);
+                                    if (user == null)
+                                    {
+                                        const string email = "some.one@user.com";
+                                        user = new User
+                                        {
+                                            FirstName = "some",
+                                            LastName = "one",
+                                            Email = email,
+                                            Username = email.CreateUsernameFromEmail()
+                                        };
+                                    }
 
-                            channelHistory.Add(new ChannelHistory
-                            {
-                                ChannelId = channel.Id, ChannelName = channel.Name, UserId = post.Value.Id,
-                                PostId = post.Value.Id, 
-                                UserName = user.Username,
-                                Created = post.Value.CreateAt.ToDateTime(),
-                                Message = post.Value.Message
-                            });
+                                    channelHistory.Add(new ChannelHistory
+                                    {
+                                        ChannelId = channel.Id,
+                                        ChannelName = channel.Name,
+                                        UserId = post.Value.Id,
+                                        PostId = post.Value.Id,
+                                        UserName = user.Username,
+                                        Created = post.Value.CreateAt.ToDateTime(),
+                                        Message = post.Value.Message
+                                    });
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            _log.Trace($"An error occurred: {ex.Message}");
                         }
                     }
                 }
@@ -528,7 +547,7 @@ public class ChatClient
                 var subPrompts = this._configuration.Prompts.GetRandom(random);
                 _log.Trace($"{username} looking at posts...");
 
-                if (random.Next(0, 100) > 50)
+                if (random.Next(0, 99) < _chatSettings.PercentWillPost)
                 {
                     _log.Info($"{username} exiting.");
                     return;
@@ -550,11 +569,13 @@ public class ChatClient
                 
                 var history = channelHistory.Where(x => x.ChannelId == randomChannelToPostTo && x.UserName != me.Username).MaxBy(x => x.Created);
                 //var historyString = history is { Message.Length: >= 100 } ? history.Message[..100] : history?.Message;
-                var historyString = history.Message;
+                var historyString = string.Empty;
+                if (history != null)
+                    historyString = history.Message;
                 
                 var prompt = $"Write my update to the chat system that {subPrompts}";
                 var respondingTo = string.Empty;
-                if (random.Next(0, 99) < Program.ApplicationSettings.AnimatorSettings.Animations.Chat.PercentReplyVsNew && !string.IsNullOrEmpty(historyString) && history.UserId != me.Id)
+                if (random.Next(0, 99) < _chatSettings.PercentReplyVsNew && !string.IsNullOrEmpty(historyString) && history.UserId != me.Id)
                 {
                     prompt =
                         $"How do I respond to this? {historyString}";
