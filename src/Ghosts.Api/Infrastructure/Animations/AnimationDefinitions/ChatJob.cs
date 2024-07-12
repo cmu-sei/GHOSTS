@@ -20,7 +20,7 @@ namespace ghosts.api.Infrastructure.Animations.AnimationDefinitions;
 public class ChatJob
 {
     private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-    private readonly ApplicationSettings _configuration;
+    private readonly ApplicationSettings.AnimatorSettingsDetail.AnimationsSettings.ChatSettings _configuration;
     private readonly ApplicationDbContext _context;
     private readonly Random _random;
     private readonly ChatClient _chatClient;
@@ -28,7 +28,7 @@ public class ChatJob
     private CancellationToken _cancellationToken;
     private IFormatterService _formatterService;
     
-    public ChatJob(ApplicationSettings configuration, IServiceScopeFactory scopeFactory, Random random,
+    public ChatJob(ApplicationSettings.AnimatorSettingsDetail.AnimationsSettings.ChatSettings configuration, IServiceScopeFactory scopeFactory, Random random,
         IHubContext<ActivityHub> activityHubContext, CancellationToken cancellationToken)
     {
         //todo: post results to activityHubContext for "top" reporting
@@ -45,20 +45,20 @@ public class ChatJob
             new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? throw new InvalidOperationException();
 
         this._formatterService =
-            new ContentCreationService(_configuration.AnimatorSettings.Animations.Chat.ContentEngine).FormatterService;
+            new ContentCreationService(_configuration.ContentEngine).FormatterService;
         
-        this._chatClient = new ChatClient(chatConfiguration, this._formatterService, activityHubContext, this._context);
+        this._chatClient = new ChatClient(_configuration, chatConfiguration, this._formatterService, activityHubContext, this._context);
         
         while (!_cancellationToken.IsCancellationRequested)
         {
-            if (this._currentStep > _configuration.AnimatorSettings.Animations.Chat.MaximumSteps)
+            if (this._currentStep > _configuration.MaximumSteps)
             {
                 _log.Trace($"Maximum steps met: {this._currentStep - 1}. Chat Job is exiting...");
                 return;
             }
 
             this.Step(random, chatConfiguration);
-            Thread.Sleep(this._configuration.AnimatorSettings.Animations.Chat.TurnLength);
+            Thread.Sleep(this._configuration.TurnLength);
 
             this._currentStep++;
         }

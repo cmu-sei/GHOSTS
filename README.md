@@ -4,6 +4,8 @@ GHOSTS simulates what anyone might do at a computer, creating documents, browsin
 
 GHOSTS has many use cases in cyber training and exercises, most notably for bringing non-player characters (NPCs) to life, but GHOSTS can be used for many other purposes where realistic activity on a computer is needed as well.
 
+There is a [short demonstration video available on YouTube](https://www.youtube.com/watch?v=EkwK-cqwjjA) (3:03).
+
 ---
 
 **Version 8 is here (with breaking changes!).** It has absorbed the other modules of the GHOSTS framework, [ANIMATOR (now archived)](https://github.com/cmu-sei/GHOSTS-ANIMATOR) and [SPECTRE (now archived)](https://github.com/cmu-sei/GHOSTS-SPECTRE). This was done in order to greatly simplify installation, configuration, and the administration of a GHOSTS instance, but also to bring further capability to the core agents by more tightly combining information segregated into separate databases and systems until now.
@@ -17,8 +19,6 @@ The breaking changes are:
 Sorry, but there is no upgrade path from previous versions — install a fresh instance to get rolling with V8.
 
 ---
-
-There is a [short demonstration video available on YouTube](https://www.youtube.com/watch?v=EkwK-cqwjjA) (3:03).
 
 ## Key Links
 
@@ -45,6 +45,18 @@ The API server provides a way for clients to interact with the GHOSTS system and
 - Manage clients, add/remove them from groups, etc.
 - Get/manage information from clients regarding their previous or current activities, etc.
 - Orchestrate new activities for particular clients to perform
+
+### [Ghosts Lite](src/Ghosts.Client.Lite/)
+
+A resource light version of the Windows GHOSTS client that can be run on minimal hardware.
+
+### [Pandora Content Server](src/ghosts.pandora/)
+
+A server that provides content to GHOSTS clients (or otherwise). Pandora determines what you most likely requested, creates that content, and serves it back in the response. Pandora also has the ability to serve predetermined static content for training and exercise purposes (and red-teaming).
+
+### [Pandora Socializer Server](src/ghosts.pandora.socializer/)
+
+The social media (x.com) server that enables Ghosts clients to post and interact with social media content.
 
 ## License
 
