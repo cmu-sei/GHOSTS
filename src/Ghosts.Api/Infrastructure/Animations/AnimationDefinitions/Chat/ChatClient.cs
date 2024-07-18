@@ -9,7 +9,9 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
+using Ghosts.Animator.Extensions;
 using ghosts.api.Hubs;
 using Ghosts.Api.Infrastructure;
 using ghosts.api.Infrastructure.Animations.AnimationDefinitions.Chat.Mattermost;
@@ -34,11 +36,14 @@ public class ChatClient
     private string _token;
     private string UserId { get; set; }
     private IFormatterService _formatterService;
-    
+
     private readonly ApplicationDbContext _context;
     private IHubContext<ActivityHub> _activityHubContext;
+    private CancellationToken _cancellationToken;
 
-    public ChatClient(ApplicationSettings.AnimatorSettingsDetail.AnimationsSettings.ChatSettings chatSettings, ChatJobConfiguration config, IFormatterService formatterService, IHubContext<ActivityHub> activityHubContext, ApplicationDbContext context)
+    public ChatClient(ApplicationSettings.AnimatorSettingsDetail.AnimationsSettings.ChatSettings chatSettings,
+        ChatJobConfiguration config, IFormatterService formatterService, IHubContext<ActivityHub> activityHubContext,
+        ApplicationDbContext context, CancellationToken ct)
     {
         _configuration = config;
         _chatSettings = chatSettings;
@@ -47,19 +52,28 @@ public class ChatClient
         this._formatterService = formatterService;
         this._context = context;
         this._activityHubContext = activityHubContext;
+        this._cancellationToken = _cancellationToken;
     }
 
     private async Task<User> AdminLogin()
     {
-        return await this.Login(this._configuration.Chat.AdminUsername,
-            this._configuration.Chat.AdminPassword);
+        try
+        {
+            return await this.Login(this._configuration.Chat.AdminUsername,
+                this._configuration.Chat.AdminPassword);
+        }
+        catch (Exception e)
+        {
+            _log.Error($"Cannot login the configured admin account – {this._configuration.Chat.AdminUsername} with error {e.Message}|{e.StackTrace}");
+            return null;
+        }
     }
 
     private async Task<User> Login(string username, string password)
     {
         var url = $"{_baseUrl}api/v4/users/login";
         _log.Trace($"Using login url: {url}");
-        
+
         try
         {
             var request = new HttpRequestMessage(HttpMethod.Post, url);
@@ -99,49 +113,62 @@ public class ChatClient
     {
         var url = $"{_baseUrl}api/v4/users/{user.Id}/teams";
         _log.Trace($"Using get teams url: {url}");
-        
+
         try
         {
             var request = new HttpRequestMessage(HttpMethod.Get, url);
             var content = await ExecuteRequest(request);
-            
-            var response = JsonSerializer.Deserialize<IEnumerable<Team>>(content,
-                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            return response;
+
+            if (!string.IsNullOrEmpty(content))
+            {
+                var response = JsonSerializer.Deserialize<IEnumerable<Team>>(content,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                return response;
+            }
         }
         catch (Exception e)
         {
             _log.Error($"No teams found {e}");
-            return new List<Team>();
         }
+        
+        return new List<Team>();
     }
 
     private async Task<IEnumerable<Channel>> GetMyChannels(User user)
     {
         var url = $"{_baseUrl}api/v4/users/{user.Id}/channels";
         _log.Trace($"Using get channels url: {url}");
+
+        var content = string.Empty;
         
         try
         {
             var request = new HttpRequestMessage(HttpMethod.Get, url);
-            var content = await ExecuteRequest(request);
-            
-            var response = JsonSerializer.Deserialize<IEnumerable<Channel>>(content,
-                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            return response;
+            content = await ExecuteRequest(request);
+
+            if (!string.IsNullOrEmpty(content))
+            {
+                if (!content.Contains("detailed_error"))
+                {
+                    var response = JsonSerializer.Deserialize<IEnumerable<Channel>>(content,
+                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    return response;
+                }
+            }
         }
         catch (Exception e)
         {
-            _log.Trace($"No channels found {e}");
-            return new List<Channel>();
+            _log.Trace($"No channels found in {content} {e}");
         }
+        
+        return new List<Channel>();
     }
 
     private async Task CreateUser(UserCreate create)
     {
         var url = $"{_baseUrl}api/v4/users";
         _log.Trace($"Using create user url: {url}");
-        
+
         try
         {
             var jsonPayload = JsonSerializer.Serialize(create.ToObject());
@@ -161,63 +188,75 @@ public class ChatClient
     {
         var url = $"{_baseUrl}api/v4/users";
         _log.Trace($"Using get users url: {url}");
-        
+
         try
         {
             var request = new HttpRequestMessage(HttpMethod.Get, url);
             var content = await ExecuteRequest(request);
 
-            var response = JsonSerializer.Deserialize<IEnumerable<User>>(content,
-                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            return response;
+            if (!string.IsNullOrEmpty(content))
+            {
+                var response = JsonSerializer.Deserialize<IEnumerable<User>>(content,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                return response;
+            }
         }
         catch (Exception e)
         {
             _log.Error($"Get users failed {e}");
-            return new List<User>();
         }
+        
+        return new List<User>();
     }
 
     private async Task<User> GetUserByUsername(string username)
     {
         var url = $"{_baseUrl}api/v4/users/username/{username}";
         _log.Trace($"Using get user by username url: {url}");
-        
+
         try
         {
             var request = new HttpRequestMessage(HttpMethod.Get, url);
             var content = await ExecuteRequest(request);
 
-            var response = JsonSerializer.Deserialize<User>(content,
-                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            return response;
+            if (!string.IsNullOrEmpty(content))
+            {
+                var response = JsonSerializer.Deserialize<User>(content,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                return response;
+            }
         }
         catch (Exception e)
         {
             _log.Error($"Get user by username failed {e}");
-            return new User();
         }
+        
+        return new User();
     }
 
     private async Task<User> GetUserById(string id)
     {
         var url = $"{_baseUrl}api/v4/users/{id}";
         _log.Trace($"Using get user by id url: {url}");
-        
+
         try
         {
             var request = new HttpRequestMessage(HttpMethod.Get, url);
             var content = await ExecuteRequest(request);
 
-            var response = JsonSerializer.Deserialize<User>(content,
-                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            return response;
+            if (!string.IsNullOrEmpty(content))
+            {
+                var response = JsonSerializer.Deserialize<User>(content,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                return response;
+            }
         }
         catch (Exception e)
         {
             _log.Error($"Get user by id failed {e}");
-            return new User();
         }
+        
+        return new User();
     }
 
     private async Task JoinTeam(string userId, string teamId)
@@ -227,7 +266,7 @@ public class ChatClient
             team_id = teamId,
             user_id = userId
         };
-        
+
         var url = $"{_baseUrl}api/v4/teams/{teamId}/members";
         _log.Trace($"Using join team url: {url}");
 
@@ -252,7 +291,7 @@ public class ChatClient
         {
             user_id = userId
         };
-        
+
         var url = $"{_baseUrl}api/v4/channels/{channelId}/members";
         _log.Trace($"Using join channel url: {url}");
 
@@ -275,7 +314,7 @@ public class ChatClient
     {
         var url = $"{_baseUrl}api/v4/teams";
         _log.Trace($"Using get teams url: {url}");
-        
+
         try
         {
             var request = new HttpRequestMessage(HttpMethod.Get, url);
@@ -296,21 +335,26 @@ public class ChatClient
     {
         var url = $"{_baseUrl}api/v4/teams/{teamId}/channels";
         _log.Trace($"Using get channels url: {url}");
-        
+
         try
         {
             var request = new HttpRequestMessage(HttpMethod.Get, url);
             var content = await ExecuteRequest(request);
-            
-            var response = JsonSerializer.Deserialize<IEnumerable<Channel>>(content,
-                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            return response;
+
+            if (!string.IsNullOrEmpty(content))
+            {
+
+                var response = JsonSerializer.Deserialize<IEnumerable<Channel>>(content,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                return response;
+            }
         }
         catch (Exception e)
         {
             _log.Error($"No channels found {e}");
-            return new List<Channel>();
         }
+        
+        return new List<Channel>();
     }
 
     // public async Task GetUnreadPosts()
@@ -331,22 +375,26 @@ public class ChatClient
     {
         var url = $"{_baseUrl}api/v4/channels/{channelId}/posts?after={afterPostId}";
         _log.Trace($"Using get posts by channel url: {url}");
-        
+
         try
         {
             var request =
                 new HttpRequestMessage(HttpMethod.Get, url);
             var content = await ExecuteRequest(request);
 
-            var response = JsonSerializer.Deserialize<PostResponse>(content,
-                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            return response;
+            if (!string.IsNullOrEmpty(content))
+            {
+                var response = JsonSerializer.Deserialize<PostResponse>(content,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                return response;
+            }
         }
         catch (Exception e)
         {
             _log.Error($"No posts found {e}");
-            return new PostResponse();
         }
+        
+        return new PostResponse();
     }
 
 
@@ -400,7 +448,7 @@ public class ChatClient
         try
         {
             var response = await this._client.SendAsync(request);
-            if (response.StatusCode == HttpStatusCode.Forbidden || response.StatusCode == HttpStatusCode.BadRequest)
+            if (response.StatusCode is HttpStatusCode.Forbidden or HttpStatusCode.BadRequest)
             {
                 _log.Info(await response.Content.ReadAsStringAsync());
                 return string.Empty;
@@ -422,208 +470,220 @@ public class ChatClient
 
     public async Task Step(Random random, IEnumerable<NpcRecord> agents)
     {
-        await this.AdminLogin();
-        
-        var agentsWithAccounts = await this.GetUsers();
-        var agentsWithAccountsHash = new HashSet<string>(agentsWithAccounts.Select(a => a.Email));
-        var agentList = agents.ToList();
-        foreach (var agent in agentList)
+        while (!this._cancellationToken.IsCancellationRequested)
         {
-            var username = agent.NpcProfile.Email.CreateUsernameFromEmail();
-            if (!agentsWithAccountsHash.Contains(agent.NpcProfile.Email))
+            var u = await this.AdminLogin();
+            if (u == null)
+                return;
+
+            var agentsWithAccounts = await this.GetUsers();
+            var agentsWithAccountsHash = new HashSet<string>(agentsWithAccounts.Select(a => a.Email));
+            var agentList = agents.ToList();
+            foreach (var agent in agentList)
             {
-                await this.CreateUser(new UserCreate
+                var username = agent.NpcProfile.Email.CreateUsernameFromEmail();
+                if (!agentsWithAccountsHash.Contains(agent.NpcProfile.Email))
                 {
-                    Email = agent.NpcProfile.Email, FirstName = agent.NpcProfile.Name.First, LastName = agent.NpcProfile.Name.Last,
-                    Nickname = agent.NpcProfile.Name.ToString() ?? string.Empty, Password = _configuration.Chat.DefaultUserPassword, Username =  username
-                });
+                    await this.CreateUser(new UserCreate
+                    {
+                        Email = agent.NpcProfile.Email, FirstName = agent.NpcProfile.Name.First,
+                        LastName = agent.NpcProfile.Name.Last,
+                        Nickname = agent.NpcProfile.Name.ToString() ?? string.Empty,
+                        Password = _configuration.Chat.DefaultUserPassword, Username = username
+                    });
+                }
+
+                await this.StepEx(random, agent.Id, username, _configuration.Chat.DefaultUserPassword);
             }
-            
-            await this.StepEx(random, agent.Id, username, _configuration.Chat.DefaultUserPassword);
         }
     }
 
-    private async Task StepEx(Random random, Guid NpcId, string username, string password)
+    private async Task StepEx(Random random, Guid npcId, string username, string password)
     {
-        _log.Trace($"Managing {username}...");
+        while (!this._cancellationToken.IsCancellationRequested)
+        {
+            _log.Trace($"Managing {username}...");
 
-        if (username.Contains("admin"))
-        {
-            _log.Trace($"Skipping user {username}...");
-            return;
-        }
-
-        try
-        {
-            await this.Login(username, password);
-            _log.Trace($"{username} is now logged in");
-        }
-        catch (Exception e)
-        {
-            _log.Warn($"Could not login {username}, {password} with: {e}");
-            return;
-        }
-
-        var me = await this.GetUserByUsername(username);
-        var channelHistory = new List<ChannelHistory>();
-        try
-        {
-            while (true)
+            if (username.Contains("admin"))
             {
-                var myTeams = await this.GetMyTeams(me);
-                var myChannels = await this.GetMyChannels(me);
-                var myChannelsList = myChannels as Channel[] ?? myChannels.ToArray();
+                _log.Trace($"Skipping user {username}...");
+                return;
+            }
 
-                var teams = await this.GetTeams();
-                var teamsList = teams as Team[] ?? teams.ToArray();
-                var notMyTeams = teamsList.Except(myTeams, new TeamComparer()).ToList();
+            try
+            {
+                await this.Login(username, password);
+                _log.Trace($"{username} is now logged in");
+            }
+            catch (Exception e)
+            {
+                _log.Warn($"Could not login {username}, {password} with: {e}");
+                return;
+            }
 
-                // Do something with the teams not in 'myTeams'
-                foreach (var team in notMyTeams.Where(x => x.AllowOpenInvite is true))
+            var me = await this.GetUserByUsername(username);
+            var channelHistory = new List<ChannelHistory>();
+            try
+            {
+                var numberOfPosts = _chatSettings.PostProbabilities.GetWeightedRandomProbabilityResult();
+                _log.Trace($"Preparing to post {numberOfPosts} times for {username}");
+                for (var i = 0; i <= numberOfPosts; i++)
                 {
-                    await this.JoinTeam(this.UserId, team.Id);
-                }
+                    var myTeams = await this.GetMyTeams(me);
+                    var myChannels = await this.GetMyChannels(me);
+                    var myChannelsList = myChannels as Channel[] ?? myChannels.ToArray();
 
-                foreach (var team in teamsList)
-                {
-                    _log.Trace($"{this.UserId} TEAM {team.Name}");
-                    var channels = await this.GetChannelsByTeam(team.Id);
-                    var channelsList = channels as Channel[] ?? channels.ToArray();
-                    var notMyChannels = channelsList.Except(myChannelsList, new ChannelComparer()).ToList();
+                    var teams = await this.GetTeams();
+                    var teamsList = teams as Team[] ?? teams.ToArray();
+                    var notMyTeams = teamsList.Except(myTeams, new TeamComparer()).ToList();
 
-                    foreach (var channel in notMyChannels)
+                    // Do something with the teams not in 'myTeams'
+                    foreach (var team in notMyTeams.Where(x => x.AllowOpenInvite is true))
                     {
-                        await this.JoinChannel(this.UserId, channel.Id);
+                        await this.JoinTeam(this.UserId, team.Id);
                     }
 
-                    foreach (var channel in channelsList)
+                    foreach (var team in teamsList)
                     {
-                        _log.Trace($"{this.UserId} CHANNEL: {channel.Id}, {channel.Name}");
-                        var lastPost = channelHistory.OrderByDescending(x => x.Created)
-                            .FirstOrDefault(x => x.ChannelId == channel.Id);
-                        var postId = string.Empty;
-                        if (lastPost != null)
-                            postId = lastPost.PostId;
-                        var posts = await this.GetPostsByChannel(channel.Id, postId);
-                        try
-                        {
-                            if (posts?.Posts != null)
-                            {
-                                foreach (var post in posts.Posts.Where(x => x.Value?.Type == ""))
-                                {
-                                    var user = await this.GetUserById(post.Value.UserId);
-                                    if (user == null)
-                                    {
-                                        const string email = "some.one@user.com";
-                                        user = new User
-                                        {
-                                            FirstName = "some",
-                                            LastName = "one",
-                                            Email = email,
-                                            Username = email.CreateUsernameFromEmail()
-                                        };
-                                    }
+                        _log.Trace($"{this.UserId} TEAM {team.Name}");
+                        var channels = await this.GetChannelsByTeam(team.Id);
+                        var channelsList = channels as Channel[] ?? channels.ToArray();
+                        var notMyChannels = channelsList.Except(myChannelsList, new ChannelComparer()).ToList();
 
-                                    channelHistory.Add(new ChannelHistory
+                        foreach (var channel in notMyChannels)
+                        {
+                            await this.JoinChannel(this.UserId, channel.Id);
+                        }
+
+                        foreach (var channel in channelsList)
+                        {
+                            _log.Trace($"{this.UserId} CHANNEL: {channel.Id}, {channel.Name}");
+                            var lastPost = channelHistory.OrderByDescending(x => x.Created)
+                                .FirstOrDefault(x => x.ChannelId == channel.Id);
+                            var postId = string.Empty;
+                            if (lastPost != null)
+                                postId = lastPost.PostId;
+                            var posts = await this.GetPostsByChannel(channel.Id, postId);
+                            try
+                            {
+                                if (posts?.Posts != null)
+                                {
+                                    foreach (var post in posts.Posts.Where(x => x.Value?.Type == ""))
                                     {
-                                        ChannelId = channel.Id,
-                                        ChannelName = channel.Name,
-                                        UserId = post.Value.Id,
-                                        PostId = post.Value.Id,
-                                        UserName = user.Username,
-                                        Created = post.Value.CreateAt.ToDateTime(),
-                                        Message = post.Value.Message
-                                    });
+                                        var user = await this.GetUserById(post.Value.UserId);
+                                        if (user == null)
+                                        {
+                                            const string email = "some.one@user.com";
+                                            user = new User
+                                            {
+                                                FirstName = "some",
+                                                LastName = "one",
+                                                Email = email,
+                                                Username = email.CreateUsernameFromEmail()
+                                            };
+                                        }
+
+                                        channelHistory.Add(new ChannelHistory
+                                        {
+                                            ChannelId = channel.Id,
+                                            ChannelName = channel.Name,
+                                            UserId = post.Value.Id,
+                                            PostId = post.Value.Id,
+                                            UserName = user.Username,
+                                            Created = post.Value.CreateAt.ToDateTime(),
+                                            Message = post.Value.Message
+                                        });
+                                    }
                                 }
                             }
-                        }
-                        catch (Exception ex)
-                        {
-                            _log.Trace($"An error occurred: {ex.Message}");
+                            catch (Exception ex)
+                            {
+                                _log.Trace($"An error occurred: {ex.Message}");
+                            }
                         }
                     }
-                }
-                
-                var subPrompts = this._configuration.Prompts.GetRandom(random);
-                _log.Trace($"{username} looking at posts...");
 
-                if (random.Next(0, 99) < _chatSettings.PercentWillPost)
-                {
-                    _log.Info($"{username} exiting.");
-                    return;
-                }
+                    var subPrompt = this._configuration.Prompts.GetRandom(random);
+                    _log.Trace($"{username} looking at posts...");
 
-                var randomChannelToPostTo = channelHistory.Select(x => x.ChannelId).ToArray().GetRandom(random);
-                if (string.IsNullOrEmpty(randomChannelToPostTo))
-                {
-                    if (myChannelsList.Any())
+                    var randomChannelToPostTo = channelHistory.Select(x => x.ChannelId).ToArray().GetRandom(random);
+                    if (string.IsNullOrEmpty(randomChannelToPostTo))
                     {
-                        randomChannelToPostTo = myChannelsList.PickRandom().Id;
+                        if (myChannelsList.Any())
+                        {
+                            randomChannelToPostTo = myChannelsList.PickRandom().Id;
+                        }
+                        else
+                        {
+                            _log.Trace($"User somehow has no channels. Is server configured correctly? {username}");
+                            continue;
+                        }
+                    }
+
+                    var history = channelHistory
+                        .Where(x => x.ChannelId == randomChannelToPostTo && x.UserName != me.Username)
+                        .MaxBy(x => x.Created);
+                    //var historyString = history is { Message.Length: >= 100 } ? history.Message[..100] : history?.Message;
+                    var historyString = string.Empty;
+                    if (history != null)
+                        historyString = history.Message;
+
+                    var prompt = $"Write my update to the chat system that {subPrompt}";
+                    var respondingTo = string.Empty;
+                    if (random.Next(0, 99) < _chatSettings.PercentReplyVsNew && !string.IsNullOrEmpty(historyString) &&
+                        history.UserId != me.Id)
+                    {
+                        prompt =
+                            $"How do I respond to this? {historyString}";
+                        respondingTo = history.UserName;
+                    }
+
+                    var message = await this._formatterService.ExecuteQuery(prompt);
+                    message = message.Clean(this._configuration.Replacements, random);
+                    if (string.IsNullOrEmpty(message))
+                    {
+                        _log.Trace($"Empty message for {me.Username} {prompt}. Continuing..");
+                        return;
+                    }
+
+                    if (!string.IsNullOrEmpty(respondingTo))
+                    {
+                        var f = $"{historyString} | {respondingTo} | {message}";
+                        message =
+                            $"> {historyString.Replace(">", "")}{Environment.NewLine}{Environment.NewLine}@{respondingTo} {message}";
+                        _log.Trace($"{historyString} | {respondingTo} | {message}{Environment.NewLine}{f}");
+                    }
+
+                    if (message.ShouldSend(this._configuration.Drops))
+                    {
+                        if (username.Contains("admin"))
+                            return;
+
+                        var post = await this.CreatePost(randomChannelToPostTo, message);
+                        _log.Info($"{prompt}|SENT|{post.Message}");
+
+
+                        //post to hub
+                        await this._activityHubContext.Clients.All.SendAsync("show",
+                            1,
+                            npcId,
+                            "chat",
+                            message,
+                            DateTime.Now.ToString(CultureInfo.InvariantCulture)
+                        );
                     }
                     else
                     {
-                        _log.Trace($"User somehow has no channels. Is server configured correctly? {username}");
-                        continue;
+                        _log.Info($"{prompt}|NOT SENT|{message}");
                     }
-                }
-                
-                var history = channelHistory.Where(x => x.ChannelId == randomChannelToPostTo && x.UserName != me.Username).MaxBy(x => x.Created);
-                //var historyString = history is { Message.Length: >= 100 } ? history.Message[..100] : history?.Message;
-                var historyString = string.Empty;
-                if (history != null)
-                    historyString = history.Message;
-                
-                var prompt = $"Write my update to the chat system that {subPrompts}";
-                var respondingTo = string.Empty;
-                if (random.Next(0, 99) < _chatSettings.PercentReplyVsNew && !string.IsNullOrEmpty(historyString) && history.UserId != me.Id)
-                {
-                    prompt =
-                        $"How do I respond to this? {historyString}";
-                    respondingTo = history.UserName;
-                }
 
-                var message = await this._formatterService.ExecuteQuery(prompt);
-                message = message.Clean(this._configuration.Replacements, random);
-                if (string.IsNullOrEmpty(message))
-                {
-                    _log.Trace($"Empty message for {me.Username} {prompt}. Continuing..");
-                    return;
+                    await Task.Delay(random.Next(5000, 250000));
                 }
-                
-                if (!string.IsNullOrEmpty(respondingTo))
-                {
-                    var f = $"{historyString} | {respondingTo} | {message}";
-                    message = $"> {historyString.Replace(">", "")}{Environment.NewLine}{Environment.NewLine}@{respondingTo} {message}";
-                    _log.Trace($"{historyString} | {respondingTo} | {message}{Environment.NewLine}{f}");
-                }
-                
-                if (message.ShouldSend(this._configuration.Drops))
-                {
-                    var post = await this.CreatePost(randomChannelToPostTo, message);
-                    _log.Info($"{prompt}|SENT|{post.Message}");
-                    
-                    
-                    //post to hub
-                    await this._activityHubContext.Clients.All.SendAsync("show",
-                        1,
-                        NpcId,
-                        "chat",
-                        message,
-                        DateTime.Now.ToString(CultureInfo.InvariantCulture)
-                    );
-                    
-                }
-                else
-                {
-                    _log.Info($"{prompt}|NOT SENT|{message}");
-                }
-
-                await Task.Delay(random.Next(5000, 250000));
             }
-        }
-        catch (Exception e)
-        {
-            _log.Error($"Chat manage run error! {e}");
+            catch (Exception e)
+            {
+                _log.Error($"Chat manage run error! {e}");
+            }
         }
     }
 }

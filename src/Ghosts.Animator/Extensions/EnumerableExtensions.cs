@@ -29,6 +29,30 @@ namespace Ghosts.Animator.Extensions
             double sum = 0;
             return list.FirstOrDefault(x => r <= (sum += x.Value)).Key;
         }
+        
+        public static int GetWeightedRandomProbabilityResult(this Dictionary<string, int> probabilitySettings)
+        {
+            var value = AnimatorRandom.Rand.Next(100);
+            var cumulativeProbability = 0;
+
+            foreach (var probability in probabilitySettings)
+            {
+                cumulativeProbability += probability.Value;
+                if (value < cumulativeProbability)
+                {
+                    try
+                    {
+                        return Convert.ToInt32(probability.Key);
+                    }
+                    catch
+                    {
+                        throw new Exception("The probabilities are not string, int");
+                    }
+                }
+            }
+
+            throw new Exception("The probabilities do not sum up to 100.");
+        }
 
         public static int RandomFromPipedProbabilityList(this Dictionary<string, double> list)
         {

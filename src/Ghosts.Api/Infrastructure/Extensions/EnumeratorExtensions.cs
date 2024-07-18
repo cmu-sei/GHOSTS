@@ -2,13 +2,24 @@
 
 using System;
 using System.Collections.Generic;
+using NLog;
 
 namespace ghosts.api.Infrastructure.Extensions;
 
 public static class EnumeratorExtensions
 {
+    private static readonly Logger _log = LogManager.GetCurrentClassLogger();
+    
     public static string GetRandom(this IList<string> list, Random random)
     {
-        return list.Count < 1 ? string.Empty : list[random.Next(list.Count)];
+        try
+        {
+            return list.Count < 1 ? "" : list[random.Next(list.Count)];
+        }
+        catch(Exception e)
+        {
+            _log.Error(e);            
+            return "";
+        }
     }
 }
