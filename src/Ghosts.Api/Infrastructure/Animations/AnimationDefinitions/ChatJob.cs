@@ -47,7 +47,7 @@ public class ChatJob
         this._formatterService =
             new ContentCreationService(_configuration.ContentEngine).FormatterService;
         
-        this._chatClient = new ChatClient(_configuration, chatConfiguration, this._formatterService, activityHubContext, this._context);
+        this._chatClient = new ChatClient(_configuration, chatConfiguration, this._formatterService, activityHubContext, this._context, this._cancellationToken);
         
         while (!_cancellationToken.IsCancellationRequested)
         {
