@@ -16,7 +16,6 @@ using ghosts.api.Hubs;
 using Ghosts.Api.Infrastructure;
 using ghosts.api.Infrastructure.Animations.AnimationDefinitions.Chat.Mattermost;
 using ghosts.api.Infrastructure.ContentServices;
-using Ghosts.Api.Infrastructure.Data;
 using ghosts.api.Infrastructure.Extensions;
 using Ghosts.Api.Infrastructure.Extensions;
 using ghosts.api.Infrastructure.Models;
@@ -35,24 +34,22 @@ public class ChatClient
     private readonly HttpClient _client;
     private string _token;
     private string UserId { get; set; }
-    private IFormatterService _formatterService;
+    private readonly IFormatterService _formatterService;
 
-    private readonly ApplicationDbContext _context;
-    private IHubContext<ActivityHub> _activityHubContext;
-    private CancellationToken _cancellationToken;
+    private readonly IHubContext<ActivityHub> _activityHubContext;
+    private readonly CancellationToken _cancellationToken;
 
     public ChatClient(ApplicationSettings.AnimatorSettingsDetail.AnimationsSettings.ChatSettings chatSettings,
         ChatJobConfiguration config, IFormatterService formatterService, IHubContext<ActivityHub> activityHubContext,
-        ApplicationDbContext context, CancellationToken ct)
+        CancellationToken ct)
     {
         _configuration = config;
         _chatSettings = chatSettings;
         this._baseUrl = _configuration.Chat.BaseUrl;
         this._client = new HttpClient();
         this._formatterService = formatterService;
-        this._context = context;
         this._activityHubContext = activityHubContext;
-        this._cancellationToken = _cancellationToken;
+        this._cancellationToken = ct;
     }
 
     private async Task<User> AdminLogin()
@@ -80,7 +77,7 @@ public class ChatClient
             var content = new StringContent($"{{\"login_id\":\"{username}\",\"password\":\"{password}\"}}", null,
                 "application/json");
             request.Content = content;
-            var response = await this._client.SendAsync(request);
+            var response = await this._client.SendAsync(request, this._cancellationToken);
             response.EnsureSuccessStatusCode();
 
             // Reading the 'Token' value from response headers
@@ -94,7 +91,7 @@ public class ChatClient
                 throw new Exception("Token not found in the response headers.");
             }
 
-            var contentString = await response.Content.ReadAsStringAsync();
+            var contentString = await response.Content.ReadAsStringAsync(this._cancellationToken);
             var user = JsonSerializer.Deserialize<User>(contentString,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             if (user == null)
@@ -447,15 +444,15 @@ public class ChatClient
     {
         try
         {
-            var response = await this._client.SendAsync(request);
+            var response = await this._client.SendAsync(request, this._cancellationToken);
             if (response.StatusCode is HttpStatusCode.Forbidden or HttpStatusCode.BadRequest)
             {
-                _log.Info(await response.Content.ReadAsStringAsync());
+                _log.Info(await response.Content.ReadAsStringAsync(this._cancellationToken));
                 return string.Empty;
             }
 
             response.EnsureSuccessStatusCode();
-            var contentString = await response.Content.ReadAsStringAsync();
+            var contentString = await response.Content.ReadAsStringAsync(this._cancellationToken);
 
             return contentString;
         }
@@ -472,6 +469,9 @@ public class ChatClient
     {
         while (!this._cancellationToken.IsCancellationRequested)
         {
+            if (agents == null || !agents.Any())
+                return;
+            
             var u = await this.AdminLogin();
             if (u == null)
                 return;
@@ -669,7 +669,7 @@ public class ChatClient
                             npcId,
                             "chat",
                             message,
-                            DateTime.Now.ToString(CultureInfo.InvariantCulture)
+                            DateTime.Now.ToString(CultureInfo.InvariantCulture), this._cancellationToken
                         );
                     }
                     else
@@ -677,7 +677,7 @@ public class ChatClient
                         _log.Info($"{prompt}|NOT SENT|{message}");
                     }
 
-                    await Task.Delay(random.Next(5000, 250000));
+                    await Task.Delay(random.Next(5000, 250000), this._cancellationToken);
                 }
             }
             catch (Exception e)
