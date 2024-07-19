@@ -25,8 +25,8 @@ public class ChatJob
     private readonly Random _random;
     private readonly ChatClient _chatClient;
     private readonly int _currentStep;
-    private CancellationToken _cancellationToken;
-    private IFormatterService _formatterService;
+    private readonly CancellationToken _cancellationToken;
+    private readonly IFormatterService _formatterService;
     
     public ChatJob(ApplicationSettings.AnimatorSettingsDetail.AnimationsSettings.ChatSettings configuration, IServiceScopeFactory scopeFactory, Random random,
         IHubContext<ActivityHub> activityHubContext, CancellationToken cancellationToken)
@@ -47,7 +47,7 @@ public class ChatJob
         this._formatterService =
             new ContentCreationService(_configuration.ContentEngine).FormatterService;
         
-        this._chatClient = new ChatClient(_configuration, chatConfiguration, this._formatterService, activityHubContext, this._context, this._cancellationToken);
+        this._chatClient = new ChatClient(_configuration, chatConfiguration, this._formatterService, activityHubContext, this._cancellationToken);
         
         while (!_cancellationToken.IsCancellationRequested)
         {
