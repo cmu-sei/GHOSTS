@@ -94,6 +94,7 @@ nav:
       - core/api.md
       - Capabilities:
         - Managing Timelines: core/api/timelines.md
+      - Grafana: core/grafana.md
   - Animations:
     - animator/index.md
     - Animation Jobs: animator/jobs.md
