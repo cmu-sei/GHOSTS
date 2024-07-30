@@ -20,7 +20,7 @@ $ docker ps -a
 
 If the container is continuously restarting, Grafana does not have the permissions it needs.
 
-![Grafana Restarting](../images/configuring-grafana-restarting.png)
+![Grafana Restarting](../../images/grafana/configuring-grafana-restarting.png)
 
 You can also check the docker logs:
 
@@ -28,7 +28,7 @@ You can also check the docker logs:
 $ docker logs ghosts-grafana
 ```
 
-![Grafana Permission Denied](../images/configuring-grafana-permission-denied.png)
+![Grafana Permission Denied](../../images/grafana/configuring-grafana-permission-denied.png)
 
 If you don't see this issue, you can continue to Step 2. If you do see this issue you will need to grant permissions on the `_g` directory of the ghosts-api folder (which stores the Grafana data for the GHOSTS API).
 
@@ -43,7 +43,7 @@ Ensure the container is running with `docker ps`.
 
 Once the container is running you can access its front end by default at [localhost:3000](http://localhost:3000)
 
-![Grafana Front end](../images/configuring-grafana-front-end.png)
+![Grafana Front end](../../images/grafana/configuring-grafana-front-end.png)
 
 The default login is:
 
@@ -84,7 +84,7 @@ GHOSTS comes with some premade dashboards to get you started. You can download t
 
 Navigate to "Dashboards" in the left menu. There will be a blue "New" button in the top right corner.
 
-![Empty Dashboard](../images/configuring-grafana-empty-dashboard.png)
+![Empty Dashboard](../../images/grafana/configuring-grafana-empty-dashboard.png)
 
 Click "New". Then, "import". 
 
@@ -92,6 +92,6 @@ You can either upload one of the dashboard json files from the GHOSTS repository
 
 Choose the ghosts datasource you added earlier from the drop down menu and then click "import".
 
-![Ghosts In the Dashboard](../images/configuring-grafana-dashboard.png)
+![Ghosts In the Dashboard](../../images/grafana/configuring-grafana-dashboard.png)
 
 You are now set up with Grafana!
