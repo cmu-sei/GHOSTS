@@ -1,103 +1,99 @@
-# GHOSTS Core API Overview
+# Setting Up the GHOSTS API
 
 ???+ info "GHOSTS Source Code"
     The [GHOSTS Source Code Repository](https://github.com/cmu-sei/GHOSTS) is hosted on GitHub.
     
+*Updated on July 24, 2024*
+
 The GHOSTS API enables the control and orchestration of non-player characters (NPCs) within a deployment. It supports logging, reporting, and managing individual, groups of, or entire deployments of client installs.
 
-## Installation
+The GHOSTS API consists of three components: the API itself for configuring and managing characters and machines, a Postgres database for managing all the pieces, and Grafana for seeing GHOSTS activities in one convenient dashboard. Each of these three components runs in its own docker container.
 
-1. Install 🐳 [Docker](https://docs.docker.com/install/) :material-open-in-new:
-2. Install [Docker Compose](https://docs.docker.com/compose/install/) :material-open-in-new:
-3. Run the following commands - we'll use [this docker-compose.yml file](https://raw.githubusercontent.com/cmu-sei/GHOSTS/master/src/Ghosts.Api/docker-compose.yml)
+Steps to set up the GHOSTS API:
 
-```cmd
-mkdir ghosts
-cd ghosts
-curl https://raw.githubusercontent.com/cmu-sei/GHOSTS/master/src/Ghosts.Api/docker-compose.yml -o docker-compose.yml
-docker-compose up -d
+  1. Choose where to host the API
+  2. Install Docker and Docker Compose
+  3. Build the GHOSTS containers
+  4. Test the API
+
+## Step 1 &mdash; Choose Where to Host the API
+
+Choose the machine you'll be using to host the GHOSTS API. If you're just playing around with the GHOSTS, your local machine is fine. If you're configuring an exercise or simulation that other people might care about, consider creating a dedidicate host (server, image, or virtual server) for the API, or even using a container service such as AWS ECS.
+
+## Step 2 &mdash; Installing Docker
+
+You'll need to install Docker and Docker Compose on your API host.
+
+First, **install 🐳 [Docker](https://docs.docker.com/install/)**.
+
+Next, **install [Docker Compose](https://docs.docker.com/compose/install/)** which will assist with starting up multiple containers at the same time.
+
+Before continuing, test that you have the command for Docker Compose available.
+
+Open your system's CMD (Linux), Terminal (Mac), or PowerShell (Windows).
+
+```
+$ docker-compose --version
 ```
 
-The required containers will be downloaded and configured automatically.
+## Step 3 &mdash; Installing the GHOSTS API
 
-Once the last command completes, if you open [http://localhost:5000/api/home](http://localhost:5000/api/home) in your browser, you should see the initial API page outlining the version of the install, and a few test machine entries. If this page renders, your API is up, running, and available.
+Once you have confirmed that Docker and Docker Compose are installed, you can build the containers required for the GHOSTS API.
 
-You will still need to set up Grafana. Beware that you must often `chown` the host location of the container as listed in the docker-compose file or the container will just continually restart in error due to insufficient permissions.
+Create a directory where you want to store the build files and containers.
 
-## Configuring the API
-
-The API generally has good defaults to get you up and running quickly, but there are some considerations in the `appconfig.json` file:
-
-```json
-    "ClientSettings": {
-        "OfflineAfterMinutes": 30, ...
-        "MatchMachinesBy": null,
+```
+$ mkdir ghosts-project
+$ cd ghosts-project
 ```
 
-Can be fqdn|host|resolvedhost|null - null tells the API to match incoming requests with machine records by the machine name. For installations where multiple domains are reporting into the same API, you probably want to use FQDN in order to avoid machines being duplicated.
+Download the docker compose file for GHOSTS.
 
-
-```json
-"QueueSyncDelayInSeconds": 10,
-"NotificationsQueueSyncDelayInSeconds": 10,
+```
+$ curl https://raw.githubusercontent.com/cmu-sei/GHOSTS/master/src/Ghosts.Api/docker-compose.yml -o docker-compose.yml
 ```
 
-This is how often the synch job runs. Incoming machine requests are not real-time in order to best bundle like records together.
+Build all of the containers at once using docker-compose.
 
-## Configuring Grafana
-
-- Grafana will be running (if containerized) on port 3000, and we can access it via the same URL we use for the API.
-- The default login is admin/admin.
-- The first step is to set up a datasource named "ghosts" to the ghosts Postgres database.
-- Now import your choice of the [grafana json files](https://github.com/cmu-sei/GHOSTS/tree/master/configuration/grafana) in this repository. It creates the default GHOSTS dashboard.
-
-## Webhooks
-
-The GHOSTS API provides webhook callbacks based on the configuration on the endpoint: `/api/webhooks`. The payload for creating a webhook is in the format:
-
-```json
-{
-  "status": 0,
-  "description": "some description",
-  "postbackUrl": "http://localhost/endpoint:port",
-  "postbackMethod": 0, (0 == get, 1 == post)
-  "postbackFormat": "see below"
-}
+```
+$ docker-compose up -d
 ```
 
-Payloads can be any format — here is a sample:
+Check for the running containers.
 
-```json
-{
- 'machine':'[machinename]',
- 'created':'[datetime.utcnow]',
- 'type':'[messagetype]',
- 'payload':'[messagepayload]'
-}
+```
+$ docker ps -a
 ```
 
-On send, the payload will be converted into the correct JSON format:
+If everything succeeds you should see the three new containers for the API, Grafana, and Postgres.
 
-```json
-{
- "machine":"some_guid",
- "created":"some_datetime",
- "type":"some_message",
- "payload":"some_payload"
-}
-```
+![Running Containers](../images/installing-the-api-running-containers.png)
 
-If the postback method is POST, the payload will be sent as the message body. If the postback method is GET, the payload will be sent as part of the querystring value ?message=`payload`.
+## Step 4 &mdash; Testing the API
 
-The following events are reported via webhooks:
+By default, the API is hosted on port 5000. You should be able to reach the API from [http://localhost:5000](http://localhost:5000). If you open this page in your browser, you should see the initial API page outlining the version of the install, and a few test machine entries. If this page renders, your API is up, running, and available.
 
-1. Timeline delivered (with the timeline that was delivered as payload) to a machine via API (original API posting of timeline only holds timeline in wait - the client still must check-in in order for that timeline to be delivered)
-2. Machine requested updates ("checked in") from API
-3. Machine posted results to API
+![Success!](../images/installing-the-api-success.png)
 
 ## Troubleshooting
 
-> Is the API up and running?
+### Problem: The API home page has an error
+
+![API Home Page Error](../images/installing-the-api-error.png)
+
+Answer: Make sure the docker container for Postgres is running using Docker Desktop or the command `docker ps -a`
+
+![Running Containers](../images/installing-the-api-running-containers.png)
+
+You can check the logs with the command `docker logs ghosts-postgres` to look for container errors.
+
+### Problem: The social graph link has an error
+
+![API Social Graph Page Error](../images/installing-the-api-social-error.png)
+
+Answer: You haven't created a social network yet, this is normal.
+
+### Problem: Is the API up and running?
 
 - Go to `/api/home` in the browser, it should return the current API version and the number of machines and groups under management. If it says relationship not found, restart the API application and it should create the database automatically.
 - Run `docker ps --all` and see that all containers are running normally. If one or more is not running, look at the logs for that machine via `docker logs [machine name]`.
