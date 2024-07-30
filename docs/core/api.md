@@ -67,7 +67,7 @@ $ docker ps -a
 
 If everything succeeds you should see the three new containers for the API, Grafana, and Postgres.
 
-![Running Containers](../../../images/api/installing-the-api-running-containers.png)
+![Running Containers](../../images/api/installing-the-api-running-containers.png)
 
 ## Step 4 &mdash; Testing the API
 
