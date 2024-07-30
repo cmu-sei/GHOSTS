@@ -67,29 +67,29 @@ $ docker ps -a
 
 If everything succeeds you should see the three new containers for the API, Grafana, and Postgres.
 
-![Running Containers](../images/installing-the-api-running-containers.png)
+![Running Containers](../../../images/api/installing-the-api-running-containers.png)
 
 ## Step 4 &mdash; Testing the API
 
 By default, the API is hosted on port 5000. You should be able to reach the API from [http://localhost:5000](http://localhost:5000). If you open this page in your browser, you should see the initial API page outlining the version of the install, and a few test machine entries. If this page renders, your API is up, running, and available.
 
-![Success!](../images/installing-the-api-success.png)
+![Success!](../../images/api/installing-the-api-success.png)
 
 ## Troubleshooting
 
 ### Problem: The API home page has an error
 
-![API Home Page Error](../images/installing-the-api-error.png)
+![API Home Page Error](../../images/api/installing-the-api-error.png)
 
 Answer: Make sure the docker container for Postgres is running using Docker Desktop or the command `docker ps -a`
 
-![Running Containers](../images/installing-the-api-running-containers.png)
+![Running Containers](../../images/api/installing-the-api-running-containers.png)
 
 You can check the logs with the command `docker logs ghosts-postgres` to look for container errors.
 
 ### Problem: The social graph link has an error
 
-![API Social Graph Page Error](../images/installing-the-api-social-error.png)
+![API Social Graph Page Error](../../images/api/installing-the-api-social-error.png)
 
 Answer: You haven't created a social network yet, this is normal.
 
