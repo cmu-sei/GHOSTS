@@ -59,7 +59,7 @@ namespace Ghosts.Domain.Code
                 }
                 catch
                 {
-                    return Assembly.GetEntryAssembly()?.Location;
+                    return Clean(Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location));
                 }
             }
         }
