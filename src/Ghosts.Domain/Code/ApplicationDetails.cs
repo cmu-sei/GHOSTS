@@ -101,7 +101,7 @@ namespace Ghosts.Domain.Code
         /// </summary>
         public static class ConfigurationFiles
         {
-            public static string InstallPath => InstalledPath + $"{System.IO.Path.DirectorySeparatorChar}config{System.IO.Path.DirectorySeparatorChar}";
+            public static string InstallPath => InstalledPath.EndsWith(".exe", StringComparison.OrdinalIgnoreCase) ? Path.GetDirectoryName(InstalledPath) : InstalledPath + $"{System.IO.Path.DirectorySeparatorChar}config{System.IO.Path.DirectorySeparatorChar}";
 
             public static string DefaultNpcImage => Clean(Path.Combine(InstallPath, "photos", "default.png"));
             public static string Application => Clean(InstallPath + "application.json");
