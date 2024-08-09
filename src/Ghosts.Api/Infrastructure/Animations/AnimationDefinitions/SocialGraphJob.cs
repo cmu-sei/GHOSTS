@@ -9,7 +9,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Ghosts.Animator.Extensions;
-using Ghosts.Api;
 using ghosts.api.Hubs;
 using Ghosts.Api.Infrastructure;
 using Ghosts.Api.Infrastructure.Data;
@@ -35,7 +34,8 @@ public class SocialGraphJob
     private bool _isEnabled = true;
     private CancellationToken _cancellationToken;
     private readonly IHubContext<ActivityHub> _activityHubContext;
-
+    private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
+    
     public SocialGraphJob(ApplicationSettings configuration, IServiceScopeFactory scopeFactory, Random random,
         IHubContext<ActivityHub> activityHubContext, CancellationToken cancellationToken)
     {
@@ -66,7 +66,7 @@ public class SocialGraphJob
             {
                 foreach (var npc in npcs)
                 {
-                    this.Step(npc);
+                    _ = this.Step(npc);
                 }
 
                 _log.Info(
@@ -74,9 +74,10 @@ public class SocialGraphJob
                 Thread.Sleep(this._configuration.AnimatorSettings.Animations.SocialGraph.TurnLength);
             }
         }
-        catch (ThreadInterruptedException)
+        catch (ThreadInterruptedException e)
         {
             // continue
+            _log.Error(e);
         }
         catch (Exception e)
         {
@@ -112,9 +113,47 @@ public class SocialGraphJob
                 });
             }
 
-            npc.NpcSocialGraph = graph;
-            await this._context.SaveChangesAsync(_cancellationToken);
-            _log.Trace($"Social graph saved for {npc.NpcProfile.Name}...");
+            await _semaphore.WaitAsync(_cancellationToken);
+            
+            try
+            {
+                npc.NpcSocialGraph = graph;
+                this._context.Entry(npc).State = EntityState.Modified;
+                await this._context.SaveChangesAsync(_cancellationToken);
+                _log.Trace($"Social graph saved for {npc.NpcProfile.Name}...");
+            }
+            catch (Exception e)
+            {
+                _log.Trace($"Error creating new social graph: {e}. Continuing...");
+            }
+            finally
+            {
+                _semaphore.Release();
+            }
+        }
+        else
+        {
+            if (npc.NpcSocialGraph.Id != npc.Id)
+            {
+                // reports of 00000... ids in the social graph. not sure how this is happening? old version of api that is out there?
+                await _semaphore.WaitAsync(_cancellationToken);
+
+                try
+                {
+                    npc.NpcSocialGraph.Id = npc.Id;
+                    this._context.Entry(npc).State = EntityState.Modified;
+                    await this._context.SaveChangesAsync(_cancellationToken);
+                    _log.Trace($"Social graph id corrected for {npc.NpcProfile.Id}...");
+                }
+                catch (Exception e)
+                {
+                    _log.Trace($"Error correcting social graph id: {e}. Continuing...");
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+            }
         }
 
         _log.Trace("Social graph step proceeding...");
