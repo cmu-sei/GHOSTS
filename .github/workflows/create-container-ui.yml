@@ -22,7 +22,7 @@ jobs:
       - name: Build and push Docker images
         uses: docker/build-push-action@v2
         with:
-          tags: dustinupdyke/ghosts-shadows:latest
+          tags: dustinupdyke/ghosts-ui:latest
           push: true
           context: ./src/ghosts.ui/
           file: ./src/ghosts.ui/Dockerfile
