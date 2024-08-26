@@ -38,13 +38,17 @@ GHOSTS clients simulate users on a machine doing "user-like" things. They can be
 - Run terminal commands
 - Etc.
 
-### Ghosts API Server
+### [Ghosts API Server](src/Ghosts.API/)
 
 The API server provides a way for clients to interact with the GHOSTS system and its clients. It can:
 
 - Manage clients, add/remove them from groups, etc.
 - Get/manage information from clients regarding their previous or current activities, etc.
 - Orchestrate new activities for particular clients to perform
+
+### [Ghosts Web Server](src/ghosts.ui/README.md)
+
+The web server provides a way for administrators to interact with the GHOSTS system and its clients.
 
 ### [Ghosts Lite](src/Ghosts.Client.Lite/)
 
