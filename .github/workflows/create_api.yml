@@ -38,3 +38,9 @@ jobs:
       - name: Save Docker image as tar
         run: | 
           docker save dustinupdyke/ghosts:latest > ghosts-api.tar
+
+      - name: Upload TAR file as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: ghosts-api
+          path: ghosts-api.tar
