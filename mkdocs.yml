@@ -67,6 +67,7 @@ nav:
   - Quick Start: quickstart.md
   - Client: 
     - core/client.md
+    - core/lite.md
     - Client Handlers:
       - Basic Configuration: core/handlers.md
       - Clicks: core/handlers/clicks.md
@@ -95,6 +96,8 @@ nav:
       - Capabilities:
         - Managing Timelines: core/api/timelines.md
       - Grafana: core/grafana.md
+  - UI: 
+    - core/ui.md
   - Animations:
     - animator/index.md
     - Animation Jobs: animator/jobs.md
@@ -103,6 +106,8 @@ nav:
     - content/index.md
     - Pandora: content/pandora.md
     - Pandora Social: content/social.md
+  - Shadows LLM API: 
+    - shadows/index.md
   - Advanced:
     - advanced/index.md
     - Cyclone: advanced/cyclone.md

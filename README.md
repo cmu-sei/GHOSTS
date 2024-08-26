@@ -46,6 +46,10 @@ The API server provides a way for clients to interact with the GHOSTS system and
 - Get/manage information from clients regarding their previous or current activities, etc.
 - Orchestrate new activities for particular clients to perform
 
+### [Ghosts UI](src/ghosts.ui/README.md)
+
+The web server provides a way for administrators to interact with the GHOSTS system and its clients.
+
 ### [Ghosts Lite](src/Ghosts.Client.Lite/)
 
 A resource light version of the Windows GHOSTS client that can be run on minimal hardware.

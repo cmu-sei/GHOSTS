@@ -6,6 +6,15 @@ networks:
   ghosts-network:
     driver: bridge
 services:
+  ghostsui:
+    image: dustinupdyke/ghosts-ui
+    container_name: ghosts-ui
+    ports:
+      - '8080:8080'
+    networks:
+      - ghosts-network
+    environment:
+      GHOSTS_API_URL: http://ghosts-api:5000
   postgres:
     image: postgres
     container_name: ghosts-postgres

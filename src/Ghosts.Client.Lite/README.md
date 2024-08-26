@@ -1,23 +1,19 @@
 # GHOSTS LITE
 
-## Background
+Generate web requests and file creation activity with minimal resources (good for when participants lack host access).
 
-### What is this?
-GHOSTS LITE is a streamlined version of the GHOSTS framework designed to simulate realistic 
-network without the expense of running actual applications. It generates web browsing traffic 
-and file creation programatically and is configured to be similar to real-user actions. 
+## Overview
 
-### Why did we build this? 
-We built ghosts-lite to provide a more efficient tool for simulating network activity. By 
-avoiding the need to launch applications like web browsers or office suites, ghosts-lite is 
-able to reduce the resource consumption and complexity of the simulation, resulting in saving 
-CPU, storage space, and other memory resources.
+### What is GHOSTS LITE?
+GHOSTS LITE is a streamlined version of the GHOSTS framework, designed to simulate realistic network activity without the overhead of running actual applications. It programmatically generates web browsing traffic and file creation, emulating real-user actions without launching resource-intensive applications.
 
-### What were the goals?
+### Purpose
+GHOSTS LITE was created to provide an efficient tool for simulating network activity. If you don't give participants access to the host, there is perhaps no need to launch applications like web browsers or office suites — so, GHOSTS LITE reduces resource consumption, including CPU, storage, and memory, simplifying the simulation process and requiring less resources to run.
 
-- **Efficiency:** Reduce the resources required to simualte user activity on a network.
-- **Simplicity:** Simplify installation and configuration compared to the full GHOSTS framework
-- **Realism:** Maintain the ability to generate realistic network activity.
+### Objectives
+- Efficiency: Minimize the resources required to simulate user activity on a network.
+- Simplicity: Simplify installation and configuration compared to the full GHOSTS framework.
+- Realism: Preserve the ability to generate realistic network activity.
 
 ## Installation
 
@@ -34,6 +30,16 @@ CPU, storage space, and other memory resources.
 
 - Ensure the .NET framework is installed with version 8.0 or later.
 - If you're experiencing any problems please submit an issue or start a discussion.
+
+## Contributing
+
+We welcome contributions! Please follow these steps to contribute to GHOSTS LITE:
+
+- Fork the repository.
+- Create a new branch (git checkout -b feature-branch).
+- Make your changes and commit them (git commit -m 'Add feature').
+- Push to the branch (git push origin feature-branch).
+- Open a Pull Request.
 
 ## License
 

@@ -3,7 +3,28 @@
 ???+ info "Welcome to GHOSTS"
     Welcome to what's new in the GHOSTS framework. Use this page to review the latest changes.
 
-## Enhancements:
+## What's new in 8.2
+
+- [GHOSTS now has a UI](core/ui.md)! Manage machines and machine groups, deploy new timelines, and view activities. 😍
+- [GHOSTS Shadows](shadows/index.md) provides integrations with an LLM for the purposes of GHOSTS agents. It provides multiple models for activities, chat, content, social, and whatever else you may need. 👻
+- [GHOSTS LITE](core/lite.md) is a stripped-down version of GHOSTS that is designed to be more lightweight and require less resources to run certain activities in training, exercises, and simulations. 👀
+- Fixes #385 default guid 00000000-0000-0000-0000-000000000000 animator NPC bug. 🐛
+- Fixes #384 client path bug. 🐛
+- Fixes animation cancellation token bugs (chat). 🐛
+- Updated documentation for Animations (Thank you to the SEI's TMR team). 🤙
+
+## What's new in 8.1
+
+- GHOSTS LITE BETA - when you want to conserve resources needed and participants won't access that machine directly.
+- API clean up, particularly machine updates and groups.
+- Made sample json objects easier to understand and submit the swagger generated defaults
+- API robustness
+- MachineGroups cleanup
+- Timeline delivery by machine and by group
+
+## What's new in 8.0
+
+### Enhancements:
 
 - ANIMATOR and SPECTRE functionality merged into the GHOSTS API proper. Those projects are now archived. 📁
 - We have moved off mongo — all that data is now stored in Postgres ❤️.
@@ -16,7 +37,7 @@
 - API endpoints have been re-organized in a more logical fashion. 🗂️
 - Added a favicon. 💅
 
-## Bug Fixes:
+### Bug Fixes:
 
 - Updates Grafana docker compose to not use root. 🚫👤
 - Cleans up containers and ensures all are amd64 (not arm!). 💻
