@@ -34,3 +34,7 @@ jobs:
           push: true
           context: src/.
           file: ./src/Dockerfile-api
+
+      - name: Save Docker image as tar
+        run: | 
+          docker save dustinupdyke/ghosts:latest > ghosts-api.tar
