@@ -10,23 +10,28 @@ WORKDIR /usr/src/app
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-# install dependencies
-RUN apk add -u zlib-dev jpeg-dev gcc musl-dev ffmpeg
+# install system dependencies
+RUN apk add --no-cache zlib-dev jpeg-dev gcc musl-dev ffmpeg libxml2-dev libxslt-dev
+
+# upgrade pip
 RUN python3 -m pip install --upgrade pip
+
+# copy requirements and install Python dependencies
 COPY ./requirements.txt /usr/src/app
-COPY ./readme.md /usr/src
+RUN pip install --no-cache-dir -r requirements.txt
 
-RUN pip install -r requirements.txt
-
-# copy project
+# copy project files
 COPY ./app /usr/src/app
 
 LABEL MAINTAINER Dustin Updyke <ddupdyke[at]sei.cmu.edu>
 LABEL PRODUCT GHOSTS PANDORA
 LABEL VERSION Browse to /about
 
+# expose port
 EXPOSE 80
 
+# set entrypoint
 ENTRYPOINT [ "python3" ]
 
+# run the application
 CMD [ "app.py", "80" ]
