@@ -1,12 +1,12 @@
 Flask==3.0.2
-gradio==4.29.0
+gradio==4.37.1
 imaginairy==14.2.0
 langchain==0.1.14
 langchain_community==0.0.31
 numpy==1.25.2
-Requests==2.31.0
-torch==2.1.0
-transformers==4.30.2
+Requests==2.32.2
+torch==2.2.0
+transformers==4.38.0
 docx2txt==0.8
 pypdf==4.1.0
 chromadb==0.4.24
