@@ -8,16 +8,22 @@ namespace tools_addmachines
     {
         static void Main(string[] args)
         {
+            var random = new Random();
             var init = Convert.ToInt32(Console.ReadLine());
             var o = init;
             while (o > 0)
             {
-                var url = "http://localhost:59460/api/clientid";
+                var url = "http://localhost:5000/api/clientid";
                 WebRequest req = WebRequest.Create(url);
-                req.Headers.Add("name", Guid.NewGuid().ToString());
-                req.Headers.Add("fqdn", Guid.NewGuid().ToString());
-                req.Headers.Add("ip", "0.0.0.0");
-                req.Headers.Add("user", "test user");
+                req.Headers.Add("ghosts-name", "ted");
+                req.Headers.Add("ghosts-fqdn", "fqdn");
+                req.Headers.Add("ghosts-user", "test user");
+
+                req.Headers.Add("ghosts-host", "host");
+                req.Headers.Add("ghosts-domain", "domain");
+                req.Headers.Add("ghosts-resolvedhost", "localhost");
+                req.Headers.Add("ghosts-ip", $"192.168.0.{random.Next(1, 255)}");
+                req.Headers.Add("ghosts-version", "8.0");
 
                 WebResponse resp = req.GetResponse();
                 System.IO.StreamReader sr = new System.IO.StreamReader(resp.GetResponseStream());

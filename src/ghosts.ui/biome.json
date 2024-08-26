@@ -1,0 +1,24 @@
+{
+	"$schema": "https://biomejs.dev/schemas/1.7.0/schema.json",
+	"files": {
+		"ignore": [
+			"node_modules/**",
+			".next/**",
+			"src/components/ui/**",
+			"_db",
+			"_g"
+		]
+	},
+	"organizeImports": {
+		"enabled": true
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"recommended": true,
+			"correctness": {
+				"noUnusedImports": "warn"
+			}
+		}
+	}
+}

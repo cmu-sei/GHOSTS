@@ -1,0 +1,14 @@
+.git
+.github
+.cache
+
+*__pycache__*
+__pycache__/*
+
+.dockerignore
+Dockerfile
+
+*venv*
+
+data/*
+docs/*
