@@ -26,3 +26,16 @@ jobs:
           push: true
           context: ./src/ghosts.ui/
           file: ./src/ghosts.ui/Dockerfile
+
+      - name: Save Docker image as tar
+        run: | 
+          docker save dustinupdyke/ghosts-ui:latest > ghosts-ui.tar
+
+      - name: Upload TAR file as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: ghosts-ui
+          path: ghosts-ui.tar
+
+      
+

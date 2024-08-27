@@ -26,3 +26,15 @@ jobs:
           push: true
           context: ./src/ghosts.pandora/
           file: ./src/ghosts.pandora/Dockerfile
+        
+      - name: Save Docker image as tar
+        run: | 
+          docker save dustinupdyke/ghosts-pandora:latest > ghosts-pandora.tar
+
+      - name: Upload TAR file as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: ghosts-pandora
+          path: ghosts-pandora.tar
+
+      
