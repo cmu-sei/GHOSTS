@@ -34,11 +34,10 @@ public class Connection
             _attempts++;
         }
 
-        Console.WriteLine($"Connected to {url}");
-
         // Send a message to the server
         while (_connection.State == HubConnectionState.Connected)
         {
+            Console.WriteLine($"Connected to {url}");
             _ = new Timer(_ => {
                 Task.Run(async () => {
                     await ClientHeartbeat();
