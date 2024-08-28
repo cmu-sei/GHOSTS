@@ -37,7 +37,7 @@ Unzip to your client machine in a directory such as `c:\exercise\ghosts`. You wi
 
 ## Linux Client
 
-Your client Linux machine will need to have the latest [Microsoft dotnetcore runtime](https://dotnet.microsoft.com/download) :material-open-in-new: installed (Note that for the GHOSTS client, there are versions for dotnetcoreapp3.1 - this will eventually go away — and dotnet6.0, which is long term support (LTS) and will stick around for a while). Again, note that you only need the runtime installed, not the full SDK.
+Your client Linux machine will need to have the latest [Microsoft dotnetcore runtime version 8.0](https://dotnet.microsoft.com/download) :material-open-in-new: installed. Again, note that you only need the runtime installed, not the full SDK. Our testing has been with Ubuntu 24.04 using the [snap instructions here](https://learn.microsoft.com/en-us/dotnet/core/install/linux-ubuntu-install?pivots=os-linux-ubuntu-2404&tabs=dotnet8), but other distributions should work as well.
 
 ### Linux Installation
 

@@ -75,20 +75,20 @@ namespace ghosts.client.linux
                 return;
             }
             
-            if (Configuration.Sockets.IsEnabled)
-            {
-                _log.Trace("Sockets enabled. Connecting...");
-                var c = new Connection(Configuration.Sockets);
-
-                async void Start()
-                {
-                    await c.Run();
-                }
-
-                var connectionThread = new Thread(Start) { IsBackground = true };
-                connectionThread.Start();
-                Queue = c.Queue;
-            }
+            // if (Configuration.Sockets.IsEnabled)
+            // {
+            //     _log.Trace("Sockets enabled. Connecting...");
+            //     var c = new Connection(Configuration.Sockets);
+            //
+            //     async void Start()
+            //     {
+            //         await c.Run();
+            //     }
+            //
+            //     var connectionThread = new Thread(Start) { IsBackground = true };
+            //     connectionThread.Start();
+            //     Queue = c.Queue;
+            // }
             
             Program.CheckId = new CheckId();
 
