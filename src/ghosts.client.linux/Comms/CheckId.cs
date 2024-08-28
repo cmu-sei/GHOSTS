@@ -46,19 +46,21 @@ namespace ghosts.client.linux.Comms
                     {
                         if (DateTime.Now > _lastChecked.AddMinutes(5))
                         {
-                            _log.Error("Skipping Check for ID from server, too many requests in a short amount of time...");
+                            _log.Error(
+                                "Skipping Check for ID from server, too many requests in a short amount of time...");
                             return string.Empty;
                         }
 
                         _lastChecked = DateTime.Now;
                         return Run();
                     }
-                    Id = File.ReadAllText(IdFile);
+
+                    _id = File.ReadAllText(IdFile);
                     return _id;
                 }
-                catch
+                catch (Exception ex)
                 {
-                    _log.Error("No ID file");
+                    _log.Error(ex, "Failed to read ID file.");
                     return string.Empty;
                 }
             }
@@ -71,7 +73,7 @@ namespace ghosts.client.linux.Comms
         /// <returns></returns>
         private string Run()
         {
-            // ignore all certs
+            // Ignore all certs
             ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
 
             var s = string.Empty;
@@ -82,16 +84,17 @@ namespace ghosts.client.linux.Comms
             }
 
             var machine = new ResultMachine();
-            
+
             try
             {
-                //call home
+                // Call home
                 using (var client = WebClientBuilder.Build(machine))
                 {
                     try
                     {
-                        using (var reader =
-                            new StreamReader(client.OpenRead(Program.ConfigurationUrls.Id) ?? throw new InvalidOperationException("CheckID client is null")))
+                        using (var reader = new StreamReader(client.OpenRead(Program.ConfigurationUrls.Id)
+                                                             ?? throw new InvalidOperationException(
+                                                                 "CheckID client is null")))
                         {
                             s = reader.ReadToEnd();
                             _log.Debug("ID Received");
@@ -103,14 +106,15 @@ namespace ghosts.client.linux.Comms
                         {
                             _log.Debug($"API not reachable: {wex.Message}");
                         }
-                        else if (((HttpWebResponse)wex.Response).StatusCode == HttpStatusCode.NotFound)
+                        else if (wex.Response is HttpWebResponse response &&
+                                 response.StatusCode == HttpStatusCode.NotFound)
                         {
                             _log.Debug($"No ID returned! {wex.Message}");
                         }
                     }
                     catch (Exception e)
                     {
-                        _log.Error($"General comms exception: {e.Message}");
+                        _log.Error($"General communication exception: {e.Message}");
                     }
                 }
             }
@@ -132,11 +136,11 @@ namespace ghosts.client.linux.Comms
                 return string.Empty;
             }
 
-            //save returned id
+            // Save returned ID
             File.WriteAllText(IdFile, s);
             return s;
         }
-        
+
         public static void WriteId(string id)
         {
             if (!string.IsNullOrEmpty(id))
@@ -148,7 +152,7 @@ namespace ghosts.client.linux.Comms
                     Directory.CreateDirectory(ApplicationDetails.InstanceFiles.Path);
                 }
 
-                //save returned id
+                // Save returned ID
                 File.WriteAllText(ApplicationDetails.InstanceFiles.Id, id);
             }
         }
