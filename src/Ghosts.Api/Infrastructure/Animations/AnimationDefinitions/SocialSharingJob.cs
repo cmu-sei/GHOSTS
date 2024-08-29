@@ -51,7 +51,7 @@ namespace ghosts.api.Infrastructure.Animations.AnimationDefinitions
                 this._updateService = innerScope.ServiceProvider.GetRequiredService<IMachineUpdateService>();
 
                 _formatterService =
-                    new ContentCreationService(_configuration.AnimatorSettings.Animations.Chat.ContentEngine).FormatterService;
+                    new ContentCreationService(_configuration.AnimatorSettings.Animations.SocialSharing.ContentEngine).FormatterService;
 
                 if (!_configuration.AnimatorSettings.Animations.SocialSharing.IsInteracting)
                 {
