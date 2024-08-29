@@ -48,7 +48,7 @@ public class FullAutonomyJob
                 ? File.ReadAllLinesAsync(this._historyFile).Result.ToList()
                 : new List<string>();
 
-            if (_configuration.AnimatorSettings.Animations.SocialSharing.IsInteracting)
+            if (_configuration.AnimatorSettings.Animations.FullAutonomy.IsInteracting)
             {
                 if (!Directory.Exists(SavePath))
                 {
@@ -57,14 +57,14 @@ public class FullAutonomyJob
 
                 while (!this._cancellationToken.IsCancellationRequested)
                 {
-                    if (this._currentStep > _configuration.AnimatorSettings.Animations.SocialSharing.MaximumSteps)
+                    if (this._currentStep > _configuration.AnimatorSettings.Animations.FullAutonomy.MaximumSteps)
                     {
                         _log.Trace($"Maximum steps met: {this._currentStep - 1}. Full Autonomy is exiting...");
                         return;
                     }
 
                     this.Step();
-                    Thread.Sleep(this._configuration.AnimatorSettings.Animations.SocialSharing.TurnLength);
+                    Thread.Sleep(this._configuration.AnimatorSettings.Animations.FullAutonomy.TurnLength);
 
                     this._currentStep++;
                 }

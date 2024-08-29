@@ -54,13 +54,6 @@ public class SocialBeliefJob
 
             this._cancellationToken = cancellationToken;
 
-            // if (this._socialGraphs.Count > 0 &&
-            //     this._socialGraphs[0].CurrentStep > _configuration.AnimatorSettings.Animations.SocialGraph.MaximumSteps)
-            // {
-            //     _log.Trace("SocialBelief has exceed maximum steps. Sleeping...");
-            //     return;
-            // }
-            
             var npcs = this._context.Npcs.RandPick(10).ToList();
 
             _log.Info("SocialBelief loaded, running steps...");
@@ -71,7 +64,7 @@ public class SocialBeliefJob
                     this.Step(npc);
                 }
 
-                _log.Info($"Step complete, sleeping for {this._configuration.AnimatorSettings.Animations.SocialGraph.TurnLength}ms");
+                _log.Info($"Step complete, sleeping for {this._configuration.AnimatorSettings.Animations.SocialBelief.TurnLength}ms");
                 Thread.Sleep(this._configuration.AnimatorSettings.Animations.SocialBelief.TurnLength);
             }
         }
