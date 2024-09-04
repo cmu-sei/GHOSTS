@@ -6,10 +6,21 @@ If you've never seen GHOSTS in action, watch this quick three-minute introductor
 
 <iframe width="1000" height="563" src="https://www.youtube.com/embed/EkwK-cqwjjA" title="GHOSTS Intro on YouTube" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 
+In a basic setup, GHOSTS consists of a client and a server API. The client is installed on the simulated end user’s device, such as a workstation, while the GHOSTS API runs on a management device. GHOSTS clients simulate user actions using timelines and NPCs. Timelines are manually configured to dictate client behavior, while NPCs act autonomously and interact with each other. The GHOSTS API allows administrators to modify the behavior of simulated users by sending new timelines, reconfiguring NPCs, and making other adjustments.
+
 ## :material-file-document: Documentation
 
 This is the [GHOSTS documentation site](https://cmu-sei.github.io/GHOSTS/) for the framework and all of its components. Each major component's detail is accessible from the main navigation. If anything is unclear or you still have questions, please do not hesitate to start a [discussion](https://github.com/cmu-sei/GHOSTS/discussions){:target="_blank"} — our community is growing and eager to help!
 
+## :material-bookmark: Glossary
+
+- **NPCs** (non-player characters) are part of the GHOSTS API and are given human-like characteristics such as jobs, personalities, and interests. They simulate user actions and interact with other NPCs through the GHOSTS Animator function. While NPC functionality is outside the scope of this application, an NPC page was required as part of the design.
+
+- A **timeline** defines the tasks a machine is to perform, including the type of operation, its duration, start and end times, commands to be executed, and other operation-specific details. A timeline is made up of multiple handlers, each containing several events.
+
+- A **machine** refers to a device running the GHOSTS Client. Machines can be assigned timelines that allow GHOSTS Client to simulate user activity.
+
+- A **machine group** is a collection of machines. Assigning a timeline to a machine group applies that timeline to all machines within the group.
 ## :material-cog: Cyber Ranges and Crucible
 
 GHOSTS is typically run on machines within a virtualized network, often referred to as "the range". This network can be as simple or as complex as required for training, exercise, modeling, or simulation purposes.
