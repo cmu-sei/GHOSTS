@@ -3,76 +3,68 @@
 ???+ info "GHOSTS Source Code"
     The [GHOSTS Source Code Repository](https://github.com/cmu-sei/GHOSTS) is hosted on GitHub.
 
-The GHOSTS client simulates what anyone might do at a computer given their particular role or membership within some team. It creates documents, browses websites, downloads files, and uses all sorts of popular applications on many versions of Windows and Linux machines. Whether you're a friendly administrator or a powerful cyber adversary, GHOSTS can replicate your expected behavior.
+The GHOSTS client simulates activities on a computer based on specific roles or memberships within a team. It creates documents, browses websites, downloads files, and interacts with various applications on Windows and Linux machines. GHOSTS is useful for cyber training, exercises, and testing scenarios.
 
 ![Types of NPCs](../../assets/img/npc-types.png)
 
-GHOSTS has many use cases in cyber training and exercises, most notably for bringing non-player characters (NPCs) to life, but it can also be used for other purposes where realistic activity on a computer or network is needed - testing or generating datasets, for example.
+GHOSTS can be used for training, testing, or generating datasets by simulating realistic computer and network activities.
 
 ???+ warning "Do I need the API?"
-    Although clients are fully functional without the API server, the latter enables logging, reports, and remote administration capabilities. Without the API, changes to clients must be managed in some other manner.
+    The API server is optional but provides logging, reporting, and remote administration features. Without the API, client management must be handled through other means.
 
-The client's configuration and command system are file-based, so if you do not wish to use the API, you can manage these through some other tool, such as Ansible or similar. All of these files are under the client's install location.
+### Run as the NPC you're representing
 
-???+ warning "Run as the NPC you're representing"
-    The GHOSTS client should typically be run as a user, and not as administrator or root - training or exercising teams will notice this immediately.
+The GHOSTS client should be run as a regular user, not as an administrator or root, to accurately simulate user behavior.
 
 ## The Windows Client
 
-GHOSTS on Windows (Win7, 10, 11, and corresponding server versions, such as 2022, etc. are currently supported) is a .NET Console application that performs user activity on client workstations - web browsing, working with office documents, using the command prompt or PowerShell, etc. Our team typically installs the client in an out-of-game directory (`c:\exercise\ghosts\`), where no event or injects will originate. It is recommended you verify one working client before deploying to multiple machines. You will need the base URL from the API installation for the client to communicate home.
+GHOSTS on Windows (supporting Win7, 10, 11, and corresponding server versions) is a .NET Console application that performs various user activities. Install the client in a directory like `c:\exercise\ghosts\`. Verify one client before deploying to multiple machines and configure it with the API base URL.
 
 ### Windows Installation
 
-- Your client Windows machine will need to have (at least) the [Microsoft DotNet 4.6.1 runtime installed](https://dotnet.microsoft.com/download/dotnet-framework/net47) :material-open-in-new:. Again, note that you only need the runtime, not the full SDK. We continue to use 4.6.1 on Windows to maintain backward compatibility.
-
-- [Download the appropriate latest client](https://github.com/cmu-sei/GHOSTS/releases/latest){:target="_blank"}
-
-Unzip to your client machine in a directory such as `c:\exercise\ghosts`. You will need to adjust the configuration in `config/application.json` for your client to talk to your an installed instance of the GHOSTS API server.
+- Ensure the [Microsoft DotNet 4.6.1 runtime](https://dotnet.microsoft.com/download/dotnet-framework/net47) is installed.
+- [Download the latest client](https://github.com/cmu-sei/GHOSTS/releases/latest) and unzip it to `c:\exercise\ghosts`.
+- Adjust `config/application.json` to point to your API server.
 
 ???+ info "Additional configuration required for web browsing"
-    For any client utilizing the Firefox or Chrome web browser, an automation driver is necessary to be included in the same folder as the GHOSTS binary. For Firefox, [download the appropriate 🦎&nbsp; Geckodriver for your version of the browser here](https://github.com/mozilla/geckodriver/releases) :material-open-in-new:. For Chrome, [download the appropriate Chromedriver for your version of the browser here](https://chromedriver.chromium.org/downloads) :material-open-in-new:.
+    For Firefox or Chrome web browsing, download the appropriate automation driver: [Geckodriver](https://github.com/mozilla/geckodriver/releases) for Firefox or [Chromedriver](https://chromedriver.chromium.org/downloads) for Chrome.
 
 ???+ info "Additional configuration required for email"
-    Using the Windows client email functions requires the use of [Redemption](http://www.dimastr.com/redemption/home.htm) :material-open-in-new: which provides robust Outlook automation. The full Redemption library should be found in `/lib`.
+    Email functions require the [Redemption library](http://www.dimastr.com/redemption/home.htm) found in `/lib`.
 
 ## Linux Client
 
-Your client Linux machine will need to have the latest [Microsoft dotnetcore runtime version 8.0](https://dotnet.microsoft.com/download) :material-open-in-new: installed. Again, note that you only need the runtime installed, not the full SDK. Our testing has been with Ubuntu 24.04 using the [snap instructions here](https://learn.microsoft.com/en-us/dotnet/core/install/linux-ubuntu-install?pivots=os-linux-ubuntu-2404&tabs=dotnet8), but other distributions should work as well.
+GHOSTS on Linux requires the [Microsoft dotnetcore runtime version 8.0](https://dotnet.microsoft.com/download). We have tested with Ubuntu 24.04, but other distributions should work.
 
 ### Linux Installation
 
-- [Download the latest Linux client](https://github.com/cmu-sei/GHOSTS/releases/latest){:target="_blank"}
-
-Unzip to a folder such as `~/ghosts` for the user that you want GHOSTS to run as.
-
-Note that on Linux machines running the client as root and utilizing web browsing may result in failures due to Gecko/Chromedriver display issues.
+- [Download the latest Linux client](https://github.com/cmu-sei/GHOSTS/releases/latest) and unzip it to a folder such as `~/ghosts`.
+- Running the client as root may cause display issues with web browsers.
 
 ## Client Directory Structure
 
 ???+ danger "Do not copy the instance folder"
-    You should never copy the `instance` folder from one machine to another.
+    The `instance` folder should not be copied between machines.
 
 | Folder          | Description                            |
 | --------------- | ---------------------------------------|
-| `config/`       |   configuration files are stored here. |
-| `instance/`     | generated files and information relative to this particular installed instance of ghosts is stored here. **This folder should never be copied from one machine to another** |
-| `lib/`          | third-party libraries used by ghosts are stored here |
-| `logs/`         | output logs for the installed instance (logs/app.log), and logs that are transferred to the server (`logs/clientupdates.log`) |
+| `config/`       | Configuration files are stored here. |
+| `instance/`     | Stores files and information specific to the instance. **Do not copy this folder** |
+| `lib/`          | Third-party libraries used by GHOSTS |
+| `logs/`         | Output logs for the client and logs transferred to the server |
 
 ## Configuration Quick Start
 
-After unzipping the GHOSTS client, we can simply double-click it to run. Note that the console window likely printed a few messages, but then disappeared. This is normal, in production mode GHOSTS hides itself. We can see it in the Windows Task Manager, however, and we can kill the process from there. We can also run the included `kill-ghosts.bat` file that closes the application and any applications it might control.
-
-Beyond this initial step of verifying that the client will run, there are two files that we might need to adjust to fit many deployments:
+After unzipping, run the client by double-clicking it. The console window may briefly appear and then disappear. To verify, check Windows Task Manager or use the `kill-ghosts.bat` script to close it.
 
 ### application.json
 
-In this file, often all we need to change are the URLs for the API, IdUrl, ClientResultsUrl, ClientUpdatesUrl, and the like. Change the hostname to your installed API location, and GHOSTS should check in as expected.
+Adjust the API URLs in `application.json` to point to your server:
 
 ```json
 {
-  "ApiRootUrl": "http://localhost:5000/api",    // there is now just one api url to change in order to point where you've hosted your api
-  "Sockets": {                                  // this is the new websockets configuration, turn it off if you're not using it
+  "ApiRootUrl": "http://localhost:5000/api",
+  "Sockets": {
     "IsEnabled": true,
     "Heartbeat": 50000
   },
@@ -126,13 +118,9 @@ In this file, often all we need to change are the URLs for the API, IdUrl, Clien
 
 ### timeline.json
 
-The other file we may want to adjust is the default timeline. This is what the agent does all day, including browsing the internet, creating documents, and similar. The defaults hopefully give you a good idea of what is possible, and of course, the array of configurations here is endless - be creative!
+The `timeline.json` file controls client activities. Example configurations include:
 
-The primary item is the HandlerType. This tells GHOSTS to run a command (Command), use Firefox to browse an array of websites (BrowserFirefox), create Excel documents (Excel)  and so on. Some of the other items related to a handler's configuration are:
-
-- Initial: The initial command for a handler to execute. For a web browser, you might enter either a URL or "about:blank".
-- UtcTimeOn | UtcTimeOff: "00:00:00": "24:00:00" to not shut off. Otherwise, enter an on and an off time to simulate things such as office hours of 9-5, etc. There are 30 minutes of jitter plus or minus from the time entered.
-- Loop: Set this to true to continue to execute this same command on a loop, or false to execute something just one time.
+- **Command Execution:**
 
 ```json
 {
@@ -143,7 +131,7 @@ The primary item is the HandlerType. This tells GHOSTS to run a command (Command
    "Loop": "True",
    "TimeLineEvents": [
       {
-         "Command": "NETSTAT",    
+         "Command": "NETSTAT",
          "CommandArgs": [],
          "DelayAfter": 900000,
          "DelayBefore": 0
@@ -152,20 +140,7 @@ The primary item is the HandlerType. This tells GHOSTS to run a command (Command
 }
 ```
 
-To access a network share file, the command might be: net use X:\\SERVER\Share
-
-To RDP to another machine: mstsc.exe {ConnectionFile | /v:ServerName[:Port]} [/console] [/f] [/w:Width/h:Height]
-
-`/v` - specifies the remote computer and port (optional) you wish to connect to
-`/console` – connects to the console of a Windows Server 2003 based system
-`/f` – starts the remote desktop connection in full screen mode
-`/w & /h` – specifies the width and height of the remote desktop connection
-
-Actions can also be created for standard copy/move/deletion of files via their respective commands.
-
-Chrome
-
-We have to pass the browser window an initial value. If we don't want it to go anywhere at start, we could pass about:blank, otherwise we'd pass a url. These can be http or https.
+- **Browser Configuration:**
 
 ```json
 {
@@ -179,7 +154,7 @@ We have to pass the browser window an initial value. If we don't want it to go a
          "Command": "random",
          "CommandArgs": [
             "http://google.com",
-            "http://facebook.com",
+            "http://facebook.com"
          ],
          "DelayAfter": 1000,
          "DelayBefore": 0
@@ -188,7 +163,7 @@ We have to pass the browser window an initial value. If we don't want it to go a
 }
 ```
 
-Excel, PowerPoint, Word
+- **Document Creation:**
 
 ```json
 {
@@ -210,7 +185,7 @@ Excel, PowerPoint, Word
 
 ## Trackables
 
-For specific Timeline Events where the outcome is needed to be tracked, like for example, a client machine spawned inject, use a Trackable (via TrackableId in the following example):
+Use Trackables to monitor specific Timeline Events:
 
 ```json
 {
@@ -263,42 +238,41 @@ For specific Timeline Events where the outcome is needed to be tracked, like for
 
 ## Troubleshooting
 
-> Clients aren't running (immediately exiting, throwing copious exceptions, or similar)
+> Clients aren't running (immediately exiting, throwing exceptions, etc.)
 
-- Is the dotnet framework runtime 4.x installed on the machine?
-- If GPO is doing white-listing of what apps can run, is `ghosts.exe` white-listed?
-- Will the client run by simply double-clicking on the exe?
-- Does it report anything to the windows application event logs?
-- What's in `logs/app.log`?
-- Is the ghosts executable set to execute automatically when the machine restarts?
-- Does the nlog.config contain these lines?
+- Ensure the .NET Framework runtime 4.x is installed.
+- Check if `ghosts.exe` is white-listed by GPO.
+- Verify the client runs when double-clicked.
+- Review Windows application event logs and `logs/app.log`.
+- Confirm the executable is set to run at startup.
+- Check `nlog.config` for these lines:
 
+```xml
+<AutoLoadExtensions="true"/>
+<internalLogToConsole="true"/>
+<internalLogFile="logs\nlog-internal.log"/>
+<internalLogLevel="Error"/>
 ```
-AutoLoadExtensions="true"
-internalLogToConsole="true"
-internalLogFile="logs\nlog-internal.log"
-internalLogLevel="Error"
-``` 
-
-If so, be sure this one exists! `internalLogFile="logs\nlog-internal.log"`
 
 > Clients aren't reporting their activity to the API
 
-- Is the client running correctly? (if not, see above)
-- Is there entries in the logs/clientupdates.log?
-- If there are, is the file too large? (Try removing it, ghosts might be hung trying to process a lot of log data)
-- If the folder `instance` created? Does the file `instance/id.json` exist? (If it does and has an ID within, then ghosts has reported home to the api at least once)
-- The file `logs/app.log` indicating any fatal issues? (Logging can be ratcheted up and down via nlog configuration)
+- Confirm the client is running correctly.
+- Check `logs/clientupdates.log` for entries and size.
+- Ensure the `instance` folder and `instance/id.json` exist.
+- Review `logs/app.log` for fatal errors.
 
 > Can I update what clients are doing?
 
-- Clients operate off their `config/timeline.json` file and this can be updated via Powershell, Ansible, or other means - it's just a file.
-- Clients can also do just-in-time activities via the `instance/timeline/in` folder. Anything placed here will be picked up, executed, and moved to the corresponding out folder once complete. This does not affect any activity currently controlled with the default timeline file.
+- Modify `config/timeline.json` directly.
+- Use the `instance/timeline/in`
+
+ folder for just-in-time activities.
 
 > Can I reset a client on a box?
 
-- Yes, launching a new instance of Ghosts kills the previous one and all associated tasks from the timeline (any instances of Word, PowerShell, etc.). Only one instance of Ghosts will be running on a client box at any time. We can also run the .bat script `kill-ghosts.bat` included in the distribution to clean everything up.
+- Launching a new GHOSTS instance will kill the previous one.
+- Use `kill-ghosts.bat` to clean up all tasks.
 
 > What is the easiest way to determine the running version of the client?
 
-- run the version flag: `ghosts.exe --version`
+- Run the version flag: `ghosts.exe --version`
