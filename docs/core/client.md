@@ -41,6 +41,87 @@ GHOSTS on Linux requires the [Microsoft dotnetcore runtime version 8.0](https://
 - [Download the latest Linux client](https://github.com/cmu-sei/GHOSTS/releases/latest) and unzip it to a folder such as `~/ghosts`.
 - Running the client as root may cause display issues with web browsers.
 
+### Linux Service Configuration
+
+To ensure the GHOSTS client runs automatically on system startup, you can configure it as a service using `systemd`.
+
+#### Step 1: Create the Service File
+
+Create a new service file for the GHOSTS client by running the following command:
+
+```bash
+sudo nano /etc/systemd/system/ghosts.service
+```
+
+#### Step 2: Define the Service
+
+Paste the following content into the service file:
+
+```ini
+[Unit]
+Description=GHOSTS Client Service
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/dotnet /path/to/ghosts/ghosts.client.linux.dll
+WorkingDirectory=/path/to/ghosts
+Restart=always
+User=ghosts_user
+Group=ghosts_user
+Environment=DOTNET_CLI_TELEMETRY_OPTOUT=1
+Environment=DISPLAY=:0
+
+[Install]
+WantedBy=multi-user.target
+```
+
+- Replace `/path/to/ghosts` with the actual path where the GHOSTS client is installed.
+- Replace `ghosts_user` with the user under which the GHOSTS client should run.
+
+#### Step 3: Reload systemd and Enable the Service
+
+After creating the service file, reload `systemd` to recognize the new service:
+
+```bash
+sudo systemctl daemon-reload
+```
+
+Enable the service to start on boot:
+
+```bash
+sudo systemctl enable ghosts
+```
+
+#### Step 4: Start the Service
+
+To start the service immediately, run:
+
+```bash
+sudo systemctl start ghosts
+```
+
+You can check the status of the service with:
+
+```bash
+sudo systemctl status ghosts
+```
+
+#### Step 5: Stopping and Restarting the Service
+
+To stop the service:
+
+```bash
+sudo systemctl stop ghosts
+```
+
+To restart the service:
+
+```bash
+sudo systemctl restart ghosts
+```
+
+Now, the GHOSTS client will run as a background service and automatically start with your system.
+
 ## Client Directory Structure
 
 ???+ danger "Do not copy the instance folder"
@@ -116,39 +197,50 @@ Adjust the API URLs in `application.json` to point to your server:
 }
 ```
 
-### timeline.json
+---
 
-The `timeline.json` file controls client activities. Example configurations include:
+### `timeline.json`
 
-- **Command Execution:**
+The `timeline.json` file defines the agent’s daily tasks, such as browsing websites, creating documents, and executing commands. The default settings provide a solid starting point, showcasing a variety of possible configurations. However, the customization options are vast—so feel free to experiment and tailor the setup to suit your needs.
 
-```json
-{
-   "HandlerType": "Command",
-   "Initial": "",
-   "UtcTimeOn": "00:00:00",
-   "UtcTimeOff": "24:00:00",
-   "Loop": "True",
-   "TimeLineEvents": [
-      {
-         "Command": "NETSTAT",
-         "CommandArgs": [],
-         "DelayAfter": 900000,
-         "DelayBefore": 0
-      }
-   ]
-}
-```
+The key field in each timeline entry is the **`HandlerType`**, which specifies the task GHOSTS should perform. These tasks might include running commands (`Command`), browsing websites using Firefox or Chrome (`BrowserFirefox`, `BrowserChrome`), or creating documents in Excel or Word. Below are some other important configuration options:
 
-- **Browser Configuration:**
+- **`Initial`**: Defines the first action the handler will execute. For web browsers, this can be a URL (e.g., `http://example.com`) or "about:blank" to start with an empty tab.
+- **`UtcTimeOn` | `UtcTimeOff`**: Specifies the time window during which the task is active. `"00:00:00"` to `"24:00:00"` will run the task continuously, but you can customize the times to simulate real-world office hours, such as 9 to 5. A random jitter of up to 30 minutes is applied to these times.
+- **`Loop`**: Set this to `true` if you want the task to repeat, or `false` if it should run only once.
 
+#### Example Commands
+
+To execute specific tasks, you can use various system commands, such as:
+
+- **Access a Network Share**:
+  ```bash
+  net use X:\SERVER\Share
+  ```
+  
+- **Remote Desktop (RDP) Connection**:
+  ```bash
+  mstsc.exe {ConnectionFile | /v:ServerName[:Port]} [/console] [/f] [/w:Width/h:Height]
+  ```
+  - `/v`: Specifies the remote machine and port (optional).
+  - `/console`: Connects to the console of a Windows Server 2003 or later.
+  - `/f`: Launches RDP in full-screen mode.
+  - `/w` & `/h`: Set the width and height of the RDP window.
+
+File operations, such as copying, moving, or deleting files, can also be configured using standard system commands.
+
+#### Browser Configuration
+
+When configuring the browser handlers (Chrome or Firefox), an initial value is required. This could be "about:blank" if you don’t want to load a page immediately or an actual URL. Both HTTP and HTTPS are supported.
+
+##### Example Configuration for Chrome:
 ```json
 {
    "HandlerType": "BrowserChrome",
    "Initial": "http://google.com",
    "UtcTimeOn": "00:00:00",
    "UtcTimeOff": "24:00:00",
-   "Loop": "True",
+   "Loop": true,
    "TimeLineEvents": [
       {
          "Command": "random",
@@ -163,7 +255,9 @@ The `timeline.json` file controls client activities. Example configurations incl
 }
 ```
 
-- **Document Creation:**
+#### Document Creation
+
+You can also configure GHOSTS to create documents in Word, Excel, or PowerPoint. Here’s an example for Word:
 
 ```json
 {
@@ -171,7 +265,7 @@ The `timeline.json` file controls client activities. Example configurations incl
    "Initial": "",
    "UtcTimeOn": "00:00:00",
    "UtcTimeOff": "24:00:00",
-   "Loop": "True",
+   "Loop": true,
    "TimeLineEvents": [
       {
          "Command": "create",
@@ -183,9 +277,9 @@ The `timeline.json` file controls client activities. Example configurations incl
 }
 ```
 
-## Trackables
+### Trackables
 
-Use Trackables to monitor specific Timeline Events:
+If you need to track the outcome of a specific timeline event (such as verifying that a client machine performed an action), you can use the **`TrackableId`**. Here's an example of tracking a file download:
 
 ```json
 {
@@ -205,30 +299,9 @@ Use Trackables to monitor specific Timeline Events:
                 },
                 {
                     "Command": "download",
-                    "CommandArgs": [ "//a[contains(@class, 'dl')]" ],
-                    "TrackableId": "<guid id from trackables table/>",
+                    "CommandArgs": [ "//a[contains(@class, 'dlbutton')]" ],
                     "DelayAfter": 0,
                     "DelayBefore": 0
-                }
-            ]
-        },
-        {
-            "HandlerType": "Command",
-            "Initial": "",
-            "UtcTimeOn": "00:00:00",
-            "UtcTimeOff": "24:00:00",
-            "Loop": false,
-            "TimeLineEvents": [
-                {
-                    "Command": "cd %homedrive%%homepath%\\Downloads",
-                    "CommandArgs": [
-                        "powershell expand-archive -Path italian_breakfast.zip -destinationpath x",
-                        "cd x",
-                        "dir"
-                    ],
-                    "TrackableId": "<guid id from trackables table/>",
-                    "DelayAfter": 10,
-                    "DelayBefore": 10000
                 }
             ]
         }
@@ -236,43 +309,49 @@ Use Trackables to monitor specific Timeline Events:
 }
 ```
 
+---
+
 ## Troubleshooting
 
-> Clients aren't running (immediately exiting, throwing exceptions, etc.)
+### Clients aren't running (immediately exiting, throwing exceptions, etc.)
 
-- Ensure the .NET Framework runtime 4.x is installed.
-- Check if `ghosts.exe` is white-listed by GPO.
-- Verify the client runs when double-clicked.
-- Review Windows application event logs and `logs/app.log`.
-- Confirm the executable is set to run at startup.
-- Check `nlog.config` for these lines:
+- **.NET Framework**: Is the .NET Framework runtime 4.x installed on the machine?
+- **GPO Whitelisting**: If GPO is whitelisting apps, is `ghosts.exe` on the whitelist?
+- **Manual Execution**: Does the client run when you double-click the `.exe` file?
+- **Event Logs**: Are there any reports in the Windows application event logs?
+- **Logs**: What’s in `logs/app.log`?
+- **Startup**: Is the `ghosts.exe` set to execute automatically when the machine restarts?
+- **NLog Configuration**: Does the `nlog.config` contain these lines?
 
 ```xml
 <AutoLoadExtensions="true"/>
 <internalLogToConsole="true"/>
-<internalLogFile="logs\nlog-internal.log"/>
+<internalLogFile="logs/nlog-internal.log"/>
 <internalLogLevel="Error"/>
 ```
 
-> Clients aren't reporting their activity to the API
+  - Ensure the `internalLogFile="logs/nlog-internal.log"` exists.
 
-- Confirm the client is running correctly.
-- Check `logs/clientupdates.log` for entries and size.
-- Ensure the `instance` folder and `instance/id.json` exist.
-- Review `logs/app.log` for fatal errors.
+### Clients aren't reporting their activity to the API
 
-> Can I update what clients are doing?
+- **Client Status**: Is the client running correctly? (If not, see the steps above.)
+- **Client Logs**: Check the `logs/clientupdates.log` file. Is it too large? (If so, try deleting it; GHOSTS might be stuck processing too much log data.)
+- **Instance/ID**: Has the folder `instance` been created? Does `instance/id.json` exist? (If this file has an ID, GHOSTS has reported to the API at least once.)
+- **App Log**: Check `logs/app.log` for any fatal issues. (Logging levels can be adjusted in `nlog.config`.)
 
-- Modify `config/timeline.json` directly.
-- Use the `instance/timeline/in`
+### Can I update what clients are doing?
 
- folder for just-in-time activities.
+- **Timeline Updates**: Clients operate based on their `config/timeline.json` file. You can update this file using PowerShell, Ansible, or similar tools. It’s just a file.
+- **Just-In-Time Activities**: Clients also support just-in-time activities. Any files placed in the `instance/timeline/in` folder will be picked up, executed, and then moved to the `out` folder once complete. This doesn’t affect the default timeline.
 
-> Can I reset a client on a box?
+### Can I reset a client on a machine?
 
-- Launching a new GHOSTS instance will kill the previous one.
-- Use `kill-ghosts.bat` to clean up all tasks.
+Yes, launching a new instance of GHOSTS will automatically kill the previous one along with all associated tasks (e.g., Word, PowerShell instances). Only one instance of GHOSTS will run on a client machine at a time. You can also run the `kill-ghosts.bat` script, included in the distribution, to clean up any previous instances.
 
-> What is the easiest way to determine the running version of the client?
+### Determining the running version of the client
 
-- Run the version flag: `ghosts.exe --version`
+You can check the client version by running:
+
+```bash
+ghosts.exe --version
+```
