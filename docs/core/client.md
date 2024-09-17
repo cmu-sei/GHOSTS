@@ -12,8 +12,6 @@ GHOSTS can be used for training, testing, or generating datasets by simulating r
 ???+ warning "Do I need the API?"
     The API server is optional but provides logging, reporting, and remote administration features. Without the API, client management must be handled through other means.
 
-### Run as the NPC you're representing
-
 The GHOSTS client should be run as a regular user, not as an administrator or root, to accurately simulate user behavior.
 
 ## The Windows Client
