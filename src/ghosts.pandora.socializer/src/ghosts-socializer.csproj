@@ -8,10 +8,10 @@
         <RootNamespace>Socializer</RootNamespace>
         <noWarn>8618</noWarn>
 
-        <ReleaseVersion>0.4.0.0</ReleaseVersion>
-        <Version>0.4.0.0</Version>
-        <AssemblyVersion>0.4.0.0</AssemblyVersion>
-        <FileVersion>0.4.0.0</FileVersion>
+        <ReleaseVersion>0.4.1.0</ReleaseVersion>
+        <Version>0.4.1.0</Version>
+        <AssemblyVersion>0.4.1.0</AssemblyVersion>
+        <FileVersion>0.4.1.0</FileVersion>
         <SynchReleaseVersion>false</SynchReleaseVersion>
 
         <Authors>GHOSTS Development Team @ Carnegie Mellon University</Authors>
@@ -22,10 +22,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Faker.Net" Version="2.0.154" />
-      <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="8.0.0" />
+      <PackageReference Include="Faker.Net" Version="2.0.163" />
+      <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="8.0.8" />
       <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.0" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.8" />
     </ItemGroup>
 
     <ItemGroup>
