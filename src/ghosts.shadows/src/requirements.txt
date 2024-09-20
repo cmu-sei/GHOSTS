@@ -2,7 +2,7 @@ Flask==3.0.2
 gradio==4.37.1
 imaginairy==14.2.0
 langchain==0.2.10
-langchain_community==0.0.31
+langchain_community==0.2.9
 numpy==1.25.2
 Requests==2.32.2
 torch==2.2.0
