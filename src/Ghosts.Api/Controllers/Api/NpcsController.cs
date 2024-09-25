@@ -51,6 +51,19 @@ public class NpcsController : ControllerBase
     {
         return Ok(await this._service.GetAll());
     }
+    
+    /// <summary>
+    /// Returns all generated NPCs in the system (caution, could return a very large amount of data)
+    /// </summary>
+    /// <returns>IEnumerable&lt;NpcProfile&gt;</returns>
+    [ProducesResponseType(typeof(ActionResult<IEnumerable<NpcRecord>>), (int)HttpStatusCode.OK)]
+    [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(ActionResult<IEnumerable<NpcRecord>>))]
+    [SwaggerOperation("NpcsCreate")]
+    [HttpPost]
+    public async Task<ActionResult<IEnumerable<NpcRecord>>> NpcsCreate(NpcProfile npc)
+    {
+        return Ok(await this._service.CreateOne(npc));
+    }
 
     /// <summary>
     /// Returns name and Id for all NPCs in the system (caution, could return a large amount of data)
