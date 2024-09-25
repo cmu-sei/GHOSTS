@@ -23,6 +23,7 @@ public interface INpcService
     public Task<NpcRecord> GetById(Guid id);
     public Task<IEnumerable<NpcRecord>> Create(GenerationConfiguration config, CancellationToken ct);
     public Task<NpcRecord> CreateOne();
+    Task<NpcRecord> CreateOne(NpcProfile npc);
     public Task DeleteById(Guid id);
     public Task<IEnumerable<string>> GetKeys(string key);
     public Task SyncWithMachineUsernames();
@@ -84,6 +85,18 @@ public class NpcService : INpcService
     public async Task<NpcRecord> CreateOne()
     {
         var npc = NpcRecord.TransformToNpc(Npc.Generate(MilitaryUnits.GetServiceBranch()));
+        npc.Id = npc.NpcProfile.Id;
+        this._context.Npcs.Add(npc);
+        await this._context.SaveChangesAsync();
+        return npc;
+    }
+    
+    public async Task<NpcRecord> CreateOne(NpcProfile npcProfile)
+    {
+        var npc = new NpcRecord
+        {
+            NpcProfile = npcProfile
+        };
         npc.Id = npc.NpcProfile.Id;
         this._context.Npcs.Add(npc);
         await this._context.SaveChangesAsync();
