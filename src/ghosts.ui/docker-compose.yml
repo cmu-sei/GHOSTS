@@ -19,51 +19,50 @@ services:
     # persist the timelines in the sqlite db
     # volumes:
     #   - ./sqlite.db:/app/sqlite.db
-  # From here on this is the basic GHOSTS docker compose
-  # postgres:
-  #   image: postgres
-  #   container_name: ghosts-postgres
-  #   environment:
-  #     POSTGRES_DB: ghosts
-  #     POSTGRES_USER: ghosts
-  #     POSTGRES_PASSWORD: scotty@1
-  #   volumes:
-  #     - ./_db:/var/lib/postgresql/data
-  #   logging:
-  #     options:
-  #       max-size: '100m'
-  #       max-file: '5'
-  #   ports:
-  #     - '5432:5432'
-  #   healthcheck:
-  #     test: ['CMD-SHELL', 'pg_isready -U ghosts']
-  #     interval: 10s
-  #     timeout: 5s
-  #     retries: 10
-  #   networks:
-  #     - ghosts-network
-  #   restart: always
-  # ghosts-api:
-  #   image: dustinupdyke/ghosts:latest
-  #   container_name: ghosts-api
-  #   depends_on:
-  #     - postgres
-  #   ports:
-  #     - '5000:5000'
-  #   networks:
-  #     - ghosts-network
-  #   restart: always
-  # grafana:
-  #   image: grafana/grafana
-  #   container_name: ghosts-grafana
-  #   depends_on:
-  #     - postgres
-  #   ports:
-  #     - '3000:3000'
-  #   networks:
-  #     - ghosts-network
-  #   restart: always
-  #   volumes:
-  #     - ./_g:/var/lib/grafana
-  #   user: root
-    
+    # From here on this is the basic GHOSTS docker compose
+    # postgres:
+    #   image: postgres
+    #   container_name: ghosts-postgres
+    #   environment:
+    #     POSTGRES_DB: ghosts
+    #     POSTGRES_USER: ghosts
+    #     POSTGRES_PASSWORD: scotty@1
+    #   volumes:
+    #     - ./_db:/var/lib/postgresql/data
+    #   logging:
+    #     options:
+    #       max-size: '100m'
+    #       max-file: '5'
+    #   ports:
+    #     - '5432:5432'
+    #   healthcheck:
+    #     test: ['CMD-SHELL', 'pg_isready -U ghosts']
+    #     interval: 10s
+    #     timeout: 5s
+    #     retries: 10
+    #   networks:
+    #     - ghosts-network
+    #   restart: always
+    # ghosts-api:
+    #   image: dustinupdyke/ghosts:latest
+    #   container_name: ghosts-api
+    #   depends_on:
+    #     - postgres
+    #   ports:
+    #     - '5000:5000'
+    #   networks:
+    #     - ghosts-network
+    #   restart: always
+    # grafana:
+    #   image: grafana/grafana
+    #   container_name: ghosts-grafana
+    #   depends_on:
+    #     - postgres
+    #   ports:
+    #     - '3000:3000'
+    #   networks:
+    #     - ghosts-network
+    #   restart: always
+    #   volumes:
+    #     - ./_g:/var/lib/grafana
+    #   user: root
