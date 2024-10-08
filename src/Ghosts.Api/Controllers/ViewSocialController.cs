@@ -2,13 +2,15 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Ghosts.Api;
 using Ghosts.Api.Infrastructure;
+using Ghosts.Api.Infrastructure.Data;
+using ghosts.api.Infrastructure.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using NLog;
 
@@ -20,10 +22,12 @@ namespace ghosts.api.Controllers
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
         private readonly ApplicationSettings _configuration;
+        private readonly ApplicationDbContext _context;
 
-        public ViewSocialController(ApplicationSettings configuration)
+        public ViewSocialController(ApplicationDbContext context)
         {
-            _configuration = configuration;
+            _configuration = Program.ApplicationSettings;
+            _context = context;
         }
 
         [HttpGet]
@@ -94,14 +98,11 @@ namespace ghosts.api.Controllers
 
         private async Task<List<NpcSocialGraph>> LoadSocialGraphsAsync()
         {
-            var path = SocialGraphJob.GetSocialGraphFile();
-            if (!System.IO.File.Exists(path))
-            {
-                return null; // File not found, return null
-            }
-
-            var json = await System.IO.File.ReadAllTextAsync(path);
-            return JsonConvert.DeserializeObject<List<NpcSocialGraph>>(json);
+            var graphs = await _context.Npcs
+                .Where(x => x.NpcSocialGraph != null)
+                .Select(x => x.NpcSocialGraph)
+                .ToListAsync();
+            return graphs;
         }
 
         private async Task<NpcSocialGraph> LoadGraphByIdAsync(Guid id)

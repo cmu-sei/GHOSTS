@@ -43,7 +43,7 @@
 
 <div class="row">
     <div class="col-sm-12">
-        @if (!ViewBag.IsEnabled || Model == null)
+        @if (ViewBag.IsEnabled != null && !ViewBag.IsEnabled || Model == null)
         {
             <p>Sorry, but social graph does not appear to be enabled or has not been loaded.</p>
         }
