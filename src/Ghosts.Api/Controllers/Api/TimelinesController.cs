@@ -36,7 +36,7 @@ namespace ghosts.api.Controllers.Api
         /// <returns>MachineTimelines</returns>
         [ProducesResponseType(typeof(MachineTimeline), 200)]
         [SwaggerOperation("TimelinesGetByMachineId")]
-        [HttpGet("timelines/{machineId}")]
+        [HttpGet("{machineId}")]
         public async Task<IActionResult> TimelinesGetByMachineId([FromRoute] Guid machineId, CancellationToken ct)
         {
             return Ok(await _machineTimelinesService.GetByMachineIdAsync(machineId, ct));
@@ -52,7 +52,7 @@ namespace ghosts.api.Controllers.Api
         /// <returns>MachineTimeline</returns>
         [ProducesResponseType(typeof(MachineTimeline), 200)]
         [SwaggerOperation("TimelinesGetByMachineIdAndTimelineId")]
-        [HttpGet("timelines/{machineId}/{timelineId}")]
+        [HttpGet("{machineId}/{timelineId}")]
         public async Task<IActionResult> TimelinesGetByMachineIdAndTimelineId([FromRoute] Guid machineId, [FromRoute] Guid timelineId, CancellationToken ct)
         {
             return Ok(await _machineTimelinesService.GetByMachineIdAndTimelineIdAsync(machineId, timelineId, ct));
@@ -64,7 +64,7 @@ namespace ghosts.api.Controllers.Api
         /// <param name="machineUpdate">The update to send</param>
         /// <param name="ct">Cancellation token</param>
         /// <returns>204 No content</returns>
-        [HttpPost("timelines")]
+        [HttpPost]
         // [ProducesResponseType(typeof(IActionResult), (int) HttpStatusCode.NoContent)] Swagger hates this https://stackoverflow.com/questions/35605427/swagger-ui-freezes-after-api-fetch-and-browser-crashes
         [SwaggerOperation("TimelinesCreate")]
         public async Task<IActionResult> TimelinesCreate([FromBody] MachineUpdateViewModel machineUpdate, CancellationToken ct)
@@ -73,7 +73,7 @@ namespace ghosts.api.Controllers.Api
             return NoContent();
         }
         
-        [HttpPost("timelines/{machineId}/{timelineId}/stop")]
+        [HttpPost("{machineId}/{timelineId}/stop")]
         [SwaggerOperation("TimelinesStop")]
         public async Task<IActionResult> TimelinesStop([FromRoute] Guid machineId, [FromRoute] Guid timelineId, CancellationToken ct)
         {

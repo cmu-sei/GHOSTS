@@ -1927,7 +1927,7 @@
 				}
 			}
 		},
-		"/timelines/{machineId}": {
+		"/api/timelines/{machineId}": {
 			"get": {
 				"tags": ["TimeLines"],
 				"summary": "This returns all timeLines for a requested machine. If all or a specific timeLine is not available,\r\na MachineUpdate request can be made to retrieve the machine timeLines",
@@ -1967,7 +1967,7 @@
 				}
 			}
 		},
-		"/timelines/updates": {
+		"/api/timelines/updates": {
 			"get": {
 				"tags": ["TimeLines"],
 				"parameters": [
@@ -2005,7 +2005,7 @@
 				}
 			}
 		},
-		"/timelines/{machineId}/{timeLineId}": {
+		"/api/timelines/{machineId}/{timeLineId}": {
 			"get": {
 				"tags": ["TimeLines"],
 				"summary": "This returns a specific timeLine for a requested machine. If the timeLine is not available,\r\na MachineUpdate request can be made to retrieve the machine timeLine",
@@ -2055,7 +2055,7 @@
 				}
 			}
 		},
-		"/timelines": {
+		"/api/timelines": {
 			"post": {
 				"tags": ["TimeLines"],
 				"summary": "Send a new timeLine to a particular machine",
@@ -2207,7 +2207,7 @@
 				}
 			}
 		},
-		"/timelines/{machineId}/{timeLineId}/stop": {
+		"/api/timelines/{machineId}/{timeLineId}/stop": {
 			"post": {
 				"tags": ["TimeLines"],
 				"parameters": [
