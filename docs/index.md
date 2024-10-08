@@ -1,58 +1,62 @@
-# The GHOSTS NPC Framework
+# GHOSTS NPC Framework
 
-Developed by Carnegie Mellon University's Software Engineering Institute (SEI), The GHOSTS Framework is an open-source (OSS) software framework that enables creating, deploying, and orchestrating complex non-player character (NPC) activity within training, exercise, simulation, and educational environments.
+Developed by Carnegie Mellon University's Software Engineering Institute (SEI), the **GHOSTS Framework** is an open-source software framework designed for creating, deploying, and orchestrating complex non-player character (NPC) activity within training, exercises, simulations, and educational environments.
 
-If you've never seen GHOSTS in action, watch this quick three-minute introductory video on YouTube:
+**Watch GHOSTS in action**:  
+Check out this quick three-minute introductory video on YouTube:
 
 <iframe width="1000" height="563" src="https://www.youtube.com/embed/EkwK-cqwjjA" title="GHOSTS Intro on YouTube" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 
-In a basic setup, GHOSTS consists of a client and a server API. The client is installed on the simulated end user’s device, such as a workstation, while the GHOSTS API runs on a management device. GHOSTS clients simulate user actions using timelines and NPCs. Timelines are manually configured to dictate client behavior, while NPCs act autonomously and interact with each other. The GHOSTS API allows administrators to modify the behavior of simulated users by sending new timelines, reconfiguring NPCs, and making other adjustments.
+At its core, GHOSTS consists of a **client** and an **API server**. The client runs on simulated user devices (e.g., workstations), while the API server is managed centrally. Clients simulate user activities based on **timelines** and **NPCs**:
+
+- **Timelines**: Preconfigured scripts that define user behavior (tasks, operations, and durations).
+- **NPCs**: Autonomous actors that simulate human-like interactions, working independently or in groups, and can be reprogrammed via the API.
 
 ## :material-file-document: Documentation
 
-This is the [GHOSTS documentation site](https://cmu-sei.github.io/GHOSTS/) for the framework and all of its components. Each major component's detail is accessible from the main navigation. If anything is unclear or you still have questions, please do not hesitate to start a [discussion](https://github.com/cmu-sei/GHOSTS/discussions){:target="_blank"} — our community is growing and eager to help!
+Visit the official [GHOSTS documentation](https://cmu-sei.github.io/GHOSTS/) for detailed information on setup, usage, and configuration. If you need further help, feel free to ask questions in our [community discussions](https://github.com/cmu-sei/GHOSTS/discussions).
 
 ## :material-bookmark: Glossary
 
-- **NPCs** (non-player characters) are part of the GHOSTS API and are given human-like characteristics such as jobs, personalities, and interests. They simulate user actions and interact with other NPCs through the GHOSTS Animator function. While NPC functionality is outside the scope of this application, an NPC page was required as part of the design.
+- **NPCs** (Non-Player Characters): Simulated users with personalities, jobs, and behaviors, driven by GHOSTS' Animator. NPCs perform activities such as browsing, document creation, or sending emails.
+- **Timeline**: A sequence of tasks defining actions a machine will perform (e.g., start time, duration, operation type).
+- **Machine**: Any device running the GHOSTS client, assigned to carry out activities according to its timeline.
+- **Machine Group**: A collection of machines. Timelines assigned to a group apply to all machines within it.
 
-- A **timeline** defines the tasks a machine is to perform, including the type of operation, its duration, start and end times, commands to be executed, and other operation-specific details. A timeline is made up of multiple handlers, each containing several events.
-
-- A **machine** refers to a device running the GHOSTS Client. Machines can be assigned timelines that allow GHOSTS Client to simulate user activity.
-
-- A **machine group** is a collection of machines. Assigning a timeline to a machine group applies that timeline to all machines within the group.
 ## :material-cog: Cyber Ranges and Crucible
 
-GHOSTS is typically run on machines within a virtualized network, often referred to as "the range". This network can be as simple or as complex as required for training, exercise, modeling, or simulation purposes.
-
-CERT's Cyber Mission Readiness (CMR) team has a great deal of experience in building cyber ranges for training, exercise, and simulation — captured in our technical report :material-file-document:[_Foundation of Cyber Ranges_](https://resources.sei.cmu.edu/library/asset-view.cfm?assetid=734198){:target="_blank"}. The report details the design considerations and execution plan for building high-fidelity, realistic virtual cyber ranges that deliver maximum training and exercise value for cyberwarfare participants.
+GHOSTS is commonly deployed in **virtualized networks** (cyber ranges) used for training, exercises, and simulations. For more on building high-fidelity, realistic cyber ranges, check out CERT's report [_Foundation of Cyber Ranges_](https://resources.sei.cmu.edu/library/asset-view.cfm?assetid=734198).
 
 ???+ tip "Run GHOSTS on the Crucible Framework"
     ![Crucible Logo](assets/img/crucible-icon-c-alpha.svg)
-    GHOSTS runs very well within the SEI's Crucible Framework ([Source Code](https://github.com/cmu-sei/crucible){:target="_blank"} and [Docs](https://cmu-sei.github.io/crucible/){:target="_blank"}) - which we use extensively for training and exercise here at [Carnegie Mellon University](https://www.cmu.edu){:target="_blank"} (CMU)'s [Software Engineering Institute](https://sei.cmu.edu/){:target="_blank"}, and particularly, within [CERT](https://cert.org){:target="_blank"}.
-
-    Building a sufficiently complex range for training and exercise purposes is often challenging. Crucible is a modular framework for creating, deploying, and managing virtual environments to support training, education, and exercises. Crucible is designed to be easy to use, extensible, and customizable to meet the needs of a wide variety of use cases.
+    GHOSTS runs efficiently on the SEI's **Crucible Framework**, a modular system for creating and managing virtual environments for training and exercises. Find more on [Crucible's source code](https://github.com/cmu-sei/crucible) and [Crucible Docs](https://cmu-sei.github.io/crucible/).
 
 ## :material-lightbulb: Philosophy
 
-GHOSTS evolved in our quest to create more realistic NPCs within cyberwarfare training and exercise. In 2018, we outlined our thoughts in a technical report entitled [_GHOSTS in the Machine: A Framework for Cyber-Warfare Exercise NPC Simulation_](https://resources.sei.cmu.edu/library/asset-view.cfm?assetid=534316){:target="_blank"}.[^1] In that report, we outline how the GHOSTS framework accomplishes the creation of simulations in which NPCs realistically represent a vast array of possible encounters and outcomes. We have continued to follow our initial path since. The litmus has always been that if we looked over someone's shoulder while they were using a computer, that is what GHOSTS should look like.[^2]
+The GHOSTS framework originated from SEI's desire to create **realistic NPCs** for cyber warfare training. Our initial technical report, [_GHOSTS in the Machine: A Framework for Cyber-Warfare Exercise NPC Simulation_](https://resources.sei.cmu.edu/library/asset-view.cfm?assetid=534316), outlines how GHOSTS replicates user behavior as observed in real-life scenarios.
 
-Since then the framework has expanded to include tools that [serve content in simulated environments](content/index.md), [create NPCs with details about them that we can programmatically use to drive their decision-making](animator/index.md), and [machine learning agent preference engines](spectre/index.md). If it is related to replicating human behavior in terms of computing, we are interested in how GHOSTS can contribute within that space. Although these efforts listed here began separately, they are now all part of the GHOSTS framework proper.
+Since its inception, GHOSTS has expanded to include features like:
+
+- **Content serving** for realistic environments
+- Detailed NPC creation with customizable behaviors
+- **Machine learning** engines for decision-making
+
+These features, initially separate, have now been fully integrated into the GHOSTS framework.
 
 ## :material-bug: Reporting Bugs
 
-Found a bug? Please report all bugs - including bugs for the individual components - in the [cmu-sei/ghosts issue tracker](https://github.com/cmu-sei/ghosts/issues){:target="_blank"}. Include as much detail as possible including steps to reproduce, the specific components involved, and any error messages you may have found.
+Found a bug? Please report it through the [GHOSTS issue tracker](https://github.com/cmu-sei/ghosts/issues). Include detailed steps for reproducing the issue and any relevant error messages.
 
 ## :material-new-box: Requesting Features
 
-Have a good idea for a new feature? Submit all new feature requests through the [cmu-sei/ghosts issue tracker](https://github.com/cmu-sei/ghosts/issues){:target="_blank"}. Include the reasons why you're requesting the new feature and how it might benefit other users.
+Have a feature request? Submit new ideas through the [GHOSTS issue tracker](https://github.com/cmu-sei/ghosts/issues) with a description of how it could benefit the community.
 
 ## :material-license: License
 
-[DISTRIBUTION STATEMENT A] This material has been approved for public release and unlimited distribution.
+[DISTRIBUTION STATEMENT A] This material has been approved for public release and unlimited distribution.  
+Copyright 2018 Carnegie Mellon University. See the [LICENSE.md](https://github.com/cmu-sei/GHOSTS/blob/master/LICENSE.md) for more details.
 
-Copyright 2018 Carnegie Mellon University. See the [LICENSE.md](https://github.com/cmu-sei/GHOSTS/blob/master/LICENSE.md){:target="_blank"} file for details.
+---
 
-[^1]: This paper is influenced by our previous paper :material-file-document:[_R-EACTR: A Framework for Designing Realistic Cyber Warfare Exercises_](https://resources.sei.cmu.edu/library/asset-view.cfm?assetid=505224){:target="_blank"} which outlines a design framework for cyber warfare exercises. It ensures that designs of team-based exercises factor realism into all aspects of the participant experience. Both of these papers are natural extensions to :material-file-document:[_The CERT Approach to Cybersecurity Workforce Development_](https://resources.sei.cmu.edu/library/asset-view.cfm?assetid=9697){:target="_blank"}.
-
-[^2]: There is also a :material-video:[GHOSTS video presentation](https://resources.sei.cmu.edu/library/asset-view.cfm?assetid=735300){:target="_blank"} from FloCon 2021 that provides a general introduction to the framework.
+[^1]: This framework is built on earlier work from SEI’s technical report [_R-EACTR: A Framework for Designing Realistic Cyber Warfare Exercises_](https://resources.sei.cmu.edu/library/asset-view.cfm?assetid=505224), which outlines the principles behind realistic cyberwarfare simulations.
+[^2]: A [GHOSTS video presentation](https://resources.sei.cmu.edu/library/asset-view.cfm?assetid=735300) from FloCon 2021 provides a general overview of the framework.
