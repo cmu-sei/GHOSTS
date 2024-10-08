@@ -102,7 +102,5 @@ This server allows GHOSTS clients to interact with simulated social media conten
 ---
 
 ## License
-
-[DISTRIBUTION STATEMENT A] Approved for public release and unlimited distribution.  
-Copyright 2017 Carnegie Mellon University.  
-See LICENSE.md for terms. 
+[DISTRIBUTION STATEMENT A] This material has been approved for public release and unlimited distribution.
+Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.

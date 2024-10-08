@@ -3,14 +3,14 @@
 ???+ info "GHOSTS Source Code"
     The [GHOSTS Source Code Repository](https://github.com/cmu-sei/GHOSTS) is hosted on GitHub.
 
-The GHOSTS client simulates activities on a computer based on specific roles or memberships within a team. It creates documents, browses websites, downloads files, and interacts with various applications on Windows and Linux machines. GHOSTS is useful for cyber training, exercises, and testing scenarios.
+The GHOSTS client simulates realistic human activities on a computer based on specific roles or memberships within a team. It creates documents, browses websites, downloads files, and interacts with various applications on Windows and Linux machines. GHOSTS is useful for cyber training, exercises, and testing scenarios.
 
 ![Types of NPCs](../../assets/img/npc-types.png)
 
 GHOSTS can be used for training, testing, or generating datasets by simulating realistic computer and network activities.
 
 ???+ warning "Do I need the API?"
-    The API server is optional but provides logging, reporting, and remote administration features. Without the API, client management must be handled through other means.
+    The API server is optional but provides logging, reporting, and remote administration features. Without the API, client management must be handled through other means such as Ansible or similar.
 
 The GHOSTS client should be run as a regular user, not as an administrator or root, to accurately simulate user behavior.
 
@@ -28,11 +28,11 @@ GHOSTS on Windows (supporting Win7, 10, 11, and corresponding server versions) i
     For Firefox or Chrome web browsing, download the appropriate automation driver: [Geckodriver](https://github.com/mozilla/geckodriver/releases) for Firefox or [Chromedriver](https://chromedriver.chromium.org/downloads) for Chrome.
 
 ???+ info "Additional configuration required for email"
-    Email functions require the [Redemption library](http://www.dimastr.com/redemption/home.htm) found in `/lib`.
+    Email functions require the [Redemption library](http://www.dimastr.com/redemption/home.htm) found in `/lib` this provides Outlook automation.
 
 ## Linux Client
 
-GHOSTS on Linux requires the [Microsoft dotnetcore runtime version 8.0](https://dotnet.microsoft.com/download). We have tested with Ubuntu 24.04, but other distributions should work.
+GHOSTS on Linux requires the [Microsoft dotnetcore runtime version 8.0](https://dotnet.microsoft.com/download). We have tested with Ubuntu 24.04 using the [snap instructions here](https://learn.microsoft.com/en-us/dotnet/core/install/linux-ubuntu-install?pivots=os-linux-ubuntu-2404&tabs=dotnet8), but other distributions should work.
 
 ### Linux Installation
 
