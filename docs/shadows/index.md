@@ -109,7 +109,7 @@ services:
     container_name: ollama
     ports:
       - "11434:11434"
-    command: ollama serve --port 11434
+    command: serve
     networks:
       - ghosts-network
 
