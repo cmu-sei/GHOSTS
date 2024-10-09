@@ -19,6 +19,9 @@ namespace ghosts.api.Infrastructure.Services
         Task<int> CreateAsync(Group model, CancellationToken ct);
         Task<Group> UpdateAsync(Group model, CancellationToken ct);
         Task<int> DeleteAsync(int model, CancellationToken ct);
+
+        Task<Group> AddMachineToGroup(int groupId, Guid machineId, CancellationToken ct);
+        Task<Group> RemoveMachineFromGroup(int groupId, Guid machineId, CancellationToken ct);
         Task<List<HistoryTimeline>> GetActivity(int id, int skip, int take, CancellationToken ct);
     }
 
@@ -107,6 +110,29 @@ namespace ghosts.api.Infrastructure.Services
             }
 
             return id;
+        }
+        
+        public async Task<Group> AddMachineToGroup(int groupId, Guid machineId, CancellationToken ct)
+        {
+            if (!_context.GroupMachines.Any(x => x.GroupId == groupId && x.MachineId == machineId))
+            {
+                _context.GroupMachines.Add(new GroupMachine { GroupId = groupId, MachineId = machineId });
+                await _context.SaveChangesAsync(ct);
+
+            }
+            return await _context.Groups.Include(x => x.GroupMachines).FirstOrDefaultAsync(x => x.Id == groupId, cancellationToken: ct);
+        }
+        
+        public async Task<Group> RemoveMachineFromGroup(int groupId, Guid machineId, CancellationToken ct)
+        {
+            foreach (var r in
+                     _context.GroupMachines.Where(x => x.GroupId == groupId && x.MachineId == machineId))
+            {
+                _context.GroupMachines.Remove(r);
+            }
+            await _context.SaveChangesAsync(ct);
+
+            return await _context.Groups.Include(x => x.GroupMachines).FirstOrDefaultAsync(x => x.Id == groupId, cancellationToken: ct);
         }
 
         public async Task<List<HistoryTimeline>> GetActivity(int id, int skip, int take, CancellationToken ct)

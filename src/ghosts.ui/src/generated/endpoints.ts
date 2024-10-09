@@ -995,6 +995,36 @@ const endpoints = makeApi([
     ],
     response: Group,
   },
+
+  {
+    method: "post",
+    path: "/api/machinegroups/:id/:machine_id",
+    alias: "machineGroupsAddMachine",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "id",
+        description: "group id",
+        type: "Path",
+        schema: z.string(),
+      },
+      {
+        name: "machine_id",
+        description: "machine id",
+        type: "Path",
+        schema: z.string(),
+      },
+    ],
+    response: Group,
+  },
+  {
+    method: "delete",
+    path: "/api/machinegroups/:id/:machine_id",
+    alias: "machineGroupsRemoveMachine",
+    requestFormat: "json",
+    response: Group,
+  },
+
   {
     method: "delete",
     path: "/api/machinegroups/:id",
