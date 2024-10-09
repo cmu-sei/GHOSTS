@@ -99,6 +99,34 @@ namespace ghosts.api.Controllers.Api
         }
 
         /// <summary>
+        /// Adds a single machine to a machine group
+        /// </summary>
+        /// <param name="machineId"></param>
+        /// <param name="ct">Cancellation Token</param>
+        /// <param name="groupId"></param>
+        /// <returns>The updated group</returns>
+        [SwaggerOperation("MachineGroupsAddMachine")]
+        [HttpPost("{groupId:int}/{machineId:guid}")]
+        public async Task<IActionResult> AddMachineToGroup([FromRoute] int groupId, [FromRoute] Guid machineId, CancellationToken ct)
+        {
+            return Ok(await _service.AddMachineToGroup(groupId, machineId, ct));
+        }
+        
+        /// <summary>
+        /// Removes a single machine from a machine group
+        /// </summary>
+        /// <param name="machineId"></param>
+        /// <param name="ct">Cancellation Token</param>
+        /// <param name="groupId"></param>
+        /// <returns>The updated group</returns>
+        [SwaggerOperation("MachineGroupsRemoveMachine")]
+        [HttpDelete("{groupId:int}/{machineId:guid}")]
+        public async Task<IActionResult> RemoveMachineFromGroup([FromRoute] int groupId, [FromRoute] Guid machineId, CancellationToken ct)
+        {
+            return Ok(await _service.RemoveMachineFromGroup(groupId, machineId, ct));
+        }
+
+        /// <summary>
         /// Create new group
         /// </summary>
         /// <param name="model">The new group to add</param>
