@@ -30,7 +30,7 @@ public class ChatClient
     private static readonly Logger _log = LogManager.GetCurrentClassLogger();
     private readonly ChatJobConfiguration _configuration;
     private readonly ApplicationSettings.AnimatorSettingsDetail.AnimationsSettings.ChatSettings _chatSettings;
-    private readonly string _baseUrl;
+    private string _baseUrl;
     private readonly HttpClient _client;
     private string _token;
     private string UserId { get; set; }
@@ -45,7 +45,7 @@ public class ChatClient
     {
         _configuration = config;
         _chatSettings = chatSettings;
-        this._baseUrl = _configuration.Chat.BaseUrl;
+        this._baseUrl = _chatSettings.PostUrl;
         this._client = new HttpClient();
         this._formatterService = formatterService;
         this._activityHubContext = activityHubContext;
@@ -68,7 +68,8 @@ public class ChatClient
 
     private async Task<User> Login(string username, string password)
     {
-        var url = $"{_baseUrl}api/v4/users/login";
+        _baseUrl = _baseUrl.TrimEnd('/');
+        var url = $"{_baseUrl}/api/v4/users/login";
         _log.Trace($"Using login url: {url}");
 
         try
