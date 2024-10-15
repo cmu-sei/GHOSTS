@@ -472,29 +472,54 @@ public class ChatClient
         {
             if (agents == null || !agents.Any())
                 return;
-            
+    
             var u = await this.AdminLogin();
             if (u == null)
+            {
+                // Log failure for admin login
+                Console.WriteLine("Admin login failed. Cannot proceed with agent steps.");
                 return;
-
+            }
+    
             var agentsWithAccounts = await this.GetUsers();
             var agentsWithAccountsHash = new HashSet<string>(agentsWithAccounts.Select(a => a.Email));
             var agentList = agents.ToList();
+    
             foreach (var agent in agentList)
             {
                 var username = agent.NpcProfile.Email.CreateUsernameFromEmail();
                 if (!agentsWithAccountsHash.Contains(agent.NpcProfile.Email))
                 {
-                    await this.CreateUser(new UserCreate
+                    try
                     {
-                        Email = agent.NpcProfile.Email, FirstName = agent.NpcProfile.Name.First,
-                        LastName = agent.NpcProfile.Name.Last,
-                        Nickname = agent.NpcProfile.Name.ToString() ?? string.Empty,
-                        Password = _configuration.Chat.DefaultUserPassword, Username = username
-                    });
+                        await this.CreateUser(new UserCreate
+                        {
+                            Email = agent.NpcProfile.Email,
+                            FirstName = agent.NpcProfile.Name.First,
+                            LastName = agent.NpcProfile.Name.Last,
+                            Nickname = agent.NpcProfile.Name.ToString() ?? string.Empty,
+                            Password = _configuration.Chat.DefaultUserPassword,
+                            Username = username
+                        });
+    
+                        Console.WriteLine($"User created: {username}");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error creating user {username}: {ex.Message}");
+                        continue; // Skip to the next agent if user creation fails
+                    }
                 }
-
-                await this.StepEx(random, agent.Id, username, _configuration.Chat.DefaultUserPassword);
+    
+                try
+                {
+                    await this.StepEx(random, agent.Id, username, _configuration.Chat.DefaultUserPassword);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error executing step for {username}: {ex.Message}");
+                    // Optionally, you could log the error but continue with the other agents
+                }
             }
         }
     }
