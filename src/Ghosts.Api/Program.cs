@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NLog;
+using Npgsql;
 
 namespace Ghosts.Api
 {
@@ -31,6 +32,8 @@ namespace Ghosts.Api
             var host = WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>()
                 .Build();
+            
+            NpgsqlConnection.GlobalTypeMapper.EnableDynamicJson();
             
             AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
             

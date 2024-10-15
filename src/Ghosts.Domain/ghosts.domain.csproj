@@ -3,16 +3,16 @@
 	<PropertyGroup>
 		<TargetFramework>netstandard2.0</TargetFramework>
 		<RootNamespace>Ghosts.Domain</RootNamespace>
-		<AssemblyVersion>8.0.0.0</AssemblyVersion>
-		<FileVersion>8.1.2.0</FileVersion>
+		<AssemblyVersion>8.2.0.0</AssemblyVersion>
+		<FileVersion>8.2.1.0</FileVersion>
 		<Platforms>AnyCPU;x64;x86</Platforms>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="DotNetCore.NPOI" Version="1.2.3" />
-		<PackageReference Include="HtmlAgilityPack" Version="1.11.61" />
+		<PackageReference Include="HtmlAgilityPack" Version="1.11.67" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-		<PackageReference Include="NLog" Version="5.3.2" />
+		<PackageReference Include="NLog" Version="5.3.4" />
 		<PackageReference Include="System.ComponentModel" Version="4.3.0" />
 		<PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
 	</ItemGroup>
