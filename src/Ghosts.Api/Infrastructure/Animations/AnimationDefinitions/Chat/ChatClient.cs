@@ -109,7 +109,7 @@ public class ChatClient
 
     private async Task<IEnumerable<Team>> GetMyTeams(User user)
     {
-        var url = $"{_baseUrl}api/v4/users/{user.Id}/teams";
+        var url = $"{_baseUrl}/api/v4/users/{user.Id}/teams";
         _log.Trace($"Using get teams url: {url}");
 
         try
@@ -134,7 +134,7 @@ public class ChatClient
 
     private async Task<IEnumerable<Channel>> GetMyChannels(User user)
     {
-        var url = $"{_baseUrl}api/v4/users/{user.Id}/channels";
+        var url = $"{_baseUrl}/api/v4/users/{user.Id}/channels";
         _log.Trace($"Using get channels url: {url}");
 
         var content = string.Empty;
@@ -164,7 +164,7 @@ public class ChatClient
 
     private async Task CreateUser(UserCreate create)
     {
-        var url = $"{_baseUrl}api/v4/users";
+        var url = $"{_baseUrl}/api/v4/users";
         _log.Trace($"Using create user url: {url}");
 
         try
@@ -184,7 +184,7 @@ public class ChatClient
 
     private async Task<IEnumerable<User>> GetUsers()
     {
-        var url = $"{_baseUrl}api/v4/users";
+        var url = $"{_baseUrl}/api/v4/users";
         _log.Trace($"Using get users url: {url}");
 
         try
@@ -209,7 +209,7 @@ public class ChatClient
 
     private async Task<User> GetUserByUsername(string username)
     {
-        var url = $"{_baseUrl}api/v4/users/username/{username}";
+        var url = $"{_baseUrl}/api/v4/users/username/{username}";
         _log.Trace($"Using get user by username url: {url}");
 
         try
@@ -234,7 +234,7 @@ public class ChatClient
 
     private async Task<User> GetUserById(string id)
     {
-        var url = $"{_baseUrl}api/v4/users/{id}";
+        var url = $"{_baseUrl}/api/v4/users/{id}";
         _log.Trace($"Using get user by id url: {url}");
 
         try
@@ -265,7 +265,7 @@ public class ChatClient
             user_id = userId
         };
 
-        var url = $"{_baseUrl}api/v4/teams/{teamId}/members";
+        var url = $"{_baseUrl}/api/v4/teams/{teamId}/members";
         _log.Trace($"Using join team url: {url}");
 
         try
@@ -290,7 +290,7 @@ public class ChatClient
             user_id = userId
         };
 
-        var url = $"{_baseUrl}api/v4/channels/{channelId}/members";
+        var url = $"{_baseUrl}/api/v4/channels/{channelId}/members";
         _log.Trace($"Using join channel url: {url}");
 
         try
@@ -310,7 +310,7 @@ public class ChatClient
 
     private async Task<IEnumerable<Team>> GetTeams()
     {
-        var url = $"{_baseUrl}api/v4/teams";
+        var url = $"{_baseUrl}/api/v4/teams";
         _log.Trace($"Using get teams url: {url}");
 
         try
@@ -331,7 +331,7 @@ public class ChatClient
 
     private async Task<IEnumerable<Channel>> GetChannelsByTeam(string teamId)
     {
-        var url = $"{_baseUrl}api/v4/teams/{teamId}/channels";
+        var url = $"{_baseUrl}/api/v4/teams/{teamId}/channels";
         _log.Trace($"Using get channels url: {url}");
 
         try
@@ -371,7 +371,7 @@ public class ChatClient
 
     private async Task<PostResponse> GetPostsByChannel(string channelId, string afterPostId = "")
     {
-        var url = $"{_baseUrl}api/v4/channels/{channelId}/posts?after={afterPostId}";
+        var url = $"{_baseUrl}/api/v4/channels/{channelId}/posts?after={afterPostId}";
         _log.Trace($"Using get posts by channel url: {url}");
 
         try
@@ -407,7 +407,7 @@ public class ChatClient
                 message = m
             };
 
-            var url = $"{_baseUrl}api/v4/posts";
+            var url = $"{_baseUrl}/api/v4/posts";
             _log.Trace($"Using create post url: {url}");
 
             // Serialize the payload to JSON
