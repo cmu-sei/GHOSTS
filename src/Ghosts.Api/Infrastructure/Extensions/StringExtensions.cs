@@ -69,7 +69,8 @@ namespace Ghosts.Api.Infrastructure.Extensions
         public static string CreateUsernameFromEmail(this string email)
         {
             if (string.IsNullOrEmpty(email)) return string.Empty;
-            return email.Split('@')[0].Replace(".mil", "").Replace(".civ", "").Replace(".ctr", "");
+            var username = email.Split('@')[0].Replace(".mil", "").Replace(".civ", "").Replace(".ctr", "").TrimEnd('.').TrimStart('.');
+            return string.IsNullOrEmpty(email) ? string.Empty : username;
         }
 
         public static bool ShouldSend(this string message, IEnumerable<string> list)
