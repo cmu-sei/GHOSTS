@@ -2,6 +2,7 @@
 @using System.Text
 @using Ghosts.Animator.Enums
 @using Ghosts.Animator.Models
+@using ghosts.api.Infrastructure.Models
 @model ghosts.api.Infrastructure.Models.NpcRecord
 
 @functions {
@@ -33,7 +34,22 @@
     
 }
 @{
-    var npc = Model.NpcProfile;
+    NpcProfile npc = null;
+    if (Model == null)
+    {
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-12">
+                        Sorry, but this NPC's Profile is incomplete and cannot be displayed.
+                </div>
+            </div>
+        </div>
+        return;
+    }
+    else
+    {
+        npc = Model.NpcProfile;    
+    }
 }
 
 <div class="container">
@@ -59,13 +75,16 @@
     </div>
     <ul class="list-group">
         <li class="list-group-item text-muted">Accounts <i class="fa fa-dashboard fa-1x"></i></li>
-        @foreach (var account in npc.Accounts)
+        @if (npc.Accounts != null)
         {
-            <li class="list-group-item text-right">
-                <span class="pull-left">
-                    @account.Username
-                </span>@@<strong>@account.Url</strong>
-            </li>
+            foreach (var account in npc.Accounts)
+            {
+                <li class="list-group-item text-right">
+                    <span class="pull-left">
+                        @account.Username
+                    </span>@@<strong>@account.Url</strong>
+                </li>
+            }
         }
     </ul>
 </div><!--/col-3-->
@@ -231,30 +250,33 @@
         <div class="col-xs-12">
             <h3 style="margin-top:0">Education</h3>
             <ul style="margin-top:20px">
-                @foreach (var item in npc.Education.Degrees)
+                @if (npc.Education != null && npc.Education.Degrees != null)
                 {
-                    <li>
-                        @switch (item.Level)
-                        {
-                            case DegreeLevel.HSDiploma:
-                                <h4>HS Graduate</h4>
-                                break;
-                            case DegreeLevel.GED:
-                                <h4>GED</h4>
-                                break;
-                            case DegreeLevel.Associates:
-                            case DegreeLevel.Bachelors:
-                            case DegreeLevel.Masters:
-                            case DegreeLevel.Doctorate:
-                            case DegreeLevel.Professional:
-                            case DegreeLevel.None:
-                            default:
-                                <h4>@item.DegreeType in @item.Major</h4>
-                                break;
-                        }
+                    foreach (var item in npc.Education.Degrees)
+                    {
+                        <li>
+                            @switch (item.Level)
+                            {
+                                case DegreeLevel.HSDiploma:
+                                    <h4>HS Graduate</h4>
+                                    break;
+                                case DegreeLevel.GED:
+                                    <h4>GED</h4>
+                                    break;
+                                case DegreeLevel.Associates:
+                                case DegreeLevel.Bachelors:
+                                case DegreeLevel.Masters:
+                                case DegreeLevel.Doctorate:
+                                case DegreeLevel.Professional:
+                                case DegreeLevel.None:
+                                default:
+                                    <h4>@item.DegreeType in @item.Major</h4>
+                                    break;
+                            }
 
-                        <p>@item.School.Name (@item.School.Location)</p>
-                    </li>
+                            <p>@item.School.Name (@item.School.Location)</p>
+                        </li>
+                    }
                 }
             </ul>
         </div>
@@ -389,18 +411,21 @@
         <div class="col-xs-12">
             <h3>Assigned Unit</h3>
             <ul style="margin-top:20px">
-                @foreach (var item in npc.Unit.Sub)
+                @if (npc.Unit != null && npc.Unit.Sub != null)
                 {
-                    <li>
-                        <p>@item.Name (@item.Type) @item.Nick</p>
-                        <p>@item.HQ</p>
-                        <ul>
-                            @foreach (var item2 in item.Sub)
-                            {
-                                @Html.Raw(WriteUnit(item2))
-                            }
-                        </ul>
-                    </li>
+                    foreach (var item in npc.Unit.Sub)
+                    {
+                        <li>
+                            <p>@item.Name (@item.Type) @item.Nick</p>
+                            <p>@item.HQ</p>
+                            <ul>
+                                @foreach (var item2 in item.Sub)
+                                {
+                                    @Html.Raw(WriteUnit(item2))
+                                }
+                            </ul>
+                        </li>
+                    }
                 }
             </ul>
         </div>

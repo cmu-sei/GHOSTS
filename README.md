@@ -2,7 +2,7 @@
 
 GHOSTS simulates user activity on a computer, like creating documents, browsing websites, and downloading files. It drives various popular applications on both Windows and Linux machines. Whether you're a friendly administrator or a cyber adversary, GHOSTS can replicate your expected behavior.
 
-GHOSTS has many use cases in cyber training and exercises, most notably for bringing non-player characters (NPCs) to life. However, it can also be used for other purposes requiring realistic activity on a computer.
+GHOSTS has many use cases in cyber experimentation, training and exercise, most notably for bringing non-player characters (NPCs) to life. However, it can also be used for other purposes requiring realistic activity on a computer.
 
 There is a [short demonstration video available on YouTube](https://www.youtube.com/watch?v=EkwK-cqwjjA) (3:03).
 
@@ -24,7 +24,7 @@ There is no upgrade path from previous versions — a fresh install is required 
 ## What's New in GHOSTS v8.2 🆕
 Welcome to the latest version of GHOSTS! Here’s a look at what’s new and improved in v8.2:
 
-- [GHOSTS now has a UI](core/ui.md)! Manage machines, machine groups, deploy new timelines, and view activities through a sleek interface. 😍
+- [GHOSTS now has a UI](core/ui.md) — Manage machines, machine groups, deploy new timelines, and view activities through a sleek interface. 😍
 - [GHOSTS Shadows](shadows/index.md) now integrates with large language models (LLMs) for GHOSTS agents, offering various models for activities, chat, content generation, social interactions, and more. 👻
 - [GHOSTS LITE](core/lite.md) is a lightweight version of GHOSTS that requires fewer resources, making it ideal for training, exercises, and simulations on minimal hardware. 👀
 - Fixes #385: Default GUID issue with Animator NPCs.
