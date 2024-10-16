@@ -111,6 +111,16 @@ namespace Ghosts.Animator.Models
 
         public override string ToString()
         {
+            if (string.IsNullOrEmpty(this.First))
+            {
+                return $"{this.Last}";
+            }
+    
+            if (string.IsNullOrEmpty(this.Last))
+            {
+                return string.IsNullOrEmpty(this.Middle) ? $"{this.First}" : $"{this.First} {this.Middle}";
+            }
+
             return string.IsNullOrEmpty(this.Middle) ? $"{this.First} {this.Last}" : $"{this.First} {this.Middle} {this.Last}";
         }
     }

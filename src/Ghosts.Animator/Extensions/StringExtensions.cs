@@ -41,6 +41,8 @@ namespace Ghosts.Animator.Extensions
         {
             if (string.IsNullOrEmpty(o)) return string.Empty;
             o = Regex.Replace(o, @"[^0-9a-zA-Z\._]", "");
+            o = o.Replace("..", ".").Replace(".@","@").TrimStart('.');
+            if (o.StartsWith(".")) return string.Empty;
             return o;
         }
 
