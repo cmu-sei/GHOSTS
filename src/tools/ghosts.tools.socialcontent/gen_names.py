@@ -1,8 +1,3 @@
-
-import ollama
-import yaml
-import posixpath
-import os
 from gen_topics_common import gen_names
 
 # This file generates a file named movie_content.yml that will have prompts
@@ -10,13 +5,10 @@ from gen_topics_common import gen_names
 # script to generate the content
 
 
-#llm = 'llama3'
-llm = ['mistral','gemma','llama3','wizardlm2','llava']
+# llm = 'llama3'
+llm = ["mistral", "gemma", "llama3", "wizardlm2", "llava"]
 
-prompt = '''
+prompt = """
 Give 100 male and female names, first and last, and also social media names mixed in the same list
-'''
-gen_names(llm, prompt, 'social_content\\names.txt')
-
-
-
+"""
+gen_names(llm, prompt, "social_content\\names.txt")

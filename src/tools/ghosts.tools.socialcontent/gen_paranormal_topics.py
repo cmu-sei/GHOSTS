@@ -1,8 +1,3 @@
-
-import ollama
-import yaml
-import posixpath
-import os
 from gen_topics_common import gen_prompts
 
 # This file generates a file named movie_content.yml that will have prompts
@@ -10,17 +5,14 @@ from gen_topics_common import gen_prompts
 # script to generate the content
 
 
-llm = 'wizardlm2'
+llm = "wizardlm2"
 
 
-prompt = '''
+prompt = """
 Generate 50 sentences, about topics concerning unidentified flying object (UFOs), alien encounters,
 alien abductions, lizard people, bigfoot, mothman, loch ness, nessie, werewolves, vampires, bailisks, fairies, unicorns, and paranormal topics such as ghosts, demons, demonic
 possession, exorcism, ghost hunting.
 
 
-'''
-gen_prompts(llm, 'paranormal2', prompt, 'paranormal2_content.yml')
-
-
-
+"""
+gen_prompts(llm, "paranormal2", prompt, "paranormal2_content.yml")

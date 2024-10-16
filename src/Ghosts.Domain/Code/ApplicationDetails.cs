@@ -183,7 +183,7 @@ namespace Ghosts.Domain.Code
                 this._root = rootUrl;
             }
 
-            private string _root;
+            private readonly string _root;
             public string Id => $"{this._root}/clientid";
             public string Timeline => $"{this._root}/clienttimeline";
             public string Results => $"{this._root}/clientresults";

@@ -20,19 +20,12 @@ namespace ghosts.api.Controllers.Api
     [ApiExplorerSettings(IgnoreApi = true)]
     [Produces("application/json")]
     [Route("api/[controller]")]
-    public class ClientUpdatesController : Controller
+    public class ClientUpdatesController(IMachineService machineService, IMachineUpdateService updateService, IBackgroundQueue queue) : Controller
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        private readonly IBackgroundQueue _queue;
-        private readonly IMachineUpdateService _updateService;
-        private readonly IMachineService _machineService;
-
-        public ClientUpdatesController(IMachineService machineService, IMachineUpdateService updateService, IBackgroundQueue queue)
-        {
-            _updateService = updateService;
-            _queue = queue;
-            _machineService = machineService;
-        }
+        private readonly IBackgroundQueue _queue = queue;
+        private readonly IMachineUpdateService _updateService = updateService;
+        private readonly IMachineService _machineService = machineService;
 
         /// <summary>
         /// Clients use this endpoint to check for updates for them to download

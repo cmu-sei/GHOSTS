@@ -22,15 +22,10 @@ namespace ghosts.api.Controllers.Api
     [ApiExplorerSettings(IgnoreApi = true)]
     [Produces("application/json")]
     [Route("api/[controller]")]
-    public class ClientSurveyController : Controller
+    public class ClientSurveyController(IBackgroundQueue service) : Controller
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        private readonly IBackgroundQueue _service;
-
-        public ClientSurveyController(IBackgroundQueue service)
-        {
-            _service = service;
-        }
+        private readonly IBackgroundQueue _service = service;
 
         /// <summary>
         /// Clients post an encrypted survey results to this endpoint

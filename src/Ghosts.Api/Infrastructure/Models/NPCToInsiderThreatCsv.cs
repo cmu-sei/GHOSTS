@@ -388,7 +388,7 @@ public class NPCToInsiderThreatCsv
                         StringComparison.CurrentCultureIgnoreCase));
                 o.IPPolicyViolations = relatedEvents.Any(x =>
                     x.Description.Contains("Compliance Violation", StringComparison.CurrentCultureIgnoreCase));
-                o.DrugAlcoholAbuse = n.NpcProfile.InsiderThreat.SubstanceAbuseAndAddictiveBehaviors.RelatedEvents.Any();
+                o.DrugAlcoholAbuse = n.NpcProfile.InsiderThreat.SubstanceAbuseAndAddictiveBehaviors.RelatedEvents.Count != 0;
                 o.CoworkerConflict = relatedEvents.Any(x =>
                     x.Description.Contains("coworker", StringComparison.CurrentCultureIgnoreCase));
                 o.EAPReferral = relatedEvents.Any(x =>
@@ -404,7 +404,7 @@ public class NPCToInsiderThreatCsv
                 o.FinancialProblems = relatedEvents.Any(x =>
                                           x.Description.Contains("Financial Problems",
                                               StringComparison.CurrentCultureIgnoreCase)) ||
-                                      n.NpcProfile.InsiderThreat.FinancialConsiderations.RelatedEvents.Any();
+                                      n.NpcProfile.InsiderThreat.FinancialConsiderations.RelatedEvents.Count != 0;
                 o.ArrestRecord = relatedEvents.Any(x =>
                     x.Description.Contains("arrest", StringComparison.CurrentCultureIgnoreCase));
                 o.GamblingHistory = relatedEvents.Any(x =>

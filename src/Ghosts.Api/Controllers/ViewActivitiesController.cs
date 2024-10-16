@@ -11,15 +11,10 @@ namespace ghosts.api.Controllers;
 [Produces("application/json")]
 [Route("view-activities")]
 [ApiExplorerSettings(IgnoreApi = true)]
-public class ViewActivitiesController : Controller
+public class ViewActivitiesController(ApplicationDbContext context) : Controller
 {
-    private readonly ApplicationDbContext _context;
-        
-    public ViewActivitiesController(ApplicationDbContext context)
-    {
-        _context = context;
-    }
-    
+    private readonly ApplicationDbContext _context = context;
+
     [HttpGet]
     public IActionResult Index()
     {

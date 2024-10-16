@@ -168,7 +168,7 @@ public class NativeContentFormatterService : IFormatterService
     {
         try
         {
-            if (!agent.Education.Degrees.Any()) return "";
+            if (agent.Education.Degrees.Count == 0) return "";
             var o = agent.Education.Degrees.RandomElement();
             var list = new[]
             {

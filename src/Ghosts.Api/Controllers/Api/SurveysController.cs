@@ -13,14 +13,9 @@ namespace ghosts.api.Controllers.Api
 {
     [Produces("application/json")]
     [Route("api/[controller]")]
-    public class SurveysController : Controller
+    public class SurveysController(ISurveyService surveyService) : Controller
     {
-        private readonly ISurveyService _surveyService;
-
-        public SurveysController(ISurveyService surveyService)
-        {
-            _surveyService = surveyService;
-        }
+        private readonly ISurveyService _surveyService = surveyService;
 
         [ProducesResponseType(typeof(Survey), 200)]
         [SwaggerOperation("SurveysGetLatestByMachineId")]

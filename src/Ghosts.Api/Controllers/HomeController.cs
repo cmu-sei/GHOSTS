@@ -11,15 +11,10 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Ghosts.Api.Controllers
 {
     [Route("/")]
-    public class HomeController : Controller
+    public class HomeController(ApplicationDbContext context) : Controller
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        private readonly ApplicationDbContext _context;
-
-        public HomeController(ApplicationDbContext context)
-        {
-            _context = context;
-        }
+        private readonly ApplicationDbContext _context = context;
 
         [HttpGet]
         [ApiExplorerSettings(IgnoreApi = true)]

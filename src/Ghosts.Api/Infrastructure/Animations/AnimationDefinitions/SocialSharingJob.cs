@@ -34,6 +34,7 @@ namespace ghosts.api.Infrastructure.Animations.AnimationDefinitions
         private readonly ApplicationDbContext _context;
         private readonly IMachineUpdateService _updateService;
         private readonly IFormatterService _formatterService;
+        private static readonly string[] ar = new[] { "user", "usr", "u", "uid", "user_id", "u_id" };
 
         public SocialSharingJob(ApplicationSettings configuration, IServiceScopeFactory scopeFactory, Random random,
             IHubContext<ActivityHub> activityHubContext, CancellationToken cancellationToken)
@@ -96,15 +97,15 @@ namespace ghosts.api.Infrastructure.Animations.AnimationDefinitions
             //take some random NPCs
             var activities = new List<NpcActivity>();
             var rawAgents = this._context.Npcs.ToList();
-            if (!rawAgents.Any())
+            if (rawAgents.Count == 0)
             {
                 _log.Warn("No NPCs found. Is this correct?");
                 return;
             }
-            _log.Trace($"Found {rawAgents.Count()} raw agents...");
+            _log.Trace($"Found {rawAgents.Count} raw agents...");
 
             var agents = rawAgents.Shuffle(_random).Take(_random.Next(5, 20)).ToList();
-            _log.Trace($"Processing {agents.Count()} agents...");
+            _log.Trace($"Processing {agents.Count} agents...");
             foreach (var agent in agents)
             {
                 _log.Trace($"Processing agent {agent.NpcProfile.Email}...");
@@ -118,7 +119,7 @@ namespace ghosts.api.Infrastructure.Animations.AnimationDefinitions
                 activities.Add(new NpcActivity { ActivityType = NpcActivity.ActivityTypes.SocialMediaPost, NpcId = agent.Id, CreatedUtc = DateTime.UtcNow, Detail = tweetText });
 
                 // the payloads to socializer are a bit randomized
-                var userFormValue = new[] { "user", "usr", "u", "uid", "user_id", "u_id" }.RandomFromStringArray();
+                var userFormValue = ar.RandomFromStringArray();
                 var messageFormValue =
                     new[] { "message", "msg", "m", "message_id", "msg_id", "msg_text", "text", "payload" }
                         .RandomFromStringArray();
@@ -167,23 +168,30 @@ namespace ghosts.api.Infrastructure.Animations.AnimationDefinitions
                         }
                     };
 
-                    var t = new Timeline();
-                    t.Id = Guid.NewGuid();
-                    t.Status = Timeline.TimelineStatus.Run;
-                    var th = new TimelineHandler();
-                    th.HandlerType = HandlerType.BrowserFirefox;
-                    th.Initial = "about:blank";
-                    th.UtcTimeOn = new TimeSpan(0, 0, 0);
-                    th.UtcTimeOff = new TimeSpan(23, 59, 59);
-                    th.HandlerArgs = new Dictionary<string, object>();
-                    th.HandlerArgs.Add("isheadless", "false");
-                    th.Loop = false;
-                    var te = new TimelineEvent();
-                    te.Command = "browse";
-                    te.CommandArgs = new List<object>();
-                    te.CommandArgs.Add(JsonConvert.SerializeObject(payload));
-                    te.DelayAfter = 0;
-                    te.DelayBefore = 0;
+                    var t = new Timeline
+                    {
+                        Id = Guid.NewGuid(),
+                        Status = Timeline.TimelineStatus.Run
+                    };
+                    var th = new TimelineHandler
+                    {
+                        HandlerType = HandlerType.BrowserFirefox,
+                        Initial = "about:blank",
+                        UtcTimeOn = new TimeSpan(0, 0, 0),
+                        UtcTimeOff = new TimeSpan(23, 59, 59),
+                        HandlerArgs = new Dictionary<string, object>
+                    {
+                        { "isheadless", "false" }
+                    },
+                        Loop = false
+                    };
+                    var te = new TimelineEvent
+                    {
+                        Command = "browse",
+                        CommandArgs = [JsonConvert.SerializeObject(payload)],
+                        DelayAfter = 0,
+                        DelayBefore = 0
+                    };
                     th.TimeLineEvents.Add(te);
                     t.TimeLineHandlers.Add(th);
 

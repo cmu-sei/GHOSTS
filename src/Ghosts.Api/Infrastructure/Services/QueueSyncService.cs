@@ -23,18 +23,12 @@ using NLog;
 
 namespace ghosts.api.Infrastructure.Services
 {
-    public class QueueSyncService : IHostedService
+    public partial class QueueSyncService(IServiceScopeFactory scopeFactory, IBackgroundQueue queue) : IHostedService
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        private readonly IServiceScopeFactory _scopeFactory;
+        private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
 
-        public QueueSyncService(IServiceScopeFactory scopeFactory, IBackgroundQueue queue)
-        {
-            _scopeFactory = scopeFactory;
-            Queue = queue;
-        }
-
-        private IBackgroundQueue Queue { get; }
+        private IBackgroundQueue Queue { get; } = queue;
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
@@ -399,8 +393,8 @@ namespace ghosts.api.Infrastructure.Services
                 if(string.IsNullOrEmpty(formattedResponse)) return;
 
                 var isValid = false;
-                var reg = new Regex(@"\[(.*?)\]");
-                foreach (Match match in reg.Matches(formattedResponse))
+                var reg = MyRegex();
+                foreach (Match match in reg.Matches(formattedResponse).Cast<Match>())
                     switch (match.Value.ToLower())
                     {
                         case "[machinename]":
@@ -463,5 +457,8 @@ namespace ghosts.api.Infrastructure.Services
                 _log.Trace($"Webhook failed response {webhook.PostbackUrl} {webhook.PostbackMethod} - {e}");
             }
         }
+
+        [GeneratedRegex(@"\[(.*?)\]")]
+        private static partial Regex MyRegex();
     }
 }

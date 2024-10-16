@@ -17,14 +17,9 @@ namespace ghosts.api.Infrastructure.Services
         Task<IEnumerable<Survey>> GetAllAsync(Guid machineId, CancellationToken ct);
     }
 
-    public class SurveyService : ISurveyService
+    public class SurveyService(ApplicationDbContext context) : ISurveyService
     {
-        private readonly ApplicationDbContext _context;
-
-        public SurveyService(ApplicationDbContext context)
-        {
-            _context = context;
-        }
+        private readonly ApplicationDbContext _context = context;
 
         public async Task<Survey> GetLatestAsync(Guid machineId, CancellationToken ct)
         {

@@ -69,7 +69,7 @@ public class CleanupService(ILogger logger, IServiceProvider serviceProvider) : 
 
         // set actual targetUtilization 10% lower of specified value so that we are not constantly tripping the cleanup
         if (targetUtilization > 0) {
-            targetUtilization = targetUtilization - (int) (targetUtilization*0.1);
+            targetUtilization -= (int) (targetUtilization*0.1);
         }
 
         if (targetUtilization > 0 && diskUtil < 0)

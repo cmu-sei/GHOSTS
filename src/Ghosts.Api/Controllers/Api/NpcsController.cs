@@ -28,16 +28,10 @@ namespace ghosts.api.Controllers.Api;
 [ApiController]
 [Produces("application/json")]
 [Route("api/[controller]")]
-public class NpcsController : ControllerBase
+public class NpcsController(ApplicationDbContext context, INpcService service) : ControllerBase
 {
-    private readonly ApplicationDbContext _context;
-    private readonly INpcService _service;
-
-    public NpcsController(ApplicationDbContext context, INpcService service)
-    {
-        this._context = context;
-        this._service = service;
-    }
+    private readonly ApplicationDbContext _context = context;
+    private readonly INpcService _service = service;
 
     /// <summary>
     /// Returns all generated NPCs in the system (caution, could return a very large amount of data)
@@ -418,7 +412,7 @@ public class NpcsController : ControllerBase
                                                                   && o.Department == job.Department
                                                                   && o.Level >= job.Level)).ToList();
 
-                if (managerList.Any())
+                if (managerList.Count != 0)
                 {
                     var manager = managerList.RandomElement();
                     job.Manager = manager.Id;

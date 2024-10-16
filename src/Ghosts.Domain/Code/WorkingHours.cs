@@ -77,11 +77,5 @@ namespace Ghosts.Domain.Code
             _log.Trace($"{handler} sleeping for {msToSleep} ms");
             Thread.Sleep(msToSleep);
         }
-
-        private static void Sleep(TimelineHandler handler, TimeSpan sleep)
-        {
-            // TODO: We need a way to kill this handler like handler.SafeKill();
-            Sleep(handler, (int)sleep.TotalMilliseconds);
-        }
     }
 }

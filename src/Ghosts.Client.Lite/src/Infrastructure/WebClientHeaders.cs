@@ -24,9 +24,10 @@ namespace Ghosts.Client.Lite.Infrastructure
 
         public static IDictionary<string, string> GetHeaders(ResultMachine machine, bool useId = true)
         {
-            var dict = new Dictionary<string, string>();
-
-            dict.Add(HttpRequestHeader.UserAgent.ToString(), "Ghosts Client");
+            var dict = new Dictionary<string, string>
+            {
+                { HttpRequestHeader.UserAgent.ToString(), "Ghosts Client" }
+            };
             if (!string.IsNullOrEmpty(machine.Id))
             {
                 dict.Add("ghosts-id", machine.Id);

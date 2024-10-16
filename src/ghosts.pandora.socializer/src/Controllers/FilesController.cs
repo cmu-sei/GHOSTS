@@ -8,13 +8,8 @@ namespace Socializer.Controllers;
 
 [Route("/images")]
 [Route("/files")]
-public class FilesController : BaseController
+public class FilesController(ILogger logger, IHubContext<PostsHub> hubContext, DataContext dbContext) : BaseController(logger, hubContext, dbContext)
 {
-    public FilesController(ILogger logger, IHubContext<PostsHub> hubContext, DataContext dbContext) :
-        base(logger, hubContext, dbContext)
-    {
-    }
-    
     [HttpPost]
     public async Task<IActionResult> UploadFile([FromForm] FileInputModel model)
     {

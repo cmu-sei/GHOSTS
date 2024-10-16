@@ -7,7 +7,7 @@ namespace ghosts.api.Hubs;
 
 public class ConnectionMapping<T>
 {
-    private readonly Dictionary<T, HashSet<string>> _connections = new();
+    private readonly Dictionary<T, HashSet<string>> _connections = [];
 
     public int Count => _connections.Count;
 
@@ -17,7 +17,7 @@ public class ConnectionMapping<T>
         {
             if (!_connections.TryGetValue(key, out var connections))
             {
-                connections = new HashSet<string>();
+                connections = [];
                 _connections.Add(key, connections);
             }
 

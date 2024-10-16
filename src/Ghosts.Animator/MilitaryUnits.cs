@@ -57,12 +57,7 @@ namespace Ghosts.Animator
             var o = JsonConvert.DeserializeObject<MilitaryBases.BaseManager>(raw);
 
             var b = o.Branches.FirstOrDefault(x => x.Name == branch.ToString());
-            var myBase = b.Bases.FirstOrDefault(x => x.Name.Equals(hq, StringComparison.InvariantCultureIgnoreCase));
-            if (myBase == null)
-            {
-                myBase = o.Branches.FirstOrDefault(x=>x.Name == branch.ToString())?.Bases.RandomElement();
-            }
-
+            var myBase = b.Bases.FirstOrDefault(x => x.Name.Equals(hq, StringComparison.InvariantCultureIgnoreCase)) ?? (o.Branches.FirstOrDefault(x=>x.Name == branch.ToString())?.Bases.RandomElement());
             if (myBase == null)
                 return null;
             

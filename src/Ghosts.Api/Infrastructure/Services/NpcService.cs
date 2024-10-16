@@ -29,15 +29,10 @@ public interface INpcService
     public Task SyncWithMachineUsernames();
 }
 
-public class NpcService : INpcService
+public class NpcService(ApplicationDbContext context) : INpcService
 {
     private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-    private readonly ApplicationDbContext _context;
-
-    public NpcService(ApplicationDbContext context)
-    {
-        _context = context;
-    }
+    private readonly ApplicationDbContext _context = context;
 
     public async Task<IEnumerable<NpcRecord>> GetAll()
     {

@@ -15,9 +15,9 @@ public class ContentCreationService
 {
     private static readonly Logger _log = LogManager.GetCurrentClassLogger();
     private readonly ApplicationSettings.AnimatorSettingsDetail.ContentEngineSettings _configuration;
-    private OpenAiFormatterService _openAiFormatterService;
-    private OllamaFormatterService _ollamaFormatterService;
-    private ShadowsFormatterService _shadowsFormatterService;
+    private readonly OpenAiFormatterService _openAiFormatterService;
+    private readonly OllamaFormatterService _ollamaFormatterService;
+    private readonly ShadowsFormatterService _shadowsFormatterService;
     public IFormatterService FormatterService;
 
     public ContentCreationService(ApplicationSettings.AnimatorSettingsDetail.ContentEngineSettings configuration)
@@ -28,17 +28,17 @@ public class ContentCreationService
         _configuration.Model = Environment.GetEnvironmentVariable("OLLAMA_MODEL") ??
                                configuration.Model;
 
-        if (_configuration.Source.ToLower() == "openai" && this._openAiFormatterService.IsReady)
+        if (_configuration.Source.Equals("openai", StringComparison.CurrentCultureIgnoreCase) && this._openAiFormatterService.IsReady)
         {
             _openAiFormatterService = new OpenAiFormatterService();
             this.FormatterService = _openAiFormatterService;
         }
-        else if (_configuration.Source.ToLower() == "ollama")
+        else if (_configuration.Source.Equals("ollama", StringComparison.CurrentCultureIgnoreCase))
         {
             _ollamaFormatterService = new OllamaFormatterService(_configuration);
             this.FormatterService = _ollamaFormatterService;
         }
-        else if (_configuration.Source.ToLower() == "shadows")
+        else if (_configuration.Source.Equals("shadows", StringComparison.CurrentCultureIgnoreCase))
         {
             _shadowsFormatterService = new ShadowsFormatterService(_configuration);
             this.FormatterService = _shadowsFormatterService;

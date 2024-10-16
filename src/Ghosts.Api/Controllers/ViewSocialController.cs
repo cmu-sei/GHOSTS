@@ -18,17 +18,11 @@ namespace ghosts.api.Controllers
 {
     [Route("view-social")]
     [ApiExplorerSettings(IgnoreApi = true)]
-    public class ViewSocialController : Controller
+    public class ViewSocialController(ApplicationDbContext context) : Controller
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        private readonly ApplicationSettings _configuration;
-        private readonly ApplicationDbContext _context;
-
-        public ViewSocialController(ApplicationDbContext context)
-        {
-            _configuration = Program.ApplicationSettings;
-            _context = context;
-        }
+        private readonly ApplicationSettings _configuration = Program.ApplicationSettings;
+        private readonly ApplicationDbContext _context = context;
 
         [HttpGet]
         public async Task<IActionResult> Index()
@@ -111,7 +105,7 @@ namespace ghosts.api.Controllers
             return graphs?.FirstOrDefault(x => x.Id == id);
         }
 
-        private InteractionMap CreateInteractionMap(NpcSocialGraph graph)
+        private static InteractionMap CreateInteractionMap(NpcSocialGraph graph)
         {
             var interactions = new InteractionMap();
             var startTime = DateTime.Now.AddMinutes(-graph.Connections.Count).AddMinutes(-1); // Adjust start time
@@ -175,8 +169,8 @@ namespace ghosts.api.Controllers
 
             public InteractionMap()
             {
-                this.nodes = new List<Node>();
-                this.links = new List<Link>();
+                this.nodes = [];
+                this.links = [];
             }
         }
     }

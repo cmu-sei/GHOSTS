@@ -88,8 +88,10 @@ namespace Ghosts.Animator.Services
 
                 if (!string.IsNullOrEmpty(currentUnit.HQ))
                 {
-                    MilUnit.Address = new AddressProfiles.AddressProfile();
-                    MilUnit.Address.Name = currentUnit.HQ;
+                    MilUnit.Address = new AddressProfiles.AddressProfile
+                    {
+                        Name = currentUnit.HQ
+                    };
                 }
 
                 currentUnit = GetUnit(currentUnit);

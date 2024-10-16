@@ -23,15 +23,10 @@ namespace ghosts.api.Controllers.Api
     [ApiExplorerSettings(IgnoreApi = true)]
     [Produces("application/json")]
     [Route("api/[controller]")]
-    public class ClientResultsController : Controller
+    public class ClientResultsController(IBackgroundQueue service) : Controller
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        private readonly IBackgroundQueue _service;
-
-        public ClientResultsController(IBackgroundQueue service)
-        {
-            _service = service;
-        }
+        private readonly IBackgroundQueue _service = service;
 
         /// <summary>
         /// Clients post an encrypted timeline or health payload to this endpoint

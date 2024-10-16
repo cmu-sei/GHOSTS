@@ -14,15 +14,10 @@ namespace ghosts.api.Controllers.Api
     [Produces("application/json")]
     [Route("api/[controller]")]
     [ResponseCache(Duration = 5)]
-    public class MachinesController : Controller
+    public class MachinesController(IMachineService service) : Controller
     {
-        private readonly IMachineService _service;
+        private readonly IMachineService _service = service;
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-
-        public MachinesController(IMachineService service)
-        {
-            _service = service;
-        }
 
         /// <summary>
         /// Gets machines matching the provided query value
@@ -79,7 +74,7 @@ namespace ghosts.api.Controllers.Api
         /// <returns>The updated machine record</returns>
         [SwaggerOperation("MachinesUpdate")]
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutMachine([FromBody] Machine machine, CancellationToken ct)
+        public async Task<IActionResult> PutMachine(string id, [FromBody] Machine machine, CancellationToken ct)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             if (machine.Id == Guid.Empty) return BadRequest();

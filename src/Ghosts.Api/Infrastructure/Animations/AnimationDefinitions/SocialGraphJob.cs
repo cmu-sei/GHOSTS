@@ -27,14 +27,14 @@ public class SocialGraphJob
     private readonly ApplicationSettings _configuration;
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly ApplicationDbContext _context;
-    private List<NpcSocialGraph> _socialGraphs;
+    private readonly List<NpcSocialGraph> _socialGraphs;
     private readonly Random _random;
     private const string SavePath = "_output/socialgraph/";
     private readonly string[] _knowledgeArray;
     private bool _isEnabled = true;
-    private CancellationToken _cancellationToken;
+    private readonly CancellationToken _cancellationToken;
     private readonly IHubContext<ActivityHub> _activityHubContext;
-    private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
+    private static readonly SemaphoreSlim _semaphore = new(1, 1);
     
     public SocialGraphJob(ApplicationSettings configuration, IServiceScopeFactory scopeFactory, Random random,
         IHubContext<ActivityHub> activityHubContext, CancellationToken cancellationToken)
@@ -46,7 +46,7 @@ public class SocialGraphJob
             this._random = random;
             this._scopeFactory = scopeFactory;
             this._cancellationToken = cancellationToken;
-            this._socialGraphs = new List<NpcSocialGraph>();
+            this._socialGraphs = [];
             this._knowledgeArray = GetAllKnowledge();
 
             // if (this._socialGraphs.Count > 0 &&
@@ -357,13 +357,7 @@ public class SocialGraphJob
         Array.Sort(k);
         return k;
     }
-    
-    private void Report()
-    {
-        this.ReportMatrix();
-        this.ReportLearning();
-    }
-    
+
     private void ReportLearning()
     {
         var line = new StringBuilder(",");

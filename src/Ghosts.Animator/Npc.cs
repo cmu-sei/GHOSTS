@@ -31,17 +31,16 @@ namespace Ghosts.Animator
         {
             if(!config.Branch.HasValue)
                 config.Branch = MilitaryUnits.GetServiceBranch();
-        
+
             NpcProfile = new NpcProfile
             {
-                Id = Guid.NewGuid()
+                Id = Guid.NewGuid(),
+                Unit = MilitaryUnits.GetOneByServiceBranch(config.Branch.Value),
+                Rank = MilitaryRanks.GetRankByBranch(config.Branch.Value),
+                BiologicalSex = PhysicalCharacteristics.GetBiologicalSex()
             };
 
-            NpcProfile.Unit = MilitaryUnits.GetOneByServiceBranch(config.Branch.Value);
-            NpcProfile.Rank = MilitaryRanks.GetRankByBranch(config.Branch.Value);
-            NpcProfile.BiologicalSex = PhysicalCharacteristics.GetBiologicalSex();
-
-            if(NpcProfile.Rank?.Pay != null)
+            if (NpcProfile.Rank?.Pay != null)
                 NpcProfile.Birthdate = PhysicalCharacteristics.GetBirthdate(NpcProfile.Rank.Pay);
             NpcProfile.Health = HealthService.GetHealthProfile();
             

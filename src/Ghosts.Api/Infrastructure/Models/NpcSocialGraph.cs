@@ -42,48 +42,29 @@ public class NpcSocialGraph
         public int Value { get; set; }
     }
 
-    public class Learning
+    public class Learning(Guid to, Guid from, string topic, long currentStep, int value)
     {
-        public Guid To { get; set; }
-        public Guid From { get; set; }
-        public string Topic { get; set; }
-        public long Step { get; set; }
-        public int Value { get; set; }
-
-        public Learning(Guid to, Guid from, string topic, long currentStep, int value)
-        {
-            this.From = from;
-            this.To = to;
-            this.Topic = topic;
-            this.Step = currentStep;
-            this.Value = value;
-        }
+        public Guid To { get; set; } = to;
+        public Guid From { get; set; } = from;
+        public string Topic { get; set; } = topic;
+        public long Step { get; set; } = currentStep;
+        public int Value { get; set; } = value;
 
         public override string ToString()
         {
             return $"{this.To},{this.From},{this.Topic},{this.Step},{this.Value}";
         }
     }
-    
-    public class Belief
-    {
-        public Guid To { get; set; }
-        public Guid From { get; set; }
-        public string Name { get; set; }
-        public long Step { get; set; }
-        public decimal Likelihood { get; set; }
-        public decimal Posterior { get; set; }
 
-        [JsonConstructor]
-        public Belief(Guid to, Guid from, string name, long step, decimal likelihood, decimal posterior)
-        {
-            this.From = from;
-            this.To = to;
-            this.Name = name;
-            this.Step = step;
-            this.Likelihood = likelihood;
-            this.Posterior = posterior;
-        }
+    [method: JsonConstructor]
+    public class Belief(Guid to, Guid from, string name, long step, decimal likelihood, decimal posterior)
+    {
+        public Guid To { get; set; } = to;
+        public Guid From { get; set; } = from;
+        public string Name { get; set; } = name;
+        public long Step { get; set; } = step;
+        public decimal Likelihood { get; set; } = likelihood;
+        public decimal Posterior { get; set; } = posterior;
 
         public override string ToString()
         {

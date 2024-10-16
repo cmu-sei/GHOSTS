@@ -39,7 +39,7 @@ namespace Ghosts.Domain.Code
             });
 
             // Replace {name} placeholders
-            value = Regex.Replace(value, @"\{name\}", match => $"file_{Guid.NewGuid()}_{DateTime.Now.ToString("yyyyMMddHHmmss")}");
+            value = Regex.Replace(value, @"\{name\}", match => $"file_{Guid.NewGuid()}_{DateTime.Now:yyyyMMddHHmmss}");
 
             return value;
         }

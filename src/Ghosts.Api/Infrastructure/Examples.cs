@@ -14,14 +14,9 @@ using Swashbuckle.AspNetCore.Filters;
 
 namespace ghosts.api.Infrastructure;
 
-public class MachineUpdateExample : IExamplesProvider<MachineUpdate>
+public class MachineUpdateExample(IServiceProvider serviceProvider) : IExamplesProvider<MachineUpdate>
 {
-    private readonly IServiceProvider _serviceProvider;
-
-    public MachineUpdateExample(IServiceProvider serviceProvider)
-    {
-        _serviceProvider = serviceProvider;
-    }
+    private readonly IServiceProvider _serviceProvider = serviceProvider;
 
     public MachineUpdate GetExamples()
     {

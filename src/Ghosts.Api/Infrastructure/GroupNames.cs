@@ -19,7 +19,7 @@ namespace Ghosts.Api.Infrastructure
             foreach (var (key, value) in d.Replacements) o = o.Replace(key, value);
 
             // reverse?
-            if (d.Direction.Equals("RightToLeft")) o = o.Split(delimeters.ToArray()).Reverse().ToString();
+            if (d.Direction.Equals("RightToLeft")) o = o.Split([.. delimeters]).Reverse().ToString();
 
             return o;
         }
@@ -65,7 +65,7 @@ namespace Ghosts.Api.Infrastructure
                 groupNameFormat = groupNameFormat.Replace("{name}", name);
                 groupNameFormat = groupNameFormat.Replace("{fqdn}", fqdn);
 
-                var nameParts = groupNameFormat.Split(delimeters.ToArray());
+                var nameParts = groupNameFormat.Split([.. delimeters]);
 
                 for (var i = nameParts.GetUpperBound(0); i > 0; i--)
                 {
@@ -73,7 +73,7 @@ namespace Ghosts.Api.Infrastructure
                     for (var j = 0; j < i; j++)
                         g.Append(nameParts[j]).Append(delimeters[0]);
 
-                    list.Add(g.Append("*").ToString().TrimEnd(Convert.ToChar(delimeters[0])));
+                    list.Add(g.Append('*').ToString().TrimEnd(Convert.ToChar(delimeters[0])));
 
                     if (list.Count > Program.ApplicationSettings.Grouping.GroupDepth)
                     {

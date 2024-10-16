@@ -18,14 +18,9 @@ namespace ghosts.api.Infrastructure.Services
         Task StopAsync(Guid machineId, Guid timelineId, CancellationToken ct);
     }
 
-    public class TimelineService : ITimelineService
+    public class TimelineService(ApplicationDbContext context) : ITimelineService
     {
-        private readonly ApplicationDbContext _context;
-
-        public TimelineService(ApplicationDbContext context)
-        {
-            _context = context;
-        }
+        private readonly ApplicationDbContext _context = context;
 
         public async Task UpdateAsync(MachineUpdateViewModel machineUpdateViewModel, CancellationToken ct)
         {
@@ -50,8 +45,10 @@ namespace ghosts.api.Infrastructure.Services
             };
             handler.TimeLineEvents.Add(timelineEvent);
 
-            var handlers = new List<TimelineHandler>();
-            handlers.Add(handler);
+            var handlers = new List<TimelineHandler>
+            {
+                handler
+            };
             
             var timeline = new Timeline
             {

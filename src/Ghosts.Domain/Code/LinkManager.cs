@@ -33,7 +33,7 @@ namespace Ghosts.Domain.Code
 
         private Uri _baseUri;
 
-        private IEnumerable<string> _denyList;
+        private readonly IEnumerable<string> _denyList;
 
         public LinkManager(int visitedSitesRemembered)
         {

@@ -1,8 +1,3 @@
-
-import ollama
-import yaml
-import posixpath
-import os
 from gen_topics_common import gen_prompts
 
 # This file generates a file named movie_content.yml that will have prompts
@@ -10,10 +5,10 @@ from gen_topics_common import gen_prompts
 # script to generate the content
 
 
-llm = 'gemma'
+llm = "gemma"
 
 
-prompt = '''
+prompt = """
 Generate 50 sentences, using the following EXAMPLE where MOVIEA and MOVIEB are replaced by random movie names.
 
 EXAMPLE:
@@ -28,8 +23,5 @@ Which movie has a more compelling storyline, MOVIEA or MOVIEB?
 EXAMPLE:
 Which film offers a more profound experience, MOVIEA or MOVIEB?
 
-'''
-gen_prompts(llm, 'movies', prompt, 'movie_content.yml')
-
-
-
+"""
+gen_prompts(llm, "movies", prompt, "movie_content.yml")

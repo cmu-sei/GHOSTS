@@ -55,12 +55,10 @@ namespace Ghosts.Client.Lite.Infrastructure.Comms
                     {
                         try
                         {
-                            using (var reader =
-                                   new StreamReader(client.OpenRead(Program.ConfigurationUrls.Updates)))
-                            {
-                                s = reader.ReadToEnd();
-                                _log.Debug($"{DateTime.Now} - Received new configuration");
-                            }
+                            using var reader =
+                                   new StreamReader(client.OpenRead(Program.ConfigurationUrls.Updates));
+                            s = reader.ReadToEnd();
+                            _log.Debug($"{DateTime.Now} - Received new configuration");
                         }
                         catch (WebException wex)
                         {
@@ -120,14 +118,12 @@ namespace Ghosts.Client.Lite.Infrastructure.Comms
                             case UpdateClientConfig.UpdateType.Health:
                             {
                                 var newTimeline = JsonConvert.DeserializeObject<ResultHealth>(update.Update.ToString());
-                                //save to local disk
-                                using (var file = File.CreateText(ApplicationDetails.ConfigurationFiles.Health))
-                                {
+                                    //save to local disk
+                                    using var file = File.CreateText(ApplicationDetails.ConfigurationFiles.Health);
                                     var serializer = new JsonSerializer { Formatting = Formatting.Indented };
                                     serializer.Serialize(file, newTimeline);
-                                }
 
-                                break;
+                                    break;
                             }
                             default:
                                 _log.Debug($"Update {update.Type} has no handler, ignoring...");
@@ -160,10 +156,10 @@ namespace Ghosts.Client.Lite.Infrastructure.Comms
                 {
                     if (timeline.Id == timelineId)
                     {
-                        timelines = new List<Timeline>()
-                        {
+                        timelines =
+                        [
                             timeline
-                        }.ToArray();
+                        ];
                         break;
                     }
                 }
@@ -316,10 +312,8 @@ namespace Ghosts.Client.Lite.Infrastructure.Comms
             {
                 using (var s = new FileStream(tempFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 {
-                    using (var tr = new StreamReader(s))
-                    {
-                        rawLogContents = tr.ReadToEnd();
-                    }
+                    using var tr = new StreamReader(s);
+                    rawLogContents = tr.ReadToEnd();
                 }
 
                 var r = new TransferLogDump { Log = rawLogContents };
@@ -334,11 +328,9 @@ namespace Ghosts.Client.Lite.Infrastructure.Comms
                     payload = JsonConvert.SerializeObject(p);
                 }
 
-                using (var client = WebClientBuilder.Build(machine))
-                {
-                    client.Headers[HttpRequestHeader.ContentType] = "application/json";
-                    client.UploadString(postUrl, payload);
-                }
+                using var client = WebClientBuilder.Build(machine);
+                client.Headers[HttpRequestHeader.ContentType] = "application/json";
+                client.UploadString(postUrl, payload);
             }
             catch (Exception e)
             {

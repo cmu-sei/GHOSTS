@@ -28,7 +28,7 @@ public class FullAutonomyJob
     private readonly List<string> _history;
     private readonly int _currentStep;
     private readonly IHubContext<ActivityHub> _activityHubContext;
-    private CancellationToken _cancellationToken;
+    private readonly CancellationToken _cancellationToken;
 
     public FullAutonomyJob(ApplicationSettings configuration, IServiceScopeFactory scopeFactory, Random random,
         IHubContext<ActivityHub> activityHubContext, CancellationToken cancellationToken)
@@ -45,8 +45,8 @@ public class FullAutonomyJob
             this._cancellationToken = cancellationToken;
 
             this._history = File.Exists(this._historyFile)
-                ? File.ReadAllLinesAsync(this._historyFile).Result.ToList()
-                : new List<string>();
+                ? [.. File.ReadAllLinesAsync(this._historyFile, cancellationToken).Result]
+                : [];
 
             if (_configuration.AnimatorSettings.Animations.FullAutonomy.IsInteracting)
             {

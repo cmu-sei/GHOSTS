@@ -15,7 +15,7 @@ public class CustomDocumentFilter : IDocumentFilter
             foreach (var operation in path.Value.Operations)
             {
                 var actionDescriptor = context.ApiDescriptions
-                    .FirstOrDefault(desc => desc.RelativePath == path.Key.Substring(1))
+                    .FirstOrDefault(desc => desc.RelativePath == path.Key[1..])
                     ?.ActionDescriptor;
 
                 if (actionDescriptor != null && actionDescriptor.RouteValues.TryGetValue("action", out var value))

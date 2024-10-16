@@ -15,9 +15,11 @@ namespace Ghosts.Animator.Services
 
             if (Npc.NpcProfile.Rank == null)
             {
-                Npc.NpcProfile.Rank = new MilitaryRank.Branch.Rank();
-                Npc.NpcProfile.Rank.Branch = MilitaryBranch.USARMY;
-                Npc.NpcProfile.Rank.Pay = "0";
+                Npc.NpcProfile.Rank = new MilitaryRank.Branch.Rank
+                {
+                    Branch = MilitaryBranch.USARMY,
+                    Pay = "0"
+                };
             }
 
             o.Height = PhysicalCharacteristics.GetMilHeight(Npc.NpcProfile.BiologicalSex, Npc.NpcProfile.Rank.Branch);

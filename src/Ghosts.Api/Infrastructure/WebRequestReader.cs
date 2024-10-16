@@ -9,7 +9,7 @@ using NLog;
 
 namespace Ghosts.Api.Infrastructure
 {
-    public static class WebRequestReader
+    public static partial class WebRequestReader
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
         public static Machine GetMachine(HttpContext context)
@@ -46,8 +46,11 @@ namespace Ghosts.Api.Infrastructure
 
         private static string CheckIfBase64Encoded(string raw)
         {
-            var reg = new Regex("^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$");
+            var reg = MyRegex();
             return reg.IsMatch(raw) ? Base64Encoder.Base64Decode(raw) : raw;
         }
+
+        [GeneratedRegex("^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$")]
+        private static partial Regex MyRegex();
     }
 }

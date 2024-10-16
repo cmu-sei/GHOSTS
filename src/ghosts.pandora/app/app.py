@@ -17,6 +17,7 @@ Send a POST request::
     curl -d "foo=bar&bin=baz" http://localhost
 
 """
+
 import configparser as cp
 import os
 import random
@@ -27,17 +28,15 @@ import urllib.parse
 import uuid
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from io import BytesIO
-from os.path import isfile, join
 import traceback
 import zipstream
 from docx import Document
-from docx.shared import Inches
 from faker import Faker
 from openpyxl import Workbook
 from openpyxl.styles import Font
 from PIL import Image
 from pptx import Presentation
-from pptx.util import Inches
+from pptx.util import Inches as pptx_Inches
 
 VERSION = "0.5.25"
 
@@ -47,7 +46,7 @@ class S(BaseHTTPRequestHandler):
         if self.headers:
             print(f'{args} - {self.handler} - {self.headers["User-Agent"]}')
         else:
-            print(f'{args}')
+            print(f"{args}")
 
     fake = Faker()
     image_array = ["png", "gif", "jpg", "jpeg", "pdf", "ico"]
@@ -57,7 +56,7 @@ class S(BaseHTTPRequestHandler):
     handler = "html"
 
     config = cp.ConfigParser()
-    config.read_file(open(r'./config/app.config'))
+    config.read_file(open(r"./config/app.config"))
     payloads = config["payloads"]
 
     def setup(self):
@@ -94,8 +93,12 @@ class S(BaseHTTPRequestHandler):
         p = self.config.get("non_200s", "percent_is_302")
         if random.randint(2, 100) > (100 - int(p)):
             self.send_response(302)
-            x = re.sub("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}", str(uuid.uuid4()), self.request_url)
-            self.send_header('Location', x)
+            x = re.sub(
+                "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}",
+                str(uuid.uuid4()),
+                self.request_url,
+            )
+            self.send_header("Location", x)
             print(self.request_url)
             print(x)
             self.end_headers()
@@ -108,11 +111,15 @@ class S(BaseHTTPRequestHandler):
         server = {self.config.get("headers", "server")}
         self.server_version = f"Server: {server}".encode("utf8")
         if content_type is not None:
-            self.send_header('Content-type', content_type)
+            self.send_header("Content-type", content_type)
         if file_name is not None:
-            self.send_header('Content-Disposition', f'attachment; filename="{file_name}"')
+            self.send_header(
+                "Content-Disposition", f'attachment; filename="{file_name}"'
+            )
         if self.file_requested.endswith(".pdf"):
-            self.send_header('Content-Disposition', f'attachment; filename="{self.file_requested}"')
+            self.send_header(
+                "Content-Disposition", f'attachment; filename="{self.file_requested}"'
+            )
         self.end_headers()
 
     def return_zip(self, file_name):
@@ -121,10 +128,13 @@ class S(BaseHTTPRequestHandler):
         buf = BytesIO(self.fake.binary(length=random.choice(range(1000, 80000))))
         buf.seek(0, 0)
 
-        with zipstream.ZipFile(mode='w', compression=zipstream.ZIP_DEFLATED) as z:
+        with zipstream.ZipFile(mode="w", compression=zipstream.ZIP_DEFLATED) as z:
             folder_name = self.fake.word()
             for _ in range(1, random.randint(1, 47)):
-                z.write_iter(f"{folder_name}/{self.fake.word()}.{self.fake.file_extension()}", buf)
+                z.write_iter(
+                    f"{folder_name}/{self.fake.word()}.{self.fake.file_extension()}",
+                    buf,
+                )
             for chunk in z:
                 self.wfile.write(chunk)
 
@@ -138,13 +148,21 @@ class S(BaseHTTPRequestHandler):
     def return_json(self):
         self.handler = "json"
         self.send_standard_headers("application/json")
-        body = self.fake.json(data_columns={'Candidates': ['name', 'name', 'name']}, num_rows=random.randint(1, 1000))
+        body = self.fake.json(
+            data_columns={"Candidates": ["name", "name", "name"]},
+            num_rows=random.randint(1, 1000),
+        )
         self.wfile.write(body.encode("utf8"))
 
     def return_csv(self):
         self.handler = "csv"
         self.send_standard_headers("text/csv")
-        body = self.fake.csv(header=('Name', 'Address', 'Password'), data_columns=('{{name}}', '{{address}}', '{{password}}'), num_rows=random.randint(1, 100), include_row_ids=True)
+        body = self.fake.csv(
+            header=("Name", "Address", "Password"),
+            data_columns=("{{name}}", "{{address}}", "{{password}}"),
+            num_rows=random.randint(1, 100),
+            include_row_ids=True,
+        )
         self.wfile.write(body.encode("utf8"))
 
     def return_text(self, file_name):
@@ -157,7 +175,15 @@ class S(BaseHTTPRequestHandler):
         self.handler = "css"
         self.send_standard_headers("text/css")
         fonts = self.config.get("css", "fonts_array").split(",")
-        body = "* {font-family:" + random.choice(fonts) + "} h1 {font-family:" + random.choice(fonts) + "} body {width:" + str(random.randint(65, 100)) + "%;}"
+        body = (
+            "* {font-family:"
+            + random.choice(fonts)
+            + "} h1 {font-family:"
+            + random.choice(fonts)
+            + "} body {width:"
+            + str(random.randint(65, 100))
+            + "%;}"
+        )
         self.wfile.write(body.encode("utf8"))
 
     def return_script(self):
@@ -166,33 +192,58 @@ class S(BaseHTTPRequestHandler):
         body = f"console.log('{self.fake.word()}, /{self.fake.date()}');"
         self.wfile.write(body.encode("utf8"))
 
-    def return_image(self, request_type):
+    def return_image(self, request_type: str) -> None:
+        """
+        Generates and returns an image based on the specified request type.
+
+        Parameters:
+            request_type (str): The type of image to generate.
+                                Accepted values are 'jpg', 'png', 'gif', and 'pdf'.
+
+        Sends the generated image in the HTTP response with the appropriate content type.
+        If the height or width parameters are provided in the query string,
+        they are used to set the dimensions of the generated image.
+        If invalid parameters are provided, a 400 error is sent in the response.
+        """
         self.handler = "img"
-        height = random.randint(10, 2000)
-        width = random.randint(10, 2000)
 
+        # Generate default random dimensions
+        height: int = random.randint(10, 2000)
+        width: int = random.randint(10, 2000)
+
+        # Parse query parameters for height and width
+        qs = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
         try:
-            qs = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
-            if qs is not None and qs["h"] is not None and qs["w"] is not None:
+            if "h" in qs and qs["h"]:
                 height = int(qs["h"][0])
+            if "w" in qs and qs["w"]:
                 width = int(qs["w"][0])
-        except:
-            pass
+        except (ValueError, IndexError):
+            # Handle invalid height or width values gracefully
+            self.send_error(400, "Invalid height or width value.")
+            return
 
-        content_type = f"image/{request_type}"
-        if request_type == "pdf":
-            content_type = f"application/{request_type}"
+        # Determine the appropriate content type
+        content_type: str = (
+            f"image/{request_type}"
+            if request_type != "pdf"
+            else f"application/{request_type}"
+        )
 
+        # Send standard headers
         self.send_standard_headers(content_type)
 
-        img = Image.new(mode="RGB", size=(width, height), color=self.fake.hex_color())
-        # set up the new image surface for drawing
-        buf = BytesIO()
-        if request_type == "jpg":
-            request_type = "JPEG"
-        img.save(buf, request_type.upper())
-        buf.seek(0, 0)
-        self.wfile.write(buf.read())
+        # Create a new image with the specified size and color
+        img: Image.Image = Image.new(
+            mode="RGB", size=(width, height), color=self.fake.hex_color()
+        )
+
+        # Use BytesIO to handle image in memory
+        with BytesIO() as buf:
+            img_format: str = "JPEG" if request_type == "jpg" else request_type.upper()
+            img.save(buf, img_format)
+            buf.seek(0)  # Move to the start of the BytesIO buffer
+            self.wfile.write(buf.read())
 
     def return_onenote(self, file_name):
         self.handler = "onenote"
@@ -208,32 +259,28 @@ class S(BaseHTTPRequestHandler):
         document = Document()
         document.add_heading(self.fake.sentence(), 0)
 
-        p = document.add_paragraph(f'{self.fake.catch_phrase()} ')
+        p = document.add_paragraph(f"{self.fake.catch_phrase()} ")
         p.add_run(self.fake.word()).bold = True
-        p.add_run(f' {self.fake.catch_phrase()} ')
+        p.add_run(f" {self.fake.catch_phrase()} ")
         p.add_run(self.fake.word()).italic = True
 
         document.add_heading(self.fake.word(), level=1)
-        document.add_paragraph(self.fake.catch_phrase(), style='Intense Quote')
+        document.add_paragraph(self.fake.catch_phrase(), style="Intense Quote")
 
-        document.add_paragraph(
-            self.fake.catch_phrase(), style='List Bullet'
-        )
-        document.add_paragraph(
-            self.fake.catch_phrase(), style='List Number'
-        )
+        document.add_paragraph(self.fake.catch_phrase(), style="List Bullet")
+        document.add_paragraph(self.fake.catch_phrase(), style="List Number")
 
         rows = 15
         cols = 3
         table = document.add_table(rows=rows, cols=cols)
         hdr_cells = table.rows[0].cells
-        hdr_cells[0].text = 'Name'
-        hdr_cells[1].text = 'Address'
-        hdr_cells[2].text = 'Email'
+        hdr_cells[0].text = "Name"
+        hdr_cells[1].text = "Address"
+        hdr_cells[2].text = "Email"
         for i in range(1, rows):
             row_cells = table.add_row().cells
             row_cells[0].text = self.fake.name()
-            row_cells[1].text = self. fake.address()
+            row_cells[1].text = self.fake.address()
             row_cells[2].text = self.fake.email()
 
         document.add_page_break()
@@ -259,7 +306,9 @@ class S(BaseHTTPRequestHandler):
         second_slide = ppt_file.slides.add_slide(Second_Layout)
         second_slide.shapes.title.text = self.fake.catch_phrase()
 
-        textbox = second_slide.shapes.add_textbox(Inches(3), Inches(1.5), Inches(3), Inches(1))
+        textbox = second_slide.shapes.add_textbox(
+            pptx_Inches(3), pptx_Inches(1.5), pptx_Inches(3), pptx_Inches(1)
+        )
         text_frame = textbox.text_frame
         paragraph = text_frame.add_paragraph()
         paragraph.text = self.fake.catch_phrase()
@@ -274,21 +323,24 @@ class S(BaseHTTPRequestHandler):
         self.handler = "xls"
         self.send_standard_headers("application/vnd.ms-excel", file_name)
         wb = Workbook()
-        wb['Sheet'].sheet_properties.tabColor = self.fake.hex_color().replace("#", "")
-        ws0 = wb['Sheet']
+        wb["Sheet"].sheet_properties.tabColor = self.fake.hex_color().replace("#", "")
+        ws0 = wb["Sheet"]
         ws0["A1"] = self.fake.catch_phrase()
-        ws0["A1"].font = Font(name='Calibri',
-                              size=40,
-                              bold=True,
-                              italic=False,
-                              strike=False,
-                              underline='none',
-                              color=self.fake.hex_color().replace("#", "")
-                              )
+        ws0["A1"].font = Font(
+            name="Calibri",
+            size=40,
+            bold=True,
+            italic=False,
+            strike=False,
+            underline="none",
+            color=self.fake.hex_color().replace("#", ""),
+        )
         for i in range(1, 5):
             wb.create_sheet(f"Sheet_{i}")
-            wb[f'Sheet_{i}'].sheet_properties.tabColor = self.fake.hex_color().replace("#", "")
-            ws1 = wb[f'Sheet_{i}']
+            wb[f"Sheet_{i}"].sheet_properties.tabColor = self.fake.hex_color().replace(
+                "#", ""
+            )
+            ws1 = wb[f"Sheet_{i}"]
             for i in range(1, 100):
                 for c in range(1, 100):
                     ws1.cell(i, c).value = random.randint(0, 32000)
@@ -304,13 +356,15 @@ class S(BaseHTTPRequestHandler):
         test_movie = "static/test_movie.mp4"
         if not os.path.isfile(test_movie):
             sp.call(
-                f'ffmpeg -y -f lavfi -i testsrc=size=1920x1080:rate=1 -vf hue=s=0 -vcodec libx264 -preset superfast -tune zerolatency -pix_fmt yuv420p -t 1000 -movflags +faststart {test_movie}', shell=True)
+                f"ffmpeg -y -f lavfi -i testsrc=size=1920x1080:rate=1 -vf hue=s=0 -vcodec libx264 -preset superfast -tune zerolatency -pix_fmt yuv420p -t 1000 -movflags +faststart {test_movie}",
+                shell=True,
+            )
 
             # Add zero padding to the end of the file https://stackoverflow.com/questions/12768026/write-zeros-to-file-blocks
             stat = os.stat(test_movie)
-            with open(test_movie, 'r+') as of:
+            with open(test_movie, "r+") as of:
                 of.seek(0, os.SEEK_END)
-                of.write('\0' * (50*1024*1024 - stat.st_size))
+                of.write("\0" * (50 * 1024 * 1024 - stat.st_size))
                 of.flush()
 
         f = open(test_movie, "rb")
@@ -338,7 +392,9 @@ class S(BaseHTTPRequestHandler):
             payload_file = payload.split(",")[1]
             payload_header = payload.split(",")[2]
             if o.path.startswith(payload_url):
-                print(f"{o.path} starts with {payload_url} - dropping {payload_file} with headers of {payload_header}")
+                print(
+                    f"{o.path} starts with {payload_url} - dropping {payload_file} with headers of {payload_header}"
+                )
                 # need to be able to serve bad documents based on url or sequence
                 # files = [f for f in os.listdir("./payloads") if os.path.isfile(join("./payloads", f))]
                 f = open(f"./payloads/{payload_file}", "rb")
@@ -361,11 +417,32 @@ class S(BaseHTTPRequestHandler):
                 self.return_mp4(self.file_requested)
                 return
 
-            elif request_type in ["xls", "xlsx", "xlsm", "xlsb", "xltm", "xla", "xlam", "xla", "ods"]:
+            elif request_type in [
+                "xls",
+                "xlsx",
+                "xlsm",
+                "xlsb",
+                "xltm",
+                "xla",
+                "xlam",
+                "xla",
+                "ods",
+            ]:
                 self.return_xls_file(self.file_requested)
                 return
 
-            elif request_type in ["ppt", "pptx", "potx", "pot", "ppsx", "pps", "pptm", "potm", "ppsm", "odp"]:
+            elif request_type in [
+                "ppt",
+                "pptx",
+                "potx",
+                "pot",
+                "ppsx",
+                "pps",
+                "pptm",
+                "potm",
+                "ppsm",
+                "odp",
+            ]:
                 self.return_ppt_file(self.file_requested)
                 return
 
@@ -397,7 +474,16 @@ class S(BaseHTTPRequestHandler):
                 self.return_zip(self.file_requested)
                 return
 
-            elif request_type in ["msi", "tar", "gz", "iso", "rar", "exe", "bin", "chm"]:
+            elif request_type in [
+                "msi",
+                "tar",
+                "gz",
+                "iso",
+                "rar",
+                "exe",
+                "bin",
+                "chm",
+            ]:
                 self.return_binary(self.file_requested)
                 return
 
@@ -410,7 +496,7 @@ class S(BaseHTTPRequestHandler):
             self.handler = "about"
             self.send_standard_headers("text/html")
             read_me = ""
-            with open('../readme.md', 'r') as file:
+            with open("../readme.md", "r") as file:
                 read_me = file.read()
             body = f"""<html><body><pre>
                 GHOSTS PANDORA, version {VERSION}
@@ -425,7 +511,7 @@ class S(BaseHTTPRequestHandler):
             return
 
         elif o.path.startswith("/video"):
-            f = open(f"./static/mp4.html", "rb")
+            f = open("./static/mp4.html", "rb")
             self.send_standard_headers("text/html")
             content = f.read()
             self.wfile.write(content)
@@ -433,7 +519,7 @@ class S(BaseHTTPRequestHandler):
             return
 
         elif o.path.startswith("/stream"):
-            f = open(f"./static/player.html", "rb")
+            f = open("./static/player.html", "rb")
             self.send_standard_headers("text/html")
             content = f.read()
             self.wfile.write(content)
@@ -484,7 +570,11 @@ class S(BaseHTTPRequestHandler):
             self.return_xls_file(self.file_requested)
             return
 
-        elif o.path.startswith("/i/") or o.path.startswith("/img") or o.path.startswith("/images"):
+        elif (
+            o.path.startswith("/i/")
+            or o.path.startswith("/img")
+            or o.path.startswith("/images")
+        ):
             request_type = random.choice(self.strict_image_array)
             self.return_image(request_type)
             return
@@ -498,26 +588,40 @@ class S(BaseHTTPRequestHandler):
             for _ in range(random.randint(1, 20)):
                 if random.randint(2, 100) > 55:
                     body = body + f"<h3>{self.fake.sentence().replace('.','')}</h3>"
-                    body = body + f"<p>{self.fake.paragraph(nb_sentences=random.randint(1, 100))}</p>"
+                    body = (
+                        body
+                        + f"<p>{self.fake.paragraph(nb_sentences=random.randint(1, 100))}</p>"
+                    )
                     if random.randint(1, 100) > 85:
-                        body = body + f"<img src='images/{self.fake.word()}.png?h={random.randint(80, 200)}&w={random.randint(200, 400)}'/>"
-            self.wfile.write(f"<html><head>{header}<title>{self.fake.catch_phrase()}</title></head><body><h1>{self.fake.catch_phrase()}</h1>{body}</body></html>".encode("utf8"))
+                        body = (
+                            body
+                            + f"<img src='images/{self.fake.word()}.png?h={random.randint(80, 200)}&w={random.randint(200, 400)}'/>"
+                        )
+            self.wfile.write(
+                f"<html><head>{header}<title>{self.fake.catch_phrase()}</title></head><body><h1>{self.fake.catch_phrase()}</h1>{body}</body></html>".encode(
+                    "utf8"
+                )
+            )
 
 
 def run(server_class=HTTPServer, handler_class=S, port=80):
-    server_address = ('0.0.0.0', port)
+    server_address = ("0.0.0.0", port)
     httpd = server_class(server_address, handler_class)
     if port == 443:
         if not os.path.exists("./server.pem"):
             print("You told me to run on 443, but no server.pem file exists! Exiting.")
             exit(1)
-        httpd.socket = ssl.wrap_socket(httpd.socket, certfile="./server.pem", server_side=True)
+        httpd.socket = ssl.wrap_socket(
+            httpd.socket, certfile="./server.pem", server_side=True
+        )
 
     print("""
 ░▄▀▒░█▄█░▄▀▄░▄▀▀░▀█▀░▄▀▀░░▒█▀▄▒▄▀▄░█▄░█░█▀▄░▄▀▄▒█▀▄▒▄▀▄
 ░▀▄█▒█▒█░▀▄▀▒▄██░▒█▒▒▄██▒░░█▀▒░█▀█░█▒▀█▒█▄▀░▀▄▀░█▀▄░█▀█
 """)
-    print(f"Starting GHOSTS PANDORA server {VERSION} on port {port}...\nReady for requests!")
+    print(
+        f"Starting GHOSTS PANDORA server {VERSION} on port {port}...\nReady for requests!"
+    )
     httpd.serve_forever()
 
 

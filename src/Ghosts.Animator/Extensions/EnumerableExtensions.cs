@@ -96,7 +96,7 @@ namespace Ghosts.Animator.Extensions
             var e = enumerable.ToList();
             if(e.Count==0)
             {
-                return default(T);
+                return default;
             }
             return e.ElementAt(rand.Next(0, e.Count));
         }

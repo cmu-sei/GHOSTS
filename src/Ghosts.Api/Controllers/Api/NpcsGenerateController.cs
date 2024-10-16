@@ -19,15 +19,10 @@ namespace ghosts.api.Controllers.Api;
 [ApiController]
 [Produces("application/json")]
 [Route("api/[controller]")]
-public class NpcsGenerateController : ControllerBase
+public class NpcsGenerateController(INpcService service) : ControllerBase
 {
     private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-    private readonly INpcService _service;
-
-    public NpcsGenerateController(INpcService service)
-    {
-        this._service = service;
-    }
+    private readonly INpcService _service = service;
 
     /// <summary>
     /// Returns all NPCs at the specified level - Campaign, Enclave, or Team

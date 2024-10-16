@@ -24,12 +24,12 @@ public class SocialBeliefJob
     private readonly ApplicationDbContext _context;
     private readonly Random _random;
     private bool _isEnabled = true;
-    private CancellationToken _cancellationToken;
+    private readonly CancellationToken _cancellationToken;
 
     private readonly IHubContext<ActivityHub> _activityHubContext;
 
     public static string[] Beliefs =
-    {
+    [
         // "Strong passwords are essential.", "Regular software updates matter.", "Public Wi-Fi is risky.",
         // "Antivirus software is a must.",
         // "Encryption protects data.", "Phishing attacks are common.", "Two-factor authentication helps.",
@@ -38,7 +38,7 @@ public class SocialBeliefJob
         // "Insider threats are real.",
         // "Dark web is a breeding ground.", "DDoS attacks disrupt services.", "Hacktivists promote causes."
         "I should vote for candidate A", "I should vote for candidate B"
-    };
+    ];
 
     public SocialBeliefJob(ApplicationSettings configuration, IServiceScopeFactory scopeFactory, Random random,
         IHubContext<ActivityHub> activityHubContext, CancellationToken cancellationToken)

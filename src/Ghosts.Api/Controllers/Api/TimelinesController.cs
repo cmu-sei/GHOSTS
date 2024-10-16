@@ -16,16 +16,10 @@ namespace ghosts.api.Controllers.Api
     /// </summary>
     [Produces("application/json")]
     [Route("api/[controller]")]
-    public class TimelinesController : Controller
+    public class TimelinesController(ITimelineService timelineService, IMachineTimelinesService machineTimelinesService) : Controller
     {
-        private readonly ITimelineService _timelineService;
-        private readonly IMachineTimelinesService _machineTimelinesService;
-
-        public TimelinesController(ITimelineService timelineService, IMachineTimelinesService machineTimelinesService)
-        {
-            _timelineService = timelineService;
-            _machineTimelinesService = machineTimelinesService;
-        }
+        private readonly ITimelineService _timelineService = timelineService;
+        private readonly IMachineTimelinesService _machineTimelinesService = machineTimelinesService;
 
         /// <summary>
         /// This returns all timelines for a requested machine. If all or a specific timeline is not available,

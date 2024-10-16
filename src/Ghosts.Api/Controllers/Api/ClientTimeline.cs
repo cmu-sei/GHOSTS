@@ -20,17 +20,11 @@ namespace ghosts.api.Controllers.Api
     [ApiExplorerSettings(IgnoreApi = true)]
     [Produces("application/json")]
     [Route("api/[controller]")]
-    public class ClientTimelineController : Controller
+    public class ClientTimelineController(IMachineTimelinesService service, IMachineService machineService) : Controller
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        private readonly IMachineTimelinesService _service;
-        private readonly IMachineService _machineService;
-
-        public ClientTimelineController(IMachineTimelinesService service, IMachineService machineService)
-        {
-            _service = service;
-            _machineService = machineService;
-        }
+        private readonly IMachineTimelinesService _service = service;
+        private readonly IMachineService _machineService = machineService;
 
         /// <summary>
         /// Clients post their timelines here, so that the C2 knows what a particular agent is doing

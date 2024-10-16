@@ -7,13 +7,8 @@ using Socializer.Infrastructure;
 namespace Socializer.Controllers;
 
 [Route("posts")]
-public class PostsController : BaseController
+public class PostsController(ILogger logger, IHubContext<PostsHub> hubContext, DataContext dbContext) : BaseController(logger, hubContext, dbContext)
 {
-    public PostsController(ILogger logger, IHubContext<PostsHub> hubContext, DataContext dbContext) :
-        base(logger, hubContext, dbContext)
-    {
-    }
-    
     [HttpGet("{id:guid}")]
     public IActionResult Detail(Guid id)
     {

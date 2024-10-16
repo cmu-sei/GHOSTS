@@ -1,11 +1,10 @@
-
 from openai import OpenAI
 import base64
 
 
-client = OpenAI( api_key="THIS_NEEDS_TO_BE_VALID_API")
+client = OpenAI(api_key="THIS_NEEDS_TO_BE_VALID_API")
 
-#image_prompt = "Generate an image about What are some of the less common but domesticated breeds of horses?"
+# image_prompt = "Generate an image about What are some of the less common but domesticated breeds of horses?"
 
 image_prompt = """
 generate a photograph about a Marmot, indoor habitat, cozy den, fluffy bedding, rocky climbing structures, bowl of fresh herbs, water fountain, playful marmot, curious expression, soft lighting, warm and inviting
@@ -17,24 +16,17 @@ Detailed rock formations, Rough textures, Dramatic lighting, Sense of suspense, 
 """
 
 response = client.images.generate(
-  model="dall-e-3",
-  prompt=image_prompt,
-  size="1024x1024",
-  quality="standard",
-  response_format="b64_json",
-  n=1,
+    model="dall-e-3",
+    prompt=image_prompt,
+    size="1024x1024",
+    quality="standard",
+    response_format="b64_json",
+    n=1,
 )
 
-#image_url = response.data[0].url
+# image_url = response.data[0].url
 image_data = response.data[0].b64_json
 
 
-
-with open("output.png", 'wb') as f:
-  f.write(base64.b64decode(image_data))
-
-
-
-
-
-
+with open("output.png", "wb") as f:
+    f.write(base64.b64decode(image_data))

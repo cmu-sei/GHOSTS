@@ -14,14 +14,9 @@ namespace ghosts.api.Controllers;
 [Controller]
 [Produces("application/json")]
 [ApiExplorerSettings(IgnoreApi = true)]
-public class ViewRelationshipsController : Controller
+public class ViewRelationshipsController(ApplicationDbContext context) : Controller
 {
-    private readonly ApplicationDbContext _context;
-        
-    public ViewRelationshipsController(ApplicationDbContext context)
-    {
-        this._context = context;
-    }
+    private readonly ApplicationDbContext _context = context;
 
     [HttpGet]
     public IActionResult Index()

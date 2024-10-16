@@ -7,13 +7,8 @@ using Socializer.Infrastructure;
 namespace Socializer.Controllers;
 
 [Route("{*catchall}")]
-public class HomeController : BaseController
+public class HomeController(ILogger logger, IHubContext<PostsHub> hubContext, DataContext dbContext) : BaseController(logger, hubContext, dbContext)
 {
-    public HomeController(ILogger logger, IHubContext<PostsHub> hubContext, DataContext dbContext) :
-        base(logger, hubContext, dbContext)
-    {
-    }
-
     [HttpGet]
     public IActionResult Index()
     {
@@ -94,7 +89,7 @@ public class HomeController : BaseController
 
         if (!string.IsNullOrEmpty(imagePath))
         {
-            post.Message = post.Message + $" <img src=\"{imagePath}\"/>";
+            post.Message += $" <img src=\"{imagePath}\"/>";
         }
 
         Db.Posts.Add(post);

@@ -23,15 +23,10 @@ namespace ghosts.api.Infrastructure.Services
         Task DeleteByMachineIdAsync(Guid model, CancellationToken ct);
     }
 
-    public class MachineTimelinesService : IMachineTimelinesService
+    public class MachineTimelinesService(ApplicationDbContext context) : IMachineTimelinesService
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        private readonly ApplicationDbContext _context;
-
-        public MachineTimelinesService(ApplicationDbContext context)
-        {
-            _context = context;
-        }
+        private readonly ApplicationDbContext _context = context;
 
         public async Task<IEnumerable<MachineTimeline>> GetByMachineIdAsync(Guid id, CancellationToken ct)
         {

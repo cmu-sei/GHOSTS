@@ -42,11 +42,13 @@ namespace Ghosts.Animator
                 r = AnimatorRandom.Rand.NextDouble() * u;
                 sum = 0;
                 var assignedRole = assignedDepartment.Roles.FirstOrDefault(x => r <= (sum += x.Probability));
-                
-                var job = new EmploymentProfile.EmploymentRecord();
-                job.Company = CompanyName();
-                job.Department = assignedDepartment.Department;
-                job.JobTitle = assignedRole.Title;
+
+                var job = new EmploymentProfile.EmploymentRecord
+                {
+                    Company = CompanyName(),
+                    Department = assignedDepartment.Department,
+                    JobTitle = assignedRole.Title
+                };
                 job.Email = $"{Npc.NpcProfile.Name.ToString().ToAccountSafeString()}@{job.Company.ToAccountSafeString()}.com".Replace("..",".");
                 //job.Manager
                 job.Organization = job.Company;

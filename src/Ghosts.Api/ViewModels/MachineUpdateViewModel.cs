@@ -50,8 +50,8 @@ namespace Ghosts.Api.ViewModels
                 {
                     Id = Guid.NewGuid(),
                     Status = Timeline.TimelineStatus.Run,
-                    TimeLineHandlers = new List<TimelineHandler>
-                    {
+                    TimeLineHandlers =
+                    [
                         new()
                         {
                             HandlerType = HandlerType.BrowserFirefox,
@@ -59,18 +59,18 @@ namespace Ghosts.Api.ViewModels
                             UtcTimeOn = TimeSpan.Parse("00:00:00"),
                             UtcTimeOff = TimeSpan.Parse("23:59:59"),
                             Loop = true,
-                            TimeLineEvents = new List<TimelineEvent>
-                            {
+                            TimeLineEvents =
+                            [
                                 new()
                                 {
                                     Command = "browse",
-                                    CommandArgs = new List<object> { "https://sei.cmu.edu" },
+                                    CommandArgs = ["https://sei.cmu.edu"],
                                     DelayAfter = 30000,
                                     DelayBefore = 0
                                 }
-                            }
+                            ]
                         }
-                    }
+                    ]
                 }
             };
         }

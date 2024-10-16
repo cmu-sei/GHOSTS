@@ -30,7 +30,7 @@ namespace Ghosts.Api.Infrastructure.Data
                     }
                 }
 
-                ids = new List<int>();
+                ids = [];
                 foreach (var o in context.HistoryTimeline.Where(x => x.MachineId == machine.Id)
                     .OrderByDescending(x => x.CreatedUtc).Take(retain))
                     ids.Add(o.Id);
@@ -47,7 +47,7 @@ namespace Ghosts.Api.Infrastructure.Data
                     }
                 }
 
-                ids = new List<int>();
+                ids = [];
                 foreach (var o in context.HistoryMachine.Where(x => x.MachineId == machine.Id)
                     .OrderByDescending(x => x.CreatedUtc).Take(retain))
                     ids.Add(o.Id);

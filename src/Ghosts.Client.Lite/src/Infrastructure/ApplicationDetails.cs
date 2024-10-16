@@ -85,7 +85,7 @@ namespace Ghosts.Client.Lite.Infrastructure
             var fileFormat = "file:\\";
             if (IsLinux() || IsOSX()) fileFormat = "file:";
 
-            if (x.Contains(fileFormat)) x = x.Substring(x.IndexOf(fileFormat, StringComparison.InvariantCultureIgnoreCase) + fileFormat.Length);
+            if (x.Contains(fileFormat)) x = x[(x.IndexOf(fileFormat, StringComparison.InvariantCultureIgnoreCase) + fileFormat.Length)..];
 
             x = x.Replace(Convert.ToChar(@"\"), Path.DirectorySeparatorChar);
             x = x.Replace(Convert.ToChar(@"/"), Path.DirectorySeparatorChar);
@@ -172,14 +172,9 @@ namespace Ghosts.Client.Lite.Infrastructure
             public static string ClientUpdates => Clean(Path + "clientupdates.log");
         }
 
-        public class ConfigurationUrls
+        public class ConfigurationUrls(string rootUrl)
         {
-            public ConfigurationUrls(string rootUrl)
-            {
-                this._root = rootUrl;
-            }
-
-            private string _root;
+            private readonly string _root = rootUrl;
             public string Id => $"{this._root}/clientid";
             public string Timeline => $"{this._root}/clienttimeline";
             public string Results => $"{this._root}/clientresults";

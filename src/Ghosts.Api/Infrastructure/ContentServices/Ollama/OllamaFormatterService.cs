@@ -15,7 +15,7 @@ public class OllamaFormatterService : IFormatterService
 {
     private static readonly Logger _log = LogManager.GetCurrentClassLogger();
     private readonly ApplicationSettings.AnimatorSettingsDetail.ContentEngineSettings _configuration;
-    private OllamaConnectorService _connectorService;
+    private readonly OllamaConnectorService _connectorService;
 
     public OllamaFormatterService(ApplicationSettings.AnimatorSettingsDetail.ContentEngineSettings configuration)
     {

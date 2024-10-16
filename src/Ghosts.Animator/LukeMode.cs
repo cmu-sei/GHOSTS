@@ -50,9 +50,11 @@ namespace Ghosts.Animator
         {
             var file = $"config/luke_mode_names.txt";
             var nameArray = file.GetRandomFromFile().Split(Convert.ToChar(","));
-            var name = new Models.NameProfile();
-            name.First = nameArray[0];
-            name.Last = nameArray[1];
+            var name = new Models.NameProfile
+            {
+                First = nameArray[0],
+                Last = nameArray[1]
+            };
             return name;
         }
 

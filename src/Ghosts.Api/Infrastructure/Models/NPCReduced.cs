@@ -15,13 +15,13 @@ public class NPCReduced
 
     public NPCReduced()
     {
-        this.PropertySelection = new Dictionary<string, string>();
+        this.PropertySelection = [];
     }
 
     public NPCReduced(IEnumerable<string> fieldsToReturn, NpcRecord npc)
     {
         //what we'll return
-        this.PropertySelection = new Dictionary<string, string>();
+        this.PropertySelection = [];
 
         //get an npc to "rip apart"
 

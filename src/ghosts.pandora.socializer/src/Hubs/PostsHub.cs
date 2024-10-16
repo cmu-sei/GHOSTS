@@ -4,18 +4,12 @@ using Socializer.Infrastructure;
 
 namespace Socializer.Hubs;
 
-public class PostsHub: Hub
+public class PostsHub(ILogger<PostsHub> logger, DataContext dbContext) : Hub
 {
-    private readonly ILogger<PostsHub> _logger;
+    private readonly ILogger<PostsHub> _logger = logger;
     //private IHubContext<PostsHub> _hubContext;
-    private readonly DataContext _db;
-    
-    public PostsHub(ILogger<PostsHub> logger, DataContext dbContext)
-    {
-        _logger = logger;
-        _db = dbContext;    
-    }
-    
+    private readonly DataContext _db = dbContext;
+
     public async Task SendMessage(string id, string user, string message, string created)
     {
         if (string.IsNullOrEmpty(id))
@@ -23,12 +17,14 @@ public class PostsHub: Hub
 
         if (string.IsNullOrEmpty(created))
             created = DateTime.UtcNow.ToString(CultureInfo.InvariantCulture);
-        
-        var post = new Post();
-        post.Id = id;
-        post.User = user;
-        post.Message = message;
-        post.CreatedUtc = DateTime.UtcNow;
+
+        var post = new Post
+        {
+            Id = id,
+            User = user,
+            Message = message,
+            CreatedUtc = DateTime.UtcNow
+        };
         ;
         _db.Posts.Add(post);
         await _db.SaveChangesAsync();

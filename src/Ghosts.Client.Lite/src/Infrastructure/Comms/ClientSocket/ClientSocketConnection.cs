@@ -6,18 +6,13 @@ using Microsoft.AspNetCore.SignalR.Client;
 
 namespace Ghosts.Client.Lite.Infrastructure.Comms.ClientSocket;
 
-public class Connection
+public class Connection(ClientConfiguration.SocketsSettings options)
 {
     private int _attempts = 0;
     private HubConnection _connection;
     private readonly CancellationToken _ct = new();
     public readonly BackgroundTaskQueue Queue = new();
-    private readonly ClientConfiguration.SocketsSettings _options;
-
-    public Connection(ClientConfiguration.SocketsSettings options)
-    {
-        this._options = options;
-    }
+    private readonly ClientConfiguration.SocketsSettings _options = options;
 
     public async Task Run()
     {

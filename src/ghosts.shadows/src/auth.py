@@ -23,10 +23,13 @@ SQLALCHEMY_DATABASE_URL = "sqlite+aiosqlite:///./test.db"
 engine = create_async_engine(SQLALCHEMY_DATABASE_URL, echo=True)
 
 # Create sessionmaker for async sessions
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine, class_=AsyncSession)
+SessionLocal = sessionmaker(
+    autocommit=False, autoflush=False, bind=engine, class_=AsyncSession
+)
 
 # Base class for SQLAlchemy models
 Base = declarative_base()
+
 
 # Define User model
 class User(Base):
@@ -38,14 +41,17 @@ class User(Base):
     hashed_password = Column(String)
     disabled = Column(Boolean, default=False)
 
+
 # Pydantic model for token response
 class Token(BaseModel):
     access_token: str
     token_type: str
 
+
 # Pydantic model for token data
 class TokenData(BaseModel):
     username: Optional[str] = None
+
 
 # Pydantic model for user data in the database
 class UserInDB(BaseModel):
@@ -53,6 +59,7 @@ class UserInDB(BaseModel):
     full_name: Optional[str] = None
     hashed_password: str
     disabled: Optional[bool] = None
+
 
 # Password hashing context using bcrypt
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -63,24 +70,29 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 # Create FastAPI instance
 app = FastAPI()
 
+
 # Event handler to create database tables on startup
 @app.on_event("startup")
 async def on_startup():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
+
 # Verify plain password against hashed password
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
+
 
 # Hash a password
 def get_password_hash(password):
     return pwd_context.hash(password)
 
+
 # Retrieve user from database by username
 async def get_user(db: AsyncSession, username: str):
     result = await db.execute(select(User).where(User.username == username))
     return result.scalars().first()
+
 
 # Authenticate user by username and password
 async def authenticate_user(db: AsyncSession, username: str, password: str):
@@ -90,6 +102,7 @@ async def authenticate_user(db: AsyncSession, username: str, password: str):
     if not verify_password(password, user.hashed_password):
         return False
     return user
+
 
 # Create a JWT token with an expiration date
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
@@ -102,13 +115,17 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
+
 # Dependency to get a database session
 async def get_db():
     async with SessionLocal() as session:
         yield session
 
+
 # Retrieve the current user from the token
-async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)):
+async def get_current_user(
+    token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)
+):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -127,15 +144,19 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession
         raise credentials_exception
     return user
 
+
 # Check if the current user is active
 async def get_current_active_user(current_user: User = Depends(get_current_user)):
     if current_user.disabled:
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
 
+
 # Endpoint for user login and token generation
 @app.post("/token", response_model=Token)
-async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)):
+async def login_for_access_token(
+    form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)
+):
     user = await authenticate_user(db, form_data.username, form_data.password)
     if not user:
         raise HTTPException(
@@ -149,9 +170,12 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
+
 # Endpoint for user signup
 @app.post("/signup", response_model=Token)
-async def signup(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)):
+async def signup(
+    form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)
+):
     user = await get_user(db, form_data.username)
     if user:
         raise HTTPException(
@@ -174,12 +198,15 @@ async def signup(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSess
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
+
 # Endpoint to get the current user's information
 @app.get("/users/me/", response_model=UserInDB)
 async def read_users_me(current_user: User = Depends(get_current_active_user)):
     return current_user
 
+
 # Run the app with Uvicorn
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)

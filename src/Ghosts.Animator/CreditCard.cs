@@ -63,11 +63,13 @@ namespace Ghosts.Animator
 		public static FinancialProfile.CreditCard GetCreditCard()
 		{
 			var t = GetCardType();
-			
-			var card = new FinancialProfile.CreditCard();
-			card.Type = t.ToString();
-			card.Number = CreditCardNumber(t);
-			return card;
+
+            var card = new FinancialProfile.CreditCard
+            {
+                Type = t.ToString(),
+                Number = CreditCardNumber(t)
+            };
+            return card;
 		}
 
 		public static double GetNetWorth()

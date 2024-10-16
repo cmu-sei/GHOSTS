@@ -12,15 +12,10 @@ namespace ghosts.api.Controllers.Api
     [Produces("application/json")]
     [Route("api/[controller]")]
     [ResponseCache(Duration = 5)]
-    public class TrackablesController : Controller
+    public class TrackablesController(ITrackableService service) : Controller
     {
-        private readonly ITrackableService _service;
-        
-        public TrackablesController(ITrackableService service)
-        {
-            _service = service;
-        }
-        
+        private readonly ITrackableService _service = service;
+
         /// <summary>
         /// Gets all trackables in the system
         /// </summary>

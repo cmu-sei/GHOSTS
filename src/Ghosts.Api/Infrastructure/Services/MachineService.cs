@@ -30,16 +30,11 @@ namespace ghosts.api.Infrastructure.Services
         Task<List<HistoryTimeline>> GetActivity(Guid id, int skip, int take, CancellationToken ct);
     }
 
-    public class MachineService : IMachineService
+    public class MachineService(ApplicationDbContext context) : IMachineService
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        private readonly ApplicationDbContext _context;
+        private readonly ApplicationDbContext _context = context;
         private readonly int _lookBack = Program.ApplicationSettings.LookbackRecords;
-
-        public MachineService(ApplicationDbContext context)
-        {
-            _context = context;
-        }
 
         public async Task<List<Machine>> GetAsync(string q, CancellationToken ct)
         {
@@ -262,7 +257,7 @@ namespace ghosts.api.Infrastructure.Services
 
             try
             {
-                return _context.HistoryTimeline.Where(o => o.MachineId == id).OrderByDescending(o => o.CreatedUtc).Skip(skip).Take(take).ToList();
+                return [.. _context.HistoryTimeline.Where(o => o.MachineId == id).OrderByDescending(o => o.CreatedUtc).Skip(skip).Take(take)];
             }
             catch (Exception e)
             {

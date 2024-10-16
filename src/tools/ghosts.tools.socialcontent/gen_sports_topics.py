@@ -1,8 +1,3 @@
-
-import ollama
-import yaml
-import posixpath
-import os
 from gen_topics_common import gen_prompts
 
 # This file generates a file named movie_content.yml that will have prompts
@@ -10,10 +5,10 @@ from gen_topics_common import gen_prompts
 # script to generate the content
 
 
-llm = 'wizardlm2'
+llm = "wizardlm2"
 
 
-prompt = '''
+prompt = """
 Generate 50 sentences, SPORT_A is replaced by a random sports name like football, baseball, basketball, 
 swimming, hockey, indy car racing, nascar, lacrosse, badminton, tennis, track and field and TEAM_A is replaced
 by a professional team or player from that sport.
@@ -35,8 +30,5 @@ I think that TEAM_A from SPORT_A should fire their coach, he is terrible!
 EXAMPLE:
 Which TEAM_A from SPORT_A do you think was the best team in history?
 
-'''
-gen_prompts(llm, 'sports', prompt, 'sports_content.yml')
-
-
-
+"""
+gen_prompts(llm, "sports", prompt, "sports_content.yml")

@@ -6,13 +6,8 @@ using Socializer.Infrastructure;
 namespace Socializer.Controllers;
 
 [Route("admin")]
-public class AdminController : BaseController
+public class AdminController(ILogger logger, IHubContext<PostsHub> hubContext, DataContext dbContext) : BaseController(logger, hubContext, dbContext)
 {
-    public AdminController(ILogger logger, IHubContext<PostsHub> hubContext, DataContext dbContext) :
-        base(logger, hubContext, dbContext)
-    {
-    }
-    
     [HttpGet("delete")]
     public async Task<IActionResult> Delete()
     {
@@ -28,15 +23,17 @@ public class AdminController : BaseController
         for (var i = 0; i < n; i++)
         {
             var min = DateTime.Now.AddDays(-7);
-            var randTicks = r.Next(0, (int)(DateTime.Now.Ticks - min.Ticks));
+            _ = r.Next(0, (int)(DateTime.Now.Ticks - min.Ticks));
 
-            var post = new Post();
-            post.Id = Guid.NewGuid().ToString();
-            post.CreatedUtc =
+            var post = new Post
+            {
+                Id = Guid.NewGuid().ToString(),
+                CreatedUtc =
                 DateTime.MinValue.Add(
-                    TimeSpan.FromTicks(min.Ticks + (long)(r.NextDouble() * (DateTime.Now.Ticks - min.Ticks))));
-            post.User = Faker.Internet.UserName();
-            post.Message = Faker.Lorem.Sentence(15);
+                    TimeSpan.FromTicks(min.Ticks + (long)(r.NextDouble() * (DateTime.Now.Ticks - min.Ticks)))),
+                User = Faker.Internet.UserName(),
+                Message = Faker.Lorem.Sentence(15)
+            };
             this.Db.Posts.Add(post);
         }
 

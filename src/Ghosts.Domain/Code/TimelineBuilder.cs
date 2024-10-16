@@ -79,7 +79,7 @@ namespace Ghosts.Domain.Code
 
         public static Timeline GetTimelineFromString(string raw, string path)
         {
-            var rnd = new Random();
+            _ = new Random();
 
             try
             {

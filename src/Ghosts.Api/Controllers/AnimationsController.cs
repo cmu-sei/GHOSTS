@@ -12,17 +12,11 @@ namespace ghosts.api.Controllers;
 
 [Route("[controller]")]
 [ApiExplorerSettings(IgnoreApi = true)]
-public class AnimationsController : Controller
+public class AnimationsController(IManageableHostedService animationsManager) : Controller
 {
     private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-    private readonly ApplicationSettings _configuration;
-    private readonly IManageableHostedService _animationsManager;
-
-    public AnimationsController(IManageableHostedService animationsManager)
-    {
-        this._configuration = Program.ApplicationSettings;
-        this._animationsManager = animationsManager;
-    }
+    private readonly ApplicationSettings _configuration = Program.ApplicationSettings;
+    private readonly IManageableHostedService _animationsManager = animationsManager;
 
     [HttpGet]
     public IActionResult Index()

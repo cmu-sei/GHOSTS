@@ -28,16 +28,11 @@ using Swashbuckle.AspNetCore.Filters;
 
 namespace Ghosts.Api
 {
-    public class Startup
+    public class Startup(IConfiguration configuration)
     {
         public const int ApiVersion = 8;
-        
-        public Startup(IConfiguration configuration)
-        {
-            Configuration = configuration;
-        }
 
-        public IConfiguration Configuration { get; }
+        public IConfiguration Configuration { get; } = configuration;
 
         public void ConfigureServices(IServiceCollection services)
         {

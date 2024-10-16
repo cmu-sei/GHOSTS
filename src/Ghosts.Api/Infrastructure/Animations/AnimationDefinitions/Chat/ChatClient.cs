@@ -94,9 +94,7 @@ public class ChatClient
 
             var contentString = await response.Content.ReadAsStringAsync(this._cancellationToken);
             var user = JsonSerializer.Deserialize<User>(contentString,
-                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            if (user == null)
-                throw new Exception("A user was not returned properly");
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? throw new Exception("A user was not returned properly");
             this.UserId = user.Id;
             return user;
         }

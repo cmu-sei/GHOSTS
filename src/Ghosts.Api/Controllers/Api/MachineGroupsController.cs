@@ -18,17 +18,11 @@ namespace ghosts.api.Controllers.Api
     [Produces("application/json")]
     [Route("api/[controller]")]
     [ResponseCache(Duration = 5)]
-    public class MachineGroupsController : Controller
+    public class MachineGroupsController(IMachineGroupService service, IMachineService machineService) : Controller
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        private readonly IMachineGroupService _service;
-        private readonly IMachineService _serviceMachine;
-
-        public MachineGroupsController(IMachineGroupService service, IMachineService machineService)
-        {
-            _service = service;
-            _serviceMachine = machineService;
-        }
+        private readonly IMachineGroupService _service = service;
+        private readonly IMachineService _serviceMachine = machineService;
 
         /// <summary>
         /// Gets the group information and the machines contained therein based on the provided query
@@ -77,7 +71,7 @@ namespace ghosts.api.Controllers.Api
         /// <returns>The updated group</returns>
         [SwaggerOperation("MachineGroupsUpdate")]
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutMachineGroup([FromBody] Group model, CancellationToken ct)
+        public async Task<IActionResult> PutMachineGroup(string id, [FromBody] Group model, CancellationToken ct)
         {
             if (!ModelState.IsValid || model.ContainsInvalidUnicode())
             {

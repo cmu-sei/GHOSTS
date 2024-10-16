@@ -56,35 +56,27 @@ public enum AnimationJobTypes
     FULLAUTONOMY
 }
 
-public class AnimationsManager : IManageableHostedService
+public class AnimationsManager(IHubContext<ActivityHub> activityHubContext, IServiceScopeFactory scopeFactory) : IManageableHostedService
 {
     private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-    private readonly IServiceScopeFactory _scopeFactory;
+    private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
 
-    private readonly ApplicationSettings _configuration;
-    private readonly Random _random;
+    private readonly ApplicationSettings _configuration = Program.ApplicationSettings;
+    private readonly Random _random = Random.Shared;
     private Thread _socialSharingJobThread;
     private Thread _socialGraphJobThread;
     private Thread _socialBeliefsJobThread;
     private Thread _chatJobThread;
     private Thread _fullAutonomyJobThread;
     
-    private CancellationTokenSource _socialSharingJobCancellationTokenSource = new CancellationTokenSource();
-    private CancellationTokenSource _socialGraphJobCancellationTokenSource = new CancellationTokenSource();
-    private CancellationTokenSource _socialBeliefsJobCancellationTokenSource = new CancellationTokenSource();
-    private CancellationTokenSource _chatJobJobCancellationTokenSource = new CancellationTokenSource();
-    private CancellationTokenSource _fullAutonomyCancellationTokenSource = new CancellationTokenSource();
+    private CancellationTokenSource _socialSharingJobCancellationTokenSource = new();
+    private CancellationTokenSource _socialGraphJobCancellationTokenSource = new();
+    private readonly CancellationTokenSource _socialBeliefsJobCancellationTokenSource = new();
+    private CancellationTokenSource _chatJobJobCancellationTokenSource = new();
+    private readonly CancellationTokenSource _fullAutonomyCancellationTokenSource = new();
     
-    private readonly IHubContext<ActivityHub> _activityHubContext;
-    private readonly ConcurrentDictionary<string, JobInfo> _jobs = new ConcurrentDictionary<string, JobInfo>();
-
-    public AnimationsManager(IHubContext<ActivityHub> activityHubContext, IServiceScopeFactory scopeFactory)
-    {
-        _scopeFactory = scopeFactory;
-        this._random = Random.Shared;
-        this._activityHubContext = activityHubContext;
-        this._configuration = Program.ApplicationSettings;
-    }
+    private readonly IHubContext<ActivityHub> _activityHubContext = activityHubContext;
+    private readonly ConcurrentDictionary<string, JobInfo> _jobs = new();
 
     public string GetOutput(AnimationJobTypes job)
     {

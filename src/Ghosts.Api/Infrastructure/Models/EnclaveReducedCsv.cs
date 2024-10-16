@@ -21,7 +21,7 @@ public class EnclaveReducedCsv
         foreach (var npc in npcDictionary)
         {
             var npcRow = new List<string>() {npc.Key};
-            npcRow.AddRange(fieldsToReturn.Select(property => npcDictionary[npc.Key].ContainsKey(property) ? npcDictionary[npc.Key][property] : ""));
+            npcRow.AddRange(fieldsToReturn.Select(property => npcDictionary[npc.Key].TryGetValue(property, out string value) ? value : ""));
             rowList.Add(string.Join(",", npcRow));
         }
 

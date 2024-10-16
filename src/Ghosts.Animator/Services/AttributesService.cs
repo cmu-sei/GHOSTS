@@ -18,8 +18,10 @@ namespace Ghosts.Animator.Services
                 }
             }
             
-            var dict = new Dictionary<string, string>();
-            dict.Add("Supply_Needs", string.Join(",", needs.Distinct()));
+            var dict = new Dictionary<string, string>
+            {
+                { "Supply_Needs", string.Join(",", needs.Distinct()) }
+            };
             return dict;
         }
     }

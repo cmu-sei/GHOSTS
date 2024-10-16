@@ -32,16 +32,11 @@ namespace ghosts.api.Infrastructure.Services
         Task<IEnumerable<MachineUpdate>> GetByType(UpdateClientConfig.UpdateType type, CancellationToken ct);
     }
 
-    public class MachineUpdateService : IMachineUpdateService
+    public class MachineUpdateService(ApplicationDbContext context) : IMachineUpdateService
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        private readonly ApplicationDbContext _context;
+        private readonly ApplicationDbContext _context = context;
 
-        public MachineUpdateService(ApplicationDbContext context)
-        {
-            _context = context;
-        }
-        
         public async Task UpdateGroupAsync(int groupId, MachineUpdateViewModel machineUpdateViewModel, CancellationToken ct)
         {
             var machineUpdate = machineUpdateViewModel.ToMachineUpdate();

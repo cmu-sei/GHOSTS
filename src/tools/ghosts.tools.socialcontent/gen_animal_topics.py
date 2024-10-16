@@ -1,8 +1,3 @@
-
-import ollama
-import yaml
-import posixpath
-import os
 from gen_topics_common import gen_prompts
 
 # This file generates a file named movie_content.yml that will have prompts
@@ -10,10 +5,10 @@ from gen_topics_common import gen_prompts
 # script to generate the content
 
 
-llm = 'wizardlm2'
+llm = "wizardlm2"
 
 
-prompt = '''
+prompt = """
 Generate 50 sentences, using the following EXAMPLE where ANIMAL_A is replaced by a random animal name such as cat, dog, bear, tiger, marmot, wolf, elephant, cobra, sheep, cow, horse, frog, turtle.
 
 EXAMPLE:
@@ -33,8 +28,5 @@ What ANIMAL_A makes the best pet for children?
 EXAMPLE:
 Do you have a  veterinarian recommendation for ANIMAL_A?
 
-'''
-gen_prompts(llm, 'animals', prompt, 'animal_content.yml')
-
-
-
+"""
+gen_prompts(llm, "animals", prompt, "animal_content.yml")

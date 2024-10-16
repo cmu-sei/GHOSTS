@@ -15,7 +15,7 @@ public class ShadowsFormatterService : IFormatterService
 {
     private static readonly Logger _log = LogManager.GetCurrentClassLogger();
     private readonly ApplicationSettings.AnimatorSettingsDetail.ContentEngineSettings _configuration;
-    private ShadowsConnectorService _connectorService;
+    private readonly ShadowsConnectorService _connectorService;
 
     public ShadowsFormatterService(ApplicationSettings.AnimatorSettingsDetail.ContentEngineSettings configuration)
     {

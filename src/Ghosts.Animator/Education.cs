@@ -22,14 +22,18 @@ namespace Ghosts.Animator
         */
         public static EducationProfile GetEducationProfile()
         {
-            var o = new EducationProfile();
-            o.Degrees = GetEducation();
+            var o = new EducationProfile
+            {
+                Degrees = GetEducation()
+            };
             return o;
         }
         public static EducationProfile GetMilEducationProfile(MilitaryRank.Branch.Rank rank)
         {
-            var o = new EducationProfile();
-            o.Degrees = GetMilEducation(rank.Pay);
+            var o = new EducationProfile
+            {
+                Degrees = GetMilEducation(rank.Pay)
+            };
 
             return DegreeMOSRequirements(o, rank);
         }
@@ -628,9 +632,9 @@ namespace Ghosts.Animator
             //read military rank probabilities
             string input = File.ReadAllText("config/military_education.json");
             var o = JsonConvert.DeserializeObject<RankDegreeProbabilityManager>(input, new JsonSerializerSettings { FloatParseHandling = FloatParseHandling.Double });
-            RankDegreeProbability r = null;
+            RankDegreeProbability r;
             //pull probabilities by rank
-            switch(rank)
+            switch (rank)
             {
                 case "E-1":
                     r = o.RankDegreeProbabilities[0];
@@ -783,7 +787,6 @@ namespace Ghosts.Animator
 
         public static string GetMajor(DegreeLevel level)
         {
-            MajorManager majors = null;
             MajorDegreeLevel mdl = null;
             if(level == DegreeLevel.None || level == DegreeLevel.GED || level == DegreeLevel.HSDiploma)
             {
@@ -791,8 +794,8 @@ namespace Ghosts.Animator
             }
 
             var input = File.ReadAllText("config/majors.json");
-            majors = JsonConvert.DeserializeObject<MajorManager>(input, new JsonSerializerSettings { FloatParseHandling = FloatParseHandling.Double });
-            var txt = "";
+            MajorManager majors = JsonConvert.DeserializeObject<MajorManager>(input, new JsonSerializerSettings { FloatParseHandling = FloatParseHandling.Double });
+            string txt;
             switch (level)
             {
                 case DegreeLevel.Associates:
@@ -826,7 +829,7 @@ namespace Ghosts.Animator
             Field field = null;
             foreach(var f in mdl.Fields)
             {
-                temp = temp + f.Percent;
+                temp += f.Percent;
                 if(rd <= temp)
                 {
                     field = f;
@@ -842,9 +845,8 @@ namespace Ghosts.Animator
         {
             string input = File.ReadAllText("config/universities.json");
             UniversityManager o = JsonConvert.DeserializeObject<UniversityManager>(input);
-            string type = "";
             IList<School> l = null;
-            if(level == DegreeLevel.GED || level == DegreeLevel.HSDiploma)
+            if (level == DegreeLevel.GED || level == DegreeLevel.HSDiploma)
             {
                 if (Npc.NpcProfile != null)
                 {
@@ -856,20 +858,23 @@ namespace Ghosts.Animator
                 return new School();
             }
 
-            if(level == DegreeLevel.Associates)
+            string type;
+            if (level == DegreeLevel.Associates)
             {
                 type = "University";
                 var rd = AnimatorRandom.Rand.NextDouble();
-                if(rd < .9) //community college, else associates degree from a 4 year college
+                if (rd < .9) //community college, else associates degree from a 4 year college
                 {
                     var name = $"{Address.GetCounty()} Community College";
-                    var s = new School();
-                    s.Name = name;
-                    s.Location = "USA";
+                    var s = new School
+                    {
+                        Name = name,
+                        Location = "USA"
+                    };
                     return s;
                 }
             }
-            else if(level == DegreeLevel.Bachelors || level == DegreeLevel.Doctorate || level == DegreeLevel.Masters)
+            else if (level == DegreeLevel.Bachelors || level == DegreeLevel.Doctorate || level == DegreeLevel.Masters)
             {
                 type = "University";
             }
@@ -888,7 +893,7 @@ namespace Ghosts.Animator
                     type = "University";
                 }
             }
-            foreach(var t in o.UniversityTypes)
+            foreach (var t in o.UniversityTypes)
             {
                 if(t.Type == type)
                 {
@@ -903,7 +908,6 @@ namespace Ghosts.Animator
         {
             string input = File.ReadAllText("config/universities.json");
             UniversityManager o = JsonConvert.DeserializeObject<UniversityManager>(input);
-            string type = "";
             IList<School> l = null;
             if (level == DegreeLevel.GED || level == DegreeLevel.HSDiploma)
             {
@@ -917,6 +921,7 @@ namespace Ghosts.Animator
                 return new School();
             }
 
+            string type;
             if (level == DegreeLevel.Associates)
             {
                 type = "University";
@@ -925,9 +930,11 @@ namespace Ghosts.Animator
                 {
                     var name = $"{Address.GetCounty()} Community College";
                     var location = "USA";
-                    School s = new School();
-                    s.Name = name;
-                    s.Location = location;
+                    School s = new School
+                    {
+                        Name = name,
+                        Location = location
+                    };
                     return s;
                 }
             }

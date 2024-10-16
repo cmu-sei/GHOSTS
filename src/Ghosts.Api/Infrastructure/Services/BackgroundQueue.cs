@@ -18,12 +18,12 @@ namespace ghosts.api.Infrastructure.Services
 
     public class BackgroundQueue : IBackgroundQueue
     {
-        private readonly ConcurrentQueue<QueueEntry> _items = new ConcurrentQueue<QueueEntry>();
-        private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(0);
+        private readonly ConcurrentQueue<QueueEntry> _items = new();
+        private readonly SemaphoreSlim _semaphore = new(0);
 
         public void Enqueue(QueueEntry item)
         {
-            if (item == null) throw new ArgumentNullException(nameof(item));
+            ArgumentNullException.ThrowIfNull(item);
 
             _items.Enqueue(item);
             _semaphore.Release();

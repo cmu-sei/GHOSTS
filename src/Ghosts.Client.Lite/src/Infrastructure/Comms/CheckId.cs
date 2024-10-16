@@ -82,32 +82,28 @@ namespace Ghosts.Client.Lite.Infrastructure.Comms
             try
             {
                 //call home
-                using (var client = WebClientBuilder.Build(machine))
+                using var client = WebClientBuilder.Build(machine);
+                try
                 {
-                    try
+                    using var reader =
+                        new StreamReader(client.OpenRead(Program.ConfigurationUrls.Id) ?? throw new InvalidOperationException("CheckID client is null"));
+                    s = reader.ReadToEnd();
+                    _log.Debug("ID Received");
+                }
+                catch (WebException wex)
+                {
+                    if (wex.Message.StartsWith("The remote name could not be resolved:"))
                     {
-                        using (var reader =
-                            new StreamReader(client.OpenRead(Program.ConfigurationUrls.Id) ?? throw new InvalidOperationException("CheckID client is null")))
-                        {
-                            s = reader.ReadToEnd();
-                            _log.Debug("ID Received");
-                        }
+                        _log.Debug($"API not reachable: {wex.Message}");
                     }
-                    catch (WebException wex)
+                    else if (((HttpWebResponse)wex.Response).StatusCode == HttpStatusCode.NotFound)
                     {
-                        if (wex.Message.StartsWith("The remote name could not be resolved:"))
-                        {
-                            _log.Debug($"API not reachable: {wex.Message}");
-                        }
-                        else if (((HttpWebResponse)wex.Response).StatusCode == HttpStatusCode.NotFound)
-                        {
-                            _log.Debug($"No ID returned! {wex.Message}");
-                        }
+                        _log.Debug($"No ID returned! {wex.Message}");
                     }
-                    catch (Exception e)
-                    {
-                        _log.Error($"General comms exception: {e.Message}");
-                    }
+                }
+                catch (Exception e)
+                {
+                    _log.Error($"General comms exception: {e.Message}");
                 }
             }
             catch (Exception e)

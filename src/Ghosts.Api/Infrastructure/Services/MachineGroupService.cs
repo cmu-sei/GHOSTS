@@ -25,15 +25,10 @@ namespace ghosts.api.Infrastructure.Services
         Task<List<HistoryTimeline>> GetActivity(int id, int skip, int take, CancellationToken ct);
     }
 
-    public class MachineGroupService : IMachineGroupService
+    public class MachineGroupService(ApplicationDbContext context) : IMachineGroupService
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        private readonly ApplicationDbContext _context;
-
-        public MachineGroupService(ApplicationDbContext context)
-        {
-            _context = context;
-        }
+        private readonly ApplicationDbContext _context = context;
 
         public async Task<List<Group>> GetAsync(string q, CancellationToken ct)
         {
@@ -141,22 +136,25 @@ namespace ghosts.api.Infrastructure.Services
                 take = 20;
             
             var machineGroup = await _context.Groups.Include(o => o.GroupMachines).FirstOrDefaultAsync(o => o.Id == id, ct);
-            if (machineGroup ==  null) return new List<HistoryTimeline>();
+            if (machineGroup ==  null) return [];
             
             var machineIds = machineGroup.GroupMachines.Select(m => m.MachineId).ToList();
-            if (machineIds.Count < 1) return new List<HistoryTimeline>();
+            if (machineIds.Count < 1) return [];
             
             try
             {
-                return (from o in _context.HistoryTimeline where machineIds.Contains(o.MachineId) select o)
-                    .OrderByDescending(x => x.CreatedUtc).Skip(skip).Take(take).ToList();
+                return
+                [
+                    .. (from o in _context.HistoryTimeline where machineIds.Contains(o.MachineId) select o)
+                                        .OrderByDescending(x => x.CreatedUtc).Skip(skip).Take(take),
+                ];
             }
             catch (Exception e)
             {
                 _log.Error(e);
             }
 
-            return new List<HistoryTimeline>();
+            return [];
         }
     }
 }

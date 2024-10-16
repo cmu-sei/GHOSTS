@@ -7,20 +7,23 @@ from faker import Faker
 
 fake = Faker()
 
+
 def post_data(url, data):
     payload = json.dumps({"query": data})
-    headers = {'Content-Type': 'application/json'}
+    headers = {"Content-Type": "application/json"}
     response = requests.post(url, headers=headers, data=payload)
     return response.text
 
+
 def post_social(url, user, data):
     payload = f"u={user}&m={data}"
-    headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+    headers = {"Content-Type": "application/x-www-form-urlencoded"}
 
     response = requests.post(url, headers=headers, data=payload)
     print("========================================================")
     print(data)
     print(response.text)
+
 
 def generate_fake_name():
     first_name = fake.first_name()
@@ -28,7 +31,7 @@ def generate_fake_name():
     return f"{first_name} {last_name}"
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     print("""
           
               ('-. .-.               .-')    .-') _     .-')    
@@ -48,7 +51,7 @@ if __name__ == '__main__':
     socializer_host = os.getenv("GHOSTS_SOCIALIZER", "http://socializer.com")
     delay = os.getenv("GHOSTS_DELAY", 30)
 
-    #does file exist?
+    # does file exist?
     if not os.path.exists("horde_users.csv"):
         with open("horde_users.csv", "w") as f:
             # create a file with 100 random users
@@ -61,7 +64,7 @@ if __name__ == '__main__':
                 strength = random.randint(1, 100)
                 f.write(f"{first_name},{last_name},{party},{strength}\n")
             f.write("")
-    
+
     # load the data from the file
     with open("horde_users.csv", "r") as f:
         data = f.readlines()
@@ -84,15 +87,15 @@ if __name__ == '__main__':
 
         prompt = f"I want to tweet about the following scandal in El Marador: `{scandal}`. Write me a tweet, but don't refer to me ever! I am a {party} with a strength of belief in my part of {partisan_level} out of 100. Write me a tweet, but don't refer to me, and don't refer to my strength of belief. If that strength is a low number, then i will be questiong things, if it is high, then i will be trying to convince others to join me."
 
-        #prompt = f"I want to tweet about the critical upcoming election in El Marador. My name is {fake_name}, and I am a {party} with a strength of belief in my part of {partisan_level} out of 100. Write me a tweet, but don't refer to me, and don't refer to my strength of belief. If that strength is a low number, then i will be questiong things, if it is high, then i will be trying to convince others to join me."
+        # prompt = f"I want to tweet about the critical upcoming election in El Marador. My name is {fake_name}, and I am a {party} with a strength of belief in my part of {partisan_level} out of 100. Write me a tweet, but don't refer to me, and don't refer to my strength of belief. If that strength is a low number, then i will be questiong things, if it is high, then i will be trying to convince others to join me."
         print("========================================================")
         print(f"{fake_name} {party} {partisan_level}")
 
-        response = post_data(shadow_host, prompt).replace('"', '')
+        response = post_data(shadow_host, prompt).replace('"', "")
         print(response)
-        
-        #post_social(socializer_host, fake_name, response)
-        
+
+        # post_social(socializer_host, fake_name, response)
+
         # Sleep for a random amount of time
         # time.sleep(random.randint(1, delay))
         time.sleep(5)

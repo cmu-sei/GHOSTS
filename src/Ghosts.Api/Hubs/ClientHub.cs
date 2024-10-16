@@ -15,22 +15,14 @@ using NLog;
 
 namespace Ghosts.Api.Hubs
 {
-    public class ClientHub : Hub
+    public class ClientHub(IMachineService machineService, IMachineUpdateService updateService, IBackgroundQueue queue) : Hub
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        private readonly IMachineService _machineService;
-        private readonly IBackgroundQueue _queue;
-        private readonly IMachineUpdateService _updateService;
-        private readonly CancellationToken _ct;
-        
-        public ClientHub(IMachineService machineService, IMachineUpdateService updateService, IBackgroundQueue queue)
-        {
-            this._ct = new CancellationToken();
-            this._updateService = updateService;
-            this._queue = queue;
-            this._machineService = machineService;
-        }
-        
+        private readonly IMachineService _machineService = machineService;
+        private readonly IBackgroundQueue _queue = queue;
+        private readonly IMachineUpdateService _updateService = updateService;
+        private readonly CancellationToken _ct = new();
+
         public override async Task OnConnectedAsync()
         {
             await base.OnConnectedAsync();
