@@ -11,22 +11,22 @@ namespace Ghosts.Animator
     {
         public static IEnumerable<CareerProfile.StrengthProfile> GetStrengths()
         {
-            return GetList(STRENGTHS).Select(o => new CareerProfile.StrengthProfile {Name = o}).ToList();
+            return GetList(STRENGTHS).Select(o => new CareerProfile.StrengthProfile { Name = o }).ToList();
         }
 
         public static CareerProfile.StrengthProfile GetStrength()
         {
-            return new CareerProfile.StrengthProfile {Name = STRENGTHS.RandomElement()};
+            return new CareerProfile.StrengthProfile { Name = STRENGTHS.RandomElement() };
         }
 
         public static IEnumerable<CareerProfile.WeaknessProfile> GetWeaknesses()
         {
-            return GetList(WEAKNESSES).Select(o => new CareerProfile.WeaknessProfile {Name = o}).ToList();
+            return GetList(WEAKNESSES).Select(o => new CareerProfile.WeaknessProfile { Name = o }).ToList();
         }
 
         public static CareerProfile.WeaknessProfile GetWeakness()
         {
-            return new CareerProfile.WeaknessProfile {Name = WEAKNESSES.RandomElement()};
+            return new CareerProfile.WeaknessProfile { Name = WEAKNESSES.RandomElement() };
         }
 
         public static int GetWorkEthic()

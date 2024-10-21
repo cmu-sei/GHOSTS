@@ -15,7 +15,7 @@ namespace Ghosts.Animator.Models
         {
             this.EmploymentRecords = new List<EmploymentRecord>();
         }
-        
+
         public class EmploymentRecord
         {
             public string Company { get; set; }

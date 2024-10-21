@@ -19,7 +19,7 @@ namespace Ghosts.Animator.Models
         {
             public string Country { get; set; }
             public IList<Branch> Branches { get; set; }
-            
+
             public class MilitaryBase
             {
                 public string Name { get; set; }

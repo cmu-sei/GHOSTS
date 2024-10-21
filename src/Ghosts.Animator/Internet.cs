@@ -53,7 +53,7 @@ namespace Ghosts.Animator
                 var file = "config/usernames.txt";
                 return file.GetRandomFromFile();
             }
-    
+
             // If name is null, generate a new name
             if (name == null)
             {
@@ -74,7 +74,7 @@ namespace Ghosts.Animator
 
             // Convert the name to an account-safe string
             name = name.ToAccountSafeString();
-    
+
             // Split and join the name using a random delimiter if there are spaces
             name = name.Split(' ').Join(new[] { ".", "_" }.RandomElement()).ToLower();
 
@@ -114,7 +114,7 @@ namespace Ghosts.Animator
         {
             if (name != null)
             {
-                var parts = name.Split(' ').Join(new[] {"."}.RandomElement());
+                var parts = name.Split(' ').Join(new[] { "." }.RandomElement());
                 return parts.ToLower();
             }
 
@@ -123,8 +123,8 @@ namespace Ghosts.Animator
                 case 0:
                     return new Regex(@"\W").Replace(Name.GetFirstName(), "").ToLower();
                 case 1:
-                    var parts = new[] {Name.GetFirstName(), Name.GetLastName()}.Select(n => new Regex(@"\W").Replace(n, ""));
-                    return parts.Join(new[] {"."}.RandomElement()).ToLower();
+                    var parts = new[] { Name.GetFirstName(), Name.GetLastName() }.Select(n => new Regex(@"\W").Replace(n, ""));
+                    return parts.Join(new[] { "." }.RandomElement()).ToLower();
                 default: throw new ApplicationException();
             }
         }
@@ -169,7 +169,7 @@ namespace Ghosts.Animator
 
         public static AccountsProfile GetAccountProfile(string name = null)
         {
-            var o = new AccountsProfile {Accounts = GetAccounts(name)};
+            var o = new AccountsProfile { Accounts = GetAccounts(name) };
             return o;
         }
 
@@ -177,7 +177,7 @@ namespace Ghosts.Animator
         {
             if (string.IsNullOrEmpty(name))
                 return new List<AccountsProfile.Account>();
-            
+
             var o = new List<AccountsProfile.Account>();
 
             var numberOfAccounts = AnimatorRandom.Rand.Next(0, 15);
@@ -198,23 +198,23 @@ namespace Ghosts.Animator
 
         public static AccountsProfile.Account GetAccount(string name = null)
         {
-            var o = new AccountsProfile.Account {Username = GetUserName(name), Password = GetPassword(), Url = GetHttpUrl()};
+            var o = new AccountsProfile.Account { Username = GetUserName(name), Password = GetPassword(), Url = GetHttpUrl() };
             return o;
         }
 
         public static AccountsProfile.Account GetSocialAccount(string name = null)
         {
-            var o = new AccountsProfile.Account {Username = GetUserName(name), Password = GetPassword(), Url = SOCIAL_ACCOUNTS.RandomElement()};
+            var o = new AccountsProfile.Account { Username = GetUserName(name), Password = GetPassword(), Url = SOCIAL_ACCOUNTS.RandomElement() };
             return o;
         }
 
         private static readonly string[] BYTE; //new [] { ((0..255).to_a.map { |n| n.to_s })
-        private static readonly string[] HOSTS = {"gmail.com", "yahoo.com", "outlook.com"};
+        private static readonly string[] HOSTS = { "gmail.com", "yahoo.com", "outlook.com" };
 
         private static readonly string[] DISPOSABLE_HOSTS =
             {"mailinator.com", "suremail.info", "spamherelots.com", "binkmail.com", "safetymail.info", "tempinbox.com"};
 
-        private static readonly string[] DOMAIN_SUFFIXES = {"co.uk", "com", "us", "uk", "ca", "biz", "info", "name"};
+        private static readonly string[] DOMAIN_SUFFIXES = { "co.uk", "com", "us", "uk", "ca", "biz", "info", "name" };
 
         private static readonly string[] SOCIAL_ACCOUNTS =
         {

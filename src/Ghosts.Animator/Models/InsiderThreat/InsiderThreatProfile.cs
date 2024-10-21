@@ -45,16 +45,16 @@ namespace Ghosts.Animator.Models.InsiderThreat
             return events;
         }
     }
-    
-    public class ForeignConsiderationsProfile : InsiderThreatBaseProfile {}
-    public class TechnicalActivityProfile : InsiderThreatBaseProfile {}
-    public class ProfessionalLifecycleAndPerformanceProfile : InsiderThreatBaseProfile {}
+
+    public class ForeignConsiderationsProfile : InsiderThreatBaseProfile { }
+    public class TechnicalActivityProfile : InsiderThreatBaseProfile { }
+    public class ProfessionalLifecycleAndPerformanceProfile : InsiderThreatBaseProfile { }
     public class SecurityAndComplianceIncidentsProfile : InsiderThreatBaseProfile { }
     public class CriminalViolentOrAbusiveConductProfile : InsiderThreatBaseProfile { }
     public class JudgementCharacterAndPsychologicalConditionsProfile : InsiderThreatBaseProfile { }
-    public class SubstanceAbuseAndAddictiveBehaviorsProfile : InsiderThreatBaseProfile  { }
+    public class SubstanceAbuseAndAddictiveBehaviorsProfile : InsiderThreatBaseProfile { }
     public class FinancialConsiderationsProfile : InsiderThreatBaseProfile { }
-    
+
     public class AccessProfile : InsiderThreatBaseProfile
     {
         public string SecurityClearance { get; set; }

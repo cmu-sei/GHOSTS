@@ -48,7 +48,7 @@ namespace Ghosts.Animator
             }
         }
 
-        private static readonly string[] SUFFIXES = {"Inc", "and Sons", "LLC", "Group"};
+        private static readonly string[] SUFFIXES = { "Inc", "and Sons", "LLC", "Group" };
 
         private static readonly string[] CATCH_PRE =
         {
@@ -176,7 +176,7 @@ namespace Ghosts.Animator
             "methodologies"
         };
 
-        private static readonly string[] POSITION_PREFIXES = {"Executive", "Assistant", "General", "Associate"};
+        private static readonly string[] POSITION_PREFIXES = { "Executive", "Assistant", "General", "Associate" };
 
         private static readonly string[] POSITION_AREAS =
         {
@@ -184,6 +184,6 @@ namespace Ghosts.Animator
             "Department", "Regional", "Division"
         };
 
-        private static readonly string[] POSITIONS = {"President", "Manager", "Director", "Secretary", "Consultant"};
+        private static readonly string[] POSITIONS = { "President", "Manager", "Director", "Secretary", "Consultant" };
     }
 }

@@ -8,16 +8,16 @@ namespace Ghosts.Animator.Models
     {
         public class InternationalAddressProfile
         {
-            [JsonProperty("country")] 
+            [JsonProperty("country")]
             public string Country { get; set; }
 
-            [JsonProperty("geonameid")] 
+            [JsonProperty("geonameid")]
             public string GeoNameId { get; set; }
 
-            [JsonProperty("name")] 
+            [JsonProperty("name")]
             public string City { get; set; }
 
-            [JsonProperty("subcountry")] 
+            [JsonProperty("subcountry")]
             public string SubCountry { get; set; }
 
             public override string ToString()

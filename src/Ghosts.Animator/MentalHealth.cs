@@ -12,17 +12,17 @@ namespace Ghosts.Animator
         {
             var m = new MentalHealthProfile
             {
-                HappyQuotient  = AnimatorRandom.Rand.Next(1,100),
+                HappyQuotient = AnimatorRandom.Rand.Next(1, 100),
                 IQ = GetIQ(),
-                MelancholyQuotient  = AnimatorRandom.Rand.Next(1,100),
-                SpideySense  = AnimatorRandom.Rand.Next(1,100),
-                SenseSomethingIsWrongQuotient  = AnimatorRandom.Rand.Next(1,100),
-                AdherenceToPolicy  = AnimatorRandom.Rand.Next(1,100),
-                EnthusiasmAndAttitude  = AnimatorRandom.Rand.Next(1,100),
-                OpenToFeedback  = AnimatorRandom.Rand.Next(1,100),
-                OverallPerformance  = AnimatorRandom.Rand.Next(1,100),
-                GeneralPerformance  = AnimatorRandom.Rand.Next(1,100),
-                InterpersonalSkills = AnimatorRandom.Rand.Next(1,100)
+                MelancholyQuotient = AnimatorRandom.Rand.Next(1, 100),
+                SpideySense = AnimatorRandom.Rand.Next(1, 100),
+                SenseSomethingIsWrongQuotient = AnimatorRandom.Rand.Next(1, 100),
+                AdherenceToPolicy = AnimatorRandom.Rand.Next(1, 100),
+                EnthusiasmAndAttitude = AnimatorRandom.Rand.Next(1, 100),
+                OpenToFeedback = AnimatorRandom.Rand.Next(1, 100),
+                OverallPerformance = AnimatorRandom.Rand.Next(1, 100),
+                GeneralPerformance = AnimatorRandom.Rand.Next(1, 100),
+                InterpersonalSkills = AnimatorRandom.Rand.Next(1, 100)
             };
             return m;
         }

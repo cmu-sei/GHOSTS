@@ -18,11 +18,11 @@ namespace Ghosts.Animator
             var o = JsonConvert.DeserializeObject<InsiderThreatManager>(raw);
 
             var insiderThreatProfile = new InsiderThreatProfile();
-            
+
             foreach (var profile in o.Profiles)
             {
                 if (profile == null || !profile.Items.Any()) continue;
-                
+
                 // some random % get a violation get violation from o
                 if (AnimatorRandom.Rand.Next(0, 100) > 72)
                 {
@@ -52,7 +52,7 @@ namespace Ghosts.Animator
                             insiderThreatProfile.FinancialConsiderations.RelatedEvents.Add(newEvent);
                             break;
                         case "ForeignConsiderationsProfile":
-                            if(Npc.NpcProfile.ForeignTravel.Trips.Any()) //probably need a trip in order to have event
+                            if (Npc.NpcProfile.ForeignTravel.Trips.Any()) //probably need a trip in order to have event
                                 insiderThreatProfile.ForeignConsiderations.RelatedEvents.Add(newEvent);
                             break;
                         case "JudgementCharacterAndPsychologicalConditionsProfile":
@@ -73,10 +73,10 @@ namespace Ghosts.Animator
                     }
                 }
             }
-            
+
             PopulateAccess(insiderThreatProfile);
             PopulateHrTickets(insiderThreatProfile);
-            
+
             return insiderThreatProfile;
         }
 
@@ -85,12 +85,12 @@ namespace Ghosts.Animator
             if (AnimatorRandom.Rand.Next(0, 100) > 85)
             {
                 insiderThreatProfile.IsBackgroundCheckStatusClear = true;
-                insiderThreatProfile.Access.SecurityClearance = new[] {"C", "S", "TS", "TS SCI"}.RandomElement();
-                insiderThreatProfile.Access.SystemsAccess = AnimatorRandom.Rand.Next(0, 100) > 15 ? new[] {"SIPR", "MIPR", "JWICS"}.RandomElement() : "N/A";
+                insiderThreatProfile.Access.SecurityClearance = new[] { "C", "S", "TS", "TS SCI" }.RandomElement();
+                insiderThreatProfile.Access.SystemsAccess = AnimatorRandom.Rand.Next(0, 100) > 15 ? new[] { "SIPR", "MIPR", "JWICS" }.RandomElement() : "N/A";
                 insiderThreatProfile.Access.CBRNAccess = AnimatorRandom.Rand.Next(0, 100) > 5 ? "Yes" : "N/A";
                 insiderThreatProfile.Access.IsDoDSystemsPrivilegedUser = AnimatorRandom.Rand.Next(0, 100) > 5;
                 insiderThreatProfile.Access.ExplosivesAccess = AnimatorRandom.Rand.Next(0, 100) > 95 ? $"ATF Form {AnimatorRandom.Rand.Next(0, 6)}" : "N/A";
-                insiderThreatProfile.Access.PhysicalAccess = AnimatorRandom.Rand.Next(0, 100) > 15 ? new[] {"Secret-cleared spaces", "SCIF", "SAP"}.RandomElement() : "N/A";
+                insiderThreatProfile.Access.PhysicalAccess = AnimatorRandom.Rand.Next(0, 100) > 15 ? new[] { "Secret-cleared spaces", "SCIF", "SAP" }.RandomElement() : "N/A";
             }
             else
             {
@@ -106,15 +106,15 @@ namespace Ghosts.Animator
 
         private static void PopulateHrTickets(InsiderThreatProfile insiderThreatProfile)
         {
-            var selectedTicket = new[] {"Policy Violation","Disruptive Behavior","Financial Hardship","Job Performance Problem"}.RandomElement();
+            var selectedTicket = new[] { "Policy Violation", "Disruptive Behavior", "Financial Hardship", "Job Performance Problem" }.RandomElement();
             var newEvent = new RelatedEvent
             {
-                 Reported = AnimatorRandom.Date(),
-                 Description = selectedTicket
+                Reported = AnimatorRandom.Date(),
+                Description = selectedTicket
             };
             insiderThreatProfile.TechnicalActivity.RelatedEvents.Add(newEvent);
         }
-        
+
         public class CorrectiveAction
         {
             public string Name { get; set; }

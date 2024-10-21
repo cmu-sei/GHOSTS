@@ -8,14 +8,14 @@ namespace Ghosts.Animator.Models
     {
         public int TotalPopulation { get; set; }
         public IList<State> States { get; set; }
-        
+
         public class State
         {
             public string Name { get; set; }
             public int Population { get; set; }
             public string Abbreviation { get; set; }
             public IList<City> Cities { get; set; }
-            
+
             public class City
             {
                 public string Name { get; set; }
@@ -23,7 +23,7 @@ namespace Ghosts.Animator.Models
                 public string Timezone { get; set; }
                 public int Population { get; set; }
                 public IList<ZipCode> ZipCodes { get; set; }
-                
+
                 public class ZipCode
                 {
                     public string Id { get; set; }

@@ -19,7 +19,7 @@ namespace Ghosts.Animator.Models
         public string Password { get; set; }
         public string HomePhone { get; set; }
         public string CellPhone { get; set; }
-        
+
         public IEnumerable<Preference> Preferences { get; set; }
         public MilitaryUnit Unit { get; set; }
         public MilitaryRank.Branch.Rank Rank { get; set; }
@@ -30,10 +30,10 @@ namespace Ghosts.Animator.Models
         [JsonConverter(typeof(StringEnumConverter))]
         public BiologicalSex BiologicalSex { get; set; }
         public DateTime Birthdate { get; set; }
-        
+
         public HealthProfile Health { get; set; }
         public Dictionary<string, string> Attributes { get; set; }
-        
+
         public IEnumerable<RelationshipProfile> Relationships { get; set; }
 
         public FamilyProfile Family { get; set; }
@@ -45,12 +45,12 @@ namespace Ghosts.Animator.Models
         public MachineProfile Workstation { get; set; }
 
         public InsiderThreatProfile InsiderThreat { get; set; }
-        
+
         public IEnumerable<AccountsProfile.Account> Accounts { get; set; }
 
         public MotivationalProfile MotivationalProfile { get; set; }
-        public string CAC  { get; set; }
-        
+        public string CAC { get; set; }
+
         public string PhotoLink { get; set; }
         public DateTime Created { get; set; }
 
@@ -90,7 +90,7 @@ namespace Ghosts.Animator.Models
             }
         }
     }
-    
+
     public class MachineProfile
     {
         public string Name { get; set; }
@@ -115,7 +115,7 @@ namespace Ghosts.Animator.Models
             {
                 return $"{this.Last}";
             }
-    
+
             if (string.IsNullOrEmpty(this.Last))
             {
                 return string.IsNullOrEmpty(this.Middle) ? $"{this.First}" : $"{this.First} {this.Middle}";
@@ -170,7 +170,7 @@ namespace Ghosts.Animator.Models
         public int OpenToFeedback { get; set; }
         public int GeneralPerformance { get; set; }
         public int OverallPerformance { get; set; }
-        
+
         public int IQ { get; set; }
         public int SpideySense { get; set; }
         public int SenseSomethingIsWrongQuotient { get; set; }

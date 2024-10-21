@@ -19,9 +19,9 @@ namespace Ghosts.Animator
 
         public static MilitaryRank.Branch.Rank GetRank()
         {
-            var ranks = new List<MilitaryRank.Branch.Rank>(); 
+            var ranks = new List<MilitaryRank.Branch.Rank>();
             var mil = GetAllEx();
-            
+
             foreach (var branch in mil.Branches)
             {
                 ranks.AddRange(branch.Ranks);
@@ -29,20 +29,20 @@ namespace Ghosts.Animator
 
             return GetRank(ranks);
         }
-        
+
         public static MilitaryRank.Branch.Rank GetRankByBranch(MilitaryBranch branch)
         {
-            var ranks = new List<MilitaryRank.Branch.Rank>(); 
+            var ranks = new List<MilitaryRank.Branch.Rank>();
             var mil = GetAllEx();
-            
-            foreach (var b in mil.Branches.Where(x=>x.Name == branch.ToString()))
+
+            foreach (var b in mil.Branches.Where(x => x.Name == branch.ToString()))
             {
                 ranks.AddRange(b.Ranks);
             }
 
             return GetRank(ranks);
         }
-        
+
         private static MilitaryRank GetAllEx()
         {
             var raw = File.ReadAllText("config/military_rank.json");
@@ -86,7 +86,7 @@ namespace Ghosts.Animator
             var thisBillet = billets.RandomElement();
             return thisBillet?.Roles.RandomElement();
         }
-        
+
         //Air Force CODEs are more complicated, but will require similar substitutions.
         private static string[] GetMOS(MilitaryRank.Branch.Rank rank)
         {
@@ -104,7 +104,7 @@ namespace Ghosts.Animator
                     if (m.MOS == null || !m.MOS.Any()) return null;
                     var possibleMOS = m.MOS.RandomElement();
                     if (possibleMOS == null) continue;
-                    var m1 = possibleMOS.Items.Where(x => PayToInt(x.Low) <= PayToInt(rank.Pay) 
+                    var m1 = possibleMOS.Items.Where(x => PayToInt(x.Low) <= PayToInt(rank.Pay)
                         && PayToInt(x.High, "high") >= PayToInt(rank.Pay));
                     var e = m1 as MOSModels.Item[] ?? m1.ToArray();
                     if (e.Any())
@@ -112,7 +112,7 @@ namespace Ghosts.Animator
                         var t = e.RandomElement();
                         mos = t.Name;
                         mosid = t.Code;
-                        
+
                         if (!string.IsNullOrEmpty(mos))
                             break;
                     }
@@ -125,11 +125,11 @@ namespace Ghosts.Animator
 
             if (rank.Branch == MilitaryBranch.USN && mosid != null)
             {
-                if(rank.Pay[0] == 'W' && mosid[3] == 'X')
+                if (rank.Pay[0] == 'W' && mosid[3] == 'X')
                 {
-                    mosid = mosid.Substring(0,3) + '1';
+                    mosid = mosid.Substring(0, 3) + '1';
                 }
-                if(rank.Pay[0] == 'O' && mosid[3] == 'X')
+                if (rank.Pay[0] == 'O' && mosid[3] == 'X')
                 {
                     mosid = mosid.Substring(0, 3) + '0';
                 }
@@ -139,12 +139,12 @@ namespace Ghosts.Animator
         }
 
         //Converts ranks to integers so they can be comparable.
-            //E-X >> 0 + X; W-X >> 100 + X; O-X >> 200 + X;
+        //E-X >> 0 + X; W-X >> 100 + X; O-X >> 200 + X;
         private static int PayToInt(string pay, string bound = "low")
         {
-            if(pay == null || pay == "")
+            if (pay == null || pay == "")
             {
-                if(bound == "low")
+                if (bound == "low")
                 {
                     return 0;
                 }
@@ -155,11 +155,11 @@ namespace Ghosts.Animator
             }
 
             int ret;
-            if(pay[0]=='E')
+            if (pay[0] == 'E')
             {
                 ret = 0;
             }
-            else if(pay[0]=='W')
+            else if (pay[0] == 'W')
             {
                 ret = 100;
             }
@@ -181,6 +181,6 @@ namespace Ghosts.Animator
             ret += x;
             return ret;
         }
-}
-    
+    }
+
 }

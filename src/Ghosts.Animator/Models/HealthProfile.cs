@@ -20,7 +20,7 @@ namespace Ghosts.Animator.Models
     public class MedicalCondition
     {
         public string Name { get; set; }
-        
+
         public List<Prescription> Prescriptions { get; set; }
 
         public MedicalCondition()

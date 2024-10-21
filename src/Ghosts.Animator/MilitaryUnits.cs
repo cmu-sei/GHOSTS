@@ -19,7 +19,7 @@ namespace Ghosts.Animator
             var o = Enum.GetValues(typeof(MilitaryBranch)).Cast<MilitaryBranch>().ToList();
             return o.RandomElement();
         }
-        
+
         public static MilitaryUnit GetAll()
         {
             var o = GetAllEx();
@@ -39,13 +39,13 @@ namespace Ghosts.Animator
             var hq = new MilitaryUnitAddressService(choice.Unit);
             if (!string.IsNullOrEmpty(hq?.MilUnit?.Address?.Name))
             {
-                choice.Unit.Address = GetBaseAddress(branch, hq.MilUnit.Address.Name);                
+                choice.Unit.Address = GetBaseAddress(branch, hq.MilUnit.Address.Name);
             }
             else
             {
                 choice.Unit.Address = new AddressProfiles.AddressProfile();
             }
-            
+
             return choice.Unit;
         }
 
@@ -57,22 +57,17 @@ namespace Ghosts.Animator
             var o = JsonConvert.DeserializeObject<MilitaryBases.BaseManager>(raw);
 
             var b = o.Branches.FirstOrDefault(x => x.Name == branch.ToString());
-            var myBase = b.Bases.FirstOrDefault(x => x.Name.Equals(hq, StringComparison.InvariantCultureIgnoreCase));
-            if (myBase == null)
-            {
-                myBase = o.Branches.FirstOrDefault(x=>x.Name == branch.ToString())?.Bases.RandomElement();
-            }
-
+            var myBase = b.Bases.FirstOrDefault(x => x.Name.Equals(hq, StringComparison.InvariantCultureIgnoreCase)) ?? (o.Branches.FirstOrDefault(x => x.Name == branch.ToString())?.Bases.RandomElement());
             if (myBase == null)
                 return null;
-            
+
             a.AddressType = "Base";
             a.Name = myBase.Name;
             if (myBase.Streets.Any())
             {
                 a.Address1 = myBase.Streets.RandomElement();
             }
-            if(string.IsNullOrEmpty(a.Address1))
+            if (string.IsNullOrEmpty(a.Address1))
                 a.Address1 = Address.GetStreetAddress();
             a.City = myBase.City;
             a.State = myBase.State;
@@ -89,7 +84,7 @@ namespace Ghosts.Animator
             }
             return a;
         }
-        
+
         private static MilitaryUnit GetAllEx()
         {
             var raw = File.ReadAllText("config/military_unit.json");

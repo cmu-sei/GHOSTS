@@ -22,14 +22,18 @@ namespace Ghosts.Animator
         */
         public static EducationProfile GetEducationProfile()
         {
-            var o = new EducationProfile();
-            o.Degrees = GetEducation();
+            var o = new EducationProfile
+            {
+                Degrees = GetEducation()
+            };
             return o;
         }
         public static EducationProfile GetMilEducationProfile(MilitaryRank.Branch.Rank rank)
         {
-            var o = new EducationProfile();
-            o.Degrees = GetMilEducation(rank.Pay);
+            var o = new EducationProfile
+            {
+                Degrees = GetMilEducation(rank.Pay)
+            };
 
             return DegreeMOSRequirements(o, rank);
         }
@@ -509,12 +513,12 @@ namespace Ghosts.Animator
         {
             List<EducationProfile.Degree> l = new List<EducationProfile.Degree>();
             var rd = AnimatorRandom.Rand.NextDouble();
-            if(rd<0.1)
+            if (rd < 0.1)
             {
                 //no high school
                 l.Add(new EducationProfile.Degree(DegreeLevel.None, "", null));
             }
-            else if(rd<0.45)
+            else if (rd < 0.45)
             {
                 //bachelors
                 var temps = GetSchool();
@@ -522,7 +526,7 @@ namespace Ghosts.Animator
                     GetMajor(DegreeLevel.Bachelors), temps));
                 //check for double major
                 rd = AnimatorRandom.Rand.NextDouble();
-                if(rd<0.125)
+                if (rd < 0.125)
                 {
                     //double major
                     l.Add(new EducationProfile.Degree(DegreeLevel.Bachelors,
@@ -530,7 +534,7 @@ namespace Ghosts.Animator
                 }
                 //check for grad degree
                 rd = AnimatorRandom.Rand.NextDouble();
-                if(rd<0.37) //has a grad degree
+                if (rd < 0.37) //has a grad degree
                 {
                     rd = AnimatorRandom.Rand.NextDouble();
                     if (rd < 0.07)
@@ -565,15 +569,15 @@ namespace Ghosts.Animator
                                 GetMajor(DegreeLevel.Masters), GetSchool(DegreeLevel.Masters)));
                     }
                 }
-                
+
             }
-            else if(rd<0.55)
+            else if (rd < 0.55)
             {
                 rd = AnimatorRandom.Rand.NextDouble();
                 //associates
-                l.Add(new EducationProfile.Degree(DegreeLevel.Associates, 
+                l.Add(new EducationProfile.Degree(DegreeLevel.Associates,
                     GetMajor(DegreeLevel.Associates), GetSchool(DegreeLevel.Associates)));
-                if(rd<.15) //associates and bachelors
+                if (rd < .15) //associates and bachelors
                 {
                     l.Add(new EducationProfile.Degree(DegreeLevel.Bachelors,
                     GetMajor(DegreeLevel.Bachelors), GetSchool()));
@@ -582,7 +586,7 @@ namespace Ghosts.Animator
             else
             {
                 rd = AnimatorRandom.Rand.NextDouble();
-                if(rd<0.9)
+                if (rd < 0.9)
                 {
                     var wasAdded = false;
                     //high school
@@ -590,12 +594,12 @@ namespace Ghosts.Animator
                     {
                         foreach (var address in Npc.NpcProfile.Address)
                         {
-                            l.Add(new EducationProfile.Degree(DegreeLevel.HSDiploma, "", new School { Name = $"{address.City} High School", Location = $"{address.City}, USA"}));
+                            l.Add(new EducationProfile.Degree(DegreeLevel.HSDiploma, "", new School { Name = $"{address.City} High School", Location = $"{address.City}, USA" }));
                             wasAdded = true;
                             break;
                         }
                     }
-                    if(!wasAdded)
+                    if (!wasAdded)
                         l.Add(new EducationProfile.Degree(DegreeLevel.HSDiploma, "", new School()));
                 }
                 else
@@ -606,12 +610,12 @@ namespace Ghosts.Animator
                     {
                         foreach (var address in Npc.NpcProfile.Address)
                         {
-                            l.Add(new EducationProfile.Degree(DegreeLevel.GED, "", new School { Name = $"{address.City} High School", Location = $"{address.City}, USA"}));
+                            l.Add(new EducationProfile.Degree(DegreeLevel.GED, "", new School { Name = $"{address.City} High School", Location = $"{address.City}, USA" }));
                             wasAdded = true;
                             break;
                         }
                     }
-                    if(!wasAdded)
+                    if (!wasAdded)
                         l.Add(new EducationProfile.Degree(DegreeLevel.GED, "", new School()));
                 }
             }
@@ -623,14 +627,14 @@ namespace Ghosts.Animator
         {
             if (string.IsNullOrEmpty(rank))
                 return new List<EducationProfile.Degree>();
-            
+
             List<EducationProfile.Degree> l = new List<EducationProfile.Degree>();
             //read military rank probabilities
             string input = File.ReadAllText("config/military_education.json");
             var o = JsonConvert.DeserializeObject<RankDegreeProbabilityManager>(input, new JsonSerializerSettings { FloatParseHandling = FloatParseHandling.Double });
-            RankDegreeProbability r = null;
+            RankDegreeProbability r;
             //pull probabilities by rank
-            switch(rank)
+            switch (rank)
             {
                 case "E-1":
                     r = o.RankDegreeProbabilities[0];
@@ -694,11 +698,11 @@ namespace Ghosts.Animator
                     break;
                 default:
                     //Rank is higher than E-9, W-4, or O-7 respectively.
-                    if(rank.Split('-')[0] == "E")
+                    if (rank.Split('-')[0] == "E")
                     {
                         r = o.RankDegreeProbabilities[8];
                     }
-                    else if(rank.Split('-')[0] == "W")
+                    else if (rank.Split('-')[0] == "W")
                     {
                         r = o.RankDegreeProbabilities[12];
                     }
@@ -709,22 +713,22 @@ namespace Ghosts.Animator
                     break;
             }
             var rd = AnimatorRandom.Rand.NextDouble();
-            if(rd < r.AssociatesProbability)
+            if (rd < r.AssociatesProbability)
             {
                 l.Add(new EducationProfile.Degree(DegreeLevel.Associates,
                     GetMajor(DegreeLevel.Associates), GetUSSchool(DegreeLevel.Associates)));
             }
             rd = AnimatorRandom.Rand.NextDouble();
-            if(rd < r.BachelorsProbability)
+            if (rd < r.BachelorsProbability)
             {
                 l.Add(new EducationProfile.Degree(DegreeLevel.Bachelors,
                     GetMajor(DegreeLevel.Bachelors), GetUSSchool()));
             }
             rd = AnimatorRandom.Rand.NextDouble();
-            if(rd < r.MastersProbability)
+            if (rd < r.MastersProbability)
             {
                 //Check to make sure there's a bachelor's degree
-                if(l.Count == 0 || (l.Count == 1 && l[0].Level != DegreeLevel.Bachelors))
+                if (l.Count == 0 || (l.Count == 1 && l[0].Level != DegreeLevel.Bachelors))
                 {
                     l.Add(new EducationProfile.Degree(DegreeLevel.Bachelors,
                         GetMajor(DegreeLevel.Bachelors), GetUSSchool()));
@@ -733,7 +737,7 @@ namespace Ghosts.Animator
                     GetMajor(DegreeLevel.Masters), GetUSSchool(DegreeLevel.Masters)));
             }
             rd = AnimatorRandom.Rand.NextDouble();
-            if(rd < r.DoctorateProbability)
+            if (rd < r.DoctorateProbability)
             {
                 //Check to make sure there's a bachelor's degree
                 if (l.Count == 0 || (l.Count == 1 && l[0].Level != DegreeLevel.Bachelors))
@@ -745,7 +749,7 @@ namespace Ghosts.Animator
                     GetMajor(DegreeLevel.Doctorate), GetUSSchool(DegreeLevel.Doctorate)));
             }
             rd = AnimatorRandom.Rand.NextDouble();
-            if(rd < r.ProfessionalProbability)
+            if (rd < r.ProfessionalProbability)
             {
                 //Check to make sure there's a bachelor's degree
                 if (l.Count == 0 || (l.Count == 1 && l[0].Level != DegreeLevel.Bachelors))
@@ -757,19 +761,19 @@ namespace Ghosts.Animator
                 l.Add(new EducationProfile.Degree(DegreeLevel.Professional,
                     t, GetUSSchool(DegreeLevel.Professional, t.Split(',')[1])));
             }
-            if(l.Count == 0)
+            if (l.Count == 0)
             {
                 var wasAdded = false;
                 if (Npc.NpcProfile != null)
                 {
                     foreach (var address in Npc.NpcProfile.Address)
                     {
-                        l.Add(new EducationProfile.Degree(DegreeLevel.HSDiploma, "", new School { Name = $"{address.City} High School", Location = $"{address.City}, USA"}));
+                        l.Add(new EducationProfile.Degree(DegreeLevel.HSDiploma, "", new School { Name = $"{address.City} High School", Location = $"{address.City}, USA" }));
                         wasAdded = true;
                         break;
                     }
                 }
-                if(!wasAdded)
+                if (!wasAdded)
                     l.Add(new EducationProfile.Degree(DegreeLevel.HSDiploma, "", new School()));
             }
             return l;
@@ -783,16 +787,15 @@ namespace Ghosts.Animator
 
         public static string GetMajor(DegreeLevel level)
         {
-            MajorManager majors = null;
             MajorDegreeLevel mdl = null;
-            if(level == DegreeLevel.None || level == DegreeLevel.GED || level == DegreeLevel.HSDiploma)
+            if (level == DegreeLevel.None || level == DegreeLevel.GED || level == DegreeLevel.HSDiploma)
             {
                 return "";
             }
 
             var input = File.ReadAllText("config/majors.json");
-            majors = JsonConvert.DeserializeObject<MajorManager>(input, new JsonSerializerSettings { FloatParseHandling = FloatParseHandling.Double });
-            var txt = "";
+            MajorManager majors = JsonConvert.DeserializeObject<MajorManager>(input, new JsonSerializerSettings { FloatParseHandling = FloatParseHandling.Double });
+            string txt;
             switch (level)
             {
                 case DegreeLevel.Associates:
@@ -811,10 +814,10 @@ namespace Ghosts.Animator
                     txt = "Professional";
                     break;
             }
-                
-            foreach(var i in majors.MajorDegreeLevels)
+
+            foreach (var i in majors.MajorDegreeLevels)
             {
-                if(i.Level == txt)
+                if (i.Level == txt)
                 {
                     mdl = i;
                 }
@@ -824,10 +827,10 @@ namespace Ghosts.Animator
             var rd = AnimatorRandom.Rand.NextDouble() * 100;
             double temp = 0;
             Field field = null;
-            foreach(var f in mdl.Fields)
+            foreach (var f in mdl.Fields)
             {
-                temp = temp + f.Percent;
-                if(rd <= temp)
+                temp += f.Percent;
+                if (rd <= temp)
                 {
                     field = f;
                     break;
@@ -842,34 +845,36 @@ namespace Ghosts.Animator
         {
             string input = File.ReadAllText("config/universities.json");
             UniversityManager o = JsonConvert.DeserializeObject<UniversityManager>(input);
-            string type = "";
             IList<School> l = null;
-            if(level == DegreeLevel.GED || level == DegreeLevel.HSDiploma)
+            if (level == DegreeLevel.GED || level == DegreeLevel.HSDiploma)
             {
                 if (Npc.NpcProfile != null)
                 {
                     foreach (var address in Npc.NpcProfile.Address)
                     {
-                        return new School { Name = $"{address.City} High School", Location = $"{address.City}, USA"};
+                        return new School { Name = $"{address.City} High School", Location = $"{address.City}, USA" };
                     }
                 }
                 return new School();
             }
 
-            if(level == DegreeLevel.Associates)
+            string type;
+            if (level == DegreeLevel.Associates)
             {
                 type = "University";
                 var rd = AnimatorRandom.Rand.NextDouble();
-                if(rd < .9) //community college, else associates degree from a 4 year college
+                if (rd < .9) //community college, else associates degree from a 4 year college
                 {
                     var name = $"{Address.GetCounty()} Community College";
-                    var s = new School();
-                    s.Name = name;
-                    s.Location = "USA";
+                    var s = new School
+                    {
+                        Name = name,
+                        Location = "USA"
+                    };
                     return s;
                 }
             }
-            else if(level == DegreeLevel.Bachelors || level == DegreeLevel.Doctorate || level == DegreeLevel.Masters)
+            else if (level == DegreeLevel.Bachelors || level == DegreeLevel.Doctorate || level == DegreeLevel.Masters)
             {
                 type = "University";
             }
@@ -888,9 +893,9 @@ namespace Ghosts.Animator
                     type = "University";
                 }
             }
-            foreach(var t in o.UniversityTypes)
+            foreach (var t in o.UniversityTypes)
             {
-                if(t.Type == type)
+                if (t.Type == type)
                 {
                     l = t.Schools;
                 }
@@ -903,7 +908,6 @@ namespace Ghosts.Animator
         {
             string input = File.ReadAllText("config/universities.json");
             UniversityManager o = JsonConvert.DeserializeObject<UniversityManager>(input);
-            string type = "";
             IList<School> l = null;
             if (level == DegreeLevel.GED || level == DegreeLevel.HSDiploma)
             {
@@ -911,12 +915,13 @@ namespace Ghosts.Animator
                 {
                     foreach (var address in Npc.NpcProfile.Address)
                     {
-                        return new School { Name = $"{address.City} High School", Location = $"{address.City}, USA"};
+                        return new School { Name = $"{address.City} High School", Location = $"{address.City}, USA" };
                     }
                 }
                 return new School();
             }
 
+            string type;
             if (level == DegreeLevel.Associates)
             {
                 type = "University";
@@ -925,9 +930,11 @@ namespace Ghosts.Animator
                 {
                     var name = $"{Address.GetCounty()} Community College";
                     var location = "USA";
-                    School s = new School();
-                    s.Name = name;
-                    s.Location = location;
+                    School s = new School
+                    {
+                        Name = name,
+                        Location = location
+                    };
                     return s;
                 }
             }
@@ -958,7 +965,7 @@ namespace Ghosts.Animator
                 }
             }
             var tmp = l.RandomElement();
-            while(tmp.Location != "USA") //Get a US specific school
+            while (tmp.Location != "USA") //Get a US specific school
             {
                 tmp = l.RandomElement();
             }

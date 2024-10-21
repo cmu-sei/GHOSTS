@@ -11,10 +11,10 @@ namespace Ghosts.Animator
         {
             switch (AnimatorRandom.Rand.Next(4))
             {
-                case 0: return new Models.NameProfile {Prefix = GetPrefix(), First = GetFirstName(), Last = GetLastName()};
-                case 1: return new Models.NameProfile {First = GetFirstName(), Last = GetLastName(), Suffix = GetSuffix()};
-                case 2: return new Models.NameProfile {First = GetFirstName(), Last = GetLastName(), Middle = GetMiddleName()};
-                default: return new Models.NameProfile {First = GetFirstName(), Last = GetLastName()};
+                case 0: return new Models.NameProfile { Prefix = GetPrefix(), First = GetFirstName(), Last = GetLastName() };
+                case 1: return new Models.NameProfile { First = GetFirstName(), Last = GetLastName(), Suffix = GetSuffix() };
+                case 2: return new Models.NameProfile { First = GetFirstName(), Last = GetLastName(), Middle = GetMiddleName() };
+                default: return new Models.NameProfile { First = GetFirstName(), Last = GetLastName() };
             }
         }
 
@@ -28,13 +28,13 @@ namespace Ghosts.Animator
 
             return file.GetRandomFromFile();
         }
-        
+
         public static string GetFirstName(BiologicalSex sex)
         {
             var file = $"config/names_{sex.ToString().ToLower()}.txt";
             return file.GetRandomFromFile();
         }
-        
+
         public static string GetMiddleName()
         {
             return GetFirstName();
@@ -55,8 +55,8 @@ namespace Ghosts.Animator
             return SUFFIXES.RandomElement();
         }
 
-        static readonly string[] PREFIXES = {"Mr.", "Mrs.", "Ms.", "Miss", "Dr."};
+        static readonly string[] PREFIXES = { "Mr.", "Mrs.", "Ms.", "Miss", "Dr." };
 
-        static readonly string[] SUFFIXES = {"Jr.", "Sr.", "I", "II", "III", "IV", "V", "MD", "DDS", "PhD", "DVM"};
+        static readonly string[] SUFFIXES = { "Jr.", "Sr.", "I", "II", "III", "IV", "V", "MD", "DDS", "PhD", "DVM" };
     }
 }

@@ -14,40 +14,39 @@ namespace Ghosts.Animator
 
         public static NpcProfile Generate()
         {
-            return Generate(new NpcGenerationConfiguration { Branch = MilitaryUnits.GetServiceBranch()});
+            return Generate(new NpcGenerationConfiguration { Branch = MilitaryUnits.GetServiceBranch() });
         }
-        
+
         public static NpcProfile Generate(Enums.MilitaryBranch branch)
         {
-            return Generate(new NpcGenerationConfiguration { Branch = branch});
+            return Generate(new NpcGenerationConfiguration { Branch = branch });
         }
-        
+
         public static NpcProfile Generate(Enums.MilitaryBranch branch, string username)
         {
             return Generate(new NpcGenerationConfiguration { Branch = branch, Username = username });
         }
-        
+
         public static NpcProfile Generate(NpcGenerationConfiguration config)
         {
-            if(!config.Branch.HasValue)
+            if (!config.Branch.HasValue)
                 config.Branch = MilitaryUnits.GetServiceBranch();
-        
+
             NpcProfile = new NpcProfile
             {
-                Id = Guid.NewGuid()
+                Id = Guid.NewGuid(),
+                Unit = MilitaryUnits.GetOneByServiceBranch(config.Branch.Value),
+                Rank = MilitaryRanks.GetRankByBranch(config.Branch.Value),
+                BiologicalSex = PhysicalCharacteristics.GetBiologicalSex()
             };
 
-            NpcProfile.Unit = MilitaryUnits.GetOneByServiceBranch(config.Branch.Value);
-            NpcProfile.Rank = MilitaryRanks.GetRankByBranch(config.Branch.Value);
-            NpcProfile.BiologicalSex = PhysicalCharacteristics.GetBiologicalSex();
-
-            if(NpcProfile.Rank?.Pay != null)
+            if (NpcProfile.Rank?.Pay != null)
                 NpcProfile.Birthdate = PhysicalCharacteristics.GetBirthdate(NpcProfile.Rank.Pay);
             NpcProfile.Health = HealthService.GetHealthProfile();
-            
+
             NpcProfile.Address.Add(Address.GetHomeAddress());
 
-            if(string.IsNullOrEmpty(config.Username))
+            if (string.IsNullOrEmpty(config.Username))
                 NpcProfile.Name = Name.GetName();
             else
                 NpcProfile.SetName(config.Username);
