@@ -1,3 +1,4 @@
+import uvicorn
 from fastapi import FastAPI, Response, HTTPException
 
 from routes import (
@@ -192,3 +193,7 @@ def file_type_handler(path: str) -> Response:
 
 
 app.include_router(unknown_routes.router)
+
+# Run the app with Uvicorn
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=80)
