@@ -1,37 +1,31 @@
-# Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
+# Use the slim variant of Python 3.12
+FROM python:3.12-slim
 
-# pull the official base image
-FROM python:3.8.5-alpine
+# Set the working directory in the container
+WORKDIR /app
 
-# set work directory
-WORKDIR /usr/src/app
+# Install required system packages and Python dependencies
+RUN apt-get update && \
+    apt-get install --no-install-recommends -y gcc libffi-dev libgl1-mesa-glx libglib2.0-0 && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
-# set environment variables
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+# Copy only the requirements file first
+COPY requirements.txt ./
 
-# install system dependencies
-RUN apk add --no-cache zlib-dev jpeg-dev gcc musl-dev ffmpeg libxml2-dev libxslt-dev
-
-# upgrade pip
-RUN python3 -m pip install --upgrade pip
-
-# copy requirements and install Python dependencies
-COPY ./requirements.txt /usr/src/app
+# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# copy project files
-COPY ./app /usr/src/app
+# Copy the rest of the application code
+COPY app ./
 
-LABEL MAINTAINER Dustin Updyke <ddupdyke[at]sei.cmu.edu>
-LABEL PRODUCT GHOSTS PANDORA
-LABEL VERSION Browse to /about
+# Set environment variables (proxy can be omitted if not needed)
+ENV HTTP_PROXY=""
+ENV HTTPS_PROXY=""
+ENV OLLAMA_API_URL="http://ollama:11434/"
 
-# expose port
+# Expose port 80
 EXPOSE 80
 
-# set entrypoint
-ENTRYPOINT [ "python3" ]
-
-# run the application
-CMD [ "app.py", "80" ]
+# Command to run the FastAPI app with Uvicorn
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]
