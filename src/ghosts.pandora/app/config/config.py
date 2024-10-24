@@ -4,6 +4,8 @@ import app_logging
 logger = app_logging.setup_logger("app_logger")
 
 OLLAMA_ENABLED = True
+OLLAMA_API_URL = "http://ollama:11434/api/generate"
+OLLAMA_TIMEOUT = 60
 
 # List of available endpoints
 endpoints = [

@@ -1,11 +1,9 @@
 import requests
 import app_logging
 import time
+from config.config import OLLAMA_API_URL, OLLAMA_TIMEOUT
 
 logger = app_logging.setup_logger("app_logger")
-
-OLLAMA_API_URL = "http://ollama:11434/api/generate"  # Use your Ollama server URL
-TIMEOUT = 60
 
 
 def generate_document_with_ollama(prompt: str, model: str):
@@ -21,7 +19,7 @@ def generate_document_with_ollama(prompt: str, model: str):
         start_time = time.time()
 
         # Make the request to Ollama with a timeout
-        response = requests.post(OLLAMA_API_URL, json=payload, timeout=TIMEOUT)
+        response = requests.post(OLLAMA_API_URL, json=payload, timeout=OLLAMA_TIMEOUT)
 
         # Calculate the elapsed time
         elapsed_time = time.time() - start_time
@@ -32,11 +30,11 @@ def generate_document_with_ollama(prompt: str, model: str):
             logger.info(
                 "Response received from Ollama in %.2f seconds: %s",
                 elapsed_time,
-                response_data,  # Log the full response for better debugging
+                response_data,
             )
             return response_data.get(
                 "response", ""
-            )  # Ensure to get the "response" field
+            )
         else:
             logger.error(
                 "Invalid response from Ollama: %s - %s",

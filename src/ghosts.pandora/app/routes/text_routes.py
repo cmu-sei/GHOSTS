@@ -47,7 +47,7 @@ def return_text(
                 response = Response(
                     content=generated_content.encode("utf8"), media_type="text/plain"
                 )
-                
+
                 # Set the filename to either effective_filename or a generated random name if None
                 response.headers["Content-Disposition"] = (
                     f"inline; filename={effective_filename + '.txt' if effective_filename else generate_random_name('.txt')}"
@@ -96,7 +96,7 @@ def return_text(
 
         # Create the response with HTML content
         response = Response(content=document.encode("utf8"), media_type="text/html")
-        
+
         # Set the filename to either effective_filename or 'document' if None
         response.headers["Content-Disposition"] = (
             f"inline; filename={effective_filename + '.html' if effective_filename else 'document.html'}"
