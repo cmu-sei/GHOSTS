@@ -1,16 +1,16 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
-using Ghosts.Domain;
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
-using Ghosts.Domain.Code.Helpers;
-using OpenQA.Selenium;
-using OpenQA.Selenium.Firefox;
-using Newtonsoft.Json.Linq;
 using System.Threading;
 using ghosts.client.linux.Infrastructure;
+using Ghosts.Domain;
+using Ghosts.Domain.Code.Helpers;
+using Newtonsoft.Json.Linq;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Firefox;
 
 
 namespace ghosts.client.linux.handlers
@@ -23,30 +23,18 @@ namespace ghosts.client.linux.handlers
         public BrowserFirefox(TimelineHandler handler)
         {
             BrowserType = HandlerType.BrowserFirefox;
-            bool hasRunSuccessfully = false;
+            var hasRunSuccessfully = false;
             while (!hasRunSuccessfully)
             {
                 hasRunSuccessfully = FirefoxEx(handler);
             }
-             _log.Trace($"Firefox is exiting BrowserFirefox method");
+            _log.Trace($"Firefox is exiting BrowserFirefox method");
         }
 
         private static int GetFirefoxVersion(string path)
         {
             var versionInfo = FileVersionInfo.GetVersionInfo(path);
             return versionInfo.FileMajorPart;
-        }
-
-        private static bool IsSufficientVersion(string path)
-        {
-            int currentVersion = GetFirefoxVersion(path);
-            int minimumVersion = Program.Configuration.FirefoxMajorVersionMinimum;
-            if (currentVersion < minimumVersion)
-            {
-                _log.Debug($"Firefox version ({currentVersion}) is incompatible - requires at least {minimumVersion}");
-                return false;
-            }
-            return true;
         }
 
         internal static string GetInstallLocation()
@@ -79,15 +67,16 @@ namespace ghosts.client.linux.handlers
             {
                 Thread.Sleep(500);
                 targetElement = Driver.FindElement(By.Id("advancedButton"));
-                BrowserHelperSupport.MoveToElementAndClick(Driver, targetElement); //click advanced 
+                BrowserHelperSupport.MoveToElementAndClick(Driver, targetElement); //click advanced
                 Thread.Sleep(500);
             }
             catch
             {
                 return; //return if not present
             }
-            try { 
-                targetElement = Driver.FindElement(By.Id("exceptionDialogButton"));  
+            try
+            {
+                targetElement = Driver.FindElement(By.Id("exceptionDialogButton"));
                 BrowserHelperSupport.MoveToElementAndClick(Driver, targetElement);   //accept risk and continue
                 Thread.Sleep(1000);
                 return;
@@ -99,7 +88,7 @@ namespace ghosts.client.linux.handlers
                 targetElement = Driver.FindElement(By.Id("advancedPanelReturnButton"));
                 BrowserHelperSupport.MoveToElementAndClick(Driver, targetElement);   //return, cannot continue
                 Thread.Sleep(1000);
-                
+
             }
             catch { }
 
@@ -146,10 +135,12 @@ namespace ghosts.client.linux.handlers
                     ExecuteEvents(handler);
                 }
             }
-            catch (ThreadAbortException){
+            catch (ThreadAbortException)
+            {
                 //ignore
             }
-            catch (ThreadInterruptedException){
+            catch (ThreadInterruptedException)
+            {
                 //ignore
             }
             catch (Exception e)
@@ -172,7 +163,7 @@ namespace ghosts.client.linux.handlers
                 catch { }
                 KillBrowser();
 
-                if (this.Restart)
+                if (Restart)
                 {
                     DoRestart(handler);
                 }
@@ -192,8 +183,10 @@ namespace ghosts.client.linux.handlers
         {
             var path = GetInstallLocation();
 
-            var options = new FirefoxOptions();
-            options.BrowserExecutableLocation = path;
+            var options = new FirefoxOptions
+            {
+                BrowserExecutableLocation = path
+            };
             options.AddArguments("--disable-infobars");
             options.AddArguments("--disable-extensions");
             options.AddArguments("--disable-notifications");
@@ -209,26 +202,28 @@ namespace ghosts.client.linux.handlers
             if (handler.HandlerArgs != null)
             {
 
-                if (handler.HandlerArgs.ContainsKey("command-line-args"))
+                if (handler.HandlerArgs.TryGetValue("command-line-args", out var v1))
                 {
-                    foreach (var option in (JArray)handler.HandlerArgs["command-line-args"])
+                    foreach (var option in (JArray)v1)
                     {
                         options.AddArgument(option.Value<string>());
                     }
                 }
                 //used to kill process as Selenium driver sometimes fails
                 string browserId;
-                if (handler.HandlerArgs.ContainsKey("browser-id") &&
-                    !string.IsNullOrEmpty(handler.HandlerArgs["browser-id"].ToString()))
+                if (handler.HandlerArgs.TryGetValue("browser-id", out var v2) &&
+                    !string.IsNullOrEmpty(v2.ToString()))
                 {
-                    browserId = handler.HandlerArgs["browser-id"].ToString();
-                } else {
+                    browserId = v2.ToString();
+                }
+                else
+                {
                     // always generate this, and save
                     browserId = Guid.NewGuid().ToString();
                     handler.HandlerArgs["browser-id"] = browserId;
                 }
                 options.AddArgument($"--{browserId}");
-                
+
 
                 if (handler.HandlerArgs.ContainsKeyWithOption("isheadless", "true"))
                 {

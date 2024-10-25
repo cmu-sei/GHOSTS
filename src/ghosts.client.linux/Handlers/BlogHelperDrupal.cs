@@ -1,8 +1,8 @@
-﻿using Ghosts.Domain;
+﻿using System;
+using System.Threading;
+using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using OpenQA.Selenium;
-using System;
-using System.Threading;
 using Actions = OpenQA.Selenium.Interactions.Actions;
 
 namespace ghosts.client.linux.handlers
@@ -36,7 +36,7 @@ namespace ghosts.client.linux.handlers
 
             //for drupal, cannot pass user/pw in the url
 
-            string target = header + site + "/";
+            var target = header + site + "/";
             //navigate to the base site first
 
             try
@@ -101,13 +101,13 @@ namespace ghosts.client.linux.handlers
         }
         public override bool DoReply(TimelineHandler handler, string reply)
         {
-            
+
             //first, browse to an existing entry
             if (DoBrowse(handler))
             {
                 try
                 {
-                    
+
                     var targetElement = Driver.FindElement(By.CssSelector("textarea#edit-comment-body-und-0-value.text-full.form-textarea.required"));
                     targetElement.SendKeys(reply);
                     Thread.Sleep(1000);
@@ -139,8 +139,8 @@ namespace ghosts.client.linux.handlers
         {
 
             RequestConfiguration config;
-            
-            string target = header + site + "/node/add/blog";
+
+            var target = header + site + "/node/add/blog";
             //navigate to the add content page
             try
             {
@@ -257,7 +257,7 @@ namespace ghosts.client.linux.handlers
         {
             Actions actions;
             RequestConfiguration config;
-            string target = header + site + "/blog";
+            var target = header + site + "/blog";
             //navigate to the blog page
             try
             {
@@ -277,38 +277,37 @@ namespace ghosts.client.linux.handlers
             }
 
             //first pick a page if there are multiple pages
-            bool onTargetPage = false;
+            var onTargetPage = false;
             try
             {
                 //first, check if there is a link to a last page
                 var targetElement = Driver.FindElement(By.CssSelector("li.pager-last.last"));
                 // if get there, then there is a last page element. Get the link to it and parse out the last page number
                 var pageLink = targetElement.FindElement(By.XPath(".//a"));
-                string href = pageLink.GetAttribute("href");
-                char[] charSeparators = new char[] { '=' };
+                var href = pageLink.GetAttribute("href");
+                var charSeparators = new char[] { '=' };
                 var words = href.Split(charSeparators, 2, StringSplitOptions.None);
                 if (words.Length == 2)
                 {
-                    string pageNumString = words[1];
-                    int lastpage;
-                    if (int.TryParse(pageNumString, out lastpage))
+                    var pageNumString = words[1];
+                    if (int.TryParse(pageNumString, out var lastpage))
                     {
-                        int pageNum = _random.Next(0, lastpage + 1);
-                        string targetPage = header + site + $"/node?page={pageNum}";
+                        var pageNum = _random.Next(0, lastpage + 1);
+                        var targetPage = header + site + $"/node?page={pageNum}";
                         config = RequestConfiguration.Load(handler, targetPage);
                         baseHandler.MakeRequest(config);
                         onTargetPage = true;
                         Thread.Sleep(1000);
                     }
                 }
-                    
+
 
             }
             catch (ThreadAbortException)
             {
                 throw;  //pass up
             }
-            catch {  }
+            catch { }
 
             if (!onTargetPage)
             {
@@ -320,7 +319,7 @@ namespace ghosts.client.linux.handlers
                     var targetElements = Driver.FindElements(By.CssSelector("li.pager-item"));
                     if (targetElements.Count > 0)
                     {
-                        int pageNum = _random.Next(0, targetElements.Count + 1);
+                        var pageNum = _random.Next(0, targetElements.Count + 1);
                         if (pageNum != targetElements.Count)
                         {
                             //pick a different page
@@ -336,9 +335,9 @@ namespace ghosts.client.linux.handlers
                     throw;  //pass up
                 }
                 catch
-                {  }
+                { }
             }
-            
+
             //on some page, click a random readmore link
             try
             {
@@ -346,10 +345,10 @@ namespace ghosts.client.linux.handlers
 
                 if (targetElements.Count > 0)
                 {
-                    int docNum = _random.Next(0, targetElements.Count);
+                    var docNum = _random.Next(0, targetElements.Count);
                     var targetElement = targetElements[docNum];
                     var pageLink = targetElement.FindElement(By.XPath(".//a"));
-                    string href = pageLink.GetAttribute("href");
+                    var href = pageLink.GetAttribute("href");
                     if (href != null)
                     {
                         //string targetpost = header + site + href;

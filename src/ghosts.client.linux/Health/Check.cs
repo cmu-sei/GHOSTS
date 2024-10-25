@@ -22,7 +22,7 @@ namespace ghosts.client.linux.Health
 
         public Check()
         {
-            this._threads = new List<Thread>();
+            _threads = new List<Thread>();
         }
 
         public void Run()
@@ -30,8 +30,10 @@ namespace ghosts.client.linux.Health
             try
             {
                 // now watch that file for changes
-                var watcher = new FileSystemWatcher(ApplicationDetails.ConfigurationFiles.InstallPath);
-                watcher.Filter = Path.GetFileName(ApplicationDetails.ConfigurationFiles.Health);
+                var watcher = new FileSystemWatcher(ApplicationDetails.ConfigurationFiles.InstallPath)
+                {
+                    Filter = Path.GetFileName(ApplicationDetails.ConfigurationFiles.Health)
+                };
                 _log.Trace($"watching {watcher.Path}");
                 watcher.NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.FileName | NotifyFilters.Size;
                 watcher.EnableRaisingEvents = true;
@@ -49,7 +51,7 @@ namespace ghosts.client.linux.Health
 
                 if (t == null) return;
                 _log.Trace($"HEALTH THREAD: {t.Name}");
-                this._threads.Add(t);
+                _threads.Add(t);
             }
             catch (Exception exc)
             {
@@ -59,8 +61,8 @@ namespace ghosts.client.linux.Health
 
         private void Shutdown()
         {
-            if (this._threads == null) return;
-            foreach (var thread in this._threads)
+            if (_threads == null) return;
+            foreach (var thread in _threads)
             {
                 thread.Interrupt();
             }
@@ -106,7 +108,7 @@ namespace ghosts.client.linux.Health
             _log.Trace($"Reloading {System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType}");
 
             // now terminate existing tasks and rerun
-            this.Shutdown();
+            Shutdown();
             StartupTasks.CleanupProcesses();
             RunEx();
         }

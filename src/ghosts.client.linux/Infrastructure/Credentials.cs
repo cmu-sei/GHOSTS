@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using System.IO;
-using NLog;
 using Ghosts.Domain;
+using NLog;
 
 
 namespace ghosts.client.linux.Infrastructure
@@ -38,9 +38,9 @@ namespace ghosts.client.linux.Infrastructure
         public string GetProperty(string credId, string prop)
         {
 
-            if (this.Data != null && this.Data.ContainsKey(credId))
+            if (Data != null && Data.TryGetValue(credId, out var value))
             {
-                if (this.Data[credId].ContainsKey(prop)) return this.Data[credId][prop];
+                if (value.ContainsKey(prop)) return value[prop];
             }
             return null;
         }

@@ -26,46 +26,46 @@ namespace ghosts.client.linux.handlers
             switch (handler.HandlerType)
             {
                 case HandlerType.BrowserChrome:
-                    this.Driver = BrowserChrome.GetDriver(handler);
+                    Driver = BrowserChrome.GetDriver(handler);
                     break;
                 case HandlerType.BrowserFirefox:
-                    this.Driver = BrowserFirefox.GetDriver(handler);
+                    Driver = BrowserFirefox.GetDriver(handler);
                     break;
             }
-            
+
             Console.WriteLine($"{Environment.CurrentManagedThreadId} handle: {Driver.CurrentWindowHandle}");
 
-            if (handler.HandlerArgs.ContainsKey("stickiness"))
+            if (handler.HandlerArgs.TryGetValue("stickiness", out var v1))
             {
-                int.TryParse(handler.HandlerArgs["stickiness"].ToString(), out _stickiness);
+                int.TryParse(v1.ToString(), out _stickiness);
             }
-            
-            if (handler.HandlerArgs.ContainsKey("crawl-site-depth"))
+
+            if (handler.HandlerArgs.TryGetValue("crawl-site-depth", out var v2))
             {
-                int.TryParse(handler.HandlerArgs["crawl-site-depth"].ToString(), out _siteDepthMax);
+                int.TryParse(v2.ToString(), out _siteDepthMax);
             }
-            
-            if (handler.HandlerArgs.ContainsKey("crawl-proxy-local-url"))
+
+            if (handler.HandlerArgs.TryGetValue("crawl-proxy-local-url", out var v3))
             {
-                _proxyLocalUrl = handler.HandlerArgs["crawl-proxy-local-url"].ToString();
+                _proxyLocalUrl = v3.ToString();
             }
-            
-            this._pageBrowseCount = 0;
+
+            _pageBrowseCount = 0;
             var config = RequestConfiguration.Load(handler, site);
-            this._linkManager = new LinkManager(0);
+            _linkManager = new LinkManager(0);
             if (config.Uri.IsWellFormedOriginalString())
             {
                 MakeRequest(config);
-                Report(new ReportItem {Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = config.ToString(), Trackable = timelineEvent.TrackableId});
-                this._siteDepthCurrent += 1;
+                Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = config.ToString(), Trackable = timelineEvent.TrackableId });
+                _siteDepthCurrent += 1;
 
-                if (this._siteDepthCurrent >= this._siteDepthMax)
+                if (_siteDepthCurrent >= _siteDepthMax)
                     return Task.CompletedTask;
-                
+
                 GetAllLinks(config, true);
                 CrawlAllLinks(config, handler, timelineEvent, true);
             }
-            
+
             Driver.Close();
             Driver.Quit();
             _log.Trace($"Run complete for {site}");
@@ -76,9 +76,9 @@ namespace ghosts.client.linux.handlers
         {
             _log.Trace($"Getting links for {config.Uri}...");
             var linksAdded = 0;
-            if (this._pageBrowseCount > this._stickiness)
+            if (_pageBrowseCount > _stickiness)
             {
-                _log.Trace($"Exceeded stickiness for {config.Uri} {this._stickiness}...");
+                _log.Trace($"Exceeded stickiness for {config.Uri} {_stickiness}...");
                 return;
             }
 
@@ -87,7 +87,7 @@ namespace ghosts.client.linux.handlers
                 var isInIframe = false;
                 // for use with pywb and proxy scraping
                 var iframes = Driver.FindElements(By.TagName("iframe"));
-                foreach(var iframe in iframes)
+                foreach (var iframe in iframes)
                 {
                     if (iframe.GetAttribute("id") == "replay_iframe")
                     {
@@ -106,22 +106,22 @@ namespace ghosts.client.linux.handlers
                     if (string.IsNullOrEmpty(node))
                         continue;
                     node = node.ToLower();
-                    if (isInIframe && !string.IsNullOrEmpty(this._proxyLocalUrl))
-                        node = this._proxyLocalUrl + node;
+                    if (isInIframe && !string.IsNullOrEmpty(_proxyLocalUrl))
+                        node = _proxyLocalUrl + node;
                     if (Uri.TryCreate(node, UriKind.RelativeOrAbsolute, out var uri))
                     {
                         if (uri.GetDomain() != config.Uri.GetDomain())
                         {
                             if (!sameSite)
                             {
-                                this._linkManager.AddLink(uri, 1);
+                                _linkManager.AddLink(uri, 1);
                                 linksAdded += 1;
                             }
                         }
-                        // relative links - prefix the scheme and host 
+                        // relative links - prefix the scheme and host
                         else
                         {
-                            this._linkManager.AddLink(uri, 2);
+                            _linkManager.AddLink(uri, 2);
                             linksAdded += 1;
                         }
                     }
@@ -132,7 +132,7 @@ namespace ghosts.client.linux.handlers
                     Driver.SwitchTo().DefaultContent();
                     _log.Trace("Switched back to main window focus");
                 }
-                
+
                 _log.Trace($"Added {linksAdded} links for {config.Uri}");
             }
             catch (Exception e)
@@ -140,30 +140,30 @@ namespace ghosts.client.linux.handlers
                 _log.Trace(e);
             }
         }
-        
+
         private void CrawlAllLinks(RequestConfiguration config, TimelineHandler handler,
             TimelineEvent timelineEvent, bool sameSite)
         {
             _log.Trace($"Crawling links for {config.Uri}");
-            if (this._linkManager?.Links == null)
+            if (_linkManager?.Links == null)
             {
                 return;
             }
-            if (this._pageBrowseCount > this._stickiness)
+            if (_pageBrowseCount > _stickiness)
             {
                 return;
             }
 
-            foreach (var link in this._linkManager.Links.Where(x => x.WasBrowsed == false)
+            foreach (var link in _linkManager.Links.Where(x => x.WasBrowsed == false)
                 .OrderByDescending(x => x.Priority))
             {
-                if (this._pageBrowseCount > this._stickiness)
+                if (_pageBrowseCount > _stickiness)
                 {
-                    _log.Trace($"Exceeded stickiness for {config.Uri} {this._stickiness} (2)...");
+                    _log.Trace($"Exceeded stickiness for {config.Uri} {_stickiness} (2)...");
                     return;
                 }
 
-                if (this._linkManager.Links.Any(x => x.Url.ToString() == link.Url.ToString() && x.WasBrowsed))
+                if (_linkManager.Links.Any(x => x.Url.ToString() == link.Url.ToString() && x.WasBrowsed))
                 {
                     continue;
                 }
@@ -173,24 +173,24 @@ namespace ghosts.client.linux.handlers
 
                 MakeRequest(config);
 
-                foreach (var l in this._linkManager.Links.Where(x => x.Url.ToString() == link.Url.ToString()))
+                foreach (var l in _linkManager.Links.Where(x => x.Url.ToString() == link.Url.ToString()))
                 {
                     l.WasBrowsed = true;
                     _log.Trace($"Skipping {config.Uri} (already browsed)");
                 }
-                this._pageBrowseCount += 1;
-                if (this._pageBrowseCount > this._stickiness)
+                _pageBrowseCount += 1;
+                if (_pageBrowseCount > _stickiness)
                 {
-                    _log.Trace($"Exceeded stickiness for {config.Uri} {this._stickiness} (3)...");
+                    _log.Trace($"Exceeded stickiness for {config.Uri} {_stickiness} (3)...");
                     return;
                 }
 
-                Report(new ReportItem {Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = config.ToString(), Trackable = timelineEvent.TrackableId});
+                Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = config.ToString(), Trackable = timelineEvent.TrackableId });
 
                 // if this is the last step down, there is no reason to keep digging,
                 // but we don't increase the current depth count so as to allow peer
                 // pages at this level to still be scraped
-                if (this._siteDepthCurrent + 1 < this._siteDepthMax)
+                if (_siteDepthCurrent + 1 < _siteDepthMax)
                 {
                     _log.Trace($"Drilling into {config.Uri}...");
                     GetAllLinks(config, sameSite);

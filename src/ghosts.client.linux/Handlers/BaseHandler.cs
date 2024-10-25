@@ -3,8 +3,8 @@
 using System;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
-using NLog;
 using Newtonsoft.Json;
+using NLog;
 
 namespace ghosts.client.linux.handlers
 {
@@ -12,14 +12,14 @@ namespace ghosts.client.linux.handlers
     {
         public static readonly Logger _log = LogManager.GetCurrentClassLogger();
         private static readonly Logger _timelineLog = LogManager.GetLogger("TIMELINE");
-        internal static readonly Random _random = new Random();
-        
-        public void Init(TimelineHandler handler)
+        internal static readonly Random _random = new();
+
+        public static void Init(TimelineHandler handler)
         {
             WorkingHours.Is(handler);
         }
 
-        public void Report(ReportItem reportItem)
+        public static void Report(ReportItem reportItem)
         {
             var result = new TimeLineRecord
             {
@@ -40,5 +40,5 @@ namespace ghosts.client.linux.handlers
             _timelineLog.Info($"TIMELINE|{DateTime.UtcNow}|{o}");
         }
     }
-       
+
 }

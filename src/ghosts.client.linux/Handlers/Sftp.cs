@@ -1,19 +1,19 @@
 ﻿using System;
 using System.IO;
 using System.Threading;
-using Renci.SshNet;
 using ghosts.client.linux.Infrastructure;
 using Ghosts.Domain;
-using Newtonsoft.Json;
 using Ghosts.Domain.Code;
+using Newtonsoft.Json;
+using Renci.SshNet;
 
 namespace ghosts.client.linux.handlers
 {
     public class Sftp : BaseHandler
     {
 
-        private Credentials CurrentCreds = null;
-        private SftpSupport CurrentSftpSupport = null;   //current SftpSupport for this object
+        private readonly Credentials CurrentCreds = null;
+        private readonly SftpSupport CurrentSftpSupport = null;   //current SftpSupport for this object
         public int jitterfactor = 0;
 
 
@@ -21,15 +21,15 @@ namespace ghosts.client.linux.handlers
         {
             try
             {
-                base.Init(handler);
-                this.CurrentSftpSupport = new SftpSupport();
+                Init(handler);
+                CurrentSftpSupport = new SftpSupport();
                 if (handler.HandlerArgs != null)
                 {
-                    if (handler.HandlerArgs.ContainsKey("CredentialsFile"))
+                    if (handler.HandlerArgs.TryGetValue("CredentialsFile", out var v1))
                     {
                         try
                         {
-                            this.CurrentCreds = JsonConvert.DeserializeObject<Credentials>(File.ReadAllText(handler.HandlerArgs["CredentialsFile"].ToString()));
+                            CurrentCreds = JsonConvert.DeserializeObject<Credentials>(File.ReadAllText(v1.ToString()));
                         }
                         catch (ThreadAbortException)
                         {
@@ -41,12 +41,12 @@ namespace ghosts.client.linux.handlers
                         }
                     }
 
-                    if (handler.HandlerArgs.ContainsKey("TimeBetweenCommandsMax"))
+                    if (handler.HandlerArgs.TryGetValue("TimeBetweenCommandsMax", out var v2))
                     {
                         try
                         {
-                            this.CurrentSftpSupport.TimeBetweenCommandsMax = Int32.Parse(handler.HandlerArgs["TimeBetweenCommandsMax"].ToString());
-                            if (this.CurrentSftpSupport.TimeBetweenCommandsMax < 0) this.CurrentSftpSupport.TimeBetweenCommandsMax = 0;
+                            CurrentSftpSupport.TimeBetweenCommandsMax = int.Parse(v2.ToString());
+                            if (CurrentSftpSupport.TimeBetweenCommandsMax < 0) CurrentSftpSupport.TimeBetweenCommandsMax = 0;
                         }
                         catch (ThreadAbortException)
                         {
@@ -57,21 +57,21 @@ namespace ghosts.client.linux.handlers
                             _log.Error(e);
                         }
                     }
-                    if (handler.HandlerArgs.ContainsKey("TimeBetweenCommandsMin"))
+                    if (handler.HandlerArgs.TryGetValue("TimeBetweenCommandsMin", out var v3))
                     {
                         try
                         {
-                            this.CurrentSftpSupport.TimeBetweenCommandsMin = Int32.Parse(handler.HandlerArgs["TimeBetweenCommandsMin"].ToString());
-                            if (this.CurrentSftpSupport.TimeBetweenCommandsMin < 0) this.CurrentSftpSupport.TimeBetweenCommandsMin = 0;
+                            CurrentSftpSupport.TimeBetweenCommandsMin = int.Parse(v3.ToString());
+                            if (CurrentSftpSupport.TimeBetweenCommandsMin < 0) CurrentSftpSupport.TimeBetweenCommandsMin = 0;
                         }
                         catch (Exception e)
                         {
                             _log.Error(e);
                         }
                     }
-                    if (handler.HandlerArgs.ContainsKey("UploadDirectory"))
+                    if (handler.HandlerArgs.TryGetValue("UploadDirectory", out var v4))
                     {
-                        string targetDir = handler.HandlerArgs["UploadDirectory"].ToString();
+                        var targetDir = v4.ToString();
                         targetDir = Environment.ExpandEnvironmentVariables(targetDir);
                         if (!Directory.Exists(targetDir))
                         {
@@ -79,20 +79,17 @@ namespace ghosts.client.linux.handlers
                         }
                         else
                         {
-                            this.CurrentSftpSupport.uploadDirectory = targetDir;
+                            CurrentSftpSupport.uploadDirectory = targetDir;
                         }
                     }
 
-                    if (this.CurrentSftpSupport.uploadDirectory == null)
-                    {
-                        this.CurrentSftpSupport.uploadDirectory = KnownFolders.GetDownloadFolderPath();
-                    }
+                    CurrentSftpSupport.uploadDirectory ??= KnownFolders.GetDownloadFolderPath();
 
-                    this.CurrentSftpSupport.downloadDirectory = KnownFolders.GetDownloadFolderPath();
+                    CurrentSftpSupport.downloadDirectory = KnownFolders.GetDownloadFolderPath();
 
-                    if (handler.HandlerArgs.ContainsKey("delay-jitter"))
+                    if (handler.HandlerArgs.TryGetValue("delay-jitter", out var value))
                     {
-                        jitterfactor = Jitter.JitterFactorParse(handler.HandlerArgs["delay-jitter"].ToString());
+                        jitterfactor = Jitter.JitterFactorParse(value.ToString());
                     }
                 }
 
@@ -137,10 +134,10 @@ namespace ghosts.client.linux.handlers
                         var cmd = timelineEvent.CommandArgs[_random.Next(0, timelineEvent.CommandArgs.Count)];
                         if (!string.IsNullOrEmpty(cmd.ToString()))
                         {
-                            this.Command(handler, timelineEvent, cmd.ToString());
+                            Command(handler, timelineEvent, cmd.ToString());
                         }
                         Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, jitterfactor));
-                        break;  
+                        break;
                 }
 
                 if (timelineEvent.DelayAfterActual > 0)
@@ -152,20 +149,20 @@ namespace ghosts.client.linux.handlers
         public void Command(TimelineHandler handler, TimelineEvent timelineEvent, string command)
         {
 
-            char[] charSeparators = new char[] { '|' };
+            var charSeparators = new char[] { '|' };
             var cmdArgs = command.Split(charSeparators, 3, StringSplitOptions.None);
             var hostIp = cmdArgs[0];
-            this.CurrentSftpSupport.HostIp = hostIp; //for trace output
+            CurrentSftpSupport.HostIp = hostIp; //for trace output
             var credKey = cmdArgs[1];
             var sftpCmds = cmdArgs[2].Split(';');
-            var username = this.CurrentCreds.GetUsername(credKey);
-            var password = this.CurrentCreds.GetPassword(credKey);
+            var username = CurrentCreds.GetUsername(credKey);
+            var password = CurrentCreds.GetPassword(credKey);
             _log.Trace("Beginning Sftp to host:  " + hostIp + " with command: " + command);
 
             if (username != null && password != null)
             {
 
-                //have IP, user/pass, try connecting 
+                //have IP, user/pass, try connecting
                 using (var client = new SftpClient(hostIp, username, password))
                 {
                     try
@@ -184,10 +181,10 @@ namespace ghosts.client.linux.handlers
                     {
                         try
                         {
-                            this.CurrentSftpSupport.RunSftpCommand(client, sftpCmd.Trim());
-                            if (this.CurrentSftpSupport.TimeBetweenCommandsMin != 0 && this.CurrentSftpSupport.TimeBetweenCommandsMax != 0 && this.CurrentSftpSupport.TimeBetweenCommandsMin < this.CurrentSftpSupport.TimeBetweenCommandsMax)
+                            CurrentSftpSupport.RunSftpCommand(client, sftpCmd.Trim());
+                            if (CurrentSftpSupport.TimeBetweenCommandsMin != 0 && CurrentSftpSupport.TimeBetweenCommandsMax != 0 && CurrentSftpSupport.TimeBetweenCommandsMin < CurrentSftpSupport.TimeBetweenCommandsMax)
                             {
-                                Thread.Sleep(_random.Next(this.CurrentSftpSupport.TimeBetweenCommandsMin, this.CurrentSftpSupport.TimeBetweenCommandsMax));
+                                Thread.Sleep(_random.Next(CurrentSftpSupport.TimeBetweenCommandsMin, CurrentSftpSupport.TimeBetweenCommandsMax));
                             }
                         }
                         catch (Exception e)
@@ -197,7 +194,7 @@ namespace ghosts.client.linux.handlers
                     }
                     client.Disconnect();
                     client.Dispose();
-                    Report(new ReportItem {Handler=handler.HandlerType.ToString(), Command= hostIp, Arg = cmdArgs[2], Trackable =  timelineEvent.TrackableId });
+                    Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = hostIp, Arg = cmdArgs[2], Trackable = timelineEvent.TrackableId });
                 }
             }
         }
