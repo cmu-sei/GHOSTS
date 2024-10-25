@@ -45,14 +45,14 @@ namespace ghosts.client.linux.handlers
 
         private void Ex(TimelineHandler handler)
         {
-            if (handler.HandlerArgs.ContainsKey("execution-probability"))
+            if (handler.HandlerArgs.TryGetValue("execution-probability", out var v1))
             {
-                int.TryParse(handler.HandlerArgs["execution-probability"].ToString(), out executionprobability);
+                int.TryParse(v1.ToString(), out executionprobability);
                 if (executionprobability < 0 || executionprobability > 100) executionprobability = 100;
             }
-            if (handler.HandlerArgs.ContainsKey("delay-jitter"))
+            if (handler.HandlerArgs.TryGetValue("delay-jitter", out var v2))
             {
-                jitterfactor = Jitter.JitterFactorParse(handler.HandlerArgs["delay-jitter"].ToString());
+                jitterfactor = Jitter.JitterFactorParse(v2.ToString());
             }
 
             foreach (var timelineEvent in handler.TimeLineEvents)
@@ -79,17 +79,17 @@ namespace ghosts.client.linux.handlers
                             var cmd = timelineEvent.CommandArgs[_random.Next(0, timelineEvent.CommandArgs.Count)];
                             if (!string.IsNullOrEmpty(cmd.ToString()))
                             {
-                                this.Command(handler.Initial, cmd.ToString());
+                                Command(handler.Initial, cmd.ToString());
                             }
                             Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, jitterfactor));
                         }
                     default:
 
-                        this.Command(handler.Initial, timelineEvent.Command);
+                        Command(handler.Initial, timelineEvent.Command);
 
                         foreach (var cmd in timelineEvent.CommandArgs.Where(cmd => !string.IsNullOrEmpty(cmd.ToString())))
                         {
-                            this.Command(handler.Initial, cmd.ToString());
+                            Command(handler.Initial, cmd.ToString());
                         }
                         break;
                 }
@@ -119,16 +119,16 @@ namespace ghosts.client.linux.handlers
 
             while (!p.StandardOutput.EndOfStream)
             {
-                this.Result += p.StandardOutput.ReadToEnd();
+                Result += p.StandardOutput.ReadToEnd();
             }
 
             p.WaitForExit();
-            Report(new ReportItem {Handler = HandlerType.Command.ToString(), Command = escapedArgs, Result = this.Result});
+            Report(new ReportItem { Handler = HandlerType.Command.ToString(), Command = escapedArgs, Result = Result });
         }
 
         private void OutputHandler(object sendingProcess, DataReceivedEventArgs outLine)
         {
-            this.Result += outLine.Data;
+            Result += outLine.Data;
         }
 
         private static void ErrorHandler(object sendingProcess, DataReceivedEventArgs outLine)

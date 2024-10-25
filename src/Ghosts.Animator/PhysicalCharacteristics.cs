@@ -24,7 +24,7 @@ namespace Ghosts.Animator
         public static BiologicalSex GetMilBiologicalSex()
         {
             var rd = AnimatorRandom.Rand.NextDouble();
-            if(rd < .144) //% of active duty women in the military. Should probably export this value to a config.
+            if (rd < .144) //% of active duty women in the military. Should probably export this value to a config.
             {
                 return BiologicalSex.Female;
             }
@@ -33,10 +33,10 @@ namespace Ghosts.Animator
                 return BiologicalSex.Male;
             }
         }
-        
+
         private static int RoundDouble(double x)
         {//Does appropriate mathematical rounding, instead of going to nearest even if val%1==.5
-            if(x%1<.5)
+            if (x % 1 < .5)
             {
                 return (int)Math.Floor(x);
             }
@@ -50,11 +50,11 @@ namespace Ghosts.Animator
             //Generates height using Box-Muller transform
             double mean;
             double std;
-            double u1 = 1.0 - AnimatorRandom.Rand.NextDouble();
-            double u2 = 1.0 - AnimatorRandom.Rand.NextDouble();
-            double randStdNormal = Math.Sqrt(-2.0 * Math.Log(u1)) * Math.Sin(2.0 * Math.PI * u2);
+            var u1 = 1.0 - AnimatorRandom.Rand.NextDouble();
+            var u2 = 1.0 - AnimatorRandom.Rand.NextDouble();
+            var randStdNormal = Math.Sqrt(-2.0 * Math.Log(u1)) * Math.Sin(2.0 * Math.PI * u2);
 
-            if(sex == BiologicalSex.Male)
+            if (sex == BiologicalSex.Male)
             {
                 mean = 68.9;
                 std = 2.84;
@@ -65,14 +65,14 @@ namespace Ghosts.Animator
                 std = 2.52;
             }
 
-            double randNormal = mean + std + randStdNormal;
-            int inches = RoundDouble(randNormal);
+            var randNormal = mean + std + randStdNormal;
+            var inches = RoundDouble(randNormal);
             return inches;
         }
         public static int GetHeight()
         {
             var rd = AnimatorRandom.Rand.Next(2);
-            if(rd == 0)
+            if (rd == 0)
             {
                 return GetHeight(BiologicalSex.Female);
             }
@@ -91,8 +91,8 @@ namespace Ghosts.Animator
             double randNormal;
             int inches;
 
-            int low = 60;
-            int high = 80;
+            var low = 60;
+            var high = 80;
             if (sex == BiologicalSex.Female)
             {
                 low = 58;
@@ -128,7 +128,7 @@ namespace Ghosts.Animator
                 randNormal = mean + std + randStdNormal;
                 inches = RoundDouble(randNormal);
             } while (inches < low || inches > high);
-            
+
             return inches;
         }
         public static int GetMilHeight(MilitaryBranch branch = MilitaryBranch.USARMY)
@@ -146,7 +146,7 @@ namespace Ghosts.Animator
 
         public static string HeightToString(int height)
         {
-            return $"{height/12}' {height%12}\"";
+            return $"{height / 12}' {height % 12}\"";
         }
         /*
          //Depricated
@@ -163,21 +163,21 @@ namespace Ghosts.Animator
 
         public static int GetWeight(int height, BiologicalSex sex)
         {
-            int weightClass = AnimatorRandom.Rand.Next(0, 1000);
+            var weightClass = AnimatorRandom.Rand.Next(0, 1000);
             int bmi;
-            if(sex==BiologicalSex.Male)
+            if (sex == BiologicalSex.Male)
             {
-                if(weightClass<55)
+                if (weightClass < 55)
                 {
                     //Extreme Obesity (40-54)
                     bmi = AnimatorRandom.Rand.Next(40, 55);
                 }
-                else if(weightClass<350)
+                else if (weightClass < 350)
                 {
                     //Obese(30-39)
                     bmi = AnimatorRandom.Rand.Next(30, 40);
                 }
-                else if(weightClass<737)
+                else if (weightClass < 737)
                 {
                     //Overweight(25-29)
                     bmi = AnimatorRandom.Rand.Next(25, 30);
@@ -190,15 +190,15 @@ namespace Ghosts.Animator
             }
             else
             {
-                if(weightClass<99)
+                if (weightClass < 99)
                 {
                     bmi = AnimatorRandom.Rand.Next(40, 55);
                 }
-                else if(weightClass<404)
+                else if (weightClass < 404)
                 {
                     bmi = AnimatorRandom.Rand.Next(30, 40);
                 }
-                else if(weightClass<669)
+                else if (weightClass < 669)
                 {
                     bmi = AnimatorRandom.Rand.Next(25, 30);
                 }
@@ -207,15 +207,15 @@ namespace Ghosts.Animator
                     bmi = AnimatorRandom.Rand.Next(19, 25);
                 }
             }
-            
-            string input = File.ReadAllText("config/bmi.json"); 
+
+            var input = File.ReadAllText("config/bmi.json");
             var bmiChart = JsonConvert.DeserializeObject<BMIManager>(input);
             double weight;
             var heightList = bmiChart.Heights.FirstOrDefault(x => x.Height == height);
             var selectedBMI = heightList.BMIs.FirstOrDefault(x => x.BMI == bmi);
-            if (height<=76 && height>=58 && 
-                bmiChart.Heights.FirstOrDefault(x => x.Height == height) !=null
-                && heightList.BMIs.FirstOrDefault(x => x.BMI == bmi) !=null)
+            if (height <= 76 && height >= 58 &&
+                bmiChart.Heights.FirstOrDefault(x => x.Height == height) != null
+                && heightList.BMIs.FirstOrDefault(x => x.BMI == bmi) != null)
             {
                 //grab from table
                 weight = selectedBMI.Weight;
@@ -223,13 +223,13 @@ namespace Ghosts.Animator
             else
             {
                 //BMI = kg/m^2, kg = BMI * m^2
-                double metricHeight = height / 39.37;
+                var metricHeight = height / 39.37;
                 weight = bmi * metricHeight * metricHeight;
             }
 
             //creates a random variance of up to 2 pounds (plus or minus)
-            double variation = (AnimatorRandom.Rand.NextDouble() * 2 - 1) * 2;
-            int result = RoundDouble(variation + weight);
+            var variation = (AnimatorRandom.Rand.NextDouble() * 2 - 1) * 2;
+            var result = RoundDouble(variation + weight);
             return result;
         }
         public static int GetWeight(int height)
@@ -248,20 +248,20 @@ namespace Ghosts.Animator
         //TODO: Update to reflect weight distribution statistics instead of even distribution within bounds
         public static int GetMilWeight(int height, DateTime birthdate, BiologicalSex sex, MilitaryBranch branch)
         {
-            string input = File.ReadAllText("config/military_height_weight.json");
+            var input = File.ReadAllText("config/military_height_weight.json");
             var hwChart = JsonConvert.DeserializeObject<MilitaryHeightWeight.MilitaryHeightWeightManager>(input);
-            int age = DateTime.Now.Year - birthdate.Year;
-            if(DateTime.Now.Month < birthdate.Month)
+            var age = DateTime.Now.Year - birthdate.Year;
+            if (DateTime.Now.Month < birthdate.Month)
             {
                 age -= 1;
             }
-            if(DateTime.Now.Month == birthdate.Month && DateTime.Now.Day < birthdate.Day)
+            if (DateTime.Now.Month == birthdate.Month && DateTime.Now.Day < birthdate.Day)
             {
                 age -= 1;
             }
             int min;
             int max;
-            if(branch == MilitaryBranch.USAF)
+            if (branch == MilitaryBranch.USAF)
             {
                 var b = hwChart.Branches.FirstOrDefault(x => x.Branch == "USAF");
                 var h = b.Heights.FirstOrDefault(x => x.Height == height);
@@ -396,19 +396,19 @@ namespace Ghosts.Animator
         public static int GetMilWeight(int height, DateTime birthdate, BiologicalSex sex)
         {
             var rv = AnimatorRandom.Rand.Next(5);
-            if(rv == 0)
+            if (rv == 0)
             {
                 return GetMilWeight(height, birthdate, sex, MilitaryBranch.USAF);
             }
-            else if(rv == 1)
+            else if (rv == 1)
             {
                 return GetMilWeight(height, birthdate, sex, MilitaryBranch.USARMY);
             }
-            else if(rv == 2)
+            else if (rv == 2)
             {
                 return GetMilWeight(height, birthdate, sex, MilitaryBranch.USCG);
             }
-            else if(rv == 3)
+            else if (rv == 3)
             {
                 return GetMilWeight(height, birthdate, sex, MilitaryBranch.USMC);
             }
@@ -420,7 +420,7 @@ namespace Ghosts.Animator
         public static int GetMilWeight(int height, DateTime birthdate, MilitaryBranch branch)
         {
             var rv = AnimatorRandom.Rand.Next(2);
-            if(rv == 0)
+            if (rv == 0)
             {
                 return GetMilWeight(height, birthdate, BiologicalSex.Female, branch);
             }
@@ -432,10 +432,10 @@ namespace Ghosts.Animator
 
         private static int CalcMilWeight(int min, int max)
         {
-            int avg = (min + max) / 2;
-            int diff = max - avg;
-            double mod = (AnimatorRandom.Rand.NextDouble() * 2 - 1) * diff;
-            return RoundDouble(avg+mod);
+            var avg = (min + max) / 2;
+            var diff = max - avg;
+            var mod = (AnimatorRandom.Rand.NextDouble() * 2 - 1) * diff;
+            return RoundDouble(avg + mod);
         }
 
         public static string WeightToString(int weight)
@@ -484,7 +484,7 @@ namespace Ghosts.Animator
             }
             dir = Directory.GetDirectories(dir).RandomElement();
             var file = Directory.GetFiles(dir).RandomElement();
-            
+
             return file;
         }
 

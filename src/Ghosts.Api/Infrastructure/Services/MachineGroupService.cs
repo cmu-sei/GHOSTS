@@ -5,8 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Ghosts.Api.Infrastructure.Data;
 using ghosts.api.Infrastructure.Models;
+using Ghosts.Api.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using NLog;
 
@@ -25,15 +25,10 @@ namespace ghosts.api.Infrastructure.Services
         Task<List<HistoryTimeline>> GetActivity(int id, int skip, int take, CancellationToken ct);
     }
 
-    public class MachineGroupService : IMachineGroupService
+    public class MachineGroupService(ApplicationDbContext context) : IMachineGroupService
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        private readonly ApplicationDbContext _context;
-
-        public MachineGroupService(ApplicationDbContext context)
-        {
-            _context = context;
-        }
+        private readonly ApplicationDbContext _context = context;
 
         public async Task<List<Group>> GetAsync(string q, CancellationToken ct)
         {
@@ -55,7 +50,7 @@ namespace ghosts.api.Infrastructure.Services
         public async Task<Group> UpdateAsync(Group model, CancellationToken ct)
         {
             // Get the original record
-            var originalRecord = await this._context.Groups.Include(x => x.GroupMachines).FirstOrDefaultAsync(x => x.Id == model.Id, ct);
+            var originalRecord = await _context.Groups.Include(x => x.GroupMachines).FirstOrDefaultAsync(x => x.Id == model.Id, ct);
             if (originalRecord == null)
             {
                 // Handle situation when the original record doesn't exist
@@ -66,7 +61,7 @@ namespace ghosts.api.Infrastructure.Services
             // Remove all machines for the original record
             foreach (var g in originalRecord.GroupMachines.ToList())
             {
-                this._context.GroupMachines.Remove(g);
+                _context.GroupMachines.Remove(g);
             }
 
             if (model.GroupMachines != null && model.GroupMachines.Count > 0)
@@ -77,7 +72,7 @@ namespace ghosts.api.Infrastructure.Services
                     if (g.MachineId != Guid.Empty)
                     {
                         g.GroupId = originalRecord.Id;
-                        this._context.GroupMachines.Add(g);
+                        _context.GroupMachines.Add(g);
                     }
                 }
             }
@@ -111,7 +106,7 @@ namespace ghosts.api.Infrastructure.Services
 
             return id;
         }
-        
+
         public async Task<Group> AddMachineToGroup(int groupId, Guid machineId, CancellationToken ct)
         {
             if (!_context.GroupMachines.Any(x => x.GroupId == groupId && x.MachineId == machineId))
@@ -122,7 +117,7 @@ namespace ghosts.api.Infrastructure.Services
             }
             return await _context.Groups.Include(x => x.GroupMachines).FirstOrDefaultAsync(x => x.Id == groupId, cancellationToken: ct);
         }
-        
+
         public async Task<Group> RemoveMachineFromGroup(int groupId, Guid machineId, CancellationToken ct)
         {
             foreach (var r in
@@ -139,13 +134,13 @@ namespace ghosts.api.Infrastructure.Services
         {
             if (take < 1)
                 take = 20;
-            
+
             var machineGroup = await _context.Groups.Include(o => o.GroupMachines).FirstOrDefaultAsync(o => o.Id == id, ct);
-            if (machineGroup ==  null) return new List<HistoryTimeline>();
-            
+            if (machineGroup == null) return new List<HistoryTimeline>();
+
             var machineIds = machineGroup.GroupMachines.Select(m => m.MachineId).ToList();
             if (machineIds.Count < 1) return new List<HistoryTimeline>();
-            
+
             try
             {
                 return (from o in _context.HistoryTimeline where machineIds.Contains(o.MachineId) select o)

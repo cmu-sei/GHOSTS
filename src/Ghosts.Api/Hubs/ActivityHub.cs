@@ -19,13 +19,13 @@ public class ActivityHub : Hub
 
     public override Task OnConnectedAsync()
     {
-        _connections.Add("1", this.Context.ConnectionId);
+        _connections.Add("1", Context.ConnectionId);
         return base.OnConnectedAsync();
     }
 
     public override Task OnDisconnectedAsync(Exception exception)
     {
-        _connections.Remove("1", this.Context.ConnectionId);
+        _connections.Remove("1", Context.ConnectionId);
         return base.OnDisconnectedAsync(exception);
     }
 
@@ -34,16 +34,16 @@ public class ActivityHub : Hub
         _log.Debug("Processing update");
 
         //do some saving
-        
+
         foreach (var connectionId in _connections.GetConnections("1"))
         {
             var types = new[] { "social", "belief", "knowledge", "relationship" };
             var t = types.RandomFromStringArray();
-            
-            await Clients.Client(connectionId).SendAsync("show", eventId, 
-                npcId, 
-                t, 
-                Faker.Lorem.Sentence(), 
+
+            await Clients.Client(connectionId).SendAsync("show", eventId,
+                npcId,
+                t,
+                Faker.Lorem.Sentence(),
                 DateTime.Now.ToString(CultureInfo.InvariantCulture));
         }
     }

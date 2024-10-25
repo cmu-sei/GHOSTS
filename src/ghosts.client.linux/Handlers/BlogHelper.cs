@@ -1,12 +1,12 @@
-﻿using ghosts.client.linux.Infrastructure;
-using ghosts.client.linux.Infrastructure.Browser;
-using Ghosts.Domain.Code;
-using Ghosts.Domain;
-using Newtonsoft.Json;
-using OpenQA.Selenium;
-using System;
+﻿using System;
 using System.Text.RegularExpressions;
+using ghosts.client.linux.Infrastructure;
+using ghosts.client.linux.Infrastructure.Browser;
+using Ghosts.Domain;
+using Ghosts.Domain.Code;
+using Newtonsoft.Json;
 using NLog;
+using OpenQA.Selenium;
 
 namespace ghosts.client.linux.handlers
 {
@@ -14,7 +14,7 @@ namespace ghosts.client.linux.handlers
     /// <summary>
     /// Handles Blog actions for BaseBrowserHandler
     /// </summary>
-    public abstract class BlogHelper : BrowserHelper
+    public abstract partial class BlogHelper : BrowserHelper
     {
 
         private int _deletionProbability = -1;
@@ -30,16 +30,16 @@ namespace ghosts.client.linux.handlers
         string _version = null;
 
         public BlogContentManager contentManager = null;
-        
+
 
         public static BlogHelper MakeHelper(BaseBrowserHandler callingHandler, IWebDriver callingDriver, TimelineHandler handler, Logger tlog)
         {
             BlogHelper helper = null;
 
             //get helper based on version
-            if (handler.HandlerArgs.ContainsKey("blog-version"))
+            if (handler.HandlerArgs.TryGetValue("blog-version", out var value))
             {
-                var version = handler.HandlerArgs["blog-version"].ToString();
+                var version = value.ToString();
                 if (version == "drupal") helper = new BlogHelperDrupal(callingHandler, callingDriver);
                 if (helper == null)
                 {
@@ -60,7 +60,7 @@ namespace ghosts.client.linux.handlers
             Driver = currentDriver;
         }
 
-        private bool CheckProbabilityVar(string name, int value)
+        private static bool CheckProbabilityVar(string name, int value)
         {
             if (!(value >= 0 && value <= 100))
             {
@@ -70,8 +70,8 @@ namespace ghosts.client.linux.handlers
             return true;
         }
 
-        
-        
+
+
         public virtual bool DoInitialLogin(TimelineHandler handler, string user, string pw)
         {
             Log.Trace($"Blog:: Unsupported action 'DoInitialLogin' in Blog version {_version} ");
@@ -105,10 +105,10 @@ namespace ghosts.client.linux.handlers
 
         private string GetNextAction()
         {
-            int choice = _random.Next(0, 101);
+            var choice = _random.Next(0, 101);
             string blogAction = null;
             int endRange;
-            int startRange = 0;
+            var startRange = 0;
 
             if (_deletionProbability > 0)
             {
@@ -135,7 +135,7 @@ namespace ghosts.client.linux.handlers
             {
                 endRange = startRange + _replyProbability;
                 if (choice >= startRange && choice <= endRange) blogAction = "reply";
-                else startRange = endRange + 1;
+                else _ = endRange + 1;
 
             }
             return blogAction;
@@ -152,7 +152,7 @@ namespace ghosts.client.linux.handlers
         {
             string credFname;
             string credentialKey = null;
-            
+
 
             switch (_state)
             {
@@ -161,37 +161,37 @@ namespace ghosts.client.linux.handlers
                 case "initial":
                     //these are only parsed once, global for the handler as handler can only have one entry.
                     _version = handler.HandlerArgs["blog-version"].ToString();  //guaranteed to have this option, already checked in base handler
-                    
-                  
-                    if (_deletionProbability < 0 && handler.HandlerArgs.ContainsKey("blog-deletion-probability"))
+
+
+                    if (_deletionProbability < 0 && handler.HandlerArgs.TryGetValue("blog-deletion-probability", out var v1))
                     {
-                        int.TryParse(handler.HandlerArgs["blog-deletion-probability"].ToString(), out _deletionProbability);
-                        if (!CheckProbabilityVar(handler.HandlerArgs["blog-deletion-probability"].ToString(), _deletionProbability))
+                        int.TryParse(v1.ToString(), out _deletionProbability);
+                        if (!CheckProbabilityVar(v1.ToString(), _deletionProbability))
                         {
                             _deletionProbability = 0;
                         }
                     }
-                    if (_uploadProbability < 0 && handler.HandlerArgs.ContainsKey("blog-upload-probability"))
+                    if (_uploadProbability < 0 && handler.HandlerArgs.TryGetValue("blog-upload-probability", out var v2))
                     {
-                        int.TryParse(handler.HandlerArgs["blog-upload-probability"].ToString(), out _uploadProbability);
-                        if (!CheckProbabilityVar(handler.HandlerArgs["blog-upload-probability"].ToString(), _uploadProbability))
+                        int.TryParse(v2.ToString(), out _uploadProbability);
+                        if (!CheckProbabilityVar(v2.ToString(), _uploadProbability))
                         {
                             _uploadProbability = 0;
                         }
                     }
-                    if (_downloadProbability < 0 && handler.HandlerArgs.ContainsKey("blog-browse-probability"))
+                    if (_downloadProbability < 0 && handler.HandlerArgs.TryGetValue("blog-browse-probability", out var v3))
                     {
-                        int.TryParse(handler.HandlerArgs["blog-browse-probability"].ToString(), out (_downloadProbability));
-                        if (!CheckProbabilityVar(handler.HandlerArgs["blog-browse-probability"].ToString(), _downloadProbability))
+                        int.TryParse(v3.ToString(), out (_downloadProbability));
+                        if (!CheckProbabilityVar(v3.ToString(), _downloadProbability))
                         {
                             _downloadProbability = 0;
                         }
                     }
 
-                    if (_replyProbability < 0 && handler.HandlerArgs.ContainsKey("blog-reply-probability"))
+                    if (_replyProbability < 0 && handler.HandlerArgs.TryGetValue("blog-reply-probability", out var v4))
                     {
-                        int.TryParse(handler.HandlerArgs["blog-reply-probability"].ToString(), out (_replyProbability));
-                        if (!CheckProbabilityVar(handler.HandlerArgs["blog-reply-probability"].ToString(), _replyProbability))
+                        int.TryParse(v4.ToString(), out (_replyProbability));
+                        if (!CheckProbabilityVar(v4.ToString(), _replyProbability))
                         {
                             _replyProbability = 0;
                         }
@@ -210,9 +210,9 @@ namespace ghosts.client.linux.handlers
                         baseHandler.BlogAbort = true;
                         return;
                     }
-                    if (handler.HandlerArgs.ContainsKey("delay-jitter"))
+                    if (handler.HandlerArgs.TryGetValue("delay-jitter", out var value))
                     {
-                        baseHandler.JitterFactor = Jitter.JitterFactorParse(handler.HandlerArgs["delay-jitter"].ToString());
+                        baseHandler.JitterFactor = Jitter.JitterFactorParse(value.ToString());
                     }
 
 
@@ -238,7 +238,7 @@ namespace ghosts.client.linux.handlers
                     //parse the command args
 
 
-                    char[] charSeparators = new char[] { ':' };
+                    var charSeparators = new char[] { ':' };
                     foreach (var cmd in timelineEvent.CommandArgs)
                     {
                         //each argument string is key:value, parse this
@@ -261,10 +261,10 @@ namespace ghosts.client.linux.handlers
                         return;
                     }
 
-                    //check if site starts with http:// or https:// 
+                    //check if site starts with http:// or https://
                     site = site.ToLower();
-                    
-                    Regex rx = new Regex("^http://.*", RegexOptions.Compiled);
+
+                    Regex rx = MyRegex();
                     var match = rx.Matches(site);
                     if (match.Count > 0) header = "http://";
                     if (header == null)
@@ -303,7 +303,8 @@ namespace ghosts.client.linux.handlers
                     }
 
                     //have username, password - do the initial login
-                    if (!DoInitialLogin(handler,username,password)) {
+                    if (!DoInitialLogin(handler, username, password))
+                    {
                         baseHandler.BlogAbort = true;
                         return;
                     }
@@ -315,9 +316,9 @@ namespace ghosts.client.linux.handlers
                 case "execute":
 
                     //determine what to do
-                    string blogAction = GetNextAction();
+                    var blogAction = GetNextAction();
 
-                    
+
                     if (blogAction == null)
                     {
                         //nothing to do this cycle
@@ -350,7 +351,8 @@ namespace ghosts.client.linux.handlers
                         if (contentManager.Subject == null || contentManager.Body == null)
                         {
                             Log.Trace($"Blog:: Content unavailable, check Blog content file, upload skipped.");
-                        } else if (!DoUpload(handler, contentManager.Subject, contentManager.Body))
+                        }
+                        else if (!DoUpload(handler, contentManager.Subject, contentManager.Body))
                         {
                             baseHandler.BlogAbort = true;
                             return;
@@ -360,7 +362,7 @@ namespace ghosts.client.linux.handlers
                     {
                         //get new content
                         var reply = contentManager.BlogReplyNext();
-                        if (reply == null )
+                        if (reply == null)
                         {
                             Log.Trace($"Blog:: Reply content unavailable, check Blog reply file, reply action skipped.");
                         }
@@ -370,7 +372,7 @@ namespace ghosts.client.linux.handlers
                             return;
                         }
                     }
-                    this.baseHandler.Report(new ReportItem {Handler = $"Blog: {handler.HandlerType.ToString()}", Command = blogAction, Arg = "", Trackable = timelineEvent.TrackableId});
+                    BaseHandler.Report(new ReportItem { Handler = $"Blog: {handler.HandlerType}", Command = blogAction, Arg = "", Trackable = timelineEvent.TrackableId });
 
 
                     break;
@@ -382,9 +384,7 @@ namespace ghosts.client.linux.handlers
 
         }
 
-
-
-
-
+        [GeneratedRegex("^http://.*", RegexOptions.Compiled)]
+        private static partial Regex MyRegex();
     }
 }

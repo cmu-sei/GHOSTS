@@ -30,7 +30,7 @@ namespace Ghosts.Domain.Code.Helpers
             }
         }
     }
-    
+
     public class TimeSpanArrayConverter : JsonConverter<TimeSpan[]>
     {
         public override void WriteJson(JsonWriter writer, TimeSpan[] value, JsonSerializer serializer)

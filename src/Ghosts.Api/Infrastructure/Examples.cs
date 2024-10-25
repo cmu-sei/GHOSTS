@@ -2,11 +2,11 @@
 
 using System;
 using System.IO;
-using Ghosts.Api.Infrastructure.Data;
+using System.Linq;
 using ghosts.api.Infrastructure.Models;
+using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
-using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
@@ -14,14 +14,9 @@ using Swashbuckle.AspNetCore.Filters;
 
 namespace ghosts.api.Infrastructure;
 
-public class MachineUpdateExample : IExamplesProvider<MachineUpdate>
+public class MachineUpdateExample(IServiceProvider serviceProvider) : IExamplesProvider<MachineUpdate>
 {
-    private readonly IServiceProvider _serviceProvider;
-
-    public MachineUpdateExample(IServiceProvider serviceProvider)
-    {
-        _serviceProvider = serviceProvider;
-    }
+    private readonly IServiceProvider _serviceProvider = serviceProvider;
 
     public MachineUpdate GetExamples()
     {
@@ -31,12 +26,12 @@ public class MachineUpdateExample : IExamplesProvider<MachineUpdate>
             .Select(m => (Guid?)m.Id) // Cast to nullable Guid
             .FirstOrDefaultAsync()
             .Result ?? Guid.Empty; // Default to Guid.Empty if no machine found
-            
+
         var o = File.ReadAllText(Path.Combine(ApplicationDetails.InstalledPath, "config", "timelines", "BrowserFirefox.json"));
         var timeline = JsonConvert.DeserializeObject<Timeline>(o);
         timeline.Id = Guid.NewGuid();
         timeline.Status = Timeline.TimelineStatus.Run;
-        
+
         return new MachineUpdate
         {
             MachineId = machineId,

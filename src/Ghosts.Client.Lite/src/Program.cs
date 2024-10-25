@@ -89,10 +89,10 @@ internal static class Program
         var schedulerFactory = new StdSchedulerFactory();
         var scheduler = await schedulerFactory.GetScheduler();
         await scheduler.Start();
-        
+
         // Schedule timeline
         await ScheduleTimeline(scheduler, timeline);
-        
+
         // Schedule memory cleanup job
         await ScheduleMemoryCleanup(scheduler);
 
@@ -147,7 +147,7 @@ internal static class Program
             }
         }
     }
-    
+
     private static async Task ScheduleMemoryCleanup(IScheduler scheduler)
     {
         var job = JobBuilder.Create<MemoryCleanupJob>()

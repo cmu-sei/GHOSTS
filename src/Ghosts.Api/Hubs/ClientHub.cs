@@ -4,9 +4,9 @@ using System;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Ghosts.Api.Infrastructure;
 using ghosts.api.Infrastructure.Models;
 using ghosts.api.Infrastructure.Services;
+using Ghosts.Api.Infrastructure;
 using Ghosts.Domain;
 using Ghosts.Domain.Messages.MesssagesForServer;
 using Microsoft.AspNetCore.SignalR;
@@ -15,26 +15,18 @@ using NLog;
 
 namespace Ghosts.Api.Hubs
 {
-    public class ClientHub : Hub
+    public class ClientHub(IMachineService machineService, IMachineUpdateService updateService, IBackgroundQueue queue) : Hub
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        private readonly IMachineService _machineService;
-        private readonly IBackgroundQueue _queue;
-        private readonly IMachineUpdateService _updateService;
-        private readonly CancellationToken _ct;
-        
-        public ClientHub(IMachineService machineService, IMachineUpdateService updateService, IBackgroundQueue queue)
-        {
-            this._ct = new CancellationToken();
-            this._updateService = updateService;
-            this._queue = queue;
-            this._machineService = machineService;
-        }
-        
+        private readonly IMachineService _machineService = machineService;
+        private readonly IBackgroundQueue _queue = queue;
+        private readonly IMachineUpdateService _updateService = updateService;
+        private readonly CancellationToken _ct = new CancellationToken();
+
         public override async Task OnConnectedAsync()
         {
             await base.OnConnectedAsync();
-            await this.SendId(null);
+            await SendId(null);
         }
 
         public override async Task OnDisconnectedAsync(Exception exception)
@@ -43,30 +35,30 @@ namespace Ghosts.Api.Hubs
             _log.Trace($"{m.Name} {m.Id} ({Context.ConnectionId}) - Disconnecting...");
             await base.OnDisconnectedAsync(exception);
         }
-        
+
         public async Task SendId(string id)
         {
             var m = await FindMachine();
             if (m.HadId) return;
             id = m.Id.ToString();
-            
+
             //client saves this for future calls
             _log.Trace($"{m.Name} {m.Id} ({Context.ConnectionId}) - ReceiveId");
-            await Clients.Caller.SendAsync("ReceiveId", id, this._ct);
+            await Clients.Caller.SendAsync("ReceiveId", id, _ct);
         }
-        
+
         public async Task SendResults(TransferLogDump message)
         {
-            await Clients.Caller.SendAsync("ReceiveResults", message, this._ct);
+            await Clients.Caller.SendAsync("ReceiveResults", message, _ct);
             throw new NotImplementedException();
         }
-        
+
         public async Task SendSurvey(Survey message)
         {
-            await Clients.Caller.SendAsync("ReceiveSurvey", message, this._ct);
+            await Clients.Caller.SendAsync("ReceiveSurvey", message, _ct);
             throw new NotImplementedException();
         }
-        
+
         public async Task SendUpdates(string message)
         {
             var m = await FindMachine();
@@ -84,7 +76,7 @@ namespace Ghosts.Api.Hubs
                 });
 
             //check dB for new updates to deliver
-            var u = await _updateService.GetAsync(m.Id, m.CurrentUsername, this._ct);
+            var u = await _updateService.GetAsync(m.Id, m.CurrentUsername, _ct);
             if (u == null)
             {
                 _log.Error("machine is invalid");
@@ -92,10 +84,10 @@ namespace Ghosts.Api.Hubs
             }
 
             _log.Trace($"Update sent to {m.Id} {m.FQDN} {u.Id} {u.Username} {u.Update}");
-            
+
             var update = new UpdateClientConfig { Type = u.Type, Update = u.Update };
 
-            await _updateService.MarkAsDeletedAsync(u.Id, m.Id, this._ct);
+            await _updateService.MarkAsDeletedAsync(u.Id, m.Id, _ct);
 
             // integrators want to know that a timeline was actually delivered
             // (the service only guarantees that the update was received)
@@ -114,15 +106,15 @@ namespace Ghosts.Api.Hubs
             message = JsonSerializer.Serialize(update);
 
             _log.Trace($"{m.Name} {m.Id} ({Context.ConnectionId}) - ReceiveUpdates");
-            await Clients.Caller.SendAsync("ReceiveUpdates", message, this._ct);
+            await Clients.Caller.SendAsync("ReceiveUpdates", message, _ct);
         }
-        
+
         public async Task SendTimeline(string message)
         {
-            await Clients.Caller.SendAsync("ReceiveTimeline", "This is not implemented yet", this._ct);
+            await Clients.Caller.SendAsync("ReceiveTimeline", "This is not implemented yet", _ct);
             throw new NotImplementedException();
         }
-        
+
         public async Task SendHeartbeat(string message)
         {
             var m = GetMachine();
@@ -130,21 +122,21 @@ namespace Ghosts.Api.Hubs
             _log.Trace(m.Id != Guid.Empty
                 ? $"{m.Name} {m.Id} ({Context.ConnectionId}) - ReceiveHeartbeat"
                 : $"New machine — ({Context.ConnectionId}) - ReceiveHeartbeat");
-            await Clients.Caller.SendAsync("ReceiveHeartbeat", DateTime.UtcNow, this._ct);
+            await Clients.Caller.SendAsync("ReceiveHeartbeat", DateTime.UtcNow, _ct);
         }
-        
+
         public async Task SendMessage(string message)
         {
             var m = await FindMachine();
             _log.Trace($"{m.Name} {m.Id} ({Context.ConnectionId}) - ReceiveMessage");
-            await Clients.All.SendAsync("ReceiveMessage", $"{message} {DateTime.UtcNow}", this._ct);
+            await Clients.All.SendAsync("ReceiveMessage", $"{message} {DateTime.UtcNow}", _ct);
         }
-    
+
         public async Task SendSpecificMessage(string message)
         {
             var m = await FindMachine();
             _log.Trace($"{m.Name} {m.Id} ({Context.ConnectionId}) - ReceiveSpecificMessage");
-            await Clients.Caller.SendAsync("ReceiveSpecificMessage", message, this._ct);
+            await Clients.Caller.SendAsync("ReceiveSpecificMessage", message, _ct);
         }
 
         private Machine GetMachine()
@@ -160,7 +152,7 @@ namespace Ghosts.Api.Hubs
 
             if (m.Id == Guid.Empty)
             {
-                var findMachineResponse = await this._machineService.FindOrCreate(Context.GetHttpContext(), this._ct);
+                var findMachineResponse = await _machineService.FindOrCreate(Context.GetHttpContext(), _ct);
                 if (!findMachineResponse.IsValid())
                 {
                     _log.Error($"Could not find machine - {findMachineResponse.Error}");

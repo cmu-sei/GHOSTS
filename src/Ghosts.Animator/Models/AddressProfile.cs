@@ -8,21 +8,21 @@ namespace Ghosts.Animator.Models
     {
         public class InternationalAddressProfile
         {
-            [JsonProperty("country")] 
+            [JsonProperty("country")]
             public string Country { get; set; }
 
-            [JsonProperty("geonameid")] 
+            [JsonProperty("geonameid")]
             public string GeoNameId { get; set; }
 
-            [JsonProperty("name")] 
+            [JsonProperty("name")]
             public string City { get; set; }
 
-            [JsonProperty("subcountry")] 
+            [JsonProperty("subcountry")]
             public string SubCountry { get; set; }
 
             public override string ToString()
             {
-                return $"{this.City}, {this.Country}";
+                return $"{City}, {Country}";
             }
         }
 
@@ -39,7 +39,7 @@ namespace Ghosts.Animator.Models
             public override string ToString()
             {
                 //TODO: clean up
-                return $"{this.Address1} {this.City}, {this.State} {this.PostalCode}";
+                return $"{Address1} {City}, {State} {PostalCode}";
             }
         }
     }

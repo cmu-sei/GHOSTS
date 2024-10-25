@@ -19,7 +19,7 @@ namespace Ghosts.Animator.Models
         public string Password { get; set; }
         public string HomePhone { get; set; }
         public string CellPhone { get; set; }
-        
+
         public IEnumerable<Preference> Preferences { get; set; }
         public MilitaryUnit Unit { get; set; }
         public MilitaryRank.Branch.Rank Rank { get; set; }
@@ -30,10 +30,10 @@ namespace Ghosts.Animator.Models
         [JsonConverter(typeof(StringEnumConverter))]
         public BiologicalSex BiologicalSex { get; set; }
         public DateTime Birthdate { get; set; }
-        
+
         public HealthProfile Health { get; set; }
         public Dictionary<string, string> Attributes { get; set; }
-        
+
         public IEnumerable<RelationshipProfile> Relationships { get; set; }
 
         public FamilyProfile Family { get; set; }
@@ -45,52 +45,52 @@ namespace Ghosts.Animator.Models
         public MachineProfile Workstation { get; set; }
 
         public InsiderThreatProfile InsiderThreat { get; set; }
-        
+
         public IEnumerable<AccountsProfile.Account> Accounts { get; set; }
 
         public MotivationalProfile MotivationalProfile { get; set; }
-        public string CAC  { get; set; }
-        
+        public string CAC { get; set; }
+
         public string PhotoLink { get; set; }
         public DateTime Created { get; set; }
 
         public NpcProfile()
         {
-            this.Created = DateTime.UtcNow;
-            this.Address = new List<AddressProfiles.AddressProfile>();
-            this.Career = new CareerProfile();
-            this.Family = new FamilyProfile();
-            this.Finances = new FinancialProfile();
-            this.ForeignTravel = new ForeignTravelProfile();
-            this.InsiderThreat = new InsiderThreatProfile();
-            this.MentalHealth = new MentalHealthProfile();
-            this.Name = new NameProfile();
-            this.Rank = new MilitaryRank.Branch.Rank();
-            this.Unit = new MilitaryUnit();
-            this.Workstation = new MachineProfile();
-            this.Education = new EducationProfile();
-            this.Employment = new EmploymentProfile();
-            this.Relationships = new List<RelationshipProfile>();
-            this.Health = new HealthProfile();
-            this.Attributes = new Dictionary<string, string>();
-            this.MotivationalProfile = new MotivationalProfile();
+            Created = DateTime.UtcNow;
+            Address = new List<AddressProfiles.AddressProfile>();
+            Career = new CareerProfile();
+            Family = new FamilyProfile();
+            Finances = new FinancialProfile();
+            ForeignTravel = new ForeignTravelProfile();
+            InsiderThreat = new InsiderThreatProfile();
+            MentalHealth = new MentalHealthProfile();
+            Name = new NameProfile();
+            Rank = new MilitaryRank.Branch.Rank();
+            Unit = new MilitaryUnit();
+            Workstation = new MachineProfile();
+            Education = new EducationProfile();
+            Employment = new EmploymentProfile();
+            Relationships = new List<RelationshipProfile>();
+            Health = new HealthProfile();
+            Attributes = new Dictionary<string, string>();
+            MotivationalProfile = new MotivationalProfile();
         }
 
         public void SetName(string o)
         {
             if (!o.Contains("."))
             {
-                this.Name.First = o;
+                Name.First = o;
             }
             else
             {
                 var a = o.Split('.');
-                this.Name.First = a[0];
-                this.Name.Last = a[a.GetUpperBound(0)];
+                Name.First = a[0];
+                Name.Last = a[a.GetUpperBound(0)];
             }
         }
     }
-    
+
     public class MachineProfile
     {
         public string Name { get; set; }
@@ -111,17 +111,17 @@ namespace Ghosts.Animator.Models
 
         public override string ToString()
         {
-            if (string.IsNullOrEmpty(this.First))
+            if (string.IsNullOrEmpty(First))
             {
-                return $"{this.Last}";
-            }
-    
-            if (string.IsNullOrEmpty(this.Last))
-            {
-                return string.IsNullOrEmpty(this.Middle) ? $"{this.First}" : $"{this.First} {this.Middle}";
+                return $"{Last}";
             }
 
-            return string.IsNullOrEmpty(this.Middle) ? $"{this.First} {this.Last}" : $"{this.First} {this.Middle} {this.Last}";
+            if (string.IsNullOrEmpty(Last))
+            {
+                return string.IsNullOrEmpty(Middle) ? $"{First}" : $"{First} {Middle}";
+            }
+
+            return string.IsNullOrEmpty(Middle) ? $"{First} {Last}" : $"{First} {Middle} {Last}";
         }
     }
 
@@ -131,7 +131,7 @@ namespace Ghosts.Animator.Models
 
         public FamilyProfile()
         {
-            this.Members = new List<Person>();
+            Members = new List<Person>();
         }
 
         public class Person
@@ -149,7 +149,7 @@ namespace Ghosts.Animator.Models
 
         public FinancialProfile()
         {
-            this.CreditCards = new List<CreditCard>();
+            CreditCards = new List<CreditCard>();
         }
 
         public class CreditCard
@@ -170,7 +170,7 @@ namespace Ghosts.Animator.Models
         public int OpenToFeedback { get; set; }
         public int GeneralPerformance { get; set; }
         public int OverallPerformance { get; set; }
-        
+
         public int IQ { get; set; }
         public int SpideySense { get; set; }
         public int SenseSomethingIsWrongQuotient { get; set; }

@@ -12,21 +12,21 @@ namespace ghosts.api.Infrastructure.Models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
-        
-        [ForeignKey("MachineId")] 
+
+        [ForeignKey("MachineId")]
         public Guid MachineId { get; set; }
-            
+
         /// <summary>
         /// This is a string unfortunately, because EF can't handle string arrays, etc.
         /// </summary>
         [Column(TypeName = "jsonb")]
         public string Timeline { get; set; }
-        
+
         public DateTime CreatedUtc { get; set; }
 
         public MachineTimeline()
         {
-            this.CreatedUtc = DateTime.UtcNow;
+            CreatedUtc = DateTime.UtcNow;
         }
     }
 }

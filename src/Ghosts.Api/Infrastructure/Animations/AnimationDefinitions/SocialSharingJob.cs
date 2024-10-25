@@ -7,13 +7,13 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using Ghosts.Animator.Extensions;
 using ghosts.api.Hubs;
-using Ghosts.Api.Infrastructure;
 using ghosts.api.Infrastructure.ContentServices;
-using Ghosts.Api.Infrastructure.Data;
 using ghosts.api.Infrastructure.Models;
 using ghosts.api.Infrastructure.Services;
+using Ghosts.Animator.Extensions;
+using Ghosts.Api.Infrastructure;
+using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Domain;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
@@ -34,21 +34,22 @@ namespace ghosts.api.Infrastructure.Animations.AnimationDefinitions
         private readonly ApplicationDbContext _context;
         private readonly IMachineUpdateService _updateService;
         private readonly IFormatterService _formatterService;
+        private static readonly string[] ar = new[] { "user", "usr", "u", "uid", "user_id", "u_id" };
 
         public SocialSharingJob(ApplicationSettings configuration, IServiceScopeFactory scopeFactory, Random random,
             IHubContext<ActivityHub> activityHubContext, CancellationToken cancellationToken)
         {
             try
             {
-                this._activityHubContext = activityHubContext;
-                this._configuration = configuration;
-                this._random = random;
+                _activityHubContext = activityHubContext;
+                _configuration = configuration;
+                _random = random;
 
                 using var innerScope = scopeFactory.CreateScope();
-                this._context = innerScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                _context = innerScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-                this._cancellationToken = cancellationToken;
-                this._updateService = innerScope.ServiceProvider.GetRequiredService<IMachineUpdateService>();
+                _cancellationToken = cancellationToken;
+                _updateService = innerScope.ServiceProvider.GetRequiredService<IMachineUpdateService>();
 
                 _formatterService =
                     new ContentCreationService(_configuration.AnimatorSettings.Animations.SocialSharing.ContentEngine).FormatterService;
@@ -75,17 +76,17 @@ namespace ghosts.api.Infrastructure.Animations.AnimationDefinitions
 
         private async Task RunAsync()
         {
-            while (!this._cancellationToken.IsCancellationRequested)
+            while (!_cancellationToken.IsCancellationRequested)
             {
-                if (this._currentStep > _configuration.AnimatorSettings.Animations.SocialSharing.MaximumSteps)
+                if (_currentStep > _configuration.AnimatorSettings.Animations.SocialSharing.MaximumSteps)
                 {
-                    _log.Trace($"Maximum steps met: {this._currentStep - 1}. Social sharing is exiting...");
+                    _log.Trace($"Maximum steps met: {_currentStep - 1}. Social sharing is exiting...");
                     return;
                 }
 
-                await this.Step();
-                await Task.Delay(this._configuration.AnimatorSettings.Animations.SocialSharing.TurnLength, this._cancellationToken);
-                this._currentStep++;
+                await Step();
+                await Task.Delay(_configuration.AnimatorSettings.Animations.SocialSharing.TurnLength, _cancellationToken);
+                _currentStep++;
             }
         }
 
@@ -95,20 +96,20 @@ namespace ghosts.api.Infrastructure.Animations.AnimationDefinitions
 
             //take some random NPCs
             var activities = new List<NpcActivity>();
-            var rawAgents = this._context.Npcs.ToList();
-            if (!rawAgents.Any())
+            var rawAgents = _context.Npcs.ToList();
+            if (rawAgents.Count == 0)
             {
                 _log.Warn("No NPCs found. Is this correct?");
                 return;
             }
-            _log.Trace($"Found {rawAgents.Count()} raw agents...");
+            _log.Trace($"Found {rawAgents.Count} raw agents...");
 
             var agents = rawAgents.Shuffle(_random).Take(_random.Next(5, 20)).ToList();
-            _log.Trace($"Processing {agents.Count()} agents...");
+            _log.Trace($"Processing {agents.Count} agents...");
             foreach (var agent in agents)
             {
                 _log.Trace($"Processing agent {agent.NpcProfile.Email}...");
-                var tweetText = await this._formatterService.GenerateTweet(agent);
+                var tweetText = await _formatterService.GenerateTweet(agent);
                 if (string.IsNullOrEmpty(tweetText))
                 {
                     _log.Trace($"Content service generated no payload...");
@@ -118,7 +119,7 @@ namespace ghosts.api.Infrastructure.Animations.AnimationDefinitions
                 activities.Add(new NpcActivity { ActivityType = NpcActivity.ActivityTypes.SocialMediaPost, NpcId = agent.Id, CreatedUtc = DateTime.UtcNow, Detail = tweetText });
 
                 // the payloads to socializer are a bit randomized
-                var userFormValue = new[] { "user", "usr", "u", "uid", "user_id", "u_id" }.RandomFromStringArray();
+                var userFormValue = ar.RandomFromStringArray();
                 var messageFormValue =
                     new[] { "message", "msg", "m", "message_id", "msg_id", "msg_text", "text", "payload" }
                         .RandomFromStringArray();
@@ -167,20 +168,26 @@ namespace ghosts.api.Infrastructure.Animations.AnimationDefinitions
                         }
                     };
 
-                    var t = new Timeline();
-                    t.Id = Guid.NewGuid();
-                    t.Status = Timeline.TimelineStatus.Run;
-                    var th = new TimelineHandler();
-                    th.HandlerType = HandlerType.BrowserFirefox;
-                    th.Initial = "about:blank";
-                    th.UtcTimeOn = new TimeSpan(0, 0, 0);
-                    th.UtcTimeOff = new TimeSpan(23, 59, 59);
-                    th.HandlerArgs = new Dictionary<string, object>();
+                    var t = new Timeline
+                    {
+                        Id = Guid.NewGuid(),
+                        Status = Timeline.TimelineStatus.Run
+                    };
+                    var th = new TimelineHandler
+                    {
+                        HandlerType = HandlerType.BrowserFirefox,
+                        Initial = "about:blank",
+                        UtcTimeOn = new TimeSpan(0, 0, 0),
+                        UtcTimeOff = new TimeSpan(23, 59, 59),
+                        HandlerArgs = new Dictionary<string, object>()
+                    };
                     th.HandlerArgs.Add("isheadless", "false");
                     th.Loop = false;
-                    var te = new TimelineEvent();
-                    te.Command = "browse";
-                    te.CommandArgs = new List<object>();
+                    var te = new TimelineEvent
+                    {
+                        Command = "browse",
+                        CommandArgs = new List<object>()
+                    };
                     te.CommandArgs.Add(JsonConvert.SerializeObject(payload));
                     te.DelayAfter = 0;
                     te.DelayBefore = 0;
@@ -202,7 +209,7 @@ namespace ghosts.api.Infrastructure.Animations.AnimationDefinitions
                 }
 
                 //post to hub
-                await this._activityHubContext.Clients.All.SendAsync("show",
+                await _activityHubContext.Clients.All.SendAsync("show",
                     "1",
                     agent.Id.ToString(),
                     "social",
@@ -211,8 +218,8 @@ namespace ghosts.api.Infrastructure.Animations.AnimationDefinitions
                     cancellationToken: _cancellationToken);
             }
 
-            await this._context.NpcActivities.AddRangeAsync(activities, _cancellationToken);
-            await this._context.SaveChangesAsync(this._cancellationToken);
+            await _context.NpcActivities.AddRangeAsync(activities, _cancellationToken);
+            await _context.SaveChangesAsync(_cancellationToken);
         }
     }
 }

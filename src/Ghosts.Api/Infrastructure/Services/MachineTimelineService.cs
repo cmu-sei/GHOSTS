@@ -5,8 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Ghosts.Api.Infrastructure.Data;
 using ghosts.api.Infrastructure.Models;
+using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Microsoft.EntityFrameworkCore;
@@ -23,21 +23,16 @@ namespace ghosts.api.Infrastructure.Services
         Task DeleteByMachineIdAsync(Guid model, CancellationToken ct);
     }
 
-    public class MachineTimelinesService : IMachineTimelinesService
+    public class MachineTimelinesService(ApplicationDbContext context) : IMachineTimelinesService
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        private readonly ApplicationDbContext _context;
-
-        public MachineTimelinesService(ApplicationDbContext context)
-        {
-            _context = context;
-        }
+        private readonly ApplicationDbContext _context = context;
 
         public async Task<IEnumerable<MachineTimeline>> GetByMachineIdAsync(Guid id, CancellationToken ct)
         {
             return await _context.MachineTimelines.Where(x => x.MachineId == id).ToListAsync(ct);
         }
-        
+
         public async Task<MachineTimeline> GetByMachineIdAndTimelineIdAsync(Guid id, Guid timelineId, CancellationToken ct)
         {
             var timelines = await _context.MachineTimelines.Where(x => x.MachineId == id).ToListAsync(ct);
@@ -53,12 +48,12 @@ namespace ghosts.api.Infrastructure.Services
 
         public async Task<MachineTimeline> CreateAsync(Machine model, Timeline timeline, CancellationToken ct)
         {
-            var t = new MachineTimeline {Timeline = JsonConvert.SerializeObject(timeline), MachineId = model.Id};
+            var t = new MachineTimeline { Timeline = JsonConvert.SerializeObject(timeline), MachineId = model.Id };
 
             _context.MachineTimelines.Add(t);
             _context.Entry(t).State = EntityState.Added;
             await _context.SaveChangesAsync(ct);
-            
+
             return t;
         }
 

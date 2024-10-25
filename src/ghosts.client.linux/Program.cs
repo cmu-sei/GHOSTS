@@ -31,7 +31,7 @@ namespace ghosts.client.linux
         {
             ThreadJobs = new List<ThreadJob>();
             ClientConfigurationLoader.UpdateConfigurationWithEnvVars();
-            
+
             try
             {
                 Run(args);
@@ -74,7 +74,7 @@ namespace ghosts.client.linux
                 Console.ReadLine();
                 return;
             }
-            
+
             if (Configuration.Sockets.IsEnabled)
             {
                 _log.Trace("Sockets enabled. Connecting...");
@@ -89,7 +89,7 @@ namespace ghosts.client.linux
                 connectionThread.Start();
                 Queue = c.Queue;
             }
-            
+
             Program.CheckId = new CheckId();
 
             //linux clients do not catch stray processes or check for job duplication
@@ -97,7 +97,7 @@ namespace ghosts.client.linux
             StartupTasks.SetStartup();
 
             ListenerManager.Run();
-            
+
             //do we have client id? or is this first run?
             _log.Trace($"CheckID: {Program.CheckId.Id}");
 

@@ -11,7 +11,7 @@ namespace Ghosts.Animator.Models
 
         public AccountsProfile()
         {
-            this.Accounts = new List<Account>();
+            Accounts = new List<Account>();
         }
 
         public class Account

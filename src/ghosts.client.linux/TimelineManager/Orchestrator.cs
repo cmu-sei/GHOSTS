@@ -40,7 +40,7 @@ namespace ghosts.client.linux.timelineManager
                     _stopfileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Attributes;
                     _stopfileWatcher.Changed += StopFileChanged;
                 }
-            
+
                 //load into an managing object
                 //which passes the timeline commands to handlers
                 //and creates a thread to execute instructions over that timeline
@@ -50,9 +50,9 @@ namespace ghosts.client.linux.timelineManager
                 }
                 else
                 {
-                    if (this.MonitorThread == null) return;
-                    this.MonitorThread.Interrupt();
-                    this.MonitorThread = null;
+                    if (MonitorThread == null) return;
+                    MonitorThread.Interrupt();
+                    MonitorThread = null;
                 }
             }
             catch (Exception exc)
@@ -63,7 +63,7 @@ namespace ghosts.client.linux.timelineManager
 
         public static void StopTimeline(Guid timelineId)
         {
-            foreach (var threadJob in Program.ThreadJobs.Where(x=>x.TimelineId == timelineId))
+            foreach (var threadJob in Program.ThreadJobs.Where(x => x.TimelineId == timelineId))
             {
                 try
                 {
@@ -109,9 +109,9 @@ namespace ghosts.client.linux.timelineManager
             }
         }
 
-        
 
-        private void StopCommon()
+
+        private static void StopCommon()
         {
             try
             {
@@ -236,7 +236,7 @@ namespace ghosts.client.linux.timelineManager
                     _log.Debug($"HandlerType {handler.HandlerType} not supported on this platform");
                     return;
                 }
-                
+
                 t.IsBackground = true;
                 t.Start();
                 Program.ThreadJobs.Add(new ThreadJob
@@ -251,4 +251,4 @@ namespace ghosts.client.linux.timelineManager
             }
         }
     }
- }
+}

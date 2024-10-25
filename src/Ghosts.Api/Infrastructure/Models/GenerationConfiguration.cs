@@ -18,10 +18,10 @@ public class GenerationConfiguration
     // Enclaves are specific subnets of a range, (or a larger number of people) 
     public IList<EnclaveConfiguration> Enclaves { get; set; }
 }
-    
+
 public class EnclaveConfiguration
 {
-    public string Name {get;set;}
+    public string Name { get; set; }
     public IList<TeamConfiguration> Teams { get; set; }
 }
 
@@ -31,7 +31,7 @@ public class TeamConfiguration
     public string Name { get; set; }
     public string MachineNameTemplate { get; set; }
     public string DomainTemplate { get; set; }
-    
+
     public IEnumerable<PreferenceOption> PreferenceSettings { get; set; }
 }
 

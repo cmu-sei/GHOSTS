@@ -5,8 +5,8 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using AutoMapper;
-using Ghosts.Animator.Models;
 using ghosts.api.Areas.Animator.Infrastructure.Models;
+using Ghosts.Animator.Models;
 
 namespace ghosts.api.Infrastructure.Models;
 
@@ -15,48 +15,48 @@ public class NpcRecord
 {
     [Key]
     public Guid Id { get; set; }
-    
+
     public Guid? MachineId { get; set; }
 
     /// <summary>
     /// Used for grouping NPCs together, e.g. 2020, 2021
     /// </summary>
     public string Campaign { get; set; }
-        
+
     /// <summary>
     /// Used for grouping NPCs together, e.g.
     /// We could call this a group but in order
     /// to be more specific we use enclave.
     /// </summary>
     public string Enclave { get; set; }
-        
+
     /// <summary>
     /// Used for grouping NPCs together, e.g. 
     /// A team within an enclave
     /// </summary>
     public string Team { get; set; }
-    
+
     // this is also currently jsonb
     public NpcProfile NpcProfile { get; set; }
-    
+
     // jsonb
-    
+
     public NpcSocialGraph NpcSocialGraph { get; set; }
-    
+
     public static NpcRecord TransformToNpc(NpcProfile o)
     {
         if (o == null) return new NpcRecord();
-        
+
         var n = new NpcRecord
         {
             NpcProfile = o,
             NpcSocialGraph = new NpcSocialGraph(),
             Id = o.Id
         };
-        
+
         return n;
     }
-    
+
     /// <summary>
     /// Summary only copies the first record for many of the lists a profile might have
     /// Often used to submit to a system such as an LLM where a full profile would be too much data

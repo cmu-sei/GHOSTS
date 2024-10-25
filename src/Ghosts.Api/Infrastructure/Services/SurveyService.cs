@@ -17,25 +17,20 @@ namespace ghosts.api.Infrastructure.Services
         Task<IEnumerable<Survey>> GetAllAsync(Guid machineId, CancellationToken ct);
     }
 
-    public class SurveyService : ISurveyService
+    public class SurveyService(ApplicationDbContext context) : ISurveyService
     {
-        private readonly ApplicationDbContext _context;
-
-        public SurveyService(ApplicationDbContext context)
-        {
-            _context = context;
-        }
+        private readonly ApplicationDbContext _context = context;
 
         public async Task<Survey> GetLatestAsync(Guid machineId, CancellationToken ct)
         {
             return await _context.Surveys
-                .Include(x=>x.Drives)
+                .Include(x => x.Drives)
                 .Include("Interfaces.Bindings")
-                .Include(x=>x.Ports)
-                .Include(x=>x.Processes)
-                .Include(x=>x.EventLogs)
-                .Include(x=>x.LocalUsers)
-                .Where(x=>x.MachineId == machineId)
+                .Include(x => x.Ports)
+                .Include(x => x.Processes)
+                .Include(x => x.EventLogs)
+                .Include(x => x.LocalUsers)
+                .Where(x => x.MachineId == machineId)
                 .OrderByDescending(x => x.Created)
                 .FirstOrDefaultAsync(ct);
         }
@@ -43,13 +38,13 @@ namespace ghosts.api.Infrastructure.Services
         public async Task<IEnumerable<Survey>> GetAllAsync(Guid machineId, CancellationToken ct)
         {
             return await _context.Surveys
-                .Include(x=>x.Drives)
+                .Include(x => x.Drives)
                 .Include("Interfaces.Bindings")
-                .Include(x=>x.Ports)
-                .Include(x=>x.Processes)
-                .Include(x=>x.EventLogs)
-                .Include(x=>x.LocalUsers)
-                .Where(x=>x.MachineId == machineId)
+                .Include(x => x.Ports)
+                .Include(x => x.Processes)
+                .Include(x => x.EventLogs)
+                .Include(x => x.LocalUsers)
+                .Where(x => x.MachineId == machineId)
                 .OrderByDescending(x => x.Created)
                 .ToArrayAsync(ct);
         }

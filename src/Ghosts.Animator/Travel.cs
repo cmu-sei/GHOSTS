@@ -28,9 +28,9 @@ namespace Ghosts.Animator
 
             var address = Address.GetInternationalAddress();
             var code = Address.GetCountryCode(address.Country);
-            
+
             return new ForeignTravelProfile.Trip
-                {ArriveDestination = arrive, DepartDestination = depart, Destination = address.ToString(), Country = address.Country, Code = code};
+            { ArriveDestination = arrive, DepartDestination = depart, Destination = address.ToString(), Country = address.Country, Code = code };
         }
     }
 }

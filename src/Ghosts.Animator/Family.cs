@@ -29,9 +29,9 @@ namespace Ghosts.Animator
                     name.First = Name.GetFirstName(BiologicalSex.Male);
                 if (Npc.NpcProfile.BiologicalSex == BiologicalSex.Male)
                     name.First = Name.GetFirstName(BiologicalSex.Female);
-                return new FamilyProfile.Person {Name = name, Relationship = GetRelationship()};
+                return new FamilyProfile.Person { Name = name, Relationship = GetRelationship() };
             }
-            return new FamilyProfile.Person {Name = Name.GetName(), Relationship = GetRelationship()};
+            return new FamilyProfile.Person { Name = Name.GetName(), Relationship = GetRelationship() };
         }
 
         public static string GetRelationship()
@@ -39,6 +39,6 @@ namespace Ghosts.Animator
             return RELATIONSHIPS.RandomElement();
         }
 
-        private static readonly string[] RELATIONSHIPS = {"Spouse", "Parent", "Sibling", "Child"};
+        private static readonly string[] RELATIONSHIPS = { "Spouse", "Parent", "Sibling", "Child" };
     }
 }

@@ -127,8 +127,8 @@ namespace Ghosts.Domain.Code
                     {
                         using (var srDecrypt = new StreamReader(csDecrypt))
 
-                            // Read the decrypted bytes from the decrypting stream
-                            // and place them in a string.
+                        // Read the decrypted bytes from the decrypting stream
+                        // and place them in a string.
                         {
                             plaintext = srDecrypt.ReadToEnd();
                         }

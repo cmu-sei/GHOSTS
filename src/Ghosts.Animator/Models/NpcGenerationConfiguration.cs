@@ -16,7 +16,7 @@ namespace Ghosts.Animator.Models
         /// <summary>
         /// Set this if a specific service branch is needed
         /// </summary>
-        
+
         [JsonConverter(typeof(StringEnumConverter))]
         public MilitaryBranch? Branch { get; set; }
         /// <summary>
@@ -27,12 +27,12 @@ namespace Ghosts.Animator.Models
         /// Set this to generate NPCs that are all part of the same service branch unit
         /// </summary>
         public string Unit { get; set; }
-        
+
         public string Username { get; set; }
-        
+
         public IEnumerable<PreferenceOption> PreferenceSettings { get; set; }
     }
-    
+
     public class PreferenceOption
     {
         public int Score { get; set; }

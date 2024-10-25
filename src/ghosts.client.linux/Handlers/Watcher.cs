@@ -1,10 +1,10 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
-using Ghosts.Domain;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
-using System.Collections.Generic;
+using Ghosts.Domain;
 
 namespace ghosts.client.linux.handlers;
 
@@ -15,17 +15,19 @@ internal class Watcher : BaseHandler
 {
     public Watcher(TimelineHandler handler)
     {
-        base.Init(handler);
+        Init(handler);
         _log.Trace("Spawning watcher handler...");
 
         try
         {
             Ex(handler);
         }
-        catch (ThreadAbortException){
-                //ignore
+        catch (ThreadAbortException)
+        {
+            //ignore
         }
-        catch (ThreadInterruptedException){
+        catch (ThreadInterruptedException)
+        {
             //ignore
         }
         catch (Exception e)
@@ -39,22 +41,23 @@ internal class Watcher : BaseHandler
     // This is changed from Windows versions as we don't have the Application.Run()
     // method available which is in the Forms library.
     //
-    public void Ex(TimelineHandler handler)
+    public static void Ex(TimelineHandler handler)
     {
-        
+
         List<FolderWatcher> folderWatcherList = new List<FolderWatcher>();
         List<FileWatcher> fileWatcherList = new List<FileWatcher>();
-        try {
+        try
+        {
 
-        
+
 
             //first, create all of the watchers
-            foreach (TimelineEvent timelineEvent in handler.TimeLineEvents)
+            foreach (var timelineEvent in handler.TimeLineEvents)
             {
                 //TODO Need to port working hours/process stuff
                 //Infrastructure.WorkingHours.Is(handler);
 
-                
+
                 _log.Trace($"Watcher: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfter}");
 
                 switch (timelineEvent.Command)
@@ -71,28 +74,35 @@ internal class Watcher : BaseHandler
                         break;
                 }
 
-                
+
             }
             //Now we have to loop forever
-            while (true){
+            while (true)
+            {
                 Thread.Sleep(2000); //default
             }
         }
-        catch (Exception){
+        catch (Exception)
+        {
             throw;  //will be logged at next level
         }
-        finally  {
-            foreach (FolderWatcher w in folderWatcherList){
-                try {
+        finally
+        {
+            foreach (var w in folderWatcherList)
+            {
+                try
+                {
                     w.Dispose();
                 }
-                catch {}
+                catch { }
             }
-            foreach (FileWatcher w in fileWatcherList){
-                try {
+            foreach (var w in fileWatcherList)
+            {
+                try
+                {
                     w.Dispose();
                 }
-                catch {}
+                catch { }
             }
         }
     }
@@ -102,7 +112,7 @@ internal class Watcher : BaseHandler
 /// <summary>
 /// Helper class to sort file list by size or creation time.
 /// </summary>
-internal class Afile 
+internal class Afile
 {
     public string name { get; set; }
     public long size { get; set; }
@@ -112,7 +122,7 @@ internal class Afile
     public static int CompareBySize(Afile x, Afile y)
     {
         // A null value means that this object is greater.
-        if ( y.size > x.size)
+        if (y.size > x.size)
             return 1;
         else if (x.size == y.size) return 0;
         else return -1;
@@ -134,17 +144,18 @@ internal class Afile
 
 internal class FolderWatcher : BaseHandler
 {
-    private TimelineHandler _handler;
-    private TimelineEvent _timelineEvent;
+    private readonly TimelineHandler _handler;
+    private readonly TimelineEvent _timelineEvent;
     private readonly string _command;
-    private string folderPath = null;
-    private long folderMaxSize = -1;   //in bytes
+    private readonly string folderPath = null;
+    private readonly long folderMaxSize = -1;   //in bytes
     private long lastFolderSize = -1;  // last known size of this folder
-    private string deletionApproach = "random";
-    private FileSystemWatcher watcher = null;
+    private readonly string deletionApproach = "random";
+    private readonly FileSystemWatcher watcher = null;
 
-    public void Dispose(){
-        if (watcher != null) watcher.Dispose();
+    public void Dispose()
+    {
+        watcher?.Dispose();
     }
 
     /// <summary>
@@ -152,20 +163,20 @@ internal class FolderWatcher : BaseHandler
     /// </summary>
     /// <param name="folder"></param>
     /// <param name="allfiles"></param>
-    static void GetAllFiles(string folder, List<Afile> allfiles )
+    static void GetAllFiles(string folder, List<Afile> allfiles)
     {
         // Get array of all file names.
-        string[] filelist = Directory.GetFiles(folder, "*");
-        foreach (string fname in filelist)
+        var filelist = Directory.GetFiles(folder, "*");
+        foreach (var fname in filelist)
         {
             FileInfo info = new FileInfo(fname);
             allfiles.Add(new Afile() { name = info.FullName, size = info.Length, ctime = info.CreationTime });
         }
         //get subdirectories
-        string[] dirlist = Directory.GetDirectories(folder, "*");
-        foreach (string dname in dirlist)
+        var dirlist = Directory.GetDirectories(folder, "*");
+        foreach (var dname in dirlist)
         {
-            GetAllFiles(dname,allfiles);
+            GetAllFiles(dname, allfiles);
         }
     }
 
@@ -177,11 +188,11 @@ internal class FolderWatcher : BaseHandler
     static long GetDirectorySize(string folder)
     {
         // Get array of all file names.
-        string[] filelist = Directory.GetFiles(folder, "*");
+        var filelist = Directory.GetFiles(folder, "*");
 
         // Sum file sizes
         long size = 0;
-        foreach (string fname in filelist)
+        foreach (var fname in filelist)
         {
             try
             {
@@ -191,8 +202,8 @@ internal class FolderWatcher : BaseHandler
             catch { }  //ignore any errors when accessing the file
         }
         //recurse, sum sub directory sizes
-        string [] dirlist = Directory.GetDirectories(folder, "*");
-        foreach (string dname in dirlist)
+        var dirlist = Directory.GetDirectories(folder, "*");
+        foreach (var dname in dirlist)
         {
             size += GetDirectorySize(dname);
         }
@@ -209,24 +220,26 @@ internal class FolderWatcher : BaseHandler
 
 
         //parse the command args
-        char[] charSeparators = new char[] { ':' };
+        var charSeparators = new char[] { ':' };
         foreach (var cmd in timelineEvent.CommandArgs)
         {
             //each argument string is key:value, parse this
             var argString = cmd.ToString();
-            if (!string.IsNullOrEmpty(argString)) {
+            if (!string.IsNullOrEmpty(argString))
+            {
                 var words = argString.Split(charSeparators, 2, StringSplitOptions.None);
                 if (words.Length == 2)
                 {
                     if (words[0] == "path") folderPath = Environment.ExpandEnvironmentVariables(words[1]);
-                    else if (words[0] == "size" && Int64.TryParse(words[1], out long localsize)) folderMaxSize = localsize * 1024 * 1024;
+                    else if (words[0] == "size" && long.TryParse(words[1], out var localsize)) folderMaxSize = localsize * 1024 * 1024;
                     else if (words[0] == "deletionApproach") deletionApproach = words[1];
                 }
             }
         }
 
         //validate the arguments
-        if (folderPath == null) {
+        if (folderPath == null)
+        {
             _log.Trace("In Watcher handler, no 'path' argument specified for a folder path, Watcher exiting.");
             return;
         }
@@ -250,10 +263,12 @@ internal class FolderWatcher : BaseHandler
 
         lastFolderSize = GetDirectorySize(folderPath);
 
-        watcher = new FileSystemWatcher(folderPath);
-        watcher.NotifyFilter = NotifyFilters.Size;
-        watcher.EnableRaisingEvents = true;
-        watcher.IncludeSubdirectories = true;
+        watcher = new FileSystemWatcher(folderPath)
+        {
+            NotifyFilter = NotifyFilters.Size,
+            EnableRaisingEvents = true,
+            IncludeSubdirectories = true
+        };
         watcher.Changed += OnChanged;
 
         _log.Trace($"Setting up watcher for folder {folderPath} with maxSize {folderMaxSize} (total bytes)");
@@ -322,7 +337,7 @@ internal class FolderWatcher : BaseHandler
                     else
                     {
                         //default is random
-                        int targetIndex = _random.Next(0, allfiles.Count);
+                        var targetIndex = _random.Next(0, allfiles.Count);
                         targetFile = allfiles[targetIndex];
                         allfiles.RemoveAt(targetIndex);
                     }
@@ -331,7 +346,7 @@ internal class FolderWatcher : BaseHandler
                     {
                         File.Delete(targetFile.name);
                         //update current size
-                        currentSize = currentSize - targetFile.size;
+                        currentSize -= targetFile.size;
                         _log.Trace($"Watcher: successfully deleted {targetFile.name} to reduce folder {folderPath} size.");
                         if (currentSize < folderMaxSize)
                         {
@@ -372,16 +387,17 @@ internal class FolderWatcher : BaseHandler
 
 internal class FileWatcher : BaseHandler
 {
-    private TimelineHandler _handler;
-    private TimelineEvent _timelineEvent;
+    private readonly TimelineHandler _handler;
+    private readonly TimelineEvent _timelineEvent;
     private readonly string _command;
     private readonly string _filePath;
     private static DateTime _lastRead = DateTime.MinValue;
 
-    private FileSystemWatcher watcher = null;
+    private readonly FileSystemWatcher watcher = null;
 
-    public void Dispose(){
-        if (watcher != null) watcher.Dispose();
+    public void Dispose()
+    {
+        watcher?.Dispose();
     }
 
 
@@ -399,7 +415,7 @@ internal class FileWatcher : BaseHandler
         //    var webhookPayload = timelineEvent.CommandArgs[2].ToString();
         //    this.WebhookCreate(webhookPayload);
         //}
-            
+
         if (string.IsNullOrEmpty(_filePath))
         {
             _log.Trace("file path null or empty");
@@ -423,7 +439,7 @@ internal class FileWatcher : BaseHandler
             file = f.Name;
             _log.Trace($"File passed - Directory : {path} File: {file}");
         }
-            
+
         watcher = new FileSystemWatcher(path)
         {
             NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.FileName | NotifyFilters.Size | NotifyFilters.CreationTime | NotifyFilters.LastWrite
@@ -453,7 +469,7 @@ internal class FileWatcher : BaseHandler
         {
             _lastRead = lastWriteTime;
             _log.Trace("File: " + e.FullPath + " " + e.ChangeType);
-                
+
             try
             {
                 string fileContents;
@@ -464,7 +480,7 @@ internal class FileWatcher : BaseHandler
                         fileContents = logFileReader.ReadToEnd();
                     }
                 }
-                    
+
                 //this.Report(_handler.HandlerType.ToString(), _command, _filePath, _timelineEvent.TrackableId, fileContents);
 
                 if (Program.IsDebug)

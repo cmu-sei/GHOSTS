@@ -7,17 +7,12 @@ using Socializer.Infrastructure;
 namespace Socializer.Controllers;
 
 [Route("{*catchall}")]
-public class HomeController : BaseController
+public class HomeController(ILogger logger, IHubContext<PostsHub> hubContext, DataContext dbContext) : BaseController(logger, hubContext, dbContext)
 {
-    public HomeController(ILogger logger, IHubContext<PostsHub> hubContext, DataContext dbContext) :
-        base(logger, hubContext, dbContext)
-    {
-    }
-
     [HttpGet]
     public IActionResult Index()
     {
-        var posts = Db.Posts.Include(x=>x.Likes).OrderByDescending(x => x.CreatedUtc).Take(Program.Configuration.DefaultDisplay).ToList();
+        var posts = Db.Posts.Include(x => x.Likes).OrderByDescending(x => x.CreatedUtc).Take(Program.Configuration.DefaultDisplay).ToList();
 
         if (Request.QueryString.HasValue && !string.IsNullOrEmpty(Request.Query["u"]))
             ViewBag.User = Request.Query["u"];
@@ -53,12 +48,12 @@ public class HomeController : BaseController
             return BadRequest("User and message are required.");
 
         // has the same user tried to post the same message within the past x minutes?
-        if (Db.Posts.Any(_ => _.Message.ToLower() == post.Message.ToLower()
-                               && _.User.ToLower() == post.User.ToLower()
+        if (Db.Posts.Any(_ => _.Message.Equals(post.Message, StringComparison.CurrentCultureIgnoreCase)
+                               && _.User.Equals(post.User, StringComparison.CurrentCultureIgnoreCase)
                                && _.CreatedUtc >
                                post.CreatedUtc.AddMinutes(-Program.Configuration.MinutesToCheckForDuplicatePost)))
         {
-            this.Logger.LogInformation("Client is posting duplicates: {PostUser}", post.User);
+            Logger.LogInformation("Client is posting duplicates: {PostUser}", post.User);
             return NoContent();
         }
 
@@ -94,13 +89,13 @@ public class HomeController : BaseController
 
         if (!string.IsNullOrEmpty(imagePath))
         {
-            post.Message = post.Message + $" <img src=\"{imagePath}\"/>";
+            post.Message += $" <img src=\"{imagePath}\"/>";
         }
 
         Db.Posts.Add(post);
         await Db.SaveChangesAsync();
-        
-        this.CookieWrite("userid", post.User);
+
+        CookieWrite("userid", post.User);
 
         await HubContext.Clients.All.SendAsync("SendMessage", post.Id, post.User, post.Message, post.CreatedUtc);
 

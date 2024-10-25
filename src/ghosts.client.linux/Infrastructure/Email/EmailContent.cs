@@ -17,7 +17,7 @@ public class EmailContentManager
     public string Subject { private set; get; }
     public string Body { private set; get; }
     public ClientConfiguration Configuration { private set; get; }
-    private static readonly Random _random = new Random();
+    private static readonly Random _random = new();
 
     internal IList<EmailContent> Content { private set; get; }
 
@@ -45,15 +45,15 @@ public class EmailContentManager
     {
         LoadEmailFile();
 
-        var total = this.Content.Count;
+        var total = Content.Count;
 
         if (total <= 0) return;
 
-        var o = this.Content[_random.Next(0, total)];
-        this.Configuration = Program.Configuration;
+        var o = Content[_random.Next(0, total)];
+        Configuration = Program.Configuration;
 
-        this.Subject = ReplaceTokens(o.Subject);
-        this.Body = Parse(o.Body);
+        Subject = ReplaceTokens(o.Subject);
+        Body = Parse(o.Body);
     }
 
     public void LoadEmailFile()
@@ -61,12 +61,12 @@ public class EmailContentManager
         try
         {
             var engine = new FileHelperEngine<EmailContent>();
-            this.Content = engine.ReadFile(ClientConfigurationResolver.EmailContent).ToList();
+            Content = engine.ReadFile(ClientConfigurationResolver.EmailContent).ToList();
         }
         catch (Exception e)
         {
             _log.Error($"email content file could not be loaded: {e}");
-            this.Content = new List<EmailContent>();
+            Content = new List<EmailContent>();
         }
     }
 
@@ -110,12 +110,12 @@ public class EmailContentManager
                 }
             }
 
-            s.Append(word).Append(" ");
+            s.Append(word).Append(' ');
             line++;
         }
 
         var tokens = Configuration.EmailContent;
-        foreach (KeyValuePair<string, string> token in tokens)
+        foreach (var token in tokens)
         {
             var t = $"<{token.Key}/>";
             s.Replace(t, token.Value);
@@ -142,7 +142,7 @@ public class EmailReplyManager
 {
     private static readonly Logger _log = LogManager.GetCurrentClassLogger();
     public string Reply { private set; get; }
-    private static readonly Random _random = new Random();
+    private static readonly Random _random = new();
 
     public EmailReplyManager()
     {
@@ -151,20 +151,20 @@ public class EmailReplyManager
             var engine = new FileHelperEngine<EmailReply>();
 
             //does file exist
-            if(!File.Exists(ClientConfigurationResolver.EmailReply))
+            if (!File.Exists(ClientConfigurationResolver.EmailReply))
                 throw new FileNotFoundException($"Email reply file not found at {ClientConfigurationResolver.EmailReply}");
 
             // To Read Use:
             var list = engine.ReadFile(ClientConfigurationResolver.EmailReply);
-            var total = list.Count();
+            var total = list.Length;
 
             var o = list[_random.Next(0, total)];
-            this.Reply = o.Reply;
+            Reply = o.Reply;
         }
         catch (Exception exc)
         {
             _log.Debug(exc);
-            this.Reply = string.Empty;
+            Reply = string.Empty;
         }
     }
 }

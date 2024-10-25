@@ -11,14 +11,14 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Ghosts.Animator.Extensions;
 using ghosts.api.Hubs;
-using Ghosts.Api.Infrastructure;
 using ghosts.api.Infrastructure.Animations.AnimationDefinitions.Chat.Mattermost;
 using ghosts.api.Infrastructure.ContentServices;
 using ghosts.api.Infrastructure.Extensions;
-using Ghosts.Api.Infrastructure.Extensions;
 using ghosts.api.Infrastructure.Models;
+using Ghosts.Animator.Extensions;
+using Ghosts.Api.Infrastructure;
+using Ghosts.Api.Infrastructure.Extensions;
 using Ghosts.Domain.Code.Helpers;
 using Microsoft.AspNetCore.SignalR;
 using NLog;
@@ -45,23 +45,23 @@ public class ChatClient
     {
         _configuration = config;
         _chatSettings = chatSettings;
-        this._baseUrl = _chatSettings.PostUrl;
-        this._client = new HttpClient();
-        this._formatterService = formatterService;
-        this._activityHubContext = activityHubContext;
-        this._cancellationToken = ct;
+        _baseUrl = _chatSettings.PostUrl;
+        _client = new HttpClient();
+        _formatterService = formatterService;
+        _activityHubContext = activityHubContext;
+        _cancellationToken = ct;
     }
 
     private async Task<User> AdminLogin()
     {
         try
         {
-            return await this.Login(this._configuration.Chat.AdminUsername,
-                this._configuration.Chat.AdminPassword);
+            return await Login(_configuration.Chat.AdminUsername,
+                _configuration.Chat.AdminPassword);
         }
         catch (Exception e)
         {
-            _log.Error($"Cannot login the configured admin account – {this._configuration.Chat.AdminUsername} with error {e.Message}|{e.StackTrace}");
+            _log.Error($"Cannot login the configured admin account – {_configuration.Chat.AdminUsername} with error {e.Message}|{e.StackTrace}");
             return null;
         }
     }
@@ -78,26 +78,24 @@ public class ChatClient
             var content = new StringContent($"{{\"login_id\":\"{username}\",\"password\":\"{password}\"}}", null,
                 "application/json");
             request.Content = content;
-            var response = await this._client.SendAsync(request, this._cancellationToken);
+            var response = await _client.SendAsync(request, _cancellationToken);
             response.EnsureSuccessStatusCode();
 
             // Reading the 'Token' value from response headers
             if (response.Headers.TryGetValues("Token", out var values))
             {
-                this._token = values.First(); // Assuming there's at least one value
-                this._client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", this._token);
+                _token = values.First(); // Assuming there's at least one value
+                _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
             }
             else
             {
                 throw new Exception("Token not found in the response headers.");
             }
 
-            var contentString = await response.Content.ReadAsStringAsync(this._cancellationToken);
+            var contentString = await response.Content.ReadAsStringAsync(_cancellationToken);
             var user = JsonSerializer.Deserialize<User>(contentString,
-                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            if (user == null)
-                throw new Exception("A user was not returned properly");
-            this.UserId = user.Id;
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? throw new Exception("A user was not returned properly");
+            UserId = user.Id;
             return user;
         }
         catch (Exception e)
@@ -128,7 +126,7 @@ public class ChatClient
         {
             _log.Error($"No teams found {e}");
         }
-        
+
         return new List<Team>();
     }
 
@@ -138,7 +136,7 @@ public class ChatClient
         _log.Trace($"Using get channels url: {url}");
 
         var content = string.Empty;
-        
+
         try
         {
             var request = new HttpRequestMessage(HttpMethod.Get, url);
@@ -158,7 +156,7 @@ public class ChatClient
         {
             _log.Trace($"No channels found in {content} {e}");
         }
-        
+
         return new List<Channel>();
     }
 
@@ -203,7 +201,7 @@ public class ChatClient
         {
             _log.Error($"Get users failed {e}");
         }
-        
+
         return new List<User>();
     }
 
@@ -228,7 +226,7 @@ public class ChatClient
         {
             _log.Error($"Get user by username failed {e}");
         }
-        
+
         return new User();
     }
 
@@ -253,7 +251,7 @@ public class ChatClient
         {
             _log.Error($"Get user by id failed {e}");
         }
-        
+
         return new User();
     }
 
@@ -351,7 +349,7 @@ public class ChatClient
         {
             _log.Error($"No channels found {e}");
         }
-        
+
         return new List<Channel>();
     }
 
@@ -391,7 +389,7 @@ public class ChatClient
         {
             _log.Error($"No posts found {e}");
         }
-        
+
         return new PostResponse();
     }
 
@@ -445,15 +443,15 @@ public class ChatClient
     {
         try
         {
-            var response = await this._client.SendAsync(request, this._cancellationToken);
+            var response = await _client.SendAsync(request, _cancellationToken);
             if (response.StatusCode is HttpStatusCode.Forbidden or HttpStatusCode.BadRequest)
             {
-                _log.Info(await response.Content.ReadAsStringAsync(this._cancellationToken));
+                _log.Info(await response.Content.ReadAsStringAsync(_cancellationToken));
                 return string.Empty;
             }
 
             response.EnsureSuccessStatusCode();
-            var contentString = await response.Content.ReadAsStringAsync(this._cancellationToken);
+            var contentString = await response.Content.ReadAsStringAsync(_cancellationToken);
 
             return contentString;
         }
@@ -468,23 +466,23 @@ public class ChatClient
 
     public async Task Step(Random random, IEnumerable<NpcRecord> agents)
     {
-        while (!this._cancellationToken.IsCancellationRequested)
+        while (!_cancellationToken.IsCancellationRequested)
         {
             if (agents == null || !agents.Any())
                 return;
-    
-            var u = await this.AdminLogin();
+
+            var u = await AdminLogin();
             if (u == null)
             {
                 // Log failure for admin login
                 Console.WriteLine("Admin login failed. Cannot proceed with agent steps.");
                 return;
             }
-    
-            var agentsWithAccounts = await this.GetUsers();
+
+            var agentsWithAccounts = await GetUsers();
             var agentsWithAccountsHash = new HashSet<string>(agentsWithAccounts.Select(a => a.Email));
             var agentList = agents.ToList();
-    
+
             foreach (var agent in agentList)
             {
                 var username = agent.NpcProfile.Email.CreateUsernameFromEmail();
@@ -492,7 +490,7 @@ public class ChatClient
                 {
                     try
                     {
-                        await this.CreateUser(new UserCreate
+                        await CreateUser(new UserCreate
                         {
                             Email = agent.NpcProfile.Email,
                             FirstName = agent.NpcProfile.Name.First,
@@ -501,7 +499,7 @@ public class ChatClient
                             Password = _configuration.Chat.DefaultUserPassword,
                             Username = username
                         });
-    
+
                         Console.WriteLine($"User created: {username}");
                     }
                     catch (Exception ex)
@@ -510,10 +508,10 @@ public class ChatClient
                         continue; // Skip to the next agent if user creation fails
                     }
                 }
-    
+
                 try
                 {
-                    await this.StepEx(random, agent.Id, username, _configuration.Chat.DefaultUserPassword);
+                    await StepEx(random, agent.Id, username, _configuration.Chat.DefaultUserPassword);
                 }
                 catch (Exception ex)
                 {
@@ -526,7 +524,7 @@ public class ChatClient
 
     private async Task StepEx(Random random, Guid npcId, string username, string password)
     {
-        while (!this._cancellationToken.IsCancellationRequested)
+        while (!_cancellationToken.IsCancellationRequested)
         {
             _log.Trace($"Managing {username}...");
 
@@ -538,7 +536,7 @@ public class ChatClient
 
             try
             {
-                await this.Login(username, password);
+                await Login(username, password);
                 _log.Trace($"{username} is now logged in");
             }
             catch (Exception e)
@@ -547,7 +545,7 @@ public class ChatClient
                 return;
             }
 
-            var me = await this.GetUserByUsername(username);
+            var me = await GetUserByUsername(username);
             var channelHistory = new List<ChannelHistory>();
             try
             {
@@ -555,48 +553,48 @@ public class ChatClient
                 _log.Trace($"Preparing to post {numberOfPosts} times for {username}");
                 for (var i = 0; i <= numberOfPosts; i++)
                 {
-                    var myTeams = await this.GetMyTeams(me);
-                    var myChannels = await this.GetMyChannels(me);
+                    var myTeams = await GetMyTeams(me);
+                    var myChannels = await GetMyChannels(me);
                     var myChannelsList = myChannels as Channel[] ?? myChannels.ToArray();
 
-                    var teams = await this.GetTeams();
+                    var teams = await GetTeams();
                     var teamsList = teams as Team[] ?? teams.ToArray();
                     var notMyTeams = teamsList.Except(myTeams, new TeamComparer()).ToList();
 
                     // Do something with the teams not in 'myTeams'
                     foreach (var team in notMyTeams.Where(x => x.AllowOpenInvite is true))
                     {
-                        await this.JoinTeam(this.UserId, team.Id);
+                        await JoinTeam(UserId, team.Id);
                     }
 
                     foreach (var team in teamsList)
                     {
-                        _log.Trace($"{this.UserId} TEAM {team.Name}");
-                        var channels = await this.GetChannelsByTeam(team.Id);
+                        _log.Trace($"{UserId} TEAM {team.Name}");
+                        var channels = await GetChannelsByTeam(team.Id);
                         var channelsList = channels as Channel[] ?? channels.ToArray();
                         var notMyChannels = channelsList.Except(myChannelsList, new ChannelComparer()).ToList();
 
                         foreach (var channel in notMyChannels)
                         {
-                            await this.JoinChannel(this.UserId, channel.Id);
+                            await JoinChannel(UserId, channel.Id);
                         }
 
                         foreach (var channel in channelsList)
                         {
-                            _log.Trace($"{this.UserId} CHANNEL: {channel.Id}, {channel.Name}");
+                            _log.Trace($"{UserId} CHANNEL: {channel.Id}, {channel.Name}");
                             var lastPost = channelHistory.OrderByDescending(x => x.Created)
                                 .FirstOrDefault(x => x.ChannelId == channel.Id);
                             var postId = string.Empty;
                             if (lastPost != null)
                                 postId = lastPost.PostId;
-                            var posts = await this.GetPostsByChannel(channel.Id, postId);
+                            var posts = await GetPostsByChannel(channel.Id, postId);
                             try
                             {
                                 if (posts?.Posts != null)
                                 {
                                     foreach (var post in posts.Posts.Where(x => x.Value?.Type == ""))
                                     {
-                                        var user = await this.GetUserById(post.Value.UserId);
+                                        var user = await GetUserById(post.Value.UserId);
                                         if (user == null)
                                         {
                                             const string email = "some.one@user.com";
@@ -629,7 +627,7 @@ public class ChatClient
                         }
                     }
 
-                    var subPrompt = this._configuration.Prompts.GetRandom(random);
+                    var subPrompt = _configuration.Prompts.GetRandom(random);
                     _log.Trace($"{username} looking at posts...");
 
                     var randomChannelToPostTo = channelHistory.Select(x => x.ChannelId).ToArray().GetRandom(random);
@@ -664,8 +662,8 @@ public class ChatClient
                         respondingTo = history.UserName;
                     }
 
-                    var message = await this._formatterService.ExecuteQuery(prompt);
-                    message = message.Clean(this._configuration.Replacements, random);
+                    var message = await _formatterService.ExecuteQuery(prompt);
+                    message = message.Clean(_configuration.Replacements, random);
                     if (string.IsNullOrEmpty(message))
                     {
                         _log.Trace($"Empty message for {me.Username} {prompt}. Continuing..");
@@ -680,22 +678,22 @@ public class ChatClient
                         _log.Trace($"{historyString} | {respondingTo} | {message}{Environment.NewLine}{f}");
                     }
 
-                    if (message.ShouldSend(this._configuration.Drops))
+                    if (message.ShouldSend(_configuration.Drops))
                     {
                         if (username.Contains("admin"))
                             return;
 
-                        var post = await this.CreatePost(randomChannelToPostTo, message);
+                        var post = await CreatePost(randomChannelToPostTo, message);
                         _log.Info($"{prompt}|SENT|{post.Message}");
 
 
                         //post to hub
-                        await this._activityHubContext.Clients.All.SendAsync("show",
+                        await _activityHubContext.Clients.All.SendAsync("show",
                             1,
                             npcId,
                             "chat",
                             message,
-                            DateTime.Now.ToString(CultureInfo.InvariantCulture), this._cancellationToken
+                            DateTime.Now.ToString(CultureInfo.InvariantCulture), _cancellationToken
                         );
                     }
                     else
@@ -703,7 +701,7 @@ public class ChatClient
                         _log.Info($"{prompt}|NOT SENT|{message}");
                     }
 
-                    await Task.Delay(random.Next(5000, 250000), this._cancellationToken);
+                    await Task.Delay(random.Next(5000, 250000), _cancellationToken);
                 }
             }
             catch (Exception e)

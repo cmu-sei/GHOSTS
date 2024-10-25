@@ -24,7 +24,7 @@ namespace Ghosts.Animator.Extensions
         {
             return Letterify(Numerify(str));
         }
-        
+
         private static string Replace(this string str, char item, Func<char> character)
         {
             var builder = new StringBuilder(str.Length);
@@ -41,7 +41,7 @@ namespace Ghosts.Animator.Extensions
         {
             if (string.IsNullOrEmpty(o)) return string.Empty;
             o = Regex.Replace(o, @"[^0-9a-zA-Z\._]", "");
-            o = o.Replace("..", ".").Replace(".@","@").TrimStart('.');
+            o = o.Replace("..", ".").Replace(".@", "@").TrimStart('.');
             if (o.StartsWith(".")) return string.Empty;
             return o;
         }
@@ -49,7 +49,7 @@ namespace Ghosts.Animator.Extensions
         public static string After(this string value, string a)
         {
             if (string.IsNullOrEmpty(value) || string.IsNullOrEmpty(a)) return string.Empty;
-            
+
             var posA = value.LastIndexOf(a, StringComparison.InvariantCultureIgnoreCase);
             if (posA == -1)
             {
@@ -58,14 +58,15 @@ namespace Ghosts.Animator.Extensions
             var adjustedPosA = posA + a.Length;
             return adjustedPosA >= value.Length ? "" : value.Substring(adjustedPosA);
         }
-        
+
         private static IEnumerable<char> To(this char from, char to)
         {
-            for(var i = from; i <= to; i++) {
+            for (var i = from; i <= to; i++)
+            {
                 yield return i;
             }
         }
-        
+
         public static IEnumerable<string> ReadAndFilter(this FileInfo info, Predicate<string> condition)
         {
             using (var reader = new StreamReader(info.FullName))

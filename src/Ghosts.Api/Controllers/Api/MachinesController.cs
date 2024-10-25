@@ -14,15 +14,10 @@ namespace ghosts.api.Controllers.Api
     [Produces("application/json")]
     [Route("api/[controller]")]
     [ResponseCache(Duration = 5)]
-    public class MachinesController : Controller
+    public class MachinesController(IMachineService service) : Controller
     {
-        private readonly IMachineService _service;
+        private readonly IMachineService _service = service;
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-
-        public MachinesController(IMachineService service)
-        {
-            _service = service;
-        }
 
         /// <summary>
         /// Gets machines matching the provided query value
@@ -74,12 +69,13 @@ namespace ghosts.api.Controllers.Api
         /// <summary>
         /// Updates a machine's information
         /// </summary>
+        /// <param name="id"></param>
         /// <param name="machine">The machine record to update</param>
         /// <param name="ct">Cancellation Token</param>
         /// <returns>The updated machine record</returns>
         [SwaggerOperation("MachinesUpdate")]
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutMachine([FromBody] Machine machine, CancellationToken ct)
+        public async Task<IActionResult> PutMachine(string id, [FromBody] Machine machine, CancellationToken ct)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             if (machine.Id == Guid.Empty) return BadRequest();
@@ -90,7 +86,7 @@ namespace ghosts.api.Controllers.Api
 
         /// <summary>
         /// Create a machine on the range
-        /// (warning: GHOSTS cannot control this machine unless its client later checks in with the same information created here) 
+        /// (warning: GHOSTS cannot control this machine unless its client later checks in with the same information created here)
         /// </summary>
         /// <param name="machine">The machine to create</param>
         /// <param name="ct">Cancellation Token</param>
@@ -149,7 +145,7 @@ namespace ghosts.api.Controllers.Api
                 return StatusCode(500, "Internal server error");
             }
         }
-        
+
         /// <summary>
         /// Gets the health for a particular machine
         /// </summary>

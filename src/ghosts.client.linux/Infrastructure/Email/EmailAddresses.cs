@@ -21,7 +21,7 @@ public static class EmailListManager
         var list = JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(fileName));
         return list;
     }
-        
+
     public static List<string> GetOutsideList()
     {
         var fileName = ClientConfigurationResolver.EmailOutside;

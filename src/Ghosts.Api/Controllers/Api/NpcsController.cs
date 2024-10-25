@@ -9,14 +9,14 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using FileHelpers;
+using ghosts.api.Areas.Animator.Infrastructure.Models;
+using ghosts.api.Infrastructure.Models;
+using ghosts.api.Infrastructure.Services;
 using Ghosts.Animator;
 using Ghosts.Animator.Extensions;
 using Ghosts.Animator.Models;
-using ghosts.api.Areas.Animator.Infrastructure.Models;
 using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Api.Infrastructure.Extensions;
-using ghosts.api.Infrastructure.Models;
-using ghosts.api.Infrastructure.Services;
 using Ghosts.Domain.Code;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -28,16 +28,10 @@ namespace ghosts.api.Controllers.Api;
 [ApiController]
 [Produces("application/json")]
 [Route("api/[controller]")]
-public class NpcsController : ControllerBase
+public class NpcsController(ApplicationDbContext context, INpcService service) : ControllerBase
 {
-    private readonly ApplicationDbContext _context;
-    private readonly INpcService _service;
-
-    public NpcsController(ApplicationDbContext context, INpcService service)
-    {
-        this._context = context;
-        this._service = service;
-    }
+    private readonly ApplicationDbContext _context = context;
+    private readonly INpcService _service = service;
 
     /// <summary>
     /// Returns all generated NPCs in the system (caution, could return a very large amount of data)
@@ -49,9 +43,9 @@ public class NpcsController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<NpcRecord>>> NpcsGetAll()
     {
-        return Ok(await this._service.GetAll());
+        return Ok(await _service.GetAll());
     }
-    
+
     /// <summary>
     /// Returns all generated NPCs in the system (caution, could return a very large amount of data)
     /// </summary>
@@ -62,7 +56,7 @@ public class NpcsController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<IEnumerable<NpcRecord>>> NpcsCreate(NpcProfile npc)
     {
-        return Ok(await this._service.CreateOne(npc));
+        return Ok(await _service.CreateOne(npc));
     }
 
     /// <summary>
@@ -75,7 +69,7 @@ public class NpcsController : ControllerBase
     [HttpGet("list")]
     public async Task<ActionResult<IEnumerable<NpcNameId>>> NpcsGetList()
     {
-        return Ok(await this._service.GetListAsync());
+        return Ok(await _service.GetListAsync());
     }
 
     /// <summary>
@@ -89,7 +83,7 @@ public class NpcsController : ControllerBase
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<NpcRecord>> NpcsGetById(Guid id)
     {
-        return Ok(await this._service.GetById(id));
+        return Ok(await _service.GetById(id));
     }
 
     /// <summary>
@@ -103,7 +97,7 @@ public class NpcsController : ControllerBase
     [HttpDelete("{id:guid}")]
     public async Task NpcsDeleteById(Guid id)
     {
-        await this._service.DeleteById(id);
+        await _service.DeleteById(id);
     }
 
     /// <summary>
@@ -122,8 +116,8 @@ public class NpcsController : ControllerBase
         if (npc == null) return NotFound();
 
         // Determine the image path
-        var imagePath = string.IsNullOrEmpty(npc.NpcProfile.PhotoLink) 
-            ? ApplicationDetails.ConfigurationFiles.DefaultNpcImage 
+        var imagePath = string.IsNullOrEmpty(npc.NpcProfile.PhotoLink)
+            ? ApplicationDetails.ConfigurationFiles.DefaultNpcImage
             : npc.NpcProfile.PhotoLink;
 
         // Check if the image file exists
@@ -152,8 +146,8 @@ public class NpcsController : ControllerBase
         {
             return BadRequest(ModelState);
         }
-        
-        var npc = await this._service.GetById(npcId);
+
+        var npc = await _service.GetById(npcId);
         if (npc == null) return null;
         return new NPCReduced(fieldsToReturn, npc).PropertySelection;
     }
@@ -213,8 +207,8 @@ public class NpcsController : ControllerBase
     public async Task NpcsEnclaveDelete(string campaign, string enclave)
     {
         var list = await NpcsEnclaveGet(campaign, enclave);
-        this._context.Npcs.RemoveRange(list);
-        await this._context.SaveChangesAsync();
+        _context.Npcs.RemoveRange(list);
+        await _context.SaveChangesAsync();
     }
 
     /// <summary>
@@ -262,7 +256,7 @@ public class NpcsController : ControllerBase
     [HttpGet("{campaign}/{enclave}/{team}")]
     public async Task<IEnumerable<NpcRecord>> NpcsTeamGet(string campaign, string enclave, string team)
     {
-        return await this._service.GetTeam(campaign, enclave, team);
+        return await _service.GetTeam(campaign, enclave, team);
     }
 
     /// <summary>
@@ -280,7 +274,7 @@ public class NpcsController : ControllerBase
     public async Task<IActionResult> NpcsTeamGetCsv(string campaign, string enclave, string team)
     {
         var engine = new FileHelperEngine<NPCToCsv>();
-        var list = await this.NpcsTeamGet(team, enclave, campaign);
+        var list = await NpcsTeamGet(team, enclave, campaign);
 
         var filteredList = list.Select(n => new NPCToCsv { Id = n.Id, Email = n.NpcProfile.Email }).ToList();
 
@@ -311,13 +305,13 @@ public class NpcsController : ControllerBase
         {
             return BadRequest(ModelState);
         }
-            
+
         var s = new StringBuilder("users = {").Append(Environment.NewLine);
-        var list = await this.NpcsTeamGet(configuration.Campaign, configuration.Enclave, configuration.Team);
+        var list = await NpcsTeamGet(configuration.Campaign, configuration.Enclave, configuration.Team);
 
         var pool = configuration.GetIpPool();
         foreach (var item in pool)
-            if (this._context.NpcIps.Any(o => o.IpAddress == item && o.Enclave == configuration.Enclave))
+            if (_context.NpcIps.Any(o => o.IpAddress == item && o.Enclave == configuration.Enclave))
                 pool.Remove(item);
 
         if (pool.Count < list.Count())
@@ -336,7 +330,7 @@ public class NpcsController : ControllerBase
             }
 
             var ip = pool.RandomElement();
-            this._context.NpcIps.Add(new NPCIpAddress { IpAddress = ip, NpcId = npc.Id, Enclave = npc.Enclave });
+            _context.NpcIps.Add(new NPCIpAddress { IpAddress = ip, NpcId = npc.Id, Enclave = npc.Enclave });
             pool.Remove(ip);
 
             s.Append("\tuser-").Append(i).Append(" = {").Append(Environment.NewLine);
@@ -358,7 +352,7 @@ public class NpcsController : ControllerBase
             i++;
         }
 
-        this._context.SaveChanges();
+        _context.SaveChanges();
 
         return File(Encoding.UTF8.GetBytes
                 (s.ToString()), "text/tfvars", $"{Guid.NewGuid()}.tfvars");
@@ -385,7 +379,7 @@ public class NpcsController : ControllerBase
         {
             return BadRequest(ModelState);
         }
-        
+
         var createdNpcs = new List<NpcRecord>();
         foreach (var enclave in config.Enclaves)
         {
@@ -418,7 +412,7 @@ public class NpcsController : ControllerBase
                                                                   && o.Department == job.Department
                                                                   && o.Level >= job.Level)).ToList();
 
-                if (managerList.Any())
+                if (managerList.Count != 0)
                 {
                     var manager = managerList.RandomElement();
                     job.Manager = manager.Id;
@@ -426,8 +420,8 @@ public class NpcsController : ControllerBase
             }
         }
 
-        this._context.Npcs.AddRange(createdNpcs);
-        await this._context.SaveChangesAsync(ct);
+        _context.Npcs.AddRange(createdNpcs);
+        await _context.SaveChangesAsync(ct);
         return createdNpcs;
     }
 
@@ -445,7 +439,7 @@ public class NpcsController : ControllerBase
         var engine = new FileHelperEngine<NPCToInsiderThreatCsv>();
         engine.HeaderText = engine.GetFileHeader();
 
-        var list = await this._context.Npcs.ToListAsync();
+        var list = await _context.Npcs.ToListAsync();
         var finalList = NPCToInsiderThreatCsv.ConvertToCsv(list.ToList());
 
         var stream = new MemoryStream();

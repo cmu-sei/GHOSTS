@@ -29,5 +29,5 @@ public static class DictionaryExtensions
         }
         sb.Append(" }");
         return sb.ToString();
-    }    
+    }
 }

@@ -19,14 +19,14 @@ public class Bayes
     /// </summary>
     public Bayes(long position, decimal likelihood_h_1, decimal prior_h_1, decimal likelihood_h_2, decimal prior_h_2)
     {
-        this.Position = position;
-        this.LikelihoodH1 = likelihood_h_1;
-        this.LikelihoodH2 = likelihood_h_2;
-        this.PriorH1 = prior_h_1;
-        this.PriorH2 = prior_h_2;
-        this.PosteriorH1 = 0;
-        this.PosteriorH2 = 0;
-        this.CalculatePosterior();
+        Position = position;
+        LikelihoodH1 = likelihood_h_1;
+        LikelihoodH2 = likelihood_h_2;
+        PriorH1 = prior_h_1;
+        PriorH2 = prior_h_2;
+        PosteriorH1 = 0;
+        PosteriorH2 = 0;
+        CalculatePosterior();
     }
 
     /// <summary>
@@ -40,28 +40,28 @@ public class Bayes
     /// </summary>
     private void CalculatePosterior()
     {
-        if (((this.LikelihoodH1 * this.PriorH1) + (this.LikelihoodH2 * this.PriorH2)) > 0)
+        if (((LikelihoodH1 * PriorH1) + (LikelihoodH2 * PriorH2)) > 0)
         {
-            this.PosteriorH1 = (this.LikelihoodH1 * this.PriorH1) /
-                               ((this.LikelihoodH1 * this.PriorH1) + (this.LikelihoodH2 * this.PriorH2));
+            PosteriorH1 = (LikelihoodH1 * PriorH1) /
+                               ((LikelihoodH1 * PriorH1) + (LikelihoodH2 * PriorH2));
         }
         else
         {
-            this.PosteriorH1 = 0;
+            PosteriorH1 = 0;
         }
 
-        if (((this.LikelihoodH2 * this.PriorH2) + (this.LikelihoodH1 * this.PriorH1)) > 0)
+        if (((LikelihoodH2 * PriorH2) + (LikelihoodH1 * PriorH1)) > 0)
         {
-            this.PosteriorH2 = (this.LikelihoodH2 * this.PriorH2) /
-                               ((this.LikelihoodH2 * this.PriorH2) + (this.LikelihoodH1 * this.PriorH1));
+            PosteriorH2 = (LikelihoodH2 * PriorH2) /
+                               ((LikelihoodH2 * PriorH2) + (LikelihoodH1 * PriorH1));
         }
         else
         {
-            this.PosteriorH2 = 0;
+            PosteriorH2 = 0;
         }
 
-        this.PosteriorH1 = Normalize(this.PosteriorH1);
-        this.PosteriorH2 = Normalize(this.PosteriorH2);
+        PosteriorH1 = Normalize(PosteriorH1);
+        PosteriorH2 = Normalize(PosteriorH2);
     }
 
     private static decimal Normalize(decimal n)

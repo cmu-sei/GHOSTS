@@ -21,7 +21,7 @@ namespace Ghosts.Animator.Extensions
                 elements[swapIndex] = elements[i];
             }
         }
-        
+
         public static string RandomFromProbabilityList(this Dictionary<string, double> list)
         {
             var u = list.Sum(x => x.Value);
@@ -29,7 +29,7 @@ namespace Ghosts.Animator.Extensions
             double sum = 0;
             return list.FirstOrDefault(x => r <= (sum += x.Value)).Key;
         }
-        
+
         public static int GetWeightedRandomProbabilityResult(this Dictionary<string, int> probabilitySettings)
         {
             var value = AnimatorRandom.Rand.Next(100);
@@ -60,12 +60,12 @@ namespace Ghosts.Animator.Extensions
             var arr = selected.Split(Convert.ToChar("|"));
             return AnimatorRandom.Rand.Next(Convert.ToInt32(arr[0]), Convert.ToInt32(arr[1]));
         }
-        
+
         public static T RandomElement<T>(this IEnumerable<T> enumerable)
         {
             return enumerable.RandomElementUsing(new Random());
         }
-        
+
         public static string Join<T>(this IEnumerable<T> items, string separator)
         {
             return items.Select(i => i.ToString())
@@ -84,19 +84,19 @@ namespace Ghosts.Animator.Extensions
             for (var i = 0; i < itemsToTake; i++)
                 yield return list[rand.Next(list.Count)];
         }
-        
+
         public static string RandomFromStringArray(this string[] ar)
         {
             var rand = AnimatorRandom.Rand;
             return ar[rand.Next(ar.Length)];
         }
-        
+
         private static T RandomElementUsing<T>(this IEnumerable<T> enumerable, Random rand)
         {
             var e = enumerable.ToList();
-            if(e.Count==0)
+            if (e.Count == 0)
             {
-                return default(T);
+                return default;
             }
             return e.ElementAt(rand.Next(0, e.Count));
         }

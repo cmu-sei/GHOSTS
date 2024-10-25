@@ -9,12 +9,12 @@ namespace Ghosts.Domain.Code
     {
         public static IEnumerable<Timeline> GetLocalTimelines()
         {
-            var timelines = new List<Timeline> 
+            var timelines = new List<Timeline>
             {
                 // get default timeline
                 TimelineBuilder.GetTimeline()
             };
-            
+
             var placesToLook = new List<string>
             {
                 // look for instance timelines

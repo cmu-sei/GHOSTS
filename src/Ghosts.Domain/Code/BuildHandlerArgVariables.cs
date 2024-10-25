@@ -39,7 +39,7 @@ namespace Ghosts.Domain.Code
             });
 
             // Replace {name} placeholders
-            value = Regex.Replace(value, @"\{name\}", match => $"file_{Guid.NewGuid()}_{DateTime.Now.ToString("yyyyMMddHHmmss")}");
+            value = Regex.Replace(value, @"\{name\}", match => $"file_{Guid.NewGuid()}_{DateTime.Now:yyyyMMddHHmmss}");
 
             return value;
         }
@@ -56,7 +56,7 @@ namespace Ghosts.Domain.Code
             var randomIndex = Random.Next(files.Length);
             return files[randomIndex];
         }
-        
+
         public static string ReplaceCommandVariables(string command, Dictionary<string, string> variables)
         {
             foreach (var variable in variables)

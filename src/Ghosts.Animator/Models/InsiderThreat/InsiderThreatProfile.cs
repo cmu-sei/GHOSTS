@@ -19,42 +19,42 @@ namespace Ghosts.Animator.Models.InsiderThreat
 
         public InsiderThreatProfile()
         {
-            this.Access = new AccessProfile();
-            this.CriminalViolentOrAbusiveConduct = new CriminalViolentOrAbusiveConductProfile();
-            this.FinancialConsiderations = new FinancialConsiderationsProfile();
-            this.ForeignConsiderations = new ForeignConsiderationsProfile();
-            this.JudgementCharacterAndPsychologicalConditions = new JudgementCharacterAndPsychologicalConditionsProfile();
-            this.ProfessionalLifecycleAndPerformance = new ProfessionalLifecycleAndPerformanceProfile();
-            this.SecurityAndComplianceIncidents = new SecurityAndComplianceIncidentsProfile();
-            this.SubstanceAbuseAndAddictiveBehaviors = new SubstanceAbuseAndAddictiveBehaviorsProfile();
-            this.TechnicalActivity = new TechnicalActivityProfile();
+            Access = new AccessProfile();
+            CriminalViolentOrAbusiveConduct = new CriminalViolentOrAbusiveConductProfile();
+            FinancialConsiderations = new FinancialConsiderationsProfile();
+            ForeignConsiderations = new ForeignConsiderationsProfile();
+            JudgementCharacterAndPsychologicalConditions = new JudgementCharacterAndPsychologicalConditionsProfile();
+            ProfessionalLifecycleAndPerformance = new ProfessionalLifecycleAndPerformanceProfile();
+            SecurityAndComplianceIncidents = new SecurityAndComplianceIncidentsProfile();
+            SubstanceAbuseAndAddictiveBehaviors = new SubstanceAbuseAndAddictiveBehaviorsProfile();
+            TechnicalActivity = new TechnicalActivityProfile();
         }
 
         public IEnumerable<RelatedEvent> GetAllEvents()
         {
             var events = new List<RelatedEvent>();
-            events.AddRange(this.Access.RelatedEvents);
-            events.AddRange(this.FinancialConsiderations.RelatedEvents);
-            events.AddRange(this.ForeignConsiderations.RelatedEvents);
-            events.AddRange(this.TechnicalActivity.RelatedEvents);
-            events.AddRange(this.ProfessionalLifecycleAndPerformance.RelatedEvents);
-            events.AddRange(this.SecurityAndComplianceIncidents.RelatedEvents);
-            events.AddRange(this.CriminalViolentOrAbusiveConduct.RelatedEvents);
-            events.AddRange(this.JudgementCharacterAndPsychologicalConditions.RelatedEvents);
-            events.AddRange(this.SubstanceAbuseAndAddictiveBehaviors.RelatedEvents);
+            events.AddRange(Access.RelatedEvents);
+            events.AddRange(FinancialConsiderations.RelatedEvents);
+            events.AddRange(ForeignConsiderations.RelatedEvents);
+            events.AddRange(TechnicalActivity.RelatedEvents);
+            events.AddRange(ProfessionalLifecycleAndPerformance.RelatedEvents);
+            events.AddRange(SecurityAndComplianceIncidents.RelatedEvents);
+            events.AddRange(CriminalViolentOrAbusiveConduct.RelatedEvents);
+            events.AddRange(JudgementCharacterAndPsychologicalConditions.RelatedEvents);
+            events.AddRange(SubstanceAbuseAndAddictiveBehaviors.RelatedEvents);
             return events;
         }
     }
-    
-    public class ForeignConsiderationsProfile : InsiderThreatBaseProfile {}
-    public class TechnicalActivityProfile : InsiderThreatBaseProfile {}
-    public class ProfessionalLifecycleAndPerformanceProfile : InsiderThreatBaseProfile {}
+
+    public class ForeignConsiderationsProfile : InsiderThreatBaseProfile { }
+    public class TechnicalActivityProfile : InsiderThreatBaseProfile { }
+    public class ProfessionalLifecycleAndPerformanceProfile : InsiderThreatBaseProfile { }
     public class SecurityAndComplianceIncidentsProfile : InsiderThreatBaseProfile { }
     public class CriminalViolentOrAbusiveConductProfile : InsiderThreatBaseProfile { }
     public class JudgementCharacterAndPsychologicalConditionsProfile : InsiderThreatBaseProfile { }
-    public class SubstanceAbuseAndAddictiveBehaviorsProfile : InsiderThreatBaseProfile  { }
+    public class SubstanceAbuseAndAddictiveBehaviorsProfile : InsiderThreatBaseProfile { }
     public class FinancialConsiderationsProfile : InsiderThreatBaseProfile { }
-    
+
     public class AccessProfile : InsiderThreatBaseProfile
     {
         public string SecurityClearance { get; set; }

@@ -18,15 +18,15 @@ namespace ghosts.api.Infrastructure.Models
 
         public FindMachineResponse()
         {
-            this.Machine = new Machine();
+            Machine = new Machine();
         }
-        
+
         public bool IsValid()
         {
-            return string.IsNullOrEmpty(this.Error);
+            return string.IsNullOrEmpty(Error);
         }
     }
-    
+
     [Table("machines")]
     public class Machine
     {
@@ -102,7 +102,7 @@ namespace ghosts.api.Infrastructure.Models
                    !string.IsNullOrEmpty(CurrentUsername);
         }
 
-        [NotMapped] 
+        [NotMapped]
         public bool HadId { get; set; }
 
         public void AddHistoryHealth(HistoryHealth model)

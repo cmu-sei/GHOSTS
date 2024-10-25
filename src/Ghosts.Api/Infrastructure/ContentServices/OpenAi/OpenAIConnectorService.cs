@@ -48,12 +48,12 @@ public class OpenAiConnectorService : IContentService
 
         var client = new HttpClient(handler);
 
-        this._service = new OpenAIService(new OpenAiOptions
+        _service = new OpenAIService(new OpenAiOptions
         {
             ApiKey = apiKey
         }, client);
 
-        this.IsReady = true;
+        IsReady = true;
     }
 
     public async Task<string> ExecuteQuery(string prompt)
@@ -62,13 +62,13 @@ public class OpenAiConnectorService : IContentService
         {
             ChatMessage.FromSystem(prompt)
         };
-        return await this.ExecuteQuery(messages);
+        return await ExecuteQuery(messages);
     }
 
     //TODO: shouldn't this method save off every request and response somewhere?
     public async Task<string> ExecuteQuery(IList<ChatMessage> messages)
     {
-        var completionResult = await this._service.ChatCompletion.CreateCompletion(new ChatCompletionCreateRequest
+        var completionResult = await _service.ChatCompletion.CreateCompletion(new ChatCompletionCreateRequest
         {
             Messages = messages,
             Model = OpenAI.ObjectModels.Models.Gpt_4,

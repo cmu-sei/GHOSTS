@@ -5,11 +5,11 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading;
-using Ghosts.Animator.Extensions;
 using ghosts.api.Hubs;
-using Ghosts.Api.Infrastructure;
 using ghosts.api.Infrastructure.Animations.AnimationDefinitions.Chat;
 using ghosts.api.Infrastructure.ContentServices;
+using Ghosts.Animator.Extensions;
+using Ghosts.Api.Infrastructure;
 using Ghosts.Api.Infrastructure.Data;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,46 +26,46 @@ public class ChatJob
     private readonly int _currentStep;
     private readonly CancellationToken _cancellationToken;
     private readonly IFormatterService _formatterService;
-    
+
     public ChatJob(ApplicationSettings.AnimatorSettingsDetail.AnimationsSettings.ChatSettings configuration, IServiceScopeFactory scopeFactory, Random random,
         IHubContext<ActivityHub> activityHubContext, CancellationToken cancellationToken)
     {
         //todo: post results to activityHubContext for "top" reporting
-       
-        this._random = random;
-        
+
+        _random = random;
+
         using var innerScope = scopeFactory.CreateScope();
-        this._context = innerScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        
-        this._cancellationToken = cancellationToken;
+        _context = innerScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+        _cancellationToken = cancellationToken;
 
         var chatConfiguration = JsonSerializer.Deserialize<ChatJobConfiguration>(File.ReadAllText("config/chat.json"),
             new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? throw new InvalidOperationException();
 
-        this._formatterService =
+        _formatterService =
             new ContentCreationService(configuration.ContentEngine).FormatterService;
-        
-        this._chatClient = new ChatClient(configuration, chatConfiguration, this._formatterService, activityHubContext, this._cancellationToken);
-        
+
+        _chatClient = new ChatClient(configuration, chatConfiguration, _formatterService, activityHubContext, _cancellationToken);
+
         while (!_cancellationToken.IsCancellationRequested)
         {
-            if (this._currentStep > configuration.MaximumSteps)
+            if (_currentStep > configuration.MaximumSteps)
             {
-                _log.Trace($"Maximum steps met: {this._currentStep - 1}. Chat Job is exiting...");
+                _log.Trace($"Maximum steps met: {_currentStep - 1}. Chat Job is exiting...");
                 return;
             }
 
-            this.Step(random, chatConfiguration);
+            Step(random, chatConfiguration);
             Thread.Sleep(configuration.TurnLength);
 
-            this._currentStep++;
+            _currentStep++;
         }
     }
 
     private async void Step(Random random, ChatJobConfiguration chatConfiguration)
     {
         _log.Trace("Executing a chat step...");
-        var agents = this._context.Npcs.ToList().Shuffle(_random).Take(chatConfiguration.Chat.AgentsPerBatch);
-        await this._chatClient.Step(random, agents);
+        var agents = _context.Npcs.ToList().Shuffle(_random).Take(chatConfiguration.Chat.AgentsPerBatch);
+        await _chatClient.Step(random, agents);
     }
 }

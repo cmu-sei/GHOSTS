@@ -16,13 +16,13 @@ namespace ghosts.client.linux.Health
             foreach (var url in config.CheckUrls)
             {
                 var request = WebRequest.Create(url);
-                
+
                 var watch = System.Diagnostics.Stopwatch.StartNew();
-                
+
                 //TODO - this only gets running user, there may be other users on the box
-                if(!r.LoggedOnUsers.Contains(Environment.UserName))
+                if (!r.LoggedOnUsers.Contains(Environment.UserName))
                     r.LoggedOnUsers.Add(Environment.UserName);
-                
+
                 try
                 {
                     using var response = (HttpWebResponse)request.GetResponse();

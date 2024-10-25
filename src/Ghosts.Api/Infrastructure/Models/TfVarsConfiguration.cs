@@ -17,13 +17,13 @@ public class TfVarsConfiguration
 
     public bool IsValid()
     {
-        if (string.IsNullOrEmpty(this.IpAddressLow)
-            || string.IsNullOrEmpty(this.IpAddressHigh)
-            || string.IsNullOrEmpty(this.Campaign)
-            || string.IsNullOrEmpty(this.Enclave)
-            || string.IsNullOrEmpty(this.Team)
-            || string.IsNullOrEmpty(this.Gateway)
-            || string.IsNullOrEmpty(this.Mask))
+        if (string.IsNullOrEmpty(IpAddressLow)
+            || string.IsNullOrEmpty(IpAddressHigh)
+            || string.IsNullOrEmpty(Campaign)
+            || string.IsNullOrEmpty(Enclave)
+            || string.IsNullOrEmpty(Team)
+            || string.IsNullOrEmpty(Gateway)
+            || string.IsNullOrEmpty(Mask))
             return false;
         return true;
     }
@@ -32,18 +32,18 @@ public class TfVarsConfiguration
     {
         var pool = new List<string>();
 
-        var lowArr = this.IpAddressLow.Split(".");
-        var highArr = this.IpAddressHigh.Split(".");
+        var lowArr = IpAddressLow.Split(".");
+        var highArr = IpAddressHigh.Split(".");
 
         var low = Convert.ToInt32(lowArr[lowArr.GetUpperBound(0)]);
         var high = Convert.ToInt32(highArr[highArr.GetUpperBound(0)]);
 
         for (var i = low; i < high; i++)
         {
-            pool.Add(ReplaceLastOccurrence(this.IpAddressLow, low.ToString(), i.ToString()));
+            pool.Add(ReplaceLastOccurrence(IpAddressLow, low.ToString(), i.ToString()));
         }
 
-        pool.Add(this.IpAddressHigh);
+        pool.Add(IpAddressHigh);
         return pool;
     }
 

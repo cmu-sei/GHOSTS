@@ -21,15 +21,10 @@ namespace ghosts.api.Controllers.Api
     /// </summary>
     [Produces("application/json")]
     [Route("api/[controller]")]
-    public class MachineUpdatesController : Controller
+    public class MachineUpdatesController(IMachineUpdateService updateService) : Controller
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        private readonly IMachineUpdateService _updateService;
-
-        public MachineUpdatesController(IMachineUpdateService updateService)
-        {
-            _updateService = updateService;
-        }
+        private readonly IMachineUpdateService _updateService = updateService;
 
         /// <summary>
         /// Sends a command for machine to perform,
