@@ -19,15 +19,10 @@ namespace ghosts.api.Controllers.Api;
 [ApiController]
 [Produces("application/json")]
 [Route("api/[controller]")]
-public class NpcsGenerateController : ControllerBase
+public class NpcsGenerateController(INpcService service) : ControllerBase
 {
     private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-    private readonly INpcService _service;
-
-    public NpcsGenerateController(INpcService service)
-    {
-        this._service = service;
-    }
+    private readonly INpcService _service = service;
 
     /// <summary>
     /// Returns all NPCs at the specified level - Campaign, Enclave, or Team
@@ -40,7 +35,7 @@ public class NpcsGenerateController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<string>>> GetKeys(string key)
     {
-        return Ok(await this._service.GetKeys(key));
+        return Ok(await _service.GetKeys(key));
     }
 
     /// <summary>
@@ -60,7 +55,7 @@ public class NpcsGenerateController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        return Ok(await this._service.Create(config, ct));
+        return Ok(await _service.Create(config, ct));
     }
 
     /// <summary>
@@ -73,7 +68,7 @@ public class NpcsGenerateController : ControllerBase
     [HttpPost("one")]
     public async Task<ActionResult<NpcRecord>> CreateOne()
     {
-        return await this._service.CreateOne();
+        return await _service.CreateOne();
     }
 
     /// <summary>
@@ -86,6 +81,6 @@ public class NpcsGenerateController : ControllerBase
     [HttpPost("syncWithMachineUsernames")]
     public async Task SyncWithMachineUsernames()
     {
-        await this._service.SyncWithMachineUsernames();
+        await _service.SyncWithMachineUsernames();
     }
 }

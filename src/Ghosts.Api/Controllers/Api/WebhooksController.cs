@@ -4,9 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Ghosts.Api.Infrastructure.Data;
 using ghosts.api.Infrastructure.Models;
 using ghosts.api.Infrastructure.Services;
+using Ghosts.Api.Infrastructure.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
@@ -16,16 +16,10 @@ namespace ghosts.api.Controllers.Api
 {
     [Produces("application/json")]
     [Route("api/[controller]")]
-    public class WebhooksController : Controller
+    public class WebhooksController(ApplicationDbContext context, IBackgroundQueue service) : Controller
     {
-        private readonly ApplicationDbContext _context;
-        private readonly IBackgroundQueue _service;
-
-        public WebhooksController(ApplicationDbContext context, IBackgroundQueue service)
-        {
-            _context = context;
-            _service = service;
-        }
+        private readonly ApplicationDbContext _context = context;
+        private readonly IBackgroundQueue _service = service;
 
         /// <summary>
         /// Gets all of the webhooks currently active on the system
@@ -101,7 +95,7 @@ namespace ghosts.api.Controllers.Api
             _context.Webhooks.Add(webhook);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetWebhook", new {id = webhook.Id}, webhook);
+            return CreatedAtAction("GetWebhook", new { id = webhook.Id }, webhook);
         }
 
         /// <summary>
@@ -137,9 +131,11 @@ namespace ghosts.api.Controllers.Api
 
             var timeline = new HistoryTimeline();
 
-            var payload = new NotificationQueueEntry();
-            payload.Type = NotificationQueueEntry.NotificationType.Timeline;
-            payload.Payload = (JObject) JToken.FromObject(timeline);
+            var payload = new NotificationQueueEntry
+            {
+                Type = NotificationQueueEntry.NotificationType.Timeline,
+                Payload = (JObject)JToken.FromObject(timeline)
+            };
 
             QueueSyncService.HandleWebhook(webhook, payload);
             return NoContent();
@@ -171,7 +167,7 @@ namespace ghosts.api.Controllers.Api
                             }
                     });
 
-                
+
             }
             catch (Exception e)
             {

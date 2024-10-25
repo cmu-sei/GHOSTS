@@ -5,10 +5,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ghosts.api.Infrastructure.Models;
 using Ghosts.Api;
 using Ghosts.Api.Infrastructure;
 using Ghosts.Api.Infrastructure.Data;
-using ghosts.api.Infrastructure.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -18,17 +18,10 @@ namespace ghosts.api.Controllers
 {
     [Route("view-social")]
     [ApiExplorerSettings(IgnoreApi = true)]
-    public class ViewSocialController : Controller
+    public class ViewSocialController(ApplicationDbContext context) : Controller
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        private readonly ApplicationSettings _configuration;
-        private readonly ApplicationDbContext _context;
-
-        public ViewSocialController(ApplicationDbContext context)
-        {
-            _configuration = Program.ApplicationSettings;
-            _context = context;
-        }
+        private readonly ApplicationSettings _configuration = Program.ApplicationSettings;
 
         [HttpGet]
         public async Task<IActionResult> Index()
@@ -98,7 +91,7 @@ namespace ghosts.api.Controllers
 
         private async Task<List<NpcSocialGraph>> LoadSocialGraphsAsync()
         {
-            var graphs = await _context.Npcs
+            var graphs = await context.Npcs
                 .Where(x => x.NpcSocialGraph != null)
                 .Select(x => x.NpcSocialGraph)
                 .ToListAsync();
@@ -111,7 +104,7 @@ namespace ghosts.api.Controllers
             return graphs?.FirstOrDefault(x => x.Id == id);
         }
 
-        private InteractionMap CreateInteractionMap(NpcSocialGraph graph)
+        private static InteractionMap CreateInteractionMap(NpcSocialGraph graph)
         {
             var interactions = new InteractionMap();
             var startTime = DateTime.Now.AddMinutes(-graph.Connections.Count).AddMinutes(-1); // Adjust start time
@@ -175,8 +168,8 @@ namespace ghosts.api.Controllers
 
             public InteractionMap()
             {
-                this.nodes = new List<Node>();
-                this.links = new List<Link>();
+                nodes = new List<Node>();
+                links = new List<Link>();
             }
         }
     }

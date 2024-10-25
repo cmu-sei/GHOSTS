@@ -13,7 +13,7 @@ namespace Ghosts.Animator
             {
                 case 0: return Name.GetLastName() + " " + GetSuffix();
                 case 1: return Name.GetLastName() + "-" + Name.GetLastName();
-                case 2: return String.Format("{0}, {1} and {2}", Name.GetLastName(), Name.GetLastName(), Name.GetLastName());
+                case 2: return string.Format("{0}, {1} and {2}", Name.GetLastName(), Name.GetLastName(), Name.GetLastName());
                 default: throw new ApplicationException();
             }
         }
@@ -48,7 +48,7 @@ namespace Ghosts.Animator
             }
         }
 
-        private static readonly string[] SUFFIXES = {"Inc", "and Sons", "LLC", "Group"};
+        private static readonly string[] SUFFIXES = { "Inc", "and Sons", "LLC", "Group" };
 
         private static readonly string[] CATCH_PRE =
         {
@@ -176,7 +176,7 @@ namespace Ghosts.Animator
             "methodologies"
         };
 
-        private static readonly string[] POSITION_PREFIXES = {"Executive", "Assistant", "General", "Associate"};
+        private static readonly string[] POSITION_PREFIXES = { "Executive", "Assistant", "General", "Associate" };
 
         private static readonly string[] POSITION_AREAS =
         {
@@ -184,6 +184,6 @@ namespace Ghosts.Animator
             "Department", "Regional", "Division"
         };
 
-        private static readonly string[] POSITIONS = {"President", "Manager", "Director", "Secretary", "Consultant"};
+        private static readonly string[] POSITIONS = { "President", "Manager", "Director", "Secretary", "Consultant" };
     }
 }

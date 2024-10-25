@@ -16,8 +16,8 @@ namespace Ghosts.Animator.Services
         {
             var unit = units.Sub.ToList().FirstOrDefault(x => x.Nick == branch.ToString());
 
-            this.Unit = units.Clone();
-            this.Unit.Sub = null;
+            Unit = units.Clone();
+            Unit.Sub = null;
 
             if (unit != null)
             {
@@ -44,13 +44,13 @@ namespace Ghosts.Animator.Services
                         previous = new List<MilitaryUnit.Unit>();
                     }
 
-                    previous = SetUnit(previous, new List<MilitaryUnit.Unit> {item});
+                    previous = SetUnit(previous, new List<MilitaryUnit.Unit> { item });
                 }
 
-                this.Unit.Sub = previous;
+                Unit.Sub = previous;
             }
 
-            this.Unit.Country = units.Country;
+            Unit.Country = units.Country;
         }
 
         private static List<MilitaryUnit.Unit> SetUnit(List<MilitaryUnit.Unit> previous, List<MilitaryUnit.Unit> current)
@@ -60,7 +60,7 @@ namespace Ghosts.Animator.Services
                 item.Sub = previous;
             }
 
-            return new List<MilitaryUnit.Unit> {current[0]};
+            return new List<MilitaryUnit.Unit> { current[0] };
         }
 
         private static MilitaryUnit.Unit GetUnit(MilitaryUnit.Unit unit)
@@ -88,8 +88,10 @@ namespace Ghosts.Animator.Services
 
                 if (!string.IsNullOrEmpty(currentUnit.HQ))
                 {
-                    MilUnit.Address = new AddressProfiles.AddressProfile();
-                    MilUnit.Address.Name = currentUnit.HQ;
+                    MilUnit.Address = new AddressProfiles.AddressProfile
+                    {
+                        Name = currentUnit.HQ
+                    };
                 }
 
                 currentUnit = GetUnit(currentUnit);

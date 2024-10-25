@@ -8,11 +8,11 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Ghosts.Animator.Extensions;
 using ghosts.api.Hubs;
+using ghosts.api.Infrastructure.Models;
+using Ghosts.Animator.Extensions;
 using Ghosts.Api.Infrastructure;
 using Ghosts.Api.Infrastructure.Data;
-using ghosts.api.Infrastructure.Models;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,27 +27,27 @@ public class SocialGraphJob
     private readonly ApplicationSettings _configuration;
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly ApplicationDbContext _context;
-    private List<NpcSocialGraph> _socialGraphs;
+    private readonly List<NpcSocialGraph> _socialGraphs;
     private readonly Random _random;
     private const string SavePath = "_output/socialgraph/";
     private readonly string[] _knowledgeArray;
     private bool _isEnabled = true;
-    private CancellationToken _cancellationToken;
+    private readonly CancellationToken _cancellationToken;
     private readonly IHubContext<ActivityHub> _activityHubContext;
-    private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
-    
+    private static readonly SemaphoreSlim _semaphore = new(1, 1);
+
     public SocialGraphJob(ApplicationSettings configuration, IServiceScopeFactory scopeFactory, Random random,
         IHubContext<ActivityHub> activityHubContext, CancellationToken cancellationToken)
     {
         try
         {
-            this._activityHubContext = activityHubContext;
-            this._configuration = configuration;
-            this._random = random;
-            this._scopeFactory = scopeFactory;
-            this._cancellationToken = cancellationToken;
-            this._socialGraphs = new List<NpcSocialGraph>();
-            this._knowledgeArray = GetAllKnowledge();
+            _activityHubContext = activityHubContext;
+            _configuration = configuration;
+            _random = random;
+            _scopeFactory = scopeFactory;
+            _cancellationToken = cancellationToken;
+            _socialGraphs = new List<NpcSocialGraph>();
+            _knowledgeArray = GetAllKnowledge();
 
             // if (this._socialGraphs.Count > 0 &&
             //     this._socialGraphs[0].CurrentStep > _configuration.AnimatorSettings.Animations.SocialGraph.MaximumSteps)
@@ -55,23 +55,23 @@ public class SocialGraphJob
             //     _log.Trace("Graph has exceed maximum steps. Sleeping...");
             //     return;
             // }
-            
-            using var innerScope = _scopeFactory.CreateScope();
-            this._context = innerScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-            var npcs = this._context.Npcs.RandPick(10).ToList();
+            using var innerScope = _scopeFactory.CreateScope();
+            _context = innerScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+            var npcs = _context.Npcs.RandPick(10).ToList();
 
             _log.Info("SocialGraph loaded, running steps...");
-            while (this._isEnabled && !this._cancellationToken.IsCancellationRequested)
+            while (_isEnabled && !_cancellationToken.IsCancellationRequested)
             {
                 foreach (var npc in npcs)
                 {
-                    _ = this.Step(npc);
+                    _ = Step(npc);
                 }
 
                 _log.Info(
-                    $"Step complete, sleeping for {this._configuration.AnimatorSettings.Animations.SocialGraph.TurnLength}ms");
-                Thread.Sleep(this._configuration.AnimatorSettings.Animations.SocialGraph.TurnLength);
+                    $"Step complete, sleeping for {_configuration.AnimatorSettings.Animations.SocialGraph.TurnLength}ms");
+                Thread.Sleep(_configuration.AnimatorSettings.Animations.SocialGraph.TurnLength);
             }
         }
         catch (ThreadInterruptedException e)
@@ -103,7 +103,7 @@ public class SocialGraphJob
                 Name = npc.NpcProfile.Name.ToString()
             };
 
-            var connections = this._context.Npcs.ToList().OrderBy(o => o.Enclave).ThenBy(o => o.Team).Take(10).ToList();
+            var connections = _context.Npcs.ToList().OrderBy(o => o.Enclave).ThenBy(o => o.Team).Take(10).ToList();
             foreach (var connection in connections)
             {
                 graph.Connections.Add(new NpcSocialGraph.SocialConnection
@@ -114,12 +114,12 @@ public class SocialGraphJob
             }
 
             await _semaphore.WaitAsync(_cancellationToken);
-            
+
             try
             {
                 npc.NpcSocialGraph = graph;
-                this._context.Entry(npc).State = EntityState.Modified;
-                await this._context.SaveChangesAsync(_cancellationToken);
+                _context.Entry(npc).State = EntityState.Modified;
+                await _context.SaveChangesAsync(_cancellationToken);
                 _log.Trace($"Social graph saved for {npc.NpcProfile.Name}...");
             }
             catch (Exception e)
@@ -141,8 +141,8 @@ public class SocialGraphJob
                 try
                 {
                     npc.NpcSocialGraph.Id = npc.Id;
-                    this._context.Entry(npc).State = EntityState.Modified;
-                    await this._context.SaveChangesAsync(_cancellationToken);
+                    _context.Entry(npc).State = EntityState.Modified;
+                    await _context.SaveChangesAsync(_cancellationToken);
                     _log.Trace($"Social graph id corrected for {npc.NpcProfile.Id}...");
                 }
                 catch (Exception e)
@@ -161,7 +161,7 @@ public class SocialGraphJob
         if (graph.CurrentStep > _configuration.AnimatorSettings.Animations.SocialGraph.MaximumSteps)
         {
             _log.Trace($"Maximum steps met: {graph.CurrentStep - 1}. Social graph is exiting...");
-            this._isEnabled = false;
+            _isEnabled = false;
             return;
         }
 
@@ -170,7 +170,7 @@ public class SocialGraphJob
 
         //get number of agents to interact with, weighted by decreasing weights calculation and who is in our graph
         var numberOfAgentsToInteract =
-            this._random.NextDouble().GetNumberByDecreasingWeights(0, graph.Connections.Count, 0.4);
+            _random.NextDouble().GetNumberByDecreasingWeights(0, graph.Connections.Count, 0.4);
 
         //pick other agent(s), allowing multiple interactions with the same person because that seems likely
         //TODO: make this weighted by distance and/or influenced by like knowledge
@@ -195,7 +195,7 @@ public class SocialGraphJob
                 graph.Knowledge.Add(learning);
 
                 //post to hub
-                await this._activityHubContext.Clients.All.SendAsync("show",
+                await _activityHubContext.Clients.All.SendAsync("show",
                     graph.CurrentStep,
                     agent.Id,
                     "knowledge",
@@ -216,9 +216,9 @@ public class SocialGraphJob
                     {
                         connection.RelationshipStatus++;
 
-                        var npcTo = this._context.Npcs.Include(x => x.NpcProfile.Name)
+                        var npcTo = _context.Npcs.Include(x => x.NpcProfile.Name)
                             .FirstOrDefault(x => x.Id == learning.To);
-                        var npcFrom = this._context.Npcs.Include(x => x.NpcProfile.Name)
+                        var npcFrom = _context.Npcs.Include(x => x.NpcProfile.Name)
                             .FirstOrDefault(x => x.Id == learning.From);
 
                         var o =
@@ -226,7 +226,7 @@ public class SocialGraphJob
                         _log.Trace(o);
 
                         //post to hub
-                        await this._activityHubContext.Clients.All.SendAsync("show",
+                        await _activityHubContext.Clients.All.SendAsync("show",
                             graph.CurrentStep,
                             agent.Id,
                             "relationship",
@@ -242,7 +242,7 @@ public class SocialGraphJob
                 _log.Trace(o);
 
                 //post to hub
-                await this._activityHubContext.Clients.All.SendAsync("show",
+                await _activityHubContext.Clients.All.SendAsync("show",
                     graph.CurrentStep,
                     agent.Id,
                     "relationship",
@@ -257,14 +257,14 @@ public class SocialGraphJob
         //https://pubsonline.informs.org/doi/10.1287/orsc.1090.0468
         //in knowledge - the world changes, and so there is some amount of knowledge that is now obsolete
         //in relationships - without work, relationships can decay
-        var stepsToDecay = this._configuration.AnimatorSettings.Animations.SocialGraph.Decay.StepsTo;
+        var stepsToDecay = _configuration.AnimatorSettings.Animations.SocialGraph.Decay.StepsTo;
         if (graph.CurrentStep > stepsToDecay)
         {
             foreach (var k in graph.Knowledge.ToList().DistinctBy(x => x.Topic))
             {
                 if (graph.Knowledge.Where(x => x.Topic == k.Topic).Sum(x => x.Value) > stepsToDecay)
                 {
-                    if (this._configuration.AnimatorSettings.Animations.SocialGraph.Decay.ChanceOf.ChanceOfThisValue())
+                    if (_configuration.AnimatorSettings.Animations.SocialGraph.Decay.ChanceOf.ChanceOfThisValue())
                     {
                         if (graph.Knowledge.Where(x => x.Topic == k.Topic).MaxBy(x => x.Step)?.Step <
                             graph.CurrentStep - stepsToDecay)
@@ -274,7 +274,7 @@ public class SocialGraphJob
                             graph.Knowledge.Add(learning);
 
                             //post to hub
-                            await this._activityHubContext.Clients.All.SendAsync("show",
+                            await _activityHubContext.Clients.All.SendAsync("show",
                                 graph.CurrentStep,
                                 graph.Id,
                                 "knowledge",
@@ -302,7 +302,7 @@ public class SocialGraphJob
                     c.Interactions.Add(interaction);
 
                     //post to hub
-                    await this._activityHubContext.Clients.All.SendAsync("show",
+                    await _activityHubContext.Clients.All.SendAsync("show",
                         graph.CurrentStep,
                         graph.Id,
                         "relationship",
@@ -313,16 +313,16 @@ public class SocialGraphJob
                 }
             }
         }
-        
-        this._socialGraphs.Add(graph);
+
+        _socialGraphs.Add(graph);
     }
 
     private string CalculateLearning(NpcSocialGraph graph)
     {
         string knowledge = null;
 
-        var chance = this._configuration.AnimatorSettings.Animations.SocialGraph.ChanceOfKnowledgeTransfer;
-        var npc = this._context.Npcs.FirstOrDefault(x => x.Id == graph.Id);
+        var chance = _configuration.AnimatorSettings.Animations.SocialGraph.ChanceOfKnowledgeTransfer;
+        var npc = _context.Npcs.FirstOrDefault(x => x.Id == graph.Id);
         if (npc == null)
             return string.Empty;
 
@@ -334,7 +334,7 @@ public class SocialGraphJob
         {
             //knowledge is probably weighted to what you already know
             var randomizer = new DynamicWeightedRandomizer<string>();
-            foreach (var k in this._knowledgeArray)
+            foreach (var k in _knowledgeArray)
             {
                 if (!randomizer.Contains(k))
                     randomizer.Add(k, graph.Knowledge.Count(x => x.Topic == k) + 1);
@@ -357,19 +357,13 @@ public class SocialGraphJob
         Array.Sort(k);
         return k;
     }
-    
-    private void Report()
-    {
-        this.ReportMatrix();
-        this.ReportLearning();
-    }
-    
+
     private void ReportLearning()
     {
         var line = new StringBuilder(",");
 
         //write header
-        foreach (var knowledge in this._knowledgeArray)
+        foreach (var knowledge in _knowledgeArray)
         {
             line.Append(knowledge).Append(',');
         }
@@ -377,11 +371,11 @@ public class SocialGraphJob
         line.Append(Environment.NewLine);
 
         //now write each person
-        foreach (var npc in this._socialGraphs)
+        foreach (var npc in _socialGraphs)
         {
             line.Append(npc.Name).Append(',');
 
-            foreach (var knowledge in this._knowledgeArray)
+            foreach (var knowledge in _knowledgeArray)
             {
                 var knowledgeOfTopic = npc.Knowledge.Count(x => x.Topic == knowledge);
                 line.Append(knowledgeOfTopic).Append(',');
@@ -396,7 +390,7 @@ public class SocialGraphJob
         //write header
         line = new StringBuilder(",");
         var knowledgeCount = new Dictionary<string, int>();
-        foreach (var knowledge in this._knowledgeArray)
+        foreach (var knowledge in _knowledgeArray)
         {
             line.Append(knowledge).Append(',');
             knowledgeCount[knowledge] = 0;
@@ -404,12 +398,12 @@ public class SocialGraphJob
 
         line.Append(Environment.NewLine);
         //now write each step
-        for (long i = 0; i < this._socialGraphs.Max(x => x.CurrentStep); i++)
+        for (long i = 0; i < _socialGraphs.Max(x => x.CurrentStep); i++)
         {
-            foreach (var knowledge in this._knowledgeArray)
+            foreach (var knowledge in _knowledgeArray)
             {
                 // ReSharper disable once AccessToModifiedClosure
-                foreach (var learningCount in this._socialGraphs.Select(npc =>
+                foreach (var learningCount in _socialGraphs.Select(npc =>
                              npc.Knowledge.Count(x => x.Topic == knowledge && x.Step < i)))
                 {
                     knowledgeCount[knowledge] += learningCount;
@@ -417,7 +411,7 @@ public class SocialGraphJob
             }
 
             line.Append(i).Append(',');
-            foreach (var knowledge in this._knowledgeArray)
+            foreach (var knowledge in _knowledgeArray)
             {
                 line.Append(knowledgeCount[knowledge]).Append(',');
             }
@@ -433,14 +427,14 @@ public class SocialGraphJob
 
         File.WriteAllText($"{SavePath}social_knowledge_graph.csv", line.ToString().TrimEnd(',') + Environment.NewLine);
     }
-   
+
 
     private void ReportMatrix()
     {
         var line = new StringBuilder(",");
 
         //write header
-        foreach (var npc in this._socialGraphs)
+        foreach (var npc in _socialGraphs)
         {
             line.Append(npc.Name).Append(',');
         }
@@ -448,10 +442,10 @@ public class SocialGraphJob
         line.Append(Environment.NewLine);
 
         //now write each person
-        foreach (var npc in this._socialGraphs)
+        foreach (var npc in _socialGraphs)
         {
             line.Append(npc.Name).Append(',');
-            foreach (var connection in this._socialGraphs)
+            foreach (var connection in _socialGraphs)
             {
                 if (connection.Id == npc.Id)
                 {

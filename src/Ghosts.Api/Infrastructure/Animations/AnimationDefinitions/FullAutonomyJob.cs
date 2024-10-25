@@ -6,10 +6,10 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using Ghosts.Animator.Extensions;
 using ghosts.api.Hubs;
-using Ghosts.Api.Infrastructure;
 using ghosts.api.Infrastructure.ContentServices;
+using Ghosts.Animator.Extensions;
+using Ghosts.Api.Infrastructure;
 using Ghosts.Api.Infrastructure.Data;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,24 +28,24 @@ public class FullAutonomyJob
     private readonly List<string> _history;
     private readonly int _currentStep;
     private readonly IHubContext<ActivityHub> _activityHubContext;
-    private CancellationToken _cancellationToken;
+    private readonly CancellationToken _cancellationToken;
 
     public FullAutonomyJob(ApplicationSettings configuration, IServiceScopeFactory scopeFactory, Random random,
         IHubContext<ActivityHub> activityHubContext, CancellationToken cancellationToken)
     {
         try
         {
-            this._activityHubContext = activityHubContext;
-            this._configuration = configuration;
-            this._random = random;
-            
-            using var innerScope = scopeFactory.CreateScope();
-            this._context = innerScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            
-            this._cancellationToken = cancellationToken;
+            _activityHubContext = activityHubContext;
+            _configuration = configuration;
+            _random = random;
 
-            this._history = File.Exists(this._historyFile)
-                ? File.ReadAllLinesAsync(this._historyFile).Result.ToList()
+            using var innerScope = scopeFactory.CreateScope();
+            _context = innerScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+            _cancellationToken = cancellationToken;
+
+            _history = File.Exists(_historyFile)
+                ? File.ReadAllLinesAsync(_historyFile, cancellationToken).Result.ToList()
                 : new List<string>();
 
             if (_configuration.AnimatorSettings.Animations.FullAutonomy.IsInteracting)
@@ -55,18 +55,18 @@ public class FullAutonomyJob
                     Directory.CreateDirectory(SavePath);
                 }
 
-                while (!this._cancellationToken.IsCancellationRequested)
+                while (!_cancellationToken.IsCancellationRequested)
                 {
-                    if (this._currentStep > _configuration.AnimatorSettings.Animations.FullAutonomy.MaximumSteps)
+                    if (_currentStep > _configuration.AnimatorSettings.Animations.FullAutonomy.MaximumSteps)
                     {
-                        _log.Trace($"Maximum steps met: {this._currentStep - 1}. Full Autonomy is exiting...");
+                        _log.Trace($"Maximum steps met: {_currentStep - 1}. Full Autonomy is exiting...");
                         return;
                     }
 
-                    this.Step();
-                    Thread.Sleep(this._configuration.AnimatorSettings.Animations.FullAutonomy.TurnLength);
+                    Step();
+                    Thread.Sleep(_configuration.AnimatorSettings.Animations.FullAutonomy.TurnLength);
 
-                    this._currentStep++;
+                    _currentStep++;
                 }
             }
         }
@@ -84,22 +84,22 @@ public class FullAutonomyJob
     {
         var contentService = new ContentCreationService(_configuration.AnimatorSettings.Animations.FullAutonomy.ContentEngine);
 
-        var agents = this._context.Npcs.ToList().Shuffle(_random).Take(_random.Next(5, 20));
+        var agents = _context.Npcs.ToList().Shuffle(_random).Take(_random.Next(5, 20));
         foreach (var agent in agents)
         {
-            var history = this._history.Where(x => x.StartsWith(agent.Id.ToString()));
+            var history = _history.Where(x => x.StartsWith(agent.Id.ToString()));
             var nextAction = await contentService.GenerateNextAction(agent, string.Join('\n', history));
 
             var line = $"{agent.Id}|{nextAction}|{DateTime.UtcNow}";
             line = $"{line.Replace(Environment.NewLine, "")}\n";
 
             await File.AppendAllTextAsync(_historyFile, line);
-            this._history.Add(line);
+            _history.Add(line);
 
             Thread.Sleep(500);
 
             // post to hub
-            await this._activityHubContext.Clients.All.SendAsync("show",
+            await _activityHubContext.Clients.All.SendAsync("show",
                 "1",
                 agent.Id.ToString(),
                 "social",
@@ -108,6 +108,6 @@ public class FullAutonomyJob
             );
         }
 
-        await File.AppendAllTextAsync($"{SavePath}tweets.csv", this._history.ToString());
+        await File.AppendAllTextAsync($"{SavePath}tweets.csv", _history.ToString());
     }
 }

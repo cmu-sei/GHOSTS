@@ -33,11 +33,11 @@ namespace ghosts.api.Infrastructure.Models
         public MachineUpdate()
         {
             var now = DateTime.UtcNow;
-            this.ActiveUtc = now;
-            this.CreatedUtc = now;
+            ActiveUtc = now;
+            CreatedUtc = now;
         }
     }
-    
+
     public class MachineUpdateConfiguration : IEntityTypeConfiguration<MachineUpdate>
     {
         public void Configure(EntityTypeBuilder<MachineUpdate> builder)

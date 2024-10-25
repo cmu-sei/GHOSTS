@@ -79,7 +79,7 @@ namespace Ghosts.Domain.Code
 
         public static Timeline GetTimelineFromString(string raw, string path)
         {
-            var rnd = new Random();
+            _ = new Random();
 
             try
             {
@@ -96,13 +96,13 @@ namespace Ghosts.Domain.Code
                 _log.Debug($"Timeline {timeline.Id} loaded successfully");
                 return timeline;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _log.Error(ex);
                 return null;
             }
         }
-        
+
         public static Timeline StringToTimeline(string raw)
         {
             try
@@ -116,7 +116,7 @@ namespace Ghosts.Domain.Code
                 return null;
             }
         }
-        
+
         public static string TimelineToString(Timeline timeline)
         {
             try
@@ -129,7 +129,7 @@ namespace Ghosts.Domain.Code
                 return null;
             }
         }
-        
+
         /// <summary>
         /// Save to local disk
         /// </summary>
@@ -146,7 +146,7 @@ namespace Ghosts.Domain.Code
                 _log.Error("Attempt to write null timeline to disk...");
             }
         }
-        
+
         /// <summary>
         /// Save to local disk
         /// </summary>

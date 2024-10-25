@@ -28,7 +28,7 @@ namespace Ghosts.Animator.Extensions
         public static int GetNumberByDecreasingWeights(this double value, int startPosition, int maxPosition, double weightFactor)
         {
             double min = 0;
-            
+
             while (true)
             {
                 if (startPosition == maxPosition) return maxPosition;

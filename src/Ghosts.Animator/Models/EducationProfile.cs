@@ -1,7 +1,7 @@
 // Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
-using Ghosts.Animator.Enums;
 using System.Collections.Generic;
+using Ghosts.Animator.Enums;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 

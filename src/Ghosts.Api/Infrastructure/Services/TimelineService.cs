@@ -4,8 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Ghosts.Api.Infrastructure.Data;
 using ghosts.api.Infrastructure.Models;
+using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Api.ViewModels;
 using Ghosts.Domain;
 using Newtonsoft.Json;
@@ -18,19 +18,14 @@ namespace ghosts.api.Infrastructure.Services
         Task StopAsync(Guid machineId, Guid timelineId, CancellationToken ct);
     }
 
-    public class TimelineService : ITimelineService
+    public class TimelineService(ApplicationDbContext context) : ITimelineService
     {
-        private readonly ApplicationDbContext _context;
-
-        public TimelineService(ApplicationDbContext context)
-        {
-            _context = context;
-        }
+        private readonly ApplicationDbContext _context = context;
 
         public async Task UpdateAsync(MachineUpdateViewModel machineUpdateViewModel, CancellationToken ct)
         {
             if (machineUpdateViewModel == null) return;
-            
+
             var machineUpdate = machineUpdateViewModel.ToMachineUpdate();
 
             _context.MachineUpdates.Add(machineUpdate);
@@ -52,7 +47,7 @@ namespace ghosts.api.Infrastructure.Services
 
             var handlers = new List<TimelineHandler>();
             handlers.Add(handler);
-            
+
             var timeline = new Timeline
             {
                 Id = timelineId,

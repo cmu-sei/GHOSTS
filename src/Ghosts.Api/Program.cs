@@ -18,11 +18,11 @@ namespace Ghosts.Api
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
 
         public static ApplicationSettings ApplicationSettings { get; set; }
-        
+
         public static void Main(string[] args)
         {
             Console.WriteLine(ApplicationDetails.Header);
-            
+
             var msg = $"GHOSTS API {ApplicationDetails.Version} ({ApplicationDetails.VersionFile}) coming online...";
             Console.WriteLine(msg);
             _log.Info(msg);
@@ -32,11 +32,11 @@ namespace Ghosts.Api
             var host = WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>()
                 .Build();
-            
+
             NpgsqlConnection.GlobalTypeMapper.EnableDynamicJson();
-            
+
             AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
-            
+
             using (var scope = host.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;

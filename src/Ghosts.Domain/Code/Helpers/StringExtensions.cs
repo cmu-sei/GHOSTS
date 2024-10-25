@@ -62,7 +62,7 @@ namespace Ghosts.Domain.Code.Helpers
         {
             return string.Join("&", dictionary.Select(x => x.Key + "=" + x.Value).ToArray());
         }
-        
+
         public static readonly string[] SizeSuffixes = { "bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
         public static string ToMemorySizeString(this long value)
         {

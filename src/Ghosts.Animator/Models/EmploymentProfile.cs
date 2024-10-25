@@ -13,9 +13,9 @@ namespace Ghosts.Animator.Models
 
         public EmploymentProfile()
         {
-            this.EmploymentRecords = new List<EmploymentRecord>();
+            EmploymentRecords = new List<EmploymentRecord>();
         }
-        
+
         public class EmploymentRecord
         {
             public string Company { get; set; }
@@ -48,7 +48,7 @@ namespace Ghosts.Animator.Models
 
             public EmploymentRecord()
             {
-                this.Address = new AddressProfiles.AddressProfile();
+                Address = new AddressProfiles.AddressProfile();
             }
         }
     }

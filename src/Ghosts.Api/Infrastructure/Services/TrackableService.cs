@@ -5,8 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Ghosts.Api.Infrastructure.Data;
 using ghosts.api.Infrastructure.Models;
+using Ghosts.Api.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace ghosts.api.Infrastructure.Services
@@ -17,14 +17,9 @@ namespace ghosts.api.Infrastructure.Services
         Task<List<HistoryTrackable>> GetActivityByTrackableId(Guid trackableId, CancellationToken ct);
     }
 
-    public class TrackableService : ITrackableService
+    public class TrackableService(ApplicationDbContext context) : ITrackableService
     {
-        private readonly ApplicationDbContext _context;
-
-        public TrackableService(ApplicationDbContext context)
-        {
-            _context = context;
-        }
+        private readonly ApplicationDbContext _context = context;
 
         public async Task<List<Trackable>> GetAsync(CancellationToken ct)
         {

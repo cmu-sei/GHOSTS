@@ -1,10 +1,10 @@
 // Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
-using Ghosts.Domain.Code.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Ghosts.Domain.Code.Helpers;
 using NLog;
 
 namespace Ghosts.Domain.Code
@@ -33,13 +33,13 @@ namespace Ghosts.Domain.Code
 
         private Uri _baseUri;
 
-        private IEnumerable<string> _denyList;
+        private readonly IEnumerable<string> _denyList;
 
         public LinkManager(int visitedSitesRemembered)
         {
             Links = new List<Link>();
             RecentlyVisited = new LifoQueue<Uri>(visitedSitesRemembered);
-            this._denyList = DenyListManager.LoadDenyList();
+            _denyList = DenyListManager.LoadDenyList();
             Log.Trace($"Creating new link manager with visitedSitesRemembered = {visitedSitesRemembered}");
         }
 
@@ -61,7 +61,7 @@ namespace Ghosts.Domain.Code
 
         public void AddLink(Uri uri, int priority)
         {
-            string[] validSchemes = {"http", "https"};
+            string[] validSchemes = { "http", "https" };
             if (!validSchemes.Contains(uri.Scheme))
             {
                 return;
@@ -76,9 +76,9 @@ namespace Ghosts.Domain.Code
             }
 
             // is in deny list?
-            if (DenyListManager.IsInDenyList(this._denyList, uri))
+            if (DenyListManager.IsInDenyList(_denyList, uri))
                 return;
-            
+
 
             // truly a new link, add it
             try
@@ -184,7 +184,7 @@ namespace Ghosts.Domain.Code
                     }
                 }
 
-                this.RecentlyVisited.Add(chosen.Url);
+                RecentlyVisited.Add(chosen.Url);
                 return chosen;
             }
             catch (Exception e)

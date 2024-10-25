@@ -14,11 +14,11 @@ public class NPCIpAddress
     public Guid NpcId { get; set; }
     public string IpAddress { get; set; }
     public DateTime CreatedUTC { get; set; }
-        
+
     public string Enclave { get; set; }
 
     public NPCIpAddress()
     {
-        this.CreatedUTC = DateTime.UtcNow;
+        CreatedUTC = DateTime.UtcNow;
     }
 }

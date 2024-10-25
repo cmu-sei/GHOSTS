@@ -37,7 +37,7 @@ namespace Ghosts.Domain.Code.Helpers
         {
             var index = url.IndexOf("#");
             if (index >= 0)
-                url= url.Substring(0, index);
+                url = url.Substring(0, index);
             index = url.IndexOf("?");
             if (index >= 0)
                 url = url.Substring(0, index);

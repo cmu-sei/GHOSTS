@@ -4,11 +4,11 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using ghosts.api.Areas.Animator.Infrastructure.Models;
+using ghosts.api.Infrastructure.Models;
 using Ghosts.Animator;
 using Ghosts.Animator.Models;
-using ghosts.api.Areas.Animator.Infrastructure.Models;
 using Ghosts.Api.Infrastructure.Data;
-using ghosts.api.Infrastructure.Models;
 using Microsoft.EntityFrameworkCore;
 using NLog;
 
@@ -29,21 +29,16 @@ public interface INpcService
     public Task SyncWithMachineUsernames();
 }
 
-public class NpcService : INpcService
+public class NpcService(ApplicationDbContext context) : INpcService
 {
     private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-    private readonly ApplicationDbContext _context;
-
-    public NpcService(ApplicationDbContext context)
-    {
-        _context = context;
-    }
+    private readonly ApplicationDbContext _context = context;
 
     public async Task<IEnumerable<NpcRecord>> GetAll()
     {
-        return await this._context.Npcs.ToListAsync();
+        return await _context.Npcs.ToListAsync();
     }
-    
+
     public async Task<IEnumerable<NpcRecord>> GetEnclave(string campaign, string enclave)
     {
         return await _context.Npcs.Where(x => x.Campaign == campaign && x.Enclave == enclave).ToListAsync();
@@ -51,7 +46,7 @@ public class NpcService : INpcService
 
     public async Task<IEnumerable<NpcNameId>> GetListAsync()
     {
-        return await this._context.Npcs
+        return await _context.Npcs
             .Select(item => new NpcNameId
             {
                 Id = item.Id,
@@ -59,11 +54,11 @@ public class NpcService : INpcService
             })
             .ToListAsync();
     }
-    
+
     public async Task<IEnumerable<NpcNameId>> GetListAsync(string campaign)
     {
-        return await this._context.Npcs
-            .Where(x=>x.Campaign == campaign)
+        return await _context.Npcs
+            .Where(x => x.Campaign == campaign)
             .Select(item => new NpcNameId
             {
                 Id = item.Id,
@@ -74,23 +69,23 @@ public class NpcService : INpcService
 
     public async Task<IEnumerable<NpcRecord>> GetTeam(string campaign, string enclave, string team)
     {
-        return await this._context.Npcs.Where(x => x.Campaign == campaign && x.Enclave == enclave && x.Team == team).ToListAsync();
+        return await _context.Npcs.Where(x => x.Campaign == campaign && x.Enclave == enclave && x.Team == team).ToListAsync();
     }
 
     public async Task<NpcRecord> GetById(Guid id)
     {
-        return await this._context.Npcs.FirstOrDefaultAsync(x => x.Id == id);
+        return await _context.Npcs.FirstOrDefaultAsync(x => x.Id == id);
     }
 
     public async Task<NpcRecord> CreateOne()
     {
         var npc = NpcRecord.TransformToNpc(Npc.Generate(MilitaryUnits.GetServiceBranch()));
         npc.Id = npc.NpcProfile.Id;
-        this._context.Npcs.Add(npc);
-        await this._context.SaveChangesAsync();
+        _context.Npcs.Add(npc);
+        await _context.SaveChangesAsync();
         return npc;
     }
-    
+
     public async Task<NpcRecord> CreateOne(NpcProfile npcProfile)
     {
         var npc = new NpcRecord
@@ -98,8 +93,8 @@ public class NpcService : INpcService
             NpcProfile = npcProfile
         };
         npc.Id = npc.NpcProfile.Id;
-        this._context.Npcs.Add(npc);
-        await this._context.SaveChangesAsync();
+        _context.Npcs.Add(npc);
+        await _context.SaveChangesAsync();
         return npc;
     }
 
@@ -125,27 +120,27 @@ public class NpcService : INpcService
                     var last = t.ElapsedMilliseconds;
                     var branch = team.Npcs.Configuration?.Branch ?? MilitaryUnits.GetServiceBranch();
                     var npc = NpcRecord.TransformToNpc(Npc.Generate(new NpcGenerationConfiguration
-                        { Branch = branch, PreferenceSettings = team.PreferenceSettings }));
+                    { Branch = branch, PreferenceSettings = team.PreferenceSettings }));
                     npc.Id = npc.NpcProfile.Id;
                     npc.Team = team.Name;
                     npc.Campaign = config.Campaign;
                     npc.Enclave = enclave.Name;
 
-                    this._context.Npcs.Add(npc);
+                    _context.Npcs.Add(npc);
                     createdNpcs.Add(npc);
                     _log.Trace($"{i} generated in {t.ElapsedMilliseconds - last} ms");
                 }
             }
         }
 
-        await this._context.SaveChangesAsync(ct);
+        await _context.SaveChangesAsync(ct);
 
         t.Stop();
         _log.Trace($"{createdNpcs.Count} NPCs generated in {t.ElapsedMilliseconds} ms");
 
         return createdNpcs;
     }
-    
+
     public async Task<IEnumerable<string>> GetKeys(string key)
     {
         if (key == null)
@@ -159,21 +154,21 @@ public class NpcService : INpcService
             _ => null
         };
     }
-    
+
     public async Task DeleteById(Guid id)
     {
-        var o = await this._context.Npcs.FindAsync(id);
+        var o = await _context.Npcs.FindAsync(id);
         if (o != null)
         {
-            this._context.Npcs.Remove(o);
-            await this._context.SaveChangesAsync();
+            _context.Npcs.Remove(o);
+            await _context.SaveChangesAsync();
         }
     }
 
     public async Task SyncWithMachineUsernames()
     {
-        var machines = this._context.Machines.ToList();
-        var npcs = this._context.Npcs.ToArray();
+        var machines = _context.Machines.ToList();
+        var npcs = _context.Npcs.ToArray();
 
         foreach (var machine in machines)
         {
@@ -189,11 +184,11 @@ public class NpcService : INpcService
 
             npc.Id = npc.NpcProfile.Id;
             npc.MachineId = machine.Id;
-            this._context.Npcs.Add(npc);
+            _context.Npcs.Add(npc);
             _log.Trace($"NPC created for {machine.CurrentUsername}...");
         }
 
-        await this._context.SaveChangesAsync();
+        await _context.SaveChangesAsync();
         _log.Trace($"NPCs created for each username in machines");
     }
 }

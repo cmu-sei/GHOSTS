@@ -48,7 +48,7 @@ namespace Ghosts.Domain.Code
 
             return newSleepValue;
         }
-        
+
         public static int Basic(int baseSleep)
         {
             //sleep with jitter
@@ -69,15 +69,15 @@ namespace Ghosts.Domain.Code
         /// <returns></returns>
         public static int JitterFactorParse(string jstring)
         {
-            int jitterFactor;
-            if (int.TryParse(jstring, out jitterFactor))
+            if (int.TryParse(jstring, out var jitterFactor))
             {
                 if (jitterFactor < 0 || jitterFactor > 50) jitterFactor = 0;
-            } else
+            }
+            else
             {
                 jitterFactor = 0;
             }
-                return jitterFactor;
+            return jitterFactor;
         }
 
         public static int JitterFactorDelay(int baseSleep, int jitterFactor)

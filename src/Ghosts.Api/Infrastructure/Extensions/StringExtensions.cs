@@ -11,13 +11,13 @@ using Match = System.Text.RegularExpressions.Match;
 
 namespace Ghosts.Api.Infrastructure.Extensions
 {
-    public static class StringExtensions
+    public static partial class StringExtensions
     {
         public static string ToCondensedLowerCase(this string input)
         {
             if (string.IsNullOrEmpty(input)) return input;
 
-            var startUnderscores = Regex.Match(input, @"^+");
+            var startUnderscores = MyRegex().Match(input);
             return startUnderscores + Regex.Replace(input, @"([a-z0-9])([A-Z])", "$1$2").ToLower();
         }
 
@@ -34,7 +34,7 @@ namespace Ghosts.Api.Infrastructure.Extensions
             var pattern = @"\b\d+\.\s(.*?)(?=(\b\d+\.|\z))";
             var matches = Regex.Matches(message, pattern);
             var listItems = new List<string>();
-            foreach (Match x in matches)
+            foreach (Match x in matches.Cast<Match>())
             {
                 listItems.Add(x.Groups[1].Value.Trim());
             }
@@ -78,5 +78,8 @@ namespace Ghosts.Api.Infrastructure.Extensions
             return !string.IsNullOrEmpty(message) &&
                    list.All(x => !message.Contains(x, StringComparison.CurrentCultureIgnoreCase));
         }
+
+        [GeneratedRegex(@"^+")]
+        private static partial Regex MyRegex();
     }
 }

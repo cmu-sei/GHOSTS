@@ -18,7 +18,7 @@ namespace Ghosts.Animator
             var raw = File.ReadAllText("config/us_population_data.json");
             US_POPULATION_DATA = JsonConvert.DeserializeObject<USPopulationData>(raw);
         }
-        
+
 
         public static string GetUSStateAbbreviation()
         {
@@ -100,7 +100,7 @@ namespace Ghosts.Animator
                             runningTotal += currCityPop;
                         }
                     }
-                    
+
                     break;
                 }
                 else
@@ -153,7 +153,7 @@ namespace Ghosts.Animator
         {
             var statesList = US_POPULATION_DATA.States;
             var selectedCity = "Default City";
-            
+
             foreach (var state in statesList)
             {
                 if (state.Abbreviation.Equals(abbrev))
@@ -161,7 +161,7 @@ namespace Ghosts.Animator
                     var statePop = state.Population;
                     var distributionChoice = AnimatorRandom.Rand.Next(statePop);
                     var runningTotal = 0;
-                    
+
                     foreach (var city in state.Cities)
                     {
                         if (runningTotal + city.Population >= distributionChoice)
@@ -184,7 +184,7 @@ namespace Ghosts.Animator
             var statesList = US_POPULATION_DATA.States;
             var selectedCity = "Default City";
             var selectedZipCode = "00000";
-            
+
             foreach (var state in statesList)
             {
                 if (state.Abbreviation.Equals(abbrev))
@@ -192,7 +192,7 @@ namespace Ghosts.Animator
                     var statePop = state.Population;
                     var distributionChoice = AnimatorRandom.Rand.Next(statePop);
                     var runningTotal = 0;
-                    
+
                     foreach (var city in state.Cities)
                     {
                         if (runningTotal + city.Population >= distributionChoice)
@@ -219,7 +219,7 @@ namespace Ghosts.Animator
                     }
                 }
             }
-            
+
             var addressData = new Dictionary<string, string> {
                 {"City", selectedCity},
                 {"ZipCode", selectedZipCode}
@@ -233,12 +233,12 @@ namespace Ghosts.Animator
             var totalPopulation = popData.TotalPopulation;
             var distributionChoice = AnimatorRandom.Rand.Next(totalPopulation);
 
-            var selectedState= "";
+            var selectedState = "";
             var selectedCity = "";
             var selectedCounty = "";
             var selectedTimeZone = "";
             var selectedZipCode = "";
-            
+
             var runningTotal = 0;
             foreach (var currState in popData.States)
             {
@@ -246,7 +246,7 @@ namespace Ghosts.Animator
                 if (runningTotal + currStatePop >= distributionChoice)
                 {
                     selectedState = currState.Name;
-                    
+
                     foreach (var currCity in currState.Cities)
                     {
                         var currCityPop = currCity.Population;
@@ -255,13 +255,13 @@ namespace Ghosts.Animator
                             selectedCity = currCity.Name;
                             selectedCounty = currCity.County;
                             selectedTimeZone = currCity.Timezone;
-                            
+
                             foreach (var currZipCode in currCity.ZipCodes)
                             {
                                 var currZipPop = currZipCode.Population;
                                 if (runningTotal + currZipPop >= distributionChoice)
                                 {
-                                    
+
                                     selectedZipCode = currZipCode.Id;
                                     break;
                                 }
@@ -270,7 +270,7 @@ namespace Ghosts.Animator
                                     runningTotal += currZipPop;
                                 }
                             }
-                            
+
                             break;
                         }
                         else
@@ -278,7 +278,7 @@ namespace Ghosts.Animator
                             runningTotal += currCityPop;
                         }
                     }
-                    
+
                     break;
                 }
                 else
@@ -286,19 +286,19 @@ namespace Ghosts.Animator
                     runningTotal += currStatePop;
                 }
             }
-            
+
             var zipData = new Dictionary<string, string> {
                 {"State", selectedState},
                 {"City", selectedCity},
-                {"County", selectedCounty}, 
-                {"TimeZone", selectedTimeZone}, 
+                {"County", selectedCounty},
+                {"TimeZone", selectedTimeZone},
                 {"ZipCode", selectedZipCode}
             };
 
             return zipData;
 
         }
-        
+
         public static string GetStreetSuffix()
         {
             return STREET_SUFFIXES.RandomElement();
@@ -317,7 +317,7 @@ namespace Ghosts.Animator
         public static AddressProfiles.AddressProfile GetHomeAddress()
         {
             var fullZipData = Address.GetFullZipCodeInfo();
-            
+
             var a = new AddressProfiles.AddressProfile
             {
                 AddressType = "Home",
@@ -400,7 +400,7 @@ namespace Ghosts.Animator
         //     "town", "ton", "land", "ville", "berg", "burgh", "borough", "bury", "view", "port",
         //     "mouth", "stad", "furt", "chester", "mouth", "fort", "haven", "side", "shire"
         // };
-        
+
         private static readonly string[] STREET_SUFFIXES = {
             "Alley", "Avenue", "Branch", "Bridge", "Brook", "Brooks", "Burg", "Burgs", "Bypass", "Camp", "Canyon", "Cape", "Causeway", "Center",
             "Centers", "Circle", "Circles", "Cliff", "Cliffs", "Club", "Common", "Corner", "Corners", "Course", "Court", "Courts", "Cove", "Coves",
@@ -418,7 +418,7 @@ namespace Ghosts.Animator
             "Viaduct", "View", "Views", "Village", "Villages", "Ville", "Vista", "Walk", "Walks", "Wall", "Way", "Ways", "Well", "Wells"
         };
 
-        private static readonly string[] SEC_ADDRESSES = {"Apt. ###", "Suite ###", "Box ###"};
+        private static readonly string[] SEC_ADDRESSES = { "Apt. ###", "Suite ###", "Box ###" };
 
         private static readonly string[] UK_COUNTIES = {
             "Avon", "Bedfordshire", "Berkshire", "Borders",
@@ -438,9 +438,9 @@ namespace Ghosts.Animator
             "West Sussex", "West Yorkshire", "Wiltshire", "Worcestershire"
         };
 
-        private static readonly string[] UK_COUNTRIES = {"England", "Scotland", "Wales", "Northern Ireland"};
+        private static readonly string[] UK_COUNTRIES = { "England", "Scotland", "Wales", "Northern Ireland" };
 
-        private static readonly string[] UK_POSTCODES = {"??# #??", "??## #??"};
+        private static readonly string[] UK_POSTCODES = { "??# #??", "??## #??" };
 
         private static readonly string[] NEIGHBORHOODS = {
             "East of Telegraph Road", "North Norridge", "Northwest Midlothian/Midlothian Country Club",

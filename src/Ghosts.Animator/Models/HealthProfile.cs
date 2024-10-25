@@ -13,19 +13,19 @@ namespace Ghosts.Animator.Models
 
         public HealthProfile()
         {
-            this.MedicalConditions = new List<MedicalCondition>();
+            MedicalConditions = new List<MedicalCondition>();
         }
     }
 
     public class MedicalCondition
     {
         public string Name { get; set; }
-        
+
         public List<Prescription> Prescriptions { get; set; }
 
         public MedicalCondition()
         {
-            this.Prescriptions = new List<Prescription>();
+            Prescriptions = new List<Prescription>();
         }
     }
 

@@ -73,7 +73,7 @@ namespace Ghosts.Api.Infrastructure
                     for (var j = 0; j < i; j++)
                         g.Append(nameParts[j]).Append(delimeters[0]);
 
-                    list.Add(g.Append("*").ToString().TrimEnd(Convert.ToChar(delimeters[0])));
+                    list.Add(g.Append('*').ToString().TrimEnd(Convert.ToChar(delimeters[0])));
 
                     if (list.Count > Program.ApplicationSettings.Grouping.GroupDepth)
                     {
