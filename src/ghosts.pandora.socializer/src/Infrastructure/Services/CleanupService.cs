@@ -1,11 +1,11 @@
-namespace Socializer.Infrastructure.Services;
 
-using Microsoft.Extensions.Hosting;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
+namespace Socializer.Infrastructure.Services;
 public class CleanupService(ILogger logger, IServiceProvider serviceProvider) : IHostedService
 {
     public Task StartAsync(CancellationToken cancellationToken)
@@ -13,7 +13,7 @@ public class CleanupService(ILogger logger, IServiceProvider serviceProvider) : 
         Run();
         return Task.CompletedTask;
     }
-    
+
     private async void Run()
     {
         while (true)
@@ -29,21 +29,22 @@ public class CleanupService(ILogger logger, IServiceProvider serviceProvider) : 
 
             await Task.Delay(
                 new TimeSpan(
-                    Program.Configuration.CleanupJob.Hours, 
-                    Program.Configuration.CleanupJob.Minutes, 
+                    Program.Configuration.CleanupJob.Hours,
+                    Program.Configuration.CleanupJob.Minutes,
                     Program.Configuration.CleanupJob.Seconds));
         }
     }
 
     // only works in Docker container as looking for overlay format
-    static int GetDiskUtil() 
+    static int GetDiskUtil()
     {
 
-        DriveInfo[] allDrives = DriveInfo.GetDrives();
-        foreach (DriveInfo d in allDrives)
+        var allDrives = DriveInfo.GetDrives();
+        foreach (var d in allDrives)
         {
-            if (d.Name == "/" && d.DriveFormat == "overlay") {
-                double utilFloat = 100.0 - ((double)(d.AvailableFreeSpace)*100.0)/(double)d.TotalSize;
+            if (d.Name == "/" && d.DriveFormat == "overlay")
+            {
+                var utilFloat = 100.0 - ((double)(d.AvailableFreeSpace) * 100.0) / (double)d.TotalSize;
                 return (int)utilFloat;
             }
         }
@@ -60,16 +61,17 @@ public class CleanupService(ILogger logger, IServiceProvider serviceProvider) : 
     // then the loop is exited with a message indicating that the target disk utilization could not be reached.
     // So, when using disk utilization, can specify large CleanUpAge on posts and not worry about filling up
     // disk.
-   
+
     private async Task Sync()
     {
         var diskUtil = GetDiskUtil();
-        var targetUtilization = Program.Configuration.CleanupDiskUtilThreshold; 
+        var targetUtilization = Program.Configuration.CleanupDiskUtilThreshold;
         logger.LogInformation($"Cleanup Service: Disk Utilization {diskUtil}, CleanupDiskUtilThreshold {targetUtilization}");
 
         // set actual targetUtilization 10% lower of specified value so that we are not constantly tripping the cleanup
-        if (targetUtilization > 0) {
-            targetUtilization = targetUtilization - (int) (targetUtilization*0.1);
+        if (targetUtilization > 0)
+        {
+            targetUtilization -= (int)(targetUtilization * 0.1);
         }
 
         if (targetUtilization > 0 && diskUtil < 0)
@@ -77,14 +79,15 @@ public class CleanupService(ILogger logger, IServiceProvider serviceProvider) : 
             logger.LogInformation($"Cleanup will not check disk utilization as the disk utilization info cannot be read.");
             targetUtilization = -1; //skip this as we cannot check disktuil
         }
-        if (targetUtilization > 0 && diskUtil < targetUtilization ) {
+        if (targetUtilization > 0 && diskUtil < targetUtilization)
+        {
             logger.LogInformation($"Cleanup skipped as disk threshold not reached.");
             return;
         }
 
-        
-        int totalPostCount = 0;
-        int totalFileCount = 0;
+
+        var totalPostCount = 0;
+        var totalFileCount = 0;
         var threshold = DateTime.UtcNow
                                         .AddDays(-Program.Configuration.CleanupAge.Days)
                                         .AddHours(-Program.Configuration.CleanupAge.Hours)
@@ -95,11 +98,11 @@ public class CleanupService(ILogger logger, IServiceProvider serviceProvider) : 
         var minThreshold = DateTime.UtcNow.AddHours(-2);  // this should be low enough for a minimum threshold
         using var scope = serviceProvider.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<DataContext>();
-        bool loopExit = false;
-        int loopCount = 0;
+        var loopExit = false;
+        var loopCount = 0;
 
         // if CleanupDiskUtilThreshold < 0 then only one loop iteration is done as we are not checking disk utilization
-        while(!loopExit) 
+        while (!loopExit)
         {
             if (loopCount == 0)
             {
@@ -111,17 +114,17 @@ public class CleanupService(ILogger logger, IServiceProvider serviceProvider) : 
             }
             var oldPosts = dbContext.Posts.Where(p => p.CreatedUtc < threshold);
             totalPostCount += oldPosts.Count();   //get the count from the query before posts are deleted
-            if(oldPosts.Any())
+            if (oldPosts.Any())
             {
                 dbContext.Posts.RemoveRange(oldPosts);
                 await dbContext.SaveChangesAsync();
             }
-            
+
             //now delete images
             var savePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images");
             if (Directory.Exists(savePath))
             {
-                int fileCount = 0;
+                var fileCount = 0;
                 foreach (var dirName in Directory.GetDirectories(savePath))
                 {
                     var fullPath = Path.GetFullPath(dirName).TrimEnd(Path.DirectorySeparatorChar);
@@ -157,32 +160,33 @@ public class CleanupService(ILogger logger, IServiceProvider serviceProvider) : 
                 }
                 totalFileCount += fileCount;
             }
-            
+
             // update disk utilization
             diskUtil = GetDiskUtil();
             // check for loop exit
             if (targetUtilization < 0) loopExit = true;  // exit if not checking disk util
             else if (diskUtil < targetUtilization) loopExit = true; // met target disk util
-            else 
+            else
             {
                 // have not met disk utilization, try to lower threshold
                 // compute a new threshold that is half of old threshold
-                threshold = startTime - (startTime - threshold)/2;
+                threshold = startTime - (startTime - threshold) / 2;
                 // at this point, above disk utilization. Check if we have reached mininium threshold of 2 hours
-                if (threshold > minThreshold) 
+                if (threshold > minThreshold)
                 {
                     logger.LogInformation($"Cleanup service is unable to free disk space to reach target utilization of {targetUtilization}");
                     loopExit = true;
                 }
             }
             loopCount++;
-            if (loopCount > 10) {
+            if (loopCount > 10)
+            {
                 // 10 iterations is good enough for 100 days. Something is wrong.
                 logger.LogInformation($"Cleanup service is unable to free disk space to reach target utilization of {targetUtilization}, max iterations reached.");
                 loopExit = true;
             }
         }
-        
+
         logger.LogInformation($"Cleanup service removed {totalPostCount} posts and {totalFileCount} files");
     }
 

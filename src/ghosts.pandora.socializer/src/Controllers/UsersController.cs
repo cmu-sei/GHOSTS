@@ -14,7 +14,7 @@ public class UsersController(ILogger logger, IHubContext<PostsHub> hubContext, D
     [HttpGet("{userId}")]
     public new virtual IActionResult User(string userId)
     {
-        var posts = Db.Posts.Include(x=>x.Likes).Where(x => x.User.ToLower() == userId.ToLower()).OrderByDescending(x => x.CreatedUtc)
+        var posts = Db.Posts.Include(x => x.Likes).Where(x => x.User.Equals(userId, StringComparison.CurrentCultureIgnoreCase)).OrderByDescending(x => x.CreatedUtc)
             .Take(Program.Configuration.DefaultDisplay).ToList();
 
         ViewBag.User = userId;
@@ -53,7 +53,7 @@ public class UsersController(ILogger logger, IHubContext<PostsHub> hubContext, D
                 {
                     // with multiple writers this can exist even though existance previously checked
                     // so do not error on already exists
-                    if (!ex.ToString().Contains("already exists")) 
+                    if (!ex.ToString().Contains("already exists"))
                     {
                         Logger.LogError(ex, "Error copying file.");
                         return StatusCode(500, "Internal Server Error");

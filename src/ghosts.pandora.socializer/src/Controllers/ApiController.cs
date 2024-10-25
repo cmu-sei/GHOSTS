@@ -7,37 +7,32 @@ using Socializer.Infrastructure;
 namespace Socializer.Controllers;
 
 [Route("/api")]
-public class ApiController : BaseController
+public class ApiController(ILogger logger, IHubContext<PostsHub> hubContext, DataContext dbContext) : BaseController(logger, hubContext, dbContext)
 {
-    public ApiController(ILogger logger, IHubContext<PostsHub> hubContext, DataContext dbContext) :
-        base(logger, hubContext, dbContext)
-    {
-    }
-
     [HttpGet]
     public IEnumerable<Post> Index()
     {
-        var posts = Db.Posts.Include(x=>x.Likes).OrderByDescending(x=>x.CreatedUtc).Take(Program.Configuration.DefaultDisplay).ToList();
+        var posts = Db.Posts.Include(x => x.Likes).OrderByDescending(x => x.CreatedUtc).Take(Program.Configuration.DefaultDisplay).ToList();
 
         if (Request.QueryString.HasValue && !string.IsNullOrEmpty(Request.Query["u"]))
             ViewBag.User = Request.Query["u"];
         return posts;
     }
-    
+
     [HttpGet("u/{userId}")]
     public new virtual IEnumerable<Post> User(string userId)
     {
-        var posts = Db.Posts.Include(x=>x.Likes).Where(x=>x.User.ToLower() == userId.ToLower()).OrderByDescending(x=>x.CreatedUtc).Take(Program.Configuration.DefaultDisplay).ToList();
+        var posts = Db.Posts.Include(x => x.Likes).Where(x => x.User.Equals(userId, StringComparison.CurrentCultureIgnoreCase)).OrderByDescending(x => x.CreatedUtc).Take(Program.Configuration.DefaultDisplay).ToList();
 
         if (Request.QueryString.HasValue && !string.IsNullOrEmpty(Request.Query["u"]))
             ViewBag.User = Request.Query["u"];
         return posts;
     }
-    
+
     [HttpGet("{id:guid}")]
     public Post? Detail(Guid id)
     {
-        var post = Db.Posts.Include(x=>x.Likes).FirstOrDefault(x => x.Id == id.ToString());
+        var post = Db.Posts.Include(x => x.Likes).FirstOrDefault(x => x.Id == id.ToString());
 
         if (Request.QueryString.HasValue && !string.IsNullOrEmpty(Request.Query["u"]))
             ViewBag.User = Request.Query["u"];
@@ -47,11 +42,11 @@ public class ApiController : BaseController
     [HttpGet("/admin/delete")]
     public async Task<IActionResult> Delete()
     {
-        this.Db.Posts.RemoveRange(this.Db.Posts);
-        await this.Db.SaveChangesAsync();
+        Db.Posts.RemoveRange(Db.Posts);
+        await Db.SaveChangesAsync();
         return NoContent();
     }
-    
+
     [HttpGet("/admin/generate/{n}")]
     public async Task<IActionResult> Generate(int n)
     {
@@ -59,14 +54,16 @@ public class ApiController : BaseController
         for (var i = 0; i < n; i++)
         {
             var min = DateTime.Now.AddDays(-7);
-            var randTicks = r.Next(0, (int) (DateTime.Now.Ticks - min.Ticks));
-            
-            var post = new Post();
-            post.Id = Guid.NewGuid().ToString();
-            post.CreatedUtc = DateTime.MinValue.Add(TimeSpan.FromTicks(min.Ticks + (long) (r.NextDouble()*(DateTime.Now.Ticks - min.Ticks))));
-            post.User = Faker.Internet.UserName();
-            post.Message = Faker.Lorem.Sentence(15);
-            this.Db.Posts.Add(post);
+            _ = r.Next(0, (int)(DateTime.Now.Ticks - min.Ticks));
+
+            var post = new Post
+            {
+                Id = Guid.NewGuid().ToString(),
+                CreatedUtc = DateTime.MinValue.Add(TimeSpan.FromTicks(min.Ticks + (long)(r.NextDouble() * (DateTime.Now.Ticks - min.Ticks)))),
+                User = Faker.Internet.UserName(),
+                Message = Faker.Lorem.Sentence(15)
+            };
+            Db.Posts.Add(post);
         }
         await Db.SaveChangesAsync();
 
@@ -81,35 +78,35 @@ public class ApiController : BaseController
             Id = Guid.NewGuid().ToString(),
             CreatedUtc = DateTime.UtcNow
         };
-        
-        var userFormValues = new [] {"user", "usr", "u", "uid", "user_id", "u_id"};
+
+        var userFormValues = new[] { "user", "usr", "u", "uid", "user_id", "u_id" };
         foreach (var userFormValue in userFormValues)
         {
             if (string.IsNullOrEmpty(Request.Form[userFormValue])) continue;
             post.User = Request.Form[userFormValue]!;
             break;
         }
-        
-        var messageFormValues = new [] {"message", "msg", "m", "message_id", "msg_id", "msg_text", "text", "payload"};
+
+        var messageFormValues = new[] { "message", "msg", "m", "message_id", "msg_id", "msg_text", "text", "payload" };
         foreach (var messageFormValue in messageFormValues)
         {
             if (string.IsNullOrEmpty(Request.Form[messageFormValue])) continue;
             post.Message = Request.Form[messageFormValue]!;
             break;
         }
-        
-        if(string.IsNullOrEmpty(post.User) || string.IsNullOrEmpty(post.Message))
+
+        if (string.IsNullOrEmpty(post.User) || string.IsNullOrEmpty(post.Message))
             return BadRequest("User and message are required.");
 
         // has the same user tried to post the same message within the past x minutes?
-        if (Db.Posts.Any(_ => _.Message.ToLower() == post.Message.ToLower()
-                                && _.User.ToLower() == post.User.ToLower()
+        if (Db.Posts.Any(_ => _.Message.Equals(post.Message, StringComparison.CurrentCultureIgnoreCase)
+                                && _.User.Equals(post.User, StringComparison.CurrentCultureIgnoreCase)
                                 && _.CreatedUtc > post.CreatedUtc.AddMinutes(-Program.Configuration.MinutesToCheckForDuplicatePost)))
         {
-            this.Logger.LogInformation("Client is posting duplicates: {PostUser}", post.User);
+            Logger.LogInformation("Client is posting duplicates: {PostUser}", post.User);
             return NoContent();
         }
-         
+
         var imagePath = string.Empty;
         if (model.File != null)
         {
@@ -120,9 +117,9 @@ public class ApiController : BaseController
             savePath = Path.Combine(savePath, guid);
             if (!Directory.Exists(savePath))
                 Directory.CreateDirectory(savePath);
-        
+
             savePath = Path.Combine(savePath, model.File.FileName);
-            
+
             try
             {
                 // Process the file and save it to storage
@@ -137,19 +134,19 @@ public class ApiController : BaseController
             catch (Exception e)
             {
                 return BadRequest(e.Message);
-            }   
+            }
         }
 
         if (!string.IsNullOrEmpty(imagePath))
         {
-            post.Message = post.Message + $" <img src=\"{imagePath}\"/>";
+            post.Message += $" <img src=\"{imagePath}\"/>";
         }
-        
+
         Db.Posts.Add(post);
         await Db.SaveChangesAsync();
-        
-        this.CookieWrite("userid", post.User);
-        
+
+        CookieWrite("userid", post.User);
+
         await HubContext.Clients.All.SendAsync("SendMessage", post.Id, post.User, post.Message, post.CreatedUtc);
 
         return NoContent();

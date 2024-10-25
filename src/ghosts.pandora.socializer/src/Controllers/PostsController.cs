@@ -7,38 +7,33 @@ using Socializer.Infrastructure;
 namespace Socializer.Controllers;
 
 [Route("posts")]
-public class PostsController : BaseController
+public class PostsController(ILogger logger, IHubContext<PostsHub> hubContext, DataContext dbContext) : BaseController(logger, hubContext, dbContext)
 {
-    public PostsController(ILogger logger, IHubContext<PostsHub> hubContext, DataContext dbContext) :
-        base(logger, hubContext, dbContext)
-    {
-    }
-    
     [HttpGet("{id:guid}")]
     public IActionResult Detail(Guid id)
     {
-        var post = Db.Posts.Include(x=>x.Likes).FirstOrDefault(x => x.Id == id.ToString());
+        var post = Db.Posts.Include(x => x.Likes).FirstOrDefault(x => x.Id == id.ToString());
 
         if (Request.QueryString.HasValue && !string.IsNullOrEmpty(Request.Query["u"]))
             ViewBag.User = Request.Query["u"];
         return View(post);
     }
-    
+
     [HttpGet("{id:guid}/likes")]
     public IEnumerable<Like> GetLikes(string id)
     {
         return Db.Likes.Where(x => x.PostId == id).ToArray();
     }
-    
+
     [HttpPost("{id:guid}/likes")]
     public IActionResult Like(string id)
     {
-        var userId = this.CookieRead("userid");
+        var userId = CookieRead("userid");
         if (string.IsNullOrEmpty(userId))
         {
             return NoContent();
         }
-        
+
         var like = new Like
         {
             PostId = id,
