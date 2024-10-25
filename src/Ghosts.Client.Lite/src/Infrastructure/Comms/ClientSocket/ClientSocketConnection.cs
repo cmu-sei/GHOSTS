@@ -6,18 +6,13 @@ using Microsoft.AspNetCore.SignalR.Client;
 
 namespace Ghosts.Client.Lite.Infrastructure.Comms.ClientSocket;
 
-public class Connection
+public class Connection(ClientConfiguration.SocketsSettings options)
 {
     private int _attempts = 0;
     private HubConnection _connection;
     private readonly CancellationToken _ct = new();
     public readonly BackgroundTaskQueue Queue = new();
-    private readonly ClientConfiguration.SocketsSettings _options;
-
-    public Connection(ClientConfiguration.SocketsSettings options)
-    {
-        this._options = options;
-    }
+    private readonly ClientConfiguration.SocketsSettings _options = options;
 
     public async Task Run()
     {
@@ -34,10 +29,13 @@ public class Connection
         // Send a message to the server
         while (_connection.State == HubConnectionState.Connected)
         {
-            _ = new Timer(_ => {
-                Task.Run(async () => {
+            _ = new Timer(_ =>
+            {
+                Task.Run(async () =>
+                {
                     await ClientHeartbeat();
-                }, _ct).ContinueWith(task => {
+                }, _ct).ContinueWith(task =>
+                {
                     if (task.Exception != null)
                     {
                         // Log or handle the exception
@@ -50,18 +48,18 @@ public class Connection
             {
                 Console.WriteLine("Peeking into queue...");
 
-                var item = await Queue.DequeueAsync(this._ct);
+                var item = await Queue.DequeueAsync(_ct);
                 if (item != null)
                 {
                     Console.WriteLine($"There was a {item.Type} in the queue: {item.Payload}");
                     if (item.Type == QueueEntry.Types.Heartbeat)
-                        await this.ClientHeartbeat();
+                        await ClientHeartbeat();
 
                     if (item.Type == QueueEntry.Types.Message)
-                        await this.ClientMessage(item.Payload.ToString());
-                    
+                        await ClientMessage(item.Payload.ToString());
+
                     if (item.Type == QueueEntry.Types.MessageSpecific)
-                        await this.ClientMessageSpecific(item.Payload.ToString());
+                        await ClientMessageSpecific(item.Payload.ToString());
                 }
                 else
                 {
@@ -87,7 +85,7 @@ public class Connection
                 x.Headers = WebClientBuilder.GetHeaders(machine, true);
             }).WithAutomaticReconnect()
             .Build();
-        
+
         Console.WriteLine($"Connection state: {_connection.State}");
 
         // Define how to handle incoming messages
@@ -130,25 +128,25 @@ public class Connection
         }
         catch (Exception ex)
         {
-            if(_attempts > 1)
+            if (_attempts > 1)
                 Console.WriteLine($"An error occurred at {url} while connecting: {ex.Message}");
         }
     }
 
     private async Task ClientHeartbeat()
     {
-        await _connection?.InvokeAsync("SendHeartbeat", $"Client heartbeat at {DateTime.UtcNow}", this._ct)!;
+        await _connection?.InvokeAsync("SendHeartbeat", $"Client heartbeat at {DateTime.UtcNow}", _ct)!;
     }
-    
+
     private async Task ClientMessage(string message)
     {
-        if(!string.IsNullOrEmpty(message))
-            await _connection?.InvokeAsync("SendMessage", $"Client message: {message}", this._ct)!;
+        if (!string.IsNullOrEmpty(message))
+            await _connection?.InvokeAsync("SendMessage", $"Client message: {message}", _ct)!;
     }
-    
+
     private async Task ClientMessageSpecific(string message)
     {
-        if(!string.IsNullOrEmpty(message))
-            await _connection?.InvokeAsync("SendSpecificMessage", $"Client specific message: {message}", this._ct)!;
+        if (!string.IsNullOrEmpty(message))
+            await _connection?.InvokeAsync("SendSpecificMessage", $"Client specific message: {message}", _ct)!;
     }
 }

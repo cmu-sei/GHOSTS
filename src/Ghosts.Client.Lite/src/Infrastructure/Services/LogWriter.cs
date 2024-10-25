@@ -9,7 +9,7 @@ namespace Ghosts.Client.Lite.Infrastructure.Services;
 public static class LogWriter
 {
     private static readonly Logger _timelineLog = LogManager.GetLogger("TIMELINE");
-    
+
     public static void Timeline(TimeLineRecord result)
     {
         var o = JsonConvert.SerializeObject(result,

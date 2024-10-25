@@ -20,7 +20,7 @@ public class FileCreatorJob : IJob
         var handler = JsonConvert.DeserializeObject<TimelineHandler>(raw);
         if (handler == null)
             return;
-        
+
         await FileHandler.Run(handler);
     }
 }
@@ -36,7 +36,7 @@ public class FileHandler
             await Run(handler.HandlerType, timelineEvent);
         }
     }
-    
+
     public static async Task Run(HandlerType handler, TimelineEvent t)
     {
         var sizeMap = new Dictionary<string, int>
@@ -49,7 +49,7 @@ public class FileHandler
         var rand = RandomFilename.Generate();
 
         var defaultSaveDirectory = t.CommandArgs[0].ToString();
-        if (defaultSaveDirectory!.Contains("%"))
+        if (defaultSaveDirectory!.Contains('%'))
         {
             defaultSaveDirectory = Environment.ExpandEnvironmentVariables(defaultSaveDirectory);
         }
@@ -64,7 +64,7 @@ public class FileHandler
                     savePathString = savePathString.Replace("\\", "/"); // Can't deserialize Windows path
                     var savePaths = JsonConvert.DeserializeObject<string[]>(savePathString);
                     defaultSaveDirectory = savePaths.PickRandom().Replace("/", "\\"); // Revert to Windows path
-                    if (defaultSaveDirectory.Contains("%"))
+                    if (defaultSaveDirectory.Contains('%'))
                     {
                         defaultSaveDirectory = Environment.ExpandEnvironmentVariables(defaultSaveDirectory);
                     }
@@ -101,7 +101,7 @@ public class FileHandler
                 _log.Trace(File.Exists(path));
                 var bitLength = new Random().Next(1000, sizeMap[handler.ToString()]);
                 var info = new UTF8Encoding(true).GetBytes(GenerateBits(bitLength));
-                await fs.WriteAsync(info, 0, info.Length);
+                await fs.WriteAsync(info);
             }
 
             // Report on file creation success

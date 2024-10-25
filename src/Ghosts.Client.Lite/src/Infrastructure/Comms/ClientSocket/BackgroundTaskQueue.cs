@@ -6,20 +6,17 @@ namespace Ghosts.Client.Lite.Infrastructure.Comms.ClientSocket;
 
 public class BackgroundTaskQueue
 {
-    private ConcurrentQueue<QueueEntry> _workItems = new ();
-    private SemaphoreSlim _signal = new SemaphoreSlim(0);
+    private readonly ConcurrentQueue<QueueEntry> _workItems = new();
+    private readonly SemaphoreSlim _signal = new(0);
 
     public IEnumerable<QueueEntry> GetAll()
     {
         return _workItems;
     }
-    
+
     public void Enqueue(QueueEntry workItem)
     {
-        if (workItem == null)
-        {
-            throw new ArgumentNullException(nameof(workItem));
-        }
+        ArgumentNullException.ThrowIfNull(workItem);
 
         _workItems.Enqueue(workItem);
         _signal.Release();
