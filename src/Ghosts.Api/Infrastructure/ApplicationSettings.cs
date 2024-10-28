@@ -21,7 +21,7 @@ public class ApplicationSettings
         public string GroupName { get; set; }
         public List<char> GroupDelimiters { get; set; }
         public List<GroupingDefinitionOption> GroupingDefinition { get; set; }
-    
+
         public class GroupingDefinitionOption
         {
             public string Value { get; set; }

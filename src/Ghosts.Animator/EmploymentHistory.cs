@@ -21,7 +21,7 @@ namespace Ghosts.Animator
             for (var i = 0; i < numberOfJobs; i++)
             {
                 var employmentStatus = EmploymentProfile.EmploymentRecord.EmploymentStatuses.Resigned;
-                
+
                 var startDate = AnimatorRandom.Date();
                 DateTime? endDate = startDate.AddDays(AnimatorRandom.Rand.Next(180, 2000));
                 if (i == 0)
@@ -29,10 +29,10 @@ namespace Ghosts.Animator
                     endDate = null;
                     employmentStatus = EmploymentProfile.EmploymentRecord.EmploymentStatuses.FullTime;
                 }
-                
+
                 var raw = File.ReadAllText("config/employment_jobtitles.json");
                 var data = JsonConvert.DeserializeObject<DepartmentManager>(raw);
-                
+
                 var u = data.Departments.Sum(x => x.Probability);
                 var r = AnimatorRandom.Rand.NextDouble() * u;
                 double sum = 0;
@@ -42,12 +42,14 @@ namespace Ghosts.Animator
                 r = AnimatorRandom.Rand.NextDouble() * u;
                 sum = 0;
                 var assignedRole = assignedDepartment.Roles.FirstOrDefault(x => r <= (sum += x.Probability));
-                
-                var job = new EmploymentProfile.EmploymentRecord();
-                job.Company = CompanyName();
-                job.Department = assignedDepartment.Department;
-                job.JobTitle = assignedRole.Title;
-                job.Email = $"{Npc.NpcProfile.Name.ToString().ToAccountSafeString()}@{job.Company.ToAccountSafeString()}.com".Replace("..",".");
+
+                var job = new EmploymentProfile.EmploymentRecord
+                {
+                    Company = CompanyName(),
+                    Department = assignedDepartment.Department,
+                    JobTitle = assignedRole.Title
+                };
+                job.Email = $"{Npc.NpcProfile.Name.ToString().ToAccountSafeString()}@{job.Company.ToAccountSafeString()}.com".Replace("..", ".");
                 //job.Manager
                 job.Organization = job.Company;
                 job.Phone = $"{PhoneNumber.GetPhoneNumber()} x####".Numerify();
@@ -56,10 +58,10 @@ namespace Ghosts.Animator
                 job.EndDate = endDate;
                 job.EmploymentStatus = employmentStatus;
                 job.Level = assignedRole.Level;
-                
+
                 job.Address = Address.GetHomeAddress();
                 job.Address.Name = job.Company;
-                
+
                 job.Address.AddressType = "Employment";
                 o.EmploymentRecords.Add(job);
             }
@@ -71,7 +73,7 @@ namespace Ghosts.Animator
         {
             return COMPANIES.RandomElement();
         }
-        
+
         //private static readonly string[] DEPARTMENTS = { "Human Resources", "IT", "Logistics", "Finance", "Corporate Strategy", ""};
 
         private static readonly string[] COMPANIES =
@@ -82,7 +84,7 @@ namespace Ghosts.Animator
             "Gringotts", "Oscorp", "Nakatomi Trading Corp.", "Spacely Space Sprockets"
         };
     }
-    
+
     public class Role
     {
         public string Title { get; set; }

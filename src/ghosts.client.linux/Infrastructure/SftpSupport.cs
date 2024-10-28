@@ -11,7 +11,7 @@ namespace ghosts.client.linux.Infrastructure
 {
     public class SftpSupport : SshSftpSupport
     {
-       
+
         public string uploadDirectory { get; set; } = null;
         public string downloadDirectory { get; set; } = null;
 
@@ -21,7 +21,7 @@ namespace ghosts.client.linux.Infrastructure
             return GetUploadFilenameBase(uploadDirectory, "*");
         }
 
-        public SftpFile GetRemoteFile(SftpClient client)
+        public static SftpFile GetRemoteFile(SftpClient client)
         {
 
             try
@@ -35,7 +35,7 @@ namespace ghosts.client.linux.Infrastructure
                 }
                 if (normalFiles.Count > 0)
                 {
-                    return normalFiles[_random.Next(0, normalFiles.Count())];
+                    return normalFiles[_random.Next(0, normalFiles.Count)];
                 }
             }
             catch (ThreadAbortException)
@@ -50,7 +50,7 @@ namespace ghosts.client.linux.Infrastructure
 
         }
 
-        public SftpFile GetRemoteDir(SftpClient client)
+        public static SftpFile GetRemoteDir(SftpClient client)
         {
 
             try
@@ -64,7 +64,7 @@ namespace ghosts.client.linux.Infrastructure
                 }
                 if (normalFiles.Count > 0)
                 {
-                    return normalFiles[_random.Next(0, remoteFiles.Count())];
+                    return normalFiles[_random.Next(0, remoteFiles.Count)];
                 }
             }
             catch (ThreadAbortException)
@@ -79,7 +79,7 @@ namespace ghosts.client.linux.Infrastructure
 
         }
 
-        public SftpFile FindDir(SftpClient client,string targetdir)
+        public static SftpFile FindDir(SftpClient client, string targetdir)
         {
 
             try
@@ -111,7 +111,7 @@ namespace ghosts.client.linux.Infrastructure
         /// <param name="cmd"></param>
         public void DoPut(SftpClient client, string cmd)
         {
-            char[] charSeparators = new char[] { ' ' };
+            var charSeparators = new char[] { ' ' };
             var cmdArgs = cmd.Split(charSeparators, 2, StringSplitOptions.None);
             if (cmdArgs.Length != 2)
             {
@@ -119,7 +119,8 @@ namespace ghosts.client.linux.Infrastructure
                 return;
             }
             var fileName = cmdArgs[1];
-            if (fileName.Contains("[localfile]") ){
+            if (fileName.Contains("[localfile]"))
+            {
                 fileName = GetUploadFilename();
                 if (fileName == null)
                 {
@@ -135,7 +136,7 @@ namespace ghosts.client.linux.Infrastructure
                     var components = fileName.Split(Path.DirectorySeparatorChar);
                     var remoteFileName = components[components.Length - 1];
                     client.UploadFile(fileStream, remoteFileName, true);
-                    Log.Trace($"Sftp:: Success, Uploaded local file {fileName} to file {remoteFileName}, host {this.HostIp} ");
+                    Log.Trace($"Sftp:: Success, Uploaded local file {fileName} to file {remoteFileName}, host {HostIp} ");
                     fileStream.Close();
                 }
             }
@@ -156,7 +157,7 @@ namespace ghosts.client.linux.Infrastructure
         /// <param name="cmd"></param>
         public void DoRemoveFile(SftpClient client, string cmd)
         {
-            char[] charSeparators = new char[] { ' ' };
+            var charSeparators = new char[] { ' ' };
             var cmdArgs = cmd.Split(charSeparators, 2, StringSplitOptions.None);
             if (cmdArgs.Length != 2)
             {
@@ -164,23 +165,23 @@ namespace ghosts.client.linux.Infrastructure
                 return;
             }
             var fileName = cmdArgs[1];
-            
+
             if (fileName.Contains("[remotefile]"))
             {
-                SftpFile file = GetRemoteFile(client);
+                var file = GetRemoteFile(client);
                 if (file == null)
                 {
-                    Log.Trace($"Sftp:: Cannot find a valid file to delete from remote host {this.HostIp}.");
+                    Log.Trace($"Sftp:: Cannot find a valid file to delete from remote host {HostIp}.");
                     return;
                 }
                 fileName = file.FullName;
             }
-            
+
             //now delete the remote file
             try
             {
                 client.DeleteFile(fileName);
-                Log.Trace($"Sftp:: Success, Deleted {fileName} on remote host {this.HostIp}.");
+                Log.Trace($"Sftp:: Success, Deleted {fileName} on remote host {HostIp}.");
             }
             catch (ThreadAbortException)
             {
@@ -199,7 +200,7 @@ namespace ghosts.client.linux.Infrastructure
         /// <param name="cmd"></param>
         public void DoGet(SftpClient client, string cmd)
         {
-            char[] charSeparators = new char[] { ' ' };
+            var charSeparators = new char[] { ' ' };
             var cmdArgs = cmd.Split(charSeparators, 2, StringSplitOptions.None);
             if (cmdArgs.Length != 2)
             {
@@ -211,10 +212,10 @@ namespace ghosts.client.linux.Infrastructure
             string remoteFilePath = null;
             if (fileName.Contains("[remotefile]"))
             {
-                SftpFile file = GetRemoteFile(client);
+                var file = GetRemoteFile(client);
                 if (file == null)
                 {
-                    Log.Trace($"Sftp:: Cannot find a valid file to download from remote host {this.HostIp}.");
+                    Log.Trace($"Sftp:: Cannot find a valid file to download from remote host {HostIp}.");
                     return;
                 }
                 remoteFilePath = file.FullName;
@@ -223,21 +224,23 @@ namespace ghosts.client.linux.Infrastructure
             else
             {
                 var seperator = '\\';
-                if (fileName.Contains("\\"))
+                if (fileName.Contains('\\'))
                 {
                     //assume this the full path to a windows box
                     remoteFilePath = fileName;
-                } else if (fileName.Contains("/"))
+                }
+                else if (fileName.Contains('/'))
                 {
                     remoteFilePath = fileName;
                     seperator = '/';
                 }
-                if  (remoteFilePath == null)
+                if (remoteFilePath == null)
                 {
                     //a local name
                     remoteFilePath = fileName;
                     localFilePath = Path.Combine(downloadDirectory, fileName);
-                } else
+                }
+                else
                 {
                     remoteFilePath = fileName;
                     //parse fullpath to get local name
@@ -269,7 +272,7 @@ namespace ghosts.client.linux.Infrastructure
                 using (var fileStream = System.IO.File.OpenWrite(localFilePath))
                 {
                     client.DownloadFile(remoteFilePath, fileStream);
-                    Log.Trace($"Sftp:: Success, Downloaded remote file {remoteFilePath},host {this.HostIp}  to file {localFilePath},  ");
+                    Log.Trace($"Sftp:: Success, Downloaded remote file {remoteFilePath},host {HostIp}  to file {localFilePath},  ");
                     fileStream.Close();
                 }
             }
@@ -285,7 +288,7 @@ namespace ghosts.client.linux.Infrastructure
 
         public void DoChangeDir(SftpClient client, string cmd)
         {
-            char[] charSeparators = new char[] { ' ' };
+            var charSeparators = new char[] { ' ' };
             var cmdArgs = cmd.Split(charSeparators, 2, StringSplitOptions.None);
             if (cmdArgs.Length != 2)
             {
@@ -295,19 +298,19 @@ namespace ghosts.client.linux.Infrastructure
             var dirName = cmdArgs[1];
             if (dirName.Contains("[remotedir]"))
             {
-                SftpFile file = GetRemoteDir(client);
+                var file = GetRemoteDir(client);
                 if (file == null)
                 {
-                    Log.Trace($"Sftp:: Cannot find a valid directory to change to on remote host {this.HostIp}.");
+                    Log.Trace($"Sftp:: Cannot find a valid directory to change to on remote host {HostIp}.");
                     return;
                 }
                 dirName = file.FullName;
             }
-            
+
             try
             {
                 client.ChangeDirectory(dirName);
-                Log.Trace($"Sftp:: Success, Changed to directory {dirName} on remote host {this.HostIp}.");
+                Log.Trace($"Sftp:: Success, Changed to directory {dirName} on remote host {HostIp}.");
             }
             catch (ThreadAbortException)
             {
@@ -322,7 +325,7 @@ namespace ghosts.client.linux.Infrastructure
 
         public void DoMakeDir(SftpClient client, string cmd)
         {
-            char[] charSeparators = new char[] { ' ' };
+            var charSeparators = new char[] { ' ' };
             var cmdArgs = cmd.Split(charSeparators, 2, StringSplitOptions.None);
             if (cmdArgs.Length != 2)
             {
@@ -340,10 +343,11 @@ namespace ghosts.client.linux.Infrastructure
                 if (FindDir(client, dirName) == null)
                 {
                     client.CreateDirectory(dirName);
-                    Log.Trace($"Sftp:: Success, Created directory {dirName} on remote host {this.HostIp}.");
-                } else
+                    Log.Trace($"Sftp:: Success, Created directory {dirName} on remote host {HostIp}.");
+                }
+                else
                 {
-                    Log.Trace($"Sftp:: mkdir directory command skipped, as {dirName} already exists remote host {this.HostIp}.");
+                    Log.Trace($"Sftp:: mkdir directory command skipped, as {dirName} already exists remote host {HostIp}.");
                 }
             }
             catch (ThreadAbortException)
@@ -359,17 +363,17 @@ namespace ghosts.client.linux.Infrastructure
 
         public void DoListDir(SftpClient client, string cmd)
         {
-            char[] charSeparators = new char[] { ' ' };
+            var charSeparators = new char[] { ' ' };
             var cmdArgs = cmd.Split(charSeparators, 2, StringSplitOptions.None);
-            
+
             var dirName = ".";
             if (cmdArgs.Length == 2) dirName = cmdArgs[1];
             if (dirName.Contains("[remotedir]"))
             {
-                SftpFile file = GetRemoteDir(client);
+                var file = GetRemoteDir(client);
                 if (file == null)
                 {
-                    Log.Trace($"Sftp:: Cannot find a valid directory to list in current working directory on remote host {this.HostIp}.");
+                    Log.Trace($"Sftp:: Cannot find a valid directory to list in current working directory on remote host {HostIp}.");
                     return;
                 }
                 dirName = file.FullName;
@@ -378,7 +382,7 @@ namespace ghosts.client.linux.Infrastructure
             try
             {
                 var remoteFiles = client.ListDirectory(dirName).OfType<SftpFile>().ToList();
-                Log.Trace($"Sftp:: Success, Found {remoteFiles.Count} in directory {dirName} on remote host {this.HostIp}.");
+                Log.Trace($"Sftp:: Success, Found {remoteFiles.Count} in directory {dirName} on remote host {HostIp}.");
             }
             catch (ThreadAbortException)
             {
@@ -405,7 +409,7 @@ namespace ghosts.client.linux.Infrastructure
 
         public void RunSftpCommand(SftpClient client, string cmd)
         {
-           
+
             if (cmd.StartsWith("put"))
             {
                 DoPut(client, cmd);
@@ -446,7 +450,7 @@ namespace ghosts.client.linux.Infrastructure
             return;
         }
 
-      
+
 
     }
 }

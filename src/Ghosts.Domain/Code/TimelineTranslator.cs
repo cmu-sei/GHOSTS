@@ -11,14 +11,15 @@ namespace Ghosts.Domain.Code
     public static class TimelineTranslator
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        
+
         public static TimelineHandler FromBrowserUnitTests(IEnumerable<string> commands)
         {
-            var timelineHandler = new TimelineHandler();
-
-            timelineHandler.HandlerType = HandlerType.BrowserFirefox;
-            timelineHandler.Initial = "about:blank";
-            timelineHandler.Loop = false;
+            var timelineHandler = new TimelineHandler
+            {
+                HandlerType = HandlerType.BrowserFirefox,
+                Initial = "about:blank",
+                Loop = false
+            };
 
             foreach (var command in commands)
             {
@@ -41,12 +42,14 @@ namespace Ghosts.Domain.Code
 
         private static TimelineEvent GetEvent(string command)
         {
-            var timelineEvent = new TimelineEvent();
-            timelineEvent.DelayBefore = 0;
-            timelineEvent.DelayAfter = 3000;
+            var timelineEvent = new TimelineEvent
+            {
+                DelayBefore = 0,
+                DelayAfter = 3000
+            };
 
             if (command.StartsWith("driver.Quit", StringComparison.InvariantCultureIgnoreCase)) return timelineEvent;
-            
+
             // determine command and commandArgs
             if (command.StartsWith("driver.Navigate()", StringComparison.InvariantCultureIgnoreCase))
             {

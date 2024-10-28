@@ -6,11 +6,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Ghosts.Api;
 using ghosts.api.Hubs;
-using Ghosts.Api.Infrastructure;
 using ghosts.api.Infrastructure.Animations.AnimationDefinitions;
 using ghosts.api.Infrastructure.Extensions;
+using Ghosts.Api;
+using Ghosts.Api.Infrastructure;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -56,35 +56,27 @@ public enum AnimationJobTypes
     FULLAUTONOMY
 }
 
-public class AnimationsManager : IManageableHostedService
+public class AnimationsManager(IHubContext<ActivityHub> activityHubContext, IServiceScopeFactory scopeFactory) : IManageableHostedService
 {
     private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-    private readonly IServiceScopeFactory _scopeFactory;
+    private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
 
-    private readonly ApplicationSettings _configuration;
-    private readonly Random _random;
+    private readonly ApplicationSettings _configuration = Program.ApplicationSettings;
+    private readonly Random _random = Random.Shared;
     private Thread _socialSharingJobThread;
     private Thread _socialGraphJobThread;
     private Thread _socialBeliefsJobThread;
     private Thread _chatJobThread;
     private Thread _fullAutonomyJobThread;
-    
-    private CancellationTokenSource _socialSharingJobCancellationTokenSource = new CancellationTokenSource();
-    private CancellationTokenSource _socialGraphJobCancellationTokenSource = new CancellationTokenSource();
-    private CancellationTokenSource _socialBeliefsJobCancellationTokenSource = new CancellationTokenSource();
-    private CancellationTokenSource _chatJobJobCancellationTokenSource = new CancellationTokenSource();
-    private CancellationTokenSource _fullAutonomyCancellationTokenSource = new CancellationTokenSource();
-    
-    private readonly IHubContext<ActivityHub> _activityHubContext;
-    private readonly ConcurrentDictionary<string, JobInfo> _jobs = new ConcurrentDictionary<string, JobInfo>();
 
-    public AnimationsManager(IHubContext<ActivityHub> activityHubContext, IServiceScopeFactory scopeFactory)
-    {
-        _scopeFactory = scopeFactory;
-        this._random = Random.Shared;
-        this._activityHubContext = activityHubContext;
-        this._configuration = Program.ApplicationSettings;
-    }
+    private CancellationTokenSource _socialSharingJobCancellationTokenSource = new();
+    private CancellationTokenSource _socialGraphJobCancellationTokenSource = new();
+    private readonly CancellationTokenSource _socialBeliefsJobCancellationTokenSource = new();
+    private CancellationTokenSource _chatJobJobCancellationTokenSource = new();
+    private readonly CancellationTokenSource _fullAutonomyCancellationTokenSource = new();
+
+    private readonly IHubContext<ActivityHub> _activityHubContext = activityHubContext;
+    private readonly ConcurrentDictionary<string, JobInfo> _jobs = new();
 
     public string GetOutput(AnimationJobTypes job)
     {
@@ -93,7 +85,7 @@ public class AnimationsManager : IManageableHostedService
         path.ZipDirectoryContents(outputZipFilePath);
         return outputZipFilePath;
     }
-    
+
     public Task StartAsync(CancellationToken cancellationToken)
     {
         _log.Info("Animations Manager initializing...");
@@ -106,10 +98,10 @@ public class AnimationsManager : IManageableHostedService
         _log.Info("Stopping Animations...");
         try
         {
-            this._socialGraphJobCancellationTokenSource.Cancel();
-            this._socialGraphJobThread?.Join();
-            this.RemoveJob("SOCIALGRAPH");
-            this._socialGraphJobCancellationTokenSource = new CancellationTokenSource();
+            _socialGraphJobCancellationTokenSource.Cancel();
+            _socialGraphJobThread?.Join();
+            RemoveJob("SOCIALGRAPH");
+            _socialGraphJobCancellationTokenSource = new CancellationTokenSource();
         }
         catch
         {
@@ -118,10 +110,10 @@ public class AnimationsManager : IManageableHostedService
 
         try
         {
-            this._socialSharingJobCancellationTokenSource.Cancel();
-            this._socialSharingJobThread?.Join();
-            this.RemoveJob("SOCIALSHARING");
-            this._socialGraphJobCancellationTokenSource = new CancellationTokenSource();
+            _socialSharingJobCancellationTokenSource.Cancel();
+            _socialSharingJobThread?.Join();
+            RemoveJob("SOCIALSHARING");
+            _socialGraphJobCancellationTokenSource = new CancellationTokenSource();
         }
         catch
         {
@@ -130,42 +122,42 @@ public class AnimationsManager : IManageableHostedService
 
         try
         {
-            this._socialSharingJobCancellationTokenSource.Cancel();
-            this._socialBeliefsJobThread?.Join();
-            this.RemoveJob("SOCIALBELIEF");
-            this._socialGraphJobCancellationTokenSource = new CancellationTokenSource();
+            _socialSharingJobCancellationTokenSource.Cancel();
+            _socialBeliefsJobThread?.Join();
+            RemoveJob("SOCIALBELIEF");
+            _socialGraphJobCancellationTokenSource = new CancellationTokenSource();
         }
         catch
         {
             // ignore
         }
-        
+
         try
         {
-            this._chatJobJobCancellationTokenSource.Cancel();
-            this._chatJobThread?.Join();
-            this.RemoveJob("CHAT");
-            this._socialGraphJobCancellationTokenSource = new CancellationTokenSource();
+            _chatJobJobCancellationTokenSource.Cancel();
+            _chatJobThread?.Join();
+            RemoveJob("CHAT");
+            _socialGraphJobCancellationTokenSource = new CancellationTokenSource();
         }
         catch
         {
             // ignore
         }
-        
+
         try
         {
-            this._fullAutonomyCancellationTokenSource.Cancel();
-            this._fullAutonomyJobThread?.Join();
-            this.RemoveJob("FULLAUTONOMY");
-            this._socialGraphJobCancellationTokenSource = new CancellationTokenSource();
+            _fullAutonomyCancellationTokenSource.Cancel();
+            _fullAutonomyJobThread?.Join();
+            RemoveJob("FULLAUTONOMY");
+            _socialGraphJobCancellationTokenSource = new CancellationTokenSource();
         }
         catch
         {
             // ignore
         }
-        
+
         _log.Info("Animations stopped.");
-        
+
         return Task.CompletedTask;
     }
 
@@ -184,43 +176,43 @@ public class AnimationsManager : IManageableHostedService
             switch (jobId.ToUpper())
             {
                 case "SOCIALGRAPH":
-                    this._socialGraphJobCancellationTokenSource.Cancel();
-                    this._socialGraphJobThread?.Join();
-                    this._socialGraphJobCancellationTokenSource = new CancellationTokenSource();
+                    _socialGraphJobCancellationTokenSource.Cancel();
+                    _socialGraphJobThread?.Join();
+                    _socialGraphJobCancellationTokenSource = new CancellationTokenSource();
                     break;
                 case "SOCIALSHARING":
-                    this._socialSharingJobCancellationTokenSource.Cancel();
-                    this._socialSharingJobThread?.Join();
-                    this._socialSharingJobCancellationTokenSource = new CancellationTokenSource();
+                    _socialSharingJobCancellationTokenSource.Cancel();
+                    _socialSharingJobThread?.Join();
+                    _socialSharingJobCancellationTokenSource = new CancellationTokenSource();
                     break;
                 case "SOCIALBELIEFS":
-                    this._socialSharingJobCancellationTokenSource.Cancel();
-                    this._socialBeliefsJobThread?.Join();
-                    this._socialSharingJobCancellationTokenSource = new CancellationTokenSource();
+                    _socialSharingJobCancellationTokenSource.Cancel();
+                    _socialBeliefsJobThread?.Join();
+                    _socialSharingJobCancellationTokenSource = new CancellationTokenSource();
                     break;
                 case "CHAT":
-                    this._chatJobJobCancellationTokenSource.Cancel();
-                    this._chatJobThread?.Join();
-                    this._chatJobJobCancellationTokenSource = new CancellationTokenSource();
+                    _chatJobJobCancellationTokenSource.Cancel();
+                    _chatJobThread?.Join();
+                    _chatJobJobCancellationTokenSource = new CancellationTokenSource();
                     break;
                 case "FULLAUTONOMY":
-                    this._fullAutonomyCancellationTokenSource.Cancel();
-                    this._fullAutonomyJobThread?.Join();
-                    this._chatJobJobCancellationTokenSource = new CancellationTokenSource();
+                    _fullAutonomyCancellationTokenSource.Cancel();
+                    _fullAutonomyJobThread?.Join();
+                    _chatJobJobCancellationTokenSource = new CancellationTokenSource();
                     break;
             }
 
-            this.RemoveJob(jobId.ToUpper());
+            RemoveJob(jobId.ToUpper());
         }
         catch
         {
             // ignore
         }
-        
+
         _log.Info($"Animation {jobId} stopped.");
         return Task.CompletedTask;
     }
-    
+
     public IEnumerable<JobInfo> GetRunningJobs()
     {
         return _jobs.Values.ToArray();
@@ -236,7 +228,7 @@ public class AnimationsManager : IManageableHostedService
         };
         _jobs.TryAdd(jobInfo.Name, jobInfo);
     }
-    
+
     private bool RemoveJob(string jobName)
     {
         return _jobs.TryRemove(jobName, out _);
@@ -244,13 +236,13 @@ public class AnimationsManager : IManageableHostedService
 
     private void Run(AnimationConfiguration animationConfiguration)
     {
-        if(string.IsNullOrEmpty(animationConfiguration.JobId)) return;
-        
+        if (string.IsNullOrEmpty(animationConfiguration.JobId)) return;
+
         _log.Info($"Attempting to start {animationConfiguration.JobId}...");
         var settings = _configuration;
-        
-        this.AddJob(animationConfiguration.JobId.ToUpper());
-        
+
+        AddJob(animationConfiguration.JobId.ToUpper());
+
         switch (animationConfiguration.JobId.ToUpper())
         {
             case "SOCIALGRAPH":
@@ -262,15 +254,15 @@ public class AnimationsManager : IManageableHostedService
                     _socialGraphJobThread = new Thread(() =>
                     {
                         Thread.CurrentThread.IsBackground = true;
-                        _ = new SocialGraphJob(settings, _scopeFactory, this._random, this._activityHubContext, this._socialGraphJobCancellationTokenSource.Token);
+                        _ = new SocialGraphJob(settings, _scopeFactory, _random, _activityHubContext, _socialGraphJobCancellationTokenSource.Token);
                     });
                     _socialGraphJobThread.Start();
                 }
                 else
                 {
-                    _ = new SocialGraphJob(settings, _scopeFactory, this._random, this._activityHubContext, this._socialGraphJobCancellationTokenSource.Token);
+                    _ = new SocialGraphJob(settings, _scopeFactory, _random, _activityHubContext, _socialGraphJobCancellationTokenSource.Token);
                 }
-                
+
                 break;
             case "SOCIALSHARING":
                 var socialSettings = JsonConvert.DeserializeObject<ApplicationSettings.AnimatorSettingsDetail.AnimationsSettings.SocialSharingSettings>(animationConfiguration
@@ -281,15 +273,15 @@ public class AnimationsManager : IManageableHostedService
                     _socialSharingJobThread = new Thread(() =>
                     {
                         Thread.CurrentThread.IsBackground = true;
-                        _ = new SocialSharingJob(settings, _scopeFactory, this._random, this._activityHubContext, this._socialSharingJobCancellationTokenSource.Token);
+                        _ = new SocialSharingJob(settings, _scopeFactory, _random, _activityHubContext, _socialSharingJobCancellationTokenSource.Token);
                     });
                     _socialSharingJobThread.Start();
                 }
                 else
                 {
-                    _ = new SocialSharingJob(settings, _scopeFactory, this._random, this._activityHubContext, this._socialSharingJobCancellationTokenSource.Token);
+                    _ = new SocialSharingJob(settings, _scopeFactory, _random, _activityHubContext, _socialSharingJobCancellationTokenSource.Token);
                 }
-                
+
                 break;
             case "SOCIALBELIEF":
                 var beliefSettings = JsonConvert.DeserializeObject<ApplicationSettings.AnimatorSettingsDetail.AnimationsSettings.SocialBeliefSettings>(animationConfiguration
@@ -300,15 +292,15 @@ public class AnimationsManager : IManageableHostedService
                     _socialBeliefsJobThread = new Thread(() =>
                     {
                         Thread.CurrentThread.IsBackground = true;
-                        _ = new SocialBeliefJob(settings, _scopeFactory, this._random, this._activityHubContext, this._socialBeliefsJobCancellationTokenSource.Token);
+                        _ = new SocialBeliefJob(settings, _scopeFactory, _random, _activityHubContext, _socialBeliefsJobCancellationTokenSource.Token);
                     });
                     _socialBeliefsJobThread.Start();
                 }
                 else
                 {
-                    _ = new SocialBeliefJob(settings, _scopeFactory, this._random, this._activityHubContext, this._socialBeliefsJobCancellationTokenSource.Token);
+                    _ = new SocialBeliefJob(settings, _scopeFactory, _random, _activityHubContext, _socialBeliefsJobCancellationTokenSource.Token);
                 }
-                
+
                 break;
             case "CHAT":
                 var chatSettings = JsonConvert.DeserializeObject<ApplicationSettings.AnimatorSettingsDetail.AnimationsSettings.ChatSettings>(animationConfiguration
@@ -319,15 +311,15 @@ public class AnimationsManager : IManageableHostedService
                     _chatJobThread = new Thread(() =>
                     {
                         Thread.CurrentThread.IsBackground = true;
-                        _ = new ChatJob(chatSettings, _scopeFactory, this._random, this._activityHubContext, this._chatJobJobCancellationTokenSource.Token);
+                        _ = new ChatJob(chatSettings, _scopeFactory, _random, _activityHubContext, _chatJobJobCancellationTokenSource.Token);
                     });
                     _chatJobThread.Start();
                 }
                 else
                 {
-                    _ = new ChatJob(chatSettings, _scopeFactory, this._random, this._activityHubContext, this._chatJobJobCancellationTokenSource.Token);
+                    _ = new ChatJob(chatSettings, _scopeFactory, _random, _activityHubContext, _chatJobJobCancellationTokenSource.Token);
                 }
-                
+
                 break;
             case "FULLATONOMY":
                 var autonomySettings = JsonConvert.DeserializeObject<ApplicationSettings.AnimatorSettingsDetail.AnimationsSettings.FullAutonomySettings>(animationConfiguration
@@ -338,22 +330,22 @@ public class AnimationsManager : IManageableHostedService
                     _fullAutonomyJobThread = new Thread(() =>
                     {
                         Thread.CurrentThread.IsBackground = true;
-                        _ = new FullAutonomyJob(settings, _scopeFactory, this._random, this._activityHubContext, this._fullAutonomyCancellationTokenSource.Token);
+                        _ = new FullAutonomyJob(settings, _scopeFactory, _random, _activityHubContext, _fullAutonomyCancellationTokenSource.Token);
                     });
                     _fullAutonomyJobThread.Start();
                 }
                 else
                 {
-                    _ = new FullAutonomyJob(settings, _scopeFactory, this._random, this._activityHubContext, this._fullAutonomyCancellationTokenSource.Token);
+                    _ = new FullAutonomyJob(settings, _scopeFactory, _random, _activityHubContext, _fullAutonomyCancellationTokenSource.Token);
                 }
-                
+
                 break;
         }
     }
 
     private void Run()
     {
-        if (!this._configuration.AnimatorSettings.Animations.IsEnabled)
+        if (!_configuration.AnimatorSettings.Animations.IsEnabled)
         {
             _log.Info($"Animations are not enabled, exiting...");
             return;
@@ -363,23 +355,23 @@ public class AnimationsManager : IManageableHostedService
 
         try
         {
-            if (this._configuration.AnimatorSettings.Animations.SocialGraph.IsEnabled && this._configuration.AnimatorSettings.Animations.SocialGraph.IsInteracting)
+            if (_configuration.AnimatorSettings.Animations.SocialGraph.IsEnabled && _configuration.AnimatorSettings.Animations.SocialGraph.IsInteracting)
             {
                 _log.Info($"Starting SocialGraph...");
-                if (this._configuration.AnimatorSettings.Animations.SocialGraph.IsMultiThreaded)
+                if (_configuration.AnimatorSettings.Animations.SocialGraph.IsMultiThreaded)
                 {
                     _socialGraphJobThread = new Thread(() =>
                     {
-                        this.AddJob("SOCIALGRAPH");
-                        
+                        AddJob("SOCIALGRAPH");
+
                         Thread.CurrentThread.IsBackground = true;
-                        _ = new SocialGraphJob(this._configuration, _scopeFactory, this._random, this._activityHubContext, this._socialGraphJobCancellationTokenSource.Token);
+                        _ = new SocialGraphJob(_configuration, _scopeFactory, _random, _activityHubContext, _socialGraphJobCancellationTokenSource.Token);
                     });
                     _socialGraphJobThread.Start();
                 }
                 else
                 {
-                    _ = new SocialGraphJob(this._configuration, _scopeFactory, this._random, this._activityHubContext, this._socialGraphJobCancellationTokenSource.Token);
+                    _ = new SocialGraphJob(_configuration, _scopeFactory, _random, _activityHubContext, _socialGraphJobCancellationTokenSource.Token);
                 }
             }
             else
@@ -394,23 +386,23 @@ public class AnimationsManager : IManageableHostedService
 
         try
         {
-            if (this._configuration.AnimatorSettings.Animations.SocialBelief.IsEnabled && this._configuration.AnimatorSettings.Animations.SocialBelief.IsInteracting)
+            if (_configuration.AnimatorSettings.Animations.SocialBelief.IsEnabled && _configuration.AnimatorSettings.Animations.SocialBelief.IsInteracting)
             {
                 _log.Info($"Starting SocialBelief...");
-                if (this._configuration.AnimatorSettings.Animations.SocialBelief.IsMultiThreaded)
+                if (_configuration.AnimatorSettings.Animations.SocialBelief.IsMultiThreaded)
                 {
-                    this.AddJob("SOCIALBELIEF");
-                    
+                    AddJob("SOCIALBELIEF");
+
                     _socialBeliefsJobThread = new Thread(() =>
                     {
                         Thread.CurrentThread.IsBackground = true;
-                        _ = new SocialBeliefJob(this._configuration, _scopeFactory, this._random, this._activityHubContext, this._socialBeliefsJobCancellationTokenSource.Token);
+                        _ = new SocialBeliefJob(_configuration, _scopeFactory, _random, _activityHubContext, _socialBeliefsJobCancellationTokenSource.Token);
                     });
                     _socialBeliefsJobThread.Start();
                 }
                 else
                 {
-                    _ = new SocialBeliefJob(this._configuration, _scopeFactory, this._random, this._activityHubContext, this._socialBeliefsJobCancellationTokenSource.Token);
+                    _ = new SocialBeliefJob(_configuration, _scopeFactory, _random, _activityHubContext, _socialBeliefsJobCancellationTokenSource.Token);
                 }
             }
             else
@@ -422,26 +414,26 @@ public class AnimationsManager : IManageableHostedService
         {
             _log.Trace(e);
         }
-        
+
         try
         {
-            if (this._configuration.AnimatorSettings.Animations.Chat.IsEnabled && this._configuration.AnimatorSettings.Animations.Chat.IsInteracting)
+            if (_configuration.AnimatorSettings.Animations.Chat.IsEnabled && _configuration.AnimatorSettings.Animations.Chat.IsInteracting)
             {
                 _log.Info($"Starting chat job...");
-                if (this._configuration.AnimatorSettings.Animations.Chat.IsMultiThreaded)
+                if (_configuration.AnimatorSettings.Animations.Chat.IsMultiThreaded)
                 {
-                    this.AddJob("CHAT");
-                    
+                    AddJob("CHAT");
+
                     _chatJobThread = new Thread(() =>
                     {
                         Thread.CurrentThread.IsBackground = true;
-                        _ = new ChatJob(this._configuration.AnimatorSettings.Animations.Chat, _scopeFactory, this._random, this._activityHubContext, this._chatJobJobCancellationTokenSource.Token);
+                        _ = new ChatJob(_configuration.AnimatorSettings.Animations.Chat, _scopeFactory, _random, _activityHubContext, _chatJobJobCancellationTokenSource.Token);
                     });
                     _chatJobThread.Start();
                 }
                 else
                 {
-                    _ = new ChatJob(this._configuration.AnimatorSettings.Animations.Chat, _scopeFactory, this._random, this._activityHubContext, this._chatJobJobCancellationTokenSource.Token);
+                    _ = new ChatJob(_configuration.AnimatorSettings.Animations.Chat, _scopeFactory, _random, _activityHubContext, _chatJobJobCancellationTokenSource.Token);
                 }
             }
             else
@@ -456,23 +448,23 @@ public class AnimationsManager : IManageableHostedService
 
         try
         {
-            if (this._configuration.AnimatorSettings.Animations.SocialSharing.IsEnabled && this._configuration.AnimatorSettings.Animations.SocialSharing.IsInteracting)
+            if (_configuration.AnimatorSettings.Animations.SocialSharing.IsEnabled && _configuration.AnimatorSettings.Animations.SocialSharing.IsInteracting)
             {
                 _log.Info($"Starting SocialSharing...");
-                if (this._configuration.AnimatorSettings.Animations.SocialSharing.IsMultiThreaded)
+                if (_configuration.AnimatorSettings.Animations.SocialSharing.IsMultiThreaded)
                 {
-                    this.AddJob("SOCIALSHARING");
-                    
+                    AddJob("SOCIALSHARING");
+
                     _socialSharingJobThread = new Thread(() =>
                     {
                         Thread.CurrentThread.IsBackground = true;
-                        _ = new SocialSharingJob(this._configuration, _scopeFactory, this._random, this._activityHubContext, this._socialSharingJobCancellationTokenSource.Token);
+                        _ = new SocialSharingJob(_configuration, _scopeFactory, _random, _activityHubContext, _socialSharingJobCancellationTokenSource.Token);
                     });
                     _socialSharingJobThread.Start();
                 }
                 else
                 {
-                    _ = new SocialSharingJob(this._configuration, _scopeFactory, this._random, this._activityHubContext, this._socialSharingJobCancellationTokenSource.Token);
+                    _ = new SocialSharingJob(_configuration, _scopeFactory, _random, _activityHubContext, _socialSharingJobCancellationTokenSource.Token);
                 }
             }
             else
@@ -484,26 +476,26 @@ public class AnimationsManager : IManageableHostedService
         {
             _log.Trace(e);
         }
-        
+
         try
         {
-            if (this._configuration.AnimatorSettings.Animations.FullAutonomy.IsEnabled && this._configuration.AnimatorSettings.Animations.FullAutonomy.IsInteracting)
+            if (_configuration.AnimatorSettings.Animations.FullAutonomy.IsEnabled && _configuration.AnimatorSettings.Animations.FullAutonomy.IsInteracting)
             {
                 _log.Info($"Starting FullAutonomy...");
-                if (this._configuration.AnimatorSettings.Animations.FullAutonomy.IsMultiThreaded)
+                if (_configuration.AnimatorSettings.Animations.FullAutonomy.IsMultiThreaded)
                 {
-                    this.AddJob("FULLAUTONOMY");
-                    
+                    AddJob("FULLAUTONOMY");
+
                     _fullAutonomyJobThread = new Thread(() =>
                     {
                         Thread.CurrentThread.IsBackground = true;
-                        _ = new FullAutonomyJob(this._configuration, _scopeFactory, this._random, this._activityHubContext, this._fullAutonomyCancellationTokenSource.Token);
+                        _ = new FullAutonomyJob(_configuration, _scopeFactory, _random, _activityHubContext, _fullAutonomyCancellationTokenSource.Token);
                     });
                     _fullAutonomyJobThread.Start();
                 }
                 else
                 {
-                    _ = new FullAutonomyJob(this._configuration, _scopeFactory, this._random, this._activityHubContext, this._fullAutonomyCancellationTokenSource.Token);
+                    _ = new FullAutonomyJob(_configuration, _scopeFactory, _random, _activityHubContext, _fullAutonomyCancellationTokenSource.Token);
                 }
             }
             else

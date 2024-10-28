@@ -10,7 +10,7 @@ namespace Ghosts.Domain.Code.Helpers
 
         public LifoQueue(int capacity)
         {
-            this._capacity = capacity;
+            _capacity = capacity;
         }
 
         public void Add(T item)

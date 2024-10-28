@@ -11,7 +11,7 @@ namespace Ghosts.Animator.Models
 
         public ForeignTravelProfile()
         {
-            this.Trips = new List<Trip>();
+            Trips = new List<Trip>();
         }
 
         public class Trip

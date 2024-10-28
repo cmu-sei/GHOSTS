@@ -17,15 +17,10 @@ namespace ghosts.api.Controllers.Api
     [ApiExplorerSettings(IgnoreApi = true)]
     [Produces("application/json")]
     [Route("api/[controller]")]
-    public class ClientIdController : Controller
+    public class ClientIdController(IMachineService service) : Controller
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        private readonly IMachineService _service;
-
-        public ClientIdController(IMachineService service)
-        {
-            _service = service;
-        }
+        private readonly IMachineService _service = service;
 
         /// <summary>
         /// Clients use this endpoint to get their unique GHOSTS system ID

@@ -11,7 +11,7 @@ namespace Ghosts.Domain.Code
     public class ClientConfiguration
     {
         public string ApiRootUrl { get; set; }
-        
+
         public IdSettings Id { get; set; }
 
         /// <summary>
@@ -74,7 +74,7 @@ namespace Ghosts.Domain.Code
 
         public ResourceControlSettings ResourceControl { get; set; }
 
-        public TimelineConf Timeline{ get; set; }
+        public TimelineConf Timeline { get; set; }
 
         public AwsCliSettings AwsCli { get; set; }
 
@@ -105,7 +105,7 @@ namespace Ghosts.Domain.Code
             // ReSharper disable once InconsistentNaming
             public string VMWareToolsLocation { get; set; }
         }
-        
+
         public class SocketsSettings
         {
             public bool IsEnabled { get; set; }
@@ -116,7 +116,7 @@ namespace Ghosts.Domain.Code
         {
             public string Location { get; set; }
         }
-        
+
         public class AwsCliSettings
         {
             public string InstallFolder { get; set; }
@@ -215,7 +215,7 @@ namespace Ghosts.Domain.Code
 
             public ResourceControlSettings()
             {
-                this.ManageProcesses = true;
+                ManageProcesses = true;
             }
         }
     }
@@ -258,7 +258,7 @@ namespace Ghosts.Domain.Code
                 var conf = JsonConvert.DeserializeObject<ClientConfiguration>(raw);
 
                 conf.ApiRootUrl = baseurl;
-                
+
                 File.WriteAllText(filePath, JsonConvert.SerializeObject(conf, Formatting.Indented));
 
                 _log.Trace($"Updating base configuration... BASE_URL is: {baseurl}");
@@ -266,7 +266,7 @@ namespace Ghosts.Domain.Code
             catch (Exception e)
             {
                 _log.Error($"Exception updating config with env vars: {e}");
-            }   
+            }
         }
     }
 }

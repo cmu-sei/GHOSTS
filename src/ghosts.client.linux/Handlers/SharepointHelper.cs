@@ -1,23 +1,23 @@
-﻿using ghosts.client.linux.Infrastructure;
-using Ghosts.Domain;
-using Ghosts.Domain.Code;
-using Newtonsoft.Json;
-using OpenQA.Selenium.Support.UI;
-using OpenQA.Selenium;
-using System;
+﻿using System;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Web;
+using ghosts.client.linux.Infrastructure;
+using Ghosts.Domain;
+using Ghosts.Domain.Code;
+using Newtonsoft.Json;
+using NLog;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Support.UI;
 using Actions = OpenQA.Selenium.Interactions.Actions;
 using Exception = System.Exception;
-using NLog;
-using System.Web;
 
 
 namespace ghosts.client.linux.handlers
 {
 
-   
+
     /// <summary>
     /// Supports upload, download, deletion of documents
     /// download, deletion only done from the first page
@@ -38,11 +38,11 @@ namespace ghosts.client.linux.handlers
             //have the username, password
             RequestConfiguration config;
 
-            string portal = site;
+            var portal = site;
 
             var pw_encoded = HttpUtility.UrlEncode(pw);
             var user_encoded = HttpUtility.UrlEncode(user);
-            string target = header + user_encoded + ":" + pw_encoded + "@" + portal + "/";
+            var target = header + user_encoded + ":" + pw_encoded + "@" + portal + "/";
             config = RequestConfiguration.Load(handler, target);
             try
             {
@@ -59,48 +59,48 @@ namespace ghosts.client.linux.handlers
                 return false;
 
             }
-            if (version == "2013")  target = header + portal + "/Documents/Forms/Allitems.aspx";
+            if (version == "2013") target = header + portal + "/Documents/Forms/Allitems.aspx";
             else target = header + portal + "/Shared Documents/Forms/Allitems.aspx";
             config = RequestConfiguration.Load(handler, target);
             baseHandler.MakeRequest(config);
 
             // check if there is a 'Return to classic Sharepoint link
             if (version != "2013")
-            {    
-                bool inClassic = false;
+            {
+                var inClassic = false;
                 try
                 {
-                    var targetElement =  Driver.FindElement(By.XPath("//a[contains(@onclick,'GoToModern(true)')]"));
+                    var targetElement = Driver.FindElement(By.XPath("//a[contains(@onclick,'GoToModern(true)')]"));
                     inClassic = true;
                 }
                 catch (ThreadAbortException)
                 {
                     throw;  //pass up
                 }
-                catch 
+                catch
                 {
                     //just ignore as if the screen is large, the menu is not present
                 }
                 if (!inClassic)
                 {
-                    try 
+                    try
                     {
                         // the screen may be small and the classic link hidden in the hamburger menu
                         var targetElement = Driver.FindElement(By.Id("O365_MainLink_HamburgerButton"));
                         targetElement.Click();
-                        Thread.Sleep(2000);                   
+                        Thread.Sleep(2000);
                     }
                     catch (ThreadAbortException)
                     {
                         throw;  //pass up
                     }
-                    catch 
+                    catch
                     {
                         //just ignore as if the screen is large, the menu is not present
                     }
                     try
                     {
-                        
+
 
                         var targetElement = Driver.FindElement(By.CssSelector("[aria-label=\"Click or enter to return to classic SharePoint\""));
 
@@ -141,7 +141,7 @@ namespace ghosts.client.linux.handlers
             return true;
         }
 
-       
+
         public override bool DoDownload(TimelineHandler handler)
         {
 
@@ -154,9 +154,9 @@ namespace ghosts.client.linux.handlers
                 var targetElements = Driver.FindElements(By.XPath("//img[@draggable='true']"));
                 if (targetElements != null && targetElements.Count > 0)
                 {
-                    int docNum = _random.Next(0, targetElements.Count);
+                    var docNum = _random.Next(0, targetElements.Count);
                     var targetElement = targetElements[docNum];
-                    string fname = targetElement.GetAttribute("title");
+                    var fname = targetElement.GetAttribute("title");
                     //now find the chkbox element corresponding to this
                     //get the element, then parent, then preceding sibling
                     var checkBoxElement = Driver.FindElement(By.XPath($"//img[contains(@title,'{fname}')]//parent::td//preceding-sibling::td[contains(@class,'ms-vb-imgFirstCell')]"));
@@ -220,7 +220,7 @@ namespace ghosts.client.linux.handlers
 
             try
             {
-                string fname = GetUploadFile();
+                var fname = GetUploadFile();
                 if (fname == null)
                 {
                     Log.Trace($"Sharepoint:: Cannot find a valid file to upload from directory {uploadDirectory}.");
@@ -261,7 +261,8 @@ namespace ghosts.client.linux.handlers
                 {
                     okElement = Driver.FindElement(By.Id("ctl00_PlaceHolderMain_ctl03_RptControls_btnOK"));
                 }
-                else { 
+                else
+                {
                     okElement = Driver.FindElement(By.XPath("//*[@value='OK']"));
                 }
                 actions = new Actions(Driver);
@@ -300,14 +301,14 @@ namespace ghosts.client.linux.handlers
                 var targetElements = Driver.FindElements(By.XPath("//img[@draggable='true']"));
                 if (targetElements.Count > 0)
                 {
-                    int docNum = _random.Next(0, targetElements.Count);
+                    var docNum = _random.Next(0, targetElements.Count);
                     var targetElement = targetElements[docNum];
-                    string fname = targetElement.GetAttribute("title");
+                    var fname = targetElement.GetAttribute("title");
                     //now find the chkbox element corresponding to this
                     //get the element, then parent, then preceding sibling
                     var checkBoxElement = Driver.FindElement(By.XPath($"//img[contains(@title,'{fname}')]//parent::td//preceding-sibling::td[contains(@class,'ms-vb-imgFirstCell')]"));
                     MoveToElementAndClick(checkBoxElement);
-                   
+
 
                     Thread.Sleep(5000);
                     //delete it
@@ -346,10 +347,10 @@ namespace ghosts.client.linux.handlers
     /// <summary>
     /// Handles Sharepoint actions for base browser handler
     /// </summary>
-    public abstract class SharepointHelper : BrowserHelper
+    public abstract partial class SharepointHelper : BrowserHelper
     {
 
-        
+
         private int _deletionProbability = -1;
         private int _uploadProbability = -1;
         private int _downloadProbability = -1;
@@ -365,17 +366,17 @@ namespace ghosts.client.linux.handlers
         public string version { get; set; } = null;
         public string uploadDirectory { get; set; } = null;
 
-        
+
 
         public static SharepointHelper MakeHelper(BaseBrowserHandler callingHandler, IWebDriver callingDriver, TimelineHandler handler, Logger tlog)
         {
             SharepointHelper helper = null;
-            if (handler.HandlerArgs.ContainsKey("sharepoint-version"))
+            if (handler.HandlerArgs.TryGetValue("sharepoint-version", out var v5))
             {
-                var version = handler.HandlerArgs["sharepoint-version"].ToString();
+                var version = v5.ToString();
                 //this needs to be extended in the future
                 if (version == "2013" || version == "2019") helper = new SharepointHelper2013_2019(callingHandler, callingDriver, version);
-               
+
 
                 if (helper == null)
                 {
@@ -394,7 +395,7 @@ namespace ghosts.client.linux.handlers
         {
             return errorCount > errorThreshold;
         }
-        
+
 
         public void Init(BaseBrowserHandler callingHandler, IWebDriver currentDriver, string aversion)
         {
@@ -403,7 +404,7 @@ namespace ghosts.client.linux.handlers
             version = aversion;
         }
 
-        private bool CheckProbabilityVar(string name, int value)
+        private static bool CheckProbabilityVar(string name, int value)
         {
             if (!(value >= 0 && value <= 100))
             {
@@ -418,7 +419,7 @@ namespace ghosts.client.linux.handlers
         {
             try
             {
-                string[] filelist = Directory.GetFiles(uploadDirectory, "*");
+                var filelist = Directory.GetFiles(uploadDirectory, "*");
                 if (filelist.Length > 0) return filelist[_random.Next(0, filelist.Length)];
                 else return null;
             }
@@ -457,10 +458,10 @@ namespace ghosts.client.linux.handlers
 
         private string GetNextAction()
         {
-            int choice = _random.Next(0, 101);
+            var choice = _random.Next(0, 101);
             string spAction = null;
             int endRange;
-            int startRange = 0;
+            var startRange = 0;
 
             if (_deletionProbability > 0)
             {
@@ -480,7 +481,7 @@ namespace ghosts.client.linux.handlers
             {
                 endRange = startRange + _downloadProbability;
                 if (choice >= startRange && choice <= endRange) spAction = "download";
-                else startRange = endRange + 1;
+                else _ = endRange + 1;
 
             }
 
@@ -509,9 +510,9 @@ namespace ghosts.client.linux.handlers
                     version = handler.HandlerArgs["sharepoint-version"].ToString();  //guaranteed to have this option, parsed in calling handler
 
 
-                    if (handler.HandlerArgs.ContainsKey("sharepoint-upload-directory"))
+                    if (handler.HandlerArgs.TryGetValue("sharepoint-upload-directory", out var v0))
                     {
-                        string targetDir = handler.HandlerArgs["sharepoint-upload-directory"].ToString();
+                        var targetDir = v0.ToString();
                         targetDir = Environment.ExpandEnvironmentVariables(targetDir);
                         if (!Directory.Exists(targetDir))
                         {
@@ -523,32 +524,29 @@ namespace ghosts.client.linux.handlers
                         }
                     }
 
-                    if (uploadDirectory == null)
-                    {
-                        uploadDirectory = KnownFolders.GetDownloadFolderPath();
-                    }
+                    uploadDirectory ??= KnownFolders.GetDownloadFolderPath();
 
 
-                    if (_deletionProbability < 0 && handler.HandlerArgs.ContainsKey("sharepoint-deletion-probability"))
+                    if (_deletionProbability < 0 && handler.HandlerArgs.TryGetValue("sharepoint-deletion-probability", out var v1))
                     {
-                        int.TryParse(handler.HandlerArgs["sharepoint-deletion-probability"].ToString(), out _deletionProbability);
-                        if (!CheckProbabilityVar(handler.HandlerArgs["sharepoint-deletion-probability"].ToString(), _deletionProbability))
+                        int.TryParse(v1.ToString(), out _deletionProbability);
+                        if (!CheckProbabilityVar(v1.ToString(), _deletionProbability))
                         {
                             _deletionProbability = 0;
                         }
                     }
-                    if (_uploadProbability < 0 && handler.HandlerArgs.ContainsKey("sharepoint-upload-probability"))
+                    if (_uploadProbability < 0 && handler.HandlerArgs.TryGetValue("sharepoint-upload-probability", out var v2))
                     {
-                        int.TryParse(handler.HandlerArgs["sharepoint-upload-probability"].ToString(), out _uploadProbability);
-                        if (!CheckProbabilityVar(handler.HandlerArgs["sharepoint-upload-probability"].ToString(), _uploadProbability))
+                        int.TryParse(v2.ToString(), out _uploadProbability);
+                        if (!CheckProbabilityVar(v2.ToString(), _uploadProbability))
                         {
                             _uploadProbability = 0;
                         }
                     }
-                    if (_downloadProbability < 0 && handler.HandlerArgs.ContainsKey("sharepoint-download-probability"))
+                    if (_downloadProbability < 0 && handler.HandlerArgs.TryGetValue("sharepoint-download-probability", out var v3))
                     {
-                        int.TryParse(handler.HandlerArgs["sharepoint-download-probability"].ToString(), out (_downloadProbability));
-                        if (!CheckProbabilityVar(handler.HandlerArgs["sharepoint-download-probability"].ToString(), _downloadProbability))
+                        int.TryParse(v3.ToString(), out (_downloadProbability));
+                        if (!CheckProbabilityVar(v3.ToString(), _downloadProbability))
                         {
                             _downloadProbability = 0;
                         }
@@ -567,9 +565,9 @@ namespace ghosts.client.linux.handlers
                         baseHandler.SharePointAbort = true;
                         return;
                     }
-                    if (handler.HandlerArgs.ContainsKey("delay-jitter"))
+                    if (handler.HandlerArgs.TryGetValue("delay-jitter", out var v4))
                     {
-                        baseHandler.JitterFactor = Jitter.JitterFactorParse(handler.HandlerArgs["delay-jitter"].ToString());
+                        baseHandler.JitterFactor = Jitter.JitterFactorParse(v4.ToString());
                     }
 
                     credFname = handler.HandlerArgs["sharepoint-credentials-file"].ToString();
@@ -594,7 +592,7 @@ namespace ghosts.client.linux.handlers
                     //parse the command args
 
 
-                    char[] charSeparators = new char[] { ':' };
+                    var charSeparators = new char[] { ':' };
                     foreach (var cmd in timelineEvent.CommandArgs)
                     {
                         //each argument string is key:value, parse this
@@ -617,10 +615,10 @@ namespace ghosts.client.linux.handlers
                         return;
                     }
 
-                    //check if site starts with http:// or https:// 
+                    //check if site starts with http:// or https://
                     site = site.ToLower();
                     header = null;
-                    Regex rx = new Regex("^http://.*", RegexOptions.Compiled);
+                    Regex rx = MyRegex();
                     var match = rx.Matches(site);
                     if (match.Count > 0) header = "http://";
                     if (header == null)
@@ -658,21 +656,23 @@ namespace ghosts.client.linux.handlers
                         return;
                     }
 
-                    int count = 0;
+                    var count = 0;
                     //have username, password - do the initial login
                     while (!DoInitialLogin(handler, username, password))
                     {
                         count += 1;
-                        if (count < 10) 
+                        if (count < 10)
                         {
                             //login failed, keep trying every 5 minutes in case it is a server startup problem
                             Log.Trace($"Sharepoint:: Login failed, sleeping and trying again.");
-                            Thread.Sleep(300*1000); 
-                        } else {
+                            Thread.Sleep(300 * 1000);
+                        }
+                        else
+                        {
                             Log.Trace($"Sharepoint:: Repeated login failed, aborting Sharepoint browsing.");
                             baseHandler.SharePointAbort = true;
                             break;
-                        } 
+                        }
                     }
 
 
@@ -685,7 +685,7 @@ namespace ghosts.client.linux.handlers
 
                     //determine what to do
 
-                    string sharepointAction = GetNextAction();
+                    var sharepointAction = GetNextAction();
 
 
                     if (sharepointAction == "download")
@@ -714,17 +714,19 @@ namespace ghosts.client.linux.handlers
                             return;
                         }
                     }
-                    this.baseHandler.Report(new ReportItem {Handler = $"Sharepoint{version}: {handler.HandlerType.ToString()}", Command = sharepointAction, Arg = "", Trackable = timelineEvent.TrackableId});
+                    BaseHandler.Report(new ReportItem { Handler = $"Sharepoint{version}: {handler.HandlerType}", Command = sharepointAction, Arg = "", Trackable = timelineEvent.TrackableId });
                     break;
 
 
             }
 
         }
+
+        [GeneratedRegex("^http://.*", RegexOptions.Compiled)]
+        private static partial Regex MyRegex();
     }
 
 
-    }
+}
 
-    
-    
+

@@ -212,12 +212,8 @@ namespace ghosts.client.linux.timelineManager
 
             try
             {
-                var timelineHandler = JsonConvert.DeserializeObject<TimelineHandler>(command);
-
-                if (timelineHandler is null)
-                    throw new DataMisalignedException(
+                var timelineHandler = JsonConvert.DeserializeObject<TimelineHandler>(command) ?? throw new DataMisalignedException(
                         "Portlistener received something that could not be interpreted as a timeline");
-
                 foreach (var evs in timelineHandler.TimeLineEvents)
                 {
                     if (string.IsNullOrEmpty(evs.TrackableId))

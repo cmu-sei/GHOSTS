@@ -1,21 +1,21 @@
-using FileHelpers;
-using NLog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FileHelpers;
 using Ghosts.Domain.Code;
+using NLog;
 
 namespace ghosts.client.linux.Infrastructure.Browser
 {
-/// <summary>
+    /// <summary>
     /// The classes in this file assist with auto-generation of POST content
     /// </summary>
     public class PostContentManager
     {
 
-        private static readonly Random _random = new Random();
+        private static readonly Random _random = new();
 
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
 
@@ -39,27 +39,28 @@ namespace ghosts.client.linux.Infrastructure.Browser
             LoadAllContent();
         }
 
-        private string getRandomInitial(bool uppercase)
+        private static string getRandomInitial(bool uppercase)
         {
-            char c = (char)_random.Next((int)'a', ((int)'z') + 1);
+            var c = (char)_random.Next((int)'a', ((int)'z') + 1);
             if (uppercase) return c.ToString().ToUpper();
             else return c.ToString();
         }
 
         //Capitalize first letter
-        private string getCapitializeFirst(bool uppercase, string s)
+        private static string getCapitializeFirst(bool uppercase, string s)
         {
             if (uppercase)
             {
                 string retval;
-                if (s.Contains("-"))
+                if (s.Contains('-'))
                 {
                     //handle conjoined last name, capitalize first letter of each name
                     var words = s.Split('-');
                     retval = words[0][0].ToString().ToUpper() + words[0].Substring(1) + "-" + words[1][0].ToString().ToUpper() + words[1].Substring(1);
-                } else
+                }
+                else
                 {
-                    retval = s[0].ToString().ToUpper() + s.Substring(1);
+                    retval = string.Concat(s[0].ToString().ToUpper(), s.AsSpan(1));
                 }
                 return retval;
             }
@@ -97,11 +98,11 @@ namespace ghosts.client.linux.Infrastructure.Browser
             var lastName = getRandomLastName();
             var lastName2 = getRandomLastName();
             var emailTarget = getRandomEmailTarget();
-            var seperator = seperators[_random.Next(0, seperators.Count())].ToString();
-            if (_random.Next(0,10) == 0) lastName = lastName + "-" + lastName2;  //10% of names are conjoined
-            var useInitials = _random.Next(0, 2)>0;
-            var useFirstNameFirst = _random.Next(0, 2)>0;
-            var useMiddleInitial = _random.Next(0, 2)>0;
+            var seperator = seperators[_random.Next(0, seperators.Length)].ToString();
+            if (_random.Next(0, 10) == 0) lastName = lastName + "-" + lastName2;  //10% of names are conjoined
+            var useInitials = _random.Next(0, 2) > 0;
+            var useFirstNameFirst = _random.Next(0, 2) > 0;
+            var useMiddleInitial = _random.Next(0, 2) > 0;
             var firstInitial = firstName[0].ToString();
             var middleInitial = getRandomInitial(false);
             var useUpperCase = _random.Next(0, 2) > 0;
@@ -114,11 +115,13 @@ namespace ghosts.client.linux.Infrastructure.Browser
             {
                 if (useMiddleInitial) name = $"{getCapitializeFirst(useUpperCase, firstInitial)}{seperator}{getCapitializeFirst(useUpperCase, middleInitial)}{seperator}{getCapitializeFirst(useUpperCase, lastName)}";
                 else name = $"{getCapitializeFirst(useUpperCase, firstInitial)}{seperator}{getCapitializeFirst(useUpperCase, lastName)}";
-            } else if (useFirstNameFirst)
+            }
+            else if (useFirstNameFirst)
             {
                 if (useMiddleInitial) name = $"{getCapitializeFirst(useUpperCase, firstName)}{seperator}{getCapitializeFirst(useUpperCase, middleInitial)}{seperator}{getCapitializeFirst(useUpperCase, lastName)}";
                 else name = $"{getCapitializeFirst(useUpperCase, firstName)}{seperator}{getCapitializeFirst(useUpperCase, lastName)}";
-            } else
+            }
+            else
             {
                 if (useMiddleInitial) name = $"{getCapitializeFirst(useUpperCase, lastName)}{seperator}{getCapitializeFirst(useUpperCase, firstName)}{seperator}{getCapitializeFirst(useUpperCase, middleInitial)}";
                 else name = $"{getCapitializeFirst(useUpperCase, lastName)}{seperator}{getCapitializeFirst(useUpperCase, firstName)}";
@@ -128,74 +131,82 @@ namespace ghosts.client.linux.Infrastructure.Browser
 
         }
 
-        
+
 
         public void GenericContentNext()
         {
 
-            var total = this.GenericContent.Count;
+            var total = GenericContent.Count;
 
             if (total <= 0)
             {
-                this.Subject = "nogenericcontentavailable";
-                this.Body = "nogenericcontentavailable";
+                Subject = "nogenericcontentavailable";
+                Body = "nogenericcontentavailable";
                 return;
             };
 
 
-            var o = this.GenericContent[_random.Next(0, total)];
+            var o = GenericContent[_random.Next(0, total)];
 
 
-            this.Subject = o.Subject.Replace("\\n", "\n");
-            this.Body = o.Body.Replace("\\n", "\n");
+            Subject = o.Subject.Replace("\\n", "\n");
+            Body = o.Body.Replace("\\n", "\n");
         }
 
-        
+
         public void LoadAllContent()
         {
             try
             {
-                var engine = new FileHelperEngine<GenericPostContent>();
-                engine.Encoding = Encoding.UTF8;
-                this.GenericContent = engine.ReadFile(ClientConfigurationResolver.GenericPostContent).ToList();
+                var engine = new FileHelperEngine<GenericPostContent>
+                {
+                    Encoding = Encoding.UTF8
+                };
+                GenericContent = engine.ReadFile(ClientConfigurationResolver.GenericPostContent).ToList();
             }
             catch (Exception e)
             {
                 _log.Error($"Post Generic content file {ClientConfigurationResolver.GenericPostContent} could not be loaded: {e}");
-                this.GenericContent = new List<GenericPostContent>();
+                GenericContent = new List<GenericPostContent>();
             }
             try
             {
-                var engine = new FileHelperEngine<FirstName>();
-                engine.Encoding = Encoding.UTF8;
-                this.firstNames = engine.ReadFile(ClientConfigurationResolver.FirstNames).ToList();
+                var engine = new FileHelperEngine<FirstName>
+                {
+                    Encoding = Encoding.UTF8
+                };
+                firstNames = engine.ReadFile(ClientConfigurationResolver.FirstNames).ToList();
             }
             catch (Exception e)
             {
                 _log.Error($"First Name content file {ClientConfigurationResolver.FirstNames} could not be loaded: {e}");
-                this.firstNames = new List<FirstName>();
+                firstNames = new List<FirstName>();
             }
             try
             {
-                var engine = new FileHelperEngine<LastName>();
-                engine.Encoding = Encoding.UTF8;
-                this.lastNames = engine.ReadFile(ClientConfigurationResolver.LastNames).ToList();
+                var engine = new FileHelperEngine<LastName>
+                {
+                    Encoding = Encoding.UTF8
+                };
+                lastNames = engine.ReadFile(ClientConfigurationResolver.LastNames).ToList();
             }
             catch (Exception e)
             {
                 _log.Error($"Last Name content file {ClientConfigurationResolver.LastNames} could not be loaded: {e}");
-                this.lastNames = new List<LastName>();
+                lastNames = new List<LastName>();
             }
             try
             {
-                var engine = new FileHelperEngine<EmailTarget>();
-                engine.Encoding = Encoding.UTF8;
-                this.emailTargets = engine.ReadFile(ClientConfigurationResolver.EmailTargets).ToList();
+                var engine = new FileHelperEngine<EmailTarget>
+                {
+                    Encoding = Encoding.UTF8
+                };
+                emailTargets = engine.ReadFile(ClientConfigurationResolver.EmailTargets).ToList();
             }
             catch (Exception e)
             {
                 _log.Error($"Last Name content file {ClientConfigurationResolver.EmailTargets} could not be loaded: {e}");
-                this.emailTargets = new List<EmailTarget>();
+                emailTargets = new List<EmailTarget>();
             }
         }
 

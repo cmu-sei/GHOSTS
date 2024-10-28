@@ -13,7 +13,7 @@ namespace ghosts.client.linux.handlers
     {
         private string Result { get; set; }
         private readonly TimelineHandler _handler;
-        
+
         public Azure(TimelineHandler handler)
         {
             _handler = handler;
@@ -27,7 +27,7 @@ namespace ghosts.client.linux.handlers
                         Ex();
                     }
                 }
-                
+
                 Ex();
             }
             catch (Exception e)
@@ -35,7 +35,7 @@ namespace ghosts.client.linux.handlers
                 _log.Error(e);
             }
         }
-        
+
         private void Ex()
         {
             var handlerArgs = BuildHandlerArgVariables.BuildHandlerArgs(_handler);
@@ -55,7 +55,7 @@ namespace ghosts.client.linux.handlers
                             if (!string.IsNullOrEmpty(cmd))
                             {
                                 cmd = BuildHandlerArgVariables.ReplaceCommandVariables(cmd, handlerArgs);
-                                this.Command(cmd);
+                                Command(cmd);
                             }
                         }
 
@@ -68,7 +68,7 @@ namespace ghosts.client.linux.handlers
 
         private void Command(string command)
         {
-            this.Result = string.Empty;
+            Result = string.Empty;
 
             try
             {
@@ -89,20 +89,20 @@ namespace ghosts.client.linux.handlers
 
                 while (!p.StandardOutput.EndOfStream)
                 {
-                    this.Result += p.StandardOutput.ReadToEnd();
+                    Result += p.StandardOutput.ReadToEnd();
                 }
 
                 var err = string.Empty;
                 while (!p.StandardError.EndOfStream)
-                { 
+                {
                     err += p.StandardError.ReadToEnd();
                 }
                 if (err.Length > 0)
                 {
                     _log.Error($"{err} on {command}");
                 }
-                
-                Report(new ReportItem {Handler = HandlerType.Azure.ToString(), Command = command, Result = this.Result});
+
+                Report(new ReportItem { Handler = HandlerType.Azure.ToString(), Command = command, Result = Result });
             }
             catch (Exception exc)
             {

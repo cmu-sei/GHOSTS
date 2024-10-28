@@ -6,9 +6,9 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using Ghosts.Api.Infrastructure.Extensions;
 using ghosts.api.Infrastructure.Models;
 using ghosts.api.Infrastructure.Services;
+using Ghosts.Api.Infrastructure.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using NLog;
 using Swashbuckle.AspNetCore.Annotations;
@@ -18,17 +18,11 @@ namespace ghosts.api.Controllers.Api
     [Produces("application/json")]
     [Route("api/[controller]")]
     [ResponseCache(Duration = 5)]
-    public class MachineGroupsController : Controller
+    public class MachineGroupsController(IMachineGroupService service, IMachineService machineService) : Controller
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        private readonly IMachineGroupService _service;
-        private readonly IMachineService _serviceMachine;
-
-        public MachineGroupsController(IMachineGroupService service, IMachineService machineService)
-        {
-            _service = service;
-            _serviceMachine = machineService;
-        }
+        private readonly IMachineGroupService _service = service;
+        private readonly IMachineService _serviceMachine = machineService;
 
         /// <summary>
         /// Gets the group information and the machines contained therein based on the provided query
@@ -72,12 +66,13 @@ namespace ghosts.api.Controllers.Api
         /// <summary>
         /// Updates a group's information
         /// </summary>
+        /// <param name="id"></param>
         /// <param name="model">The group to update</param>
         /// <param name="ct">Cancellation Token</param>
         /// <returns>The updated group</returns>
         [SwaggerOperation("MachineGroupsUpdate")]
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutMachineGroup([FromBody] Group model, CancellationToken ct)
+        public async Task<IActionResult> PutMachineGroup(string id, [FromBody] Group model, CancellationToken ct)
         {
             if (!ModelState.IsValid || model.ContainsInvalidUnicode())
             {
@@ -88,8 +83,8 @@ namespace ghosts.api.Controllers.Api
             // if trying to update something that doesn't exist, create it instead
             if (await _service.GetAsync(model.Id, ct) == null)
             {
-                var id = await _service.CreateAsync(model, ct);
-                return CreatedAtAction(nameof(GetMachineGroup), new { id }, model);
+                var createId = await _service.CreateAsync(model, ct);
+                return CreatedAtAction(nameof(GetMachineGroup), new { createId }, model);
             }
 
             await _service.UpdateAsync(model, ct);
@@ -111,7 +106,7 @@ namespace ghosts.api.Controllers.Api
         {
             return Ok(await _service.AddMachineToGroup(groupId, machineId, ct));
         }
-        
+
         /// <summary>
         /// Removes a single machine from a machine group
         /// </summary>
@@ -138,9 +133,9 @@ namespace ghosts.api.Controllers.Api
         [HttpPost]
         public async Task<IActionResult> PostMachineGroup([FromBody] Group model, CancellationToken ct)
         {
-            if (!ModelState.IsValid 
-                || model.ContainsInvalidUnicode() 
-                || model.Status == StatusType.Deleted 
+            if (!ModelState.IsValid
+                || model.ContainsInvalidUnicode()
+                || model.Status == StatusType.Deleted
                 || model.GroupMachines == null)
             {
                 _log.Warn("Invalid model state");
@@ -148,9 +143,9 @@ namespace ghosts.api.Controllers.Api
             }
 
             // does group exist?
-            if(await _service.GetAsync(model.Id, ct) != null)
+            if (await _service.GetAsync(model.Id, ct) != null)
                 return CreatedAtAction(nameof(GetMachineGroup), new { model.Id }, model);
-            
+
             var id = await _service.CreateAsync(model, ct);
             _log.Info($"Group with id {id} created");
 
@@ -203,7 +198,7 @@ namespace ghosts.api.Controllers.Api
                 return StatusCode(500, "Internal server error");
             }
         }
-        
+
         /// <summary>
         /// Endpoint returns health records for all of the machines in a group
         /// </summary>

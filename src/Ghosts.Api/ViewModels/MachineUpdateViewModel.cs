@@ -35,7 +35,7 @@ namespace Ghosts.Api.ViewModels
             return machineUpdate;
         }
     }
-    
+
     public class MachineUpdateViewModelExample : IExamplesProvider<MachineUpdateViewModel>
     {
         public MachineUpdateViewModel GetExamples()

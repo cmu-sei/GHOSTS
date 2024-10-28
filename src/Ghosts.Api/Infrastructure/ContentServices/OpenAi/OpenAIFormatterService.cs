@@ -13,18 +13,18 @@ public class OpenAiFormatterService : IFormatterService
 {
     private static readonly Logger _log = LogManager.GetCurrentClassLogger();
     private readonly OpenAiConnectorService _connectorService;
-    
+
     public bool IsReady { get; set; }
-    
+
     public OpenAiFormatterService()
     {
         _connectorService = new OpenAiConnectorService();
-        this.IsReady = _connectorService.IsReady;
+        IsReady = _connectorService.IsReady;
     }
-    
+
     public async Task<string> ExecuteQuery(string prompt)
     {
-        return await this._connectorService.ExecuteQuery(prompt);
+        return await _connectorService.ExecuteQuery(prompt);
     }
 
     public async Task<string> GenerateTweet(NpcRecord npc)
@@ -40,7 +40,7 @@ public class OpenAiFormatterService : IFormatterService
             var s = p.Replace("[[flattenedAgent]]", flattenedAgent[..3050]);
             messages.Add(ChatMessage.FromSystem(s));
         }
-        
+
         return await _connectorService.ExecuteQuery(messages);
     }
 
@@ -51,18 +51,18 @@ public class OpenAiFormatterService : IFormatterService
         _log.Trace($"{npc.NpcProfile.Name} with {history.Length} history records");
 
         var messages = new List<ChatMessage>();
-        
+
         var prompt = await File.ReadAllTextAsync("config/ContentServices/OpenAi/GenerateNextAction.txt");
         foreach (var p in prompt.Split(System.Environment.NewLine))
         {
             var s = p.Replace("[[flattenedAgent]]", flattenedAgent[..3050]);
             s = s.Replace("[[history]]", history);
-            messages.Add(ChatMessage.FromSystem(s));    
+            messages.Add(ChatMessage.FromSystem(s));
         }
 
         return await _connectorService.ExecuteQuery(messages);
     }
-    
+
     public async Task<string> GeneratePowershellScript(NpcRecord npc)
     {
         var flattenedAgent = GenericContentHelpers.GetFlattenedNpc(npc);
@@ -88,7 +88,7 @@ public class OpenAiFormatterService : IFormatterService
 
         return await _connectorService.ExecuteQuery(messages);
     }
-    
+
     //public async Task<string> GenerateDocumentContent(NPC npc)
     //public async Task<string> GenerateExcelContent(NPC npc)
     //public async Task<string> GeneratePowerPointContent(NPC npc)

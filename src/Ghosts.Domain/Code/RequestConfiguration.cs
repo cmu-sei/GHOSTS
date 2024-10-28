@@ -10,7 +10,7 @@ namespace Ghosts.Domain.Code
     {
         public string GetHost()
         {
-            return $"{this.Uri.Scheme}://{this.Uri.Host}";
+            return $"{Uri.Scheme}://{Uri.Host}";
         }
 
         /// <summary>

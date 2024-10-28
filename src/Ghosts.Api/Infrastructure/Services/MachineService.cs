@@ -5,10 +5,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using ghosts.api.Infrastructure.Models;
 using Ghosts.Api;
 using Ghosts.Api.Infrastructure;
 using Ghosts.Api.Infrastructure.Data;
-using ghosts.api.Infrastructure.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using NLog;
@@ -19,7 +19,7 @@ namespace ghosts.api.Infrastructure.Services
     {
         Task<List<Machine>> GetAsync(string q, CancellationToken ct);
         Task<Machine> GetByIdAsync(Guid id, CancellationToken ct);
-        
+
         Task<FindMachineResponse> FindOrCreate(HttpContext httpContext, CancellationToken ct);
         List<MachineListItem> GetList();
         Task<Guid> CreateAsync(Machine model, CancellationToken ct);
@@ -30,16 +30,11 @@ namespace ghosts.api.Infrastructure.Services
         Task<List<HistoryTimeline>> GetActivity(Guid id, int skip, int take, CancellationToken ct);
     }
 
-    public class MachineService : IMachineService
+    public class MachineService(ApplicationDbContext context) : IMachineService
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        private readonly ApplicationDbContext _context;
+        private readonly ApplicationDbContext _context = context;
         private readonly int _lookBack = Program.ApplicationSettings.LookbackRecords;
-
-        public MachineService(ApplicationDbContext context)
-        {
-            _context = context;
-        }
 
         public async Task<List<Machine>> GetAsync(string q, CancellationToken ct)
         {
@@ -62,7 +57,7 @@ namespace ghosts.api.Infrastructure.Services
 
             if (m.Id == Guid.Empty)
             {
-                m = await this.FindByValue(WebRequestReader.GetMachine(httpContext), ct);
+                m = await FindByValue(WebRequestReader.GetMachine(httpContext), ct);
             }
 
             if (m is null || !m.IsValid())
@@ -70,7 +65,7 @@ namespace ghosts.api.Infrastructure.Services
                 m = WebRequestReader.GetMachine(httpContext);
 
                 m.History.Add(new Machine.MachineHistoryItem { Type = Machine.MachineHistoryItem.HistoryType.Created });
-                await this.CreateAsync(m, ct);
+                await CreateAsync(m, ct);
 
                 if (!m.IsValid())
                 {
@@ -79,7 +74,7 @@ namespace ghosts.api.Infrastructure.Services
                 else
                 {
                     m.History.Add(new Machine.MachineHistoryItem { Type = Machine.MachineHistoryItem.HistoryType.RequestedId });
-                    await this.UpdateAsync(m, ct);
+                    await UpdateAsync(m, ct);
 
                     machineResponse.Machine = m;
                 }
@@ -118,10 +113,11 @@ namespace ghosts.api.Infrastructure.Services
         {
             var items = new List<MachineListItem>();
             var q = from r in _context.Machines
-                select new
-                {
-                    r.Id, r.Name
-                };
+                    select new
+                    {
+                        r.Id,
+                        r.Name
+                    };
             foreach (var item in q)
                 items.Add(new MachineListItem
                 {
@@ -252,7 +248,7 @@ namespace ghosts.api.Infrastructure.Services
         {
             if (take < 1)
                 take = 25;
-            
+
             var machine = await _context.Machines.FirstOrDefaultAsync(o => o.Id == id, ct);
             if (machine == null)
             {

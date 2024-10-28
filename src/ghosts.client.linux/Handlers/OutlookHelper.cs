@@ -1,21 +1,20 @@
-﻿using ghosts.client.linux.Infrastructure;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
+using System.Text.RegularExpressions;
+using System.Threading;
+using ghosts.client.linux.Infrastructure;
 using ghosts.client.linux.Infrastructure.Email;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Newtonsoft.Json;
-using OpenQA.Selenium.Support.UI;
-using OpenQA.Selenium;
-using System.Diagnostics;
-using System;
-using System.IO;
-using System.Collections.ObjectModel;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
-using System.Threading;
-using Actions = OpenQA.Selenium.Interactions.Actions;
-
-using Exception = System.Exception;
 using NLog;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Support.UI;
+using Actions = OpenQA.Selenium.Interactions.Actions;
+using Exception = System.Exception;
 
 
 
@@ -59,8 +58,8 @@ namespace ghosts.client.linux.handlers
             EmailXpath = "//div[@aria-label='Mail list']//child::*[contains(@role,'listbox')]//child::div[contains(@id,'ariaId')]";
             EmailXpathSender = ".//span[contains(@class,'lvHighlightFromClass')]";
             EmptyFolderActionXpath = "//div[@role='menu' and @iscontextmenu='1']//child::span[text()='Empty folder']//parent::div//parent::div//parent::button";
-    
-        } 
+
+        }
 
 
     }
@@ -101,20 +100,20 @@ namespace ghosts.client.linux.handlers
         public string AttachmentWindowTitle = "Open"; //this is for chrome
 
         public string EmailDeleteXpath { get; set; } = "//span[text()='Delete']//parent::button";
-        public string EmailReplySendXpath { get; set; } =  "//button[@title='Send' and @aria-label='Send']";
+        public string EmailReplySendXpath { get; set; } = "//button[@title='Send' and @aria-label='Send']";
         public string EmailXpath { get; set; } = "//div[contains(@tempid,'emailslistview')]//child::div[contains(@role,'button')]";
         public string EmailXpathSender { get; set; } = ".//span[contains(@class,'lvHighlightFromClass')]";
 
-        
+
         public string EmailOtherXpath { get; set; } = "//div[contains(@aria-label,'Search completed')]//child::div[contains(@id,'_ariaId_')]";
-        public string NewMailXpath { get; set; } = "//div[@aria-label='Mail']//child::div//child::div//child::div//child::div//child::button//child::span[@role='presentation']//following-sibling::span[text()='New mail']//parent::button";        
+        public string NewMailXpath { get; set; } = "//div[@aria-label='Mail']//child::div//child::div//child::div//child::div//child::button//child::span[@role='presentation']//following-sibling::span[text()='New mail']//parent::button";
         public string EmailFiltersXpath { get; set; } = "//div[contains(@aria-label,'Email Filters')]//child::div//child::div[contains(@style,'inline-block')]//child::span[contains(@role,'menuitemradio')]";
         public string MarkAsReadXpath { get; set; } = "//div[contains(@tempid,'ItemHeaderView.Mouse')]//child::span[text()='Mark as read']//parent::button";
         public string ToRecipientsXpath { get; set; } = "//input[contains(@aria-label,'To recipients.')]";
         public string CcRecipientsXpath { get; set; } = "//input[contains(@aria-label,'Cc recipients.')]";
         public string SubjectXpath { get; set; } = "//input[contains(@aria-labelledby,'MailCompose.SubjectWellLabel')]";
         public string EmailBodyXpath { get; set; } = "//div[contains(@id,'MicrosoftOWAEditorRegion')]";
-        
+
 
         public string SendButtonXpath { get; set; } = "//div[contains(@tempid,'mailcomposetoolbar')]//child::button[contains(@aria-label,'Send')]";
 
@@ -155,7 +154,7 @@ namespace ghosts.client.linux.handlers
         private LinuxSupport linuxHelper = null;
 
 
-        public List<string> InitialWindows = new List<string>();
+        public List<string> InitialWindows = new();
 
 
         public static bool isWindowsOs()
@@ -165,9 +164,9 @@ namespace ghosts.client.linux.handlers
             return OsName.Contains("Windows");
         }
 
-        public void AttachFileWindows(string filename)
+        public static void AttachFileWindows(string filename)
         {
-            
+
             //IntPtr winHandle = Winuser.FindWindow(null, AttachmentWindowTitle);
             //if (winHandle == IntPtr.Zero)
             //{
@@ -201,9 +200,10 @@ namespace ghosts.client.linux.handlers
         public void AttachFileLinux(string filename)
         {
             var status = linuxHelper.AttachFileUsingThread("WebOutlook", filename, AttachmentWindowTitle, 30, 2);
-            if (!status){
+            if (!status)
+            {
                 //force a restart
-                errorCount = errorThreshold + 1; 
+                errorCount = errorThreshold + 1;
             }
         }
 
@@ -217,12 +217,12 @@ namespace ghosts.client.linux.handlers
         public static OutlookHelper MakeHelper(BaseBrowserHandler callingHandler, IWebDriver callingDriver, TimelineHandler handler, Logger tlog)
         {
             OutlookHelper helper = null;
-            if (handler.HandlerArgs.ContainsKey("exchange-version"))
+            if (handler.HandlerArgs.TryGetValue("exchange-version", out var value))
             {
-                var version = handler.HandlerArgs["exchange-version"].ToString();
+                var version = value.ToString();
                 //this needs to be extended in the future
-                if (version == "2013" ) helper = new OutlookHelper2013(callingHandler, callingDriver, version);
-                else if (version == "2019" || version == "2016" ) helper = new OutlookHelper2019(callingHandler, callingDriver, version); 
+                if (version == "2013") helper = new OutlookHelper2013(callingHandler, callingDriver, version);
+                else if (version == "2019" || version == "2016") helper = new OutlookHelper2019(callingHandler, callingDriver, version);
                 if (helper == null)
                 {
                     Log.Trace($"WebOutlook:: Unsupported Exchange version {version} , outlook browser action will not be executed.");
@@ -250,7 +250,7 @@ namespace ghosts.client.linux.handlers
             linuxHelper = new LinuxSupport(Log);
         }
 
-        private bool CheckProbabilityVar(string name, int value)
+        private static bool CheckProbabilityVar(string name, int value)
         {
             if (!(value >= 0 && value <= 100))
             {
@@ -260,7 +260,7 @@ namespace ghosts.client.linux.handlers
             return true;
         }
 
-        private string GetRecipientString(List<string> targets)
+        private static string GetRecipientString(List<string> targets)
         {
 
             string recipients = null;
@@ -286,7 +286,7 @@ namespace ghosts.client.linux.handlers
                 }
 
             }
-            
+
             catch (Exception e)
             {
                 if (e is ThreadAbortException || e is ThreadInterruptedException)
@@ -357,9 +357,10 @@ namespace ghosts.client.linux.handlers
                     BrowserHelperSupport.ElementClick(Driver, emailListElements[0]);
                     Thread.Sleep(500);
                 }
-                else 
+                else
                 {
-                    if (!DoCurrentEmailAction("Reply")) {
+                    if (!DoCurrentEmailAction("Reply"))
+                    {
                         Log.Trace($"WebOutlook:: Unable to find reply button in current mail, reply will not be sent.");
                         return false;
                     }
@@ -368,7 +369,7 @@ namespace ghosts.client.linux.handlers
                 //compose the message and send
                 var emailReply = new EmailReplyManager();  //this has the reply
 
-                if (version == "2013") 
+                if (version == "2013")
                 {
                     Driver.SwitchTo().Frame("EditorBody");
                     var targetElement = Driver.FindElement(By.XPath(EmailBodyXpath));
@@ -386,7 +387,7 @@ namespace ghosts.client.linux.handlers
                     Thread.Sleep(500);
                     //switch back to parent frame
                     Driver.SwitchTo().DefaultContent();
-                     //send the email
+                    //send the email
                     targetElement = Driver.FindElement(By.XPath(SendButtonXpath));
                     if (targetElement == null)
                     {
@@ -395,7 +396,9 @@ namespace ghosts.client.linux.handlers
                     }
                     BrowserHelperSupport.ElementClick(Driver, targetElement);
                     Thread.Sleep(500);
-                } else {
+                }
+                else
+                {
                     var targetElement = Driver.FindElement(By.XPath(EmailBodyXpath));
                     if (targetElement == null)
                     {
@@ -413,7 +416,7 @@ namespace ghosts.client.linux.handlers
                     BrowserHelperSupport.ElementClick(Driver, targetElement);
                     Thread.Sleep(500);
                 }
-               
+
                 HandleAttachmentReminder();  //handle the attachment popup if present
                 HandleSubjectReminder();
 
@@ -433,7 +436,7 @@ namespace ghosts.client.linux.handlers
 
         public bool SelectFirstEmailFromCurrentList()
         {
-            ReadOnlyCollection<IWebElement> emailElements = Driver.FindElements(By.XPath(EmailXpath));
+            var emailElements = Driver.FindElements(By.XPath(EmailXpath));
             if (emailElements != null && emailElements.Count > 0)
             {
                 //select one of the first 5
@@ -447,7 +450,7 @@ namespace ghosts.client.linux.handlers
         {
             try
             {
-                string[] filelist = Directory.GetFiles(uploadDirectory, "*");
+                var filelist = Directory.GetFiles(uploadDirectory, "*");
                 if (filelist.Length > 0) return filelist[_random.Next(0, filelist.Length)];
                 else return null;
             }
@@ -467,7 +470,7 @@ namespace ghosts.client.linux.handlers
 
             //have the username, password
             RequestConfiguration config;
-            string target = site;
+            var target = site;
             config = RequestConfiguration.Load(handler, target);
             try
             {
@@ -504,7 +507,7 @@ namespace ghosts.client.linux.handlers
 
             if (handler.HandlerType == HandlerType.BrowserFirefox)
             {
-                //check for certificate 
+                //check for certificate
                 var targetElements = Driver.FindElements(By.XPath("//*[@class='certerror']"));
                 if (targetElements != null && targetElements.Count > 0)
                 {
@@ -546,10 +549,10 @@ namespace ghosts.client.linux.handlers
             if (optionElements != null && optionElements.Count > 0)
             {
                 //use default language selection, select timezone
-                bool found = false;
-                foreach (IWebElement te in optionElements)
+                var found = false;
+                foreach (var te in optionElements)
                 {
-                    string avalue = te.GetAttribute("value");
+                    var avalue = te.GetAttribute("value");
                     if (avalue.Contains("Central Standard Time"))
                     {
                         te.Click();
@@ -601,14 +604,14 @@ namespace ghosts.client.linux.handlers
         {
             try
             {
-                int numAttachments = _random.Next(attachmentsMin, attachmentsMax);
+                var numAttachments = _random.Next(attachmentsMin, attachmentsMax);
                 if (numAttachments > 0)
                 {
-                    List<string> attachments = GetRandomFiles(uploadDirectory, "*", numAttachments, attachmentsMaxSize);
+                    var attachments = GetRandomFiles(uploadDirectory, "*", numAttachments, attachmentsMaxSize);
                     if (attachments != null)
                     {
                         //try adding these attachments
-                        foreach (string FileToAttach in attachments)
+                        foreach (var FileToAttach in attachments)
                         {
                             if (version == "2013")
                             {
@@ -627,9 +630,11 @@ namespace ghosts.client.linux.handlers
                                         AttachFile(FileToAttach);
                                     }
                                 }
-                            } else {
+                            }
+                            else
+                            {
                                 var insertAttachmentElement = Driver.FindElement(By.XPath(InsertAttachmentXpath));
-                                if (insertAttachmentElement  != null)
+                                if (insertAttachmentElement != null)
                                 {
                                     BrowserHelperSupport.ElementClick(Driver, insertAttachmentElement);
                                     Thread.Sleep(500);
@@ -784,7 +789,7 @@ namespace ghosts.client.linux.handlers
                     targetElement.SendKeys(emailConfig.Body);
                     Thread.Sleep(500);
                     //switch back to parent frame
-                    if (version == "2013")  Driver.SwitchTo().DefaultContent();
+                    if (version == "2013") Driver.SwitchTo().DefaultContent();
                     Thread.Sleep(300);
                     Log.Trace($"WebOutlook:: Email body created.");
                 }
@@ -820,7 +825,7 @@ namespace ghosts.client.linux.handlers
         // Keep deleting elements until there are only 10 left in the folder
         // if reach 500 deleted, then return and wait for next deletion cycle.
 
-        public bool DeleteItemsInFolder(string folderName, string folderXpath, string emailSearchPath, 
+        public bool DeleteItemsInFolder(string folderName, string folderXpath, string emailSearchPath,
             bool deleteAll, out int numDeleted)
         {
             numDeleted = 0;
@@ -834,13 +839,13 @@ namespace ghosts.client.linux.handlers
             {
                 //select the first email from "ALL"
                 SelectEmail("All");
-                ReadOnlyCollection<IWebElement> emailElements = Driver.FindElements(By.XPath(emailSearchPath));
+                var emailElements = Driver.FindElements(By.XPath(emailSearchPath));
                 if (emailElements == null || emailElements.Count == 0) return true; //nothing to delete
                 if (emailElements.Count <= 20) return true;   //quit when under 20
                 //there is no good way to determine the total number of emails in the inbox.
                 //just delete 15 emails per loop
-                int MaxToDelete = 15;
-                int count = 0;
+                var MaxToDelete = 15;
+                var count = 0;
                 var elementToDelete = emailElements[0];
                 while (count < MaxToDelete)
                 {
@@ -848,8 +853,8 @@ namespace ghosts.client.linux.handlers
                     BrowserHelperSupport.MoveToElementAndClick(Driver, elementToDelete);
                     Thread.Sleep(200);
 
-                    bool UseDeleteMenu = true;
-                    if (version== "2013")
+                    var UseDeleteMenu = true;
+                    if (version == "2013")
                     {
                         //check for discard available. this will be for drafts
                         var DiscardElements = Driver.FindElements(By.XPath(DiscardXpath));
@@ -876,27 +881,27 @@ namespace ghosts.client.linux.handlers
                     {
                         if (version == "2013")
                         {
-                        //get the delete menu
-                        var targetElement = Driver.FindElement(By.XPath(MoreActionsXpath));
-                        if (targetElement == null)
-                        {
-                            Log.Trace($"WebOutlook:: Unable to find MoreActions for current email, deletion not done.");
-                            return false;
+                            //get the delete menu
+                            var targetElement = Driver.FindElement(By.XPath(MoreActionsXpath));
+                            if (targetElement == null)
+                            {
+                                Log.Trace($"WebOutlook:: Unable to find MoreActions for current email, deletion not done.");
+                                return false;
+                            }
+                            // bring up the more actions menu
+                            BrowserHelperSupport.ElementClick(Driver, targetElement);
+                            Thread.Sleep(200);
+                            targetElement = Driver.FindElement(By.XPath(DeleteActionXpath));
+                            if (targetElement == null)
+                            {
+                                Log.Trace($"WebOutlook:: Unable to find Delete action for current email, deletion not done.");
+                                return false;
+                            }
+                            // delete the current email
+                            BrowserHelperSupport.ElementClick(Driver, targetElement);
+                            Thread.Sleep(500);
                         }
-                        // bring up the more actions menu
-                        BrowserHelperSupport.ElementClick(Driver, targetElement);
-                        Thread.Sleep(200);
-                        targetElement = Driver.FindElement(By.XPath(DeleteActionXpath));
-                        if (targetElement == null)
-                        {
-                            Log.Trace($"WebOutlook:: Unable to find Delete action for current email, deletion not done.");
-                            return false;
-                        }
-                        // delete the current email
-                        BrowserHelperSupport.ElementClick(Driver, targetElement);
-                        Thread.Sleep(500);
-                        } 
-                        else 
+                        else
                         {
                             // 2019, 2016 has a handy delete button that can be used
                             var targetElement = Driver.FindElement(By.XPath(EmailDeleteXpath));
@@ -910,9 +915,9 @@ namespace ghosts.client.linux.handlers
                             Thread.Sleep(500);
                         }
                     }
-                    count = count + 1;
-                    numDeleted = numDeleted + 1;
-                    if (numDeleted > 500) return true;  //stop after 500  
+                    count++;
+                    numDeleted++;
+                    if (numDeleted > 500) return true;  //stop after 500
                     //get next one
                     emailElements = Driver.FindElements(By.XPath(emailSearchPath));
                     if (emailElements == null || emailElements.Count == 0) return true;
@@ -978,8 +983,7 @@ namespace ghosts.client.linux.handlers
         {
             try
             {
-                int NumDeleted = 0;
-                DeleteItemsInFolder("Inbox", InboxFolderXpath, EmailXpath, false, out NumDeleted);
+                DeleteItemsInFolder("Inbox", InboxFolderXpath, EmailXpath, false, out var NumDeleted);
                 if (NumDeleted > 0)
                 {
                     Log.Trace($"WebOutlook:: Successfully deleted {NumDeleted} items from inbox. ");
@@ -1007,8 +1011,8 @@ namespace ghosts.client.linux.handlers
             try
             {
                 const string removeFilterXpath = "//div[contains(@class,'folderHeadContainer')]//child::span[contains(@class,'ms-Icon--x')]//parent::button";
-                var removeFilterElement =  Driver.FindElement(By.XPath(removeFilterXpath));
-                        
+                var removeFilterElement = Driver.FindElement(By.XPath(removeFilterXpath));
+
                 if (removeFilterElement != null)
                 {
                     BrowserHelperSupport.ElementClick(Driver, removeFilterElement);
@@ -1028,7 +1032,7 @@ namespace ghosts.client.linux.handlers
         public IWebElement GetFilterElement()
         {
             const string filterXpath = "//span[text()='Filter']//parent::button";
-            try 
+            try
             {
                 return Driver.FindElement(By.XPath(filterXpath));
             }
@@ -1055,7 +1059,7 @@ namespace ghosts.client.linux.handlers
                     {
                         foreach (var menuElement in menuElements)
                         {
-                            string menuText = menuElement.Text;
+                            var menuText = menuElement.Text;
                             if (mailType == menuText)
                             {
                                 BrowserHelperSupport.ElementClick(Driver, menuElement);
@@ -1063,7 +1067,9 @@ namespace ghosts.client.linux.handlers
                             }
                         }
                     }
-                } else {
+                }
+                else
+                {
                     //Try finding the menu 'Filter' element
                     var MenuFilter = GetFilterElement();
                     //if null, try removing last filter
@@ -1073,13 +1079,13 @@ namespace ghosts.client.linux.handlers
                         //try again
                         MenuFilter = GetFilterElement();
                     }
-                    if (MenuFilter != null) 
+                    if (MenuFilter != null)
                     {
                         //click on the menu filter
                         BrowserHelperSupport.ElementClick(Driver, MenuFilter);
                         Thread.Sleep(300);
                         //now select a menu item
-                        string MenuItemXpath = $"//div[@role='menu' and @iscontextmenu='1']//child::span[text()='{mailType}']//parent::div//parent::div//parent::button";
+                        var MenuItemXpath = $"//div[@role='menu' and @iscontextmenu='1']//child::span[text()='{mailType}']//parent::div//parent::div//parent::button";
                         var MenuItemElement = Driver.FindElement(By.XPath(MenuItemXpath));
                         BrowserHelperSupport.ElementClick(Driver, MenuItemElement);
                         Thread.Sleep(300);
@@ -1100,52 +1106,59 @@ namespace ghosts.client.linux.handlers
 
         public IWebElement GetOneEmailFromCurrentList()
         {
-            
+
             var settings = Program.Configuration.Email;
             string[] EmailNoReply = null;
-            if (settings.EmailNoReply != null && settings.EmailNoReply != "") {
+            if (settings.EmailNoReply != null && settings.EmailNoReply != "")
+            {
                 EmailNoReply = settings.EmailNoReply.ToLower().Split(',');
             }
-            ReadOnlyCollection<IWebElement> emailElements = Driver.FindElements(By.XPath(EmailXpath));
+            var emailElements = Driver.FindElements(By.XPath(EmailXpath));
             if (emailElements != null && emailElements.Count > 0)
             {
-                if (EmailNoReply == null) 
+                if (EmailNoReply == null)
                 {
                     // no filtering based on reply address
                     //select one of the first 5
-                    int max = emailElements.Count;
+                    var max = emailElements.Count;
                     if (max > 5) max = 5;
-                    int choice = _random.Next(0, max);
+                    var choice = _random.Next(0, max);
                     return emailElements[choice];
-                } else {
+                }
+                else
+                {
                     // have to work harder, filter by return address
                     List<IWebElement> targetEmails = new List<IWebElement>();
                     var count = 0;
-                    foreach (IWebElement emailElement in emailElements) {
-                        try 
+                    foreach (var emailElement in emailElements)
+                    {
+                        try
                         {
                             var replyElement = emailElement.FindElement(By.XPath(EmailXpathSender));
-                            if (replyElement != null) 
+                            if (replyElement != null)
                             {
                                 var sender = replyElement.Text.ToLower();
                                 // check if this sender is ok
-                                bool reject = false;
-                                foreach (string target in EmailNoReply) {
-                                    if (sender.Contains(target)) {
+                                var reject = false;
+                                foreach (var target in EmailNoReply)
+                                {
+                                    if (sender.Contains(target))
+                                    {
                                         reject = true;
                                         break;
                                     }
                                 }
-                                if (!reject) {
+                                if (!reject)
+                                {
                                     targetEmails.Add(emailElement);
                                     if (targetEmails.Count > 5) break;
                                 }
                                 count += 1;
                                 if (count > 50) break;
                             }
-                            
-                        } 
-                        catch (Exception e)
+
+                        }
+                        catch (Exception)
                         {
                             //ignore any exceptions
                         }
@@ -1153,13 +1166,15 @@ namespace ghosts.client.linux.handlers
                     }
 
                     // filtering is done
-                    if (targetEmails.Count == 0) {
+                    if (targetEmails.Count == 0)
+                    {
                         Log.Trace($"WebOutlook:: Unable to find valid email to reply to because of EmailNoReply filter..");
                         return null; //unable to find valid email
                     }
-                    else  {
+                    else
+                    {
                         //return a random one out of the list
-                        int choice = _random.Next(0, targetEmails.Count+1);
+                        var choice = _random.Next(0, targetEmails.Count + 1);
                         return targetEmails[choice];
                     }
 
@@ -1167,15 +1182,15 @@ namespace ghosts.client.linux.handlers
             }
 
 
-            
-            
+
+
             return null;
         }
 
         public bool DoCurrentEmailAction(string action)
         {
-            
-            string MenuMoreActionsXpath = "//button[@aria-label='More Actions']";
+
+            var MenuMoreActionsXpath = "//button[@aria-label='More Actions']";
             IWebElement targetElement = null;
             try
             {
@@ -1208,7 +1223,7 @@ namespace ghosts.client.linux.handlers
             return false;
         }
 
-        
+
 
         public bool MarkCurrentEmailAsRead()
         {
@@ -1246,7 +1261,9 @@ namespace ghosts.client.linux.handlers
                     Log.Error(e);
                 }
                 return false;
-            } else {
+            }
+            else
+            {
                 return DoCurrentEmailAction("Mark as read");
             }
         }
@@ -1379,7 +1396,7 @@ namespace ghosts.client.linux.handlers
             {
                 endRange = startRange + _replyProbability;
                 if (choice >= startRange && choice <= endRange) action = "reply";
-                else startRange = endRange + 1;
+                else _ = endRange + 1;
 
             }
             return action;
@@ -1419,14 +1436,14 @@ namespace ghosts.client.linux.handlers
 
 
                         version = "2013";
-                        if (handler.HandlerArgs.ContainsKey("exchange-version"))
+                        if (handler.HandlerArgs.TryGetValue("exchange-version", out var v0))
                         {
-                            version = handler.HandlerArgs["exchange-version"].ToString();
+                            version = v0.ToString();
                         }
 
-                        if (handler.HandlerArgs.ContainsKey("outlook-uploads-directory"))
+                        if (handler.HandlerArgs.TryGetValue("outlook-uploads-directory", out var v1))
                         {
-                            string targetDir = handler.HandlerArgs["outlook-uploads-directory"].ToString();
+                            var targetDir = v1.ToString();
                             targetDir = Environment.ExpandEnvironmentVariables(targetDir);
                             if (!Directory.Exists(targetDir))
                             {
@@ -1438,43 +1455,40 @@ namespace ghosts.client.linux.handlers
                             }
                         }
 
-                        if (uploadDirectory == null)
-                        {
-                            uploadDirectory = KnownFolders.GetDownloadFolderPath();
-                        }
+                        uploadDirectory ??= KnownFolders.GetDownloadFolderPath();
 
 
-                        if (_deleteProbability < 0 && handler.HandlerArgs.ContainsKey("outlook-delete-probability"))
+                        if (_deleteProbability < 0 && handler.HandlerArgs.TryGetValue("outlook-delete-probability", out var v2))
                         {
-                            int.TryParse(handler.HandlerArgs["outlook-delete-probability"].ToString(), out _deleteProbability);
-                            if (!CheckProbabilityVar(handler.HandlerArgs["outlook-delete-probability"].ToString(), _deleteProbability))
+                            int.TryParse(v2.ToString(), out _deleteProbability);
+                            if (!CheckProbabilityVar(v2.ToString(), _deleteProbability))
                             {
                                 _deleteProbability = 0;
                             }
                         }
 
-                        if (_createProbability < 0 && handler.HandlerArgs.ContainsKey("outlook-create-probability"))
+                        if (_createProbability < 0 && handler.HandlerArgs.TryGetValue("outlook-create-probability", out var v3))
                         {
-                            int.TryParse(handler.HandlerArgs["outlook-create-probability"].ToString(), out _createProbability);
-                            if (!CheckProbabilityVar(handler.HandlerArgs["outlook-create-probability"].ToString(), _createProbability))
+                            int.TryParse(v3.ToString(), out _createProbability);
+                            if (!CheckProbabilityVar(v3.ToString(), _createProbability))
                             {
                                 _createProbability = 0;
                             }
                         }
 
-                        if (_replyProbability < 0 && handler.HandlerArgs.ContainsKey("outlook-reply-probability"))
+                        if (_replyProbability < 0 && handler.HandlerArgs.TryGetValue("outlook-reply-probability", out var v4))
                         {
-                            int.TryParse(handler.HandlerArgs["outlook-reply-probability"].ToString(), out _replyProbability);
-                            if (!CheckProbabilityVar(handler.HandlerArgs["outlook-reply-probability"].ToString(), _replyProbability))
+                            int.TryParse(v4.ToString(), out _replyProbability);
+                            if (!CheckProbabilityVar(v4.ToString(), _replyProbability))
                             {
                                 _replyProbability = 0;
                             }
                         }
 
-                        if (_readProbability < 0 && handler.HandlerArgs.ContainsKey("outlook-read-probability"))
+                        if (_readProbability < 0 && handler.HandlerArgs.TryGetValue("outlook-read-probability", out var v5))
                         {
-                            int.TryParse(handler.HandlerArgs["outlook-read-probability"].ToString(), out _readProbability);
-                            if (!CheckProbabilityVar(handler.HandlerArgs["outlook-read-probability"].ToString(), _readProbability))
+                            int.TryParse(v5.ToString(), out _readProbability);
+                            if (!CheckProbabilityVar(v5.ToString(), _readProbability))
                             {
                                 _readProbability = 0;
                             }
@@ -1492,50 +1506,50 @@ namespace ghosts.client.linux.handlers
                             Log.Trace($"WebOutlook:: The sum of the delete/read/create/reply outlook probabilities == 0 , reverting to defaults.");
                             setProbabilityDefaults();
                         }
-                        if (handler.HandlerArgs.ContainsKey("delay-jitter"))
+                        if (handler.HandlerArgs.TryGetValue("delay-jitter", out var v6))
                         {
-                            baseHandler.JitterFactor = Jitter.JitterFactorParse(handler.HandlerArgs["delay-jitter"].ToString());
+                            baseHandler.JitterFactor = Jitter.JitterFactorParse(v6.ToString());
                         }
 
-                        if (handler.HandlerArgs.ContainsKey("outlook-save-attachment-probability"))
+                        if (handler.HandlerArgs.TryGetValue("outlook-save-attachment-probability", out var v7))
                         {
-                            int.TryParse(handler.HandlerArgs["outlook-save-attachment-probability"].ToString(), out saveAttachmentProbability);
-                            if (!CheckProbabilityVar(handler.HandlerArgs["outlook-save-attachment-probability"].ToString(), saveAttachmentProbability))
+                            int.TryParse(v7.ToString(), out saveAttachmentProbability);
+                            if (!CheckProbabilityVar(v7.ToString(), saveAttachmentProbability))
                             {
                                 saveAttachmentProbability = 0;
                             }
                         }
 
-                        if (handler.HandlerArgs.ContainsKey("outlook-attachment-probability"))
+                        if (handler.HandlerArgs.TryGetValue("outlook-attachment-probability", out var v8))
                         {
-                            int.TryParse(handler.HandlerArgs["outlook-attachment-probability"].ToString(), out attachmentProbability);
-                            if (!CheckProbabilityVar(handler.HandlerArgs["outlook-attachment-probability"].ToString(), attachmentProbability))
+                            int.TryParse(v8.ToString(), out attachmentProbability);
+                            if (!CheckProbabilityVar(v8.ToString(), attachmentProbability))
                             {
                                 attachmentProbability = 0;
                             }
                         }
 
-                        if (handler.HandlerArgs.ContainsKey("outlook-max-attachments-size"))
+                        if (handler.HandlerArgs.TryGetValue("outlook-max-attachments-size", out var v9))
                         {
-                            int.TryParse(handler.HandlerArgs["outlook-max-attachments-size"].ToString(), out attachmentsMaxSize);
+                            int.TryParse(v9.ToString(), out attachmentsMaxSize);
                             if (attachmentsMaxSize <= 0)
                             {
                                 attachmentsMaxSize = 10;
                             }
                         }
 
-                        if (handler.HandlerArgs.ContainsKey("outlook-min-attachments"))
+                        if (handler.HandlerArgs.TryGetValue("outlook-min-attachments", out var v10))
                         {
-                            int.TryParse(handler.HandlerArgs["outlook-min-attachments"].ToString(), out attachmentsMin);
+                            int.TryParse(v10.ToString(), out attachmentsMin);
                             if (attachmentsMin < 0)
                             {
                                 attachmentsMin = 1;
                             }
                         }
 
-                        if (handler.HandlerArgs.ContainsKey("outlook-max-attachments"))
+                        if (handler.HandlerArgs.TryGetValue("outlook-max-attachments", out var v11))
                         {
-                            int.TryParse(handler.HandlerArgs["outlook-max-attachments"].ToString(), out attachmentsMax);
+                            int.TryParse(v11.ToString(), out attachmentsMax);
                             if (attachmentsMax < 0)
                             {
                                 attachmentsMax = 10;
@@ -1564,7 +1578,7 @@ namespace ghosts.client.linux.handlers
                         //parse the command args
 
 
-                        char[] charSeparators = new char[] { ':' };
+                        var charSeparators = new char[] { ':' };
                         foreach (var cmd in timelineEvent.CommandArgs)
                         {
                             //each argument string is key:value, parse this
@@ -1580,9 +1594,9 @@ namespace ghosts.client.linux.handlers
                             }
                         }
 
-                        if (handler.HandlerArgs.ContainsKey("outlook-url"))
+                        if (handler.HandlerArgs.TryGetValue("outlook-url", out var v12))
                         {
-                            site = handler.HandlerArgs["outlook-url"].ToString();
+                            site = v12.ToString();
                         }
 
 
@@ -1595,9 +1609,9 @@ namespace ghosts.client.linux.handlers
 
                         site = site.ToLower();
 
-                        if (handler.HandlerArgs.ContainsKey("outlook-credential-key"))
+                        if (handler.HandlerArgs.TryGetValue("outlook-credential-key", out var v13))
                         {
-                            credentialKey = handler.HandlerArgs["outlook-credential-key"].ToString();
+                            credentialKey = v13.ToString();
                         }
 
 
@@ -1658,7 +1672,7 @@ namespace ghosts.client.linux.handlers
 
 
                         //determine what to do
-                        string action = GetNextAction();
+                        var action = GetNextAction();
 
 
 
@@ -1669,7 +1683,7 @@ namespace ghosts.client.linux.handlers
                             return;
                         }
 
-                        bool success = true;
+                        var success = true;
 
                         Log.Trace($"WebOutlook:: Starting action: {action}.");
                         if (action == "create")
@@ -1699,12 +1713,12 @@ namespace ghosts.client.linux.handlers
                         else
                         {
                             Log.Trace($"WebOutlook:: Failed action: {action}.");
-                            errorCount = errorCount + 1;
+                            errorCount++;
                         }
                         var handlerName = handler.HandlerType.ToString();
-                        this.baseHandler.Report(new ReportItem {Handler = $"WebOutlook: {handler.HandlerType.ToString()}", Command = action, Arg = "", Trackable = timelineEvent.TrackableId});
+                        BaseHandler.Report(new ReportItem { Handler = $"WebOutlook: {handler.HandlerType}", Command = action, Arg = "", Trackable = timelineEvent.TrackableId });
 
-                        
+
                         break;
 
                 }

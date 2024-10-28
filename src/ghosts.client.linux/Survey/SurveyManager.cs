@@ -104,7 +104,7 @@ namespace ghosts.client.linux.Survey
         }
     }
 
-    public class SurveyResult
+    public partial class SurveyResult
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
 
@@ -112,7 +112,7 @@ namespace ghosts.client.linux.Survey
 
         public SurveyResult()
         {
-            this.Survey = new Ghosts.Domain.Messages.MesssagesForServer.Survey
+            Survey = new Ghosts.Domain.Messages.MesssagesForServer.Survey
             {
                 Uptime = GetUptime()
             };
@@ -122,36 +122,36 @@ namespace ghosts.client.linux.Survey
         {
             var random = new Random();
 
-            this.Survey.Ports = GetNetStatPorts();
+            Survey.Ports = GetNetStatPorts();
             if (!Program.IsDebug)
                 Thread.Sleep(random.Next(500, 900000));
 
-            this.Survey.Interfaces = GetInterfaces();
+            Survey.Interfaces = GetInterfaces();
             if (!Program.IsDebug)
                 Thread.Sleep(random.Next(500, 900000));
 
-            this.Survey.LocalUsers = GetLocalAccounts();
+            Survey.LocalUsers = GetLocalAccounts();
             if (!Program.IsDebug)
                 Thread.Sleep(random.Next(500, 900000));
 
-            this.Survey.Drives = this.GetDriveInfo();
+            Survey.Drives = GetDriveInfo();
             if (!Program.IsDebug)
                 Thread.Sleep(random.Next(500, 900000));
 
-            this.Survey.Processes = this.GetProcesses();
+            Survey.Processes = GetProcesses();
             if (!Program.IsDebug)
                 Thread.Sleep(random.Next(500, 900000));
 
-            this.Survey.EventLogs = GetEventLogs();
+            Survey.EventLogs = GetEventLogs();
             if (!Program.IsDebug)
                 Thread.Sleep(random.Next(500, 900000));
 
-            foreach (var item in this.Survey.EventLogs)
+            foreach (var item in Survey.EventLogs)
             {
                 item.Entries = new List<Ghosts.Domain.Messages.MesssagesForServer.Survey.EventLog.EventLogEntry>();
                 if (!Program.IsDebug)
                     Thread.Sleep(random.Next(500, 5000));
-                foreach (var o in this.GetEventLogEntries(item.Name))
+                foreach (var o in GetEventLogEntries(item.Name))
                     item.Entries.Add(o);
             }
         }
@@ -172,7 +172,7 @@ namespace ghosts.client.linux.Survey
         public static List<Ghosts.Domain.Messages.MesssagesForServer.Survey.Port> GetNetStatPorts()
         {
             var ports = new List<Ghosts.Domain.Messages.MesssagesForServer.Survey.Port>();
-            
+
             try
             {
                 using var p = new Process();
@@ -202,7 +202,7 @@ namespace ghosts.client.linux.Survey
                 }
 
                 //Get The Rows
-                var rows = Regex.Split(content, "\r\n");
+                var rows = MyRegex().Split(content);
                 foreach (var row in rows)
                 {
                     //Split it
@@ -219,7 +219,7 @@ namespace ghosts.client.linux.Survey
                             ForeignPort = foreignAddress.Split(':')[1],
                             State = tokens[1] == "UDP" ? null : tokens[4],
                             PID = tokens[1] == "UDP" ? Convert.ToInt16(tokens[4]) : Convert.ToInt16(tokens[5]),
-                            Protocol = localAddress.Contains("1.1.1.1") ? String.Format("{0}v6", tokens[1]) : String.Format("{0}v4", tokens[1]),
+                            Protocol = localAddress.Contains("1.1.1.1") ? string.Format("{0}v6", tokens[1]) : string.Format("{0}v4", tokens[1]),
                             Process = tokens[1] == "UDP" ? LookupProcess(Convert.ToInt16(tokens[4])) : LookupProcess(Convert.ToInt16(tokens[5]))
                         });
                     }
@@ -241,7 +241,7 @@ namespace ghosts.client.linux.Survey
             return procName;
         }
 
-        public List<Ghosts.Domain.Messages.MesssagesForServer.Survey.Interface> GetInterfaces()
+        public static List<Ghosts.Domain.Messages.MesssagesForServer.Survey.Interface> GetInterfaces()
         {
             var results = new List<Ghosts.Domain.Messages.MesssagesForServer.Survey.Interface>();
 
@@ -252,9 +252,11 @@ namespace ghosts.client.linux.Survey
                 foreach (var adapter in adapters)
                 {
                     adapterCount += 1;
-                    var iFace = new Ghosts.Domain.Messages.MesssagesForServer.Survey.Interface();
-                    iFace.Name = adapter.Name;
-                    iFace.Id = adapterCount;
+                    var iFace = new Ghosts.Domain.Messages.MesssagesForServer.Survey.Interface
+                    {
+                        Name = adapter.Name,
+                        Id = adapterCount
+                    };
 
                     var physicalAddress = adapter.GetPhysicalAddress();
                     var ipProperties = adapter.GetIPProperties();
@@ -262,10 +264,12 @@ namespace ghosts.client.linux.Survey
                     {
                         foreach (var address in ipProperties.UnicastAddresses)
                         {
-                            var bind = new Ghosts.Domain.Messages.MesssagesForServer.Survey.Interface.InterfaceBinding();
-                            bind.Type = adapter.NetworkInterfaceType.ToString();
-                            bind.InternetAddress = address.Address.ToString();
-                            bind.PhysicalAddress = physicalAddress.ToString();        
+                            var bind = new Ghosts.Domain.Messages.MesssagesForServer.Survey.Interface.InterfaceBinding
+                            {
+                                Type = adapter.NetworkInterfaceType.ToString(),
+                                InternetAddress = address.Address.ToString(),
+                                PhysicalAddress = physicalAddress.ToString()
+                            };
                             iFace.Bindings.Add(bind);
                         }
                     }
@@ -281,12 +285,12 @@ namespace ghosts.client.linux.Survey
             return results;
         }
 
-        public List<Ghosts.Domain.Messages.MesssagesForServer.Survey.LocalUser> GetLocalAccounts()
+        public static List<Ghosts.Domain.Messages.MesssagesForServer.Survey.LocalUser> GetLocalAccounts()
         {
             var users = new List<Ghosts.Domain.Messages.MesssagesForServer.Survey.LocalUser>();
             try
             {
-                
+
             }
             catch (Exception e)
             {
@@ -295,7 +299,7 @@ namespace ghosts.client.linux.Survey
             return users;
         }
 
-        public List<Ghosts.Domain.Messages.MesssagesForServer.Survey.DriveInfo> GetDriveInfo()
+        public static List<Ghosts.Domain.Messages.MesssagesForServer.Survey.DriveInfo> GetDriveInfo()
         {
             var results = new List<Ghosts.Domain.Messages.MesssagesForServer.Survey.DriveInfo>();
             try
@@ -303,16 +307,18 @@ namespace ghosts.client.linux.Survey
                 var allDrives = System.IO.DriveInfo.GetDrives();
                 foreach (var drive in allDrives)
                 {
-                    var result = new Ghosts.Domain.Messages.MesssagesForServer.Survey.DriveInfo();
-                    result.AvailableFreeSpace = drive.AvailableFreeSpace;
-                    result.DriveFormat = drive.DriveFormat;
-                    result.DriveType = drive.DriveType.ToString();
-                    result.IsReady = drive.IsReady;
-                    result.Name = drive.Name;
-                    result.RootDirectory = drive.RootDirectory.ToString();
-                    result.TotalFreeSpace = drive.TotalFreeSpace;
-                    result.TotalSize = drive.TotalSize;
-                    result.VolumeLabel = drive.VolumeLabel;
+                    var result = new Ghosts.Domain.Messages.MesssagesForServer.Survey.DriveInfo
+                    {
+                        AvailableFreeSpace = drive.AvailableFreeSpace,
+                        DriveFormat = drive.DriveFormat,
+                        DriveType = drive.DriveType.ToString(),
+                        IsReady = drive.IsReady,
+                        Name = drive.Name,
+                        RootDirectory = drive.RootDirectory.ToString(),
+                        TotalFreeSpace = drive.TotalFreeSpace,
+                        TotalSize = drive.TotalSize,
+                        VolumeLabel = drive.VolumeLabel
+                    };
                     results.Add(result);
                 }
             }
@@ -323,7 +329,7 @@ namespace ghosts.client.linux.Survey
             return results;
         }
 
-        public List<Ghosts.Domain.Messages.MesssagesForServer.Survey.LocalProcess> GetProcesses()
+        public static List<Ghosts.Domain.Messages.MesssagesForServer.Survey.LocalProcess> GetProcesses()
         {
             var results = new List<Ghosts.Domain.Messages.MesssagesForServer.Survey.LocalProcess>();
             try
@@ -336,9 +342,9 @@ namespace ghosts.client.linux.Survey
                         result.MainWindowTitle = item.MainWindowTitle;
                     if (!string.IsNullOrEmpty(item.ProcessName))
                         result.ProcessName = item.ProcessName;
-                    try { result.StartTime = item.StartTime; } 
-                    catch 
-                    { 
+                    try { result.StartTime = item.StartTime; }
+                    catch
+                    {
                         // ignore
                     }
                     if (!string.IsNullOrEmpty(item.StartInfo.FileName))
@@ -360,12 +366,12 @@ namespace ghosts.client.linux.Survey
             return results;
         }
 
-        public List<Ghosts.Domain.Messages.MesssagesForServer.Survey.EventLog> GetEventLogs()
+        public static List<Ghosts.Domain.Messages.MesssagesForServer.Survey.EventLog> GetEventLogs()
         {
             var results = new List<Ghosts.Domain.Messages.MesssagesForServer.Survey.EventLog>();
             try
             {
-                
+
             }
             catch (Exception e)
             {
@@ -374,12 +380,12 @@ namespace ghosts.client.linux.Survey
             return results;
         }
 
-        public List<Ghosts.Domain.Messages.MesssagesForServer.Survey.EventLog.EventLogEntry> GetEventLogEntries(string logName)
+        public static List<Ghosts.Domain.Messages.MesssagesForServer.Survey.EventLog.EventLogEntry> GetEventLogEntries(string logName)
         {
             var results = new List<Ghosts.Domain.Messages.MesssagesForServer.Survey.EventLog.EventLogEntry>();
             try
             {
-                
+
             }
             catch (Exception e)
             {
@@ -387,5 +393,8 @@ namespace ghosts.client.linux.Survey
             }
             return results;
         }
+
+        [GeneratedRegex("\r\n")]
+        private static partial Regex MyRegex();
     }
 }

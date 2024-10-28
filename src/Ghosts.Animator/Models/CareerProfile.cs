@@ -13,8 +13,8 @@ namespace Ghosts.Animator.Models
 
         public CareerProfile()
         {
-            this.Strengths = new List<StrengthProfile>();
-            this.Weaknesses = new List<WeaknessProfile>();
+            Strengths = new List<StrengthProfile>();
+            Weaknesses = new List<WeaknessProfile>();
         }
 
         public class StrengthProfile

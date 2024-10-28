@@ -17,7 +17,7 @@ namespace ghosts.api.Infrastructure.Models
             GroupMachines = new List<GroupMachine>();
         }
 
-        [Key] 
+        [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
@@ -32,7 +32,7 @@ namespace ghosts.api.Infrastructure.Models
     [Table("group_machines")]
     public class GroupMachine
     {
-        [Key] 
+        [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 

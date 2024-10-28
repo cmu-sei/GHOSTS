@@ -1,11 +1,11 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
-using FileHelpers;
-using NLog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using FileHelpers;
+using NLog;
 
 namespace ghosts.client.linux.Infrastructure.Browser;
 
@@ -15,7 +15,7 @@ public class BlogContentManager
     public string Body { private set; get; }
 
     internal IList<BlogContent> Content { private set; get; }
-    private static readonly Random _random = new Random();
+    private static readonly Random _random = new();
 
     internal IList<BlogReply> Replies { private set; get; }
 
@@ -46,46 +46,48 @@ public class BlogContentManager
     }
     public string BlogReplyNext()
     {
-        var total = this.Replies.Count;
+        var total = Replies.Count;
 
         if (total <= 0) return null;
-           
-        BlogReply o = this.Replies[_random.Next(0, total)];
+
+        var o = Replies[_random.Next(0, total)];
         return o.Reply.Replace("\\n", "\n");
     }
 
     public void BlogContentNext()
     {
 
-        var total = this.Content.Count;
+        var total = Content.Count;
 
         if (total <= 0)
         {
-            this.Subject = null;
-            this.Body = null;
+            Subject = null;
+            Body = null;
             return;
         };
 
 
-        var o = this.Content[_random.Next(0, total)];
-            
+        var o = Content[_random.Next(0, total)];
 
-        this.Subject = o.Subject.Replace("\\n","\n");
-        this.Body = o.Body.Replace("\\n", "\n");
+
+        Subject = o.Subject.Replace("\\n", "\n");
+        Body = o.Body.Replace("\\n", "\n");
     }
 
     public void LoadBlogFile()
     {
         try
         {
-            var engine = new FileHelperEngine<BlogContent>();
-            engine.Encoding = Encoding.UTF8;
-            this.Content = engine.ReadFile(ClientConfigurationResolver.BlogContent).ToList();
+            var engine = new FileHelperEngine<BlogContent>
+            {
+                Encoding = Encoding.UTF8
+            };
+            Content = engine.ReadFile(ClientConfigurationResolver.BlogContent).ToList();
         }
         catch (Exception e)
         {
             _log.Error($"Blog content file could not be loaded: {e}");
-            this.Content = new List<BlogContent>();
+            Content = new List<BlogContent>();
         }
     }
 
@@ -93,15 +95,17 @@ public class BlogContentManager
     {
         try
         {
-            var engine = new FileHelperEngine<BlogReply>();
-            engine.Encoding = Encoding.UTF8;
-            this.Replies = engine.ReadFile(ClientConfigurationResolver.BlogReply).ToList();
+            var engine = new FileHelperEngine<BlogReply>
+            {
+                Encoding = Encoding.UTF8
+            };
+            Replies = engine.ReadFile(ClientConfigurationResolver.BlogReply).ToList();
         }
-                
+
         catch (Exception e)
         {
             _log.Error($"Blog reply file could not be loaded: {e}");
-            this.Replies = new List<BlogReply>();
+            Replies = new List<BlogReply>();
         }
     }
 }

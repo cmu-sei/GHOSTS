@@ -4,12 +4,12 @@ public class ApplicationConfiguration
 {
     public int DefaultDisplay { get; set; }
     public int MinutesToCheckForDuplicatePost { get; set; }
-    
+
     public CleanupJobConfig CleanupJob { get; set; }
     public CleanupAgeConfig CleanupAge { get; set; }
 
     public int CleanupDiskUtilThreshold { get; set; }
-    
+
     public class CleanupJobConfig
     {
         public int Hours { get; set; }

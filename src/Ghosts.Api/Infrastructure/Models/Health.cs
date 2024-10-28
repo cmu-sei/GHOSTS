@@ -46,18 +46,18 @@ namespace ghosts.api.Infrastructure.Models
         public string Command { get; set; }
         public string CommandArg { get; set; }
         public string Result { get; set; }
-        
+
         public string Tags { get; set; }
-        
+
         public IEnumerable<string> GetTags()
         {
-            if (string.IsNullOrEmpty(this.Tags)) return new List<string>();
-            return this.Tags.ToLower().Split(",");
+            if (string.IsNullOrEmpty(Tags)) return new List<string>();
+            return Tags.ToLower().Split(",");
         }
 
         public void SetTags(string value)
         {
-            if(value != null) this.Tags = string.Join(",", value.ToLower());
+            if (value != null) Tags = string.Join(",", value.ToLower());
         }
     }
 

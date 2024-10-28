@@ -25,7 +25,7 @@ namespace Ghosts.Animator.Models
                 public string Name { get; set; }
                 public string Abbr { get; set; }
                 public string Classification { get; set; }
-                
+
                 //Position number wrt this unit
                 public string Billet { get; set; }
                 public string MOS { get; set; }
@@ -34,7 +34,7 @@ namespace Ghosts.Animator.Models
             }
         }
     }
-    
+
     public class Billet
     {
         public string Pay { get; set; }

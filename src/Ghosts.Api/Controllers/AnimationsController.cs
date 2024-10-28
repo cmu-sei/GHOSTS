@@ -1,9 +1,9 @@
 // Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System.Threading;
+using ghosts.api.Infrastructure.Animations;
 using Ghosts.Api;
 using Ghosts.Api.Infrastructure;
-using ghosts.api.Infrastructure.Animations;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using NLog;
@@ -12,17 +12,11 @@ namespace ghosts.api.Controllers;
 
 [Route("[controller]")]
 [ApiExplorerSettings(IgnoreApi = true)]
-public class AnimationsController : Controller
+public class AnimationsController(IManageableHostedService animationsManager) : Controller
 {
     private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-    private readonly ApplicationSettings _configuration;
-    private readonly IManageableHostedService _animationsManager;
-
-    public AnimationsController(IManageableHostedService animationsManager)
-    {
-        this._configuration = Program.ApplicationSettings;
-        this._animationsManager = animationsManager;
-    }
+    private readonly ApplicationSettings _configuration = Program.ApplicationSettings;
+    private readonly IManageableHostedService _animationsManager = animationsManager;
 
     [HttpGet]
     public IActionResult Index()
@@ -36,7 +30,7 @@ public class AnimationsController : Controller
         ViewBag.RunningJobs = _animationsManager.GetRunningJobs();
         return View(new AnimationConfiguration());
     }
-    
+
     [HttpPost("start")]
     public IActionResult Start(AnimationConfiguration configuration, [FromForm] string jobConfiguration)
     {
@@ -44,7 +38,7 @@ public class AnimationsController : Controller
         _animationsManager.StartJob(configuration, new CancellationToken());
         return RedirectToAction("Index");
     }
-    
+
     [HttpPost("stop")]
     public IActionResult Stop(string jobId)
     {

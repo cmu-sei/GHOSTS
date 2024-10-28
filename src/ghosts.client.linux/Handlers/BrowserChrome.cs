@@ -1,14 +1,14 @@
 // Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
-using Ghosts.Domain;
-using OpenQA.Selenium.Chrome;
 using System;
 using System.IO;
 using System.Threading;
-using Ghosts.Domain.Code.Helpers;
-using OpenQA.Selenium;
-using Newtonsoft.Json.Linq;
 using ghosts.client.linux.Infrastructure;
+using Ghosts.Domain;
+using Ghosts.Domain.Code.Helpers;
+using Newtonsoft.Json.Linq;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
 
 namespace ghosts.client.linux.handlers
 {
@@ -18,7 +18,7 @@ namespace ghosts.client.linux.handlers
 
         public BrowserChrome(TimelineHandler handler)
         {
-            base.Init(handler);
+            Init(handler);
             BrowserType = HandlerType.BrowserChrome;
             try
             {
@@ -76,7 +76,7 @@ namespace ghosts.client.linux.handlers
                 catch { }
                 KillBrowser();
 
-                if (this.Restart)
+                if (Restart)
                 {
                     DoRestart(handler);
                 }
@@ -102,20 +102,22 @@ namespace ghosts.client.linux.handlers
 
             if (handler.HandlerArgs != null)
             {
-                if (handler.HandlerArgs.ContainsKey("command-line-args"))
+                if (handler.HandlerArgs.TryGetValue("command-line-args", out var v1))
                 {
-                    foreach (var option in (JArray)handler.HandlerArgs["command-line-args"])
+                    foreach (var option in (JArray)v1)
                     {
                         options.AddArgument(option.Value<string>());
                     }
                 }
                 //used to kill process as Selenium driver sometimes fails
                 string browserId;
-                if (handler.HandlerArgs.ContainsKey("browser-id") &&
-                    !string.IsNullOrEmpty(handler.HandlerArgs["browser-id"].ToString()))
+                if (handler.HandlerArgs.TryGetValue("browser-id", out var v2) &&
+                    !string.IsNullOrEmpty(v2.ToString()))
                 {
-                    browserId = handler.HandlerArgs["browser-id"].ToString();
-                } else {
+                    browserId = v2.ToString();
+                }
+                else
+                {
                     // always generate this, and save
                     browserId = Guid.NewGuid().ToString();
                     handler.HandlerArgs["browser-id"] = browserId;
@@ -123,10 +125,10 @@ namespace ghosts.client.linux.handlers
                 options.AddArgument($"--{browserId}");
 
 
-                if (handler.HandlerArgs.ContainsKey("executable-location") &&
-                    !string.IsNullOrEmpty(handler.HandlerArgs["executable-location"].ToString()))
+                if (handler.HandlerArgs.TryGetValue("executable-location", out var value) &&
+                    !string.IsNullOrEmpty(value.ToString()))
                 {
-                    options.BinaryLocation = handler.HandlerArgs["executable-location"].ToString();
+                    options.BinaryLocation = value.ToString();
                 }
 
                 if (handler.HandlerArgs.ContainsKeyWithOption("isheadless", "true"))
@@ -172,7 +174,7 @@ namespace ghosts.client.linux.handlers
             options.AddLocalStatePreference("profile.managed_default_content_settings.geolocation", 2);
             options.AddLocalStatePreference("profile.managed_default_content_settings.media_stream", 2);
 
-            
+
 
             //avoid download modal
             options.AddLocalStatePreference("browser.helperApps.alwaysAsk.force", false);
@@ -190,7 +192,7 @@ namespace ghosts.client.linux.handlers
 
             //unsure if the following is still needed but is on the Windows side
             //ironically, the following must be true for the next two options to work
-            options.AddUserProfilePreference("safebrowsing.enabled",true);
+            options.AddUserProfilePreference("safebrowsing.enabled", true);
             options.AddArguments("--safebrowsing-disable-download-protection");
             options.AddArguments("--safebrowsing-disable-extension-blacklist");
 

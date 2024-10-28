@@ -1,31 +1,31 @@
 ﻿
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Web;
 using ghosts.client.linux.Infrastructure;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Newtonsoft.Json;
-using OpenQA.Selenium.Support.UI;
+using NLog;
 using OpenQA.Selenium;
-using System;
-using System.IO;
-using System.Text.RegularExpressions;
-using System.Threading;
+using OpenQA.Selenium.Support.UI;
 using Actions = OpenQA.Selenium.Interactions.Actions;
 using Exception = System.Exception;
-using NLog;
-using System.Web;
-using System.Collections.Generic;
 
 
 
 
-namespace ghosts.client.linux.handlers 
+namespace ghosts.client.linux.handlers
 {
 
-    
+
     public abstract class BrowserHelper
     {
         public static readonly Logger Log = LogManager.GetCurrentClassLogger();
-        internal static readonly Random _random = new Random();
+        internal static readonly Random _random = new();
         public BaseBrowserHandler baseHandler = null;
         public IWebDriver Driver = null;
 
@@ -50,11 +50,11 @@ namespace ghosts.client.linux.handlers
                     if (count == 0) return null;
                     //divide maxSize by count so that there is no possibility of total attachment size exceeding maxSize
                     long maxSizeBytes = (maxSize * 1024 * 1024) / count; //maxSize is in MB
-                    string[] filelist = Directory.GetFiles(targetDir, pattern);
+                    var filelist = Directory.GetFiles(targetDir, pattern);
                     if (filelist.Length == 0) return null;
                     //filter files by maxSizeBytes
                     List<string> filteredFiles = new List<string>();
-                    foreach (string file in filelist)
+                    foreach (var file in filelist)
                     {
                         try
                         {
@@ -63,7 +63,7 @@ namespace ghosts.client.linux.handlers
                             {
                                 filteredFiles.Add(file);
                             }
-                    
+
                         }
                         catch (ThreadAbortException)
                         {
@@ -74,8 +74,8 @@ namespace ghosts.client.linux.handlers
                             Log.Error($"File access error: {e}");
                         }
                     }
-                    if (filteredFiles.Count == 0) return null;         
-                    
+                    if (filteredFiles.Count == 0) return null;
+
                     if (count == 1)
                     {
                         return new List<string>() { filteredFiles[_random.Next(0, filteredFiles.Count)] };
@@ -95,13 +95,14 @@ namespace ghosts.client.linux.handlers
             {
                 throw;  //pass up
             }
-            catch {
+            catch
+            {
                 //ignore others
             }
             return null;
         }
-    
-    
+
+
 
     }
 
@@ -160,8 +161,9 @@ namespace ghosts.client.linux.handlers
             {
                 return; //return if not present
             }
-            try { 
-                targetElement = Driver.FindElement(By.Id("exceptionDialogButton"));  
+            try
+            {
+                targetElement = Driver.FindElement(By.Id("exceptionDialogButton"));
                 MoveToElementAndClick(Driver, targetElement);   //accept risk and continue
                 Thread.Sleep(1000);
                 return;
@@ -173,7 +175,7 @@ namespace ghosts.client.linux.handlers
                 targetElement = Driver.FindElement(By.Id("advancedPanelReturnButton"));
                 MoveToElementAndClick(Driver, targetElement);   //return, cannot continue
                 Thread.Sleep(1000);
-                
+
             }
             catch { }
 
@@ -181,4 +183,4 @@ namespace ghosts.client.linux.handlers
 
     }
 
-    }
+}

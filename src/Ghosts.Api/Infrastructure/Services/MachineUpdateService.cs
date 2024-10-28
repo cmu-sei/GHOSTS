@@ -5,8 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Ghosts.Api.Infrastructure.Data;
 using ghosts.api.Infrastructure.Models;
+using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Api.ViewModels;
 using Ghosts.Domain;
 using Microsoft.EntityFrameworkCore;
@@ -20,7 +20,7 @@ namespace ghosts.api.Infrastructure.Services
 
         Task<MachineUpdate> CreateAsync(MachineUpdate model, CancellationToken ct);
         Task<int> MarkAsDeletedAsync(int id, Guid machineId, CancellationToken ct);
-        
+
         Task UpdateGroupAsync(int groupId, MachineUpdateViewModel machineUpdate, CancellationToken ct);
 
         Task<MachineUpdate> GetById(int updateId, CancellationToken ct);
@@ -32,16 +32,11 @@ namespace ghosts.api.Infrastructure.Services
         Task<IEnumerable<MachineUpdate>> GetByType(UpdateClientConfig.UpdateType type, CancellationToken ct);
     }
 
-    public class MachineUpdateService : IMachineUpdateService
+    public class MachineUpdateService(ApplicationDbContext context) : IMachineUpdateService
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        private readonly ApplicationDbContext _context;
+        private readonly ApplicationDbContext _context = context;
 
-        public MachineUpdateService(ApplicationDbContext context)
-        {
-            _context = context;
-        }
-        
         public async Task UpdateGroupAsync(int groupId, MachineUpdateViewModel machineUpdateViewModel, CancellationToken ct)
         {
             var machineUpdate = machineUpdateViewModel.ToMachineUpdate();
@@ -64,11 +59,11 @@ namespace ghosts.api.Infrastructure.Services
         {
             if (machineId == Guid.Empty && string.IsNullOrEmpty(currentUsername))
                 return new MachineUpdate();
-            
+
             // Build the base query with conditions that are always true
             var query = _context.MachineUpdates
                 .Where(m => m.ActiveUtc <= DateTime.UtcNow && m.Status == StatusType.Active);
-    
+
             // Adjust the query based on the provided arguments
             if (machineId != Guid.Empty)
             {
@@ -82,7 +77,7 @@ namespace ghosts.api.Infrastructure.Services
                     query = query.Where(m => m.Username.ToLower().StartsWith(usernameLower));
                 }
             }
-    
+
             var update = await query.FirstOrDefaultAsync(ct);
             return update;
         }
@@ -101,7 +96,7 @@ namespace ghosts.api.Infrastructure.Services
         {
             return await _context.MachineUpdates.Where(x => x.Type == type).ToListAsync(ct);
         }
-        
+
         public async Task<IEnumerable<MachineUpdate>> GetByStatus(StatusType status, CancellationToken ct)
         {
             return await _context.MachineUpdates.Where(x => x.Status == status).ToListAsync(ct);
@@ -109,12 +104,12 @@ namespace ghosts.api.Infrastructure.Services
 
         public async Task<MachineUpdate> CreateAsync(MachineUpdate model, CancellationToken ct)
         {
-            var machineUpdate = await this.GetById(model.Id, ct);
+            var machineUpdate = await GetById(model.Id, ct);
             if (machineUpdate != null)
                 return machineUpdate;
 
             model.Update.Id = Guid.NewGuid();
-            
+
             _context.MachineUpdates.Add(model);
             await _context.SaveChangesAsync(ct);
             return model;
@@ -139,7 +134,7 @@ namespace ghosts.api.Infrastructure.Services
                 _log.Info($"Machine update {id} marked as deleted successfully.");
                 return id;
             }
-    
+
             _log.Error($"Could not mark machine update {id} as deleted: {operation}");
             throw new InvalidOperationException("Could not delete Machine Update");
         }

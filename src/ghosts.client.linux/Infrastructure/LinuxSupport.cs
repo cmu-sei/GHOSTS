@@ -1,14 +1,13 @@
 ﻿using System;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.IO;
 using System.Linq;
-using System.Threading;
-using System;
-using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Diagnostics;
-
+using System.Threading;
 using NLog;
 
 namespace ghosts.client.linux.Infrastructure
@@ -23,7 +22,8 @@ namespace ghosts.client.linux.Infrastructure
         public string windowTitle;
 
 
-        public BashExecute(Logger aLog){
+        public BashExecute(Logger aLog)
+        {
             Log = aLog;
         }
 
@@ -58,7 +58,7 @@ namespace ghosts.client.linux.Infrastructure
             Log.Trace($"{id}:: Spawning {p.StartInfo.FileName} with command {escapedArgs}");
             p.Start();
 
-            string Result = "";
+            var Result = "";
             while (!p.StandardOutput.EndOfStream)
             {
                 Result += p.StandardOutput.ReadToEnd();
@@ -71,8 +71,9 @@ namespace ghosts.client.linux.Infrastructure
 
         public void AttachFile()
         {
-            try {
-                string cmd = $"xdotool search -name '{windowTitle}' windowfocus type '{filename}' ";
+            try
+            {
+                var cmd = $"xdotool search -name '{windowTitle}' windowfocus type '{filename}' ";
                 ExecuteBashCommand(id, cmd);
                 Thread.Sleep(2000);
                 cmd = $"xdotool search -name '{windowTitle}' windowfocus key KP_Enter";
@@ -80,16 +81,18 @@ namespace ghosts.client.linux.Infrastructure
                 Thread.Sleep(2000);
                 // Check if the window has closed
                 cmd = $"xdotool search -name '{windowTitle}'";
-                string result = ExecuteBashCommand(id, cmd);
-                if (result != "") {
+                var result = ExecuteBashCommand(id, cmd);
+                if (result != "")
+                {
                     // close the window
                     cmd = $"xdotool search -name '{windowTitle}' windowfocus key alt+c";
                     ExecuteBashCommand(id, cmd);
                     Thread.Sleep(500);
                 }
                 return;
-            } 
-            catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 Log.Error(e);
             }
         }
@@ -98,50 +101,57 @@ namespace ghosts.client.linux.Infrastructure
     }
 
 
-    public class LinuxSupport 
+    public class LinuxSupport
     {
-       
-        
+
+
         public static Logger Log;
         private BashExecute runner = null;
 
 
-        public LinuxSupport(Logger aLog){
+        public LinuxSupport(Logger aLog)
+        {
             Log = aLog;
         }
 
-        public bool AttachFileUsingThread(string id, string filename, string windowTitle, int timeoutSeconds, int retries) {
+        public bool AttachFileUsingThread(string id, string filename, string windowTitle, int timeoutSeconds, int retries)
+        {
             // Use a thread in case the xdotool execution hangs
 
-            if (runner == null) runner = new BashExecute(Log);
+            runner ??= new BashExecute(Log);
             runner.id = id;
             runner.windowTitle = windowTitle;
             runner.filename = filename;
-            int count = 0;
-            while (count < retries+1) {
+            var count = 0;
+            while (count < retries + 1)
+            {
                 Thread t = new Thread(new ThreadStart(runner.AttachFile));
                 t.Start();
-                int totalTime = 0;
-                while (totalTime < timeoutSeconds) {
+                var totalTime = 0;
+                while (totalTime < timeoutSeconds)
+                {
                     Thread.Sleep(10000);
                     if (!t.IsAlive) break;
                     totalTime += 10;
                 }
-                if (t.IsAlive){
+                if (t.IsAlive)
+                {
                     t.Abort();
                     Thread.Sleep(5000);
                     retries += 1;
-                } else {
+                }
+                else
+                {
                     break;
                 }
             }
 
-            return (count < retries+1);
+            return (count < retries + 1);
 
         }
 
-        
+
     }
 
-        
+
 }

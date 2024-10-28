@@ -52,12 +52,12 @@ public class UserCreate
     {
         return new
         {
-            email = this.Email,
-            username = this.Username,
-            first_name = this.FirstName,
-            last_name = this.LastName,
-            nickname = this.Nickname,
-            password = this.Password
+            email = Email,
+            username = Username,
+            first_name = FirstName,
+            last_name = LastName,
+            nickname = Nickname,
+            password = Password
         };
     }
 }

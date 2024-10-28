@@ -9,7 +9,7 @@ public class ChatJobConfiguration
     public ChatPlatformConfiguration Chat { get; set; }
     public List<string> Replacements { get; set; }
     public List<string> Drops { get; set; }
-    
+
     public List<string> Prompts { get; set; }
 
     public class ChatPlatformConfiguration

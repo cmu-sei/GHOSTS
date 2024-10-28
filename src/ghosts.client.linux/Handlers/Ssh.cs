@@ -1,11 +1,11 @@
 ﻿using System;
 using System.IO;
 using System.Threading;
-using Renci.SshNet;
 using ghosts.client.linux.Infrastructure;
 using Ghosts.Domain;
-using Newtonsoft.Json;
 using Ghosts.Domain.Code;
+using Newtonsoft.Json;
+using Renci.SshNet;
 
 /*
  * Used Package Renci.sshNet
@@ -20,85 +20,85 @@ namespace ghosts.client.linux.handlers
     /// This uses the Credentials class that keeps a simple dictionary of credentials
     /// For SSH, is  uses the Renci.sshNet package, install via PM with Install-Package SSH.NET
     /// The SSH connection uses a ShellStream for executing commands once a connection is established.
-    /// Each SSH shell command can have reserved words in it, such as '[remotedirectory]' which 
+    /// Each SSH shell command can have reserved words in it, such as '[remotedirectory]' which
     /// is replaced by a random remote directory on the server.  So 'cd [remotedirectory]' will change
-    /// to a random remote directory. 
+    /// to a random remote directory.
     /// See the Sample Timelines/Ssh.json for a sample timeline using this handler.
     /// </summary>
     public class Ssh : BaseHandler
     {
-        private Credentials CurrentCreds = null;
-        private SshSupport CurrentSshSupport = null;   //current SshSupport for this object
+        private readonly Credentials CurrentCreds = null;
+        private readonly SshSupport CurrentSshSupport = null;   //current SshSupport for this object
         public int jitterfactor = 0;
 
         public Ssh(TimelineHandler handler)
         {
             try
             {
-                base.Init(handler);
-                this.CurrentSshSupport = new SshSupport();
+                Init(handler);
+                CurrentSshSupport = new SshSupport();
                 if (handler.HandlerArgs != null)
                 {
-                    if (handler.HandlerArgs.ContainsKey("CredentialsFile"))
+                    if (handler.HandlerArgs.TryGetValue("CredentialsFile", out var v1))
                     {
                         try
                         {
-                            this.CurrentCreds = JsonConvert.DeserializeObject<Credentials>(File.ReadAllText(handler.HandlerArgs["CredentialsFile"].ToString()));
+                            CurrentCreds = JsonConvert.DeserializeObject<Credentials>(File.ReadAllText(v1.ToString()));
                         }
                         catch (Exception e)
                         {
                             _log.Error(e);
                         }
                     }
-                    if (handler.HandlerArgs.ContainsKey("ValidExts"))
+                    if (handler.HandlerArgs.TryGetValue("ValidExts", out var v2))
                     {
                         try
                         {
-                            this.CurrentSshSupport.ValidExts = handler.HandlerArgs["ValidExts"].ToString().Split(';');
+                            CurrentSshSupport.ValidExts = v2.ToString().Split(';');
                         }
                         catch (Exception e)
                         {
                             _log.Error(e);
                         }
                     }
-                    if (handler.HandlerArgs.ContainsKey("CommandTimeout"))
+                    if (handler.HandlerArgs.TryGetValue("CommandTimeout", out var v3))
                     {
                         try
                         {
-                            this.CurrentSshSupport.CommandTimeout = Int32.Parse(handler.HandlerArgs["CommandTimeout"].ToString());
+                            CurrentSshSupport.CommandTimeout = int.Parse(v3.ToString());
                         }
                         catch (Exception e)
                         {
                             _log.Error(e);
                         }
                     }
-                    if (handler.HandlerArgs.ContainsKey("TimeBetweenCommandsMax"))
+                    if (handler.HandlerArgs.TryGetValue("TimeBetweenCommandsMax", out var v4))
                     {
                         try
                         {
-                            this.CurrentSshSupport.TimeBetweenCommandsMax = Int32.Parse(handler.HandlerArgs["TimeBetweenCommandsMax"].ToString());
-                            if (this.CurrentSshSupport.TimeBetweenCommandsMax < 0) this.CurrentSshSupport.TimeBetweenCommandsMax = 0;
+                            CurrentSshSupport.TimeBetweenCommandsMax = int.Parse(v4.ToString());
+                            if (CurrentSshSupport.TimeBetweenCommandsMax < 0) CurrentSshSupport.TimeBetweenCommandsMax = 0;
                         }
                         catch (Exception e)
                         {
                             _log.Error(e);
                         }
                     }
-                    if (handler.HandlerArgs.ContainsKey("TimeBetweenCommandsMin"))
+                    if (handler.HandlerArgs.TryGetValue("TimeBetweenCommandsMin", out var v5))
                     {
                         try
                         {
-                            this.CurrentSshSupport.TimeBetweenCommandsMin = Int32.Parse(handler.HandlerArgs["TimeBetweenCommandsMin"].ToString());
-                            if (this.CurrentSshSupport.TimeBetweenCommandsMin < 0) this.CurrentSshSupport.TimeBetweenCommandsMin = 0;
+                            CurrentSshSupport.TimeBetweenCommandsMin = int.Parse(v5.ToString());
+                            if (CurrentSshSupport.TimeBetweenCommandsMin < 0) CurrentSshSupport.TimeBetweenCommandsMin = 0;
                         }
                         catch (Exception e)
                         {
                             _log.Error(e);
                         }
                     }
-                    if (handler.HandlerArgs.ContainsKey("delay-jitter"))
+                    if (handler.HandlerArgs.TryGetValue("delay-jitter", out var v6))
                     {
-                        jitterfactor = Jitter.JitterFactorParse(handler.HandlerArgs["delay-jitter"].ToString());
+                        jitterfactor = Jitter.JitterFactorParse(v6.ToString());
                     }
                 }
 
@@ -143,10 +143,10 @@ namespace ghosts.client.linux.handlers
                         var cmd = timelineEvent.CommandArgs[_random.Next(0, timelineEvent.CommandArgs.Count)];
                         if (!string.IsNullOrEmpty(cmd.ToString()))
                         {
-                            this.Command(handler, timelineEvent, cmd.ToString());
+                            Command(handler, timelineEvent, cmd.ToString());
                         }
                         Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, jitterfactor));
-                        break;  
+                        break;
                 }
 
                 if (timelineEvent.DelayAfterActual > 0)
@@ -157,20 +157,20 @@ namespace ghosts.client.linux.handlers
 
         public void Command(TimelineHandler handler, TimelineEvent timelineEvent, string command)
         {
-            
-            char[] charSeparators = new char[] { '|' };
-            var cmdArgs = command.Split(charSeparators, 3,StringSplitOptions.None);
+
+            var charSeparators = new char[] { '|' };
+            var cmdArgs = command.Split(charSeparators, 3, StringSplitOptions.None);
             var hostIp = cmdArgs[0];
             var credKey = cmdArgs[1];
             var sshCmds = cmdArgs[2].Split(';');
-            var username = this.CurrentCreds.GetUsername(credKey);
-            var password = this.CurrentCreds.GetPassword(credKey);
+            var username = CurrentCreds.GetUsername(credKey);
+            var password = CurrentCreds.GetPassword(credKey);
             _log.Trace("Beginning SSH to host:  " + hostIp + " with command: " + command);
 
             if (username != null && password != null)
             {
-                
-                //have IP, user/pass, try connecting 
+
+                //have IP, user/pass, try connecting
                 using (var client = new SshClient(hostIp, username, password))
                 {
                     try
@@ -187,14 +187,14 @@ namespace ghosts.client.linux.handlers
                         return;  //unable to connect
                     }
                     //we are connected, execute the commands
-                    ShellStream shellStreamSSH = client.CreateShellStream("vt220", 80, 60, 800, 600, 65536);
+                    var shellStreamSSH = client.CreateShellStream("vt220", 80, 60, 800, 600, 65536);
                     //before running commands, flush the input of welcome login text
-                    this.CurrentSshSupport.GetSshCommandOutput(shellStreamSSH, true);
+                    CurrentSshSupport.GetSshCommandOutput(shellStreamSSH, true);
                     foreach (var sshCmd in sshCmds)
                     {
                         try
                         {
-                            this.CurrentSshSupport.RunSshCommand(shellStreamSSH, sshCmd.Trim());
+                            CurrentSshSupport.RunSshCommand(shellStreamSSH, sshCmd.Trim());
                         }
                         catch (ThreadAbortException)
                         {
@@ -207,7 +207,7 @@ namespace ghosts.client.linux.handlers
                     }
                     client.Disconnect();
                     client.Dispose();
-                    Report(new ReportItem {Handler = handler.HandlerType.ToString(), Command= hostIp, Arg = cmdArgs[2], Trackable = timelineEvent.TrackableId });
+                    Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = hostIp, Arg = cmdArgs[2], Trackable = timelineEvent.TrackableId });
                 }
             }
 

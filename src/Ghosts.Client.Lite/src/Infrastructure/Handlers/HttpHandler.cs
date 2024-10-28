@@ -103,7 +103,7 @@ namespace Ghosts.Client.Lite.Infrastructure.Handlers
             }
         }
 
-        private HttpClient CreateHttpClient(HandlerType handler, string url)
+        private static HttpClient CreateHttpClient(HandlerType handler, string url)
         {
             var clientHandler = new HttpClientHandler
             {
@@ -138,7 +138,7 @@ namespace Ghosts.Client.Lite.Infrastructure.Handlers
             return client;
         }
 
-        private async Task<string> ReadContentAsync(HttpContent content)
+        private static async Task<string> ReadContentAsync(HttpContent content)
         {
             var encoding = content.Headers.ContentEncoding;
             var contentStream = await content.ReadAsStreamAsync();

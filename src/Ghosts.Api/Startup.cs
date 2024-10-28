@@ -5,13 +5,13 @@ using System.IO;
 using System.Reflection;
 using System.Text.Json.Serialization;
 using ghosts.api.Hubs;
-using Ghosts.Api.Hubs;
 using ghosts.api.Infrastructure;
 using ghosts.api.Infrastructure.Animations;
+using ghosts.api.Infrastructure.Services;
+using Ghosts.Api.Hubs;
 using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Api.Infrastructure.Extensions;
 using Ghosts.Api.Infrastructure.Filters;
-using ghosts.api.Infrastructure.Services;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
 using Microsoft.AspNetCore.Builder;
@@ -28,21 +28,16 @@ using Swashbuckle.AspNetCore.Filters;
 
 namespace Ghosts.Api
 {
-    public class Startup
+    public class Startup(IConfiguration configuration)
     {
         public const int ApiVersion = 8;
-        
-        public Startup(IConfiguration configuration)
-        {
-            Configuration = configuration;
-        }
 
-        public IConfiguration Configuration { get; }
+        public IConfiguration Configuration { get; } = configuration;
 
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
-            
+
             services.TryAddTransient<IHttpContextAccessor, HttpContextAccessor>();
             services.AddCors(options => options.UseConfiguredCors(Configuration.GetSection("CorsPolicy")));
 
@@ -84,27 +79,27 @@ namespace Ghosts.Api
             services.AddScoped<ITrackableService, TrackableService>();
             services.AddScoped<ISurveyService, SurveyService>();
             services.AddScoped<INpcService, NpcService>();
-            
+
             services.AddScoped<MachineUpdateExample>();
             services.AddSwaggerExamplesFromAssemblyOf<MachineUpdateExample>();
-            
+
             services.AddSingleton<IBackgroundQueue, BackgroundQueue>();
             services.AddSingleton<IHostedService, QueueSyncService>();
 
             services.AddCors(options => options.UseConfiguredCors(Configuration.GetSection("CorsPolicy")));
-            
-            services.AddControllers().AddJsonOptions(options => 
+
+            services.AddControllers().AddJsonOptions(options =>
                 options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
             services.AddMvc().AddNewtonsoftJson(options =>
             {
                 options.SerializerSettings.Converters.Add(new TimeSpanConverter());
                 options.SerializerSettings.Converters.Add(new StringEnumConverter());
             });
-            
+
             services.AddSignalR();
             services.AddControllersWithViews().AddRazorRuntimeCompilation();
             services.AddRouting(options => options.LowercaseUrls = true);
-            
+
             // start any configured animation jobs
             services.AddSingleton<IManageableHostedService, AnimationsManager>();
         }
@@ -122,16 +117,16 @@ namespace Ghosts.Api
                     "areas",
                     "{area:exists}/{controller=Home}/{action=Index}/{id?}"
                 );
-                
+
                 endpoints.MapControllerRoute(
                     "default",
                     "{controller=Home}/{action=Index}/{id?}");
-                
+
                 endpoints.MapHub<ClientHub>("/clientHub");
                 endpoints.MapHub<ClientHub>("/api/clientHub");
                 endpoints.MapHub<ActivityHub>("/hubs/activities");
             });
-            
+
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {

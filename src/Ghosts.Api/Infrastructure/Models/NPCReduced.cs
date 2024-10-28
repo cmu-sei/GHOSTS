@@ -15,13 +15,13 @@ public class NPCReduced
 
     public NPCReduced()
     {
-        this.PropertySelection = new Dictionary<string, string>();
+        PropertySelection = new Dictionary<string, string>();
     }
 
     public NPCReduced(IEnumerable<string> fieldsToReturn, NpcRecord npc)
     {
         //what we'll return
-        this.PropertySelection = new Dictionary<string, string>();
+        PropertySelection = new Dictionary<string, string>();
 
         //get an npc to "rip apart"
 
@@ -31,14 +31,14 @@ public class NPCReduced
             var fieldArray = fieldToReturn.Split(".");
 
             //get that field on the npc object
-                
+
             object currentObject = npc;
-                
+
             foreach (var f in fieldArray)
             {
                 if (currentObject != null && currentObject.GetType().GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEnumerable<>)))
                 {
-                    var collection = (IList) currentObject;
+                    var collection = (IList)currentObject;
                     currentObject = collection[0];
                 }
 
@@ -47,8 +47,8 @@ public class NPCReduced
 
             if (currentObject is not null)
             {
-                if(currentObject.GetType().GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEnumerable<>))) {}
-                this.PropertySelection.Add(fieldToReturn, currentObject.ToString());
+                if (currentObject.GetType().GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEnumerable<>))) { }
+                PropertySelection.Add(fieldToReturn, currentObject.ToString());
             }
 
 
@@ -62,10 +62,10 @@ public class NPCReduced
     {
         if (src.GetType().GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEnumerable<>)))
         {
-            var collection = (IList) src;
+            var collection = (IList)src;
             src = collection[0];
         }
-        
+
         return src.GetType().GetProperties().FirstOrDefault(x => x.Name == name);
     }
 }

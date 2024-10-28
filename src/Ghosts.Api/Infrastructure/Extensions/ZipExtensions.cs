@@ -12,7 +12,7 @@ public static class ZipExtensions
         if (string.IsNullOrEmpty(zipFileOutputPath)) return;
         if (File.Exists(zipFileOutputPath))
             File.Delete(zipFileOutputPath);
-        
+
         using var zip = ZipFile.Open(zipFileOutputPath, ZipArchiveMode.Create);
         var files = Directory.GetFiles(sourceDirectory);
         foreach (var file in files)

@@ -7,8 +7,8 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using Ghosts.Api.Infrastructure;
 using ghosts.api.Infrastructure.Extensions;
+using Ghosts.Api.Infrastructure;
 using Newtonsoft.Json;
 using NLog;
 using JsonSerializer = System.Text.Json.JsonSerializer;
@@ -19,7 +19,7 @@ public class ShadowsConnectorService : IContentService
 {
     private static readonly Logger _log = LogManager.GetCurrentClassLogger();
     private readonly ApplicationSettings.AnimatorSettingsDetail.ContentEngineSettings _configuration;
-    
+
     public ShadowsConnectorService(ApplicationSettings.AnimatorSettingsDetail.ContentEngineSettings configuration)
     {
         _configuration = configuration;
@@ -28,7 +28,7 @@ public class ShadowsConnectorService : IContentService
         _configuration.Model = Environment.GetEnvironmentVariable("GHOSTS_SHADOWS_MODEL") ??
                                configuration.Model;
     }
-    
+
     public async Task<string> ExecuteQuery(string prompt)
     {
         return await ExecuteQuery(_configuration.Model, prompt);
@@ -48,7 +48,7 @@ public class ShadowsConnectorService : IContentService
 
             payload = payload.Where(kv => kv.Value != null).ToDictionary(kv => kv.Key, kv => kv.Value);
             using var client = new HttpClient();
-            client.Timeout = new TimeSpan(0,0,60);
+            client.Timeout = new TimeSpan(0, 0, 60);
             using var response = await client.PostAsync(url, new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json"));
             response.EnsureSuccessStatusCode();
 

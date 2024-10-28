@@ -58,7 +58,7 @@ namespace Ghosts.Domain.Code
                     }
                 }
 
-                if (!isInTimeBlock &&  nextActionTime == DateTime.MaxValue) // If not in a block and no next action time was found
+                if (!isInTimeBlock && nextActionTime == DateTime.MaxValue) // If not in a block and no next action time was found
                 {
                     var nextStartTime = handler.UtcTimeBlocks.Where(t => today.Add(t) > utcNow).Min();
                     nextActionTime = today.Add(nextStartTime);
@@ -76,12 +76,6 @@ namespace Ghosts.Domain.Code
         {
             _log.Trace($"{handler} sleeping for {msToSleep} ms");
             Thread.Sleep(msToSleep);
-        }
-
-        private static void Sleep(TimelineHandler handler, TimeSpan sleep)
-        {
-            // TODO: We need a way to kill this handler like handler.SafeKill();
-            Sleep(handler, (int)sleep.TotalMilliseconds);
         }
     }
 }

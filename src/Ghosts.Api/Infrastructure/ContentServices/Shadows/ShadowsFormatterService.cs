@@ -5,8 +5,8 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Ghosts.Api.Infrastructure;
 using ghosts.api.Infrastructure.Models;
+using Ghosts.Api.Infrastructure;
 using NLog;
 
 namespace ghosts.api.Infrastructure.ContentServices.Shadows;
@@ -15,7 +15,7 @@ public class ShadowsFormatterService : IFormatterService
 {
     private static readonly Logger _log = LogManager.GetCurrentClassLogger();
     private readonly ApplicationSettings.AnimatorSettingsDetail.ContentEngineSettings _configuration;
-    private ShadowsConnectorService _connectorService;
+    private readonly ShadowsConnectorService _connectorService;
 
     public ShadowsFormatterService(ApplicationSettings.AnimatorSettingsDetail.ContentEngineSettings configuration)
     {
@@ -30,7 +30,7 @@ public class ShadowsFormatterService : IFormatterService
 
     public async Task<string> ExecuteQuery(string prompt)
     {
-        return await this._connectorService.ExecuteQuery(prompt);
+        return await _connectorService.ExecuteQuery(prompt);
     }
 
     public async Task<string> GenerateTweet(NpcRecord npc)
@@ -42,11 +42,11 @@ public class ShadowsFormatterService : IFormatterService
         foreach (var p in prompt.Split(System.Environment.NewLine))
         {
             var s = p.Replace("[[flattenedAgent]]", flattenedAgent[..3050]);
-            messages.Append(s);    
+            messages.Append(s);
         }
-        
+
         var tweetText = await _connectorService.ExecuteQuery(messages.ToString());
-        
+
         var tries = 0;
         while (string.IsNullOrEmpty(tweetText))
         {
@@ -55,12 +55,12 @@ public class ShadowsFormatterService : IFormatterService
             if (tries > 5)
                 return null;
         }
-                
-        var regArray = new [] {"\"activities\": \\[\"([^\"]+)\"", "\"activity\": \"([^\"]+)\"", "'activities': \\['([^\\']+)'\\]", "\"activities\": \\[\"([^\\']+)'\\]"} ;
+
+        var regArray = new[] { "\"activities\": \\[\"([^\"]+)\"", "\"activity\": \"([^\"]+)\"", "'activities': \\['([^\\']+)'\\]", "\"activities\": \\[\"([^\\']+)'\\]" };
 
         foreach (var reg in regArray)
         {
-            var match = Regex.Match(tweetText,reg);
+            var match = Regex.Match(tweetText, reg);
             if (match.Success)
             {
                 // Extract the activity
@@ -93,7 +93,7 @@ public class ShadowsFormatterService : IFormatterService
         }
 
         // _log.Trace(messages.ToString());
-        
+
         return await _connectorService.ExecuteQuery(messages.ToString());
     }
 }

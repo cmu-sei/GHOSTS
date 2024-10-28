@@ -102,7 +102,7 @@ namespace Ghosts.Domain
                 if (NetworkInterface.GetIsNetworkAvailable())
                 {
                     var host = Dns.GetHostEntry(Dns.GetHostName());
-                    return host.AddressList.FirstOrDefault(x=>x.AddressFamily == AddressFamily.InterNetwork)?.ToString();
+                    return host.AddressList.FirstOrDefault(x => x.AddressFamily == AddressFamily.InterNetwork)?.ToString();
                 }
             }
             catch
@@ -110,7 +110,7 @@ namespace Ghosts.Domain
                 // ignore
             }
 
-			return "-9";    
+            return "-9";
         }
     }
 }

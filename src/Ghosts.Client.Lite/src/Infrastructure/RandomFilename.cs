@@ -6,7 +6,7 @@ namespace Ghosts.Client.Lite.Infrastructure;
 
 public static class RandomFilename
 {
-    private static readonly Random _random = new ();
+    private static readonly Random _random = new();
 
     public static string Generate()
     {

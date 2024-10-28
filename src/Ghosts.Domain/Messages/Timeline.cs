@@ -18,7 +18,7 @@ namespace Ghosts.Domain
         {
             TimeLineHandlers = new List<TimelineHandler>();
         }
-        
+
         /// <summary>
         /// Useful for tracking where activity on a client originated
         /// </summary>
@@ -30,7 +30,7 @@ namespace Ghosts.Domain
             Run,
             Stop
         }
-        
+
         /// <summary>
         /// Run or Stop
         /// </summary>
@@ -63,7 +63,7 @@ namespace Ghosts.Domain
         [JsonConverter(typeof(TimeSpanConverter))]
         [JsonProperty(TypeNameHandling = TypeNameHandling.All)]
         public TimeSpan UtcTimeOn { get; set; }
-        
+
         [JsonConverter(typeof(TimeSpanConverter))]
         [JsonProperty(TypeNameHandling = TypeNameHandling.All)]
         public TimeSpan UtcTimeOff { get; set; }

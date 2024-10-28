@@ -16,16 +16,10 @@ namespace ghosts.api.Controllers.Api
     /// </summary>
     [Produces("application/json")]
     [Route("api/[controller]")]
-    public class TimelinesController : Controller
+    public class TimelinesController(ITimelineService timelineService, IMachineTimelinesService machineTimelinesService) : Controller
     {
-        private readonly ITimelineService _timelineService;
-        private readonly IMachineTimelinesService _machineTimelinesService;
-
-        public TimelinesController(ITimelineService timelineService, IMachineTimelinesService machineTimelinesService)
-        {
-            _timelineService = timelineService;
-            _machineTimelinesService = machineTimelinesService;
-        }
+        private readonly ITimelineService _timelineService = timelineService;
+        private readonly IMachineTimelinesService _machineTimelinesService = machineTimelinesService;
 
         /// <summary>
         /// This returns all timelines for a requested machine. If all or a specific timeline is not available,
@@ -41,7 +35,7 @@ namespace ghosts.api.Controllers.Api
         {
             return Ok(await _machineTimelinesService.GetByMachineIdAsync(machineId, ct));
         }
-        
+
         /// <summary>
         /// This returns a specific timeline for a requested machine. If the timeline is not available,
         /// a MachineUpdate request can be made to retrieve the machine timeline   
@@ -57,7 +51,7 @@ namespace ghosts.api.Controllers.Api
         {
             return Ok(await _machineTimelinesService.GetByMachineIdAndTimelineIdAsync(machineId, timelineId, ct));
         }
-        
+
         /// <summary>
         /// Send a new timeline to a particular machine
         /// </summary>
@@ -72,7 +66,7 @@ namespace ghosts.api.Controllers.Api
             await _timelineService.UpdateAsync(machineUpdate, ct);
             return NoContent();
         }
-        
+
         [HttpPost("{machineId}/{timelineId}/stop")]
         [SwaggerOperation("TimelinesStop")]
         public async Task<IActionResult> TimelinesStop([FromRoute] Guid machineId, [FromRoute] Guid timelineId, CancellationToken ct)

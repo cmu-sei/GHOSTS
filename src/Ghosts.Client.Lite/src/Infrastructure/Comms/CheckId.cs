@@ -78,7 +78,7 @@ namespace Ghosts.Client.Lite.Infrastructure.Comms
             }
 
             var machine = new ResultMachine();
-            
+
             try
             {
                 //call home
@@ -132,7 +132,7 @@ namespace Ghosts.Client.Lite.Infrastructure.Comms
             File.WriteAllText(IdFile, s);
             return s;
         }
-        
+
         public static void WriteId(string id)
         {
             if (!string.IsNullOrEmpty(id))

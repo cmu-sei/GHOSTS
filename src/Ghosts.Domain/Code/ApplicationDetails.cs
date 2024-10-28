@@ -14,7 +14,7 @@ namespace Ghosts.Domain.Code
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
 
-        public static string Header => 
+        public static string Header =>
 @"             ('-. .-.               .-')    .-') _     .-')    
             ( OO )  /              ( OO ). (  OO) )   ( OO ).  
   ,----.    ,--. ,--. .-'),-----. (_)---\_)/     '._ (_)---\_) 
@@ -68,7 +68,7 @@ namespace Ghosts.Domain.Code
         {
             return Path.GetFullPath(Path.Combine(InstalledPath, loc));
         }
-        
+
         public static bool IsLinux()
         {
             return RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
@@ -180,16 +180,16 @@ namespace Ghosts.Domain.Code
         {
             public ConfigurationUrls(string rootUrl)
             {
-                this._root = rootUrl;
+                _root = rootUrl;
             }
 
-            private string _root;
-            public string Id => $"{this._root}/clientid";
-            public string Timeline => $"{this._root}/clienttimeline";
-            public string Results => $"{this._root}/clientresults";
-            public string Updates => $"{this._root}/clientupdates";
-            public string Survey => $"{this._root}/clientsurvey";
-            public string Socket => $"{this._root.Replace("/api","")}/clientHub";
+            private readonly string _root;
+            public string Id => $"{_root}/clientid";
+            public string Timeline => $"{_root}/clienttimeline";
+            public string Results => $"{_root}/clientresults";
+            public string Updates => $"{_root}/clientupdates";
+            public string Survey => $"{_root}/clientsurvey";
+            public string Socket => $"{_root.Replace("/api", "")}/clientHub";
         }
     }
 }

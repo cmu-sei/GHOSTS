@@ -11,7 +11,7 @@ namespace Ghosts.Animator.Models.InsiderThreat
 
         public InsiderThreatBaseProfile()
         {
-            this.RelatedEvents = new List<RelatedEvent>();
+            RelatedEvents = new List<RelatedEvent>();
         }
     }
 }
