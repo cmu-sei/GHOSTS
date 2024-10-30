@@ -1,7 +1,6 @@
 # docker-compose up -d
 # -f compose-api.yml (if you want a custom file)
 
-version: '3.2'
 networks:
   ghosts-network:
     driver: bridge
