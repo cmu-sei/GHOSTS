@@ -8,6 +8,14 @@ There is a [short demonstration video available on YouTube](https://www.youtube.
 
 ---
 
+## Key Links
+
+- [Quick Start: Installation from distribution binaries](https://cmu-sei.github.io/GHOSTS/quickstart/)
+- [GHOSTS Documentation](https://cmu-sei.github.io/GHOSTS/)
+- [Submit issues and feature requests](https://github.com/cmu-sei/GHOSTS/issues)
+
+---
+
 **Version 8.2 is here!** 
 
 GHOSTS has undergone major updates, including breaking changes introduced in version 8.0. Version 8 absorbed the [ANIMATOR](https://github.com/cmu-sei/GHOSTS-ANIMATOR) and [SPECTRE](https://github.com/cmu-sei/GHOSTS-SPECTRE) modules, simplifying the installation, configuration, and administration of a GHOSTS instance, while bringing further capabilities to core agents by integrating previously segregated data. With version 8.2, more improvements and features are introduced, making it easier and more powerful to use.
@@ -24,9 +32,9 @@ There is no upgrade path from previous versions — a fresh install is required 
 ## What's New in GHOSTS v8.2 🆕
 Welcome to the latest version of GHOSTS! Here’s a look at what’s new and improved in v8.2:
 
-- [GHOSTS now has a UI](core/ui.md) — Manage machines, machine groups, deploy new timelines, and view activities through a sleek interface. 😍
-- [GHOSTS Shadows](shadows/index.md) now integrates with large language models (LLMs) for GHOSTS agents, offering various models for activities, chat, content generation, social interactions, and more. 👻
-- [GHOSTS LITE](core/lite.md) is a lightweight version of GHOSTS that requires fewer resources, making it ideal for training, exercises, and simulations on minimal hardware. 👀
+- [GHOSTS now has a UI](src/ghosts.ui) — Manage machines, machine groups, deploy new timelines, and view activities through a sleek interface. 😍
+- [GHOSTS Shadows](src/ghosts.shadows) now integrates with large language models (LLMs) for GHOSTS agents, offering various models for activities, chat, content generation, social interactions, and more. 👻
+- [GHOSTS LITE](src/Ghosts.Client.Lite) is a lightweight version of GHOSTS that requires fewer resources, making it ideal for training, exercises, and simulations on minimal hardware. 👀
 - Fixes #385: Default GUID issue with Animator NPCs.
 - Fixes #384: Client path bug.
 - Resolved various animation cancellation token bugs in chat features.
@@ -60,14 +68,6 @@ Welcome to the latest version of GHOSTS! Here’s a look at what’s new and imp
 - Resolved issues with delay values exceeding integer limits.
 - Added "log" level to application logs for better insight into operations.
 - Fixed documentation bug related to machine group timelines.
-
----
-
-## Key Links
-
-- [Quick Start: Installation from distribution binaries](https://cmu-sei.github.io/GHOSTS/quickstart/)
-- [GHOSTS Documentation](https://cmu-sei.github.io/GHOSTS/)
-- [Submit issues and feature requests](https://github.com/cmu-sei/GHOSTS/issues)
 
 ---
 
