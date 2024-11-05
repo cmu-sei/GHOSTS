@@ -1,9 +1,6 @@
 # Setting Up the GHOSTS API
 
-???+ info "GHOSTS Source Code"
-    The [GHOSTS Source Code Repository](https://github.com/cmu-sei/GHOSTS) is hosted on GitHub.
-    
-*Updated on July 24, 2024*
+_Updated on October 30, 2024_
 
 The GHOSTS API enables the control and orchestration of non-player characters (NPCs) within a deployment. It supports logging, reporting, and managing individual, groups of, or entire deployments of client installs.
 
@@ -11,10 +8,10 @@ The GHOSTS API consists of three components: the API itself for configuring and 
 
 Steps to set up the GHOSTS API:
 
-  1. Choose where to host the API
-  2. Install Docker and Docker Compose
-  3. Build the GHOSTS containers
-  4. Test the API
+1. Choose where to host the API
+2. Install Docker and Docker Compose
+3. Build the GHOSTS containers
+4. Test the API
 
 ## Step 1 &mdash; Choose Where to Host the API
 
@@ -42,62 +39,53 @@ Once you have confirmed that Docker and Docker Compose are installed, you can bu
 
 Create a directory where you want to store the build files and containers.
 
-```
-$ mkdir ghosts-project
-$ cd ghosts-project
+```shell
+mkdir ghosts-project
+cd ghosts-project
 ```
 
 Download the docker compose file for GHOSTS.
 
-```
-$ curl https://raw.githubusercontent.com/cmu-sei/GHOSTS/master/src/Ghosts.Api/docker-compose.yml -o docker-compose.yml
+```shell
+curl https://raw.githubusercontent.com/cmu-sei/GHOSTS/master/src/Ghosts.Api/docker-compose.yml -o docker-compose.yml
 ```
 
 Build all of the containers at once using docker-compose.
 
 ```
-$ docker-compose up -d
+docker-compose up -d
 ```
 
 Check for the running containers.
 
 ```
-$ docker ps -a
+docker ps -a
 ```
 
-If everything succeeds you should see the three new containers for the API, Grafana, and Postgres.
+If everything succeeds you should see four new containers for the API, UI, Grafana, and Postgres.
 
-![Running Containers](../../images/api/installing-the-api-running-containers.png)
+![Running Containers](../images/installing-the-api-running-containers.png)
 
 ## Step 4 &mdash; Testing the API
 
 By default, the API is hosted on port 5000. You should be able to reach the API from [http://localhost:5000](http://localhost:5000). If you open this page in your browser, you should see the initial API page outlining the version of the install, and a few test machine entries. If this page renders, your API is up, running, and available.
 
-![Success!](../../images/api/installing-the-api-success.png)
+![Success!](../images/installing-the-api-success.png)
 
 ## Troubleshooting
 
 ### Problem: The API home page has an error
 
-![API Home Page Error](../../images/api/installing-the-api-error.png)
+![API Home Page Error](../images/installing-the-api-error.png)
 
 Answer: Make sure the docker container for Postgres is running using Docker Desktop or the command `docker ps -a`
 
-![Running Containers](../../images/api/installing-the-api-running-containers.png)
+![Running Containers](../images/installing-the-api-running-containers.png)
 
 You can check the logs with the command `docker logs ghosts-postgres` to look for container errors.
 
 ### Problem: The social graph link has an error
 
-![API Social Graph Page Error](../../images/api/installing-the-api-social-error.png)
+![API Social Graph Page Error](../images/installing-the-api-social-error.png)
 
 Answer: You haven't created a social network yet, this is normal.
-
-### Problem: Is the API up and running?
-
-- Go to `/api/home` in the browser, it should return the current API version and the number of machines and groups under management. If it says relationship not found, restart the API application and it should create the database automatically.
-- Run `docker ps --all` and see that all containers are running normally. If one or more is not running, look at the logs for that machine via `docker logs [machine name]`.
-
-> The ClientId, ClientResults, and other Client* endpoints are failing.
-
-The Client* endpoints are for the Clients to use only. There are specific header values set by the client in the request that is used to authenticate the request. If you are not using the client, you will not have these headers set, and these endpoints will fail.
