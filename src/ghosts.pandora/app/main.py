@@ -71,24 +71,6 @@ app.include_router(executable_routes.router)
 app.include_router(iso_routes.router)
 
 
-@app.get("/", tags=["Information"])
-async def hello_world() -> Response:
-    """
-    Returns a simple 'Hello World' message.
-
-    Returns:
-        Response: A response containing 'Hello World'.
-    """
-    logger.info("Received request for Hello World endpoint.")
-    try:
-        response = Response(content="Hello World", status_code=200)
-        logger.info("Successfully generated Hello World response.")
-        return response
-    except Exception as e:
-        logger.error(f"Error in Hello World endpoint: {e}")
-        raise HTTPException(status_code=500, detail="Internal Server Error")
-
-
 @app.get("/about", tags=["Information"])
 async def about() -> dict:
     """
