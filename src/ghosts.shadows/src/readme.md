@@ -1,2 +1,0 @@
-# GHOSTS SHADOWS
-

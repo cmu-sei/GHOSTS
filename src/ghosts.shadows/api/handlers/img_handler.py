@@ -1,6 +1,7 @@
 from imaginairy.api import imagine
 from imaginairy.schema import ImaginePrompt
 
+
 def main(prompt):
     prompts = [
         ImaginePrompt(prompt),

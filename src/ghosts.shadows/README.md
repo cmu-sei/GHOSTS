@@ -1,76 +1,96 @@
 # GHOSTS SHADOWS
 
-Shadows provides access to a locally-hosted llm for the purposes of GHOSTS agents.
+Shadows provides access to a locally-hosted large language model (LLM) for GHOSTS agents, featuring multiple interfaces:
 
-It provides multiple interfaces:
+- **REST API**: Designed for GHOSTS agents.
+- **Web UI**: Intended for testing and demonstration purposes.
 
-- A REST API for the purposes of ghosts agents
-- A UI web interface for testing and demo purposes
+## API Endpoints
 
-The API endpoints are:
+- **Activities**: Answers the question, "What should an NPC do next?"
+- **Chat**: Supplies content for NPC interactions with players or other NPCs.
+- **Content**: Delivers a variety of content for documents created by NPCs.
+- **Social**: Provides content for NPCs to post on social media platforms like GHOSTS Socializer.
+- **Lessons**: Offers educational content for NPCs to utilize in their interactions.
 
-- **Activities**: Answers the question of "what should an NPC do next?"
-- **Chat**: Provides content for an NPC to chat with a player or other NPC
-- **Content**: Provides a richer array of content for the docuements created by NPCs in a range
-- **Social**: Provides content for an NPC to post on a social media system such as GHOSTS Socializer
-
-We suspect there will be many more in the future.
+We expect to expand the features in the future. Swagger documentation for the API is available at `/docs`.
 
 ## Running via Docker
 
-Typically, the easiest way to manage deployment is to pass the env var "GHOSTS_OLLAMA_URL" into the container.
-
-    EXPORT GHOSTS_OLLAMA_URL=http://localhost:11434
-
-(where 5900 is the api port and 7860 is the ui port)
-`docker run -d --name shadows -p 5900:5900 -p 7860:7860 dustinupdyke/ghosts-shadows`
-
-## Running on bare metal
-
-Standing up the Shadows stack is currently (you'll need three terminal windows. We'll clean this up eventually):
-
-Get Ollama up and running:
+The easiest way to manage deployment is to set the environment variable `GHOSTS_OLLAMA_URL` in the container:
 
 ```bash
-cd content-models/content
-ollama create content
-ollama run content
+export GHOSTS_OLLAMA_URL=http://localhost:11434
 ```
-Now run the two servers (in separate terminals):
+
+*(Note: 5900 is the API port, and 7860 is the UI port.)*
 
 ```bash
-python api.py
-python ui.py
+docker run -d --name shadows -p 5900:5900 -p 7860:7860 dustinupdyke/ghosts-shadows
 ```
 
-Eventually ollama will serve multiple models all the time.
+## Running on Bare Metal
 
-So, this loop for ["content", "social", "chat", "activities"] will be:
+Setting up the Shadows stack requires three terminal windows. We plan to streamline this process in the future.
+
+1. **Initialize Ollama**:
+
+   ```bash
+   cd content-models/content
+   ollama create content
+   ollama run content
+   ```
+
+2. **Run the servers** in separate terminals:
+
+   ```bash
+   python api.py
+   python ui.py
+   ```
+
+3. **Set up additional models**. You can choose between two methods:
+
+   - Use the provided script: [Model script](src/ghosts.shadows/content-models/create-models.py). A detailed README is available at [README.md](src/ghosts.shadows/content-models/readme.md).
+   - Alternatively, execute the following commands for each model:
+
+   ```bash
+   cd content-models/activity
+   ollama create activity
+
+   cd content-models/chat
+   ollama create chat
+
+   cd content-models/social
+   ollama create social
+
+   cd content-models/lessons
+   ollama create lessons
+
+   cd content-models/web_content
+   ollama create web_content
+
+   cd content-models/img_content
+   ollama create img_content
+
+   cd content-models/excel_content
+   ollama create excel_content
+
+   ollama serve
+   ```
+
+To make the service available beyond `localhost`, run:
 
 ```bash
-cd content-models/activities
-ollama create activities
-
-cd content-models/chat
-ollama create chat
-
-cd content-models/social
-ollama create social
-
-ollama serve
+OLLAMA_HOST=0.0.0.0:11434 ollama serve
 ```
 
-If you want this to be available beyond localhost, you'd need to run:
-
-    OLLAMA_HOST=0.0.0.0:11434 ollama serve
-
-Now ollama is running all four models concurrently. The API server provides access into each.
+This will launch all models concurrently, allowing the API server to provide access to each.
 
 ## Documentation
 
 - [GHOSTS Documentation](https://cmu-sei.github.io/GHOSTS/)
-- [Don't hesitate to submit issues and feature requests](https://github.com/cmu-sei/GHOSTS/issues)
+- [Submit issues and feature requests](https://github.com/cmu-sei/GHOSTS/issues)
 
 ## License
 
-[DISTRIBUTION STATEMENT A] This material has been approved for public release and unlimited distribution. Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
+[DISTRIBUTION STATEMENT A] This material has been approved for public release and unlimited distribution. Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md for terms.

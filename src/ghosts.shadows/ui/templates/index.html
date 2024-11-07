@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/png" href="/static/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg" />
+    <link rel="shortcut icon" href="/static/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="GHOSTS" />
+    <link rel="manifest" href="/static/site.webmanifest" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FastAPI Auth SPA</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <img src="/static/logo.png" alt="GHOSTS Logo" class="logo">
+        </header>
+
+        <div id="form-container" class="flex-container">
+            <div class="form-column">
+                <div id="signup" class="form-section">
+                    <h2>Signup</h2>
+                    <input type="text" id="signup-username" placeholder="Username" required />
+                    <input type="password" id="signup-password" placeholder="Password" required />
+                    <button onclick="signup()">Signup</button>
+                </div>
+
+                <div id="login" class="form-section">
+                    <h2>Login</h2>
+                    <input type="text" id="login-username" placeholder="Username" required />
+                    <input type="password" id="login-password" placeholder="Password" required />
+                    <button onclick="login()">Login</button>
+                </div>
+
+                <div id="query" class="form-section">
+                    <h2>Query Model</h2>
+                    <label for="model">Choose a Model:</label>
+                    <select id="model" name="model">
+                        <option value="activity">Activity</option>
+                        <option value="chat">Chat</option>
+                        <option value="content">Content</option>
+                        <option value="lessons">Lessons</option>
+                        <option value="social">Social</option>
+                    </select>
+                    <input id="model-input" placeholder="Enter your query" />
+                    <button onclick="generateContent()">Get User Info</button>
+                </div>
+            </div>
+
+            <div class="response-column">
+                <div id="response" class="response-section">
+                    <h2>API Response:</h2>
+                    <pre id="response-output"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>

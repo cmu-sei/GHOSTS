@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+requests
+jinja2
+python-multipart
+sqlalchemy
+databases
+jose
