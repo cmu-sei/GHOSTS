@@ -84,6 +84,7 @@ def return_chm(file_name: str = None) -> StreamingResponse:
 
     return response
 
+
 @router.get("/", tags=["Information"])
 @router.get("/html", tags=["Web"])
 @router.post("/html", tags=["Web"])
@@ -106,9 +107,14 @@ def return_html(file_name: str = None) -> HTMLResponse:
     for _ in range(random.randint(1, 20)):
         if random.randint(2, 100) > 55:
             body = body + f"<h3>{fake.sentence().replace('.','')}</h3>"
-            body = body + f"<p>{fake.paragraph(nb_sentences=random.randint(1, 100))}</p>"
+            body = (
+                body + f"<p>{fake.paragraph(nb_sentences=random.randint(1, 100))}</p>"
+            )
             if random.randint(1, 100) > 85:
-                body = body + f"<img src='images/{fake.word()}.png?h={random.randint(80, 200)}&w={random.randint(200, 400)}'/>"
+                body = (
+                    body
+                    + f"<img src='images/{fake.word()}.png?h={random.randint(80, 200)}&w={random.randint(200, 400)}'/>"
+                )
 
     header = f'<script type="text/javascript" src="/scripts/{fake.uuid4()}.js"></script><link rel="stylesheet" href="/css/{fake.uuid4()}/{fake.word()}.css" type="text/css" />'
     html_content = f"""
@@ -130,29 +136,5 @@ def return_html(file_name: str = None) -> HTMLResponse:
     response = HTMLResponse(content=html_content)
 
     logger.info("HTML file generated successfully.")
-
-    return response
-
-@router.get("/{file_path:path}.css", tags=["Web"])
-def return_css(file_name: str = None) -> HTMLResponse:
-    
-    fonts=["sans-serif","serif","geneva","georgia","Arial","Verdana","Helvetica","Tahoma","Trebuchet MS","Times New Roman","Garamond","Courier New"]
-
-    content = "* {font-family:" + random.choice(fonts) + "} h1 {font-family:" + random.choice(fonts) + "} body {width:" + str(random.randint(65, 100)) + "%;}"
-
-    response = HTMLResponse(content=content, media_type="text/css")
-
-    logger.info("css file generated successfully.")
-
-    return response
-
-@router.get("/{file_path:path}.js", tags=["Web"])
-def return_css(file_name: str = None) -> HTMLResponse:
-    
-    content = f"console.log('{fake.word()}, /{fake.date()}');"    
-
-    response = HTMLResponse(content=content, media_type="text/javascript")
-
-    logger.info("js file generated successfully.")
 
     return response
