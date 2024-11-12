@@ -23,7 +23,7 @@ GHOSTS on Windows (supporting Win7, 10, 11, and corresponding server versions) i
 - Ensure the [Microsoft DotNet 4.6.1 runtime](https://go.microsoft.com/fwlink/?LinkId=2099467) is installed.
 - [Download the latest client](https://github.com/cmu-sei/GHOSTS/releases/latest) and unzip it to `c:\exercise\ghosts`.
 - Adjust `config/application.json` to point to your API server.
-- Run the executable at `c:\exervise\ghosts\ghosts.exe` to setup and start GHOSTS.
+- Run the executable at `c:\exercise\ghosts\ghosts.exe` to setup and start GHOSTS.
 
 ???+ info "Additional configuration required for web browsing"
     For Firefox or Chrome web browsing, download the appropriate automation driver: [Geckodriver](https://github.com/mozilla/geckodriver/releases) for Firefox or [Chromedriver](https://chromedriver.chromium.org/downloads) for Chrome.
