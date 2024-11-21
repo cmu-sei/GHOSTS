@@ -20,15 +20,19 @@ GHOSTS on Windows (supporting Win7, 10, 11, and corresponding server versions) i
 
 ### Windows Installation
 
-- Ensure the [Microsoft DotNet 4.6.1 runtime](https://dotnet.microsoft.com/download/dotnet-framework/net47) is installed.
+- Ensure the [Microsoft DotNet 4.6.1 runtime](https://go.microsoft.com/fwlink/?LinkId=2099467) is installed.
 - [Download the latest client](https://github.com/cmu-sei/GHOSTS/releases/latest) and unzip it to `c:\exercise\ghosts`.
 - Adjust `config/application.json` to point to your API server.
+- Run the executable at `c:\exercise\ghosts\ghosts.exe` to setup and start GHOSTS.
 
 ???+ info "Additional configuration required for web browsing"
     For Firefox or Chrome web browsing, download the appropriate automation driver: [Geckodriver](https://github.com/mozilla/geckodriver/releases) for Firefox or [Chromedriver](https://chromedriver.chromium.org/downloads) for Chrome.
 
 ???+ info "Additional configuration required for email"
     Email functions require the [Redemption library](http://www.dimastr.com/redemption/home.htm) found in `/lib` this provides Outlook automation.
+
+???+ info "Additional configuration required for RDP"
+    RDP Handlers require [registering AutoIt dlls](https://github.com/cmu-sei/GHOSTS/issues/429#issuecomment-2403269945).
 
 ## Linux Client
 
