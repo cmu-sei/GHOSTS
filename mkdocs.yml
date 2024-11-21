@@ -134,10 +134,10 @@ nav:
       - Pandora Social: content/social.md
   - Shadows LLM API:
       - shadows/index.md
-  - Advanced:
-      - advanced/index.md
-      - Cyclone: advanced/cyclone.md
-      - Enchanter (Keysender): advanced/enchanter.md
-      - Necromancer: advanced/necromancer.md
+  # - Advanced:
+  #     - advanced/index.md
+  #     - Cyclone: advanced/cyclone.md
+  #     - Enchanter (Keysender): advanced/enchanter.md
+  #     - Necromancer: advanced/necromancer.md
 repo_url: "https://github.com/cmu-sei/GHOSTS"
 repo_name: "cmu-sei/GHOSTS"
