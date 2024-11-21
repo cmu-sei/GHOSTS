@@ -1,4 +1,8 @@
 site_name: GHOSTS Documentation
+site_description: "GHOSTS is a framework for simulating human behaviors on a network."
+site_author: "GHOSTS Team"
+copyright: >
+  Copyright &copy; 2017 Carnegie Mellon University. All rights reserved.
 extra_css:
   - stylesheets/extra.css
 theme:
@@ -61,55 +65,79 @@ extra:
   analytics:
     provider: google
     property: G-QXR9QHNERH
+  social:
+    - icon: material/message-question
+      link: https://github.com/cmu-sei/GHOSTS/issues/new?template=question.md
+      name: Ask a Question
+    - icon: fontawesome/solid/bug
+      link: https://github.com/cmu-sei/GHOSTS/issues/new?template=bug_report.md
+      name: Report a Problem
+    - icon: material/lightbulb-on
+      link: https://github.com/cmu-sei/GHOSTS/issues/new?template=feature_request.md
+      name: Request a Feature
+    - icon: fontawesome/regular/comments
+      link: https://github.com/cmu-sei/GHOSTS/discussions
+      name: SSVC Community Discussions
+    - icon: fontawesome/brands/github
+      link: https://github.com/cmu-sei/GHOSTS
+      name: cmu-sei/GHOSTS on Github
+    - icon: fontawesome/regular/envelope
+      link: mailto:info@sei.cmu.edu?subject=GHOSTS%20Feedback
+      name: Email GHOSTS Team
+    - icon: fontawesome/solid/house
+      link: https://www.sei.cmu.edu/
+      name: Software Engineering Institute
 nav:
   - Home: index.md
   - What's New: new.md
   - Quick Start: quickstart.md
-  - Client: 
-    - core/client.md
-    - core/lite.md
-    - Client Handlers:
-      - Basic Configuration: core/handlers.md
-      - Clicks: core/handlers/clicks.md
-      - Cmd: core/handlers/cmd.md
-      - Notepad: core/handlers/notepad.md
-      - NPCSystem: core/handlers/npc_system.md
-      - Office:
-        - Excel: core/handlers/excel.md
-        - Outlook: core/handlers/outlook.md
-        - PowerPoint: core/handlers/powerpoint.md
-        - Word: core/handlers/word.md
-      - Pidgin: core/handlers/pidgin.md
-      - Print: core/handlers/print.md
-      - RDP: core/handlers/rdp.md
-      - Reboot: core/handlers/reboot.md
-      - Sftp: core/handlers/sftp.md
-      - Ssh: core/handlers/ssh.md
-      - Watcher: core/handlers/watcher.md
-      - Web Browsers (Firefox|Chrome): core/handlers/browser.md
-      - Web Browser Helper Functions:
-        - Blogs/Drupal: core/handlers/blog_helper.md
-        - Sharepoint: core/handlers/sharepoint_helper.md
-      - Wmi: core/handlers/wmi.md
-  - API: 
+  - Client:
+      - core/client.md
+      - core/lite.md
+      - Client Handlers:
+          - Basic Configuration: core/handlers.md
+          - Clicks: core/handlers/clicks.md
+          - Cmd: core/handlers/cmd.md
+          - Notepad: core/handlers/notepad.md
+          - NPCSystem: core/handlers/npc_system.md
+          - Office:
+              - Excel: core/handlers/excel.md
+              - Outlook: core/handlers/outlook.md
+              - PowerPoint: core/handlers/powerpoint.md
+              - Word: core/handlers/word.md
+          - Pidgin: core/handlers/pidgin.md
+          - Print: core/handlers/print.md
+          - RDP: core/handlers/rdp.md
+          - Reboot: core/handlers/reboot.md
+          - Sftp: core/handlers/sftp.md
+          - Ssh: core/handlers/ssh.md
+          - Watcher: core/handlers/watcher.md
+          - Web Browsers (Firefox|Chrome): core/handlers/browser.md
+          - Web Browser Helper Functions:
+              - Blogs/Drupal: core/handlers/blog_helper.md
+              - Sharepoint: core/handlers/sharepoint_helper.md
+          - Wmi: core/handlers/wmi.md
+  - API:
       - core/api.md
       - Capabilities:
-        - Managing Timelines: core/api/timelines.md
+          - Managing Timelines: core/api/timelines.md
       - Grafana: core/grafana.md
-  - UI: 
-    - core/ui.md
+  - UI:
+      - core/ui.md
   - Animations:
-    - animator/index.md
-    - Animation Jobs: animator/jobs.md
-    - Running Animations: animator/run.md
-  - Content Servers: 
-    - content/index.md
-    - Pandora: content/pandora.md
-    - Pandora Social: content/social.md
-  - Shadows LLM API: 
-    - shadows/index.md
+      - animator/index.md
+      - Animation Jobs: animator/jobs.md
+      - Running Animations: animator/run.md
+  - Content Servers:
+      - content/index.md
+      - Pandora: content/pandora.md
+      - Pandora Social: content/social.md
+  - Shadows LLM API:
+      - shadows/index.md
   - Advanced:
-    - advanced/index.md
-    - Cyclone: advanced/cyclone.md
-    - Enchanter (Keysender): advanced/enchanter.md
-    - Necromancer: advanced/necromancer.md
+      - advanced/index.md
+      - Cyclone: advanced/cyclone.md
+      - Enchanter (Keysender): advanced/enchanter.md
+      - Necromancer: advanced/necromancer.md
+repo_url: "https://github.com/cmu-sei/GHOSTS"
+repo_name: "cmu-sei/GHOSTS"
