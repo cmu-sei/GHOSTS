@@ -2,7 +2,7 @@ import tempfile
 from typing import Optional
 
 from app_logging import setup_logger
-from config.config import VOICE_MODEL, VOICE_GENERATION_ENABLED
+from config.config import VOICE_GENERATION_ENABLED, VOICE_MODEL
 from fastapi import APIRouter, Query, Response
 from fastapi.responses import FileResponse
 from utils.ollama import generate_document_with_ollama

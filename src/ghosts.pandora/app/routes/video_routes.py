@@ -3,7 +3,7 @@ import os
 from app_logging import setup_logger
 from config.config import VIDEO_GENERATION_ENABLED
 from faker import Faker
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException
 from fastapi.responses import Response, StreamingResponse
 from utils.helper import generate_frames
 from utils.text2video import generate_video_with_cogvideox
@@ -92,9 +92,13 @@ def return_video(
     # If the video file doesn't exist, serve fallback video
     if not os.path.isfile(video_path):
         logger.warning("Video file not found: %s. Using fallback.", video_path)
-        fallback_path = f"{VIDEO_DIRECTORY}/{FALLBACK_VIDEO}"  # Ensure a fallback video exists
+        fallback_path = (
+            f"{VIDEO_DIRECTORY}/{FALLBACK_VIDEO}"  # Ensure a fallback video exists
+        )
         if not os.path.isfile(fallback_path):
-            logger.error(f"Fallback video not found: {VIDEO_DIRECTORY}/{FALLBACK_VIDEO}")
+            logger.error(
+                f"Fallback video not found: {VIDEO_DIRECTORY}/{FALLBACK_VIDEO}"
+            )
             raise HTTPException(
                 status_code=500,
                 detail="Fallback video not available and generation failed.",
@@ -113,4 +117,3 @@ def return_video(
 
     logger.info("Serving video file: %s", video_path)
     return response
-

@@ -1,4 +1,5 @@
 """WIP Requires Tuning (Works with a single H100 or A100 currently)"""
+
 import os
 
 import numpy as np
@@ -8,8 +9,7 @@ from diffusers import (AutoencoderKLCogVideoX, CogVideoXPipeline,
                        CogVideoXTransformer3DModel)
 from diffusers.utils import export_to_video
 from torch.amp import autocast
-from torchao.quantization import (int8_dynamic_activation_int8_weight,
-                                  int8_weight_only, quantize_)
+from torchao.quantization import int8_weight_only, quantize_
 from transformers import T5EncoderModel
 
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
@@ -17,6 +17,7 @@ torch._dynamo.config.suppress_errors = True
 
 
 logger = setup_logger(__name__)
+
 
 def generate_video_with_cogvideox(
     prompt: str,
@@ -62,7 +63,9 @@ def generate_video_with_cogvideox(
 
         # Load and apply auto-tuning to text encoder
         logger.debug("Loading text encoder with auto-tuning...")
-        text_encoder = T5EncoderModel.from_pretrained("THUDM/CogVideoX-5b", subfolder="text_encoder", torch_dtype=torch.float16)
+        text_encoder = T5EncoderModel.from_pretrained(
+            "THUDM/CogVideoX-5b", subfolder="text_encoder", torch_dtype=torch.float16
+        )
         # Apply auto-tuning (compile and quantize)
         text_encoder = torch.compile(text_encoder, mode="max-autotune")
         quantize_(text_encoder, quantization(), device=device)
@@ -70,7 +73,9 @@ def generate_video_with_cogvideox(
 
         # Load and apply auto-tuning to transformer
         logger.debug("Loading transformer with auto-tuning...")
-        transformer = CogVideoXTransformer3DModel.from_pretrained("THUDM/CogVideoX-5b", subfolder="transformer", torch_dtype=torch.float16)
+        transformer = CogVideoXTransformer3DModel.from_pretrained(
+            "THUDM/CogVideoX-5b", subfolder="transformer", torch_dtype=torch.float16
+        )
         # Apply auto-tuning (compile and quantize)
         transformer = torch.compile(transformer, mode="max-autotune")
         quantize_(transformer, quantization(), device=device)
@@ -78,7 +83,9 @@ def generate_video_with_cogvideox(
 
         # Load and apply auto-tuning to VAE
         logger.debug("Loading VAE with auto-tuning...")
-        vae = AutoencoderKLCogVideoX.from_pretrained("THUDM/CogVideoX-2b", subfolder="vae", torch_dtype=torch.float16)
+        vae = AutoencoderKLCogVideoX.from_pretrained(
+            "THUDM/CogVideoX-2b", subfolder="vae", torch_dtype=torch.float16
+        )
         # Apply auto-tuning (compile and quantize)
         vae = torch.compile(vae, mode="max-autotune")
         quantize_(vae, quantization(), device=device)
@@ -109,7 +116,7 @@ def generate_video_with_cogvideox(
         # Generate video
         logger.info("Starting video generation process.")
 
-        with autocast("cuda",enabled=True):
+        with autocast("cuda", enabled=True):
             video_frames = pipe(
                 prompt=prompt,
                 num_videos_per_prompt=1,
@@ -124,7 +131,6 @@ def generate_video_with_cogvideox(
         # Clip and scale image values
         video_frames = [np.clip(frame, 0, 1) for frame in video_frames]
         video_frames = [(frame * 255).round().astype("uint8") for frame in video_frames]
-
 
         # Export video to file
         logger.debug("Exporting video frames to file.")
