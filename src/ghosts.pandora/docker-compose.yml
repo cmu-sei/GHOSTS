@@ -1,11 +1,20 @@
 # Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
-version: "3"
-services: 
+services:
   pandora:
     restart: always
     container_name: ghosts-pandora
     image: dustinupdyke/ghosts-pandora
+    deploy:
+      reservations:
+        devices:
+          - driver:
+            count: 1
+            capabilities: [gpu]
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
     ports:
       - "80:80"
       - "8081:8081"
@@ -14,3 +23,4 @@ services:
     volumes:
       - "./app/config:/usr/src/app/config"
       - "./app/payloads:/usr/src/app/payloads"
+

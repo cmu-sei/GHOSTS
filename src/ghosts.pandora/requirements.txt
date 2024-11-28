@@ -12,3 +12,17 @@ python-docx==1.1.2
 python-pptx==1.0.2
 rarfile==4.2
 requests==2.32.3
+diffusers
+transformers
+pillow
+accelerate
+scipy
+safetensors
+numpy
+torch
+pyttsx3
+protobuf
+sentencepiece
+imaginairy
+python-json-logger
+torchao

@@ -1,18 +1,17 @@
-from fastapi import APIRouter, Response
-import app_logging
 import random
+
+from app_logging import setup_logger
+from config.config import OLLAMA_ENABLED, TEXT_MODEL
 from faker import Faker
+from fastapi import APIRouter, Response
 from utils.helper import generate_random_name
 from utils.ollama import generate_document_with_ollama
-from config.config import OLLAMA_ENABLED
 
 router = APIRouter()
-logger = app_logging.setup_logger("app_logger")
+logger = setup_logger(__name__)
 
 # Initialize Faker for fallback content generation
 fake = Faker()
-
-model = "llama3.2"
 
 
 @router.get("/text")
@@ -38,9 +37,9 @@ def return_text(
                 if effective_filename
                 else "Create a document with several paragraphs about a chosen topic."
             )
-            logger.info("Sending request to Ollama model with prompt: %s", prompt)
+            logger.info(f"Sending request to Ollama model with prompt: {prompt}")
 
-            generated_content = generate_document_with_ollama(prompt, model)
+            generated_content = generate_document_with_ollama(prompt, TEXT_MODEL)
 
             if generated_content:
                 # Create the response with plain text content

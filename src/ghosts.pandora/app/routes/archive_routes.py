@@ -1,17 +1,10 @@
+import app_logging
 from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
-from faker import Faker
-import app_logging
-from utils.helper import (
-    generate_random_name,
-    generate_zip,
-    generate_tar,
-    generate_gz,
-    create_response,
-)
+from utils.helper import (create_response, generate_archive,
+                          generate_random_name)
 
 router = APIRouter()
-fake = Faker()
 
 logger = app_logging.setup_logger("app_logger")
 
@@ -28,7 +21,7 @@ def return_zip(file_name: str = None) -> StreamingResponse:
         file_name += ".zip"
 
     logger.info(f"Generating ZIP file: {file_name}")
-    buffer = generate_zip(file_name)
+    buffer = generate_archive(file_name, "zip")
     return create_response(buffer, file_name, "application/zip")
 
 
@@ -44,21 +37,5 @@ def return_tar(file_name: str = None) -> StreamingResponse:
         file_name += ".tar"
 
     logger.info(f"Generating TAR file: {file_name}")
-    buffer = generate_tar(file_name)
+    buffer = generate_archive(file_name, "tar")
     return create_response(buffer, file_name, "application/x-tar")
-
-
-@router.get("/gz", tags=["Archives"])
-@router.post("/gz", tags=["Archives"])
-@router.get("/gz/{file_name}", tags=["Archives"])
-@router.post("/gz/{file_name}", tags=["Archives"])
-def return_gz(file_name: str = None) -> StreamingResponse:
-    """Return a GZ file containing random binary data."""
-    if file_name is None:
-        file_name = generate_random_name(".gz")
-    elif not file_name.endswith(".gz"):
-        file_name += ".gz"
-
-    logger.info(f"Generating GZ file: {file_name}")
-    buffer = generate_gz(file_name)
-    return create_response(buffer, file_name, "application/gzip")

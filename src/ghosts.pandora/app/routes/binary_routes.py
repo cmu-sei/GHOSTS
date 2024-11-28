@@ -1,14 +1,15 @@
-from fastapi import APIRouter, Response
-from io import BytesIO
-from faker import Faker
 import random
+from io import BytesIO
+
+from app_logging import setup_logger
+from faker import Faker
+from fastapi import APIRouter, Response
 from utils.helper import generate_random_name
-import app_logging
 
 router = APIRouter()
 fake = Faker()
 
-logger = app_logging.setup_logger("app_logger")
+logger = setup_logger(__name__)
 
 
 @router.get("/binary", tags=["Binary"])
@@ -32,11 +33,11 @@ def return_binary(file_name: str = None) -> Response:
     """
     if file_name is None:
         file_name = generate_random_name(".bin")
-        logger.info("Generated random file name: %s", file_name)
+        logger.info(f"Generated random file name: {file_name}")
 
     # Generate random binary content
-    binary_length = random.randint(1000, 300000)
-    logger.debug("Generating binary content of length: %d bytes", binary_length)
+    binary_length = random.randint(1000, 3000000)
+    logger.debug(f"Generating binary content of length: {binary_length} bytes")
     buf = BytesIO(fake.binary(length=binary_length))
 
     # Create a response with binary content and set the correct media type
@@ -44,6 +45,6 @@ def return_binary(file_name: str = None) -> Response:
 
     # Set the content disposition header for file download
     response.headers["Content-Disposition"] = f"attachment; filename={file_name}"
-    logger.info("Serving binary file: %s", file_name)
+    logger.info(f"Serving binary file: {file_name}")
 
     return response
