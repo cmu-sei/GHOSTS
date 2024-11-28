@@ -1,7 +1,7 @@
 import os
 
 from app_logging import setup_logger
-from config.config import VIDEO_GENERATION
+from config.config import VIDEO_GENERATION_ENABLED
 from faker import Faker
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import Response, StreamingResponse
@@ -65,7 +65,7 @@ def return_video(
     # Define path for static and generated videos
     video_path = f"{VIDEO_DIRECTORY}/{file_name}"
 
-    if VIDEO_GENERATION:
+    if VIDEO_GENERATION_ENABLED:
         if file_name:
             # Attempt to generate the video based on the text prompt
             logger.info("Generating video from text prompt: %s", file_name)

@@ -2,7 +2,7 @@ import tempfile
 from typing import Optional
 
 from app_logging import setup_logger
-from config.config import VOICE_MODEL, VOICE_SYNTHESIS_ENABLED
+from config.config import VOICE_MODEL, VOICE_GENERATION_ENABLED
 from fastapi import APIRouter, Query, Response
 from fastapi.responses import FileResponse
 from utils.ollama import generate_document_with_ollama
@@ -72,7 +72,7 @@ def generate_synthesised_conversation(
     filtered_script = filter_dialogue_lines(conversation_script)
     logger.debug("Filtered conversation script: %s", filtered_script)
 
-    if VOICE_SYNTHESIS_ENABLED:
+    if VOICE_GENERATION_ENABLED:
         logger.info("Synthesis enabled. Generating audio for both voices.")
 
         # Generate audio using the filtered dialogue script

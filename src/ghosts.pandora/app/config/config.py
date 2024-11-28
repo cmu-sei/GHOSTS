@@ -9,11 +9,6 @@ LOG_JSON_FORMATTING = "%(asctime)s %(name)s %(levelname)s %(message)s"
 OLLAMA_ENABLED = True
 OLLAMA_API_URL = "http://ollama:11434/api/generate"
 OLLAMA_TIMEOUT = 60
-VOICE_SYNTHESIS_ENABLED = True
-IMAGE_GENERATION_MODEL = "stabilityai/sdxl-turbo"
-DIFFUSERS_LOCAL_FILES_ONLY = True
-VIDEO_GENERATION = False
-
 HTML_MODEL = "web_content"
 IMAGE_MODEL = "llama3.2"
 JSON_MODEL = "llama3.2"
@@ -25,6 +20,16 @@ VOICE_MODEL = "llama3.2"
 XLSX_MODEL = "llama3.2"
 PDF_MODEL = "llama3.2"
 CSV_MODEL = "llama3.2"
+
+# Voice Configuration
+VOICE_GENERATION_ENABLED = False
+
+# Image Configuration
+IMAGE_GENERATION_MODEL = "stabilityai/sdxl-turbo"
+DIFFUSERS_LOCAL_FILES_ONLY = True
+
+# Video Configuration
+VIDEO_GENERATION_ENABLED = False
 
 # Faker config (not used currently)
 FAKER_LOCALE = ["en_US", "en_GB"]
