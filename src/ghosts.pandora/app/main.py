@@ -96,7 +96,7 @@ def file_type_handler(path: str) -> Response:
         # Video files
         "mp4": video_routes.return_video,
         # Sound files
-        # "mp3": voice_routes.generate_synthesised_conversation,
+        "mp3": voice_routes.generate_synthesised_conversation,
         # Spreadsheets
         "xls": xlsx_routes.return_xlsx,
         "xlsx": xlsx_routes.return_xlsx,

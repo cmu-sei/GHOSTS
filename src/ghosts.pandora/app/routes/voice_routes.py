@@ -9,21 +9,24 @@ from utils.ollama import generate_document_with_ollama
 from utils.voice import generate_audio_response
 
 logger = setup_logger(__name__)
-
 router = APIRouter()
 
 
-def filter_dialogue_lines(conversation_script: str) -> str:
-    """Filter and return only lines that start with 'actor1:' or 'actor2:'."""
-    logger.debug("Filtering dialogue lines from the generated conversation script.")
-    lines = conversation_script.strip().split("\n")
-    filtered_lines = [
+def filter_dialogue_lines(script: str) -> str:
+    """Extract and return only lines starting with 'actor1:' or 'actor2:'."""
+    logger.debug("Filtering dialogue lines from the script.")
+    return "\n".join(
         line
-        for line in lines
+        for line in script.strip().splitlines()
         if line.startswith("actor1:") or line.startswith("actor2:")
-    ]
-    logger.debug("Filtered lines: %s", filtered_lines)
-    return "\n".join(filtered_lines)
+    )
+
+
+def create_temp_audio_file(audio_data: bytes) -> str:
+    """Save audio data to a temporary file and return the file path."""
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp_file:
+        tmp_file.write(audio_data)
+        return tmp_file.name
 
 
 @router.get("/call", tags=["Audio"])
@@ -36,16 +39,17 @@ def generate_synthesised_conversation(
         "senior software engineer", description="Role of the second voice"
     ),
 ) -> Response:
-    """Generate and return a synthesized telephone conversation between two actors."""
+    """
+    Generate and return a synthesized telephone conversation between two actors.
+    """
 
-    logger.debug("Received request to generate a synthesized conversation.")
-    logger.debug("Actor1 role: %s, Actor2 role: %s", actor1, actor2)
+    logger.debug(f"Request received with actor1: {actor1}, actor2: {actor2}")
 
     # Create a prompt for the conversation script
     prompt = (
         f"Create a professional conversation between a {actor1} and a {actor2} "
         "discussing a project update. The conversation should be realistic and cover "
-        "concerns about deadlines and workload adjustments. Format the output as follows don't use the role to describe the actor use actor1 or actor2:\n\n"
+        "concerns about deadlines and workload adjustments. Format the output as follows:\n\n"
         "actor1: [Dialogue for actor1]\n"
         "actor2: [Dialogue for actor2]\n"
         "actor1: [Dialogue for actor1]\n"
@@ -55,39 +59,32 @@ def generate_synthesised_conversation(
         "character names, or additional context—just the dialogue lines."
     )
 
-    logger.debug("Generated prompt for ChatOllama: %s", prompt)
-
-    # Generate the conversation script using ChatOllama
+    logger.debug("Generated prompt for ChatOllama.")
     conversation_script = generate_document_with_ollama(prompt, model=VOICE_MODEL)
 
     if not conversation_script:
-        logger.warning("Failed to generate conversation script using ChatOllama.")
+        logger.warning("Failed to generate conversation script.")
         return Response(
             content="Failed to generate conversation script.", media_type="text/plain"
         )
 
-    logger.info("Generated conversation script: %s", conversation_script)
-
-    # Filter out any extraneous content to ensure only dialogue lines are used
+    logger.info("Conversation script generated successfully.")
     filtered_script = filter_dialogue_lines(conversation_script)
-    logger.debug("Filtered conversation script: %s", filtered_script)
+    logger.debug(
+        f"Filtered script: {filtered_script}",
+    )
 
-    if VOICE_GENERATION_ENABLED:
-        logger.info("Synthesis enabled. Generating audio for both voices.")
+    if not VOICE_GENERATION_ENABLED:
+        logger.info("Voice generation is disabled. Returning text response.")
+        return Response(content=filtered_script, media_type="text/plain")
 
-        # Generate audio using the filtered dialogue script
-        audio_data = generate_audio_response(filtered_script)
+    logger.info("Voice generation enabled. Generating audio.")
+    audio_data = generate_audio_response(filtered_script)
 
     if audio_data:
-        # Create a temporary file to store the audio data
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp_file:
-            tmp_file.write(audio_data)
-            tmp_file.close()
+        audio_file_path = create_temp_audio_file(audio_data)
+        logger.debug(f"Returning generated audio file: {audio_file_path}")
+        return FileResponse(audio_file_path, media_type="audio/wav")
 
-            # Return the audio file as a response
-            logger.debug(f"Returning audio file: {tmp_file.name}")
-            return FileResponse(tmp_file.name, media_type="audio/wav")
-
-    else:
-        logger.warning("Failed to generate audio data. Check synthesis service.")
-        return Response(content="Audio synthesis failed.", media_type="text/plain")
+    logger.error("Audio synthesis failed.")
+    return Response(content="Audio synthesis failed.", media_type="text/plain")
