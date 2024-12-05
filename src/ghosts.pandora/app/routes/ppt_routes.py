@@ -1,17 +1,16 @@
-from fastapi import APIRouter, Response
 from io import BytesIO
-from pptx import Presentation
+
+from app_logging import setup_logger
+from config.config import OLLAMA_ENABLED, PPT_MODEL
 from faker import Faker
-import app_logging
+from fastapi import APIRouter, Response
+from pptx import Presentation
 from utils.helper import generate_random_name
 from utils.ollama import generate_document_with_ollama
-from config.config import OLLAMA_ENABLED
 
 router = APIRouter()
 fake = Faker()
-logger = app_logging.setup_logger("app_logger")
-
-model = "llama3.2"  # Specify the model you want to use with Ollama
+logger = setup_logger(__name__)
 
 
 def split_content_to_bullets(content: str) -> str:
@@ -56,7 +55,7 @@ def return_ppt(file_name: str = None) -> Response:
         if OLLAMA_ENABLED:
             logger.info("Generating title using Ollama.")
             try:
-                title = generate_document_with_ollama(title_prompt, model) or title
+                title = generate_document_with_ollama(title_prompt, PPT_MODEL) or title
                 logger.info("Generated title: %s", title)
             except Exception as e:
                 logger.warning(
@@ -66,7 +65,7 @@ def return_ppt(file_name: str = None) -> Response:
             logger.info("Generating content using Ollama.")
             try:
                 content = (
-                    generate_document_with_ollama(content_prompt, model) or content
+                    generate_document_with_ollama(content_prompt, PPT_MODEL) or content
                 )
                 logger.info("Generated content: %s", content)
             except Exception as e:

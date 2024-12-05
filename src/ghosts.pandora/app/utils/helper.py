@@ -1,42 +1,53 @@
-# app/utils/helpers.py
-from faker import Faker
+import random
+import tarfile
+from io import BytesIO
+from typing import Generator, List, Tuple
+
 import cv2
 import numpy as np
-from io import BytesIO
-import zipstream
-import random
-from typing import Generator
-import app_logging
-from fastapi.responses import StreamingResponse
 import pyzipper
-import tarfile
-
+import zipstream
+from app_logging import setup_logger
+from config.config import HTML_MODEL, JSON_MODEL, OLLAMA_ENABLED, TEXT_MODEL
+from faker import Faker
 from fastapi import Response
+from fastapi.responses import StreamingResponse
 from PIL import Image, ImageDraw, ImageFont
+from utils.ollama import generate_document_with_ollama
 
+logger = setup_logger(__name__)
 fake = Faker()
-
-logger = app_logging.setup_logger("app_logger")
 
 
 def generate_random_name(extension: str = "") -> str:
-    """Generate a random name with the specified file extension."""
+    """
+    Generate a random name with the specified file extension.
+
+    Args:
+        extension (str): The file extension to append to the name.
+
+    Returns:
+        str: A randomly generated file name with the given extension.
+    """
     name = f"{fake.word()}_{fake.word()}{extension}"
-    logger.debug("Generated random name: %s", name)
+    logger.debug(f"Generated random name: {name}")
     return name
 
 
 def generate_frames() -> Generator[bytes, None, None]:
-    """Generate random video frames."""
+    """
+    Generate random video frames as JPEG.
+
+    Yields:
+        Generator[bytes, None, None]: A stream of JPEG-encoded video frames.
+    """
     while True:
-        # Generate a random image frame
         frame = np.random.randint(0, 256, (480, 640, 3), dtype=np.uint8)
-        # Encode the frame as JPEG
         ret, buffer = cv2.imencode(".jpg", frame)
         if not ret:
-            logger.warning("Failed to encode frame as JPEG")
+            logger.warning("Failed to encode frame as JPEG.")
             continue
-        logger.debug("Generated a frame of size: %d bytes", buffer.size)
+        logger.debug(f"Generated frame of size: {buffer.size} bytes.")
         yield (
             b"--frame\r\n"
             b"Content-Type: image/jpeg\r\n\r\n" + buffer.tobytes() + b"\r\n"
@@ -44,88 +55,87 @@ def generate_frames() -> Generator[bytes, None, None]:
 
 
 def generate_zip_stream(zip_file: zipstream.ZipFile) -> Generator[bytes, None, None]:
-    """Yield chunks from the ZIP file for streaming."""
+    """
+    Yield chunks from the ZIP file for streaming.
+
+    Args:
+        zip_file (zipstream.ZipFile): A zipstream.ZipFile object containing the files.
+
+    Yields:
+        Generator[bytes, None, None]: Chunks of the ZIP file content.
+    """
     for chunk in zip_file:
-        logger.debug("Yielding chunk of size: %d bytes", len(chunk))
+        logger.debug(f"Yielding chunk of size: {len(chunk)} bytes.")
         yield chunk
 
 
 def generate_video_from_frames(
     output_file: str, frame_count: int = 100, fps: int = 30
 ) -> None:
-    """Create a video using generated frames."""
+    """
+    Create a video using randomly generated frames.
+
+    Args:
+        output_file (str): The file path for the output video.
+        frame_count (int): Number of frames to generate. Defaults to 100.
+        fps (int): Frames per second for the video. Defaults to 30.
+    """
     logger.info(
-        "Generating video: %s with %d frames at %d FPS", output_file, frame_count, fps
+        f"Generating video '{output_file}' with {frame_count} frames at {fps} FPS."
     )
 
     frame_generator = generate_frames()
-
-    # Set video properties
     frame_width, frame_height = 640, 480
     fourcc = cv2.VideoWriter_fourcc(*"mp4v")
     out = cv2.VideoWriter(output_file, fourcc, fps, (frame_width, frame_height))
 
     for i in range(frame_count):
-        # Get the next frame
         frame = next(frame_generator)
-
-        # Decode the JPEG back to an image
         frame_data = frame.split(b"\r\n\r\n")[1]
         img = cv2.imdecode(np.frombuffer(frame_data, dtype=np.uint8), cv2.IMREAD_COLOR)
-
-        # Write the frame to the video
         out.write(img)
-        logger.debug("Written frame %d to video", i + 1)
+        logger.debug(f"Written frame {i + 1}/{frame_count} to video.")
 
     out.release()
-    logger.info("Video generation complete: %s", output_file)
+    logger.info(f"Video generation complete: {output_file}")
 
 
 def generate_image_response(request_type: str) -> Response:
-    """Generate a random image response based on the requested type."""
-    # Random image dimensions
-    height = random.randint(200, 800)  # Random height
-    width = random.randint(200, 800)  # Random width
+    """
+    Generate a random image response based on the requested format.
+
+    Args:
+        request_type (str): The image format (e.g., 'jpg', 'png').
+
+    Returns:
+        Response: A FastAPI response containing the generated image.
+    """
+    height, width = random.randint(200, 800), random.randint(200, 800)
     content_type = f"image/{request_type}"
 
-    # Create a new image and draw random shapes
     img = Image.new(mode="RGB", size=(width, height), color=(255, 255, 255))
     draw = ImageDraw.Draw(img)
 
-    # Draw a random number of shapes
     for _ in range(random.randint(5, 15)):
         shape_type = random.choice(["circle", "rectangle"])
-        color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+        color = tuple(random.randint(0, 255) for _ in range(3))
 
-        # Define starting points for rectangle
-        x1 = random.randint(0, width - 1)
-        y1 = random.randint(0, height - 1)
-        x2 = random.randint(x1 + 1, width)  # x2 must be greater than x1
-        y2 = random.randint(y1 + 1, height)  # y2 must be greater than y1
+        x1, y1 = random.randint(0, width - 1), random.randint(0, height - 1)
+        x2, y2 = random.randint(x1 + 1, width), random.randint(y1 + 1, height)
 
         if shape_type == "circle":
             radius = random.randint(10, 100)
             draw.ellipse((x1, y1, x1 + radius, y1 + radius), fill=color)
-        elif shape_type == "rectangle":
+        else:
             draw.rectangle((x1, y1, x2, y2), fill=color)
 
-    # Generate and draw random text on the image
-    text = fake.sentence(nb_words=random.randint(2, 6))  # Generate a random sentence
-    font_size = random.randint(20, 50)  # Random font size
-    font_color = (
-        random.randint(0, 255),
-        random.randint(0, 255),
-        random.randint(0, 255),
-    )
-
-    # Load a default font
+    text = fake.sentence(nb_words=random.randint(2, 6))
+    font_size = random.randint(20, 50)
+    font_color = tuple(random.randint(0, 255) for _ in range(3))
     font = ImageFont.load_default()
 
-    # Random position for the text
-    text_x = random.randint(0, width - 100)  # Ensure text fits within width
-    text_y = random.randint(0, height - font_size)  # Ensure text fits within height
-
-    # Draw the text
+    text_x = random.randint(0, max(0, width - 100))
+    text_y = random.randint(0, max(0, height - font_size))
     draw.text((text_x, text_y), text, fill=font_color, font=font)
 
     with BytesIO() as buf:
@@ -134,72 +144,133 @@ def generate_image_response(request_type: str) -> Response:
         buf.seek(0)
 
         file_name = generate_random_name(f".{request_type}")
-
-        # Log the generated image properties
-        logger.info(f"Generated image of type: {img_format}, filename: {file_name}")
+        logger.info(f"Generated image: {file_name} ({img_format}, {width}x{height})")
 
         response = Response(content=buf.read(), media_type=content_type)
         response.headers["Content-Disposition"] = f"attachment; filename={file_name}"
-
-        logger.info("Image generated successfully.")
-
         return response
 
 
-def create_random_files(num_files: int, extension: str) -> list:
-    """Generate random file names and content."""
+def create_random_files(num_files: int) -> List[Tuple[str, bytes]]:
+    """
+    Generate random file names and content for specified extensions.
+
+    Args:
+        num_files (int): Number of files to generate.
+
+    Returns:
+        List[Tuple[str, bytes]]: A list of tuples containing filenames and content.
+    """
     files = []
     for _ in range(num_files):
-        random_file_name = generate_random_name(extension)
-        random_content = fake.paragraph().encode()
-        files.append((random_file_name, random_content))
+        extension = random.choice([".txt", ".html", ".json"])
+        file_name = generate_random_name(extension)
+
+        if OLLAMA_ENABLED:
+            prompt = f"Generate a document suitable for a {extension} file format."
+            logger.info(f"Requesting content for '{file_name}' from Ollama.")
+            if extension == ".txt":
+                model = TEXT_MODEL
+            elif extension == ".html":
+                model = HTML_MODEL
+            elif extension == ".json":
+                model = JSON_MODEL
+            else:
+                break
+
+            content = generate_document_with_ollama(prompt, model, timeout=3)
+            if content:
+                files.append((file_name, content.encode("utf8")))
+                logger.info(f"Generated content for {file_name} using Ollama.")
+                continue
+
+        # Fallback to Faker for content generation
+        logger.info(f"Falling back to Faker for {file_name}.")
+        if extension == ".txt":
+            content = fake.text(max_nb_chars=500)
+        elif extension == ".json":
+            content = fake.json(
+                data_columns={"name": "name", "email": "email"}, num_rows=3
+            )
+        elif extension == ".html":
+            content = f"<h1>{fake.sentence()}</h1><p>{fake.paragraph()}</p>"
+        else:
+            content = fake.text(max_nb_chars=300)
+
+        files.append((file_name, content.encode("utf8")))
+        logger.info(f"Generated random content for {file_name}.")
     return files
 
 
-def generate_zip(file_name: str) -> BytesIO:
-    """Generate ZIP file."""
-    zip_buffer = BytesIO()
-    with pyzipper.ZipFile(zip_buffer, "w", pyzipper.ZIP_DEFLATED) as zip_file:
-        files = create_random_files(random.randint(1, 10), ".txt")
-        for name, content in files:
-            zip_file.writestr(name, content)
-            logger.info(f"Added file to ZIP: {name}")
-    zip_buffer.seek(0)
-    return zip_buffer
+def generate_archive(file_name: str, archive_type: str) -> BytesIO:
+    """
+    Generate a compressed archive (ZIP or TAR) containing files with random content.
 
+    Args:
+        file_name (str): Name of the output archive.
+        archive_type (str): Type of archive ("zip" or "tar").
 
-def generate_tar(file_name: str) -> BytesIO:
-    """Generate TAR file."""
-    tar_buffer = BytesIO()
-    with tarfile.open(fileobj=tar_buffer, mode="w") as tar_file:
-        files = create_random_files(random.randint(1, 10), ".txt")
-        for name, content in files:
-            tar_info = tarfile.TarInfo(name=name)
-            tar_info.size = len(content)
-            tar_file.addfile(tar_info, BytesIO(content))
-            logger.info(f"Added file to TAR: {name}")
-    tar_buffer.seek(0)
-    return tar_buffer
+    Returns:
+        BytesIO: A buffer containing the archive data.
+    """
+    buffer = BytesIO()
+    num_files = random.randint(5, 15)  # Generate 5-15 files
+    files = create_random_files(num_files)
 
+    if archive_type == "zip":
+        with pyzipper.ZipFile(buffer, "w", pyzipper.ZIP_DEFLATED) as archive:
+            for name, content in files:
+                archive.writestr(name, content)
+                logger.info(f"Added {name} to ZIP archive.")
+    elif archive_type == "tar":
+        with tarfile.open(fileobj=buffer, mode="w") as archive:
+            for name, content in files:
+                tar_info = tarfile.TarInfo(name=name)
+                tar_info.size = len(content)
+                archive.addfile(tar_info, BytesIO(content))
+                logger.info(f"Added {name} to TAR archive.")
+    else:
+        logger.error(f"Unsupported archive type: {archive_type}")
+        raise ValueError(f"Unsupported archive type: {archive_type}")
 
-def generate_gz(file_name: str) -> BytesIO:
-    """Generate GZ file."""
-    gz_buffer = BytesIO()
-    with pyzipper.ZipFile(gz_buffer, "w", pyzipper.ZIP_DEFLATED) as gz_file:
-        files = create_random_files(random.randint(1, 10), ".txt")
-        for name, content in files:
-            gz_file.writestr(name, content)
-            logger.info(f"Added file to GZ: {name}")
-    gz_buffer.seek(0)
-    return gz_buffer
+    buffer.seek(0)
+    logger.info(f"{archive_type.upper()} archive created: {file_name}")
+    return buffer
 
 
 def create_response(
     buffer: BytesIO, file_name: str, media_type: str
 ) -> StreamingResponse:
-    """Helper function to create a streaming response."""
+    """
+    Helper function to create a streaming response.
+
+    Args:
+        buffer (BytesIO): The buffer containing the content.
+        file_name (str): Name of the file to attach to the response.
+        media_type (str): The MIME type of the response.
+
+    Returns:
+        StreamingResponse: A FastAPI streaming response.
+    """
+    logger.debug(f"Creating streaming response for file: {file_name}")
     return StreamingResponse(
         buffer,
         media_type=media_type,
         headers={"Content-Disposition": f"attachment; filename={file_name}"},
     )
+
+
+def clean_content(content: str) -> str:
+    """
+    Remove backticks and the word 'html' from the start or end of the content.
+
+    Args:
+        content (str): The raw content to clean.
+
+    Returns:
+        str: Cleaned content with unnecessary characters removed.
+    """
+    content = content.replace("```html", "").strip()
+    content = content.replace("```", "").strip()
+
+    return content

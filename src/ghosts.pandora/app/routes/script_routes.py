@@ -1,39 +1,47 @@
-from fastapi import APIRouter, Response, HTTPException
+import os
+
+from app_logging import setup_logger
+from config.config import OLLAMA_ENABLED, SCRIPT_MODEL
 from faker import Faker
-import random
-import app_logging
+from fastapi import APIRouter, HTTPException, Response
 from utils.ollama import generate_document_with_ollama
-from config.config import OLLAMA_ENABLED
 
 fake = Faker()
 router = APIRouter()
-logger = app_logging.setup_logger("app_logger")
-
-model = "llama3.2"  # Specify the model you want to use with Ollama
-ollama_enabled = True  # Set Ollama enabled status
+logger = setup_logger(__name__)
 
 
 @router.get("/script/{filename:path}", tags=["Web"])
 @router.post("/script/{filename:path}", tags=["Web"])
 @router.get("/script", tags=["Web"])
 @router.post("/script", tags=["Web"])
-def return_script() -> Response:
-    """Generate a random script in either JavaScript or Python."""
+def return_script(filename: str = None) -> Response:
+    """
+    Generate a script based on the filename extension.
 
-    # Randomly choose between JavaScript and Python
-    script_type = random.choice(["javascript", "python"])
-    logger.info(f"Generating a {script_type} script.")
+    Args:
+        filename (str): Filename provided in the route, including extension.
+
+    Returns:
+        Response: A response containing the generated script.
+    """
+    if not filename:
+        filename = "script.js"
+        logger.info(f"No filename provided. Defaulting to '{filename}'")
+    # Determine script type from file extension
+    _, ext = os.path.splitext(filename)
+    script_type = "python" if ext == ".py" else "javascript"
+
+    logger.info(f"Generating a {script_type} script for filename: {filename}")
 
     if OLLAMA_ENABLED:
-        # Prepare a prompt for generating the script
         prompt = f"Give me a {script_type} script without any quotes around it. Just the code."
-        logger.info("Sending request to Ollama model with prompt: %s", prompt)
+        logger.info(f"Sending request to Ollama model with prompt: {prompt}")
 
         try:
-            generated_script = generate_document_with_ollama(prompt, model)
+            generated_script = generate_document_with_ollama(prompt, SCRIPT_MODEL)
 
             if generated_script:
-                # Ensure correct media type and file extension based on script type
                 media_type = (
                     "text/javascript"
                     if script_type == "javascript"
@@ -58,10 +66,8 @@ def return_script() -> Response:
 
         except Exception as e:
             logger.error(f"Error generating script with Ollama: {e}", exc_info=True)
-            # Fallback to Faker for script generation if an error occurs
             logger.info("Falling back to Faker for script generation.")
 
-    # Fallback to Faker for script generation
     try:
         if script_type == "javascript":
             body = f"console.log('{fake.word()}, {fake.date()}');"

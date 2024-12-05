@@ -1,19 +1,17 @@
-from fastapi import APIRouter, Response
 import configparser
-import random
 import os
-import app_logging
-from utils.ollama import generate_document_with_ollama
-from config.config import OLLAMA_ENABLED
+import random
 
-logger = app_logging.setup_logger("app_logger")
+from app_logging import setup_logger
+from config.config import OLLAMA_ENABLED, STYLESHEET_MODEL
+from fastapi import APIRouter, Response
+from utils.ollama import generate_document_with_ollama
+
+logger = setup_logger(__name__)
 
 router = APIRouter()
 config = configparser.ConfigParser()
 config.read(os.path.join("app", "config", "app.config"))
-
-ollama_enabled = True  # Set Ollama enabled status
-model = "llama3.2"  # Specify the model you want to use with Ollama
 
 
 @router.get("/stylesheet", tags=["Web"])
@@ -24,9 +22,9 @@ def return_stylesheet() -> Response:
     if OLLAMA_ENABLED:
         # Prepare a prompt for generating CSS styles
         prompt = "Provide a plain CSS stylesheet with random font styles, colours and sizes without any enclosing quotes"
-        logger.info("Sending request to Ollama model with prompt: %s", prompt)
+        logger.info(f"Sending request to Ollama model with prompt: {prompt}")
 
-        generated_css = generate_document_with_ollama(prompt, model)
+        generated_css = generate_document_with_ollama(prompt, STYLESHEET_MODEL)
 
         if generated_css:
             logger.info("CSS stylesheet generated successfully using Ollama.")

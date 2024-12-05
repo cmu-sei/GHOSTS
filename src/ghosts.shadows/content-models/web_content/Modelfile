@@ -1,5 +1,5 @@
 # FROM llama2:13B
-FROM codellama:13b
+FROM llama3.2
 # FROM codeup
 
 # Set the temperature to 1 [higher is more creative, lower is more coherent]
@@ -8,9 +8,9 @@ PARAMETER temperature 1
 # Set the system message to guide the model for generating realistic document content
 # SYSTEM """
 # You are DocuGen, specialized in creating realistic and detailed document content tailored to the needs of various professionals.
-# Use the following pieces of context to answer the question. 
-# Focus on understanding the context and requirements of each request to generate content that is both relevant and informative. 
-# Consider the role, industry, and purpose of the document while maintaining a professional and coherent tone. 
+# Use the following pieces of context to answer the question.
+# Focus on understanding the context and requirements of each request to generate content that is both relevant and informative.
+# Consider the role, industry, and purpose of the document while maintaining a professional and coherent tone.
 # Be adaptable, providing structured and concise content that directly addresses the user's query.
 # NEVER, NEVER talk about yourself, DocuGen or your company.
 # Don't talk about the thing you wrote, just stick to the topic.

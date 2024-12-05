@@ -1,33 +1,16 @@
-import uvicorn
-from fastapi import FastAPI, Response, HTTPException
-
-from routes import (
-    zip_routes,
-    binary_routes,
-    json_routes,
-    csv_routes,
-    text_routes,
-    stylesheet_routes,
-    script_routes,
-    image_routes,
-    html_routes,
-    onenote_routes,
-    doc_routes,
-    executable_routes,
-    iso_routes,
-    ppt_routes,
-    xlsx_routes,
-    mp4_routes,
-    video_routes,
-    payload_routes,
-    pdf_routes,
-    unknown_routes,
-)
 import configparser
-import os
-import app_logging
 import inspect
-from config.config import OPENAPI_METADATA
+import os
+
+import uvicorn
+from app_logging import configure_uvicorn_logging, setup_logger
+from config.config import LOG_LEVEL, OPENAPI_METADATA
+from fastapi import FastAPI, HTTPException, Response
+from routes import (archive_routes, binary_routes, csv_routes, doc_routes,
+                    executable_routes, html_routes, image_routes, iso_routes,
+                    json_routes, onenote_routes, payload_routes, pdf_routes,
+                    ppt_routes, script_routes, stylesheet_routes, text_routes,
+                    unknown_routes, video_routes, voice_routes, xlsx_routes)
 
 # Unset proxy environment variables
 os.environ.pop("http_proxy", None)
@@ -35,22 +18,21 @@ os.environ.pop("https_proxy", None)
 os.environ.pop("HTTP_PROXY", None)
 os.environ.pop("HTTPS_PROXY", None)
 
+logger = setup_logger(__name__)
 
-# Initialize logger
-logger = app_logging.setup_logger("app_logger")
+configure_uvicorn_logging()
 
-# Load configuration
+# Load configuration (original)
 config = configparser.ConfigParser()
 config.read(os.path.join("app", "config", "app.config"))
 
 # Initialize FastAPI with OpenAPI metadata from config
-app = FastAPI(
-    **OPENAPI_METADATA,  # Unpacking the OpenAPI metadata
-)
+app = FastAPI(**OPENAPI_METADATA)
 
 
 # Include routers
-app.include_router(zip_routes.router)
+app.include_router(archive_routes.router)
+app.include_router(voice_routes.router)
 app.include_router(binary_routes.router)
 app.include_router(json_routes.router)
 app.include_router(csv_routes.router)
@@ -62,7 +44,6 @@ app.include_router(onenote_routes.router)
 app.include_router(doc_routes.router)
 app.include_router(ppt_routes.router)
 app.include_router(xlsx_routes.router)
-app.include_router(mp4_routes.router)
 app.include_router(video_routes.router)
 app.include_router(pdf_routes.router)
 app.include_router(payload_routes.router)
@@ -102,7 +83,7 @@ def file_type_handler(path: str) -> Response:
         "gif": image_routes.return_image,
         "jpg": image_routes.return_image,
         "jpeg": image_routes.return_image,
-        "ico": image_routes.return_image,
+        # "ico": image_routes.return_image,
         # Documents
         "doc": doc_routes.return_doc_file,
         "docx": doc_routes.return_doc_file,
@@ -113,7 +94,9 @@ def file_type_handler(path: str) -> Response:
         "odt": doc_routes.return_doc_file,
         "one": onenote_routes.return_onenote,
         # Video files
-        "mp4": mp4_routes.return_mp4,
+        "mp4": video_routes.return_video,
+        # Sound files
+        "mp3": voice_routes.generate_synthesised_conversation,
         # Spreadsheets
         "xls": xlsx_routes.return_xlsx,
         "xlsx": xlsx_routes.return_xlsx,
@@ -135,9 +118,8 @@ def file_type_handler(path: str) -> Response:
         "ppsm": ppt_routes.return_ppt,
         "odp": ppt_routes.return_ppt,
         # Compressed Files
-        "tar": zip_routes.return_tar,
-        "gz": zip_routes.return_gz,
-        "zip": zip_routes.return_zip,
+        "tar": archive_routes.return_tar,
+        "zip": archive_routes.return_zip,
         # Executables
         "exe": executable_routes.return_exe,
         "msi": executable_routes.return_msi,
@@ -153,17 +135,14 @@ def file_type_handler(path: str) -> Response:
         None: text_routes.return_text,
     }
 
-    # Check if the file type has a corresponding handler
     if file_type in handler_mapping:
         logger.info(f"File type '{file_type}' is supported.")
         handler_function = handler_mapping[file_type]
 
-        # Prepare parameters if necessary (depends on your handler's requirements)
         params = {}
         if "path" in inspect.signature(handler_function).parameters:
             params["path"] = path
 
-        # Call the handler function
         try:
             return handler_function(**params)
         except Exception as e:
@@ -176,6 +155,12 @@ def file_type_handler(path: str) -> Response:
 
 app.include_router(unknown_routes.router)
 
-# Run the app with Uvicorn
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=80)
+    uvicorn.run(
+        app,
+        host="0.0.0.0",
+        port=80,
+        log_config=None,
+        log_level=LOG_LEVEL,
+        colorize=False,
+    )

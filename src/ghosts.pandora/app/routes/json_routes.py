@@ -1,16 +1,16 @@
-from fastapi import APIRouter, Response
+import json
 import random
-import logging
+
+from app_logging import setup_logger
+from config.config import JSON_MODEL, OLLAMA_ENABLED
 from faker import Faker
-from utils.ollama import generate_document_with_ollama
+from fastapi import APIRouter, Response
 from utils.helper import generate_random_name
-from config.config import OLLAMA_ENABLED
+from utils.ollama import generate_document_with_ollama
 
 router = APIRouter()
 fake = Faker()
-logger = logging.getLogger("app_logger")
-
-model = "llama3.2"
+logger = setup_logger(__name__)
 
 
 @router.get("/api", tags=["Data Structures"])
@@ -38,22 +38,23 @@ def return_json(path: str = "") -> Response:
     # Attempt to generate JSON using Ollama
     if OLLAMA_ENABLED:
         try:
-            prompt = f"Produce a valid JSON array with at least {num_rows} number of rows and at least 10 columns based on a random subject. No additional text or formatting."
+            prompt = f"Produce a valid JSON array with at least {num_rows} rows and at least 10 columns based on a random subject. No additional text or formatting."
             logger.info("Sending request to Ollama with prompt: %s", prompt)
 
-            body = generate_document_with_ollama(prompt, model)
+            body = generate_document_with_ollama(prompt, JSON_MODEL)
 
-            if body:  # Check if body is successfully generated
-                logger.debug("Generated JSON data from Ollama: %s", body)
+            # Validate if the generated body is valid JSON
+            try:
+                json_data = json.loads(body)  # Attempt to parse the JSON
+                body = json.dumps(json_data)  # Re-format the JSON to ensure it's valid
+                logger.debug("Generated valid JSON data from Ollama: %s", body)
                 return Response(
                     content=body,
                     media_type="application/json",
                     headers={"Content-Disposition": "inline; filename=data.json"},
                 )
-            else:
-                logger.warning(
-                    "Ollama did not return valid data, falling back to Faker."
-                )
+            except json.JSONDecodeError:
+                logger.warning("Ollama returned invalid JSON, falling back to Faker.")
 
         except Exception as e:
             logger.error("Error while calling Ollama: %s", str(e))
@@ -70,6 +71,6 @@ def return_json(path: str = "") -> Response:
         content=body,
         media_type="application/json",
         headers={
-            "Content-Disposition": f"inline; filename={path if not None else generate_random_name()}.json"
+            "Content-Disposition": f"inline; filename={path if path else generate_random_name()}.json"
         },
     )

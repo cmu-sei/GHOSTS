@@ -1,35 +1,23 @@
-from fastapi import APIRouter, HTTPException, Request
-from utils.helper import generate_random_name
-import random
 import inspect
-from config.config import endpoints
+import random
 from typing import Any
-import app_logging
-from routes import (
-    zip_routes,
-    binary_routes,
-    json_routes,
-    csv_routes,
-    text_routes,
-    stylesheet_routes,
-    script_routes,
-    image_routes,
-    onenote_routes,
-    doc_routes,
-    ppt_routes,
-    pdf_routes,
-    xlsx_routes,
-    mp4_routes,
-)
 
+from app_logging import setup_logger
+from config.config import endpoints
+from fastapi import APIRouter, HTTPException, Request
+from routes import (archive_routes, binary_routes, csv_routes, doc_routes,
+                    image_routes, json_routes, onenote_routes, pdf_routes,
+                    ppt_routes, script_routes, stylesheet_routes, text_routes,
+                    video_routes, xlsx_routes)
+from utils.helper import generate_random_name
 
-logger = app_logging.setup_logger("app_logger")
+logger = setup_logger(__name__)
 
 router = APIRouter()
 
 # Create a mapping of endpoint names to their corresponding functions
 endpoint_mapping = {
-    "return_zip": zip_routes.return_zip,
+    "return_zip": archive_routes.return_zip,
     "return_binary": binary_routes.return_binary,
     "return_json": json_routes.return_json,
     "return_csv": csv_routes.return_csv,
@@ -42,7 +30,7 @@ endpoint_mapping = {
     "return_pdf": pdf_routes.return_pdf,
     "return_ppt": ppt_routes.return_ppt,
     "return_xlsx": xlsx_routes.return_xlsx,
-    "return_mp4": mp4_routes.return_mp4,
+    "return_video": video_routes.return_video,
 }
 
 

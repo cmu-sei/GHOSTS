@@ -1,14 +1,15 @@
+from io import BytesIO
+
+from app_logging import setup_logger
+from faker import Faker
 from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
-from faker import Faker
-import app_logging
-from io import BytesIO
 from utils.helper import generate_random_name
 
 router = APIRouter()
 fake = Faker()
 
-logger = app_logging.setup_logger("app_logger")
+logger = setup_logger(__name__)
 
 
 @router.get("/iso", tags=["Files"])

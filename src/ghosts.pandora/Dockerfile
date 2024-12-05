@@ -1,17 +1,17 @@
-# Use the slim variant of Python 3.12
-FROM python:3.12-slim
+# Use the slim variant of Python 3.10
+FROM python:3.10-slim
 
 # Set the working directory in the container
 WORKDIR /app
 
 # Install required system packages and Python dependencies
 RUN apt-get update && \
-    apt-get install --no-install-recommends -y gcc libffi-dev libgl1-mesa-glx libglib2.0-0 && \
+    apt-get install --no-install-recommends -y gcc libffi-dev libgl1-mesa-glx libglib2.0-0 ffmpeg espeak-ng && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 # Copy only the requirements file first
-COPY requirements.txt ./
+COPY requirements.txt .
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
