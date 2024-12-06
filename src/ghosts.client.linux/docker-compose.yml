@@ -1,38 +1,7 @@
-version: "3"
 
 services:
-  staypuft-011:
-    image: ghosts.client.alpine
-    container_name: aaa
-    build:
-      context: ..
-      dockerfile: ghosts.client.linux/dockerfile-alpine
+  ghosts-client:
+    image: dustinupdyke/ghosts-client-linux
+    container_name: ghosts-client-001
     volumes:
       - ./config:/app/config
-    networks:
-      - custom_network
-  staypuft-1:
-    image: ghosts.client.alpine
-    container_name: staypuft-2
-    volumes:
-      - ./config:/app/config
-    networks:
-      - custom_network
-  staypuft-2:
-    image: ghosts.client.alpine
-    container_name: staypuft-1
-    volumes:
-      - ./config:/app/config
-    networks:
-      - custom_network
-  staypuft-3:
-    image: ghosts.client.alpine
-    container_name: staypuft-3
-    volumes:
-      - ./config:/app/config
-    networks:
-      - custom_network
-networks:
-  custom_network:
-    external:
-      name: ghostsapi_ghosts-network
