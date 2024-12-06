@@ -33,8 +33,7 @@ namespace ghosts.api.Controllers.Api
         {
             if (!Request.Headers.TryGetValue("ghosts-id", out var id))
             {
-                _log.Warn("Request missing ghosts-id header");
-                return BadRequest("Missing ghosts-id header");
+                id = string.Empty;
             }
 
             _log.Info($"Request by {id}");
