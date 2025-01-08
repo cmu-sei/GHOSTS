@@ -74,7 +74,7 @@ namespace ghosts.client.linux.Comms
         private string Run()
         {
             // Ignore all certs
-            ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
+            ServicePointManager.ServerCertificateValidationCallback += (_, _, _, _) => true;
 
             var s = string.Empty;
 

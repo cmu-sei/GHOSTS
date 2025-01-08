@@ -21,14 +21,16 @@ RUN apk add --no-cache \
     busybox-extras \
     nikto \
     openssh-client \
-    python3 && \
+    python3 \
+    iproute2 \
+    ethtool && \
     wget 'https://github.com/sqlmapproject/sqlmap/tarball/master' -O sqlmap.tar.gz && \
     mkdir sqlmap && \
     tar -xvf sqlmap.tar.gz -C sqlmap && \
     rm sqlmap.tar.gz
 
 COPY --from=dev /app/ghosts.client.linux/out ./app
-WORKDIR /app/  
+WORKDIR /app/
 
 ENV ASPNETCORE_URLS=http://+:5000
 EXPOSE 5000/tcp
