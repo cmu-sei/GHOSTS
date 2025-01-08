@@ -636,9 +636,6 @@ namespace ghosts.client.linux.handlers
                         header = "http://";  //default header
                     }
 
-
-
-
                     if (credentialKey == null)
                     {
                         Log.Trace($"Sharepoint:: The command args must specify a 'credentialKey:<value>' , sharepoint browser action will not be executed.");
