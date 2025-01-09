@@ -33,7 +33,7 @@ namespace ghosts.client.linux.Infrastructure
             var dict = new Dictionary<string, string>();
 
             dict.Add(HttpRequestHeader.UserAgent.ToString(), "Ghosts Client");
-            if (Program.CheckId != null && !string.IsNullOrEmpty(Program.CheckId.Id) && useId)
+            if (useId && Program.CheckId != null && !string.IsNullOrEmpty(Program.CheckId.Id))
             {
                 dict.Add("ghosts-id", Program.CheckId.Id);
             }
