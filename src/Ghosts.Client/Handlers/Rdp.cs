@@ -288,8 +288,8 @@ namespace Ghosts.Client.Handlers
             {
                 Log.Trace($"RDP:: Unable to find desktop window for {target}, sleeping 1 minute");
                 Thread.Sleep(wait * 1000); //sleep for exponential back off amount of seconds
-                wait = wait * 2 //double the time to wait next loop (2^n)
                 if (2 * wait - 1 >= timeout) break; // sum(2^n) from n=0 -> n=x is 2 * 2^x - 1
+                wait = wait * 2 //double the time to wait next loop (2^n)
                 winHandle = Winuser.FindWindow("TscShellContainerClass", caption);
             }
             return winHandle != IntPtr.Zero;
