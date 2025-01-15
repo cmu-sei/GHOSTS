@@ -242,14 +242,15 @@ namespace Ghosts.Client.Handlers
                         process.StandardInput.Close(); // line added to stop process from hanging on ReadToEnd()
                         Thread.Sleep(2000);  //give time for response
                         checkPasswordPrompt(au, password, username, usePasswordOnly);
-                        //wait 3 minutes for connection window
-                        if (!findRdpWindow(target, 180))
+                        //wait 15 seconds for connection window
+                        if (!findRdpWindow(target, 15))
                         {
                             //may have a certificate problem
+                            Log.Trace("RDP:: Unable to find a RDP window, attempting to accept an untrusted certificate");
                             checkGenericPrompt(au, "{TAB}{TAB}{TAB}{ENTER}");  //this is for a certificate prompt
                         }
-                        //try again for another 3 minutes to find
-                        if (findRdpWindow(target, 180))
+                        //try again for another 4.25 minutes to find
+                        if (findRdpWindow(target, 255))
                         {
                             doMouseLoop(caption, target, au, timelineEvent);
                         }
@@ -286,10 +287,10 @@ namespace Ghosts.Client.Handlers
             //wait for window to appear 
             while (winHandle == IntPtr.Zero)
             {
-                Log.Trace($"RDP:: Unable to find desktop window for {target}, sleeping 1 minute");
+                Log.Trace($"RDP:: Unable to find desktop window for {target}, sleeping {wait} seconds");
                 Thread.Sleep(wait * 1000); //sleep for exponential back off amount of seconds
                 if (2 * wait - 1 >= timeout) break; // sum(2^n) from n=0 -> n=x is 2 * 2^x - 1
-                wait = wait * 2 //double the time to wait next loop (2^n)
+                wait = 2 * wait; //double the time to wait next loop (2^n)
                 winHandle = Winuser.FindWindow("TscShellContainerClass", caption);
             }
             return winHandle != IntPtr.Zero;
