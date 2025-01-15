@@ -242,14 +242,15 @@ namespace Ghosts.Client.Handlers
                         process.StandardInput.Close(); // line added to stop process from hanging on ReadToEnd()
                         Thread.Sleep(2000);  //give time for response
                         checkPasswordPrompt(au, password, username, usePasswordOnly);
-                        //wait 3 minutes for connection window
-                        if (!findRdpWindow(target, 3))
+                        //wait 15 seconds for connection window
+                        if (!findRdpWindow(target, 15))
                         {
                             //may have a certificate problem
+                            Log.Trace("RDP:: Unable to find a RDP window, attempting to accept an untrusted certificate");
                             checkGenericPrompt(au, "{TAB}{TAB}{TAB}{ENTER}");  //this is for a certificate prompt
                         }
-                        //try again for another 3 minutes to find
-                        if (findRdpWindow(target, 3))
+                        //try again for another 4.25 minutes to find
+                        if (findRdpWindow(target, 255))
                         {
                             doMouseLoop(caption, target, au, timelineEvent);
                         }
@@ -278,18 +279,18 @@ namespace Ghosts.Client.Handlers
             }
         }
 
-        public bool findRdpWindow(string target,int minutes)
+        public bool findRdpWindow(string target,int timeout)
         {
             var caption = $"{target} - Remote Desktop Connection";
             var winHandle = Winuser.FindWindow("TscShellContainerClass", caption);
-            int count = 0;
+            int wait = 1; //time to wait for this loop (exponential back off: 2^n starting with n=0)
             //wait for window to appear 
             while (winHandle == IntPtr.Zero)
             {
-                Log.Trace($"RDP:: Unable to find desktop window for {target}, sleeping 1 minute");
-                Thread.Sleep(60 * 1000); //sleep 1 minute, then try again
-                count++;
-                if (count >= minutes) break;
+                Log.Trace($"RDP:: Unable to find desktop window for {target}, sleeping {wait} seconds");
+                Thread.Sleep(wait * 1000); //sleep for exponential back off amount of seconds
+                if (2 * wait - 1 >= timeout) break; // sum(2^n) from n=0 -> n=x is 2 * 2^x - 1
+                wait = 2 * wait; //double the time to wait next loop (2^n)
                 winHandle = Winuser.FindWindow("TscShellContainerClass", caption);
             }
             return winHandle != IntPtr.Zero;
