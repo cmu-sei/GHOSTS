@@ -302,6 +302,7 @@ If you need to track the outcome of a specific timeline event (such as verifying
                 {
                     "Command": "download",
                     "CommandArgs": [ "//a[contains(@class, 'dlbutton')]" ],
+                    "TrackableId": "<guid id from trackables table/>",
                     "DelayAfter": 0,
                     "DelayBefore": 0
                 }
