@@ -75,19 +75,29 @@ namespace ghosts.client.linux.Infrastructure
             {
                 var cmd = $"xdotool search -name '{windowTitle}' windowfocus type '{filename}' ";
                 ExecuteBashCommand(id, cmd);
-                Thread.Sleep(2000);
+                Thread.Sleep(3000);
                 cmd = $"xdotool search -name '{windowTitle}' windowfocus key KP_Enter";
                 ExecuteBashCommand(id, cmd);
-                Thread.Sleep(2000);
-                // Check if the window has closed
-                cmd = $"xdotool search -name '{windowTitle}'";
-                var result = ExecuteBashCommand(id, cmd);
-                if (result != "")
+                Thread.Sleep(3000);  // this is the actual upload
+                // Check if the window has closed, do multiple close attempts
+                int i = 0;
+                while (i < 10)
                 {
-                    // close the window
-                    cmd = $"xdotool search -name '{windowTitle}' windowfocus key alt+c";
-                    ExecuteBashCommand(id, cmd);
-                    Thread.Sleep(500);
+                    cmd = $"xdotool search -name '{windowTitle}'";
+                    string result = ExecuteBashCommand(id, cmd);
+                    Thread.Sleep(1000);
+                    if (result != "")
+                    {
+                        // close the window
+                        cmd = $"xdotool search -name '{windowTitle}' windowfocus key alt+c";
+                        ExecuteBashCommand(id, cmd);
+                        Thread.Sleep(1000);
+                    }
+                    else
+                    {
+                        break;
+                    }
+                    i += 1;
                 }
                 return;
             }
