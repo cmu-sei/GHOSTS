@@ -8,6 +8,7 @@ using ghosts.api.Infrastructure.Models;
 using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Api.ViewModels;
 using Ghosts.Domain;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
 namespace ghosts.api.Infrastructure.Services
@@ -20,16 +21,14 @@ namespace ghosts.api.Infrastructure.Services
 
     public class TimelineService(ApplicationDbContext context) : ITimelineService
     {
-        private readonly ApplicationDbContext _context = context;
-
         public async Task UpdateAsync(MachineUpdateViewModel machineUpdateViewModel, CancellationToken ct)
         {
             if (machineUpdateViewModel == null) return;
 
             var machineUpdate = machineUpdateViewModel.ToMachineUpdate();
 
-            _context.MachineUpdates.Add(machineUpdate);
-            await _context.SaveChangesAsync(ct);
+            context.MachineUpdates.Add(machineUpdate);
+            await context.SaveChangesAsync(ct);
         }
 
         public async Task StopAsync(Guid machineId, Guid timelineId, CancellationToken ct)
@@ -65,8 +64,8 @@ namespace ghosts.api.Infrastructure.Services
                 Type = UpdateClientConfig.UpdateType.TimelinePartial
             };
 
-            _context.MachineUpdates.Add(o);
-            await _context.SaveChangesAsync(ct);
+            context.MachineUpdates.Add(o);
+            await context.SaveChangesAsync(ct);
         }
     }
 }

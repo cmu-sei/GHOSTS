@@ -1,6 +1,7 @@
 // Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
+using System.ComponentModel.DataAnnotations;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,8 +19,7 @@ namespace ghosts.api.Controllers.Api
     [Produces("application/json")]
     [Route("api/[controller]")]
     public class TimelinesController(
-        private readonly ITimelineService _timelineService,
-        private readonly IMachineTimelinesService _machineTimelinesService) : Controller
+        ITimelineService timelineService, IMachineTimelinesService machineTimelinesService) : Controller
     {
         /// <summary>
         /// Helper method to return a standardized NotFound response.
@@ -49,7 +49,7 @@ namespace ghosts.api.Controllers.Api
         [HttpGet("{machineId}")]
         public async Task<IActionResult> TimelinesGetByMachineId([FromRoute] Guid machineId, CancellationToken ct)
         {
-            var timelines = await _machineTimelinesService.GetByMachineIdAsync(machineId, ct);
+            var timelines = await machineTimelinesService.GetByMachineIdAsync(machineId, ct);
             return timelines != null ? Ok(timelines) : NotFoundResponse($"No timelines found for Machine ID: {machineId}");
         }
 
@@ -67,7 +67,7 @@ namespace ghosts.api.Controllers.Api
         [HttpGet("{machineId}/{timelineId}")]
         public async Task<IActionResult> TimelinesGetByMachineIdAndTimelineId([FromRoute] Guid machineId, [FromRoute] Guid timelineId, CancellationToken ct)
         {
-            var timeline = await _machineTimelinesService.GetByMachineIdAndTimelineIdAsync(machineId, timelineId, ct);
+            var timeline = await machineTimelinesService.GetByMachineIdAndTimelineIdAsync(machineId, timelineId, ct);
             return timeline != null ? Ok(timeline) : NotFoundResponse($"Timeline ID {timelineId} not found for Machine ID {machineId}");
         }
 
@@ -83,7 +83,7 @@ namespace ghosts.api.Controllers.Api
         [SwaggerOperation(nameof(TimelinesCreate))]
         public async Task<IActionResult> TimelinesCreate([FromBody, Required] MachineUpdateViewModel machineUpdate, CancellationToken ct)
         {
-            await _timelineService.UpdateAsync(machineUpdate, ct);
+            await timelineService.UpdateAsync(machineUpdate, ct);
             return SuccessResponse("Timeline updated successfully");
         }
 
@@ -101,10 +101,7 @@ namespace ghosts.api.Controllers.Api
         [SwaggerOperation(nameof(TimelinesStop))]
         public async Task<IActionResult> TimelinesStop([FromRoute] Guid machineId, [FromRoute] Guid timelineId, CancellationToken ct)
         {
-            if (!await _timelineService.ExistsAsync(machineId, timelineId, ct))
-                return NotFoundResponse($"Timeline ID {timelineId} not found for Machine ID {machineId}");
-
-            await _timelineService.StopAsync(machineId, timelineId, ct);
+            await timelineService.StopAsync(machineId, timelineId, ct);
             return SuccessResponse("Timeline stopped successfully");
         }
     }
