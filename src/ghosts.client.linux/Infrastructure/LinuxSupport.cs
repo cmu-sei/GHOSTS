@@ -20,6 +20,7 @@ namespace ghosts.client.linux.Infrastructure
         public string filename;
         public string id;
         public string windowTitle;
+        public bool needRestart = false;
 
 
         public BashExecute(Logger aLog)
@@ -27,15 +28,20 @@ namespace ghosts.client.linux.Infrastructure
             Log = aLog;
         }
 
+        public bool GetNeedRestart()
+        {
+            return needRestart;
+        }
+
         private void OutputHandler(object sendingProcess, DataReceivedEventArgs outLine)
         {
-            Log.Trace($"Social:: STDOUT from bash process: {outLine.Data}");
+            Log.Trace($"{id}:: STDOUT from bash process: {outLine.Data}");
             return;
         }
 
         private static void ErrorHandler(object sendingProcess, DataReceivedEventArgs outLine)
         {
-            Log.Trace($"Social:: STDERR output from bash process: {outLine.Data}");
+            Log.Trace($"STDERR output from bash process: {outLine.Data}");
             return;
         }
 
@@ -65,7 +71,7 @@ namespace ghosts.client.linux.Infrastructure
             }
 
             p.WaitForExit();
-            Log.Trace($"Social:: Bash command output: {Result}");
+            Log.Trace($"{id}:: Bash command output: {Result}");
             return Result;
         }
 
@@ -73,21 +79,54 @@ namespace ghosts.client.linux.Infrastructure
         {
             try
             {
-                var cmd = $"xdotool search -name '{windowTitle}' windowfocus type '{filename}' ";
+                needRestart = false;
+                //The dummy \b (backspaces) are needed at the beginning because a few characters at the start can be lost
+                string cmd = $"xdotool search -name '{windowTitle}' windowfocus --sync type --delay 100 '\b\b\b\b\b\b\b\b\b\b{filename}\r'";
                 ExecuteBashCommand(id, cmd);
-                Thread.Sleep(2000);
-                cmd = $"xdotool search -name '{windowTitle}' windowfocus key KP_Enter";
-                ExecuteBashCommand(id, cmd);
-                Thread.Sleep(2000);
-                // Check if the window has closed
-                cmd = $"xdotool search -name '{windowTitle}'";
-                var result = ExecuteBashCommand(id, cmd);
-                if (result != "")
+                Thread.Sleep(3000);
+                // Check if the window has closed, do multiple close attempts
+                int i = 0;
+                int closeMax = 5;
+                while (i < closeMax)
                 {
-                    // close the window
-                    cmd = $"xdotool search -name '{windowTitle}' windowfocus key alt+c";
-                    ExecuteBashCommand(id, cmd);
-                    Thread.Sleep(500);
+                    cmd = $"xdotool search -name '{windowTitle}'";
+                    string result = ExecuteBashCommand(id, cmd);
+                    Thread.Sleep(1000);
+                    if (result != "")
+                    {
+                        // close the window
+                        cmd = $"xdotool search -name '{windowTitle}' windowfocus key alt+c";
+                        ExecuteBashCommand(id, cmd);
+                        Thread.Sleep(1000);
+                    }
+                    else
+                    {
+                        break;
+                    }
+                    i += 1;
+                }
+                if (i == closeMax)
+                {
+                    // try windowkill
+                    cmd = $"xdotool search -name '{windowTitle}'";
+                    string result = ExecuteBashCommand(id, cmd);
+                    if (result != "")
+                    {
+                        cmd = $"xdotool search -name '{windowTitle}' windowkill";
+                        ExecuteBashCommand(id, cmd);
+                        Thread.Sleep(1000);
+                        result = ExecuteBashCommand(id, cmd);
+                        ExecuteBashCommand(id, cmd);
+                        Thread.Sleep(1000);
+                        // reset i if window actually killed
+                        if (result == "") i = 0;
+                    }
+
+                }
+                if (i == closeMax)
+                {
+                    needRestart = true;
+                    Log.Error($"{id}:: Unable to attach file {filename}");
                 }
                 return;
             }
@@ -96,12 +135,10 @@ namespace ghosts.client.linux.Infrastructure
                 Log.Error(e);
             }
         }
-
-
     }
 
 
-    public class LinuxSupport
+public class LinuxSupport
     {
 
 
@@ -144,6 +181,11 @@ namespace ghosts.client.linux.Infrastructure
                 {
                     break;
                 }
+            }
+
+            if (runner.GetNeedRestart())
+            {
+                return false;
             }
 
             return (count < retries + 1);

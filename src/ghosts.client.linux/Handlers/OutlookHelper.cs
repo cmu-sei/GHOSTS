@@ -150,6 +150,7 @@ namespace ghosts.client.linux.handlers
 
 
         public string FileDownloadAllXpath { get; set; } = "//span[text()='Download all']/parent::button";
+        public string FileDownloadXpath { get; set; } = "//span[text()='Download']/parent::button";
 
         private LinuxSupport linuxHelper = null;
 
@@ -1275,6 +1276,7 @@ namespace ghosts.client.linux.handlers
                 IWebElement targetElement = null;
                 if (saveAttachmentProbability > _random.Next(0, 100))
                 {
+                    bool didDownload = false;
                     try
                     {
                         targetElement = Driver.FindElement(By.XPath(FileDownloadAllXpath));
@@ -1290,9 +1292,34 @@ namespace ghosts.client.linux.handlers
 
                     if (targetElement != null)
                     {
+                        didDownload = true;
                         BrowserHelperSupport.ElementClick(Driver, targetElement);
                         Thread.Sleep(300);
                         Log.Trace($"WebOutlook:: Attachments downloads successfull.");
+                    }
+                    if (!didDownload)
+                    {
+                        try
+                        {
+                            targetElement = Driver.FindElement(By.XPath(FileDownloadXpath));
+                        }
+                        catch (Exception e)
+                        {
+                            if (e is ThreadAbortException || e is ThreadInterruptedException)
+                            {
+                                throw;
+                            }
+                            //ignore may not be present
+                        }
+
+                        if (targetElement != null)
+                        {
+                            didDownload = true;
+                            BrowserHelperSupport.ElementClick(Driver, targetElement);
+                            Thread.Sleep(300);
+                            Log.Trace($"WebOutlook:: Single Attachment download successfull.");
+                        }
+
                     }
                 }
             }
