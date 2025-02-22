@@ -16,10 +16,11 @@ using Ghosts.Animator;
 using Ghosts.Animator.Extensions;
 using Ghosts.Animator.Models;
 using Ghosts.Api.Infrastructure.Data;
-using Ghosts.Api.Infrastructure.Extensions;
+using ghosts.api.Infrastructure.Extensions;
 using Ghosts.Domain.Code;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NLog;
 using Swashbuckle.AspNetCore.Annotations;
 using Swashbuckle.AspNetCore.Filters;
 
@@ -30,8 +31,7 @@ namespace ghosts.api.Controllers.Api;
 [Route("api/[controller]")]
 public class NpcsController(ApplicationDbContext context, INpcService service) : ControllerBase
 {
-    private readonly ApplicationDbContext _context = context;
-    private readonly INpcService _service = service;
+    private static readonly Logger _log = LogManager.GetCurrentClassLogger();
 
     /// <summary>
     /// Returns all generated NPCs in the system (caution, could return a very large amount of data)
@@ -43,7 +43,7 @@ public class NpcsController(ApplicationDbContext context, INpcService service) :
     [HttpGet]
     public async Task<ActionResult<IEnumerable<NpcRecord>>> NpcsGetAll()
     {
-        return Ok(await _service.GetAll());
+        return Ok(await service.GetAll());
     }
 
     /// <summary>
@@ -56,7 +56,7 @@ public class NpcsController(ApplicationDbContext context, INpcService service) :
     [HttpPost]
     public async Task<ActionResult<IEnumerable<NpcRecord>>> NpcsCreate(NpcProfile npc)
     {
-        return Ok(await _service.CreateOne(npc));
+        return Ok(await service.CreateOne(npc));
     }
 
     /// <summary>
@@ -69,7 +69,7 @@ public class NpcsController(ApplicationDbContext context, INpcService service) :
     [HttpGet("list")]
     public async Task<ActionResult<IEnumerable<NpcNameId>>> NpcsGetList()
     {
-        return Ok(await _service.GetListAsync());
+        return Ok(await service.GetListAsync());
     }
 
     /// <summary>
@@ -83,7 +83,7 @@ public class NpcsController(ApplicationDbContext context, INpcService service) :
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<NpcRecord>> NpcsGetById(Guid id)
     {
-        return Ok(await _service.GetById(id));
+        return Ok(await service.GetById(id));
     }
 
     /// <summary>
@@ -97,7 +97,7 @@ public class NpcsController(ApplicationDbContext context, INpcService service) :
     [HttpDelete("{id:guid}")]
     public async Task NpcsDeleteById(Guid id)
     {
-        await _service.DeleteById(id);
+        await service.DeleteById(id);
     }
 
     /// <summary>
@@ -112,7 +112,7 @@ public class NpcsController(ApplicationDbContext context, INpcService service) :
     public async Task<IActionResult> NpcsGetAvatarById(Guid id)
     {
         // Get NPC and find image
-        var npc = await _service.GetById(id);
+        var npc = await service.GetById(id);
         if (npc == null) return NotFound();
 
         // Determine the image path
@@ -123,11 +123,26 @@ public class NpcsController(ApplicationDbContext context, INpcService service) :
         // Check if the image file exists
         if (!System.IO.File.Exists(imagePath))
         {
+            _log.Warn($"Npc {id} — File does not exist! {imagePath} — switching to default npc image");
+            imagePath = ApplicationDetails.ConfigurationFiles.DefaultNpcImage;
+        }
+
+        // is path within the app? is it a jpg?
+        if (!imagePath.IsPathWithinAppScope(ApplicationDetails.InstalledPath))
+        {
+            _log.Warn($"Npc {id} — Bad image path! {imagePath} — switching to default npc image");
+            imagePath = ApplicationDetails.ConfigurationFiles.DefaultNpcImage;
+        }
+
+        // is an image?
+        if (!new HashSet<string> { ".jpg", ".jpeg", ".png" }.Contains(Path.GetExtension(imagePath)?.ToLower()))
+        {
+            _log.Warn($"Npc {id} — Not an image! {imagePath} — switching to default npc image");
             imagePath = ApplicationDetails.ConfigurationFiles.DefaultNpcImage;
         }
 
         // Load image as stream and return as file result
-        var stream = new FileStream(imagePath, FileMode.Open, FileAccess.Read);
+        var stream = new FileStream(imagePath!, FileMode.Open, FileAccess.Read);
         return File(stream, "image/jpg", $"{npc.NpcProfile.Name.ToString()!.Replace(" ", "_")}.jpg");
     }
 
@@ -147,7 +162,7 @@ public class NpcsController(ApplicationDbContext context, INpcService service) :
             return BadRequest(ModelState);
         }
 
-        var npc = await _service.GetById(npcId);
+        var npc = await service.GetById(npcId);
         if (npc == null) return null;
         return new NPCReduced(fieldsToReturn, npc).PropertySelection;
     }
@@ -164,7 +179,7 @@ public class NpcsController(ApplicationDbContext context, INpcService service) :
     [HttpGet("{campaign}/{enclave}")]
     public async Task<IEnumerable<NpcRecord>> NpcsEnclaveGet(string campaign, string enclave)
     {
-        return await _service.GetEnclave(campaign, enclave);
+        return await service.GetEnclave(campaign, enclave);
     }
 
     /// <summary>
@@ -207,8 +222,8 @@ public class NpcsController(ApplicationDbContext context, INpcService service) :
     public async Task NpcsEnclaveDelete(string campaign, string enclave)
     {
         var list = await NpcsEnclaveGet(campaign, enclave);
-        _context.Npcs.RemoveRange(list);
-        await _context.SaveChangesAsync();
+        context.Npcs.RemoveRange(list);
+        await context.SaveChangesAsync();
     }
 
     /// <summary>
@@ -256,7 +271,7 @@ public class NpcsController(ApplicationDbContext context, INpcService service) :
     [HttpGet("{campaign}/{enclave}/{team}")]
     public async Task<IEnumerable<NpcRecord>> NpcsTeamGet(string campaign, string enclave, string team)
     {
-        return await _service.GetTeam(campaign, enclave, team);
+        return await service.GetTeam(campaign, enclave, team);
     }
 
     /// <summary>
@@ -311,7 +326,7 @@ public class NpcsController(ApplicationDbContext context, INpcService service) :
 
         var pool = configuration.GetIpPool();
         foreach (var item in pool)
-            if (_context.NpcIps.Any(o => o.IpAddress == item && o.Enclave == configuration.Enclave))
+            if (context.NpcIps.Any(o => o.IpAddress == item && o.Enclave == configuration.Enclave))
                 pool.Remove(item);
 
         if (pool.Count < list.Count())
@@ -330,7 +345,7 @@ public class NpcsController(ApplicationDbContext context, INpcService service) :
             }
 
             var ip = pool.RandomElement();
-            _context.NpcIps.Add(new NPCIpAddress { IpAddress = ip, NpcId = npc.Id, Enclave = npc.Enclave });
+            context.NpcIps.Add(new NPCIpAddress { IpAddress = ip, NpcId = npc.Id, Enclave = npc.Enclave });
             pool.Remove(ip);
 
             s.Append("\tuser-").Append(i).Append(" = {").Append(Environment.NewLine);
@@ -352,7 +367,7 @@ public class NpcsController(ApplicationDbContext context, INpcService service) :
             i++;
         }
 
-        _context.SaveChanges();
+        context.SaveChanges();
 
         return File(Encoding.UTF8.GetBytes
                 (s.ToString()), "text/tfvars", $"{Guid.NewGuid()}.tfvars");
@@ -420,8 +435,8 @@ public class NpcsController(ApplicationDbContext context, INpcService service) :
             }
         }
 
-        _context.Npcs.AddRange(createdNpcs);
-        await _context.SaveChangesAsync(ct);
+        context.Npcs.AddRange(createdNpcs);
+        await context.SaveChangesAsync(ct);
         return createdNpcs;
     }
 
@@ -439,7 +454,7 @@ public class NpcsController(ApplicationDbContext context, INpcService service) :
         var engine = new FileHelperEngine<NPCToInsiderThreatCsv>();
         engine.HeaderText = engine.GetFileHeader();
 
-        var list = await _context.Npcs.ToListAsync();
+        var list = await context.Npcs.ToListAsync();
         var finalList = NPCToInsiderThreatCsv.ConvertToCsv(list.ToList());
 
         var stream = new MemoryStream();

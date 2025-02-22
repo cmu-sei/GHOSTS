@@ -18,13 +18,13 @@ public class NativeContentFormatterService : IFormatterService
     public async Task<string> GenerateNextAction(NpcRecord npc, string history)
     {
         //TODO
-        return string.Empty;
+        return await Task.FromResult(string.Empty);
     }
 
     public async Task<string> ExecuteQuery(string prompt)
     {
         //TODO
-        return string.Empty;
+        return await Task.FromResult(string.Empty);
     }
 
     public async Task<string> GenerateTweet(NpcRecord npc)
@@ -49,7 +49,7 @@ public class NativeContentFormatterService : IFormatterService
             };
         }
 
-        return tweetText;
+        return await Task.FromResult(tweetText);
     }
 
     private static string ProcessAccount(NpcProfile agent)

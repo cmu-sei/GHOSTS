@@ -13,7 +13,7 @@ python-pptx==1.0.2
 rarfile==4.2
 requests==2.32.3
 diffusers==0.31.0
-transformers==4.46.3
+transformers==4.48.0
 pillow==11.0.0
 accelerate==1.1.1
 scipy==1.14.1
