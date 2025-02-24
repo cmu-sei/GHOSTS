@@ -50,6 +50,21 @@ namespace ghosts.client.linux.handlers
                             _log.Error(e);
                         }
                     }
+                    if (handler.HandlerArgs.TryGetValue("Credentials", out var credentials_arg))
+                    {
+                        try 
+                        {
+                            CurrentCreds = JsonConvert.DeserializeObject<Credentials>(credentials_arg.ToString());
+                        }
+                        catch (ThreadAbortException)
+                        {
+                            throw;  //pass up
+                        }
+                        catch (Exception e)
+                        {
+                            _log.Error(e);
+                        }
+                    }
                     if (handler.HandlerArgs.TryGetValue("ValidExts", out var v2))
                     {
                         try
@@ -102,7 +117,10 @@ namespace ghosts.client.linux.handlers
                     }
                 }
 
-
+                if (CurrentCreds == null) {
+                    _log.Error($"SSH:: No credentials supplied, either CredentialsFile or Credentials must be supplied in handler args, exiting.");
+                    return;
+                }
 
                 if (handler.Loop)
                 {

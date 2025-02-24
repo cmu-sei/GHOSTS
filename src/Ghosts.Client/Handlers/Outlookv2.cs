@@ -16,6 +16,7 @@ using Exception = System.Exception;
 using MAPIFolder = Microsoft.Office.Interop.Outlook.MAPIFolder;
 using Ghosts.Client.Infrastructure;
 using ReportItem = Ghosts.Domain.Code.ReportItem;
+using Newtonsoft.Json;
 
 namespace Ghosts.Client.Handlers;
 
@@ -48,6 +49,7 @@ public class Outlookv2 : BaseHandler
     private int _saveattachmentProbability = 0;   //when reading, probability to save attachment to disk
     private int _initialOutlookDelay = 3 * 60 * 1000;
     private int _attachmentsMaxSize = 10; //max total size of attachments in MB
+    private List<string> _domainEmailList = null;
 
     private string _inputDirectory = null;
     private string _outputDirectory = null;
@@ -242,7 +244,7 @@ public class Outlookv2 : BaseHandler
                     {
                         case "create":
                             
-                            emailConfig = new EmailConfiguration(timelineEvent.CommandArgs);
+                            emailConfig = new EmailConfiguration(timelineEvent.CommandArgs, _domainEmailList);
                             if (SendEmailViaOutlook(emailConfig))
                             {
                                 Log.Trace("Outlookv2:: Created email");
@@ -256,7 +258,7 @@ public class Outlookv2 : BaseHandler
                             break;
                         case "reply":
                             
-                            emailConfig = new EmailConfiguration(timelineEvent.CommandArgs);
+                            emailConfig = new EmailConfiguration(timelineEvent.CommandArgs, _domainEmailList);
                             if (ReplyViaOutlook(emailConfig))
                             {
                                 
@@ -504,6 +506,21 @@ public class Outlookv2 : BaseHandler
         {
             _jitterfactor = Jitter.JitterFactorParse(handler.HandlerArgs["delay-jitter"].ToString());
             if (_jitterfactor < 0) _jitterfactor = 0;
+        }
+
+        if (handler.HandlerArgs.ContainsKey("domain-addresses"))
+        {
+
+            try
+            {
+                _domainEmailList = JsonConvert.DeserializeObject<List<string>>(handler.HandlerArgs["domain-addresses"].ToString());
+            }
+            catch (System.Exception e)
+            {
+                Log.Trace($"Outlookv2:: Error parsing outlook domain-addresses list,this is argument being ignored.");
+                _domainEmailList = null;
+                Log.Error(e);
+            }
         }
     }
 

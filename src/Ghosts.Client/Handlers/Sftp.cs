@@ -40,6 +40,21 @@ namespace Ghosts.Client.Handlers
                             Log.Error(e);
                         }
                     }
+                    if (handler.HandlerArgs.ContainsKey("Credentials"))
+                    {
+                        try
+                        {
+                            this.CurrentCreds = JsonConvert.DeserializeObject<Credentials>(handler.HandlerArgs["Credentials"].ToString());
+                        }
+                        catch (ThreadAbortException)
+                        {
+                            throw;  //pass up
+                        }
+                        catch (Exception e)
+                        {
+                            Log.Error(e);
+                        }
+                    }
 
                     if (handler.HandlerArgs.ContainsKey("TimeBetweenCommandsMax"))
                     {
@@ -95,9 +110,11 @@ namespace Ghosts.Client.Handlers
                         jitterfactor = Jitter.JitterFactorParse(handler.HandlerArgs["delay-jitter"].ToString());
                     }
                 }
-
-
-
+                if (this.CurrentCreds == null)
+                {
+                    Log.Error($"Sftp:: No credentials supplied, either CredentialsFile or Credentials must be supplied in handler args, exiting.");
+                    return;
+                }
                 if (handler.Loop)
                 {
                     while (true)

@@ -25,14 +25,30 @@
   "TimeLineHandlers": [
     {
       "HandlerType": "Ssh",
-      "HandlerArgs": {
-        "CommandTimeout": 1000, //max time to wait for new input from an SSH command execution
-        "TimeBetweenCommandsMax": 5000, //max,min between individual SSH commands
-        "TimeBetweenCommandsMin": 1000,
-        "ValidExts": "txt;doc;png;jpeg", //used by [randomextension] reserved word, choose random extension from this list
-        "CredentialsFile": "d:\\ghosts_data\\ssh_creds.json", //required, file path to a JSON file containing the SSH credentials
-        "delay-jitter": 0 //optional, default =0, range 0 to 50, if specified, DelayAfter varied by delay-%jitter*delay to delay+%jitter*delay
-      },
+        "HandlerArgs": {
+            "CommandTimeout": 1000, //max time to wait for new input from an SSH command execution
+            "TimeBetweenCommandsMax": 5000, //max,min between individual SSH commands
+            "TimeBetweenCommandsMin": 1000,
+            "ValidExts": "txt;doc;png;jpeg", //used by [randomextension] reserved word, choose random extension from this list
+            // either Credentials File or Credentials must be defined
+            // if both Credentials and CredentialFile present, then Credentials takes precedence.
+            // Use Credentials arg to store Credentials directly in the timeline 
+            "CredentialsFile": "<path to credentials>", // file path to a JSON file containing the SSH credentials
+            "Credentials": {
+                "Version": "1.0",
+                "Data": {
+                    "xx.xx.xx.xx_ahostname": {
+                        "username": "auser",
+                        "password": "b64encodedpw"
+                    },
+                    "yy.xx.xx.xx_ahostname": {
+                        "username": "auser",
+                        "password": "b64encodedpw"
+                    }
+                }
+            },
+            "delay-jitter": 0 //optional, default =0, range 0 to 50, if specified, DelayAfter varied by delay-%jitter*delay to delay+%jitter*delay
+        },
       "Initial": "",
       "UtcTimeOn": "00:00:00",
       "UtcTimeOff": "24:00:00",

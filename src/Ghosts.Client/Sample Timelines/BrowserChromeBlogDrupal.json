@@ -39,24 +39,36 @@
   "TimeLineHandlers": [
     {
       "HandlerType": "BrowserChrome",
-      "HandlerArgs": {
-        "isheadless": "false",
-        "blockimages": "true",
-        "blockstyles": "true",
-        "blockflash": "true",
-        "blockscripts": "true",
-        "stickiness": 75,
-        "stickiness-depth-min": 5,
-        "stickiness-depth-max": 10000,
-        "incognito": "true",
-        "blog-credentials-file": "c:\\ghosts_data\\blog_creds.json",
-        "blog-deletion-probability": 0,
-        "blog-upload-probability": 0,
-        "blog-browse-probability": 0,
-        "blog-reply-probability": 100,
-        "blog-version": "drupal"
+        "HandlerArgs": {
+            "isheadless": "false",
+            "blockimages": "true",
+            "blockstyles": "true",
+            "blockflash": "true",
+            "blockscripts": "true",
+            "stickiness": 75,
+            "stickiness-depth-min": 5,
+            "stickiness-depth-max": 10000,
+            "incognito": "true",
+            // either blog-credentials-file or blog-credentials must be defined
+            // if both  blog-credentials-file and blog-credentials present, then blog-credentials takes precedence.
+            // Use blog-credentials arg to store credentials directly in the timeline 
+            "blog-credentials-file": "<path to credentials>", // file path to a JSON file containing the blog credentials
+            "blog-credentials": {
+                "Version": "1.0",
+                "Data": {
+                    "bloguser": {
+                        "username": "bloguser",
+                        "password": "b64encodedpw"
+                    }
+                }
+            },
+            "blog-deletion-probability": 0,
+            "blog-upload-probability": 0,
+            "blog-browse-probability": 0,
+            "blog-reply-probability": 100,
+            "blog-version": "drupal"
 
-      },
+        },
       "Initial": "about:blank",
       "UtcTimeOn": "00:00:00",
       "UtcTimeOff": "24:00:00",

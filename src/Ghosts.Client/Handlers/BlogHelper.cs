@@ -150,7 +150,7 @@ namespace Ghosts.Client.Handlers
         /// <param name="timelineEvent"></param>
         public void Execute(TimelineHandler handler, TimelineEvent timelineEvent)
         {
-            string credFname;
+            string credFname = null;
             string credentialKey = null;
             
 
@@ -215,12 +215,9 @@ namespace Ghosts.Client.Handlers
                         baseHandler.JitterFactor = Jitter.JitterFactorParse(handler.HandlerArgs["delay-jitter"].ToString());
                     }
 
-
-                    credFname = handler.HandlerArgs["blog-credentials-file"].ToString();
-
                     if (handler.HandlerArgs.ContainsKey("blog-credentials-file"))
                     {
-
+                        credFname = handler.HandlerArgs["blog-credentials-file"].ToString();
                         try
                         {
                             _credentials = JsonConvert.DeserializeObject<Credentials>(System.IO.File.ReadAllText(credFname));
@@ -232,6 +229,29 @@ namespace Ghosts.Client.Handlers
                             Log.Error(e);
                             return;
                         }
+                    }
+
+                    if (handler.HandlerArgs.ContainsKey("blog-credentials"))
+                    {
+
+                        try
+                        {
+                            _credentials = JsonConvert.DeserializeObject<Credentials>(handler.HandlerArgs["blog-credentials"].ToString());
+                        }
+                        catch (System.Exception e)
+                        {
+                            Log.Trace($"Blog:: Error parsing blog credentials , blog browser action will not be executed.");
+                            baseHandler.BlogAbort = true;
+                            Log.Error(e);
+                            return;
+                        }
+                    }
+
+                    if (_credentials == null)
+                    {
+                        Log.Trace($"Blog:: No credentials specified in handler-args, blog browser action will not be executed.");
+                        baseHandler.BlogAbort = true;
+                        return;
                     }
 
                     //now parse the command args
@@ -297,7 +317,7 @@ namespace Ghosts.Client.Handlers
 
                     if (username == null || password == null)
                     {
-                        Log.Trace($"Blog:: The credential key {credentialKey} does not return a valid credential from file {credFname}, blog browser action will not be executed");
+                        Log.Trace($"Blog:: The credential key {credentialKey} does not return a valid credential, blog browser action will not be executed");
                         baseHandler.BlogAbort = true;
                         return;
                     }

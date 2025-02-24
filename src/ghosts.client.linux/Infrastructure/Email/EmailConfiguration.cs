@@ -50,7 +50,7 @@ public class EmailConfiguration
     public List<string> Attachments { get; }
     public EmailBodyType BodyType { get; }
 
-    public EmailConfiguration(IList<object> args)
+    public EmailConfiguration(IList<object> args, List<string> domainEmailList=null)
     {
         var settings = Program.Configuration.Email;
         var emailConfigArray = args;
@@ -74,9 +74,9 @@ public class EmailConfiguration
         //    this.From = $"{Environment.UserName}@{System.Net.NetworkInformation.IPGlobalProperties.GetIPGlobalProperties().DomainName}";
         //}
 
-        To = ParseEmail(emailConfigArray[1].ToString(), settings.RecipientsToMin, settings.RecipientsToMax);
-        Cc = ParseEmail(emailConfigArray[2].ToString(), settings.RecipientsCcMin, settings.RecipientsCcMax);
-        Bcc = ParseEmail(emailConfigArray[3].ToString(), settings.RecipientsBccMin, settings.RecipientsBccMax);
+        To = ParseEmail(emailConfigArray[1].ToString(), settings.RecipientsToMin, settings.RecipientsToMax, domainEmailList);
+        Cc = ParseEmail(emailConfigArray[2].ToString(), settings.RecipientsCcMin, settings.RecipientsCcMax, domainEmailList);
+        Bcc = ParseEmail(emailConfigArray[3].ToString(), settings.RecipientsBccMin, settings.RecipientsBccMax, domainEmailList);
 
         var emailContent = new EmailContentManager();
 
@@ -126,7 +126,7 @@ public class EmailConfiguration
         return $"Sending email from: {From} to: {string.Join(",", To)} cc: {string.Join(",", Cc)} bcc: {string.Join(",", Bcc)}";
     }
 
-    private static List<string> ParseEmail(string raw, int min, int max)
+    private static List<string> ParseEmail(string raw, int min, int max, List<string> domainEmailList=null)
     {
         var list = new List<string>();
         if (string.IsNullOrEmpty(raw)) return list;
@@ -152,7 +152,13 @@ public class EmailConfiguration
             else //build list
             {
                 //add domain
-                var emails = EmailListManager.GetDomainList();
+                var emails = domainEmailList;
+
+                if (emails == null)
+                {
+                    emails = EmailListManager.GetDomainList();
+                }
+                
 
                 for (var i = 0; i < numberOfRecipients; i++)
                     list.Add(emails.PickRandom());

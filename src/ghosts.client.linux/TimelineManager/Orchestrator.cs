@@ -8,6 +8,8 @@ using ghosts.client.linux.handlers;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Models;
+using System.Reflection;
+
 using NLog;
 
 namespace ghosts.client.linux.timelineManager
@@ -18,7 +20,9 @@ namespace ghosts.client.linux.timelineManager
     public class Orchestrator
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
+        private static DateTime _lastRead = DateTime.MinValue;
         private Thread MonitorThread { get; set; }
+        private FileSystemWatcher _timelineWatcher;
         private FileSystemWatcher _stopfileWatcher;  //watches for changes to config/stop.txt indicating a stop request
 
         public void Run()
@@ -28,6 +32,19 @@ namespace ghosts.client.linux.timelineManager
                 var timeline = TimelineBuilder.GetTimeline();
 
                 var dirName = TimelineBuilder.TimelineFilePath().DirectoryName;
+                // now watch that file for changes
+                if (_timelineWatcher == null && dirName != null) //you can change this to a bool if you want but checks if the object has been created
+                {
+                    _log.Trace("Timeline watcher starting and is null...");
+                    _timelineWatcher = new FileSystemWatcher(dirName)
+                    {
+                        Filter = Path.GetFileName(TimelineBuilder.TimelineFilePath().Name)
+                    };
+                    _log.Trace($"watching {Path.GetFileName(TimelineBuilder.TimelineFilePath().Name)}");
+                    _timelineWatcher.NotifyFilter = NotifyFilters.LastWrite;
+                    _timelineWatcher.EnableRaisingEvents = true;
+                    _timelineWatcher.Changed += OnChanged;
+                }
 
                 if (_stopfileWatcher == null && dirName != null)
                 {
@@ -248,6 +265,40 @@ namespace ghosts.client.linux.timelineManager
             catch (Exception e)
             {
                 _log.Error(e);
+            }
+        }
+
+        private void OnChanged(object source, FileSystemEventArgs e)
+        {
+            try
+            {
+                _log.Trace($"FileWatcher event raised: {e.FullPath} {e.Name} {e.ChangeType}");
+
+                // filewatcher throws two events, we only need 1
+                var lastWriteTime = File.GetLastWriteTime(e.FullPath);
+                if (lastWriteTime == _lastRead) return;
+
+                _lastRead = lastWriteTime;
+                _log.Trace("FileWatcher Processing: " + e.FullPath + " " + e.ChangeType);
+                _log.Trace($"Reloading {MethodBase.GetCurrentMethod()?.DeclaringType}");
+
+                _log.Trace("terminate existing tasks and rerun orchestrator");
+
+                StopCommon();
+                Thread.Sleep(7500);
+
+                try
+                {
+                    Run();
+                }
+                catch (Exception exception)
+                {
+                    _log.Info(exception);
+                }
+            }
+            catch (Exception exc)
+            {
+                _log.Info(exc);
             }
         }
     }

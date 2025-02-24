@@ -57,15 +57,28 @@
   "TimeLineHandlers": [
     {
       "HandlerType": "Rdp",
-      "HandlerArgs": {
-        "CredentialsFile": "<path to credentials>", //required, file path to a JSON file containing the RDP credentials
-        "mouse-sleep-time": 10000, //time to sleep between random mouse movements
-        "execution-time": 60000, //after this total connection time has elapsed, the RDP is closed and a new connection opened
-        "custom-login": "#PASSWORD\n#DELAY1000\n{TAB}\n{TAB}\n{TAB}\n{ENTER}", //see explanation above
-        "execution-probability": 100, //after choosing a random target, the probability that a RDP to the target is opened
-        "delay-jitter": 50
+        "HandlerArgs": {
+            // either Credentials File or Credentials must be defined
+            // if both Credentials and CredentialFile present, then Credentials takes precedence.
+            // Use Credentials arg to store Credentials directly in the timeline 
+            "CredentialsFile": "<path to credentials>", // file path to a JSON file containing the RDP credentials
+            "Credentials": {
+                "Version": "1.0",
+                "Data": {
+                    "xx.xx.xx.xx": {
+                        "domain": "domainname",  //optional
+                        "username": "auser",
+                        "password": "b64encodedpw"
+                    }
+                }
+            },
+            "mouse-sleep-time": 10000, //time to sleep between random mouse movements
+            "execution-time": 60000, //after this total connection time has elapsed, the RDP is closed and a new connection opened
+            "custom-login": "#PASSWORD\n#DELAY1000\n{TAB}\n{TAB}\n{TAB}\n{ENTER}", //see explanation above
+            "execution-probability": 100, //after choosing a random target, the probability that a RDP to the target is opened
+            "delay-jitter": 50
 
-      },
+        },
       "Initial": "",
       "UtcTimeOn": "00:00:00",
       "UtcTimeOff": "24:00:00",

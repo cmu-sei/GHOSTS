@@ -96,6 +96,17 @@ namespace Ghosts.Client.Handlers
                         Log.Error(e);
                     }
                 }
+                if (handler.HandlerArgs.ContainsKey("Credentials"))
+                {
+                    try
+                    {
+                        this.CurrentCreds = JsonConvert.DeserializeObject<Credentials>(handler.HandlerArgs["Credentials"].ToString());
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error(e);
+                    }
+                }
                 if (handler.HandlerArgs.ContainsKey("mouse-sleep-time"))
                 {
                     int.TryParse(handler.HandlerArgs["mouse-sleep-time"].ToString(), out MouseSleep);
@@ -121,6 +132,11 @@ namespace Ghosts.Client.Handlers
                 {
                     JitterFactor = Jitter.JitterFactorParse(handler.HandlerArgs["delay-jitter"].ToString());
                 }
+            }
+            if (this.CurrentCreds == null)
+            {
+                Log.Error($"RDP:: No credentials supplied, either CredentialsFile or Credentials must be supplied in handler args, exiting.");
+                return;
             }
             AutoItX3 au = new AutoItX3();
 

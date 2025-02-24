@@ -500,7 +500,7 @@ namespace Ghosts.Client.Handlers
         /// <param name="timelineEvent"></param>
         public void Execute(TimelineHandler handler, TimelineEvent timelineEvent)
         {
-            string credFname;
+            string credFname = null;
             string credentialKey = null;
 
 
@@ -576,11 +576,9 @@ namespace Ghosts.Client.Handlers
                         baseHandler.JitterFactor = Jitter.JitterFactorParse(handler.HandlerArgs["delay-jitter"].ToString());
                     }
 
-                    credFname = handler.HandlerArgs["sharepoint-credentials-file"].ToString();
-
                     if (handler.HandlerArgs.ContainsKey("sharepoint-credentials-file"))
                     {
-
+                        credFname = handler.HandlerArgs["sharepoint-credentials-file"].ToString();
                         try
                         {
                             _credentials = JsonConvert.DeserializeObject<Credentials>(System.IO.File.ReadAllText(credFname));
@@ -592,6 +590,29 @@ namespace Ghosts.Client.Handlers
                             Log.Error(e);
                             return;
                         }
+                    }
+
+                    if (handler.HandlerArgs.ContainsKey("sharepoint-credentials"))
+                    {
+
+                        try
+                        {
+                            _credentials = JsonConvert.DeserializeObject<Credentials>(handler.HandlerArgs["sharepoint-credentials"].ToString());
+                        }
+                        catch (System.Exception e)
+                        {
+                            Log.Trace($"Sharepoint:: Error parsing sharepoint credentials , sharepoint browser action will not be executed.");
+                            baseHandler.SharePointAbort = true;
+                            Log.Error(e);
+                            return;
+                        }
+                    }
+
+                    if (_credentials == null)
+                    {
+                        Log.Trace($"Sharepoint:: No credentials specified in handler-args, sharepoint browser action will not be executed.");
+                        baseHandler.SharePointAbort = true;
+                        return;
                     }
 
                     //now parse the command args
@@ -657,7 +678,7 @@ namespace Ghosts.Client.Handlers
 
                     if (username == null || password == null)
                     {
-                        Log.Trace($"Sharepoint:: The credential key {credentialKey} does not return a valid credential from file {credFname},   sharepoint browser action will not be executed");
+                        Log.Trace($"Sharepoint:: The credential key {credentialKey} does not return a valid credential, sharepoint browser action will not be executed");
                         baseHandler.SharePointAbort = true;
                         return;
                     }
