@@ -1,0 +1,26 @@
+{
+    "TimeLineHandlers": [
+        {
+            "HandlerType": "ExecuteFile",
+            "Initial": "",
+            "UtcTimeOn": "00:00:00",
+            "UtcTimeOff": "24:00:00",
+            "Loop": true,
+            "HandlerArgs": {
+                "delay-jitter": "0",
+                "execution-probability": "100",
+                "outFolder": "c:\\tmp",
+                "folderPath": "%homedrive%%homepath%\\Downloads",
+                "execWaitTime": "1000"
+            },
+            "TimeLineEvents": [
+                {
+                    "Command": "random",
+                    "TrackableId": "<guid id from trackables table/>",
+                    "DelayAfter": 10,
+                    "DelayBefore": 10000
+                }
+            ]
+        }
+    ]
+}

@@ -128,7 +128,8 @@ namespace Ghosts.Domain
         Outlookv2 = 105,
         Ftp = 106,
         Aws = 110,
-        Azure = 120
+        Azure = 120,
+        ExecuteFile = 128
     }
 
     /// <summary>
