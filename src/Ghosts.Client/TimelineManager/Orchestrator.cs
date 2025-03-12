@@ -345,6 +345,12 @@ namespace Ghosts.Client.TimelineManager
                             _ = new Handlers.Azure(handler);
                         });
                         break;
+                    case HandlerType.ExecuteFile:
+                        t = new Thread(() =>
+                        {
+                            _ = new ExecuteFile(handler);
+                        });
+                        break;
                     case HandlerType.Rdp:
                         t = new Thread(() =>
                         {
