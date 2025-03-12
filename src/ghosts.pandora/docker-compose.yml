@@ -1,26 +1,45 @@
 # Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 services:
+  ollama:
+    restart: unless-stopped
+    container_name: ollama
+    image: ollama/ollama
+    networks:
+      - ghosts
+    expose:
+      - 11434
   pandora:
-    restart: always
-    container_name: ghosts-pandora
+    restart: unless-stopped
+    container_name: pandora
     image: dustinupdyke/ghosts-pandora
-    deploy:
-      reservations:
-        devices:
-          - driver:
-            count: 1
-            capabilities: [gpu]
-    runtime: nvidia
-    environment:
-      - NVIDIA_VISIBLE_DEVICES=all
-      - NVIDIA_DRIVER_CAPABILITIES=all
-    ports:
-      - "80:80"
-      - "8081:8081"
-      - "1935:1935"
-      - "443:443"
     volumes:
       - "./app/config:/usr/src/app/config"
       - "./app/payloads:/usr/src/app/payloads"
+    networks:
+    - ghosts
+    expose:
+      - 80
+        #      - "8081:8081"
+        #      - "1935:1935"
+        #      - "443:443"
+    depends_on:
+      - ollama
+  nginx:
+    restart: unless-stopped
+    container_name: nginx
+    image: nginx
+    volumes:
+      - "./nginx/certs:/etc/nginx/certs:ro"
+      - "./nginx/nginx.conf:/etc/nginx/nginx.conf:ro"
+    networks:
+      - ghosts
+    ports:
+      - 80:80
+      - 443:443
+    depends_on:
+      - pandora
 
+networks:
+  ghosts:
+    name: ghosts
