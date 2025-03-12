@@ -46,6 +46,25 @@ namespace Ghosts.Client.Handlers
                         {
                             this.CurrentCreds = JsonConvert.DeserializeObject<Credentials>(File.ReadAllText(handler.HandlerArgs["CredentialsFile"].ToString()));
                         }
+                        catch (ThreadAbortException)
+                        {
+                            throw;  //pass up
+                        }
+                        catch (Exception e)
+                        {
+                            Log.Error(e);
+                        }
+                    }
+                    if (handler.HandlerArgs.ContainsKey("Credentials"))
+                    {
+                        try
+                        {
+                            this.CurrentCreds = JsonConvert.DeserializeObject<Credentials>(handler.HandlerArgs["Credentials"].ToString());
+                        }
+                        catch (ThreadAbortException)
+                        {
+                            throw;  //pass up
+                        }
                         catch (Exception e)
                         {
                             Log.Error(e);
@@ -103,7 +122,11 @@ namespace Ghosts.Client.Handlers
                     }
                 }
 
-
+                if (this.CurrentCreds == null)
+                {
+                    Log.Error($"SSH:: No credentials supplied, either CredentialsFile or Credentials must be supplied in handler args, exiting.");
+                    return;
+                }
 
                 if (handler.Loop)
                 {
@@ -119,7 +142,7 @@ namespace Ghosts.Client.Handlers
             }
             catch (ThreadAbortException)
             {
-                Log.Trace("Ssh closing...");
+                Log.Trace("SSH closing...");
             }
             catch (Exception e)
             {

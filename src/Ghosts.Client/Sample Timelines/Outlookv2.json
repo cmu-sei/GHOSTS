@@ -22,21 +22,22 @@
       "Initial": "",
       "UtcTimeOn": "00:00:00",
       "UtcTimeOff": "24.00:00:00",
-      "HandlerArgs": {
-        "delay-jitter": 50, //%jitter to add to delayAfter, delayBefore
-        "delete-probability": 0, //probability that a delete operation will be done
-        "create-probability": 0, //probability that a new email will be created
-        "read-probability": 100, //probability that an existing email will be read, unread is given preference
-        "reply-probability": 0, //probability that a reply to an existing email is created
-        "click-probability": 35, //TODO, not implemented yet
-        "attachment-probability": 100, //when creating a new email, probability that attachments are added
-        "save-attachment-probability": 100, //when reading a email, probability that emails are saved to disk
-        "min-attachments": 5, //when adding an attachment, min number of attachments
-        "max-attachments": 5, //when adding an attachment, max number of attachments
-        "max-attachments-size": 10, //in MB, total size of all attachments will not exceed this
-        "input-directory": "C:\\ghosts_data\\uploads", // source directory for attachments
-        "output-directory": "C:\\ghosts_data\\downloads" // target directory for saved attachments, created if does not exist
-      },
+        "HandlerArgs": {
+            "domain-addresses": [ "johndoe@somedomain", "mary@somedomain" ], //optional, replaces EmailDomain in application config
+            "delay-jitter": 50, //%jitter to add to delayAfter, delayBefore
+            "delete-probability": 0, //probability that a delete operation will be done
+            "create-probability": 0, //probability that a new email will be created
+            "read-probability": 100, //probability that an existing email will be read, unread is given preference
+            "reply-probability": 0, //probability that a reply to an existing email is created
+            "click-probability": 35, //TODO, not implemented yet
+            "attachment-probability": 100, //when creating a new email, probability that attachments are added
+            "save-attachment-probability": 100, //when reading a email, probability that emails are saved to disk
+            "min-attachments": 5, //when adding an attachment, min number of attachments
+            "max-attachments": 5, //when adding an attachment, max number of attachments
+            "max-attachments-size": 10, //in MB, total size of all attachments will not exceed this
+            "input-directory": "C:\\ghosts_data\\uploads", // source directory for attachments
+            "output-directory": "C:\\ghosts_data\\downloads" // target directory for saved attachments, created if does not exist
+        },
       "Loop": true,
       "TimeLineEvents": [
         {

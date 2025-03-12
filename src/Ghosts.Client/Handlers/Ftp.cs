@@ -41,6 +41,21 @@ namespace Ghosts.Client.Handlers
                             Log.Error(e);
                         }
                     }
+                    if (handler.HandlerArgs.ContainsKey("Credentials"))
+                    {
+                        try
+                        {
+                            this.CurrentCreds = JsonConvert.DeserializeObject<Credentials>(handler.HandlerArgs["Credentials"].ToString());
+                        }
+                        catch (ThreadAbortException)
+                        {
+                            throw;  //pass up
+                        }
+                        catch (Exception e)
+                        {
+                            Log.Error(e);
+                        }
+                    }
                     if (handler.HandlerArgs.ContainsKey("UploadDirectory"))
                     {
                         string targetDir = handler.HandlerArgs["UploadDirectory"].ToString();
@@ -103,6 +118,11 @@ namespace Ghosts.Client.Handlers
                     this.CurrentFtpSupport.deletionProbability = 20;
                 }
 
+                if (this.CurrentCreds == null)
+                {
+                    Log.Error($"Ftp:: No credentials supplied, either CredentialsFile or Credentials must be supplied in handler args, exiting.");
+                    return;
+                }
 
 
                 if (handler.Loop)

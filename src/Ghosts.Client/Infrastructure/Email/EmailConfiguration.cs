@@ -52,7 +52,7 @@ public class EmailConfiguration
     public List<string> Attachments { get; }
     public EmailBodyType BodyType { get; }
 
-    public EmailConfiguration(IList<object> args)
+    public EmailConfiguration(IList<object> args, List<string> domainEmailList = null)
     {
         _log.Trace($"Building email configuration from timeline {JsonConvert.SerializeObject(args)}...");
 
@@ -78,9 +78,9 @@ public class EmailConfiguration
         //    this.From = $"{Environment.UserName}@{System.Net.NetworkInformation.IPGlobalProperties.GetIPGlobalProperties().DomainName}";
         //}
 
-        this.To = ParseEmail(emailConfigArray[1].ToString(), settings.RecipientsToMin, settings.RecipientsToMax);
-        this.Cc = ParseEmail(emailConfigArray[2].ToString(), settings.RecipientsCcMin, settings.RecipientsCcMax);
-        this.Bcc = ParseEmail(emailConfigArray[3].ToString(), settings.RecipientsBccMin, settings.RecipientsBccMax);
+        this.To = ParseEmail(emailConfigArray[1].ToString(), settings.RecipientsToMin, settings.RecipientsToMax, domainEmailList);
+        this.Cc = ParseEmail(emailConfigArray[2].ToString(), settings.RecipientsCcMin, settings.RecipientsCcMax, domainEmailList);
+        this.Bcc = ParseEmail(emailConfigArray[3].ToString(), settings.RecipientsBccMin, settings.RecipientsBccMax, domainEmailList);
 
         var emailContent = new EmailContentManager();
 
@@ -169,7 +169,7 @@ public class EmailConfiguration
         return $"Sending email from: {this.From} to: {string.Join(",", this.To)} cc: {string.Join(",", this.Cc)} bcc: {string.Join(",", this.Bcc)}";
     }
 
-    private static List<string> ParseEmail(string raw, int min, int max)
+    private static List<string> ParseEmail(string raw, int min, int max, List<string> domainEmailList = null)
     {
         _log.Trace($"Parsing email - raw {raw} min {min} max {max}");
         var list = new List<string>();
@@ -187,7 +187,12 @@ public class EmailConfiguration
         if (raw.StartsWith("random", StringComparison.InvariantCultureIgnoreCase))
         {
             //add domain
-            var emails = EmailListManager.GetDomainList();
+            var emails = domainEmailList;
+            if (emails == null)
+            {
+                emails = EmailListManager.GetDomainList();
+            }
+            
             _log.Trace($"Building domain email list: {emails.Count}...");
 
             for (var i = 0; i < numberOfRecipients; i++)

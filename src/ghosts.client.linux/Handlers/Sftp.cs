@@ -25,6 +25,7 @@ namespace ghosts.client.linux.handlers
                 CurrentSftpSupport = new SftpSupport();
                 if (handler.HandlerArgs != null)
                 {
+
                     if (handler.HandlerArgs.TryGetValue("CredentialsFile", out var v1))
                     {
                         try
@@ -40,7 +41,21 @@ namespace ghosts.client.linux.handlers
                             _log.Error(e);
                         }
                     }
-
+                    if (handler.HandlerArgs.TryGetValue("Credentials", out var credentials_arg))
+                    {
+                        try 
+                        {
+                            CurrentCreds = JsonConvert.DeserializeObject<Credentials>(credentials_arg.ToString());
+                        }
+                        catch (ThreadAbortException)
+                        {
+                            throw;  //pass up
+                        }
+                        catch (Exception e)
+                        {
+                            _log.Error(e);
+                        }
+                    }
                     if (handler.HandlerArgs.TryGetValue("TimeBetweenCommandsMax", out var v2))
                     {
                         try
@@ -93,7 +108,10 @@ namespace ghosts.client.linux.handlers
                     }
                 }
 
-
+                if (CurrentCreds == null) {
+                    _log.Error($"Sftp:: No credentials supplied, either CredentialsFile or Credentials must be supplied in handler args, exiting.");
+                    return;
+                }
 
                 if (handler.Loop)
                 {

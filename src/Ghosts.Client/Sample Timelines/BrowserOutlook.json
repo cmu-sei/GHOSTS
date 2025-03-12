@@ -42,25 +42,38 @@
       "Initial": "about:blank",
       "UtcTimeOn": "00:00:00",
       "UtcTimeOff": "24.00:00:00",
-      "HandlerArgs": {
-        "isheadless": "false",
-        "delay-jitter": 50, //%jitter to add to delayAfter, delayBefore
-        "browser-id": "ghosts-client-outlook", //This is only used in the Linux client to delete the Outlook browser process on restart as sometimes the normal Selenium shutdown fails to close the browser
-        "outlook-credentials-file": "<path to credentials file>", //path to credentials files
-        "outlook-delete-probability": 20, //probability that a delete operation will be done
-        "outlook-read-probability": 30, //probability that an existing email will be read, unread is given preference
-        "outlook-reply-probability": 20, //probability that a reply to an existing email is created
-        "outlook-create-probability": 30, //probability that a new email will be created
-        "outlook-attachment-probability": 100, //when creating a new email, probability that attachments are added
-        "outlook-save-attachment-probability": 100, //when reading a email, probability that emails are saved to disk
-        "outlook-min-attachments": 0, //when adding an attachment, min number of attachments
-        "outlook-max-attachments": 3, //when adding an attachment, max number of attachments
-        "outlook-max-attachments-size": 10, //in MB, total size of all attachments will not exceed this
-        "outlook-url": "https://enc01-exchg2013.sitea.com/owa", // URL to Exchange Outlook server
-        "outlook-credential-key": "<aCredentialKey>", //this key used to look up a username/password credential
-        "exchange-version": "2013", //Exchange Web server version, only 2013 is supported at this time
-        "outlook-uploads-directory": "<path to uploads file>" //path to directory contains files to be used for attachments
-      },
+        "HandlerArgs": {
+            "isheadless": "false",
+            "delay-jitter": 50, //%jitter to add to delayAfter, delayBefore
+            "browser-id": "ghosts-client-outlook", //This is only used in the Linux client to delete the Outlook browser process on restart as sometimes the normal Selenium shutdown fails to close the browser
+            // either outlook-credentials-file or outlook-credentials must be defined
+            // if both  outlook-credentials-file and outlook-credentials present, then outlook-credentials takes precedence.
+            // Use outlook-credentials arg to store credentials directly in the timeline 
+            "outlook-credentials-file": "<path to credentials>", // file path to a JSON file containing the outlook credentials
+            "outlook-credentials": {
+                "Version": "1.0",
+                "Data": {
+                    "outlookuser": {
+                        "username": "outlookuser",
+                        "password": "b64encodedpw"
+                    }
+                }
+            },
+            "outlook-email-domain-addresses":  [ "johndoe@somedomain", "mary@somedomain"], //optional, replaces EmailDomain in application config
+            "outlook-delete-probability": 20, //probability that a delete operation will be done
+            "outlook-read-probability": 30, //probability that an existing email will be read, unread is given preference
+            "outlook-reply-probability": 20, //probability that a reply to an existing email is created
+            "outlook-create-probability": 30, //probability that a new email will be created
+            "outlook-attachment-probability": 100, //when creating a new email, probability that attachments are added
+            "outlook-save-attachment-probability": 100, //when reading a email, probability that emails are saved to disk
+            "outlook-min-attachments": 0, //when adding an attachment, min number of attachments
+            "outlook-max-attachments": 3, //when adding an attachment, max number of attachments
+            "outlook-max-attachments-size": 10, //in MB, total size of all attachments will not exceed this
+            "outlook-url": "https://enc01-exchg2013.sitea.com/owa", // URL to Exchange Outlook server
+            "outlook-credential-key": "<aCredentialKey>", //this key used to look up a username/password credential
+            "exchange-version": "2013", //Exchange Web server version, only 2013 is supported at this time
+            "outlook-uploads-directory": "<path to uploads file>" //path to directory contains files to be used for attachments
+        },
       "Loop": true,
       "TimeLineEvents": [
         {

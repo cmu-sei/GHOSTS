@@ -30,12 +30,30 @@
   "TimeLineHandlers": [
     {
       "HandlerType": "Wmi",
-      "HandlerArgs": {
-        "TimeBetweenCommandsMax": 5000, //max,min between individual WMI commands
-        "TimeBetweenCommandsMin": 1000,
-        "CredentialsFile": "<path to credentials>", //required, file path to a JSON file containing the WMI credentials
-        "delay-jitter": 0 //optional, default =0, range 0 to 50, if specified, DelayAfter varied by delay-%jitter*delay to delay+%jitter*delay
-      },
+        "HandlerArgs": {
+            "TimeBetweenCommandsMax": 5000, //max,min between individual WMI commands
+            "TimeBetweenCommandsMin": 1000,
+            // either Credentials File or Credentials must be defined
+            // if both Credentials and CredentialFile present, then Credentials takes precedence.
+            // Use Credentials arg to store Credentials directly in the timeline 
+            "CredentialsFile": "<path to credentials>", // file path to a JSON file containing the SSH credentials
+            "Credentials": {
+                "Version": "1.0",
+                "Data": {
+                    "xx.xx.xx.xx_ahostname": {
+                        "domain":  "domainname"
+                        "username": "auser",
+                        "password": "b64encodedpw"
+                    },
+                    "yy.xx.xx.xx_ahostname": {
+                        "domain": "domainname",
+                        "username": "auser",
+                        "password": "b64encodedpw"
+                    }
+                }
+            },
+            "delay-jitter": 0 //optional, default =0, range 0 to 50, if specified, DelayAfter varied by delay-%jitter*delay to delay+%jitter*delay
+        },
       "Initial": "",
       "UtcTimeOn": "00:00:00",
       "UtcTimeOff": "24:00:00",
