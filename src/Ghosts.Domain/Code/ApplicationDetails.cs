@@ -104,9 +104,32 @@ namespace Ghosts.Domain.Code
             public static string InstallPath => InstalledPath + $"{System.IO.Path.DirectorySeparatorChar}config{System.IO.Path.DirectorySeparatorChar}";
 
             public static string DefaultNpcImage => Clean(Path.Combine(InstallPath, "photos", "default.png"));
-            public static string Application => Clean(InstallPath + "application.json");
+            public static string Application
+            {
+                get {
+                    var baseName = Clean(InstallPath + "application");
+                    string[] extensions = {".yaml", ".yml", ".json"};
+                    foreach (var ext in extensions) {
+                        var path = baseName + ext;
+                        if (File.Exists(path)) return path;
+                    }
+                    return baseName + ".json";
+                }
+            }
+
             public static string Health => Clean(InstallPath + "health.json");
-            public static string Timeline => Clean(InstallPath + "timeline.json");
+            public static string Timeline
+            {
+                get {
+                    var baseName = Clean(InstallPath + "timeline");
+                    string[] extensions = {".yaml", ".yml", ".json"};
+                    foreach (var ext in extensions) {
+                        var path = baseName + ext;
+                        if (File.Exists(path)) return path;
+                    }
+                    return baseName + ".json";
+                }
+            }
 
             public static string DenyList => Clean(InstallPath + "denylist.txt");
             public static string EmailsFooter => Clean(InstallPath + "emails-footer.txt");

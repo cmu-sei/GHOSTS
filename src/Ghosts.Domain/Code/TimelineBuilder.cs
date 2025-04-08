@@ -3,6 +3,7 @@
 using System;
 using System.IO;
 using System.Net;
+using Ghosts.Domain.Code.Helpers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NLog;
@@ -121,7 +122,7 @@ namespace Ghosts.Domain.Code
         {
             try
             {
-                return JsonConvert.SerializeObject(timeline);
+                return ConfigManager.SerializeConfig(timeline);
             }
             catch
             {
@@ -155,6 +156,8 @@ namespace Ghosts.Domain.Code
         {
             using (var file = File.CreateText(ApplicationDetails.ConfigurationFiles.Timeline))
             {
+                //TODO 
+                //TODO Add application setting for preferring yaml
                 var serializer = new JsonSerializer
                 {
                     Formatting = Formatting.Indented
