@@ -196,7 +196,7 @@ namespace ghosts.client.linux.Comms
                 {
                     _log.Trace("posting timeline");
 
-                    var payload = TimelineBuilder.TimelineToString(timeline);
+                    var payload = TimelineBuilder.TimelineToJsonPayload(timeline);
                     var machine = new ResultMachine();
 
                     using (var client = WebClientBuilder.Build(machine))

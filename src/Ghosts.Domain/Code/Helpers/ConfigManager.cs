@@ -2,45 +2,22 @@
 using System;
 using System.IO;
 using Newtonsoft.Json;
+using NLog;
 using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
 
 namespace Ghosts.Domain.Code.Helpers
 {
     public static class ConfigManager
     {
+        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
         public enum FileFormat { Json, Yaml }
         private static ISerializer yamlSerializer = new SerializerBuilder()
-        .WithNamingConvention(LowerCaseNamingConvention.Instance)
         .Build();
         private static IDeserializer yamlDeserializer = new DeserializerBuilder()
-        .WithNamingConvention(LowerCaseNamingConvention.Instance)
         .Build();
 
-        public static FileFormat GetConfigFileFormat<T>(string raw) {
-            if (raw.Length < 1) 
-            {
-                throw new ArgumentException("Configuration data cannot be empty");
-            }
-            try {
-                try 
-                {
-                    JsonConvert.DeserializeObject<T>(raw);
-                    return FileFormat.Json;
-                }
-                catch 
-                {
-                    yamlDeserializer.Deserialize<T>(raw);
-                    return FileFormat.Yaml;
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new ArgumentException($"Passed data was not valid JSON or YAML", ex);
-            }
-        }
 
-        public static T DeserializeConfig<T>(string raw)
+        public static (T, FileFormat) DeserializeConfig<T>(string raw)
         {
             if (raw.Length < 1) 
             {
@@ -49,16 +26,18 @@ namespace Ghosts.Domain.Code.Helpers
             try {
                 try 
                 {
-                    return JsonConvert.DeserializeObject<T>(raw);
+                    return (JsonConvert.DeserializeObject<T>(raw), FileFormat.Json);
                 }
-                catch 
+                catch (Exception ex)
                 {
-                    return yamlDeserializer.Deserialize<T>(raw);
+                    _log.Debug("Input was not valid JSON: " + ex.Message);
+                    _log.Debug("raw data: ", raw);
+                    return (yamlDeserializer.Deserialize<T>(raw), FileFormat.Yaml);
                 }
             }
             catch (Exception ex)
             {
-                throw new ArgumentException($"Passed data was not valid JSON or YAML", ex);
+                throw new ArgumentException($"Passed data was not valid JSON or YAML: " + ex.Message, ex);
             }
         }
 
@@ -74,7 +53,7 @@ namespace Ghosts.Domain.Code.Helpers
 
         }
 
-        public static T LoadConfig<T>(string path) 
+        public static (T, FileFormat) LoadConfig<T>(string path) 
         {
             var extension = Path.GetExtension(path);
             var content = File.ReadAllText(path);
@@ -85,10 +64,10 @@ namespace Ghosts.Domain.Code.Helpers
             }
 
             if (extension == ".yaml" || extension == ".yml") {
-                return yamlDeserializer.Deserialize<T>(content);
+                return (yamlDeserializer.Deserialize<T>(content), FileFormat.Yaml);
             }
             else if (extension == ".json") {
-               return JsonConvert.DeserializeObject<T>(content);
+               return (JsonConvert.DeserializeObject<T>(content), FileFormat.Json);
             } else {
                 throw new ArgumentException($"{0} is not a valid config extension. Use .yaml, .yml or .json", extension);
             }
