@@ -140,6 +140,12 @@ Now, the GHOSTS client will run as a background service and automatically start 
 
 After unzipping, run the client by double-clicking it. The console window may briefly appear and then disappear. To verify, check Windows Task Manager or use the `kill-ghosts.bat` script to close it.
 
+Ghosts supports using YAML and JSON for the application and timeline configuration files. The used configuration file is chosen in the following order of precedence:
+
+1. `.yaml`
+2. `.yml`
+3. `.json`
+
 ### Application configuration
 
 Adjust the API URLs in `application.json` to point to your server:
