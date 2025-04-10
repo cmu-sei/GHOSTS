@@ -40,7 +40,7 @@ This section provides a straightforward guide to installing and configuring GHOS
 
 ## :material-account: **GHOSTS Clients**
 
-To use GHOSTS clients that require a browser, you need to include an automation driver in the same folder as the GHOSTS binary. 
+To use GHOSTS clients that require a browser, you need to include an automation driver in the same folder as the GHOSTS binary.
 
 - **For Firefox:** [Download the appropriate Geckodriver](https://github.com/mozilla/geckodriver/releases) for your browser version.
 - **For Chrome:** [Download the appropriate Chromedriver](https://chromedriver.chromium.org/downloads) for your browser version.
@@ -53,7 +53,7 @@ Additional setup may be required for [Outlook email automation](core/client.md).
 
 1. Ensure that the [Microsoft .NET Framework 4.6.1 runtime](https://dotnet.microsoft.com/download/dotnet-framework/net47) is installed on your client machine. You do not need the full SDK.
 2. [Download the latest Windows client](https://github.com/cmu-sei/GHOSTS/releases/latest).
-3. Extract the contents to a directory, such as `c:\exercise\ghosts`. Update the `config/application.json` file to connect to the previously installed API server.
+3. Extract the contents to a directory, such as `c:\exercise\ghosts`. Update the `config/application.{json|yaml}` file to connect to the previously installed API server.
 
 ### :material-linux: **Linux Client**
 

@@ -22,7 +22,7 @@ GHOSTS on Windows (supporting Win7, 10, 11, and corresponding server versions) i
 
 - Ensure the [Microsoft DotNet 4.6.1 runtime](https://go.microsoft.com/fwlink/?LinkId=2099467) is installed.
 - [Download the latest client](https://github.com/cmu-sei/GHOSTS/releases/latest) and unzip it to `c:\exercise\ghosts`.
-- Adjust `config/application.json` to point to your API server.
+- Adjust `config/application.{json|yaml}` to point to your API server.
 - Run the executable at `c:\exercise\ghosts\ghosts.exe` to setup and start GHOSTS.
 
 ???+ info "Additional configuration required for web browsing"
@@ -140,7 +140,7 @@ Now, the GHOSTS client will run as a background service and automatically start 
 
 After unzipping, run the client by double-clicking it. The console window may briefly appear and then disappear. To verify, check Windows Task Manager or use the `kill-ghosts.bat` script to close it.
 
-### application.json
+### Application configuration
 
 Adjust the API URLs in `application.json` to point to your server:
 
@@ -199,11 +199,58 @@ Adjust the API URLs in `application.json` to point to your server:
 }
 ```
 
+or if you prefer using `application.yaml`
+
+```yaml
+---
+ApiRootUrl: http://localhost:5000/api
+Sockets:
+  IsEnabled: true
+  Heartbeat: 50000
+Id:
+  IsEnabled: true
+  Format: guestlocal
+  FormatKey: guestinfo.id
+  FormatValue: "$formatkeyvalue$-$machinename$"
+  VMWareToolsLocation: C:\progra~1\VMware\VMware Tools\vmtoolsd.exe
+AllowMultipleInstances: false
+EncodeHeaders: true
+ClientResults:
+  IsEnabled: true
+  IsSecure: false
+  CycleSleep: 300000
+ClientUpdates:
+  IsEnabled: true
+  CycleSleep: 300000
+Survey:
+  IsEnabled: false
+  IsSecure: false
+  Frequency: once
+  CycleSleepMinutes: 5
+  OutputFormat: indent
+Timeline:
+  Location: config/timeline.yaml
+Content:
+  EmailContent: ''
+  EmailReply: ''
+  EmailDomain: ''
+  EmailOutside: ''
+  BlogContent: ''
+  BlogReply: ''
+  FileNames: ''
+  Dictionary: ''
+ResourceControl:
+  ManageProcesses: true
+HealthIsEnabled: false
+HandlersIsEnabled: true
+DisableStartup: false
+```
+
 ---
 
-### `timeline.json`
+### Timeline configuration
 
-The `timeline.json` file defines the agent’s daily tasks, such as browsing websites, creating documents, and executing commands. The default settings provide a solid starting point, showcasing a variety of possible configurations. However, the customization options are vast—so feel free to experiment and tailor the setup to suit your needs.
+The `timeline.{json|yaml}` file defines the agent’s daily tasks, such as browsing websites, creating documents, and executing commands. The default settings provide a solid starting point, showcasing a variety of possible configurations. However, the customization options are vast—so feel free to experiment and tailor the setup to suit your needs.
 
 The key field in each timeline entry is the **`HandlerType`**, which specifies the task GHOSTS should perform. These tasks might include running commands (`Command`), browsing websites using Firefox or Chrome (`BrowserFirefox`, `BrowserChrome`), or creating documents in Excel or Word. Below are some other important configuration options:
 
@@ -219,7 +266,7 @@ To execute specific tasks, you can use various system commands, such as:
   ```bash
   net use X:\SERVER\Share
   ```
-  
+
 - **Remote Desktop (RDP) Connection**:
   ```bash
   mstsc.exe {ConnectionFile | /v:ServerName[:Port]} [/console] [/f] [/w:Width/h:Height]
@@ -344,7 +391,7 @@ If you need to track the outcome of a specific timeline event (such as verifying
 
 ### Can I update what clients are doing?
 
-- **Timeline Updates**: Clients operate based on their `config/timeline.json` file. You can update this file using PowerShell, Ansible, or similar tools. It’s just a file.
+- **Timeline Updates**: Clients operate based on their `config/timeline.{json|timeline}` file. You can update this file using PowerShell, Ansible, or similar tools. It’s just a file.
 - **Just-In-Time Activities**: Clients also support just-in-time activities. Any files placed in the `instance/timeline/in` folder will be picked up, executed, and then moved to the `out` folder once complete. This doesn’t affect the default timeline.
 
 ### Can I reset a client on a machine?

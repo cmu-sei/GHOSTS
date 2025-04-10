@@ -27,7 +27,7 @@ Under drupal, it assumed that all users have the capabilty to delete all blogs, 
 
 Default content in config directory is blog-content.csv, default reply content is blog-reply.csv
 
-This content can be overridden in application.json by the 'BlogContent', 'BlogReply' fields.
+This content can be overridden in `application.{json|yaml}` by the 'BlogContent', 'BlogReply' fields.
 
 ```json
   "Content": {
