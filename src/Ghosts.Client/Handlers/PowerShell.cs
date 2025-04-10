@@ -98,7 +98,7 @@ namespace Ghosts.Client.Handlers
         {
             var replacements = handler.HandlerArgs["replace"];
 
-            foreach (var replacement in (JArray)replacements)
+            foreach (var replacement in JArray.FromObject(replacements))
             {
                 foreach (var o in replacement)
                 {

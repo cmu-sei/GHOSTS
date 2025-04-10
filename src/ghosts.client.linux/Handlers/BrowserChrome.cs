@@ -104,7 +104,7 @@ namespace ghosts.client.linux.handlers
             {
                 if (handler.HandlerArgs.TryGetValue("command-line-args", out var v1))
                 {
-                    foreach (var option in (JArray)v1)
+                    foreach (var option in JArray.FromObject(v1))
                     {
                         options.AddArgument(option.Value<string>());
                     }

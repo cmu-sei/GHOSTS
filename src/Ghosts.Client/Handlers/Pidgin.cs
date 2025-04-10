@@ -99,7 +99,7 @@ namespace Ghosts.Client.Handlers
                         try
                         {
                             ErrorWindowTitles = new List<string>();
-                            foreach (var option in (JArray)handler.HandlerArgs["ErrorWindowTitles"])
+                            foreach (var option in JArray.FromObject(handler.HandlerArgs["ErrorWindowTitles"]))
                             {
                                 ErrorWindowTitles.Add(option.Value<string>());
                             }
