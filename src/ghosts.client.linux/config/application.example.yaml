@@ -27,7 +27,6 @@ Survey:
 Timeline:
   Location: config/timeline.json
 Content:
-  EmailsMax: 20
   EmailContent: ''
   EmailReply: ''
   EmailDomain: ''
@@ -46,6 +45,7 @@ FirefoxInstallLocation: ''
 FirefoxMajorVersionMinimum: 48
 OfficeDocsMaxAgeInHours: 72
 Email:
+  EmailsMax: 20
   RecipientsToMin: 1
   RecipientsToMax: 3
   RecipientsCcMin: 0
