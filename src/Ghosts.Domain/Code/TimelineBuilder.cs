@@ -3,8 +3,8 @@
 using System;
 using System.IO;
 using System.Net;
+using Ghosts.Domain.Code.Helpers;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using NLog;
 
 namespace Ghosts.Domain.Code
@@ -83,13 +83,13 @@ namespace Ghosts.Domain.Code
 
             try
             {
-                var timeline = JsonConvert.DeserializeObject<Timeline>(raw);
+                var (timeline, fileFormat) = ConfigManager.DeserializeConfig<Timeline>(raw);
                 if (timeline.Id == Guid.Empty)
                 {
                     timeline.Id = Guid.NewGuid();
                     if (!string.IsNullOrEmpty(path))
                     {
-                        SetLocalTimeline(path, timeline);
+                        SetLocalTimeline(timeline, path);
                     }
                 }
 
@@ -103,25 +103,11 @@ namespace Ghosts.Domain.Code
             }
         }
 
-        public static Timeline StringToTimeline(string raw)
+        public static string TimelineToJsonPayload(Timeline timeline)
         {
             try
             {
-                var timeline = JsonConvert.DeserializeObject<Timeline>(raw);
-                return timeline;
-            }
-            catch
-            {
-                _log.Debug($"String is not a timeline: {raw}");
-                return null;
-            }
-        }
-
-        public static string TimelineToString(Timeline timeline)
-        {
-            try
-            {
-                return JsonConvert.SerializeObject(timeline);
+                return ConfigManager.SerializeConfig(timeline, ConfigManager.FileFormat.Json);
             }
             catch
             {
@@ -153,26 +139,12 @@ namespace Ghosts.Domain.Code
         /// <param name="timeline">`Timeline` type</param>
         public static void SetLocalTimeline(Timeline timeline)
         {
-            using (var file = File.CreateText(ApplicationDetails.ConfigurationFiles.Timeline))
-            {
-                var serializer = new JsonSerializer
-                {
-                    Formatting = Formatting.Indented
-                };
-                serializer.Serialize(file, timeline);
-            }
+            ConfigManager.SaveConfig(timeline, TimelineFile, Formatting.Indented);
         }
 
-        public static void SetLocalTimeline(string path, Timeline timeline)
+        public static void SetLocalTimeline(Timeline timeline, string path)
         {
-            using (var file = File.CreateText(path))
-            {
-                var serializer = new JsonSerializer
-                {
-                    Formatting = Formatting.Indented
-                };
-                serializer.Serialize(file, timeline);
-            }
+            ConfigManager.SaveConfig(timeline, path);
         }
     }
 }

@@ -228,7 +228,7 @@ namespace Ghosts.Client.Handlers
             //options.AddArguments("--remote-debugging-port=0");
             if (handler.HandlerArgs.ContainsKey("command-line-args"))
             {
-                foreach (var option in (JArray)handler.HandlerArgs["command-line-args"])
+                foreach (var option in JArray.FromObject(handler.HandlerArgs["command-line-args"]))
                 {
                     options.AddArgument(option.Value<string>());
                 }

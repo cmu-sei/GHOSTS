@@ -34,7 +34,7 @@ namespace Ghosts.Domain.Code
             if (handler.HandlerArgs.ContainsKey("url-replace"))
             {
                 var replacements = handler.HandlerArgs["url-replace"];
-                foreach (var replacement in (JArray)replacements)
+                foreach (var replacement in JArray.FromObject(replacements))
                 {
                     foreach (var o in replacement)
                     {

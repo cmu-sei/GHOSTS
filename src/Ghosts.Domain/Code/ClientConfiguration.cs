@@ -2,7 +2,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
+using Ghosts.Domain.Code.Helpers;
 using Newtonsoft.Json;
 using NLog;
 
@@ -235,11 +235,9 @@ namespace Ghosts.Domain.Code
             {
                 if (_conf == null)
                 {
-                    var file = ApplicationDetails.ConfigurationFiles.Application;
-                    var raw = File.ReadAllText(file);
-                    _conf = JsonConvert.DeserializeObject<ClientConfiguration>(raw);
-
-                    _log.Debug($"App config loaded successfully: {file}");
+                    var filePath = ApplicationDetails.ConfigurationFiles.Application;
+                    (_conf, _) = ConfigManager.LoadConfig<ClientConfiguration>(filePath);
+                    _log.Debug($"App config loaded successfully: {filePath}");
                 }
 
                 return _conf;
@@ -254,12 +252,11 @@ namespace Ghosts.Domain.Code
                 if (string.IsNullOrEmpty(baseurl)) return;
 
                 var filePath = ApplicationDetails.ConfigurationFiles.Application;
-                var raw = File.ReadAllText(filePath);
-                var conf = JsonConvert.DeserializeObject<ClientConfiguration>(raw);
+                var (conf, _) = ConfigManager.LoadConfig<ClientConfiguration>(filePath);
 
                 conf.ApiRootUrl = baseurl;
 
-                File.WriteAllText(filePath, JsonConvert.SerializeObject(conf, Formatting.Indented));
+                ConfigManager.SaveConfig(conf, filePath, Formatting.Indented);
 
                 _log.Trace($"Updating base configuration... BASE_URL is: {baseurl}");
             }

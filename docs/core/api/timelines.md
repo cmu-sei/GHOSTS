@@ -55,14 +55,14 @@ Client timelines are updated via POST to /api/timelines in the following format:
 
 The key values to consider here are: The machine ID that you want to update, the other key value is the `type` of timeline. The type is an integer value that represents the type of update. The following are the types of updates that are currently supported:
 
-- Timeline = 0            // this 
+- Timeline = 0            // this
 - Health = 1
 - TimelinePartial = 10    // this the agent is currently doing off its default timeline
 - RequestForTimeline = 20
 
 | ID | Type               | Description                          |
 |----| -----------        | ------------------------------------ |
-|  0 | Timeline           | Replaces the client's default timeline stored within ./config/timeline.json                                             |
+|  0 | Timeline           | Replaces the client's default timeline stored within ./config/timeline.{json|yaml}                                      |
 |  1 | Health             | This updates a client's health instructions                                                                             |
 | 10 | TimelinePartial    | Does not replace the default timeline, rather this timeline is executed immediately on separate threads from whatever   |
 | 20 | RequestForTimeline | Use this to instruct the client to send its current default timeline up to the API                                     |

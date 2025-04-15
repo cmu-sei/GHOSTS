@@ -6,6 +6,7 @@ using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using YamlDotNet.Serialization;
 
 namespace Ghosts.Domain
 {
@@ -162,9 +163,11 @@ namespace Ghosts.Domain
         public object DelayBefore { get; set; }
 
         [JsonIgnore]
+        [YamlIgnore]
         public int DelayAfterActual => DelayAfter.GetDelay();
 
         [JsonIgnore]
+        [YamlIgnore]
         public int DelayBeforeActual => DelayBefore.GetDelay();
     }
 
