@@ -914,8 +914,8 @@
     "list": []
   },
   "time": {
-    "from": "2021-10-01T12:17:30.079Z",
-    "to": "2021-10-01T12:56:45.763Z"
+    "from": "now-30m",
+    "to": "now"
   },
   "timepicker": {
     "refresh_intervals": [
