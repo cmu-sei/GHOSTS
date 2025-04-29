@@ -5,8 +5,8 @@ langchain==0.3.0
 langchain_community==0.3.0
 numpy==1.25.2
 Requests==2.32.2
-torch==2.6.0
-transformers==4.48.0
+torch==2.7.0
+transformers==4.50.0
 docx2txt==0.8
 pypdf==4.1.0
 chromadb==0.4.24
