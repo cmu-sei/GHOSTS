@@ -5,6 +5,7 @@ using System.IO;
 using System.Threading;
 using ghosts.client.linux.Infrastructure;
 using Ghosts.Domain;
+using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
 using Newtonsoft.Json.Linq;
 using OpenQA.Selenium;
@@ -160,9 +161,26 @@ namespace ghosts.client.linux.handlers
                 {
                     options.AddLocalStatePreference("profile.managed_default_content_settings.javascript", 1);
                 }
+
+                if (handler.HandlerArgs.ContainsKey("ua-string"))
+                {
+                    switch (handler.HandlerArgs["ua-string"].ToString()?.ToLower())
+                    {
+                        case "random":
+                           options.AddUserProfilePreference("general.useragent.override", UserAgentManager.Get());
+                            break;
+                        case "strict":
+                            options.AddUserProfilePreference("general.useragent.override", UserAgentManager.GetBrowserSpecific("chrome"));
+                            break;
+                        default:
+                            options.AddUserProfilePreference("general.useragent.override", handler.HandlerArgs["ua-string"].ToString());
+                            break;
+                    }
+                }
+
                 if (handler.HandlerArgs.ContainsKeyWithOption("accept-insecure-certificates", "true"))
                 {
-                    options.AddArguments("ignore-certificate-errors");
+                    options.AcceptInsecureCertificates = true;
                 }
             }
 
