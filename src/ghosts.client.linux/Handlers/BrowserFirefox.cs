@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using ghosts.client.linux.Infrastructure;
 using Ghosts.Domain;
+using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
 using Newtonsoft.Json.Linq;
 using OpenQA.Selenium;
@@ -248,6 +249,21 @@ namespace ghosts.client.linux.handlers
                 if (handler.HandlerArgs.ContainsKeyWithOption("blockscripts", "true"))
                 {
                     options.Profile.SetPreference("permissions.default.script", 2);
+                }
+                if (handler.HandlerArgs.ContainsKey("ua-string"))
+                {
+                    switch (handler.HandlerArgs["ua-string"].ToString()?.ToLower())
+                    {
+                        case "random":
+                            options.SetPreference("general.useragent.override", UserAgentManager.Get());
+                            break;
+                        case "strict":
+                            options.SetPreference("general.useragent.override", UserAgentManager.GetBrowserSpecific("firefox"));
+                            break;
+                        default:
+                            options.SetPreference("general.useragent.override", handler.HandlerArgs["ua-string"].ToString());
+                            break;
+                    }
                 }
                 if (handler.HandlerArgs.ContainsKeyWithOption("accept-insecure-certificates", "true"))
                 {

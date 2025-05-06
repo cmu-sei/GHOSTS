@@ -3,14 +3,14 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <RuntimeIdentifiers>win-x64;linux-x64;osx-x64</RuntimeIdentifiers>
-    
+
     <Version>8.0.0.0</Version>
     <AssemblyVersion>8.0.0.0</AssemblyVersion>
     <ReleaseVersion>8.0.0.0</ReleaseVersion>
-    <FileVersion>8.2.2.0</FileVersion>
-    
+    <FileVersion>8.2.3.0</FileVersion>
+
     <SynchReleaseVersion>false</SynchReleaseVersion>
-        
+
     <Authors>Dustin Updyke for Carnegie Mellon University</Authors>
     <Company>Carnegie Mellon University</Company>
     <Product>GHOSTS</Product>
@@ -20,7 +20,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <LangVersion>12</LangVersion>
   </PropertyGroup>
-  
+
   <ItemGroup>
     <PackageReference Include="CommandLineParser" Version="2.9.1" />
     <PackageReference Include="HtmlAgilityPack" Version="1.11.67" />
@@ -31,13 +31,13 @@
     <PackageReference Include="SimpleTCP" Version="1.0.24" />
     <PackageReference Include="System.Diagnostics.Process" Version="4.3.0" />
     <PackageReference Include="SSH.NET" Version="2024.1.0" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.10" />  
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.10" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Ghosts.Domain\ghosts.domain.csproj" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <Content Include="config\application.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -91,5 +91,5 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  
+
 </Project>
