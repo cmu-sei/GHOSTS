@@ -1,23 +1,34 @@
+#!/bin/bash
+
 # Navigate to the root directory of the project
 cd ../
 
-# Build the project assuming the dotnet version is already installed
-dotnet publish -c Release -r win-x64
+# Build the project for Windows
+dotnet publish -c Release -r win-x64 --self-contained false
 
-# Navigate to the directory where ghosts-lite is located
+# Build the project for Linux
+dotnet publish -c Release -r linux-x64 --self-contained false
+
+# Navigate to the output directory
 cd src/bin/Release/net8.0
 
-# Remove unnecessary files
+# Clean up Windows build
 rm win-x64/*pdb
 rm win-x64/Ghosts.Client.Lite.deps.json
 rm -rf win-x64/publish
 
-# Remove the existing ghosts-lite directory and zip if they exist
-rm -rf ghosts-lite
-rm ghosts-lite.zip
+# Clean up Linux build
+rm linux-x64/*pdb
+rm linux-x64/Ghosts.Client.Lite.deps.json
+rm -rf linux-x64/publish
 
-# Move the win-x64 directory to ghosts-lite
-mv win-x64 ghosts-lite
+# Remove existing directories/zips if they exist
+rm -rf ghosts-lite-win ghosts-lite-linux
+rm ghosts-lite-win.zip ghosts-lite-linux.zip
 
-# Create the zip file from within the net8.0 directory
-zip -r ghosts-lite.zip ghosts-lite
+# Rename and zip
+mv win-x64 ghosts-lite-win
+zip -r ghosts-lite-win.zip ghosts-lite-win
+
+mv linux-x64 ghosts-lite-linux
+zip -r ghosts-lite-linux.zip ghosts-lite-linux

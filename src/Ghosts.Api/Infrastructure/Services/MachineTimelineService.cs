@@ -38,7 +38,7 @@ namespace ghosts.api.Infrastructure.Services
             var timelines = await _context.MachineTimelines.Where(x => x.MachineId == id).ToListAsync(ct);
             foreach (var timeline in timelines)
             {
-                var t = TimelineBuilder.StringToTimeline(timeline.Timeline);
+                var t = TimelineBuilder.GetTimelineFromString(timeline.Timeline, null);
                 if (t.Id == timelineId)
                     return timeline;
             }
