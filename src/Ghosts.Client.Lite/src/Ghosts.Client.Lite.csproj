@@ -16,14 +16,14 @@
         <Version>0.1.0.0</Version>
         <AssemblyVersion>0.1.0.0</AssemblyVersion>
         <ReleaseVersion>0.1.0.0</ReleaseVersion>
-        <FileVersion>0.1.14.0</FileVersion>
+        <FileVersion>0.1.30.0</FileVersion>
 
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="HtmlAgilityPack" Version="1.11.61"/>
+        <PackageReference Include="HtmlAgilityPack" Version="1.11.67" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3"/>
-        <PackageReference Include="NLog" Version="5.3.2"/>
+        <PackageReference Include="NLog" Version="5.3.4" />
         <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.1"/>
         <PackageReference Include="Quartz" Version="3.9.0" />
     </ItemGroup>
@@ -41,9 +41,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Reference Include="ghosts.domain">
-        <HintPath>..\lib\ghosts.domain.dll</HintPath>
-      </Reference>
+      <ProjectReference Include="..\..\Ghosts.Domain\ghosts.domain.csproj" />
     </ItemGroup>
 
 </Project>

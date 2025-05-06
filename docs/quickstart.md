@@ -61,3 +61,8 @@ Additional setup may be required for [Outlook email automation](core/client.md).
 2. [Download the latest Linux client](https://github.com/cmu-sei/GHOSTS/releases/latest) zip file. Unzip it to a directory like `~/ghosts` for the user you intend to run GHOSTS.
 
 **Note:** Running the Linux client as root while using web browsing may cause display issues with Gecko/Chromedriver.
+
+### Ghosts Lite Clients
+
+- [Ghosts Lite for Windows](https://cmu.box.com/s/2nu9fvzkpp4ku7o2d4uk82lozpkacatn)
+- [Ghosts Lite for Linux](https://cmu.box.com/s/1dy5ip3e3gm1pdo6v9dy21hd4ybe3pa2)
