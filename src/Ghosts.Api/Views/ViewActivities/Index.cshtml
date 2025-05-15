@@ -43,18 +43,36 @@
                 $("#" + npcId + "-msg").html(icon + " " + message);
                 $("#" + npcId + "-img").removeClass("active");
             }
-            
+
+            const infiniteReconnectStrategy = {
+                nextRetryDelayInMilliseconds: function (retryContext) {
+                    if (retryContext.elapsedMilliseconds < 60000) {
+                        return 5000;
+                    } else {
+                        return 30000;
+                    }
+                }
+            };
+
             const connection = new signalR.HubConnectionBuilder()
                 .withUrl("/hubs/activities")
                 .configureLogging(signalR.LogLevel.Information)
+                .withAutomaticReconnect(infiniteReconnectStrategy)
                 .build();
-                                   
+
             connection.on("show", function (eventId, npcId, type, message, time) {
                 console.log(eventId, npcId, type, message, time);
+
+                if (typeof message === 'object' && message !== null) {
+                    message = `Used ${message.handler} to ${message.action} because ${message.reasoning}`;
+                } else if (typeof message !== 'string') {
+                    message = String(message);
+                }
+
                 $("#" + npcId + "-img").addClass("active");
-                                
+
                 $("#" + npcId + "-msg").html('<i class="fa-solid fa-ellipsis"></i>');
-                
+
                 var icon = "<i class='fa-brands fa-twitter' style='color:#1DA1F2'></i>";
                 if (type === "belief")
                     icon = "<i class='fa-solid fa-cloud-bolt' style='color:gold'></i>";
@@ -64,11 +82,15 @@
                     icon = "<i class='fa-solid fa-graduation-cap' style='color:green'></i>";
                 else if (type === "relationship")
                     icon = "<i class='fa-solid fa-user-group' style='color:purple'></i>";
-                                
+                else if (type === "activity-other")
+                    icon = "<i class='fa-solid fa-user-plus' style='color:red'></i>";
+                else if (type === "activity")
+                    icon = "<i class='fa-solid fa-user-plus' style='color:green'></i>";
+
                 setTimeout(b, 1000, npcId, icon, message);
-                
+
             });
-                        
+
             connection.start().catch(err => console.error(err.toString()));
         });
     </script>

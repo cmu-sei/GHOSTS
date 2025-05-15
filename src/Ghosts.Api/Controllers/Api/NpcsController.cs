@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -15,10 +16,12 @@ using ghosts.api.Infrastructure.Services;
 using Ghosts.Animator;
 using Ghosts.Animator.Extensions;
 using Ghosts.Animator.Models;
+using ghosts.api.Hubs;
 using Ghosts.Api.Infrastructure.Data;
 using ghosts.api.Infrastructure.Extensions;
 using Ghosts.Domain.Code;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using NLog;
 using Swashbuckle.AspNetCore.Annotations;
@@ -29,7 +32,7 @@ namespace ghosts.api.Controllers.Api;
 [ApiController]
 [Produces("application/json")]
 [Route("api/[controller]")]
-public class NpcsController(ApplicationDbContext context, INpcService service) : ControllerBase
+public class NpcsController(ApplicationDbContext context, INpcService service, IHubContext<ActivityHub> activityHubContext) : ControllerBase
 {
     private static readonly Logger _log = LogManager.GetCurrentClassLogger();
 
@@ -464,5 +467,88 @@ public class NpcsController(ApplicationDbContext context, INpcService service) :
         stream.Seek(0, SeekOrigin.Begin);
 
         return File(stream, "text/csv", $"insider_threat_{Guid.NewGuid()}.csv");
+    }
+
+    /// <summary>
+    /// Send AI driven instructions to the NPCs
+    /// </summary>
+    /// <returns></returns>
+    [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.OK)]
+    [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(IActionResult))]
+    [SwaggerOperation("NpcsAiCommand")]
+    [HttpPost("command")]
+    public async Task<IActionResult> Command([FromBody] ActionRequest actionRequest, CancellationToken ct)
+    {
+        Random _random = new Random();
+        var npcs = context.Npcs.ToList().Shuffle(_random).Take(_random.Next(1,20));
+
+        foreach (var npc in npcs)
+        {
+            switch (actionRequest.handler.ToLower())
+            {
+                case "aws":
+                case "azure":
+                case "blog":
+                case "blogdrupal":
+                case "browserchrome":
+                case "browsercrawl":
+                case "browserfirefox":
+                case "clicks":
+                case "cmd":
+                case "excel":
+                case "executefile":
+                case "ftp":
+                case "notepad":
+                case "outlook":
+                case "pidgin":
+                case "powerpoint":
+                case "powershell":
+                case "print":
+                case "rdp":
+                case "reboot":
+                case "sftp":
+                case "sharepoint":
+                case "social":
+                case "ssh":
+                case "watcher":
+                case "wmi":
+                case "word":
+                    await ProcessHandledAction(npc, actionRequest, ct);
+                    break;
+                default:
+                    await ProcessUnhandledAction(npc, actionRequest, ct);
+                    break;
+            }
+        }
+        return NoContent();
+    }
+
+    private async Task ProcessUnhandledAction(NpcRecord npc, ActionRequest actionRequest, CancellationToken ct)
+    {
+        await activityHubContext.Clients.All.SendAsync("show",
+            "1",
+            npc.Id,
+            "activity-other",
+            actionRequest,
+            DateTime.Now.ToString(CultureInfo.InvariantCulture),
+            cancellationToken: ct);
+    }
+
+    private async Task ProcessHandledAction(NpcRecord npc, ActionRequest actionRequest, CancellationToken ct)
+    {
+        await activityHubContext.Clients.All.SendAsync("show",
+            "1",
+            npc.Id,
+            "activity",
+            actionRequest,
+            DateTime.Now.ToString(CultureInfo.InvariantCulture),
+            cancellationToken: ct);
+    }
+
+    public class ActionRequest
+    {
+        public string handler { get; set; }
+        public string action { get; set; }
+        public string reasoning { get; set; }
     }
 }

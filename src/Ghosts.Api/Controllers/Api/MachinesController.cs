@@ -11,9 +11,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace ghosts.api.Controllers.Api
 {
-    [Produces("application/json")]
     [Route("api/[controller]")]
-    [ResponseCache(Duration = 5)]
     public class MachinesController(IMachineService service) : Controller
     {
         private readonly IMachineService _service = service;
@@ -54,7 +52,7 @@ namespace ghosts.api.Controllers.Api
         /// <param name="ct">Cancellation Token</param>
         /// <returns>Machine record</returns>
         [SwaggerOperation("MachinesGetById")]
-        [HttpGet("{id}")]
+        [HttpGet("{id:guid}")]
         public async Task<IActionResult> GetMachine([FromRoute] Guid id, CancellationToken ct)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -74,7 +72,7 @@ namespace ghosts.api.Controllers.Api
         /// <param name="ct">Cancellation Token</param>
         /// <returns>The updated machine record</returns>
         [SwaggerOperation("MachinesUpdate")]
-        [HttpPut("{id}")]
+        [HttpPut("{id:guid}")]
         public async Task<IActionResult> PutMachine(string id, [FromBody] Machine machine, CancellationToken ct)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -110,7 +108,7 @@ namespace ghosts.api.Controllers.Api
         /// <returns>204 No Content</returns>
         [ResponseCache(Duration = 0)]
         [SwaggerOperation("MachinesDeleteById")]
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:guid}")]
         public async Task<IActionResult> DeleteMachine([FromRoute] Guid id, CancellationToken ct)
         {
             if (!ModelState.IsValid || id == Guid.Empty) return BadRequest(ModelState);
@@ -128,7 +126,7 @@ namespace ghosts.api.Controllers.Api
         /// <param name="ct">Cancellation Token</param>
         /// <returns>The activity history for the requested machine</returns>
         [SwaggerOperation("MachinesGetActivityById")]
-        [HttpGet("{id}/activity")]
+        [HttpGet("{id:guid}/activity")]
         public async Task<IActionResult> Activity([FromRoute] Guid id, int skip, int take, CancellationToken ct)
         {
             if (!ModelState.IsValid || id == Guid.Empty) return BadRequest(ModelState);
@@ -147,13 +145,40 @@ namespace ghosts.api.Controllers.Api
         }
 
         /// <summary>
+        /// Adds activity for a given machine
+        /// </summary>
+        /// <param name="id">The machine to add the activity to</param>
+        /// <param name="historyItem"></param>
+        /// <param name="ct">Cancellation Token</param>
+        /// <returns>Add to the activity history for a machine</returns>
+        [SwaggerOperation("MachinesAddActivityById")]
+        [HttpPost("{id:guid}/activity")]
+        public async Task<IActionResult> ActivityAdd([FromRoute] Guid id, [FromBody] HistoryTimeline historyItem, CancellationToken ct)
+        {
+            if (!ModelState.IsValid || id == Guid.Empty) return BadRequest(ModelState);
+
+            try
+            {
+                await _service.AddActivity(id, historyItem, ct);
+
+                return NoContent();
+            }
+            catch (Exception exc)
+            {
+                // Log the exception and return a 500 status code
+                _log.Error(exc, $"An error occurred while adding activity for machine {id}");
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        /// <summary>
         /// Gets the health for a particular machine
         /// </summary>
         /// <param name="id">Machine Guid</param>
         /// <param name="ct">Cancellation Token</param>
         /// <returns>Health records for the machine</returns>
         [SwaggerOperation("MachinesGetHealthById")]
-        [HttpGet("{id}/health")]
+        [HttpGet("{id:guid}/health")]
         public async Task<IActionResult> Health([FromRoute] Guid id, CancellationToken ct)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);

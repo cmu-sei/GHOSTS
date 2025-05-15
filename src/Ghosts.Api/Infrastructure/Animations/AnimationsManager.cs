@@ -254,7 +254,7 @@ public class AnimationsManager(IHubContext<ActivityHub> activityHubContext, ISer
                     _socialGraphJobThread = new Thread(() =>
                     {
                         Thread.CurrentThread.IsBackground = true;
-                        _ = new SocialGraphJob(settings, _scopeFactory, _random, _activityHubContext, _socialGraphJobCancellationTokenSource.Token);
+                        _ = new SocialGraphJob(settings, _scopeFactory, _random, _activityHubContext, _socialGraphJobCancellationTokenSource.Token).RunAsync(100);
                     });
                     _socialGraphJobThread.Start();
                 }

@@ -2,14 +2,17 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ghosts.api.Infrastructure.Models;
 using Ghosts.Api;
+using ghosts.api.Hubs;
 using Ghosts.Api.Infrastructure;
 using Ghosts.Api.Infrastructure.Data;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using NLog;
 
@@ -28,9 +31,10 @@ namespace ghosts.api.Infrastructure.Services
         Task<List<HistoryHealth>> GetMachineHistoryHealth(Guid model, CancellationToken ct);
         Task<List<Machine.MachineHistoryItem>> GetMachineHistory(Guid model, CancellationToken ct);
         Task<List<HistoryTimeline>> GetActivity(Guid id, int skip, int take, CancellationToken ct);
+        Task AddActivity(Guid id, HistoryTimeline historyTimeline, CancellationToken ct);
     }
 
-    public class MachineService(ApplicationDbContext context) : IMachineService
+    public class MachineService(ApplicationDbContext context, IHubContext<ActivityHub> activityHubContext) : IMachineService
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
         private readonly ApplicationDbContext _context = context;
@@ -265,6 +269,19 @@ namespace ghosts.api.Infrastructure.Services
                 _log.Debug(e);
                 throw;
             }
+        }
+
+        public async Task AddActivity(Guid id, HistoryTimeline historyTimeline, CancellationToken ct)
+        {
+            await _context.HistoryTimeline.AddAsync(historyTimeline, ct);
+
+            await activityHubContext.Clients.All.SendAsync("show",
+                "1",
+                id,
+                "activity",
+                historyTimeline.ToActivityPlainText(),
+                DateTime.Now.ToString(CultureInfo.InvariantCulture),
+                cancellationToken: ct);
         }
 
 

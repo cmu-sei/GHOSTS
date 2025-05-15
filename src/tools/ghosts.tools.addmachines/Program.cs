@@ -15,12 +15,12 @@ namespace tools_addmachines
             {
                 var url = "http://localhost:5000/api/clientid";
                 WebRequest req = WebRequest.Create(url);
-                req.Headers.Add("ghosts-name", "ted");
-                req.Headers.Add("ghosts-fqdn", "fqdn");
-                req.Headers.Add("ghosts-user", "test user");
+                req.Headers.Add("ghosts-name",  Faker.Name.Last());
+                req.Headers.Add("ghosts-fqdn", Faker.Internet.DomainWord());
+                req.Headers.Add("ghosts-user", Faker.Internet.UserName());
 
                 req.Headers.Add("ghosts-host", "host");
-                req.Headers.Add("ghosts-domain", "domain");
+                req.Headers.Add("ghosts-domain", Faker.Internet.DomainName());
                 req.Headers.Add("ghosts-resolvedhost", "localhost");
                 req.Headers.Add("ghosts-ip", $"192.168.0.{random.Next(1, 255)}");
                 req.Headers.Add("ghosts-version", "8.0");
