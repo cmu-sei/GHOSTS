@@ -6,7 +6,10 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using FileHelpers;
@@ -16,7 +19,10 @@ using ghosts.api.Infrastructure.Services;
 using Ghosts.Animator;
 using Ghosts.Animator.Extensions;
 using Ghosts.Animator.Models;
+using Ghosts.Api;
 using ghosts.api.Hubs;
+using Ghosts.Api.Infrastructure;
+using ghosts.api.Infrastructure.ContentServices.Ollama;
 using Ghosts.Api.Infrastructure.Data;
 using ghosts.api.Infrastructure.Extensions;
 using Ghosts.Domain.Code;
@@ -24,6 +30,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using NLog;
+using OpenAI.ObjectModels.RequestModels;
 using Swashbuckle.AspNetCore.Annotations;
 using Swashbuckle.AspNetCore.Filters;
 
@@ -32,7 +39,10 @@ namespace ghosts.api.Controllers.Api;
 [ApiController]
 [Produces("application/json")]
 [Route("api/[controller]")]
-public class NpcsController(ApplicationDbContext context, INpcService service, IHubContext<ActivityHub> activityHubContext) : ControllerBase
+public class NpcsController(
+    ApplicationDbContext context,
+    INpcService service,
+    IHubContext<ActivityHub> activityHubContext) : ControllerBase
 {
     private static readonly Logger _log = LogManager.GetCurrentClassLogger();
 
@@ -239,7 +249,8 @@ public class NpcsController(ApplicationDbContext context, INpcService service, I
     [HttpPost("{campaign}/{enclave}/custom")]
     [Obsolete("Obsolete")]
     [SwaggerOperation("NpcsEnclaveReducedFields")]
-    public async Task<IActionResult> NpcsEnclaveReducedFields(string campaign, string enclave, [FromBody] string[] fieldsToReturn)
+    public async Task<IActionResult> NpcsEnclaveReducedFields(string campaign, string enclave,
+        [FromBody] string[] fieldsToReturn)
     {
         var npcList = await NpcsEnclaveGet(campaign, enclave);
         var npcDetails = new Dictionary<string, Dictionary<string, string>>();
@@ -391,7 +402,8 @@ public class NpcsController(ApplicationDbContext context, INpcService service, I
     [Obsolete("Obsolete")]
     [ProducesResponseType((int)HttpStatusCode.BadRequest, Type = typeof(string))]
     [SwaggerResponse((int)HttpStatusCode.BadRequest, Type = typeof(string))]
-    public async Task<ActionResult<IEnumerable<NpcRecord>>> NpcsInsiderThreatCreate(InsiderThreatGenerationConfiguration config, CancellationToken ct)
+    public async Task<ActionResult<IEnumerable<NpcRecord>>> NpcsInsiderThreatCreate(
+        InsiderThreatGenerationConfiguration config, CancellationToken ct)
     {
         if (!ModelState.IsValid || config?.Enclaves == null)
         {
@@ -425,10 +437,10 @@ public class NpcsController(ApplicationDbContext context, INpcService service, I
                 //get same company departments and highest ranked in that department
 
                 var managerList = createdNpcs.Where(x => x.Id != npc.Id
-                                                         && x.NpcProfile.Employment.EmploymentRecords.Any(
-                                                             o => o.Company == job.Company
-                                                                  && o.Department == job.Department
-                                                                  && o.Level >= job.Level)).ToList();
+                                                         && x.NpcProfile.Employment.EmploymentRecords.Any(o =>
+                                                             o.Company == job.Company
+                                                             && o.Department == job.Department
+                                                             && o.Level >= job.Level)).ToList();
 
                 if (managerList.Count != 0)
                 {
@@ -479,11 +491,42 @@ public class NpcsController(ApplicationDbContext context, INpcService service, I
     [HttpPost("command")]
     public async Task<IActionResult> Command([FromBody] ActionRequest actionRequest, CancellationToken ct)
     {
-        Random _random = new Random();
-        var npcs = context.Npcs.ToList().Shuffle(_random).Take(_random.Next(1,20));
+        IEnumerable<NpcRecord> npcs = null;
+        Random random = new Random();
+        var scale = actionRequest.scale;
+        if (scale > 1)
+        {
+            scale *= random.Next(1, 10);
+            npcs = context.Npcs.ToList().Shuffle(random).Take(scale);
+        }
+        else
+        {
+            try
+            {
+                npcs = context.Npcs.Where(x => x.NpcProfile.Name.First.ToLower() == actionRequest.who.ToLower());
+            }
+            catch (Exception e)
+            {
+                //pass
+            }
+
+            if (npcs == null || !npcs.Any())
+                npcs = context.Npcs.ToList().Shuffle(random).Take(1);
+        }
 
         foreach (var npc in npcs)
         {
+            actionRequest = await GetSentiment(actionRequest);
+
+            // clean up outliers
+            if (actionRequest.handler.Contains("word") || actionRequest.handler.Contains("docs"))
+                actionRequest.handler = "Word";
+            if (actionRequest.handler.Contains("browser"))
+                actionRequest.handler = random.NextDouble() < 0.8 ? "BrowserFirefox" : "BrowserChrome";
+            if (actionRequest.handler == "email")
+                actionRequest.handler = "Outlook";
+
+            // now map
             switch (actionRequest.handler.ToLower())
             {
                 case "aws":
@@ -520,11 +563,43 @@ public class NpcsController(ApplicationDbContext context, INpcService service, I
                     break;
             }
         }
+
         return NoContent();
+    }
+
+    private readonly JsonSerializerOptions _jsonSerializerOptions = new()
+    {
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        WriteIndented = false
+    };
+
+    private async Task<ActionRequest> GetSentiment(ActionRequest actionRequest)
+    {
+        try
+        {
+            var client = new HttpClient();
+            var request = new HttpRequestMessage(HttpMethod.Post, "http://localhost:5005/moods");
+            var content =
+                new StringContent(
+                    "{\"text\": \"" + actionRequest.action + " because " + actionRequest.reasoning + "\"}", null,
+                    "application/json");
+            request.Content = content;
+            var response = await client.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+            var o = JsonSerializer.Deserialize<SentimentResult>(await response.Content.ReadAsStringAsync(),
+                _jsonSerializerOptions);
+            actionRequest.sentiment = o.intent;
+        }
+        catch (Exception e)
+        {
+            actionRequest.sentiment = "neutral";
+        }
+        return actionRequest;
     }
 
     private async Task ProcessUnhandledAction(NpcRecord npc, ActionRequest actionRequest, CancellationToken ct)
     {
+        actionRequest.sentiment ??= "neutral";
         await activityHubContext.Clients.All.SendAsync("show",
             "1",
             npc.Id,
@@ -536,6 +611,7 @@ public class NpcsController(ApplicationDbContext context, INpcService service, I
 
     private async Task ProcessHandledAction(NpcRecord npc, ActionRequest actionRequest, CancellationToken ct)
     {
+        actionRequest.sentiment ??= "neutral";
         await activityHubContext.Clients.All.SendAsync("show",
             "1",
             npc.Id,
@@ -549,6 +625,17 @@ public class NpcsController(ApplicationDbContext context, INpcService service, I
     {
         public string handler { get; set; }
         public string action { get; set; }
+        public int scale { get; set; }
+        public string who { get; set; }
         public string reasoning { get; set; }
+        public string sentiment { get; set; }
+        public string original { get; set; }
+    }
+
+    public class SentimentResult
+    {
+        public string intent { get; set; }
+        public decimal confidence { get; set; }
+        public object entities { get; set; }
     }
 }

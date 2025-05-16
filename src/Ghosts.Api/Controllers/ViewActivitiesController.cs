@@ -22,6 +22,13 @@ public class ViewActivitiesController(ApplicationDbContext context) : Controller
         return View("Index", list);
     }
 
+    [HttpGet("current")]
+    public IActionResult Current()
+    {
+        var list = _context.Npcs.ToList().OrderBy(o => o.Enclave).ThenBy(o => o.Team);
+        return View("current", list);
+    }
+
     [HttpGet("{id:guid}")]
     public IActionResult Detail(Guid id)
     {
