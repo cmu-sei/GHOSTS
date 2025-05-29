@@ -32,7 +32,7 @@ jobs:
           docker save dustinupdyke/ghosts-socializer:latest > ghosts-socializer.tar
 
       - name: Upload TAR file as artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: ghosts-socializer
           path: ghosts-socializer.tar
