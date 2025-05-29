@@ -81,6 +81,8 @@ export function JSONImporter<
 						}
 
 						const result = validator.safeParse(json);
+						console.log(json, result);
+
 						if (!result.success) {
 							toast({
 								title: "JSON is not a valid array of timeline handlers",
