@@ -2,6 +2,7 @@
 
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text;
 using Ghosts.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -35,6 +36,34 @@ namespace ghosts.api.Infrastructure.Models
             var now = DateTime.UtcNow;
             ActiveUtc = now;
             CreatedUtc = now;
+        }
+
+        public string ToActivityPlainText()
+        {
+            var sb = new StringBuilder();
+            try
+            {
+                foreach (var handler in this.Update.TimeLineHandlers)
+                {
+                    switch (handler.HandlerType)
+                    {
+                        case HandlerType.BrowserChrome:
+                        case HandlerType.BrowserFirefox:
+                            sb.Append($"Used {handler.HandlerType.ToString().Replace("Browser", "")} to visit {handler.Initial}\n");
+                            break;
+                        default:
+                            sb.Append($"Used {handler.HandlerType.ToString()} to perform some activity\n");
+                            break;
+                    }
+
+                }
+            }
+            catch (Exception e)
+            {
+                return "";
+            }
+
+            return sb.ToString();
         }
     }
 

@@ -2,10 +2,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using FileHelpers;
@@ -15,12 +19,18 @@ using ghosts.api.Infrastructure.Services;
 using Ghosts.Animator;
 using Ghosts.Animator.Extensions;
 using Ghosts.Animator.Models;
+using Ghosts.Api;
+using ghosts.api.Hubs;
+using Ghosts.Api.Infrastructure;
+using ghosts.api.Infrastructure.ContentServices.Ollama;
 using Ghosts.Api.Infrastructure.Data;
 using ghosts.api.Infrastructure.Extensions;
 using Ghosts.Domain.Code;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using NLog;
+using OpenAI.ObjectModels.RequestModels;
 using Swashbuckle.AspNetCore.Annotations;
 using Swashbuckle.AspNetCore.Filters;
 
@@ -29,7 +39,10 @@ namespace ghosts.api.Controllers.Api;
 [ApiController]
 [Produces("application/json")]
 [Route("api/[controller]")]
-public class NpcsController(ApplicationDbContext context, INpcService service) : ControllerBase
+public class NpcsController(
+    ApplicationDbContext context,
+    INpcService service,
+    IHubContext<ActivityHub> activityHubContext) : ControllerBase
 {
     private static readonly Logger _log = LogManager.GetCurrentClassLogger();
 
@@ -236,7 +249,8 @@ public class NpcsController(ApplicationDbContext context, INpcService service) :
     [HttpPost("{campaign}/{enclave}/custom")]
     [Obsolete("Obsolete")]
     [SwaggerOperation("NpcsEnclaveReducedFields")]
-    public async Task<IActionResult> NpcsEnclaveReducedFields(string campaign, string enclave, [FromBody] string[] fieldsToReturn)
+    public async Task<IActionResult> NpcsEnclaveReducedFields(string campaign, string enclave,
+        [FromBody] string[] fieldsToReturn)
     {
         var npcList = await NpcsEnclaveGet(campaign, enclave);
         var npcDetails = new Dictionary<string, Dictionary<string, string>>();
@@ -388,7 +402,8 @@ public class NpcsController(ApplicationDbContext context, INpcService service) :
     [Obsolete("Obsolete")]
     [ProducesResponseType((int)HttpStatusCode.BadRequest, Type = typeof(string))]
     [SwaggerResponse((int)HttpStatusCode.BadRequest, Type = typeof(string))]
-    public async Task<ActionResult<IEnumerable<NpcRecord>>> NpcsInsiderThreatCreate(InsiderThreatGenerationConfiguration config, CancellationToken ct)
+    public async Task<ActionResult<IEnumerable<NpcRecord>>> NpcsInsiderThreatCreate(
+        InsiderThreatGenerationConfiguration config, CancellationToken ct)
     {
         if (!ModelState.IsValid || config?.Enclaves == null)
         {
@@ -422,10 +437,10 @@ public class NpcsController(ApplicationDbContext context, INpcService service) :
                 //get same company departments and highest ranked in that department
 
                 var managerList = createdNpcs.Where(x => x.Id != npc.Id
-                                                         && x.NpcProfile.Employment.EmploymentRecords.Any(
-                                                             o => o.Company == job.Company
-                                                                  && o.Department == job.Department
-                                                                  && o.Level >= job.Level)).ToList();
+                                                         && x.NpcProfile.Employment.EmploymentRecords.Any(o =>
+                                                             o.Company == job.Company
+                                                             && o.Department == job.Department
+                                                             && o.Level >= job.Level)).ToList();
 
                 if (managerList.Count != 0)
                 {
@@ -464,5 +479,163 @@ public class NpcsController(ApplicationDbContext context, INpcService service) :
         stream.Seek(0, SeekOrigin.Begin);
 
         return File(stream, "text/csv", $"insider_threat_{Guid.NewGuid()}.csv");
+    }
+
+    /// <summary>
+    /// Send AI driven instructions to the NPCs
+    /// </summary>
+    /// <returns></returns>
+    [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.OK)]
+    [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(IActionResult))]
+    [SwaggerOperation("NpcsAiCommand")]
+    [HttpPost("command")]
+    public async Task<IActionResult> Command([FromBody] ActionRequest actionRequest, CancellationToken ct)
+    {
+        IEnumerable<NpcRecord> npcs = null;
+        Random random = new Random();
+        var scale = actionRequest.scale;
+        if (scale > 1)
+        {
+            scale *= random.Next(1, 10);
+            npcs = context.Npcs.ToList().Shuffle(random).Take(scale);
+        }
+        else
+        {
+            try
+            {
+                npcs = context.Npcs.Where(x => x.NpcProfile.Name.First.ToLower() == actionRequest.who.ToLower());
+            }
+            catch (Exception e)
+            {
+                //pass
+            }
+
+            if (npcs == null || !npcs.Any())
+                npcs = context.Npcs.ToList().Shuffle(random).Take(1);
+        }
+
+        foreach (var npc in npcs)
+        {
+            actionRequest = await GetSentiment(actionRequest);
+
+            // clean up outliers
+            if (actionRequest.handler.Contains("word") || actionRequest.handler.Contains("docs"))
+                actionRequest.handler = "Word";
+            if (actionRequest.handler.Contains("browser"))
+                actionRequest.handler = random.NextDouble() < 0.8 ? "BrowserFirefox" : "BrowserChrome";
+            if (actionRequest.handler == "email")
+                actionRequest.handler = "Outlook";
+
+            // now map
+            switch (actionRequest.handler.ToLower())
+            {
+                case "aws":
+                case "azure":
+                case "blog":
+                case "blogdrupal":
+                case "browserchrome":
+                case "browsercrawl":
+                case "browserfirefox":
+                case "clicks":
+                case "cmd":
+                case "excel":
+                case "executefile":
+                case "ftp":
+                case "notepad":
+                case "outlook":
+                case "pidgin":
+                case "powerpoint":
+                case "powershell":
+                case "print":
+                case "rdp":
+                case "reboot":
+                case "sftp":
+                case "sharepoint":
+                case "social":
+                case "ssh":
+                case "watcher":
+                case "wmi":
+                case "word":
+                    await ProcessHandledAction(npc, actionRequest, ct);
+                    break;
+                default:
+                    await ProcessUnhandledAction(npc, actionRequest, ct);
+                    break;
+            }
+        }
+
+        return NoContent();
+    }
+
+    private readonly JsonSerializerOptions _jsonSerializerOptions = new()
+    {
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        WriteIndented = false
+    };
+
+    private async Task<ActionRequest> GetSentiment(ActionRequest actionRequest)
+    {
+        try
+        {
+            var client = new HttpClient();
+            var request = new HttpRequestMessage(HttpMethod.Post, "http://localhost:5005/moods");
+            var content =
+                new StringContent(
+                    "{\"text\": \"" + actionRequest.action + " because " + actionRequest.reasoning + "\"}", null,
+                    "application/json");
+            request.Content = content;
+            var response = await client.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+            var o = JsonSerializer.Deserialize<SentimentResult>(await response.Content.ReadAsStringAsync(),
+                _jsonSerializerOptions);
+            actionRequest.sentiment = o.intent;
+        }
+        catch (Exception e)
+        {
+            actionRequest.sentiment = "neutral";
+        }
+        return actionRequest;
+    }
+
+    private async Task ProcessUnhandledAction(NpcRecord npc, ActionRequest actionRequest, CancellationToken ct)
+    {
+        actionRequest.sentiment ??= "neutral";
+        await activityHubContext.Clients.All.SendAsync("show",
+            "1",
+            npc.Id,
+            "activity-other",
+            actionRequest,
+            DateTime.Now.ToString(CultureInfo.InvariantCulture),
+            cancellationToken: ct);
+    }
+
+    private async Task ProcessHandledAction(NpcRecord npc, ActionRequest actionRequest, CancellationToken ct)
+    {
+        actionRequest.sentiment ??= "neutral";
+        await activityHubContext.Clients.All.SendAsync("show",
+            "1",
+            npc.Id,
+            "activity",
+            actionRequest,
+            DateTime.Now.ToString(CultureInfo.InvariantCulture),
+            cancellationToken: ct);
+    }
+
+    public class ActionRequest
+    {
+        public string handler { get; set; }
+        public string action { get; set; }
+        public int scale { get; set; }
+        public string who { get; set; }
+        public string reasoning { get; set; }
+        public string sentiment { get; set; }
+        public string original { get; set; }
+    }
+
+    public class SentimentResult
+    {
+        public string intent { get; set; }
+        public decimal confidence { get; set; }
+        public object entities { get; set; }
     }
 }

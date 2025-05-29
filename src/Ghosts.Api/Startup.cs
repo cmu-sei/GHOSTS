@@ -12,6 +12,7 @@ using Ghosts.Api.Hubs;
 using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Api.Infrastructure.Extensions;
 using Ghosts.Api.Infrastructure.Filters;
+using ghosts.api.Infrastructure.Formatters;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
 using Microsoft.AspNetCore.Builder;
@@ -25,6 +26,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Converters;
 using Swashbuckle.AspNetCore.Filters;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace Ghosts.Api
 {
@@ -66,9 +68,16 @@ namespace Ghosts.Api
                 c.DocumentFilter<CustomDocumentFilter>();
                 c.IncludeXmlComments(xmlPath);
                 c.ExampleFilters();
+                c.CustomOperationIds(apiDesc =>
+                    apiDesc.TryGetMethodInfo(out var methodInfo) ? methodInfo.Name : null);
             });
             services.AddSwaggerGenNewtonsoftSupport(); // explicit opt-in - needs to be placed after AddSwaggerGen()
             services.AddSwaggerExamplesFromAssemblies(Assembly.GetEntryAssembly());
+
+            services.AddControllers(options =>
+            {
+                options.OutputFormatters.Add(new MarkdownOutputFormatter());
+            });
 
             // Add application services.
             services.AddScoped<IMachineService, MachineService>();

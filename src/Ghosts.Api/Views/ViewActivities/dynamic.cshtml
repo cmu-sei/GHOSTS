@@ -1,0 +1,397 @@
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>GHOSTS NPC Network</title>
+    <link type="text/css" href="/bootstrap/css/bootstrap.css" rel="stylesheet" id="bootstrap-css"/>
+    <script src="/bootstrap/js/bootstrap.js"></script>
+    <script src="/bootstrap/js/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/lib/fontawesome/css/all.css"/>
+    <link rel="stylesheet" href="/flags/flags.css"/>
+    <link rel="icon" href="/img/ghosts.png" type="image/png">
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="/lib/signalr/dist/browser/signalr.js"></script>
+    <style>
+        body {
+            margin: 0;
+            background: #fff;
+            color: #000;
+            font-family: monospace;
+        }
+
+        svg {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .tooltip {
+            position: absolute;
+            background: #333;
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        #mood-meter {
+            position: fixed;
+            bottom: 110px;
+            right: 10px;
+            background: #eee;
+            border: 1px solid #999;
+            padding: 6px 12px;
+            font-family: monospace;
+            font-size: 14px;
+            border-radius: 4px;
+            z-index: 999;
+        }
+
+        #update-console {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            max-height: 97px;
+            overflow-y: auto;
+            background: white;
+            border-top: 1px solid silver;
+            font-family: monospace;
+            font-size: 12px;
+            padding: 4px 8px;
+            z-index: 998;
+        }
+    </style>
+</head>
+<body>
+<div id="mood-meter">Range Mood: 😐 Neutral</div>
+<div id="update-console"></div>
+<div class="tooltip" id="tooltip"></div>
+<script>
+    @{
+        var lastId = ((IEnumerable<dynamic>)Model).Last().NpcProfile.Id;
+    }
+    const nodes = [
+        @foreach (var x in Model)
+        {
+            var npc = x.NpcProfile;
+            <text>{
+                id: "@npc.Id",
+                name: "@npc.Name",
+                knowledge: [],
+                image: "/api/npcs/@npc.Id/photo"
+            }@(npc.Id.ToString() == lastId.ToString() ? "" : ",")</text>
+        }
+    ];
+    @{
+        var list = ((IEnumerable<dynamic>)Model).ToList();
+    }
+    const links = [
+        @for (int i = 1; i < list.Count; i++)
+        {
+            var a = list[i - 1].NpcProfile.Id;
+            var b = list[i].NpcProfile.Id;
+            <text>{source: "@a", target: "@b", strength: 1}@(i == list.Count - 1 ? "" : ",")</text>
+        }
+    ];
+
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    const svg = d3.select("body").append("svg")
+        .attr("width", width)
+        .attr("height", height);
+
+    svg.append("defs").html(`
+        <filter id="pulse-glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="blur"/>
+            <feColorMatrix in="blur" type="matrix"
+              values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0"/>
+            <feMerge>
+              <feMergeNode/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+        </filter>`);
+
+    const tooltip = d3.select("#tooltip");
+
+    const simulation = d3.forceSimulation(nodes)
+        .force("link", d3.forceLink(links).id(d => d.id).distance(150))
+        .force("charge", d3.forceManyBody().strength(-300))
+        .force("center", d3.forceCenter(width / 2, height / 2));
+
+    const linkLayer = svg.append("g");
+    const link = linkLayer
+        .attr("stroke", "#999")
+        .attr("stroke-opacity", 0.6)
+        .selectAll("line")
+        .data(links)
+        .join("line")
+        .attr("stroke-width", d => d.strength);
+
+    const nodeLayer = svg.append("g");
+    const node = nodeLayer
+        .selectAll("image")
+        .data(nodes)
+        .join("image")
+        .attr("xlink:href", d => d.image || "default.png")
+        .attr("width", 36)
+        .attr("height", 36)
+        .attr("clip-path", "circle(18px at 18px 18px)")
+        .on("mouseover", (event, d) => {
+            tooltip.style("opacity", 1)
+                .style("left", `${event.pageX + 10}px`)
+                .style("top", `${event.pageY - 10}px`)
+                .html(`<strong>${d.name}</strong><br/>Knowledge: ${d.knowledge.join(", ") || "None"}`);
+        })
+        .on("mouseout", () => tooltip.style("opacity", 0))
+        .call(drag(simulation));
+
+    const iconLayer = svg.append("g");
+    const label = svg.append("g")
+        .selectAll("text")
+        .data(nodes)
+        .join("text")
+        .text(d => d.name)
+        .attr("fill", "black")
+        .attr("text-anchor", "middle")
+        .attr("dy", 30)
+        .attr("font-size", 10)
+        .attr("pointer-events", "none");
+
+    const icons = iconLayer.selectAll("text")
+        .data(nodes)
+        .join("text")
+        .text("")
+        .attr("text-anchor", "start")
+        .attr("font-size", 18)
+        .attr("fill", "white")
+        .attr("opacity", 0);
+
+    simulation.on("tick", () => {
+        link
+            .attr("x1", d => d.source.x)
+            .attr("y1", d => d.source.y)
+            .attr("x2", d => d.target.x)
+            .attr("y2", d => d.target.y);
+
+        node
+            .attr("x", d => d.x - 18)
+            .attr("y", d => d.y - 18);
+
+        label
+            .attr("x", d => d.x)
+            .attr("y", d => d.y + 30);
+
+        icons
+            .attr("x", d => d.x + 22)
+            .attr("y", d => d.y - 10);
+    });
+
+    function drag(simulation) {
+        return d3.drag()
+            .on("start", (event, d) => {
+                if (!event.active) simulation.alphaTarget(0.3).restart();
+                d.fx = d.x;
+                d.fy = d.y;
+            })
+            .on("drag", (event, d) => {
+                d.fx = event.x;
+                d.fy = event.y;
+            })
+            .on("end", (event, d) => {
+                if (!event.active) simulation.alphaTarget(0);
+                d.fx = null;
+                d.fy = null;
+            });
+    }
+
+    let moodState = [];
+
+    function updateMood(label, value) {
+        const existing = moodState.find(m => m.label === label);
+        if (existing) {
+            existing.value += value;
+        } else {
+            moodState.push({ label, value });
+        }
+
+        console.log(moodState);
+
+        const top = moodState
+            .filter(m => typeof m.value === 'number')
+            .sort((a, b) => Math.abs(b.value) - Math.abs(a.value))
+            .slice(0, 2);
+
+        const display = top.map(m => `${addEmoji(capitalize(m.label))} (${m.value})`).join(', ');
+        console.log(display);
+        document.getElementById("mood-meter").innerText = `Range Mood: ${display}`;
+    }
+
+    function capitalize(s) {
+        return s.charAt(0).toUpperCase() + s.slice(1);
+    }
+
+    function addEmoji(label) {
+        const emojiMap = {
+            Happy:      "😁",
+            Anxious:    "😨",
+            Sad:        "☹️",
+            Angry:      "😡",
+            Curious:    "🤔",
+            Confident:  "😎",
+            Bored:      "🥱"
+        };
+        const emoji = emojiMap[label] || "✨";
+        return `${emoji} ${label}`;
+    }
+
+    function logUpdate(type, message) {
+        console.log(type, message);
+        const emojiMap = {
+            knowledge: "🎓",
+            relationship: "🤝",
+            chat: "💬",
+            belief: "⚡",
+            activity: "🧠",
+            "activity-other": "❗"
+        };
+        const emoji = emojiMap[type] || "✨";
+        const consoleDiv = document.getElementById("update-console");
+        const entry = document.createElement("div");
+        const time = new Date().toLocaleTimeString();
+        const msgText = typeof message === 'object' && message !== null
+            ? `Used ${message.handler} to ${message.action} because ${message.reasoning}`
+            : message;
+        entry.textContent = `[${time}] ${emoji} ${msgText}`;
+        consoleDiv.appendChild(entry);
+        consoleDiv.scrollTop = consoleDiv.scrollHeight;
+    }
+
+    function flashIcon(npcId, type) {
+        const emojiMap = {
+            knowledge: "🎓",
+            relationship: "🤝",
+            chat: "💬",
+            belief: "⚡",
+            activity: "🧠",
+            "activity-other": "❗"
+        };
+        const emoji = emojiMap[type] || "✨";
+
+        icons
+            .filter(d => d.id === npcId)
+            .text(emoji)
+            .attr("opacity", 1)
+            .transition().delay(30000).duration(1000)
+            .attr("opacity", 0)
+            .on("end", function () {
+                d3.select(this).text("");
+            });
+    }
+
+    function handleSignalRUpdate(eventId, npcId, type, message, time) {
+        const n1 = nodes.find(x => x.id === npcId);
+        const npcName = n1?.name || npcId;
+        logUpdate(type, `${type} event from ${npcName}: ${typeof message === 'string' ? message : JSON.stringify(message)}`);
+
+        if (type === "chat" || type === "relationship") updateMood("happy", 1);
+        if (type === "belief" || type === "activity-other") updateMood("sad", -1);
+
+        if (type === "relationship" && typeof message === 'string' && message.includes("improved relationship")) {
+            const parts = message.match(/(.+?) improved relationship with (.+)/);
+            if (parts && parts.length === 3) {
+                const from = nodes.find(n => n.name === parts[1]);
+                const to = nodes.find(n => n.name === parts[2]);
+                if (from && to) {
+                    const tempLine = linkLayer.append("line")
+                        .attr("x1", from.x)
+                        .attr("y1", from.y)
+                        .attr("x2", to.x)
+                        .attr("y2", to.y)
+                        .attr("stroke", "silver")
+                        .attr("stroke-width", 1)
+                        .attr("stroke-dasharray", "4,4")
+                        .attr("opacity", .6)
+                        .style("filter", "url(#pulse-glow)");
+
+                    tempLine.transition().duration(1000)
+                        .attr("stroke", "aliceblue")
+                        .attr("stroke-width", 2);
+
+                    tempLine.transition().delay(29000).duration(1000)
+                        .style("opacity", 0)
+                        .remove();
+                }
+            }
+        }
+
+        const n = nodes.find(n => n.id === npcId);
+        if (!n) return;
+
+        d3.selectAll("image")
+            .filter(d => d.id === npcId)
+            .transition().duration(150)
+            .attr("opacity", 0.85)
+            .transition().duration(1000)
+            .attr("opacity", 1);
+
+        flashIcon(npcId, type);
+
+        const box = svg.append("foreignObject")
+            .attr("x", n.x + 51)
+            .attr("y", Math.max(10, n.y - 30))
+            .attr("width", 180)
+            .attr("height", 100)
+            .style("opacity", 0)
+            .transition().duration(135).style("opacity", 1).selection();
+
+        let html = "";
+        if (typeof message === 'object' && message !== null) {
+            html = `<div style='color:#000;'>Used <strong>${message.handler}</strong> to ${message.action}<br/>because ${message.reasoning}</div>`;
+            updateMood(message.sentiment, 1);
+        } else {
+            html = `<div style='color:#000;'>${message}</div>`
+        }
+        box.append("xhtml:div")
+            .style("color", "#000")
+            .style("background-color", "#fff")
+            .style("border", "1px solid silver")
+            .style("border-radius", "8px")
+            .style("padding", "6px 10px")
+            .style("font-size", "12px")
+            .style("box-shadow", "2px 2px 6px rgba(0,0,0,0.15)")
+            .style("width", "180px")
+            .style("overflow", "hidden")
+            .style("text-overflow", "ellipsis")
+            .style("white-space", "normal")
+            .style("line-height", "1.4")
+            .style("font-family", "monospace")
+            .html(html);
+
+        box.transition()
+            .delay(8000)
+            .duration(1000)
+            .style("opacity", 0)
+            .remove();
+    }
+
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/hubs/activities")
+        .configureLogging(signalR.LogLevel.Information)
+        .withAutomaticReconnect()
+        .build();
+
+    connection.on("show", handleSignalRUpdate);
+    connection.start().catch(err => console.error(err.toString()));
+</script>
+</body>
+</html>

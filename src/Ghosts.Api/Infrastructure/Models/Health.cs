@@ -3,6 +3,8 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text;
+using Ghosts.Domain;
 
 namespace ghosts.api.Infrastructure.Models
 {
@@ -16,7 +18,8 @@ namespace ghosts.api.Infrastructure.Models
 
         public int Id { get; set; }
 
-        [ForeignKey("MachineId")] public Guid MachineId { get; set; }
+        [ForeignKey("MachineId")]
+        public Guid MachineId { get; set; }
 
         public DateTime CreatedUtc { get; set; }
 
@@ -38,7 +41,8 @@ namespace ghosts.api.Infrastructure.Models
 
         public int Id { get; set; }
 
-        [ForeignKey("MachineId")] public Guid MachineId { get; set; }
+        [ForeignKey("MachineId")]
+        public Guid MachineId { get; set; }
 
         public DateTime CreatedUtc { get; set; }
 
@@ -59,6 +63,30 @@ namespace ghosts.api.Infrastructure.Models
         {
             if (value != null) Tags = string.Join(",", value.ToLower());
         }
+
+        public string ToActivityPlainText()
+        {
+            var sb = new StringBuilder();
+            try
+            {
+                switch (this.Handler)
+                {
+                    case "BrowserChrome":
+                    case "BrowserFirefox":
+                        sb.Append($"Used {this.Handler.Replace("Browser", "")} to visit {this.Command}\n");
+                        break;
+                    default:
+                        sb.Append($"Used {this.Handler} to perform some activity\n");
+                        break;
+                }
+            }
+            catch (Exception e)
+            {
+                return "";
+            }
+
+            return sb.ToString();
+        }
     }
 
     [Table("history_trackables")]
@@ -71,9 +99,11 @@ namespace ghosts.api.Infrastructure.Models
 
         public int Id { get; set; }
 
-        [ForeignKey("MachineId")] public Guid MachineId { get; set; }
+        [ForeignKey("MachineId")]
+        public Guid MachineId { get; set; }
 
-        [ForeignKey("TrackableId")] public Guid TrackableId { get; set; }
+        [ForeignKey("TrackableId")]
+        public Guid TrackableId { get; set; }
 
         public DateTime CreatedUtc { get; set; }
 

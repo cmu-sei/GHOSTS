@@ -59,7 +59,11 @@ Psychology
 Relationships
 Socrates
 Philosophy
-Philosophical theories
+Philosophical Theories
+Ethics
+Philosophy of Science
+Game Theory
+Decision Theory
 Humanism
 Logic
 Thinking
@@ -76,7 +80,7 @@ Law
 Political science
 Psychology
 Sociology
-Relationships 
+Relationships
 Society
 Community
 Criminal justice

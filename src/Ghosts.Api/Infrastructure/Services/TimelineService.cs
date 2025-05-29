@@ -2,12 +2,15 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
+using ghosts.api.Hubs;
 using ghosts.api.Infrastructure.Models;
 using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Api.ViewModels;
 using Ghosts.Domain;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
@@ -19,7 +22,7 @@ namespace ghosts.api.Infrastructure.Services
         Task StopAsync(Guid machineId, Guid timelineId, CancellationToken ct);
     }
 
-    public class TimelineService(ApplicationDbContext context) : ITimelineService
+    public class TimelineService(ApplicationDbContext context, IHubContext<ActivityHub> hub) : ITimelineService
     {
         public async Task UpdateAsync(MachineUpdateViewModel machineUpdateViewModel, CancellationToken ct)
         {
@@ -28,6 +31,15 @@ namespace ghosts.api.Infrastructure.Services
             var machineUpdate = machineUpdateViewModel.ToMachineUpdate();
 
             context.MachineUpdates.Add(machineUpdate);
+
+            var npc = await context.Npcs.FirstOrDefaultAsync(x=>x.MachineId == machineUpdate.MachineId, ct);
+            if (npc != null)
+            {
+                await hub.Clients.All.SendAsync("show", 1, npc.Id, "activity",
+                    machineUpdate.ToActivityPlainText(),
+                    DateTime.Now.ToString(CultureInfo.InvariantCulture), CancellationToken.None);
+            }
+
             await context.SaveChangesAsync(ct);
         }
 

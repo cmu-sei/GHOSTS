@@ -42,13 +42,24 @@ public class NpcSocialGraph
         public int Value { get; set; }
     }
 
-    public class Learning(Guid to, Guid from, string topic, long currentStep, int value)
+    public class Learning
     {
-        public Guid To { get; set; } = to;
-        public Guid From { get; set; } = from;
-        public string Topic { get; set; } = topic;
-        public long Step { get; set; } = currentStep;
-        public int Value { get; set; } = value;
+        public Guid To { get; set; }
+        public Guid From { get; set; }
+        public string Topic { get; set; }
+        public long Step { get; set; }
+        public int Value { get; set; }
+
+        public Learning() { }
+
+        public Learning(Guid to, Guid from, string topic, long step, int value)
+        {
+            To = to;
+            From = from;
+            Topic = topic;
+            Step = step;
+            Value = value;
+        }
 
         public override string ToString()
         {

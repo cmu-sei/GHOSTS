@@ -2,7 +2,6 @@
 @using System.Text
 @using Ghosts.Animator.Enums
 @using Ghosts.Animator.Models
-@using ghosts.api.Infrastructure.Models
 @model ghosts.api.Infrastructure.Models.NpcRecord
 
 @functions {
@@ -31,7 +30,7 @@
         return sb.ToString();
     }
 
-    
+
 }
 @{
     NpcProfile npc = null;
@@ -48,7 +47,7 @@
     }
     else
     {
-        npc = Model.NpcProfile;    
+        npc = Model.NpcProfile;
     }
 }
 

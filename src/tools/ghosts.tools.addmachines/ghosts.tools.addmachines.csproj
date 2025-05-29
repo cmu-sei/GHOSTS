@@ -6,4 +6,8 @@
     <ReleaseVersion>2.2.0.0</ReleaseVersion>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Faker.Net" Version="2.0.163" />
+  </ItemGroup>
+
 </Project>
