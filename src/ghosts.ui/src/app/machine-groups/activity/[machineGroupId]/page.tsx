@@ -3,12 +3,13 @@ import { SheetWrapper } from "@/components/sheet-wrapper";
 import { api } from "@/generated/endpoints";
 import { getSortedActivity } from "@/lib/server-utils";
 
-type PageProps = {
+export default async function Page({
+	params,
+	searchParams,
+}: {
 	params: { machineGroupId: string };
 	searchParams?: Record<string, string | string[]>;
-};
-
-export default async function Page({ params, searchParams }: PageProps) {
+}) {
 	const id = Number.parseInt(params.machineGroupId);
 
 	const sortedActivity = await getSortedActivity(
