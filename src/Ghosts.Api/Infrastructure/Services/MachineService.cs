@@ -226,7 +226,7 @@ namespace ghosts.api.Infrastructure.Services
             }
 
             a.Status = StatusType.Deleted;
-            _context.Entry(a).State = EntityState.Modified;
+            _context.Machines.Update(a); // force tracking
 
             var operation = await _context.SaveChangesAsync(ct);
             if (operation >= 1) return id;
