@@ -22,11 +22,11 @@ public class ViewActivitiesController(ApplicationDbContext context) : Controller
         return View("Index", list);
     }
 
-    [HttpGet("current")]
-    public IActionResult Current()
+    [HttpGet("dynamic")]
+    public IActionResult Dynamic()
     {
         var list = _context.Npcs.ToList().OrderBy(o => o.Enclave).ThenBy(o => o.Team);
-        return View("current", list);
+        return View("dynamic", list);
     }
 
     [HttpGet("{id:guid}")]
