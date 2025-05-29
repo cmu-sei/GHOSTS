@@ -27,12 +27,4 @@ jobs:
           context: ./src/ghosts.shadows/
           file: ./src/ghosts.shadows/Dockerfile
       
-      - name: Save Docker image as tar
-        run: | 
-          docker save dustinupdyke/ghosts-shadows:latest > ghosts-shadows.tar
-          
-      - name: Upload TAR file as artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: ghosts-shadows
-          path: ghosts-shadows.tar
+      
