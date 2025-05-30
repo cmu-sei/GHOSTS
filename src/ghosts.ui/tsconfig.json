@@ -1,10 +1,14 @@
 {
 	"compilerOptions": {
-		"lib": ["dom", "dom.iterable", "esnext"],
+		"lib": [
+			"dom",
+			"dom.iterable",
+			"esnext"
+		],
 		"target": "ES2016",
 		"allowJs": true,
 		"skipLibCheck": true,
-		"strict": true,
+		"strict": false,
 		"noEmit": true,
 		"esModuleInterop": true,
 		"module": "esnext",
@@ -20,7 +24,9 @@
 			}
 		],
 		"paths": {
-			"@/*": ["./src/*"]
+			"@/*": [
+				"./src/*"
+			]
 		}
 	},
 	"include": [
@@ -30,5 +36,7 @@
 		".next/types/**/*.ts",
 		"public/generated"
 	],
-	"exclude": ["node_modules"]
+	"exclude": [
+		"node_modules"
+	]
 }

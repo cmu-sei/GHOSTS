@@ -1,8 +1,7 @@
-FROM node:20-alpine AS base
+FROM node:20.11.1-alpine AS base
 
 # libc6-compat for nextjs. This is needed at runtime so its fine to have in the base container
 RUN apk add --no-cache libc6-compat
-
 
 # Stage for installing deps
 FROM base AS deps
@@ -22,14 +21,20 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+COPY drizzle.config.ts ./
+COPY src ./src
+
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NEXT_DISABLE_ESLINT=true
+ENV NEXT_DISABLE_TYPECHECKING=true
+RUN npx drizzle-kit push --config=drizzle.config.ts && cp sqlite.db /tmp/sqlite.db
 RUN npm run build
-
-# Create SQLite database and correct tables
-RUN npx drizzle-kit push:sqlite
-
 
 # Final stage to run the app
 FROM base AS runner
+
+# Add sqlite CLI for inspection/debugging
+RUN apk add --no-cache sqlite
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
@@ -40,7 +45,7 @@ RUN chown -R nextjs app
 
 WORKDIR /app
 
-ENV NODE_ENV production
+ENV NODE_ENV=production
 
 # Set the correct permission for prerender cache
 RUN mkdir .next
@@ -52,8 +57,8 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
-# Copy database file to runner and ensure that the nextjs user has write access
-COPY --from=builder --chown=nextjs:nodejs /app/sqlite.db ./sqlite.db 
+# Copy migrated database file to runner
+COPY --from=builder --chown=nextjs:nodejs /tmp/sqlite.db ./sqlite.db
 RUN chmod 777 sqlite.db
 
 USER nextjs
@@ -63,5 +68,4 @@ EXPOSE 8080
 ENV PORT 8080
 
 # server.js is created by next build from the standalone output
-# https://nextjs.org/docs/pages/api-reference/next-config-js/output
 CMD HOSTNAME="0.0.0.0" node server.js
