@@ -37,10 +37,15 @@ function MachinesDrowpdown({
 
 export function MachineGroupMachines({
 	machineGroup,
+	allMachines,
 }: {
 	machineGroup: GroupType;
+	allMachines: MachineType[];
 }) {
-	const machines = machineGroup.machines ?? [];
+	const machines = (machineGroup.groupMachines ?? [])
+		.map((gm) => allMachines.find((m) => m.id === gm.machineId))
+		.filter((m): m is MachineType => !!m);
+
 	const router = useRouter();
 
 	return (
@@ -48,35 +53,41 @@ export function MachineGroupMachines({
 			triggerText={`View machines (${machines.length})`}
 			dropdownDesc="Machines in this group, click to remove"
 		>
-			{machines.map((machine) => {
-				return (
-					<DropdownMenuItem
-						key={machine.id}
-						onClick={async () => {
-							const groupMachinesWithoutDeleted = machines
-								.filter((m) => m.id !== machine.id)
-								.map((machine2) => ({
-									groupId: machineGroup.id,
-									machineId: machine2.id,
-								}));
-							await api.putApimachinegroupsId(
-								{
-									id: machineGroup.id,
-									name: machineGroup.name,
-									groupMachines: groupMachinesWithoutDeleted,
-								},
-								{ params: { id: machineGroup.id?.toString() ?? "" } },
-							);
-							router.refresh();
-						}}
-					>
-						{machine.name}
-					</DropdownMenuItem>
-				);
-			})}
+			{machines.map((machine) => (
+				<DropdownMenuItem
+					key={machine.id}
+					onClick={async () => {
+						const updatedGroupMachines = machines
+							.filter((m) => m.id !== machine.id)
+							.map((m) => ({
+								groupId: machineGroup.id,
+								machineId: m.id,
+							}));
+						// await api.putApimachinegroupsId(
+						// 	{
+						// 		id: machineGroup.id,
+						// 		name: machineGroup.name,
+						// 		groupMachines: updatedGroupMachines,
+						// 	},
+						// 	{ params: { id: machineGroup.id.toString() } },
+						// );
+						await api.machineGroupsRemoveMachine(undefined, {
+							params: {
+								id: machineGroup.id.toString(),
+								machine_id: machine.id.toString(),
+							},
+						});
+
+						router.refresh();
+					}}
+				>
+					{machine.name}
+				</DropdownMenuItem>
+			))}
 		</MachinesDrowpdown>
 	);
 }
+
 
 export function MachineGroupAddMachines({
 	machineGroup,
@@ -102,19 +113,27 @@ export function MachineGroupAddMachines({
 				<DropdownMenuItem
 					key={machine.id}
 					onClick={async () => {
-						await api.putApimachinegroupsId(
-							{
-								id: machineGroup.id,
-								name: machineGroup.name,
-								groupMachines: [
-									...currentGroupMachines,
-									{ groupId: machineGroup.id, machineId: machine.id },
-								],
+						await api.machineGroupsAddMachine(undefined, {
+							params: {
+								id: machineGroup.id.toString(),
+								machine_id: machine.id.toString(),
 							},
-							{
-								params: { id: machineGroup.id?.toString() ?? "" },
-							},
-						);
+						});
+
+
+						// await api.putApimachinegroupsId(
+						// 	{
+						// 		id: machineGroup.id,
+						// 		name: machineGroup.name,
+						// 		groupMachines: [
+						// 			...currentGroupMachines,
+						// 			{ groupId: machineGroup.id, machineId: machine.id },
+						// 		],
+						// 	},
+						// 	{
+						// 		params: { id: machineGroup.id?.toString() ?? "" },
+						// 	},
+						// );
 						router.refresh();
 					}}
 				>

@@ -68,7 +68,7 @@ export class HttpConnection implements IConnection {
         Arg.isRequired(url, "url");
 
         this.logger = createLogger(options.logger);
-        this.baseUrl = this.resolveUrl(url);
+        this.baseUrl = this.resolveUrl(url) || url;
 
         options = options || {};
         options.logMessageContent = options.logMessageContent === undefined ? false : options.logMessageContent;
@@ -511,25 +511,10 @@ export class HttpConnection implements IConnection {
         }
     }
 
-    private resolveUrl(url: string): string {
-        // startsWith is not supported in IE
-        if (url.lastIndexOf("https://", 0) === 0 || url.lastIndexOf("http://", 0) === 0) {
-            return url;
-        }
-
-        if (!Platform.isBrowser || !window.document) {
-            throw new Error(`Cannot resolve '${url}'.`);
-        }
-
-        // Setting the url to the href propery of an anchor tag handles normalization
-        // for us. There are 3 main cases.
-        // 1. Relative path normalization e.g "b" -> "http://localhost:5000/a/b"
-        // 2. Absolute path normalization e.g "/a/b" -> "http://localhost:5000/a/b"
-        // 3. Networkpath reference normalization e.g "//localhost:5000/a/b" -> "http://localhost:5000/a/b"
-        const aTag = window.document.createElement("a");
+    private resolveUrl(url: string): string | null {
+        if (typeof window === 'undefined' || !window.document) return null;
+        const aTag = window.document.createElement('a');
         aTag.href = url;
-
-        this.logger.log(LogLevel.Information, `Normalizing '${url}' to '${aTag.href}'.`);
         return aTag.href;
     }
 
