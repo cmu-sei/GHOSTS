@@ -1,23 +1,19 @@
+export const dynamic = "force-dynamic";
+
+import { Inter } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Toaster } from "@/components/ui/toaster";
-import { Inter } from "next/font/google";
 import Link from "next/link";
-import "./globals.css";
 import Image from "next/image";
 import GLogo from "../../public/logo.png";
+import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const dynamic = "force-dynamic";
-
-export default function RootLayout({
-	children,
-}: Readonly<{
-	children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
 	return (
-		<html lang="en">
+		<html lang="en" suppressHydrationWarning>
 			<body className={inter.className}>
 				<ThemeProvider
 					attribute="class"

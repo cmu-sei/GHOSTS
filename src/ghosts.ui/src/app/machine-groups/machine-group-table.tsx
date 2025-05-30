@@ -25,7 +25,10 @@ export function MachineGroupTable({
 		{
 			header: "Machines",
 			cell: ({ row: { original } }) => (
-				<MachineGroupMachines machineGroup={original} />
+				<MachineGroupMachines
+					machineGroup={original}
+					allMachines={allMachines}
+				/>
 			),
 		},
 		{

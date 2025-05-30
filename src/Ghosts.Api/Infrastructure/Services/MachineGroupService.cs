@@ -49,51 +49,49 @@ namespace ghosts.api.Infrastructure.Services
 
         public async Task<Group> UpdateAsync(Group model, CancellationToken ct)
         {
-            // Get the original record
-            var originalRecord = await _context.Groups.Include(x => x.GroupMachines).FirstOrDefaultAsync(x => x.Id == model.Id, ct);
-            if (originalRecord == null)
+            await using var transaction = await _context.Database.BeginTransactionAsync(ct);
+
+            var original = await _context.Groups
+                .Include(g => g.GroupMachines)
+                .FirstOrDefaultAsync(g => g.Id == model.Id, ct);
+
+            if (original is null)
             {
-                // Handle situation when the original record doesn't exist
                 _log.Error($"No Group found with Id {model.Id}");
                 return model;
             }
 
-            // Remove all machines for the original record
-            foreach (var g in originalRecord.GroupMachines.ToList())
-            {
-                _context.GroupMachines.Remove(g);
-            }
+            // Remove old GroupMachines
+            _context.GroupMachines.RemoveRange(original.GroupMachines);
 
-            if (model.GroupMachines != null && model.GroupMachines.Count > 0)
+            // Add new GroupMachines
+            if (model.GroupMachines?.Count > 0)
             {
-                // Add new GroupMachines from the model
-                foreach (var g in model.GroupMachines)
+                foreach (var gm in model.GroupMachines.Where(gm => gm.MachineId != Guid.Empty))
                 {
-                    if (g.MachineId != Guid.Empty)
-                    {
-                        g.GroupId = originalRecord.Id;
-                        _context.GroupMachines.Add(g);
-                    }
+                    gm.GroupId = original.Id;
+                    _context.GroupMachines.Add(gm);
                 }
             }
 
-            // Update properties of the original record to match those of the model
-            // Assuming Group has properties Name and Description
-            originalRecord.Name = model.Name;
-            originalRecord.Status = model.Status;
+            // Update scalar properties
+            original.Name = model.Name;
+            original.Status = model.Status;
 
             try
             {
                 await _context.SaveChangesAsync(ct);
+                await transaction.CommitAsync(ct);
             }
-            catch (DbUpdateConcurrencyException ex)
+            catch (DbUpdateException ex)
             {
-                // Log the exception
-                _log.Error($"Machine group update exception: {ex}");
+                _log.Error($"Failed to update Group with Id {model.Id}: {ex}");
+                await transaction.RollbackAsync(ct);
             }
 
-            return originalRecord;
+            return original;
         }
+
 
         public async Task<int> DeleteAsync(int id, CancellationToken ct)
         {
