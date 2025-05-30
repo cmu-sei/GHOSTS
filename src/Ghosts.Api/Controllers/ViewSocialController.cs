@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ghosts.api.Infrastructure.Models;
+using Ghosts.Api.Infrastructure.Models;
 using Ghosts.Api;
 using Ghosts.Api.Infrastructure;
 using Ghosts.Api.Infrastructure.Data;
@@ -14,7 +14,7 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using NLog;
 
-namespace ghosts.api.Controllers
+namespace Ghosts.Api.Controllers
 {
     [Route("view-social")]
     [ApiExplorerSettings(IgnoreApi = true)]

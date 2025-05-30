@@ -6,8 +6,8 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using ghosts.api.Hubs;
-using ghosts.api.Infrastructure.Models;
+using Ghosts.Api.Hubs;
+using Ghosts.Api.Infrastructure.Models;
 using Ghosts.Animator.Extensions;
 using Ghosts.Api.Infrastructure;
 using Ghosts.Api.Infrastructure.Data;
@@ -16,7 +16,7 @@ using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using Weighted_Randomizer;
 
-namespace ghosts.api.Infrastructure.Animations.AnimationDefinitions;
+namespace Ghosts.Api.Infrastructure.Animations.AnimationDefinitions;
 
 public class SocialGraphJob
 {

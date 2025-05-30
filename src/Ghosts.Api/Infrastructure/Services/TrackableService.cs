@@ -5,11 +5,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using ghosts.api.Infrastructure.Models;
+using Ghosts.Api.Infrastructure.Models;
 using Ghosts.Api.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace ghosts.api.Infrastructure.Services
+namespace Ghosts.Api.Infrastructure.Services
 {
     public interface ITrackableService
     {

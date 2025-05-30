@@ -1,9 +1,9 @@
 // Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
-using ghosts.api.Infrastructure.Models;
+using Ghosts.Api.Infrastructure.Models;
 using Newtonsoft.Json;
 
-namespace ghosts.api.Infrastructure.ContentServices;
+namespace Ghosts.Api.Infrastructure.ContentServices;
 
 public class GenericContentHelpers
 {

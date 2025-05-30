@@ -4,15 +4,15 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using ghosts.api.Areas.Animator.Infrastructure.Models;
-using ghosts.api.Infrastructure.Models;
+using Ghosts.Api.Areas.Animator.Infrastructure.Models;
+using Ghosts.Api.Infrastructure.Models;
 using Ghosts.Animator;
 using Ghosts.Animator.Models;
 using Ghosts.Api.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using NLog;
 
-namespace ghosts.api.Infrastructure.Services;
+namespace Ghosts.Api.Infrastructure.Services;
 
 public interface INpcService
 {

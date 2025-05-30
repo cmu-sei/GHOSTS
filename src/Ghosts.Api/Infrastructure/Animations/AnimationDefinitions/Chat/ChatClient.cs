@@ -11,19 +11,17 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using ghosts.api.Hubs;
-using ghosts.api.Infrastructure.Animations.AnimationDefinitions.Chat.Mattermost;
-using ghosts.api.Infrastructure.ContentServices;
-using ghosts.api.Infrastructure.Extensions;
-using ghosts.api.Infrastructure.Models;
-using Ghosts.Animator.Extensions;
-using Ghosts.Api.Infrastructure;
+using Ghosts.Api.Hubs;
+using Ghosts.Api.Infrastructure.Animations.AnimationDefinitions.Chat.Mattermost;
+using Ghosts.Api.Infrastructure.ContentServices;
 using Ghosts.Api.Infrastructure.Extensions;
+using Ghosts.Api.Infrastructure.Models;
+using Ghosts.Animator.Extensions;
 using Ghosts.Domain.Code.Helpers;
 using Microsoft.AspNetCore.SignalR;
 using NLog;
 
-namespace ghosts.api.Infrastructure.Animations.AnimationDefinitions.Chat;
+namespace Ghosts.Api.Infrastructure.Animations.AnimationDefinitions.Chat;
 
 public class ChatClient
 {

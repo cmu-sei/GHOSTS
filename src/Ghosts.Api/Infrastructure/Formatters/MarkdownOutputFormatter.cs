@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Formatters;
 
-namespace ghosts.api.Infrastructure.Formatters;
+namespace Ghosts.Api.Infrastructure.Formatters;
 
 public class MarkdownOutputFormatter : TextOutputFormatter
 {

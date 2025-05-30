@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace ghosts.api.Infrastructure.Models
+namespace Ghosts.Api.Infrastructure.Models
 {
     [Table("machine_updates")]
     public class MachineUpdate
@@ -58,7 +58,7 @@ namespace ghosts.api.Infrastructure.Models
 
                 }
             }
-            catch (Exception e)
+            catch
             {
                 return "";
             }

@@ -5,10 +5,10 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using AutoMapper;
-using ghosts.api.Areas.Animator.Infrastructure.Models;
+using Ghosts.Api.Areas.Animator.Infrastructure.Models;
 using Ghosts.Animator.Models;
 
-namespace ghosts.api.Infrastructure.Models;
+namespace Ghosts.Api.Infrastructure.Models;
 
 [Table("npcs")]
 public class NpcRecord
@@ -31,7 +31,7 @@ public class NpcRecord
     public string Enclave { get; set; }
 
     /// <summary>
-    /// Used for grouping NPCs together, e.g. 
+    /// Used for grouping NPCs together, e.g.
     /// A team within an enclave
     /// </summary>
     public string Team { get; set; }

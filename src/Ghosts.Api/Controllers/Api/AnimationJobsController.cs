@@ -1,11 +1,11 @@
 // Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
-using ghosts.api.Infrastructure.Animations;
+using Ghosts.Api.Infrastructure.Animations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace ghosts.api.Controllers.Api;
+namespace Ghosts.Api.Controllers.Api;
 
 [Route("animations")]
 [Route("api/[controller]")]

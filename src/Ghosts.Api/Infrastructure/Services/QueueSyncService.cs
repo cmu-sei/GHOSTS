@@ -9,8 +9,8 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
-using ghosts.api.Infrastructure.Models;
-using ghosts.api.ViewModels;
+using Ghosts.Api.Infrastructure.Models;
+using Ghosts.Api.ViewModels;
 using Ghosts.Api;
 using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Domain.Messages.MesssagesForServer;
@@ -21,7 +21,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NLog;
 
-namespace ghosts.api.Infrastructure.Services
+namespace Ghosts.Api.Infrastructure.Services
 {
     public partial class QueueSyncService(IServiceScopeFactory scopeFactory, IBackgroundQueue queue) : IHostedService
     {

@@ -3,7 +3,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace ghosts.api.Hubs;
+namespace Ghosts.Api.Hubs;
 
 public class ConnectionMapping<T>
 {

@@ -4,9 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using ghosts.api.Infrastructure.Extensions;
-using Newtonsoft.Json;
-using NPOI.SS.Formula.Functions;
+using Ghosts.Api.Infrastructure.Extensions;
 using Match = System.Text.RegularExpressions.Match;
 
 namespace Ghosts.Api.Infrastructure.Extensions

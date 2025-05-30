@@ -3,7 +3,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace ghosts.api.Infrastructure.Models
+namespace Ghosts.Api.Infrastructure.Models
 {
     [JsonConverter(typeof(StringEnumConverter))]
     public enum StatusType

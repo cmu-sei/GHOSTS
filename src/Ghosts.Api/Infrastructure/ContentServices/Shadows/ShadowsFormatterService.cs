@@ -5,11 +5,11 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using ghosts.api.Infrastructure.Models;
+using Ghosts.Api.Infrastructure.Models;
 using Ghosts.Api.Infrastructure;
 using NLog;
 
-namespace ghosts.api.Infrastructure.ContentServices.Shadows;
+namespace Ghosts.Api.Infrastructure.ContentServices.Shadows;
 
 public class ShadowsFormatterService : IFormatterService
 {

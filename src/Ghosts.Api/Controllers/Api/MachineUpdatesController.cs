@@ -3,9 +3,9 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using ghosts.api.Infrastructure;
-using ghosts.api.Infrastructure.Models;
-using ghosts.api.Infrastructure.Services;
+using Ghosts.Api.Infrastructure;
+using Ghosts.Api.Infrastructure.Models;
+using Ghosts.Api.Infrastructure.Services;
 using Ghosts.Api.ViewModels;
 using Ghosts.Domain;
 using Microsoft.AspNetCore.Mvc;
@@ -13,7 +13,7 @@ using NLog;
 using Swashbuckle.AspNetCore.Annotations;
 using Swashbuckle.AspNetCore.Filters;
 
-namespace ghosts.api.Controllers.Api
+namespace Ghosts.Api.Controllers.Api
 {
     /// <summary>
     /// Enter a machine command, so that the next time a machine checks in,

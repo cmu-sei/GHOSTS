@@ -6,7 +6,7 @@ using Ghosts.Animator.Enums;
 using Ghosts.Animator.Models;
 using Swashbuckle.AspNetCore.Filters;
 
-namespace ghosts.api.Infrastructure.Models;
+namespace Ghosts.Api.Infrastructure.Models;
 
 /// <summary>
 /// The configuration for generating a large number of NPCs for your scenario
@@ -15,7 +15,7 @@ public class GenerationConfiguration
 {
     // A campaign is the top level of an engagement
     public string Campaign { get; set; }
-    // Enclaves are specific subnets of a range, (or a larger number of people) 
+    // Enclaves are specific subnets of a range, (or a larger number of people)
     public IList<EnclaveConfiguration> Enclaves { get; set; }
 }
 
@@ -45,7 +45,7 @@ public class NpcConfiguration
     /// </summary>
     public int Number { get; set; }
     /// <summary>
-    /// The configuration to tune the generation of NPCs 
+    /// The configuration to tune the generation of NPCs
     /// </summary>
     public NpcGenerationConfiguration Configuration { get; set; }
 }

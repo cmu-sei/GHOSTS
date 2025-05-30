@@ -11,7 +11,7 @@ using OpenAI;
 using OpenAI.Managers;
 using OpenAI.ObjectModels.RequestModels;
 
-namespace ghosts.api.Infrastructure.ContentServices.OpenAi;
+namespace Ghosts.Api.Infrastructure.ContentServices.OpenAi;
 
 public class OpenAiConnectorService : IContentService
 {

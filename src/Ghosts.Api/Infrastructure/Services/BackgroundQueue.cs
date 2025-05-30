@@ -5,9 +5,9 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using ghosts.api.Infrastructure.Models;
+using Ghosts.Api.Infrastructure.Models;
 
-namespace ghosts.api.Infrastructure.Services
+namespace Ghosts.Api.Infrastructure.Services
 {
     public interface IBackgroundQueue
     {

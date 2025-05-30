@@ -6,9 +6,9 @@ using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using ghosts.api.Infrastructure.Models;
+using Ghosts.Api.Infrastructure.Models;
 using Ghosts.Api;
-using ghosts.api.Hubs;
+using Ghosts.Api.Hubs;
 using Ghosts.Api.Infrastructure;
 using Ghosts.Api.Infrastructure.Data;
 using Microsoft.AspNetCore.Http;
@@ -16,7 +16,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using NLog;
 
-namespace ghosts.api.Infrastructure.Services
+namespace Ghosts.Api.Infrastructure.Services
 {
     public interface IMachineService
     {

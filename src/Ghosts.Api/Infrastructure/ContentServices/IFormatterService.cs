@@ -1,9 +1,9 @@
 // Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System.Threading.Tasks;
-using ghosts.api.Infrastructure.Models;
+using Ghosts.Api.Infrastructure.Models;
 
-namespace ghosts.api.Infrastructure.ContentServices;
+namespace Ghosts.Api.Infrastructure.ContentServices;
 
 public interface IFormatterService
 {

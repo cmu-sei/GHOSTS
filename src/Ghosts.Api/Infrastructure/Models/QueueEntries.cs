@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 
-namespace ghosts.api.Infrastructure.Models
+namespace Ghosts.Api.Infrastructure.Models
 {
     public class QueueEntry
     {

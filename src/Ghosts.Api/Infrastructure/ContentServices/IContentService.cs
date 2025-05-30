@@ -2,7 +2,7 @@
 
 using System.Threading.Tasks;
 
-namespace ghosts.api.Infrastructure.ContentServices;
+namespace Ghosts.Api.Infrastructure.ContentServices;
 
 public interface IContentService
 {

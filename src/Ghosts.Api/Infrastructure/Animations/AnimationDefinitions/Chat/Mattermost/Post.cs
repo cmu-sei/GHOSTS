@@ -3,7 +3,7 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace ghosts.api.Infrastructure.Animations.AnimationDefinitions.Chat.Mattermost;
+namespace Ghosts.Api.Infrastructure.Animations.AnimationDefinitions.Chat.Mattermost;
 
 public class PostResponse
 {

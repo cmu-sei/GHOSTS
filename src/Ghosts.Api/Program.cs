@@ -33,8 +33,6 @@ namespace Ghosts.Api
                 .UseStartup<Startup>()
                 .Build();
 
-            NpgsqlConnection.GlobalTypeMapper.EnableDynamicJson();
-
             AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
             using (var scope = host.Services.CreateScope())

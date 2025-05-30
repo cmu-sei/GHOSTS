@@ -4,15 +4,15 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Text.Json.Serialization;
-using ghosts.api.Hubs;
-using ghosts.api.Infrastructure;
-using ghosts.api.Infrastructure.Animations;
-using ghosts.api.Infrastructure.Services;
 using Ghosts.Api.Hubs;
+using Ghosts.Api.Infrastructure;
+using Ghosts.Api.Infrastructure.Animations;
+using Ghosts.Api.Infrastructure.Services;
 using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Api.Infrastructure.Extensions;
 using Ghosts.Api.Infrastructure.Filters;
-using ghosts.api.Infrastructure.Formatters;
+using Ghosts.Api.Infrastructure.Formatters;
+using Ghosts.Api.Infrastructure.Services.ClientServices;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
 using Microsoft.AspNetCore.Builder;
@@ -88,6 +88,12 @@ namespace Ghosts.Api
             services.AddScoped<ITrackableService, TrackableService>();
             services.AddScoped<ISurveyService, SurveyService>();
             services.AddScoped<INpcService, NpcService>();
+
+            services.AddScoped<IClientResultsService, ClientResultsService>();
+            services.AddScoped<IClientIdService, ClientIdService>();
+            services.AddScoped<IClientSurveyService, ClientSurveyService>();
+            services.AddScoped<IClientTimelineService, ClientTimelineService>();
+            services.AddScoped<IClientUpdateService, ClientUpdateService>();
 
             services.AddScoped<MachineUpdateExample>();
             services.AddSwaggerExamplesFromAssemblyOf<MachineUpdateExample>();

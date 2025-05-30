@@ -2,7 +2,7 @@
 
 using System;
 
-namespace ghosts.api.Infrastructure.Models;
+namespace Ghosts.Api.Infrastructure.Models;
 
 public class NpcNameId
 {

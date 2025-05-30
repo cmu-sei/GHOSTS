@@ -7,7 +7,7 @@ using Ghosts.Animator.Extensions;
 using Microsoft.AspNetCore.SignalR;
 using NLog;
 
-namespace ghosts.api.Hubs;
+namespace Ghosts.Api.Hubs;
 
 public class ActivityHub : Hub
 {

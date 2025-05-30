@@ -4,14 +4,14 @@ using System.Collections.Generic;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using ghosts.api.Areas.Animator.Infrastructure.Models;
-using ghosts.api.Infrastructure.Models;
-using ghosts.api.Infrastructure.Services;
+using Ghosts.Api.Areas.Animator.Infrastructure.Models;
+using Ghosts.Api.Infrastructure.Models;
+using Ghosts.Api.Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;
 using NLog;
 using Swashbuckle.AspNetCore.Annotations;
 
-namespace ghosts.api.Controllers.Api;
+namespace Ghosts.Api.Controllers.Api;
 
 /// <summary>
 /// Build entire team of NPCs for a campaign and enclave

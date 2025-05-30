@@ -9,7 +9,7 @@ using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Domain.Messages.MesssagesForServer;
 using Microsoft.EntityFrameworkCore;
 
-namespace ghosts.api.Infrastructure.Services
+namespace Ghosts.Api.Infrastructure.Services
 {
     public interface ISurveyService
     {

@@ -2,7 +2,7 @@
 
 using System;
 using System.Collections.Generic;
-using ghosts.api.Infrastructure.Models;
+using Ghosts.Api.Infrastructure.Models;
 using Ghosts.Domain;
 using Newtonsoft.Json;
 using Swashbuckle.AspNetCore.Filters;

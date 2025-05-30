@@ -2,7 +2,7 @@
 
 using System;
 
-namespace ghosts.api.Infrastructure.ContentServices.OpenAi;
+namespace Ghosts.Api.Infrastructure.ContentServices.OpenAi;
 
 public static class OpenAiHelpers
 {

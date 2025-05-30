@@ -5,14 +5,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using ghosts.api.Infrastructure.Models;
+using Ghosts.Api.Infrastructure.Models;
 using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Api.ViewModels;
 using Ghosts.Domain;
+using Ghosts.Api.Infrastructure.Extensions;
 using Microsoft.EntityFrameworkCore;
 using NLog;
 
-namespace ghosts.api.Infrastructure.Services
+namespace Ghosts.Api.Infrastructure.Services
 {
     public interface IMachineUpdateService
     {
@@ -30,18 +31,18 @@ namespace ghosts.api.Infrastructure.Services
         Task<IEnumerable<MachineUpdate>> GetByStatus(StatusType status, CancellationToken ct);
 
         Task<IEnumerable<MachineUpdate>> GetByType(UpdateClientConfig.UpdateType type, CancellationToken ct);
+
+        Task<MachineUpdate> CreateByActionRequest(NpcRecord npc, AiModels.ActionRequest actionRequest, CancellationToken ct);
     }
 
     public class MachineUpdateService(ApplicationDbContext context) : IMachineUpdateService
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        private readonly ApplicationDbContext _context = context;
-
         public async Task UpdateGroupAsync(int groupId, MachineUpdateViewModel machineUpdateViewModel, CancellationToken ct)
         {
             var machineUpdate = machineUpdateViewModel.ToMachineUpdate();
 
-            var group = _context.Groups.Include(o => o.GroupMachines).FirstOrDefault(x => x.Id == groupId);
+            var group = context.Groups.Include(o => o.GroupMachines).FirstOrDefault(x => x.Id == groupId);
 
             if (group == null)
                 return;
@@ -49,10 +50,10 @@ namespace ghosts.api.Infrastructure.Services
             foreach (var machineMapping in group.GroupMachines)
             {
                 machineUpdate.MachineId = machineMapping.MachineId;
-                _context.MachineUpdates.Add(machineUpdate);
+                context.MachineUpdates.Add(machineUpdate);
             }
 
-            await _context.SaveChangesAsync(ct);
+            await context.SaveChangesAsync(ct);
         }
 
         public async Task<MachineUpdate> GetAsync(Guid machineId, string currentUsername, CancellationToken ct)
@@ -61,7 +62,7 @@ namespace ghosts.api.Infrastructure.Services
                 return new MachineUpdate();
 
             // Build the base query with conditions that are always true
-            var query = _context.MachineUpdates
+            var query = context.MachineUpdates
                 .Where(m => m.ActiveUtc <= DateTime.UtcNow && m.Status == StatusType.Active);
 
             // Adjust the query based on the provided arguments
@@ -84,22 +85,22 @@ namespace ghosts.api.Infrastructure.Services
 
         public async Task<MachineUpdate> GetById(int updateId, CancellationToken ct)
         {
-            return await _context.MachineUpdates.FirstOrDefaultAsync(x => x.Id == updateId, ct);
+            return await context.MachineUpdates.FirstOrDefaultAsync(x => x.Id == updateId, ct);
         }
 
         public async Task<IEnumerable<MachineUpdate>> GetByMachineId(Guid machineId, CancellationToken ct)
         {
-            return await _context.MachineUpdates.Where(x => x.MachineId == machineId).ToListAsync(ct);
+            return await context.MachineUpdates.Where(x => x.MachineId == machineId).ToListAsync(ct);
         }
 
         public async Task<IEnumerable<MachineUpdate>> GetByType(UpdateClientConfig.UpdateType type, CancellationToken ct)
         {
-            return await _context.MachineUpdates.Where(x => x.Type == type).ToListAsync(ct);
+            return await context.MachineUpdates.Where(x => x.Type == type).ToListAsync(ct);
         }
 
         public async Task<IEnumerable<MachineUpdate>> GetByStatus(StatusType status, CancellationToken ct)
         {
-            return await _context.MachineUpdates.Where(x => x.Status == status).ToListAsync(ct);
+            return await context.MachineUpdates.Where(x => x.Status == status).ToListAsync(ct);
         }
 
         public async Task<MachineUpdate> CreateAsync(MachineUpdate model, CancellationToken ct)
@@ -110,14 +111,14 @@ namespace ghosts.api.Infrastructure.Services
 
             model.Update.Id = Guid.NewGuid();
 
-            _context.MachineUpdates.Add(model);
-            await _context.SaveChangesAsync(ct);
+            context.MachineUpdates.Add(model);
+            await context.SaveChangesAsync(ct);
             return model;
         }
 
         public async Task<int> MarkAsDeletedAsync(int id, Guid machineId, CancellationToken ct)
         {
-            var model = await _context.MachineUpdates.FirstOrDefaultAsync(o => o.Id == id, ct);
+            var model = await context.MachineUpdates.FirstOrDefaultAsync(o => o.Id == id, ct);
             if (model == null)
             {
                 _log.Error($"Machine update not found for id: {id}");
@@ -128,7 +129,7 @@ namespace ghosts.api.Infrastructure.Services
             model.MachineId = machineId;
             _log.Info($"Marking machine update {id} as deleted.");
 
-            var operation = await _context.SaveChangesAsync(ct);
+            var operation = await context.SaveChangesAsync(ct);
             if (operation >= 1)
             {
                 _log.Info($"Machine update {id} marked as deleted successfully.");
@@ -137,6 +138,49 @@ namespace ghosts.api.Infrastructure.Services
 
             _log.Error($"Could not mark machine update {id} as deleted: {operation}");
             throw new InvalidOperationException("Could not delete Machine Update");
+        }
+
+        public async Task<MachineUpdate> CreateByActionRequest(NpcRecord npc, AiModels.ActionRequest actionRequest, CancellationToken ct)
+        {
+            if (npc.MachineId.HasValue && actionRequest.Handler.TryParseHandlerType(out var handler))
+            {
+                var timelineEvent = new TimelineEvent
+                {
+                    Command = actionRequest.Action
+                };
+
+                var timelineHandler = new TimelineHandler
+                {
+                    HandlerType = handler
+                };
+                timelineHandler.TimeLineEvents.Add(timelineEvent);
+
+                var handlers = new List<TimelineHandler> { timelineHandler };
+
+                var timeline = new Timeline
+                {
+                    Id = Guid.NewGuid(),
+                    Status = Timeline.TimelineStatus.Run,
+                    TimeLineHandlers = handlers
+                };
+
+                var o = new MachineUpdate
+                {
+                    Status = StatusType.Active,
+                    Update = timeline,
+                    ActiveUtc = DateTime.UtcNow,
+                    CreatedUtc = DateTime.UtcNow,
+                    MachineId = npc.MachineId.Value,
+                    Type = UpdateClientConfig.UpdateType.TimelinePartial
+                };
+
+                context.MachineUpdates.Add(o);
+                await context.SaveChangesAsync(ct);
+
+                return o;
+            }
+
+            return null;
         }
     }
 }

@@ -3,11 +3,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using ghosts.api.Infrastructure.Models;
+using Ghosts.Api.Infrastructure.Models;
 using NLog;
 using OpenAI.ObjectModels.RequestModels;
 
-namespace ghosts.api.Infrastructure.ContentServices.OpenAi;
+namespace Ghosts.Api.Infrastructure.ContentServices.OpenAi;
 
 public class OpenAiFormatterService : IFormatterService
 {

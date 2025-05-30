@@ -3,7 +3,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ghosts.api.Infrastructure.Extensions;
+namespace Ghosts.Api.Infrastructure.Extensions;
 
 public static class DictionaryExtensions
 {

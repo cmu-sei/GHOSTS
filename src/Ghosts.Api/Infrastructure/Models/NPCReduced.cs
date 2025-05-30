@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace ghosts.api.Infrastructure.Models;
+namespace Ghosts.Api.Infrastructure.Models;
 
 [Obsolete("This will move to an Automapper map from NPC to NpcProfileSummary class")]
 public class NPCReduced
@@ -52,7 +52,7 @@ public class NPCReduced
             }
 
 
-            //other potential datas to look at 
+            //other potential datas to look at
             //type.GetProperties()
             //foreach (var method in type.GetMethods())
         }
