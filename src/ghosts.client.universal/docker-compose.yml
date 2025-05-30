@@ -1,0 +1,6 @@
+services:
+  ghosts-client:
+    image: dustinupdyke/ghosts-client-universal
+    container_name: ghosts-client-001
+    volumes:
+      - ./config:/app/config

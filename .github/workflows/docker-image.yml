@@ -1,4 +1,4 @@
-name: Create Linux Container
+name: Create Universal Container
 
 on:
   workflow_dispatch:
@@ -32,8 +32,8 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           tags: |
-            dustinupdyke/ghosts-client-linux:${{ env.tag }}
-            dustinupdyke/ghosts-client-linux:latest
+            dustinupdyke/ghosts-client-universal:${{ env.tag }}
+            dustinupdyke/ghosts-client-universal:latest
           push: true
           context: src/.
-          file: ./src/Dockerfile-linux-client
+          file: ./src/Dockerfile-universal-client
