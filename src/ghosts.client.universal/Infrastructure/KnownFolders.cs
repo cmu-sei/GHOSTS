@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ghosts.client.universal.Infrastructure;
+namespace Ghosts.Client.Universal.Infrastructure;
 
 public static class KnownFolders
 {

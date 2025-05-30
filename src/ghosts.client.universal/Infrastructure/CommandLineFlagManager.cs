@@ -11,7 +11,7 @@ using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Newtonsoft.Json;
 
-namespace ghosts.client.universal.Infrastructure
+namespace Ghosts.Client.Universal.Infrastructure
 {
     internal static class CommandLineFlagManager
     {

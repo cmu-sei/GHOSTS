@@ -1,22 +1,21 @@
 ﻿using System;
 using System.Text.RegularExpressions;
-using ghosts.client.universal.Infrastructure;
-using ghosts.client.universal.Infrastructure.Browser;
+using Ghosts.Client.Universal.Handlers;
+using Ghosts.Client.Universal.Infrastructure;
+using Ghosts.Client.Universal.Infrastructure.Browser;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Newtonsoft.Json;
 using NLog;
 using OpenQA.Selenium;
 
-namespace ghosts.client.universal.handlers
+namespace Ghosts.Client.Universal.handlers
 {
-
     /// <summary>
     /// Handles Blog actions for BaseBrowserHandler
     /// </summary>
     public abstract partial class BlogHelper : BrowserHelper
     {
-
         private int _deletionProbability = -1;
         private int _uploadProbability = -1;
         private int _downloadProbability = -1;
@@ -32,7 +31,8 @@ namespace ghosts.client.universal.handlers
         public BlogContentManager contentManager = null;
 
 
-        public static BlogHelper MakeHelper(BaseBrowserHandler callingHandler, IWebDriver callingDriver, TimelineHandler handler, Logger tlog)
+        public static BlogHelper MakeHelper(BaseBrowserHandler callingHandler, IWebDriver callingDriver,
+            TimelineHandler handler, Logger tlog)
         {
             BlogHelper helper = null;
 
@@ -43,13 +43,16 @@ namespace ghosts.client.universal.handlers
                 if (version == "drupal") helper = new BlogHelperDrupal(callingHandler, callingDriver);
                 if (helper == null)
                 {
-                    tlog.Trace($"Blog:: Unsupported Blog version {version} , Blog browser action will not be executed.");
+                    tlog.Trace(
+                        $"Blog:: Unsupported Blog version {version} , Blog browser action will not be executed.");
                 }
             }
             else
             {
-                tlog.Trace($"Blog:: Handler option 'blog-version' must be specified, currently supported versions: 'drupal'. Blog browser action will not be executed.");
+                tlog.Trace(
+                    $"Blog:: Handler option 'blog-version' must be specified, currently supported versions: 'drupal'. Blog browser action will not be executed.");
             }
+
             return helper;
         }
 
@@ -67,9 +70,9 @@ namespace ghosts.client.universal.handlers
                 Log.Trace($"Variable {name} with value {value} must be an int between 0 and 100, setting to 0");
                 return false;
             }
+
             return true;
         }
-
 
 
         public virtual bool DoInitialLogin(TimelineHandler handler, string user, string pw)
@@ -129,17 +132,16 @@ namespace ghosts.client.universal.handlers
                 endRange = startRange + _downloadProbability;
                 if (choice >= startRange && choice <= endRange) blogAction = "download";
                 else startRange = endRange + 1;
-
             }
+
             if (blogAction == null && _replyProbability > 0)
             {
                 endRange = startRange + _replyProbability;
                 if (choice >= startRange && choice <= endRange) blogAction = "reply";
                 else _ = endRange + 1;
-
             }
-            return blogAction;
 
+            return blogAction;
         }
 
         /// <summary>
@@ -156,14 +158,14 @@ namespace ghosts.client.universal.handlers
 
             switch (_state)
             {
-
-
                 case "initial":
                     //these are only parsed once, global for the handler as handler can only have one entry.
-                    _version = handler.HandlerArgs["blog-version"].ToString();  //guaranteed to have this option, already checked in base handler
+                    _version = handler.HandlerArgs["blog-version"]
+                        .ToString(); //guaranteed to have this option, already checked in base handler
 
 
-                    if (_deletionProbability < 0 && handler.HandlerArgs.TryGetValue("blog-deletion-probability", out var v1))
+                    if (_deletionProbability < 0 &&
+                        handler.HandlerArgs.TryGetValue("blog-deletion-probability", out var v1))
                     {
                         int.TryParse(v1.ToString(), out _deletionProbability);
                         if (!CheckProbabilityVar(v1.ToString(), _deletionProbability))
@@ -171,7 +173,9 @@ namespace ghosts.client.universal.handlers
                             _deletionProbability = 0;
                         }
                     }
-                    if (_uploadProbability < 0 && handler.HandlerArgs.TryGetValue("blog-upload-probability", out var v2))
+
+                    if (_uploadProbability < 0 &&
+                        handler.HandlerArgs.TryGetValue("blog-upload-probability", out var v2))
                     {
                         int.TryParse(v2.ToString(), out _uploadProbability);
                         if (!CheckProbabilityVar(v2.ToString(), _uploadProbability))
@@ -179,7 +183,9 @@ namespace ghosts.client.universal.handlers
                             _uploadProbability = 0;
                         }
                     }
-                    if (_downloadProbability < 0 && handler.HandlerArgs.TryGetValue("blog-browse-probability", out var v3))
+
+                    if (_downloadProbability < 0 &&
+                        handler.HandlerArgs.TryGetValue("blog-browse-probability", out var v3))
                     {
                         int.TryParse(v3.ToString(), out (_downloadProbability));
                         if (!CheckProbabilityVar(v3.ToString(), _downloadProbability))
@@ -199,17 +205,20 @@ namespace ghosts.client.universal.handlers
 
                     if ((_deletionProbability + _uploadProbability + _downloadProbability + _replyProbability) > 100)
                     {
-                        Log.Trace($"Blog:: The sum of the browse/upload/deletion/reply blog probabilities is > 100 , blog browser action will not be executed.");
+                        Log.Trace(
+                            $"Blog:: The sum of the browse/upload/deletion/reply blog probabilities is > 100 , blog browser action will not be executed.");
                         baseHandler.BlogAbort = true;
                         return;
                     }
 
                     if ((_deletionProbability + _uploadProbability + _downloadProbability + _replyProbability) == 0)
                     {
-                        Log.Trace($"Blog:: The sum of the download/upload/deletion/reply blog probabilities == 0 , blog browser action will not be executed.");
+                        Log.Trace(
+                            $"Blog:: The sum of the download/upload/deletion/reply blog probabilities == 0 , blog browser action will not be executed.");
                         baseHandler.BlogAbort = true;
                         return;
                     }
+
                     if (handler.HandlerArgs.TryGetValue("delay-jitter", out var value))
                     {
                         baseHandler.JitterFactor = Jitter.JitterFactorParse(value.ToString());
@@ -220,11 +229,13 @@ namespace ghosts.client.universal.handlers
                         credFname = handler.HandlerArgs["blog-credentials-file"].ToString();
                         try
                         {
-                            _credentials = JsonConvert.DeserializeObject<Credentials>(System.IO.File.ReadAllText(credFname));
+                            _credentials =
+                                JsonConvert.DeserializeObject<Credentials>(System.IO.File.ReadAllText(credFname));
                         }
                         catch (System.Exception e)
                         {
-                            Log.Trace($"Blog:: Error parsing blog credentials file {credFname} , blog browser action will not be executed.");
+                            Log.Trace(
+                                $"Blog:: Error parsing blog credentials file {credFname} , blog browser action will not be executed.");
                             baseHandler.BlogAbort = true;
                             Log.Error(e);
                             return;
@@ -233,14 +244,16 @@ namespace ghosts.client.universal.handlers
 
                     if (handler.HandlerArgs.ContainsKey("blog-credentials"))
                     {
-
                         try
                         {
-                            _credentials = JsonConvert.DeserializeObject<Credentials>(handler.HandlerArgs["blog-credentials"].ToString());
+                            _credentials =
+                                JsonConvert.DeserializeObject<Credentials>(handler.HandlerArgs["blog-credentials"]
+                                    .ToString());
                         }
                         catch (System.Exception e)
                         {
-                            Log.Trace($"Blog:: Error parsing blog credentials , blog browser action will not be executed.");
+                            Log.Trace(
+                                $"Blog:: Error parsing blog credentials , blog browser action will not be executed.");
                             baseHandler.BlogAbort = true;
                             Log.Error(e);
                             return;
@@ -249,7 +262,8 @@ namespace ghosts.client.universal.handlers
 
                     if (_credentials == null)
                     {
-                        Log.Trace($"Blog:: No credentials specified in handler-args, blog browser action will not be executed.");
+                        Log.Trace(
+                            $"Blog:: No credentials specified in handler-args, blog browser action will not be executed.");
                         baseHandler.BlogAbort = true;
                         return;
                     }
@@ -276,7 +290,8 @@ namespace ghosts.client.universal.handlers
 
                     if (site == null)
                     {
-                        Log.Trace($"Blog:: The command args must specify a 'site:<value>' , blog browser action will not be executed.");
+                        Log.Trace(
+                            $"Blog:: The command args must specify a 'site:<value>' , blog browser action will not be executed.");
                         baseHandler.BlogAbort = true;
                         return;
                     }
@@ -293,21 +308,21 @@ namespace ghosts.client.universal.handlers
                         match = rx.Matches(site);
                         if (match.Count > 0) header = "https://";
                     }
+
                     if (header != null)
                     {
                         site = site.Replace(header, "");
                     }
                     else
                     {
-                        header = "http://";  //default header
+                        header = "http://"; //default header
                     }
-
-
 
 
                     if (credentialKey == null)
                     {
-                        Log.Trace($"Blog:: The command args must specify a 'credentialKey:<value>' , blog browser action will not be executed.");
+                        Log.Trace(
+                            $"Blog:: The command args must specify a 'credentialKey:<value>' , blog browser action will not be executed.");
                         baseHandler.BlogAbort = true;
                         return;
                     }
@@ -317,7 +332,8 @@ namespace ghosts.client.universal.handlers
 
                     if (username == null || password == null)
                     {
-                        Log.Trace($"Blog:: The credential key {credentialKey} does not return a valid credential, blog browser action will not be executed");
+                        Log.Trace(
+                            $"Blog:: The credential key {credentialKey} does not return a valid credential, blog browser action will not be executed");
                         baseHandler.BlogAbort = true;
                         return;
                     }
@@ -378,13 +394,15 @@ namespace ghosts.client.universal.handlers
                             return;
                         }
                     }
+
                     if (blogAction == "reply")
                     {
                         //get new content
                         var reply = contentManager.BlogReplyNext();
                         if (reply == null)
                         {
-                            Log.Trace($"Blog:: Reply content unavailable, check Blog reply file, reply action skipped.");
+                            Log.Trace(
+                                $"Blog:: Reply content unavailable, check Blog reply file, reply action skipped.");
                         }
                         else if (!DoReply(handler, reply))
                         {
@@ -392,16 +410,17 @@ namespace ghosts.client.universal.handlers
                             return;
                         }
                     }
-                    BaseHandler.Report(new ReportItem { Handler = $"Blog: {handler.HandlerType}", Command = blogAction, Arg = "", Trackable = timelineEvent.TrackableId });
 
+                    BaseHandler.Report(new ReportItem
+                    {
+                        Handler = $"Blog: {handler.HandlerType}",
+                        Command = blogAction,
+                        Arg = "",
+                        Trackable = timelineEvent.TrackableId
+                    });
 
                     break;
-
-
-
-
             }
-
         }
 
         [GeneratedRegex("^http://.*", RegexOptions.Compiled)]

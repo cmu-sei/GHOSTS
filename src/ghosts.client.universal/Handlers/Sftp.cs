@@ -1,13 +1,14 @@
 ﻿using System;
 using System.IO;
 using System.Threading;
-using ghosts.client.universal.Infrastructure;
+using Ghosts.Client.Universal.Handlers;
+using Ghosts.Client.Universal.Infrastructure;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Newtonsoft.Json;
 using Renci.SshNet;
 
-namespace ghosts.client.universal.handlers
+namespace Ghosts.Client.Universal.handlers
 {
     public class Sftp : BaseHandler
     {

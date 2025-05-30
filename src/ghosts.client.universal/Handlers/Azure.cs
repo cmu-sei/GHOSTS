@@ -3,11 +3,12 @@
 using System;
 using System.Diagnostics;
 using System.Threading;
+using Ghosts.Client.Universal.Handlers;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
 
-namespace ghosts.client.universal.handlers
+namespace Ghosts.Client.Universal.Handlers
 {
     public class Azure : BaseHandler
     {

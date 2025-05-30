@@ -5,7 +5,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Web;
-using ghosts.client.universal.Infrastructure;
+using Ghosts.Client.Universal.Infrastructure;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Newtonsoft.Json;
@@ -18,7 +18,7 @@ using Exception = System.Exception;
 
 
 
-namespace ghosts.client.universal.handlers
+namespace Ghosts.Client.Universal.handlers
 {
 
 
@@ -154,7 +154,7 @@ namespace ghosts.client.universal.handlers
             {
                 Thread.Sleep(500);
                 targetElement = Driver.FindElement(By.Id("advancedButton"));
-                MoveToElementAndClick(Driver, targetElement); //click advanced 
+                MoveToElementAndClick(Driver, targetElement); //click advanced
                 Thread.Sleep(500);
             }
             catch

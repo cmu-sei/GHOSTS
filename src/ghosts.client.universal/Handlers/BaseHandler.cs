@@ -6,7 +6,7 @@ using Ghosts.Domain.Code;
 using Newtonsoft.Json;
 using NLog;
 
-namespace ghosts.client.universal.handlers
+namespace Ghosts.Client.Universal.Handlers
 {
     public abstract class BaseHandler
     {
@@ -14,7 +14,7 @@ namespace ghosts.client.universal.handlers
         private static readonly Logger _timelineLog = LogManager.GetLogger("TIMELINE");
         internal static readonly Random _random = new();
 
-        public static void Init(TimelineHandler handler)
+        public void Init(TimelineHandler handler)
         {
             WorkingHours.Is(handler);
         }

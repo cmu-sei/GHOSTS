@@ -3,12 +3,13 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Ghosts.Client.Universal.Handlers;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
 using OpenQA.Selenium;
 
-namespace ghosts.client.universal.handlers
+namespace Ghosts.Client.Universal.handlers
 {
     class BrowserCrawl : BaseHandler
     {

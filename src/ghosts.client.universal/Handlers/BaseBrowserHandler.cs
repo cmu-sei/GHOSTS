@@ -6,14 +6,15 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using ghosts.client.universal.Infrastructure.Browser;
+using Ghosts.Client.Universal.Handlers;
+using Ghosts.Client.Universal.Infrastructure.Browser;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
 
-namespace ghosts.client.universal.handlers
+namespace Ghosts.Client.Universal.handlers
 {
     public abstract class BaseBrowserHandler : BaseHandler
     {

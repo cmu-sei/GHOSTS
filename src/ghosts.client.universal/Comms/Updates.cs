@@ -6,15 +6,15 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading;
-using ghosts.client.universal.Infrastructure;
-using ghosts.client.universal.timelineManager;
+using Ghosts.Client.Universal.Infrastructure;
+using Ghosts.Client.Universal.TimelineManager;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Messages.MesssagesForServer;
 using Newtonsoft.Json;
 using NLog;
 
-namespace ghosts.client.universal.Comms
+namespace Ghosts.Client.Universal.Comms
 {
     /// <summary>
     /// Get updates from the C2 server - could be timeline, health, etc.
@@ -115,7 +115,8 @@ namespace ghosts.client.universal.Comms
                                             }
                                         }
 
-                                        Orchestrator.RunCommand(timeline, timelineHandler);
+                                        var orchestrator = new Orchestrator();
+                                        orchestrator.RunCommand(timeline, timelineHandler);
                                     }
                                 }
                                 catch (Exception exc)
@@ -157,8 +158,9 @@ namespace ghosts.client.universal.Comms
             // is the config for a specific timeline id?
             var timelineId = TimelineUpdateClientConfigManager.GetConfigUpdateTimelineId(update);
 
+
             // get all timelines
-            var localTimelines = TimelineManager.GetLocalTimelines();
+            var localTimelines = Ghosts.Domain.Code.TimelineManager.GetLocalTimelines();
 
             var timelines = localTimelines as Timeline[] ?? localTimelines.ToArray();
             if (timelineId != Guid.Empty)

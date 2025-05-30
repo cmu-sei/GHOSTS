@@ -25,6 +25,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Converters;
+using Npgsql;
 using Swashbuckle.AspNetCore.Filters;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
@@ -39,6 +40,7 @@ namespace Ghosts.Api
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
+            NpgsqlConnection.GlobalTypeMapper.EnableDynamicJson();
 
             services.TryAddTransient<IHttpContextAccessor, HttpContextAccessor>();
             services.AddCors(options => options.UseConfiguredCors(Configuration.GetSection("CorsPolicy")));
@@ -94,6 +96,7 @@ namespace Ghosts.Api
             services.AddScoped<IClientSurveyService, ClientSurveyService>();
             services.AddScoped<IClientTimelineService, ClientTimelineService>();
             services.AddScoped<IClientUpdateService, ClientUpdateService>();
+            services.AddScoped<IClientHubService, ClientHubService>();
 
             services.AddScoped<MachineUpdateExample>();
             services.AddSwaggerExamplesFromAssemblyOf<MachineUpdateExample>();

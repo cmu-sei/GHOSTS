@@ -2,7 +2,7 @@
 
 using Ghosts.Domain.Code;
 
-namespace ghosts.client.universal.Infrastructure
+namespace Ghosts.Client.Universal.Infrastructure
 {
 
     public static class ClientConfigurationResolver

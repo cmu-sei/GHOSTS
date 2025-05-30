@@ -5,7 +5,7 @@ using Ghosts.Domain.Code;
 using OpenQA.Selenium;
 using Actions = OpenQA.Selenium.Interactions.Actions;
 
-namespace ghosts.client.universal.handlers
+namespace Ghosts.Client.Universal.handlers
 {
 
     public class BlogHelperDrupal : BlogHelper
@@ -54,7 +54,7 @@ namespace ghosts.client.universal.handlers
                 Log.Error(e);
                 return false;
             }
-            //now login 
+            //now login
             try
             {
                 var targetElement = Driver.FindElement(By.CssSelector("input#edit-name.form-text.required"));

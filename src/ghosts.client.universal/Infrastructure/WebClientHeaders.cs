@@ -6,9 +6,8 @@ using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Newtonsoft.Json;
 using NLog;
-using NLog.Fluent;
 
-namespace ghosts.client.universal.Infrastructure
+namespace Ghosts.Client.Universal.Infrastructure
 {
     /// <summary>
     /// Sets web request headers for updates/post of results
@@ -50,7 +49,7 @@ namespace ghosts.client.universal.Infrastructure
                 username = Base64Encoder.Base64Encode(username);
 
             dict.Add("ghosts-user", username);
-            dict.Add("ghosts-version", ApplicationDetails.Version);
+            dict.Add("ghosts-version", ApplicationDetails.VersionFile);
 
             _log.Trace($"Webrequest headers generated: {JsonConvert.SerializeObject(dict)}");
 

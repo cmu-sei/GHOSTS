@@ -1,6 +1,6 @@
 // Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
-namespace ghosts.client.universal.Comms.ClientSocket;
+namespace Ghosts.Client.Universal.Comms.ClientSocket;
 
 public class QueueEntry
 {
@@ -10,7 +10,10 @@ public class QueueEntry
         Heartbeat,
         Message,
         MessageSpecific,
-        Timeline
+        Timeline,
+        Results,
+        Survey,
+        Updates
     }
 
     public object Payload { get; set; }

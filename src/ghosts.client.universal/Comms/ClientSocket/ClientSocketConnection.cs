@@ -1,23 +1,24 @@
 // Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using ghosts.client.universal.Infrastructure;
+using Ghosts.Client.Universal.Infrastructure;
+using Ghosts.Client.Universal.TimelineManager;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Microsoft.AspNetCore.SignalR.Client;
-using Exception = System.Exception;
+using Newtonsoft.Json;
 
-namespace ghosts.client.universal.Comms.ClientSocket;
+namespace Ghosts.Client.Universal.Comms.ClientSocket;
 
 public class Connection(ClientConfiguration.SocketsSettings options)
 {
     private int _attempts = 0;
     private HubConnection _connection;
-    private readonly CancellationToken _ct = new();
+    private readonly CancellationToken _ct = CancellationToken.None;
     public readonly BackgroundTaskQueue Queue = new();
-    private readonly ClientConfiguration.SocketsSettings _options = options;
 
     public async Task Run()
     {
@@ -46,7 +47,7 @@ public class Connection(ClientConfiguration.SocketsSettings options)
                         Console.WriteLine($"Exception in ClientHeartbeat: {task.Exception}");
                     }
                 }, _ct);
-            }, null, TimeSpan.Zero, TimeSpan.FromSeconds(_options.Heartbeat));
+            }, null, TimeSpan.Zero, TimeSpan.FromSeconds(options.Heartbeat));
 
             while (true)
             {
@@ -56,14 +57,33 @@ public class Connection(ClientConfiguration.SocketsSettings options)
                 if (item != null)
                 {
                     Console.WriteLine($"There was a {item.Type} in the queue: {item.Payload}");
-                    if (item.Type == QueueEntry.Types.Heartbeat)
-                        await ClientHeartbeat();
 
-                    if (item.Type == QueueEntry.Types.Message)
-                        await ClientMessage(item.Payload.ToString());
-
-                    if (item.Type == QueueEntry.Types.MessageSpecific)
-                        await ClientMessageSpecific(item.Payload.ToString());
+                    switch (item.Type)
+                    {
+                        case QueueEntry.Types.Heartbeat:
+                            await ClientHeartbeat();
+                            break;
+                        case QueueEntry.Types.Message:
+                            await ClientMessage(item.Payload.ToString());
+                            break;
+                        case QueueEntry.Types.MessageSpecific:
+                            await ClientMessageSpecific(item.Payload.ToString());
+                            break;
+                        case QueueEntry.Types.Results:
+                            if (item.Payload is TransferLogDump r)
+                                await ClientResults(r);
+                            break;
+                        case QueueEntry.Types.Survey:
+                            if (item.Payload is Ghosts.Domain.Messages.MesssagesForServer.Survey s)
+                                await ClientSurvey(s);
+                            break;
+                        case QueueEntry.Types.Updates:
+                            await ClientUpdates("check");
+                            break;
+                        case QueueEntry.Types.Timeline:
+                            await ClientTimeline(item.Payload.ToString());
+                            break;
+                    }
                 }
                 else
                 {
@@ -86,7 +106,7 @@ public class Connection(ClientConfiguration.SocketsSettings options)
         _connection = new HubConnectionBuilder()
             .WithUrl(url, x =>
             {
-                x.Headers = WebClientBuilder.GetHeaders(machine, true);
+                x.Headers = WebClientBuilder.GetHeaders(machine);
             }).WithAutomaticReconnect()
             .Build();
 
@@ -114,11 +134,48 @@ public class Connection(ClientConfiguration.SocketsSettings options)
         _connection.On<string>("ReceiveSurvey",
             (message) => { Console.WriteLine($"Survey: {message}"); });
 
-        _connection.On<string>("ReceiveUpdates",
-            (message) => { Console.WriteLine($"Updates: {message}"); });
+        _connection.On<string>("ReceiveUpdate", (message) =>
+        {
+            Console.WriteLine($"Timeline: {message}");
 
-        _connection.On<string>("ReceiveTimeline",
-            (message) => { Console.WriteLine($"Timeline: {message}"); });
+            try
+            {
+                var update = JsonConvert.DeserializeObject<UpdateClientConfig>(message);
+
+                if (update != null)
+                {
+                    try
+                    {
+                        var timeline = JsonConvert.DeserializeObject<Timeline>(update.Update.ToString());
+
+                        foreach (var timelineHandler in timeline.TimeLineHandlers)
+                        {
+                            //_log.Trace($"PartialTimeline found: {timelineHandler.HandlerType}");
+
+                            foreach (var timelineEvent in timelineHandler.TimeLineEvents)
+                            {
+                                if (string.IsNullOrEmpty(timelineEvent.TrackableId))
+                                {
+                                    timelineEvent.TrackableId = Guid.NewGuid().ToString();
+                                }
+                            }
+
+                            var orchestrator = new Orchestrator();
+                            orchestrator.RunCommand(timeline, timelineHandler);
+                        }
+                    }
+                    catch (Exception exc)
+                    {
+                        //_log.Debug(exc);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to process timeline: {ex.Message} from {message}");
+            }
+        });
+
 
         _connection.Closed += async (error) =>
         {
@@ -144,13 +201,76 @@ public class Connection(ClientConfiguration.SocketsSettings options)
 
     private async Task ClientMessage(string message)
     {
-        if (!string.IsNullOrEmpty(message))
-            await _connection?.InvokeAsync("SendMessage", $"Client message: {message}", _ct)!;
+        try
+        {
+            if (!string.IsNullOrEmpty(message))
+                await _connection?.InvokeAsync("SendMessage", $"Client message: {message}", _ct)!;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
     }
 
     private async Task ClientMessageSpecific(string message)
     {
-        if (!string.IsNullOrEmpty(message))
-            await _connection?.InvokeAsync("SendSpecificMessage", $"Client specific message: {message}", _ct)!;
+        try
+        {
+            if (!string.IsNullOrEmpty(message))
+                await _connection?.InvokeAsync("SendSpecificMessage", $"Client specific message: {message}", _ct)!;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
     }
+
+    private async Task ClientResults(TransferLogDump message)
+    {
+        try
+        {
+            await _connection?.InvokeAsync("SendResults", message, _ct)!;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+    }
+
+    private async Task ClientSurvey(Ghosts.Domain.Messages.MesssagesForServer.Survey message)
+    {
+        try
+        {
+            await _connection?.InvokeAsync("SendSurvey", message, _ct)!;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+    }
+
+    private async Task ClientUpdates(string trigger)
+    {
+        try
+        {
+            await _connection?.InvokeAsync("SendUpdates", trigger, _ct)!;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+    }
+
+    private async Task ClientTimeline(string message)
+    {
+        try
+        {
+            await _connection?.InvokeAsync("SendTimeline", message, _ct)!;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+    }
+
 }

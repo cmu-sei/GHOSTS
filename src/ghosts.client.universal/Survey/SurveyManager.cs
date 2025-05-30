@@ -7,12 +7,12 @@ using System.IO;
 using System.Net.NetworkInformation;
 using System.Text.RegularExpressions;
 using System.Threading;
-using ghosts.client.universal.Comms;
+using Ghosts.Client.Universal.Comms;
 using Ghosts.Domain.Code;
 using Newtonsoft.Json;
 using NLog;
 
-namespace ghosts.client.universal.Survey
+namespace Ghosts.Client.Universal.Survey
 {
     public static class SurveyManager
     {

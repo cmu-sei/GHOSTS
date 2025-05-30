@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading;
-using ghosts.client.universal.Infrastructure;
+using Ghosts.Client.Universal.Infrastructure;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
@@ -14,7 +14,7 @@ using OpenQA.Selenium;
 using OpenQA.Selenium.Firefox;
 
 
-namespace ghosts.client.universal.handlers
+namespace Ghosts.Client.Universal.handlers
 {
     public class BrowserFirefox : BaseBrowserHandler
     {
@@ -110,7 +110,7 @@ namespace ghosts.client.universal.handlers
                 }
 
                 //hack: bad urls used in the past...
-                if (handler.Initial.Equals("") ||
+                if (string.IsNullOrEmpty(handler.Initial) ||
                     handler.Initial.Equals("about:internal", StringComparison.InvariantCultureIgnoreCase) ||
                     handler.Initial.Equals("about:external", StringComparison.InvariantCultureIgnoreCase))
                 {

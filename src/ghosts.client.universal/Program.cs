@@ -7,15 +7,16 @@ using System.IO;
 using System.Net;
 using System.Reflection;
 using System.Threading;
-using ghosts.client.universal.Comms;
-using ghosts.client.universal.Comms.ClientSocket;
-using ghosts.client.universal.Infrastructure;
-using ghosts.client.universal.timelineManager;
+using Ghosts.Client.Universal.Comms;
+using Ghosts.Client.Universal.Comms.ClientSocket;
+using Ghosts.Client.Universal.Infrastructure;
+using Ghosts.Client.Universal.timelineManager;
+using Ghosts.Client.Universal.TimelineManager;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Models;
 using NLog;
 
-namespace ghosts.client.universal
+namespace Ghosts.Client.Universal
 {
     internal static class Program
     {

@@ -3,12 +3,12 @@
 using System;
 using System.IO;
 using System.Net;
-using ghosts.client.universal.Infrastructure;
+using Ghosts.Client.Universal.Infrastructure;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using NLog;
 
-namespace ghosts.client.universal.Comms
+namespace Ghosts.Client.Universal.Comms
 {
     /// <summary>
     /// The client ID is used in the header to save having to send hostname/user/fqdn/etc. information with every request

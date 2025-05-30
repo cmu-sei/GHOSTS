@@ -6,7 +6,8 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Web;
-using ghosts.client.universal.Infrastructure;
+using Ghosts.Client.Universal.Handlers;
+using Ghosts.Client.Universal.Infrastructure;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Newtonsoft.Json;
@@ -17,11 +18,8 @@ using Actions = OpenQA.Selenium.Interactions.Actions;
 using Exception = System.Exception;
 
 
-
-namespace ghosts.client.universal.handlers
+namespace Ghosts.Client.Universal.handlers
 {
-
-
     /// <summary>
     /// Supports upload, download, deletion of documents
     /// download, deletion only done from the first page
@@ -30,18 +28,15 @@ namespace ghosts.client.universal.handlers
     /// </summary>
     public class SocialHelperV1 : SocialHelper
     {
-
         public SocialHelperV1(BaseBrowserHandler callingHandler, IWebDriver callingDriver, string aversion)
         {
             base.Init(callingHandler, callingDriver, aversion);
-
         }
 
 
         public override bool DoInitialLogin(TimelineHandler handler)
         {
-
-            postCount = 0;   //reset post count
+            postCount = 0; //reset post count
 
             if (!GotoHomeSite(handler))
             {
@@ -57,11 +52,11 @@ namespace ghosts.client.universal.handlers
             }
             catch (ThreadAbortException)
             {
-                throw;  //pass up
+                throw; //pass up
             }
+
             return foundSocializer;
         }
-
 
 
         public override bool DoBrowse(TimelineHandler handler)
@@ -69,13 +64,16 @@ namespace ghosts.client.universal.handlers
             // browse to the first friend suggestion in the friend feed
             // var targetElement =  Driver.FindElement(By.XPath("//ul[contains(@class,'w-friend-pages-added notification-list')]//child::div[contains(@class,'notification-event')]//child::a[contains(@class,'notification-friend')]"));
             // browse to the first person of first post in feed
-            var targetElement = Driver.FindElement(By.XPath("//div[contains(@class,'author-date')]//child::a[contains(@class,'post__author-name')]"));
+            var targetElement =
+                Driver.FindElement(
+                    By.XPath("//div[contains(@class,'author-date')]//child::a[contains(@class,'post__author-name')]"));
             if (targetElement != null)
             {
                 BrowserHelperSupport.ElementClick(Driver, targetElement);
                 Thread.Sleep(500);
                 Log.Trace($"Social:: Successfully browsed post on site {site}.");
             }
+
             return true;
         }
 
@@ -89,6 +87,7 @@ namespace ghosts.client.universal.handlers
                 Thread.Sleep(500);
                 Log.Trace($"Social:: Successfully liked post on site {site}.");
             }
+
             return true;
         }
 
@@ -103,21 +102,27 @@ namespace ghosts.client.universal.handlers
             {
                 // get the file content
                 var postContent = File.ReadAllText(postFileList[0]);
-                var targetElement = Driver.FindElement(By.XPath("//label[text()='Share what you are thinking here...']//following-sibling::textarea"));
+                var targetElement =
+                    Driver.FindElement(By.XPath(
+                        "//label[text()='Share what you are thinking here...']//following-sibling::textarea"));
                 targetElement.SendKeys(postContent);
                 Thread.Sleep(500);
                 var targetName = "";
-                if (userName != null) targetName = userName;  //always use this if specified
+                if (userName != null) targetName = userName; //always use this if specified
                 else
                 {
                     if (lastUserName == null || useUniqueName)
                     {
                         lastUserName = findUserName();
                     }
+
                     targetName = lastUserName;
                 }
+
                 // post target Name
-                targetElement = Driver.FindElement(By.XPath("//label[text()='Share what you are thinking here...']//following-sibling::input"));
+                targetElement =
+                    Driver.FindElement(
+                        By.XPath("//label[text()='Share what you are thinking here...']//following-sibling::input"));
                 targetElement.Clear(); //clear the name before sending another one
                 targetElement.SendKeys(targetName);
                 Thread.Sleep(500);
@@ -129,7 +134,6 @@ namespace ghosts.client.universal.handlers
 
                     if ((imageFilesPng.Length + imageFilesJpg.Length) > 0)
                     {
-
                         string imageFile = null;
                         if (imageFilesPng.Length > 0 && imageFilesJpg.Length > 0)
                         {
@@ -143,7 +147,6 @@ namespace ghosts.client.universal.handlers
                             {
                                 imageFile = imageFilesPng[index];
                             }
-
                         }
                         else if (imageFilesJpg.Length > 0)
                         {
@@ -153,8 +156,10 @@ namespace ghosts.client.universal.handlers
                         {
                             imageFile = imageFilesPng[(_random.Next(0, imageFilesPng.Length))];
                         }
+
                         // click the browse button
-                        targetElement = Driver.FindElement(By.XPath("//label[text()='Share what you are thinking here...']//following-sibling::input[@type='file']"));
+                        targetElement = Driver.FindElement(By.XPath(
+                            "//label[text()='Share what you are thinking here...']//following-sibling::input[@type='file']"));
                         if (targetElement != null)
                         {
                             BrowserHelperSupport.ElementClick(Driver, targetElement);
@@ -164,9 +169,7 @@ namespace ghosts.client.universal.handlers
                             Thread.Sleep(500);
                         }
                     }
-
                 }
-
 
 
                 targetElement = Driver.FindElement(By.XPath("//button[@id='sendButton']"));
@@ -175,17 +178,11 @@ namespace ghosts.client.universal.handlers
                 Thread.Sleep(500);
                 Log.Trace($"Social:: Successfully added post on site {site}.");
                 postCount += 1;
-
-
             }
-
 
 
             return true;
         }
-
-
-
     }
 
     /// <summary>
@@ -193,8 +190,6 @@ namespace ghosts.client.universal.handlers
     /// </summary>
     public abstract partial class SocialHelper : BrowserHelper
     {
-
-
         private int _postProbability = -1;
         private int _likeProbability = -1;
         private int _browseProbability = -1;
@@ -210,7 +205,7 @@ namespace ghosts.client.universal.handlers
 
         private string _state = "initial";
         public int errorCount = 0;
-        public int errorThreshold = 3;  //after three strikes, restart the browser
+        public int errorThreshold = 3; //after three strikes, restart the browser
         public string site { get; set; } = null;
 
         public string header { get; set; } = null;
@@ -240,20 +235,22 @@ namespace ghosts.client.universal.handlers
 
         public string findUserName()
         {
-
-            var targetElement = Driver.FindElement(By.XPath("//ul[contains(@class,'w-friend-pages-added notification-list')]//child::div[contains(@class,'notification-event')]//child::a[contains(@class,'notification-friend')]"));
+            var targetElement = Driver.FindElement(By.XPath(
+                "//ul[contains(@class,'w-friend-pages-added notification-list')]//child::div[contains(@class,'notification-event')]//child::a[contains(@class,'notification-friend')]"));
 
             if (targetElement != null)
             {
                 var name = targetElement.Text;
                 return name;
             }
+
             Log.Trace($"Social:: Unable to find user name to use for post, using default name.");
-            return "Dr.Mysterious";  // always return a name
+            return "Dr.Mysterious"; // always return a name
         }
 
 
-        public static SocialHelper MakeHelper(BaseBrowserHandler callingHandler, IWebDriver callingDriver, TimelineHandler handler, Logger tlog)
+        public static SocialHelper MakeHelper(BaseBrowserHandler callingHandler, IWebDriver callingDriver,
+            TimelineHandler handler, Logger tlog)
         {
             SocialHelper helper = new SocialHelperV1(callingHandler, callingDriver, "1.0");
             return helper;
@@ -280,6 +277,7 @@ namespace ghosts.client.universal.handlers
                 Log.Trace($"Variable {name} with value {value} must be an int between 0 and 100, setting to 0");
                 return false;
             }
+
             return true;
         }
 
@@ -305,22 +303,22 @@ namespace ghosts.client.universal.handlers
             }
             catch (ThreadAbortException)
             {
-                throw;  //pass up
+                throw; //pass up
             }
             catch (System.Exception e)
             {
-                Log.Trace($"Social:: Unable to parse site {site}, url may be malformed. Social browser action will not be executed.");
+                Log.Trace(
+                    $"Social:: Unable to parse site {site}, url may be malformed. Social browser action will not be executed.");
                 Log.Error(e);
                 return false;
-
             }
+
             return true;
         }
 
 
         public static void AttachFileWindows(string filename)
         {
-
         }
 
         public void AttachFileLinux(string filename)
@@ -340,7 +338,6 @@ namespace ghosts.client.universal.handlers
         }
 
 
-
         public string GetUploadFile()
         {
             try
@@ -351,9 +348,12 @@ namespace ghosts.client.universal.handlers
             }
             catch (ThreadAbortException)
             {
-                throw;  //pass up
+                throw; //pass up
             }
-            catch { } //ignore any errors
+            catch
+            {
+            } //ignore any errors
+
             return null;
         }
 
@@ -386,7 +386,6 @@ namespace ghosts.client.universal.handlers
         {
             try
             {
-
                 if (topicDirs != null && topicDirs.Count > 0)
                 {
                     //ensure these topic dirs still exists
@@ -401,7 +400,8 @@ namespace ghosts.client.universal.handlers
                         //this will be the topic directory
                         var topicDir = dirlist[_random.Next(0, dirlist.Count)];
                         // get the post directory
-                        var topicContentDirList = Directory.GetDirectories(topicDir, "*", SearchOption.TopDirectoryOnly);
+                        var topicContentDirList =
+                            Directory.GetDirectories(topicDir, "*", SearchOption.TopDirectoryOnly);
                         if (topicContentDirList.Length > 0)
                         {
                             var topicContentDir = topicContentDirList[_random.Next(0, topicContentDirList.Length)];
@@ -414,16 +414,15 @@ namespace ghosts.client.universal.handlers
             }
             catch (ThreadAbortException)
             {
-                throw;  //pass up
+                throw; //pass up
             }
+
             return null;
         }
 
 
-
         private string GetNextAction()
         {
-
             var choice = _random.Next(0, 101);
             string action = null;
             int endRange;
@@ -436,6 +435,7 @@ namespace ghosts.client.universal.handlers
                 else action = "post";
                 return action;
             }
+
             if (_likeProbability > 0)
             {
                 endRange = _likeProbability;
@@ -463,7 +463,6 @@ namespace ghosts.client.universal.handlers
 
 
             return action;
-
         }
 
         /// <summary>
@@ -476,14 +475,12 @@ namespace ghosts.client.universal.handlers
         {
             try
             {
-
                 switch (_state)
                 {
-
-
                     case "initial":
                         //these are only parsed once, global for the handler as handler can only have one entry.
-                        version = handler.HandlerArgs["social-version"].ToString();  //guaranteed to have this option, parsed in calling handler
+                        version = handler.HandlerArgs["social-version"]
+                            .ToString(); //guaranteed to have this option, parsed in calling handler
 
                         if (handler.HandlerArgs.TryGetValue("social-username", out var v0))
                         {
@@ -501,14 +498,14 @@ namespace ghosts.client.universal.handlers
                             targetDir = Environment.ExpandEnvironmentVariables(targetDir);
                             if (!Directory.Exists(targetDir))
                             {
-                                Log.Trace($"Social:: contentdirectory {targetDir} does not exist, aborting social handler.");
+                                Log.Trace(
+                                    $"Social:: contentdirectory {targetDir} does not exist, aborting social handler.");
                                 baseHandler.SocialAbort = true;
                             }
                             else
                             {
                                 contentDirectory = targetDir;
                             }
-
                         }
 
                         string topics = null;
@@ -518,11 +515,13 @@ namespace ghosts.client.universal.handlers
                             topics = v3.ToString();
                             topics = topics.ToLower();
                         }
+
                         if (contentDirectory != null)
                         {
                             // create list of valid topic dirs
                             topicDirs = new List<string>();
-                            var dirlist = Directory.GetDirectories(contentDirectory, "*", SearchOption.TopDirectoryOnly);
+                            var dirlist =
+                                Directory.GetDirectories(contentDirectory, "*", SearchOption.TopDirectoryOnly);
                             if (dirlist.Length > 0)
                             {
                                 //get the base directory
@@ -541,6 +540,7 @@ namespace ghosts.client.universal.handlers
                                         }
                                     }
                                 }
+
                                 if (topicDirs.Count == 0 && topics != null)
                                 {
                                     // No match to specified topics, add all available
@@ -553,7 +553,8 @@ namespace ghosts.client.universal.handlers
                             else
                             {
                                 // no topic dirs, abort
-                                Log.Trace($"Social:: contentdirectory {contentDirectory} does not have topic subdirectories, aborting, aborting social handler.");
+                                Log.Trace(
+                                    $"Social:: contentdirectory {contentDirectory} does not have topic subdirectories, aborting, aborting social handler.");
                                 baseHandler.SocialAbort = true;
                             }
                         }
@@ -566,6 +567,7 @@ namespace ghosts.client.universal.handlers
                                 _postProbability = 0;
                             }
                         }
+
                         if (handler.HandlerArgs.TryGetValue("social-like-probability", out var v5))
                         {
                             int.TryParse(v5.ToString(), out _likeProbability);
@@ -574,6 +576,7 @@ namespace ghosts.client.universal.handlers
                                 _likeProbability = 0;
                             }
                         }
+
                         if (handler.HandlerArgs.TryGetValue("social-browse-probability", out var v6))
                         {
                             int.TryParse(v6.ToString(), out _browseProbability);
@@ -582,7 +585,9 @@ namespace ghosts.client.universal.handlers
                                 _browseProbability = 0;
                             }
                         }
-                        if (_addImageProbability < 0 && handler.HandlerArgs.TryGetValue("social-addimage-probability", out var v7))
+
+                        if (_addImageProbability < 0 &&
+                            handler.HandlerArgs.TryGetValue("social-addimage-probability", out var v7))
                         {
                             int.TryParse(v7.ToString(), out _addImageProbability);
                             if (!CheckProbabilityVar(v7.ToString(), _addImageProbability))
@@ -600,7 +605,6 @@ namespace ghosts.client.universal.handlers
                         {
                             userName = v9.ToString();
                         }
-
 
 
                         //now parse the command args
@@ -624,7 +628,8 @@ namespace ghosts.client.universal.handlers
 
                         if (site == null)
                         {
-                            Log.Trace($"Social:: The command args must specify a 'site:<value>' , social browser action will not be executed.");
+                            Log.Trace(
+                                $"Social:: The command args must specify a 'site:<value>' , social browser action will not be executed.");
                             baseHandler.SocialAbort = true;
                             return;
                         }
@@ -641,18 +646,20 @@ namespace ghosts.client.universal.handlers
                             match = rx.Matches(site);
                             if (match.Count > 0) header = "https://";
                         }
+
                         if (header != null)
                         {
                             site = site.Replace(header, "");
                         }
                         else
                         {
-                            header = "http://";  //default header
+                            header = "http://"; //default header
                         }
 
                         if (!DoInitialLogin(handler))
                         {
-                            Log.Trace($"Social:: Target site {site} does not appear to be a socializer site, aborting Social browsing.");
+                            Log.Trace(
+                                $"Social:: Target site {site} does not appear to be a socializer site, aborting Social browsing.");
                             baseHandler.SocialAbort = true;
                             return;
                         }
@@ -700,13 +707,15 @@ namespace ghosts.client.universal.handlers
                             }
                         }
 
-
-                        BaseHandler.Report(new ReportItem { Handler = $"Social{version}: {handler.HandlerType}", Command = socialAction, Arg = "", Trackable = timelineEvent.TrackableId });
+                        BaseHandler.Report(new ReportItem
+                        {
+                            Handler = $"Social{version}: {handler.HandlerType}",
+                            Command = socialAction,
+                            Arg = "",
+                            Trackable = timelineEvent.TrackableId
+                        });
                         break;
-
-
                 }
-
             }
             catch (Exception e)
             {
@@ -714,19 +723,16 @@ namespace ghosts.client.universal.handlers
                 {
                     throw;
                 }
-                errorCount = errorThreshold + 1;  // an exception at  this level needs a restart
-                LastException = e;  //save last exception so that it can be thrown up during restart
+
+                errorCount = errorThreshold + 1; // an exception at  this level needs a restart
+                LastException = e; //save last exception so that it can be thrown up during restart
                 Log.Trace($"WebSocial:: Error at top level of execute loop.");
                 Log.Error(e);
-                Thread.Sleep(20000);   // sleep to prevent tight error loop
+                Thread.Sleep(20000); // sleep to prevent tight error loop
             }
         }
 
         [GeneratedRegex("^http://.*", RegexOptions.Compiled)]
         private static partial Regex MyRegex();
     }
-
-
 }
-
-

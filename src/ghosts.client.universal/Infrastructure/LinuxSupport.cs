@@ -1,27 +1,19 @@
-﻿using System;
+﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
+
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.IO;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading;
 using NLog;
 
-namespace ghosts.client.universal.Infrastructure
+namespace Ghosts.Client.Universal.Infrastructure
 {
-
     internal class BashExecute
     {
-
         public static Logger Log;
         public string filename;
         public string id;
         public string windowTitle;
         public bool needRestart = false;
-
 
         public BashExecute(Logger aLog)
         {
@@ -81,7 +73,8 @@ namespace ghosts.client.universal.Infrastructure
             {
                 needRestart = false;
                 //The dummy \b (backspaces) are needed at the beginning because a few characters at the start can be lost
-                string cmd = $"xdotool search -name '{windowTitle}' windowfocus --sync type --delay 100 '\b\b\b\b\b\b\b\b\b\b{filename}\r'";
+                string cmd =
+                    $"xdotool search -name '{windowTitle}' windowfocus --sync type --delay 100 '\b\b\b\b\b\b\b\b\b\b{filename}\r'";
                 ExecuteBashCommand(id, cmd);
                 Thread.Sleep(3000);
                 // Check if the window has closed, do multiple close attempts
@@ -103,8 +96,10 @@ namespace ghosts.client.universal.Infrastructure
                     {
                         break;
                     }
+
                     i += 1;
                 }
+
                 if (i == closeMax)
                 {
                     // try windowkill
@@ -121,13 +116,14 @@ namespace ghosts.client.universal.Infrastructure
                         // reset i if window actually killed
                         if (result == "") i = 0;
                     }
-
                 }
+
                 if (i == closeMax)
                 {
                     needRestart = true;
                     Log.Error($"{id}:: Unable to attach file {filename}");
                 }
+
                 return;
             }
             catch (Exception e)
@@ -140,8 +136,6 @@ namespace ghosts.client.universal.Infrastructure
 
     public class LinuxSupport
     {
-
-
         public static Logger Log;
         private BashExecute runner = null;
 
@@ -151,7 +145,8 @@ namespace ghosts.client.universal.Infrastructure
             Log = aLog;
         }
 
-        public bool AttachFileUsingThread(string id, string filename, string windowTitle, int timeoutSeconds, int retries)
+        public bool AttachFileUsingThread(string id, string filename, string windowTitle, int timeoutSeconds,
+            int retries)
         {
             // Use a thread in case the xdotool execution hangs
 
@@ -171,6 +166,7 @@ namespace ghosts.client.universal.Infrastructure
                     if (!t.IsAlive) break;
                     totalTime += 10;
                 }
+
                 if (t.IsAlive)
                 {
                     t.Abort();
@@ -189,11 +185,6 @@ namespace ghosts.client.universal.Infrastructure
             }
 
             return (count < retries + 1);
-
         }
-
-
     }
-
-
 }

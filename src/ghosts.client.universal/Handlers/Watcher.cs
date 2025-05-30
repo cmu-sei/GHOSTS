@@ -4,9 +4,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using Ghosts.Client.Universal.Handlers;
 using Ghosts.Domain;
 
-namespace ghosts.client.universal.handlers;
+namespace Ghosts.Client.Universal.handlers;
 
 /// <summary>
 /// Watcher is file only at the moment
@@ -15,7 +16,7 @@ internal class Watcher : BaseHandler
 {
     public Watcher(TimelineHandler handler)
     {
-        Init(handler);
+        base.Init(handler);
         _log.Trace("Spawning watcher handler...");
 
         try
@@ -362,7 +363,7 @@ internal class FolderWatcher : BaseHandler
                     }
                     if (allfiles.Count == 0)
                     {
-                        //no more files to try to delete and loop is still running. 
+                        //no more files to try to delete and loop is still running.
                         break; //break out of the loop
 
                     }

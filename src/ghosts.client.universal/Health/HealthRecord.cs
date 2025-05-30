@@ -4,7 +4,7 @@ using System;
 using System.Net;
 using Ghosts.Domain;
 
-namespace ghosts.client.universal.Health
+namespace Ghosts.Client.Universal.Health
 {
     public static class HealthManager
     {

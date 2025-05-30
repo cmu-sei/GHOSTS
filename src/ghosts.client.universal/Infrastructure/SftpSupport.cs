@@ -7,7 +7,7 @@ using Renci.SshNet;
 using Renci.SshNet.Sftp;
 
 
-namespace ghosts.client.universal.Infrastructure
+namespace Ghosts.Client.Universal.Infrastructure
 {
     public class SftpSupport : SshSftpSupport
     {

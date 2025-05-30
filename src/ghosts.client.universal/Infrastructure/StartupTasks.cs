@@ -6,11 +6,11 @@ using System.Diagnostics;
 using System.Threading;
 using NLog;
 
-namespace ghosts.client.universal.Infrastructure
+namespace Ghosts.Client.Universal.Infrastructure
 {
     /// <summary>
     /// Some apps (word, excel, etc.) like to hang around and leech memory on client machines
-    /// this class attempts to kill those pesky applications on GHOSTS 
+    /// this class attempts to kill those pesky applications on GHOSTS
     /// startup and shutdown (and maybe periodically in-between)
     /// </summary>
     public static class StartupTasks

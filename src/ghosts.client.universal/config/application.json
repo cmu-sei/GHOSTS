@@ -1,5 +1,5 @@
 ﻿{
-    "ApiRootUrl": "http://ghosts-api/api",
+    "ApiRootUrl": "http://ghosts-api:5000/api",
     "Sockets": {
         "IsEnabled": true,
         "Heartbeat": 50000

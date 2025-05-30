@@ -4,6 +4,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using Ghosts.Client.Universal.TimelineManager;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Newtonsoft.Json;
@@ -11,7 +12,7 @@ using NLog;
 using SimpleTCP;
 // ReSharper disable ObjectCreationAsStatement
 
-namespace ghosts.client.universal.timelineManager
+namespace Ghosts.Client.Universal.timelineManager
 {
     public static class ListenerManager
     {
@@ -119,7 +120,8 @@ namespace ghosts.client.universal.timelineManager
                             }
                         }
 
-                        Orchestrator.RunCommand(timeline, timelineHandler);
+                        var o = new Orchestrator();
+                        o.RunCommand(timeline, timelineHandler);
                     }
                 }
                 catch (Exception exc)
@@ -141,7 +143,9 @@ namespace ghosts.client.universal.timelineManager
                             Status = Timeline.TimelineStatus.Run
                         };
                         t.TimeLineHandlers.Add(constructedTimelineHandler);
-                        Orchestrator.RunCommand(t, constructedTimelineHandler);
+
+                        var o = new Orchestrator();
+                        o.RunCommand(t, constructedTimelineHandler);
                     }
                 }
                 catch (Exception exc)
@@ -231,7 +235,8 @@ namespace ghosts.client.universal.timelineManager
                 };
                 t.TimeLineHandlers.Add(timelineHandler);
 
-                Orchestrator.RunCommand(t, timelineHandler);
+                var o = new Orchestrator();
+                o.RunCommand(t, timelineHandler);
 
                 var obj = JsonConvert.SerializeObject(timelineHandler);
 

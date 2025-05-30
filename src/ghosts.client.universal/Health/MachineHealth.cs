@@ -8,7 +8,7 @@ using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using NLog;
 
-namespace ghosts.client.universal.Health
+namespace Ghosts.Client.Universal.Health
 {
     public static class MachineHealth
     {

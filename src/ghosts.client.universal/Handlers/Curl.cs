@@ -4,11 +4,12 @@ using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
+using Ghosts.Client.Universal.Handlers;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using HtmlAgilityPack;
 
-namespace ghosts.client.universal.handlers
+namespace Ghosts.Client.Universal.handlers
 {
     public class Curl : BaseHandler
     {

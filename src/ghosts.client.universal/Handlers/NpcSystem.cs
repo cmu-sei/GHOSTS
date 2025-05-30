@@ -2,12 +2,14 @@
 
 using System;
 using System.Linq;
-using ghosts.client.universal.Infrastructure;
-using ghosts.client.universal.timelineManager;
+using Ghosts.Client.Universal.Handlers;
+using Ghosts.Client.Universal.Infrastructure;
+using Ghosts.Client.Universal.timelineManager;
+using Ghosts.Client.Universal.TimelineManager;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 
-namespace ghosts.client.universal.handlers
+namespace Ghosts.Client.Universal.handlers
 {
     public class NpcSystem : BaseHandler
     {
@@ -29,7 +31,8 @@ namespace ghosts.client.universal.handlers
                     case "stop":
                         if (timeline.Id != Guid.Empty)
                         {
-                            Orchestrator.StopTimeline(timeline.Id);
+                            var o = new Orchestrator();
+                            o.StopTimeline(timeline.Id);
                         }
                         else
                         {

@@ -513,7 +513,7 @@
             "http://www.makeup.com",
             "http://www.lyricsworld.com"
           ],
-          "DelayAfter": 15000,
+          "DelayAfter": 1500000,
           "DelayBefore": 0
         }
       ]

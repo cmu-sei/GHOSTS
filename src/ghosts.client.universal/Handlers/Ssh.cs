@@ -1,7 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Threading;
-using ghosts.client.universal.Infrastructure;
+using Ghosts.Client.Universal.Handlers;
+using Ghosts.Client.Universal.Infrastructure;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Newtonsoft.Json;
@@ -13,7 +14,7 @@ using Renci.SshNet;
  * Install-Package SSH.NET
  */
 
-namespace ghosts.client.universal.handlers
+namespace Ghosts.Client.Universal.handlers
 {
     /// <summary>
     /// This handler connects to a remote host and executes SSH commands.
