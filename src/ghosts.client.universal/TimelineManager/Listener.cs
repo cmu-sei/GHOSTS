@@ -3,22 +3,20 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using Ghosts.Client.Universal.TimelineManager;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Newtonsoft.Json;
 using NLog;
 using SimpleTCP;
-// ReSharper disable ObjectCreationAsStatement
 
 namespace Ghosts.Client.Universal.timelineManager
 {
     public static class ListenerManager
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        internal static string In = ApplicationDetails.InstanceDirectories.TimelineIn;
-        internal static string Out = ApplicationDetails.InstanceDirectories.TimelineOut;
+        internal static readonly string _in = ApplicationDetails.InstanceDirectories.TimelineIn;
+        internal static readonly string _out = ApplicationDetails.InstanceDirectories.TimelineOut;
 
         public static void Run()
         {
@@ -36,18 +34,18 @@ namespace Ghosts.Client.Universal.timelineManager
 
             try
             {
-                if (!string.IsNullOrEmpty(In))
+                if (!string.IsNullOrEmpty(_in))
                 {
-                    if (!Directory.Exists(In))
+                    if (!Directory.Exists(_in))
                     {
-                        Directory.CreateDirectory(In);
-                        _log.Trace($"DirectoryListener created DirIn: {In})");
+                        Directory.CreateDirectory(_in);
+                        _log.Trace($"DirectoryListener created DirIn: {_in})");
                     }
 
-                    if (!Directory.Exists(Out))
+                    if (!Directory.Exists(_out))
                     {
-                        Directory.CreateDirectory(Out);
-                        _log.Trace($"DirectoryListener created DirIn: {Out})");
+                        Directory.CreateDirectory(_out);
+                        _log.Trace($"DirectoryListener created DirIn: {_out})");
                     }
 
                     var _ = new DirectoryListener();
@@ -70,8 +68,8 @@ namespace Ghosts.Client.Universal.timelineManager
     public class DirectoryListener
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        private static readonly string _in = ListenerManager.In;
-        private static readonly string _out = ListenerManager.Out;
+        private static readonly string _in = ListenerManager._in;
+        private static readonly string _out = ListenerManager._out;
         private static string _currentlyProcessing = string.Empty;
 
         public DirectoryListener()
@@ -157,7 +155,11 @@ namespace Ghosts.Client.Universal.timelineManager
             try
             {
                 var outfile = e.FullPath.Replace(_in, _out);
-                outfile = outfile.Replace(e.Name, $"{DateTime.Now.ToString("G").Replace("/", "-").Replace(" ", "").Replace(":", "")}-{e.Name}");
+                if (e.Name != null)
+                {
+                    outfile = outfile.Replace(e.Name,
+                        $"{DateTime.Now.ToString("G").Replace("/", "-").Replace(" ", "").Replace(":", "")}-{e.Name}");
+                }
 
                 File.Move(e.FullPath, outfile);
             }
@@ -185,7 +187,7 @@ namespace Ghosts.Client.Universal.timelineManager
                 Console.WriteLine(
                     $"PortListener active on {string.Join(",", server.GetListeningIPs())} : {Program.Configuration.Listener.Port}");
 
-                server.DataReceived += (sender, message) =>
+                server.DataReceived += (_, message) =>
                 {
                     var obj = Handle(message);
                     message.ReplyLine($"{obj}{Environment.NewLine}");
