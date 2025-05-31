@@ -25,30 +25,38 @@ public class ClientSurveyService(IBackgroundQueue queue) : IClientSurveyService
 
     public Task<bool> ProcessSurveyAsync(HttpContext context, Survey value, CancellationToken ct)
     {
-        if (!context.Request.Headers.TryGetValue("ghosts-id", out var id) || string.IsNullOrEmpty(id))
+        try
         {
-            _log.Warn("Missing ghosts-id header");
+            if (!context.Request.Headers.TryGetValue("ghosts-id", out var id) || string.IsNullOrEmpty(id))
+            {
+                _log.Warn("Missing ghosts-id header");
+                return Task.FromResult(false);
+            }
+
+            _log.Info($"Request by {id}");
+
+            var machine = WebRequestReader.GetMachine(context);
+            if (!string.IsNullOrEmpty(id))
+                machine.Id = new Guid(id);
+
+            if (!machine.IsValid())
+            {
+                _log.Warn("Invalid machine request");
+                return Task.FromResult(false);
+            }
+
+            value.MachineId = machine.Id;
+            if (value.Created == DateTime.MinValue)
+                value.Created = DateTime.UtcNow;
+
+            queue.Enqueue(new QueueEntry { Type = QueueEntry.Types.Survey, Payload = value });
+            return Task.FromResult(true);
+        }
+        catch (Exception e)
+        {
+            _log.Error(e);
             return Task.FromResult(false);
         }
-
-        _log.Info($"Request by {id}");
-
-        var machine = WebRequestReader.GetMachine(context);
-        if (!string.IsNullOrEmpty(id))
-            machine.Id = new Guid(id);
-
-        if (!machine.IsValid())
-        {
-            _log.Warn("Invalid machine request");
-            return Task.FromResult(false);
-        }
-
-        value.MachineId = machine.Id;
-        if (value.Created == DateTime.MinValue)
-            value.Created = DateTime.UtcNow;
-
-        queue.Enqueue(new QueueEntry { Type = QueueEntry.Types.Survey, Payload = value });
-        return Task.FromResult(true);
     }
 
     public async Task<bool> ProcessEncryptedSurveyAsync(HttpContext context, EncryptedPayload transmission,

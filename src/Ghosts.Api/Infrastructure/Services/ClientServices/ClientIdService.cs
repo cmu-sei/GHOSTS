@@ -20,17 +20,25 @@ public class ClientIdService(IMachineService machineService) : IClientIdService
     public async Task<(bool Success, Guid MachineId, string Error)> GetMachineIdAsync(HttpContext context,
         CancellationToken ct)
     {
-        var idHeader = context.Request.Headers.TryGetValue("ghosts-id", out var id) ? id.ToString() : string.Empty;
-
-        _log.Info($"Request by {idHeader}");
-
-        var findMachineResponse = await machineService.FindOrCreate(context, ct);
-        if (!findMachineResponse.IsValid())
+        try
         {
-            _log.Error($"FindOrCreate failed for {idHeader}: {findMachineResponse.Error}");
-            return (false, Guid.Empty, findMachineResponse.Error);
-        }
+            var idHeader = context.Request.Headers.TryGetValue("ghosts-id", out var id) ? id.ToString() : string.Empty;
 
-        return (true, findMachineResponse.Machine.Id, string.Empty);
+            _log.Info($"Request by {idHeader}");
+
+            var findMachineResponse = await machineService.FindOrCreate(context, ct);
+            if (!findMachineResponse.IsValid())
+            {
+                _log.Error($"FindOrCreate failed for {idHeader}: {findMachineResponse.Error}");
+                return (false, Guid.Empty, findMachineResponse.Error);
+            }
+
+            return (true, findMachineResponse.Machine.Id, string.Empty);
+        }
+        catch (Exception e)
+        {
+            _log.Error(e);
+            return (false, Guid.Empty, $"Exception occured: {e.Message}");
+        }
     }
 }

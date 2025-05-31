@@ -1,5 +1,6 @@
 // Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Ghosts.Api.Infrastructure.Models;
@@ -24,50 +25,58 @@ public class ClientUpdateService(
 
     public async Task<(bool Success, UpdateClientConfig Update, int StatusCode, string Error)> GetUpdateAsync(HttpContext context, CancellationToken ct)
     {
-        var id = context.Request.Headers["ghosts-id"];
-        _log.Trace($"Request by {id}");
-
-        var findMachineResponse = await machineService.FindOrCreate(context, ct);
-        if (!findMachineResponse.IsValid())
+        try
         {
-            return (false, null, StatusCodes.Status401Unauthorized, findMachineResponse.Error);
-        }
+            var id = context.Request.Headers["ghosts-id"];
+            _log.Trace($"Request by {id}");
 
-        var m = findMachineResponse.Machine;
-
-        queue.Enqueue(new QueueEntry
-        {
-            Payload = new MachineQueueEntry
+            var findMachineResponse = await machineService.FindOrCreate(context, ct);
+            if (!findMachineResponse.IsValid())
             {
-                Machine = m,
-                LogDump = null,
-                HistoryType = Machine.MachineHistoryItem.HistoryType.RequestedUpdates
-            },
-            Type = QueueEntry.Types.Machine
-        });
+                return (false, null, StatusCodes.Status401Unauthorized, findMachineResponse.Error);
+            }
 
-        var u = await updateService.GetAsync(m.Id, m.CurrentUsername, ct);
-        if (u == null)
-        {
-            return (false, null, StatusCodes.Status404NotFound, "No update available");
-        }
+            var m = findMachineResponse.Machine;
 
-        _log.Trace($"Update {u.Id} sent to {m.Id} {m.Name}({m.FQDN}) {u.Id} {u.Username} {u.Update}");
-
-        var update = new UpdateClientConfig { Type = u.Type, Update = u.Update };
-
-        await updateService.MarkAsDeletedAsync(u.Id, m.Id, ct);
-
-        queue.Enqueue(new QueueEntry
-        {
-            Payload = new NotificationQueueEntry
+            queue.Enqueue(new QueueEntry
             {
-                Type = NotificationQueueEntry.NotificationType.TimelineDelivered,
-                Payload = (JObject)JToken.FromObject(update)
-            },
-            Type = QueueEntry.Types.Notification
-        });
+                Payload = new MachineQueueEntry
+                {
+                    Machine = m,
+                    LogDump = null,
+                    HistoryType = Machine.MachineHistoryItem.HistoryType.RequestedUpdates
+                },
+                Type = QueueEntry.Types.Machine
+            });
 
-        return (true, update, StatusCodes.Status200OK, string.Empty);
+            var u = await updateService.GetAsync(m.Id, m.CurrentUsername, ct);
+            if (u == null)
+            {
+                return (false, null, StatusCodes.Status404NotFound, "No update available");
+            }
+
+            _log.Trace($"Update {u.Id} sent to {m.Id} {m.Name}({m.FQDN}) {u.Id} {u.Username} {u.Update}");
+
+            var update = new UpdateClientConfig { Type = u.Type, Update = u.Update };
+
+            await updateService.MarkAsDeletedAsync(u.Id, m.Id, ct);
+
+            queue.Enqueue(new QueueEntry
+            {
+                Payload = new NotificationQueueEntry
+                {
+                    Type = NotificationQueueEntry.NotificationType.TimelineDelivered,
+                    Payload = (JObject)JToken.FromObject(update)
+                },
+                Type = QueueEntry.Types.Notification
+            });
+
+            return (true, update, StatusCodes.Status200OK, string.Empty);
+        }
+        catch (Exception e)
+        {
+            _log.Error(e);
+            return (false, null, StatusCodes.Status500InternalServerError, $"Exception occured: {e.Message}");
+        }
     }
 }

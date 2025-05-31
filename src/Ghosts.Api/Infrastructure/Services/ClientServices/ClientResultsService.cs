@@ -26,35 +26,43 @@ public class ClientResultsService(IBackgroundQueue queue) : IClientResultsServic
 
     public Task<bool> ProcessResultAsync(HttpContext context, TransferLogDump logDump, CancellationToken ct)
     {
-        if (logDump == null || string.IsNullOrWhiteSpace(logDump.Log))
-            return Task.FromResult(false);
-
-        var machine = WebRequestReader.GetMachine(context);
-
-        if (!context.Request.Headers.TryGetValue("ghosts-id", out var id) || string.IsNullOrEmpty(id))
+        try
         {
-            if (!machine.IsValid())
+            if (logDump == null || string.IsNullOrWhiteSpace(logDump.Log))
                 return Task.FromResult(false);
-        }
-        else
-        {
-            machine.Id = new Guid(id);
-        }
 
-        _log.Info($"Payload received from {machine.Id}: {logDump.Log}");
+            var machine = WebRequestReader.GetMachine(context);
 
-        queue.Enqueue(new QueueEntry
-        {
-            Payload = new MachineQueueEntry
+            if (!context.Request.Headers.TryGetValue("ghosts-id", out var id) || string.IsNullOrEmpty(id))
             {
-                Machine = machine,
-                LogDump = logDump,
-                HistoryType = Machine.MachineHistoryItem.HistoryType.PostedResults
-            },
-            Type = QueueEntry.Types.Machine
-        });
+                if (!machine.IsValid())
+                    return Task.FromResult(false);
+            }
+            else
+            {
+                machine.Id = new Guid(id);
+            }
 
-        return Task.FromResult(true);
+            _log.Info($"Payload received from {machine.Id}: {logDump.Log}");
+
+            queue.Enqueue(new QueueEntry
+            {
+                Payload = new MachineQueueEntry
+                {
+                    Machine = machine,
+                    LogDump = logDump,
+                    HistoryType = Machine.MachineHistoryItem.HistoryType.PostedResults
+                },
+                Type = QueueEntry.Types.Machine
+            });
+
+            return Task.FromResult(true);
+        }
+        catch (Exception e)
+        {
+            _log.Error(e);
+            return Task.FromResult(false);
+        }
     }
 
     public async Task<bool> ProcessEncryptedAsync(HttpContext context, EncryptedPayload encrypted, CancellationToken ct)

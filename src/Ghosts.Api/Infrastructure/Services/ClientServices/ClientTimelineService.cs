@@ -24,38 +24,46 @@ public class ClientTimelineService(IMachineService machineService, IMachineTimel
     public async Task<(bool Success, object Result, string Error)> ProcessTimelineAsync(HttpContext context,
         string rawJson, CancellationToken ct)
     {
-        if (!context.Request.Headers.TryGetValue("ghosts-id", out var id) || string.IsNullOrEmpty(id))
-        {
-            _log.Warn("Missing ghosts-id header");
-            return (false, null, "Missing ghosts-id header");
-        }
-
-        _log.Info($"Request by {id}");
-
-        var machine = WebRequestReader.GetMachine(context);
-
-        if (!string.IsNullOrEmpty(id))
-        {
-            machine.Id = new Guid(id);
-            await machineService.CreateAsync(machine, ct); // ensure machine is tracked
-        }
-        else if (!machine.IsValid())
-        {
-            return (false, null, "Invalid machine request");
-        }
-
-        Timeline timeline;
         try
         {
-            timeline = JsonConvert.DeserializeObject<Timeline>(rawJson);
+            if (!context.Request.Headers.TryGetValue("ghosts-id", out var id) || string.IsNullOrEmpty(id))
+            {
+                _log.Warn("Missing ghosts-id header");
+                return (false, null, "Missing ghosts-id header");
+            }
+
+            _log.Info($"Request by {id}");
+
+            var machine = WebRequestReader.GetMachine(context);
+
+            if (!string.IsNullOrEmpty(id))
+            {
+                machine.Id = new Guid(id);
+                await machineService.CreateAsync(machine, ct); // ensure machine is tracked
+            }
+            else if (!machine.IsValid())
+            {
+                return (false, null, "Invalid machine request");
+            }
+
+            Timeline timeline;
+            try
+            {
+                timeline = JsonConvert.DeserializeObject<Timeline>(rawJson);
+            }
+            catch (Exception e)
+            {
+                _log.Error(e, "Invalid timeline file");
+                return (false, null, "Invalid timeline format");
+            }
+
+            var result = await timelineService.CreateAsync(machine, timeline, ct);
+            return (true, result, string.Empty);
         }
         catch (Exception e)
         {
-            _log.Error(e, "Invalid timeline file");
-            return (false, null, "Invalid timeline format");
+            _log.Error(e);
+            return (false, null, $"Exception occured: {e.Message}");
         }
-
-        var result = await timelineService.CreateAsync(machine, timeline, ct);
-        return (true, result, string.Empty);
     }
 }
