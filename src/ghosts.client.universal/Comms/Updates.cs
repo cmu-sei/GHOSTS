@@ -5,7 +5,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Threading;
+using System.Threading.Tasks;
 using Ghosts.Client.Universal.Infrastructure;
 using Ghosts.Client.Universal.TimelineManager;
 using Ghosts.Domain;
@@ -28,46 +30,28 @@ namespace Ghosts.Client.Universal.Comms
         /// </summary>
         public static void Run()
         {
-            new Thread(() =>
-            {
-                Thread.CurrentThread.IsBackground = true;
-                GetServerUpdates();
-            }).Start();
-
-            new Thread(() =>
-            {
-                Thread.CurrentThread.IsBackground = true;
-                PostClientResults();
-            }).Start();
+            Task.Run(GetServerUpdates);
+            Task.Run(PostClientResults);
         }
 
-        private static void GetServerUpdates()
+        private static async Task GetServerUpdates()
         {
             if (!Program.Configuration.ClientUpdates.IsEnabled)
                 return;
 
-            // ignore all certs
-            ServicePointManager.ServerCertificateValidationCallback += (_, _, _, _) => true;
-
             var machine = new ResultMachine();
-
-            //Thread.Sleep(Jitter.Basic(Program.Configuration.ClientUpdates.CycleSleep));
-
             while (true)
             {
                 try
                 {
                     var s = string.Empty;
-                    using (var client = WebClientBuilder.Build(machine))
+                    using (var client = HttpClientBuilder.Build(machine))
                     {
                         try
                         {
-                            using (var reader =
-                                   new StreamReader(client.OpenRead(Program.ConfigurationUrls.Updates)))
-                            {
-                                s = reader.ReadToEnd();
-                                _log.Debug($"{DateTime.Now} - Received new configuration");
-                            }
+                            await using var stream = await client.GetStreamAsync(Program.ConfigurationUrls.Updates);
+                            using var reader = new StreamReader(stream);
+                            s = await reader.ReadToEndAsync();
                         }
                         catch (WebException wex)
                         {
@@ -93,7 +77,7 @@ namespace Ghosts.Client.Universal.Comms
                         switch (update.Type)
                         {
                             case UpdateClientConfig.UpdateType.RequestForTimeline:
-                                PostCurrentTimeline(update);
+                                await PostCurrentTimeline(update);
                                 break;
                             case UpdateClientConfig.UpdateType.Timeline:
                                 TimelineBuilder.SetLocalTimeline(update.Update.ToString());
@@ -129,11 +113,9 @@ namespace Ghosts.Client.Universal.Comms
                                 {
                                     var newTimeline = JsonConvert.DeserializeObject<ResultHealth>(update.Update.ToString());
                                     //save to local disk
-                                    using (var file = File.CreateText(ApplicationDetails.ConfigurationFiles.Health))
-                                    {
-                                        var serializer = new JsonSerializer { Formatting = Formatting.Indented };
-                                        serializer.Serialize(file, newTimeline);
-                                    }
+                                    await using var file = File.CreateText(ApplicationDetails.ConfigurationFiles.Health);
+                                    var serializer = new JsonSerializer { Formatting = Formatting.Indented };
+                                    serializer.Serialize(file, newTimeline);
 
                                     break;
                                 }
@@ -153,7 +135,7 @@ namespace Ghosts.Client.Universal.Comms
             }
         }
 
-        private static void PostCurrentTimeline(UpdateClientConfig update)
+        private static async Task PostCurrentTimeline(UpdateClientConfig update)
         {
             // is the config for a specific timeline id?
             var timelineId = TimelineUpdateClientConfigManager.GetConfigUpdateTimelineId(update);
@@ -178,8 +160,6 @@ namespace Ghosts.Client.Universal.Comms
                 }
             }
 
-            ServicePointManager.ServerCertificateValidationCallback += (_, _, _, _) => true;
-
             string postUrl;
 
             try
@@ -201,10 +181,13 @@ namespace Ghosts.Client.Universal.Comms
                     var payload = TimelineBuilder.TimelineToJsonPayload(timeline);
                     var machine = new ResultMachine();
 
-                    using (var client = WebClientBuilder.Build(machine))
+                    using (var client = HttpClientBuilder.Build(machine))
                     {
-                        client.Headers[HttpRequestHeader.ContentType] = "application/json";
-                        client.UploadString(postUrl, JsonConvert.SerializeObject(payload));
+                        var content = new StringContent(JsonConvert.SerializeObject(payload));
+                        content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+
+                        var response = await client.PostAsync(postUrl, content);
+                        response.EnsureSuccessStatusCode(); // throws if not 2xx
                     }
 
                     _log.Trace($"{DateTime.Now} - timeline posted to server successfully");
@@ -218,13 +201,10 @@ namespace Ghosts.Client.Universal.Comms
             }
         }
 
-        private static void PostClientResults()
+        private static async Task PostClientResults()
         {
             if (!Program.Configuration.ClientResults.IsEnabled)
                 return;
-
-            // ignore all certs
-            ServicePointManager.ServerCertificateValidationCallback += (_, _, _, _) => true;
 
             var fileName = ApplicationDetails.LogFiles.ClientUpdates;
             var postUrl = Program.ConfigurationUrls.Results;
@@ -239,7 +219,7 @@ namespace Ghosts.Client.Universal.Comms
                 {
                     if (File.Exists(fileName))
                     {
-                        PostResults(fileName, machine, postUrl);
+                        await PostResults(fileName, machine, postUrl);
                         _log.Trace($"{fileName} posted successfully...");
                     }
                     else
@@ -267,7 +247,7 @@ namespace Ghosts.Client.Universal.Comms
                     {
                         if (!file.EndsWith("app.log") && file != fileName)
                         {
-                            PostResults(file, machine, postUrl);
+                            await PostResults(file, machine, postUrl);
                             _log.Trace($"{fileName} posted successfully...");
                         }
                     }
@@ -286,7 +266,7 @@ namespace Ghosts.Client.Universal.Comms
             }
         }
 
-        private static void PostResults(string fileName, ResultMachine machine, string postUrl)
+        private static async Task PostResults(string fileName, ResultMachine machine, string postUrl)
         {
             var tempFile = ($"{fileName.Replace("clientupdates.log", Guid.NewGuid().ToString())}.log");
             if (fileName.EndsWith("clientupdates_not_posted.log"))
@@ -323,11 +303,11 @@ namespace Ghosts.Client.Universal.Comms
 
             try
             {
-                using (var s = new FileStream(tempFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                await using (var s = new FileStream(tempFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 {
                     using (var tr = new StreamReader(s))
                     {
-                        rawLogContents = tr.ReadToEnd();
+                        rawLogContents = await tr.ReadToEndAsync();
                     }
                 }
 
@@ -343,11 +323,15 @@ namespace Ghosts.Client.Universal.Comms
                     payload = JsonConvert.SerializeObject(p);
                 }
 
-                using (var client = WebClientBuilder.Build(machine))
+                using (var client = HttpClientBuilder.Build(machine))
                 {
-                    client.Headers[HttpRequestHeader.ContentType] = "application/json";
-                    client.UploadString(postUrl, payload);
+                    var content = new StringContent(payload);
+                    content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+
+                    var response = await client.PostAsync(postUrl, content);
+                    response.EnsureSuccessStatusCode();
                 }
+
             }
             catch (Exception e)
             {
@@ -360,7 +344,7 @@ namespace Ghosts.Client.Universal.Comms
                         var backupFile =
                             ApplicationDetails.LogFiles.ClientUpdates.Replace("clientupdates.log",
                                 "clientupdates_not_posted.log");
-                        File.AppendAllText(backupFile, rawLogContents);
+                        await File.AppendAllTextAsync(backupFile, rawLogContents);
                         File.Delete(tempFile);
                     }
                     catch
@@ -377,11 +361,8 @@ namespace Ghosts.Client.Universal.Comms
             _log.Trace($"{DateTime.Now} - {fileName} posted to server successfully");
         }
 
-        internal static void PostSurvey()
+        internal static async Task PostSurvey()
         {
-            // ignore all certs
-            ServicePointManager.ServerCertificateValidationCallback += (_, _, _, _) => true;
-
             string postUrl;
 
             try
@@ -405,7 +386,7 @@ namespace Ghosts.Client.Universal.Comms
 
                 var survey =
                     JsonConvert.DeserializeObject<Ghosts.Domain.Messages.MesssagesForServer.Survey>(
-                        File.ReadAllText(ApplicationDetails.InstanceFiles.SurveyResults));
+                        await File.ReadAllTextAsync(ApplicationDetails.InstanceFiles.SurveyResults));
 
                 var payload = JsonConvert.SerializeObject(survey);
 
@@ -421,10 +402,13 @@ namespace Ghosts.Client.Universal.Comms
                     payload = JsonConvert.SerializeObject(p);
                 }
 
-                using (var client = WebClientBuilder.Build(machine))
+                using (var client = HttpClientBuilder.Build(machine))
                 {
-                    client.Headers[HttpRequestHeader.ContentType] = "application/json";
-                    client.UploadString(postUrl, payload);
+                    using var content = new StringContent(payload);
+                    content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+
+                    var response = await client.PostAsync(postUrl, content);
+                    response.EnsureSuccessStatusCode(); // Optional: throws if not 2xx
                 }
 
                 _log.Trace($"{DateTime.Now} - survey posted to server successfully");

@@ -7,6 +7,7 @@ using System.IO;
 using System.Net.NetworkInformation;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using Ghosts.Client.Universal.Comms;
 using Ghosts.Domain.Code;
 using Newtonsoft.Json;
@@ -18,16 +19,11 @@ namespace Ghosts.Client.Universal.Survey
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
 
-        public static void Run()
+        public static async Task Run()
         {
             try
             {
-                new Thread(() =>
-                {
-                    Thread.CurrentThread.IsBackground = true;
-                    RunEx();
-
-                }).Start();
+                await Task.Run(async () => await RunEx());
             }
             catch (Exception e)
             {
@@ -35,7 +31,7 @@ namespace Ghosts.Client.Universal.Survey
             }
         }
 
-        private static void RunEx()
+        private static async Task RunEx()
         {
             while (true)
             {
@@ -92,7 +88,7 @@ namespace Ghosts.Client.Universal.Survey
                         };
                         serializer.Serialize(file, s.Survey);
                     }
-                    Updates.PostSurvey();
+                    await Updates.PostSurvey();
                 }
                 catch (Exception e)
                 {
@@ -304,7 +300,7 @@ namespace Ghosts.Client.Universal.Survey
             var results = new List<Ghosts.Domain.Messages.MesssagesForServer.Survey.DriveInfo>();
             try
             {
-                var allDrives = System.IO.DriveInfo.GetDrives();
+                var allDrives = DriveInfo.GetDrives();
                 foreach (var drive in allDrives)
                 {
                     var result = new Ghosts.Domain.Messages.MesssagesForServer.Survey.DriveInfo

@@ -34,12 +34,12 @@ namespace Ghosts.Client.Universal.Handlers
                     Ex(handler);
                 }
             }
-            catch (ThreadAbortException e)
+            catch (ThreadAbortException)
             {
                 //ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.Command);
                 _log.Trace($"Execute closing...");
             }
-            catch (System.Exception e)
+            catch (Exception e)
             {
                 _log.Error(e);
             }

@@ -3,6 +3,7 @@
 using System;
 using System.IO;
 using System.Net;
+using System.Threading.Tasks;
 using Ghosts.Client.Universal.Infrastructure;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
@@ -60,7 +61,7 @@ namespace Ghosts.Client.Universal.Comms
 
                         _log.Info("Attempting to retrieve ID from server.");
                         _lastChecked = DateTime.Now;
-                        _id = Run();
+                        _id = Run().GetAwaiter().GetResult(); //todo: cringe :)
 
                         if (string.IsNullOrEmpty(_id))
                         {
@@ -91,12 +92,9 @@ namespace Ghosts.Client.Universal.Comms
         /// API call to get client ID (probably based on hostname, but configurable) and saves it locally
         /// </summary>
         /// <returns></returns>
-        private string Run()
+        private async Task<string> Run()
         {
             _log.Trace("Run method started: Attempting to fetch ID from server.");
-
-            // Ignore all certs
-            ServicePointManager.ServerCertificateValidationCallback += (_, _, _, _) => true;
 
             var fetchedId = string.Empty;
 
@@ -111,13 +109,20 @@ namespace Ghosts.Client.Universal.Comms
             try
             {
                 // Call home
-                using (var client = WebClientBuilder.Build(machine, false))
+                using (var client = HttpClientBuilder.Build(machine, false))
                 {
                     try
                     {
                         _log.Info($"Attempting to connect to ID endpoint: {Program.ConfigurationUrls.Id}");
 
-                        using (var responseStream = client.OpenRead(Program.ConfigurationUrls.Id))
+                        var response = await client.GetAsync(Program.ConfigurationUrls.Id);
+                        if (!response.IsSuccessStatusCode)
+                        {
+                            _log.Error($"Failed to fetch ID. Status code: {response.StatusCode}");
+                            return fetchedId;
+                        }
+
+                        using (var responseStream = await response.Content.ReadAsStreamAsync())
                         {
                             if (responseStream == null)
                             {
@@ -127,7 +132,7 @@ namespace Ghosts.Client.Universal.Comms
 
                             using (var reader = new StreamReader(responseStream))
                             {
-                                fetchedId = reader.ReadToEnd().Trim();
+                                fetchedId = (await reader.ReadToEndAsync()).Trim();
                                 _log.Info($"ID successfully received from server: {fetchedId}");
                             }
                         }

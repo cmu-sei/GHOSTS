@@ -4,9 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
-using System.Net;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 using Ghosts.Client.Universal.Comms;
 using Ghosts.Client.Universal.Comms.ClientSocket;
 using Ghosts.Client.Universal.Infrastructure;
@@ -28,14 +28,14 @@ namespace Ghosts.Client.Universal
         public static CheckId CheckId { get; set; }
         internal static BackgroundTaskQueue Queue;
 
-        private static void Main(string[] args)
+        private static async Task Main(string[] args)
         {
             ThreadJobs = new List<ThreadJob>();
             ClientConfigurationLoader.UpdateConfigurationWithEnvVars();
 
             try
             {
-                Run(args);
+                await Run(args);
             }
             catch (Exception e)
             {
@@ -45,11 +45,8 @@ namespace Ghosts.Client.Universal
             }
         }
 
-        private static void Run(IEnumerable<string> args)
+        private static async Task Run(IEnumerable<string> args)
         {
-            // ignore all certs
-            ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
-
             // parse program flags
             if (!CommandLineFlagManager.Parse(args))
             {
@@ -111,7 +108,7 @@ namespace Ghosts.Client.Universal
                 _log.Trace("Survey enabled, initalizing...");
                 try
                 {
-                    Survey.SurveyManager.Run();
+                    await Survey.SurveyManager.Run();
                 }
                 catch (Exception exc)
                 {

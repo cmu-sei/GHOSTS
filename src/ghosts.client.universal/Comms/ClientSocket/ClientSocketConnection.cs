@@ -106,7 +106,7 @@ public class Connection(ClientConfiguration.SocketsSettings options)
         _connection = new HubConnectionBuilder()
             .WithUrl(url, x =>
             {
-                x.Headers = WebClientBuilder.GetHeaders(machine);
+                x.Headers = HttpClientBuilder.GetHeaders(machine);
             }).WithAutomaticReconnect()
             .Build();
 
@@ -164,8 +164,9 @@ public class Connection(ClientConfiguration.SocketsSettings options)
                             orchestrator.RunCommand(timeline, timelineHandler);
                         }
                     }
-                    catch (Exception exc)
+                    catch (Exception)
                     {
+                        //pass
                         //_log.Debug(exc);
                     }
                 }
