@@ -4,18 +4,15 @@ using Ghosts.Domain;
 using Microsoft.Win32;
 using NLog;
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using System.Security.Permissions;
 using Ghosts.Client.Universal.handlers;
 using Ghosts.Client.Universal.Handlers;
 using Ghosts.Client.Universal.Infrastructure;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Models;
-// ReSharper disable RedundantAssignment
 
 namespace Ghosts.Client.Universal.TimelineManager
 {
@@ -134,7 +131,7 @@ namespace Ghosts.Client.Universal.TimelineManager
                 try
                 {
                     threadJob.Thread.Abort(null);
-                    _log.Trace($"Sent abort signal to Thread job {threadJob.ToString()} ");
+                    _log.Trace($"Sent abort signal to Thread job {threadJob} ");
                 }
                 catch (Exception e)
                 {
@@ -145,7 +142,7 @@ namespace Ghosts.Client.Universal.TimelineManager
                 try
                 {
                     threadJob.Thread.Join();
-                    _log.Trace($"Thread job {threadJob.ToString()}  has aborted.");
+                    _log.Trace($"Thread job {threadJob}  has aborted.");
                 }
                 catch (Exception e)
                 {
@@ -323,9 +320,8 @@ namespace Ghosts.Client.Universal.TimelineManager
             {
                 _log.Trace($"Attempting new thread for: {handler.HandlerType}");
 
-                bool AddToThreadJobs = true;
+                var addToThreadJobs = true;
                 Thread t = null;
-                object _;
                 switch (handler.HandlerType)
                 {
                     case HandlerType.NpcSystem:
@@ -459,7 +455,7 @@ namespace Ghosts.Client.Universal.TimelineManager
                             }
                             catch (Exception e)
                             {
-                                _log.Error("Outlook thread error:", e);
+                                _log.Error(e);
                             }
                         });
                         break;
@@ -489,7 +485,7 @@ namespace Ghosts.Client.Universal.TimelineManager
                         });
                         break;
                     case HandlerType.Watcher:
-                        AddToThreadJobs = false; //do not add this to thread jobs to be stopped, thread only adds event handlers
+                        addToThreadJobs = false; //do not add this to thread jobs to be stopped, thread only adds event handlers
                         t = new Thread(() =>
                         {
                             _ = new Watcher(handler);
@@ -526,7 +522,7 @@ namespace Ghosts.Client.Universal.TimelineManager
                 t.Name = $"{handler.HandlerType}_{Guid.NewGuid()}";
                 t.IsBackground = true;
                 t.Start();
-                if (AddToThreadJobs)
+                if (addToThreadJobs)
                 {
                     Program.ThreadJobs.Add(new ThreadJob
                     {
@@ -579,7 +575,7 @@ namespace Ghosts.Client.Universal.TimelineManager
                 _log.Trace("Quartz terminated");
                 LogManager.Shutdown();  //shutdown all logging
                 Thread.Sleep(10000);
-                System.Environment.Exit(0); //exit
+                Environment.Exit(0); //exit
             }
             catch (Exception exc)
             {
