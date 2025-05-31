@@ -2,12 +2,27 @@
 
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Ghosts.Domain.Models
 {
-    public class ThreadJob
+    public class TaskJob
     {
         public Guid TimelineId { get; set; }
+
+        /// <summary>
+        /// for the classic windows app
+        /// </summary>
         public Thread Thread { get; set; }
+
+        /// <summary>
+        /// for the modern universal app
+        /// </summary>
+        public Task Task { get; set; }
+
+        /// <summary>
+        /// for the modern universal app
+        /// </summary>
+        public CancellationTokenSource CancellationTokenSource { get; set; }
     }
 }

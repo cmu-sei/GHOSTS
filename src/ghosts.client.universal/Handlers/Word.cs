@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
 using Newtonsoft.Json;
@@ -17,10 +18,13 @@ using VB = Microsoft.VisualBasic;
 
 namespace Ghosts.Client.Universal.Handlers;
 
-public class WordHandler : BaseHandler
+public class WordHandler(Timeline timeline, TimelineHandler handler, CancellationToken token)
+    : BaseHandler(timeline, handler, token)
 {
-    public WordHandler(){}
-    public WordHandler(Timeline timeline, TimelineHandler handler){}
+    protected override Task RunOnce()
+    {
+        throw new NotImplementedException();
+    }
 
     // public WordHandler(Timeline timeline, TimelineHandler handler)
     // {

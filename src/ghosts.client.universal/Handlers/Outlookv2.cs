@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 using Ghosts.Domain.Code.Helpers;
 using Exception = System.Exception;
 //using MAPIFolder = Microsoft.Office.Interop.Outlook.MAPIFolder;
@@ -20,10 +21,13 @@ using Newtonsoft.Json;
 
 namespace Ghosts.Client.Universal.Handlers;
 
-public class Outlookv2 : BaseHandler
+public class Outlookv2(Timeline timeline, TimelineHandler handler, CancellationToken token)
+    : BaseHandler(timeline, handler, token)
 {
-    public Outlookv2(){}
-    public Outlookv2(TimelineHandler handler){}
+    protected override Task RunOnce()
+    {
+        throw new NotImplementedException();
+    }
     //private readonly Application _app;
     //private readonly NameSpace _oMapiNamespace;
     //private readonly MAPIFolder _folderOutbox;

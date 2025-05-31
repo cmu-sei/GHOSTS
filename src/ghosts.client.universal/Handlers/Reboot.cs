@@ -1,18 +1,20 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System.Threading;
+using System.Threading.Tasks;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 
 namespace Ghosts.Client.Universal.Handlers;
 
-public class Reboot : BaseHandler
+public class Reboot(Timeline entireTimeline, TimelineHandler timelineHandler, CancellationToken cancellationToken)
+    : BaseHandler(entireTimeline, timelineHandler, cancellationToken)
 {
-    public Reboot(TimelineHandler handler)
+    protected override Task RunOnce()
     {
-        foreach (var timelineEvent in handler.TimeLineEvents)
+        foreach (var timelineEvent in this.Handler.TimeLineEvents)
         {
-            WorkingHours.Is(handler);
+            WorkingHours.Is(this.Handler);
 
             if (timelineEvent.DelayBeforeActual > 0)
                 Thread.Sleep(timelineEvent.DelayBeforeActual);
@@ -26,5 +28,7 @@ public class Reboot : BaseHandler
                     break;
             }
         }
+
+        return Task.CompletedTask;
     }
 }

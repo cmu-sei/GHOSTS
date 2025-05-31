@@ -1,19 +1,19 @@
-﻿using System;
-using System.IO;
+﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
+
+using System;
 using System.Threading;
 using Ghosts.Domain;
-using Newtonsoft.Json;
-using Ghosts.Domain.Code;
-using System.Net;
-using Ghosts.Client.Infrastructure;
-using Ghosts.Client.Universal.Infrastructure;
+using System.Threading.Tasks;
 
 namespace Ghosts.Client.Universal.Handlers
 {
-    public class Ftp : BaseHandler
+    public class Ftp(Timeline entireTimeline, TimelineHandler timelineHandler, CancellationToken cancellationToken)
+        : BaseHandler(entireTimeline, timelineHandler, cancellationToken)
     {
-        public Ftp(){}
-        public Ftp(TimelineHandler handler){}
+        protected override Task RunOnce()
+        {
+            throw new NotImplementedException();
+        }
 
         // private Credentials CurrentCreds = null;
         // private FtpSupport CurrentFtpSupport = null;   //current FtpSupport for this object

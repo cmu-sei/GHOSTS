@@ -4,43 +4,20 @@ using Ghosts.Domain;
 using System;
 using System.Diagnostics;
 using System.Threading;
+using System.Threading.Tasks;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
 
 namespace Ghosts.Client.Universal.Handlers;
 
-public class Print : BaseHandler
+public class Print(Timeline entireTimeline, TimelineHandler timelineHandler, CancellationToken cancellationToken)
+    : BaseHandler(entireTimeline, timelineHandler, cancellationToken)
 {
-    public Print(TimelineHandler handler)
+    protected override Task RunOnce()
     {
-        try
+        foreach (var timelineEvent in this.Handler.TimeLineEvents)
         {
-            base.Init(handler);
-            _log.Trace("Spawning printer job...");
-
-            if (handler.Loop)
-            {
-                while (true)
-                {
-                    Ex(handler);
-                }
-            }
-            else
-            {
-                Ex(handler);
-            }
-        }
-        catch (Exception e)
-        {
-            _log.Error(e);
-        }
-    }
-
-    public void Ex(TimelineHandler handler)
-    {
-        foreach (var timelineEvent in handler.TimeLineEvents)
-        {
-            WorkingHours.Is(handler);
+            WorkingHours.Is(this.Handler);
 
             if (timelineEvent.DelayBeforeActual > 0)
             {
@@ -49,16 +26,18 @@ public class Print : BaseHandler
 
             _log.Trace($"Print Job: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfterActual}");
 
-            Command(handler, timelineEvent, timelineEvent.Command);
+            ProcessCommand(this.Handler, timelineEvent, timelineEvent.Command);
 
             if (timelineEvent.DelayAfterActual > 0)
             {
                 Thread.Sleep(timelineEvent.DelayAfterActual);
             }
         }
+
+        return Task.CompletedTask;
     }
 
-    public void Command(TimelineHandler handler, TimelineEvent timelineEvent, string command)
+    public void ProcessCommand(TimelineHandler handler, TimelineEvent timelineEvent, string command)
     {
         Thread.Sleep(1000);
 

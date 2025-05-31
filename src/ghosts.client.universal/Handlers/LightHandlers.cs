@@ -5,14 +5,19 @@ using Ghosts.Domain;
 using System;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 using Ghosts.Client.Universal.Infrastructure;
 using Ghosts.Domain.Code;
+using NLog;
 
 namespace Ghosts.Client.Universal.Handlers;
 
-public class LightHandlers : BaseHandler
+public class LightHandlers
 {
-    private static string GetSavePath(Type cls, TimelineHandler handler, TimelineEvent timelineEvent, string fileExtension)
+    internal static readonly Logger _log = LogManager.GetCurrentClassLogger();
+
+    private static string GetSavePath(Type cls, TimelineHandler handler, TimelineEvent timelineEvent,
+        string fileExtension)
     {
         _log.Trace($"{cls} event - {timelineEvent}");
         WorkingHours.Is(handler);
@@ -64,41 +69,19 @@ public class LightHandlers : BaseHandler
         return path;
     }
 
-    public class LightWordHandler : BaseHandler
+    public class LightWordHandler(
+        Timeline entireTimeline,
+        TimelineHandler timelineHandler,
+        CancellationToken cancellationToken)
+        : BaseHandler(entireTimeline, timelineHandler, cancellationToken)
     {
-        public LightWordHandler(TimelineHandler handler)
-        {
-            base.Init(handler);
-            _log.Trace("Launching Light Word handler");
-            try
-            {
-                if (handler.Loop)
-                {
-                    _log.Trace("Light Word loop");
-                    while (true)
-                    {
-                        ExecuteEvents(handler);
-                    }
-                }
-                else
-                {
-                    _log.Trace("Light Word single run");
-                    ExecuteEvents(handler);
-                }
-            }
-            catch (Exception e)
-            {
-                _log.Error(e);
-            }
-        }
-
-        private void ExecuteEvents(TimelineHandler handler)
+        protected override Task RunOnce()
         {
             try
             {
-                foreach (var timelineEvent in handler.TimeLineEvents)
+                foreach (var timelineEvent in this.Handler.TimeLineEvents)
                 {
-                    var path = GetSavePath(typeof(LightExcelHandler), handler, timelineEvent, "docx");
+                    var path = GetSavePath(typeof(LightExcelHandler), this.Handler, timelineEvent, "docx");
 
                     var list = RandomText.GetDictionary.GetDictionaryList();
                     using (var rt = new RandomText(list))
@@ -111,57 +94,50 @@ public class LightHandlers : BaseHandler
                         Domain.Code.Office.Word.Write(path, title, paragraph);
                     }
 
-                    FileListing.Add(path, handler.HandlerType);
-                    Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = timelineEvent.CommandArgs[0].ToString(), Trackable = timelineEvent.TrackableId });
-                }
-            }
-            catch (Exception e)
-            {
-                _log.Error(e);
-            }
-        }
-    }
-
-    public class LightPowerPointHandler : BaseHandler
-    {
-        // NPOI Does not support PowerPoint Presentations
-    }
-
-    public class LightExcelHandler : BaseHandler
-    {
-        public LightExcelHandler(TimelineHandler handler)
-        {
-            base.Init(handler);
-            _log.Trace("Launching Light Excel handler");
-            try
-            {
-                if (handler.Loop)
-                {
-                    _log.Trace("Light Excel loop");
-                    while (true)
+                    FileListing.Add(path, this.Handler.HandlerType);
+                    Report(new ReportItem
                     {
-                        ExecuteEvents(handler);
-                    }
-                }
-                else
-                {
-                    _log.Trace("Light Excel single run");
-                    ExecuteEvents(handler);
+                        Handler = this.Handler.HandlerType.ToString(),
+                        Command = timelineEvent.Command,
+                        Arg = timelineEvent.CommandArgs[0].ToString(),
+                        Trackable = timelineEvent.TrackableId
+                    });
                 }
             }
             catch (Exception e)
             {
                 _log.Error(e);
             }
-        }
 
-        private void ExecuteEvents(TimelineHandler handler)
+            return Task.CompletedTask;
+        }
+    }
+
+    public class LightPowerPointHandler(
+        Timeline entireTimeline,
+        TimelineHandler timelineHandler,
+        CancellationToken cancellationToken)
+        : BaseHandler(entireTimeline, timelineHandler, cancellationToken)
+    {
+        protected override Task RunOnce()
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class LightExcelHandler(
+        Timeline entireTimeline,
+        TimelineHandler timelineHandler,
+        CancellationToken cancellationToken)
+        : BaseHandler(entireTimeline, timelineHandler, cancellationToken)
+    {
+        protected override Task RunOnce()
         {
             try
             {
-                foreach (var timelineEvent in handler.TimeLineEvents)
+                foreach (var timelineEvent in this.Handler.TimeLineEvents)
                 {
-                    var path = GetSavePath(typeof(LightExcelHandler), handler, timelineEvent, "xlsx");
+                    var path = GetSavePath(typeof(LightExcelHandler), this.Handler, timelineEvent, "xlsx");
 
                     var list = RandomText.GetDictionary.GetDictionaryList();
                     using (var rt = new RandomText(list))
@@ -170,14 +146,22 @@ public class LightHandlers : BaseHandler
                         Domain.Code.Office.Excel.Write(path, rt.Content);
                     }
 
-                    FileListing.Add(path, handler.HandlerType);
-                    Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = timelineEvent.Command, Arg = timelineEvent.CommandArgs[0].ToString(), Trackable = timelineEvent.TrackableId });
+                    FileListing.Add(path, this.Handler.HandlerType);
+                    Report(new ReportItem
+                    {
+                        Handler = this.Handler.HandlerType.ToString(),
+                        Command = timelineEvent.Command,
+                        Arg = timelineEvent.CommandArgs[0].ToString(),
+                        Trackable = timelineEvent.TrackableId
+                    });
                 }
             }
             catch (Exception e)
             {
                 _log.Error(e);
             }
+
+            return Task.CompletedTask;
         }
     }
 }

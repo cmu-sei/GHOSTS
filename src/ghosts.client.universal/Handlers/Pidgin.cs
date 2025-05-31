@@ -1,57 +1,56 @@
-﻿using System.IO;
+﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
+
 using System.Threading;
 using Ghosts.Domain;
-using System.Diagnostics;
-using Ghosts.Domain.Code;
 using System;
-using Newtonsoft.Json.Linq;
-using System.Collections.Generic;
-using Exception = System.Exception;
-// using System.Windows.Interop;
+using System.Threading.Tasks;
 
-namespace Ghosts.Client.Universal.Handlers
+namespace Ghosts.Client.Universal.Handlers;
+
+/// <summary>
+/// Exercises a Pidgin client - tested with Pidgin 2.14.1 (libpurple 2.14.1) ane Centos 7.3 ejabberd server
+/// Prequisites
+///   Pidgin must be installed and already configured with an enabled account in %APPDATA%\.purple\accounts.xml
+///     and pointing to the target server.
+///
+///   The _logged in user must have an enabled Pidgin account in accounts.xml
+///   Pidgin preferences must have already been set in  %APPDATA%\.purple\prefs.xml
+///   Conversations must be TABBED (in prefs.xml/conversations section, name='tabs' type='bool' value='1')
+/// Implementation
+///   This implementation is about 95% open loop as there are no C# bindings for the Pidgin libpurple.dll
+///   The only feedback to GHOSTS is via window titles, it cannot determine when messages arrive or message content.
+///   GHOSTS cannot parse the chat _logs to synch converstations as the Pidgin process has these _log files locked.
+///   So messages are sent open loop with simple delays between messages.
+///   The GHOSTS time line CommandArgs lists chat targets (username@domain)
+/// Activity Cycle - each activity cycle is seperated by DelayAfter. An activity cycle does:
+///   Pick a random target from the timeline -  this is only used to initiate the first chat
+///   If Pidgin is not started then Pidgin is started.
+///   If an IM window is not open, the roll against NewChatProbability and open an IM window to the random target chosen from the timeline
+///   If roll against  NewChatProbability was not successful, end activity cycle.
+///   If an IM window is open and a new chat was not initiated, the roll against CloseChatProbability, if successful, close current chat and end activity cycle.
+///   If get to this point, then IM window is open with one or more targets and message loop is entered.
+///   Enter a loop in which between RepliesMin and RepliesMax messages are sent.
+///   The first message is sent to current selected target in the Chat window, then the next chat
+///   target in the Chat window is selected. If the max replies is reached, then the loop exits and
+///   the activity cycle is ended. The next activity cycle picks up where the last activity cycle
+///   ended as per the first chat target.
+///
+///
+///   A chat target can be the current _logged in user, which means messages are simply echoed back from the server.
+///   As chats arrive from other different users, the number of open tabs in the grows, but chats can be closed by CloseChatProbability
+///   Between 1-4 random emojis are added to a message based on EmojiProbability
+///
+///   During an activity cycle, any popup windows that match a title in ErrorWindowTitles are closed
+///
+/// </summary>
+public class Pidgin(Timeline timeline, TimelineHandler handler, CancellationToken token)
+    : BaseHandler(timeline, handler, token)
 {
-
-    /// <summary>
-    /// Exercises a Pidgin client - tested with Pidgin 2.14.1 (libpurple 2.14.1) ane Centos 7.3 ejabberd server
-    /// Prequisites
-    ///   Pidgin must be installed and already configured with an enabled account in %APPDATA%\.purple\accounts.xml
-    ///     and pointing to the target server.
-    ///
-    ///   The _logged in user must have an enabled Pidgin account in accounts.xml
-    ///   Pidgin preferences must have already been set in  %APPDATA%\.purple\prefs.xml
-    ///   Conversations must be TABBED (in prefs.xml/conversations section, name='tabs' type='bool' value='1')
-    /// Implementation
-    ///   This implementation is about 95% open loop as there are no C# bindings for the Pidgin libpurple.dll
-    ///   The only feedback to GHOSTS is via window titles, it cannot determine when messages arrive or message content.
-    ///   GHOSTS cannot parse the chat _logs to synch converstations as the Pidgin process has these _log files locked.
-    ///   So messages are sent open loop with simple delays between messages.
-    ///   The GHOSTS time line CommandArgs lists chat targets (username@domain)
-    /// Activity Cycle - each activity cycle is seperated by DelayAfter. An activity cycle does:
-    ///   Pick a random target from the timeline -  this is only used to initiate the first chat
-    ///   If Pidgin is not started then Pidgin is started.
-    ///   If an IM window is not open, the roll against NewChatProbability and open an IM window to the random target chosen from the timeline
-    ///   If roll against  NewChatProbability was not successful, end activity cycle.
-    ///   If an IM window is open and a new chat was not initiated, the roll against CloseChatProbability, if successful, close current chat and end activity cycle.
-    ///   If get to this point, then IM window is open with one or more targets and message loop is entered.
-    ///   Enter a loop in which between RepliesMin and RepliesMax messages are sent.
-    ///   The first message is sent to current selected target in the Chat window, then the next chat
-    ///   target in the Chat window is selected. If the max replies is reached, then the loop exits and
-    ///   the activity cycle is ended. The next activity cycle picks up where the last activity cycle
-    ///   ended as per the first chat target.
-    ///
-    ///
-    ///   A chat target can be the current _logged in user, which means messages are simply echoed back from the server.
-    ///   As chats arrive from other different users, the number of open tabs in the grows, but chats can be closed by CloseChatProbability
-    ///   Between 1-4 random emojis are added to a message based on EmojiProbability
-    ///
-    ///   During an activity cycle, any popup windows that match a title in ErrorWindowTitles are closed
-    ///
-    /// </summary>
-    public class Pidgin : BaseHandler
+    protected override Task RunOnce()
     {
-        public Pidgin(){}
-        public Pidgin(TimelineHandler handler){}
+        throw new NotImplementedException();
+    }
+
     //     private int TimeBetweenMessagesMax = 10000;
     //     private int TimeBetweenMessagesMin = 4000;
     //     private int RepliesMin = 0;
@@ -594,5 +593,4 @@ namespace Ghosts.Client.Universal.Handlers
     //         }
     //         return Winuser.FindWindow("gdkWindowToplevel", "Buddy List");
     //     }
-    }
 }

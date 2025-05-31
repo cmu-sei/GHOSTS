@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 using Ghosts.Client.Infrastructure;
 using Ghosts.Domain.Code.Helpers;
 using Exception = System.Exception;
@@ -20,10 +21,13 @@ using Newtonsoft.Json;
 
 namespace Ghosts.Client.Universal.Handlers;
 
-public class Outlook : BaseHandler
+public class Outlook(Timeline timeline, TimelineHandler handler, CancellationToken token)
+    : BaseHandler(timeline, handler, token)
 {
-    public Outlook(){}
-    public Outlook(TimelineHandler handler){}
+    protected override Task RunOnce()
+    {
+        throw new NotImplementedException();
+    }
 
     // private readonly Application _app;
     // private readonly NameSpace _oMapiNamespace;

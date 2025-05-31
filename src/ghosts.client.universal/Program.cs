@@ -1,6 +1,7 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -23,14 +24,13 @@ namespace Ghosts.Client.Universal
         internal static ClientConfiguration Configuration { get; private set; }
         internal static ApplicationDetails.ConfigurationUrls ConfigurationUrls { get; set; }
         internal static bool IsDebug;
-        internal static List<ThreadJob> ThreadJobs { get; private set; }
+        internal static ConcurrentDictionary<Guid, TaskJob> RunningTasks { get; } = new();
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
         public static CheckId CheckId { get; set; }
         internal static BackgroundTaskQueue Queue;
 
         private static async Task Main(string[] args)
         {
-            ThreadJobs = new List<ThreadJob>();
             ClientConfigurationLoader.UpdateConfigurationWithEnvVars();
 
             try

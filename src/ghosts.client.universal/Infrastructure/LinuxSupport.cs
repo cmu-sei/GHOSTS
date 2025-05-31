@@ -169,7 +169,7 @@ namespace Ghosts.Client.Universal.Infrastructure
 
                 if (t.IsAlive)
                 {
-                    t.Abort();
+                    t.Join();
                     Thread.Sleep(5000);
                     retries += 1;
                 }

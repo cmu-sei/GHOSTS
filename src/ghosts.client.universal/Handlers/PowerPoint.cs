@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
 using Newtonsoft.Json;
@@ -16,10 +17,13 @@ using Newtonsoft.Json;
 
 namespace Ghosts.Client.Universal.Handlers;
 
-public class PowerPointHandler : BaseHandler
+public class PowerPointHandler(Timeline timeline, TimelineHandler handler, CancellationToken token)
+    : BaseHandler(timeline, handler, token)
 {
-    public PowerPointHandler(){}
-    public PowerPointHandler(Timeline timeline, TimelineHandler handler){}
+    protected override Task RunOnce()
+    {
+        throw new NotImplementedException();
+    }
     // public PowerPointHandler(Timeline timeline, TimelineHandler handler)
     // {
     //     base.Init(handler);

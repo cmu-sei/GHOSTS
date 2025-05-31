@@ -1,18 +1,21 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
-using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 //using System.Windows.Forms;
 using Ghosts.Domain;
-using Ghosts.Domain.Code;
 
 namespace Ghosts.Client.Universal.Handlers;
 
-public class Clicks : BaseHandler
+public class Clicks(Timeline timeline, TimelineHandler handler, CancellationToken token)
+    : BaseHandler(timeline, handler, token)
 {
-    public Clicks(){}
-    public Clicks(TimelineHandler handler){}
+    protected override Task RunOnce()
+    {
+        throw new NotImplementedException();
+    }
+
     // [DllImport("user32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
     // public static extern void mouse_event(uint dwFlags, uint dx, uint dy, uint cButtons, uint dwExtraInfo);
     //
