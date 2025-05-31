@@ -77,21 +77,14 @@ namespace Ghosts.Client.Universal
             {
                 _log.Trace("Sockets enabled. Connecting...");
                 var c = new Connection(Configuration.Sockets);
-
-                async void Start()
-                {
-                    await c.Run();
-                }
-
-                var connectionThread = new Thread(Start) { IsBackground = true };
-                connectionThread.Start();
                 Queue = c.Queue;
+
+                _ = Task.Run(() => c.Run());
             }
 
-            Program.CheckId = new CheckId();
+            CheckId = new CheckId();
 
-            //linux clients do not catch stray processes or check for job duplication
-
+            //should we catch stray processes or check for job duplication?
             StartupTasks.SetStartup();
 
             ListenerManager.Run();
@@ -105,7 +98,7 @@ namespace Ghosts.Client.Universal
             //local survey gathers information such as drives, accounts, logs, etc.
             if (Configuration.Survey.IsEnabled)
             {
-                _log.Trace("Survey enabled, initalizing...");
+                _log.Trace("Survey enabled, initializing...");
                 try
                 {
                     await Survey.SurveyManager.Run();
@@ -122,7 +115,7 @@ namespace Ghosts.Client.Universal
 
             if (Configuration.HealthIsEnabled)
             {
-                _log.Trace("Health checks enabled, initalizing...");
+                _log.Trace("Health checks enabled, initializing...");
                 var h = new Health.Check();
                 h.Run();
             }
@@ -133,7 +126,7 @@ namespace Ghosts.Client.Universal
 
             if (Configuration.HandlersIsEnabled)
             {
-                _log.Trace("Handlers enabled, initalizing...");
+                _log.Trace("Handlers enabled, initializing...");
                 var o = new Orchestrator();
                 o.Run();
             }
@@ -142,7 +135,7 @@ namespace Ghosts.Client.Universal
                 _log.Trace("Handling disabed, continuing.");
             }
 
-            new ManualResetEvent(false).WaitOne();
+            await Task.Delay(Timeout.Infinite, CancellationToken.None);
         }
 
         private static void CurrentDomain_ProcessExit(object sender, EventArgs e)
