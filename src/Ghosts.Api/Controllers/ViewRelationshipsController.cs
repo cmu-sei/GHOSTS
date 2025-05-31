@@ -3,7 +3,6 @@
 using System;
 using System.Linq;
 using System.Text;
-using Ghosts.Api.Areas.Animator.Infrastructure.Models;
 using Ghosts.Api.Infrastructure.Models;
 using Ghosts.Api.Infrastructure.Data;
 using Microsoft.AspNetCore.Mvc;
@@ -16,8 +15,6 @@ namespace Ghosts.Api.Controllers;
 [ApiExplorerSettings(IgnoreApi = true)]
 public class ViewRelationshipsController(ApplicationDbContext context) : Controller
 {
-    private readonly ApplicationDbContext _context = context;
-
     [HttpGet]
     public IActionResult Index()
     {
@@ -27,7 +24,7 @@ public class ViewRelationshipsController(ApplicationDbContext context) : Control
     [HttpGet("profile/{id:guid}")]
     public IActionResult Profile(Guid id)
     {
-        var npc = _context.Npcs.FirstOrDefault(x => x.Id == id);
+        var npc = context.Npcs.FirstOrDefault(x => x.Id == id);
         return View("Profile", npc);
     }
 
@@ -37,7 +34,7 @@ public class ViewRelationshipsController(ApplicationDbContext context) : Control
         const string fileName = "data1.csv";
         var content = new StringBuilder("npc_id,source,target,type").Append(Environment.NewLine);
 
-        var list = _context.Npcs.ToList().OrderBy(o => o.Enclave).ThenBy(o => o.Team);
+        var list = context.Npcs.ToList().OrderBy(o => o.Enclave).ThenBy(o => o.Team);
 
         NpcRecord previousNpc = null;
         var enclave = string.Empty;

@@ -4,9 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Ghosts.Api.Infrastructure.Models;
-using Ghosts.Api;
 using Ghosts.Api.Infrastructure;
 using Ghosts.Api.Infrastructure.Data;
 using Microsoft.AspNetCore.Mvc;
@@ -111,11 +111,11 @@ namespace Ghosts.Api.Controllers
             var endTime = DateTime.Now.AddMinutes(1); // End time
 
             // Create a node for the main graph
-            interactions.nodes.Add(new Node
+            interactions.Nodes.Add(new Node
             {
-                id = graph.Id.ToString(),
-                start = startTime,
-                end = endTime
+                Id = graph.Id.ToString(),
+                Start = startTime,
+                End = endTime
             });
 
             // Add nodes for each connection
@@ -123,23 +123,23 @@ namespace Ghosts.Api.Controllers
             {
                 if (connection.Interactions.Count < 1) continue;
 
-                interactions.nodes.Add(new Node
+                interactions.Nodes.Add(new Node
                 {
-                    id = connection.Id.ToString(),
-                    start = startTime.AddMinutes(connection.Interactions.Min(x => x.Step)),
-                    end = endTime
+                    Id = connection.Id.ToString(),
+                    Start = startTime.AddMinutes(connection.Interactions.Min(x => x.Step)),
+                    End = endTime
                 });
             }
 
             // Add links for each knowledge entry
             foreach (var learning in graph.Knowledge)
             {
-                interactions.links.Add(new Link
+                interactions.Links.Add(new Link
                 {
-                    start = startTime.AddMinutes(learning.Step),
-                    source = learning.To.ToString(),
-                    target = learning.From.ToString(),
-                    end = startTime.AddMinutes(1) // Adjusting end time for links
+                    Start = startTime.AddMinutes(learning.Step),
+                    Source = learning.To.ToString(),
+                    Target = learning.From.ToString(),
+                    End = startTime.AddMinutes(1) // Adjusting end time for links
                 });
             }
 
@@ -148,29 +148,38 @@ namespace Ghosts.Api.Controllers
 
         public class Link
         {
-            public string source { get; set; }
-            public string target { get; set; }
-            public DateTime start { get; set; }
-            public DateTime end { get; set; }
+            [JsonPropertyName("source")]
+            public string Source { get; set; }
+
+            [JsonPropertyName("target")]
+            public string Target { get; set; }
+
+            [JsonPropertyName("start")]
+            public DateTime Start { get; set; }
+
+            [JsonPropertyName("end")]
+            public DateTime End { get; set; }
         }
 
         public class Node
         {
-            public string id { get; set; }
-            public DateTime start { get; set; }
-            public DateTime end { get; set; }
+            [JsonPropertyName("id")]
+            public string Id { get; set; }
+
+            [JsonPropertyName("start")]
+            public DateTime Start { get; set; }
+
+            [JsonPropertyName("end")]
+            public DateTime End { get; set; }
         }
 
         public class InteractionMap
         {
-            public List<Node> nodes { get; set; }
-            public List<Link> links { get; set; }
+            [JsonPropertyName("nodes")]
+            public List<Node> Nodes { get; set; } = [];
 
-            public InteractionMap()
-            {
-                nodes = new List<Node>();
-                links = new List<Link>();
-            }
+            [JsonPropertyName("links")]
+            public List<Link> Links { get; set; } = [];
         }
     }
 }
