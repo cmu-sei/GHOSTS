@@ -13,20 +13,20 @@ namespace Ghosts.Client.Universal.Handlers;
 public class Bash(Timeline timeline, TimelineHandler handler, CancellationToken token)
     : BaseHandler(timeline, handler, token)
 {
-    public int executionprobability = 100;
-    public int jitterfactor { get; set; } = 0; //used with Jitter.JitterFactorDelay
+    private int _executionProbability = 100;
+    private int _jitterFactor { get; set; } = 0; //used with Jitter.JitterFactorDelay
 
     protected override Task RunOnce()
     {
         if (this.Handler.HandlerArgs.TryGetValue("execution-probability", out var v1))
         {
-            int.TryParse(v1.ToString(), out executionprobability);
-            if (executionprobability < 0 || executionprobability > 100) executionprobability = 100;
+            int.TryParse(v1.ToString(), out _executionProbability);
+            if (_executionProbability < 0 || _executionProbability > 100) _executionProbability = 100;
         }
 
         if (this.Handler.HandlerArgs.TryGetValue("delay-jitter", out var v2))
         {
-            jitterfactor = Jitter.JitterFactorParse(v2.ToString());
+            _jitterFactor = Jitter.JitterFactorParse(v2.ToString());
         }
 
         foreach (var timelineEvent in this.Handler.TimeLineEvents)
@@ -43,11 +43,11 @@ public class Bash(Timeline timeline, TimelineHandler handler, CancellationToken 
                 case "random":
                     while (true)
                     {
-                        if (executionprobability < _random.Next(0, 100))
+                        if (_executionProbability < _random.Next(0, 100))
                         {
                             //skipping this command
                             _log.Trace($"Command choice skipped due to execution probability");
-                            Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, jitterfactor));
+                            Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, _jitterFactor));
                             continue;
                         }
 
@@ -57,7 +57,7 @@ public class Bash(Timeline timeline, TimelineHandler handler, CancellationToken 
                             ProcessCommand(this.Handler.Initial, cmd.ToString());
                         }
 
-                        Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, jitterfactor));
+                        Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, _jitterFactor));
                     }
                 default:
 

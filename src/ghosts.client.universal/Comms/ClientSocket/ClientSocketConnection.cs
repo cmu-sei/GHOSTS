@@ -1,7 +1,6 @@
 // Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Ghosts.Client.Universal.Infrastructure;
@@ -15,7 +14,7 @@ namespace Ghosts.Client.Universal.Comms.ClientSocket;
 
 public class Connection(ClientConfiguration.SocketsSettings options)
 {
-    private int _attempts = 0;
+    private int _attempts;
     private HubConnection _connection;
     private readonly CancellationToken _ct = CancellationToken.None;
     public readonly BackgroundTaskQueue Queue = new();
@@ -146,7 +145,7 @@ public class Connection(ClientConfiguration.SocketsSettings options)
                 {
                     try
                     {
-                        var timeline = JsonConvert.DeserializeObject<Timeline>(update.Update.ToString());
+                        var timeline = JsonConvert.DeserializeObject<Timeline>(update.Update.ToString() ?? string.Empty);
 
                         foreach (var timelineHandler in timeline.TimeLineHandlers)
                         {

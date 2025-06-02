@@ -1,5 +1,7 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
+using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Ghosts.Domain;
@@ -21,12 +23,22 @@ public class Reboot(Timeline entireTimeline, TimelineHandler timelineHandler, Ca
 
             _log.Trace($"Reboot: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfterActual}");
 
-            switch (timelineEvent.Command)
+            switch (OperatingSystem.IsWindows(), OperatingSystem.IsLinux(), OperatingSystem.IsMacOS())
             {
+                case (true, _, _):
+                    Process.Start("shutdown.exe", "-r -t 0");
+                    break;
+                case (_, true, _):
+                    Process.Start("shutdown", "-r now");
+                    break;
+                case (_, _, true):
+                    Process.Start("sudo", "shutdown -r now");
+                    break;
                 default:
-                    System.Diagnostics.Process.Start("shutdown.exe", "-r -t 0");
+                    _log.Warn("Unsupported platform for reboot");
                     break;
             }
+
         }
 
         return Task.CompletedTask;

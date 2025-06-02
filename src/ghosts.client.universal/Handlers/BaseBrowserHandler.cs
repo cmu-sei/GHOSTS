@@ -350,7 +350,7 @@ public abstract class BaseBrowserHandler(Timeline timeline, TimelineHandler hand
         {
             throw; //pass up
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             _log.Trace("Exeception while trying to kill browser process.");
             _log.Error(e);

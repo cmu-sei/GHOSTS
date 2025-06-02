@@ -11,22 +11,19 @@ namespace Ghosts.Client.Universal.Handlers;
 public class Cmd(Timeline entireTimeline, TimelineHandler timelineHandler, CancellationToken cancellationToken)
     : BaseHandler(entireTimeline, timelineHandler, cancellationToken)
 {
-    private int _executionProbability = 100;
-    private int _jitterFactor = 0; //used with Jitter.JitterFactorDelay
-
     protected override Task RunOnce()
     {
         var handler = this.Handler;
 
         if (handler.HandlerArgs.ContainsKey("execution-probability"))
         {
-            int.TryParse(handler.HandlerArgs["execution-probability"].ToString(), out _executionProbability);
-            if (_executionProbability < 0 || _executionProbability > 100) _executionProbability = 100;
+            int.TryParse(handler.HandlerArgs["execution-probability"].ToString(), out this.ExecutionProbability);
+            if (this.ExecutionProbability < 0 || this.ExecutionProbability > 100) this.ExecutionProbability = 100;
         }
 
         if (handler.HandlerArgs.ContainsKey("delay-jitter"))
         {
-            _jitterFactor = Jitter.JitterFactorParse(handler.HandlerArgs["delay-jitter"].ToString());
+            this.JitterFactor = Jitter.JitterFactorParse(handler.HandlerArgs["delay-jitter"].ToString());
         }
 
         foreach (var timelineEvent in handler.TimeLineEvents)
@@ -43,11 +40,11 @@ public class Cmd(Timeline entireTimeline, TimelineHandler timelineHandler, Cance
                 case "random":
                     while (true)
                     {
-                        if (_executionProbability < _random.Next(0, 100))
+                        if (this.ExecutionProbability < _random.Next(0, 100))
                         {
                             //skipping this command
                             _log.Trace($"Command choice skipped due to execution probability");
-                            Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, _jitterFactor));
+                            Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, this.JitterFactor));
                             continue;
                         }
 
@@ -57,7 +54,7 @@ public class Cmd(Timeline entireTimeline, TimelineHandler timelineHandler, Cance
                             ProcessCommand(handler, timelineEvent, cmd.ToString());
                         }
 
-                        Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, _jitterFactor));
+                        Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, this.JitterFactor));
                     }
                 default:
                     ProcessCommand(handler, timelineEvent, timelineEvent.Command);
