@@ -182,11 +182,19 @@ public class MachineUpdateService(
                 Type = UpdateClientConfig.UpdateType.TimelinePartial
             };
 
+            _log.Trace($"Machine update {npc.MachineId} created and sending to machine over websocket...");
+
             // Attempt real-time delivery; fallback to DB-delivery if no active socket
             if (!await clientHubService.SendUpdate(npc.MachineId.Value, o))
             {
+                _log.Trace($"Machine update {npc.MachineId} sending to machine over websocket...");
+
                 context.MachineUpdates.Add(o);
                 await context.SaveChangesAsync(ct);
+            }
+            else
+            {
+                _log.Trace($"Machine update {npc.MachineId} could not be delivered to machine - no socket...");
             }
 
             return o;

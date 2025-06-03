@@ -46,7 +46,7 @@ public class Clicks(Timeline entireTimeline, TimelineHandler timelineHandler, Ca
                 if (timelineEvent.DelayAfterActual > 0)
                     Thread.Sleep(timelineEvent.DelayAfterActual);
             }
-        }, cancellationToken);
+        }, this.Token);
     }
 
     private static void DoLeftMouseClick(int x, int y)

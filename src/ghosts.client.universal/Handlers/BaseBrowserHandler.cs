@@ -32,7 +32,6 @@ public abstract class BaseBrowserHandler(Timeline timeline, TimelineHandler hand
     public string BrowserProcessTag { get; set; } = null; //used for killing Linux browser processes
 
     public int BrowseProbability = 100;
-    public int JitterFactor { get; set; } = 0; //used with Jitter.JitterFactorDelay
     public bool SharePointAbort { get; set; } = false; //will be set to True if unable to proceed with Handler execution
     public bool BlogAbort { get; set; } = false; //will be set to True if unable to proceed with Handler execution
     public bool OutlookAbort { get; set; } = false; //will be set to True if unable to proceed with Handler execution

@@ -105,6 +105,7 @@ public class CheckId
         }
 
         var machine = new ResultMachine();
+        GuestInfoVars.Load(machine);
 
         try
         {

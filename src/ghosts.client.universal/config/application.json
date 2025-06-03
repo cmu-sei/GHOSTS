@@ -6,10 +6,10 @@
     },
     "Id": {
         "IsEnabled": true,
-        "Format": "guestlocal",
-        "FormatKey": "guestinfo.id",
+        "Format": "guestinfo",
+        "FormatKey": "guestinfo.rangename",
         "FormatValue": "$formatkeyvalue$-$machinename$",
-        "VMWareToolsLocation": "C:\\progra~1\\VMware\\VMware Tools\\vmtoolsd.exe"
+        "VMWareToolsLocation": "C:\\progra~1\\VMware\\VMware~1\\vmtoolsd.exe"
     },
     "AllowMultipleInstances": false,
     "EncodeHeaders": true,

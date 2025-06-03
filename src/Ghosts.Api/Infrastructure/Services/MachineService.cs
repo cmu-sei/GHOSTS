@@ -7,9 +7,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Ghosts.Api.Infrastructure.Models;
-using Ghosts.Api;
 using Ghosts.Api.Hubs;
-using Ghosts.Api.Infrastructure;
 using Ghosts.Api.Infrastructure.Data;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
@@ -100,17 +98,15 @@ namespace Ghosts.Api.Infrastructure.Services
                                                                         || o.Host.ToLower().Contains(machine.Host.ToLower())
                                                                         || o.ResolvedHost.ToLower().Contains(machine.ResolvedHost.ToLower()), ct);
             }
-            else
+
+            return Program.ApplicationSettings.MatchMachinesBy.ToLower() switch
             {
-                return Program.ApplicationSettings.MatchMachinesBy.ToLower() switch
-                {
-                    "name" => await _context.Machines.FirstOrDefaultAsync(o => o.Name.ToLower().Contains(machine.Name.ToLower()), ct),
-                    "fqdn" => await _context.Machines.FirstOrDefaultAsync(o => o.FQDN.ToLower().Contains(machine.FQDN.ToLower()), ct),
-                    "host" => await _context.Machines.FirstOrDefaultAsync(o => o.Host.ToLower().Contains(machine.Host.ToLower()), ct),
-                    "resolvedhost" => await _context.Machines.FirstOrDefaultAsync(o => o.ResolvedHost.ToLower().Contains(machine.ResolvedHost.ToLower()), ct),
-                    _ => await _context.Machines.FirstOrDefaultAsync(o => o.Name.ToLower().Contains(machine.Name.ToLower()), ct)
-                };
-            }
+                "name" => await _context.Machines.FirstOrDefaultAsync(o => o.Name.ToLower().Contains(machine.Name.ToLower()), ct),
+                "fqdn" => await _context.Machines.FirstOrDefaultAsync(o => o.FQDN.ToLower().Contains(machine.FQDN.ToLower()), ct),
+                "host" => await _context.Machines.FirstOrDefaultAsync(o => o.Host.ToLower().Contains(machine.Host.ToLower()), ct),
+                "resolvedhost" => await _context.Machines.FirstOrDefaultAsync(o => o.ResolvedHost.ToLower().Contains(machine.ResolvedHost.ToLower()), ct),
+                _ => await _context.Machines.FirstOrDefaultAsync(o => o.Name.ToLower().Contains(machine.Name.ToLower()), ct)
+            };
         }
 
         public List<MachineListItem> GetList()

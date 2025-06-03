@@ -40,6 +40,8 @@ public static class Updates
             return;
 
         var machine = new ResultMachine();
+        GuestInfoVars.Load(machine);
+
         while (true)
         {
             try
@@ -177,6 +179,7 @@ public static class Updates
 
                 var payload = TimelineBuilder.TimelineToJsonPayload(timeline);
                 var machine = new ResultMachine();
+                GuestInfoVars.Load(machine);
 
                 using (var client = HttpClientBuilder.Build(machine))
                 {
@@ -207,6 +210,7 @@ public static class Updates
         var postUrl = Program.ConfigurationUrls.Results;
 
         var machine = new ResultMachine();
+        GuestInfoVars.Load(machine);
 
         Thread.Sleep(Jitter.Basic(Program.Configuration.ClientResults.CycleSleep));
 
@@ -387,6 +391,7 @@ public static class Updates
             var payload = JsonConvert.SerializeObject(survey);
 
             var machine = new ResultMachine();
+            GuestInfoVars.Load(machine);
 
             if (Program.Configuration.Survey.IsSecure)
             {

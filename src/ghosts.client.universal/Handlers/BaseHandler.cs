@@ -21,6 +21,7 @@ public abstract class BaseHandler : IHandler
     internal static readonly Logger _log = LogManager.GetCurrentClassLogger();
     internal static readonly Random _random = new();
 
+    public int JitterFactor = 0;
     protected readonly TimelineHandler Handler;
     protected readonly Timeline Timeline;
     protected readonly CancellationToken Token;
@@ -30,7 +31,6 @@ public abstract class BaseHandler : IHandler
     /// <summary>
     /// Used with Jitter.JitterFactorDelay
     /// </summary>
-    protected int JitterFactor = 0;
 
     public string Arg { get; set; }
     public string TrackableId { get; set; }

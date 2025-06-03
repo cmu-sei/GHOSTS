@@ -9,6 +9,7 @@ using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Microsoft.AspNetCore.SignalR.Client;
 using Newtonsoft.Json;
+using NLog;
 
 namespace Ghosts.Client.Universal.Comms.ClientSocket;
 
@@ -18,6 +19,7 @@ public class Connection(ClientConfiguration.SocketsSettings options)
     private HubConnection _connection;
     private readonly CancellationToken _ct = CancellationToken.None;
     public readonly BackgroundTaskQueue Queue = new();
+    private static readonly Logger _log = LogManager.GetCurrentClassLogger();
 
     public async Task Run()
     {
@@ -100,12 +102,14 @@ public class Connection(ClientConfiguration.SocketsSettings options)
         }
 
         var machine = new ResultMachine();
-        //GuestInfoVars.Load(machine);
+        GuestInfoVars.Load(machine);
+
+        var headers = HttpClientBuilder.GetHeaders(machine);
 
         _connection = new HubConnectionBuilder()
             .WithUrl(url, x =>
             {
-                x.Headers = HttpClientBuilder.GetHeaders(machine);
+                x.Headers = headers;
             }).WithAutomaticReconnect()
             .Build();
 
