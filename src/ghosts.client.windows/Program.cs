@@ -35,7 +35,7 @@ class Program
     private const int SwHide = 0;
     private const int SwShow = 5;
 
-    internal static List<ThreadJob> ThreadJobs { get; set; }
+    internal static List<TaskJob> TaskJobs { get; set; }
     internal static ClientConfiguration Configuration { get; set; }
     internal static ApplicationDetails.ConfigurationUrls ConfigurationUrls { get; set; }
     internal static DateTime LastChecked = DateTime.Now.AddHours(-1);
@@ -121,7 +121,7 @@ class Program
 
         _log.Trace($"Initiating {ApplicationDetails.Name} startup - Local time: {DateTime.Now.TimeOfDay} UTC: {DateTime.UtcNow.TimeOfDay}");
 
-        ThreadJobs = new List<ThreadJob>();
+        TaskJobs = [];
 
         //load configuration
         try
@@ -154,7 +154,7 @@ class Program
             Queue = c.Queue;
         }
 
-        Program.CheckId = new CheckId(true);
+        Program.CheckId = new CheckId();
 
         DebugManager.Evaluate();
 

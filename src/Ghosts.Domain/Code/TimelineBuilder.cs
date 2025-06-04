@@ -3,6 +3,7 @@
 using System;
 using System.IO;
 using System.Net;
+using System.Net.Http;
 using Ghosts.Domain.Code.Helpers;
 using Newtonsoft.Json;
 using NLog;
@@ -22,13 +23,13 @@ namespace Ghosts.Domain.Code
             return new FileInfo(TimelineFile);
         }
 
-        public static void CheckForUrlTimeline(WebClient client, string timelineConfig)
+        public static void CheckForUrlTimeline(HttpClient client, string timelineConfig)
         {
             if (!timelineConfig.StartsWith("http")) return;
 
             try
             {
-                using (var stream = client.OpenRead(timelineConfig))
+                using (var stream = client.GetStreamAsync(timelineConfig).Result)
                     if (stream != null)
                         using (var reader = new StreamReader(stream))
                         {

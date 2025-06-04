@@ -1,12 +1,13 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
+using System;
+using System.IO;
+using System.Net;
+using System.Threading.Tasks;
 using Ghosts.Client.Infrastructure;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using NLog;
-using System;
-using System.IO;
-using System.Net;
 
 namespace Ghosts.Client.Comms;
 
@@ -20,9 +21,16 @@ public class CheckId
     /// <summary>
     /// The actual path to the client id file, specified in application config
     /// </summary>
-    public string IdFile = ApplicationDetails.InstanceFiles.Id;
+    private readonly string _idFile = ApplicationDetails.InstanceFiles.Id;
 
+    private DateTime _lastChecked = DateTime.Now;
     private string _id = string.Empty;
+
+    public CheckId()
+    {
+        _log.Info("CheckId instance created");
+        _log.Debug($"CheckId instantiated with ID File Path: {_idFile}");
+    }
 
     public CheckId(bool checkInitialTimeline = false)
     {
@@ -32,8 +40,19 @@ public class CheckId
         {
             if (checkInitialTimeline)
             {
-                using var client = GetClient();
-                TimelineBuilder.CheckForUrlTimeline(client, Program.Configuration.Timeline.Location);
+                var machine = new ResultMachine();
+                GuestInfoVars.Load(machine);
+
+                try
+                {
+                    // Call home
+                    using var client = HttpClientBuilder.Build(machine, false);
+                    TimelineBuilder.CheckForUrlTimeline(client, Program.Configuration.Timeline.Location);
+                }
+                catch
+                {
+                    // pass
+                }
             }
         }
         catch
@@ -42,14 +61,6 @@ public class CheckId
         }
     }
 
-    private WebClient GetClient()
-    {
-        var machine = new ResultMachine();
-        GuestInfoVars.Load(machine);
-        return WebClientBuilder.Build(machine, !string.IsNullOrEmpty(_id));
-    }
-
-
     /// <summary>
     /// Gets the agent's current id from local instance, and if it does not exist, gets an id from the server and saves it locally
     /// </summary>
@@ -57,100 +68,192 @@ public class CheckId
     {
         get
         {
+            _log.Trace("Id property getter invoked");
+
             if (!string.IsNullOrEmpty(_id))
+            {
+                _log.Debug($"Returning cached Id: {_id}");
                 return _id;
+            }
 
             try
             {
-                if (!File.Exists(IdFile))
+                if (!File.Exists(_idFile))
                 {
-                    if (DateTime.Now < Program.LastChecked.AddMinutes(5))
+                    _log.Warn($"ID file not found at path: {_idFile}");
+
+                    if (DateTime.Now > _lastChecked.AddMinutes(5))
                     {
-                        _log.Error("Skipping Check for ID from server, too many requests in a short amount of time...");
+                        _log.Error("Skipping check for ID from server due to recent check within 5 minutes.");
                         return string.Empty;
                     }
 
-                    Program.LastChecked = DateTime.Now;
-                    return Run();
+                    _log.Info("Attempting to retrieve ID from server.");
+                    _lastChecked = DateTime.Now;
+                    _id = Run().GetAwaiter().GetResult(); //todo: cringe :)
+
+                    if (string.IsNullOrEmpty(_id))
+                    {
+                        _log.Warn("Retrieved ID is empty after attempting to fetch from server.");
+                    }
+
+                    return _id;
                 }
-                Id = File.ReadAllText(IdFile);
+
+                _id = File.ReadAllText(_idFile).Trim();
+                _log.Info($"ID retrieved from local file: {_id}");
                 return _id;
             }
-            catch
+            catch (Exception ex)
             {
-                _log.Error("No ID file");
+                _log.Error(ex, "Exception occurred while retrieving ID.");
                 return string.Empty;
             }
         }
-        set => _id = value;
+        set
+        {
+            _log.Debug($"Setting ID to: {value}");
+            _id = value;
+        }
     }
 
     /// <summary>
     /// API call to get client ID (probably based on hostname, but configurable) and saves it locally
     /// </summary>
     /// <returns></returns>
-    private string Run()
+    private async Task<string> Run()
     {
-        // ignore all certs
-        ServicePointManager.ServerCertificateValidationCallback += (_, _, _, _) => true;
+        _log.Trace("Run method started: Attempting to fetch ID from server.");
 
-        var s = string.Empty;
+        var fetchedId = string.Empty;
 
         if (!Program.Configuration.Id.IsEnabled)
         {
-            return s;
+            _log.Warn("ID retrieval is disabled in the configuration.");
+            return fetchedId;
         }
 
-        using var client = GetClient();
+        var machine = new ResultMachine();
+        GuestInfoVars.Load(machine);
 
         try
         {
-            //call home
+            // Call home
+            using var client = HttpClientBuilder.Build(machine, false);
             try
             {
-                using var reader = new StreamReader(client.OpenRead(Program.ConfigurationUrls.Id) ?? throw new InvalidOperationException("CheckID client is null"));
-                s = reader.ReadToEnd();
-                _log.Debug("ID Received");
+                _log.Info($"Attempting to connect to ID endpoint: {Program.ConfigurationUrls.Id}");
+
+                var response = await client.GetAsync(Program.ConfigurationUrls.Id);
+                if (!response.IsSuccessStatusCode)
+                {
+                    _log.Error($"Failed to fetch ID. Status code: {response.StatusCode}");
+                    return fetchedId;
+                }
+
+                using var responseStream = await response.Content.ReadAsStreamAsync();
+                using var reader = new StreamReader(responseStream);
+                fetchedId = (await reader.ReadToEndAsync()).Trim();
+                _log.Info($"ID successfully received from server: {fetchedId}");
             }
             catch (WebException wex)
             {
+                _log.Warn(wex, "WebException occurred while attempting to fetch ID.");
+
                 if (wex.Message.StartsWith("The remote name could not be resolved:"))
                 {
-                    _log.Debug($"API not reachable: {wex.Message}");
+                    _log.Warn($"API not reachable: {wex.Message}");
                 }
-                else if (((HttpWebResponse)wex.Response).StatusCode == HttpStatusCode.NotFound)
+                else if (wex.Response is HttpWebResponse { StatusCode: HttpStatusCode.NotFound })
                 {
-                    _log.Debug($"No ID returned! {wex.Message}");
+                    _log.Warn($"ID not found (404): {wex.Message}");
+                }
+                else
+                {
+                    _log.Error(wex, $"WebException encountered: {wex.Message}");
                 }
             }
             catch (Exception e)
             {
-                _log.Error($"General comms exception: {e.Message}");
+                _log.Error(e, $"Unexpected exception during ID retrieval: {e.Message}");
             }
         }
         catch (Exception e)
         {
-            _log.Error($"Cannot connect to API: {e.Message}");
+            _log.Error(e, $"Cannot connect to API: {e.Message}");
+            return string.Empty;
         }
 
-        WriteId(s);
+        // Remove potential surrounding quotes
+        fetchedId = fetchedId.Replace("\"", "");
 
-        return s;
+        if (!Directory.Exists(ApplicationDetails.InstanceFiles.Path))
+        {
+            try
+            {
+                Directory.CreateDirectory(ApplicationDetails.InstanceFiles.Path);
+                _log.Info($"Created directory for ID file: {ApplicationDetails.InstanceFiles.Path}");
+            }
+            catch (Exception ex)
+            {
+                _log.Error(ex, $"Failed to create directory: {ApplicationDetails.InstanceFiles.Path}");
+                return string.Empty;
+            }
+        }
+
+        if (string.IsNullOrEmpty(fetchedId))
+        {
+            _log.Warn("Fetched ID is empty after processing.");
+            return string.Empty;
+        }
+
+        try
+        {
+            // Save returned ID
+            File.WriteAllText(_idFile, fetchedId);
+            _log.Info($"ID successfully written to file: {_idFile}");
+        }
+        catch (Exception ex)
+        {
+            _log.Error(ex, $"Failed to write ID to file: {_idFile}");
+            return string.Empty;
+        }
+
+        return fetchedId;
     }
 
+    /// <summary>
+    /// Writes the provided ID to the ID file, ensuring proper formatting and directory existence.
+    /// </summary>
+    /// <param name="id">The ID to write.</param>
     public static void WriteId(string id)
     {
-        if (!string.IsNullOrEmpty(id))
+        _log.Trace("WriteId method invoked.");
+
+        if (string.IsNullOrEmpty(id))
         {
-            id = id.Replace("\"", "");
+            _log.Warn("Attempted to write an empty or null ID.");
+            return;
+        }
+
+        try
+        {
+            _log.Debug($"Received ID for writing: {id}");
+            id = id.Replace("\"", "").Trim();
 
             if (!Directory.Exists(ApplicationDetails.InstanceFiles.Path))
             {
                 Directory.CreateDirectory(ApplicationDetails.InstanceFiles.Path);
+                _log.Info($"Created directory for ID file: {ApplicationDetails.InstanceFiles.Path}");
             }
 
-            //save returned id
+            // Save returned ID
             File.WriteAllText(ApplicationDetails.InstanceFiles.Id, id);
+            _log.Info($"ID successfully written to file: {ApplicationDetails.InstanceFiles.Id}");
+        }
+        catch (Exception ex)
+        {
+            _log.Error(ex, $"Failed to write ID to file: {ApplicationDetails.InstanceFiles.Id}");
         }
     }
 }

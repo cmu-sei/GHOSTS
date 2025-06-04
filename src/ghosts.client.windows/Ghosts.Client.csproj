@@ -221,7 +221,7 @@
     <Compile Include="Infrastructure\RandomFilename.cs" />
     <Compile Include="Infrastructure\RandomText.cs" />
     <Compile Include="Infrastructure\Trackables.cs" />
-    <Compile Include="Infrastructure\WebClientHeaders.cs" />
+    <Compile Include="Infrastructure\HttpClientBuilder.cs" />
     <Compile Include="Comms\CheckId.cs" />
     <Compile Include="Comms\Updates.cs" />
     <Compile Include="Handlers\BrowserChrome.cs" />
