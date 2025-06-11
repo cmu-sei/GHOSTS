@@ -6,7 +6,7 @@
     <RootNamespace>Ghosts.Api</RootNamespace>
 
     <AssemblyVersion>8.0.0.0</AssemblyVersion>
-    <FileVersion>8.5.3.0</FileVersion>
+    <FileVersion>8.5.4.0</FileVersion>
 
     <Authors>GHOSTS Development Team for CERT > Software Engineering Institute > Carnegie Mellon University</Authors>
     <Company>Carnegie Mellon University</Company>
