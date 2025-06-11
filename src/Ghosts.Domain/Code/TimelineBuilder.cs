@@ -2,6 +2,8 @@
 
 using System;
 using System.IO;
+using System.Net.Http;
+using System.Threading.Tasks;
 using Ghosts.Domain.Code.Helpers;
 using Newtonsoft.Json;
 using NLog;
@@ -11,48 +13,48 @@ namespace Ghosts.Domain.Code
     /// <summary>
     /// Helper class that loads timeline and watches it for future changes
     /// </summary>
-    public static class TimelineBuilder
+    public class TimelineBuilder
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        private static readonly string _timelineFile = ApplicationDetails.ConfigurationFiles.Timeline;
+        public static string TimelineFile = ApplicationDetails.ConfigurationFiles.Timeline;
 
         public static FileInfo TimelineFilePath()
         {
-            return new FileInfo(_timelineFile);
+            return new FileInfo(TimelineFile);
         }
 
-        // public static void CheckForUrlTimeline(HttpClient client, string timelineConfig)
-        // {
-        //     if (!timelineConfig.StartsWith("http")) return;
-        //
-        //     try
-        //     {
-        //         using (var stream = client.GetStreamAsync(timelineConfig).Result)
-        //             if (stream != null)
-        //                 using (var reader = new StreamReader(stream))
-        //                 {
-        //                     var content = reader.ReadToEnd();
-        //                     if (string.IsNullOrEmpty(content))
-        //                         throw new Exception("Http timeline file could not be found, falling back to local");
-        //
-        //                     try
-        //                     {
-        //                         GetTimelineFromString(content, null);
-        //                     }
-        //                     catch (Exception)
-        //                     {
-        //                         _log.Error($"Timeline fetched from {timelineConfig} is not in the correct format, falling back to local");
-        //                         throw;
-        //                     }
-        //
-        //                     File.WriteAllText(TimelineFile, content);
-        //                 }
-        //     }
-        //     catch (Exception e)
-        //     {
-        //         _log.Error($"Http timeline file could not be found, falling back to local: {e}");
-        //     }
-        // }
+        public static async Task CheckForUrlTimeline(HttpClient client, string timelineConfig)
+        {
+            if (!timelineConfig.StartsWith("http")) return;
+
+            try
+            {
+                var response = await client.GetAsync(timelineConfig);
+                if (!response.IsSuccessStatusCode)
+                    throw new Exception("Http timeline file could not be found, falling back to local");
+
+                var content = await response.Content.ReadAsStringAsync();
+                if (string.IsNullOrEmpty(content))
+                    throw new Exception("Http timeline file is empty, falling back to local");
+
+                try
+                {
+                    GetTimelineFromString(content, null);
+                }
+                catch (Exception)
+                {
+                    _log.Error($"Timeline fetched from {timelineConfig} is not in the correct format, falling back to local");
+                    throw;
+                }
+
+                File.WriteAllText(TimelineFile, content);
+            }
+            catch (Exception e)
+            {
+                _log.Error($"Http timeline file could not be found, falling back to local: {e}");
+            }
+        }
+
 
         /// <summary>
         /// Get from local disk
@@ -60,7 +62,7 @@ namespace Ghosts.Domain.Code
         /// <returns>The local timeline to be executed</returns>
         public static Timeline GetTimeline()
         {
-            return GetTimeline(_timelineFile);
+            return GetTimeline(TimelineFile);
         }
 
         public static Timeline GetTimeline(string path)
@@ -82,7 +84,7 @@ namespace Ghosts.Domain.Code
 
             try
             {
-                var (timeline, _) = ConfigManager.DeserializeConfig<Timeline>(raw);
+                var (timeline, fileFormat) = ConfigManager.DeserializeConfig<Timeline>(raw);
                 if (timeline.Id == Guid.Empty)
                 {
                     timeline.Id = Guid.NewGuid();
@@ -106,7 +108,7 @@ namespace Ghosts.Domain.Code
         {
             try
             {
-                return ConfigManager.SerializeConfig(timeline);
+                return ConfigManager.SerializeConfig(timeline, ConfigManager.FileFormat.Json);
             }
             catch
             {
@@ -138,10 +140,10 @@ namespace Ghosts.Domain.Code
         /// <param name="timeline">`Timeline` type</param>
         public static void SetLocalTimeline(Timeline timeline)
         {
-            ConfigManager.SaveConfig(timeline, _timelineFile, Formatting.Indented);
+            ConfigManager.SaveConfig(timeline, TimelineFile, Formatting.Indented);
         }
 
-        private static void SetLocalTimeline(Timeline timeline, string path)
+        public static void SetLocalTimeline(Timeline timeline, string path)
         {
             ConfigManager.SaveConfig(timeline, path);
         }
