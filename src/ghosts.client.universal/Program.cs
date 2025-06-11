@@ -1,40 +1,41 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
-using System.Net;
 using System.Reflection;
 using System.Threading;
-using ghosts.client.universal.Comms;
-using ghosts.client.universal.Comms.ClientSocket;
-using ghosts.client.universal.Infrastructure;
-using ghosts.client.universal.timelineManager;
+using System.Threading.Tasks;
+using Ghosts.Client.Universal.Comms;
+using Ghosts.Client.Universal.Comms.ClientSocket;
+using Ghosts.Client.Universal.Infrastructure;
+using Ghosts.Client.Universal.timelineManager;
+using Ghosts.Client.Universal.TimelineManager;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Models;
 using NLog;
 
-namespace ghosts.client.universal
+namespace Ghosts.Client.Universal
 {
     internal static class Program
     {
         internal static ClientConfiguration Configuration { get; private set; }
         internal static ApplicationDetails.ConfigurationUrls ConfigurationUrls { get; set; }
         internal static bool IsDebug;
-        internal static List<ThreadJob> ThreadJobs { get; private set; }
+        internal static ConcurrentDictionary<Guid, TaskJob> RunningTasks { get; } = new();
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
         public static CheckId CheckId { get; set; }
         internal static BackgroundTaskQueue Queue;
 
-        private static void Main(string[] args)
+        private static async Task Main(string[] args)
         {
-            ThreadJobs = new List<ThreadJob>();
             ClientConfigurationLoader.UpdateConfigurationWithEnvVars();
 
             try
             {
-                Run(args);
+                await Run(args);
             }
             catch (Exception e)
             {
@@ -44,11 +45,8 @@ namespace ghosts.client.universal
             }
         }
 
-        private static void Run(IEnumerable<string> args)
+        private static async Task Run(IEnumerable<string> args)
         {
-            // ignore all certs
-            ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
-
             // parse program flags
             if (!CommandLineFlagManager.Parse(args))
             {
@@ -79,21 +77,14 @@ namespace ghosts.client.universal
             {
                 _log.Trace("Sockets enabled. Connecting...");
                 var c = new Connection(Configuration.Sockets);
-
-                async void Start()
-                {
-                    await c.Run();
-                }
-
-                var connectionThread = new Thread(Start) { IsBackground = true };
-                connectionThread.Start();
                 Queue = c.Queue;
+
+                _ = Task.Run(() => c.Run());
             }
 
-            Program.CheckId = new CheckId();
+            CheckId = new CheckId();
 
-            //linux clients do not catch stray processes or check for job duplication
-
+            //should we catch stray processes or check for job duplication?
             StartupTasks.SetStartup();
 
             ListenerManager.Run();
@@ -107,10 +98,10 @@ namespace ghosts.client.universal
             //local survey gathers information such as drives, accounts, logs, etc.
             if (Configuration.Survey.IsEnabled)
             {
-                _log.Trace("Survey enabled, initalizing...");
+                _log.Trace("Survey enabled, initializing...");
                 try
                 {
-                    Survey.SurveyManager.Run();
+                    await Survey.SurveyManager.Run();
                 }
                 catch (Exception exc)
                 {
@@ -124,7 +115,7 @@ namespace ghosts.client.universal
 
             if (Configuration.HealthIsEnabled)
             {
-                _log.Trace("Health checks enabled, initalizing...");
+                _log.Trace("Health checks enabled, initializing...");
                 var h = new Health.Check();
                 h.Run();
             }
@@ -135,7 +126,7 @@ namespace ghosts.client.universal
 
             if (Configuration.HandlersIsEnabled)
             {
-                _log.Trace("Handlers enabled, initalizing...");
+                _log.Trace("Handlers enabled, initializing...");
                 var o = new Orchestrator();
                 o.Run();
             }
@@ -144,7 +135,7 @@ namespace ghosts.client.universal
                 _log.Trace("Handling disabed, continuing.");
             }
 
-            new ManualResetEvent(false).WaitOne();
+            await Task.Delay(Timeout.Infinite, CancellationToken.None);
         }
 
         private static void CurrentDomain_ProcessExit(object sender, EventArgs e)

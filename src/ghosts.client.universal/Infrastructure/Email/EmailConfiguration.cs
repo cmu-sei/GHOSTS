@@ -8,7 +8,7 @@ using Ghosts.Domain.Code.Helpers;
 using NLog;
 // ReSharper disable InconsistentNaming
 
-namespace ghosts.client.universal.Infrastructure.Email;
+namespace Ghosts.Client.Universal.Infrastructure.Email;
 
 /// <summary>
 /// "CurrentUser|Other:string FromEmailAddress",

@@ -7,13 +7,13 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using ghosts.api.Infrastructure.Extensions;
+using Ghosts.Api.Infrastructure.Extensions;
 using Ghosts.Api.Infrastructure;
 using Newtonsoft.Json;
 using NLog;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
-namespace ghosts.api.Infrastructure.ContentServices.Shadows;
+namespace Ghosts.Api.Infrastructure.ContentServices.Shadows;
 
 public class ShadowsConnectorService : IContentService
 {

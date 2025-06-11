@@ -1,14 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading;
-using Ghosts.Domain;
-using NLog;
 
-
-namespace ghosts.client.universal.Infrastructure
+namespace Ghosts.Client.Universal.Infrastructure
 {
     /// <summary>
     /// Simple class for storing credentials. This version is not meant to be secure in any

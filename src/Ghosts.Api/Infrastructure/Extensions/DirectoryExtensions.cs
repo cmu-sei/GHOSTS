@@ -3,7 +3,7 @@
 using System;
 using System.IO;
 
-namespace ghosts.api.Infrastructure.Extensions;
+namespace Ghosts.Api.Infrastructure.Extensions;
 
 public static class DirectoryExtensions
 {

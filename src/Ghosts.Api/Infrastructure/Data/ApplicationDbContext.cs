@@ -1,8 +1,8 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System.IO;
-using ghosts.api.Areas.Animator.Infrastructure.Models;
-using ghosts.api.Infrastructure.Models;
+using Ghosts.Api.Areas.Animator.Infrastructure.Models;
+using Ghosts.Api.Infrastructure.Models;
 using Ghosts.Api.Infrastructure.Extensions;
 using Ghosts.Domain.Messages.MesssagesForServer;
 using Microsoft.EntityFrameworkCore;

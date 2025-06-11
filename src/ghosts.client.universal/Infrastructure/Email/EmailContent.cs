@@ -10,7 +10,7 @@ using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
 using NLog;
 
-namespace ghosts.client.universal.Infrastructure.Email;
+namespace Ghosts.Client.Universal.Infrastructure.Email;
 
 public class EmailContentManager
 {

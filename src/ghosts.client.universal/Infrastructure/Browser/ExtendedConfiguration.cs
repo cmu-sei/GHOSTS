@@ -3,7 +3,7 @@
 using Newtonsoft.Json;
 // ReSharper disable UnusedMember.Global
 
-namespace ghosts.client.universal.Infrastructure.Browser
+namespace Ghosts.Client.Universal.Infrastructure.Browser
 {
     public class ExtendedConfiguration
     {

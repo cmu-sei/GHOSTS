@@ -11,7 +11,7 @@ using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Newtonsoft.Json;
 
-namespace ghosts.client.universal.Infrastructure
+namespace Ghosts.Client.Universal.Infrastructure
 {
     internal static class CommandLineFlagManager
     {
@@ -48,7 +48,10 @@ namespace ghosts.client.universal.Infrastructure
 
             if (options.Information)
             {
-                Console.WriteLine(JsonConvert.SerializeObject(new ResultMachine(), Formatting.Indented));
+                var machine = new ResultMachine();
+                GuestInfoVars.Load(machine);
+
+                Console.WriteLine(JsonConvert.SerializeObject(machine, Formatting.Indented));
                 return false;
             }
             // end handling flags that result in program exit

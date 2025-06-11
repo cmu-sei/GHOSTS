@@ -3,13 +3,13 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using ghosts.api.Infrastructure.Models;
-using ghosts.api.Infrastructure.Services;
+using Ghosts.Api.Infrastructure.Models;
+using Ghosts.Api.Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;
 using NLog;
 using Swashbuckle.AspNetCore.Annotations;
 
-namespace ghosts.api.Controllers.Api
+namespace Ghosts.Api.Controllers.Api
 {
     [Route("api/[controller]")]
     public class MachinesController(IMachineService service) : Controller

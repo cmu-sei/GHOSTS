@@ -1,22 +1,22 @@
 // Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using ghosts.api.Hubs;
-using ghosts.api.Infrastructure.Models;
+using Ghosts.Api.Hubs;
+using Ghosts.Api.Infrastructure.Models;
 using Ghosts.Animator.Extensions;
-using Ghosts.Api.Infrastructure;
 using Ghosts.Api.Infrastructure.Data;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using Weighted_Randomizer;
 
-namespace ghosts.api.Infrastructure.Animations.AnimationDefinitions;
+namespace Ghosts.Api.Infrastructure.Animations.AnimationDefinitions;
 
 public class SocialGraphJob
 {
@@ -26,17 +26,15 @@ public class SocialGraphJob
     private readonly IHubContext<ActivityHub> _hub;
     private readonly string[] _knowledgeTopics;
     private readonly CancellationToken _token;
-    private readonly Random _random;
+    private readonly ThreadLocal<Random> _random = new(() => new Random());
     private const string SavePath = "_output/socialgraph/";
 
-    public SocialGraphJob(ApplicationSettings config, IServiceScopeFactory scopeFactory, Random random,
-        IHubContext<ActivityHub> hub, CancellationToken token)
+    public SocialGraphJob(ApplicationSettings config, IServiceScopeFactory scopeFactory, IHubContext<ActivityHub> hub, CancellationToken token)
     {
         _config = config;
         _scopeFactory = scopeFactory;
         _hub = hub;
         _token = token;
-        _random = random;
         _knowledgeTopics = File.ReadAllLines("config/knowledge_topics.txt");
     }
 
@@ -61,6 +59,20 @@ public class SocialGraphJob
         }
     }
 
+    private IEnumerable<NpcSocialGraph.SocialConnection> GetSocialConnectionFromNpc(NpcRecord npc)
+    {
+        var connection = new NpcSocialGraph.SocialConnection();
+        connection.Id = npc.Id;
+        connection.Name = npc.NpcProfile.Name.ToString();
+        connection.RelationshipStatus = 0;
+        connection.Distance = "";
+        connection.Interactions = new List<NpcSocialGraph.Interaction>();
+        var connections = new List<NpcSocialGraph.SocialConnection>();
+        connections.Add(connection);
+        return connections;
+    }
+
+
     private async Task ProcessAgentAsync(Guid npcId)
     {
         try
@@ -75,8 +87,12 @@ public class SocialGraphJob
                 return;
 
             graph.CurrentStep++;
-            var interactCount = _random.NextDouble().GetNumberByDecreasingWeights(0, graph.Connections.Count, 0.4);
+            var interactCount = _random.Value.NextDouble().GetNumberByDecreasingWeights(0, graph.Connections.Count, 0.4);
             var targets = graph.Connections.RandPick(interactCount);
+
+            // if no one knows anyone, its hard to get started, so "meet someone at the coffee counter"
+            if(!targets.Any())
+                targets = GetSocialConnectionFromNpc(context.Npcs.RandPick(1).FirstOrDefault());
 
             foreach (var target in targets)
             {

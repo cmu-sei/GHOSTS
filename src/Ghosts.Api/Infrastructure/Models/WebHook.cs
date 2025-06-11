@@ -3,11 +3,11 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using ghosts.api.ViewModels;
+using Ghosts.Api.ViewModels;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace ghosts.api.Infrastructure.Models
+namespace Ghosts.Api.Infrastructure.Models
 {
     [Table("webhooks")]
     public class Webhook

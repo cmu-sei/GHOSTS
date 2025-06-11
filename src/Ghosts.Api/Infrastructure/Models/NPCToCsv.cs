@@ -3,7 +3,7 @@
 using System;
 using FileHelpers;
 
-namespace ghosts.api.Infrastructure.Models;
+namespace Ghosts.Api.Infrastructure.Models;
 
 [DelimitedRecord(",")]
 public class NPCToCsv

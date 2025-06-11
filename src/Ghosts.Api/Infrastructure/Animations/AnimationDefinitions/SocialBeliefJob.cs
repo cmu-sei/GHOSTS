@@ -5,9 +5,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
-using ghosts.api.Areas.Animator.Infrastructure;
-using ghosts.api.Hubs;
-using ghosts.api.Infrastructure.Models;
+using Ghosts.Api.Areas.Animator.Infrastructure;
+using Ghosts.Api.Hubs;
+using Ghosts.Api.Infrastructure.Models;
 using Ghosts.Animator.Extensions;
 using Ghosts.Api.Infrastructure;
 using Ghosts.Api.Infrastructure.Data;
@@ -15,7 +15,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
 
-namespace ghosts.api.Infrastructure.Animations.AnimationDefinitions;
+namespace Ghosts.Api.Infrastructure.Animations.AnimationDefinitions;
 
 public class SocialBeliefJob
 {

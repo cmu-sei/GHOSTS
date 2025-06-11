@@ -14,7 +14,6 @@ namespace Ghosts.Api.Controllers
     public class HomeController(ApplicationDbContext context) : Controller
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        private readonly ApplicationDbContext _context = context;
 
         [HttpGet]
         [ApiExplorerSettings(IgnoreApi = true)]
@@ -45,9 +44,9 @@ namespace Ghosts.Api.Controllers
 
             try
             {
-                status.Machines = _context.Machines.Count();
-                status.Groups = _context.Groups.Count();
-                status.Npcs = _context.Npcs.Count();
+                status.Machines = context.Machines.Count();
+                status.Groups = context.Groups.Count();
+                status.Npcs = context.Npcs.Count();
             }
             catch (Exception e)
             {

@@ -3,111 +3,90 @@
 using System;
 using System.Diagnostics;
 using System.Threading;
+using System.Threading.Tasks;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
-using Ghosts.Domain.Code.Helpers;
 
-namespace ghosts.client.universal.handlers
+namespace Ghosts.Client.Universal.Handlers;
+
+public class Azure(Timeline timeline, TimelineHandler handler, CancellationToken token)
+    : BaseHandler(timeline, handler, token)
 {
-    public class Azure : BaseHandler
+    protected override Task RunOnce()
     {
-        private string Result { get; set; }
-        private readonly TimelineHandler _handler;
-
-        public Azure(TimelineHandler handler)
+        var handlerArgs = BuildHandlerArgVariables.BuildHandlerArgs(this.Handler);
+        foreach (var timelineEvent in this.Handler.TimeLineEvents)
         {
-            _handler = handler;
+            WorkingHours.Is(this.Handler);
 
-            try
+            if (timelineEvent.DelayBeforeActual > 0)
+                Thread.Sleep(timelineEvent.DelayBeforeActual);
+
+            switch (timelineEvent.Command)
             {
-                if (_handler.Loop)
-                {
-                    while (true)
+                default:
+                    foreach (var cmdObj in timelineEvent.CommandArgs)
                     {
-                        Ex();
-                    }
-                }
-
-                Ex();
-            }
-            catch (Exception e)
-            {
-                _log.Error(e);
-            }
-        }
-
-        private void Ex()
-        {
-            var handlerArgs = BuildHandlerArgVariables.BuildHandlerArgs(_handler);
-            foreach (var timelineEvent in _handler.TimeLineEvents)
-            {
-                WorkingHours.Is(_handler);
-
-                if (timelineEvent.DelayBeforeActual > 0)
-                    Thread.Sleep(timelineEvent.DelayBeforeActual);
-
-                switch (timelineEvent.Command)
-                {
-                    default:
-                        foreach (var cmdObj in timelineEvent.CommandArgs)
+                        var cmd = cmdObj?.ToString();
+                        if (!string.IsNullOrEmpty(cmd))
                         {
-                            var cmd = cmdObj?.ToString();
-                            if (!string.IsNullOrEmpty(cmd))
-                            {
-                                cmd = BuildHandlerArgVariables.ReplaceCommandVariables(cmd, handlerArgs);
-                                Command(cmd);
-                            }
+                            cmd = BuildHandlerArgVariables.ReplaceCommandVariables(cmd, handlerArgs);
+                            ProcessCommand(cmd);
                         }
+                    }
 
-                        break;
-                }
-                if (timelineEvent.DelayAfterActual <= 0) continue;
-                Thread.Sleep(timelineEvent.DelayAfterActual);
+                    break;
             }
+
+            if (timelineEvent.DelayAfterActual <= 0) continue;
+            Thread.Sleep(timelineEvent.DelayAfterActual);
         }
 
-        private void Command(string command)
+        return Task.CompletedTask;
+    }
+
+    private void ProcessCommand(string rawCommand)
+    {
+        this.Command = rawCommand;
+
+        try
         {
-            Result = string.Empty;
-
-            try
+            var p = new Process
             {
-                var p = new Process
+                EnableRaisingEvents = false,
+                StartInfo =
                 {
-                    EnableRaisingEvents = false,
-                    StartInfo =
-                    {
-                        FileName = "az",
-                        Arguments = command,
-                        UseShellExecute = false,
-                        RedirectStandardOutput = true,
-                        RedirectStandardError = true,
-                        CreateNoWindow = true
-                    }
-                };
-                p.Start();
-
-                while (!p.StandardOutput.EndOfStream)
-                {
-                    Result += p.StandardOutput.ReadToEnd();
+                    FileName = "az",
+                    Arguments = this.Command,
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true
                 }
+            };
+            p.Start();
 
-                var err = string.Empty;
-                while (!p.StandardError.EndOfStream)
-                {
-                    err += p.StandardError.ReadToEnd();
-                }
-                if (err.Length > 0)
-                {
-                    _log.Error($"{err} on {command}");
-                }
-
-                Report(new ReportItem { Handler = HandlerType.Azure.ToString(), Command = command, Result = Result });
-            }
-            catch (Exception exc)
+            while (!p.StandardOutput.EndOfStream)
             {
-                _log.Debug(exc);
+                this.Result += p.StandardOutput.ReadToEnd();
             }
+
+            var err = string.Empty;
+            while (!p.StandardError.EndOfStream)
+            {
+                err += p.StandardError.ReadToEnd();
+            }
+
+            if (err.Length > 0)
+            {
+                _log.Error($"{err} on {this.Command}");
+            }
+
+            Report(new ReportItem { Handler = nameof(HandlerType.Azure), Command = this.Command, Result = this.Result });
+        }
+        catch (Exception exc)
+        {
+            _log.Debug(exc);
         }
     }
 }

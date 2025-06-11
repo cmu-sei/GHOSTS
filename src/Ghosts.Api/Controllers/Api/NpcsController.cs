@@ -6,35 +6,28 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using FileHelpers;
-using ghosts.api.Areas.Animator.Infrastructure.Models;
-using ghosts.api.Infrastructure.Models;
-using ghosts.api.Infrastructure.Services;
+using Ghosts.Api.Areas.Animator.Infrastructure.Models;
+using Ghosts.Api.Infrastructure.Models;
+using Ghosts.Api.Infrastructure.Services;
 using Ghosts.Animator;
 using Ghosts.Animator.Extensions;
 using Ghosts.Animator.Models;
-using Ghosts.Api;
-using ghosts.api.Hubs;
-using Ghosts.Api.Infrastructure;
-using ghosts.api.Infrastructure.ContentServices.Ollama;
+using Ghosts.Api.Hubs;
 using Ghosts.Api.Infrastructure.Data;
-using ghosts.api.Infrastructure.Extensions;
+using Ghosts.Api.Infrastructure.Extensions;
 using Ghosts.Domain.Code;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using NLog;
-using OpenAI.ObjectModels.RequestModels;
 using Swashbuckle.AspNetCore.Annotations;
 using Swashbuckle.AspNetCore.Filters;
 
-namespace ghosts.api.Controllers.Api;
+namespace Ghosts.Api.Controllers.Api;
 
 [ApiController]
 [Produces("application/json")]
@@ -42,7 +35,8 @@ namespace ghosts.api.Controllers.Api;
 public class NpcsController(
     ApplicationDbContext context,
     INpcService service,
-    IHubContext<ActivityHub> activityHubContext) : ControllerBase
+    IHubContext<ActivityHub> activityHubContext,
+    IMachineUpdateService machineUpdateService) : ControllerBase
 {
     private static readonly Logger _log = LogManager.GetCurrentClassLogger();
 
@@ -336,7 +330,7 @@ public class NpcsController(
         }
 
         var s = new StringBuilder("users = {").Append(Environment.NewLine);
-        var list = await NpcsTeamGet(configuration.Campaign, configuration.Enclave, configuration.Team);
+        var list = (await NpcsTeamGet(configuration.Campaign, configuration.Enclave, configuration.Team)).ToList();
 
         var pool = configuration.GetIpPool();
         foreach (var item in pool)
@@ -381,7 +375,7 @@ public class NpcsController(
             i++;
         }
 
-        context.SaveChanges();
+        await context.SaveChangesAsync();
 
         return File(Encoding.UTF8.GetBytes
                 (s.ToString()), "text/tfvars", $"{Guid.NewGuid()}.tfvars");
@@ -482,52 +476,67 @@ public class NpcsController(
     }
 
     /// <summary>
-    /// Send AI driven instructions to the NPCs
+    /// Send AI-driven instructions to the NPCs
     /// </summary>
     /// <returns></returns>
     [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.OK)]
     [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(IActionResult))]
     [SwaggerOperation("NpcsAiCommand")]
     [HttpPost("command")]
-    public async Task<IActionResult> Command([FromBody] ActionRequest actionRequest, CancellationToken ct)
+    public async Task<IActionResult> Command([FromBody] AiModels.ActionRequest actionRequest, CancellationToken ct)
     {
         IEnumerable<NpcRecord> npcs = null;
         Random random = new Random();
-        var scale = actionRequest.scale;
+        var scale = actionRequest.Scale;
         if (scale > 1)
         {
             scale *= random.Next(1, 10);
-            npcs = context.Npcs.ToList().Shuffle(random).Take(scale);
+            npcs = (context.Npcs.ToList().Shuffle(random).Take(scale)).ToList();
         }
         else
         {
             try
             {
-                npcs = context.Npcs.Where(x => x.NpcProfile.Name.First.ToLower() == actionRequest.who.ToLower());
+                npcs = context.Npcs.Where(x => x.NpcProfile.Name.First.ToLower() == actionRequest.Who.ToLower());
             }
-            catch (Exception e)
+            catch
             {
                 //pass
             }
 
             if (npcs == null || !npcs.Any())
+            {
+                try
+                {
+                    npcs = context.Npcs.Where(x =>
+                        x.NpcSocialGraph.Name.ToLower().StartsWith(actionRequest.Who.ToLower()));
+                }
+                catch
+                {
+                    //pass
+                }
+            }
+
+            if (npcs == null || !npcs.Any())
+            {
                 npcs = context.Npcs.ToList().Shuffle(random).Take(1);
+            }
         }
 
         foreach (var npc in npcs)
         {
-            actionRequest = await GetSentiment(actionRequest);
+            //actionRequest = await GetSentiment(actionRequest);
 
             // clean up outliers
-            if (actionRequest.handler.Contains("word") || actionRequest.handler.Contains("docs"))
-                actionRequest.handler = "Word";
-            if (actionRequest.handler.Contains("browser"))
-                actionRequest.handler = random.NextDouble() < 0.8 ? "BrowserFirefox" : "BrowserChrome";
-            if (actionRequest.handler == "email")
-                actionRequest.handler = "Outlook";
+            if (actionRequest.Handler.ToLower().Contains("word") || actionRequest.Handler.ToLower().Contains("docs"))
+                actionRequest.Handler = "Word";
+            if (actionRequest.Handler.ToLower().Contains("browser"))
+                actionRequest.Handler = random.NextDouble() < 0.8 ? "BrowserFirefox" : "BrowserChrome";
+            if (actionRequest.Handler.ToLower().Contains("email"))
+                actionRequest.Handler = "Outlook";
 
             // now map
-            switch (actionRequest.handler.ToLower())
+            switch (actionRequest.Handler.ToLower())
             {
                 case "aws":
                 case "azure":
@@ -567,39 +576,9 @@ public class NpcsController(
         return NoContent();
     }
 
-    private readonly JsonSerializerOptions _jsonSerializerOptions = new()
+    private async Task ProcessUnhandledAction(NpcRecord npc, AiModels.ActionRequest actionRequest, CancellationToken ct)
     {
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-        WriteIndented = false
-    };
-
-    private async Task<ActionRequest> GetSentiment(ActionRequest actionRequest)
-    {
-        try
-        {
-            var client = new HttpClient();
-            var request = new HttpRequestMessage(HttpMethod.Post, "http://localhost:5005/moods");
-            var content =
-                new StringContent(
-                    "{\"text\": \"" + actionRequest.action + " because " + actionRequest.reasoning + "\"}", null,
-                    "application/json");
-            request.Content = content;
-            var response = await client.SendAsync(request);
-            response.EnsureSuccessStatusCode();
-            var o = JsonSerializer.Deserialize<SentimentResult>(await response.Content.ReadAsStringAsync(),
-                _jsonSerializerOptions);
-            actionRequest.sentiment = o.intent;
-        }
-        catch (Exception e)
-        {
-            actionRequest.sentiment = "neutral";
-        }
-        return actionRequest;
-    }
-
-    private async Task ProcessUnhandledAction(NpcRecord npc, ActionRequest actionRequest, CancellationToken ct)
-    {
-        actionRequest.sentiment ??= "neutral";
+        actionRequest.Sentiment ??= "neutral";
         await activityHubContext.Clients.All.SendAsync("show",
             "1",
             npc.Id,
@@ -609,33 +588,21 @@ public class NpcsController(
             cancellationToken: ct);
     }
 
-    private async Task ProcessHandledAction(NpcRecord npc, ActionRequest actionRequest, CancellationToken ct)
+    private async Task ProcessHandledAction(NpcRecord npc, AiModels.ActionRequest actionRequest, CancellationToken ct)
     {
-        actionRequest.sentiment ??= "neutral";
-        await activityHubContext.Clients.All.SendAsync("show",
-            "1",
-            npc.Id,
-            "activity",
-            actionRequest,
-            DateTime.Now.ToString(CultureInfo.InvariantCulture),
-            cancellationToken: ct);
-    }
+        // create and send timeline to machine that npc is associated with
+        var machineUpdate = await machineUpdateService.CreateByActionRequest(npc, actionRequest, ct);
 
-    public class ActionRequest
-    {
-        public string handler { get; set; }
-        public string action { get; set; }
-        public int scale { get; set; }
-        public string who { get; set; }
-        public string reasoning { get; set; }
-        public string sentiment { get; set; }
-        public string original { get; set; }
-    }
-
-    public class SentimentResult
-    {
-        public string intent { get; set; }
-        public decimal confidence { get; set; }
-        public object entities { get; set; }
+        if (machineUpdate != null)
+        {
+            actionRequest.Sentiment ??= "neutral";
+            await activityHubContext.Clients.All.SendAsync("show",
+                "1",
+                npc.Id,
+                "activity",
+                actionRequest,
+                DateTime.Now.ToString(CultureInfo.InvariantCulture),
+                cancellationToken: ct);
+        }
     }
 }

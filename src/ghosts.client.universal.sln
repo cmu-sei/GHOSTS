@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ghosts.Domain", "Ghosts.Domain\ghosts.domain.csproj", "{2667ECE7-34FA-456A-8877-BB9EEB40E9F7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ghosts.client.universal", "ghosts.client.universal\ghosts.client.universal.csproj", "{B30F73F8-B3CB-40B0-9814-AF631D19EEC7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ghosts.Client.Universal", "Ghosts.Client.Universal\Ghosts.Client.Universal.csproj", "{B30F73F8-B3CB-40B0-9814-AF631D19EEC7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

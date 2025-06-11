@@ -104,7 +104,7 @@ namespace Ghosts.Client.TimelineManager
 
         public void StopTimeline(Guid timelineId)
         {
-            foreach (var threadJob in Program.ThreadJobs.Where(x => x.TimelineId == timelineId))
+            foreach (var threadJob in Program.TaskJobs.Where(x => x.TimelineId == timelineId))
             {
                 try
                 {
@@ -128,7 +128,7 @@ namespace Ghosts.Client.TimelineManager
 
         public void Stop()
         {
-            foreach (var threadJob in Program.ThreadJobs)
+            foreach (var threadJob in Program.TaskJobs)
             {
                 try
                 {
@@ -524,7 +524,7 @@ namespace Ghosts.Client.TimelineManager
                 t.Start();
                 if (AddToThreadJobs)
                 {
-                    Program.ThreadJobs.Add(new ThreadJob
+                    Program.TaskJobs.Add(new TaskJob()
                     {
                         TimelineId = timeline.Id,
                         Thread = t

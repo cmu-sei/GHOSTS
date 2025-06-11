@@ -2,7 +2,7 @@
 
 using System;
 
-namespace ghosts.api.Infrastructure.Extensions;
+namespace Ghosts.Api.Infrastructure.Extensions;
 
 public static class DateTimeExtensions
 {

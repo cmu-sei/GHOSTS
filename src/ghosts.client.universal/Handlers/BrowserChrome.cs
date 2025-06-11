@@ -1,9 +1,9 @@
 // Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
-using System.IO;
 using System.Threading;
-using ghosts.client.universal.Infrastructure;
+using System.Threading.Tasks;
+using Ghosts.Client.Universal.Infrastructure;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
@@ -11,23 +11,23 @@ using Newtonsoft.Json.Linq;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 
-namespace ghosts.client.universal.handlers
-{
-    public class BrowserChrome : BaseBrowserHandler
+namespace Ghosts.Client.Universal.Handlers;
+
+    public class BrowserChrome(Timeline entireTimeline, TimelineHandler timelineHandler, CancellationToken cancellationToken)
+        : BaseBrowserHandler(entireTimeline, timelineHandler, cancellationToken)
     {
         public new IJavaScriptExecutor JS { get; private set; }
 
-        public BrowserChrome(TimelineHandler handler)
+        protected override Task RunOnce()
         {
-            Init(handler);
             BrowserType = HandlerType.BrowserChrome;
             try
             {
-                using (Driver = GetDriver(handler))
+                using (Driver = GetDriver(this.Handler))
                 {
                     base.Driver = Driver;
 
-                    if (handler.HandlerArgs.ContainsKey("javascript-enable"))
+                    if (this.Handler.HandlerArgs.ContainsKey("javascript-enable"))
                     {
                         JS = (IJavaScriptExecutor)Driver;
                         base.JS = JS;
@@ -35,22 +35,23 @@ namespace ghosts.client.universal.handlers
 
                     try
                     {
-                        Driver.Navigate().GoToUrl(handler.Initial);
+                        Driver.Navigate().GoToUrl(this.Handler.Initial);
                     }
                     catch
                     {
+                        //pass
                     }
 
-                    if (handler.Loop)
+                    if (this.Handler.Loop)
                     {
                         while (true)
                         {
-                            ExecuteEvents(handler);
+                            ExecuteEvents(this.Handler);
                         }
                     }
                     else
                     {
-                        ExecuteEvents(handler);
+                        ExecuteEvents(this.Handler);
                     }
                 }
             }
@@ -68,26 +69,34 @@ namespace ghosts.client.universal.handlers
                 {
                     Driver.Quit();
                 }
-                catch { }
+                catch
+                {
+                    //pass
+                }
 
                 try
                 {
                     Driver.Dispose();
                 }
-                catch { }
+                catch
+                {
+                    //pass
+                }
                 KillBrowser();
 
                 if (Restart)
                 {
-                    DoRestart(handler);
+                    DoRestart();
                 }
             }
+
+            return Task.CompletedTask;
         }
 
-        public virtual void DoRestart(TimelineHandler handler)
+        public virtual void DoRestart()
         {
             Thread.Sleep(2000);
-            _ = new BrowserChrome(handler);
+            _ = new BrowserChrome(this.Timeline, this.Handler, this.Token);
         }
 
         internal static IWebDriver GetDriver(TimelineHandler handler)
@@ -173,7 +182,7 @@ namespace ghosts.client.universal.handlers
                             options.AddUserProfilePreference("general.useragent.override", UserAgentManager.GetBrowserSpecific("chrome"));
                             break;
                         default:
-                            options.AddUserProfilePreference("general.useragent.override", handler.HandlerArgs["ua-string"].ToString());
+                            options.AddUserProfilePreference("general.useragent.override", handler.HandlerArgs["ua-string"].ToString() ?? string.Empty);
                             break;
                     }
                 }
@@ -224,4 +233,3 @@ namespace ghosts.client.universal.handlers
             return driver;
         }
     }
-}

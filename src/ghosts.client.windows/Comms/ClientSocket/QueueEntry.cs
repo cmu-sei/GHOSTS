@@ -10,7 +10,10 @@ public class QueueEntry
         Heartbeat,
         Message,
         MessageSpecific,
-        Timeline
+        Timeline,
+        Results,
+        Survey,
+        Updates
     }
 
     public object Payload { get; set; }

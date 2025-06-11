@@ -7,7 +7,7 @@ using FileHelpers;
 using Ghosts.Domain.Code;
 using NLog;
 
-namespace ghosts.client.universal.Infrastructure.Browser
+namespace Ghosts.Client.Universal.Infrastructure.Browser
 {
     /// <summary>
     /// The classes in this file assist with auto-generation of POST content

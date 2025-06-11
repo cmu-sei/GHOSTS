@@ -7,10 +7,10 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using ghosts.api.Hubs;
-using ghosts.api.Infrastructure.ContentServices;
-using ghosts.api.Infrastructure.Models;
-using ghosts.api.Infrastructure.Services;
+using Ghosts.Api.Hubs;
+using Ghosts.Api.Infrastructure.ContentServices;
+using Ghosts.Api.Infrastructure.Models;
+using Ghosts.Api.Infrastructure.Services;
 using Ghosts.Animator.Extensions;
 using Ghosts.Api.Infrastructure;
 using Ghosts.Api.Infrastructure.Data;
@@ -21,7 +21,7 @@ using Newtonsoft.Json;
 using NLog;
 using RestSharp;
 
-namespace ghosts.api.Infrastructure.Animations.AnimationDefinitions
+namespace Ghosts.Api.Infrastructure.Animations.AnimationDefinitions
 {
     public class SocialSharingJob
     {

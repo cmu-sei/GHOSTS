@@ -2,13 +2,13 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using ghosts.api.Infrastructure.Services;
+using Ghosts.Api.Infrastructure.Services.ClientServices;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using NLog;
 using Swashbuckle.AspNetCore.Annotations;
 
-namespace ghosts.api.Controllers.Api
+namespace Ghosts.Api.Controllers.Api
 {
     /// <summary>
     /// GHOSTS CLIENT CONTROLLER
@@ -17,10 +17,9 @@ namespace ghosts.api.Controllers.Api
     [ApiExplorerSettings(IgnoreApi = true)]
     [Produces("application/json")]
     [Route("api/[controller]")]
-    public class ClientIdController(IMachineService service) : Controller
+    public class ClientIdController(IClientIdService clientIdService) : Controller
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        private readonly IMachineService _service = service;
 
         /// <summary>
         /// Clients use this endpoint to get their unique GHOSTS system ID
@@ -31,24 +30,8 @@ namespace ghosts.api.Controllers.Api
         [HttpGet]
         public async Task<IActionResult> Index(CancellationToken ct)
         {
-            if (!Request.Headers.TryGetValue("ghosts-id", out var id))
-            {
-                id = string.Empty;
-            }
-
-            _log.Info($"Request by {id}");
-
-            var findMachineResponse = await _service.FindOrCreate(HttpContext, ct);
-            if (!findMachineResponse.IsValid())
-            {
-                _log.Error($"FindOrCreate failed for {id}: {findMachineResponse.Error}");
-                return StatusCode(StatusCodes.Status401Unauthorized, findMachineResponse.Error);
-            }
-
-            var machineId = findMachineResponse.Machine.Id;
-
-            //client saves this for future calls
-            return Ok(machineId);
+            var (success, machineId, error) = await clientIdService.GetMachineIdAsync(HttpContext, ct);
+            return success ? Ok(machineId) : StatusCode(StatusCodes.Status401Unauthorized, error);
         }
     }
 }

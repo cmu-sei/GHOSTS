@@ -4,15 +4,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using ghosts.api.Infrastructure.Models;
-using ghosts.api.Infrastructure.Services;
+using Ghosts.Api.Infrastructure.Models;
+using Ghosts.Api.Infrastructure.Services;
 using Ghosts.Api.Infrastructure.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
 using Swashbuckle.AspNetCore.Annotations;
 
-namespace ghosts.api.Controllers.Api
+namespace Ghosts.Api.Controllers.Api
 {
     [Produces("application/json")]
     [Route("api/[controller]")]
@@ -172,7 +172,7 @@ namespace ghosts.api.Controllers.Api
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-                //todo log this 
+                //todo log this
             }
             return NoContent();
         }

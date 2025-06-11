@@ -5,7 +5,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Threading;
+using System.Threading.Tasks;
 using Ghosts.Client.Infrastructure;
 using Ghosts.Client.TimelineManager;
 using Ghosts.Domain;
@@ -41,7 +43,7 @@ public static class Updates
         }).Start();
     }
 
-    private static void GetServerUpdates()
+    private static async Task GetServerUpdates()
     {
         if (!Program.Configuration.ClientUpdates.IsEnabled)
             return;
@@ -58,13 +60,13 @@ public static class Updates
             try
             {
                 var s = string.Empty;
-                using (var client = WebClientBuilder.Build(machine))
+                using (var client = HttpClientBuilder.Build(machine))
                 {
                     try
                     {
-                        using var reader =
-                            new StreamReader(client.OpenRead(Program.ConfigurationUrls.Updates));
-                        s = reader.ReadToEnd();
+                        using var stream = await client.GetStreamAsync(Program.ConfigurationUrls.Updates);
+                        using var reader = new StreamReader(stream);
+                        s = await reader.ReadToEndAsync();
                         _log.Debug($"{DateTime.Now} - Received new configuration");
                     }
                     catch (WebException wex)
@@ -149,7 +151,7 @@ public static class Updates
         }
     }
 
-    private static void PostCurrentTimeline(UpdateClientConfig update)
+    private static async Task PostCurrentTimeline(UpdateClientConfig update)
     {
         // is the config for a specific timeline id?
         var timelineId = TimelineUpdateClientConfigManager.GetConfigUpdateTimelineId(update);
@@ -196,10 +198,13 @@ public static class Updates
                 var payload = TimelineBuilder.TimelineToJsonPayload(timeline);
                 var machine = new ResultMachine();
 
-                using (var client = WebClientBuilder.Build(machine))
+                using (var client = HttpClientBuilder.Build(machine))
                 {
-                    client.Headers[HttpRequestHeader.ContentType] = "application/json";
-                    client.UploadString(postUrl, JsonConvert.SerializeObject(payload));
+                    var content = new StringContent(JsonConvert.SerializeObject(payload));
+                    content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+
+                    var response = await client.PostAsync(postUrl, content);
+                    response.EnsureSuccessStatusCode(); // throws if not 2xx
                 }
 
                 _log.Trace($"{DateTime.Now} - timeline posted to server successfully");
@@ -279,7 +284,7 @@ public static class Updates
         }
     }
 
-    private static void PostResults(string fileName, ResultMachine machine, string postUrl)
+    private static async Task PostResults(string fileName, ResultMachine machine, string postUrl)
     {
         var tempFile = ($"{fileName.Replace("clientupdates.log", Guid.NewGuid().ToString())}.log");
         if (fileName.EndsWith("clientupdates_not_posted.log"))
@@ -333,9 +338,14 @@ public static class Updates
                 payload = JsonConvert.SerializeObject(p);
             }
 
-            using var client = WebClientBuilder.Build(machine);
-            client.Headers[HttpRequestHeader.ContentType] = "application/json";
-            client.UploadString(postUrl, payload);
+            using (var client = HttpClientBuilder.Build(machine))
+            {
+                var content = new StringContent(JsonConvert.SerializeObject(payload));
+                content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+
+                var response = await client.PostAsync(postUrl, content);
+                response.EnsureSuccessStatusCode(); // throws if not 2xx
+            }
         }
         catch (Exception e)
         {
@@ -362,7 +372,7 @@ public static class Updates
         _log.Trace($"{DateTime.Now} - {fileName} posted to server successfully");
     }
 
-    internal static void PostSurvey()
+    internal static async Task PostSurvey()
     {
         // ignore all certs
         ServicePointManager.ServerCertificateValidationCallback += (_, _, _, _) => true;
@@ -404,10 +414,13 @@ public static class Updates
                 payload = JsonConvert.SerializeObject(p);
             }
 
-            using (var client = WebClientBuilder.Build(machine))
+            using (var client = HttpClientBuilder.Build(machine))
             {
-                client.Headers[HttpRequestHeader.ContentType] = "application/json";
-                client.UploadString(postUrl, payload);
+                var content = new StringContent(JsonConvert.SerializeObject(payload));
+                content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+
+                var response = await client.PostAsync(postUrl, content);
+                response.EnsureSuccessStatusCode(); // throws if not 2xx
             }
 
             _log.Trace($"{DateTime.Now} - survey posted to server successfully");

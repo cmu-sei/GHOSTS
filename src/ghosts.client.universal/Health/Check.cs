@@ -4,13 +4,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
-using ghosts.client.universal.Infrastructure;
+using Ghosts.Client.Universal.Infrastructure;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Newtonsoft.Json;
 using NLog;
 
-namespace ghosts.client.universal.Health
+namespace Ghosts.Client.Universal.Health
 {
     public class Check
     {

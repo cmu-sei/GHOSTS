@@ -4,7 +4,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ghosts.api.Infrastructure.Models
+namespace Ghosts.Api.Infrastructure.Models
 {
     [Table("trackables")]
     public class Trackable

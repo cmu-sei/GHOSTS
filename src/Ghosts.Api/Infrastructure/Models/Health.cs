@@ -4,9 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
-using Ghosts.Domain;
 
-namespace ghosts.api.Infrastructure.Models
+namespace Ghosts.Api.Infrastructure.Models
 {
     [Table("history_health")]
     public class HistoryHealth
@@ -80,7 +79,7 @@ namespace ghosts.api.Infrastructure.Models
                         break;
                 }
             }
-            catch (Exception e)
+            catch
             {
                 return "";
             }

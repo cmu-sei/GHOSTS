@@ -3,7 +3,7 @@
 using System.IO;
 using System.IO.Compression;
 
-namespace ghosts.api.Infrastructure.Extensions;
+namespace Ghosts.Api.Infrastructure.Extensions;
 
 public static class ZipExtensions
 {

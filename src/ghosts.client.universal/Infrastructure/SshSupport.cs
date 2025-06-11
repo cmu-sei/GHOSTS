@@ -4,15 +4,15 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using ghosts.client.universal.Infrastructure;
+using Ghosts.Client.Universal.Infrastructure;
 using NLog;
 using Renci.SshNet;
 
-namespace ghosts.client.universal.Infrastructure
+namespace Ghosts.Client.Universal.Infrastructure
 {
     /// <summary>
     /// This class provides SSH/SFTP support using Renci.SshNet
-    /// 
+    ///
     /// </summary>
     public partial class SshSupport : SshSftpSupport
     {
@@ -71,11 +71,11 @@ namespace ghosts.client.universal.Infrastructure
         ///  remotedirectory -- returns a random directory from the remote host
         ///  randomname -- generates a random ASCII lowercase string
         ///  randomextension -- selects a random extension from the set of random extensions
-        ///  
-        /// 
+        ///
+        ///
         /// This may require execution and parsing of an internal SSH command before returning
         /// the new command
-        /// </summary> 
+        /// </summary>
         /// <param name="cmd"></param>  - string parse for reserved words
         /// <returns></returns>
         private string ParseSshCmd(ShellStream client, string cmd)
@@ -102,7 +102,7 @@ namespace ghosts.client.universal.Infrastructure
 
         /// <summary>
         /// Method <c>GetSshCommandOutput</c> uses ShellStream to run a command because the channel model does not have any
-        /// shell context, ie. if you cd to a directory, the  next command still runs in the 
+        /// shell context, ie. if you cd to a directory, the  next command still runs in the
         /// home directory. This  implementation using SshStream just uses long timeouts
         /// to wait for data since for a traffic generator do not care about performance
         /// </summary>
@@ -195,7 +195,7 @@ namespace ghosts.client.universal.Infrastructure
         {
             var size = _random.Next(min, max);
             var builder = new StringBuilder(size);
-            const int lettersOffset = 26; // A...Z or a..z: length=26  
+            const int lettersOffset = 26; // A...Z or a..z: length=26
             char[] others = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
 
             for (var i = 0; i < size; i++)

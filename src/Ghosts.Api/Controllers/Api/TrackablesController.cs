@@ -3,11 +3,11 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using ghosts.api.Infrastructure.Services;
+using Ghosts.Api.Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
-namespace ghosts.api.Controllers.Api
+namespace Ghosts.Api.Controllers.Api
 {
     [Produces("application/json")]
     [Route("api/[controller]")]

@@ -7,7 +7,7 @@ using System.Text;
 using FileHelpers;
 using NLog;
 
-namespace ghosts.client.universal.Infrastructure.Browser;
+namespace Ghosts.Client.Universal.Infrastructure.Browser;
 
 public class BlogContentManager
 {

@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ghosts.client.universal.Comms.ClientSocket;
+namespace Ghosts.Client.Universal.Comms.ClientSocket;
 
 public class BackgroundTaskQueue
 {

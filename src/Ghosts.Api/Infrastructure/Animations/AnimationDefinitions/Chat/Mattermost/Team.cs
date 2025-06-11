@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 #pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
 
-namespace ghosts.api.Infrastructure.Animations.AnimationDefinitions.Chat.Mattermost;
+namespace Ghosts.Api.Infrastructure.Animations.AnimationDefinitions.Chat.Mattermost;
 
 public class Team
 {

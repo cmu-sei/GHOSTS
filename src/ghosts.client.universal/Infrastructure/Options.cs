@@ -2,7 +2,7 @@
 
 using CommandLine;
 
-namespace ghosts.client.universal.Infrastructure
+namespace Ghosts.Client.Universal.Infrastructure
 {
     /// <summary>
     /// Defines the flags you can send to the client

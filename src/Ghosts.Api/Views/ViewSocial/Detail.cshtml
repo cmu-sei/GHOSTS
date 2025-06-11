@@ -1,4 +1,4 @@
-@model ghosts.api.Infrastructure.Models.NpcSocialGraph
+@model Ghosts.Api.Infrastructure.Models.NpcSocialGraph
 
 @{
     string FormatClass(int x)
@@ -7,7 +7,7 @@
             return "darr";
         return x == 0 ? "harr" : "uarr";
     }
-    
+
     string FormatValue(int x)
     {
         if (x<0)
@@ -27,7 +27,7 @@
 <style>
     .darr {color: red;}
     .uarr {color: green;}
-    .harr {color: goldenrod;} 
+    .harr {color: goldenrod;}
     .bump {margin:0px 0px 20px 20px;}
 </style>
 <div class="container">
@@ -84,7 +84,7 @@
                         <li>Step @k.Step <span class="@Html.Raw(FormatClass(k.Value))">@k.Topic (@Html.Raw(v))</span></li>
                     }
                 </ul>
-                
+
             </ul>
         </div>
     </div>

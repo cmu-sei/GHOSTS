@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
 
-namespace ghosts.client.universal.Infrastructure.Email;
+namespace Ghosts.Client.Universal.Infrastructure.Email;
 
 public static class EmailListManager
 {

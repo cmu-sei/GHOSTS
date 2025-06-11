@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace ghosts.api.Infrastructure.Models;
+namespace Ghosts.Api.Infrastructure.Models;
 
 public class NpcSocialGraph
 {

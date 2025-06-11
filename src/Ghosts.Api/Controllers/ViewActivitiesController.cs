@@ -5,7 +5,7 @@ using System.Linq;
 using Ghosts.Api.Infrastructure.Data;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ghosts.api.Controllers;
+namespace Ghosts.Api.Controllers;
 
 [Controller]
 [Produces("application/json")]

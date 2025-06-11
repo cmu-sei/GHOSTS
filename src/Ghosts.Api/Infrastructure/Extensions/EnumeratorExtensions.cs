@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using NLog;
 
-namespace ghosts.api.Infrastructure.Extensions;
+namespace Ghosts.Api.Infrastructure.Extensions;
 
 public static class EnumeratorExtensions
 {

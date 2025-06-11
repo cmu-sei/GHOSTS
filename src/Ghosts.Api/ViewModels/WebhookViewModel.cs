@@ -1,11 +1,11 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
-using ghosts.api.Infrastructure.Models;
+using Ghosts.Api.Infrastructure.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace ghosts.api.ViewModels
+namespace Ghosts.Api.ViewModels
 {
     public class WebhookViewModel
     {

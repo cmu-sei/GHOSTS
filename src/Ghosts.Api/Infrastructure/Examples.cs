@@ -3,7 +3,7 @@
 using System;
 using System.IO;
 using System.Linq;
-using ghosts.api.Infrastructure.Models;
+using Ghosts.Api.Infrastructure.Models;
 using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
@@ -12,7 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Swashbuckle.AspNetCore.Filters;
 
-namespace ghosts.api.Infrastructure;
+namespace Ghosts.Api.Infrastructure;
 
 public class MachineUpdateExample(IServiceProvider serviceProvider) : IExamplesProvider<MachineUpdate>
 {
