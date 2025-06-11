@@ -1,7 +1,6 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -22,11 +21,11 @@ public class BrowserFirefox(Timeline timeline, TimelineHandler handler, Cancella
     public new IWebDriver Driver { get; private set; }
     public new IJavaScriptExecutor JS { get; private set; }
 
-    private static int GetFirefoxVersion(string path)
-    {
-        var versionInfo = FileVersionInfo.GetVersionInfo(path);
-        return versionInfo.FileMajorPart;
-    }
+    // private static int GetFirefoxVersion(string path)
+    // {
+    //     var versionInfo = FileVersionInfo.GetVersionInfo(path);
+    //     return versionInfo.FileMajorPart;
+    // }
 
     internal static string GetInstallLocation()
     {
@@ -75,6 +74,7 @@ public class BrowserFirefox(Timeline timeline, TimelineHandler handler, Cancella
         }
         catch
         {
+            //pass
         }
 
         //look for return button
@@ -86,6 +86,7 @@ public class BrowserFirefox(Timeline timeline, TimelineHandler handler, Cancella
         }
         catch
         {
+            //pass
         }
     }
 
@@ -151,6 +152,7 @@ public class BrowserFirefox(Timeline timeline, TimelineHandler handler, Cancella
             }
             catch
             {
+                //pass
             }
 
             try
@@ -159,6 +161,7 @@ public class BrowserFirefox(Timeline timeline, TimelineHandler handler, Cancella
             }
             catch
             {
+                //pass
             }
 
             KillBrowser();
@@ -265,7 +268,7 @@ public class BrowserFirefox(Timeline timeline, TimelineHandler handler, Cancella
                         break;
                     default:
                         options.SetPreference("general.useragent.override",
-                            handler.HandlerArgs["ua-string"].ToString());
+                            handler.HandlerArgs["ua-string"].ToString() ?? string.Empty);
                         break;
                 }
             }

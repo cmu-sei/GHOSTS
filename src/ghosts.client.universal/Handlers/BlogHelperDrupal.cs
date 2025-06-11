@@ -20,8 +20,6 @@ public class BlogHelperDrupal : BlogHelper
     /// Login into the Drupal site
     /// </summary>
     /// <param name="handler"></param>
-    /// <param name="baseHelper"></param>
-    /// <param name="header"></param>
     /// <param name="user"></param>
     /// <param name="pw"></param>
     /// <returns></returns>

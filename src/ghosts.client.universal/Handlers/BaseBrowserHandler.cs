@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Ghosts.Client.Universal.Infrastructure.Browser;
@@ -11,6 +12,7 @@ using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
 using OpenQA.Selenium;
+using OpenQA.Selenium.DevTools.V137.Security;
 using OpenQA.Selenium.Interactions;
 
 namespace Ghosts.Client.Universal.Handlers;
@@ -29,31 +31,29 @@ public abstract class BaseBrowserHandler(Timeline timeline, TimelineHandler hand
     private int _actionsBeforeRestart = -1;
     private LinkManager _linkManager;
     private int _actionsCount = 0;
-    public string BrowserProcessTag { get; set; } = null; //used for killing Linux browser processes
+    public string BrowserProcessTag { get; set; } //used for killing Linux browser processes
 
     public int BrowseProbability = 100;
-    public bool SharePointAbort { get; set; } = false; //will be set to True if unable to proceed with Handler execution
-    public bool BlogAbort { get; set; } = false; //will be set to True if unable to proceed with Handler execution
-    public bool OutlookAbort { get; set; } = false; //will be set to True if unable to proceed with Handler execution
+    public bool SharePointAbort { get; set; } //will be set to True if unable to proceed with Handler execution
+    public bool BlogAbort { get; set; } //will be set to True if unable to proceed with Handler execution
+    public bool OutlookAbort { get; set; } //will be set to True if unable to proceed with Handler execution
 
-    public bool SocialAbort { get; set; } = false; //will be set to True if unable to proceed with Handler execution
+    public bool SocialAbort { get; set; } //will be set to True if unable to proceed with Handler execution
 
-    private SharepointHelper _sharePointHelper = null;
+    private SharepointHelper _sharePointHelper;
 
-    private SocialHelper _socialHelper = null;
+    private SocialHelper _socialHelper;
 
-    private BlogHelper _blogHelper = null;
+    private BlogHelper _blogHelper;
 
-    private PostContentManager _postHelper = null;
+    private PostContentManager _postHelper;
 
-    private OutlookHelper _outlookHelper = null;
+    private OutlookHelper _outlookHelper;
 
-    private static Task LaunchThread(TimelineHandler handler, TimelineEvent timelineEvent, string site)
+    private Task LaunchThread(TimelineHandler handler, TimelineEvent timelineEvent, string site)
     {
-        throw new NotImplementedException();
-        //var o = new BrowserCrawl();
-        //return o.Crawl(handler, timelineEvent, site);
-        //return Task.CompletedTask;
+        var o = new BrowserCrawl(this.Timeline, handler, this.Token);
+        return o.Crawl(handler, timelineEvent, site);
     }
 
     public void ExecuteEvents(TimelineHandler handler)

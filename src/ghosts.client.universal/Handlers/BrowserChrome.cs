@@ -39,6 +39,7 @@ namespace Ghosts.Client.Universal.Handlers;
                     }
                     catch
                     {
+                        //pass
                     }
 
                     if (this.Handler.Loop)
@@ -68,13 +69,19 @@ namespace Ghosts.Client.Universal.Handlers;
                 {
                     Driver.Quit();
                 }
-                catch { }
+                catch
+                {
+                    //pass
+                }
 
                 try
                 {
                     Driver.Dispose();
                 }
-                catch { }
+                catch
+                {
+                    //pass
+                }
                 KillBrowser();
 
                 if (Restart)
@@ -175,7 +182,7 @@ namespace Ghosts.Client.Universal.Handlers;
                             options.AddUserProfilePreference("general.useragent.override", UserAgentManager.GetBrowserSpecific("chrome"));
                             break;
                         default:
-                            options.AddUserProfilePreference("general.useragent.override", handler.HandlerArgs["ua-string"].ToString());
+                            options.AddUserProfilePreference("general.useragent.override", handler.HandlerArgs["ua-string"].ToString() ?? string.Empty);
                             break;
                     }
                 }

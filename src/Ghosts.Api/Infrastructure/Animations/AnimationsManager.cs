@@ -254,13 +254,13 @@ public class AnimationsManager(IHubContext<ActivityHub> activityHubContext, ISer
                     _socialGraphJobThread = new Thread(() =>
                     {
                         Thread.CurrentThread.IsBackground = true;
-                        _ = new SocialGraphJob(settings, _scopeFactory, _random, _activityHubContext, _socialGraphJobCancellationTokenSource.Token).RunAsync(100);
+                        _ = new SocialGraphJob(settings, _scopeFactory, _activityHubContext, _socialGraphJobCancellationTokenSource.Token).RunAsync(100);
                     });
                     _socialGraphJobThread.Start();
                 }
                 else
                 {
-                    _ = new SocialGraphJob(settings, _scopeFactory, _random, _activityHubContext, _socialGraphJobCancellationTokenSource.Token);
+                    _ = new SocialGraphJob(settings, _scopeFactory, _activityHubContext, _socialGraphJobCancellationTokenSource.Token);
                 }
 
                 break;
@@ -365,13 +365,13 @@ public class AnimationsManager(IHubContext<ActivityHub> activityHubContext, ISer
                         AddJob("SOCIALGRAPH");
 
                         Thread.CurrentThread.IsBackground = true;
-                        _ = new SocialGraphJob(_configuration, _scopeFactory, _random, _activityHubContext, _socialGraphJobCancellationTokenSource.Token);
+                        _ = new SocialGraphJob(_configuration, _scopeFactory, _activityHubContext, _socialGraphJobCancellationTokenSource.Token);
                     });
                     _socialGraphJobThread.Start();
                 }
                 else
                 {
-                    _ = new SocialGraphJob(_configuration, _scopeFactory, _random, _activityHubContext, _socialGraphJobCancellationTokenSource.Token);
+                    _ = new SocialGraphJob(_configuration, _scopeFactory, _activityHubContext, _socialGraphJobCancellationTokenSource.Token);
                 }
             }
             else

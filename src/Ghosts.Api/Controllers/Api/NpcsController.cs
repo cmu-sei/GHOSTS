@@ -375,7 +375,7 @@ public class NpcsController(
             i++;
         }
 
-        context.SaveChanges();
+        await context.SaveChangesAsync();
 
         return File(Encoding.UTF8.GetBytes
                 (s.ToString()), "text/tfvars", $"{Guid.NewGuid()}.tfvars");
@@ -505,7 +505,22 @@ public class NpcsController(
             }
 
             if (npcs == null || !npcs.Any())
+            {
+                try
+                {
+                    npcs = context.Npcs.Where(x =>
+                        x.NpcSocialGraph.Name.ToLower().StartsWith(actionRequest.Who.ToLower()));
+                }
+                catch
+                {
+                    //pass
+                }
+            }
+
+            if (npcs == null || !npcs.Any())
+            {
                 npcs = context.Npcs.ToList().Shuffle(random).Take(1);
+            }
         }
 
         foreach (var npc in npcs)
