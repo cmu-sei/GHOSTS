@@ -55,16 +55,17 @@ namespace Ghosts.Api.Infrastructure.Services
         public async Task<FindMachineResponse> FindOrCreate(HttpContext httpContext, CancellationToken ct)
         {
             var machineResponse = new FindMachineResponse();
-            var m = WebRequestReader.GetMachine(httpContext);
+            var httpHeadersMachine = WebRequestReader.GetMachine(httpContext);
+            var m = httpHeadersMachine;
 
             if (m.Id == Guid.Empty)
             {
-                m = await FindByValue(WebRequestReader.GetMachine(httpContext), ct);
+                m = await FindByValue(httpHeadersMachine, ct);
             }
 
             if (m is null || !m.IsValid())
             {
-                m = WebRequestReader.GetMachine(httpContext);
+                m = httpHeadersMachine;
 
                 m.History.Add(new Machine.MachineHistoryItem { Type = Machine.MachineHistoryItem.HistoryType.Created });
                 await CreateAsync(m, ct);
@@ -84,6 +85,14 @@ namespace Ghosts.Api.Infrastructure.Services
             else
             {
                 machineResponse.Machine = m;
+
+                // if new version, update that info
+                if (!m.ClientVersion.Equals(httpHeadersMachine.ClientVersion))
+                {
+                    m.ClientVersion = httpHeadersMachine.ClientVersion;
+                    _context.Entry(m).State = EntityState.Modified;
+                    await _context.SaveChangesAsync(ct);
+                }
             }
 
             return machineResponse;
