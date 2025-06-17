@@ -1,0 +1,65 @@
+/*
+  The 'social' command for a browser handler allows posting to a Pandora Socializer site, this only works for Firefox. 
+  Windows and Linux clients are supported.
+  The handlerArgs for the social command are:
+        "social-post-probability": 100,   -  probability of posting during an activity cyle
+        "social-like-probability": 0,   -  probability of liking the first post in feed during an activity cyle
+        "social-browse-probability": 0, -  probability of browsing to the author of the first post in feed during an activity cyle
+        "social-addimage-probability": 100, - probability of adding an image to a post (if one is available)
+        "social-content-directory": "/opt/ghosts_data/social_content",  -  content directory containing post data
+        "social-use-unique-user": "True",  - if true use a unique user for each post. If false, after first user, all posts made by
+                                       by same user. The user chosen is the first name that appears on the suggested friends list
+        "social-version": "v1.0"  - always  this version for now
+        "social-topiclist": "topic,topic...,topic" - if supplied, a comma delimited list of keywords.  Available Post topic directories are pruned
+                      by these keywords, a post topic directory is used only if it contains one of these keywords.
+                      If no matches or a topiclist is not provided, then random choice of topic. 
+    
+    
+  Sum of post+like+browsing must be <= 100 
+  The CommandArgs are strings of the form "key:value", supported args are:
+    site:<blog site>   -- required
+    
+  The format of the social content directory is assumed as:
+   <social-content-directory>/ topicdirs(multiple) / postdirs (mulitple) / post.txt, image*.png
+
+  The post.txt is the text to post; if multiple image*.png (image0.png, image1.png, etc) then one is randomly chosen
+  A topicdir is chosen randomly, followed by random choice of a postdir.
+
+
+*/
+
+{
+  "Id": "97353363-25da-420b-b137-61ffd56b8c37",
+  "Status": "Run",
+  "TimeLineHandlers": [
+    {
+      "HandlerType": "BrowserFirefox",
+      "Initial": "about:blank",
+      "UtcTimeOn": "00:00:00",
+      "UtcTimeOff": "24.00:00:00",
+      "HandlerArgs": {
+        "isheadless": "false",
+        "delay-jitter": 50,
+        "social-post-probability": 100,
+        "social-like-probability": 0,
+        "social-browse-probability": 0,
+        "social-addimage-probability": 100,
+        "social-content-directory": "/opt/ghosts_data/social_content",
+        "social-use-unique-user": "True",
+        "social-version": "v1.0"
+      },
+      "Loop": true,
+      "TimeLineEvents": [
+        {
+          "Command": "social",
+          "CommandArgs": [
+            "site:http://www.tweeter.com"
+          ],
+          "DelayAfter": 30000,
+          "DelayBefore": 0
+        }
+      ],
+      "ScheduleType": "Other"
+    }
+  ]
+}

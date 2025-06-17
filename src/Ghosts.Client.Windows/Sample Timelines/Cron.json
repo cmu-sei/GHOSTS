@@ -1,0 +1,22 @@
+{
+    "Status": "Run",
+    "TimeLineHandlers": [
+      {
+        "HandlerType": "Command",
+        "Initial": "",
+        "UtcTimeOn": "00:00:00",
+        "UtcTimeOff": "24:00:00",
+        "Loop": true,
+        "ScheduleType": "Cron",
+        "Schedule": "* * * * * ? *",
+        "TimeLineEvents": [
+          {
+            "Command": "echo \"cron style job\"",
+            "CommandArgs": [ "arp -a" ],
+            "DelayAfter": 10,
+            "DelayBefore": 0
+          }
+        ]
+      }
+    ]
+}
