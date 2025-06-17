@@ -4,7 +4,7 @@ VisualStudioVersion = 17.5.33414.496
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ghosts.Domain", "Ghosts.Domain\Ghosts.Domain.csproj", "{2667ECE7-34FA-456A-8877-BB9EEB40E9F7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ghosts.Client", "ghosts.client.windows\Ghosts.Client.csproj", "{9B185127-C1A8-479C-B48F-3BC51B97023D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ghosts.Client", "Ghosts.Client.Windows\Ghosts.Client.csproj", "{9B185127-C1A8-479C-B48F-3BC51B97023D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

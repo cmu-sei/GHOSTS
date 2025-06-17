@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <RootNamespace>Ghosts.Animator</RootNamespace>
+        <AssemblyName>ghosts.animator</AssemblyName>
+
+        <AssemblyVersion>1.3.0.0</AssemblyVersion>
+        <FileVersion>1.3.0.0</FileVersion>
+
+        <Authors>GHOSTS Development Team @ Carnegie Mellon University</Authors>
+        <Company>Carnegie Mellon University</Company>
+        <Product>GHOSTS ANIMATOR</Product>
+        <Description>GHOSTS ANIMATOR - please email ddupdyke at sei.cmu.edu with bugs/requests/other</Description>
+        <Copyright>Carnegie Mellon University 2020</Copyright>
+        <NoWarn>NU1701</NoWarn>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+      <PackageReference Include="NLog" Version="5.3.4" />
+      <PackageReference Include="WeightedRandomizer" Version="2.0.1" />
+    </ItemGroup>
+</Project>

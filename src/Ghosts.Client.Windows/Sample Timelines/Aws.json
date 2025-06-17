@@ -1,0 +1,73 @@
+{
+  "Status": "Run",
+  "TimeLineHandlers": [
+    {
+      "HandlerType": "Aws",
+      "HandlerArgs": {
+        "bucket_1": "bucket-a-{guid}",
+        "bucket_2": "bucket-b-{guid}",
+        "local_file": "{random_file:~/Pictures/}",
+        "cloud_file": "{name}",
+        "cloud_file_2": "{name}"
+      },
+      "Initial": "",
+      "UtcTimeOn": "00:00:00",
+      "UtcTimeOff": "24:00:00",
+      "Loop": false,
+      "TimeLineEvents": [
+        {
+          "Command": "aws",
+          "CommandArgs": [
+            "--version",
+            "s3api create-bucket --bucket {bucket_1}",
+            "s3api create-bucket --bucket {bucket_2}",
+            "s3 cp {local_file} s3://{bucket_1}/{cloud_file}",
+            "s3 ls s3://{bucket_1}/",
+            "s3 cp s3://{bucket_1}/{cloud_file} ~/Downloads/.",
+            "s3 cp s3://{bucket_1}/{cloud_file} s3://{bucket_1}/{cloud_file_2}",
+            "s3 rm s3://{bucket_1}/{cloud_file}",
+            "s3api put-object-acl --bucket {bucket_1} --key {cloud_file} --acl public-read",
+            "s3 cp s3://{bucket_1}/{cloud_file_2} s3://{bucket_2}/{cloud_file}",
+            "s3 rm s3://{bucket_1}/{cloud_file}",
+            "s3api put-bucket-logging --bucket {bucket_1} --bucket-logging-status {}",
+            "s3 rm s3://{bucket_1} --recursive",
+            "s3 rm s3://{bucket_2} --recursive",
+            "s3api delete-bucket --bucket {bucket_1}",
+            "s3api delete-bucket --bucket {bucket_2}"
+          ],
+          "DelayAfter": 0,
+          "DelayBefore": 0
+        }
+      ]
+    },
+    {
+      "HandlerType": "Azure",
+      "Initial": "",
+      "UtcTimeOn": "00:00:00",
+      "UtcTimeOff": "24:00:00",
+      "Loop": false,
+      "TimeLineEvents": [
+        {
+          "Command": "azure",
+          "CommandArgs": [
+            "--version",
+            "storage container create --name bucket-a-a9bff98e-257a-456b-a0ac-d020834be709 --account-name <your-storage-account-name>",
+            "storage container create --name bucket-b-df44bb1d-ce39-451c-ae44-4d5073e5f30e --account-name <your-storage-account-name>",
+            "monitor diagnostic-settings create --name 'diag-bucket-a' --resource <resource-id-for-bucket-a> --logs '[{\"category\": \"StorageRead\", \"enabled\": true}, {\"category\": \"StorageWrite\", \"enabled\": true}]' --storage-account <your-storage-account-name>",
+            "storage blob upload --file /Users/ddupdyke/Pictures/tribute.gif --container-name bucket-a-a9bff98e-257a-456b-a0ac-d020834be709 --name tribute.gif --account-name <your-storage-account-name>",
+            "storage blob list --container-name bucket-a-a9bff98e-257a-456b-a0ac-d020834be709 --account-name <your-storage-account-name>",
+            "storage blob download --container-name bucket-a-a9bff98e-257a-456b-a0ac-d020834be709 --name tribute.png --file ~/Downloads/tribute.png --account-name <your-storage-account-name>",
+            "storage blob copy start --source-uri https://<your-storage-account-name>.blob.core.windows.net/bucket-a-a9bff98e-257a-456b-a0ac-d020834be709/tribute.gif --destination-container bucket-a-a9bff98e-257a-456b-a0ac-d020834be709 --destination-blob this-is-not-the-greatest-bucket-its-just-a-tribute.gif --account-name <your-storage-account-name>",
+            "storage blob delete --container-name bucket-a-a9bff98e-257a-456b-a0ac-d020834be709 --name tribute.gif --account-name <your-storage-account-name>",
+            "storage blob set-tier --container-name bucket-a-a9bff98e-257a-456b-a0ac-d020834be709 --name this-is-not-the-greatest-bucket-its-just-a-tribute.gif --tier Hot --account-name <your-storage-account-name>",
+            "storage blob copy start --source-uri https://<your-storage-account-name>.blob.core.windows.net/bucket-a-a9bff98e-257a-456b-a0ac-d020834be709/this-is-not-the-greatest-bucket-its-just-a-tribute.gif --destination-container bucket-b-df44bb1d-ce39-451c-ae44-4d5073e5f30e --destination-blob this-is-not-the-greatest-bucket-its-just-a-tribute.gif --account-name <your-storage-account-name>",
+            "storage blob delete --container-name bucket-a-a9bff98e-257a-456b-a0ac-d020834be709 --name this-is-not-the-greatest-bucket-its-just-a-tribute.gif --account-name <your-storage-account-name>",
+            "monitor diagnostic-settings delete --name 'diag-bucket-a' --resource <resource-id-for-bucket-a>"
+          ],
+          "DelayAfter": 0,
+          "DelayBefore": 0
+        }
+      ]
+    }
+  ]
+}
