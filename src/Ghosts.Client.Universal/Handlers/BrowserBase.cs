@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Ghosts.Client.Universal.Infrastructure.Browser;
@@ -12,12 +11,11 @@ using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
 using OpenQA.Selenium;
-using OpenQA.Selenium.DevTools.V137.Security;
 using OpenQA.Selenium.Interactions;
 
 namespace Ghosts.Client.Universal.Handlers;
 
-public abstract class BaseBrowserHandler(Timeline timeline, TimelineHandler handler, CancellationToken token)
+public abstract class BrowserBase(Timeline timeline, TimelineHandler handler, CancellationToken token)
     : BaseHandler(timeline, handler, token)
 {
     public IWebDriver Driver { get; set; }
