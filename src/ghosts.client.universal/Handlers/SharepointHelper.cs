@@ -22,7 +22,7 @@ namespace Ghosts.Client.Universal.Handlers;
 /// </summary>
 public class SharepointHelper2013_2019 : SharepointHelper
 {
-    public SharepointHelper2013_2019(BrowserBase callingHandler, IWebDriver callingDriver, string aversion)
+    public SharepointHelper2013_2019(BaseBrowserHandler callingHandler, IWebDriver callingDriver, string aversion)
     {
         base.Init(callingHandler, callingDriver, aversion);
     }
@@ -365,7 +365,7 @@ public abstract partial class SharepointHelper : BrowserHelper
     public string uploadDirectory { get; set; } = null;
 
 
-    public static SharepointHelper MakeHelper(BrowserBase callingHandler, IWebDriver callingDriver,
+    public static SharepointHelper MakeHelper(BaseBrowserHandler callingHandler, IWebDriver callingDriver,
         TimelineHandler handler, Logger tlog)
     {
         SharepointHelper helper = null;
@@ -398,7 +398,7 @@ public abstract partial class SharepointHelper : BrowserHelper
     }
 
 
-    public void Init(BrowserBase callingHandler, IWebDriver currentDriver, string aversion)
+    public void Init(BaseBrowserHandler callingHandler, IWebDriver currentDriver, string aversion)
     {
         baseHandler = callingHandler;
         Driver = currentDriver;

@@ -16,7 +16,7 @@ using OpenQA.Selenium.Firefox;
 namespace Ghosts.Client.Universal.Handlers;
 
 public class BrowserFirefox(Timeline timeline, TimelineHandler handler, CancellationToken token)
-    : BrowserBase(timeline, handler, token)
+    : BaseBrowserHandler(timeline, handler, token)
 {
     public new IWebDriver Driver { get; private set; }
     public new IJavaScriptExecutor JS { get; private set; }

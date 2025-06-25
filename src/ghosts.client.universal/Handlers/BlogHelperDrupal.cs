@@ -11,7 +11,7 @@ namespace Ghosts.Client.Universal.Handlers;
 
 public class BlogHelperDrupal : BlogHelper
 {
-    public BlogHelperDrupal(BrowserBase callingHandler, IWebDriver callingDriver)
+    public BlogHelperDrupal(BaseBrowserHandler callingHandler, IWebDriver callingDriver)
     {
         base.Init(callingHandler, callingDriver);
     }

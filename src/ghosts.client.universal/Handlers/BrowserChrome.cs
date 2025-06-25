@@ -14,7 +14,7 @@ using OpenQA.Selenium.Chrome;
 namespace Ghosts.Client.Universal.Handlers;
 
     public class BrowserChrome(Timeline entireTimeline, TimelineHandler timelineHandler, CancellationToken cancellationToken)
-        : BrowserBase(entireTimeline, timelineHandler, cancellationToken)
+        : BaseBrowserHandler(entireTimeline, timelineHandler, cancellationToken)
     {
         public new IJavaScriptExecutor JS { get; private set; }
 
