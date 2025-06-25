@@ -32,7 +32,7 @@ public abstract partial class BlogHelper : BrowserHelper
     public BlogContentManager contentManager = null;
 
 
-    public static BlogHelper MakeHelper(BaseBrowserHandler callingHandler, IWebDriver callingDriver,
+    public static BlogHelper MakeHelper(BrowserBase callingHandler, IWebDriver callingDriver,
         TimelineHandler handler, Logger tlog)
     {
         BlogHelper helper = null;
@@ -57,7 +57,7 @@ public abstract partial class BlogHelper : BrowserHelper
         return helper;
     }
 
-    public void Init(BaseBrowserHandler parent, IWebDriver currentDriver)
+    public void Init(BrowserBase parent, IWebDriver currentDriver)
     {
         baseHandler = parent;
         contentManager = new BlogContentManager();

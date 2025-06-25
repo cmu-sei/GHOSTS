@@ -15,7 +15,7 @@ public abstract class BrowserHelper
 {
     public static readonly Logger Log = LogManager.GetCurrentClassLogger();
     internal static readonly Random _random = new();
-    public BaseBrowserHandler baseHandler = null;
+    public BrowserBase baseHandler = null;
     public IWebDriver Driver = null;
 
 

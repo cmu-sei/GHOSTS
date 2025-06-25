@@ -27,7 +27,7 @@ namespace Ghosts.Client.Universal.Handlers;
 /// </summary>
 public class OutlookHelper2013 : OutlookHelper
 {
-    public OutlookHelper2013(BaseBrowserHandler callingHandler, IWebDriver callingDriver, string aversion)
+    public OutlookHelper2013(BrowserBase callingHandler, IWebDriver callingDriver, string aversion)
     {
         base.Init(callingHandler, callingDriver, aversion);
     }
@@ -36,7 +36,7 @@ public class OutlookHelper2013 : OutlookHelper
 // This is used for Exchange Server 2016 also
 public class OutlookHelper2019 : OutlookHelper
 {
-    public OutlookHelper2019(BaseBrowserHandler callingHandler, IWebDriver callingDriver, string aversion)
+    public OutlookHelper2019(BrowserBase callingHandler, IWebDriver callingDriver, string aversion)
     {
         base.Init(callingHandler, callingDriver, aversion);
         NewMailXpath = "//span[text()='New']//parent::span//parent::button";
@@ -234,7 +234,7 @@ public abstract class OutlookHelper : BrowserHelper
     }
 
 
-    public static OutlookHelper MakeHelper(BaseBrowserHandler callingHandler, IWebDriver callingDriver,
+    public static OutlookHelper MakeHelper(BrowserBase callingHandler, IWebDriver callingDriver,
         TimelineHandler handler, Logger tlog)
     {
         OutlookHelper helper = null;
@@ -266,7 +266,7 @@ public abstract class OutlookHelper : BrowserHelper
     }
 
 
-    public void Init(BaseBrowserHandler callingHandler, IWebDriver currentDriver, string aversion)
+    public void Init(BrowserBase callingHandler, IWebDriver currentDriver, string aversion)
     {
         baseHandler = callingHandler;
         Driver = currentDriver;

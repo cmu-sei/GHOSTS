@@ -23,7 +23,7 @@ namespace Ghosts.Client.Universal.Handlers;
 /// </summary>
 public class SocialHelperV1 : SocialHelper
 {
-    public SocialHelperV1(BaseBrowserHandler callingHandler, IWebDriver callingDriver, string aversion)
+    public SocialHelperV1(BrowserBase callingHandler, IWebDriver callingDriver, string aversion)
     {
         base.Init(callingHandler, callingDriver, aversion);
     }
@@ -244,7 +244,7 @@ public abstract partial class SocialHelper : BrowserHelper
     }
 
 
-    public static SocialHelper MakeHelper(BaseBrowserHandler callingHandler, IWebDriver callingDriver,
+    public static SocialHelper MakeHelper(BrowserBase callingHandler, IWebDriver callingDriver,
         TimelineHandler handler, Logger tlog)
     {
         SocialHelper helper = new SocialHelperV1(callingHandler, callingDriver, "1.0");
@@ -257,7 +257,7 @@ public abstract partial class SocialHelper : BrowserHelper
     }
 
 
-    public void Init(BaseBrowserHandler callingHandler, IWebDriver currentDriver, string aversion)
+    public void Init(BrowserBase callingHandler, IWebDriver currentDriver, string aversion)
     {
         baseHandler = callingHandler;
         Driver = currentDriver;

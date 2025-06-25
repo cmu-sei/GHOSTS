@@ -90,7 +90,7 @@ public class SocialGraphJob
             var interactCount = _random.Value.NextDouble().GetNumberByDecreasingWeights(0, graph.Connections.Count, 0.4);
             var targets = graph.Connections.RandPick(interactCount);
 
-            // if no one knows anyone, its hard to get started, so "meet someone at the coffee counter"
+            // if no one knows anyone, It's hard to get started, so "meet someone at the coffee counter"
             if(!targets.Any())
                 targets = GetSocialConnectionFromNpc(context.Npcs.RandPick(1).FirstOrDefault());
 
@@ -113,6 +113,21 @@ public class SocialGraphJob
                         await _hub.Clients.All.SendAsync("show", graph.CurrentStep, target.Id, "relationship",
                             $"{npc.NpcProfile.Name} improved relationship with {target.Name}",
                             DateTime.Now.ToString(CultureInfo.InvariantCulture), _token);
+                    }
+                    else
+                    {
+                        var newConnection = context.Npcs.FirstOrDefault(c => c.Id == learning.From);
+                        if (newConnection != null)
+                        {
+                            graph.Connections.Add(new NpcSocialGraph.SocialConnection()
+                            {
+                                Id = newConnection.Id, Name = newConnection.NpcProfile.Name.ToString()
+                            });
+                            await Task.Delay(1500, _token);
+                            await _hub.Clients.All.SendAsync("show", graph.CurrentStep, target.Id, "relationship",
+                                $"{npc.NpcProfile.Name} improved relationship with {target.Name}",
+                                DateTime.Now.ToString(CultureInfo.InvariantCulture), _token);
+                        }
                     }
                 }
             }
