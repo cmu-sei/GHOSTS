@@ -1,115 +1,84 @@
 import random
+from fastapi import APIRouter, Request, Response
 
 from app_logging import setup_logger
-from config.config import IMAGE_MODEL, OLLAMA_ENABLED
-from fastapi import APIRouter, Response
-from utils.helper import generate_image_response
+from config.config import IMAGE_MODEL, OLLAMA_ENABLED, STORE_RESULTS
 from utils.ollama import generate_document_with_ollama
 from utils.text2image import generate_image_with_diffusers
+from utils.helper import generate_image_response
+from utils.content_manager import ContentManager
 
-# Setup logger
+router = APIRouter()
 logger = setup_logger(__name__)
 
-# Initialize FastAPI router
-router = APIRouter()
+
+def generate_prompt(input_text: str) -> str:
+    base = input_text.split(".")[0]
+    prompt = (
+        f"Based on the following text '{base}', create a detailed prompt for generating a high-quality image. "
+        "Include artistic elements such as lighting, composition, mood, and style. No more than 50 words. "
+        "Return only the prompt."
+    )
+    result = generate_document_with_ollama(prompt, IMAGE_MODEL)
+    if result:
+        logger.info(f"Enhanced image prompt: {result[:50]}...")
+        return result[:50]
+    logger.warning("Failed to generate enhanced prompt, using raw input.")
+    return input_text
 
 
-# Helper function to generate and return an image
-def generate_image_from_prompt(prompt: str, request_type: str) -> Response:
-    """Generate an image based on the prompt and return it as a Response."""
+def generate_image(prompt: str, ext: str, cm: ContentManager) -> Response:
     logger.info(f"Generating image with prompt: {prompt}")
 
-    # Generate the image using the diffusers model
-    image_data = generate_image_with_diffusers(prompt, image_format=request_type)
-    if image_data:
-        # Ensure we seek to the start of the image_bytes before returning it
-        image_data.seek(0)
-        return Response(content=image_data.read(), media_type=f"image/{request_type}")
+    if cm.is_storing():
+        if content := cm.load():
+            return Response(content=content, media_type=f"image/{ext}")
 
-    logger.warning(
-        "Failed to generate image, falling back to default image generation."
-    )
-    # Fallback to default image generation if it fails
-    return generate_image_response(request_type)
+    image = generate_image_with_diffusers(prompt, image_format=ext)
+    if image:
+        image.seek(0)
+        content = image.read()
 
+        if cm.is_storing():
+            cm.save(content)
 
-# Helper function to generate an enhanced prompt using Ollama
-def generate_enhanced_prompt(input_text: str) -> str:
-    """Generate a detailed, creative, and visually rich prompt using Ollama."""
-    stripped_input_text = input_text.split(".")[0]
-    image_prompt = f"Based on the following text '{stripped_input_text}', create a detailed and prompt for generating a high-quality images. The generated prompt should provide more context to the subject given and artistic elements such as lighting, composition, mood, and style. No more than 50 words. Return only the prompt no other commentary"
+        return Response(content=content, media_type=f"image/{ext}")
 
-    # Generate the detailed prompt from Ollama
-    ollama_image_prompt = generate_document_with_ollama(image_prompt, IMAGE_MODEL)
-    if ollama_image_prompt:
-        logger.info(
-            f"Enhanced image prompt generated: {ollama_image_prompt[:50]}..."
-        )  # Log the first 50 characters for brevity
-        return ollama_image_prompt[:50]  # Return only the first 50 characters
-    else:
-        logger.warning(
-            "Failed to generate enhanced prompt, falling back to basic input."
-        )
-        return input_text  # Return the input text as-is if Ollama fails
+    logger.warning("Diffuser model failed. Falling back.")
+    return generate_image_response(ext)
 
 
-# Endpoint to return a random image
-@router.get("/i", tags=["Image"])
-@router.post("/i", tags=["Image"])
-@router.get("/img", tags=["Image"])
-@router.post("/img", tags=["Image"])
-@router.get("/images", tags=["Image"])
-@router.post("/images", tags=["Image"])
-def return_random_image() -> Response:
-    """Generate and return a random image if enabled."""
-    request_type = random.choice(["jpg", "png", "gif"])
+def resolve_image_type(path: str = None) -> str:
+    ext = (path.split(".")[-1].lower() if path and "." in path else random.choice(["jpg", "png", "gif"]))
+    if ext not in ["jpg", "png", "gif"]:
+        logger.warning(f"Unsupported image type: {ext}. Defaulting to jpg.")
+        return "jpg"
+    return ext
+
+
+def return_random_image(request: Request) -> Response:
+    cm = ContentManager(default="random", extension="jpg" if not OLLAMA_ENABLED else "png")
+    cm.resolve(request)
+
+    ext = cm.extension
+    prompt = "A random image that would make someone laugh"
 
     if OLLAMA_ENABLED:
-        prompt = "A random image that would make someone laugh"
-        logger.info(f"Requesting image prompt generation with prompt: {prompt}")
-
-        # Generate the enhanced prompt using Ollama
-        enhanced_prompt = generate_enhanced_prompt(prompt)
-
-        # Generate and return the image based on the enhanced prompt
-        return generate_image_from_prompt(enhanced_prompt, request_type)
-
-    # Fallback to default image generation if Ollama is not enabled or fails
-    return generate_image_response(request_type)
+        return generate_image(generate_prompt(prompt), ext, cm)
+    return generate_image_response(ext)
 
 
-# Endpoint to return an image based on a dynamic path
-@router.get("/i/{path:path}", tags=["Image"])
-@router.post("/i/{path:path}", tags=["Image"])
-@router.get("/img/{path:path}", tags=["Image"])
-@router.post("/img/{path:path}", tags=["Image"])
-@router.get("/images/{path:path}", tags=["Image"])
-@router.post("/images/{path:path}", tags=["Image"])
-def return_image(path: str) -> Response:
-    """Generate and return an image based on the request path, if enabled."""
-    request_type = (
-        path.split(".")[-1].upper()
-        if "." in path
-        else random.choice(["JPEG", "PNG", "GIF"])
-    )
-
-    # Validate the requested image type
-    if request_type not in ["JPEG", "PNG", "GIF"]:
-        logger.warning(
-            f"Invalid image type requested: {request_type}. Defaulting to JPEG."
-        )
-        request_type = "JPEG"
-
-    logger.info(f"Received request to generate image of type: {request_type}")
+def return_image(request: Request) -> Response:
+    ext = resolve_image_type(request.url.path)
+    cm = ContentManager(default="index", extension=ext)
+    cm.resolve(request)
 
     if OLLAMA_ENABLED:
-        logger.info(f"Requesting image prompt generation with prompt: {path}")
+        return generate_image(generate_prompt(cm.full_path), ext, cm)
+    return generate_image_response(ext)
 
-        # Generate the enhanced prompt using Ollama
-        # enhanced_prompt = generate_enhanced_prompt(path)
 
-        # Generate and return the image based on the enhanced prompt
-        return generate_image_from_prompt(path, request_type)
-
-    # Fallback to default image generation if Ollama is not enabled or fails
-    return generate_image_response(request_type)
+ROUTES = ["/i", "/img", "/images"]
+for route in ROUTES:
+    router.add_api_route(f"{route}", return_random_image, methods=["GET", "POST"], tags=["Image"])
+    router.add_api_route(f"{route}/{{path:path}}", return_image, methods=["GET", "POST"], tags=["Image"])

@@ -1,122 +1,84 @@
 from io import BytesIO
-
-from app_logging import setup_logger
-from config.config import OLLAMA_ENABLED, PPT_MODEL
-from faker import Faker
-from fastapi import APIRouter, Response
+from fastapi import APIRouter, Request, Response
 from pptx import Presentation
-from utils.helper import generate_random_name
+from faker import Faker
+
+from config.config import OLLAMA_ENABLED, PPT_MODEL
 from utils.ollama import generate_document_with_ollama
+from utils.content_manager import ContentManager
+from app_logging import setup_logger
 
 router = APIRouter()
-fake = Faker()
 logger = setup_logger(__name__)
+fake = Faker()
+cm = ContentManager(default="index", extension="pptx")
 
 
 def split_content_to_bullets(content: str) -> str:
-    """Split content into bullet points if it exceeds a certain length."""
-    max_length = 200  # Set a maximum length for content per bullet
-    bullets = content.split(". ")  # Split by sentences
-    formatted_content = []
-
-    for bullet in bullets:
-        if len(bullet) > max_length:
-            # Truncate if necessary and add an ellipsis
-            bullet = bullet[:max_length].rstrip() + "..."
-        formatted_content.append(f"• {bullet.strip()}")
-
-    return "\n".join(formatted_content)
+    bullets = content.split(". ")
+    return "\n".join(f"• {b[:200].rstrip()}..." if len(b) > 200 else f"• {b.strip()}" for b in bullets)
 
 
-@router.get("/slides", response_class=Response, tags=["Presentations"])
-@router.post("/slides", tags=["Presentations"])
-@router.get("/ppt", tags=["Presentations"])
-@router.post("/ppt", tags=["Presentations"])
-@router.get("/ppt/{file_name}", tags=["Presentations"])
-@router.post("/ppt/{file_name}", tags=["Presentations"])
-def return_ppt(file_name: str = None) -> Response:
-    """Return a PowerPoint presentation with random content."""
-    logger.info("PowerPoint generation request received.")
+def return_ppt(request: Request) -> Response:
+    cm.resolve(request)
 
-    if file_name is None:
-        file_name = generate_random_name(".pptx")  # Use random name generation
-        logger.info("Generated random file name: %s", file_name)
+    if cm.is_storing():
+        if content := cm.load():
+            return Response(
+                content=content,
+                media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                headers={"Content-Disposition": f"attachment; filename={cm.file_name}"},
+            )
 
-    try:
-        presentation = Presentation()
+    presentation = Presentation()
+    title = fake.sentence()
+    content = fake.paragraph(nb_sentences=3)
 
-        # Prepare prompts for slide content
-        title_prompt = "Provide just the title for a PowerPoint slide."
-        content_prompt = f"Provide just the content for a PowerPoint presentation slide with the title {title_prompt}"
+    if OLLAMA_ENABLED:
+        try:
+            t = generate_document_with_ollama("Provide just the title for a PowerPoint slide.", PPT_MODEL)
+            title = t or title
+        except Exception as e:
+            logger.warning(f"Ollama title gen failed: {e}")
 
-        title = fake.sentence()  # Default to Faker title
-        content = fake.paragraph(nb_sentences=3)  # Default to Faker content
+        try:
+            c = generate_document_with_ollama(
+                f"Provide just the content for a PowerPoint presentation slide with the title {title}", PPT_MODEL
+            )
+            content = c or content
+        except Exception as e:
+            logger.warning(f"Ollama content gen failed: {e}")
 
-        if OLLAMA_ENABLED:
-            logger.info("Generating title using Ollama.")
-            try:
-                title = generate_document_with_ollama(title_prompt, PPT_MODEL) or title
-                logger.info("Generated title: %s", title)
-            except Exception as e:
-                logger.warning(
-                    "Ollama call for title failed: %s. Falling back to Faker.", str(e)
-                )
+    bullets = split_content_to_bullets(content)
 
-            logger.info("Generating content using Ollama.")
-            try:
-                content = (
-                    generate_document_with_ollama(content_prompt, PPT_MODEL) or content
-                )
-                logger.info("Generated content: %s", content)
-            except Exception as e:
-                logger.warning(
-                    "Ollama call for content failed: %s. Falling back to Faker.", str(e)
-                )
+    # Title Slide
+    title_slide = presentation.slides.add_slide(presentation.slide_layouts[0])
+    title_slide.shapes.title.text = title
+    title_slide.placeholders[1].text = fake.sentence()
 
-        # Split and format the content into bullet points
-        formatted_content = split_content_to_bullets(content)
+    # Content Slide
+    content_slide = presentation.slides.add_slide(presentation.slide_layouts[1])
+    content_slide.shapes.title.text = title
+    content_slide.placeholders[1].text = bullets
 
-        # Add a title slide
-        slide_layout = presentation.slide_layouts[0]  # 0 is the layout for title slide
-        slide = presentation.slides.add_slide(slide_layout)
-        title_shape = slide.shapes.title
-        subtitle_shape = slide.placeholders[1]
-        title_shape.text = title
-        subtitle_shape.text = fake.sentence()  # Keep subtitle from Faker for variety
-        logger.debug(
-            "Added title slide with title: %s and subtitle: %s",
-            title_shape.text,
-            subtitle_shape.text,
-        )
+    buf = BytesIO()
+    presentation.save(buf)
+    buf.seek(0)
 
-        # Add a content slide
-        slide_layout = presentation.slide_layouts[
-            1
-        ]  # 1 is the layout for content slide
-        slide = presentation.slides.add_slide(slide_layout)
-        title_shape = slide.shapes.title
-        content_shape = slide.placeholders[1]
-        title_shape.text = title  # Reusing title for content slide for demonstration
-        content_shape.text = formatted_content  # Set formatted content as text
-        logger.debug("Added content slide with title: %s", title_shape.text)
+    if cm.is_storing():
+        cm.save(buf.getvalue())
 
-        # Save the presentation to a BytesIO buffer
-        buf = BytesIO()
-        presentation.save(buf)
-        buf.seek(0)  # Reset the buffer's position to the beginning
+    logger.info(f"PowerPoint file generated: {cm.file_name}")
 
-        response = Response(
-            content=buf.getvalue(),
-            media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
-        )
-        response.headers["Content-Disposition"] = f"attachment; filename={file_name}"
+    return Response(
+        content=buf.getvalue(),
+        media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        headers={"Content-Disposition": f"attachment; filename={cm.file_name}"},
+    )
 
-        logger.info("PowerPoint file generated successfully: %s", file_name)
-        return response
 
-    except Exception as e:
-        logger.error("Error while generating PowerPoint: %s", str(e))
-        return Response(
-            content="An error occurred while generating the PowerPoint presentation.",
-            status_code=500,
-        )
+# Register routes
+ROUTES = ["/ppt", "/slides"]
+for route in ROUTES:
+    router.add_api_route(f"{route}", return_ppt, methods=["GET", "POST"], tags=["Presentations"])
+    router.add_api_route(f"{route}/{{file_name:path}}", return_ppt, methods=["GET", "POST"], tags=["Presentations"])

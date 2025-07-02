@@ -19,12 +19,12 @@ if not config.read(config_path):
 
 
 @router.get("/payloads/{path_name:path}", tags=["Payloads"])
-async def return_payloads(path_name: str, request: Request) -> Response:
+async def return_payloads(request: Request) -> Response:
     """
     Serve predefined payloads based on the requested path.
     Payload configurations are read from the app.config file.
     """
-    logger.info(f"Received request for payloads at path: {path_name}")
+    logger.info(f"Received request for payloads at path: {request.url.path}")
 
     # Validate configuration section
     if CONFIG_SECTION not in config:
@@ -45,13 +45,13 @@ async def return_payloads(path_name: str, request: Request) -> Response:
             logger.warning(f"Invalid payload format for key={key}: {payload}")
             continue
 
-        if path_name.startswith(payload_url):
+        if request.url.path.startswith(payload_url):
             matched_payload = (payload_file, payload_header)
             break
 
     # Handle unmatched paths
     if not matched_payload:
-        logger.warning(f"No payload match found for path: {path_name}")
+        logger.warning(f"No payload match found for path: {request.url.path}")
         raise HTTPException(status_code=404, detail="Payload not found.")
 
     payload_file, payload_header = matched_payload

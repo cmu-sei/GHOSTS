@@ -1,15 +1,20 @@
+PANDORA_VERSION = "0.7.0"
+
 # Define log directory and file
-LOG_DIR = "logs"
+LOG_DIR = "_logs"
 LOG_FILE = "app.log"
 LOG_LEVEL = "DEBUG"
 FILE_LOGGING = True
 LOG_JSON_FORMATTING = "%(asctime)s %(name)s %(levelname)s %(message)s"
 
+# storage configuration
+STORE_RESULTS = True
+
 # AI Configuration
 OLLAMA_ENABLED = True
-OLLAMA_API_URL = "http://ollama:11434/api/generate"
+OLLAMA_API_URL = "http://host.docker.internal:11434/api/generate"
 OLLAMA_TIMEOUT = 60
-HTML_MODEL = "web_content"
+HTML_MODEL = "llama3.2:3b"
 IMAGE_MODEL = "llama3.2"
 JSON_MODEL = "llama3.2"
 PPT_MODEL = "llama3.2"
@@ -69,7 +74,7 @@ allowed_extensions = [
 OPENAPI_METADATA = {
     "title": "GHOSTS PANDORA API",
     "description": "This is the API for the GHOSTS PANDORA server, designed to serve a variety of file types dynamically and support video streaming.",
-    "version": "0.6.0",
+    "version": PANDORA_VERSION,
     "contact": {
         "name": "Carnegie Mellon University",
         "url": "https://www.cmu.edu",

@@ -1,51 +1,47 @@
 from io import BytesIO
 
-from app_logging import setup_logger
-from faker import Faker
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 from fastapi.responses import StreamingResponse
-from utils.helper import generate_random_name
+from faker import Faker
+
+from app_logging import setup_logger
+from utils.content_manager import ContentManager
 
 router = APIRouter()
 fake = Faker()
-
 logger = setup_logger(__name__)
 
 
-@router.get("/iso", tags=["Files"])
-@router.post("/iso", tags=["Files"])
-@router.get("/iso/{file_name}", tags=["Files"])
-@router.post("/iso/{file_name}", tags=["Files"])
-def return_iso(file_name: str = None) -> StreamingResponse:
-    """Return an ISO file containing random data."""
+def return_iso(request: Request) -> StreamingResponse:
+    cm = ContentManager(default="index", extension="iso")
+    cm.resolve(request)
 
-    if file_name is None:
-        file_name = generate_random_name(".iso")
-    elif not file_name.endswith(".iso"):
-        file_name += ".iso"  # Add .iso extension if not present
+    if cm.is_storing():
+        if content := cm.load(binary=True):
+            return StreamingResponse(
+                BytesIO(content),
+                media_type="application/octet-stream",
+                headers={"Content-Disposition": f"attachment; filename={cm.file_name}"},
+            )
 
-    logger.info(f"Generating ISO file: {file_name}")
+    payload = f"Fake ISO content: {fake.paragraph()}".encode("utf-8")
+    if cm.is_storing():
+        cm.save(payload)
 
-    # Create a simple ISO file structure in memory
-    iso_content = (
-        f"This is a random ISO file with random content: {fake.paragraph()}".encode(
-            "utf-8"
-        )
-    )
+    buf = BytesIO(payload)
+    buf.seek(0)
 
-    # Create a BytesIO buffer to hold the ISO file
-    iso_buffer = BytesIO(iso_content)
+    logger.info(f"Returning ISO file: {cm.file_name}")
 
-    # Seek to the beginning of the BytesIO buffer
-    iso_buffer.seek(0)
-
-    # Create the StreamingResponse
-    response = StreamingResponse(
-        iso_buffer,
+    return StreamingResponse(
+        buf,
         media_type="application/octet-stream",
-        headers={"Content-Disposition": f"attachment; filename={file_name}"},
+        headers={"Content-Disposition": f"attachment; filename={cm.file_name}"},
     )
 
-    logger.info("ISO file generated successfully.")
 
-    return response
+# register routes after function is defined
+ROUTES = ["/iso"]
+for route in ROUTES:
+    router.add_api_route(route, return_iso, methods=["GET", "POST"], tags=["Files"])
+    router.add_api_route(f"{route}/{{file_name}}", return_iso, methods=["GET", "POST"], tags=["Files"])

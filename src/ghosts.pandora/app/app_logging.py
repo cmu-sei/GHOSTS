@@ -42,7 +42,10 @@ def setup_logger(
     logger.setLevel(level)
 
     # JSON formatter for both console and file
-    json_formatter = jsonlogger.JsonFormatter(LOG_JSON_FORMATTING)
+    json_formatter = jsonlogger.JsonFormatter(
+        fmt=LOG_JSON_FORMATTING,
+        json_indent=2
+    )
 
     # Console handler
     console_handler = logging.StreamHandler()

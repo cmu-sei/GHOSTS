@@ -3,20 +3,15 @@ from io import BytesIO
 
 from app_logging import setup_logger
 from faker import Faker
-from fastapi import APIRouter, Response
-from utils.helper import generate_random_name
+from fastapi import APIRouter, Request, Response
+from utils.content_manager import ContentManager
 
 router = APIRouter()
-fake = Faker()
-
 logger = setup_logger(__name__)
-
-
-@router.get("/binary", tags=["Binary"])
-@router.post("/binary", tags=["Binary"])
-@router.get("/binary/{file_name}", tags=["Binary"])
-@router.post("/binary/{file_name}", tags=["Binary"])
-def return_binary(file_name: str = None) -> Response:
+fake = Faker()
+cm = ContentManager(default="index", extension="bin")
+    
+def return_binary(request: Request) -> Response:
     """
     Generate and return a binary file as a response.
 
@@ -31,9 +26,12 @@ def return_binary(file_name: str = None) -> Response:
         Response: A FastAPI Response object containing binary data and
         a content disposition header to trigger a file download.
     """
-    if file_name is None:
-        file_name = generate_random_name(".bin")
-        logger.info(f"Generated random file name: {file_name}")
+    cm.resolve(request)
+
+    # Cache check
+    if cm.is_storing():
+        if content := cm.load():
+            return Response(content=content, media_type="application/octet-stream")
 
     # Generate random binary content
     binary_length = random.randint(1000, 3000000)
@@ -44,7 +42,16 @@ def return_binary(file_name: str = None) -> Response:
     response = Response(content=buf.getvalue(), media_type="application/octet-stream")
 
     # Set the content disposition header for file download
-    response.headers["Content-Disposition"] = f"attachment; filename={file_name}"
-    logger.info(f"Serving binary file: {file_name}")
+    response.headers["Content-Disposition"] = f"attachment; filename={cm.file_name}"
+    logger.info(f"Serving binary file: {cm.file_name}")
+
+    if cm.is_storing():
+        cm.save(buf.getvalue())
 
     return response
+
+
+ROUTES = ["/bin", "/binary", "/binaries"]
+for route in ROUTES:
+    router.add_api_route(f"{route}", return_binary, methods=["GET", "POST"], tags=["Binary"])
+    router.add_api_route(f"{route}/{{file_name:path}}", return_binary, methods=["GET", "POST"], tags=["Binary"])

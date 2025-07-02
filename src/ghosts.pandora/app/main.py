@@ -1,16 +1,18 @@
-import configparser
 import inspect
 import os
+import mimetypes
+import time
 
 import uvicorn
 from app_logging import configure_uvicorn_logging, setup_logger
-from config.config import LOG_LEVEL, OPENAPI_METADATA
-from fastapi import FastAPI, HTTPException, Response
+from config.config import LOG_LEVEL, OPENAPI_METADATA, PANDORA_VERSION, STORE_RESULTS
+from fastapi import FastAPI, HTTPException, Response, Request
 from routes import (archive_routes, binary_routes, csv_routes, doc_routes,
                     executable_routes, html_routes, image_routes, iso_routes,
                     json_routes, onenote_routes, payload_routes, pdf_routes,
                     ppt_routes, script_routes, stylesheet_routes, text_routes,
                     unknown_routes, video_routes, voice_routes, xlsx_routes)
+
 
 # Unset proxy environment variables
 os.environ.pop("http_proxy", None)
@@ -22,13 +24,16 @@ logger = setup_logger(__name__)
 
 configure_uvicorn_logging()
 
-# Load configuration (original)
-config = configparser.ConfigParser()
-config.read(os.path.join("app", "config", "app.config"))
-
 # Initialize FastAPI with OpenAPI metadata from config
 app = FastAPI(**OPENAPI_METADATA)
 
+def guess_media_type(path: str) -> str:
+    media_type, _ = mimetypes.guess_type(path)
+    return media_type or "application/octet-stream"
+
+def is_text_type(path: str) -> bool:
+    mimetype, _ = mimetypes.guess_type(path)
+    return mimetype is not None and mimetype.startswith("text")
 
 # Include routers
 app.include_router(archive_routes.router)
@@ -51,7 +56,6 @@ app.include_router(html_routes.router)
 app.include_router(executable_routes.router)
 app.include_router(iso_routes.router)
 
-
 @app.get("/about", tags=["Information"])
 async def about() -> dict:
     """
@@ -60,20 +64,43 @@ async def about() -> dict:
     Returns:
         dict: A dictionary containing version information and a message.
     """
+    start = time.monotonic()
+
     logger.info("Received request for about information.")
     return {
-        "version": "0.6.0",
+        "version": PANDORA_VERSION,
         "message": "GHOSTS PANDORA server",
         "copyright": "Carnegie Mellon University. All Rights Reserved.",
+        "duration": time.monotonic() - start
     }
 
 
 @app.get("/{path:path}", tags=["Files"])
 @app.post("/{path:path}", tags=["Files"])
-def file_type_handler(path: str) -> Response:
+def file_type_handler(request: Request, path: str) -> Response:
+    start = time.monotonic()
+
     """Handle requests based on the file type in the path."""
     logger.info(f"Received request for file type handler with path: {path}")
     file_type = path.split(".")[-1] if "." in path else None
+
+    # # Cache read
+    # if STORE_RESULTS:
+    #     cached = content_manager.get_saved_content(request)
+    #     if cached is not None:
+    #         media_type = guess_media_type(path)
+    #         # If cached is already bytes or str, wrap it
+    #         if isinstance(cached, (str, bytes)):
+    #             filename = os.path.basename(request.url.path)
+    #             return Response(
+    #                 content=cached,
+    #                 media_type=media_type,
+    #                 headers={"Content-Disposition": f"inline; filename={filename}", "X-Duration": f"{time.monotonic() - start:.3f}s"}
+    #             )
+    #         # If cached is a full Response object (optional support)
+    #         if isinstance(cached, Response):
+    #             cached.headers["X-Duration"] = f"{time.monotonic() - start:.3f}s"
+    #             return cached
 
     # Map file types to their corresponding endpoint functions
     handler_mapping = {
@@ -132,6 +159,8 @@ def file_type_handler(path: str) -> Response:
         "css": stylesheet_routes.return_stylesheet,
         "js": script_routes.return_script,
         "json": json_routes.return_json,
+        "csv": csv_routes.return_csv,
+        "payload": payload_routes.return_payloads,
         None: text_routes.return_text,
     }
 
@@ -144,7 +173,15 @@ def file_type_handler(path: str) -> Response:
             params["path"] = path
 
         try:
-            return handler_function(**params)
+            result = handler_function(request)
+
+            # if STORE_RESULTS and hasattr(result, "body"):
+            #     body = result.body
+            #     content_manager.save_content_if_not_exists(request, body)
+
+            result.headers["X-Duration"] = f"{time.monotonic() - start:.3f}s"
+            return result
+
         except Exception as e:
             logger.error(f"Error in file_type_handler for '{path}': {e}")
             raise HTTPException(status_code=500, detail=str(e))

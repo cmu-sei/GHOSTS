@@ -1,119 +1,89 @@
 import os
-
 from app_logging import setup_logger
-from config.config import VIDEO_GENERATION_ENABLED
+from config.config import STORE_RESULTS, VIDEO_GENERATION_ENABLED
 from faker import Faker
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import Response, StreamingResponse
 from utils.helper import generate_frames
 from utils.text2video import generate_video_with_cogvideox
-
-fake = Faker()
+from utils.content_manager import ContentManager
 
 router = APIRouter()
-
 logger = setup_logger(__name__)
+fake = Faker()
 
-VIDEO_DIRECTORY = "static"
-FALLBACK_VIDEO = "fallback.mp4"
-
-# Ensure the static directory exists
-os.makedirs("static", exist_ok=True)
+VIDEO_DIR = "static"
+FALLBACK = "fallback.mp4"
+os.makedirs(VIDEO_DIR, exist_ok=True)
 
 
-@router.get("/live_stream", response_class=StreamingResponse, tags=["Video"])
-@router.post("/live_stream", response_class=StreamingResponse, tags=["Video"])
-def return_video_feed() -> StreamingResponse:
-    """Return a live streaming response of random video frames."""
-    logger.info("Video feed request received.")
-
+def return_video_feed(_: Request) -> StreamingResponse:
+    logger.info("Live stream request received.")
     try:
-        response = StreamingResponse(
-            generate_frames(), media_type="multipart/x-mixed-replace; boundary=frame"
+        return StreamingResponse(
+            generate_frames(),
+            media_type="multipart/x-mixed-replace; boundary=frame",
         )
-        logger.info("Video feed streaming started.")
-        return response
     except Exception as e:
-        logger.error(f"Error while generating video feed: {str(e)}")
-        return {"error": "An error occurred while generating the video feed."}
+        logger.error(f"Live stream failure: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Streaming error")
 
 
-@router.get("/video", tags=["Video"])
-@router.post("/video", tags=["Video"])
-@router.get("/video/{file_name}", tags=["Video"])
-@router.post("/video/{file_name}", tags=["Video"])
-def return_video(
-    file_name: str = None,
-) -> Response:
-    """
-    Return an MP4 video file. Generate one based on a text prompt if provided.
-    Falls back to a static file if generation fails.
+def return_video(request: Request) -> Response:
+    file_name = file_name or f"{fake.word()}_movie.mp4"
+    cm = ContentManager(directory=VIDEO_DIR, file_name=file_name)
+    cm.resolve(request)
 
-    Args:
-        file_name (str): Optional. Name of the video file to serve or generate.
-        prompt (str): Optional. Text prompt to generate a video.
-
-    Returns:
-        Response: Video file as an HTTP response.
-    """
-    if not file_name:
-        file_name = f"{fake.word()}_movie.mp4"
-        logger.info("Generated random file name: %s", file_name)
-    else:
-        logger.info("Requested file name: %s", file_name)
-
-    # Define path for static and generated videos
-    video_path = f"{VIDEO_DIRECTORY}/{file_name}"
+    if cm.is_storing():
+        if content := cm.load():
+            logger.info(f"Serving cached video: {cm.file_name}")
+            return _video_response(content, cm.file_name)
 
     if VIDEO_GENERATION_ENABLED:
-        if file_name:
-            # Attempt to generate the video based on the text prompt
-            logger.info("Generating video from text prompt: %s", file_name)
-            try:
-                output_file = generate_video_with_cogvideox(
-                    prompt=file_name,
-                    output_filename=video_path,
-                    num_frames=49,
-                    guidance_scale=6,
-                    seed=42,
-                )
-                if output_file:
-                    logger.info("Video generated successfully: %s", output_file)
-                else:
-                    logger.warning(
-                        "Failed to generate video. Falling back to static content."
-                    )
-            except Exception as e:
-                logger.error("Error generating video: %s", e, exc_info=True)
-                logger.warning("Falling back to static content.")
-    else:
-        logger.info("Video generation is disabled. Skipping AI generation.")
+        try:
+            logger.info(f"Generating video from prompt: {cm.file_name}")
+            output = generate_video_with_cogvideox(
+                prompt=cm.file_name,
+                output_filename=cm.full_path,
+                num_frames=49,
+                guidance_scale=6,
+                seed=42,
+            )
+            if output and os.path.exists(output):
+                with open(output, "rb") as f:
+                    content = f.read()
+                if cm.is_storing():
+                    cm.save(content)
+                return _video_response(content, cm.file_name)
+        except Exception as e:
+            logger.error(f"Video generation error: {e}", exc_info=True)
 
-    # If the video file doesn't exist, serve fallback video
-    if not os.path.isfile(video_path):
-        logger.warning("Video file not found: %s. Using fallback.", video_path)
-        fallback_path = (
-            f"{VIDEO_DIRECTORY}/{FALLBACK_VIDEO}"  # Ensure a fallback video exists
+    fallback_path = os.path.join(VIDEO_DIR, FALLBACK)
+    if not os.path.exists(fallback_path):
+        logger.error(f"Fallback video missing: {fallback_path}")
+        raise HTTPException(
+            status_code=500,
+            detail="Fallback video unavailable and generation failed.",
         )
-        if not os.path.isfile(fallback_path):
-            logger.error(
-                f"Fallback video not found: {VIDEO_DIRECTORY}/{FALLBACK_VIDEO}"
-            )
-            raise HTTPException(
-                status_code=500,
-                detail="Fallback video not available and generation failed.",
-            )
-        video_path = fallback_path
 
-    # Serve the video file
-    with open(video_path, "rb") as f:
+    with open(fallback_path, "rb") as f:
         content = f.read()
-        logger.debug("Read video file: %s of size: %d bytes", video_path, len(content))
+    return _video_response(content, FALLBACK)
 
+
+def _video_response(content: bytes, name: str) -> Response:
     response = Response(content=content, media_type="video/mp4")
-    response.headers["Content-Disposition"] = (
-        f"attachment; filename={os.path.basename(video_path)}"
-    )
-
-    logger.info("Serving video file: %s", video_path)
+    response.headers["Content-Disposition"] = f"attachment; filename={name}"
     return response
+
+
+# ROUTES
+LIVE_ROUTES = ["/live_stream"]
+VIDEO_ROUTES = ["/video"]
+
+for route in LIVE_ROUTES:
+    router.add_api_route(route, return_video_feed, methods=["GET", "POST"], tags=["Video"])
+
+for route in VIDEO_ROUTES:
+    router.add_api_route(route, return_video, methods=["GET", "POST"], tags=["Video"])
+    router.add_api_route(f"{route}/{{file_name}}", return_video, methods=["GET", "POST"], tags=["Video"])
