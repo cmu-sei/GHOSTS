@@ -6,7 +6,7 @@ langchain_community==0.3.0
 numpy==1.25.2
 Requests==2.32.4
 torch==2.7.1
-transformers==4.51.0
+transformers==4.52.1
 docx2txt==0.8
 pypdf==4.1.0
 chromadb==0.4.24
