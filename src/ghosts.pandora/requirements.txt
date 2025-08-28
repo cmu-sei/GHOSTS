@@ -6,7 +6,7 @@ fpdf==1.7.2
 numpy==2.3.1
 opencv_python==4.11.0.86
 openpyxl==3.1.5
-Pillow==11.2.1
+Pillow==11.3.0
 python-docx==1.2.0
 python-json-logger==3.3.0
 python-pptx==1.0.2
