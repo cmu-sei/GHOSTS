@@ -1,8 +1,8 @@
 import inspect
 import random
 from typing import Any
-
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import Request, HTTPException, APIRouter
+from fastapi.responses import HTMLResponse
 from app_logging import setup_logger
 from config.config import endpoints
 from utils.helper import generate_random_name
@@ -43,23 +43,42 @@ ENDPOINT_MAP = {
     "return_video": video_routes.return_video,
 }
 
+def as_html(content: Any) -> HTMLResponse:
+    """Force any content into an HTML page."""
+    if isinstance(content, HTMLResponse):
+        return content
+    if isinstance(content, dict):
+        # pretty-print dict as <pre>
+        import json
+        body = f"<pre>{json.dumps(content, indent=2)}</pre>"
+    elif isinstance(content, (list, tuple)):
+        body = f"<pre>{content}</pre>"
+    else:
+        body = f"<p>{content}</p>"
+    return HTMLResponse(f"<html><body>{body}</body></html>")
 
-@router.api_route("/{path_name:path}", methods=["GET", "POST", "PUT", "DELETE"], tags=["Default Route"])
-async def unknown_path(request: Request) -> Any:
+@router.api_route(
+    "/{path_name:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["Default Route"],
+    response_class=HTMLResponse
+)
+async def unknown_path(request: Request) -> HTMLResponse:
     logger.info(f"{request.method} request for unknown path: {request.url.path}")
 
     if request.method == "PUT":
         name = generate_random_name(".txt")
         logger.info(f"Simulated PUT update: {name}")
-        return {"message": f"Resource '{name}' has been updated successfully."}
+        return as_html(f"Resource '{name}' has been updated successfully.")
 
     if request.method == "DELETE":
         name = generate_random_name(".txt")
         logger.info(f"Simulated DELETE delete: {name}")
-        return {"message": f"Resource '{name}' has been deleted successfully."}
+        return as_html(f"Resource '{name}' has been deleted successfully.")
 
     valid = [
-        ep for ep in endpoints if ep not in {"unknown_path", "return_payloads", "return_video_feed"}
+        ep for ep in endpoints
+        if ep not in {"unknown_path", "return_payloads", "return_video_feed"}
     ]
     choice = random.choice(valid)
     handler = ENDPOINT_MAP.get(choice)
@@ -70,13 +89,13 @@ async def unknown_path(request: Request) -> Any:
 
     sig = inspect.signature(handler)
     kwargs = {}
-
     if "request" in sig.parameters:
         kwargs["request"] = request
 
     try:
         logger.info(f"Calling endpoint fallback: {choice}({list(kwargs)})")
-        return await handler(**kwargs) if inspect.iscoroutinefunction(handler) else handler(**kwargs)
+        result = await handler(**kwargs) if inspect.iscoroutinefunction(handler) else handler(**kwargs)
+        return as_html(result)
     except Exception as e:
         logger.error(f"Error invoking {choice}: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))

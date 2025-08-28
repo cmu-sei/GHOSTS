@@ -5,7 +5,7 @@ import time
 
 import uvicorn
 from app_logging import configure_uvicorn_logging, setup_logger
-from config.config import LOG_LEVEL, OPENAPI_METADATA, PANDORA_VERSION, STORE_RESULTS
+from config.config import LOG_LEVEL, OPENAPI_METADATA, PANDORA_VERSION, STORE_RESULTS, OLLAMA_ENABLED
 from fastapi import FastAPI, HTTPException, Response, Request
 from routes import (archive_routes, binary_routes, csv_routes, doc_routes,
                     executable_routes, html_routes, image_routes, iso_routes,
@@ -21,7 +21,6 @@ os.environ.pop("HTTP_PROXY", None)
 os.environ.pop("HTTPS_PROXY", None)
 
 logger = setup_logger(__name__)
-
 configure_uvicorn_logging()
 
 # Initialize FastAPI with OpenAPI metadata from config
@@ -69,6 +68,7 @@ async def about() -> dict:
     logger.info("Received request for about information.")
     return {
         "version": PANDORA_VERSION,
+        "ollama": OLLAMA_ENABLED,
         "message": "GHOSTS PANDORA server",
         "copyright": "Carnegie Mellon University. All Rights Reserved.",
         "duration": time.monotonic() - start
@@ -154,14 +154,15 @@ def file_type_handler(request: Request, path: str) -> Response:
         "iso": iso_routes.return_iso,
         "bin": binary_routes.return_binary,
         "chm": html_routes.return_chm,
-        "html": html_routes.return_html,
         "txt": text_routes.return_text,
         "css": stylesheet_routes.return_stylesheet,
         "js": script_routes.return_script,
         "json": json_routes.return_json,
         "csv": csv_routes.return_csv,
         "payload": payload_routes.return_payloads,
-        None: text_routes.return_text,
+        "html": html_routes.return_html,
+        "htm": html_routes.return_html,
+        None: html_routes.return_html,
     }
 
     if file_type in handler_mapping:
@@ -197,7 +198,5 @@ if __name__ == "__main__":
         app,
         host="0.0.0.0",
         port=80,
-        log_config=None,
-        log_level=LOG_LEVEL,
-        colorize=False,
+        
     )
