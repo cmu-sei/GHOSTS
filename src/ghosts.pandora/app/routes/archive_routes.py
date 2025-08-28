@@ -1,41 +1,37 @@
 import app_logging
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 from fastapi.responses import StreamingResponse
-from utils.helper import (create_response, generate_archive,
-                          generate_random_name)
+from utils.helper import (create_response, generate_archive)
+from utils.content_manager import ContentManager
 
 router = APIRouter()
-
 logger = app_logging.setup_logger("app_logger")
 
-
-@router.get("/zip", tags=["Archives"])
-@router.post("/zip", tags=["Archives"])
-@router.get("/zip/{file_name}", tags=["Archives"])
-@router.post("/zip/{file_name}", tags=["Archives"])
-def return_zip(file_name: str = None) -> StreamingResponse:
+def return_zip(request: Request) -> StreamingResponse:
     """Return a ZIP file containing random binary data."""
-    if file_name is None:
-        file_name = generate_random_name(".zip")
-    elif not file_name.endswith(".zip"):
-        file_name += ".zip"
+    cm = ContentManager(default="index", extension="zip")
+    cm.resolve(request)
+    
+    buffer = generate_archive(cm.file_name, "zip")
+    return create_response(buffer, cm.file_name, "application/zip")
 
-    logger.info(f"Generating ZIP file: {file_name}")
-    buffer = generate_archive(file_name, "zip")
-    return create_response(buffer, file_name, "application/zip")
+ROUTES = ["/zip", "/zips"]
+for route in ROUTES:
+    router.add_api_route(f"{route}", return_zip, methods=["GET", "POST"], tags=["Archives"])
+    router.add_api_route(f"{route}/{{file_name:path}}", return_zip, methods=["GET", "POST"], tags=["Archives"])
 
 
-@router.get("/tar", tags=["Archives"])
-@router.post("/tar", tags=["Archives"])
-@router.get("/tar/{file_name}", tags=["Archives"])
-@router.post("/tar/{file_name}", tags=["Archives"])
-def return_tar(file_name: str = None) -> StreamingResponse:
-    """Return a TAR file containing random binary data."""
-    if file_name is None:
-        file_name = generate_random_name(".tar")
-    elif not file_name.endswith(".tar"):
-        file_name += ".tar"
+####
 
-    logger.info(f"Generating TAR file: {file_name}")
-    buffer = generate_archive(file_name, "tar")
-    return create_response(buffer, file_name, "application/x-tar")
+def return_tar(request: Request) -> StreamingResponse:
+    """Return a ZIP file containing random binary data."""
+    cm = ContentManager(default="index", extension="tar")
+    cm.resolve(request)
+    
+    buffer = generate_archive(cm.file_name, "tar")
+    return create_response(buffer, cm.file_name, "application/x-tar")
+
+ROUTES = ["/tar", "/tars"]
+for route in ROUTES:
+    router.add_api_route(f"{route}", return_tar, methods=["GET", "POST"], tags=["Archives"])
+    router.add_api_route(f"{route}/{{file_name:path}}", return_tar, methods=["GET", "POST"], tags=["Archives"])

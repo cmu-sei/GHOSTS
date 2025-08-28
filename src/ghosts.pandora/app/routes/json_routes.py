@@ -1,76 +1,69 @@
 import json
 import random
 
-from app_logging import setup_logger
-from config.config import JSON_MODEL, OLLAMA_ENABLED
+from fastapi import APIRouter, Request, Response
 from faker import Faker
-from fastapi import APIRouter, Response
-from utils.helper import generate_random_name
+
+from app_logging import setup_logger
+from config.config import OLLAMA_ENABLED, JSON_MODEL
 from utils.ollama import generate_document_with_ollama
+from utils.content_manager import ContentManager
 
 router = APIRouter()
 fake = Faker()
 logger = setup_logger(__name__)
 
 
-@router.get("/api", tags=["Data Structures"])
-@router.post("/api", tags=["Data Structures"])
-@router.get("/json", tags=["Data Structures"])
-@router.post("/json", tags=["Data Structures"])
-@router.get("/api/{path:path}", tags=["Data Structures"])
-@router.post("/api/{path:path}", tags=["Data Structures"])
-@router.get("/json/{path:path}", tags=["Data Structures"])
-@router.post("/json/{path:path}", tags=["Data Structures"])
-def return_json(path: str = "") -> Response:
-    """Return a JSON response with random data for any request starting with /api or /json."""
+def return_json(request: Request) -> Response:
+    cm = ContentManager(default="index", extension="json")
+    cm.resolve(request)
     num_rows = random.randint(1, 100)
 
-    if path:  # If path is not empty, log it
-        logger.info(
-            "Generating JSON with %d rows for path: /api/%s or /json/%s",
-            num_rows,
-            path,
-            path,
-        )
-    else:  # If path is empty, log it differently
-        logger.info("Generating JSON with %d rows for path: /api or /json", num_rows)
+    logger.info(f"Generating JSON with {num_rows} rows for path: {cm.rel_path}")
 
-    # Attempt to generate JSON using Ollama
+    if cm.is_storing():
+        if content := cm.load():
+            return Response(
+                content=content,
+                media_type="application/json",
+                headers={"Content-Disposition": f"inline; filename={cm.file_name}"},
+            )
+
+    # Try Ollama
     if OLLAMA_ENABLED:
+        prompt = (
+            f"Produce a valid JSON array with at least {num_rows} rows and at least "
+            f"10 columns based on a random subject. No additional text or formatting."
+        )
+        logger.info(f"Ollama prompt: {prompt}")
         try:
-            prompt = f"Produce a valid JSON array with at least {num_rows} rows and at least 10 columns based on a random subject. No additional text or formatting."
-            logger.info("Sending request to Ollama with prompt: %s", prompt)
-
             body = generate_document_with_ollama(prompt, JSON_MODEL)
-
-            # Validate if the generated body is valid JSON
-            try:
-                json_data = json.loads(body)  # Attempt to parse the JSON
-                body = json.dumps(json_data)  # Re-format the JSON to ensure it's valid
-                logger.debug("Generated valid JSON data from Ollama: %s", body)
-                return Response(
-                    content=body,
-                    media_type="application/json",
-                    headers={"Content-Disposition": "inline; filename=data.json"},
-                )
-            except json.JSONDecodeError:
-                logger.warning("Ollama returned invalid JSON, falling back to Faker.")
-
+            json_data = json.loads(body)
+            body = json.dumps(json_data)
         except Exception as e:
-            logger.error("Error while calling Ollama: %s", str(e))
-            logger.warning("Falling back to Faker for JSON generation.")
+            logger.warning(f"Ollama failed or returned invalid JSON: {e}")
+            body = None
 
-    # Fallback to Faker for JSON generation
-    body = fake.json(
-        data_columns={"Candidates": ["name", "name", "name"]},
-        num_rows=num_rows,
-    )
-    logger.debug("Generated JSON data from Faker: %s", body)
+    # Fallback to Faker
+    if not body:
+        logger.info("Falling back to Faker for JSON generation.")
+        body = fake.json(
+            data_columns={"Candidates": ["name", "name", "name"]},
+            num_rows=num_rows,
+        )
+
+    if cm.is_storing():
+        cm.save(body)
 
     return Response(
         content=body,
         media_type="application/json",
-        headers={
-            "Content-Disposition": f"inline; filename={path if path else generate_random_name()}.json"
-        },
+        headers={"Content-Disposition": f"inline; filename={cm.file_name}"},
     )
+
+
+# Register routes
+ROUTES = ["/api", "/json"]
+for route in ROUTES:
+    router.add_api_route(route, return_json, methods=["GET", "POST"], tags=["Data Structures"])
+    router.add_api_route(f"{route}/{{file_name:path}}", return_json, methods=["GET", "POST"], tags=["Data Structures"])

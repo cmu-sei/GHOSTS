@@ -1,104 +1,75 @@
 import random
 from io import BytesIO
-
-from app_logging import setup_logger
-from config.config import OLLAMA_ENABLED, PDF_MODEL
-from faker import Faker
-from fastapi import APIRouter, Response
+from fastapi import APIRouter, Request, Response
 from fpdf import FPDF
-from utils.helper import generate_random_name
-from utils.ollama import generate_document_with_ollama
+from faker import Faker
 
-logger = setup_logger(__name__)
-fake = Faker()
+from config.config import OLLAMA_ENABLED, PDF_MODEL, STORE_RESULTS
+from utils.ollama import generate_document_with_ollama
+from utils.content_manager import ContentManager
+from app_logging import setup_logger
 
 router = APIRouter()
+logger = setup_logger(__name__)
+fake = Faker()
+cm = ContentManager(default="index", extension="pdf")
 
 
 def sanitize_text(text: str) -> str:
-    """Sanitize text to ensure it can be encoded in 'latin1'."""
     return text.encode("latin1", "replace").decode("latin1")
 
 
-@router.get("/pdf", tags=["Documents"])
-@router.post("/pdf", tags=["Documents"])
-@router.get("/pdf/{path:path}", tags=["Documents"])
-@router.post("/pdf/{path:path}", tags=["Documents"])
-def return_pdf() -> Response:
-    """Generate and return a random PDF document with a title and content based on that title."""
-    logger.info("Received request to generate PDF")
+def return_pdf(request: Request) -> Response:
+    cm.resolve(request)
 
+    if cm.is_storing():
+        if content := cm.load():
+            return Response(content=content, media_type="application/pdf")
+
+    title = fake.sentence()
     if OLLAMA_ENABLED:
-        title_prompt = "Provide a single creative title for a document."
-        logger.info("Requesting title from Ollama with prompt: %s", title_prompt)
         try:
-            response_title = generate_document_with_ollama(title_prompt, PDF_MODEL)
-            title = (
-                response_title.strip()
-                if response_title and response_title.strip()
-                else generate_random_name()
-            )
+            raw_title = generate_document_with_ollama("Provide a single creative title for a document.", PDF_MODEL)
+            title = raw_title.strip() or title
         except Exception as e:
-            logger.error(f"Error while using Ollama for title: {e}", exc_info=True)
-            title = generate_random_name()
-    else:
-        title = generate_random_name()
+            logger.error(f"Ollama title gen error: {e}", exc_info=True)
 
-    logger.info(f"Generated title: {title}")
+    logger.info(f"PDF title: {title}")
 
-    # Step 2: Create a PDF document
-    logger.info("Initializing PDF generation")
     pdf = FPDF()
     pdf.set_auto_page_break(auto=True, margin=15)
     pdf.add_page()
-
-    # Step 3: Set default font and add title
-    pdf.set_font("Arial", "B", size=16)
-    sanitized_title = sanitize_text(title)
-    pdf.cell(200, 10, txt=sanitized_title, ln=True, align="C")
+    pdf.set_font("Arial", "B", 16)
+    pdf.cell(200, 10, txt=sanitize_text(title), ln=True, align="C")
     pdf.ln(10)
+    pdf.set_font("Arial", "", 12)
 
-    # Step 4: Add random text content
-    logger.info("Adding text content based on title to PDF")
-    pdf.set_font("Arial", size=12)
-    content_prompt = f"Provide a few paragraphs about the topic: '{title}, this should be a text only response'."
-
-    # Attempt to get content from Ollama once
+    response_content = None
     if OLLAMA_ENABLED:
         try:
-            response_content = generate_document_with_ollama(content_prompt, PDF_MODEL)
+            prompt = f"Provide a few paragraphs about the topic: '{title}'. Only return the content."
+            response_content = generate_document_with_ollama(prompt, PDF_MODEL).strip()
         except Exception as e:
-            logger.error(f"Error while using Ollama for content: {e}", exc_info=True)
-            response_content = None
-    else:
-        response_content = None  # Set to None if Ollama is not enabled
+            logger.error(f"Ollama content gen error: {e}", exc_info=True)
 
-    # Fallback to Faker-generated content if Ollama fails or is disabled
     for _ in range(random.randint(5, 15)):
-        if response_content and response_content.strip():
-            content = response_content.strip()  # Use Ollama response if valid
-        else:
-            content = fake.sentence()  # Default to Faker content
+        paragraph = response_content or fake.sentence()
+        pdf.multi_cell(0, 10, txt=sanitize_text(paragraph))
 
-        sanitized_content = sanitize_text(content)
-        pdf.multi_cell(0, 10, txt=sanitized_content)
+    buf = BytesIO(pdf.output(dest="S").encode("latin1"))
+    buf.seek(0)
 
-    # Step 5: Save the PDF
-    pdf_output = BytesIO()
-    pdf_data = pdf.output(dest="S").encode("latin1")
-    pdf_output.write(pdf_data)
-    pdf_output.seek(0)
+    if cm.is_storing():
+        cm.save(buf.getvalue())
 
-    if len(pdf_output.getvalue()) == 0:
-        logger.error("Generated PDF is empty")
-        raise ValueError("Generated PDF has no content")
-
-    # Step 6: Generate a random filename and return the response
-    pdf_file_name = f"{fake.word()}_document.pdf"
-    logger.info(f"Generated PDF filename: {pdf_file_name}")
-
-    response = Response(content=pdf_output.getvalue(), media_type="application/pdf")
-    response.headers["Content-Disposition"] = f"inline; filename={pdf_file_name}"
-
-    logger.info("PDF generated and response prepared successfully.")
+    logger.info(f"Returning PDF: {cm.file_name}")
+    response = Response(content=buf.getvalue(), media_type="application/pdf")
+    response.headers["Content-Disposition"] = f"inline; filename={cm.file_name}"
     return response
+
+
+# Register routes
+ROUTES = ["/pdf"]
+for route in ROUTES:
+    router.add_api_route(f"{route}", return_pdf, methods=["GET", "POST"], tags=["Documents"])
+    router.add_api_route(f"{route}/{{file_name:path}}", return_pdf, methods=["GET", "POST"], tags=["Documents"])

@@ -11,6 +11,7 @@ from diffusers.utils import export_to_video
 from torch.amp import autocast
 from torchao.quantization import int8_weight_only, quantize_
 from transformers import T5EncoderModel
+import utils.janitor as janitor
 
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 torch._dynamo.config.suppress_errors = True
@@ -142,3 +143,5 @@ def generate_video_with_cogvideox(
     except Exception as e:
         logger.error(f"Error during video generation: {e}", exc_info=True)
         return None
+    finally:
+        janitor.start_cache_janitor()

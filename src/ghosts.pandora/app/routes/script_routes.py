@@ -1,101 +1,76 @@
 import os
-
-from app_logging import setup_logger
-from config.config import OLLAMA_ENABLED, SCRIPT_MODEL
+from fastapi import APIRouter, Request, Response
 from faker import Faker
-from fastapi import APIRouter, HTTPException, Response
+from config.config import OLLAMA_ENABLED, SCRIPT_MODEL
 from utils.ollama import generate_document_with_ollama
+from utils.content_manager import ContentManager
+from app_logging import setup_logger
 
-fake = Faker()
 router = APIRouter()
 logger = setup_logger(__name__)
+fake = Faker()
+cm = ContentManager(default="script", extension="js")
 
 
-@router.get("/script/{filename:path}", tags=["Web"])
-@router.post("/script/{filename:path}", tags=["Web"])
-@router.get("/script", tags=["Web"])
-@router.post("/script", tags=["Web"])
-def return_script(filename: str = None) -> Response:
-    """
-    Generate a script based on the filename extension.
+def return_script(request: Request) -> Response:
+    cm.resolve(request)
 
-    Args:
-        filename (str): Filename provided in the route, including extension.
+    script_type = "python" if cm.file_name.endswith(".py") else "javascript"
+    media_type = "text/x-python" if script_type == "python" else "text/javascript"
 
-    Returns:
-        Response: A response containing the generated script.
-    """
-    if not filename:
-        filename = "script.js"
-        logger.info(f"No filename provided. Defaulting to '{filename}'")
-    # Determine script type from file extension
-    _, ext = os.path.splitext(filename)
-    script_type = "python" if ext == ".py" else "javascript"
+    if cm.is_storing():
+        if cached := cm.load():
+            logger.info(f"Serving cached script: {cm.file_name}")
+            return Response(
+                content=cached,
+                media_type=media_type,
+                headers={"Content-Disposition": f"attachment; filename={cm.file_name}"},
+            )
 
-    logger.info(f"Generating a {script_type} script for filename: {filename}")
-
+    # Generate via Ollama if available
     if OLLAMA_ENABLED:
         prompt = f"Give me a {script_type} script without any quotes around it. Just the code."
-        logger.info(f"Sending request to Ollama model with prompt: {prompt}")
-
         try:
-            generated_script = generate_document_with_ollama(prompt, SCRIPT_MODEL)
-
-            if generated_script:
-                media_type = (
-                    "text/javascript"
-                    if script_type == "javascript"
-                    else "text/x-python"
+            logger.info(f"Ollama script prompt: {prompt}")
+            generated = generate_document_with_ollama(prompt, SCRIPT_MODEL)
+            if generated:
+                logger.info(f"Ollama script generated for {cm.file_name}")
+                if cm.is_storing():
+                    cm.save(generated.encode("utf-8"))
+                return Response(
+                    content=generated.encode("utf-8"),
+                    media_type=media_type,
+                    headers={"Content-Disposition": f"attachment; filename={cm.file_name}"},
                 )
-                extension = "js" if script_type == "javascript" else "py"
-
-                filename = f"{fake.word()}_{fake.uuid4()}.{extension}"  # Generate random filename with correct extension
-                logger.info(f"Script generated successfully using Ollama: {filename}")
-
-                response = Response(
-                    content=generated_script.encode("utf8"), media_type=media_type
-                )
-                response.headers["Content-Disposition"] = (
-                    f"attachment; filename={filename}"
-                )
-                return response
-            else:
-                logger.warning(
-                    "Ollama failed to generate script. Falling back to default generation."
-                )
-
         except Exception as e:
-            logger.error(f"Error generating script with Ollama: {e}", exc_info=True)
-            logger.info("Falling back to Faker for script generation.")
+            logger.error(f"Ollama failed: {e}", exc_info=True)
 
-    try:
-        if script_type == "javascript":
-            body = f"console.log('{fake.word()}, {fake.date()}');"
-            media_type = "text/javascript"
-            extension = "js"
-        else:
-            body = f"""
-# Simple Python script
-import datetime
-
-def main():
-print('{fake.word()}, {fake.date()}')
-
-if __name__ == "__main__":
-    main()
-                    """
-            media_type = "text/x-python"
-            extension = "py"
-
-        filename = f"{fake.word()}_{fake.uuid4()}.{extension}"  # Generate random filename with correct extension
-        logger.info(f"Script generated: {filename}")
-
-        response = Response(content=body.encode("utf8"), media_type=media_type)
-        response.headers["Content-Disposition"] = f"attachment; filename={filename}"
-        return response
-
-    except Exception as e:
-        logger.error(f"Error during fallback script generation: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=500, detail="An error occurred while generating the script."
+    # Fallback to Faker
+    if script_type == "javascript":
+        content = f"console.log('{fake.word()}, {fake.date()}');"
+    else:
+        content = (
+            "# Simple Python script\n"
+            "import datetime\n\n"
+            "def main():\n"
+            f"    print('{fake.word()}, {fake.date()}')\n\n"
+            "if __name__ == '__main__':\n"
+            "    main()\n"
         )
+
+    if cm.is_storing():
+        cm.save(content.encode("utf-8"))
+
+    logger.info(f"Fallback script generated: {cm.file_name}")
+    return Response(
+        content=content.encode("utf-8"),
+        media_type=media_type,
+        headers={"Content-Disposition": f"attachment; filename={cm.file_name}"},
+    )
+
+
+# Register routes
+ROUTES = ["/script", "/scripts", "/js"]
+for route in ROUTES:
+    router.add_api_route(route, return_script, methods=["GET", "POST"], tags=["Web"])
+    router.add_api_route(f"{route}/{{file_name:path}}", return_script, methods=["GET", "POST"], tags=["Web"])

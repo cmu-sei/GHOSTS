@@ -1,22 +1,32 @@
 import inspect
 import random
 from typing import Any
-
+from fastapi import Request, HTTPException, APIRouter
+from fastapi.responses import HTMLResponse
 from app_logging import setup_logger
 from config.config import endpoints
-from fastapi import APIRouter, HTTPException, Request
-from routes import (archive_routes, binary_routes, csv_routes, doc_routes,
-                    image_routes, json_routes, onenote_routes, pdf_routes,
-                    ppt_routes, script_routes, stylesheet_routes, text_routes,
-                    video_routes, xlsx_routes)
 from utils.helper import generate_random_name
+from routes import (
+    archive_routes,
+    binary_routes,
+    csv_routes,
+    doc_routes,
+    image_routes,
+    json_routes,
+    onenote_routes,
+    pdf_routes,
+    ppt_routes,
+    script_routes,
+    stylesheet_routes,
+    text_routes,
+    video_routes,
+    xlsx_routes,
+)
 
 logger = setup_logger(__name__)
-
 router = APIRouter()
 
-# Create a mapping of endpoint names to their corresponding functions
-endpoint_mapping = {
+ENDPOINT_MAP = {
     "return_zip": archive_routes.return_zip,
     "return_binary": binary_routes.return_binary,
     "return_json": json_routes.return_json,
@@ -33,73 +43,59 @@ endpoint_mapping = {
     "return_video": video_routes.return_video,
 }
 
+def as_html(content: Any) -> HTMLResponse:
+    """Force any content into an HTML page."""
+    if isinstance(content, HTMLResponse):
+        return content
+    if isinstance(content, dict):
+        # pretty-print dict as <pre>
+        import json
+        body = f"<pre>{json.dumps(content, indent=2)}</pre>"
+    elif isinstance(content, (list, tuple)):
+        body = f"<pre>{content}</pre>"
+    else:
+        body = f"<p>{content}</p>"
+    return HTMLResponse(f"<html><body>{body}</body></html>")
 
-@router.get("/{path_name:path}", tags=["Default Route"])
-@router.post("/{path_name:path}", tags=["Default Route"])
-@router.delete("/{path_name:path}", tags=["Default Route"])
-@router.put("/{path_name:path}", tags=["Default Route"])
-async def unknown_path(
-    path_name: str, request: Request
-) -> dict[str, str] | Any | object:
-    """Handle unknown paths by returning a random method's result or appropriate responses for PUT/DELETE."""
+@router.api_route(
+    "/{path_name:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["Default Route"],
+    response_class=HTMLResponse
+)
+async def unknown_path(request: Request) -> HTMLResponse:
+    logger.info(f"{request.method} request for unknown path: {request.url.path}")
 
-    # Log the request method and path
-    logger.info(f"Received {request.method} request for path: {path_name}")
-
-    # Handle PUT and DELETE requests
     if request.method == "PUT":
-        file_name_or_type = generate_random_name(".txt")  # Use random name generation
-        logger.info(f"Updating resource: {file_name_or_type}")
-        return {
-            "message": f"Resource '{file_name_or_type}' has been updated successfully."
-        }
+        name = generate_random_name(".txt")
+        logger.info(f"Simulated PUT update: {name}")
+        return as_html(f"Resource '{name}' has been updated successfully.")
 
-    elif request.method == "DELETE":
-        file_name_or_type = generate_random_name(".txt")
-        logger.info(f"Deleting resource: {file_name_or_type}")
-        return {
-            "message": f"Resource '{file_name_or_type}' has been deleted successfully."
-        }
+    if request.method == "DELETE":
+        name = generate_random_name(".txt")
+        logger.info(f"Simulated DELETE delete: {name}")
+        return as_html(f"Resource '{name}' has been deleted successfully.")
 
-    # Handle GET and POST requests
-    valid_endpoints = [
-        ep
-        for ep in endpoints
+    valid = [
+        ep for ep in endpoints
         if ep not in {"unknown_path", "return_payloads", "return_video_feed"}
     ]
-    endpoint_name = random.choice(valid_endpoints)
-    logger.info(f"Selected Endpoint: {endpoint_name}")
+    choice = random.choice(valid)
+    handler = ENDPOINT_MAP.get(choice)
 
-    endpoint_function = endpoint_mapping.get(endpoint_name)
+    if not callable(handler):
+        logger.error(f"Handler for {choice} not callable.")
+        raise HTTPException(status_code=500, detail="Handler not callable.")
 
-    if not callable(endpoint_function):
-        logger.error("Endpoint function is not callable.")
-        raise HTTPException(
-            status_code=500, detail="Endpoint function is not callable."
-        )
+    sig = inspect.signature(handler)
+    kwargs = {}
+    if "request" in sig.parameters:
+        kwargs["request"] = request
 
-    # Prepare parameters based on the selected endpoint
-    params = {}
-
-    # Get the signature of the endpoint function
-    sig = inspect.signature(endpoint_function)
-    param_names = sig.parameters.keys()
-    logger.info(f"Parameters avaliable {param_names}")
-
-    # Call the selected endpoint function with the prepared parameters
     try:
-        if inspect.iscoroutinefunction(endpoint_function):
-            logger.info(
-                f"Calling endpoint function: {endpoint_name} with params: {params}"
-            )
-            return await endpoint_function(**params)  # Await if the function is async
-        else:
-            logger.info(
-                f"Calling endpoint function: {endpoint_name} with params: {params}"
-            )
-            return endpoint_function(**params)  # Call directly if the function is sync
+        logger.info(f"Calling endpoint fallback: {choice}({list(kwargs)})")
+        result = await handler(**kwargs) if inspect.iscoroutinefunction(handler) else handler(**kwargs)
+        return as_html(result)
     except Exception as e:
-        logger.error(
-            f"Error occurred while calling endpoint function: {endpoint_name} - {str(e)}"
-        )
+        logger.error(f"Error invoking {choice}: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))

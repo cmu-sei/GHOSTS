@@ -6,6 +6,8 @@ from app_logging import setup_logger
 from config.config import DIFFUSERS_LOCAL_FILES_ONLY, IMAGE_GENERATION_MODEL
 from diffusers import AutoPipelineForText2Image
 
+import utils.janitor as janitor
+
 logger = setup_logger(__name__)
 
 
@@ -91,3 +93,5 @@ def generate_image_with_diffusers(
     except Exception as e:
         logger.error(f"Error during image generation: {e}", exc_info=True)
         return None
+    finally:
+        janitor.start_cache_janitor()

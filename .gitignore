@@ -313,6 +313,10 @@ _data/
 _data/*
 *_data/*
 
+_logs/
+_logs/*
+*_logs/*
+
 _config/
 _config/*
 *_config/*

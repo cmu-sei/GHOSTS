@@ -3,88 +3,65 @@ from typing import Optional
 
 from app_logging import setup_logger
 from config.config import VOICE_GENERATION_ENABLED, VOICE_MODEL
-from fastapi import APIRouter, Query, Response
+from fastapi import APIRouter, Query, Request, Response
 from fastapi.responses import FileResponse
 from utils.ollama import generate_document_with_ollama
 from utils.voice import generate_audio_response
 
-logger = setup_logger(__name__)
 router = APIRouter()
+logger = setup_logger(__name__)
 
 
-def filter_dialogue_lines(script: str) -> str:
-    """Extract and return only lines starting with 'actor1:' or 'actor2:'."""
-    logger.debug("Filtering dialogue lines from the script.")
+def _filter_dialogue(script: str) -> str:
     return "\n".join(
-        line
-        for line in script.strip().splitlines()
+        line for line in script.strip().splitlines()
         if line.startswith("actor1:") or line.startswith("actor2:")
     )
 
 
-def create_temp_audio_file(audio_data: bytes) -> str:
-    """Save audio data to a temporary file and return the file path."""
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp_file:
-        tmp_file.write(audio_data)
-        return tmp_file.name
+def _temp_audio(audio_data: bytes) -> str:
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
+        tmp.write(audio_data)
+        return tmp.name
 
 
-@router.get("/call", tags=["Audio"])
-@router.post("/call", tags=["Audio"])
 def generate_synthesised_conversation(
-    actor1: Optional[str] = Query(
-        "software engineer", description="Role of the first voice"
-    ),
-    actor2: Optional[str] = Query(
-        "senior software engineer", description="Role of the second voice"
-    ),
+    request: Request,
+    actor1: Optional[str] = Query("software engineer", description="Voice 1 role"),
+    actor2: Optional[str] = Query("senior software engineer", description="Voice 2 role"),
 ) -> Response:
-    """
-    Generate and return a synthesized telephone conversation between two actors.
-    """
-
-    logger.debug(f"Request received with actor1: {actor1}, actor2: {actor2}")
-
-    # Create a prompt for the conversation script
+    logger.debug(f"Actors: {actor1} vs {actor2}")
     prompt = (
         f"Create a professional conversation between a {actor1} and a {actor2} "
-        "discussing a project update. The conversation should be realistic and cover "
-        "concerns about deadlines and workload adjustments. Format the output as follows:\n\n"
-        "actor1: [Dialogue for actor1]\n"
-        "actor2: [Dialogue for actor2]\n"
-        "actor1: [Dialogue for actor1]\n"
-        "actor2: [Dialogue for actor2]\n"
-        "...\n\n"
-        "Only output the dialogue lines in this format. Do NOT include any setting descriptions, "
-        "character names, or additional context—just the dialogue lines."
+        "discussing a project update. Format:\n\n"
+        "actor1: [Line]\nactor2: [Line]\n...\n\n"
+        "Only dialogue. No setting, names, or context."
     )
 
-    logger.debug("Generated prompt for ChatOllama.")
-    conversation_script = generate_document_with_ollama(prompt, model=VOICE_MODEL)
+    script = generate_document_with_ollama(prompt, model=VOICE_MODEL)
+    if not script:
+        logger.warning("Script generation failed.")
+        return Response(content="Failed to generate conversation script.", media_type="text/plain")
 
-    if not conversation_script:
-        logger.warning("Failed to generate conversation script.")
-        return Response(
-            content="Failed to generate conversation script.", media_type="text/plain"
-        )
-
-    logger.info("Conversation script generated successfully.")
-    filtered_script = filter_dialogue_lines(conversation_script)
-    logger.debug(
-        f"Filtered script: {filtered_script}",
-    )
+    filtered = _filter_dialogue(script)
+    logger.debug(f"Filtered script:\n{filtered}")
 
     if not VOICE_GENERATION_ENABLED:
-        logger.info("Voice generation is disabled. Returning text response.")
-        return Response(content=filtered_script, media_type="text/plain")
+        logger.info("Voice synthesis disabled. Returning text.")
+        return Response(content=filtered, media_type="text/plain")
 
-    logger.info("Voice generation enabled. Generating audio.")
-    audio_data = generate_audio_response(filtered_script)
+    logger.info("Generating voice from script.")
+    audio = generate_audio_response(filtered)
+    if audio:
+        path = _temp_audio(audio)
+        return FileResponse(path, media_type="audio/wav")
 
-    if audio_data:
-        audio_file_path = create_temp_audio_file(audio_data)
-        logger.debug(f"Returning generated audio file: {audio_file_path}")
-        return FileResponse(audio_file_path, media_type="audio/wav")
-
-    logger.error("Audio synthesis failed.")
+    logger.error("Audio generation failed.")
     return Response(content="Audio synthesis failed.", media_type="text/plain")
+
+
+# route registration
+ROUTES = ["/call", "/calls"]
+for route in ROUTES:
+    router.add_api_route(f"{route}", generate_synthesised_conversation, methods=["GET", "POST"], tags=["Audio"])
+    router.add_api_route(f"{route}/{{file_name:path}}", generate_synthesised_conversation, methods=["GET", "POST"], tags=["Audio"])
