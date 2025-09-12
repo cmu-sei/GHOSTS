@@ -33,7 +33,7 @@ There is no upgrade path from previous versions — a fresh install is required 
 Welcome to the latest version of GHOSTS! Here’s a look at what’s new and improved in v8.2:
 
 - [GHOSTS now has a UI](src/ghosts.ui) — Manage machines, machine groups, deploy new timelines, and view activities through a sleek interface. 😍
-- [GHOSTS Shadows](src/ghosts.shadows) now integrates with large language models (LLMs) for GHOSTS agents, offering various models for activities, chat, content generation, social interactions, and more. 👻
+- GHOSTS Shadows now integrates with large language models (LLMs) for GHOSTS agents, offering various models for activities, chat, content generation, social interactions, and more. **(Shadows is depreciated. See [RangerAI](https://github.com/cmu-sei/rangerai) for all new GHOSTS AI efforts going forward)**.
 - [GHOSTS LITE](src/Ghosts.Client.Lite) is a lightweight version of GHOSTS that requires fewer resources, making it ideal for training, exercises, and simulations on minimal hardware. 👀
 - Fixes #385: Default GUID issue with Animator NPCs.
 - Fixes #384: Client path bug.

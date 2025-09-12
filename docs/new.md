@@ -6,7 +6,7 @@
 ## What's new in 8.2
 
 - [GHOSTS now has a UI](core/ui.md)! Manage machines and machine groups, deploy new timelines, and view activities. 😍
-- [GHOSTS Shadows](shadows/index.md) provides integrations with an LLM for the purposes of GHOSTS agents. It provides multiple models for activities, chat, content, social, and whatever else you may need. 👻
+- Shadows now integrates with large language models (LLMs) for GHOSTS agents, offering various models for activities, chat, content generation, social interactions, and more. **(Shadows is depreciated. See [RangerAI](https://github.com/cmu-sei/rangerai) for all new GHOSTS AI efforts going forward)**.
 - [GHOSTS LITE](core/lite.md) is a stripped-down version of GHOSTS that is designed to be more lightweight and require less resources to run certain activities in training, exercises, and simulations. 👀
 - Fixes #385 default guid 00000000-0000-0000-0000-000000000000 animator NPC bug. 🐛
 - Fixes #384 client path bug. 🐛
