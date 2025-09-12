@@ -1,5 +1,9 @@
 # GHOSTS SHADOWS
 
+**(Shadows is depreciated. See [RangerAI](https://github.com/cmu-sei/rangerai) for all new GHOSTS AI efforts going forward)**.
+
+---
+
 Shadows provides access to a locally-hosted llm for the purposes of GHOSTS agents.
 
 It provides multiple interfaces:
