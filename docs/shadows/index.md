@@ -1,6 +1,10 @@
 # Setting Up Shadows
 
-_Updated on October 30, 2024_
+_Updated on 12 Sept, 2025_
+
+**(Shadows is depreciated. See [RangerAI](https://github.com/cmu-sei/rangerai) for all new GHOSTS AI efforts going forward)**.
+
+---
 
 Shadows provides access to a locally-hosted LLM for various GHOSTS agent purposes. It offers multiple interfaces:
 
