@@ -24,7 +24,7 @@ public class Connection(ClientConfiguration.SocketsSettings options)
     public async Task Run()
     {
         var url = Program.ConfigurationUrls.Socket;
-        Console.WriteLine($"Connecting to {url}...");
+        _log.Trace($"Connecting to {url}...");
         while (_connection == null)
         {
             await EstablishConnection(url);
@@ -34,7 +34,7 @@ public class Connection(ClientConfiguration.SocketsSettings options)
         // Send a message to the server
         while (_connection.State == HubConnectionState.Connected)
         {
-            Console.WriteLine($"Connected to {url}");
+            _log.Trace($"Connected to {url}");
             _ = new Timer(_ =>
             {
                 Task.Run(async () =>
@@ -45,19 +45,19 @@ public class Connection(ClientConfiguration.SocketsSettings options)
                     if (task.Exception != null)
                     {
                         // Log or handle the exception
-                        Console.WriteLine($"Exception in ClientHeartbeat: {task.Exception}");
+                        _log.Error($"Exception in ClientHeartbeat: {task.Exception}");
                     }
                 }, _ct);
             }, null, TimeSpan.Zero, TimeSpan.FromSeconds(options.Heartbeat));
 
             while (true)
             {
-                Console.WriteLine("Peeking into queue...");
+                _log.Trace("Peeking into queue...");
 
                 var item = await Queue.DequeueAsync(_ct);
                 if (item != null)
                 {
-                    Console.WriteLine($"There was a {item.Type} in the queue: {item.Payload}");
+                    _log.Trace($"There was a {item.Type} in the queue: {item.Payload}");
 
                     switch (item.Type)
                     {
@@ -113,33 +113,33 @@ public class Connection(ClientConfiguration.SocketsSettings options)
             }).WithAutomaticReconnect()
             .Build();
 
-        Console.WriteLine($"Connection state: {_connection.State}");
+        _log.Trace($"Connection state: {_connection.State}");
 
         // Define how to handle incoming messages
         _connection.On<string>("ReceiveHeartbeat",
-            (message) => { Console.WriteLine($"Heartbeat {message}"); });
+            (message) => { _log.Trace($"Heartbeat {message}"); });
 
         _connection.On<string>("ReceiveMessage",
-            (message) => { Console.WriteLine($"ALL: {message}"); });
+            (message) => { _log.Trace($"ALL: {message}"); });
 
         _connection.On<string>("ReceiveSpecificMessage",
-            (message) => { Console.WriteLine($"SPECIFIC: {message}"); });
+            (message) => { _log.Trace($"SPECIFIC: {message}"); });
 
         _connection.On<string>("ReceiveId", (id) =>
         {
-            Console.WriteLine($"ID: {id}");
+            _log.Trace($"ID: {id}");
             CheckId.WriteId(id);
         });
 
         _connection.On<TransferLogDump>("ReceiveResults",
-            (message) => { Console.WriteLine($"Results: {message}"); });
+            (message) => { _log.Trace($"Results: {message}"); });
 
         _connection.On<string>("ReceiveSurvey",
-            (message) => { Console.WriteLine($"Survey: {message}"); });
+            (message) => { _log.Trace($"Survey: {message}"); });
 
         _connection.On<string>("ReceiveUpdate", (message) =>
         {
-            Console.WriteLine($"Timeline: {message}");
+            _log.Trace($"Timeline: {message}");
 
             try
             {
@@ -176,14 +176,14 @@ public class Connection(ClientConfiguration.SocketsSettings options)
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed to process timeline: {ex.Message} from {message}");
+                _log.Error($"Failed to process timeline: {ex.Message} from {message}");
             }
         });
 
 
         _connection.Closed += async (error) =>
         {
-            Console.WriteLine($"Connection lost {error}. Trying to reconnect...");
+            _log.Trace($"Connection lost {error}. Trying to reconnect...");
             await EstablishConnection(url); // Call your reconnection method
         };
 
@@ -194,7 +194,7 @@ public class Connection(ClientConfiguration.SocketsSettings options)
         catch (Exception ex)
         {
             if (_attempts > 1)
-                Console.WriteLine($"An error occurred at {url} while connecting: {ex.Message}");
+                _log.Error($"An error occurred at {url} while connecting: {ex.Message}");
         }
     }
 
@@ -212,7 +212,7 @@ public class Connection(ClientConfiguration.SocketsSettings options)
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            _log.Error(e);
         }
     }
 
@@ -225,7 +225,7 @@ public class Connection(ClientConfiguration.SocketsSettings options)
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            _log.Error(e);
         }
     }
 
@@ -237,7 +237,7 @@ public class Connection(ClientConfiguration.SocketsSettings options)
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            _log.Error(e);
         }
     }
 
@@ -249,7 +249,7 @@ public class Connection(ClientConfiguration.SocketsSettings options)
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            _log.Error(e);
         }
     }
 
@@ -261,7 +261,7 @@ public class Connection(ClientConfiguration.SocketsSettings options)
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            _log.Error(e);
         }
     }
 
@@ -273,7 +273,7 @@ public class Connection(ClientConfiguration.SocketsSettings options)
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            _log.Error(e);
         }
     }
 

@@ -125,6 +125,7 @@ public class NpcService(ApplicationDbContext context) : INpcService
                     npc.Team = team.Name;
                     npc.Campaign = config.Campaign;
                     npc.Enclave = enclave.Name;
+                    npc.NpcSocialGraph = new NpcSocialGraph { Id = npc.Id };
 
                     _context.Npcs.Add(npc);
                     createdNpcs.Add(npc);

@@ -15,7 +15,7 @@ using OpenQA.Selenium.Interactions;
 
 namespace Ghosts.Client.Universal.Handlers;
 
-public abstract class BrowserBase(Timeline timeline, TimelineHandler handler, CancellationToken token)
+public abstract class BaseBrowserHandler(Timeline timeline, TimelineHandler handler, CancellationToken token)
     : BaseHandler(timeline, handler, token)
 {
     public IWebDriver Driver { get; set; }
@@ -28,7 +28,7 @@ public abstract class BrowserBase(Timeline timeline, TimelineHandler handler, Ca
     private int _visitedRemember = 5;
     private int _actionsBeforeRestart = -1;
     private LinkManager _linkManager;
-    private int _actionsCount = 0;
+    private int _actionsCount;
     public string BrowserProcessTag { get; set; } //used for killing Linux browser processes
 
     public int BrowseProbability = 100;
