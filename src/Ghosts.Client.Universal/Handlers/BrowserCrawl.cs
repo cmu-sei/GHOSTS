@@ -15,13 +15,13 @@ public class BrowserCrawl(Timeline entireTimeline, TimelineHandler timelineHandl
     : BaseHandler(entireTimeline, timelineHandler, cancellationToken)
 {
     public IWebDriver Driver { get; set; }
-    public IJavaScriptExecutor JS { get; set; }
-    private int _stickiness = 0;
+    public IJavaScriptExecutor Js { get; set; }
+    private int _stickiness;
     private LinkManager _linkManager;
-    private int _pageBrowseCount = 0;
+    private int _pageBrowseCount;
     private string _proxyLocalUrl = string.Empty;
     private int _siteDepthMax = 1;
-    private int _siteDepthCurrent = 0;
+    private int _siteDepthCurrent;
 
     protected override Task RunOnce()
     {

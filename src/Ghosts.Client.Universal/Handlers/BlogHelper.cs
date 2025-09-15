@@ -21,16 +21,15 @@ public abstract partial class BlogHelper : BrowserHelper
     private int _uploadProbability = -1;
     private int _downloadProbability = -1;
     private int _replyProbability = -1;
-    private Credentials _credentials = null;
+    private Credentials _credentials;
     private string _state = "initial";
-    public string site { get; set; } = null;
-    public string header { get; set; } = null;
-    public string username { get; set; } = null;
-    public string password { get; set; } = null;
-    string _version = null;
+    public string site { get; set; }
+    public string header { get; set; }
+    public string username { get; set; }
+    public string password { get; set; }
+    string _version;
 
-    public BlogContentManager contentManager = null;
-
+    public BlogContentManager contentManager;
 
     public static BlogHelper MakeHelper(BaseBrowserHandler callingHandler, IWebDriver callingDriver,
         TimelineHandler handler, Logger tlog)
@@ -153,7 +152,7 @@ public abstract partial class BlogHelper : BrowserHelper
     /// <param name="timelineEvent"></param>
     public void Execute(TimelineHandler handler, TimelineEvent timelineEvent)
     {
-        string credFname = null;
+        string credFname;
         string credentialKey = null;
 
 
@@ -231,9 +230,9 @@ public abstract partial class BlogHelper : BrowserHelper
                     try
                     {
                         _credentials =
-                            JsonConvert.DeserializeObject<Credentials>(System.IO.File.ReadAllText(credFname));
+                            JsonConvert.DeserializeObject<Credentials>(System.IO.File.ReadAllText(credFname ?? string.Empty));
                     }
-                    catch (System.Exception e)
+                    catch (Exception e)
                     {
                         Log.Trace(
                             $"Blog:: Error parsing blog credentials file {credFname} , blog browser action will not be executed.");
@@ -249,9 +248,9 @@ public abstract partial class BlogHelper : BrowserHelper
                     {
                         _credentials =
                             JsonConvert.DeserializeObject<Credentials>(handler.HandlerArgs["blog-credentials"]
-                                .ToString());
+                                .ToString() ?? string.Empty);
                     }
-                    catch (System.Exception e)
+                    catch (Exception e)
                     {
                         Log.Trace(
                             $"Blog:: Error parsing blog credentials , blog browser action will not be executed.");
@@ -273,7 +272,7 @@ public abstract partial class BlogHelper : BrowserHelper
                 //parse the command args
 
 
-                var charSeparators = new char[] { ':' };
+                var charSeparators = new [] { ':' };
                 foreach (var cmd in timelineEvent.CommandArgs)
                 {
                     //each argument string is key:value, parse this
@@ -318,7 +317,6 @@ public abstract partial class BlogHelper : BrowserHelper
                 {
                     header = "http://"; //default header
                 }
-
 
                 if (credentialKey == null)
                 {

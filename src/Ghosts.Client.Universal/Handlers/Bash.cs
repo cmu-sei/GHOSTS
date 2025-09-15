@@ -14,14 +14,14 @@ public class Bash(Timeline timeline, TimelineHandler handler, CancellationToken 
     : BaseHandler(timeline, handler, token)
 {
     private int _executionProbability = 100;
-    private int _jitterFactor { get; set; } = 0; //used with Jitter.JitterFactorDelay
+    private int _jitterFactor { get; set; } //used with Jitter.JitterFactorDelay
 
     protected override Task RunOnce()
     {
         if (this.Handler.HandlerArgs.TryGetValue("execution-probability", out var v1))
         {
             int.TryParse(v1.ToString(), out _executionProbability);
-            if (_executionProbability < 0 || _executionProbability > 100) _executionProbability = 100;
+            if (_executionProbability is < 0 or > 100) _executionProbability = 100;
         }
 
         if (this.Handler.HandlerArgs.TryGetValue("delay-jitter", out var v2))

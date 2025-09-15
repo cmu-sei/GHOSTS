@@ -28,7 +28,7 @@ public abstract class BaseBrowserHandler(Timeline timeline, TimelineHandler hand
     private int _visitedRemember = 5;
     private int _actionsBeforeRestart = -1;
     private LinkManager _linkManager;
-    private int _actionsCount = 0;
+    private int _actionsCount;
     public string BrowserProcessTag { get; set; } //used for killing Linux browser processes
 
     public int BrowseProbability = 100;
