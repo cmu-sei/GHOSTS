@@ -15,7 +15,7 @@ using OpenQA.Selenium.Interactions;
 
 namespace Ghosts.Client.Universal.Handlers;
 
-public abstract class BrowserBase(Timeline timeline, TimelineHandler handler, CancellationToken token)
+public abstract class BaseBrowserHandler(Timeline timeline, TimelineHandler handler, CancellationToken token)
     : BaseHandler(timeline, handler, token)
 {
     public IWebDriver Driver { get; set; }
