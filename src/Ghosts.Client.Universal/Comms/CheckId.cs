@@ -53,7 +53,7 @@ public class CheckId
                 {
                     _log.Warn($"ID file not found at path: {_idFile}");
 
-                    if (DateTime.Now > _lastChecked.AddMinutes(5))
+                    if (DateTime.Now < _lastChecked.AddMinutes(5))
                     {
                         _log.Error("Skipping check for ID from server due to recent check within 5 minutes.");
                         return string.Empty;
@@ -61,7 +61,7 @@ public class CheckId
 
                     _log.Info("Attempting to retrieve ID from server.");
                     _lastChecked = DateTime.Now;
-                    _id = Run().GetAwaiter().GetResult(); //todo: cringe :)
+                    _id = Task.Run(async () => await Run()).GetAwaiter().GetResult();
 
                     if (string.IsNullOrEmpty(_id))
                     {
