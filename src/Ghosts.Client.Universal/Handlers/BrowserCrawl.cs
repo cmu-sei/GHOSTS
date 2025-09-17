@@ -119,7 +119,7 @@ public class BrowserCrawl(Timeline entireTimeline, TimelineHandler timelineHandl
                 var node = l.GetAttribute("href");
                 if (string.IsNullOrEmpty(node))
                     continue;
-                node = node.ToLower();
+                node = node.ToLowerInvariant();
                 if (isInIframe && !string.IsNullOrEmpty(_proxyLocalUrl))
                     node = _proxyLocalUrl + node;
                 if (Uri.TryCreate(node, UriKind.RelativeOrAbsolute, out var uri))

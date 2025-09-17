@@ -655,7 +655,7 @@ public abstract partial class SharepointHelper : BrowserHelper
                 }
 
                 //check if site starts with http:// or https://
-                site = site.ToLower();
+                site = site.ToLowerInvariant();
                 header = null;
                 Regex rx = MyRegex();
                 var match = rx.Matches(site);

@@ -257,7 +257,7 @@ public class BrowserFirefox(Timeline timeline, TimelineHandler handler, Cancella
 
             if (handler.HandlerArgs.ContainsKey("ua-string"))
             {
-                switch (handler.HandlerArgs["ua-string"].ToString()?.ToLower())
+                switch (handler.HandlerArgs["ua-string"].ToString()?.ToLowerInvariant())
                 {
                     case "random":
                         options.SetPreference("general.useragent.override", UserAgentManager.Get());

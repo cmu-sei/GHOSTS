@@ -802,7 +802,7 @@ public abstract class OutlookHelper : BrowserHelper
                 Thread.Sleep(300);
             }
 
-            if (emailConfig.Subject == null || emailConfig.Subject == "")
+            if (string.IsNullOrEmpty(emailConfig.Subject))
             {
                 // do not have an empty subject
                 targetElement.SendKeys("Attention All");
@@ -1174,9 +1174,9 @@ public abstract class OutlookHelper : BrowserHelper
     {
         var settings = Program.Configuration.Email;
         string[] EmailNoReply = null;
-        if (settings.EmailNoReply != null && settings.EmailNoReply != "")
+        if (!string.IsNullOrEmpty(settings.EmailNoReply))
         {
-            EmailNoReply = settings.EmailNoReply.ToLower().Split(',');
+            EmailNoReply = settings.EmailNoReply.ToLowerInvariant().Split(',');
         }
 
         var emailElements = Driver.FindElements(By.XPath(EmailXpath));

@@ -160,7 +160,7 @@ public class Curl(Timeline entireTimeline, TimelineHandler timelineHandler, Canc
             {
                 //get all links from results
                 var doc = new HtmlDocument();
-                doc.LoadHtml(Result.ToLower());
+                doc.LoadHtml(Result.ToLowerInvariant());
 
                 var nodes = doc.DocumentNode.SelectNodes("//a");
                 if (nodes == null || nodes.Count == 0)
@@ -182,12 +182,12 @@ public class Curl(Timeline entireTimeline, TimelineHandler timelineHandler, Canc
                     else if (node.Attributes["href"].Value
                              .StartsWith("http", StringComparison.CurrentCultureIgnoreCase))
                     {
-                        linkManager.AddLink(new Uri(node.Attributes["href"].Value.ToLower()), 1);
+                        linkManager.AddLink(new Uri(node.Attributes["href"].Value.ToLowerInvariant()), 1);
                     }
                     // relative links - prefix the scheme and host
                     else
                     {
-                        linkManager.AddLink(new Uri($"{_currentHost}{node.Attributes["href"].Value.ToLower()}"), 2);
+                        linkManager.AddLink(new Uri($"{_currentHost}{node.Attributes["href"].Value.ToLowerInvariant()}"), 2);
                     }
                 }
 

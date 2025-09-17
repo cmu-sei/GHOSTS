@@ -698,7 +698,7 @@ public abstract class BaseBrowserHandler(Timeline timeline, TimelineHandler hand
             config.Uri = targetUri; //set this so that can print out info on return
 
 
-            if (targetUri.ToString().ToLower().EndsWith(".htm") || targetUri.ToString().ToLower().EndsWith(".html"))
+            if (targetUri.ToString().EndsWith(".htm", StringComparison.OrdinalIgnoreCase) || targetUri.ToString().EndsWith(".html", StringComparison.OrdinalIgnoreCase))
             {
                 Driver.Navigate().GoToUrl(targetUri);
             }
@@ -838,7 +838,7 @@ public abstract class BaseBrowserHandler(Timeline timeline, TimelineHandler hand
         // but in other versions it seems to fail gracefully. We want to always fail gracefully
         try
         {
-            switch (config.Method.ToUpper())
+            switch (config.Method.ToUpperInvariant())
             {
                 case "GET":
                     Driver.Navigate().GoToUrl(config.Uri);
@@ -848,7 +848,7 @@ public abstract class BaseBrowserHandler(Timeline timeline, TimelineHandler hand
                 case "DELETE":
                     Driver.Navigate().GoToUrl("about:blank");
                     var script = "var xhr = new XMLHttpRequest();";
-                    script += $"xhr.open('{config.Method.ToUpper()}', '{config.Uri}', true);";
+                    script += $"xhr.open('{config.Method.ToUpperInvariant()}', '{config.Uri}', true);";
                     script += "xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');";
                     script += "xhr.onload = function() {";
                     script += "document.write(this.responseText);";
