@@ -1,0 +1,164 @@
+@{
+    Layout = null;
+}
+@model Socializer.Infrastructure.Post
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@Model.User on Instagram</title>
+    <link rel="stylesheet" href="/themes/instagram/css/feed.css">
+    <link rel="icon" href="/themes/instagram/images/instagram-icon.png">
+</head>
+<body>
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-container">
+                <div class="logo">
+                    <img src="/themes/instagram/images/instagram-logo.png" alt="Instagram" class="instagram-logo">
+                </div>
+                <div class="search-container">
+                    <div class="search-box">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" placeholder="Search" class="search-input">
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button class="action-btn">🏠</button>
+                    <button class="action-btn">💬</button>
+                    <button class="action-btn">➕</button>
+                    <button class="action-btn">🧭</button>
+                    <button class="action-btn">❤️</button>
+                    <div class="profile-menu">
+                        <img src="/u/@ViewBag.UserId/avatar" alt="Profile" class="header-avatar">
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-container">
+            <!-- Post Detail -->
+            <div class="post-detail">
+                <div class="post" data-post-id="@Model.Id">
+                    <!-- Post Header -->
+                    <div class="post-header">
+                        <div class="post-user-info">
+                            <img src="/u/@Model.User/avatar" alt="@Model.User" class="user-avatar">
+                            <div class="user-details">
+                                <div class="username">@Model.User</div>
+                                <div class="location">📍 Location</div>
+                            </div>
+                        </div>
+                        <button class="more-options">⋯</button>
+                    </div>
+
+                    <!-- Post Image/Content -->
+                    <div class="post-image-container">
+                        @if(!string.IsNullOrEmpty(Model.ImageUrl))
+                        {
+                            <img src="@Model.ImageUrl" alt="Post image" class="post-image">
+                        }
+                        else
+                        {
+                            <div class="post-placeholder">
+                                <span class="placeholder-icon">📷</span>
+                                <p class="placeholder-text">No image available</p>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Post Actions -->
+                    <div class="post-actions">
+                        <div class="action-buttons">
+                            <button class="action-btn like-btn" data-id="@Model.Id">❤️</button>
+                            <button class="action-btn comment-btn">💬</button>
+                            <button class="action-btn share-btn">📤</button>
+                        </div>
+                        <button class="action-btn bookmark-btn">🔖</button>
+                    </div>
+
+                    <!-- Post Stats -->
+                    <div class="post-stats">
+                        <div class="likes-count">
+                            @{
+                                var likesCount = Model.Likes?.Count ?? 0;
+                                if (likesCount > 0)
+                                {
+                                    <span><strong>@likesCount likes</strong></span>
+                                }
+                                else
+                                {
+                                    <span><strong>0 likes</strong></span>
+                                }
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Post Caption -->
+                    <div class="post-caption">
+                        <span class="username">@Model.User</span>
+                        <span class="caption-text">@Html.Raw(Model.Message)</span>
+                    </div>
+
+                    <!-- Post Time -->
+                    <div class="post-time">
+                        <time datetime="@Model.CreatedUtc">@Model.CreatedUtc.ToString("MMMM d, yyyy")</time>
+                    </div>
+                </div>
+
+                <!-- Comments Section -->
+                <div class="comments-section">
+                    <div class="comments-header">
+                        <h3>Comments</h3>
+                    </div>
+
+                    <!-- Add Comment -->
+                    <div class="add-comment">
+                        <img src="/u/@ViewBag.UserId/avatar" alt="Your avatar" class="comment-avatar">
+                        <input type="text" placeholder="Add a comment..." class="comment-input">
+                        <button class="comment-post-btn">Post</button>
+                    </div>
+
+                    <!-- Comments List -->
+                    <div class="comments-list">
+                        @if (Model.Comments != null && Model.Comments.Any())
+                        {
+                            @foreach (var comment in Model.Comments)
+                            {
+                                <div class="comment">
+                                    <img src="/u/@comment.UserId/avatar" alt="@comment.UserId" class="comment-avatar">
+                                    <div class="comment-content">
+                                        <div class="comment-text">
+                                            <span class="comment-username">@comment.UserId</span>
+                                            <span class="comment-message">@comment.Message</span>
+                                        </div>
+                                        <div class="comment-actions">
+                                            <span class="comment-time">@comment.CreatedUtc.ToString("MMM d")</span>
+                                            <button class="comment-like">Like</button>
+                                            <button class="comment-reply">Reply</button>
+                                        </div>
+                                    </div>
+                                    <button class="comment-like-btn">❤️</button>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="no-comments">
+                                <p>No comments yet.</p>
+                                <p>Start the conversation.</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/themes/instagram/js/instagram.js"></script>
+</body>
+</html>
