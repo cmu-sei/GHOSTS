@@ -14,8 +14,12 @@ public class UsersController(ILogger logger, IHubContext<PostsHub> hubContext, D
     [HttpGet("{userId}")]
     public new virtual IActionResult User(string userId)
     {
-        var posts = Db.Posts.Include(x => x.Likes).Where(x => x.User.Equals(userId, StringComparison.CurrentCultureIgnoreCase)).OrderByDescending(x => x.CreatedUtc)
-            .Take(Program.Configuration.DefaultDisplay).ToList();
+        var posts = Db.Posts
+            .Include(x => x.Likes)
+            .Where(x => x.User.ToLower() == userId.ToLower())
+            .OrderByDescending(x => x.CreatedUtc)
+            .Take(Program.Configuration.DefaultDisplay)
+            .ToList();
 
         ViewBag.User = userId;
         return View("Index", posts);

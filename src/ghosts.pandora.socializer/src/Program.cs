@@ -19,24 +19,33 @@ class Program
         Configuration = ApplicationConfigurationLoader.Load();
         var logger = app.Services.GetRequiredService<ILogger<Program>>();
         logger.LogInformation(ApplicationDetails.Header);
-        logger.LogInformation("GHOSTS SOCIALIZER {Version} ({VersionFile}) coming online...",
-            ApplicationDetails.Version, ApplicationDetails.VersionFile);
+        logger.LogInformation(
+            "GHOSTS SOCIALIZER {Version} ({VersionFile}) coming online...",
+            ApplicationDetails.Version, ApplicationDetails.VersionFile
+        );
+
         app.Run();
     }
 
     private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {
         services.AddDbContext<DataContext>();
-        services.AddRazorPages().AddRazorRuntimeCompilation();
-        services.AddControllersWithViews();
+
+        services
+            .AddControllersWithViews()
+            .AddRazorRuntimeCompilation()
+            .AddRazorOptions(opts =>
+            {
+                opts.ViewLocationExpanders.Add(new ThemeViewLocationExpander());
+            });
+
         services.AddSignalR();
-
-        services.AddSingleton<ILogger>(provider =>
-            LoggerFactory.Create(config => config.AddConsole()).CreateLogger("Program"));
-
         services.AddHostedService<CleanupService>();
 
-        // Optionally, add more service configurations here
+        services.AddSingleton<ILogger>(provider =>
+            LoggerFactory
+                .Create(config => config.AddConsole())
+                .CreateLogger("Program"));
     }
 
     private static void ConfigureMiddleware(WebApplication app)
@@ -48,10 +57,13 @@ class Program
 
         app.UseEndpoints(endpoints =>
         {
-            endpoints.MapControllers();
+            // MVC route
+            endpoints.MapControllerRoute(
+                name: "default",
+                pattern: "{controller=Home}/{action=Index}/{id?}");
+
+            // SignalR
             endpoints.MapHub<PostsHub>("/hubs/posts");
         });
-
-        // Optionally, add more middleware configurations here
     }
 }

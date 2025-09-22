@@ -1,0 +1,274 @@
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sarah Wilson's Post - Facebook</title>
+    <link rel="stylesheet" href="/themes/facebook/css/facebook.css">
+    <link rel="icon" href="/themes/facebook/images/facebook-icon.png" type="image/png">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <a href="/" class="logo">facebook</a>
+            <input type="text" class="search-bar" placeholder="Search Facebook">
+        </div>
+
+        <div class="header-center">
+            <a href="/" class="nav-item">🏠</a>
+            <a href="#" class="nav-item">📺</a>
+            <a href="#" class="nav-item">🛍️</a>
+            <a href="#" class="nav-item">👥</a>
+            <a href="#" class="nav-item">🎮</a>
+        </div>
+
+        <div class="header-right">
+            <button class="icon-btn">⊕</button>
+            <button class="icon-btn">💬</button>
+            <button class="icon-btn">🔔</button>
+            <img src="/themes/facebook/images/profile-pic.jpg" alt="Profile" class="profile-pic">
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Post Detail -->
+        <div class="post-detail">
+            <!-- Main Post -->
+            <article class="post" data-post-id="1">
+                <div class="post-header">
+                    <div class="post-user-info">
+                        <img src="/themes/facebook/images/friend1.jpg" alt="Sarah Wilson" class="profile-pic">
+                        <div>
+                            <div class="post-user-name">Sarah Wilson</div>
+                            <div class="post-time">2 hours ago · 🌍</div>
+                        </div>
+                    </div>
+                    <button class="post-menu">⋯</button>
+                </div>
+                <div class="post-content">
+                    <div class="post-text">Just had an amazing day at the beach! The sunset was absolutely breathtaking. Sometimes you need to take a step back and appreciate the beautiful moments in life. 🌅✨
+
+There's something magical about watching the sun dip below the horizon, painting the sky in brilliant oranges and pinks. The waves gently lapping at the shore, the warm sand beneath your feet, and the salty breeze in your hair - it's moments like these that remind me how beautiful our world truly is.
+
+I spent hours just sitting there, watching the colors change and listening to the rhythm of the ocean. It's incredible how nature has this way of putting everything into perspective. All the stress and worries of daily life just seemed to melt away.
+
+Feeling grateful for these peaceful moments and excited to share this beautiful view with all of you! ✨</div>
+                    <img src="/themes/facebook/images/beach-sunset.jpg" alt="Beach sunset" class="post-image">
+                </div>
+                <div class="post-stats">
+                    <span>👍❤️😊 245 people liked this</span>
+                    <span>23 comments · 8 shares</span>
+                </div>
+                <div class="post-actions">
+                    <button class="post-action like-btn liked" data-action="like">👍 Like</button>
+                    <button class="post-action comment-btn" data-action="comment">💬 Comment</button>
+                    <button class="post-action share-btn" data-action="share">📤 Share</button>
+                </div>
+            </article>
+
+            <!-- Comments Section -->
+            <div class="comments-section">
+                <!-- Comment Input -->
+                <div class="comment-input">
+                    <img src="/themes/facebook/images/profile-pic.jpg" alt="Your profile" class="profile-pic">
+                    <input type="text" placeholder="Write a comment...">
+                    <button style="margin-left: 8px; background: none; border: none; color: #1877f2; cursor: pointer;">😊</button>
+                    <button style="margin-left: 4px; background: none; border: none; color: #1877f2; cursor: pointer;">📷</button>
+                </div>
+
+                <!-- Comments -->
+                <div class="comment">
+                    <img src="/themes/facebook/images/friend2.jpg" alt="Mike Johnson" class="profile-pic">
+                    <div>
+                        <div class="comment-content">
+                            <div class="comment-author">Mike Johnson</div>
+                            <div class="comment-text">Absolutely stunning! 😍 There's nothing quite like a beach sunset. Thanks for sharing this beautiful moment with us!</div>
+                        </div>
+                        <div class="comment-actions">
+                            <a href="#" class="comment-action">Like</a>
+                            <a href="#" class="comment-action">Reply</a>
+                            <span style="color: #65676b; font-size: 12px;">1h</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="comment">
+                    <img src="/themes/facebook/images/friend3.jpg" alt="Emma Davis" class="profile-pic">
+                    <div>
+                        <div class="comment-content">
+                            <div class="comment-author">Emma Davis</div>
+                            <div class="comment-text">This is gorgeous! 🌅 I need to visit the beach soon. Where is this beautiful spot?</div>
+                        </div>
+                        <div class="comment-actions">
+                            <a href="#" class="comment-action">Like</a>
+                            <a href="#" class="comment-action">Reply</a>
+                            <span style="color: #65676b; font-size: 12px;">45m</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reply to Emma -->
+                <div class="comment" style="margin-left: 40px;">
+                    <img src="/themes/facebook/images/friend1.jpg" alt="Sarah Wilson" class="profile-pic">
+                    <div>
+                        <div class="comment-content">
+                            <div class="comment-author">Sarah Wilson</div>
+                            <div class="comment-text">Emma Davis This was taken at Malibu Beach! Highly recommend going there for sunset - it's absolutely magical ✨</div>
+                        </div>
+                        <div class="comment-actions">
+                            <a href="#" class="comment-action">Like</a>
+                            <a href="#" class="comment-action">Reply</a>
+                            <span style="color: #65676b; font-size: 12px;">30m</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="comment">
+                    <img src="/themes/facebook/images/friend4.jpg" alt="Alex Smith" class="profile-pic">
+                    <div>
+                        <div class="comment-content">
+                            <div class="comment-author">Alex Smith</div>
+                            <div class="comment-text">Nature's masterpiece! 🎨 The colors in this photo are incredible. You captured it perfectly!</div>
+                        </div>
+                        <div class="comment-actions">
+                            <a href="#" class="comment-action">Like</a>
+                            <a href="#" class="comment-action">Reply</a>
+                            <span style="color: #65676b; font-size: 12px;">20m</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="comment">
+                    <img src="/themes/facebook/images/friend5.jpg" alt="Lisa Brown" class="profile-pic">
+                    <div>
+                        <div class="comment-content">
+                            <div class="comment-author">Lisa Brown</div>
+                            <div class="comment-text">So peaceful and beautiful! 🌊 I can almost feel the ocean breeze just looking at this. Thanks for the reminder to slow down and appreciate these moments.</div>
+                        </div>
+                        <div class="comment-actions">
+                            <a href="#" class="comment-action">Like</a>
+                            <a href="#" class="comment-action">Reply</a>
+                            <span style="color: #65676b; font-size: 12px;">15m</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="comment">
+                    <img src="/themes/facebook/images/friend6.jpg" alt="Tom Wilson" class="profile-pic">
+                    <div>
+                        <div class="comment-content">
+                            <div class="comment-author">Tom Wilson</div>
+                            <div class="comment-text">Amazing shot! 📸 The lighting and composition are perfect. You should definitely consider photography more seriously!</div>
+                        </div>
+                        <div class="comment-actions">
+                            <a href="#" class="comment-action">Like</a>
+                            <a href="#" class="comment-action">Reply</a>
+                            <span style="color: #65676b; font-size: 12px;">10m</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="comment">
+                    <img src="/themes/facebook/images/profile-pic.jpg" alt="John Doe" class="profile-pic">
+                    <div>
+                        <div class="comment-content">
+                            <div class="comment-author">John Doe</div>
+                            <div class="comment-text">Beautiful capture, Sarah! 😊 This makes me want to plan a beach trip soon. There's something so calming about watching the sunset by the ocean.</div>
+                        </div>
+                        <div class="comment-actions">
+                            <a href="#" class="comment-action">Like</a>
+                            <a href="#" class="comment-action">Reply</a>
+                            <span style="color: #65676b; font-size: 12px;">5m</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="comment">
+                    <img src="/themes/facebook/images/friend7.jpg" alt="Jessica Taylor" class="profile-pic">
+                    <div>
+                        <div class="comment-content">
+                            <div class="comment-author">Jessica Taylor</div>
+                            <div class="comment-text">This is why I love following your adventures! 🌟 You always find the most beautiful spots and capture them so well. Keep sharing these amazing moments!</div>
+                        </div>
+                        <div class="comment-actions">
+                            <a href="#" class="comment-action">Like</a>
+                            <a href="#" class="comment-action">Reply</a>
+                            <span style="color: #65676b; font-size: 12px;">2m</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Show more comments -->
+                <div style="padding: 16px; text-align: center;">
+                    <a href="#" style="color: #1877f2; text-decoration: none; font-weight: 600;">View 15 more comments</a>
+                </div>
+            </div>
+
+            <!-- Related Posts -->
+            <div style="margin-top: 32px;">
+                <h3 style="color: #65676b; margin-bottom: 16px; padding: 0 16px;">More posts from Sarah Wilson</h3>
+
+                <article class="post" data-post-id="9">
+                    <div class="post-header">
+                        <div class="post-user-info">
+                            <img src="/themes/facebook/images/friend1.jpg" alt="Sarah Wilson" class="profile-pic">
+                            <div>
+                                <div class="post-user-name">Sarah Wilson</div>
+                                <div class="post-time">1 day ago · 🌍</div>
+                            </div>
+                        </div>
+                        <button class="post-menu">⋯</button>
+                    </div>
+                    <div class="post-content">
+                        <div class="post-text">Morning hike completed! 🥾 There's no better way to start the day than with fresh air and beautiful views. The trail was challenging but so rewarding!</div>
+                        <img src="/themes/facebook/images/hiking-trail.jpg" alt="Hiking trail" class="post-image">
+                    </div>
+                    <div class="post-stats">
+                        <span>👍💪🏔️ 189 people</span>
+                        <span>31 comments · 6 shares</span>
+                    </div>
+                    <div class="post-actions">
+                        <button class="post-action like-btn" data-action="like">👍 Like</button>
+                        <button class="post-action comment-btn" data-action="comment">💬 Comment</button>
+                        <button class="post-action share-btn" data-action="share">📤 Share</button>
+                    </div>
+                </article>
+
+                <article class="post" data-post-id="10">
+                    <div class="post-header">
+                        <div class="post-user-info">
+                            <img src="/themes/facebook/images/friend1.jpg" alt="Sarah Wilson" class="profile-pic">
+                            <div>
+                                <div class="post-user-name">Sarah Wilson</div>
+                                <div class="post-time">3 days ago · 👥</div>
+                            </div>
+                        </div>
+                        <button class="post-menu">⋯</button>
+                    </div>
+                    <div class="post-content">
+                        <div class="post-text">Trying out a new recipe today! 👩‍🍳 Homemade pasta with fresh herbs from my garden. Cooking has become such a therapeutic hobby for me lately.</div>
+                        <img src="/themes/facebook/images/homemade-pasta.jpg" alt="Homemade pasta" class="post-image">
+                    </div>
+                    <div class="post-stats">
+                        <span>👍😋🍝 156 people</span>
+                        <span>22 comments · 4 shares</span>
+                    </div>
+                    <div class="post-actions">
+                        <button class="post-action like-btn" data-action="like">👍 Like</button>
+                        <button class="post-action comment-btn" data-action="comment">💬 Comment</button>
+                        <button class="post-action share-btn" data-action="share">📤 Share</button>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </div>
+
+    <script src="/themes/facebook/js/facebook.js"></script>
+</body>
+</html>

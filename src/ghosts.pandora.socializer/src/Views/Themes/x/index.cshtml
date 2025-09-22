@@ -1,0 +1,275 @@
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home / X</title>
+    <link rel="stylesheet" href="/themes/x/css/feed.css">
+    <link rel="icon" href="/themes/x/images/x-icon.png">
+</head>
+<body>
+    <div class="app">
+        <!-- Left Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-content">
+                <div class="logo">
+                    <img src="/themes/images/x-logo.png" alt="X" class="x-logo">
+                </div>
+                <nav class="nav-menu">
+                    <a href="feed.html" class="nav-item active">
+                        <span class="nav-icon">🏠</span>
+                        <span class="nav-text">Home</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <span class="nav-icon">🔍</span>
+                        <span class="nav-text">Explore</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <span class="nav-icon">🔔</span>
+                        <span class="nav-text">Notifications</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <span class="nav-icon">✉️</span>
+                        <span class="nav-text">Messages</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <span class="nav-icon">🔖</span>
+                        <span class="nav-text">Bookmarks</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <span class="nav-icon">👥</span>
+                        <span class="nav-text">Communities</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <span class="nav-icon">❌</span>
+                        <span class="nav-text">Premium</span>
+                    </a>
+                    <a href="profile.html" class="nav-item">
+                        <span class="nav-icon">👤</span>
+                        <span class="nav-text">Profile</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <span class="nav-icon">⋯</span>
+                        <span class="nav-text">More</span>
+                    </a>
+                </nav>
+                <button class="post-button">Post</button>
+            </div>
+            <div class="user-info">
+                <img src="/themes/images/profile-avatar.jpg" alt="Profile" class="user-avatar">
+                <div class="user-details">
+                    <div class="username">John Doe</div>
+                    <div class="handle">##johndoe</div>
+                </div>
+                <span class="more-options">⋯</span>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="content-wrapper">
+                <!-- Header -->
+                <div class="header">
+                    <h1>Home</h1>
+                    <div class="header-tabs">
+                        <div class="tab active">For you</div>
+                        <div class="tab">Following</div>
+                    </div>
+                </div>
+
+                <!-- Compose Tweet -->
+                <div class="compose-section">
+                    <img src="/themes/images/profile-avatar.jpg" alt="Profile" class="compose-avatar">
+                    <div class="compose-content">
+                        <textarea placeholder="What is happening?!" class="compose-textarea"></textarea>
+                        <div class="compose-actions">
+                            <div class="compose-options">
+                                <button class="compose-option">📷</button>
+                                <button class="compose-option">🎥</button>
+                                <button class="compose-option">📊</button>
+                                <button class="compose-option">😊</button>
+                                <button class="compose-option">📅</button>
+                                <button class="compose-option">📍</button>
+                            </div>
+                            <button class="post-btn" disabled>Post</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feed -->
+                <div class="feed">
+                    <!-- Tweet 1 -->
+                    <div class="tweet">
+                        <img src="/themes/images/user1-avatar.jpg" alt="User" class="tweet-avatar">
+                        <div class="tweet-content">
+                            <div class="tweet-header">
+                                <span class="tweet-name">Alice Johnson</span>
+                                <span class="tweet-handle">##alicej</span>
+                                <span class="tweet-time">· 2h</span>
+                                <span class="tweet-more">⋯</span>
+                            </div>
+                            <div class="tweet-text">
+                                Just shipped a new feature! The team worked incredibly hard on this. Excited to see how users respond 🚀
+                            </div>
+                            <div class="tweet-actions">
+                                <button class="action-btn">
+                                    <span class="action-icon">💬</span>
+                                    <span class="action-count">12</span>
+                                </button>
+                                <button class="action-btn">
+                                    <span class="action-icon">🔄</span>
+                                    <span class="action-count">45</span>
+                                </button>
+                                <button class="action-btn">
+                                    <span class="action-icon">❤️</span>
+                                    <span class="action-count">128</span>
+                                </button>
+                                <button class="action-btn">
+                                    <span class="action-icon">📊</span>
+                                    <span class="action-count">1.2k</span>
+                                </button>
+                                <button class="action-btn">
+                                    <span class="action-icon">📤</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tweet 2 -->
+                    <div class="tweet">
+                        <img src="/themes/images/user2-avatar.jpg" alt="User" class="tweet-avatar">
+                        <div class="tweet-content">
+                            <div class="tweet-header">
+                                <span class="tweet-name">Tech News</span>
+                                <span class="tweet-handle">##technews</span>
+                                <span class="tweet-verified">✓</span>
+                                <span class="tweet-time">· 4h</span>
+                                <span class="tweet-more">⋯</span>
+                            </div>
+                            <div class="tweet-text">
+                                Breaking: Major tech company announces revolutionary AI breakthrough that could change everything
+                            </div>
+                            <div class="tweet-media">
+                                <img src="/themes/images/tech-news.jpg" alt="Tech news" class="tweet-image">
+                            </div>
+                            <div class="tweet-actions">
+                                <button class="action-btn">
+                                    <span class="action-icon">💬</span>
+                                    <span class="action-count">324</span>
+                                </button>
+                                <button class="action-btn">
+                                    <span class="action-icon">🔄</span>
+                                    <span class="action-count">892</span>
+                                </button>
+                                <button class="action-btn">
+                                    <span class="action-icon">❤️</span>
+                                    <span class="action-count">2.1k</span>
+                                </button>
+                                <button class="action-btn">
+                                    <span class="action-icon">📊</span>
+                                    <span class="action-count">15k</span>
+                                </button>
+                                <button class="action-btn">
+                                    <span class="action-icon">📤</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tweet 3 -->
+                    <div class="tweet">
+                        <img src="/themes/images/user3-avatar.jpg" alt="User" class="tweet-avatar">
+                        <div class="tweet-content">
+                            <div class="tweet-header">
+                                <span class="tweet-name">Design Inspiration</span>
+                                <span class="tweet-handle">##designinspo</span>
+                                <span class="tweet-time">· 6h</span>
+                                <span class="tweet-more">⋯</span>
+                            </div>
+                            <div class="tweet-text">
+                                Beautiful UI animation concepts that every designer should see 🎨
+                                <br><br>
+                                Thread 🧵 👇
+                            </div>
+                            <div class="tweet-actions">
+                                <button class="action-btn">
+                                    <span class="action-icon">💬</span>
+                                    <span class="action-count">67</span>
+                                </button>
+                                <button class="action-btn">
+                                    <span class="action-icon">🔄</span>
+                                    <span class="action-count">234</span>
+                                </button>
+                                <button class="action-btn">
+                                    <span class="action-icon">❤️</span>
+                                    <span class="action-count">456</span>
+                                </button>
+                                <button class="action-btn">
+                                    <span class="action-icon">📊</span>
+                                    <span class="action-count">3.2k</span>
+                                </button>
+                                <button class="action-btn">
+                                    <span class="action-icon">📤</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Sidebar -->
+        <div class="right-sidebar">
+            <div class="search-bar">
+                <input type="text" placeholder="Search">
+                <span class="search-icon">🔍</span>
+            </div>
+
+            <div class="trending-section">
+                <h2>What's happening</h2>
+                <div class="trending-item">
+                    <div class="trending-category">Technology · Trending</div>
+                    <div class="trending-topic">AI Revolution</div>
+                    <div class="trending-posts">125k posts</div>
+                </div>
+                <div class="trending-item">
+                    <div class="trending-category">Sports · Trending</div>
+                    <div class="trending-topic">World Cup</div>
+                    <div class="trending-posts">89.2k posts</div>
+                </div>
+                <div class="trending-item">
+                    <div class="trending-category">Entertainment · Trending</div>
+                    <div class="trending-topic">New Movie</div>
+                    <div class="trending-posts">45.7k posts</div>
+                </div>
+            </div>
+
+            <div class="suggestions-section">
+                <h2>Who to follow</h2>
+                <div class="suggestion-item">
+                    <img src="/themes/images/suggested1.jpg" alt="User" class="suggestion-avatar">
+                    <div class="suggestion-info">
+                        <div class="suggestion-name">Jane Smith</div>
+                        <div class="suggestion-handle">##janesmith</div>
+                    </div>
+                    <button class="follow-btn">Follow</button>
+                </div>
+                <div class="suggestion-item">
+                    <img src="/themes/images/suggested2.jpg" alt="User" class="suggestion-avatar">
+                    <div class="suggestion-info">
+                        <div class="suggestion-name">Tech Guru</div>
+                        <div class="suggestion-handle">##techguru</div>
+                    </div>
+                    <button class="follow-btn">Follow</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/themes/x/js/feed.js"></script>
+</body>
+</html>

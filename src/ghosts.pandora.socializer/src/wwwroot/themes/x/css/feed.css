@@ -1,0 +1,544 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: #000;
+    color: #e7e9ea;
+    line-height: 1.4;
+}
+
+.app {
+    display: flex;
+    min-height: 100vh;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Left Sidebar */
+.sidebar {
+    width: 275px;
+    padding: 20px;
+    border-right: 1px solid #2f3336;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-content {
+    flex: 1;
+}
+
+.logo {
+    margin-bottom: 30px;
+}
+
+.x-logo {
+    width: 30px;
+    height: 30px;
+}
+
+.nav-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    border-radius: 9999px;
+    color: #e7e9ea;
+    text-decoration: none;
+    font-size: 20px;
+    font-weight: 400;
+    transition: background-color 0.2s;
+}
+
+.nav-item:hover {
+    background-color: rgba(231, 233, 234, 0.1);
+}
+
+.nav-item.active {
+    font-weight: 700;
+}
+
+.nav-icon {
+    margin-right: 20px;
+    font-size: 24px;
+}
+
+.post-button {
+    background-color: #1d9bf0;
+    color: white;
+    border: none;
+    border-radius: 9999px;
+    padding: 16px 32px;
+    font-size: 17px;
+    font-weight: 700;
+    margin-top: 30px;
+    cursor: pointer;
+    width: 100%;
+    transition: background-color 0.2s;
+}
+
+.post-button:hover {
+    background-color: #1a8cd8;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    border-radius: 9999px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.user-info:hover {
+    background-color: rgba(231, 233, 234, 0.1);
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 12px;
+}
+
+.user-details {
+    flex: 1;
+}
+
+.username {
+    font-weight: 700;
+    font-size: 15px;
+}
+
+.handle {
+    color: #71767b;
+    font-size: 15px;
+}
+
+.more-options {
+    color: #71767b;
+    font-size: 20px;
+}
+
+/* Main Content */
+.main-content {
+    flex: 1;
+    max-width: 600px;
+    border-right: 1px solid #2f3336;
+}
+
+.content-wrapper {
+    min-height: 100vh;
+}
+
+.header {
+    position: sticky;
+    top: 0;
+    background-color: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid #2f3336;
+    padding: 16px;
+    z-index: 100;
+}
+
+.header h1 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 16px;
+}
+
+.header-tabs {
+    display: flex;
+}
+
+.tab {
+    flex: 1;
+    text-align: center;
+    padding: 16px;
+    font-weight: 500;
+    color: #71767b;
+    cursor: pointer;
+    position: relative;
+}
+
+.tab.active {
+    color: #e7e9ea;
+    font-weight: 700;
+}
+
+.tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 4px;
+    background-color: #1d9bf0;
+    border-radius: 2px;
+}
+
+/* Compose Section */
+.compose-section {
+    display: flex;
+    padding: 16px;
+    border-bottom: 1px solid #2f3336;
+    gap: 12px;
+}
+
+.compose-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+}
+
+.compose-content {
+    flex: 1;
+}
+
+.compose-textarea {
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: #e7e9ea;
+    font-size: 20px;
+    resize: none;
+    outline: none;
+    min-height: 120px;
+    font-family: inherit;
+}
+
+.compose-textarea::placeholder {
+    color: #71767b;
+}
+
+.compose-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 12px;
+}
+
+.compose-options {
+    display: flex;
+    gap: 16px;
+}
+
+.compose-option {
+    background: none;
+    border: none;
+    color: #1d9bf0;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+}
+
+.compose-option:hover {
+    background-color: rgba(29, 155, 240, 0.1);
+}
+
+.post-btn {
+    background-color: #1d9bf0;
+    color: white;
+    border: none;
+    border-radius: 9999px;
+    padding: 8px 24px;
+    font-weight: 700;
+    cursor: pointer;
+    opacity: 0.5;
+}
+
+.post-btn:not([disabled]) {
+    opacity: 1;
+}
+
+.post-btn:not([disabled]):hover {
+    background-color: #1a8cd8;
+}
+
+/* Feed */
+.feed {
+    border-bottom: 1px solid #2f3336;
+}
+
+.tweet {
+    display: flex;
+    padding: 16px;
+    border-bottom: 1px solid #2f3336;
+    gap: 12px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.tweet:hover {
+    background-color: rgba(231, 233, 234, 0.03);
+}
+
+.tweet-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+.tweet-content {
+    flex: 1;
+}
+
+.tweet-header {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 4px;
+}
+
+.tweet-name {
+    font-weight: 700;
+    font-size: 15px;
+}
+
+.tweet-handle {
+    color: #71767b;
+    font-size: 15px;
+}
+
+.tweet-verified {
+    color: #1d9bf0;
+    font-size: 16px;
+}
+
+.tweet-time {
+    color: #71767b;
+    font-size: 15px;
+}
+
+.tweet-more {
+    margin-left: auto;
+    color: #71767b;
+    font-size: 20px;
+    padding: 4px;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+}
+
+.tweet-more:hover {
+    background-color: rgba(29, 155, 240, 0.1);
+    color: #1d9bf0;
+}
+
+.tweet-text {
+    font-size: 15px;
+    line-height: 1.3;
+    margin-bottom: 12px;
+}
+
+.tweet-media {
+    margin-bottom: 12px;
+}
+
+.tweet-image {
+    width: 100%;
+    border-radius: 16px;
+    max-height: 400px;
+    object-fit: cover;
+}
+
+.tweet-actions {
+    display: flex;
+    justify-content: space-between;
+    max-width: 425px;
+}
+
+.action-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    color: #71767b;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 9999px;
+    transition: all 0.2s;
+}
+
+.action-btn:hover {
+    background-color: rgba(29, 155, 240, 0.1);
+    color: #1d9bf0;
+}
+
+.action-icon {
+    font-size: 18px;
+}
+
+/* Right Sidebar */
+.right-sidebar {
+    width: 350px;
+    padding: 20px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+.search-bar {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.search-bar input {
+    width: 100%;
+    background-color: #202327;
+    border: 1px solid #2f3336;
+    border-radius: 9999px;
+    padding: 12px 16px 12px 48px;
+    color: #e7e9ea;
+    font-size: 15px;
+    outline: none;
+}
+
+.search-bar input:focus {
+    border-color: #1d9bf0;
+    background-color: #000;
+}
+
+.search-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #71767b;
+    font-size: 20px;
+}
+
+.trending-section,
+.suggestions-section {
+    background-color: #16181c;
+    border-radius: 16px;
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.trending-section h2,
+.suggestions-section h2 {
+    font-size: 20px;
+    font-weight: 800;
+    padding: 16px;
+    border-bottom: 1px solid #2f3336;
+}
+
+.trending-item {
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.trending-item:hover {
+    background-color: rgba(231, 233, 234, 0.03);
+}
+
+.trending-category {
+    font-size: 13px;
+    color: #71767b;
+    line-height: 1.2;
+}
+
+.trending-topic {
+    font-size: 15px;
+    font-weight: 700;
+    margin: 2px 0;
+}
+
+.trending-posts {
+    font-size: 13px;
+    color: #71767b;
+}
+
+.suggestion-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    gap: 12px;
+    transition: background-color 0.2s;
+}
+
+.suggestion-item:hover {
+    background-color: rgba(231, 233, 234, 0.03);
+}
+
+.suggestion-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+.suggestion-info {
+    flex: 1;
+}
+
+.suggestion-name {
+    font-weight: 700;
+    font-size: 15px;
+}
+
+.suggestion-handle {
+    color: #71767b;
+    font-size: 15px;
+}
+
+.follow-btn {
+    background-color: #e7e9ea;
+    color: #0f1419;
+    border: none;
+    border-radius: 9999px;
+    padding: 6px 16px;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.follow-btn:hover {
+    background-color: #d7dbdc;
+}
+
+@media (max-width: 1024px) {
+    .right-sidebar {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        width: 68px;
+    }
+
+    .nav-text {
+        display: none;
+    }
+
+    .user-details {
+        display: none;
+    }
+
+    .post-button {
+        width: 52px;
+        height: 52px;
+        padding: 0;
+        font-size: 24px;
+        border-radius: 50%;
+    }
+}

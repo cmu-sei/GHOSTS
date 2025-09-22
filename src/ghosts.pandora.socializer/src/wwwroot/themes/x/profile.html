@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>John Doe (@johndoe) / X</title>
+    <link rel="stylesheet" href="css/profile.css">
+    <link rel="icon" href="images/x-icon.png">
+</head>
+<body>
+    <div class="app">
+        <!-- Left Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-content">
+                <div class="logo">
+                    <img src="images/x-logo.png" alt="X" class="x-logo">
+                </div>
+                <nav class="nav-menu">
+                    <a href="feed.html" class="nav-item">
+                        <span class="nav-icon">🏠</span>
+                        <span class="nav-text">Home</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <span class="nav-icon">🔍</span>
+                        <span class="nav-text">Explore</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <span class="nav-icon">🔔</span>
+                        <span class="nav-text">Notifications</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <span class="nav-icon">✉️</span>
+                        <span class="nav-text">Messages</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <span class="nav-icon">🔖</span>
+                        <span class="nav-text">Bookmarks</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <span class="nav-icon">👥</span>
+                        <span class="nav-text">Communities</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <span class="nav-icon">❌</span>
+                        <span class="nav-text">Premium</span>
+                    </a>
+                    <a href="profile.html" class="nav-item active">
+                        <span class="nav-icon">👤</span>
+                        <span class="nav-text">Profile</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <span class="nav-icon">⋯</span>
+                        <span class="nav-text">More</span>
+                    </a>
+                </nav>
+                <button class="post-button">Post</button>
+            </div>
+            <div class="user-info">
+                <img src="images/profile-avatar.jpg" alt="Profile" class="user-avatar">
+                <div class="user-details">
+                    <div class="username">John Doe</div>
+                    <div class="handle">@johndoe</div>
+                </div>
+                <span class="more-options">⋯</span>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <div class="profile-header">
+                <div class="header-nav">
+                    <button class="back-btn">←</button>
+                    <div class="header-info">
+                        <h1>John Doe</h1>
+                        <span class="post-count">1,234 posts</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Section -->
+            <div class="profile-section">
+                <div class="cover-photo">
+                    <img src="images/cover-photo.jpg" alt="Cover" class="cover-image">
+                </div>
+
+                <div class="profile-info">
+                    <div class="avatar-section">
+                        <img src="images/profile-avatar.jpg" alt="Profile" class="profile-avatar">
+                        <div class="profile-actions">
+                            <button class="action-btn">⋯</button>
+                            <button class="action-btn">✉️</button>
+                            <button class="edit-profile-btn">Edit profile</button>
+                        </div>
+                    </div>
+
+                    <div class="profile-details">
+                        <h2 class="profile-name">John Doe</h2>
+                        <span class="profile-handle">@johndoe</span>
+
+                        <div class="profile-bio">
+                            Software Developer 💻 | Tech Enthusiast | Building the future one line of code at a time
+                            <br>🌍 San Francisco, CA
+                            <br>🔗 <a href="#">johndoe.dev</a>
+                            <br>📅 Joined March 2020
+                        </div>
+
+                        <div class="profile-stats">
+                            <a href="#" class="stat-item">
+                                <span class="stat-number">234</span>
+                                <span class="stat-label">Following</span>
+                            </a>
+                            <a href="#" class="stat-item">
+                                <span class="stat-number">1.2k</span>
+                                <span class="stat-label">Followers</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Tabs -->
+                <div class="profile-tabs">
+                    <div class="tab active">Posts</div>
+                    <div class="tab">Replies</div>
+                    <div class="tab">Highlights</div>
+                    <div class="tab">Articles</div>
+                    <div class="tab">Media</div>
+                    <div class="tab">Likes</div>
+                </div>
+            </div>
+
+            <!-- Posts Feed -->
+            <div class="posts-feed">
+                <!-- Pinned Post -->
+                <div class="tweet pinned">
+                    <div class="pin-indicator">
+                        <span class="pin-icon">📌</span>
+                        <span class="pin-text">Pinned</span>
+                    </div>
+                    <div class="tweet-main">
+                        <img src="images/profile-avatar.jpg" alt="User" class="tweet-avatar">
+                        <div class="tweet-content">
+                            <div class="tweet-header">
+                                <span class="tweet-name">John Doe</span>
+                                <span class="tweet-handle">@johndoe</span>
+                                <span class="tweet-time">· Dec 15</span>
+                                <span class="tweet-more">⋯</span>
+                            </div>
+                            <div class="tweet-text">
+                                🚀 Excited to share my latest project! Built a full-stack app using React, Node.js, and PostgreSQL.
+                                Check it out and let me know what you think!
+                                <br><br>
+                                #webdev #react #nodejs #postgresql
+                            </div>
+                            <div class="tweet-media">
+                                <img src="images/project-screenshot.jpg" alt="Project" class="tweet-image">
+                            </div>
+                            <div class="tweet-actions">
+                                <button class="action-btn">
+                                    <span class="action-icon">💬</span>
+                                    <span class="action-count">45</span>
+                                </button>
+                                <button class="action-btn">
+                                    <span class="action-icon">🔄</span>
+                                    <span class="action-count">123</span>
+                                </button>
+                                <button class="action-btn">
+                                    <span class="action-icon">❤️</span>
+                                    <span class="action-count">289</span>
+                                </button>
+                                <button class="action-btn">
+                                    <span class="action-icon">📊</span>
+                                    <span class="action-count">2.1k</span>
+                                </button>
+                                <button class="action-btn">
+                                    <span class="action-icon">📤</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Regular Posts -->
+                <div class="tweet">
+                    <img src="images/profile-avatar.jpg" alt="User" class="tweet-avatar">
+                    <div class="tweet-content">
+                        <div class="tweet-header">
+                            <span class="tweet-name">John Doe</span>
+                            <span class="tweet-handle">@johndoe</span>
+                            <span class="tweet-time">· 2h</span>
+                            <span class="tweet-more">⋯</span>
+                        </div>
+                        <div class="tweet-text">
+                            Working on some exciting new features today! The debugging process can be challenging but so rewarding when everything clicks 🔧✨
+                        </div>
+                        <div class="tweet-actions">
+                            <button class="action-btn">
+                                <span class="action-icon">💬</span>
+                                <span class="action-count">12</span>
+                            </button>
+                            <button class="action-btn">
+                                <span class="action-icon">🔄</span>
+                                <span class="action-count">34</span>
+                            </button>
+                            <button class="action-btn">
+                                <span class="action-icon">❤️</span>
+                                <span class="action-count">67</span>
+                            </button>
+                            <button class="action-btn">
+                                <span class="action-icon">📊</span>
+                                <span class="action-count">892</span>
+                            </button>
+                            <button class="action-btn">
+                                <span class="action-icon">📤</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tweet">
+                    <img src="images/profile-avatar.jpg" alt="User" class="tweet-avatar">
+                    <div class="tweet-content">
+                        <div class="tweet-header">
+                            <span class="tweet-name">John Doe</span>
+                            <span class="tweet-handle">@johndoe</span>
+                            <span class="tweet-time">· 1d</span>
+                            <span class="tweet-more">⋯</span>
+                        </div>
+                        <div class="tweet-text">
+                            Just attended an amazing tech conference! So many innovative ideas and met some brilliant people. The future of tech is looking bright 🌟
+                            <br><br>
+                            Key takeaways:
+                            <br>• AI is revolutionizing everything
+                            <br>• Remote work is here to stay
+                            <br>• Focus on user experience above all
+                        </div>
+                        <div class="tweet-actions">
+                            <button class="action-btn">
+                                <span class="action-icon">💬</span>
+                                <span class="action-count">89</span>
+                            </button>
+                            <button class="action-btn">
+                                <span class="action-icon">🔄</span>
+                                <span class="action-count">234</span>
+                            </button>
+                            <button class="action-btn">
+                                <span class="action-icon">❤️</span>
+                                <span class="action-count">567</span>
+                            </button>
+                            <button class="action-btn">
+                                <span class="action-icon">📊</span>
+                                <span class="action-count">3.2k</span>
+                            </button>
+                            <button class="action-btn">
+                                <span class="action-icon">📤</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tweet">
+                    <img src="images/profile-avatar.jpg" alt="User" class="tweet-avatar">
+                    <div class="tweet-content">
+                        <div class="tweet-header">
+                            <span class="tweet-name">John Doe</span>
+                            <span class="tweet-handle">@johndoe</span>
+                            <span class="tweet-time">· 3d</span>
+                            <span class="tweet-more">⋯</span>
+                        </div>
+                        <div class="tweet-text">
+                            Coffee, code, repeat ☕️💻
+                            <br><br>
+                            What's your coding fuel of choice?
+                        </div>
+                        <div class="tweet-actions">
+                            <button class="action-btn">
+                                <span class="action-icon">💬</span>
+                                <span class="action-count">156</span>
+                            </button>
+                            <button class="action-btn">
+                                <span class="action-icon">🔄</span>
+                                <span class="action-count">78</span>
+                            </button>
+                            <button class="action-btn">
+                                <span class="action-icon">❤️</span>
+                                <span class="action-count">234</span>
+                            </button>
+                            <button class="action-btn">
+                                <span class="action-icon">📊</span>
+                                <span class="action-count">1.5k</span>
+                            </button>
+                            <button class="action-btn">
+                                <span class="action-icon">📤</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Sidebar -->
+        <div class="right-sidebar">
+            <div class="search-bar">
+                <input type="text" placeholder="Search">
+                <span class="search-icon">🔍</span>
+            </div>
+
+            <div class="suggestions-section">
+                <h2>You might like</h2>
+                <div class="suggestion-item">
+                    <img src="images/suggested1.jpg" alt="User" class="suggestion-avatar">
+                    <div class="suggestion-info">
+                        <div class="suggestion-name">Jane Smith</div>
+                        <div class="suggestion-handle">@janesmith</div>
+                    </div>
+                    <button class="follow-btn">Follow</button>
+                </div>
+                <div class="suggestion-item">
+                    <img src="images/suggested2.jpg" alt="User" class="suggestion-avatar">
+                    <div class="suggestion-info">
+                        <div class="suggestion-name">Tech Guru</div>
+                        <div class="suggestion-handle">@techguru</div>
+                    </div>
+                    <button class="follow-btn">Follow</button>
+                </div>
+                <div class="suggestion-item">
+                    <img src="images/suggested3.jpg" alt="User" class="suggestion-avatar">
+                    <div class="suggestion-info">
+                        <div class="suggestion-name">Design Pro</div>
+                        <div class="suggestion-handle">@designpro</div>
+                    </div>
+                    <button class="follow-btn">Follow</button>
+                </div>
+            </div>
+
+            <div class="trending-section">
+                <h2>What's happening</h2>
+                <div class="trending-item">
+                    <div class="trending-category">Technology · Trending</div>
+                    <div class="trending-topic">JavaScript</div>
+                    <div class="trending-posts">45.2k posts</div>
+                </div>
+                <div class="trending-item">
+                    <div class="trending-category">Programming · Trending</div>
+                    <div class="trending-topic">React</div>
+                    <div class="trending-posts">32.1k posts</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/profile.js"></script>
+</body>
+</html>

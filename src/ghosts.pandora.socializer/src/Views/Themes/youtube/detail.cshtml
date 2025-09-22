@@ -1,0 +1,440 @@
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Building a React App from Scratch - Complete Tutorial - YouTube</title>
+    <link rel="stylesheet" href="css/video.css">
+    <link rel="icon" href="images/youtube-icon.png">
+</head>
+<body>
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <button class="menu-btn">☰</button>
+                <div class="logo">
+                    <img src="/themes/youtube/images/youtube-logo.png" alt="YouTube" class="youtube-logo">
+                </div>
+            </div>
+            <div class="header-center">
+                <div class="search-container">
+                    <input type="text" placeholder="Search" class="search-input">
+                    <button class="search-btn">🔍</button>
+                </div>
+                <button class="mic-btn">🎤</button>
+            </div>
+            <div class="header-right">
+                <button class="header-btn">📹</button>
+                <button class="header-btn">🔔</button>
+                <div class="user-menu">
+                    <img src="/themes/youtube/images/profile-avatar.jpg" alt="Profile" class="user-avatar">
+                </div>
+            </div>
+        </header>
+
+        <div class="main-container">
+            <!-- Primary Content -->
+            <div class="primary-content">
+                <!-- Video Player -->
+                <div class="video-player-container">
+                    <div class="video-player">
+                        <div class="video-placeholder">
+                            <div class="play-button">▶</div>
+                            <div class="video-controls">
+                                <div class="progress-bar">
+                                    <div class="progress-filled" style="width: 35%;"></div>
+                                    <div class="progress-thumb" style="left: 35%;"></div>
+                                </div>
+                                <div class="controls-bottom">
+                                    <div class="controls-left">
+                                        <button class="control-btn play-pause">⏸️</button>
+                                        <button class="control-btn">🔊</button>
+                                        <span class="volume-slider"></span>
+                                        <span class="time-display">4:23 / 12:34</span>
+                                    </div>
+                                    <div class="controls-right">
+                                        <button class="control-btn">⚙️</button>
+                                        <button class="control-btn">🎬</button>
+                                        <button class="control-btn">⛶</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Video Info -->
+                <div class="video-info">
+                    <h1 class="video-title">Building a React App from Scratch - Complete Tutorial</h1>
+
+                    <div class="video-metadata">
+                        <div class="metadata-left">
+                            <span class="view-count">1,234,567 views</span>
+                            <span class="upload-date">Dec 15, 2024</span>
+                        </div>
+                        <div class="metadata-right">
+                            <div class="action-buttons">
+                                <button class="action-btn liked">
+                                    <span class="action-icon">👍</span>
+                                    <span class="action-count">12K</span>
+                                </button>
+                                <button class="action-btn">
+                                    <span class="action-icon">👎</span>
+                                </button>
+                                <button class="action-btn">
+                                    <span class="action-icon">🔗</span>
+                                    <span class="action-text">Share</span>
+                                </button>
+                                <button class="action-btn">
+                                    <span class="action-icon">💾</span>
+                                    <span class="action-text">Save</span>
+                                </button>
+                                <button class="action-btn">
+                                    <span class="action-icon">⋯</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Channel Info -->
+                <div class="channel-info">
+                    <div class="channel-details">
+                        <img src="/themes/youtube/images/channel1.jpg" alt="Channel" class="channel-avatar">
+                        <div class="channel-text">
+                            <h3 class="channel-name">Coding Tutorials</h3>
+                            <span class="subscriber-count">1.2M subscribers</span>
+                        </div>
+                    </div>
+                    <button class="subscribe-btn subscribed">
+                        <span class="subscribe-text">Subscribed</span>
+                        <span class="bell-icon">🔔</span>
+                    </button>
+                </div>
+
+                <!-- Video Description -->
+                <div class="video-description">
+                    <div class="description-preview">
+                        <p class="description-text">
+                            In this comprehensive tutorial, we'll build a complete React application from scratch! Perfect for beginners and intermediate developers looking to strengthen their React skills.
+                            <br><br>
+                            🎯 What you'll learn:
+                            <br>• Setting up a React project with Vite
+                            <br>• Component structure and JSX
+                            <br>• State management with useState and useEffect
+                            <br>• Handling user input and forms
+                            <br>• API integration and data fetching
+                            <br>• Styling with CSS modules
+                            <br>• Deployment to production
+                            <br><br>
+                            📋 Timestamps:
+                            <br>0:00 Introduction
+                            <br>1:30 Project setup
+                            <br>3:45 Creating components
+                            <br>6:20 Adding state management
+                            <br>9:15 API integration
+                            <br>11:40 Final touches and deployment
+                            <br><br>
+                            💻 Source code: https://github.com/coding-tutorials/react-app
+                            <br>📚 React documentation: https://react.dev
+                            <br><br>
+                            #React #JavaScript #WebDevelopment #Programming #Tutorial
+                        </p>
+                        <button class="show-more-btn">Show more</button>
+                    </div>
+                </div>
+
+                <!-- Comments Section -->
+                <div class="comments-section">
+                    <div class="comments-header">
+                        <h3 class="comments-count">847 Comments</h3>
+                        <div class="sort-comments">
+                            <button class="sort-btn">
+                                <span class="sort-icon">⚏</span>
+                                <span class="sort-text">Sort by</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Add Comment -->
+                    <div class="add-comment">
+                        <img src="/themes/youtube/images/profile-avatar.jpg" alt="Your avatar" class="comment-avatar">
+                        <div class="comment-input-container">
+                            <input type="text" placeholder="Add a comment..." class="comment-input">
+                            <div class="comment-actions">
+                                <button class="cancel-btn">Cancel</button>
+                                <button class="comment-btn" disabled>Comment</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Comments List -->
+                    <div class="comments-list">
+                        <!-- Comment 1 -->
+                        <div class="comment">
+                            <img src="/themes/youtube/images/user1-avatar.jpg" alt="User" class="comment-avatar">
+                            <div class="comment-content">
+                                <div class="comment-header">
+                                    <span class="commenter-name">#TechEnthusiast42</span>
+                                    <span class="comment-time">2 hours ago</span>
+                                </div>
+                                <div class="comment-text">
+                                    This is exactly what I needed! Your explanation of hooks is so clear and easy to follow. Thank you for making such high-quality content! 🙏
+                                </div>
+                                <div class="comment-actions">
+                                    <button class="comment-action like-action">
+                                        <span class="action-icon">👍</span>
+                                        <span class="like-count">42</span>
+                                    </button>
+                                    <button class="comment-action">
+                                        <span class="action-icon">👎</span>
+                                    </button>
+                                    <button class="reply-btn">Reply</button>
+                                </div>
+
+                                <!-- Replies -->
+                                <div class="replies">
+                                    <div class="reply">
+                                        <img src="/themes/youtube/images/channel1.jpg" alt="Channel" class="comment-avatar">
+                                        <div class="comment-content">
+                                            <div class="comment-header">
+                                                <span class="commenter-name">#CodingTutorials</span>
+                                                <span class="creator-badge">✓</span>
+                                                <span class="comment-time">1 hour ago</span>
+                                            </div>
+                                            <div class="comment-text">
+                                                #TechEnthusiast42 So glad it helped! That's exactly why I make these tutorials. Happy coding! 🚀
+                                            </div>
+                                            <div class="comment-actions">
+                                                <button class="comment-action">
+                                                    <span class="action-icon">👍</span>
+                                                    <span class="like-count">15</span>
+                                                </button>
+                                                <button class="comment-action">
+                                                    <span class="action-icon">👎</span>
+                                                </button>
+                                                <button class="reply-btn">Reply</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Comment 2 -->
+                        <div class="comment">
+                            <img src="/themes/youtube/images/user2-avatar.jpg" alt="User" class="comment-avatar">
+                            <div class="comment-content">
+                                <div class="comment-header">
+                                    <span class="commenter-name">#ReactNewbie</span>
+                                    <span class="comment-time">4 hours ago</span>
+                                </div>
+                                <div class="comment-text">
+                                    I'm just starting with React and this tutorial is perfect! Could you do a follow-up on advanced patterns like custom hooks?
+                                </div>
+                                <div class="comment-actions">
+                                    <button class="comment-action">
+                                        <span class="action-icon">👍</span>
+                                        <span class="like-count">28</span>
+                                    </button>
+                                    <button class="comment-action">
+                                        <span class="action-icon">👎</span>
+                                    </button>
+                                    <button class="reply-btn">Reply</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Comment 3 -->
+                        <div class="comment">
+                            <img src="/themes/youtube/images/user3-avatar.jpg" alt="User" class="comment-avatar">
+                            <div class="comment-content">
+                                <div class="comment-header">
+                                    <span class="commenter-name">#WebDevExpert</span>
+                                    <span class="comment-time">6 hours ago</span>
+                                </div>
+                                <div class="comment-text">
+                                    Great tutorial! One suggestion: it would be helpful to mention TypeScript integration for those interested in adding type safety to their React projects.
+                                </div>
+                                <div class="comment-actions">
+                                    <button class="comment-action">
+                                        <span class="action-icon">👍</span>
+                                        <span class="like-count">67</span>
+                                    </button>
+                                    <button class="comment-action">
+                                        <span class="action-icon">👎</span>
+                                    </button>
+                                    <button class="reply-btn">Reply</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Comment 4 -->
+                        <div class="comment">
+                            <img src="/themes/youtube/images/user4-avatar.jpg" alt="User" class="comment-avatar">
+                            <div class="comment-content">
+                                <div class="comment-header">
+                                    <span class="commenter-name">#CodeLearner2024</span>
+                                    <span class="comment-time">8 hours ago</span>
+                                </div>
+                                <div class="comment-text">
+                                    Bookmarked for later! Your teaching style is really easy to follow. Do you have any recommendations for practice projects after completing this tutorial?
+                                </div>
+                                <div class="comment-actions">
+                                    <button class="comment-action">
+                                        <span class="action-icon">👍</span>
+                                        <span class="like-count">19</span>
+                                    </button>
+                                    <button class="comment-action">
+                                        <span class="action-icon">👎</span>
+                                    </button>
+                                    <button class="reply-btn">Reply</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <div class="up-next-section">
+                    <h3 class="sidebar-title">Up next</h3>
+
+                    <!-- Autoplay Toggle -->
+                    <div class="autoplay-toggle">
+                        <span class="autoplay-text">Autoplay</span>
+                        <div class="toggle-switch active">
+                            <div class="toggle-slider"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Related Videos -->
+                <div class="related-videos">
+                    <!-- Related Video 1 -->
+                    <div class="related-video">
+                        <div class="video-thumbnail">
+                            <img src="/themes/youtube/images/related1.jpg" alt="Related video" class="thumbnail-img">
+                            <span class="video-duration">15:42</span>
+                        </div>
+                        <div class="video-details">
+                            <h4 class="video-title">Advanced React Patterns You Should Know</h4>
+                            <div class="video-meta">
+                                <span class="channel-name">Coding Tutorials</span>
+                                <div class="meta-info">
+                                    <span>892K views</span>
+                                    <span>•</span>
+                                    <span>1 week ago</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Related Video 2 -->
+                    <div class="related-video">
+                        <div class="video-thumbnail">
+                            <img src="/themes/youtube/images/related2.jpg" alt="Related video" class="thumbnail-img">
+                            <span class="video-duration">8:23</span>
+                        </div>
+                        <div class="video-details">
+                            <h4 class="video-title">React vs Vue vs Angular - Which One to Choose?</h4>
+                            <div class="video-meta">
+                                <span class="channel-name">Tech Comparison</span>
+                                <div class="meta-info">
+                                    <span>1.2M views</span>
+                                    <span>•</span>
+                                    <span>3 days ago</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Related Video 3 -->
+                    <div class="related-video">
+                        <div class="video-thumbnail">
+                            <img src="/themes/youtube/images/related3.jpg" alt="Related video" class="thumbnail-img">
+                            <span class="video-duration">22:15</span>
+                        </div>
+                        <div class="video-details">
+                            <h4 class="video-title">Building a Full Stack App with React and Node.js</h4>
+                            <div class="video-meta">
+                                <span class="channel-name">Full Stack Dev</span>
+                                <div class="meta-info">
+                                    <span>567K views</span>
+                                    <span>•</span>
+                                    <span>2 weeks ago</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Related Video 4 -->
+                    <div class="related-video">
+                        <div class="video-thumbnail">
+                            <img src="/themes/youtube/images/related4.jpg" alt="Related video" class="thumbnail-img">
+                            <span class="video-duration">11:37</span>
+                        </div>
+                        <div class="video-details">
+                            <h4 class="video-title">React Hooks Explained in 10 Minutes</h4>
+                            <div class="video-meta">
+                                <span class="channel-name">Quick Tutorials</span>
+                                <div class="meta-info">
+                                    <span>334K views</span>
+                                    <span>•</span>
+                                    <span>5 days ago</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Related Video 5 -->
+                    <div class="related-video">
+                        <div class="video-thumbnail">
+                            <img src="/themes/youtube/images/related5.jpg" alt="Related video" class="thumbnail-img">
+                            <span class="video-duration">18:54</span>
+                        </div>
+                        <div class="video-details">
+                            <h4 class="video-title">State Management in React - Redux vs Context API</h4>
+                            <div class="video-meta">
+                                <span class="channel-name">React Masters</span>
+                                <div class="meta-info">
+                                    <span>678K views</span>
+                                    <span>•</span>
+                                    <span>1 month ago</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Related Video 6 -->
+                    <div class="related-video">
+                        <div class="video-thumbnail">
+                            <img src="/themes/youtube/images/related6.jpg" alt="Related video" class="thumbnail-img">
+                            <span class="video-duration">7:28</span>
+                        </div>
+                        <div class="video-details">
+                            <h4 class="video-title">CSS Grid vs Flexbox - When to Use Which?</h4>
+                            <div class="video-meta">
+                                <span class="channel-name">CSS Guru</span>
+                                <div class="meta-info">
+                                    <span>445K views</span>
+                                    <span>•</span>
+                                    <span>2 weeks ago</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/video.js"></script>
+</body>
+</html>

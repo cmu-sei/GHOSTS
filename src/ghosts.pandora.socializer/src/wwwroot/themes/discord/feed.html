@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discord | Your Place to Talk and Hang Out</title>
+    <link rel="stylesheet" href="css/feed.css">
+    <link rel="icon" href="images/discord-icon.png">
+</head>
+<body>
+    <div class="app">
+        <!-- Left Sidebar -->
+        <div class="server-sidebar">
+            <div class="home-button">
+                <div class="server-icon home">
+                    <img src="images/discord-icon.png" alt="Discord Home" class="discord-logo">
+                </div>
+            </div>
+            <div class="server-separator"></div>
+
+            <!-- Servers -->
+            <div class="server-list">
+                <div class="server-item active">
+                    <div class="server-icon">
+                        <img src="images/gaming-server.jpg" alt="Gaming Server" class="server-avatar">
+                    </div>
+                    <div class="notification-badge">3</div>
+                </div>
+                <div class="server-item">
+                    <div class="server-icon">
+                        <img src="images/tech-server.jpg" alt="Tech Server" class="server-avatar">
+                    </div>
+                </div>
+                <div class="server-item">
+                    <div class="server-icon">
+                        <img src="images/art-server.jpg" alt="Art Server" class="server-avatar">
+                    </div>
+                    <div class="notification-badge">1</div>
+                </div>
+                <div class="server-item">
+                    <div class="server-icon">
+                        <img src="images/music-server.jpg" alt="Music Server" class="server-avatar">
+                    </div>
+                </div>
+                <div class="server-item">
+                    <div class="server-icon">
+                        <img src="images/study-server.jpg" alt="Study Server" class="server-avatar">
+                    </div>
+                </div>
+            </div>
+
+            <div class="add-server">
+                <div class="server-icon add">+</div>
+            </div>
+
+            <div class="explore-server">
+                <div class="server-icon explore">🧭</div>
+            </div>
+        </div>
+
+        <!-- Channel Sidebar -->
+        <div class="channel-sidebar">
+            <div class="server-header">
+                <h2 class="server-name">Gaming Hub</h2>
+                <button class="dropdown-btn">▼</button>
+            </div>
+
+            <div class="channels-container">
+                <!-- Text Channels -->
+                <div class="channel-category">
+                    <div class="category-header">
+                        <span class="category-arrow">▼</span>
+                        <span class="category-name">TEXT CHANNELS</span>
+                        <button class="add-channel">+</button>
+                    </div>
+                    <div class="channel-list">
+                        <div class="channel-item active">
+                            <span class="channel-icon">#</span>
+                            <span class="channel-name">general</span>
+                            <div class="unread-indicator"></div>
+                        </div>
+                        <div class="channel-item">
+                            <span class="channel-icon">#</span>
+                            <span class="channel-name">gaming-discussion</span>
+                        </div>
+                        <div class="channel-item">
+                            <span class="channel-icon">#</span>
+                            <span class="channel-name">tech-talk</span>
+                            <div class="unread-indicator">2</div>
+                        </div>
+                        <div class="channel-item">
+                            <span class="channel-icon">#</span>
+                            <span class="channel-name">memes</span>
+                        </div>
+                        <div class="channel-item">
+                            <span class="channel-icon">#</span>
+                            <span class="channel-name">off-topic</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Voice Channels -->
+                <div class="channel-category">
+                    <div class="category-header">
+                        <span class="category-arrow">▼</span>
+                        <span class="category-name">VOICE CHANNELS</span>
+                        <button class="add-channel">+</button>
+                    </div>
+                    <div class="channel-list">
+                        <div class="channel-item">
+                            <span class="channel-icon">🔊</span>
+                            <span class="channel-name">General Voice</span>
+                            <div class="voice-users">
+                                <img src="images/user1-avatar.jpg" alt="User" class="voice-avatar">
+                                <img src="images/user2-avatar.jpg" alt="User" class="voice-avatar">
+                                <span class="voice-count">+2</span>
+                            </div>
+                        </div>
+                        <div class="channel-item">
+                            <span class="channel-icon">🔊</span>
+                            <span class="channel-name">Gaming Room</span>
+                        </div>
+                        <div class="channel-item">
+                            <span class="channel-icon">🔊</span>
+                            <span class="channel-name">Study Room</span>
+                            <div class="voice-users">
+                                <img src="images/user3-avatar.jpg" alt="User" class="voice-avatar">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Panel -->
+            <div class="user-panel">
+                <div class="user-info">
+                    <img src="images/profile-avatar.jpg" alt="Profile" class="user-avatar">
+                    <div class="user-details">
+                        <div class="user-name">JohnDoe</div>
+                        <div class="user-status">#1234</div>
+                    </div>
+                </div>
+                <div class="user-controls">
+                    <button class="control-btn" title="Mute">🎤</button>
+                    <button class="control-btn" title="Deafen">🎧</button>
+                    <button class="control-btn" title="Settings">⚙️</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Channel Header -->
+            <div class="channel-header">
+                <div class="channel-info">
+                    <span class="channel-hashtag">#</span>
+                    <h3 class="channel-title">general</h3>
+                    <span class="channel-topic">Welcome to the Gaming Hub! Feel free to chat about anything here.</span>
+                </div>
+                <div class="channel-controls">
+                    <button class="header-btn" title="Start Voice Call">📞</button>
+                    <button class="header-btn" title="Start Video Call">📹</button>
+                    <button class="header-btn" title="Pin Message">📌</button>
+                    <button class="header-btn" title="Member List">👥</button>
+                    <div class="search-bar">
+                        <input type="text" placeholder="Search" class="search-input">
+                        <button class="search-btn">🔍</button>
+                    </div>
+                    <button class="header-btn" title="Inbox">📥</button>
+                    <button class="header-btn" title="Help">❓</button>
+                </div>
+            </div>
+
+            <!-- Messages Container -->
+            <div class="messages-container">
+                <div class="messages-list">
+                    <!-- Message 1 -->
+                    <div class="message">
+                        <img src="images/user1-avatar.jpg" alt="User" class="message-avatar">
+                        <div class="message-content">
+                            <div class="message-header">
+                                <span class="message-author">AliceGamer</span>
+                                <span class="message-timestamp">Today at 2:47 PM</span>
+                            </div>
+                            <div class="message-text">
+                                Hey everyone! Just finished the new God of War game. What an incredible experience! Anyone else played it yet?
+                            </div>
+                            <div class="message-reactions">
+                                <div class="reaction">
+                                    <span class="reaction-emoji">🎮</span>
+                                    <span class="reaction-count">3</span>
+                                </div>
+                                <div class="reaction">
+                                    <span class="reaction-emoji">🔥</span>
+                                    <span class="reaction-count">7</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="message-actions">
+                            <button class="message-action" title="Add Reaction">😀</button>
+                            <button class="message-action" title="Reply">↩️</button>
+                            <button class="message-action" title="More">⋯</button>
+                        </div>
+                    </div>
+
+                    <!-- Message 2 -->
+                    <div class="message">
+                        <img src="images/user2-avatar.jpg" alt="User" class="message-avatar">
+                        <div class="message-content">
+                            <div class="message-header">
+                                <span class="message-author">TechNinja</span>
+                                <span class="message-timestamp">Today at 2:52 PM</span>
+                            </div>
+                            <div class="message-text">
+                                @AliceGamer Yes! I'm about halfway through. The combat system is so satisfying!
+                                <br><br>
+                                Here's a screenshot of my favorite moment so far:
+                            </div>
+                            <div class="message-attachment">
+                                <img src="images/game-screenshot.jpg" alt="Game Screenshot" class="attachment-image">
+                            </div>
+                            <div class="message-reactions">
+                                <div class="reaction">
+                                    <span class="reaction-emoji">😍</span>
+                                    <span class="reaction-count">5</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="message-actions">
+                            <button class="message-action" title="Add Reaction">😀</button>
+                            <button class="message-action" title="Reply">↩️</button>
+                            <button class="message-action" title="More">⋯</button>
+                        </div>
+                    </div>
+
+                    <!-- Message 3 -->
+                    <div class="message">
+                        <img src="images/user3-avatar.jpg" alt="User" class="message-avatar">
+                        <div class="message-content">
+                            <div class="message-header">
+                                <span class="message-author">CodeMaster</span>
+                                <span class="message-bot-tag">BOT</span>
+                                <span class="message-timestamp">Today at 3:15 PM</span>
+                            </div>
+                            <div class="message-text">
+                                🎉 Welcome to our new members: @NewUser1, @NewUser2, and @NewUser3!
+                                <br>
+                                Please check out #rules and introduce yourselves in #introductions!
+                            </div>
+                        </div>
+                        <div class="message-actions">
+                            <button class="message-action" title="Add Reaction">😀</button>
+                            <button class="message-action" title="Reply">↩️</button>
+                            <button class="message-action" title="More">⋯</button>
+                        </div>
+                    </div>
+
+                    <!-- Message 4 -->
+                    <div class="message">
+                        <img src="images/user4-avatar.jpg" alt="User" class="message-avatar">
+                        <div class="message-content">
+                            <div class="message-header">
+                                <span class="message-author">DevGuru</span>
+                                <span class="message-timestamp">Today at 3:28 PM</span>
+                            </div>
+                            <div class="message-text">
+                                Working on a new React project today. Anyone know of good state management libraries besides Redux? Looking for something lighter weight.
+                            </div>
+                            <div class="message-reactions">
+                                <div class="reaction">
+                                    <span class="reaction-emoji">🤔</span>
+                                    <span class="reaction-count">2</span>
+                                </div>
+                                <div class="reaction">
+                                    <span class="reaction-emoji">💡</span>
+                                    <span class="reaction-count">1</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="message-actions">
+                            <button class="message-action" title="Add Reaction">😀</button>
+                            <button class="message-action" title="Reply">↩️</button>
+                            <button class="message-action" title="More">⋯</button>
+                        </div>
+                    </div>
+
+                    <!-- Message 5 -->
+                    <div class="message">
+                        <img src="images/user5-avatar.jpg" alt="User" class="message-avatar">
+                        <div class="message-content">
+                            <div class="message-header">
+                                <span class="message-author">ReactPro</span>
+                                <span class="message-timestamp">Today at 3:31 PM</span>
+                            </div>
+                            <div class="message-text">
+                                @DevGuru Check out Zustand! It's super lightweight and easy to use. Perfect for smaller projects.
+                                <br><br>
+                                Also consider Jotai for atomic state management. Both are great alternatives to Redux.
+                            </div>
+                            <div class="message-reactions">
+                                <div class="reaction">
+                                    <span class="reaction-emoji">👍</span>
+                                    <span class="reaction-count">4</span>
+                                </div>
+                                <div class="reaction">
+                                    <span class="reaction-emoji">💯</span>
+                                    <span class="reaction-count">2</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="message-actions">
+                            <button class="message-action" title="Add Reaction">😀</button>
+                            <button class="message-action" title="Reply">↩️</button>
+                            <button class="message-action" title="More">⋯</button>
+                        </div>
+                    </div>
+
+                    <!-- Typing Indicator -->
+                    <div class="typing-indicator">
+                        <img src="images/user6-avatar.jpg" alt="User" class="typing-avatar">
+                        <div class="typing-content">
+                            <span class="typing-text">MusicLover is typing...</span>
+                            <div class="typing-dots">
+                                <span class="dot"></span>
+                                <span class="dot"></span>
+                                <span class="dot"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Message Input -->
+            <div class="message-input-container">
+                <div class="message-input-wrapper">
+                    <button class="attachment-btn">📎</button>
+                    <div class="input-area">
+                        <textarea placeholder="Message #general" class="message-input" rows="1"></textarea>
+                        <div class="input-actions">
+                            <button class="input-action" title="Gift Nitro">🎁</button>
+                            <button class="input-action" title="GIF">GIF</button>
+                            <button class="input-action" title="Sticker">😊</button>
+                            <button class="input-action" title="Emoji">🙂</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Member List -->
+        <div class="member-list">
+            <div class="members-header">
+                <h3>Members — 127</h3>
+            </div>
+
+            <div class="members-container">
+                <!-- Online Members -->
+                <div class="member-category">
+                    <h4 class="member-role">ONLINE — 23</h4>
+                    <div class="member-list-items">
+                        <div class="member-item">
+                            <img src="images/user1-avatar.jpg" alt="User" class="member-avatar">
+                            <div class="member-info">
+                                <div class="member-name">AliceGamer</div>
+                                <div class="member-activity">Playing God of War</div>
+                            </div>
+                            <div class="member-status online"></div>
+                        </div>
+                        <div class="member-item">
+                            <img src="images/user2-avatar.jpg" alt="User" class="member-avatar">
+                            <div class="member-info">
+                                <div class="member-name">TechNinja</div>
+                                <div class="member-activity">Listening to Spotify</div>
+                            </div>
+                            <div class="member-status online"></div>
+                        </div>
+                        <div class="member-item">
+                            <img src="images/user3-avatar.jpg" alt="User" class="member-avatar">
+                            <div class="member-info">
+                                <div class="member-name">CodeMaster</div>
+                                <div class="member-bot-badge">BOT</div>
+                            </div>
+                            <div class="member-status online"></div>
+                        </div>
+                        <div class="member-item">
+                            <img src="images/user4-avatar.jpg" alt="User" class="member-avatar">
+                            <div class="member-info">
+                                <div class="member-name">DevGuru</div>
+                                <div class="member-activity">Visual Studio Code</div>
+                            </div>
+                            <div class="member-status online"></div>
+                        </div>
+                        <div class="member-item">
+                            <img src="images/user5-avatar.jpg" alt="User" class="member-avatar">
+                            <div class="member-info">
+                                <div class="member-name">ReactPro</div>
+                            </div>
+                            <div class="member-status online"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Offline Members -->
+                <div class="member-category">
+                    <h4 class="member-role">OFFLINE — 104</h4>
+                    <div class="member-list-items">
+                        <div class="member-item">
+                            <img src="images/user6-avatar.jpg" alt="User" class="member-avatar offline">
+                            <div class="member-info">
+                                <div class="member-name offline">MusicLover</div>
+                            </div>
+                            <div class="member-status offline"></div>
+                        </div>
+                        <div class="member-item">
+                            <img src="images/user7-avatar.jpg" alt="User" class="member-avatar offline">
+                            <div class="member-info">
+                                <div class="member-name offline">GameMaster</div>
+                            </div>
+                            <div class="member-status offline"></div>
+                        </div>
+                        <div class="member-item">
+                            <img src="images/user8-avatar.jpg" alt="User" class="member-avatar offline">
+                            <div class="member-info">
+                                <div class="member-name offline">ArtisticSoul</div>
+                            </div>
+                            <div class="member-status offline"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/feed.js"></script>
+</body>
+</html>

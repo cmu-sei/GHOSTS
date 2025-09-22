@@ -1,10 +1,3 @@
-
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-
 namespace Socializer.Infrastructure.Services;
 public class CleanupService(ILogger logger, IServiceProvider serviceProvider) : IHostedService
 {
@@ -146,7 +139,7 @@ public class CleanupService(ILogger logger, IServiceProvider serviceProvider) : 
                         }
                     }
                     // now delete the post directory, will be empty
-                    // we could just delete the entire directory+files in one call but there have been bug reports about this 
+                    // we could just delete the entire directory+files in one call but there have been bug reports about this
                     // not working consistently across all platforms, safer to delete the files first to get an empty directory
                     try
                     {

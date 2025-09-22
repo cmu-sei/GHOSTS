@@ -12,11 +12,19 @@ public class HomeController(ILogger logger, IHubContext<PostsHub> hubContext, Da
     [HttpGet]
     public IActionResult Index()
     {
+        var view = "index";
+        var path = (Request.Path.Value ?? "").ToLowerInvariant();
+        if (path.EndsWith("/detail") || path.StartsWith("/detail"))
+            view = "detail";
+
+        if (path.EndsWith("/profile") || path.StartsWith("/profile"))
+            view = "profile";
+
         var posts = Db.Posts.Include(x => x.Likes).OrderByDescending(x => x.CreatedUtc).Take(Program.Configuration.DefaultDisplay).ToList();
 
         if (Request.QueryString.HasValue && !string.IsNullOrEmpty(Request.Query["u"]))
             ViewBag.User = Request.Query["u"];
-        return View(posts);
+        return View(view, posts);
     }
 
     [HttpPost]
@@ -48,10 +56,10 @@ public class HomeController(ILogger logger, IHubContext<PostsHub> hubContext, Da
             return BadRequest("User and message are required.");
 
         // has the same user tried to post the same message within the past x minutes?
-        if (Db.Posts.Any(_ => _.Message.Equals(post.Message, StringComparison.CurrentCultureIgnoreCase)
-                               && _.User.Equals(post.User, StringComparison.CurrentCultureIgnoreCase)
-                               && _.CreatedUtc >
-                               post.CreatedUtc.AddMinutes(-Program.Configuration.MinutesToCheckForDuplicatePost)))
+        if (Db.Posts.Any(_ =>
+                _.Message.ToLower() == post.Message.ToLower()
+                && _.User.ToLower() == post.User.ToLower()
+                && _.CreatedUtc > post.CreatedUtc.AddMinutes(-Program.Configuration.MinutesToCheckForDuplicatePost)))
         {
             Logger.LogInformation("Client is posting duplicates: {PostUser}", post.User);
             return NoContent();

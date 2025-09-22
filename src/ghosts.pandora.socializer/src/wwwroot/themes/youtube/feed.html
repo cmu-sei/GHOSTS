@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube</title>
+    <link rel="stylesheet" href="css/feed.css">
+    <link rel="icon" href="images/youtube-icon.png">
+</head>
+<body>
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <button class="menu-btn">☰</button>
+                <div class="logo">
+                    <img src="images/youtube-logo.png" alt="YouTube" class="youtube-logo">
+                </div>
+            </div>
+            <div class="header-center">
+                <div class="search-container">
+                    <input type="text" placeholder="Search" class="search-input">
+                    <button class="search-btn">🔍</button>
+                </div>
+                <button class="mic-btn">🎤</button>
+            </div>
+            <div class="header-right">
+                <button class="header-btn">📹</button>
+                <button class="header-btn">🔔</button>
+                <div class="user-menu">
+                    <img src="images/profile-avatar.jpg" alt="Profile" class="user-avatar">
+                </div>
+            </div>
+        </header>
+
+        <div class="main-container">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="sidebar-section">
+                    <div class="sidebar-item active">
+                        <span class="sidebar-icon">🏠</span>
+                        <span class="sidebar-text">Home</span>
+                    </div>
+                    <div class="sidebar-item">
+                        <span class="sidebar-icon">🎬</span>
+                        <span class="sidebar-text">Shorts</span>
+                    </div>
+                    <div class="sidebar-item">
+                        <span class="sidebar-icon">📺</span>
+                        <span class="sidebar-text">Subscriptions</span>
+                    </div>
+                </div>
+
+                <div class="sidebar-divider"></div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-item">
+                        <span class="sidebar-icon">📚</span>
+                        <span class="sidebar-text">Library</span>
+                    </div>
+                    <div class="sidebar-item">
+                        <span class="sidebar-icon">🕒</span>
+                        <span class="sidebar-text">History</span>
+                    </div>
+                    <div class="sidebar-item">
+                        <span class="sidebar-icon">📹</span>
+                        <span class="sidebar-text">Your videos</span>
+                    </div>
+                    <div class="sidebar-item">
+                        <span class="sidebar-icon">⏰</span>
+                        <span class="sidebar-text">Watch later</span>
+                    </div>
+                    <div class="sidebar-item">
+                        <span class="sidebar-icon">👍</span>
+                        <span class="sidebar-text">Liked videos</span>
+                    </div>
+                </div>
+
+                <div class="sidebar-divider"></div>
+
+                <div class="sidebar-section">
+                    <h3 class="sidebar-title">Subscriptions</h3>
+                    <div class="sidebar-item">
+                        <img src="images/channel1.jpg" alt="Channel" class="channel-avatar">
+                        <span class="sidebar-text">Tech Reviews</span>
+                    </div>
+                    <div class="sidebar-item">
+                        <img src="images/channel2.jpg" alt="Channel" class="channel-avatar">
+                        <span class="sidebar-text">Coding Tutorials</span>
+                    </div>
+                    <div class="sidebar-item">
+                        <img src="images/channel3.jpg" alt="Channel" class="channel-avatar">
+                        <span class="sidebar-text">Gaming Central</span>
+                    </div>
+                    <div class="sidebar-item">
+                        <img src="images/channel4.jpg" alt="Channel" class="channel-avatar">
+                        <span class="sidebar-text">Music Hub</span>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="main-content">
+                <!-- Category Tabs -->
+                <div class="category-tabs">
+                    <button class="category-tab active">All</button>
+                    <button class="category-tab">Gaming</button>
+                    <button class="category-tab">Music</button>
+                    <button class="category-tab">Technology</button>
+                    <button class="category-tab">Programming</button>
+                    <button class="category-tab">Education</button>
+                    <button class="category-tab">Entertainment</button>
+                    <button class="category-tab">Sports</button>
+                    <button class="category-tab">News</button>
+                </div>
+
+                <!-- Videos Grid -->
+                <div class="videos-grid">
+                    <!-- Video 1 -->
+                    <div class="video-card">
+                        <div class="video-thumbnail">
+                            <img src="images/video1-thumbnail.jpg" alt="Video" class="thumbnail-image">
+                            <span class="video-duration">12:34</span>
+                        </div>
+                        <div class="video-info">
+                            <img src="images/channel1.jpg" alt="Channel" class="channel-avatar">
+                            <div class="video-details">
+                                <h3 class="video-title">Building a React App from Scratch - Complete Tutorial</h3>
+                                <div class="video-meta">
+                                    <span class="channel-name">Coding Tutorials</span>
+                                    <div class="video-stats">
+                                        <span>1.2M views</span>
+                                        <span>•</span>
+                                        <span>2 days ago</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Video 2 -->
+                    <div class="video-card">
+                        <div class="video-thumbnail">
+                            <img src="images/video2-thumbnail.jpg" alt="Video" class="thumbnail-image">
+                            <span class="video-duration">8:45</span>
+                        </div>
+                        <div class="video-info">
+                            <img src="images/channel2.jpg" alt="Channel" class="channel-avatar">
+                            <div class="video-details">
+                                <h3 class="video-title">iPhone 15 Pro Review - Is it Worth the Upgrade?</h3>
+                                <div class="video-meta">
+                                    <span class="channel-name">Tech Reviews</span>
+                                    <div class="video-stats">
+                                        <span>856K views</span>
+                                        <span>•</span>
+                                        <span>1 day ago</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Video 3 -->
+                    <div class="video-card">
+                        <div class="video-thumbnail">
+                            <img src="images/video3-thumbnail.jpg" alt="Video" class="thumbnail-image">
+                            <span class="video-duration">15:22</span>
+                        </div>
+                        <div class="video-info">
+                            <img src="images/channel3.jpg" alt="Channel" class="channel-avatar">
+                            <div class="video-details">
+                                <h3 class="video-title">Epic Gaming Moments - Best Clips of the Month</h3>
+                                <div class="video-meta">
+                                    <span class="channel-name">Gaming Central</span>
+                                    <div class="video-stats">
+                                        <span>2.3M views</span>
+                                        <span>•</span>
+                                        <span>3 days ago</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Video 4 -->
+                    <div class="video-card">
+                        <div class="video-thumbnail">
+                            <img src="images/video4-thumbnail.jpg" alt="Video" class="thumbnail-image">
+                            <span class="video-duration">4:56</span>
+                        </div>
+                        <div class="video-info">
+                            <img src="images/channel4.jpg" alt="Channel" class="channel-avatar">
+                            <div class="video-details">
+                                <h3 class="video-title">Top 10 Songs of 2024 - Year End Mix</h3>
+                                <div class="video-meta">
+                                    <span class="channel-name">Music Hub</span>
+                                    <div class="video-stats">
+                                        <span>567K views</span>
+                                        <span>•</span>
+                                        <span>5 days ago</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Video 5 -->
+                    <div class="video-card">
+                        <div class="video-thumbnail">
+                            <img src="images/video5-thumbnail.jpg" alt="Video" class="thumbnail-image">
+                            <span class="video-duration">22:18</span>
+                        </div>
+                        <div class="video-info">
+                            <img src="images/channel1.jpg" alt="Channel" class="channel-avatar">
+                            <div class="video-details">
+                                <h3 class="video-title">Advanced JavaScript Concepts You Need to Know</h3>
+                                <div class="video-meta">
+                                    <span class="channel-name">Coding Tutorials</span>
+                                    <div class="video-stats">
+                                        <span>789K views</span>
+                                        <span>•</span>
+                                        <span>1 week ago</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Video 6 -->
+                    <div class="video-card">
+                        <div class="video-thumbnail">
+                            <img src="images/video6-thumbnail.jpg" alt="Video" class="thumbnail-image">
+                            <span class="video-duration">6:33</span>
+                        </div>
+                        <div class="video-info">
+                            <img src="images/channel2.jpg" alt="Channel" class="channel-avatar">
+                            <div class="video-details">
+                                <h3 class="video-title">MacBook Pro M3 vs M2 - Performance Comparison</h3>
+                                <div class="video-meta">
+                                    <span class="channel-name">Tech Reviews</span>
+                                    <div class="video-stats">
+                                        <span>1.5M views</span>
+                                        <span>•</span>
+                                        <span>2 weeks ago</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Video 7 -->
+                    <div class="video-card">
+                        <div class="video-thumbnail">
+                            <img src="images/video7-thumbnail.jpg" alt="Video" class="thumbnail-image">
+                            <span class="video-duration">18:45</span>
+                        </div>
+                        <div class="video-info">
+                            <img src="images/channel3.jpg" alt="Channel" class="channel-avatar">
+                            <div class="video-details">
+                                <h3 class="video-title">New Game Releases This Month - What to Play</h3>
+                                <div class="video-meta">
+                                    <span class="channel-name">Gaming Central</span>
+                                    <div class="video-stats">
+                                        <span>923K views</span>
+                                        <span>•</span>
+                                        <span>3 weeks ago</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Video 8 -->
+                    <div class="video-card">
+                        <div class="video-thumbnail">
+                            <img src="images/video8-thumbnail.jpg" alt="Video" class="thumbnail-image">
+                            <span class="video-duration">11:27</span>
+                        </div>
+                        <div class="video-info">
+                            <img src="images/channel4.jpg" alt="Channel" class="channel-avatar">
+                            <div class="video-details">
+                                <h3 class="video-title">Behind the Scenes - Music Production Process</h3>
+                                <div class="video-meta">
+                                    <span class="channel-name">Music Hub</span>
+                                    <div class="video-stats">
+                                        <span>234K views</span>
+                                        <span>•</span>
+                                        <span>1 month ago</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="js/feed.js"></script>
+</body>
+</html>
