@@ -16,7 +16,7 @@ public class UsersController(ILogger logger, IHubContext<PostsHub> hubContext, D
     {
         var posts = Db.Posts
             .Include(x => x.Likes)
-            .Where(x => x.User.ToLower() == userId.ToLower())
+            .Where(x => x.User.Username.ToLower() == userId.ToLower())
             .OrderByDescending(x => x.CreatedUtc)
             .Take(Program.Configuration.DefaultDisplay)
             .ToList();

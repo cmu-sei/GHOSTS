@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="/themes/facebook/css/facebook.css">
     <link rel="icon" href="/themes/facebook/images/facebook-icon.png" type="image/png">
 </head>
-<body>
+<body data-theme="facebook">
     <!-- Header -->
     <header class="header">
         <div class="header-left">
@@ -103,160 +103,55 @@
                     <h3 style="margin-bottom: 16px;">Stories</h3>
                     <div style="display: flex; gap: 8px; overflow-x: auto;">
                         <div style="min-width: 112px; height: 200px; background: linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%); border-radius: 8px; position: relative; cursor: pointer;">
-                            <img src="/themes/facebook/images/profile-pic.jpg" alt="Your story" style="width: 100%; height: 70%; object-fit: cover; border-radius: 8px 8px 0 0;">
+                            <img src="/u/@ViewBag.UserId/avatar" alt="Your story" style="width: 100%; height: 70%; object-fit: cover; border-radius: 8px 8px 0 0;">
                             <div style="position: absolute; bottom: 8px; left: 8px; color: white; font-size: 12px; font-weight: 600;">Your Story</div>
-                        </div>
-                        <div style="min-width: 112px; height: 200px; background: linear-gradient(45deg, #667eea 0%, #764ba2 100%); border-radius: 8px; position: relative; cursor: pointer;">
-                            <img src="/themes/facebook/images/friend1.jpg" alt="Friend story" style="width: 100%; height: 70%; object-fit: cover; border-radius: 8px 8px 0 0;">
-                            <div style="position: absolute; bottom: 8px; left: 8px; color: white; font-size: 12px; font-weight: 600;">Sarah Wilson</div>
-                        </div>
-                        <div style="min-width: 112px; height: 200px; background: linear-gradient(45deg, #f093fb 0%, #f5576c 100%); border-radius: 8px; position: relative; cursor: pointer;">
-                            <img src="/themes/facebook/images/friend2.jpg" alt="Friend story" style="width: 100%; height: 70%; object-fit: cover; border-radius: 8px 8px 0 0;">
-                            <div style="position: absolute; bottom: 8px; left: 8px; color: white; font-size: 12px; font-weight: 600;">Mike Johnson</div>
-                        </div>
-                        <div style="min-width: 112px; height: 200px; background: linear-gradient(45deg, #4facfe 0%, #00f2fe 100%); border-radius: 8px; position: relative; cursor: pointer;">
-                            <img src="/themes/facebook/images/friend3.jpg" alt="Friend story" style="width: 100%; height: 70%; object-fit: cover; border-radius: 8px 8px 0 0;">
-                            <div style="position: absolute; bottom: 8px; left: 8px; color: white; font-size: 12px; font-weight: 600;">Emma Davis</div>
                         </div>
                     </div>
                 </div>
             </div>
+
             <div id="newsfeed-items-grid">
                 <button class="btn btn-primary btn-md-2" type="submit" name="submit" id="sendButton">Post Status</button>
                 @{
                     foreach (var post in Model)
                     {
-                        <article class="post" data-post-id="1">
+                        <article class="post" data-post-id="@post.Id">
                             <div class="post-header">
                                 <div class="post-user-info">
-                                    <img src="/u/@post.User/avatar" class="profile-pic">
+                                    <img src="/u/@post.User.Username/avatar" class="profile-pic">
                                     <div>
-                                        <div class="post-user-name">@post.User</div>
-                                        <div class="post-time">@post.CreatedUtc · 🌍</div>
+                                        <div class="post-user-name"><a href="/u/@post.User.Username">@post.User.Username</a></div>
+                                        <div class="post-time">@post.CreatedUtc.ToString("MMM d, yyyy") · 🌍</div>
                                     </div>
                                 </div>
                                 <button class="post-menu">⋯</button>
                             </div>
                             <div class="post-content">
-                                <div class="post-text">@post.Message</div>
+                                <div class="post-text">@Html.Raw(post.Message)</div>
                             </div>
                             <div class="post-stats">
-                                <span>👍❤️😊 @post.Likes.Count</span>
-                                <span>23 comments · 8 shares</span>
+                                @{
+                                    var likesCount = post.Likes?.Count ?? 0;
+
+                                }
+                                @if (likesCount > 0)
+                                {
+                                    <span>👍❤️😊 @likesCount people</span>
+                                }
+                                <span>0 comments</span>
                             </div>
                             <div class="post-actions">
-                                <button class="post-action like-btn" data-action="like">👍 Like</button>
+                                <button class="post-action like-btn like-it" data-id="@post.Id">👍 Like</button>
                                 <button class="post-action comment-btn" data-action="comment">💬 Comment</button>
                                 <button class="post-action share-btn" data-action="share">📤 Share</button>
                             </div>
                         </article>
-                        //await Html.RenderPartialAsync("_Post", post);
                     }
                 }
             </div>
-            <!-- Posts -->
-            <article class="post" data-post-id="1">
-                <div class="post-header">
-                    <div class="post-user-info">
-                        <img src="/themes/facebook/images/friend1.jpg" alt="Sarah Wilson" class="profile-pic">
-                        <div>
-                            <div class="post-user-name">Sarah Wilson</div>
-                            <div class="post-time">2 hours ago · 🌍</div>
-                        </div>
-                    </div>
-                    <button class="post-menu">⋯</button>
-                </div>
-                <div class="post-content">
-                    <div class="post-text">Just had an amazing day at the beach! The sunset was absolutely breathtaking. Sometimes you need to take a step back and appreciate the beautiful moments in life. 🌅✨</div>
-                    <img src="/themes/facebook/images/beach-sunset.jpg" alt="Beach sunset" class="post-image">
-                </div>
-                <div class="post-stats">
-                    <span>👍❤️😊 245 people</span>
-                    <span>23 comments · 8 shares</span>
-                </div>
-                <div class="post-actions">
-                    <button class="post-action like-btn" data-action="like">👍 Like</button>
-                    <button class="post-action comment-btn" data-action="comment">💬 Comment</button>
-                    <button class="post-action share-btn" data-action="share">📤 Share</button>
-                </div>
-            </article>
-
-            <article class="post" data-post-id="2">
-                <div class="post-header">
-                    <div class="post-user-info">
-                        <img src="/themes/facebook/images/friend2.jpg" alt="Mike Johnson" class="profile-pic">
-                        <div>
-                            <div class="post-user-name">Mike Johnson</div>
-                            <div class="post-time">4 hours ago · 👥</div>
-                        </div>
-                    </div>
-                    <button class="post-menu">⋯</button>
-                </div>
-                <div class="post-content">
-                    <div class="post-text">Excited to share that I've completed my first marathon! 26.2 miles of pure determination and endurance. Thank you to everyone who supported me along the way. Next goal: under 4 hours! 🏃‍♂️💪</div>
-                    <img src="/themes/facebook/images/marathon.jpg" alt="Marathon finish line" class="post-image">
-                </div>
-                <div class="post-stats">
-                    <span>👍💪🔥 189 people</span>
-                    <span>45 comments · 12 shares</span>
-                </div>
-                <div class="post-actions">
-                    <button class="post-action like-btn" data-action="like">👍 Like</button>
-                    <button class="post-action comment-btn" data-action="comment">💬 Comment</button>
-                    <button class="post-action share-btn" data-action="share">📤 Share</button>
-                </div>
-            </article>
-
-            <article class="post" data-post-id="3">
-                <div class="post-header">
-                    <div class="post-user-info">
-                        <img src="/themes/facebook/images/friend3.jpg" alt="Emma Davis" class="profile-pic">
-                        <div>
-                            <div class="post-user-name">Emma Davis</div>
-                            <div class="post-time">6 hours ago · 🌍</div>
-                        </div>
-                    </div>
-                    <button class="post-menu">⋯</button>
-                </div>
-                <div class="post-content">
-                    <div class="post-text">Homemade pizza night! 🍕 Tried a new recipe with fresh basil and mozzarella. The family loved it! Sometimes the best meals are the ones made with love at home.</div>
-                    <img src="/themes/facebook/images/homemade-pizza.jpg" alt="Homemade pizza" class="post-image">
-                </div>
-                <div class="post-stats">
-                    <span>👍😍🤤 127 people</span>
-                    <span>18 comments · 5 shares</span>
-                </div>
-                <div class="post-actions">
-                    <button class="post-action like-btn" data-action="like">👍 Like</button>
-                    <button class="post-action comment-btn" data-action="comment">💬 Comment</button>
-                    <button class="post-action share-btn" data-action="share">📤 Share</button>
-                </div>
-            </article>
-
-            <article class="post" data-post-id="4">
-                <div class="post-header">
-                    <div class="post-user-info">
-                        <img src="/themes/facebook/images/profile-pic.jpg" alt="John Doe" class="profile-pic">
-                        <div>
-                            <div class="post-user-name">John Doe</div>
-                            <div class="post-time">1 day ago · 👥</div>
-                        </div>
-                    </div>
-                    <button class="post-menu">⋯</button>
-                </div>
-                <div class="post-content">
-                    <div class="post-text">Working on a new project that I'm really excited about! It's amazing how technology can bring people together and create meaningful connections. Can't wait to share more details soon! 💻🚀</div>
-                </div>
-                <div class="post-stats">
-                    <span>👍🚀💯 98 people</span>
-                    <span>12 comments · 3 shares</span>
-                </div>
-                <div class="post-actions">
-                    <button class="post-action like-btn liked" data-action="like">👍 Like</button>
-                    <button class="post-action comment-btn" data-action="comment">💬 Comment</button>
-                    <button class="post-action share-btn" data-action="share">📤 Share</button>
-                </div>
-            </article>
+            <a id="load-more-button" href="#" class="btn btn-control btn-more" data-load-link="items-to-load.html" data-container="newsfeed-items-grid">
+                <span>⋯</span>
+            </a>
         </main>
 
         <!-- Right Sidebar -->
@@ -275,24 +170,16 @@
             <div>
                 <h3 style="color: #65676b; margin-bottom: 16px;">Contacts</h3>
                 <div class="sidebar-item">
-                    <img src="/themes/facebook/images/friend1.jpg" alt="Sarah Wilson" class="profile-pic">
-                    <span>Sarah Wilson</span>
+                    <img src="/themes/facebook/images/friend1.jpg" alt="Contact" class="profile-pic">
+                    <span>Contact 1</span>
                 </div>
                 <div class="sidebar-item">
-                    <img src="/themes/facebook/images/friend2.jpg" alt="Mike Johnson" class="profile-pic">
-                    <span>Mike Johnson</span>
+                    <img src="/themes/facebook/images/friend2.jpg" alt="Contact" class="profile-pic">
+                    <span>Contact 2</span>
                 </div>
                 <div class="sidebar-item">
-                    <img src="/themes/facebook/images/friend3.jpg" alt="Emma Davis" class="profile-pic">
-                    <span>Emma Davis</span>
-                </div>
-                <div class="sidebar-item">
-                    <img src="/themes/facebook/images/friend4.jpg" alt="Alex Smith" class="profile-pic">
-                    <span>Alex Smith</span>
-                </div>
-                <div class="sidebar-item">
-                    <img src="/themes/facebook/images/friend5.jpg" alt="Lisa Brown" class="profile-pic">
-                    <span>Lisa Brown</span>
+                    <img src="/themes/facebook/images/friend3.jpg" alt="Contact" class="profile-pic">
+                    <span>Contact 3</span>
                 </div>
             </div>
         </aside>
@@ -301,7 +188,6 @@
     <script src="/themes/facebook/js/facebook.js"></script>
     <!-- JS Scripts -->
     <script src="/js/jQuery/jquery-3.5.1.min.js"></script>
-
     <script src="/js/libs/jquery.mousewheel.min.js"></script>
     <script src="/js/libs/perfect-scrollbar.min.js"></script>
     <script src="/js/libs/imagesloaded.pkgd.min.js"></script>
@@ -310,18 +196,13 @@
     <script src="/js/libs/isotope.pkgd.min.js"></script>
     <script src="/js/libs/ajax-pagination.min.js"></script>
     <script src="/js/libs/jquery.magnific-popup.min.js"></script>
-
     <script src="/js/main.js"></script>
     <script src="/js/libs-init/libs-init.js"></script>
-
     <script src="/Bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-
     <!-- SVG icons loader -->
     <script src="/js/svg-loader.js"></script>
     <!-- /SVG icons loader -->
-
     <script src="~/js/signalr.min.js"></script>
     <script src="~/js/posts.js?@System.Guid.NewGuid()" asp-append-version="true"></script>
-
 </body>
 </html>

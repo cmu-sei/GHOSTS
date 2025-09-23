@@ -1,6 +1,7 @@
 @{
     Layout = null;
 }
+@model List<Socializer.Infrastructure.Post>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -102,122 +103,44 @@
 
                 <!-- Feed -->
                 <div class="feed">
-                    <!-- Tweet 1 -->
-                    <div class="tweet">
-                        <img src="/themes/images/user1-avatar.jpg" alt="User" class="tweet-avatar">
-                        <div class="tweet-content">
-                            <div class="tweet-header">
-                                <span class="tweet-name">Alice Johnson</span>
-                                <span class="tweet-handle">##alicej</span>
-                                <span class="tweet-time">· 2h</span>
-                                <span class="tweet-more">⋯</span>
-                            </div>
-                            <div class="tweet-text">
-                                Just shipped a new feature! The team worked incredibly hard on this. Excited to see how users respond 🚀
-                            </div>
-                            <div class="tweet-actions">
-                                <button class="action-btn">
-                                    <span class="action-icon">💬</span>
-                                    <span class="action-count">12</span>
-                                </button>
-                                <button class="action-btn">
-                                    <span class="action-icon">🔄</span>
-                                    <span class="action-count">45</span>
-                                </button>
-                                <button class="action-btn">
-                                    <span class="action-icon">❤️</span>
-                                    <span class="action-count">128</span>
-                                </button>
-                                <button class="action-btn">
-                                    <span class="action-icon">📊</span>
-                                    <span class="action-count">1.2k</span>
-                                </button>
-                                <button class="action-btn">
-                                    <span class="action-icon">📤</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Tweet 2 -->
-                    <div class="tweet">
-                        <img src="/themes/images/user2-avatar.jpg" alt="User" class="tweet-avatar">
-                        <div class="tweet-content">
-                            <div class="tweet-header">
-                                <span class="tweet-name">Tech News</span>
-                                <span class="tweet-handle">##technews</span>
-                                <span class="tweet-verified">✓</span>
-                                <span class="tweet-time">· 4h</span>
-                                <span class="tweet-more">⋯</span>
-                            </div>
-                            <div class="tweet-text">
-                                Breaking: Major tech company announces revolutionary AI breakthrough that could change everything
-                            </div>
-                            <div class="tweet-media">
-                                <img src="/themes/images/tech-news.jpg" alt="Tech news" class="tweet-image">
-                            </div>
-                            <div class="tweet-actions">
-                                <button class="action-btn">
-                                    <span class="action-icon">💬</span>
-                                    <span class="action-count">324</span>
-                                </button>
-                                <button class="action-btn">
-                                    <span class="action-icon">🔄</span>
-                                    <span class="action-count">892</span>
-                                </button>
-                                <button class="action-btn">
-                                    <span class="action-icon">❤️</span>
-                                    <span class="action-count">2.1k</span>
-                                </button>
-                                <button class="action-btn">
-                                    <span class="action-icon">📊</span>
-                                    <span class="action-count">15k</span>
-                                </button>
-                                <button class="action-btn">
-                                    <span class="action-icon">📤</span>
-                                </button>
+                    @foreach (var post in Model)
+                    {
+                        <div class="tweet">
+                            <img src="/u/@post.User.Username/avatar" alt="@post.User.Username" class="tweet-avatar">
+                            <div class="tweet-content">
+                                <div class="tweet-header">
+                                    <span class="tweet-name">@post.User.Username</span>
+                                    <span class="tweet-handle">@@@post.User.Username</span>
+                                    <span class="tweet-time">· @post.CreatedUtc</span>
+                                    <span class="tweet-more">⋯</span>
+                                </div>
+                                <div class="tweet-text">
+                                    @Html.Raw(post.Message)
+                                </div>
+                                <div class="tweet-actions">
+                                    <button class="action-btn">
+                                        <span class="action-icon">💬</span>
+                                        <span class="action-count">0</span>
+                                    </button>
+                                    <button class="action-btn">
+                                        <span class="action-icon">🔄</span>
+                                        <span class="action-count">0</span>
+                                    </button>
+                                    <button class="action-btn like-it" data-id="@post.Id">
+                                        <span class="action-icon">❤️</span>
+                                        <span class="action-count">@(post.Likes?.Count ?? 0)</span>
+                                    </button>
+                                    <button class="action-btn">
+                                        <span class="action-icon">📊</span>
+                                        <span class="action-count">0</span>
+                                    </button>
+                                    <button class="action-btn">
+                                        <span class="action-icon">📤</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Tweet 3 -->
-                    <div class="tweet">
-                        <img src="/themes/images/user3-avatar.jpg" alt="User" class="tweet-avatar">
-                        <div class="tweet-content">
-                            <div class="tweet-header">
-                                <span class="tweet-name">Design Inspiration</span>
-                                <span class="tweet-handle">##designinspo</span>
-                                <span class="tweet-time">· 6h</span>
-                                <span class="tweet-more">⋯</span>
-                            </div>
-                            <div class="tweet-text">
-                                Beautiful UI animation concepts that every designer should see 🎨
-                                <br><br>
-                                Thread 🧵 👇
-                            </div>
-                            <div class="tweet-actions">
-                                <button class="action-btn">
-                                    <span class="action-icon">💬</span>
-                                    <span class="action-count">67</span>
-                                </button>
-                                <button class="action-btn">
-                                    <span class="action-icon">🔄</span>
-                                    <span class="action-count">234</span>
-                                </button>
-                                <button class="action-btn">
-                                    <span class="action-icon">❤️</span>
-                                    <span class="action-count">456</span>
-                                </button>
-                                <button class="action-btn">
-                                    <span class="action-icon">📊</span>
-                                    <span class="action-count">3.2k</span>
-                                </button>
-                                <button class="action-btn">
-                                    <span class="action-icon">📤</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                    }
                 </div>
             </div>
         </div>
@@ -270,6 +193,9 @@
         </div>
     </div>
 
+    <script src="/lib/jquery/dist/jquery.min.js"></script>
+    <script src="/js/signalr.min.js"></script>
+    <script src="/js/posts.js"></script>
     <script src="/themes/x/js/feed.js"></script>
 </body>
 </html>

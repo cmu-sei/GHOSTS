@@ -1,5 +1,6 @@
 using System.Globalization;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using Socializer.Infrastructure;
 
 namespace Socializer.Hubs;
@@ -18,14 +19,48 @@ public class PostsHub(ILogger<PostsHub> logger, DataContext dbContext) : Hub
         if (string.IsNullOrEmpty(created))
             created = DateTime.UtcNow.ToString(CultureInfo.InvariantCulture);
 
+        // Get or create user
+        var dbUser = await _db.Users.FirstOrDefaultAsync(u => u.Username == user);
+        if (dbUser == null)
+        {
+            dbUser = new User
+            {
+                Id = Guid.NewGuid().ToString(),
+                Username = user,
+                DisplayName = user,
+                Bio = $"User {user}",
+                Avatar = $"/u/{user}/avatar",
+                Status = "online",
+                CreatedUtc = DateTime.UtcNow,
+                LastActiveUtc = DateTime.UtcNow
+            };
+            _db.Users.Add(dbUser);
+            await _db.SaveChangesAsync();
+        }
+
+        // Get default theme
+        var theme = await _db.Themes.FirstOrDefaultAsync(t => t.Name == "facebook");
+        if (theme == null)
+        {
+            theme = new Theme
+            {
+                Name = "facebook",
+                DisplayName = "Facebook",
+                Description = "Facebook theme"
+            };
+            _db.Themes.Add(theme);
+            await _db.SaveChangesAsync();
+        }
+
         var post = new Post
         {
             Id = id,
-            User = user,
+            UserId = dbUser.Id,
+            ThemeId = theme.Id,
             Message = message,
             CreatedUtc = DateTime.UtcNow
         };
-        ;
+
         _db.Posts.Add(post);
         await _db.SaveChangesAsync();
 

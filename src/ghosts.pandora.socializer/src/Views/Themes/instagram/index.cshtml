@@ -1,6 +1,7 @@
 @{
     Layout = null;
 }
+@model List<Socializer.Infrastructure.Post>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -11,7 +12,7 @@
     <link rel="stylesheet" href="/themes/instagram/css/feed.css">
     <link rel="icon" href="/themes/instagram/images/instagram-icon.png">
 </head>
-<body>
+<body data-theme="instagram">
     <div class="app">
         <!-- Header -->
         <header class="header">
@@ -32,7 +33,7 @@
                     <button class="action-btn">🧭</button>
                     <button class="action-btn">❤️</button>
                     <div class="profile-menu">
-                        <img src="/themes/instagram/images/profile-avatar.jpg" alt="Profile" class="header-avatar">
+                        <img src="/u/@ViewBag.UserId/avatar" alt="Profile" class="header-avatar">
                     </div>
                 </div>
             </div>
@@ -46,302 +47,98 @@
                     <!-- Your Story -->
                     <div class="story-item your-story">
                         <div class="story-avatar">
-                            <img src="/themes/instagram/images/profile-avatar.jpg" alt="Your story" class="avatar">
+                            <img src="/u/@ViewBag.UserId/avatar" alt="Your story" class="avatar">
                             <div class="add-story">+</div>
                         </div>
                         <span class="story-username">Your story</span>
-                    </div>
-
-                    <!-- Friend Stories -->
-                    <div class="story-item">
-                        <div class="story-avatar">
-                            <img src="/themes/instagram/images/user1-avatar.jpg" alt="User" class="avatar">
-                        </div>
-                        <span class="story-username">alice_photo</span>
-                    </div>
-
-                    <div class="story-item">
-                        <div class="story-avatar">
-                            <img src="/themes/instagram/images/user2-avatar.jpg" alt="User" class="avatar">
-                        </div>
-                        <span class="story-username">tech_guru</span>
-                    </div>
-
-                    <div class="story-item">
-                        <div class="story-avatar">
-                            <img src="/themes/instagram/images/user3-avatar.jpg" alt="User" class="avatar">
-                        </div>
-                        <span class="story-username">art_lover</span>
-                    </div>
-
-                    <div class="story-item">
-                        <div class="story-avatar">
-                            <img src="/themes/instagram/images/user4-avatar.jpg" alt="User" class="avatar">
-                        </div>
-                        <span class="story-username">fitness_life</span>
-                    </div>
-
-                    <div class="story-item">
-                        <div class="story-avatar">
-                            <img src="/themes/instagram/images/user5-avatar.jpg" alt="User" class="avatar">
-                        </div>
-                        <span class="story-username">food_explorer</span>
-                    </div>
-
-                    <div class="story-item">
-                        <div class="story-avatar">
-                            <img src="/themes/instagram/images/user6-avatar.jpg" alt="User" class="avatar">
-                        </div>
-                        <span class="story-username">travel_diary</span>
                     </div>
                 </div>
             </div>
 
             <!-- Posts Feed -->
-            <div class="feed-container">
-                <!-- Post 1 -->
-                <div class="post">
-                    <div class="post-header">
-                        <div class="post-user">
-                            <img src="/themes/instagram/images/user1-avatar.jpg" alt="User" class="post-avatar">
-                            <div class="user-info">
-                                <span class="username">alice_photo</span>
-                                <span class="location">San Francisco, CA</span>
+            <div class="feed-container" id="newsfeed-items-grid">
+                <button class="btn btn-primary btn-md-2" type="submit" name="submit" id="sendButton">Post Status</button>
+                @{
+                    foreach (var post in Model)
+                    {
+                        <div class="post" data-post-id="@post.Id">
+                            <div class="post-header">
+                                <div class="post-user">
+                                    <img src="/u/@post.User.Username/avatar" alt="@post.User.Username" class="post-avatar">
+                                    <div class="user-info">
+                                        <span class="username"><a href="/u/@post.User.Username">@post.User.Username</a></span>
+                                        <span class="location">📍 Location</span>
+                                    </div>
+                                </div>
+                                <button class="more-options">⋯</button>
+                            </div>
+
+
+                            <div class="post-actions">
+                                <div class="action-buttons">
+                                    <button class="action-btn like-btn like-it" data-id="@post.Id">❤️</button>
+                                    <button class="action-btn comment-btn">💬</button>
+                                    <button class="action-btn share-btn">📤</button>
+                                </div>
+                                <button class="save-btn">🔖</button>
+                            </div>
+
+                            <div class="post-info">
+                                @{
+                                    var likesCount = post.Likes?.Count ?? 0;
+                                    var commentsCount = 0;
+                                }
+                                @if (likesCount > 0)
+                                {
+                                    <div class="likes">
+                                        <span class="likes-count">@likesCount likes</span>
+                                    </div>
+                                }
+                                <div class="caption">
+                                    <span class="username">@post.User.Username</span>
+                                    <span class="caption-text">@Html.Raw(post.Message)</span>
+                                </div>
+                                @if (commentsCount > 0)
+                                {
+                                    <div class="comments-preview">
+                                        <span class="view-comments">View all @commentsCount comments</span>
+                                    </div>
+                                }
+                                <div class="post-time">@post.CreatedUtc.ToString("MMM d, yyyy")</div>
+                            </div>
+
+                            <div class="add-comment">
+                                <input type="text" placeholder="Add a comment..." class="comment-input">
+                                <button class="post-comment">Post</button>
                             </div>
                         </div>
-                        <button class="more-options">⋯</button>
-                    </div>
-
-                    <div class="post-image">
-                        <img src="/themes/instagram/images/post1.jpg" alt="Post" class="image">
-                    </div>
-
-                    <div class="post-actions">
-                        <div class="action-buttons">
-                            <button class="action-btn like-btn">❤️</button>
-                            <button class="action-btn comment-btn">💬</button>
-                            <button class="action-btn share-btn">📤</button>
-                        </div>
-                        <button class="save-btn">🔖</button>
-                    </div>
-
-                    <div class="post-info">
-                        <div class="likes">
-                            <span class="likes-count">1,234 likes</span>
-                        </div>
-                        <div class="caption">
-                            <span class="username">alice_photo</span>
-                            <span class="caption-text">Beautiful sunset from my balcony today! 🌅 Nature never fails to amaze me. #sunset #photography #grateful</span>
-                        </div>
-                        <div class="comments-preview">
-                            <span class="view-comments">View all 47 comments</span>
-                        </div>
-                        <div class="comment">
-                            <span class="comment-username">tech_guru</span>
-                            <span class="comment-text">Absolutely stunning! 📸</span>
-                        </div>
-                        <div class="comment">
-                            <span class="comment-username">art_lover</span>
-                            <span class="comment-text">The colors are incredible! What camera did you use?</span>
-                        </div>
-                        <div class="post-time">2 hours ago</div>
-                    </div>
-
-                    <div class="add-comment">
-                        <input type="text" placeholder="Add a comment..." class="comment-input">
-                        <button class="post-comment">Post</button>
-                    </div>
-                </div>
-
-                <!-- Post 2 -->
-                <div class="post">
-                    <div class="post-header">
-                        <div class="post-user">
-                            <img src="/themes/instagram/images/user2-avatar.jpg" alt="User" class="post-avatar">
-                            <div class="user-info">
-                                <span class="username">tech_guru</span>
-                                <span class="location">Silicon Valley</span>
-                            </div>
-                        </div>
-                        <button class="more-options">⋯</button>
-                    </div>
-
-                    <div class="post-image">
-                        <img src="/themes/instagram/images/post2.jpg" alt="Post" class="image">
-                    </div>
-
-                    <div class="post-actions">
-                        <div class="action-buttons">
-                            <button class="action-btn like-btn">❤️</button>
-                            <button class="action-btn comment-btn">💬</button>
-                            <button class="action-btn share-btn">📤</button>
-                        </div>
-                        <button class="save-btn">🔖</button>
-                    </div>
-
-                    <div class="post-info">
-                        <div class="likes">
-                            <span class="likes-count">892 likes</span>
-                        </div>
-                        <div class="caption">
-                            <span class="username">tech_guru</span>
-                            <span class="caption-text">New setup is finally complete! 💻✨ Ready for some serious coding sessions. What do you think? #coding #setup #workspace #productivity</span>
-                        </div>
-                        <div class="comments-preview">
-                            <span class="view-comments">View all 23 comments</span>
-                        </div>
-                        <div class="comment">
-                            <span class="comment-username">alice_photo</span>
-                            <span class="comment-text">So clean and organized! Love it 👌</span>
-                        </div>
-                        <div class="post-time">4 hours ago</div>
-                    </div>
-
-                    <div class="add-comment">
-                        <input type="text" placeholder="Add a comment..." class="comment-input">
-                        <button class="post-comment">Post</button>
-                    </div>
-                </div>
-
-                <!-- Post 3 -->
-                <div class="post">
-                    <div class="post-header">
-                        <div class="post-user">
-                            <img src="/themes/instagram/images/user5-avatar.jpg" alt="User" class="post-avatar">
-                            <div class="user-info">
-                                <span class="username">food_explorer</span>
-                                <span class="location">New York, NY</span>
-                            </div>
-                        </div>
-                        <button class="more-options">⋯</button>
-                    </div>
-
-                    <div class="post-image">
-                        <img src="/themes/instagram/images/post3.jpg" alt="Post" class="image">
-                    </div>
-
-                    <div class="post-actions">
-                        <div class="action-buttons">
-                            <button class="action-btn like-btn">❤️</button>
-                            <button class="action-btn comment-btn">💬</button>
-                            <button class="action-btn share-btn">📤</button>
-                        </div>
-                        <button class="save-btn">🔖</button>
-                    </div>
-
-                    <div class="post-info">
-                        <div class="likes">
-                            <span class="likes-count">567 likes</span>
-                        </div>
-                        <div class="caption">
-                            <span class="username">food_explorer</span>
-                            <span class="caption-text">Homemade pasta night! 🍝 Nothing beats fresh ingredients and good company. Recipe in my stories! #pasta #homemade #cooking #foodie</span>
-                        </div>
-                        <div class="comments-preview">
-                            <span class="view-comments">View all 15 comments</span>
-                        </div>
-                        <div class="comment">
-                            <span class="comment-username">fitness_life</span>
-                            <span class="comment-text">Looks delicious! Share the recipe please! 🤤</span>
-                        </div>
-                        <div class="post-time">6 hours ago</div>
-                    </div>
-
-                    <div class="add-comment">
-                        <input type="text" placeholder="Add a comment..." class="comment-input">
-                        <button class="post-comment">Post</button>
-                    </div>
-                </div>
+                    }
+                }
             </div>
-
-            <!-- Right Sidebar -->
-            <div class="sidebar">
-                <!-- Profile Info -->
-                <div class="profile-card">
-                    <div class="profile-info">
-                        <img src="/themes/instagram/images/profile-avatar.jpg" alt="Profile" class="profile-avatar">
-                        <div class="profile-details">
-                            <span class="profile-username">johndoe</span>
-                            <span class="profile-name">John Doe</span>
-                        </div>
-                    </div>
-                    <button class="switch-btn">Switch</button>
-                </div>
-
-                <!-- Suggestions -->
-                <div class="suggestions-section">
-                    <div class="suggestions-header">
-                        <span class="suggestions-title">Suggestions for you</span>
-                        <button class="see-all">See All</button>
-                    </div>
-
-                    <div class="suggestions-list">
-                        <div class="suggestion-item">
-                            <img src="/themes/instagram/images/suggested1.jpg" alt="User" class="suggestion-avatar">
-                            <div class="suggestion-info">
-                                <span class="suggestion-username">jane_doe</span>
-                                <span class="suggestion-meta">Followed by alice_photo + 2 others</span>
-                            </div>
-                            <button class="follow-btn">Follow</button>
-                        </div>
-
-                        <div class="suggestion-item">
-                            <img src="/themes/instagram/images/suggested2.jpg" alt="User" class="suggestion-avatar">
-                            <div class="suggestion-info">
-                                <span class="suggestion-username">mike_travels</span>
-                                <span class="suggestion-meta">Followed by tech_guru</span>
-                            </div>
-                            <button class="follow-btn">Follow</button>
-                        </div>
-
-                        <div class="suggestion-item">
-                            <img src="/themes/instagram/images/suggested3.jpg" alt="User" class="suggestion-avatar">
-                            <div class="suggestion-info">
-                                <span class="suggestion-username">sarah_designs</span>
-                                <span class="suggestion-meta">New to Instagram</span>
-                            </div>
-                            <button class="follow-btn">Follow</button>
-                        </div>
-
-                        <div class="suggestion-item">
-                            <img src="/themes/instagram/images/suggested4.jpg" alt="User" class="suggestion-avatar">
-                            <div class="suggestion-info">
-                                <span class="suggestion-username">fitness_coach</span>
-                                <span class="suggestion-meta">Followed by fitness_life</span>
-                            </div>
-                            <button class="follow-btn">Follow</button>
-                        </div>
-
-                        <div class="suggestion-item">
-                            <img src="/themes/instagram/images/suggested5.jpg" alt="User" class="suggestion-avatar">
-                            <div class="suggestion-info">
-                                <span class="suggestion-username">music_producer</span>
-                                <span class="suggestion-meta">Followed by 3 friends</span>
-                            </div>
-                            <button class="follow-btn">Follow</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Footer -->
-                <div class="sidebar-footer">
-                    <div class="footer-links">
-                        <a href="#">About</a>
-                        <a href="#">Help</a>
-                        <a href="#">Press</a>
-                        <a href="#">API</a>
-                        <a href="#">Jobs</a>
-                        <a href="#">Privacy</a>
-                        <a href="#">Terms</a>
-                    </div>
-                    <div class="copyright">
-                        © 2024 Instagram from Meta
-                    </div>
-                </div>
-            </div>
+            <a id="load-more-button" href="#" class="btn btn-control btn-more" data-load-link="items-to-load.html" data-container="newsfeed-items-grid">
+                <span>⋯</span>
+            </a>
         </div>
     </div>
 
-    <script src="/themes/instagram/js/feed.js"></script>
+    <script src="/themes/instagram/js/instagram.js"></script>
+    <!-- JS Scripts -->
+    <script src="/js/jQuery/jquery-3.5.1.min.js"></script>
+    <script src="/js/libs/jquery.mousewheel.min.js"></script>
+    <script src="/js/libs/perfect-scrollbar.min.js"></script>
+    <script src="/js/libs/imagesloaded.pkgd.min.js"></script>
+    <script src="/js/libs/material.min.js"></script>
+    <script src="/js/libs/selectize.min.js"></script>
+    <script src="/js/libs/isotope.pkgd.min.js"></script>
+    <script src="/js/libs/ajax-pagination.min.js"></script>
+    <script src="/js/libs/jquery.magnific-popup.min.js"></script>
+    <script src="/js/main.js"></script>
+    <script src="/js/libs-init/libs-init.js"></script>
+    <script src="/Bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- SVG icons loader -->
+    <script src="/js/svg-loader.js"></script>
+    <!-- /SVG icons loader -->
+    <script src="~/js/signalr.min.js"></script>
+    <script src="~/js/posts.js?@System.Guid.NewGuid()" asp-append-version="true"></script>
 </body>
 </html>

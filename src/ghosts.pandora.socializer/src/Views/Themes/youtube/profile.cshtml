@@ -123,9 +123,7 @@
                             var featuredPost = Model.First();
                             <div class="featured-video">
                                 <div class="video-thumbnail">
-                                    @if(!string.IsNullOrEmpty(featuredPost.ImageUrl))
                                     {
-                                        <img src="@featuredPost.ImageUrl" alt="Featured video" class="thumbnail-img">
                                     }
                                     else
                                     {
@@ -155,9 +153,7 @@
                                 {
                                     <div class="video-card">
                                         <div class="video-thumbnail">
-                                            @if(!string.IsNullOrEmpty(post.ImageUrl))
                                             {
-                                                <img src="@post.ImageUrl" alt="Video thumbnail" class="thumbnail-img">
                                             }
                                             else
                                             {

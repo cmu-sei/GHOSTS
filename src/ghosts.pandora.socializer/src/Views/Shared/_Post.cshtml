@@ -7,9 +7,9 @@
     <div class="ui-block">
         <article class="hentry post">
         <div class="post__author author vcard inline-items">
-            <img loading="lazy" src="/u/@post.User/avatar" alt="author" width="42" height="42">
+            <img loading="lazy" src="/u/@post.User.Username/avatar" alt="author" width="42" height="42">
             <div class="author-date">
-                <a class="h6 post__author-name fn" href="/u/@post.User">@post.User</a> shared a <a href="/posts/@post.Id">link</a>
+                <a class="h6 post__author-name fn" href="/u/@post.User.Username">@post.User.Username</a> shared a <a href="/posts/@post.Id">link</a>
                 <div class="post__date">
                 <time class="published" datetime="@post.CreatedUtc">
                     @post.CreatedUtc

@@ -1,6 +1,7 @@
 @{
     Layout = null;
 }
+@model List<Socializer.Infrastructure.Post>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -120,186 +121,45 @@
 
                 <!-- Videos Grid -->
                 <div class="videos-grid">
-                    <!-- Video 1 -->
-                    <div class="video-card">
-                        <div class="video-thumbnail">
-                            <img src="/themes/youtube/images/video1-thumbnail.jpg" alt="Video" class="thumbnail-image">
-                            <span class="video-duration">12:34</span>
-                        </div>
-                        <div class="video-info">
-                            <img src="/themes/youtube/images/channel1.jpg" alt="Channel" class="channel-avatar">
-                            <div class="video-details">
-                                <h3 class="video-title">Building a React App from Scratch - Complete Tutorial</h3>
-                                <div class="video-meta">
-                                    <span class="channel-name">Coding Tutorials</span>
-                                    <div class="video-stats">
-                                        <span>1.2M views</span>
-                                        <span>•</span>
-                                        <span>2 days ago</span>
+                    @foreach (var post in Model)
+                    {
+                        <div class="video-card">
+                            <div class="video-thumbnail">
+                                <div class="thumbnail-placeholder">
+                                    <span>Video</span>
+                                </div>
+                            </div>
+                            <div class="video-info">
+                                <img src="/u/@post.User.Username/avatar" alt="@post.User.Username" class="channel-avatar">
+                                <div class="video-details">
+                                    <div class="video-title">@Html.Raw(post.Message)</div>
+                                    <div class="video-meta">
+                                        <span class="channel-name">@post.User.Username</span>
+                                        <div class="video-stats">
+                                            <span>@(post.Likes?.Count ?? 0) likes</span>
+                                            <span>•</span>
+                                            <span>@(post.Comments?.Count ?? 0) comments</span>
+                                            <span>•</span>
+                                            <span>@post.CreatedUtc</span>
+                                        </div>
+                                        <div class="video-actions">
+                                            <button class="like-it" data-id="@post.Id">
+                                                ❤️ @(post.Likes?.Count ?? 0)
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Video 2 -->
-                    <div class="video-card">
-                        <div class="video-thumbnail">
-                            <img src="/themes/youtube/images/video2-thumbnail.jpg" alt="Video" class="thumbnail-image">
-                            <span class="video-duration">8:45</span>
-                        </div>
-                        <div class="video-info">
-                            <img src="/themes/youtube/images/channel2.jpg" alt="Channel" class="channel-avatar">
-                            <div class="video-details">
-                                <h3 class="video-title">iPhone 15 Pro Review - Is it Worth the Upgrade?</h3>
-                                <div class="video-meta">
-                                    <span class="channel-name">Tech Reviews</span>
-                                    <div class="video-stats">
-                                        <span>856K views</span>
-                                        <span>•</span>
-                                        <span>1 day ago</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Video 3 -->
-                    <div class="video-card">
-                        <div class="video-thumbnail">
-                            <img src="/themes/youtube/images/video3-thumbnail.jpg" alt="Video" class="thumbnail-image">
-                            <span class="video-duration">15:22</span>
-                        </div>
-                        <div class="video-info">
-                            <img src="/themes/youtube/images/channel3.jpg" alt="Channel" class="channel-avatar">
-                            <div class="video-details">
-                                <h3 class="video-title">Epic Gaming Moments - Best Clips of the Month</h3>
-                                <div class="video-meta">
-                                    <span class="channel-name">Gaming Central</span>
-                                    <div class="video-stats">
-                                        <span>2.3M views</span>
-                                        <span>•</span>
-                                        <span>3 days ago</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Video 4 -->
-                    <div class="video-card">
-                        <div class="video-thumbnail">
-                            <img src="/themes/youtube/images/video4-thumbnail.jpg" alt="Video" class="thumbnail-image">
-                            <span class="video-duration">4:56</span>
-                        </div>
-                        <div class="video-info">
-                            <img src="/themes/youtube/images/channel4.jpg" alt="Channel" class="channel-avatar">
-                            <div class="video-details">
-                                <h3 class="video-title">Top 10 Songs of 2024 - Year End Mix</h3>
-                                <div class="video-meta">
-                                    <span class="channel-name">Music Hub</span>
-                                    <div class="video-stats">
-                                        <span>567K views</span>
-                                        <span>•</span>
-                                        <span>5 days ago</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Video 5 -->
-                    <div class="video-card">
-                        <div class="video-thumbnail">
-                            <img src="/themes/youtube/images/video5-thumbnail.jpg" alt="Video" class="thumbnail-image">
-                            <span class="video-duration">22:18</span>
-                        </div>
-                        <div class="video-info">
-                            <img src="/themes/youtube/images/channel1.jpg" alt="Channel" class="channel-avatar">
-                            <div class="video-details">
-                                <h3 class="video-title">Advanced JavaScript Concepts You Need to Know</h3>
-                                <div class="video-meta">
-                                    <span class="channel-name">Coding Tutorials</span>
-                                    <div class="video-stats">
-                                        <span>789K views</span>
-                                        <span>•</span>
-                                        <span>1 week ago</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Video 6 -->
-                    <div class="video-card">
-                        <div class="video-thumbnail">
-                            <img src="/themes/youtube/images/video6-thumbnail.jpg" alt="Video" class="thumbnail-image">
-                            <span class="video-duration">6:33</span>
-                        </div>
-                        <div class="video-info">
-                            <img src="/themes/youtube/images/channel2.jpg" alt="Channel" class="channel-avatar">
-                            <div class="video-details">
-                                <h3 class="video-title">MacBook Pro M3 vs M2 - Performance Comparison</h3>
-                                <div class="video-meta">
-                                    <span class="channel-name">Tech Reviews</span>
-                                    <div class="video-stats">
-                                        <span>1.5M views</span>
-                                        <span>•</span>
-                                        <span>2 weeks ago</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Video 7 -->
-                    <div class="video-card">
-                        <div class="video-thumbnail">
-                            <img src="/themes/youtube/images/video7-thumbnail.jpg" alt="Video" class="thumbnail-image">
-                            <span class="video-duration">18:45</span>
-                        </div>
-                        <div class="video-info">
-                            <img src="/themes/youtube/images/channel3.jpg" alt="Channel" class="channel-avatar">
-                            <div class="video-details">
-                                <h3 class="video-title">New Game Releases This Month - What to Play</h3>
-                                <div class="video-meta">
-                                    <span class="channel-name">Gaming Central</span>
-                                    <div class="video-stats">
-                                        <span>923K views</span>
-                                        <span>•</span>
-                                        <span>3 weeks ago</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Video 8 -->
-                    <div class="video-card">
-                        <div class="video-thumbnail">
-                            <img src="/themes/youtube/images/video8-thumbnail.jpg" alt="Video" class="thumbnail-image">
-                            <span class="video-duration">11:27</span>
-                        </div>
-                        <div class="video-info">
-                            <img src="/themes/youtube/images/channel4.jpg" alt="Channel" class="channel-avatar">
-                            <div class="video-details">
-                                <h3 class="video-title">Behind the Scenes - Music Production Process</h3>
-                                <div class="video-meta">
-                                    <span class="channel-name">Music Hub</span>
-                                    <div class="video-stats">
-                                        <span>234K views</span>
-                                        <span>•</span>
-                                        <span>1 month ago</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    }
                 </div>
             </main>
         </div>
     </div>
 
+    <script src="/lib/jquery/dist/jquery.min.js"></script>
+    <script src="/js/signalr.min.js"></script>
+    <script src="/js/posts.js"></script>
     <script src="/themes/youtube/js/feed.js"></script>
 </body>
 </html>

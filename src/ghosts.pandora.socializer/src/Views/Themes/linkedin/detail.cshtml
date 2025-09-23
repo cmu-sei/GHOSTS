@@ -94,10 +94,8 @@
                             <div class="post-text">
                                 @Html.Raw(Model.Message)
                             </div>
-                            @if(!string.IsNullOrEmpty(Model.ImageUrl))
                             {
                                 <div class="post-media">
-                                    <img src="@Model.ImageUrl" alt="Post image" class="post-image">
                                 </div>
                             }
                         </div>

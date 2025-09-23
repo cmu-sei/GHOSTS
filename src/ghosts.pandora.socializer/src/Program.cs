@@ -1,6 +1,7 @@
 using Socializer.Hubs;
 using Socializer.Infrastructure;
 using Socializer.Infrastructure.Services;
+using Socializer.Services;
 
 namespace Socializer;
 
@@ -41,6 +42,13 @@ class Program
 
         services.AddSignalR();
         services.AddHostedService<CleanupService>();
+
+        // Register new services
+        services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IThemeService, ThemeService>();
+        services.AddScoped<IPostService, PostService>();
+        services.AddScoped<DatabaseSeeder>();
+        services.AddScoped<QueryExamples>();
 
         services.AddSingleton<ILogger>(provider =>
             LoggerFactory

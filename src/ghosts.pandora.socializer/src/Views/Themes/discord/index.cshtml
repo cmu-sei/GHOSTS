@@ -1,6 +1,7 @@
 @{
     Layout = null;
 }
+@model List<Socializer.Infrastructure.Post>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -178,159 +179,41 @@
             <!-- Messages Container -->
             <div class="messages-container">
                 <div class="messages-list">
-                    <!-- Message 1 -->
-                    <div class="message">
-                        <img src="/themes/discord/images/user1-avatar.jpg" alt="User" class="message-avatar">
-                        <div class="message-content">
-                            <div class="message-header">
-                                <span class="message-author">AliceGamer</span>
-                                <span class="message-timestamp">Today at 2:47 PM</span>
-                            </div>
-                            <div class="message-text">
-                                Hey everyone! Just finished the new God of War game. What an incredible experience! Anyone else played it yet?
-                            </div>
-                            <div class="message-reactions">
-                                <div class="reaction">
-                                    <span class="reaction-emoji">🎮</span>
-                                    <span class="reaction-count">3</span>
+                    @foreach (var post in Model)
+                    {
+                        <div class="message">
+                            <img src="/u/@post.User.Username/avatar" alt="@post.User.Username" class="message-avatar">
+                            <div class="message-content">
+                                <div class="message-header">
+                                    <span class="message-author">@post.User.Username</span>
+                                    <span class="message-timestamp">@post.CreatedUtc</span>
                                 </div>
-                                <div class="reaction">
-                                    <span class="reaction-emoji">🔥</span>
-                                    <span class="reaction-count">7</span>
+                                <div class="message-text">
+                                    @Html.Raw(post.Message)
                                 </div>
-                            </div>
-                        </div>
-                        <div class="message-actions">
-                            <button class="message-action" title="Add Reaction">😀</button>
-                            <button class="message-action" title="Reply">↩️</button>
-                            <button class="message-action" title="More">⋯</button>
-                        </div>
-                    </div>
+                                <div class="message-reactions">
+                                    @if (post.Likes?.Count > 0)
+                                    {
+                                        <div class="reaction">
+                                            <span class="reaction-emoji">❤️</span>
+                                            <span class="reaction-count">@post.Likes.Count</span>
+                                        </div>
+                                    }
 
-                    <!-- Message 2 -->
-                    <div class="message">
-                        <img src="/themes/discord/images/user2-avatar.jpg" alt="User" class="message-avatar">
-                        <div class="message-content">
-                            <div class="message-header">
-                                <span class="message-author">TechNinja</span>
-                                <span class="message-timestamp">Today at 2:52 PM</span>
-                            </div>
-                            <div class="message-text">
-                                @@AliceGamer Yes! I'm about halfway through. The combat system is so satisfying!
-                                <br><br>
-                                Here's a screenshot of my favorite moment so far:
-                            </div>
-                            <div class="message-attachment">
-                                <img src="/themes/discord/images/game-screenshot.jpg" alt="Game Screenshot" class="attachment-image">
-                            </div>
-                            <div class="message-reactions">
-                                <div class="reaction">
-                                    <span class="reaction-emoji">😍</span>
-                                    <span class="reaction-count">5</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="message-actions">
-                            <button class="message-action" title="Add Reaction">😀</button>
-                            <button class="message-action" title="Reply">↩️</button>
-                            <button class="message-action" title="More">⋯</button>
-                        </div>
-                    </div>
+                                        <div class="reaction">
+                                            <span class="reaction-emoji">💬</span>
+                                            <span class="reaction-count">0</span>
+                                        </div>
 
-                    <!-- Message 3 -->
-                    <div class="message">
-                        <img src="/themes/discord/images/user3-avatar.jpg" alt="User" class="message-avatar">
-                        <div class="message-content">
-                            <div class="message-header">
-                                <span class="message-author">CodeMaster</span>
-                                <span class="message-bot-tag">BOT</span>
-                                <span class="message-timestamp">Today at 3:15 PM</span>
-                            </div>
-                            <div class="message-text">
-                                🎉 Welcome to our new members: @@NewUser1, @@NewUser2, and @@NewUser3!
-                                <br>
-                                Please check out #rules and introduce yourselves in #introductions!
-                            </div>
-                        </div>
-                        <div class="message-actions">
-                            <button class="message-action" title="Add Reaction">😀</button>
-                            <button class="message-action" title="Reply">↩️</button>
-                            <button class="message-action" title="More">⋯</button>
-                        </div>
-                    </div>
-
-                    <!-- Message 4 -->
-                    <div class="message">
-                        <img src="/themes/discord/images/user4-avatar.jpg" alt="User" class="message-avatar">
-                        <div class="message-content">
-                            <div class="message-header">
-                                <span class="message-author">DevGuru</span>
-                                <span class="message-timestamp">Today at 3:28 PM</span>
-                            </div>
-                            <div class="message-text">
-                                Working on a new React project today. Anyone know of good state management libraries besides Redux? Looking for something lighter weight.
-                            </div>
-                            <div class="message-reactions">
-                                <div class="reaction">
-                                    <span class="reaction-emoji">🤔</span>
-                                    <span class="reaction-count">2</span>
-                                </div>
-                                <div class="reaction">
-                                    <span class="reaction-emoji">💡</span>
-                                    <span class="reaction-count">1</span>
                                 </div>
                             </div>
-                        </div>
-                        <div class="message-actions">
-                            <button class="message-action" title="Add Reaction">😀</button>
-                            <button class="message-action" title="Reply">↩️</button>
-                            <button class="message-action" title="More">⋯</button>
-                        </div>
-                    </div>
-
-                    <!-- Message 5 -->
-                    <div class="message">
-                        <img src="/themes/discord/images/user5-avatar.jpg" alt="User" class="message-avatar">
-                        <div class="message-content">
-                            <div class="message-header">
-                                <span class="message-author">ReactPro</span>
-                                <span class="message-timestamp">Today at 3:31 PM</span>
-                            </div>
-                            <div class="message-text">
-                                @@DevGuru Check out Zustand! It's super lightweight and easy to use. Perfect for smaller projects.
-                                <br><br>
-                                Also consider Jotai for atomic state management. Both are great alternatives to Redux.
-                            </div>
-                            <div class="message-reactions">
-                                <div class="reaction">
-                                    <span class="reaction-emoji">👍</span>
-                                    <span class="reaction-count">4</span>
-                                </div>
-                                <div class="reaction">
-                                    <span class="reaction-emoji">💯</span>
-                                    <span class="reaction-count">2</span>
-                                </div>
+                            <div class="message-actions">
+                                <button class="message-action like-it" data-id="@post.Id" title="Add Reaction">😀</button>
+                                <button class="message-action" title="Reply">↩️</button>
+                                <button class="message-action" title="More">⋯</button>
                             </div>
                         </div>
-                        <div class="message-actions">
-                            <button class="message-action" title="Add Reaction">😀</button>
-                            <button class="message-action" title="Reply">↩️</button>
-                            <button class="message-action" title="More">⋯</button>
-                        </div>
-                    </div>
-
-                    <!-- Typing Indicator -->
-                    <div class="typing-indicator">
-                        <img src="/themes/discord/images/user6-avatar.jpg" alt="User" class="typing-avatar">
-                        <div class="typing-content">
-                            <span class="typing-text">MusicLover is typing...</span>
-                            <div class="typing-dots">
-                                <span class="dot"></span>
-                                <span class="dot"></span>
-                                <span class="dot"></span>
-                            </div>
-                        </div>
-                    </div>
+                    }
                 </div>
             </div>
 
@@ -435,6 +318,9 @@
         </div>
     </div>
 
+    <script src="/lib/jquery/dist/jquery.min.js"></script>
+    <script src="/js/signalr.min.js"></script>
+    <script src="/js/posts.js"></script>
     <script src="/themes/discord/js/feed.js"></script>
 </body>
 </html>

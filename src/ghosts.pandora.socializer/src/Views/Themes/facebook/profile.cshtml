@@ -1,13 +1,14 @@
 @{
     Layout = null;
 }
+@model List<Socializer.Infrastructure.Post>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>John Doe - Facebook</title>
+    <title>@ViewBag.ProfileUser - Facebook</title>
     <link rel="stylesheet" href="/themes/facebook/css/facebook.css">
     <link rel="icon" href="/themes/facebook/images/facebook-icon.png" type="image/png">
 </head>
@@ -31,7 +32,7 @@
             <button class="icon-btn">⊕</button>
             <button class="icon-btn">💬</button>
             <button class="icon-btn">🔔</button>
-            <img src="/themes/facebook/images/profile-pic.jpg" alt="Profile" class="profile-pic">
+            <img src="/u/@ViewBag.UserId/avatar" alt="Profile" class="profile-pic">
         </div>
     </header>
 
@@ -44,10 +45,10 @@
             </div>
 
             <div class="profile-info">
-                <img src="/themes/facebook/images/profile-pic-large.jpg" alt="John Doe" class="profile-picture-large">
+                <img src="/u/@ViewBag.ProfileUser/avatar" alt="@ViewBag.ProfileUser" class="profile-picture-large">
 
                 <div class="profile-details">
-                    <h1 class="profile-name">John Doe</h1>
+                    <h1 class="profile-name">@ViewBag.ProfileUser</h1>
                     <div class="profile-stats">1,234 friends</div>
 
                     <div style="display: flex; gap: 8px; margin-top: 16px;">
@@ -176,7 +177,7 @@
                 <!-- Create Post -->
                 <div class="create-post">
                     <div class="create-post-top">
-                        <img src="/themes/facebook/images/profile-pic.jpg" alt="Profile" class="profile-pic">
+                        <img src="/u/@ViewBag.UserId/avatar" alt="Profile" class="profile-pic">
                         <input type="text" class="create-post-input" placeholder="What's on your mind, John?">
                     </div>
                     <div class="create-post-buttons">

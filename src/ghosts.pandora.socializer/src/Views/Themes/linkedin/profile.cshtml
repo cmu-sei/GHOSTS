@@ -159,19 +159,17 @@
                                 {
                                     <article class="activity-post">
                                         <div class="post-header">
-                                            <img src="/u/@post.User/avatar" alt="@post.User" class="post-avatar">
+                                            <img src="/u/@post.User.Username/avatar" alt="@post.User.Username" class="post-avatar">
                                             <div class="post-meta">
-                                                <div class="post-author">@post.User</div>
+                                                <div class="post-author">@post.User.Username</div>
                                                 <div class="post-time">@post.CreatedUtc.ToString("MMM d, yyyy")</div>
                                             </div>
                                         </div>
 
                                         <div class="post-content">
                                             <div class="post-text">@Html.Raw(post.Message)</div>
-                                            @if(!string.IsNullOrEmpty(post.ImageUrl))
                                             {
                                                 <div class="post-media">
-                                                    <img src="@post.ImageUrl" alt="Post image" class="post-image">
                                                 </div>
                                             }
                                         </div>
