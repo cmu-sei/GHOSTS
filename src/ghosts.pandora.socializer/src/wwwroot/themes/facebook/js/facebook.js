@@ -9,7 +9,6 @@ function initializeFacebookFeatures() {
     initializeCommentButtons();
     initializeShareButtons();
     initializePostMenus();
-    initializeCreatePost();
     initializeSearch();
     initializeProfilePictureHovers();
     initializeImageLightbox();
@@ -171,67 +170,6 @@ function showPostMenu(button) {
     });
 }
 
-// Create Post Functionality
-function initializeCreatePost() {
-    const createPostInput = document.querySelector('.create-post-input');
-    const createPostButtons = document.querySelectorAll('.create-post-btn');
-
-    if (createPostInput) {
-        createPostInput.addEventListener('click', function() {
-            showCreatePostModal();
-        });
-
-        createPostInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                showCreatePostModal();
-            }
-        });
-    }
-
-    createPostButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const action = this.textContent.trim();
-            showToast(`${action} clicked`);
-        });
-    });
-}
-
-function showCreatePostModal() {
-    // Simple modal simulation
-    const modal = document.createElement('div');
-    modal.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.5);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 10000;
-    `;
-
-    modal.innerHTML = `
-        <div style="background: white; padding: 24px; border-radius: 8px; max-width: 500px; width: 90%;">
-            <h2 style="margin-bottom: 16px;">Create Post</h2>
-            <textarea placeholder="What's on your mind?" style="width: 100%; height: 100px; border: none; resize: none; font-size: 16px; outline: none;"></textarea>
-            <div style="display: flex; gap: 8px; margin-top: 16px;">
-                <button onclick="this.closest('.modal').remove()" style="padding: 8px 16px; background: #1877f2; color: white; border: none; border-radius: 6px; cursor: pointer;">Post</button>
-                <button onclick="this.closest('.modal').remove()" style="padding: 8px 16px; background: #e4e6ea; border: none; border-radius: 6px; cursor: pointer;">Cancel</button>
-            </div>
-        </div>
-    `;
-
-    modal.className = 'modal';
-    document.body.appendChild(modal);
-
-    modal.addEventListener('click', function(e) {
-        if (e.target === modal) {
-            modal.remove();
-        }
-    });
-}
 
 // Search Functionality
 function initializeSearch() {

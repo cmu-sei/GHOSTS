@@ -1,42 +1,42 @@
+using Ghosts.Socializer.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore;
-using Ghosts.Socializer.Hubs;
-using Ghosts.Socializer.Infrastructure;
 
 namespace Ghosts.Socializer.Controllers;
 
-[Route("u")]
-public class UsersController(ILogger logger, IHubContext<PostsHub> hubContext, DataContext dbContext,
-        IWebHostEnvironment env, ApplicationConfiguration applicationConfiguration)
-    : BaseController(logger, hubContext, dbContext)
-{
-    [HttpGet("{userId}")]
-    public new virtual IActionResult User(string userId)
-    {
-        var posts = Db.Posts
-            .Include(x => x.Likes)
-            .Where(x => x.User.Username.ToLower() == userId.ToLower())
-            .OrderByDescending(x => x.CreatedUtc)
-            .Take(applicationConfiguration.DefaultDisplay)
-            .ToList();
 
-        ViewBag.User = userId;
-        return View("Index", posts);
+[Route("/user")]
+[Route("/u")]
+[Route("/users")]
+[Route("/profile")]
+public class UsersController(ILogger logger, IWebHostEnvironment env, IUserService userService)
+    : BaseController(logger)
+{
+    [HttpGet]
+    public async Task<IActionResult> Index()
+    {
+        var user = await userService.GetUserByUsernameAsync(CookieRead("username"));
+        return View("Profile", user);
     }
 
-    [HttpGet("{userId}/avatar")]
-    public IActionResult GetUserAvatar(string userId)
+    [HttpGet("{username}")]
+    public async Task<IActionResult> User(string username)
+    {
+        var user = await userService.GetUserByUsernameAsync(username);
+        return View("Profile", user);
+    }
+
+    [HttpGet("{username}/avatar")]
+    public IActionResult GetUserAvatar(string username)
     {
         Logger.LogTrace("{RequestScheme}://{RequestHost}{RequestPath}{RequestQueryString}|{RequestMethod}|",
             Request.Scheme, Request.Host, Request.Path, Request.QueryString, Request.Method);
 
-        if (string.IsNullOrEmpty(userId))
+        if (string.IsNullOrEmpty(username))
         {
             return PhysicalFile(Path.Combine(env.WebRootPath, "img", "avatar1.webp"), "image/webp");
         }
 
-        var imageDir = Path.Combine(env.WebRootPath, "images", "u", userId);
+        var imageDir = Path.Combine(env.WebRootPath, "images", "u", username);
         var imagePath = Path.Combine(imageDir, "avatar.webp");
 
         if (!System.IO.File.Exists(imagePath))

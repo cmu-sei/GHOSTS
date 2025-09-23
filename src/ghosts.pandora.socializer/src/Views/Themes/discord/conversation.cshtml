@@ -1,0 +1,350 @@
+@{
+    Layout = null;
+}
+@using Ghosts.Socializer.Infrastructure
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discord | @ViewBag.PartnerUsername</title>
+    <link rel="stylesheet" href="/themes/discord/css/feed.css">
+    <link rel="icon" href="/themes/discord/images/discord-icon.png">
+    <style>
+        .dm-sidebar {
+            width: 240px;
+            background-color: #2f3136;
+            border-right: 1px solid #202225;
+            overflow-y: auto;
+        }
+
+        .dm-header {
+            padding: 16px;
+            border-bottom: 1px solid #36393f;
+        }
+
+        .dm-search {
+            background-color: #40444b;
+            border: none;
+            border-radius: 4px;
+            color: #dcddde;
+            padding: 8px 12px;
+            width: 100%;
+            font-size: 14px;
+        }
+
+        .dm-list {
+            padding: 8px 0;
+        }
+
+        .dm-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 16px;
+            cursor: pointer;
+            color: #8e9297;
+            transition: background-color 0.2s;
+            text-decoration: none;
+        }
+
+        .dm-item:hover, .dm-item.active {
+            background-color: #36393f;
+            color: #dcddde;
+        }
+
+        .dm-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            margin-right: 12px;
+        }
+
+        .dm-info {
+            flex: 1;
+        }
+
+        .dm-name {
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .dm-content {
+            flex: 1;
+            background-color: #36393f;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dm-content-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #40444b;
+            background-color: #36393f;
+            display: flex;
+            align-items: center;
+        }
+
+        .dm-header-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            margin-right: 12px;
+        }
+
+        .dm-title {
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .conversation-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .conversation-messages {
+            flex: 1;
+            padding: 16px 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .conversation-message {
+            display: flex;
+            margin-bottom: 16px;
+            max-width: 70%;
+        }
+
+        .conversation-message.sent {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .conversation-message.received {
+            align-self: flex-start;
+        }
+
+        .conversation-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin: 0 12px;
+            flex-shrink: 0;
+        }
+
+        .conversation-message-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .conversation-message-bubble {
+            background-color: #40444b;
+            color: #dcddde;
+            padding: 10px 16px;
+            border-radius: 18px;
+            font-size: 14px;
+            line-height: 1.4;
+            word-wrap: break-word;
+            position: relative;
+        }
+
+        .conversation-message.sent .conversation-message-bubble {
+            background-color: #7289da;
+            color: #ffffff;
+        }
+
+        .conversation-message-info {
+            font-size: 11px;
+            color: #72767d;
+            margin-top: 4px;
+            padding: 0 16px;
+        }
+
+        .conversation-message.sent .conversation-message-info {
+            text-align: right;
+        }
+
+        .conversation-input-container {
+            padding: 16px 20px;
+            background-color: #40444b;
+            border-top: 1px solid #202225;
+        }
+
+        .conversation-input-form {
+            display: flex;
+            align-items: center;
+            background-color: #484c52;
+            border-radius: 24px;
+            padding: 8px 16px;
+        }
+
+        .conversation-input {
+            flex: 1;
+            background: none;
+            border: none;
+            color: #dcddde;
+            font-size: 14px;
+            padding: 8px 0;
+            outline: none;
+        }
+
+        .conversation-input::placeholder {
+            color: #72767d;
+        }
+
+        .conversation-send-btn {
+            background-color: #7289da;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            color: #ffffff;
+            cursor: pointer;
+            margin-left: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+
+        .conversation-send-btn:hover {
+            background-color: #677bc4;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: #b9bbbe;
+            cursor: pointer;
+            padding: 8px;
+            margin-right: 8px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .back-btn:hover {
+            background-color: #40444b;
+        }
+
+        .empty-conversation {
+            text-align: center;
+            padding: 40px 20px;
+            color: #72767d;
+            margin: auto;
+        }
+
+        .empty-conversation h3 {
+            color: #ffffff;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- Left Sidebar (same as index) -->
+        <div class="server-sidebar">
+            <div class="home-button">
+                <div class="server-icon home">
+                    <img src="/themes/discord/images/discord-icon.png" alt="Discord Home" class="discord-logo">
+                </div>
+            </div>
+            <div class="server-separator"></div>
+            <div class="server-list">
+                <div class="server-item">
+                    <div class="server-icon">
+                        <img src="/themes/discord/images/gaming-server.jpg" alt="Gaming Server" class="server-avatar">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DM Sidebar -->
+        <div class="dm-sidebar">
+            <div class="dm-header">
+                <input type="text" class="dm-search" placeholder="Find or start a conversation">
+            </div>
+
+            <div class="dm-list">
+                <a href="/messages" class="dm-item">
+                    <div class="dm-info">
+                        <div class="dm-name">← Back to Direct Messages</div>
+                    </div>
+                </a>
+
+                <div class="dm-item active">
+                    <img src="/u/@ViewBag.PartnerUsername/avatar" alt="@ViewBag.PartnerUsername" class="dm-avatar">
+                    <div class="dm-info">
+                        <div class="dm-name">@ViewBag.PartnerUsername</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="dm-content">
+            <div class="dm-content-header">
+                <img src="/u/@ViewBag.PartnerUsername/avatar" alt="@ViewBag.PartnerUsername" class="dm-header-avatar">
+                <h1 class="dm-title">@ViewBag.PartnerUsername</h1>
+            </div>
+
+            <div class="conversation-container">
+                <div class="conversation-messages">
+                    @if (ViewBag.Conversation != null)
+                    {
+                        @foreach (var message in ViewBag.Conversation)
+                        {
+                            <div class="conversation-message @(message.FromUsername == ViewBag.Username ? "sent" : "received")">
+                                <img src="/u/@(message.FromUsername == ViewBag.Username ? message.ToUsername : message.FromUsername)/avatar"
+                                     alt="@(message.FromUsername == ViewBag.Username ? message.ToUsername : message.FromUsername)"
+                                     class="conversation-avatar">
+                                <div class="conversation-message-content">
+                                    <div class="conversation-message-bubble">
+                                        @message.Message
+                                    </div>
+                                    <div class="conversation-message-info">
+                                        @message.CreatedUtc.ToString("MMM dd, h:mm tt")@(message.ReadUtc != null ? " • Read" : "")
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="empty-conversation">
+                            <h3>Start the conversation!</h3>
+                            <p>Send a message to @ViewBag.PartnerUsername to get started.</p>
+                        </div>
+                    }
+                </div>
+
+                <div class="conversation-input-container">
+                    <form method="post" action="/messages/send" class="conversation-input-form">
+                        <input type="hidden" name="toUsername" value="@ViewBag.PartnerUsername">
+                        <input type="text" name="message" class="conversation-input"
+                               placeholder="Message @ViewBag.PartnerUsername" required>
+                        <button type="submit" class="conversation-send-btn">
+                            ➤
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/lib/jquery/dist/jquery.min.js"></script>
+    <script>
+        // Auto-scroll to bottom of messages
+        $('.conversation-messages').scrollTop($('.conversation-messages')[0].scrollHeight);
+
+        // Auto-resize input
+        $('.conversation-input').on('input', function() {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight + 'px';
+        });
+    </script>
+</body>
+</html>

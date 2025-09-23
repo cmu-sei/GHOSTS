@@ -1,0 +1,272 @@
+@{
+    Layout = null;
+}
+@using Ghosts.Socializer.Infrastructure
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facebook | Chat with @ViewBag.PartnerUsername</title>
+    <link rel="stylesheet" href="/themes/facebook/css/facebook.css">
+    <link rel="icon" href="/themes/facebook/images/facebook-icon.png" type="image/png">
+    <style>
+        .chat-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f0f2f5;
+            min-height: 100vh;
+        }
+
+        .chat-header {
+            background: #fff;
+            border-radius: 8px 8px 0 0;
+            padding: 16px 20px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: #1877f2;
+            cursor: pointer;
+            padding: 8px;
+            margin-right: 12px;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: background-color 0.2s;
+        }
+
+        .back-btn:hover {
+            background: #f0f2f5;
+        }
+
+        .chat-user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 12px;
+        }
+
+        .chat-user-info h1 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1c1e21;
+            margin: 0;
+        }
+
+        .chat-messages {
+            background: #fff;
+            min-height: 400px;
+            max-height: 500px;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .chat-message {
+            display: flex;
+            align-items: flex-start;
+            max-width: 70%;
+        }
+
+        .chat-message.sent {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .chat-message.received {
+            align-self: flex-start;
+        }
+
+        .chat-message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            margin: 0 8px;
+        }
+
+        .chat-message-bubble {
+            background: #e4e6ea;
+            padding: 8px 12px;
+            border-radius: 18px;
+            max-width: 100%;
+            word-wrap: break-word;
+        }
+
+        .chat-message.sent .chat-message-bubble {
+            background: #1877f2;
+            color: #fff;
+        }
+
+        .chat-message-text {
+            font-size: 14px;
+            line-height: 1.4;
+            margin-bottom: 2px;
+        }
+
+        .chat-message-time {
+            font-size: 11px;
+            color: #65676b;
+            text-align: center;
+            margin-top: 4px;
+        }
+
+        .chat-message.sent .chat-message-time {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .chat-input-container {
+            background: #fff;
+            border-radius: 0 0 8px 8px;
+            padding: 16px 20px;
+            box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .chat-input-form {
+            display: flex;
+            align-items: center;
+            background: #f0f2f5;
+            border-radius: 20px;
+            padding: 8px 16px;
+        }
+
+        .chat-input {
+            flex: 1;
+            border: none;
+            background: none;
+            font-size: 14px;
+            padding: 8px 0;
+            outline: none;
+            resize: none;
+            max-height: 100px;
+        }
+
+        .chat-input::placeholder {
+            color: #65676b;
+        }
+
+        .chat-send-btn {
+            background: #1877f2;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            color: #fff;
+            cursor: pointer;
+            margin-left: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+
+        .chat-send-btn:hover {
+            background: #166fe5;
+        }
+
+        .empty-chat {
+            text-align: center;
+            padding: 40px 20px;
+            color: #65676b;
+            margin: auto;
+        }
+
+        .empty-chat h3 {
+            color: #1c1e21;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body data-theme="facebook">
+<br /><br />
+<!-- Header -->
+<header class="header">
+    <div class="header-left">
+        <a href="/" class="logo">facebook</a>
+    </div>
+    <div class="header-center">
+        <a href="/" class="nav-item">🏠</a>
+        <a href="/messages" class="nav-item active">💬</a>
+    </div>
+    <div class="header-right">
+        <img src="/u/@ViewBag.Username/avatar" alt="Profile" class="profile-pic">
+    </div>
+</header>
+
+<div class="chat-container">
+    <div class="chat-header">
+        <button class="back-btn" onclick="window.location.href='/messages'">←</button>
+        <img src="/u/@ViewBag.PartnerUsername/avatar" alt="@ViewBag.PartnerUsername" class="chat-user-avatar">
+        <div class="chat-user-info">
+            <h1>@ViewBag.PartnerUsername</h1>
+        </div>
+    </div>
+
+    <div class="chat-messages">
+        @if (ViewBag.Conversation != null)
+        {
+            @foreach (var message in ViewBag.Conversation)
+            {
+                <div class="chat-message @(message.FromUsername == ViewBag.Username ? "sent" : "received")">
+                    <img src="/u/@(message.FromUsername == ViewBag.Username ? ViewBag.Username : ViewBag.PartnerUsername)/avatar"
+                         alt="@(message.FromUsername == ViewBag.Username ? ViewBag.Username : ViewBag.PartnerUsername)"
+                         class="chat-message-avatar">
+                    <div class="chat-message-content">
+                        <div class="chat-message-bubble">
+                            <div class="chat-message-text">@message.Message</div>
+                        </div>
+                        <div class="chat-message-time">
+                            @message.CreatedUtc.ToString("h:mm tt")@(message.ReadUtc != null ? " • Seen" : "")
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="empty-chat">
+                <h3>Say hello to @ViewBag.PartnerUsername!</h3>
+                <p>Start the conversation by sending a message below.</p>
+            </div>
+        }
+    </div>
+
+    <div class="chat-input-container">
+        <form method="post" action="/messages/send" class="chat-input-form">
+            <input type="hidden" name="toUsername" value="@ViewBag.PartnerUsername">
+            <textarea name="message" class="chat-input" placeholder="Type a message..." required rows="1"></textarea>
+            <button type="submit" class="chat-send-btn">
+                ➤
+            </button>
+        </form>
+    </div>
+</div>
+
+<script src="/lib/jquery/dist/jquery.min.js"></script>
+<script>
+        // Auto-scroll to bottom of messages
+        $('.chat-messages').scrollTop($('.chat-messages')[0].scrollHeight);
+
+        // Auto-resize textarea
+        $('.chat-input').on('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+        });
+
+        // Submit on Enter
+        $('.chat-input').on('keypress', function(e) {
+            if (e.which === 13 && !e.shiftKey) {
+                e.preventDefault();
+                $(this).closest('form').submit();
+            }
+        });
+    </script>
+</body>
+</html>

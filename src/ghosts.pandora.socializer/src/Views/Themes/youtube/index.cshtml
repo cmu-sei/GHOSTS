@@ -60,6 +60,12 @@
 
                 <div class="sidebar-section">
                     <div class="sidebar-item">
+                        <a href="/messages" style="text-decoration: none; color: inherit; display: flex; align-items: center;">
+                            <span class="sidebar-icon">💬</span>
+                            <span class="sidebar-text">Messages</span>
+                        </a>
+                    </div>
+                    <div class="sidebar-item">
                         <span class="sidebar-icon">📚</span>
                         <span class="sidebar-text">Library</span>
                     </div>
@@ -130,11 +136,11 @@
                                 </div>
                             </div>
                             <div class="video-info">
-                                <img src="/u/@post.User.Username/avatar" alt="@post.User.Username" class="channel-avatar">
+                                <img src="/u/@post.Username/avatar" alt="@post.Username" class="channel-avatar">
                                 <div class="video-details">
                                     <div class="video-title">@Html.Raw(post.Message)</div>
                                     <div class="video-meta">
-                                        <span class="channel-name">@post.User.Username</span>
+                                        <span class="channel-name">@post.Username</span>
                                         <div class="video-stats">
                                             <span>@(post.Likes?.Count ?? 0) likes</span>
                                             <span>•</span>

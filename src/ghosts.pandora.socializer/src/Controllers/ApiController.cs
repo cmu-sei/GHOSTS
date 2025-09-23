@@ -7,7 +7,7 @@ using Ghosts.Socializer.Infrastructure;
 namespace Ghosts.Socializer.Controllers;
 
 [Route("/api")]
-public class ApiController(ILogger logger, IHubContext<PostsHub> hubContext, DataContext dbContext, ApplicationConfiguration applicationConfiguration) : BaseController(logger, hubContext, dbContext)
+public class ApiController(ILogger logger, IHubContext<PostsHub> hubContext, DataContext dbContext, ApplicationConfiguration applicationConfiguration) : BaseController(logger)
 {
     [HttpGet]
     public IEnumerable<Post> Index()
@@ -25,14 +25,14 @@ public class ApiController(ILogger logger, IHubContext<PostsHub> hubContext, Dat
         return posts;
     }
 
-    [HttpGet("u/{userId}")]
-    public new virtual IEnumerable<Post> User(string userId)
+    [HttpGet("u/{username}")]
+    public new virtual IEnumerable<Post> User(string username)
     {
         var posts = dbContext.Posts
             .Include(x => x.Likes)
             .Include(x => x.User)
             .Include(x => x.Theme)
-            .Where(x => x.User.Username.Equals(userId, StringComparison.CurrentCultureIgnoreCase))
+            .Where(x => x.User.Username.Equals(username, StringComparison.CurrentCultureIgnoreCase))
             .OrderByDescending(x => x.CreatedUtc)
             .Take(applicationConfiguration.DefaultDisplay)
             .ToList();
@@ -69,19 +69,6 @@ public class ApiController(ILogger logger, IHubContext<PostsHub> hubContext, Dat
     {
         var r = new Random();
 
-        // Get or create default theme
-        var theme = await dbContext.Themes.FirstOrDefaultAsync(t => t.Name == "facebook") ?? new Theme
-        {
-            Name = "facebook",
-            DisplayName = "Facebook",
-            Description = "Facebook theme"
-        };
-        if (theme.Id == 0)
-        {
-            dbContext.Themes.Add(theme);
-            await dbContext.SaveChangesAsync();
-        }
-
         for (var i = 0; i < n; i++)
         {
             var min = DateTime.Now.AddDays(-7);
@@ -109,7 +96,7 @@ public class ApiController(ILogger logger, IHubContext<PostsHub> hubContext, Dat
                 Id = Guid.NewGuid(),
                 CreatedUtc = DateTime.MinValue.Add(TimeSpan.FromTicks(min.Ticks + (long)(r.NextDouble() * (DateTime.Now.Ticks - min.Ticks)))),
                 Username = user.Username,
-                ThemeId = theme.Id,
+                Theme = user.Theme,
                 Message = Faker.Lorem.Sentence(15)
             };
             dbContext.Posts.Add(post);
@@ -165,22 +152,8 @@ public class ApiController(ILogger logger, IHubContext<PostsHub> hubContext, Dat
             await dbContext.SaveChangesAsync();
         }
 
-        // Get default theme
-        var theme = await dbContext.Themes.FirstOrDefaultAsync(t => t.Name == "facebook");
-        if (theme == null)
-        {
-            theme = new Theme
-            {
-                Name = "facebook",
-                DisplayName = "Facebook",
-                Description = "Facebook theme"
-            };
-            dbContext.Themes.Add(theme);
-            await dbContext.SaveChangesAsync();
-        }
-
         post.Username = user.Username;
-        post.ThemeId = theme.Id;
+        post.Theme = user.Theme;
 
         // has the same user tried to post the same message within the past x minutes?
         if (dbContext.Posts.Any(p => p.Message.Equals(post.Message, StringComparison.CurrentCultureIgnoreCase)
@@ -229,9 +202,9 @@ public class ApiController(ILogger logger, IHubContext<PostsHub> hubContext, Dat
         dbContext.Posts.Add(post);
         await dbContext.SaveChangesAsync();
 
-        CookieWrite("userid", username);
+        UserWrite(username);
 
-        await HubContext.Clients.All.SendAsync("SendMessage", post.Id, username, post.Message, post.CreatedUtc);
+        await hubContext.Clients.All.SendAsync("SendMessage", post.Id, username, post.Message, post.CreatedUtc);
 
         return NoContent();
     }

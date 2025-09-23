@@ -6,11 +6,12 @@ namespace Ghosts.Socializer.Services;
 public interface IUserService
 {
     Task<List<User>> GetAllUsersAsync();
-    Task<User> GetUserByIdAsync(string userId);
+    Task<User> GetUserByIdAsync(string username);
     Task<User> GetUserByUsernameAsync(string username);
     Task<User> CreateUserAsync(string username, string bio = null);
-    Task<User> UpdateUserAsync(string userId, string bio = null, string status = null);
-    Task<bool> DeleteUserAsync(string userId);
+    Task<User> GetOrCreateUserAsync(string username, string bio = null);
+    Task<User> UpdateUserAsync(string username, string bio = null, string status = null);
+    Task<bool> DeleteUserAsync(string username);
     Task<bool> UsernameExistsAsync(string username);
     Task<List<User>> SearchUsersAsync(string searchTerm, int limit = 20);
 }
@@ -65,9 +66,20 @@ public class UserService(DataContext context) : IUserService
         return user;
     }
 
-    public async Task<User> UpdateUserAsync(string userId, string bio = null, string status = null)
+    public async Task<User> GetOrCreateUserAsync(string username, string bio = null)
     {
-        var user = await context.Users.FindAsync(userId);
+        var existingUser = await GetUserByUsernameAsync(username);
+        if (existingUser != null)
+        {
+            return existingUser;
+        }
+
+        return await CreateUserAsync(username, bio);
+    }
+
+    public async Task<User> UpdateUserAsync(string username, string bio = null, string status = null)
+    {
+        var user = await context.Users.FindAsync(username);
         if (user == null)
             return null;
 
@@ -83,9 +95,9 @@ public class UserService(DataContext context) : IUserService
         return user;
     }
 
-    public async Task<bool> DeleteUserAsync(string userId)
+    public async Task<bool> DeleteUserAsync(string username)
     {
-        var user = await context.Users.FindAsync(userId);
+        var user = await context.Users.FindAsync(username);
         if (user == null)
             return false;
 

@@ -28,7 +28,9 @@
             </div>
             <div class="header-right">
                 <button class="header-btn">📈</button>
-                <button class="header-btn">💬</button>
+                <a href="/messages" style="text-decoration: none;">
+                    <button class="header-btn">💬</button>
+                </a>
                 <button class="header-btn">🔔</button>
                 <button class="header-btn">➕</button>
                 <div class="user-menu">
@@ -131,10 +133,10 @@
                             </div>
                             <div class="post-content">
                                 <div class="post-header">
-                                    <img src="/u/@post.User.Username/avatar" alt="@post.User.Username" class="subreddit-icon">
+                                    <img src="/u/@post.Username/avatar" alt="@post.Username" class="subreddit-icon">
                                     <span class="subreddit-name">r/general</span>
                                     <span class="post-meta">
-                                        • Posted by u/@post.User.Username
+                                        • Posted by u/@post.Username
                                         <span class="post-time">@post.CreatedUtc</span>
                                     </span>
                                 </div>

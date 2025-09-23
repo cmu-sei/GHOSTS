@@ -33,7 +33,7 @@
                 <button class="header-btn">📹</button>
                 <button class="header-btn">🔔</button>
                 <div class="user-menu">
-                    <img src="/u/@ViewBag.UserId/avatar" alt="Profile" class="user-avatar">
+                    <img src="/u/@ViewBag.Username/avatar" alt="Profile" class="user-avatar">
                 </div>
             </div>
         </header>
@@ -118,7 +118,7 @@
                     <!-- Featured Video Section -->
                     <div class="featured-section">
                         <h2 class="section-title">Featured</h2>
-                        @if (Model != null && Model.Any())
+                        @if (Model != null)
                         {
                             var featuredPost = Model.First();
                             <div class="featured-video">
@@ -147,9 +147,9 @@
                     <div class="videos-section">
                         <h2 class="section-title">Recent uploads</h2>
                         <div class="videos-grid">
-                            @if (Model != null && Model.Any())
+                            @if (Model != null)
                             {
-                                @foreach (var post in Model.Take(6))
+                                @foreach (var post in Model)
                                 {
                                     <div class="video-card">
                                         <div class="video-thumbnail">

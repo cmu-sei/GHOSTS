@@ -1,0 +1,485 @@
+@{
+    Layout = null;
+}
+@using Ghosts.Socializer.Infrastructure
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube | Messages</title>
+    <link rel="stylesheet" href="/themes/youtube/css/youtube.css">
+    <link rel="icon" href="/themes/youtube/images/youtube-icon.png" type="image/png">
+    <style>
+        .messages-layout {
+            display: flex;
+            min-height: 100vh;
+            background: #0f0f0f;
+            color: #fff;
+        }
+
+        .messages-sidebar {
+            width: 340px;
+            background: #212121;
+            border-right: 1px solid #3c3c3c;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid #3c3c3c;
+            background: #ff0000;
+            display: flex;
+            align-items: center;
+        }
+
+        .sidebar-icon {
+            font-size: 24px;
+            margin-right: 12px;
+        }
+
+        .sidebar-title {
+            font-size: 18px;
+            font-weight: 500;
+            margin: 0;
+            color: #fff;
+        }
+
+        .new-message-section {
+            padding: 20px;
+            border-bottom: 1px solid #3c3c3c;
+        }
+
+        .section-header {
+            font-size: 14px;
+            font-weight: 500;
+            color: #aaa;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 400;
+            color: #fff;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #3c3c3c;
+            border-radius: 2px;
+            font-size: 14px;
+            background: #0f0f0f;
+            color: #fff;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #ff0000;
+            box-shadow: 0 0 0 1px #ff0000;
+        }
+
+        .form-input::placeholder {
+            color: #717171;
+        }
+
+        .btn-red {
+            background: #ff0000;
+            border: none;
+            border-radius: 2px;
+            color: #fff;
+            padding: 10px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.1s;
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-red:hover {
+            background: #cc0000;
+        }
+
+        .conversations-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .conversation-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: background-color 0.1s;
+            text-decoration: none;
+            color: inherit;
+            border-bottom: 1px solid #3c3c3c;
+        }
+
+        .conversation-item:hover {
+            background-color: #3c3c3c;
+        }
+
+        .conversation-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 12px;
+        }
+
+        .conversation-info {
+            flex: 1;
+        }
+
+        .conversation-name {
+            font-weight: 500;
+            color: #fff;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .conversation-preview {
+            color: #aaa;
+            font-size: 12px;
+        }
+
+        .subscriber-count {
+            color: #ff0000;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .messages-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #0f0f0f;
+        }
+
+        .messages-header {
+            padding: 24px;
+            border-bottom: 1px solid #3c3c3c;
+            background: #212121;
+        }
+
+        .messages-title {
+            font-size: 24px;
+            font-weight: 400;
+            color: #fff;
+            margin: 0 0 8px 0;
+        }
+
+        .messages-subtitle {
+            color: #aaa;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .message-groups {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .message-group {
+            margin-bottom: 32px;
+        }
+
+        .message-group-title {
+            font-size: 18px;
+            font-weight: 500;
+            color: #fff;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #ff0000;
+            display: inline-block;
+        }
+
+        .message-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 16px;
+            padding: 16px;
+            background: #212121;
+            border-radius: 8px;
+            border-left: 4px solid #3c3c3c;
+        }
+
+        .message-item.sent {
+            background: #1a0000;
+            border-left-color: #ff0000;
+            margin-left: 20px;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 12px;
+        }
+
+        .message-content {
+            flex: 1;
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .message-sender {
+            font-weight: 500;
+            color: #fff;
+            font-size: 14px;
+            margin-right: 12px;
+        }
+
+        .message-time {
+            color: #aaa;
+            font-size: 12px;
+        }
+
+        .message-text {
+            color: #fff;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .video-section {
+            display: flex;
+            align-items: center;
+            margin: 0 12px;
+            flex-direction: column;
+        }
+
+        .video-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #aaa;
+            font-size: 16px;
+            padding: 4px;
+            transition: color 0.1s;
+            margin-bottom: 4px;
+        }
+
+        .video-btn:hover {
+            color: #ff0000;
+        }
+
+        .view-count {
+            font-size: 10px;
+            color: #aaa;
+            text-align: center;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 48px 20px;
+            color: #aaa;
+            margin: auto;
+        }
+
+        .empty-state h3 {
+            color: #fff;
+            margin-bottom: 8px;
+            font-weight: 400;
+        }
+
+        .creator-badge {
+            background: #ff0000;
+            color: #fff;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 2px;
+            margin-left: 8px;
+            font-weight: 500;
+        }
+
+        .verified-check {
+            color: #aaa;
+            margin-left: 4px;
+            font-size: 14px;
+        }
+
+        .trending-indicator {
+            background: linear-gradient(45deg, #ff0000, #ff4444);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body data-theme="youtube">
+    <!-- YouTube Header -->
+    <header class="header">
+        <div class="header-left">
+            <button class="menu-button">☰</button>
+            <a href="/" class="logo">
+                <img src="/themes/youtube/images/youtube-icon.png" alt="YouTube" class="youtube-logo">
+                <span class="youtube-text">YouTube</span>
+            </a>
+        </div>
+        <div class="header-center">
+            <div class="search-container">
+                <input type="text" placeholder="Search" class="search-input">
+                <button class="search-button">🔍</button>
+            </div>
+        </div>
+        <div class="header-right">
+            <a href="/" class="header-icon">🏠</a>
+            <a href="/messages" class="header-icon active">💬</a>
+            <img src="/u/@ViewBag.Username/avatar" alt="Profile" class="profile-pic">
+        </div>
+    </header>
+
+    <div class="messages-layout">
+        <div class="messages-sidebar">
+            <div class="sidebar-header">
+                <span class="sidebar-icon">💬</span>
+                <h2 class="sidebar-title">Messages</h2>
+            </div>
+
+            <div class="new-message-section">
+                <div class="section-header">Create Message</div>
+                <form method="post" action="/messages/send">
+                    <div class="form-group">
+                        <label class="form-label">To:</label>
+                        <input type="text" name="toUsername" class="form-input" placeholder="Channel name" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Message:</label>
+                        <input type="text" name="message" class="form-input" placeholder="What's on your mind?" required>
+                    </div>
+                    <button type="submit" class="btn-red">Send Message</button>
+                </form>
+            </div>
+
+            @if (ViewBag.ConversationPartners != null)
+            {
+                <div class="conversations-list">
+                    @foreach (var partner in ViewBag.ConversationPartners)
+                    {
+                        <a href="/messages/conversation/@partner" class="conversation-item">
+                            <img src="/u/@partner/avatar" alt="@partner" class="conversation-avatar">
+                            <div class="conversation-info">
+                                <div class="conversation-name">
+                                    @partner
+                                    <span class="verified-check">✓</span>
+                                    <span class="creator-badge">CREATOR</span>
+                                </div>
+                                <div class="conversation-preview">Click to open conversation</div>
+                                <div class="subscriber-count">2.4M subscribers</div>
+                            </div>
+                        </a>
+                    }
+                </div>
+            }
+        </div>
+
+        <div class="messages-main">
+            <div class="messages-header">
+                <h1 class="messages-title">Your Messages</h1>
+                <p class="messages-subtitle">Connect with creators and viewers in your community</p>
+            </div>
+
+            <div class="message-groups">
+                @if (ViewBag.ReceivedMessages != null)
+                {
+                    <div class="message-group">
+                        <h3 class="message-group-title">📥 Inbox</h3>
+                        @foreach (var message in ViewBag.ReceivedMessages)
+                        {
+                            <div class="message-item">
+                                <div class="video-section">
+                                    <button class="video-btn">👍</button>
+                                    <div class="view-count">1.2K</div>
+                                    <button class="video-btn">👎</button>
+                                </div>
+                                <img src="/u/@message.FromUsername/avatar" alt="@message.FromUsername" class="message-avatar">
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-sender">
+                                            @message.FromUsername
+                                            <span class="verified-check">✓</span>
+                                        </span>
+                                        <span class="message-time">@message.CreatedUtc.ToString("MMM dd") • @message.CreatedUtc.ToString("h:mm tt")</span>
+                                    </div>
+                                    <div class="message-text">@message.Message</div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+
+                @if (ViewBag.SentMessages != null)
+                {
+                    <div class="message-group">
+                        <h3 class="message-group-title">📤 Sent</h3>
+                        @foreach (var message in ViewBag.SentMessages)
+                        {
+                            <div class="message-item sent">
+                                <div class="video-section">
+                                    <button class="video-btn">👍</button>
+                                    <div class="view-count">856</div>
+                                    <button class="video-btn">👎</button>
+                                </div>
+                                <img src="/u/@message.ToUsername/avatar" alt="@message.ToUsername" class="message-avatar">
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-sender">To @message.ToUsername</span>
+                                        <span class="message-time">@message.CreatedUtc.ToString("MMM dd") • @message.CreatedUtc.ToString("h:mm tt")</span>
+                                    </div>
+                                    <div class="message-text">@message.Message</div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+
+                @if (ViewBag.ReceivedMessages == null &&
+                     ViewBag.SentMessages == null)
+                {
+                    <div class="empty-state">
+                        <h3>No messages yet</h3>
+                        <p>Start connecting with creators and viewers! <span class="trending-indicator">Join the conversation.</span></p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <script src="/lib/jquery/dist/jquery.min.js"></script>
+    <script>
+        // Like/Dislike button interactions
+        $('.video-btn').click(function(e) {
+            e.preventDefault();
+            $(this).css('color', '#ff0000');
+            var viewCount = $(this).siblings('.view-count');
+            var currentCount = parseFloat(viewCount.text());
+
+            if ($(this).text() === '👍') {
+                viewCount.text((currentCount + 0.1).toFixed(1) + 'K');
+            }
+
+            setTimeout(() => {
+                $(this).css('color', '#aaa');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

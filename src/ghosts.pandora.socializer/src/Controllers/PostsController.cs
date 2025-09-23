@@ -1,32 +1,39 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore;
-using Ghosts.Socializer.Hubs;
 using Ghosts.Socializer.Infrastructure;
 using Ghosts.Socializer.Services;
 
 namespace Ghosts.Socializer.Controllers;
 
-[Route("posts")]
-public class PostsController(ILogger logger, IHubContext<PostsHub> hubContext, DataContext dbContext, IUserService userService) : BaseController(logger, hubContext, dbContext)
+[Route("/r")]
+[Route("/r/{subreddit}")]
+[Route("/posts")]
+public class PostsController(ILogger logger, DataContext dbContext, IUserService userService) : BaseController(logger)
 {
+    [HttpGet]
+    public IActionResult Index()
+    {
+        var theme = ThemeRead();
+        var posts = dbContext.Posts.Where(x=>x.Theme == theme).OrderByDescending(x=>x.CreatedUtc).ToList();
+
+        return View("Index", posts);
+    }
+
     [HttpGet("{id:guid}")]
     public IActionResult Detail(Guid id)
     {
-        var post = Db.Posts.Include(x => x.Likes).FirstOrDefault(x => x.Id == id);
+        var theme = ThemeRead();
+        var post = dbContext.Posts.Where(x=>x.Theme == theme && x.Id == id);
 
-        if (Request.QueryString.HasValue && !string.IsNullOrEmpty(Request.Query["u"]))
-            ViewBag.User = Request.Query["u"];
-        return View(post);
+        return View("detail", post);
     }
 
-    [HttpGet("{id:guid}/likes")]
+    [HttpGet("/api/posts/{id:guid}/likes")]
     public IEnumerable<Like> GetLikes(Guid id)
     {
-        return Db.Likes.Where(x => x.PostId == id).ToArray();
+        return dbContext.Likes.Where(x => x.PostId == id).ToArray();
     }
 
-    [HttpPost("{id:guid}/likes")]
+    [HttpPost("/api/posts/{id:guid}/likes")]
     public async Task<IActionResult> Like(Guid id)
     {
         var username = GetOrCreateUsernameCookie(this.HttpContext);
@@ -40,8 +47,8 @@ public class PostsController(ILogger logger, IHubContext<PostsHub> hubContext, D
             CreatedUtc = DateTime.UtcNow
         };
 
-        Db.Likes.Add(like);
-        await Db.SaveChangesAsync();
+        dbContext.Likes.Add(like);
+        await dbContext.SaveChangesAsync();
         return NoContent();
     }
 }

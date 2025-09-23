@@ -30,10 +30,6 @@ public class DataContext : DbContext
             .WithMany(u => u.Posts)
             .HasForeignKey(p => p.Username);
 
-        modelBuilder.Entity<Post>()
-            .HasOne(p => p.Theme)
-            .WithMany(t => t.Posts)
-            .HasForeignKey(p => p.ThemeId);
 
         modelBuilder.Entity<Like>()
             .HasOne(l => l.Post)
@@ -55,13 +51,24 @@ public class DataContext : DbContext
             .WithMany(u => u.Comments)
             .HasForeignKey(c => c.Username);
 
+        modelBuilder.Entity<DirectMessage>()
+            .HasOne(dm => dm.FromUser)
+            .WithMany(u => u.SentMessages)
+            .HasForeignKey(dm => dm.FromUsername);
+
+        modelBuilder.Entity<DirectMessage>()
+            .HasOne(dm => dm.ToUser)
+            .WithMany(u => u.ReceivedMessages)
+            .HasForeignKey(dm => dm.ToUsername);
+
+
         // Configure indexes for common queries
         modelBuilder.Entity<Post>()
-            .HasIndex(p => new { p.ThemeId, p.CreatedUtc })
+            .HasIndex(p => new { p.Theme, p.CreatedUtc })
             .HasDatabaseName("IX_Post_Theme_CreatedUtc");
 
         modelBuilder.Entity<Post>()
-            .HasIndex(p => new { p.Username, p.ThemeId, p.CreatedUtc })
+            .HasIndex(p => new { p.Username, p.Theme, p.CreatedUtc })
             .HasDatabaseName("IX_Post_User_Theme_CreatedUtc");
 
         modelBuilder.Entity<Like>()
@@ -69,16 +76,15 @@ public class DataContext : DbContext
             .IsUnique()
             .HasDatabaseName("IX_Like_User_Post_Unique");
 
-        // Seed data
-        modelBuilder.Entity<Theme>().HasData(
-            new Theme { Id = 1, Name = "facebook", DisplayName = "Facebook", Description = "Facebook-style social media theme", IsActive = true },
-            new Theme { Id = 2, Name = "instagram", DisplayName = "Instagram", Description = "Instagram-style photo sharing theme", IsActive = true },
-            new Theme { Id = 3, Name = "x", DisplayName = "X (Twitter)", Description = "X/Twitter-style microblogging theme", IsActive = true },
-            new Theme { Id = 4, Name = "linkedin", DisplayName = "LinkedIn", Description = "LinkedIn-style professional networking theme", IsActive = true },
-            new Theme { Id = 5, Name = "reddit", DisplayName = "Reddit", Description = "Reddit-style forum theme", IsActive = true },
-            new Theme { Id = 6, Name = "youtube", DisplayName = "YouTube", Description = "YouTube-style video platform theme", IsActive = true },
-            new Theme { Id = 7, Name = "discord", DisplayName = "Discord", Description = "Discord-style chat theme", IsActive = true }
-        );
+        modelBuilder.Entity<DirectMessage>()
+            .HasIndex(dm => new { dm.ToUsername, dm.CreatedUtc })
+            .HasDatabaseName("IX_DirectMessage_ToUser_CreatedUtc");
+
+        modelBuilder.Entity<DirectMessage>()
+            .HasIndex(dm => new { dm.FromUsername, dm.CreatedUtc })
+            .HasDatabaseName("IX_DirectMessage_FromUser_CreatedUtc");
+
+
 
         base.OnModelCreating(modelBuilder);
     }
@@ -87,7 +93,7 @@ public class DataContext : DbContext
     public DbSet<Post> Posts { get; set; }
     public DbSet<Like> Likes { get; set; }
     public DbSet<Comment> Comments { get; set; }
-    public DbSet<Theme> Themes { get; set; }
+    public DbSet<DirectMessage> DirectMessages { get; set; }
 }
 
 public class User
@@ -106,6 +112,9 @@ public class User
     [MaxLength(50)]
     public string Status { get; set; }
 
+    [MaxLength(50)]
+    public string Theme { get; set; } = "default";
+
     public DateTime CreatedUtc { get; set; } = DateTime.UtcNow;
     public DateTime LastActiveUtc { get; set; } = DateTime.UtcNow;
 
@@ -113,27 +122,10 @@ public class User
     public virtual ICollection<Post> Posts { get; set; } = new List<Post>();
     public virtual ICollection<Like> Likes { get; set; } = new List<Like>();
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
+    public virtual ICollection<DirectMessage> SentMessages { get; set; } = new List<DirectMessage>();
+    public virtual ICollection<DirectMessage> ReceivedMessages { get; set; } = new List<DirectMessage>();
 }
 
-public class Theme
-{
-    [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public int Id { get; set; }
-
-    [Required]
-    [MaxLength(50)]
-    public string Name { get; set; } // facebook, instagram, x, etc.
-
-    public string DisplayName { get; set; } // Facebook, Instagram
-
-    [MaxLength(500)]
-    public string Description { get; set; }
-
-    public bool IsActive { get; set; } = true;
-
-    public virtual ICollection<Post> Posts { get; set; } = new List<Post>();
-}
 
 public class Post
 {
@@ -144,17 +136,16 @@ public class Post
     public string Username { get; set; }
 
     [Required]
-    public int ThemeId { get; set; }
-
-    [Required]
     [MaxLength(5000)]
     public string Message { get; set; }
+
+    [MaxLength(50)]
+    public string Theme { get; set; } = "default";
 
     public DateTime CreatedUtc { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedUtc { get; set; } = DateTime.UtcNow;
 
     public virtual User User { get; set; }
-    public virtual Theme Theme { get; set; }
     public virtual ICollection<Like> Likes { get; set; } = new List<Like>();
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
 }
@@ -198,4 +189,30 @@ public class Comment
 
     public virtual User User { get; set; }
     public virtual Post Post { get; set; }
+}
+
+public class DirectMessage
+{
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int Id { get; set; }
+
+    [Required]
+    [MaxLength(50)]
+    public string FromUsername { get; set; }
+
+    [Required]
+    [MaxLength(50)]
+    public string ToUsername { get; set; }
+
+
+    [Required]
+    [MaxLength(2000)]
+    public string Message { get; set; }
+
+    public DateTime CreatedUtc { get; set; } = DateTime.UtcNow;
+    public DateTime? ReadUtc { get; set; }
+
+    public virtual User FromUser { get; set; }
+    public virtual User ToUser { get; set; }
 }

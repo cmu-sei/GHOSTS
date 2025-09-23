@@ -1,0 +1,457 @@
+@{
+    Layout = null;
+}
+@using Ghosts.Socializer.Infrastructure
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>reddit: the front page of the internet | Messages</title>
+    <link rel="stylesheet" href="/themes/reddit/css/reddit.css">
+    <link rel="icon" href="/themes/reddit/images/reddit-icon.png" type="image/png">
+    <style>
+        .messages-layout {
+            display: flex;
+            min-height: 100vh;
+            background: #dae0e6;
+        }
+
+        .messages-sidebar {
+            width: 320px;
+            background: #ffffff;
+            border-right: 1px solid #edeff1;
+            border-radius: 4px;
+            margin: 16px 0 16px 16px;
+            height: fit-content;
+        }
+
+        .sidebar-header {
+            padding: 16px;
+            border-bottom: 1px solid #edeff1;
+            background: #ff4500;
+            color: #fff;
+            border-radius: 4px 4px 0 0;
+        }
+
+        .sidebar-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .new-message-section {
+            padding: 20px;
+            border-bottom: 1px solid #edeff1;
+        }
+
+        .section-header {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1c1c1c;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 500;
+            color: #1c1c1c;
+            margin-bottom: 4px;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            background: #fff;
+            font-family: 'IBM Plex Sans', sans-serif;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #ff4500;
+            box-shadow: 0 0 0 1px #ff4500;
+        }
+
+        .btn-orange {
+            background: #ff4500;
+            border: none;
+            border-radius: 4px;
+            color: #fff;
+            padding: 8px 16px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: background-color 0.1s;
+            width: 100%;
+        }
+
+        .btn-orange:hover {
+            background: #dc3900;
+        }
+
+        .conversations-list {
+            padding: 0;
+        }
+
+        .conversation-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: background-color 0.1s;
+            text-decoration: none;
+            color: inherit;
+            border-bottom: 1px solid #f6f7f8;
+        }
+
+        .conversation-item:hover {
+            background-color: #f6f7f8;
+        }
+
+        .conversation-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            margin-right: 12px;
+        }
+
+        .conversation-info {
+            flex: 1;
+        }
+
+        .conversation-name {
+            font-weight: 500;
+            color: #1c1c1c;
+            font-size: 12px;
+            margin-bottom: 2px;
+        }
+
+        .conversation-name::before {
+            content: "u/";
+            color: #787c7e;
+        }
+
+        .conversation-preview {
+            color: #787c7e;
+            font-size: 12px;
+        }
+
+        .conversation-karma {
+            color: #ff4500;
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .messages-main {
+            flex: 1;
+            padding: 16px;
+        }
+
+        .messages-container {
+            background: #ffffff;
+            border-radius: 4px;
+            min-height: 600px;
+        }
+
+        .messages-header {
+            padding: 20px;
+            border-bottom: 1px solid #edeff1;
+            background: #f6f7f8;
+            border-radius: 4px 4px 0 0;
+        }
+
+        .messages-title {
+            font-size: 18px;
+            font-weight: 500;
+            color: #1c1c1c;
+            margin: 0 0 4px 0;
+        }
+
+        .messages-subtitle {
+            color: #787c7e;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .message-groups {
+            padding: 20px;
+        }
+
+        .message-group {
+            margin-bottom: 24px;
+        }
+
+        .message-group-title {
+            font-size: 16px;
+            font-weight: 500;
+            color: #1c1c1c;
+            margin-bottom: 12px;
+            padding-bottom: 4px;
+            border-bottom: 2px solid #ff4500;
+            display: inline-block;
+        }
+
+        .message-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            border-left: 4px solid #edeff1;
+        }
+
+        .message-item.sent {
+            background: #ffe8d6;
+            border-left-color: #ff4500;
+            margin-left: 20px;
+        }
+
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            margin-right: 12px;
+        }
+
+        .message-content {
+            flex: 1;
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .message-sender {
+            font-weight: 500;
+            color: #1c1c1c;
+            font-size: 12px;
+            margin-right: 8px;
+        }
+
+        .message-sender::before {
+            content: "u/";
+            color: #787c7e;
+        }
+
+        .message-time {
+            color: #787c7e;
+            font-size: 10px;
+        }
+
+        .message-text {
+            color: #1c1c1c;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .vote-buttons {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-right: 8px;
+            padding-top: 4px;
+        }
+
+        .vote-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #878a8c;
+            font-size: 16px;
+            padding: 2px;
+            transition: color 0.1s;
+        }
+
+        .vote-btn:hover {
+            color: #ff4500;
+        }
+
+        .vote-count {
+            font-size: 10px;
+            font-weight: 700;
+            color: #1c1c1c;
+            margin: 2px 0;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 48px 20px;
+            color: #787c7e;
+        }
+
+        .empty-state h3 {
+            color: #1c1c1c;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .reddit-premium {
+            background: linear-gradient(45deg, #ff6600, #ff8c42);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body data-theme="reddit">
+    <!-- Reddit Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <a href="/" class="logo-link">
+                    <img src="/themes/reddit/images/reddit-icon.png" alt="reddit" class="reddit-logo">
+                    <span class="reddit-text">reddit</span>
+                </a>
+            </div>
+            <div class="header-center">
+                <div class="search-bar">
+                    <input type="text" placeholder="Search Reddit" class="search-input">
+                </div>
+            </div>
+            <div class="header-right">
+                <a href="/" class="nav-button">Home</a>
+                <a href="/messages" class="nav-button active">Messages</a>
+                <img src="/u/@ViewBag.Username/avatar" alt="Profile" class="user-avatar">
+            </div>
+        </div>
+    </header>
+
+    <div class="messages-layout">
+        <div class="messages-sidebar">
+            <div class="sidebar-header">
+                <h2 class="sidebar-title">Direct Messages</h2>
+            </div>
+
+            <div class="new-message-section">
+                <div class="section-header">Compose</div>
+                <form method="post" action="/messages/send">
+                    <div class="form-group">
+                        <label class="form-label">To:</label>
+                        <input type="text" name="toUsername" class="form-input" placeholder="u/username" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Message:</label>
+                        <input type="text" name="message" class="form-input" placeholder="What's on your mind?" required>
+                    </div>
+                    <button type="submit" class="btn-orange">Send Message</button>
+                </form>
+            </div>
+
+            @if (ViewBag.ConversationPartners != null)
+            {
+                <div class="conversations-list">
+                    @foreach (var partner in ViewBag.ConversationPartners)
+                    {
+                        <a href="/messages/conversation/@partner" class="conversation-item">
+                            <img src="/u/@partner/avatar" alt="@partner" class="conversation-avatar">
+                            <div class="conversation-info">
+                                <div class="conversation-name">@partner</div>
+                                <div class="conversation-preview">Click to view thread</div>
+                                <div class="conversation-karma">+1,337 karma</div>
+                            </div>
+                        </a>
+                    }
+                </div>
+            }
+        </div>
+
+        <div class="messages-main">
+            <div class="messages-container">
+                <div class="messages-header">
+                    <h1 class="messages-title">Your Messages</h1>
+                    <p class="messages-subtitle">Private conversations with fellow Redditors</p>
+                </div>
+
+                <div class="message-groups">
+                    @if (ViewBag.ReceivedMessages != null)
+                    {
+                        <div class="message-group">
+                            <h3 class="message-group-title">📨 Inbox</h3>
+                            @foreach (var message in ViewBag.ReceivedMessages)
+                            {
+                                <div class="message-item">
+                                    <div class="vote-buttons">
+                                        <button class="vote-btn">▲</button>
+                                        <div class="vote-count">1</div>
+                                        <button class="vote-btn">▼</button>
+                                    </div>
+                                    <img src="/u/@message.FromUsername/avatar" alt="@message.FromUsername" class="message-avatar">
+                                    <div class="message-content">
+                                        <div class="message-header">
+                                            <span class="message-sender">@message.FromUsername</span>
+                                            <span class="message-time">@message.CreatedUtc.ToString("MMM dd") • @message.CreatedUtc.ToString("h:mm tt")</span>
+                                        </div>
+                                        <div class="message-text">@message.Message</div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+
+                    @if (ViewBag.SentMessages != null)
+                    {
+                        <div class="message-group">
+                            <h3 class="message-group-title">📤 Sent</h3>
+                            @foreach (var message in ViewBag.SentMessages)
+                            {
+                                <div class="message-item sent">
+                                    <div class="vote-buttons">
+                                        <button class="vote-btn">▲</button>
+                                        <div class="vote-count">1</div>
+                                        <button class="vote-btn">▼</button>
+                                    </div>
+                                    <img src="/u/@message.ToUsername/avatar" alt="@message.ToUsername" class="message-avatar">
+                                    <div class="message-content">
+                                        <div class="message-header">
+                                            <span class="message-sender">To @message.ToUsername</span>
+                                            <span class="message-time">@message.CreatedUtc.ToString("MMM dd") • @message.CreatedUtc.ToString("h:mm tt")</span>
+                                        </div>
+                                        <div class="message-text">@message.Message</div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+
+                    @if (ViewBag.ReceivedMessages == null && ViewBag.SentMessages == null)
+                    {
+                        <div class="empty-state">
+                            <h3>No messages yet</h3>
+                            <p>Start a conversation with fellow Redditors! <span class="reddit-premium">Join the discussion.</span></p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/lib/jquery/dist/jquery.min.js"></script>
+    <script>
+        // Vote button interactions
+        $('.vote-btn').click(function(e) {
+            e.preventDefault();
+            $(this).css('color', '#ff4500');
+            setTimeout(() => {
+                $(this).css('color', '#878a8c');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

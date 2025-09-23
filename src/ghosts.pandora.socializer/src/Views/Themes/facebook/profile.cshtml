@@ -1,7 +1,7 @@
 @{
     Layout = null;
 }
-@model List<Ghosts.Socializer.Infrastructure.Post>
+@model Ghosts.Socializer.Infrastructure.User
 
 <!DOCTYPE html>
 <html lang="en">
@@ -32,7 +32,7 @@
             <button class="icon-btn">⊕</button>
             <button class="icon-btn">💬</button>
             <button class="icon-btn">🔔</button>
-            <img src="/u/@ViewBag.UserId/avatar" alt="Profile" class="profile-pic">
+            <img src="/u/@ViewBag.Username/avatar" alt="Profile" class="profile-pic">
         </div>
     </header>
 
@@ -41,14 +41,14 @@
         <!-- Profile Header -->
         <div class="profile-header">
             <div class="profile-cover">
-                <img src="/themes/facebook/images/cover-photo.jpg" alt="Cover photo" style="width: 100%; height: 100%; object-fit: cover; border-radius: 0 0 8px 8px;">
+                <img src="/themes/facebook/images/cover-photo.jpg" alt="@Model.Username" style="width: 100%; height: 100%; object-fit: cover; border-radius: 0 0 8px 8px;">
             </div>
 
             <div class="profile-info">
-                <img src="/u/@ViewBag.ProfileUser/avatar" alt="@ViewBag.ProfileUser" class="profile-picture-large">
+                <img src="/u/@Model.Username/avatar" alt="@Model.Username" class="profile-picture-large">
 
                 <div class="profile-details">
-                    <h1 class="profile-name">@ViewBag.ProfileUser</h1>
+                    <h1 class="profile-name">@Model.Username</h1>
                     <div class="profile-stats">1,234 friends</div>
 
                     <div style="display: flex; gap: 8px; margin-top: 16px;">
@@ -101,7 +101,7 @@
                         </div>
                         <div style="display: flex; align-items: center; margin-bottom: 8px;">
                             <span style="margin-right: 8px;">📍</span>
-                            <span>From <strong>New York, NY</strong></span>
+                            <span>From <strong>@Model.LastActiveUtc</strong></span>
                         </div>
                         <div style="display: flex; align-items: center; margin-bottom: 8px;">
                             <span style="margin-right: 8px;">❤️</span>
@@ -177,8 +177,8 @@
                 <!-- Create Post -->
                 <div class="create-post">
                     <div class="create-post-top">
-                        <img src="/u/@ViewBag.UserId/avatar" alt="Profile" class="profile-pic">
-                        <input type="text" class="create-post-input" placeholder="What's on your mind, John?">
+                        <img src="/u/@ViewBag.Username/avatar" alt="Profile" class="profile-pic">
+                        <input type="text" class="create-post-input" placeholder="What's on your mind, @ViewBag.Username?">
                     </div>
                     <div class="create-post-buttons">
                         <button class="create-post-btn">📹 Live video</button>
@@ -191,9 +191,9 @@
                 <article class="post" data-post-id="5">
                     <div class="post-header">
                         <div class="post-user-info">
-                            <img src="/themes/facebook/images/profile-pic.jpg" alt="John Doe" class="profile-pic">
+                            <img src="/themes/facebook/images/profile-pic.jpg" alt="@Model.Username" class="profile-pic">
                             <div>
-                                <div class="post-user-name">John Doe</div>
+                                <div class="post-user-name">@Model.Username</div>
                                 <div class="post-time">3 hours ago · 🌍</div>
                             </div>
                         </div>
@@ -217,9 +217,9 @@
                 <article class="post" data-post-id="6">
                     <div class="post-header">
                         <div class="post-user-info">
-                            <img src="/themes/facebook/images/profile-pic.jpg" alt="John Doe" class="profile-pic">
+                            <img src="/themes/facebook/images/profile-pic.jpg" alt="@Model.Username" class="profile-pic">
                             <div>
-                                <div class="post-user-name">John Doe</div>
+                                <div class="post-user-name">@Model.Username</div>
                                 <div class="post-time">1 day ago · 👥</div>
                             </div>
                         </div>
@@ -243,9 +243,9 @@
                 <article class="post" data-post-id="7">
                     <div class="post-header">
                         <div class="post-user-info">
-                            <img src="/themes/facebook/images/profile-pic.jpg" alt="John Doe" class="profile-pic">
+                            <img src="/themes/facebook/images/profile-pic.jpg" alt="@Model.Username" class="profile-pic">
                             <div>
-                                <div class="post-user-name">John Doe</div>
+                                <div class="post-user-name">@Model.Username</div>
                                 <div class="post-time">3 days ago · 🌍</div>
                             </div>
                         </div>
@@ -268,9 +268,9 @@
                 <article class="post" data-post-id="8">
                     <div class="post-header">
                         <div class="post-user-info">
-                            <img src="/themes/facebook/images/profile-pic.jpg" alt="John Doe" class="profile-pic">
+                            <img src="/themes/facebook/images/profile-pic.jpg" alt="@Model.Username" class="profile-pic">
                             <div>
-                                <div class="post-user-name">John Doe</div>
+                                <div class="post-user-name">@Model.Username</div>
                                 <div class="post-time">1 week ago · 🌍</div>
                             </div>
                         </div>

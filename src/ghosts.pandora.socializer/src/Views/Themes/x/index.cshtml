@@ -33,7 +33,7 @@
                         <span class="nav-icon">🔔</span>
                         <span class="nav-text">Notifications</span>
                     </a>
-                    <a href="#" class="nav-item">
+                    <a href="/messages" class="nav-item">
                         <span class="nav-icon">✉️</span>
                         <span class="nav-text">Messages</span>
                     </a>
@@ -106,11 +106,11 @@
                     @foreach (var post in Model)
                     {
                         <div class="tweet">
-                            <img src="/u/@post.User.Username/avatar" alt="@post.User.Username" class="tweet-avatar">
+                            <img src="/u/@post.Username/avatar" alt="@post.Username" class="tweet-avatar">
                             <div class="tweet-content">
                                 <div class="tweet-header">
-                                    <span class="tweet-name">@post.User.Username</span>
-                                    <span class="tweet-handle">@@@post.User.Username</span>
+                                    <span class="tweet-name">@post.Username</span>
+                                    <span class="tweet-handle">@@@post.Username</span>
                                     <span class="tweet-time">· @post.CreatedUtc</span>
                                     <span class="tweet-more">⋯</span>
                                 </div>

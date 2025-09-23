@@ -46,7 +46,7 @@
                         <span class="nav-text">Notifications</span>
                     </div>
                     <div class="nav-item">
-                        <img src="/u/@ViewBag.UserId/avatar" alt="Me" class="nav-avatar">
+                        <img src="/u/@ViewBag.Username/avatar" alt="Me" class="nav-avatar">
                         <span class="nav-text">Me</span>
                         <span class="dropdown-arrow">▼</span>
                     </div>
@@ -62,9 +62,9 @@
                 <div class="profile-card">
                     <div class="profile-cover"></div>
                     <div class="profile-info">
-                        <img src="/u/@ViewBag.UserId/avatar" alt="Profile" class="profile-avatar">
+                        <img src="/u/@ViewBag.Username/avatar" alt="Profile" class="profile-avatar">
                         <div class="profile-details">
-                            <h3 class="profile-name">@ViewBag.UserId</h3>
+                            <h3 class="profile-name">@ViewBag.Username</h3>
                             <p class="profile-headline">Professional</p>
                         </div>
                     </div>
@@ -143,7 +143,7 @@
                     <div class="comments-section">
                         <!-- Add Comment -->
                         <div class="add-comment">
-                            <img src="/u/@ViewBag.UserId/avatar" alt="Your avatar" class="comment-avatar">
+                            <img src="/u/@ViewBag.Username/avatar" alt="Your avatar" class="comment-avatar">
                             <div class="comment-input-container">
                                 <input type="text" placeholder="Add a comment..." class="comment-input">
                                 <button class="comment-post-btn">Post</button>
@@ -152,7 +152,7 @@
 
                         <!-- Comments List -->
                         <div class="comments-list">
-                            @if (Model.Comments != null && Model.Comments.Any())
+                            @if (Model.Comments != null)
                             {
                                 @foreach (var comment in Model.Comments)
                                 {

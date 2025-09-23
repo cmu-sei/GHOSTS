@@ -32,7 +32,7 @@
             <button class="icon-btn">⊕</button>
             <button class="icon-btn">💬</button>
             <button class="icon-btn">🔔</button>
-            <img src="/u/@ViewBag.UserId/avatar" alt="Profile" class="profile-pic">
+            <img src="/u/@ViewBag.Username/avatar" alt="Profile" class="profile-pic">
         </div>
     </header>
 
@@ -82,14 +82,14 @@
             <div class="comments-section">
                 <!-- Comment Input -->
                 <div class="comment-input">
-                    <img src="/u/@ViewBag.UserId/avatar" alt="Your profile" class="profile-pic">
+                    <img src="/u/@ViewBag.Username/avatar" alt="Your profile" class="profile-pic">
                     <input type="text" placeholder="Write a comment...">
                     <button style="margin-left: 8px; background: none; border: none; color: #1877f2; cursor: pointer;">😊</button>
                     <button style="margin-left: 4px; background: none; border: none; color: #1877f2; cursor: pointer;">📷</button>
                 </div>
 
                 <!-- Comments -->
-                @if (Model.Comments != null && Model.Comments.Any())
+                @if (Model.Comments != null)
                 {
                     @foreach (var comment in Model.Comments)
                     {

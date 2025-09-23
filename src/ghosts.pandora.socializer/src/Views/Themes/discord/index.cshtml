@@ -104,6 +104,21 @@
                     </div>
                 </div>
 
+                <!-- Direct Messages -->
+                <div class="channel-category">
+                    <div class="category-header">
+                        <span class="category-arrow">▼</span>
+                        <span class="category-name">DIRECT MESSAGES</span>
+                        <button class="add-channel">+</button>
+                    </div>
+                    <div class="channel-list">
+                        <a href="/messages" class="channel-item" style="text-decoration: none; color: inherit;">
+                            <span class="channel-icon">📩</span>
+                            <span class="channel-name">Direct Messages</span>
+                        </a>
+                    </div>
+                </div>
+
                 <!-- Voice Channels -->
                 <div class="channel-category">
                     <div class="category-header">
@@ -182,10 +197,10 @@
                     @foreach (var post in Model)
                     {
                         <div class="message">
-                            <img src="/u/@post.User.Username/avatar" alt="@post.User.Username" class="message-avatar">
+                            <img src="/u/@post.Username/avatar" alt="@post.Username" class="message-avatar">
                             <div class="message-content">
                                 <div class="message-header">
-                                    <span class="message-author">@post.User.Username</span>
+                                    <span class="message-author">@post.Username</span>
                                     <span class="message-timestamp">@post.CreatedUtc</span>
                                 </div>
                                 <div class="message-text">

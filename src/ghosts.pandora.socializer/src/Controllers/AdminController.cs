@@ -1,19 +1,17 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore;
-using Ghosts.Socializer.Hubs;
 using Ghosts.Socializer.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 
 namespace Ghosts.Socializer.Controllers;
 
 [Route("admin")]
-public class AdminController(ILogger logger, IHubContext<PostsHub> hubContext, DataContext dbContext) : BaseController(logger, hubContext, dbContext)
+public class AdminController(ILogger logger, DataContext dbContext) : BaseController(logger)
 {
     [HttpGet("delete")]
     public async Task<IActionResult> Delete()
     {
-        Db.Posts.RemoveRange(Db.Posts);
-        await Db.SaveChangesAsync();
+        dbContext.Posts.RemoveRange(dbContext.Posts);
+        await dbContext.SaveChangesAsync();
         return NoContent();
     }
 
@@ -29,7 +27,7 @@ public class AdminController(ILogger logger, IHubContext<PostsHub> hubContext, D
             var username = Faker.Internet.UserName();
 
             // Get or create user
-            var user = await Db.Users.FirstOrDefaultAsync(u => u.Username == username);
+            var user = await dbContext.Users.FirstOrDefaultAsync(u => u.Username == username);
             if (user == null)
             {
                 user = new User
@@ -41,22 +39,8 @@ public class AdminController(ILogger logger, IHubContext<PostsHub> hubContext, D
                     CreatedUtc = DateTime.UtcNow,
                     LastActiveUtc = DateTime.UtcNow
                 };
-                Db.Users.Add(user);
-                await Db.SaveChangesAsync();
-            }
-
-            // Get default theme
-            var theme = await Db.Themes.FirstOrDefaultAsync(t => t.Name == "facebook");
-            if (theme == null)
-            {
-                theme = new Theme
-                {
-                    Name = "facebook",
-                    DisplayName = "Facebook",
-                    Description = "Facebook theme"
-                };
-                Db.Themes.Add(theme);
-                await Db.SaveChangesAsync();
+                dbContext.Users.Add(user);
+                await dbContext.SaveChangesAsync();
             }
 
             var post = new Post
@@ -65,13 +49,13 @@ public class AdminController(ILogger logger, IHubContext<PostsHub> hubContext, D
                 CreatedUtc = DateTime.MinValue.Add(
                     TimeSpan.FromTicks(min.Ticks + (long)(r.NextDouble() * (DateTime.Now.Ticks - min.Ticks)))),
                 Username = user.Username,
-                ThemeId = theme.Id,
+                Theme = user.Theme,
                 Message = Faker.Lorem.Sentence(15)
             };
-            Db.Posts.Add(post);
+            dbContext.Posts.Add(post);
         }
 
-        await Db.SaveChangesAsync();
+        await dbContext.SaveChangesAsync();
 
         return NoContent();
     }

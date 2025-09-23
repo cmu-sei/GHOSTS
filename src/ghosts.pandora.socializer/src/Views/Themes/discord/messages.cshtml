@@ -1,0 +1,388 @@
+@{
+    Layout = null;
+}
+@using Ghosts.Socializer.Infrastructure
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discord | Direct Messages</title>
+    <link rel="stylesheet" href="/themes/discord/css/feed.css">
+    <link rel="icon" href="/themes/discord/images/discord-icon.png">
+    <style>
+        .dm-sidebar {
+            width: 240px;
+            background-color: #2f3136;
+            border-right: 1px solid #202225;
+            overflow-y: auto;
+        }
+
+        .dm-header {
+            padding: 16px;
+            border-bottom: 1px solid #36393f;
+        }
+
+        .dm-search {
+            background-color: #40444b;
+            border: none;
+            border-radius: 4px;
+            color: #dcddde;
+            padding: 8px 12px;
+            width: 100%;
+            font-size: 14px;
+        }
+
+        .dm-list {
+            padding: 8px 0;
+        }
+
+        .dm-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 16px;
+            cursor: pointer;
+            color: #8e9297;
+            transition: background-color 0.2s;
+        }
+
+        .dm-item:hover, .dm-item.active {
+            background-color: #36393f;
+            color: #dcddde;
+        }
+
+        .dm-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            margin-right: 12px;
+        }
+
+        .dm-info {
+            flex: 1;
+        }
+
+        .dm-name {
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .dm-preview {
+            font-size: 12px;
+            color: #72767d;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .dm-timestamp {
+            font-size: 11px;
+            color: #72767d;
+        }
+
+        .unread-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #ffffff;
+            border-radius: 50%;
+            margin-left: 8px;
+        }
+
+        .dm-content {
+            flex: 1;
+            background-color: #36393f;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dm-content-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #40444b;
+            background-color: #36393f;
+        }
+
+        .dm-title {
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .dm-subtitle {
+            color: #b9bbbe;
+            font-size: 14px;
+            margin: 4px 0 0 0;
+        }
+
+        .new-dm-form {
+            padding: 20px;
+            background-color: #2f3136;
+            border-bottom: 1px solid #40444b;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            color: #b9bbbe;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .form-input {
+            background-color: #40444b;
+            border: 1px solid #40444b;
+            border-radius: 4px;
+            color: #dcddde;
+            padding: 10px 12px;
+            width: 100%;
+            font-size: 14px;
+        }
+
+        .form-input:focus {
+            border-color: #7289da;
+            outline: none;
+        }
+
+        .btn-send {
+            background-color: #7289da;
+            border: none;
+            border-radius: 4px;
+            color: #ffffff;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-send:hover {
+            background-color: #677bc4;
+        }
+
+        .message-list {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .message-group {
+            margin-bottom: 20px;
+        }
+
+        .message-group-header {
+            color: #72767d;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .dm-message {
+            display: flex;
+            margin-bottom: 16px;
+            padding: 8px 0;
+        }
+
+        .dm-message.sent {
+            flex-direction: row-reverse;
+        }
+
+        .dm-message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin: 0 12px;
+        }
+
+        .dm-message-content {
+            flex: 1;
+            max-width: 70%;
+        }
+
+        .dm-message.sent .dm-message-content {
+            text-align: right;
+        }
+
+        .dm-message-header {
+            display: flex;
+            align-items: baseline;
+            margin-bottom: 4px;
+        }
+
+        .dm-message.sent .dm-message-header {
+            justify-content: flex-end;
+        }
+
+        .dm-message-author {
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 500;
+            margin-right: 8px;
+        }
+
+        .dm-message-time {
+            color: #72767d;
+            font-size: 12px;
+        }
+
+        .dm-message-text {
+            background-color: #40444b;
+            color: #dcddde;
+            padding: 8px 12px;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+
+        .dm-message.sent .dm-message-text {
+            background-color: #7289da;
+            color: #ffffff;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #72767d;
+        }
+
+        .empty-state h3 {
+            color: #ffffff;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>MESSAGES
+    <div class="app">
+        <!-- Left Sidebar (same as index) -->
+        <div class="server-sidebar">
+            <div class="home-button">
+                <div class="server-icon home">
+                    <img src="/themes/discord/images/discord-icon.png" alt="Discord Home" class="discord-logo">
+                </div>
+            </div>
+            <div class="server-separator"></div>
+            <div class="server-list">
+                <div class="server-item">
+                    <div class="server-icon">
+                        <img src="/themes/discord/images/gaming-server.jpg" alt="Gaming Server" class="server-avatar">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DM Sidebar -->
+        <div class="dm-sidebar">
+            <div class="dm-header">
+                <input type="text" class="dm-search" placeholder="Find or start a conversation">
+            </div>
+
+            <div class="dm-list">
+                <div class="dm-item active">
+                    <div class="dm-info">
+                        <div class="dm-name">Direct Messages</div>
+                    </div>
+                </div>
+
+                @foreach (var partner in ViewBag.ConversationPartners)
+                {
+                    <div class="dm-item">
+                        <img src="/u/@partner/avatar" alt="@partner" class="dm-avatar">
+                        <div class="dm-info">
+                            <div class="dm-name">@partner</div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="dm-content">
+            <div class="dm-content-header">
+                <h1 class="dm-title">Direct Messages</h1>
+                <p class="dm-subtitle">Send private messages to other users</p>
+            </div>
+
+            <div class="new-dm-form">
+                <form method="post" action="/messages/send">
+                    <div class="form-group">
+                        <label class="form-label">To:</label>
+                        <input type="text" name="toUsername" class="form-input" placeholder="Enter username" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Message:</label>
+                        <input type="text" name="message" class="form-input" placeholder="Type your message..." required>
+                    </div>
+                    <button type="submit" class="btn-send">Send Message</button>
+                </form>
+            </div>
+
+            <div class="message-list">
+                @if (ViewBag.ReceivedMessages != null)
+                {
+                    <div class="message-group">
+                        <div class="message-group-header">Received Messages</div>
+                        @foreach (var message in ViewBag.ReceivedMessages)
+                        {
+                            <div class="dm-message">
+                                <img src="/u/@message.FromUsername/avatar" alt="@message.FromUsername" class="dm-message-avatar">
+                                <div class="dm-message-content">
+                                    <div class="dm-message-header">
+                                        <span class="dm-message-author">@message.FromUsername</span>
+                                        <span class="dm-message-time">@message.CreatedUtc.ToString("MMM dd, h:mm tt")</span>
+                                    </div>
+                                    <div class="dm-message-text">@message.Message</div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+
+                @if (ViewBag.SentMessages != null)
+                {
+                    <div class="message-group">
+                        <div class="message-group-header">Sent Messages</div>
+                        @foreach (var message in ViewBag.SentMessages)
+                        {
+                            <div class="dm-message sent">
+                                <img src="/u/@message.ToUsername/avatar" alt="@message.ToUsername" class="dm-message-avatar">
+                                <div class="dm-message-content">
+                                    <div class="dm-message-header">
+                                        <span class="dm-message-author">To @message.ToUsername</span>
+                                        <span class="dm-message-time">@message.CreatedUtc.ToString("MMM dd, h:mm tt")</span>
+                                    </div>
+                                    <div class="dm-message-text">@message.Message</div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+
+                @if (ViewBag.ReceivedMessages == null &&
+                     ViewBag.SentMessages == null)
+                {
+                    <div class="empty-state">
+                        <h3>No messages yet</h3>
+                        <p>Start a conversation by sending a message above!</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <script src="/lib/jquery/dist/jquery.min.js"></script>
+    <script>
+        $('.dm-item').click(function() {
+            $('.dm-item').removeClass('active');
+            $(this).addClass('active');
+        });
+    </script>
+</body>
+</html>

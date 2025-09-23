@@ -7,22 +7,19 @@ public interface IPostService
 {
     // Theme-based queries
     Task<List<Post>> GetPostsByThemeAsync(string themeName, int limit = 50, int offset = 0);
-    Task<List<Post>> GetPostsByThemeAsync(int themeId, int limit = 50, int offset = 0);
     Task<List<Post>> GetLatestPostsByThemeAsync(string themeName, int count = 100);
 
     // User-based queries
     Task<List<Post>> GetPostsByUserAsync(string username, int limit = 50, int offset = 0);
-    Task<List<Post>> GetPostsByUserIdAsync(string userId, int limit = 50, int offset = 0);
 
     // Combined user + theme queries
     Task<List<Post>> GetPostsByUserAndThemeAsync(string username, string themeName, int limit = 50, int offset = 0);
-    Task<List<Post>> GetPostsByUserAndThemeAsync(string userId, int themeId, int limit = 50, int offset = 0);
 
     // General queries
     Task<List<Post>> GetAllPostsAsync(int limit = 50, int offset = 0);
     Task<Post> GetPostByIdAsync(Guid postId);
-    Task<Post> CreatePostAsync(string userId, int themeId, string message);
-    Task<bool> DeletePostAsync(Guid postId, string userId);
+    Task<Post> CreatePostAsync(string username, string themeName, string message);
+    Task<bool> DeletePostAsync(Guid postId, string username);
 
     // Statistics
     Task<int> GetPostCountByThemeAsync(string themeName);
@@ -44,33 +41,17 @@ public class PostService : IPostService
     {
         return await _context.Posts
             .Include(p => p.User)
-            .Include(p => p.Theme)
             .Include(p => p.Likes)
             .ThenInclude(l => l.User)
             .Include(p => p.Comments)
             .ThenInclude(c => c.User)
-            .Where(p => p.Theme.Name.ToLower() == themeName.ToLower())
+            .Where(p => p.Theme.ToLower() == themeName.ToLower())
             .OrderByDescending(p => p.CreatedUtc)
             .Skip(offset)
             .Take(limit)
             .ToListAsync();
     }
 
-    public async Task<List<Post>> GetPostsByThemeAsync(int themeId, int limit = 50, int offset = 0)
-    {
-        return await _context.Posts
-            .Include(p => p.User)
-            .Include(p => p.Theme)
-            .Include(p => p.Likes)
-            .ThenInclude(l => l.User)
-            .Include(p => p.Comments)
-            .ThenInclude(c => c.User)
-            .Where(p => p.ThemeId == themeId)
-            .OrderByDescending(p => p.CreatedUtc)
-            .Skip(offset)
-            .Take(limit)
-            .ToListAsync();
-    }
 
     public async Task<List<Post>> GetLatestPostsByThemeAsync(string themeName, int count = 100)
     {
@@ -82,7 +63,6 @@ public class PostService : IPostService
     {
         return await _context.Posts
             .Include(p => p.User)
-            .Include(p => p.Theme)
             .Include(p => p.Likes)
             .ThenInclude(l => l.User)
             .Include(p => p.Comments)
@@ -94,62 +74,30 @@ public class PostService : IPostService
             .ToListAsync();
     }
 
-    public async Task<List<Post>> GetPostsByUserIdAsync(string userId, int limit = 50, int offset = 0)
-    {
-        return await _context.Posts
-            .Include(p => p.User)
-            .Include(p => p.Theme)
-            .Include(p => p.Likes)
-            .ThenInclude(l => l.User)
-            .Include(p => p.Comments)
-            .ThenInclude(c => c.User)
-            .Where(p => p.Username == userId)
-            .OrderByDescending(p => p.CreatedUtc)
-            .Skip(offset)
-            .Take(limit)
-            .ToListAsync();
-    }
 
     // Combined user + theme queries
     public async Task<List<Post>> GetPostsByUserAndThemeAsync(string username, string themeName, int limit = 50, int offset = 0)
     {
         return await _context.Posts
             .Include(p => p.User)
-            .Include(p => p.Theme)
             .Include(p => p.Likes)
             .ThenInclude(l => l.User)
             .Include(p => p.Comments)
             .ThenInclude(c => c.User)
             .Where(p => p.User.Username.ToLower() == username.ToLower() &&
-                       p.Theme.Name.ToLower() == themeName.ToLower())
+                       p.Theme.ToLower() == themeName.ToLower())
             .OrderByDescending(p => p.CreatedUtc)
             .Skip(offset)
             .Take(limit)
             .ToListAsync();
     }
 
-    public async Task<List<Post>> GetPostsByUserAndThemeAsync(string userId, int themeId, int limit = 50, int offset = 0)
-    {
-        return await _context.Posts
-            .Include(p => p.User)
-            .Include(p => p.Theme)
-            .Include(p => p.Likes)
-            .ThenInclude(l => l.User)
-            .Include(p => p.Comments)
-            .ThenInclude(c => c.User)
-            .Where(p => p.Username == userId && p.ThemeId == themeId)
-            .OrderByDescending(p => p.CreatedUtc)
-            .Skip(offset)
-            .Take(limit)
-            .ToListAsync();
-    }
 
     // General queries
     public async Task<List<Post>> GetAllPostsAsync(int limit = 50, int offset = 0)
     {
         return await _context.Posts
             .Include(p => p.User)
-            .Include(p => p.Theme)
             .Include(p => p.Likes)
             .ThenInclude(l => l.User)
             .Include(p => p.Comments)
@@ -164,7 +112,6 @@ public class PostService : IPostService
     {
         return await _context.Posts
             .Include(p => p.User)
-            .Include(p => p.Theme)
             .Include(p => p.Likes)
             .ThenInclude(l => l.User)
             .Include(p => p.Comments)
@@ -172,13 +119,13 @@ public class PostService : IPostService
             .FirstOrDefaultAsync(p => p.Id == postId);
     }
 
-    public async Task<Post> CreatePostAsync(string username, int themeId, string message)
+    public async Task<Post> CreatePostAsync(string username, string themeName, string message)
     {
         var post = new Post
         {
             Id = Guid.NewGuid(),
             Username = username,
-            ThemeId = themeId,
+            Theme = themeName,
             Message = message,
             CreatedUtc = DateTime.UtcNow
         };
@@ -206,7 +153,7 @@ public class PostService : IPostService
     public async Task<int> GetPostCountByThemeAsync(string themeName)
     {
         return await _context.Posts
-            .Where(p => p.Theme.Name.ToLower() == themeName.ToLower())
+            .Where(p => p.Theme.ToLower() == themeName.ToLower())
             .CountAsync();
     }
 
@@ -220,7 +167,7 @@ public class PostService : IPostService
     public async Task<Dictionary<string, int>> GetPostCountsByThemeAsync()
     {
         return await _context.Posts
-            .GroupBy(p => p.Theme.Name)
+            .GroupBy(p => p.Theme)
             .Select(g => new { Theme = g.Key, Count = g.Count() })
             .ToDictionaryAsync(x => x.Theme, x => x.Count);
     }

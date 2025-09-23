@@ -30,9 +30,9 @@
 
         <div class="header-right">
             <button class="icon-btn">⊕</button>
-            <button class="icon-btn">💬</button>
+            <a href="/messages" class="icon-btn" style="text-decoration: none;">💬</a>
             <button class="icon-btn">🔔</button>
-            <img src="/u/@ViewBag.UserId/avatar" alt="Profile" class="profile-pic">
+            <img src="/u/@ViewBag.Username/avatar" alt="Profile" class="profile-pic">
         </div>
     </header>
 
@@ -41,8 +41,8 @@
         <!-- Left Sidebar -->
         <aside class="left-sidebar">
             <a href="/profile" class="sidebar-item">
-                <img src="/u/@ViewBag.UserId/avatar" alt="Profile" class="profile-pic">
-                <span> &nbsp; @ViewBag.UserId</span>
+                <img src="/u/@ViewBag.Username/avatar" alt="Profile" class="profile-pic">
+                <span> &nbsp; @ViewBag.Username</span>
             </a>
             <a href="#" class="sidebar-item">
                 <div class="sidebar-icon"></div>
@@ -86,10 +86,15 @@
         <main class="feed-container">
             <!-- Create Post -->
             <div class="create-post">
-                <div class="create-post-top">
-                    <img src="/u/@ViewBag.UserId/avatar" alt="Profile" class="profile-pic">
-                    <input type="text" class="create-post-input" placeholder="What's on your mind, @ViewBag.UserId?">
-                </div>
+                <form method="post" action="/">
+                    <input type="hidden" name="theme" value="facebook">
+                    <input type="hidden" name="user" value="@ViewBag.Username">
+                    <div class="create-post-top">
+                        <img src="/u/@ViewBag.Username/avatar" alt="Profile" class="profile-pic">
+                        <input type="text" name="message" class="create-post-input" placeholder="What's on your mind, @ViewBag.Username?" required>
+                        <button type="submit" class="post-btn">Post</button>
+                    </div>
+                </form>
                 <div class="create-post-buttons">
                     <button class="create-post-btn">📹 Live video</button>
                     <button class="create-post-btn">📷 Photo/video</button>
@@ -103,7 +108,7 @@
                     <h3 style="margin-bottom: 16px;">Stories</h3>
                     <div style="display: flex; gap: 8px; overflow-x: auto;">
                         <div style="min-width: 112px; height: 200px; background: linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%); border-radius: 8px; position: relative; cursor: pointer;">
-                            <img src="/u/@ViewBag.UserId/avatar" alt="Your story" style="width: 100%; height: 70%; object-fit: cover; border-radius: 8px 8px 0 0;">
+                            <img src="/u/@ViewBag.Username/avatar" alt="Your story" style="width: 100%; height: 70%; object-fit: cover; border-radius: 8px 8px 0 0;">
                             <div style="position: absolute; bottom: 8px; left: 8px; color: white; font-size: 12px; font-weight: 600;">Your Story</div>
                         </div>
                     </div>
@@ -113,39 +118,42 @@
             <div id="newsfeed-items-grid">
                 <button class="btn btn-primary btn-md-2" type="submit" name="submit" id="sendButton">Post Status</button>
                 @{
-                    foreach (var post in Model)
+                    if (Model != null)
                     {
-                        <article class="post" data-post-id="@post.Id">
-                            <div class="post-header">
-                                <div class="post-user-info">
-                                    <img src="/u/@post.User.Username/avatar" class="profile-pic">
-                                    <div>
-                                        <div class="post-user-name"><a href="/u/@post.User.Username">@post.User.Username</a></div>
-                                        <div class="post-time">@post.CreatedUtc.ToString("MMM d, yyyy") · 🌍</div>
+                        foreach (var post in Model)
+                        {
+                            <article class="post" data-post-id="@post.Id">
+                                <div class="post-header">
+                                    <div class="post-user-info">
+                                        <img src="/u/@post.Username/avatar" class="profile-pic">
+                                        <div>
+                                            <div class="post-user-name"><a href="/u/@post.Username">@post.Username</a></div>
+                                            <div class="post-time">@post.CreatedUtc.ToString("MMM d, yyyy") · 🌍</div>
+                                        </div>
                                     </div>
+                                    <button class="post-menu">⋯</button>
                                 </div>
-                                <button class="post-menu">⋯</button>
-                            </div>
-                            <div class="post-content">
-                                <div class="post-text">@Html.Raw(post.Message)</div>
-                            </div>
-                            <div class="post-stats">
-                                @{
-                                    var likesCount = post.Likes?.Count ?? 0;
+                                <div class="post-content">
+                                    <div class="post-text">@Html.Raw(post.Message)</div>
+                                </div>
+                                <div class="post-stats">
+                                    @{
+                                        var likesCount = post.Likes?.Count ?? 0;
 
-                                }
-                                @if (likesCount > 0)
-                                {
-                                    <span>👍❤️😊 @likesCount people</span>
-                                }
-                                <span>0 comments</span>
-                            </div>
-                            <div class="post-actions">
-                                <button class="post-action like-btn like-it" data-id="@post.Id">👍 Like</button>
-                                <button class="post-action comment-btn" data-action="comment">💬 Comment</button>
-                                <button class="post-action share-btn" data-action="share">📤 Share</button>
-                            </div>
-                        </article>
+                                    }
+                                    @if (likesCount > 0)
+                                    {
+                                        <span>👍❤️😊 @likesCount people</span>
+                                    }
+                                    <span>0 comments</span>
+                                </div>
+                                <div class="post-actions">
+                                    <button class="post-action like-btn like-it" data-id="@post.Id">👍 Like</button>
+                                    <button class="post-action comment-btn" data-action="comment">💬 Comment</button>
+                                    <button class="post-action share-btn" data-action="share">📤 Share</button>
+                                </div>
+                            </article>
+                        }
                     }
                 }
             </div>

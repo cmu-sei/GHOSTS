@@ -6,39 +6,41 @@ using Ghosts.Socializer.Infrastructure;
 
 namespace Ghosts.Socializer.Controllers;
 
-[Route("{*catchall}")]
 public class HomeController(
     ILogger logger, IHubContext<PostsHub> hubContext, DataContext dbContext,
     ApplicationConfiguration applicationConfiguration)
-    : BaseController(logger, hubContext, dbContext)
+    : BaseController(logger)
 {
-    [HttpGet]
-    public IActionResult Index()
+    // Catch-all for unhandled routes - must be LAST in priority
+    [HttpGet("{*catchall}")]
+    public IActionResult CatchAll()
     {
-        var view = "index";
-        var path = (Request.Path.Value ?? "").ToLowerInvariant();
-        if (path.EndsWith("/detail") || path.StartsWith("/detail"))
-            view = "detail";
+        var path = Request.Path.Value ?? "";
 
-        if (path.EndsWith("/profile") || path.StartsWith("/profile"))
-            view = "profile";
+        // Log unhandled routes for debugging
+        Logger.LogWarning("Unhandled route: {Path}", path);
 
-        var posts = dbContext.Posts
-            .Include(x => x.Likes)
-            .Include(x => x.User)
-            .Include(x => x.Theme)
-            .OrderByDescending(x => x.CreatedUtc)
-            .Take(applicationConfiguration.DefaultDisplay)
-            .ToList();
+        // Try to extract useful information from the path
+        var segments = path.Split('/', StringSplitOptions.RemoveEmptyEntries);
 
-        if (Request.QueryString.HasValue && !string.IsNullOrEmpty(Request.Query["u"]))
-            ViewBag.User = Request.Query["u"];
-        return View(view, posts);
+        if (segments.Length > 0)
+        {
+            RedirectToAction(segments.Last(), "Posts");
+        }
+
+        var theme = ThemeRead();
+        var posts = dbContext.Posts.Where(x=>x.Theme == theme).OrderByDescending(x=>x.CreatedUtc).ToList();
+
+        return View("Index", posts);
     }
 
-    [HttpPost]
+    [HttpPost("{*catchall}")]
     public async Task<IActionResult> Post([FromForm] FilesController.FileInputModel model)
     {
+        var queryTheme = Request.Query["theme"].ToString();
+        if (string.IsNullOrEmpty(queryTheme))
+            queryTheme = ThemeRead();
+
         var post = new Post
         {
             Id = Guid.NewGuid(),
@@ -52,6 +54,12 @@ public class HomeController(
             if (string.IsNullOrEmpty(Request.Form[userFormValue])) continue;
             username = Request.Form[userFormValue]!;
             break;
+        }
+
+        if (string.IsNullOrEmpty(username))
+        {
+            username = Faker.Internet.UserName();
+            UserWrite(username);
         }
 
         var messageFormValues = new[] { "message", "msg", "m", "message_id", "msg_id", "msg_text", "text", "payload" };
@@ -75,6 +83,7 @@ public class HomeController(
                 Bio = $"User {username}",
                 Avatar = $"/u/{username}/avatar",
                 Status = "online",
+                Theme = queryTheme,
                 CreatedUtc = DateTime.UtcNow,
                 LastActiveUtc = DateTime.UtcNow
             };
@@ -82,22 +91,8 @@ public class HomeController(
             await dbContext.SaveChangesAsync();
         }
 
-        // Get default theme (facebook for now, or detect from request)
-        var theme = await dbContext.Themes.FirstOrDefaultAsync(t => t.Name == "facebook");
-        if (theme == null)
-        {
-            theme = new Theme
-            {
-                Name = "facebook",
-                DisplayName = "Facebook",
-                Description = "Facebook theme"
-            };
-            dbContext.Themes.Add(theme);
-            await dbContext.SaveChangesAsync();
-        }
-
         post.Username = user.Username;
-        post.ThemeId = theme.Id;
+        post.Theme = queryTheme;
 
         // has the same user tried to post the same message within the past x minutes?
         if (dbContext.Posts.Any(p =>
@@ -147,9 +142,9 @@ public class HomeController(
         dbContext.Posts.Add(post);
         await dbContext.SaveChangesAsync();
 
-        CookieWrite("userid", username);
+        UserWrite(username);
 
-        await HubContext.Clients.All.SendAsync("SendMessage", post.Id, username, post.Message, post.CreatedUtc);
+        await hubContext.Clients.All.SendAsync("SendMessage", post.Id, username, post.Message, post.CreatedUtc);
 
         return NoContent();
     }

@@ -1,112 +1,98 @@
-using Microsoft.EntityFrameworkCore;
 using Ghosts.Socializer.Infrastructure;
 
 namespace Ghosts.Socializer.Services;
 
 public interface IThemeService
 {
-    Task<List<Theme>> GetAllThemesAsync();
-    Task<List<Theme>> GetActiveThemesAsync();
-    Task<Theme> GetThemeByIdAsync(int themeId);
-    Task<Theme> GetThemeByNameAsync(string themeName);
-    Task<Theme> CreateThemeAsync(string name, string displayName, string description = null);
-    Task<Theme> UpdateThemeAsync(int themeId, string displayName = null, string description = null, bool? isActive = null);
-    Task<bool> DeleteThemeAsync(int themeId);
-    Task<bool> ThemeExistsAsync(string themeName);
+    List<string> GetAvailableThemes();
+    bool ThemeExists(string themeName);
+    ThemeInfo GetThemeInfo(string themeName);
+    Task<ThemeInfo> GetThemeByNameAsync(string themeName);
+}
+
+public class ThemeInfo
+{
+    public string Name { get; set; }
+    public string DisplayName { get; set; }
+    public string Description { get; set; }
+    public bool IsActive { get; set; } = true;
 }
 
 public class ThemeService : IThemeService
 {
-    private readonly DataContext _context;
+    private readonly IWebHostEnvironment _environment;
+    private readonly string _themesPath;
 
-    public ThemeService(DataContext context)
+    public ThemeService(IWebHostEnvironment environment)
     {
-        _context = context;
+        _environment = environment;
+        _themesPath = Path.Combine(_environment.ContentRootPath, "Views", "Themes");
     }
 
-    public async Task<List<Theme>> GetAllThemesAsync()
+    public List<string> GetAvailableThemes()
     {
-        return await _context.Themes
-            .OrderBy(t => t.DisplayName)
-            .ToListAsync();
+        if (!Directory.Exists(_themesPath))
+            return new List<string>();
+
+        return Directory.GetDirectories(_themesPath)
+            .Select(dir => Path.GetFileName(dir))
+            .Where(themeName => !string.IsNullOrEmpty(themeName))
+            .OrderBy(name => name)
+            .ToList();
     }
 
-    public async Task<List<Theme>> GetActiveThemesAsync()
+    public bool ThemeExists(string themeName)
     {
-        return await _context.Themes
-            .Where(t => t.IsActive)
-            .OrderBy(t => t.DisplayName)
-            .ToListAsync();
+        if (string.IsNullOrEmpty(themeName))
+            return false;
+
+        var themePath = Path.Combine(_themesPath, themeName);
+        return Directory.Exists(themePath);
     }
 
-    public async Task<Theme> GetThemeByIdAsync(int themeId)
+    public ThemeInfo GetThemeInfo(string themeName)
     {
-        return await _context.Themes
-            .Include(t => t.Posts)
-            .FirstOrDefaultAsync(t => t.Id == themeId);
-    }
+        if (!ThemeExists(themeName))
+            return null;
 
-    public async Task<Theme> GetThemeByNameAsync(string themeName)
-    {
-        return await _context.Themes
-            .Include(t => t.Posts)
-            .FirstOrDefaultAsync(t => t.Name.ToLower() == themeName.ToLower());
-    }
-
-    public async Task<Theme> CreateThemeAsync(string name, string displayName, string description = null)
-    {
-        if (await ThemeExistsAsync(name))
+        // Generate display names from theme names
+        var displayName = themeName switch
         {
-            throw new InvalidOperationException($"Theme '{name}' already exists.");
-        }
+            "default" => "Default",
+            "facebook" => "Facebook",
+            "instagram" => "Instagram",
+            "discord" => "Discord",
+            "x" => "X (Twitter)",
+            "linkedin" => "LinkedIn",
+            "reddit" => "Reddit",
+            "youtube" => "YouTube",
+            _ => char.ToUpper(themeName[0]) + themeName.Substring(1)
+        };
 
-        var theme = new Theme
+        var description = themeName switch
         {
-            Name = name.ToLower(),
+            "default" => "Clean, minimal social platform theme",
+            "facebook" => "Facebook-style social media theme",
+            "instagram" => "Instagram-style photo sharing theme",
+            "discord" => "Discord-style chat theme",
+            "x" => "X/Twitter-style microblogging theme",
+            "linkedin" => "LinkedIn-style professional networking theme",
+            "reddit" => "Reddit-style forum theme",
+            "youtube" => "YouTube-style video platform theme",
+            _ => $"{displayName} theme"
+        };
+
+        return new ThemeInfo
+        {
+            Name = themeName,
             DisplayName = displayName,
             Description = description,
             IsActive = true
         };
-
-        _context.Themes.Add(theme);
-        await _context.SaveChangesAsync();
-
-        return theme;
     }
 
-    public async Task<Theme> UpdateThemeAsync(int themeId, string displayName = null, string description = null, bool? isActive = null)
+    public async Task<ThemeInfo> GetThemeByNameAsync(string themeName)
     {
-        var theme = await _context.Themes.FindAsync(themeId);
-        if (theme == null)
-            return null;
-
-        if (displayName != null)
-            theme.DisplayName = displayName;
-
-        if (description != null)
-            theme.Description = description;
-
-        if (isActive.HasValue)
-            theme.IsActive = isActive.Value;
-
-        await _context.SaveChangesAsync();
-        return theme;
-    }
-
-    public async Task<bool> DeleteThemeAsync(int themeId)
-    {
-        var theme = await _context.Themes.FindAsync(themeId);
-        if (theme == null)
-            return false;
-
-        _context.Themes.Remove(theme);
-        await _context.SaveChangesAsync();
-        return true;
-    }
-
-    public async Task<bool> ThemeExistsAsync(string themeName)
-    {
-        return await _context.Themes
-            .AnyAsync(t => t.Name.ToLower() == themeName.ToLower());
+        return await Task.FromResult(GetThemeInfo(themeName));
     }
 }

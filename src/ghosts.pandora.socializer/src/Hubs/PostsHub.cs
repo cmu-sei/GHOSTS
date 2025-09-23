@@ -1,4 +1,5 @@
 using System.Globalization;
+using Ghosts.Socializer.Controllers;
 using Microsoft.AspNetCore.SignalR;
 using Ghosts.Socializer.Infrastructure;
 using Microsoft.EntityFrameworkCore;
@@ -30,24 +31,10 @@ public class PostsHub(DataContext dbContext) : Hub
             await dbContext.SaveChangesAsync();
         }
 
-        // Get default theme
-        var theme = await dbContext.Themes.FirstOrDefaultAsync(t => t.Name == "facebook");
-        if (theme == null)
-        {
-            theme = new Theme
-            {
-                Name = "facebook",
-                DisplayName = "Facebook",
-                Description = "Facebook theme"
-            };
-            dbContext.Themes.Add(theme);
-            await dbContext.SaveChangesAsync();
-        }
-
         var post = new Post
         {
             Username = dbUser.Username,
-            ThemeId = theme.Id,
+            Theme = dbUser.Theme,
             Message = message,
             CreatedUtc = DateTime.UtcNow
         };

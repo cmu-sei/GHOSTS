@@ -46,7 +46,7 @@
                         <span class="nav-text">Notifications</span>
                     </div>
                     <div class="nav-item">
-                        <img src="/u/@ViewBag.UserId/avatar" alt="Me" class="nav-avatar">
+                        <img src="/u/@ViewBag.Username/avatar" alt="Me" class="nav-avatar">
                         <span class="nav-text">Me</span>
                         <span class="dropdown-arrow">▼</span>
                     </div>
@@ -153,15 +153,15 @@
 
                         <!-- Recent Posts -->
                         <div class="activity-posts">
-                            @if (Model != null && Model.Any())
+                            @if (Model != null)
                             {
-                                @foreach (var post in Model.Take(5))
+                                @foreach (var post in Model)
                                 {
                                     <article class="activity-post">
                                         <div class="post-header">
-                                            <img src="/u/@post.User.Username/avatar" alt="@post.User.Username" class="post-avatar">
+                                            <img src="/u/@post.Username/avatar" alt="@post.Username" class="post-avatar">
                                             <div class="post-meta">
-                                                <div class="post-author">@post.User.Username</div>
+                                                <div class="post-author">@post.Username</div>
                                                 <div class="post-time">@post.CreatedUtc.ToString("MMM d, yyyy")</div>
                                             </div>
                                         </div>

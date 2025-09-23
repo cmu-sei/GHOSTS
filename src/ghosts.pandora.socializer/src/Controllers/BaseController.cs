@@ -1,16 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.AspNetCore.SignalR;
-using Ghosts.Socializer.Hubs;
-using Ghosts.Socializer.Infrastructure;
 
 namespace Ghosts.Socializer.Controllers;
 
 public class BaseController : Controller
 {
     protected readonly ILogger Logger;
-    protected readonly IHubContext<PostsHub> HubContext;
-    protected readonly DataContext Db;
 
     public override void OnActionExecuted(ActionExecutedContext filterContext)
     {
@@ -24,15 +19,13 @@ public class BaseController : Controller
             Request.Scheme, Request.Host, Request.Path, Request.QueryString, Request.Method,
             form);
 
-        ViewBag.UserId = CookieRead("userid");
+        ViewBag.Username = CookieRead("username");
         base.OnActionExecuted(filterContext);
     }
 
-    internal BaseController(ILogger logger, IHubContext<PostsHub> hubContext, DataContext dbContext)
+    internal BaseController(ILogger logger)
     {
         Logger = logger;
-        HubContext = hubContext;
-        Db = dbContext;
     }
 
     internal void CookieWrite(string key, string value)
@@ -80,5 +73,25 @@ public class BaseController : Controller
             });
 
         return username;
+    }
+
+    internal void UserWrite(string username)
+    {
+        CookieWrite("username", username);
+    }
+
+    internal string UserRead()
+    {
+        return CookieRead("username");
+    }
+
+    internal void ThemeWrite(string theme)
+    {
+        CookieWrite("theme", theme);
+    }
+
+    internal string ThemeRead()
+    {
+        return CookieRead("theme");
     }
 }

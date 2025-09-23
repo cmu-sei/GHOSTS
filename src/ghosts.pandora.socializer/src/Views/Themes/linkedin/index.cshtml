@@ -38,8 +38,10 @@
                         <span class="nav-text">Jobs</span>
                     </div>
                     <div class="nav-item">
-                        <span class="nav-icon">💬</span>
-                        <span class="nav-text">Messaging</span>
+                        <a href="/messages" style="text-decoration: none; color: inherit; display: flex; flex-direction: column; align-items: center;">
+                            <span class="nav-icon">💬</span>
+                            <span class="nav-text">Messaging</span>
+                        </a>
                     </div>
                     <div class="nav-item">
                         <span class="nav-icon">🔔</span>
@@ -131,173 +133,18 @@
 
                 <!-- Posts -->
                 <div class="posts-container">
-                    <!-- Post 1 -->
-                    <article class="post">
-                        <div class="post-header">
-                            <img src="/themes/linkedin/images/user1-avatar.jpg" alt="User" class="post-avatar">
-                            <div class="post-author-info">
-                                <h4 class="author-name">Alice Johnson</h4>
-                                <p class="author-title">Senior Frontend Developer at TechStart</p>
-                                <span class="post-time">2h • 🌍</span>
-                            </div>
-                            <button class="post-menu">⋯</button>
-                        </div>
-                        <div class="post-content">
-                            <p class="post-text">
-                                Just shipped a major feature update! 🚀 Working with an amazing team to build something that will impact millions of users.
-                                The journey from concept to production was challenging but incredibly rewarding.
-                                <br><br>
-                                Key learnings:
-                                <br>• User feedback is invaluable
-                                <br>• Collaboration drives innovation
-                                <br>• Persistence pays off
-                                <br><br>
-                                #TechLife #ProductDevelopment #TeamWork
-                            </p>
-                        </div>
-                        <div class="post-engagement">
-                            <div class="engagement-stats">
-                                <span class="reactions">❤️👏💡 234</span>
-                                <div class="engagement-counts">
-                                    <span>45 comments</span>
-                                    <span>•</span>
-                                    <span>12 reposts</span>
-                                </div>
-                            </div>
-                            <div class="post-actions">
-                                <button class="post-action">
-                                    <span class="action-icon">👍</span>
-                                    <span class="action-text">Like</span>
-                                </button>
-                                <button class="post-action">
-                                    <span class="action-icon">💬</span>
-                                    <span class="action-text">Comment</span>
-                                </button>
-                                <button class="post-action">
-                                    <span class="action-icon">🔄</span>
-                                    <span class="action-text">Repost</span>
-                                </button>
-                                <button class="post-action">
-                                    <span class="action-icon">📤</span>
-                                    <span class="action-text">Send</span>
-                                </button>
-                            </div>
-                        </div>
-                    </article>
+                    <div id="newsfeed-items-grid">
+                        @{
+                            if (Model != null)
+                            {
+                                foreach (var post in Model)
+                                {
+                                    await Html.RenderPartialAsync("_Post", post);
+                                }
+                            }
+                        }
+                    </div>
 
-                    <!-- Post 2 -->
-                    <article class="post">
-                        <div class="post-header">
-                            <img src="/themes/linkedin/images/user2-avatar.jpg" alt="User" class="post-avatar">
-                            <div class="post-author-info">
-                                <h4 class="author-name">Tech Industry News</h4>
-                                <p class="author-title">Technology News & Updates</p>
-                                <span class="post-time">4h • 🌍</span>
-                            </div>
-                            <button class="post-menu">⋯</button>
-                        </div>
-                        <div class="post-content">
-                            <p class="post-text">
-                                🔥 BREAKING: Major tech company announces revolutionary AI breakthrough that could transform software development.
-                                <br><br>
-                                The new AI model can:
-                                <br>✅ Generate production-ready code
-                                <br>✅ Debug complex issues automatically
-                                <br>✅ Optimize performance in real-time
-                                <br><br>
-                                This could be a game-changer for developers worldwide. What are your thoughts?
-                                <br><br>
-                                #AI #TechNews #SoftwareDevelopment #Innovation
-                            </p>
-                            <div class="post-image">
-                                <img src="/themes/linkedin/images/tech-news.jpg" alt="Tech News" class="content-image">
-                            </div>
-                        </div>
-                        <div class="post-engagement">
-                            <div class="engagement-stats">
-                                <span class="reactions">👍🔥💡 567</span>
-                                <div class="engagement-counts">
-                                    <span>89 comments</span>
-                                    <span>•</span>
-                                    <span>34 reposts</span>
-                                </div>
-                            </div>
-                            <div class="post-actions">
-                                <button class="post-action">
-                                    <span class="action-icon">👍</span>
-                                    <span class="action-text">Like</span>
-                                </button>
-                                <button class="post-action">
-                                    <span class="action-icon">💬</span>
-                                    <span class="action-text">Comment</span>
-                                </button>
-                                <button class="post-action">
-                                    <span class="action-icon">🔄</span>
-                                    <span class="action-text">Repost</span>
-                                </button>
-                                <button class="post-action">
-                                    <span class="action-icon">📤</span>
-                                    <span class="action-text">Send</span>
-                                </button>
-                            </div>
-                        </div>
-                    </article>
-
-                    <!-- Post 3 -->
-                    <article class="post">
-                        <div class="post-header">
-                            <img src="/themes/linkedin/images/user3-avatar.jpg" alt="User" class="post-avatar">
-                            <div class="post-author-info">
-                                <h4 class="author-name">Sarah Chen</h4>
-                                <p class="author-title">Product Manager at InnovateInc</p>
-                                <span class="post-time">6h • 🌍</span>
-                            </div>
-                            <button class="post-menu">⋯</button>
-                        </div>
-                        <div class="post-content">
-                            <p class="post-text">
-                                Lessons learned after 5 years in product management:
-                                <br><br>
-                                1️⃣ Listen to your users, but don't build everything they ask for
-                                <br>2️⃣ Data is important, but intuition matters too
-                                <br>3️⃣ The best features are often the simplest ones
-                                <br>4️⃣ Communication is 80% of the job
-                                <br>5️⃣ Failure is the best teacher
-                                <br><br>
-                                What would you add to this list?
-                                <br><br>
-                                #ProductManagement #Leadership #CareerAdvice
-                            </p>
-                        </div>
-                        <div class="post-engagement">
-                            <div class="engagement-stats">
-                                <span class="reactions">👍💡👏 189</span>
-                                <div class="engagement-counts">
-                                    <span>23 comments</span>
-                                    <span>•</span>
-                                    <span>8 reposts</span>
-                                </div>
-                            </div>
-                            <div class="post-actions">
-                                <button class="post-action">
-                                    <span class="action-icon">👍</span>
-                                    <span class="action-text">Like</span>
-                                </button>
-                                <button class="post-action">
-                                    <span class="action-icon">💬</span>
-                                    <span class="action-text">Comment</span>
-                                </button>
-                                <button class="post-action">
-                                    <span class="action-icon">🔄</span>
-                                    <span class="action-text">Repost</span>
-                                </button>
-                                <button class="post-action">
-                                    <span class="action-icon">📤</span>
-                                    <span class="action-text">Send</span>
-                                </button>
-                            </div>
-                        </div>
-                    </article>
                 </div>
             </main>
 

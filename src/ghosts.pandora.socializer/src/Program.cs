@@ -24,8 +24,7 @@ builder.Services.AddHostedService<CleanupService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IThemeService, ThemeService>();
 builder.Services.AddScoped<IPostService, PostService>();
-builder.Services.AddScoped<DatabaseSeeder>();
-builder.Services.AddScoped<QueryExamples>();
+builder.Services.AddScoped<IDirectMessageService, DirectMessageService>();
 
 builder.Services.AddSingleton(_ =>
     LoggerFactory

@@ -182,6 +182,23 @@ body {
     outline: none;
 }
 
+.post-btn {
+    background-color: #1877f2;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 16px;
+    margin-left: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.post-btn:hover {
+    background-color: #166fe5;
+}
+
 .create-post-buttons {
     display: flex;
     padding-top: 8px;
