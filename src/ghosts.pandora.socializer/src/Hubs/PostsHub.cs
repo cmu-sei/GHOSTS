@@ -1,9 +1,9 @@
 using System.Globalization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-using Socializer.Infrastructure;
+using Ghosts.Socializer.Infrastructure;
 
-namespace Socializer.Hubs;
+namespace Ghosts.Socializer.Hubs;
 
 public class PostsHub(ILogger<PostsHub> logger, DataContext dbContext) : Hub
 {

@@ -1,13 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-using Socializer.Hubs;
-using Socializer.Infrastructure;
+using Ghosts.Socializer.Hubs;
+using Ghosts.Socializer.Infrastructure;
 
-namespace Socializer.Controllers;
+namespace Ghosts.Socializer.Controllers;
 
 [Route("{*catchall}")]
-public class HomeController(ILogger logger, IHubContext<PostsHub> hubContext, DataContext dbContext) : BaseController(logger, hubContext, dbContext)
+public class HomeController(ILogger logger, IHubContext<PostsHub> hubContext, DataContext dbContext, ApplicationConfiguration applicationConfiguration) : BaseController(logger, hubContext, dbContext)
 {
     [HttpGet]
     public IActionResult Index()
@@ -25,7 +25,7 @@ public class HomeController(ILogger logger, IHubContext<PostsHub> hubContext, Da
             .Include(x => x.User)
             .Include(x => x.Theme)
             .OrderByDescending(x => x.CreatedUtc)
-            .Take(Program.Configuration.DefaultDisplay)
+            .Take(applicationConfiguration.DefaultDisplay)
             .ToList();
 
         if (Request.QueryString.HasValue && !string.IsNullOrEmpty(Request.Query["u"]))
@@ -42,7 +42,7 @@ public class HomeController(ILogger logger, IHubContext<PostsHub> hubContext, Da
             CreatedUtc = DateTime.UtcNow
         };
 
-        string? username = null;
+        string username = null;
         var userFormValues = new[] { "user", "usr", "u", "uid", "user_id", "u_id" };
         foreach (var userFormValue in userFormValues)
         {
@@ -102,7 +102,7 @@ public class HomeController(ILogger logger, IHubContext<PostsHub> hubContext, Da
         if (Db.Posts.Any(_ =>
                 _.Message.ToLower() == post.Message.ToLower()
                 && _.UserId == user.Id
-                && _.CreatedUtc > post.CreatedUtc.AddMinutes(-Program.Configuration.MinutesToCheckForDuplicatePost)))
+                && _.CreatedUtc > post.CreatedUtc.AddMinutes(-applicationConfiguration.MinutesToCheckForDuplicatePost)))
         {
             Logger.LogInformation("Client is posting duplicates: {PostUser}", username);
             return NoContent();

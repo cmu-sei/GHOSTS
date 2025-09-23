@@ -1,6 +1,6 @@
-using Socializer.Infrastructure;
+using Ghosts.Socializer.Infrastructure;
 
-namespace Socializer.Services;
+namespace Ghosts.Socializer.Services;
 
 /// <summary>
 /// Example queries demonstrating the specific use cases mentioned:

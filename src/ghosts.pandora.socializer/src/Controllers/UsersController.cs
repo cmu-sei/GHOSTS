@@ -1,14 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-using Socializer.Hubs;
-using Socializer.Infrastructure;
+using Ghosts.Socializer.Hubs;
+using Ghosts.Socializer.Infrastructure;
 
-namespace Socializer.Controllers;
+namespace Ghosts.Socializer.Controllers;
 
 [Route("u")]
 public class UsersController(ILogger logger, IHubContext<PostsHub> hubContext, DataContext dbContext,
-        IWebHostEnvironment env)
+        IWebHostEnvironment env, ApplicationConfiguration applicationConfiguration)
     : BaseController(logger, hubContext, dbContext)
 {
     [HttpGet("{userId}")]
@@ -18,7 +18,7 @@ public class UsersController(ILogger logger, IHubContext<PostsHub> hubContext, D
             .Include(x => x.Likes)
             .Where(x => x.User.Username.ToLower() == userId.ToLower())
             .OrderByDescending(x => x.CreatedUtc)
-            .Take(Program.Configuration.DefaultDisplay)
+            .Take(applicationConfiguration.DefaultDisplay)
             .ToList();
 
         ViewBag.User = userId;

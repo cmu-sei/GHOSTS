@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using Socializer.Infrastructure;
+using Ghosts.Socializer.Infrastructure;
 
-namespace Socializer.Services;
+namespace Ghosts.Socializer.Services;
 
 public interface IThemeService
 {

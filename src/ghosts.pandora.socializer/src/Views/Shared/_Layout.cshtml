@@ -2,9 +2,9 @@
     var rnd = new Random();
     var statusArray = new[] { "online", "away", "disconnected" };
 
-    Socializer.Infrastructure.User GetRandomUser()
+    Ghosts.Socializer.Infrastructure.User GetRandomUser()
     {
-        var u = new Socializer.Infrastructure.User();
+        var u = new Ghosts.Socializer.Infrastructure.User();
         var number = rnd.Next(1, 85);
         u.Username = Faker.Internet.UserName();
         u.Avatar = $"/u/{u.Username}/avatar";

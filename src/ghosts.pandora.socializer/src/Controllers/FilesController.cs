@@ -1,10 +1,10 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
-using Socializer.Hubs;
-using Socializer.Infrastructure;
+using Ghosts.Socializer.Hubs;
+using Ghosts.Socializer.Infrastructure;
 
-namespace Socializer.Controllers;
+namespace Ghosts.Socializer.Controllers;
 
 [Route("/images")]
 [Route("/files")]

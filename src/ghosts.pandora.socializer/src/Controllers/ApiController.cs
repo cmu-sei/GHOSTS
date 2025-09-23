@@ -1,13 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-using Socializer.Hubs;
-using Socializer.Infrastructure;
+using Ghosts.Socializer.Hubs;
+using Ghosts.Socializer.Infrastructure;
 
-namespace Socializer.Controllers;
+namespace Ghosts.Socializer.Controllers;
 
 [Route("/api")]
-public class ApiController(ILogger logger, IHubContext<PostsHub> hubContext, DataContext dbContext) : BaseController(logger, hubContext, dbContext)
+public class ApiController(ILogger logger, IHubContext<PostsHub> hubContext, DataContext dbContext, ApplicationConfiguration applicationConfiguration) : BaseController(logger, hubContext, dbContext)
 {
     [HttpGet]
     public IEnumerable<Post> Index()
@@ -17,7 +17,7 @@ public class ApiController(ILogger logger, IHubContext<PostsHub> hubContext, Dat
             .Include(x => x.User)
             .Include(x => x.Theme)
             .OrderByDescending(x => x.CreatedUtc)
-            .Take(Program.Configuration.DefaultDisplay)
+            .Take(applicationConfiguration.DefaultDisplay)
             .ToList();
 
         if (Request.QueryString.HasValue && !string.IsNullOrEmpty(Request.Query["u"]))
@@ -34,7 +34,7 @@ public class ApiController(ILogger logger, IHubContext<PostsHub> hubContext, Dat
             .Include(x => x.Theme)
             .Where(x => x.User.Username.Equals(userId, StringComparison.CurrentCultureIgnoreCase))
             .OrderByDescending(x => x.CreatedUtc)
-            .Take(Program.Configuration.DefaultDisplay)
+            .Take(applicationConfiguration.DefaultDisplay)
             .ToList();
 
         if (Request.QueryString.HasValue && !string.IsNullOrEmpty(Request.Query["u"]))
@@ -43,7 +43,7 @@ public class ApiController(ILogger logger, IHubContext<PostsHub> hubContext, Dat
     }
 
     [HttpGet("{id:guid}")]
-    public Post? Detail(Guid id)
+    public Post Detail(Guid id)
     {
         var post = Db.Posts
             .Include(x => x.Likes)
@@ -130,7 +130,7 @@ public class ApiController(ILogger logger, IHubContext<PostsHub> hubContext, Dat
             CreatedUtc = DateTime.UtcNow
         };
 
-        string? username = null;
+        string username = null;
         var userFormValues = new[] { "user", "usr", "u", "uid", "user_id", "u_id" };
         foreach (var userFormValue in userFormValues)
         {
@@ -189,7 +189,7 @@ public class ApiController(ILogger logger, IHubContext<PostsHub> hubContext, Dat
         // has the same user tried to post the same message within the past x minutes?
         if (Db.Posts.Any(_ => _.Message.Equals(post.Message, StringComparison.CurrentCultureIgnoreCase)
                                 && _.UserId == user.Id
-                                && _.CreatedUtc > post.CreatedUtc.AddMinutes(-Program.Configuration.MinutesToCheckForDuplicatePost)))
+                                && _.CreatedUtc > post.CreatedUtc.AddMinutes(-applicationConfiguration.MinutesToCheckForDuplicatePost)))
         {
             Logger.LogInformation("Client is posting duplicates: {PostUser}", username);
             return NoContent();

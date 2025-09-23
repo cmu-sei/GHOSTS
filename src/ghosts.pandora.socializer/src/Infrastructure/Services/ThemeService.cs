@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc.Razor;
 
-namespace Socializer.Infrastructure.Services;
+namespace Ghosts.Socializer.Infrastructure.Services;
 public class ThemeViewLocationExpander : IViewLocationExpander
 {
     public void PopulateValues(ViewLocationExpanderContext context)
