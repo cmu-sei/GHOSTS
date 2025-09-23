@@ -94,10 +94,10 @@
                     @foreach (var comment in Model.Comments)
                     {
                         <div class="comment">
-                            <img src="/u/@comment.UserId/avatar" alt="@comment.UserId" class="profile-pic">
+                            <img src="/u/@comment.Username/avatar" alt="@comment.Username" class="profile-pic">
                             <div>
                                 <div class="comment-content">
-                                    <div class="comment-author"><a href="/u/@comment.UserId">@comment.UserId</a></div>
+                                    <div class="comment-author"><a href="/u/@comment.Username">@comment.Username</a></div>
                                     <div class="comment-text">@Html.Raw(comment.Message)</div>
                                 </div>
                                 <div class="comment-actions">
@@ -137,6 +137,6 @@
     <script src="/js/svg-loader.js"></script>
     <!-- /SVG icons loader -->
     <script src="~/js/signalr.min.js"></script>
-    <script src="~/js/posts.js?@System.Guid.NewGuid()" asp-append-version="true"></script>
+    <script src="~/js/posts.js?@Guid.NewGuid()" asp-append-version="true"></script>
 </body>
 </html>

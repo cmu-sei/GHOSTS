@@ -30,8 +30,7 @@ public class DatabaseSeeder
             {
                 var user = await _userService.CreateUserAsync(
                     username,
-                    $"{char.ToUpper(username[0])}{username.Substring(1)}",
-                    $"Hello, I'm {username}!"
+                    $"{char.ToUpper(username[0])}{username.Substring(1)}"
                 );
                 users.Add(user);
             }
@@ -82,7 +81,7 @@ public class DatabaseSeeder
                     _ => message
                 };
 
-                await _postService.CreatePostAsync(user.Id, theme.Id, message);
+                await _postService.CreatePostAsync(user.Username, theme.Id, message);
 
                 // Random delay to spread out creation times
                 await Task.Delay(10);

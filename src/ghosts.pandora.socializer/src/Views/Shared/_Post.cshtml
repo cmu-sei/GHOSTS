@@ -44,7 +44,7 @@
             @{
                 foreach (var like in post.Likes)
                 {
-                    <span><a href="/u/@like.UserId">@like.UserId</a> and <br/>@post.Likes.Count more liked this</span>
+                    <span><a href="/u/@like.Username">@like.Username</a> and <br/>@post.Likes.Count more liked this</span>
                     break;
                 }
             }

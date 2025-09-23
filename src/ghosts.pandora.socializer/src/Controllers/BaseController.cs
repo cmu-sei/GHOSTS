@@ -54,4 +54,31 @@ public class BaseController : Controller
             return string.Empty;
         }
     }
+
+    internal string GetOrCreateUsernameCookie(HttpContext context, string fallbackUsername = null)
+    {
+        const string cookieName = "username";
+
+        // Already exists?
+        if (context.Request.Cookies.TryGetValue(cookieName, out var value) &&
+            !string.IsNullOrWhiteSpace(value))
+        {
+            return value;
+        }
+
+        // No cookie — create one using provided fallback (or generate something)
+        var username = fallbackUsername ?? Faker.Internet.UserName();
+
+        context.Response.Cookies.Append(
+            cookieName,
+            username,
+            new CookieOptions
+            {
+                HttpOnly = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTimeOffset.UtcNow.AddYears(5)
+            });
+
+        return username;
+    }
 }

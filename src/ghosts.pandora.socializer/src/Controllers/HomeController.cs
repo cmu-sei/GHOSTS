@@ -7,7 +7,10 @@ using Ghosts.Socializer.Infrastructure;
 namespace Ghosts.Socializer.Controllers;
 
 [Route("{*catchall}")]
-public class HomeController(ILogger logger, IHubContext<PostsHub> hubContext, DataContext dbContext, ApplicationConfiguration applicationConfiguration) : BaseController(logger, hubContext, dbContext)
+public class HomeController(
+    ILogger logger, IHubContext<PostsHub> hubContext, DataContext dbContext,
+    ApplicationConfiguration applicationConfiguration)
+    : BaseController(logger, hubContext, dbContext)
 {
     [HttpGet]
     public IActionResult Index()
@@ -20,7 +23,7 @@ public class HomeController(ILogger logger, IHubContext<PostsHub> hubContext, Da
         if (path.EndsWith("/profile") || path.StartsWith("/profile"))
             view = "profile";
 
-        var posts = Db.Posts
+        var posts = dbContext.Posts
             .Include(x => x.Likes)
             .Include(x => x.User)
             .Include(x => x.Theme)
@@ -38,7 +41,7 @@ public class HomeController(ILogger logger, IHubContext<PostsHub> hubContext, Da
     {
         var post = new Post
         {
-            Id = Guid.NewGuid().ToString(),
+            Id = Guid.NewGuid(),
             CreatedUtc = DateTime.UtcNow
         };
 
@@ -63,26 +66,24 @@ public class HomeController(ILogger logger, IHubContext<PostsHub> hubContext, Da
             return BadRequest("User and message are required.");
 
         // Get or create user
-        var user = await Db.Users.FirstOrDefaultAsync(u => u.Username == username);
+        var user = await dbContext.Users.FirstOrDefaultAsync(u => u.Username == username);
         if (user == null)
         {
             user = new User
             {
-                Id = Guid.NewGuid().ToString(),
                 Username = username,
-                DisplayName = username,
                 Bio = $"User {username}",
                 Avatar = $"/u/{username}/avatar",
                 Status = "online",
                 CreatedUtc = DateTime.UtcNow,
                 LastActiveUtc = DateTime.UtcNow
             };
-            Db.Users.Add(user);
-            await Db.SaveChangesAsync();
+            dbContext.Users.Add(user);
+            await dbContext.SaveChangesAsync();
         }
 
         // Get default theme (facebook for now, or detect from request)
-        var theme = await Db.Themes.FirstOrDefaultAsync(t => t.Name == "facebook");
+        var theme = await dbContext.Themes.FirstOrDefaultAsync(t => t.Name == "facebook");
         if (theme == null)
         {
             theme = new Theme
@@ -91,18 +92,18 @@ public class HomeController(ILogger logger, IHubContext<PostsHub> hubContext, Da
                 DisplayName = "Facebook",
                 Description = "Facebook theme"
             };
-            Db.Themes.Add(theme);
-            await Db.SaveChangesAsync();
+            dbContext.Themes.Add(theme);
+            await dbContext.SaveChangesAsync();
         }
 
-        post.UserId = user.Id;
+        post.Username = user.Username;
         post.ThemeId = theme.Id;
 
         // has the same user tried to post the same message within the past x minutes?
-        if (Db.Posts.Any(_ =>
-                _.Message.ToLower() == post.Message.ToLower()
-                && _.UserId == user.Id
-                && _.CreatedUtc > post.CreatedUtc.AddMinutes(-applicationConfiguration.MinutesToCheckForDuplicatePost)))
+        if (dbContext.Posts.Any(p =>
+                p.Message.ToLower() == post.Message.ToLower()
+                && p.Username == user.Username
+                && p.CreatedUtc > post.CreatedUtc.AddMinutes(-applicationConfiguration.MinutesToCheckForDuplicatePost)))
         {
             Logger.LogInformation("Client is posting duplicates: {PostUser}", username);
             return NoContent();
@@ -143,8 +144,8 @@ public class HomeController(ILogger logger, IHubContext<PostsHub> hubContext, Da
             post.Message += $" <img src=\"{imagePath}\"/>";
         }
 
-        Db.Posts.Add(post);
-        await Db.SaveChangesAsync();
+        dbContext.Posts.Add(post);
+        await dbContext.SaveChangesAsync();
 
         CookieWrite("userid", username);
 

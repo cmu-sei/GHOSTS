@@ -20,9 +20,9 @@ public interface IPostService
 
     // General queries
     Task<List<Post>> GetAllPostsAsync(int limit = 50, int offset = 0);
-    Task<Post> GetPostByIdAsync(string postId);
+    Task<Post> GetPostByIdAsync(Guid postId);
     Task<Post> CreatePostAsync(string userId, int themeId, string message);
-    Task<bool> DeletePostAsync(string postId, string userId);
+    Task<bool> DeletePostAsync(Guid postId, string userId);
 
     // Statistics
     Task<int> GetPostCountByThemeAsync(string themeName);
@@ -103,7 +103,7 @@ public class PostService : IPostService
             .ThenInclude(l => l.User)
             .Include(p => p.Comments)
             .ThenInclude(c => c.User)
-            .Where(p => p.UserId == userId)
+            .Where(p => p.Username == userId)
             .OrderByDescending(p => p.CreatedUtc)
             .Skip(offset)
             .Take(limit)
@@ -137,7 +137,7 @@ public class PostService : IPostService
             .ThenInclude(l => l.User)
             .Include(p => p.Comments)
             .ThenInclude(c => c.User)
-            .Where(p => p.UserId == userId && p.ThemeId == themeId)
+            .Where(p => p.Username == userId && p.ThemeId == themeId)
             .OrderByDescending(p => p.CreatedUtc)
             .Skip(offset)
             .Take(limit)
@@ -160,7 +160,7 @@ public class PostService : IPostService
             .ToListAsync();
     }
 
-    public async Task<Post> GetPostByIdAsync(string postId)
+    public async Task<Post> GetPostByIdAsync(Guid postId)
     {
         return await _context.Posts
             .Include(p => p.User)
@@ -172,12 +172,12 @@ public class PostService : IPostService
             .FirstOrDefaultAsync(p => p.Id == postId);
     }
 
-    public async Task<Post> CreatePostAsync(string userId, int themeId, string message)
+    public async Task<Post> CreatePostAsync(string username, int themeId, string message)
     {
         var post = new Post
         {
-            Id = Guid.NewGuid().ToString(),
-            UserId = userId,
+            Id = Guid.NewGuid(),
+            Username = username,
             ThemeId = themeId,
             Message = message,
             CreatedUtc = DateTime.UtcNow
@@ -189,10 +189,10 @@ public class PostService : IPostService
         return await GetPostByIdAsync(post.Id);
     }
 
-    public async Task<bool> DeletePostAsync(string postId, string userId)
+    public async Task<bool> DeletePostAsync(Guid postId, string username)
     {
         var post = await _context.Posts
-            .FirstOrDefaultAsync(p => p.Id == postId && p.UserId == userId);
+            .FirstOrDefaultAsync(p => p.Id == postId && p.Username == username);
 
         if (post == null)
             return false;

@@ -157,10 +157,10 @@
                                 @foreach (var comment in Model.Comments)
                                 {
                                     <div class="comment">
-                                        <img src="/u/@comment.UserId/avatar" alt="@comment.UserId" class="comment-avatar">
+                                        <img src="/u/@comment.Username/avatar" alt="@comment.Username" class="comment-avatar">
                                         <div class="comment-content">
                                             <div class="comment-header">
-                                                <span class="comment-author">@comment.UserId</span>
+                                                <span class="comment-author">@comment.Username</span>
                                                 <span class="comment-title">Professional</span>
                                                 <span class="comment-time">@comment.CreatedUtc.ToString("MMM d")</span>
                                             </div>

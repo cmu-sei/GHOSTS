@@ -12,7 +12,7 @@ public class ApiController(ILogger logger, IHubContext<PostsHub> hubContext, Dat
     [HttpGet]
     public IEnumerable<Post> Index()
     {
-        var posts = Db.Posts
+        var posts = dbContext.Posts
             .Include(x => x.Likes)
             .Include(x => x.User)
             .Include(x => x.Theme)
@@ -28,7 +28,7 @@ public class ApiController(ILogger logger, IHubContext<PostsHub> hubContext, Dat
     [HttpGet("u/{userId}")]
     public new virtual IEnumerable<Post> User(string userId)
     {
-        var posts = Db.Posts
+        var posts = dbContext.Posts
             .Include(x => x.Likes)
             .Include(x => x.User)
             .Include(x => x.Theme)
@@ -45,11 +45,11 @@ public class ApiController(ILogger logger, IHubContext<PostsHub> hubContext, Dat
     [HttpGet("{id:guid}")]
     public Post Detail(Guid id)
     {
-        var post = Db.Posts
+        var post = dbContext.Posts
             .Include(x => x.Likes)
             .Include(x => x.User)
             .Include(x => x.Theme)
-            .FirstOrDefault(x => x.Id == id.ToString());
+            .FirstOrDefault(x => x.Id == id);
 
         if (Request.QueryString.HasValue && !string.IsNullOrEmpty(Request.Query["u"]))
             ViewBag.User = Request.Query["u"];
@@ -59,8 +59,8 @@ public class ApiController(ILogger logger, IHubContext<PostsHub> hubContext, Dat
     [HttpGet("/admin/delete")]
     public async Task<IActionResult> Delete()
     {
-        Db.Posts.RemoveRange(Db.Posts);
-        await Db.SaveChangesAsync();
+        dbContext.Posts.RemoveRange(dbContext.Posts);
+        await dbContext.SaveChangesAsync();
         return NoContent();
     }
 
@@ -70,7 +70,7 @@ public class ApiController(ILogger logger, IHubContext<PostsHub> hubContext, Dat
         var r = new Random();
 
         // Get or create default theme
-        var theme = await Db.Themes.FirstOrDefaultAsync(t => t.Name == "facebook") ?? new Theme
+        var theme = await dbContext.Themes.FirstOrDefaultAsync(t => t.Name == "facebook") ?? new Theme
         {
             Name = "facebook",
             DisplayName = "Facebook",
@@ -78,8 +78,8 @@ public class ApiController(ILogger logger, IHubContext<PostsHub> hubContext, Dat
         };
         if (theme.Id == 0)
         {
-            Db.Themes.Add(theme);
-            await Db.SaveChangesAsync();
+            dbContext.Themes.Add(theme);
+            await dbContext.SaveChangesAsync();
         }
 
         for (var i = 0; i < n; i++)
@@ -88,35 +88,33 @@ public class ApiController(ILogger logger, IHubContext<PostsHub> hubContext, Dat
             var username = Faker.Internet.UserName();
 
             // Get or create user
-            var user = await Db.Users.FirstOrDefaultAsync(u => u.Username == username);
+            var user = await dbContext.Users.FirstOrDefaultAsync(u => u.Username == username);
             if (user == null)
             {
                 user = new User
                 {
-                    Id = Guid.NewGuid().ToString(),
                     Username = username,
-                    DisplayName = username,
                     Bio = $"User {username}",
                     Avatar = $"/u/{username}/avatar",
                     Status = "online",
                     CreatedUtc = DateTime.UtcNow,
                     LastActiveUtc = DateTime.UtcNow
                 };
-                Db.Users.Add(user);
-                await Db.SaveChangesAsync();
+                dbContext.Users.Add(user);
+                await dbContext.SaveChangesAsync();
             }
 
             var post = new Post
             {
-                Id = Guid.NewGuid().ToString(),
+                Id = Guid.NewGuid(),
                 CreatedUtc = DateTime.MinValue.Add(TimeSpan.FromTicks(min.Ticks + (long)(r.NextDouble() * (DateTime.Now.Ticks - min.Ticks)))),
-                UserId = user.Id,
+                Username = user.Username,
                 ThemeId = theme.Id,
                 Message = Faker.Lorem.Sentence(15)
             };
-            Db.Posts.Add(post);
+            dbContext.Posts.Add(post);
         }
-        await Db.SaveChangesAsync();
+        await dbContext.SaveChangesAsync();
 
         return NoContent();
     }
@@ -126,7 +124,7 @@ public class ApiController(ILogger logger, IHubContext<PostsHub> hubContext, Dat
     {
         var post = new Post
         {
-            Id = Guid.NewGuid().ToString(),
+            Id = Guid.NewGuid(),
             CreatedUtc = DateTime.UtcNow
         };
 
@@ -151,26 +149,24 @@ public class ApiController(ILogger logger, IHubContext<PostsHub> hubContext, Dat
             return BadRequest("User and message are required.");
 
         // Get or create user
-        var user = await Db.Users.FirstOrDefaultAsync(u => u.Username == username);
+        var user = await dbContext.Users.FirstOrDefaultAsync(u => u.Username == username);
         if (user == null)
         {
             user = new User
             {
-                Id = Guid.NewGuid().ToString(),
                 Username = username,
-                DisplayName = username,
                 Bio = $"User {username}",
                 Avatar = $"/u/{username}/avatar",
                 Status = "online",
                 CreatedUtc = DateTime.UtcNow,
                 LastActiveUtc = DateTime.UtcNow
             };
-            Db.Users.Add(user);
-            await Db.SaveChangesAsync();
+            dbContext.Users.Add(user);
+            await dbContext.SaveChangesAsync();
         }
 
         // Get default theme
-        var theme = await Db.Themes.FirstOrDefaultAsync(t => t.Name == "facebook");
+        var theme = await dbContext.Themes.FirstOrDefaultAsync(t => t.Name == "facebook");
         if (theme == null)
         {
             theme = new Theme
@@ -179,17 +175,17 @@ public class ApiController(ILogger logger, IHubContext<PostsHub> hubContext, Dat
                 DisplayName = "Facebook",
                 Description = "Facebook theme"
             };
-            Db.Themes.Add(theme);
-            await Db.SaveChangesAsync();
+            dbContext.Themes.Add(theme);
+            await dbContext.SaveChangesAsync();
         }
 
-        post.UserId = user.Id;
+        post.Username = user.Username;
         post.ThemeId = theme.Id;
 
         // has the same user tried to post the same message within the past x minutes?
-        if (Db.Posts.Any(_ => _.Message.Equals(post.Message, StringComparison.CurrentCultureIgnoreCase)
-                                && _.UserId == user.Id
-                                && _.CreatedUtc > post.CreatedUtc.AddMinutes(-applicationConfiguration.MinutesToCheckForDuplicatePost)))
+        if (dbContext.Posts.Any(p => p.Message.Equals(post.Message, StringComparison.CurrentCultureIgnoreCase)
+                                && p.Username == user.Username
+                                && p.CreatedUtc > post.CreatedUtc.AddMinutes(-applicationConfiguration.MinutesToCheckForDuplicatePost)))
         {
             Logger.LogInformation("Client is posting duplicates: {PostUser}", username);
             return NoContent();
@@ -230,8 +226,8 @@ public class ApiController(ILogger logger, IHubContext<PostsHub> hubContext, Dat
             post.Message += $" <img src=\"{imagePath}\"/>";
         }
 
-        Db.Posts.Add(post);
-        await Db.SaveChangesAsync();
+        dbContext.Posts.Add(post);
+        await dbContext.SaveChangesAsync();
 
         CookieWrite("userid", username);
 

@@ -34,9 +34,7 @@ public class AdminController(ILogger logger, IHubContext<PostsHub> hubContext, D
             {
                 user = new User
                 {
-                    Id = Guid.NewGuid().ToString(),
                     Username = username,
-                    DisplayName = username,
                     Bio = $"User {username}",
                     Avatar = $"/u/{username}/avatar",
                     Status = "online",
@@ -63,10 +61,10 @@ public class AdminController(ILogger logger, IHubContext<PostsHub> hubContext, D
 
             var post = new Post
             {
-                Id = Guid.NewGuid().ToString(),
+                Id = Guid.NewGuid(),
                 CreatedUtc = DateTime.MinValue.Add(
                     TimeSpan.FromTicks(min.Ticks + (long)(r.NextDouble() * (DateTime.Now.Ticks - min.Ticks)))),
-                UserId = user.Id,
+                Username = user.Username,
                 ThemeId = theme.Id,
                 Message = Faker.Lorem.Sentence(15)
             };

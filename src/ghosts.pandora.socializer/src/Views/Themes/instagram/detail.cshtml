@@ -128,10 +128,10 @@
                             @foreach (var comment in Model.Comments)
                             {
                                 <div class="comment">
-                                    <img src="/u/@comment.UserId/avatar" alt="@comment.UserId" class="comment-avatar">
+                                    <img src="/u/@comment.Username/avatar" alt="@comment.Username" class="comment-avatar">
                                     <div class="comment-content">
                                         <div class="comment-text">
-                                            <span class="comment-username">@comment.UserId</span>
+                                            <span class="comment-username">@comment.Username</span>
                                             <span class="comment-message">@comment.Message</span>
                                         </div>
                                         <div class="comment-actions">

@@ -28,7 +28,7 @@ public class DataContext : DbContext
         modelBuilder.Entity<Post>()
             .HasOne(p => p.User)
             .WithMany(u => u.Posts)
-            .HasForeignKey(p => p.UserId);
+            .HasForeignKey(p => p.Username);
 
         modelBuilder.Entity<Post>()
             .HasOne(p => p.Theme)
@@ -43,7 +43,7 @@ public class DataContext : DbContext
         modelBuilder.Entity<Like>()
             .HasOne(l => l.User)
             .WithMany(u => u.Likes)
-            .HasForeignKey(l => l.UserId);
+            .HasForeignKey(l => l.Username);
 
         modelBuilder.Entity<Comment>()
             .HasOne(c => c.Post)
@@ -53,7 +53,7 @@ public class DataContext : DbContext
         modelBuilder.Entity<Comment>()
             .HasOne(c => c.User)
             .WithMany(u => u.Comments)
-            .HasForeignKey(c => c.UserId);
+            .HasForeignKey(c => c.Username);
 
         // Configure indexes for common queries
         modelBuilder.Entity<Post>()
@@ -61,11 +61,11 @@ public class DataContext : DbContext
             .HasDatabaseName("IX_Post_Theme_CreatedUtc");
 
         modelBuilder.Entity<Post>()
-            .HasIndex(p => new { p.UserId, p.ThemeId, p.CreatedUtc })
+            .HasIndex(p => new { p.Username, p.ThemeId, p.CreatedUtc })
             .HasDatabaseName("IX_Post_User_Theme_CreatedUtc");
 
         modelBuilder.Entity<Like>()
-            .HasIndex(l => new { l.UserId, l.PostId })
+            .HasIndex(l => new { l.Username, l.PostId })
             .IsUnique()
             .HasDatabaseName("IX_Like_User_Post_Unique");
 
@@ -93,14 +93,9 @@ public class DataContext : DbContext
 public class User
 {
     [Key]
-    public string Id { get; set; } = Guid.NewGuid().ToString();
-
     [Required]
     [MaxLength(50)]
     public string Username { get; set; }
-
-    [MaxLength(100)]
-    public string DisplayName { get; set; }
 
     [MaxLength(500)]
     public string Bio { get; set; }
@@ -111,8 +106,8 @@ public class User
     [MaxLength(50)]
     public string Status { get; set; }
 
-    public DateTime CreatedUtc { get; set; }
-    public DateTime LastActiveUtc { get; set; }
+    public DateTime CreatedUtc { get; set; } = DateTime.UtcNow;
+    public DateTime LastActiveUtc { get; set; } = DateTime.UtcNow;
 
     // Navigation properties
     public virtual ICollection<Post> Posts { get; set; } = new List<Post>();
@@ -130,26 +125,23 @@ public class Theme
     [MaxLength(50)]
     public string Name { get; set; } // facebook, instagram, x, etc.
 
-    [Required]
-    [MaxLength(100)]
-    public string DisplayName { get; set; } // Facebook, Instagram, X (Twitter), etc.
+    public string DisplayName { get; set; } // Facebook, Instagram
 
     [MaxLength(500)]
     public string Description { get; set; }
 
     public bool IsActive { get; set; } = true;
 
-    // Navigation properties
     public virtual ICollection<Post> Posts { get; set; } = new List<Post>();
 }
 
 public class Post
 {
     [Key]
-    public string Id { get; set; } = Guid.NewGuid().ToString();
+    public Guid Id { get; set; } = Guid.NewGuid();
 
     [Required]
-    public string UserId { get; set; }
+    public string Username { get; set; }
 
     [Required]
     public int ThemeId { get; set; }
@@ -158,10 +150,9 @@ public class Post
     [MaxLength(5000)]
     public string Message { get; set; }
 
-    public DateTime CreatedUtc { get; set; }
-    public DateTime? UpdatedUtc { get; set; }
+    public DateTime CreatedUtc { get; set; } = DateTime.UtcNow;
+    public DateTime? UpdatedUtc { get; set; } = DateTime.UtcNow;
 
-    // Navigation properties
     public virtual User User { get; set; }
     public virtual Theme Theme { get; set; }
     public virtual ICollection<Like> Likes { get; set; } = new List<Like>();
@@ -175,14 +166,13 @@ public class Like
     public int Id { get; set; }
 
     [Required]
-    public string UserId { get; set; }
+    public string Username { get; set; }
 
     [Required]
-    public string PostId { get; set; }
+    public Guid PostId { get; set; }
 
-    public DateTime CreatedUtc { get; set; }
+    public DateTime CreatedUtc { get; set; } = DateTime.UtcNow;
 
-    // Navigation properties
     public virtual User User { get; set; }
     public virtual Post Post { get; set; }
 }
@@ -194,19 +184,18 @@ public class Comment
     public int Id { get; set; }
 
     [Required]
-    public string UserId { get; set; }
+    public string Username { get; set; }
 
     [Required]
-    public string PostId { get; set; }
+    public Guid PostId { get; set; }
 
     [Required]
     [MaxLength(2000)]
     public string Message { get; set; }
 
-    public DateTime CreatedUtc { get; set; }
-    public DateTime? UpdatedUtc { get; set; }
+    public DateTime CreatedUtc { get; set; } = DateTime.UtcNow;
+    public DateTime? UpdatedUtc { get; set; } = DateTime.UtcNow;
 
-    // Navigation properties
     public virtual User User { get; set; }
     public virtual Post Post { get; set; }
 }
