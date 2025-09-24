@@ -84,23 +84,6 @@
 
         <!-- Feed -->
         <main class="feed-container">
-            <!-- Create Post -->
-            <div class="create-post">
-                <form method="post" action="/">
-                    <input type="hidden" name="theme" value="facebook">
-                    <input type="hidden" name="user" value="@ViewBag.Username">
-                    <div class="create-post-top">
-                        <img src="/u/@ViewBag.Username/avatar" alt="Profile" class="profile-pic">
-                        <input type="text" name="message" class="create-post-input" placeholder="What's on your mind, @ViewBag.Username?" required>
-                        <button type="submit" class="post-btn">Post</button>
-                    </div>
-                </form>
-                <div class="create-post-buttons">
-                    <button class="create-post-btn">📹 Live video</button>
-                    <button class="create-post-btn">📷 Photo/video</button>
-                    <button class="create-post-btn">😊 Feeling/activity</button>
-                </div>
-            </div>
 
             <!-- Stories -->
             <div class="post">
@@ -115,6 +98,12 @@
                 </div>
             </div>
 
+            @{
+                ViewBag.Theme = "facebook";
+            }
+
+            @await Html.PartialAsync("_CreatePost")
+
             <div id="newsfeed-items-grid">
                 <button class="btn btn-primary btn-md-2" type="submit" name="submit" id="sendButton">Post Status</button>
                 @{
@@ -122,36 +111,7 @@
                     {
                         foreach (var post in Model)
                         {
-                            <article class="post" data-post-id="@post.Id">
-                                <div class="post-header">
-                                    <div class="post-user-info">
-                                        <img src="/u/@post.Username/avatar" class="profile-pic">
-                                        <div>
-                                            <div class="post-user-name"><a href="/u/@post.Username">@post.Username</a></div>
-                                            <div class="post-time">@post.CreatedUtc.ToString("MMM d, yyyy") · 🌍</div>
-                                        </div>
-                                    </div>
-                                    <button class="post-menu">⋯</button>
-                                </div>
-                                <div class="post-content">
-                                    <div class="post-text">@Html.Raw(post.Message)</div>
-                                </div>
-                                <div class="post-stats">
-                                    @{
-                                        var likesCount = post.Likes?.Count ?? 0;
-                                    }
-                                    @if (likesCount > 0)
-                                    {
-                                        <span>👍❤️😊 @likesCount people</span>
-                                    }
-                                    <div>@post.Comments?.Count comments</div>
-                                </div>
-                                <div class="post-actions">
-                                    <button class="post-action like-btn like-it" data-id="@post.Id">👍 Like</button>
-                                    <a href="/posts/@post.Id" style="text-decoration: none"><button class="post-action comment-btn" data-action="comment">💬 Comment</button></a>
-                                    <button class="post-action share-btn" data-action="share">📤 Share</button>
-                                </div>
-                            </article>
+                            await Html.RenderPartialAsync("_PostCard", post);
                         }
                     }
                 }
@@ -192,7 +152,6 @@
         </aside>
     </div>
 
-    <script src="/themes/facebook/js/facebook.js"></script>
     <!-- JS Scripts -->
     <script src="/js/jQuery/jquery-3.5.1.min.js"></script>
     <script src="/js/libs/jquery.mousewheel.min.js"></script>
@@ -210,6 +169,6 @@
     <script src="/js/svg-loader.js"></script>
     <!-- /SVG icons loader -->
     <script src="~/js/signalr.min.js"></script>
-    <script src="~/js/posts.js?@System.Guid.NewGuid()" asp-append-version="true"></script>
+    <script src="~/js/social.js?@System.Guid.NewGuid()" asp-append-version="true"></script>
 </body>
 </html>

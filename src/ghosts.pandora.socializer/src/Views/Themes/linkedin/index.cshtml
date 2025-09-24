@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="/themes/linkedin/css/feed.css">
     <link rel="icon" href="/themes/linkedin/images/linkedin-icon.png">
 </head>
-<body>
+<body data-theme="linkedin">
     <div class="app">
         <!-- Header -->
         <header class="header">
@@ -48,7 +48,7 @@
                         <span class="nav-text">Notifications</span>
                     </div>
                     <div class="nav-item">
-                        <img src="/themes/linkedin/images/profile-avatar.jpg" alt="Me" class="nav-avatar">
+                        <img src="/u/@ViewBag.Username/avatar" alt="Me" class="nav-avatar">
                         <span class="nav-text">Me</span>
                         <span class="dropdown-arrow">▼</span>
                     </div>
@@ -64,10 +64,10 @@
                 <div class="profile-card">
                     <div class="profile-cover"></div>
                     <div class="profile-info">
-                        <img src="/themes/linkedin/images/profile-avatar.jpg" alt="Profile" class="profile-avatar">
+                        <img src="/u/@ViewBag.Username/avatar" alt="Profile" class="profile-avatar">
                         <div class="profile-details">
-                            <h3 class="profile-name">John Doe</h3>
-                            <p class="profile-headline">Software Developer at Tech Corp</p>
+                            <h3 class="profile-name">@ViewBag.Username</h3>
+                            <p class="profile-headline">Software Developer</p>
                         </div>
                     </div>
                     <div class="profile-stats">
@@ -98,114 +98,87 @@
                     </div>
                     <div class="link-item">
                         <span class="link-icon">📰</span>
-                        <span class="link-text">Newsletters</span>
+                        <span class="link-text">Newsletter</span>
                     </div>
                 </div>
             </aside>
 
-            <!-- Main Feed -->
-            <main class="main-feed">
-                <!-- Post Composer -->
-                <div class="post-composer">
-                    <div class="composer-header">
-                        <img src="/themes/linkedin/images/profile-avatar.jpg" alt="Profile" class="composer-avatar">
-                        <button class="start-post-btn">Start a post</button>
-                    </div>
-                    <div class="composer-actions">
-                        <button class="composer-action">
-                            <span class="action-icon">📷</span>
-                            <span class="action-text">Photo</span>
-                        </button>
-                        <button class="composer-action">
-                            <span class="action-icon">🎥</span>
-                            <span class="action-text">Video</span>
-                        </button>
-                        <button class="composer-action">
-                            <span class="action-icon">📅</span>
-                            <span class="action-text">Event</span>
-                        </button>
-                        <button class="composer-action">
-                            <span class="action-icon">📝</span>
-                            <span class="action-text">Write article</span>
-                        </button>
-                    </div>
-                </div>
+            <!-- Main Content -->
+            <main class="main-content">
+                @{
+                    ViewBag.Theme = "linkedin";
+                }
 
-                <!-- Posts -->
-                <div class="posts-container">
-                    <div id="newsfeed-items-grid">
-                        @{
-                            if (Model != null)
+                @await Html.PartialAsync("_CreatePost")
+
+                <!-- Feed -->
+                <div class="feed" id="newsfeed-items-grid">
+                    @{
+                        if (Model != null)
+                        {
+                            foreach (var post in Model)
                             {
-                                foreach (var post in Model)
-                                {
-                                    await Html.RenderPartialAsync("_Post", post);
-                                }
+                                await Html.RenderPartialAsync("_PostCard", post);
                             }
                         }
-                    </div>
-
+                    }
                 </div>
             </main>
 
             <!-- Right Sidebar -->
             <aside class="right-sidebar">
-                <!-- News Section -->
-                <div class="news-section">
-                    <h3 class="section-title">LinkedIn News</h3>
-                    <div class="news-item">
-                        <h4 class="news-title">Tech layoffs continue</h4>
-                        <span class="news-meta">1d ago • 2,345 readers</span>
+                <!-- News Widget -->
+                <div class="news-widget">
+                    <div class="widget-header">
+                        <h3>LinkedIn News</h3>
+                        <span class="info-icon">ℹ️</span>
                     </div>
-                    <div class="news-item">
-                        <h4 class="news-title">Remote work trends</h4>
-                        <span class="news-meta">2d ago • 1,567 readers</span>
-                    </div>
-                    <div class="news-item">
-                        <h4 class="news-title">AI in the workplace</h4>
-                        <span class="news-meta">3d ago • 3,421 readers</span>
-                    </div>
-                    <div class="news-item">
-                        <h4 class="news-title">Startup funding surge</h4>
-                        <span class="news-meta">4d ago • 987 readers</span>
+                    <div class="news-list">
+                        <div class="news-item">
+                            <h4>Tech industry trends</h4>
+                            <p>4,582 readers</p>
+                        </div>
+                        <div class="news-item">
+                            <h4>Remote work evolution</h4>
+                            <p>3,241 readers</p>
+                        </div>
+                        <div class="news-item">
+                            <h4>AI in workplace</h4>
+                            <p>2,876 readers</p>
+                        </div>
                     </div>
                 </div>
 
-                <!-- People You May Know -->
-                <div class="suggestions-section">
-                    <h3 class="section-title">People you may know</h3>
-                    <div class="suggestion-item">
-                        <img src="/themes/linkedin/images/suggested1.jpg" alt="User" class="suggestion-avatar">
-                        <div class="suggestion-info">
-                            <h4 class="suggestion-name">Mike Rodriguez</h4>
-                            <p class="suggestion-title">UX Designer at CreativeStudio</p>
-                            <span class="mutual-connections">5 mutual connections</span>
-                        </div>
-                        <button class="connect-btn">Connect</button>
+                <!-- People Widget -->
+                <div class="people-widget">
+                    <div class="widget-header">
+                        <h3>People you may know</h3>
                     </div>
-                    <div class="suggestion-item">
-                        <img src="/themes/linkedin/images/suggested2.jpg" alt="User" class="suggestion-avatar">
-                        <div class="suggestion-info">
-                            <h4 class="suggestion-name">Emily Watson</h4>
-                            <p class="suggestion-title">Data Scientist at DataCorp</p>
-                            <span class="mutual-connections">3 mutual connections</span>
+                    <div class="people-list">
+                        <div class="person-item">
+                            <img src="/themes/linkedin/images/person1.jpg" alt="Person" class="person-avatar">
+                            <div class="person-info">
+                                <h4>Sarah Wilson</h4>
+                                <p>Software Engineer at TechCorp</p>
+                            </div>
+                            <button class="connect-btn">Connect</button>
                         </div>
-                        <button class="connect-btn">Connect</button>
-                    </div>
-                    <div class="suggestion-item">
-                        <img src="/themes/linkedin/images/suggested3.jpg" alt="User" class="suggestion-avatar">
-                        <div class="suggestion-info">
-                            <h4 class="suggestion-name">David Kim</h4>
-                            <p class="suggestion-title">Marketing Manager at BrandPlus</p>
-                            <span class="mutual-connections">2 mutual connections</span>
+                        <div class="person-item">
+                            <img src="/themes/linkedin/images/person2.jpg" alt="Person" class="person-avatar">
+                            <div class="person-info">
+                                <h4>Mike Johnson</h4>
+                                <p>Product Manager at StartupCo</p>
+                            </div>
+                            <button class="connect-btn">Connect</button>
                         </div>
-                        <button class="connect-btn">Connect</button>
                     </div>
                 </div>
             </aside>
         </div>
     </div>
 
-    <script src="/themes/linkedin/js/feed.js"></script>
+    <script src="/lib/jquery/dist/jquery.min.js"></script>
+    <script src="/js/signalr.min.js"></script>
+    <script src="/js/social.js"></script>
 </body>
 </html>

@@ -8,217 +8,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>reddit: the front page of the internet</title>
+    <title>Reddit</title>
     <link rel="stylesheet" href="/themes/reddit/css/feed.css">
     <link rel="icon" href="/themes/reddit/images/reddit-icon.png">
 </head>
-<body>
+<body data-theme="reddit">
     <div class="app">
         <!-- Header -->
         <header class="header">
-            <div class="header-left">
-                <div class="logo">
+            <div class="header-container">
+                <div class="header-left">
                     <img src="/themes/reddit/images/reddit-logo.png" alt="Reddit" class="reddit-logo">
-                    <span class="reddit-text">reddit</span>
-                </div>
-                <div class="search-container">
                     <input type="text" placeholder="Search Reddit" class="search-input">
-                    <button class="search-btn">🔍</button>
                 </div>
-            </div>
-            <div class="header-right">
-                <button class="header-btn">📈</button>
-                <a href="/messages" style="text-decoration: none;">
-                    <button class="header-btn">💬</button>
-                </a>
-                <button class="header-btn">🔔</button>
-                <button class="header-btn">➕</button>
-                <div class="user-menu">
-                    <img src="/themes/reddit/images/profile-avatar.jpg" alt="Profile" class="user-avatar">
-                    <span class="username">u/johndoe</span>
-                    <span class="dropdown-arrow">▼</span>
+                <div class="header-right">
+                    <button class="header-btn">Popular</button>
+                    <button class="header-btn">All</button>
+                    <a href="/messages" class="header-btn" style="text-decoration: none;">💬</a>
+                    <div class="user-menu">
+                        <img src="/u/@ViewBag.Username/avatar" alt="User" class="user-avatar">
+                        <span class="username">@ViewBag.Username</span>
+                        <span class="dropdown-arrow">▼</span>
+                    </div>
                 </div>
             </div>
         </header>
 
         <div class="main-container">
             <!-- Left Sidebar -->
-            <div class="sidebar">
-                <div class="popular-section">
-                    <h3>POPULAR COMMUNITIES</h3>
-                    <div class="community-item">
-                        <img src="/themes/reddit/images/askreddit-icon.jpg" alt="AskReddit" class="community-icon">
-                        <div class="community-info">
-                            <div class="community-name">r/AskReddit</div>
-                            <div class="community-members">45.2M members</div>
+            <aside class="left-sidebar">
+                <div class="subreddit-list">
+                    <div class="sidebar-section">
+                        <h3>FEEDS</h3>
+                        <div class="feed-item active">
+                            <span class="feed-icon">🏠</span>
+                            <span class="feed-name">Home</span>
                         </div>
-                        <button class="join-btn">Join</button>
-                    </div>
-                    <div class="community-item">
-                        <img src="/themes/reddit/images/funny-icon.jpg" alt="funny" class="community-icon">
-                        <div class="community-info">
-                            <div class="community-name">r/funny</div>
-                            <div class="community-members">52.1M members</div>
+                        <div class="feed-item">
+                            <span class="feed-icon">📈</span>
+                            <span class="feed-name">Popular</span>
                         </div>
-                        <button class="join-btn">Join</button>
-                    </div>
-                    <div class="community-item">
-                        <img src="/themes/reddit/images/gaming-icon.jpg" alt="gaming" class="community-icon">
-                        <div class="community-info">
-                            <div class="community-name">r/gaming</div>
-                            <div class="community-members">37.8M members</div>
+                        <div class="feed-item">
+                            <span class="feed-icon">🎯</span>
+                            <span class="feed-name">All</span>
                         </div>
-                        <button class="join-btn">Join</button>
                     </div>
-                    <div class="community-item">
-                        <img src="/themes/reddit/images/aww-icon.jpg" alt="aww" class="community-icon">
-                        <div class="community-info">
-                            <div class="community-name">r/aww</div>
-                            <div class="community-members">34.5M members</div>
-                        </div>
-                        <button class="join-btn">Join</button>
-                    </div>
-                    <div class="community-item">
-                        <img src="/themes/reddit/images/mildlyinteresting-icon.jpg" alt="mildlyinteresting" class="community-icon">
-                        <div class="community-info">
-                            <div class="community-name">r/mildlyinteresting</div>
-                            <div class="community-members">22.7M members</div>
-                        </div>
-                        <button class="join-btn">Join</button>
-                    </div>
-                </div>
 
-                <div class="recent-section">
-                    <h3>RECENT POSTS</h3>
-                    <div class="recent-item">
-                        <div class="recent-community">r/technology</div>
-                        <div class="recent-title">New AI breakthrough announced</div>
-                    </div>
-                    <div class="recent-item">
-                        <div class="recent-community">r/worldnews</div>
-                        <div class="recent-title">Breaking: Major development in...</div>
-                    </div>
-                    <div class="recent-item">
-                        <div class="recent-community">r/science</div>
-                        <div class="recent-title">Researchers discover new species</div>
+                    <div class="sidebar-section">
+                        <h3>RECENT COMMUNITIES</h3>
+                        <div class="community-item">
+                            <img src="/themes/reddit/images/community1.jpg" alt="Community" class="community-icon">
+                            <span class="community-name">r/programming</span>
+                        </div>
+                        <div class="community-item">
+                            <img src="/themes/reddit/images/community2.jpg" alt="Community" class="community-icon">
+                            <span class="community-name">r/webdev</span>
+                        </div>
+                        <div class="community-item">
+                            <img src="/themes/reddit/images/community3.jpg" alt="Community" class="community-icon">
+                            <span class="community-name">r/javascript</span>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </aside>
 
             <!-- Main Content -->
-            <div class="main-content">
-                <!-- Sorting Options -->
-                <div class="sort-container">
-                    <div class="sort-tabs">
-                        <button class="sort-tab active">🔥 Hot</button>
-                        <button class="sort-tab">🆕 New</button>
-                        <button class="sort-tab">⭐ Top</button>
-                        <button class="sort-tab">📈 Rising</button>
-                    </div>
-                    <div class="view-options">
-                        <button class="view-btn active">📄</button>
-                        <button class="view-btn">🃏</button>
+            <main class="main-content">
+                <div class="feed-header">
+                    <h2>Popular posts</h2>
+                    <div class="sort-options">
+                        <button class="sort-btn active">Hot</button>
+                        <button class="sort-btn">New</button>
+                        <button class="sort-btn">Top</button>
+                        <button class="sort-btn">Rising</button>
                     </div>
                 </div>
 
-                <!-- Posts Feed -->
-                <div class="posts-feed">
-                    @foreach (var post in Model)
-                    {
-                        <div class="post">
-                            <div class="post-votes">
-                                <button class="vote-btn upvote">▲</button>
-                                <span class="vote-count">@(post.Likes?.Count ?? 0)</span>
-                                <button class="vote-btn downvote">▼</button>
-                            </div>
-                            <div class="post-content">
-                                <div class="post-header">
-                                    <img src="/u/@post.Username/avatar" alt="@post.Username" class="subreddit-icon">
-                                    <span class="subreddit-name">r/general</span>
-                                    <span class="post-meta">
-                                        • Posted by u/@post.Username
-                                        <span class="post-time">@post.CreatedUtc</span>
-                                    </span>
-                                </div>
-                                <div class="post-text">
-                                    @Html.Raw(post.Message)
-                                </div>
-                                <div class="post-actions">
-                                    <button class="action-btn">
-                                        <span class="action-icon">💬</span>
-                                        <span class="action-text">0 Comments</span>
-                                    </button>
-                                    <button class="action-btn like-it" data-id="@post.Id">
-                                        <span class="action-icon">❤️</span>
-                                        <span class="action-text">@(post.Likes?.Count ?? 0) Likes</span>
-                                    </button>
-                                    <button class="action-btn">
-                                        <span class="action-icon">🔗</span>
-                                        <span class="action-text">Share</span>
-                                    </button>
-                                    <button class="action-btn">
-                                        <span class="action-icon">💾</span>
-                                        <span class="action-text">Save</span>
-                                    </button>
-                                    <button class="action-btn">
-                                        <span class="action-icon">⋯</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+                @{
+                    ViewBag.Theme = "reddit";
+                }
+
+                @await Html.PartialAsync("_CreatePost")
+
+                <!-- Feed -->
+                <div class="feed" id="newsfeed-items-grid">
+                    @{
+                        if (Model != null)
+                        {
+                            foreach (var post in Model)
+                            {
+                                await Html.RenderPartialAsync("_PostCard", post);
+                            }
+                        }
                     }
                 </div>
-            </div>
+            </main>
 
             <!-- Right Sidebar -->
-            <div class="right-sidebar">
-                <div class="create-post-card">
-                    <div class="create-header">
-                        <img src="/themes/reddit/images/profile-avatar.jpg" alt="Profile" class="create-avatar">
-                        <input type="text" placeholder="Create Post" class="create-input">
+            <aside class="right-sidebar">
+                <div class="community-info">
+                    <div class="info-header">
+                        <h3>r/general</h3>
                     </div>
-                    <div class="create-options">
-                        <button class="create-btn">📝</button>
-                        <button class="create-btn">📷</button>
-                        <button class="create-btn">🔗</button>
-                        <button class="create-btn">📊</button>
+                    <div class="community-stats">
+                        <div class="stat">
+                            <span class="stat-number">1.2m</span>
+                            <span class="stat-label">Members</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number">5.4k</span>
+                            <span class="stat-label">Online</span>
+                        </div>
                     </div>
+                    <button class="join-btn">Joined</button>
                 </div>
 
-                <div class="trending-card">
-                    <h3>Trending today</h3>
-                    <div class="trending-item">
-                        <div class="trending-info">
-                            <div class="trending-topic">Technology updates</div>
-                            <div class="trending-posts">1.2k posts</div>
-                        </div>
+                <div class="community-rules">
+                    <h3>Community Rules</h3>
+                    <div class="rule-item">
+                        <span class="rule-number">1.</span>
+                        <span class="rule-text">Be respectful</span>
                     </div>
-                    <div class="trending-item">
-                        <div class="trending-info">
-                            <div class="trending-topic">Gaming news</div>
-                            <div class="trending-posts">845 posts</div>
-                        </div>
+                    <div class="rule-item">
+                        <span class="rule-number">2.</span>
+                        <span class="rule-text">No spam or self-promotion</span>
                     </div>
-                    <div class="trending-item">
-                        <div class="trending-info">
-                            <div class="trending-topic">Science breakthrough</div>
-                            <div class="trending-posts">623 posts</div>
-                        </div>
+                    <div class="rule-item">
+                        <span class="rule-number">3.</span>
+                        <span class="rule-text">Stay on topic</span>
                     </div>
                 </div>
-
-                <div class="reddit-premium-card">
-                    <h3>Reddit Premium</h3>
-                    <p>The best Reddit experience, with monthly Coins</p>
-                    <button class="premium-btn">Try Now</button>
-                </div>
-            </div>
+            </aside>
         </div>
     </div>
 
     <script src="/lib/jquery/dist/jquery.min.js"></script>
     <script src="/js/signalr.min.js"></script>
-    <script src="/js/posts.js"></script>
-    <script src="/themes/reddit/js/feed.js"></script>
+    <script src="/js/social.js"></script>
 </body>
 </html>

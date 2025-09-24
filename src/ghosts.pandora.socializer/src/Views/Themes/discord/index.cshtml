@@ -193,60 +193,19 @@
 
             <!-- Messages Container -->
             <div class="messages-container">
+                @{
+                    ViewBag.Theme = "discord";
+                }
+
                 <div class="messages-list">
                     @foreach (var post in Model)
                     {
-                        <div class="message">
-                            <img src="/u/@post.Username/avatar" alt="@post.Username" class="message-avatar">
-                            <div class="message-content">
-                                <div class="message-header">
-                                    <span class="message-author">@post.Username</span>
-                                    <span class="message-timestamp">@post.CreatedUtc</span>
-                                </div>
-                                <div class="message-text">
-                                    @Html.Raw(post.Message)
-                                </div>
-                                <div class="message-reactions">
-                                    @if (post.Likes?.Count > 0)
-                                    {
-                                        <div class="reaction">
-                                            <span class="reaction-emoji">❤️</span>
-                                            <span class="reaction-count">@post.Likes.Count</span>
-                                        </div>
-                                    }
-
-                                        <div class="reaction">
-                                            <span class="reaction-emoji">💬</span>
-                                            <span class="reaction-count">0</span>
-                                        </div>
-
-                                </div>
-                            </div>
-                            <div class="message-actions">
-                                <button class="message-action like-it" data-id="@post.Id" title="Add Reaction">😀</button>
-                                <button class="message-action" title="Reply">↩️</button>
-                                <button class="message-action" title="More">⋯</button>
-                            </div>
-                        </div>
+                        await Html.RenderPartialAsync("_PostCard", post);
                     }
                 </div>
             </div>
 
-            <!-- Message Input -->
-            <div class="message-input-container">
-                <div class="message-input-wrapper">
-                    <button class="attachment-btn">📎</button>
-                    <div class="input-area">
-                        <textarea placeholder="Message #general" class="message-input" rows="1"></textarea>
-                        <div class="input-actions">
-                            <button class="input-action" title="Gift Nitro">🎁</button>
-                            <button class="input-action" title="GIF">GIF</button>
-                            <button class="input-action" title="Sticker">😊</button>
-                            <button class="input-action" title="Emoji">🙂</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            @await Html.PartialAsync("_CreatePost")
         </div>
 
         <!-- Member List -->
@@ -335,7 +294,6 @@
 
     <script src="/lib/jquery/dist/jquery.min.js"></script>
     <script src="/js/signalr.min.js"></script>
-    <script src="/js/posts.js"></script>
-    <script src="/themes/discord/js/feed.js"></script>
+    <script src="/js/social.js"></script>
 </body>
 </html>

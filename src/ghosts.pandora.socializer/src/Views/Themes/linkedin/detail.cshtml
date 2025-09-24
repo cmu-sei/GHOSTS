@@ -79,9 +79,9 @@
                         <!-- Post Header -->
                         <div class="post-header">
                             <div class="post-author">
-                                <img src="/u/@Model.User/avatar" alt="@Model.User" class="author-avatar">
+                                <img src="/u/@Model.Username/avatar" alt="@Model.Username" class="author-avatar">
                                 <div class="author-info">
-                                    <div class="author-name">@Model.User</div>
+                                    <div class="author-name">@Model.Username</div>
                                     <div class="author-title">Professional</div>
                                     <div class="post-time">@Model.CreatedUtc.ToString("MMM d, yyyy") • 🌍</div>
                                 </div>
@@ -94,10 +94,6 @@
                             <div class="post-text">
                                 @Html.Raw(Model.Message)
                             </div>
-                            {
-                                <div class="post-media">
-                                </div>
-                            }
                         </div>
 
                         <!-- Post Stats -->
@@ -204,6 +200,8 @@
         </div>
     </div>
 
-    <script src="/themes/linkedin/js/linkedin.js"></script>
+    <script src="/lib/jquery/dist/jquery.min.js"></script>
+    <script src="/js/signalr.min.js"></script>
+    <script src="/js/social.js"></script>
 </body>
 </html>

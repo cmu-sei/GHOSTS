@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using Ghosts.Socializer.Infrastructure;
 
-namespace Ghosts.Socializer.Services;
+namespace Ghosts.Socializer.Infrastructure.Services;
 
 public interface IDirectMessageService
 {

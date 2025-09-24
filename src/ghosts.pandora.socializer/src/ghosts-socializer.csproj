@@ -33,6 +33,7 @@
 
     <ItemGroup>
       <Folder Include="Infrastructure\Models\" />
+      <Folder Include="Services\" />
       <Folder Include="Views\Themes\" />
       <Folder Include="wwwroot\images\u\" />
     </ItemGroup>
@@ -42,6 +43,11 @@
       <_ContentIncludedByDefault Remove="Views\Home\Index.cshtml" />
       <_ContentIncludedByDefault Remove="Views\Posts\Detail.cshtml" />
       <_ContentIncludedByDefault Remove="Views\Users\Index.cshtml" />
+      <_ContentIncludedByDefault Remove="wwwroot\themes\facebook\js\facebook.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\themes\instagram\js\feed.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\themes\reddit\js\feed.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\themes\reddit\js\post.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\themes\reddit\js\profile.js" />
     </ItemGroup>
 
 </Project>

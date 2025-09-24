@@ -1,8 +1,6 @@
 using System.Net;
-using Ghosts.Socializer.Hubs;
 using Ghosts.Socializer.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -10,7 +8,7 @@ namespace Ghosts.Socializer.Controllers.Api;
 
 [Route("/api/users")]
 [SwaggerTag("API Functionality for users.")]
-public class UsersController(ILogger logger, IHubContext<PostsHub> hubContext, DataContext dbContext, ApplicationConfiguration applicationConfiguration) : BaseController(logger)
+public class UsersController(ILogger logger, DataContext dbContext, ApplicationConfiguration applicationConfiguration) : BaseController(logger)
 {
     [SwaggerOperation(
         Summary = "Retrieve all posts for a user",

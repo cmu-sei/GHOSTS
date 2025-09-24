@@ -1,8 +1,6 @@
 ﻿using System.Net;
-using Ghosts.Socializer.Hubs;
 using Ghosts.Socializer.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -10,7 +8,7 @@ namespace Ghosts.Socializer.Controllers.Api;
 
 [Route("/api/admin")]
 [SwaggerTag("Administration functions")]
-public class AdminController(ILogger logger, IHubContext<PostsHub> hubContext, DataContext dbContext, ApplicationConfiguration applicationConfiguration) : BaseController(logger)
+public class AdminController(ILogger logger, DataContext dbContext) : BaseController(logger)
 {
     [SwaggerOperation(
         Summary = "Resets server by deleting all posts",

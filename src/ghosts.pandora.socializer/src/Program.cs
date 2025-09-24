@@ -2,7 +2,6 @@ using Ghosts.Socializer.Hubs;
 using Ghosts.Socializer.Infrastructure;
 using Ghosts.Socializer.Infrastructure.Services;
 using Ghosts.Socializer.Infrastructure.Startup.Extensions;
-using Ghosts.Socializer.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

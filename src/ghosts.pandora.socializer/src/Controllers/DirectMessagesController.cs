@@ -1,5 +1,5 @@
+using Ghosts.Socializer.Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;
-using Ghosts.Socializer.Services;
 
 namespace Ghosts.Socializer.Controllers;
 

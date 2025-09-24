@@ -12,43 +12,42 @@
     <link rel="stylesheet" href="/themes/youtube/css/feed.css">
     <link rel="icon" href="/themes/youtube/images/youtube-icon.png">
 </head>
-<body>
+<body data-theme="youtube">
     <div class="app">
         <!-- Header -->
         <header class="header">
-            <div class="header-left">
-                <button class="menu-btn">☰</button>
-                <div class="logo">
+            <div class="header-container">
+                <div class="header-left">
+                    <button class="menu-btn">☰</button>
                     <img src="/themes/youtube/images/youtube-logo.png" alt="YouTube" class="youtube-logo">
                 </div>
-            </div>
-            <div class="header-center">
-                <div class="search-container">
-                    <input type="text" placeholder="Search" class="search-input">
-                    <button class="search-btn">🔍</button>
+                <div class="header-center">
+                    <div class="search-container">
+                        <input type="text" placeholder="Search" class="search-input">
+                        <button class="search-btn">🔍</button>
+                    </div>
+                    <button class="voice-search-btn">🎤</button>
                 </div>
-                <button class="mic-btn">🎤</button>
-            </div>
-            <div class="header-right">
-                <button class="header-btn">📹</button>
-                <button class="header-btn">🔔</button>
-                <div class="user-menu">
-                    <img src="/themes/youtube/images/profile-avatar.jpg" alt="Profile" class="user-avatar">
+                <div class="header-right">
+                    <button class="header-btn">📹</button>
+                    <button class="header-btn">🔔</button>
+                    <a href="/messages" class="header-btn" style="text-decoration: none;">💬</a>
+                    <img src="/u/@ViewBag.Username/avatar" alt="User" class="user-avatar">
                 </div>
             </div>
         </header>
 
         <div class="main-container">
-            <!-- Sidebar -->
-            <aside class="sidebar">
+            <!-- Left Sidebar -->
+            <aside class="left-sidebar">
                 <div class="sidebar-section">
                     <div class="sidebar-item active">
                         <span class="sidebar-icon">🏠</span>
                         <span class="sidebar-text">Home</span>
                     </div>
                     <div class="sidebar-item">
-                        <span class="sidebar-icon">🎬</span>
-                        <span class="sidebar-text">Shorts</span>
+                        <span class="sidebar-icon">🔥</span>
+                        <span class="sidebar-text">Trending</span>
                     </div>
                     <div class="sidebar-item">
                         <span class="sidebar-icon">📺</span>
@@ -56,15 +55,7 @@
                     </div>
                 </div>
 
-                <div class="sidebar-divider"></div>
-
                 <div class="sidebar-section">
-                    <div class="sidebar-item">
-                        <a href="/messages" style="text-decoration: none; color: inherit; display: flex; align-items: center;">
-                            <span class="sidebar-icon">💬</span>
-                            <span class="sidebar-text">Messages</span>
-                        </a>
-                    </div>
                     <div class="sidebar-item">
                         <span class="sidebar-icon">📚</span>
                         <span class="sidebar-text">Library</span>
@@ -87,76 +78,51 @@
                     </div>
                 </div>
 
-                <div class="sidebar-divider"></div>
-
                 <div class="sidebar-section">
-                    <h3 class="sidebar-title">Subscriptions</h3>
-                    <div class="sidebar-item">
+                    <h3>SUBSCRIPTIONS</h3>
+                    <div class="channel-item">
                         <img src="/themes/youtube/images/channel1.jpg" alt="Channel" class="channel-avatar">
-                        <span class="sidebar-text">Tech Reviews</span>
+                        <span class="channel-name">Tech Channel</span>
                     </div>
-                    <div class="sidebar-item">
+                    <div class="channel-item">
                         <img src="/themes/youtube/images/channel2.jpg" alt="Channel" class="channel-avatar">
-                        <span class="sidebar-text">Coding Tutorials</span>
+                        <span class="channel-name">Coding Tutorials</span>
                     </div>
-                    <div class="sidebar-item">
+                    <div class="channel-item">
                         <img src="/themes/youtube/images/channel3.jpg" alt="Channel" class="channel-avatar">
-                        <span class="sidebar-text">Gaming Central</span>
-                    </div>
-                    <div class="sidebar-item">
-                        <img src="/themes/youtube/images/channel4.jpg" alt="Channel" class="channel-avatar">
-                        <span class="sidebar-text">Music Hub</span>
+                        <span class="channel-name">Web Dev Tips</span>
                     </div>
                 </div>
             </aside>
 
             <!-- Main Content -->
             <main class="main-content">
-                <!-- Category Tabs -->
-                <div class="category-tabs">
-                    <button class="category-tab active">All</button>
-                    <button class="category-tab">Gaming</button>
-                    <button class="category-tab">Music</button>
-                    <button class="category-tab">Technology</button>
-                    <button class="category-tab">Programming</button>
-                    <button class="category-tab">Education</button>
-                    <button class="category-tab">Entertainment</button>
-                    <button class="category-tab">Sports</button>
-                    <button class="category-tab">News</button>
+                <div class="filter-bar">
+                    <button class="filter-btn active">All</button>
+                    <button class="filter-btn">Music</button>
+                    <button class="filter-btn">Gaming</button>
+                    <button class="filter-btn">News</button>
+                    <button class="filter-btn">Sports</button>
+                    <button class="filter-btn">Technology</button>
+                    <button class="filter-btn">Education</button>
                 </div>
 
-                <!-- Videos Grid -->
-                <div class="videos-grid">
-                    @foreach (var post in Model)
-                    {
-                        <div class="video-card">
-                            <div class="video-thumbnail">
-                                <div class="thumbnail-placeholder">
-                                    <span>Video</span>
-                                </div>
-                            </div>
-                            <div class="video-info">
-                                <img src="/u/@post.Username/avatar" alt="@post.Username" class="channel-avatar">
-                                <div class="video-details">
-                                    <div class="video-title">@Html.Raw(post.Message)</div>
-                                    <div class="video-meta">
-                                        <span class="channel-name">@post.Username</span>
-                                        <div class="video-stats">
-                                            <span>@(post.Likes?.Count ?? 0) likes</span>
-                                            <span>•</span>
-                                            <span>@(post.Comments?.Count ?? 0) comments</span>
-                                            <span>•</span>
-                                            <span>@post.CreatedUtc</span>
-                                        </div>
-                                        <div class="video-actions">
-                                            <button class="like-it" data-id="@post.Id">
-                                                ❤️ @(post.Likes?.Count ?? 0)
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                @{
+                    ViewBag.Theme = "youtube";
+                }
+
+                @await Html.PartialAsync("_CreatePost")
+
+                <!-- Video Grid -->
+                <div class="video-grid" id="newsfeed-items-grid">
+                    @{
+                        if (Model != null)
+                        {
+                            foreach (var post in Model)
+                            {
+                                await Html.RenderPartialAsync("_PostCard", post);
+                            }
+                        }
                     }
                 </div>
             </main>
@@ -165,7 +131,6 @@
 
     <script src="/lib/jquery/dist/jquery.min.js"></script>
     <script src="/js/signalr.min.js"></script>
-    <script src="/js/posts.js"></script>
-    <script src="/themes/youtube/js/feed.js"></script>
+    <script src="/js/social.js"></script>
 </body>
 </html>

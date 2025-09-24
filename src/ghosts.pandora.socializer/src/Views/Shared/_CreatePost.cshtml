@@ -1,0 +1,160 @@
+@{
+    var theme = ViewBag.Theme as string ?? "default";
+    var username = ViewBag.Username as string ?? "User";
+}
+
+@switch (theme)
+{
+    case "facebook":
+        <div class="create-post">
+            <form method="post" action="/">
+                <input type="hidden" name="theme" value="facebook">
+                <input type="hidden" name="user" value="@username">
+                <div class="create-post-top">
+                    <img src="/u/@username/avatar" alt="Profile" class="profile-pic">
+                    <input type="text" name="message" class="create-post-input" placeholder="What's on your mind, @username?" required>
+                    <button type="submit" class="post-btn">Post</button>
+                </div>
+            </form>
+            <div class="create-post-buttons">
+                <button class="create-post-btn">📹 Live video</button>
+                <button class="create-post-btn">📷 Photo/video</button>
+                <button class="create-post-btn">😊 Feeling/activity</button>
+            </div>
+        </div>
+        break;
+
+    case "instagram":
+        <div class="create-post">
+            <form method="post" action="/">
+                <input type="hidden" name="theme" value="instagram">
+                <input type="hidden" name="user" value="@username">
+                <div class="post-composer">
+                    <img src="/u/@username/avatar" alt="Profile" class="profile-pic">
+                    <textarea name="message" placeholder="What's happening?" class="post-input" required></textarea>
+                    <button type="submit" class="post-btn">Share</button>
+                </div>
+            </form>
+        </div>
+        break;
+
+    case "x":
+        <div class="compose-tweet">
+            <form method="post" action="/">
+                <input type="hidden" name="theme" value="x">
+                <input type="hidden" name="user" value="@username">
+                <div class="tweet-composer">
+                    <img src="/u/@username/avatar" alt="Profile" class="tweet-avatar">
+                    <div class="tweet-input-container">
+                        <textarea name="message" placeholder="What's happening?" class="tweet-input" maxlength="280" required></textarea>
+                        <div class="tweet-toolbar">
+                            <div class="tweet-options">
+                                <button type="button" class="option-btn">🖼️</button>
+                                <button type="button" class="option-btn">GIF</button>
+                                <button type="button" class="option-btn">📊</button>
+                                <button type="button" class="option-btn">😊</button>
+                                <button type="button" class="option-btn">📅</button>
+                                <button type="button" class="option-btn">📍</button>
+                            </div>
+                            <button type="submit" class="tweet-btn">Post</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        break;
+
+    case "linkedin":
+        <div class="create-post">
+            <form method="post" action="/">
+                <input type="hidden" name="theme" value="linkedin">
+                <input type="hidden" name="user" value="@username">
+                <div class="post-composer">
+                    <img src="/u/@username/avatar" alt="Profile" class="profile-pic">
+                    <textarea name="message" placeholder="Share an update..." class="post-input" required></textarea>
+                    <div class="post-options">
+                        <button type="button" class="option-btn">📷 Photo</button>
+                        <button type="button" class="option-btn">🎥 Video</button>
+                        <button type="button" class="option-btn">📄 Document</button>
+                        <button type="button" class="option-btn">💼 Job</button>
+                        <button type="button" class="option-btn">🎉 Celebrate</button>
+                    </div>
+                    <button type="submit" class="post-btn">Post</button>
+                </div>
+            </form>
+        </div>
+        break;
+
+    case "reddit":
+        <div class="create-post">
+            <form method="post" action="/">
+                <input type="hidden" name="theme" value="reddit">
+                <input type="hidden" name="user" value="@username">
+                <div class="post-composer">
+                    <div class="post-type-tabs">
+                        <button type="button" class="tab active" data-type="text">📝 Post</button>
+                        <button type="button" class="tab" data-type="image">🖼️ Images & Video</button>
+                        <button type="button" class="tab" data-type="link">🔗 Link</button>
+                    </div>
+                    <input type="text" placeholder="Title" class="post-title" required>
+                    <textarea name="message" placeholder="Text (optional)" class="post-input" required></textarea>
+                    <button type="submit" class="post-btn">Post</button>
+                </div>
+            </form>
+        </div>
+        break;
+
+    case "youtube":
+        <div class="create-post">
+            <form method="post" action="/">
+                <input type="hidden" name="theme" value="youtube">
+                <input type="hidden" name="user" value="@username">
+                <div class="video-upload">
+                    <div class="upload-placeholder">
+                        <div class="upload-icon">📹</div>
+                        <h3>Upload video</h3>
+                        <p>Drag and drop video files to upload</p>
+                    </div>
+                    <textarea name="message" placeholder="Video description..." class="video-description" required></textarea>
+                    <button type="submit" class="upload-btn">Upload</button>
+                </div>
+            </form>
+        </div>
+        break;
+
+    case "discord":
+        <div class="message-input-container">
+            <form method="post" action="/">
+                <input type="hidden" name="theme" value="discord">
+                <input type="hidden" name="user" value="@username">
+                <div class="message-input-wrapper">
+                    <button type="button" class="attachment-btn">📎</button>
+                    <div class="input-area">
+                        <textarea name="message" placeholder="Message #general" class="message-input" rows="1" required></textarea>
+                        <div class="input-actions">
+                            <button type="button" class="input-action" title="Gift Nitro">🎁</button>
+                            <button type="button" class="input-action" title="GIF">GIF</button>
+                            <button type="button" class="input-action" title="Sticker">😊</button>
+                            <button type="button" class="input-action" title="Emoji">🙂</button>
+                            <button type="submit" class="send-btn" title="Send">➤</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        break;
+
+    default:
+        <div class="create-post">
+            <form method="post" action="/">
+                <input type="hidden" name="theme" value="default">
+                <input type="hidden" name="user" value="@username">
+                <div class="post-composer">
+                    <img src="/u/@username/avatar" alt="Profile" class="profile-pic">
+                    <textarea name="message" placeholder="What's on your mind?" class="post-input" required></textarea>
+                    <button type="submit" class="post-btn">Post</button>
+                </div>
+            </form>
+        </div>
+        break;
+}

@@ -3,13 +3,19 @@ ViewData["Title"] = "Home Page";
 }
 @model List<Ghosts.Socializer.Infrastructure.Post>
 
+@{
+    ViewBag.Theme = "default";
+}
+
+@await Html.PartialAsync("_CreatePost")
+
 <div id="newsfeed-items-grid">
     @{
         if (Model != null)
         {
             foreach (var post in Model)
             {
-                await Html.RenderPartialAsync("_Post", post);
+                await Html.RenderPartialAsync("_PostCard", post);
             }
         }
     }
