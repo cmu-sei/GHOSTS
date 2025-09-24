@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Ghosts.Socializer.Controllers;
 
+[ApiExplorerSettings(IgnoreApi = true)]
 [Route("/images")]
 [Route("/files")]
 public class FilesController(ILogger logger) : BaseController(logger)

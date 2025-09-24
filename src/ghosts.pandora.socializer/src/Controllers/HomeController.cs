@@ -6,6 +6,7 @@ using Ghosts.Socializer.Infrastructure;
 
 namespace Ghosts.Socializer.Controllers;
 
+[ApiExplorerSettings(IgnoreApi = true)]
 public class HomeController(
     ILogger logger, IHubContext<PostsHub> hubContext, DataContext dbContext,
     ApplicationConfiguration applicationConfiguration)
@@ -29,7 +30,11 @@ public class HomeController(
         }
 
         var theme = ThemeRead();
-        var posts = dbContext.Posts.Where(x=>x.Theme == theme).OrderByDescending(x=>x.CreatedUtc).ToList();
+        var posts = dbContext.Posts
+            .Include(x=>x.Comments.OrderByDescending(c => c.CreatedUtc))
+            .Include(x=>x.Likes)
+            .Where(x=>x.Theme == theme)
+            .OrderByDescending(x=>x.CreatedUtc).ToList();
 
         return View("Index", posts);
     }
@@ -136,7 +141,7 @@ public class HomeController(
 
         if (!string.IsNullOrEmpty(imagePath))
         {
-            post.Message += $" <img src=\"{imagePath}\"/>";
+            post.Message += $"<br/><img src=\"{imagePath}\"/>";
         }
 
         dbContext.Posts.Add(post);

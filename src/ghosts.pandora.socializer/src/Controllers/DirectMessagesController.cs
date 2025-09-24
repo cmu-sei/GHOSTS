@@ -3,6 +3,7 @@ using Ghosts.Socializer.Services;
 
 namespace Ghosts.Socializer.Controllers;
 
+[ApiExplorerSettings(IgnoreApi = true)]
 [Route("/messages")]
 public class DirectMessagesController(
     ILogger logger, IDirectMessageService directMessageService, IUserService userService)

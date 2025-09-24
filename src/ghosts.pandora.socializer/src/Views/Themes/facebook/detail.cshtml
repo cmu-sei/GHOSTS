@@ -44,9 +44,9 @@
             <article class="post" data-post-id="@Model.Id">
                 <div class="post-header">
                     <div class="post-user-info">
-                        <img src="/u/@Model.User/avatar" alt="@Model.User" class="profile-pic">
+                        <img src="/u/@Model.Username/avatar" alt="@Model.Username" class="profile-pic">
                         <div>
-                            <div class="post-user-name"><a href="/u/@Model.User">@Model.User</a></div>
+                            <div class="post-user-name"><a href="/u/@Model.Username">@Model.Username</a></div>
                             <div class="post-time">@Model.CreatedUtc.ToString("MMM d, yyyy") · 🌍</div>
                         </div>
                     </div>
@@ -54,8 +54,6 @@
                 </div>
                 <div class="post-content">
                     <div class="post-text">@Html.Raw(Model.Message)</div>
-                    {
-                    }
                 </div>
                 <div class="post-stats">
                     @{
@@ -64,11 +62,11 @@
                     }
                     @if (likesCount > 0)
                     {
-                        <span>👍❤️😊 @likesCount people liked this</span>
+                        <div>👍 @likesCount people liked this</div>
                     }
                     @if (commentsCount > 0)
                     {
-                        <span>@commentsCount comments</span>
+                        <div>@commentsCount comments</div>
                     }
                 </div>
                 <div class="post-actions">
@@ -81,17 +79,30 @@
             <!-- Comments Section -->
             <div class="comments-section">
                 <!-- Comment Input -->
-                <div class="comment-input">
-                    <img src="/u/@ViewBag.Username/avatar" alt="Your profile" class="profile-pic">
-                    <input type="text" placeholder="Write a comment...">
-                    <button style="margin-left: 8px; background: none; border: none; color: #1877f2; cursor: pointer;">😊</button>
-                    <button style="margin-left: 4px; background: none; border: none; color: #1877f2; cursor: pointer;">📷</button>
-                </div>
+                <form method="post" action="/posts/@Model.Id/comments" id="commentForm">
+                    <input type="hidden" name="theme" value="facebook">
+                    <input type="hidden" name="user" value="@ViewBag.Username">
+                    <div class="comment-input">
+                        <img src="/u/@ViewBag.Username/avatar" alt="Your profile" class="profile-pic">
+                        <input type="text" placeholder="Write a comment..." name="message">
+                        <button type="submit" style="margin-left: 8px; background: none; border: none; color: #1877f2; cursor: pointer;">Post</button>
+                    </div>
+                </form>
+                <script>
+                  document.getElementById("commentForm").addEventListener("submit", async (e) => {
+                    e.preventDefault();
+                    let form = e.target;
+                    let data = new FormData(form);
+                    await fetch(form.action, { method: "POST", body: data });
+                    location.reload();
+                  });
+                </script>
 
                 <!-- Comments -->
                 @if (Model.Comments != null)
                 {
-                    @foreach (var comment in Model.Comments)
+                    var c = Model.Comments.OrderByDescending(c => c.CreatedUtc);
+                    @foreach (var comment in c)
                     {
                         <div class="comment">
                             <img src="/u/@comment.Username/avatar" alt="@comment.Username" class="profile-pic">

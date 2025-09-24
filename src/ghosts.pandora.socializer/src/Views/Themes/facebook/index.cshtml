@@ -139,17 +139,16 @@
                                 <div class="post-stats">
                                     @{
                                         var likesCount = post.Likes?.Count ?? 0;
-
                                     }
                                     @if (likesCount > 0)
                                     {
                                         <span>👍❤️😊 @likesCount people</span>
                                     }
-                                    <span>0 comments</span>
+                                    <div>@post.Comments?.Count comments</div>
                                 </div>
                                 <div class="post-actions">
                                     <button class="post-action like-btn like-it" data-id="@post.Id">👍 Like</button>
-                                    <button class="post-action comment-btn" data-action="comment">💬 Comment</button>
+                                    <a href="/posts/@post.Id" style="text-decoration: none"><button class="post-action comment-btn" data-action="comment">💬 Comment</button></a>
                                     <button class="post-action share-btn" data-action="share">📤 Share</button>
                                 </div>
                             </article>

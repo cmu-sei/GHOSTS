@@ -1,9 +1,10 @@
+using Ghosts.Socializer.Infrastructure;
 using Ghosts.Socializer.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ghosts.Socializer.Controllers;
 
-
+[ApiExplorerSettings(IgnoreApi = true)]
 [Route("/user")]
 [Route("/u")]
 [Route("/users")]
@@ -12,16 +13,14 @@ public class UsersController(ILogger logger, IWebHostEnvironment env, IUserServi
     : BaseController(logger)
 {
     [HttpGet]
-    public async Task<IActionResult> Index()
-    {
-        var user = await userService.GetUserByUsernameAsync(CookieRead("username"));
-        return View("Profile", user);
-    }
-
     [HttpGet("{username}")]
-    public async Task<IActionResult> User(string username)
+    public async Task<IActionResult> GetUser(string username = null)
     {
-        var user = await userService.GetUserByUsernameAsync(username);
+        User user;
+        if (string.IsNullOrEmpty(username))
+            user = await userService.GetUserByUsernameAsync(CookieRead("username"));
+        else
+            user = await userService.GetUserByUsernameAsync(username);
         return View("Profile", user);
     }
 

@@ -273,6 +273,11 @@ body {
     margin-bottom: 12px;
 }
 
+.post-text img {
+    max-height: 300px;
+    max-width: 480px;
+}
+
 .post-image {
     width: 100%;
     border-radius: 8px;

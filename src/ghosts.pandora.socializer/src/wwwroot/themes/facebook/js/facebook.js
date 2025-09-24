@@ -6,7 +6,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function initializeFacebookFeatures() {
     initializeLikeButtons();
-    initializeCommentButtons();
     initializeShareButtons();
     initializePostMenus();
     initializeSearch();
@@ -51,30 +50,6 @@ function updateLikeCount(statsElement, change) {
         const newCount = currentCount + change;
         statsElement.textContent = text.replace(/\d+/, newCount);
     }
-}
-
-// Comment Button Functionality
-function initializeCommentButtons() {
-    const commentButtons = document.querySelectorAll('.comment-btn');
-
-    commentButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const post = this.closest('.post');
-            const postId = post.getAttribute('data-post-id');
-
-            if (window.location.pathname.includes('post.html')) {
-                // Scroll to comment input if already on post page
-                const commentInput = document.querySelector('.comment-input input');
-                if (commentInput) {
-                    commentInput.focus();
-                    commentInput.scrollIntoView({ behavior: 'smooth' });
-                }
-            } else {
-                // Navigate to post page
-                window.location.href = `post.html?id=${postId}`;
-            }
-        });
-    });
 }
 
 // Share Button Functionality

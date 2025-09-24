@@ -1,6 +1,7 @@
 using Ghosts.Socializer.Hubs;
 using Ghosts.Socializer.Infrastructure;
 using Ghosts.Socializer.Infrastructure.Services;
+using Ghosts.Socializer.Infrastructure.Startup.Extensions;
 using Ghosts.Socializer.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,6 +19,9 @@ builder.Services
         opts.ViewLocationExpanders.Add(new ThemeViewLocationExpander());
     });
 
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwagger();
+
 builder.Services.AddSignalR();
 builder.Services.AddHostedService<CleanupService>();
 
@@ -34,6 +38,10 @@ builder.Services.AddSingleton(_ =>
 var app = builder.Build();
 
 app.UseStaticFiles();
+
+app.UseSwagger();
+app.UseSwaggerUI();
+
 app.UseRouting();
 app.UseAuthorization();
 

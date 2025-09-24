@@ -1,19 +1,28 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore;
+﻿using System.Net;
 using Ghosts.Socializer.Hubs;
 using Ghosts.Socializer.Infrastructure;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
+using Swashbuckle.AspNetCore.Annotations;
 
-namespace Ghosts.Socializer.Controllers;
+namespace Ghosts.Socializer.Controllers.Api;
 
-[Route("/api")]
-public class ApiController(ILogger logger, IHubContext<PostsHub> hubContext, DataContext dbContext, ApplicationConfiguration applicationConfiguration) : BaseController(logger)
+[Route("/api/posts")]
+[SwaggerTag("API Functionality for posts")]
+public class PostsController(ILogger logger, IHubContext<PostsHub> hubContext, DataContext dbContext, ApplicationConfiguration applicationConfiguration) : BaseController(logger)
 {
+    [SwaggerOperation(
+        Summary = "Retrieve all posts",
+        Description = "Returns a list of all posts.",
+        OperationId = "GetPosts")]
+    [ProducesResponseType(typeof(IEnumerable<Post>), (int)HttpStatusCode.OK)]
     [HttpGet]
-    public IEnumerable<Post> Index()
+    public IEnumerable<Post> Posts()
     {
         var posts = dbContext.Posts
             .Include(x => x.Likes)
+            .Include(x=>x.Comments.OrderByDescending(c => c.CreatedUtc))
             .Include(x => x.User)
             .Include(x => x.Theme)
             .OrderByDescending(x => x.CreatedUtc)
@@ -25,28 +34,12 @@ public class ApiController(ILogger logger, IHubContext<PostsHub> hubContext, Dat
         return posts;
     }
 
-    [HttpGet("u/{username}")]
-    public new virtual IEnumerable<Post> User(string username)
-    {
-        var posts = dbContext.Posts
-            .Include(x => x.Likes)
-            .Include(x => x.User)
-            .Include(x => x.Theme)
-            .Where(x => x.User.Username.Equals(username, StringComparison.CurrentCultureIgnoreCase))
-            .OrderByDescending(x => x.CreatedUtc)
-            .Take(applicationConfiguration.DefaultDisplay)
-            .ToList();
-
-        if (Request.QueryString.HasValue && !string.IsNullOrEmpty(Request.Query["u"]))
-            ViewBag.User = Request.Query["u"];
-        return posts;
-    }
-
-    [HttpGet("{id:guid}")]
+    [HttpGet("{id:guid}/detail")]
     public Post Detail(Guid id)
     {
         var post = dbContext.Posts
             .Include(x => x.Likes)
+            .Include(x=>x.Comments.OrderByDescending(c => c.CreatedUtc))
             .Include(x => x.User)
             .Include(x => x.Theme)
             .FirstOrDefault(x => x.Id == id);
@@ -54,56 +47,6 @@ public class ApiController(ILogger logger, IHubContext<PostsHub> hubContext, Dat
         if (Request.QueryString.HasValue && !string.IsNullOrEmpty(Request.Query["u"]))
             ViewBag.User = Request.Query["u"];
         return post;
-    }
-
-    [HttpGet("/admin/delete")]
-    public async Task<IActionResult> Delete()
-    {
-        dbContext.Posts.RemoveRange(dbContext.Posts);
-        await dbContext.SaveChangesAsync();
-        return NoContent();
-    }
-
-    [HttpGet("/admin/generate/{n}")]
-    public async Task<IActionResult> Generate(int n)
-    {
-        var r = new Random();
-
-        for (var i = 0; i < n; i++)
-        {
-            var min = DateTime.Now.AddDays(-7);
-            var username = Faker.Internet.UserName();
-
-            // Get or create user
-            var user = await dbContext.Users.FirstOrDefaultAsync(u => u.Username == username);
-            if (user == null)
-            {
-                user = new User
-                {
-                    Username = username,
-                    Bio = $"User {username}",
-                    Avatar = $"/u/{username}/avatar",
-                    Status = "online",
-                    CreatedUtc = DateTime.UtcNow,
-                    LastActiveUtc = DateTime.UtcNow
-                };
-                dbContext.Users.Add(user);
-                await dbContext.SaveChangesAsync();
-            }
-
-            var post = new Post
-            {
-                Id = Guid.NewGuid(),
-                CreatedUtc = DateTime.MinValue.Add(TimeSpan.FromTicks(min.Ticks + (long)(r.NextDouble() * (DateTime.Now.Ticks - min.Ticks)))),
-                Username = user.Username,
-                Theme = user.Theme,
-                Message = Faker.Lorem.Sentence(15)
-            };
-            dbContext.Posts.Add(post);
-        }
-        await dbContext.SaveChangesAsync();
-
-        return NoContent();
     }
 
     [HttpPost]
