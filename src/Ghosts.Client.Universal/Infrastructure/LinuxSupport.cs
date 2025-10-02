@@ -85,7 +85,7 @@ namespace Ghosts.Client.Universal.Infrastructure
                     cmd = $"xdotool search -name '{windowTitle}'";
                     string result = ExecuteBashCommand(id, cmd);
                     Thread.Sleep(1000);
-                    if (result != "")
+                    if (!string.IsNullOrEmpty(result))
                     {
                         // close the window
                         cmd = $"xdotool search -name '{windowTitle}' windowfocus key alt+c";
@@ -105,7 +105,7 @@ namespace Ghosts.Client.Universal.Infrastructure
                     // try windowkill
                     cmd = $"xdotool search -name '{windowTitle}'";
                     string result = ExecuteBashCommand(id, cmd);
-                    if (result != "")
+                    if (!string.IsNullOrEmpty(result))
                     {
                         cmd = $"xdotool search -name '{windowTitle}' windowkill";
                         ExecuteBashCommand(id, cmd);
@@ -114,7 +114,7 @@ namespace Ghosts.Client.Universal.Infrastructure
                         ExecuteBashCommand(id, cmd);
                         Thread.Sleep(1000);
                         // reset i if window actually killed
-                        if (result == "") i = 0;
+                        if (string.IsNullOrEmpty(result)) i = 0;
                     }
                 }
 

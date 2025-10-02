@@ -1,0 +1,149 @@
+@{
+    Layout = null;
+}
+@model List<Ghosts.Socializer.Infrastructure.Post>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reddit</title>
+    <link rel="stylesheet" href="/themes/reddit/css/feed.css">
+    <link rel="icon" href="/themes/reddit/images/reddit-icon.png">
+</head>
+<body data-theme="reddit">
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-container">
+                <div class="header-left">
+                    <img src="/themes/reddit/images/reddit-logo.png" alt="Reddit" class="reddit-logo">
+                    <input type="text" placeholder="Search Reddit" class="search-input">
+                </div>
+                <div class="header-right">
+                    <button class="header-btn">Popular</button>
+                    <button class="header-btn">All</button>
+                    <a href="/messages" class="header-btn" style="text-decoration: none;">💬</a>
+                    <div class="user-menu">
+                        <img src="/u/@ViewBag.Username/avatar" alt="User" class="user-avatar">
+                        <span class="username">@ViewBag.Username</span>
+                        <span class="dropdown-arrow">▼</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-container">
+            <!-- Left Sidebar -->
+            <aside class="left-sidebar">
+                <div class="subreddit-list">
+                    <div class="sidebar-section">
+                        <h3>FEEDS</h3>
+                        <div class="feed-item active">
+                            <span class="feed-icon">🏠</span>
+                            <span class="feed-name">Home</span>
+                        </div>
+                        <div class="feed-item">
+                            <span class="feed-icon">📈</span>
+                            <span class="feed-name">Popular</span>
+                        </div>
+                        <div class="feed-item">
+                            <span class="feed-icon">🎯</span>
+                            <span class="feed-name">All</span>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-section">
+                        <h3>RECENT COMMUNITIES</h3>
+                        <div class="community-item">
+                            <img src="/themes/reddit/images/community1.jpg" alt="Community" class="community-icon">
+                            <span class="community-name">r/programming</span>
+                        </div>
+                        <div class="community-item">
+                            <img src="/themes/reddit/images/community2.jpg" alt="Community" class="community-icon">
+                            <span class="community-name">r/webdev</span>
+                        </div>
+                        <div class="community-item">
+                            <img src="/themes/reddit/images/community3.jpg" alt="Community" class="community-icon">
+                            <span class="community-name">r/javascript</span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="main-content">
+                <div class="feed-header">
+                    <h2>Popular posts</h2>
+                    <div class="sort-options">
+                        <button class="sort-btn active">Hot</button>
+                        <button class="sort-btn">New</button>
+                        <button class="sort-btn">Top</button>
+                        <button class="sort-btn">Rising</button>
+                    </div>
+                </div>
+
+                @{
+                    ViewBag.Theme = "reddit";
+                }
+
+                @await Html.PartialAsync("_CreatePost")
+
+                <!-- Feed -->
+                <div class="feed" id="newsfeed-items-grid">
+                    @{
+                        if (Model != null)
+                        {
+                            foreach (var post in Model)
+                            {
+                                await Html.RenderPartialAsync("_PostCard", post);
+                            }
+                        }
+                    }
+                </div>
+            </main>
+
+            <!-- Right Sidebar -->
+            <aside class="right-sidebar">
+                <div class="community-info">
+                    <div class="info-header">
+                        <h3>r/general</h3>
+                    </div>
+                    <div class="community-stats">
+                        <div class="stat">
+                            <span class="stat-number">1.2m</span>
+                            <span class="stat-label">Members</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number">5.4k</span>
+                            <span class="stat-label">Online</span>
+                        </div>
+                    </div>
+                    <button class="join-btn">Joined</button>
+                </div>
+
+                <div class="community-rules">
+                    <h3>Community Rules</h3>
+                    <div class="rule-item">
+                        <span class="rule-number">1.</span>
+                        <span class="rule-text">Be respectful</span>
+                    </div>
+                    <div class="rule-item">
+                        <span class="rule-number">2.</span>
+                        <span class="rule-text">No spam or self-promotion</span>
+                    </div>
+                    <div class="rule-item">
+                        <span class="rule-number">3.</span>
+                        <span class="rule-text">Stay on topic</span>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <script src="/lib/jquery/dist/jquery.min.js"></script>
+    <script src="/js/signalr.min.js"></script>
+    <script src="/js/social.js"></script>
+</body>
+</html>

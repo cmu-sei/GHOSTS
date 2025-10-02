@@ -1,33 +1,46 @@
 using System.Globalization;
+using Ghosts.Socializer.Controllers;
 using Microsoft.AspNetCore.SignalR;
-using Socializer.Infrastructure;
+using Ghosts.Socializer.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 
-namespace Socializer.Hubs;
+namespace Ghosts.Socializer.Hubs;
 
-public class PostsHub(ILogger<PostsHub> logger, DataContext dbContext) : Hub
+public class PostsHub(DataContext dbContext) : Hub
 {
-    private readonly ILogger<PostsHub> _logger = logger;
-    //private IHubContext<PostsHub> _hubContext;
-    private readonly DataContext _db = dbContext;
-
-    public async Task SendMessage(string id, string user, string message, string created)
+    public async Task SendMessage(Guid id, string user, string message, string created)
     {
-        if (string.IsNullOrEmpty(id))
-            id = Guid.NewGuid().ToString();
+        if (id == Guid.Empty)
+            id = Guid.NewGuid();
 
         if (string.IsNullOrEmpty(created))
             created = DateTime.UtcNow.ToString(CultureInfo.InvariantCulture);
 
+        // Get or create user
+        var dbUser = await dbContext.Users.FirstOrDefaultAsync(u => u.Username == user);
+        if (dbUser == null)
+        {
+            dbUser = new User
+            {
+                Username = user,
+                Bio = $"User {user}",
+                Avatar = $"/u/{user}/avatar",
+                Status = "online",
+            };
+            dbContext.Users.Add(dbUser);
+            await dbContext.SaveChangesAsync();
+        }
+
         var post = new Post
         {
-            Id = id,
-            User = user,
+            Username = dbUser.Username,
+            Theme = dbUser.Theme,
             Message = message,
             CreatedUtc = DateTime.UtcNow
         };
-        ;
-        _db.Posts.Add(post);
-        await _db.SaveChangesAsync();
+
+        dbContext.Posts.Add(post);
+        await dbContext.SaveChangesAsync();
 
         await Clients.All.SendAsync("SendMessage", id, user, message, created);
     }

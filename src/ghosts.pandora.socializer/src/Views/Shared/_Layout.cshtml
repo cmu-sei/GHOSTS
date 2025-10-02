@@ -1,18 +1,18 @@
 ﻿@{
     var rnd = new Random();
     var statusArray = new[] { "online", "away", "disconnected" };
-    
-    Socializer.Infrastructure.User GetRandomUser()
+
+    Ghosts.Socializer.Infrastructure.User GetRandomUser()
     {
-        var u = new Socializer.Infrastructure.User();
+        var u = new Ghosts.Socializer.Infrastructure.User();
         var number = rnd.Next(1, 85);
-        u.Name = Faker.Internet.UserName();
-        u.Avatar = $"/u/{u.Name}/avatar";
+        u.Username = Faker.Internet.UserName();
+        u.Avatar = $"/u/{u.Username}/avatar";
         if(rnd.Next(1, 3) > 1)
-            u.Name = Faker.Name.FullName();
+            u.Username = Faker.Name.FullName();
         u.Status = statusArray[rnd.Next(statusArray.Length)];
         return u;
-    } 
+    }
 }
 
 <!DOCTYPE html>
@@ -72,7 +72,7 @@
 
     <div class="mCustomScrollbar" data-mcs-theme="dark">
         <ul class="left-menu">
-            
+
             <li>
                 <a href="#">
                     <svg class="olymp-newsfeed-icon left-menu-icon" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="NEWSFEED">
@@ -477,25 +477,25 @@
 
     <div class="mCustomScrollbar" data-mcs-theme="dark">
         <ul class="chat-users">
-            
+
             @{
                 for (var i = 0; i < rnd.Next(1, 20); i++)
                 {
                     var u = GetRandomUser();
                     <li class="inline-items">
                         <div class="author-thumb">
-                            <img loading="lazy" alt="author" src="@u.Avatar" class="avatar" width="34" height="34" title="@u.Name">
+                            <img loading="lazy" alt="author" src="@u.Avatar" class="avatar" width="34" height="34" title="@u.Username">
                             <span class="icon-status @u.Status"></span>
                         </div>
                     </li>
                 }
             }
-            
+
         </ul>
     </div>
 
 
-    
+
 </div>
 
 <div class="fixed-sidebar-right sidebar--large" id="sidebar-right-1">
@@ -607,11 +607,11 @@
                     </div>
                     <div class="form-group with-icon label-floating is-empty">
                         <label class="control-label">Share what you are thinking here...</label>
-                        <textarea class="form-control" type="text" name="m" id="m"></textarea> 
+                        <textarea class="form-control" type="text" name="m" id="m"></textarea>
                         <br/>
-                        <input type="text" name="u" id="u" value="@ViewBag.UserId" />
+                        <input type="text" name="u" id="u" value="@ViewBag.Username" />
                         <br/>
-                        <input type="file" name="File"/> 
+                        <input type="file" name="File"/>
                     </div>
                     <div class="add-options-message">
                         <a href="#" class="options-message" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="ADD PHOTOS">
@@ -678,7 +678,7 @@
                         <img loading="lazy" src="@u.Avatar" alt="author" width="28" height="28">
                     </div>
                     <div class="notification-event">
-                        <a href="/u/@u.Name" class="h6 notification-friend">@u.Name</a> commented on a user’s <a href="#" class="notification-link">photo.</a>.
+                        <a href="/u/@u.Username" class="h6 notification-friend">@u.Username</a> commented on a user’s <a href="#" class="notification-link">photo.</a>.
                         <span class="notification-date">
                             <time class="entry-date updated" datetime="2004-07-24T18:18">2 mins ago</time>
                         </span>
@@ -722,7 +722,7 @@
                             <img loading="lazy" src="@u.Avatar" alt="author" width="36" height="36">
                         </div>
                         <div class="notification-event">
-                            <a href="/u/@u.Name" class="h6 notification-friend">@u.Name</a>
+                            <a href="/u/@u.Username" class="h6 notification-friend">@u.Username</a>
                             <span class="chat-message-item">@rnd.Next(1, 200) Friends in Common</span>
                         </div>
                         <span class="notification-icon">

@@ -1,16 +1,27 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.AspNetCore.SignalR;
-using Socializer.Hubs;
-using Socializer.Infrastructure;
 
-namespace Socializer.Controllers;
+namespace Ghosts.Socializer.Controllers;
 
 public class BaseController : Controller
 {
     protected readonly ILogger Logger;
-    protected readonly IHubContext<PostsHub> HubContext;
-    protected readonly DataContext Db;
+
+    public override void OnActionExecuting(ActionExecutingContext context)
+    {
+        // Ensure every request has an associated username and theme for downstream views
+        ViewBag.Username = GetOrCreateUsernameCookie(context.HttpContext);
+
+        var theme = ThemeRead();
+        if (string.IsNullOrWhiteSpace(theme))
+        {
+            theme = "default";
+        }
+
+        ViewBag.Theme = theme;
+
+        base.OnActionExecuting(context);
+    }
 
     public override void OnActionExecuted(ActionExecutedContext filterContext)
     {
@@ -24,15 +35,21 @@ public class BaseController : Controller
             Request.Scheme, Request.Host, Request.Path, Request.QueryString, Request.Method,
             form);
 
-        ViewBag.UserId = CookieRead("userid");
+        ViewBag.Username = GetOrCreateUsernameCookie(filterContext.HttpContext);
+
+        var theme = ThemeRead();
+        if (string.IsNullOrWhiteSpace(theme))
+        {
+            theme = "default";
+        }
+
+        ViewBag.Theme = theme;
         base.OnActionExecuted(filterContext);
     }
 
-    internal BaseController(ILogger logger, IHubContext<PostsHub> hubContext, DataContext dbContext)
+    internal BaseController(ILogger logger)
     {
         Logger = logger;
-        HubContext = hubContext;
-        Db = dbContext;
     }
 
     internal void CookieWrite(string key, string value)
@@ -53,5 +70,52 @@ public class BaseController : Controller
             Logger.LogDebug(e.Message);
             return string.Empty;
         }
+    }
+
+    internal string GetOrCreateUsernameCookie(HttpContext context, string fallbackUsername = null)
+    {
+        const string cookieName = "username";
+
+        // Already exists?
+        if (context.Request.Cookies.TryGetValue(cookieName, out var value) &&
+            !string.IsNullOrWhiteSpace(value))
+        {
+            return value;
+        }
+
+        // No cookie — create one using provided fallback (or generate something)
+        var username = fallbackUsername ?? Faker.Internet.UserName();
+
+        context.Response.Cookies.Append(
+            cookieName,
+            username,
+            new CookieOptions
+            {
+                HttpOnly = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTimeOffset.UtcNow.AddYears(5)
+            });
+
+        return username;
+    }
+
+    internal void UserWrite(string username)
+    {
+        CookieWrite("username", username);
+    }
+
+    internal string UserRead()
+    {
+        return CookieRead("username");
+    }
+
+    internal void ThemeWrite(string theme)
+    {
+        CookieWrite("theme", theme);
+    }
+
+    internal string ThemeRead()
+    {
+        return CookieRead("theme");
     }
 }

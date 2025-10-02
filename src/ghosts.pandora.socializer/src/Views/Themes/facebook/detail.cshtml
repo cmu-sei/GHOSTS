@@ -1,0 +1,160 @@
+@{
+    Layout = null;
+    ViewBag.Theme = "facebook";
+    var currentUser = ViewBag.Username as string;
+    var currentUserLiked = !string.IsNullOrWhiteSpace(currentUser) &&
+        (Model?.Likes?.Any(l => string.Equals(l.Username, currentUser, StringComparison.OrdinalIgnoreCase)) ?? false);
+    var likedClass = currentUserLiked ? " liked" : string.Empty;
+}
+@model Ghosts.Socializer.Infrastructure.Post
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@Model.User's Post - Facebook</title>
+    <link rel="stylesheet" href="/themes/facebook/css/facebook.css">
+    <link rel="icon" href="/themes/facebook/images/facebook-icon.png" type="image/png">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <a href="/" class="logo">facebook</a>
+            <input type="text" class="search-bar" placeholder="Search Facebook">
+        </div>
+
+        <div class="header-center">
+            <a href="/" class="nav-item">🏠</a>
+            <a href="#" class="nav-item">📺</a>
+            <a href="#" class="nav-item">🛍️</a>
+            <a href="#" class="nav-item">👥</a>
+            <a href="#" class="nav-item">🎮</a>
+        </div>
+
+        <div class="header-right">
+            <a href="#"><button class="icon-btn">⊕</button></a>
+            <a href="/messages" class="icon-btn" style="text-decoration: none;">💬</a>
+            <a href="#"><button class="icon-btn">🔔</button></a>
+            <a href="/profile"><img src="/u/@ViewBag.Username/avatar" alt="Profile" class="profile-pic"></a>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Post Detail -->
+        <div class="post-detail">
+            <!-- Main Post -->
+            <article class="post" data-post-id="@Model.Id">
+                <div class="post-header">
+                    <div class="post-user-info">
+                        <img src="/u/@Model.Username/avatar" alt="@Model.Username" class="profile-pic">
+                        <div>
+                            <div class="post-user-name"><a href="/u/@Model.Username">@Model.Username</a></div>
+                            <div class="post-time">@Model.CreatedUtc.ToString("MMM d, yyyy") · 🌍</div>
+                        </div>
+                    </div>
+                    <button class="post-menu">⋯</button>
+                </div>
+                <div class="post-content">
+                    <div class="post-text">@Html.Raw(Model.Message)</div>
+                </div>
+                <div class="post-stats">
+                    @{
+                        var likesCount = Model.Likes?.Count ?? 0;
+                        var commentsCount = Model.Comments?.Count ?? 0;
+                    }
+                    @if (likesCount > 0)
+                    {
+                        <div>👍 @likesCount people liked this</div>
+                    }
+                    @if (commentsCount > 0)
+                    {
+                        <div>@commentsCount comments</div>
+                    }
+                </div>
+                <div class="post-actions">
+                    <button class="post-action like-btn like-it@likedClass" data-id="@Model.Id">
+                        @(currentUserLiked ? "👍 Liked" : "👍 Like")
+                    </button>
+                    <button class="post-action comment-btn" data-action="comment">💬 Comment</button>
+                    <button class="post-action share-btn" data-action="share">📤 Share</button>
+                </div>
+            </article>
+
+            <!-- Comments Section -->
+            <div class="comments-section">
+                <!-- Comment Input -->
+                <form method="post" action="/posts/@Model.Id/comments" id="commentForm">
+                    <input type="hidden" name="theme" value="facebook">
+                    <input type="hidden" name="user" value="@ViewBag.Username">
+                    <div class="comment-input">
+                        <img src="/u/@ViewBag.Username/avatar" alt="Your profile" class="profile-pic">
+                        <input type="text" placeholder="Write a comment..." name="message">
+                        <button type="submit" style="margin-left: 8px; background: none; border: none; color: #1877f2; cursor: pointer;">Post</button>
+                    </div>
+                </form>
+                <script>
+                  document.getElementById("commentForm").addEventListener("submit", async (e) => {
+                    e.preventDefault();
+                    let form = e.target;
+                    let data = new FormData(form);
+                    await fetch(form.action, { method: "POST", body: data });
+                    location.reload();
+                  });
+                </script>
+
+                <!-- Comments -->
+                @if (Model.Comments != null)
+                {
+                    var c = Model.Comments.OrderByDescending(c => c.CreatedUtc);
+                    @foreach (var comment in c)
+                    {
+                        <div class="comment">
+                            <img src="/u/@comment.Username/avatar" alt="@comment.Username" class="profile-pic">
+                            <div>
+                                <div class="comment-content">
+                                    <div class="comment-author"><a href="/u/@comment.Username">@comment.Username</a></div>
+                                    <div class="comment-text">@Html.Raw(comment.Message)</div>
+                                </div>
+                                <div class="comment-actions">
+                                    <a href="#" class="comment-action">Like</a>
+                                    <a href="#" class="comment-action">Reply</a>
+                                    <span style="color: #65676b; font-size: 12px;">@comment.CreatedUtc.ToString("MMM d")</span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="no-comments">
+                        <p>No comments yet.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- JS Scripts -->
+    <script src="/js/jQuery/jquery-3.5.1.min.js"></script>
+    <script src="/js/libs/jquery.mousewheel.min.js"></script>
+    <script src="/js/libs/perfect-scrollbar.min.js"></script>
+    <script src="/js/libs/imagesloaded.pkgd.min.js"></script>
+    <script src="/js/libs/material.min.js"></script>
+    <script src="/js/libs/selectize.min.js"></script>
+    <script src="/js/libs/isotope.pkgd.min.js"></script>
+    <script src="/js/libs/ajax-pagination.min.js"></script>
+    <script src="/js/libs/jquery.magnific-popup.min.js"></script>
+    <script src="/js/main.js"></script>
+    <script src="/js/libs-init/libs-init.js"></script>
+    <script src="/Bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- SVG icons loader -->
+    <script src="/js/svg-loader.js"></script>
+    <!-- /SVG icons loader -->
+    <script src="~/js/signalr.min.js"></script>
+    <script src="/js/social.js"></script>
+
+</body>
+</html>

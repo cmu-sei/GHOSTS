@@ -44,7 +44,7 @@ public class Outlook(Timeline timeline, TimelineHandler handler, CancellationTok
     //         //by default, they are assumed to be in the same folder as the current assembly and be named
     //         //Redemption.dll and Redemption64.dll.
     //         //In that case, you do not need to set the two properties below
-    //         var currentDir = new FileInfo(GetType().Assembly.Location).Directory;
+    //         var currentDir = new DirectoryInfo(AppContext.BaseDirectory);
     //         RedemptionLoader.DllLocation64Bit = Path.GetFullPath(currentDir + @"\lib\redemption64.dll");
     //         RedemptionLoader.DllLocation32Bit = Path.GetFullPath(currentDir + @"\lib\redemption.dll");
     //

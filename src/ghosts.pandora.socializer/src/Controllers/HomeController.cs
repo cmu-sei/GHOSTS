@@ -1,39 +1,70 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-using Socializer.Hubs;
-using Socializer.Infrastructure;
+using Ghosts.Socializer.Hubs;
+using Ghosts.Socializer.Infrastructure;
 
-namespace Socializer.Controllers;
+namespace Ghosts.Socializer.Controllers;
 
-[Route("{*catchall}")]
-public class HomeController(ILogger logger, IHubContext<PostsHub> hubContext, DataContext dbContext) : BaseController(logger, hubContext, dbContext)
+[ApiExplorerSettings(IgnoreApi = true)]
+public class HomeController(
+    ILogger logger, IHubContext<PostsHub> hubContext, DataContext dbContext,
+    ApplicationConfiguration applicationConfiguration)
+    : BaseController(logger)
 {
-    [HttpGet]
-    public IActionResult Index()
+    // Catch-all for unhandled routes - must be LAST in priority
+    [HttpGet("{*catchall}")]
+    public IActionResult CatchAll()
     {
-        var posts = Db.Posts.Include(x => x.Likes).OrderByDescending(x => x.CreatedUtc).Take(Program.Configuration.DefaultDisplay).ToList();
+        var path = Request.Path.Value ?? "";
 
-        if (Request.QueryString.HasValue && !string.IsNullOrEmpty(Request.Query["u"]))
-            ViewBag.User = Request.Query["u"];
-        return View(posts);
+        // Log unhandled routes for debugging
+        Logger.LogWarning("Unhandled route: {Path}", path);
+
+        // Try to extract useful information from the path
+        var segments = path.Split('/', StringSplitOptions.RemoveEmptyEntries);
+
+        if (segments.Length > 0)
+        {
+            RedirectToAction(segments.Last(), "Posts");
+        }
+
+        var theme = ThemeRead();
+        var posts = dbContext.Posts
+            .Include(x=>x.Comments.OrderByDescending(c => c.CreatedUtc))
+            .Include(x=>x.Likes)
+            .Where(x=>x.Theme == theme)
+            .OrderByDescending(x=>x.CreatedUtc).ToList();
+
+        return View("Index", posts);
     }
 
-    [HttpPost]
+    [HttpPost("{*catchall}")]
     public async Task<IActionResult> Post([FromForm] FilesController.FileInputModel model)
     {
+        var queryTheme = Request.Query["theme"].ToString();
+        if (string.IsNullOrEmpty(queryTheme))
+            queryTheme = ThemeRead();
+
         var post = new Post
         {
-            Id = Guid.NewGuid().ToString(),
+            Id = Guid.NewGuid(),
             CreatedUtc = DateTime.UtcNow
         };
 
+        string username = null;
         var userFormValues = new[] { "user", "usr", "u", "uid", "user_id", "u_id" };
         foreach (var userFormValue in userFormValues)
         {
             if (string.IsNullOrEmpty(Request.Form[userFormValue])) continue;
-            post.User = Request.Form[userFormValue]!;
+            username = Request.Form[userFormValue]!;
             break;
+        }
+
+        if (string.IsNullOrEmpty(username))
+        {
+            username = Faker.Internet.UserName();
+            UserWrite(username);
         }
 
         var messageFormValues = new[] { "message", "msg", "m", "message_id", "msg_id", "msg_text", "text", "payload" };
@@ -44,16 +75,37 @@ public class HomeController(ILogger logger, IHubContext<PostsHub> hubContext, Da
             break;
         }
 
-        if (string.IsNullOrEmpty(post.User) || string.IsNullOrEmpty(post.Message))
+        if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(post.Message))
             return BadRequest("User and message are required.");
 
-        // has the same user tried to post the same message within the past x minutes?
-        if (Db.Posts.Any(_ => _.Message.Equals(post.Message, StringComparison.CurrentCultureIgnoreCase)
-                               && _.User.Equals(post.User, StringComparison.CurrentCultureIgnoreCase)
-                               && _.CreatedUtc >
-                               post.CreatedUtc.AddMinutes(-Program.Configuration.MinutesToCheckForDuplicatePost)))
+        // Get or create user
+        var user = await dbContext.Users.FirstOrDefaultAsync(u => u.Username == username);
+        if (user == null)
         {
-            Logger.LogInformation("Client is posting duplicates: {PostUser}", post.User);
+            user = new User
+            {
+                Username = username,
+                Bio = $"User {username}",
+                Avatar = $"/u/{username}/avatar",
+                Status = "online",
+                Theme = queryTheme,
+                CreatedUtc = DateTime.UtcNow,
+                LastActiveUtc = DateTime.UtcNow
+            };
+            dbContext.Users.Add(user);
+            await dbContext.SaveChangesAsync();
+        }
+
+        post.Username = user.Username;
+        post.Theme = queryTheme;
+
+        // has the same user tried to post the same message within the past x minutes?
+        if (dbContext.Posts.Any(p =>
+                p.Message.ToLower() == post.Message.ToLower()
+                && p.Username == user.Username
+                && p.CreatedUtc > post.CreatedUtc.AddMinutes(-applicationConfiguration.MinutesToCheckForDuplicatePost)))
+        {
+            Logger.LogInformation("Client is posting duplicates: {PostUser}", username);
             return NoContent();
         }
 
@@ -89,15 +141,15 @@ public class HomeController(ILogger logger, IHubContext<PostsHub> hubContext, Da
 
         if (!string.IsNullOrEmpty(imagePath))
         {
-            post.Message += $" <img src=\"{imagePath}\"/>";
+            post.Message += $"<br/><img src=\"{imagePath}\"/>";
         }
 
-        Db.Posts.Add(post);
-        await Db.SaveChangesAsync();
+        dbContext.Posts.Add(post);
+        await dbContext.SaveChangesAsync();
 
-        CookieWrite("userid", post.User);
+        UserWrite(username);
 
-        await HubContext.Clients.All.SendAsync("SendMessage", post.Id, post.User, post.Message, post.CreatedUtc);
+        await hubContext.Clients.All.SendAsync("SendMessage", post.Id, username, post.Message, post.CreatedUtc);
 
         return NoContent();
     }

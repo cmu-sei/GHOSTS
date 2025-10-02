@@ -55,7 +55,7 @@ namespace Ghosts.Client.Universal.Infrastructure
             string newLine = Environment.NewLine;  //format using platform new line
             foreach (var pstring in paragraphs)
             {
-                if (pstring == "")
+                if (string.IsNullOrEmpty(pstring))
                 {
                     //marks the end of a paragraph
                     builder.Append(newLine);

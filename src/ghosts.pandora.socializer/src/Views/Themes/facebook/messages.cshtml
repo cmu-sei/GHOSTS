@@ -1,0 +1,337 @@
+@{
+    Layout = null;
+}
+@using Ghosts.Socializer.Infrastructure
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facebook | Messages</title>
+    <link rel="stylesheet" href="/themes/facebook/css/facebook.css">
+    <link rel="icon" href="/themes/facebook/images/facebook-icon.png" type="image/png">
+    <style>
+        .messages-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f0f2f5;
+            min-height: 100vh;
+        }
+
+        .messages-header {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .messages-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1c1e21;
+            margin: 0 0 10px 0;
+        }
+
+        .messages-subtitle {
+            color: #65676b;
+            font-size: 15px;
+            margin: 0;
+        }
+
+        .messages-content {
+            display: flex;
+            gap: 20px;
+        }
+
+        .messages-sidebar {
+            width: 300px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .new-message-form {
+            padding: 20px;
+            border-bottom: 1px solid #e4e6ea;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: #1c1e21;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #dddfe2;
+            border-radius: 6px;
+            font-size: 14px;
+            background: #f0f2f5;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #1877f2;
+            background: #fff;
+        }
+
+        .btn-primary {
+            background: #1877f2;
+            border: none;
+            border-radius: 6px;
+            color: #fff;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: #166fe5;
+        }
+
+        .conversations-list {
+            padding: 16px 0;
+        }
+
+        .conversation-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .conversation-item:hover {
+            background-color: #f2f3f5;
+        }
+
+        .conversation-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 12px;
+        }
+
+        .conversation-info {
+            flex: 1;
+        }
+
+        .conversation-name {
+            font-weight: 600;
+            color: #1c1e21;
+            font-size: 14px;
+            margin-bottom: 2px;
+        }
+
+        .conversation-preview {
+            color: #65676b;
+            font-size: 13px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .messages-main {
+            flex: 1;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        .message-groups {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .message-group {
+            margin-bottom: 30px;
+        }
+
+        .message-group-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1c1e21;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e4e6ea;
+        }
+
+        .message-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 16px;
+            padding: 12px;
+            background: #f0f2f5;
+            border-radius: 8px;
+        }
+
+        .message-item.sent {
+            background: #e7f3ff;
+            margin-left: 20px;
+        }
+
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            margin-right: 12px;
+        }
+
+        .message-content {
+            flex: 1;
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .message-sender {
+            font-weight: 600;
+            color: #1c1e21;
+            font-size: 13px;
+            margin-right: 8px;
+        }
+
+        .message-time {
+            color: #65676b;
+            font-size: 12px;
+        }
+
+        .message-text {
+            color: #1c1e21;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #65676b;
+        }
+
+        .empty-state h3 {
+            color: #1c1e21;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body data-theme="facebook">
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <a href="/" class="logo">facebook</a>
+        </div>
+        <div class="header-center">
+            <a href="/" class="nav-item">🏠</a>
+            <a href="/messages" class="nav-item active">💬</a>
+        </div>
+        <div class="header-right">
+            <img src="/u/@ViewBag.Username/avatar" alt="Profile" class="profile-pic">
+        </div>
+    </header>
+
+    <div class="messages-container">
+        <div class="messages-header">
+            <h1 class="messages-title">Messages</h1>
+            <p class="messages-subtitle">Send and receive private messages</p>
+        </div>
+
+        <div class="messages-content">
+            <div class="messages-sidebar">
+                <div class="new-message-form">
+                    <form method="post" action="/messages/send">
+                        <div class="form-group">
+                            <label class="form-label">To:</label>
+                            <input type="text" name="toUsername" class="form-input" placeholder="Enter username" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Message:</label>
+                            <input type="text" name="message" class="form-input" placeholder="Type your message..." required>
+                        </div>
+                        <button type="submit" class="btn-primary">Send Message</button>
+                    </form>
+                </div>
+
+                @if (ViewBag.ConversationPartners != null)
+                {
+                    <div class="conversations-list">
+                        @foreach (var partner in ViewBag.ConversationPartners)
+                        {
+                            <a href="/messages/conversation/@partner" class="conversation-item">
+                                <img src="/u/@partner/avatar" alt="@partner" class="conversation-avatar">
+                                <div class="conversation-info">
+                                    <div class="conversation-name">@partner</div>
+                                    <div class="conversation-preview">Click to view conversation</div>
+                                </div>
+                            </a>
+                        }
+                    </div>
+                }
+            </div>
+
+            <div class="messages-main">
+                @if (ViewBag.ReceivedMessages != null)
+                {
+                    <div class="message-group">
+                        <h3 class="message-group-title">Recent Messages</h3>
+                        <div class="message-groups">
+                            @foreach (var message in ViewBag.ReceivedMessages)
+                            {
+                                <div class="message-item">
+                                    <img src="/u/@message.FromUsername/avatar" alt="@message.FromUsername" class="message-avatar">
+                                    <div class="message-content">
+                                        <div class="message-header">
+                                            <span class="message-sender">@message.FromUsername</span>
+                                            <span class="message-time">@message.CreatedUtc.ToString("MMM dd, h:mm tt")</span>
+                                        </div>
+                                        <div class="message-text">@message.Message</div>
+                                    </div>
+                                </div>
+                            }
+
+                            @foreach (var message in ViewBag.SentMessages)
+                            {
+                                <div class="message-item sent">
+                                    <img src="/u/@message.ToUsername/avatar" alt="@message.ToUsername" class="message-avatar">
+                                    <div class="message-content">
+                                        <div class="message-header">
+                                            <span class="message-sender">To @message.ToUsername</span>
+                                            <span class="message-time">@message.CreatedUtc.ToString("MMM dd, h:mm tt")</span>
+                                        </div>
+                                        <div class="message-text">@message.Message</div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="empty-state">
+                        <h3>No messages yet</h3>
+                        <p>Start a conversation by sending a message!</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</body>
+</html>

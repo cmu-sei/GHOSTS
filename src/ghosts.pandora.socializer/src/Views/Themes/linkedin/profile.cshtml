@@ -1,0 +1,352 @@
+@model List<Ghosts.Socializer.Infrastructure.Post>
+@{
+    Layout = null;
+    var profileUsername = (ViewContext.RouteData.Values["username"] as string)?.Trim();
+    if (string.IsNullOrWhiteSpace(profileUsername))
+    {
+        profileUsername = Context.Request.Cookies["username"];
+    }
+
+    if (string.IsNullOrWhiteSpace(profileUsername))
+    {
+        profileUsername = Model?.FirstOrDefault()?.Username ?? "user";
+    }
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@profileUsername | LinkedIn</title>
+    <link rel="stylesheet" href="/themes/linkedin/css/feed.css">
+    <link rel="icon" href="/themes/linkedin/images/linkedin-icon.png">
+    <style>
+        .follow-action-form {
+            margin-left: 12px;
+        }
+
+        .follow-action-button {
+            background: #0a66c2;
+            border: none;
+            border-radius: 999px;
+            color: #fff;
+            padding: 8px 18px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .connections-card {
+            padding: 0 0 16px;
+        }
+
+        .connections-summary {
+            display: flex;
+            justify-content: space-between;
+            padding: 0 24px 8px;
+            font-size: 14px;
+            color: rgba(0, 0, 0, 0.6);
+        }
+
+        .connections-columns {
+            display: grid;
+            gap: 16px;
+            padding: 0 24px 16px;
+        }
+
+        .connections-column {
+            background: #f3f2ef;
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .connections-column h3 {
+            margin: 0 0 12px;
+            font-size: 14px;
+            color: rgba(0, 0, 0, 0.8);
+        }
+
+        .connections-scroll {
+            max-height: 220px;
+            overflow-y: auto;
+        }
+
+        .connection-item {
+            background: transparent;
+        }
+
+        .connection-item:hover {
+            background: rgba(10, 102, 194, 0.08);
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-container">
+                <div class="header-left">
+                    <img src="/themes/linkedin/images/linkedin-logo.png" alt="LinkedIn" class="linkedin-logo">
+                    <div class="search-container">
+                        <input type="text" placeholder="Search" class="search-input">
+                        <button class="search-btn">🔍</button>
+                    </div>
+                </div>
+                <nav class="header-nav">
+                    <div class="nav-item active">
+                        <span class="nav-icon">🏠</span>
+                        <span class="nav-text">Home</span>
+                    </div>
+                    <div class="nav-item">
+                        <span class="nav-icon">👥</span>
+                        <span class="nav-text">My Network</span>
+                    </div>
+                    <div class="nav-item">
+                        <span class="nav-icon">💼</span>
+                        <span class="nav-text">Jobs</span>
+                    </div>
+                    <div class="nav-item">
+                        <span class="nav-icon">💬</span>
+                        <span class="nav-text">Messaging</span>
+                    </div>
+                    <div class="nav-item">
+                        <span class="nav-icon">🔔</span>
+                        <span class="nav-text">Notifications</span>
+                    </div>
+                    <div class="nav-item">
+                        <img src="/u/@ViewBag.Username/avatar" alt="Me" class="nav-avatar">
+                        <span class="nav-text">Me</span>
+                        <span class="dropdown-arrow">▼</span>
+                    </div>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Main Container -->
+        <div class="main-container">
+            <!-- Profile Header -->
+            <div class="profile-header">
+                <div class="profile-cover">
+                    <div class="cover-image"></div>
+                </div>
+
+                <div class="profile-main-info">
+                    <div class="profile-picture-container">
+                        <img src="/u/@profileUsername/avatar" alt="@profileUsername" class="profile-picture">
+                    </div>
+
+                    <div class="profile-details">
+                        <h1 class="profile-name">@profileUsername</h1>
+                        <p class="profile-headline">Professional at Company</p>
+                        <p class="profile-location">📍 Location</p>
+                        <p class="profile-connections"><span data-followers-count>0</span> followers • <span data-following-count>0</span> following</p>
+                    </div>
+
+                    <div class="profile-actions">
+                        <button class="btn btn-primary">Connect</button>
+                        <button class="btn btn-secondary">Message</button>
+                        <button class="btn btn-secondary">More</button>
+                        @await Html.PartialAsync("~/Views/Shared/_FollowActions.cshtml")
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Content -->
+            <div class="profile-content">
+                <!-- Left Column -->
+                <aside class="profile-sidebar">
+                    <div class="profile-card connections-card" data-profile-connections data-username="@profileUsername">
+                        <h2 class="card-title">Connections</h2>
+                        <div class="connections-summary">
+                            <span><strong data-followers-count>0</strong> followers</span>
+                            <span><strong data-following-count>0</strong> following</span>
+                        </div>
+                        <div class="connections-columns">
+                            <div class="connections-column">
+                                <h3>Following (<span data-following-count>0</span>)</h3>
+                                <div class="connections-scroll" data-following-list></div>
+                            </div>
+                            <div class="connections-column">
+                                <h3>Followers (<span data-followers-count>0</span>)</h3>
+                                <div class="connections-scroll" data-followers-list></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- About Card -->
+                    <div class="profile-card">
+                        <h2 class="card-title">About</h2>
+                        <div class="about-content">
+                            <p>Experienced professional with a passion for innovation and technology.
+                            Skilled in various aspects of business development and strategic planning.</p>
+                        </div>
+                    </div>
+
+                    <!-- Experience Card -->
+                    <div class="profile-card">
+                        <h2 class="card-title">Experience</h2>
+                        <div class="experience-item">
+                            <div class="experience-logo">🏢</div>
+                            <div class="experience-details">
+                                <h3 class="experience-title">Senior Professional</h3>
+                                <p class="experience-company">Company Name</p>
+                                <p class="experience-duration">Jan 2020 - Present</p>
+                                <p class="experience-location">Location</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Education Card -->
+                    <div class="profile-card">
+                        <h2 class="card-title">Education</h2>
+                        <div class="education-item">
+                            <div class="education-logo">🎓</div>
+                            <div class="education-details">
+                                <h3 class="education-school">University Name</h3>
+                                <p class="education-degree">Bachelor's Degree</p>
+                                <p class="education-duration">2016 - 2020</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Skills Card -->
+                    <div class="profile-card">
+                        <h2 class="card-title">Skills</h2>
+                        <div class="skills-list">
+                            <div class="skill-item">
+                                <span class="skill-name">Leadership</span>
+                                <span class="skill-endorsements">12 endorsements</span>
+                            </div>
+                            <div class="skill-item">
+                                <span class="skill-name">Project Management</span>
+                                <span class="skill-endorsements">8 endorsements</span>
+                            </div>
+                            <div class="skill-item">
+                                <span class="skill-name">Strategic Planning</span>
+                                <span class="skill-endorsements">6 endorsements</span>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- Main Content -->
+                <main class="profile-main">
+                    <!-- Activity Section -->
+                    <div class="profile-card">
+                        <div class="card-header">
+                            <h2 class="card-title">Activity</h2>
+                            <p class="activity-followers">500+ followers</p>
+                        </div>
+
+                        <!-- Recent Posts -->
+                        <div class="activity-posts">
+                            @if (Model != null)
+                            {
+                                @foreach (var post in Model)
+                                {
+                                    <article class="activity-post">
+                                        <div class="post-header">
+                                            <img src="/u/@post.Username/avatar" alt="@post.Username" class="post-avatar">
+                                            <div class="post-meta">
+                                                <div class="post-author">@post.Username</div>
+                                                <div class="post-time">@post.CreatedUtc.ToString("MMM d, yyyy")</div>
+                                            </div>
+                                        </div>
+
+                                        <div class="post-content">
+                                            <div class="post-text">@Html.Raw(post.Message)</div>
+                                            {
+                                                <div class="post-media">
+                                                </div>
+                                            }
+                                        </div>
+
+                                        <div class="post-stats">
+                                            @{
+                                                var likesCount = post.Likes?.Count ?? 0;
+                                                var commentsCount = post.Comments?.Count ?? 0;
+                                            }
+                                            @if (likesCount > 0 || commentsCount > 0)
+                                            {
+                                                <div class="engagement-stats">
+                                                    @if (likesCount > 0)
+                                                    {
+                                                        <span>👍 @likesCount</span>
+                                                    }
+                                                    @if (commentsCount > 0)
+                                                    {
+                                                        <span>@commentsCount comments</span>
+                                                    }
+                                                </div>
+                                            }
+                                        </div>
+
+                                        <div class="post-actions">
+                                            <button class="action-btn">
+                                                <span class="action-icon">👍</span>
+                                                <span class="action-text">Like</span>
+                                            </button>
+                                            <button class="action-btn">
+                                                <span class="action-icon">💬</span>
+                                                <span class="action-text">Comment</span>
+                                            </button>
+                                            <button class="action-btn">
+                                                <span class="action-icon">📤</span>
+                                                <span class="action-text">Share</span>
+                                            </button>
+                                        </div>
+                                    </article>
+                                }
+                            }
+                            else
+                            {
+                                <div class="no-posts">
+                                    <p>No posts to show</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </main>
+
+                <!-- Right Column -->
+                <aside class="profile-right-sidebar">
+                    <!-- People Also Viewed -->
+                    <div class="sidebar-widget">
+                        <h3 class="widget-title">People also viewed</h3>
+                        <div class="people-list">
+                            <div class="person-item">
+                                <img src="/themes/linkedin/images/person1.jpg" alt="Person" class="person-avatar">
+                                <div class="person-info">
+                                    <div class="person-name">Jane Smith</div>
+                                    <div class="person-title">Marketing Manager</div>
+                                </div>
+                                <button class="connect-btn">Connect</button>
+                            </div>
+                            <div class="person-item">
+                                <img src="/themes/linkedin/images/person2.jpg" alt="Person" class="person-avatar">
+                                <div class="person-info">
+                                    <div class="person-name">Mike Johnson</div>
+                                    <div class="person-title">Software Engineer</div>
+                                </div>
+                                <button class="connect-btn">Connect</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- LinkedIn Learning -->
+                    <div class="sidebar-widget">
+                        <h3 class="widget-title">LinkedIn Learning</h3>
+                        <div class="learning-item">
+                            <div class="learning-title">Leadership Skills</div>
+                            <div class="learning-progress">Progress: 75%</div>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </div>
+
+    <script src="/themes/linkedin/js/linkedin.js"></script>
+    <script src="/js/connections.js"></script>
+</body>
+</html>

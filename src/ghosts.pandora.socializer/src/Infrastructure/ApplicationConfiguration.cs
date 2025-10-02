@@ -1,4 +1,4 @@
-namespace Socializer.Infrastructure;
+namespace Ghosts.Socializer.Infrastructure;
 
 public class ApplicationConfiguration
 {

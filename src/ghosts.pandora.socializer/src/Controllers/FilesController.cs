@@ -1,14 +1,12 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
-using Socializer.Hubs;
-using Socializer.Infrastructure;
 
-namespace Socializer.Controllers;
+namespace Ghosts.Socializer.Controllers;
 
+[ApiExplorerSettings(IgnoreApi = true)]
 [Route("/images")]
 [Route("/files")]
-public class FilesController(ILogger logger, IHubContext<PostsHub> hubContext, DataContext dbContext) : BaseController(logger, hubContext, dbContext)
+public class FilesController(ILogger logger) : BaseController(logger)
 {
     [HttpPost]
     public async Task<IActionResult> UploadFile([FromForm] FileInputModel model)

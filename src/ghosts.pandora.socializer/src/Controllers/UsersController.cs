@@ -1,38 +1,81 @@
+using Ghosts.Socializer.Infrastructure;
+using Ghosts.Socializer.Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore;
-using Socializer.Hubs;
-using Socializer.Infrastructure;
 
-namespace Socializer.Controllers;
+namespace Ghosts.Socializer.Controllers;
 
-[Route("u")]
-public class UsersController(ILogger logger, IHubContext<PostsHub> hubContext, DataContext dbContext,
-        IWebHostEnvironment env)
-    : BaseController(logger, hubContext, dbContext)
+[ApiExplorerSettings(IgnoreApi = true)]
+[Route("/user")]
+[Route("/u")]
+[Route("/users")]
+[Route("/profile")]
+public class UsersController(
+    ILogger logger,
+    IWebHostEnvironment env,
+    IUserService userService,
+    IPostService postService,
+    IFollowService followService)
+    : BaseController(logger)
 {
-    [HttpGet("{userId}")]
-    public new virtual IActionResult User(string userId)
+    [HttpGet]
+    [HttpGet("{username}")]
+    public async Task<IActionResult> GetUser(string username = null)
     {
-        var posts = Db.Posts.Include(x => x.Likes).Where(x => x.User.Equals(userId, StringComparison.CurrentCultureIgnoreCase)).OrderByDescending(x => x.CreatedUtc)
-            .Take(Program.Configuration.DefaultDisplay).ToList();
+        var currentUsername = UserRead();
+        var targetUsername = string.IsNullOrWhiteSpace(username) ? currentUsername : username;
 
-        ViewBag.User = userId;
-        return View("Index", posts);
+        if (string.IsNullOrWhiteSpace(targetUsername))
+        {
+            return RedirectToAction("Index", "Home");
+        }
+
+        var user = await userService.GetUserByUsernameAsync(targetUsername);
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        var theme = ThemeRead();
+        if (string.IsNullOrWhiteSpace(theme))
+        {
+            theme = user.Theme ?? "default";
+        }
+
+        var isSelf = !string.IsNullOrWhiteSpace(currentUsername) &&
+                     string.Equals(currentUsername, user.Username, StringComparison.OrdinalIgnoreCase);
+        var isFollowing = !isSelf &&
+                          !string.IsNullOrWhiteSpace(currentUsername) &&
+                          await followService.IsFollowingAsync(currentUsername, user.Username);
+
+        ViewBag.Theme = theme;
+        ViewBag.ProfileUser = user.Username;
+        ViewBag.ProfileUsername = user.Username;
+        ViewBag.IsSelf = isSelf;
+        ViewBag.IsFollowing = isFollowing;
+
+        var viewPath = $"~/Views/Themes/{theme}/profile.cshtml";
+
+        if (string.Equals(theme, "default", StringComparison.OrdinalIgnoreCase))
+        {
+            var posts = await postService.GetPostsByUserAsync(user.Username, 100);
+            return View(viewPath, posts);
+        }
+
+        return View(viewPath, user);
     }
 
-    [HttpGet("{userId}/avatar")]
-    public IActionResult GetUserAvatar(string userId)
+    [HttpGet("{username}/avatar")]
+    public IActionResult GetUserAvatar(string username)
     {
         Logger.LogTrace("{RequestScheme}://{RequestHost}{RequestPath}{RequestQueryString}|{RequestMethod}|",
             Request.Scheme, Request.Host, Request.Path, Request.QueryString, Request.Method);
 
-        if (string.IsNullOrEmpty(userId))
+        if (string.IsNullOrEmpty(username))
         {
             return PhysicalFile(Path.Combine(env.WebRootPath, "img", "avatar1.webp"), "image/webp");
         }
 
-        var imageDir = Path.Combine(env.WebRootPath, "images", "u", userId);
+        var imageDir = Path.Combine(env.WebRootPath, "images", "u", username);
         var imagePath = Path.Combine(imageDir, "avatar.webp");
 
         if (!System.IO.File.Exists(imagePath))

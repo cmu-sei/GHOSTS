@@ -1,57 +1,61 @@
-using Socializer.Hubs;
-using Socializer.Infrastructure;
-using Socializer.Infrastructure.Services;
+using Ghosts.Socializer.Hubs;
+using Ghosts.Socializer.Infrastructure;
+using Ghosts.Socializer.Infrastructure.Services;
+using Ghosts.Socializer.Infrastructure.Startup.Extensions;
 
-namespace Socializer;
+var builder = WebApplication.CreateBuilder(args);
 
-class Program
-{
-    public static ApplicationConfiguration Configuration { get; private set; }
+var configuration = ApplicationConfigurationLoader.Load();
+builder.Services.AddSingleton(configuration);
 
-    public static void Main(string[] args)
+builder.Services.AddDbContext<DataContext>();
+
+builder.Services
+    .AddControllersWithViews()
+    .AddRazorRuntimeCompilation()
+    .AddRazorOptions(opts =>
     {
-        var builder = WebApplication.CreateBuilder(args);
-        ConfigureServices(builder.Services, builder.Configuration);
+        opts.ViewLocationExpanders.Add(new ThemeViewLocationExpander());
+    });
 
-        var app = builder.Build();
-        ConfigureMiddleware(app);
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwagger();
 
-        Configuration = ApplicationConfigurationLoader.Load();
-        var logger = app.Services.GetRequiredService<ILogger<Program>>();
-        logger.LogInformation(ApplicationDetails.Header);
-        logger.LogInformation("GHOSTS SOCIALIZER {Version} ({VersionFile}) coming online...",
-            ApplicationDetails.Version, ApplicationDetails.VersionFile);
-        app.Run();
-    }
+builder.Services.AddSignalR();
+builder.Services.AddHostedService<CleanupService>();
 
-    private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
-    {
-        services.AddDbContext<DataContext>();
-        services.AddRazorPages().AddRazorRuntimeCompilation();
-        services.AddControllersWithViews();
-        services.AddSignalR();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IThemeService, ThemeService>();
+builder.Services.AddScoped<IPostService, PostService>();
+builder.Services.AddScoped<IDirectMessageService, DirectMessageService>();
+builder.Services.AddScoped<IFollowService, FollowService>();
 
-        services.AddSingleton<ILogger>(provider =>
-            LoggerFactory.Create(config => config.AddConsole()).CreateLogger("Program"));
+builder.Services.AddSingleton(_ =>
+    LoggerFactory
+        .Create(config => config.AddConsole())
+        .CreateLogger("Program"));
 
-        services.AddHostedService<CleanupService>();
+var app = builder.Build();
 
-        // Optionally, add more service configurations here
-    }
+app.UseStaticFiles();
 
-    private static void ConfigureMiddleware(WebApplication app)
-    {
-        //app.UseHttpsRedirection();
-        app.UseStaticFiles();
-        app.UseRouting();
-        app.UseAuthorization();
+app.UseSwagger();
+app.UseSwaggerUI();
 
-        app.UseEndpoints(endpoints =>
-        {
-            endpoints.MapControllers();
-            endpoints.MapHub<PostsHub>("/hubs/posts");
-        });
+app.UseRouting();
+app.UseAuthorization();
 
-        // Optionally, add more middleware configurations here
-    }
-}
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.MapHub<PostsHub>("/hubs/posts");
+
+var logger = app.Services.GetRequiredService<ILogger<Program>>();
+logger.LogInformation(ApplicationDetails.Header);
+logger.LogInformation(
+    "GHOSTS SOCIALIZER {Version} ({VersionFile}) coming online...",
+    ApplicationDetails.Version, ApplicationDetails.VersionFile
+);
+
+app.Run();

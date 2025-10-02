@@ -1,0 +1,324 @@
+@{
+    var profileUsername = (ViewContext.RouteData.Values["username"] as string)?.Trim();
+    if (string.IsNullOrWhiteSpace(profileUsername))
+    {
+        profileUsername = Context.Request.Cookies["username"];
+    }
+
+    profileUsername ??= "user";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@profileUsername - Discord</title>
+    <link rel="stylesheet" href="css/profile.css">
+    <link rel="icon" href="images/discord-icon.png">
+    <style>
+        .follow-action-form {
+            display: inline-block;
+            margin: 0 12px;
+        }
+
+        .follow-action-button {
+            background: #5865f2;
+            border: none;
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .connections-panel {
+            margin-top: 20px;
+            padding: 16px;
+            background: #2f3136;
+            border-radius: 12px;
+            border: 1px solid #202225;
+        }
+
+        .connections-columns {
+            display: grid;
+            gap: 12px;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        }
+
+        .connections-column {
+            background: #36393f;
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .connections-column h3 {
+            margin: 0 0 12px;
+            font-size: 14px;
+            color: #fff;
+        }
+
+        .connections-scroll {
+            max-height: 220px;
+            overflow-y: auto;
+        }
+
+        .connection-item {
+            background: transparent;
+        }
+
+        .connection-item:hover {
+            background: rgba(88, 101, 242, 0.2);
+        }
+
+        .connection-name {
+            color: #fff;
+        }
+
+        .connection-bio {
+            color: #b9bbbe;
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- Profile Modal Overlay -->
+        <div class="profile-overlay">
+            <div class="profile-modal">
+                <!-- Profile Banner -->
+                <div class="profile-banner">
+                    <img src="images/profile-banner.jpg" alt="Profile Banner" class="banner-image">
+                    <button class="close-btn">✕</button>
+                </div>
+
+                <!-- Profile Content -->
+                <div class="profile-content">
+                    <!-- User Info -->
+                    <div class="user-section">
+                        <div class="avatar-container">
+                            <img src="/u/@profileUsername/avatar" alt="@profileUsername" class="profile-avatar">
+                            <div class="status-indicator online"></div>
+                        </div>
+                        <div class="user-info">
+                            <div class="username-section">
+                                <h2 class="display-name">@profileUsername</h2>
+                                <span class="username">Followers: <span data-followers-count>0</span> • Following: <span data-following-count>0</span></span>
+                            </div>
+                            <div class="user-status">
+                                <div class="status-icon">💻</div>
+                                <span class="status-text">Coding React projects</span>
+                            </div>
+                        </div>
+                        <div class="profile-actions">
+                            <button class="action-btn primary">Send Message</button>
+                            @await Html.PartialAsync("~/Views/Shared/_FollowActions.cshtml")
+                            <button class="action-btn icon-btn">⋯</button>
+                        </div>
+                    </div>
+                    <div class="connections-panel" data-profile-connections data-username="@profileUsername">
+                        <div class="connections-columns">
+                            <div class="connections-column">
+                                <h3>Following (<span data-following-count>0</span>)</h3>
+                                <div class="connections-scroll" data-following-list></div>
+                            </div>
+                            <div class="connections-column">
+                                <h3>Followers (<span data-followers-count>0</span>)</h3>
+                                <div class="connections-scroll" data-followers-list></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Profile Tabs -->
+                    <div class="profile-tabs">
+                        <button class="tab-btn active">User Info</button>
+                        <button class="tab-btn">Mutual Servers</button>
+                        <button class="tab-btn">Mutual Friends</button>
+                    </div>
+
+                    <!-- Tab Content -->
+                    <div class="tab-content">
+                        <!-- User Info Tab -->
+                        <div class="user-info-tab active">
+                            <div class="info-section">
+                                <h3 class="section-title">ABOUT ME</h3>
+                                <div class="about-text">
+                                    Full-stack developer passionate about React, Node.js, and modern web technologies.
+                                    Always learning something new and sharing knowledge with the community.
+                                    <br><br>
+                                    🎮 Gamer | 💻 Developer | 🎵 Music Lover
+                                </div>
+                            </div>
+
+                            <div class="info-section">
+                                <h3 class="section-title">DISCORD MEMBER SINCE</h3>
+                                <div class="member-since">
+                                    <div class="date-info">
+                                        <span class="date">Mar 15, 2021</span>
+                                        <span class="duration">3 years ago</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="info-section">
+                                <h3 class="section-title">ROLES</h3>
+                                <div class="roles-container">
+                                    <div class="role-badge developer">
+                                        <div class="role-color"></div>
+                                        <span class="role-name">Developer</span>
+                                    </div>
+                                    <div class="role-badge moderator">
+                                        <div class="role-color"></div>
+                                        <span class="role-name">Moderator</span>
+                                    </div>
+                                    <div class="role-badge member">
+                                        <div class="role-color"></div>
+                                        <span class="role-name">Member</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="info-section">
+                                <h3 class="section-title">NOTE</h3>
+                                <div class="note-container">
+                                    <textarea placeholder="Click to add a note" class="note-input"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Mutual Servers Tab -->
+                        <div class="mutual-servers-tab">
+                            <div class="servers-list">
+                                <div class="server-item">
+                                    <img src="images/gaming-server.jpg" alt="Server" class="server-icon">
+                                    <div class="server-info">
+                                        <div class="server-name">Gaming Hub</div>
+                                        <div class="server-members">1,247 members</div>
+                                    </div>
+                                </div>
+                                <div class="server-item">
+                                    <img src="images/tech-server.jpg" alt="Server" class="server-icon">
+                                    <div class="server-info">
+                                        <div class="server-name">Tech Community</div>
+                                        <div class="server-members">856 members</div>
+                                    </div>
+                                </div>
+                                <div class="server-item">
+                                    <img src="images/study-server.jpg" alt="Server" class="server-icon">
+                                    <div class="server-info">
+                                        <div class="server-name">Study Group</div>
+                                        <div class="server-members">234 members</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Mutual Friends Tab -->
+                        <div class="mutual-friends-tab">
+                            <div class="friends-list">
+                                <div class="friend-item">
+                                    <img src="images/user1-avatar.jpg" alt="Friend" class="friend-avatar">
+                                    <div class="friend-info">
+                                        <div class="friend-name">AliceGamer</div>
+                                        <div class="friend-status">Online</div>
+                                    </div>
+                                    <button class="message-btn">💬</button>
+                                </div>
+                                <div class="friend-item">
+                                    <img src="images/user2-avatar.jpg" alt="Friend" class="friend-avatar">
+                                    <div class="friend-info">
+                                        <div class="friend-name">TechNinja</div>
+                                        <div class="friend-status">Playing Valorant</div>
+                                    </div>
+                                    <button class="message-btn">💬</button>
+                                </div>
+                                <div class="friend-item">
+                                    <img src="images/user4-avatar.jpg" alt="Friend" class="friend-avatar">
+                                    <div class="friend-info">
+                                        <div class="friend-name">DevGuru</div>
+                                        <div class="friend-status">Offline</div>
+                                    </div>
+                                    <button class="message-btn">💬</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <button class="quick-action" title="Voice Call">📞</button>
+                    <button class="quick-action" title="Video Call">📹</button>
+                    <button class="quick-action" title="Screen Share">🖥️</button>
+                </div>
+
+                <!-- Connection Status -->
+                <div class="connection-status">
+                    <div class="connection-item">
+                        <div class="connection-icon spotify">🎵</div>
+                        <div class="connection-info">
+                            <div class="connection-name">Spotify</div>
+                            <div class="connection-detail">Listening to Code Music</div>
+                        </div>
+                    </div>
+                    <div class="connection-item">
+                        <div class="connection-icon github">🐙</div>
+                        <div class="connection-info">
+                            <div class="connection-name">GitHub</div>
+                            <div class="connection-detail">johndoe</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Activity History -->
+                <div class="activity-section">
+                    <h3 class="section-title">ACTIVITY</h3>
+                    <div class="activity-list">
+                        <div class="activity-item">
+                            <div class="activity-icon">🎮</div>
+                            <div class="activity-info">
+                                <div class="activity-name">Playing Valorant</div>
+                                <div class="activity-time">2 hours ago</div>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon">💻</div>
+                            <div class="activity-info">
+                                <div class="activity-name">Visual Studio Code</div>
+                                <div class="activity-time">5 hours ago</div>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon">🎵</div>
+                            <div class="activity-info">
+                                <div class="activity-name">Spotify</div>
+                                <div class="activity-time">8 hours ago</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Badge -->
+                <div class="profile-badges">
+                    <h3 class="section-title">BADGES</h3>
+                    <div class="badges-grid">
+                        <div class="badge-item" title="Discord Nitro">
+                            <div class="badge-icon nitro">💎</div>
+                        </div>
+                        <div class="badge-item" title="Early Supporter">
+                            <div class="badge-icon supporter">🌟</div>
+                        </div>
+                        <div class="badge-item" title="Server Booster">
+                            <div class="badge-icon booster">🚀</div>
+                        </div>
+                        <div class="badge-item" title="Bug Hunter">
+                            <div class="badge-icon hunter">🐛</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/profile.js"></script>
+    <script src="/js/connections.js"></script>
+</body>
+</html>

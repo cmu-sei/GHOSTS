@@ -1,0 +1,156 @@
+@{
+    Layout = null;
+}
+@model List<Ghosts.Socializer.Infrastructure.Post>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facebook</title>
+    <link rel="stylesheet" href="/themes/facebook/css/facebook.css">
+    <link rel="icon" href="/themes/facebook/images/facebook-icon.png" type="image/png">
+</head>
+<body data-theme="facebook">
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <a href="/" class="logo">facebook</a>
+            <input type="text" class="search-bar" placeholder="Search Facebook">
+        </div>
+
+        <div class="header-center">
+            <a href="/" class="nav-item active">🏠</a>
+            <a href="#" class="nav-item">📺</a>
+            <a href="#" class="nav-item">🛍️</a>
+            <a href="#" class="nav-item">👥</a>
+            <a href="#" class="nav-item">🎮</a>
+        </div>
+
+        <div class="header-right">
+            <a href="#"><button class="icon-btn">⊕</button></a>
+            <a href="/messages" class="icon-btn" style="text-decoration: none;">💬</a>
+            <a href="#"><button class="icon-btn">🔔</button></a>
+            <a href="/profile"><img src="/u/@ViewBag.Username/avatar" alt="Profile" class="profile-pic"></a>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Left Sidebar -->
+        <aside class="left-sidebar">
+            <a href="/profile" class="sidebar-item">
+                <img src="/u/@ViewBag.Username/avatar" alt="Profile" class="profile-pic">
+                <span> &nbsp; @ViewBag.Username</span>
+            </a>
+            <a href="#" class="sidebar-item">
+                <div class="sidebar-icon"></div>
+                <span>Friends</span>
+            </a>
+            <a href="#" class="sidebar-item">
+                <div class="sidebar-icon"></div>
+                <span>Groups</span>
+            </a>
+            <a href="#" class="sidebar-item">
+                <div class="sidebar-icon"></div>
+                <span>Marketplace</span>
+            </a>
+            <a href="#" class="sidebar-item">
+                <div class="sidebar-icon"></div>
+                <span>Watch</span>
+            </a>
+            <a href="#" class="sidebar-item">
+                <div class="sidebar-icon"></div>
+                <span>Memories</span>
+            </a>
+            <a href="#" class="sidebar-item">
+                <div class="sidebar-icon"></div>
+                <span>Saved</span>
+            </a>
+            <a href="#" class="sidebar-item">
+                <div class="sidebar-icon"></div>
+                <span>Pages</span>
+            </a>
+            <a href="#" class="sidebar-item">
+                <div class="sidebar-icon"></div>
+                <span>Events</span>
+            </a>
+            <a href="#" class="sidebar-item">
+                <div class="sidebar-icon"></div>
+                <span>Ad Manager</span>
+            </a>
+        </aside>
+
+        <!-- Feed -->
+        <main class="feed-container">
+
+            <!-- Stories -->
+            <div class="post">
+                <div style="padding: 16px;">
+                    <h3 style="margin-bottom: 16px;">Stories</h3>
+                    <div style="display: flex; gap: 8px; overflow-x: auto;">
+                        <div style="min-width: 112px; height: 200px; background: linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%); border-radius: 8px; position: relative; cursor: pointer;">
+                            <img src="/u/@ViewBag.Username/avatar" alt="Your story" style="width: 100%; height: 70%; object-fit: cover; border-radius: 8px 8px 0 0;">
+                            <div style="position: absolute; bottom: 8px; left: 8px; color: white; font-size: 12px; font-weight: 600;">Your Story</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @{
+                ViewBag.Theme = "facebook";
+            }
+
+            @await Html.PartialAsync("_CreatePost")
+
+            <div id="newsfeed-items-grid">
+                <button class="btn btn-primary btn-md-2" type="submit" name="submit" id="sendButton">Post Status</button>
+                @{
+                    if (Model != null)
+                    {
+                        foreach (var post in Model)
+                        {
+                            await Html.RenderPartialAsync("_PostCard", post);
+                        }
+                    }
+                }
+            </div>
+        </main>
+
+        <!-- Right Sidebar -->
+        <aside class="right-sidebar">
+            <div style="margin-bottom: 24px;">
+                <h3 style="color: #65676b; margin-bottom: 16px;">Sponsored</h3>
+                <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                    <img src="/themes/facebook/images/ad-placeholder.jpg" alt="Ad" style="width: 100px; height: 100px; border-radius: 8px; margin-right: 12px;">
+                    <div>
+                        <div style="font-weight: 600; margin-bottom: 4px;">Learn Web Development</div>
+                        <div style="color: #65676b; font-size: 13px;">codecademy.com</div>
+                    </div>
+                </div>
+            </div>
+
+        </aside>
+    </div>
+
+    <!-- JS Scripts -->
+    <script src="/js/jQuery/jquery-3.5.1.min.js"></script>
+    <script src="/js/libs/jquery.mousewheel.min.js"></script>
+    <script src="/js/libs/perfect-scrollbar.min.js"></script>
+    <script src="/js/libs/imagesloaded.pkgd.min.js"></script>
+    <script src="/js/libs/material.min.js"></script>
+    <script src="/js/libs/selectize.min.js"></script>
+    <script src="/js/libs/isotope.pkgd.min.js"></script>
+    <script src="/js/libs/ajax-pagination.min.js"></script>
+    <script src="/js/libs/jquery.magnific-popup.min.js"></script>
+    <script src="/js/main.js"></script>
+    <script src="/js/libs-init/libs-init.js"></script>
+    <script src="/Bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- SVG icons loader -->
+    <script src="/js/svg-loader.js"></script>
+    <!-- /SVG icons loader -->
+    <script src="~/js/signalr.min.js"></script>
+    <script src="~/js/social.js?@System.Guid.NewGuid()" asp-append-version="true"></script>
+</body>
+</html>

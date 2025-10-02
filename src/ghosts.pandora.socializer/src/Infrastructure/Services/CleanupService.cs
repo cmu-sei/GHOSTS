@@ -1,12 +1,5 @@
-
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-
-namespace Socializer.Infrastructure.Services;
-public class CleanupService(ILogger logger, IServiceProvider serviceProvider) : IHostedService
+namespace Ghosts.Socializer.Infrastructure.Services;
+public class CleanupService(ILogger logger, IServiceProvider serviceProvider, ApplicationConfiguration applicationConfiguration) : IHostedService
 {
     public Task StartAsync(CancellationToken cancellationToken)
     {
@@ -29,9 +22,9 @@ public class CleanupService(ILogger logger, IServiceProvider serviceProvider) : 
 
             await Task.Delay(
                 new TimeSpan(
-                    Program.Configuration.CleanupJob.Hours,
-                    Program.Configuration.CleanupJob.Minutes,
-                    Program.Configuration.CleanupJob.Seconds));
+                    applicationConfiguration.CleanupJob.Hours,
+                    applicationConfiguration.CleanupJob.Minutes,
+                    applicationConfiguration.CleanupJob.Seconds));
         }
     }
 
@@ -65,7 +58,7 @@ public class CleanupService(ILogger logger, IServiceProvider serviceProvider) : 
     private async Task Sync()
     {
         var diskUtil = GetDiskUtil();
-        var targetUtilization = Program.Configuration.CleanupDiskUtilThreshold;
+        var targetUtilization = applicationConfiguration.CleanupDiskUtilThreshold;
         logger.LogInformation($"Cleanup Service: Disk Utilization {diskUtil}, CleanupDiskUtilThreshold {targetUtilization}");
 
         // set actual targetUtilization 10% lower of specified value so that we are not constantly tripping the cleanup
@@ -89,9 +82,9 @@ public class CleanupService(ILogger logger, IServiceProvider serviceProvider) : 
         var totalPostCount = 0;
         var totalFileCount = 0;
         var threshold = DateTime.UtcNow
-                                        .AddDays(-Program.Configuration.CleanupAge.Days)
-                                        .AddHours(-Program.Configuration.CleanupAge.Hours)
-                                        .AddMinutes(-Program.Configuration.CleanupAge.Minutes);
+                                        .AddDays(-applicationConfiguration.CleanupAge.Days)
+                                        .AddHours(-applicationConfiguration.CleanupAge.Hours)
+                                        .AddMinutes(-applicationConfiguration.CleanupAge.Minutes);
 
         var startTime = DateTime.UtcNow;
 
@@ -146,7 +139,7 @@ public class CleanupService(ILogger logger, IServiceProvider serviceProvider) : 
                         }
                     }
                     // now delete the post directory, will be empty
-                    // we could just delete the entire directory+files in one call but there have been bug reports about this 
+                    // we could just delete the entire directory+files in one call but there have been bug reports about this
                     // not working consistently across all platforms, safer to delete the files first to get an empty directory
                     try
                     {

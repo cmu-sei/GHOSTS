@@ -1,0 +1,316 @@
+@model List<Ghosts.Socializer.Infrastructure.Post>
+@{
+    Layout = null;
+    var profileUsername = (ViewContext.RouteData.Values["username"] as string)?.Trim();
+    if (string.IsNullOrWhiteSpace(profileUsername))
+    {
+        profileUsername = Context.Request.Cookies["username"];
+    }
+
+    if (string.IsNullOrWhiteSpace(profileUsername))
+    {
+        profileUsername = Model?.FirstOrDefault()?.Username ?? "user";
+    }
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@profileUsername - YouTube</title>
+    <link rel="stylesheet" href="/themes/youtube/css/feed.css">
+    <link rel="icon" href="/themes/youtube/images/youtube-icon.png">
+    <style>
+        .follow-action-form {
+            display: inline-block;
+            margin-right: 12px;
+        }
+
+        .follow-action-button {
+            background: #ff0000;
+            border: none;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 999px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .channel-connections {
+            background: #fff;
+            border-radius: 16px;
+            padding: 24px;
+            margin-top: 24px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+        }
+
+        .connections-heading {
+            margin: 0 0 12px;
+            font-size: 20px;
+        }
+
+        .connections-summary {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #606060;
+            margin-bottom: 16px;
+        }
+
+        .connections-columns {
+            display: grid;
+            gap: 16px;
+        }
+
+        .connections-column {
+            background: #f9f9f9;
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .connections-column h3 {
+            margin: 0 0 12px;
+            font-size: 15px;
+            text-transform: uppercase;
+            color: #202020;
+        }
+
+        .connections-scroll {
+            max-height: 220px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <button class="menu-btn">☰</button>
+                <div class="logo">
+                    <img src="/themes/youtube/images/youtube-logo.png" alt="YouTube" class="youtube-logo">
+                </div>
+            </div>
+            <div class="header-center">
+                <div class="search-container">
+                    <input type="text" placeholder="Search" class="search-input">
+                    <button class="search-btn">🔍</button>
+                </div>
+                <button class="mic-btn">🎤</button>
+            </div>
+            <div class="header-right">
+                <button class="header-btn">📹</button>
+                <button class="header-btn">🔔</button>
+                <div class="user-menu">
+                    <img src="/u/@ViewBag.Username/avatar" alt="Profile" class="user-avatar">
+                </div>
+            </div>
+        </header>
+
+        <div class="main-container">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="sidebar-section">
+                    <div class="sidebar-item">
+                        <span class="sidebar-icon">🏠</span>
+                        <span class="sidebar-text">Home</span>
+                    </div>
+                    <div class="sidebar-item">
+                        <span class="sidebar-icon">🎬</span>
+                        <span class="sidebar-text">Shorts</span>
+                    </div>
+                    <div class="sidebar-item">
+                        <span class="sidebar-icon">📺</span>
+                        <span class="sidebar-text">Subscriptions</span>
+                    </div>
+                </div>
+
+                <div class="sidebar-divider"></div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-item">
+                        <span class="sidebar-icon">📚</span>
+                        <span class="sidebar-text">Library</span>
+                    </div>
+                    <div class="sidebar-item">
+                        <span class="sidebar-icon">🕒</span>
+                        <span class="sidebar-text">History</span>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="channel-content">
+                <!-- Channel Header -->
+                <div class="channel-header">
+                    <div class="channel-banner">
+                        <div class="banner-image"></div>
+                    </div>
+
+                    <div class="channel-info">
+                        <div class="channel-avatar-section">
+                            <img src="/u/@profileUsername/avatar" alt="@profileUsername" class="channel-avatar">
+                        </div>
+
+                        <div class="channel-details">
+                            <h1 class="channel-name">@profileUsername</h1>
+                            <div class="channel-meta">
+                                <span class="channel-handle">@($"@{profileUsername}")</span>
+                                <span class="channel-stats"><span data-followers-count>0</span> subscribers • <span data-following-count>0</span> following</span>
+                            </div>
+                        <div class="channel-description">
+                            Welcome to my channel! Here you'll find amazing content about technology, lifestyle, and more.
+                            Subscribe for weekly uploads!
+                        </div>
+                    </div>
+
+                    <div class="channel-actions">
+                        @await Html.PartialAsync("~/Views/Shared/_FollowActions.cshtml")
+                        <button class="btn btn-secondary">Join</button>
+                    </div>
+                </div>
+
+                <div class="channel-connections" data-profile-connections data-username="@profileUsername">
+                    <h2 class="connections-heading">Community</h2>
+                    <div class="connections-summary">
+                        <span><strong data-followers-count>0</strong> subscribers</span>
+                        <span><strong data-following-count>0</strong> following</span>
+                    </div>
+                    <div class="connections-columns">
+                        <div class="connections-column">
+                            <h3>Following (<span data-following-count>0</span>)</h3>
+                            <div class="connections-scroll" data-following-list></div>
+                        </div>
+                        <div class="connections-column">
+                            <h3>Subscribers (<span data-followers-count>0</span>)</h3>
+                            <div class="connections-scroll" data-followers-list></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Channel Navigation -->
+                    <nav class="channel-nav">
+                        <div class="nav-item active">HOME</div>
+                        <div class="nav-item">VIDEOS</div>
+                        <div class="nav-item">SHORTS</div>
+                        <div class="nav-item">LIVE</div>
+                        <div class="nav-item">PLAYLISTS</div>
+                        <div class="nav-item">COMMUNITY</div>
+                        <div class="nav-item">ABOUT</div>
+                    </nav>
+                </div>
+
+                <!-- Channel Content -->
+                <div class="channel-main">
+                    <!-- Featured Video Section -->
+                    <div class="featured-section">
+                        <h2 class="section-title">Featured</h2>
+                        @if (Model != null)
+                        {
+                            var featuredPost = Model.First();
+                            <div class="featured-video">
+                                <div class="video-thumbnail">
+                                    {
+                                    }
+                                    else
+                                    {
+                                        <div class="thumbnail-placeholder">
+                                            <span class="play-icon">▶️</span>
+                                        </div>
+                                    }
+                                    <div class="video-duration">12:34</div>
+                                </div>
+                                <div class="video-info">
+                                    <h3 class="video-title">@Html.Raw(featuredPost.Message.Length > 100 ? featuredPost.Message.Substring(0, 100) + "..." : featuredPost.Message)</h3>
+                                    <div class="video-meta">
+                                        <span>1.2M views • @featuredPost.CreatedUtc.ToString("MMM d, yyyy")</span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Recent Videos Section -->
+                    <div class="videos-section">
+                        <h2 class="section-title">Recent uploads</h2>
+                        <div class="videos-grid">
+                            @if (Model != null)
+                            {
+                                @foreach (var post in Model)
+                                {
+                                    <div class="video-card">
+                                        <div class="video-thumbnail">
+                                            {
+                                            }
+                                            else
+                                            {
+                                                <div class="thumbnail-placeholder">
+                                                    <span class="play-icon">▶️</span>
+                                                </div>
+                                            }
+                                            <div class="video-duration">@{var duration = new Random().Next(3, 25);}@duration:@(new Random().Next(10, 59))</div>
+                                        </div>
+
+                                        <div class="video-info">
+                                            <h3 class="video-title">@Html.Raw(post.Message.Length > 60 ? post.Message.Substring(0, 60) + "..." : post.Message)</h3>
+                                            <div class="video-meta">
+                                                <div class="video-views">@{var views = new Random().Next(1000, 500000);}@views.ToString("N0") views</div>
+                                                <div class="video-date">@post.CreatedUtc.ToString("MMM d, yyyy")</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="no-videos">
+                                    <p>No videos available</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- About Section -->
+                    <div class="about-section">
+                        <h2 class="section-title">About</h2>
+                        <div class="about-content">
+                            <div class="about-text">
+                                <p>Welcome to my YouTube channel! I create content about technology, programming, and digital innovation.</p>
+                                <p>New videos every week covering the latest trends in tech and tutorials to help you improve your skills.</p>
+                            </div>
+                            <div class="about-stats">
+                                <div class="stat-item">
+                                    <div class="stat-number">1.2M</div>
+                                    <div class="stat-label">Subscribers</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-number">245</div>
+                                    <div class="stat-label">Videos</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-number">52M</div>
+                                    <div class="stat-label">Views</div>
+                                </div>
+                            </div>
+                            <div class="about-details">
+                                <div class="detail-item">
+                                    <span class="detail-icon">📅</span>
+                                    <span class="detail-text">Joined Jan 15, 2020</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-icon">🌍</span>
+                                    <span class="detail-text">United States</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="/themes/youtube/js/youtube.js"></script>
+    <script src="/js/connections.js"></script>
+</body>
+</html>

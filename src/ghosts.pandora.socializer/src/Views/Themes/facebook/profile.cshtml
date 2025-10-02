@@ -1,0 +1,368 @@
+@{
+    Layout = null;
+}
+@model Ghosts.Socializer.Infrastructure.User
+@{
+    var profileUsername = Model?.Username ?? (ViewContext.RouteData.Values["username"] as string)?.Trim();
+    if (string.IsNullOrWhiteSpace(profileUsername))
+    {
+        profileUsername = Context.Request.Cookies["username"];
+    }
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@profileUsername - Facebook</title>
+    <link rel="stylesheet" href="/themes/facebook/css/facebook.css">
+    <link rel="icon" href="/themes/facebook/images/facebook-icon.png" type="image/png">
+    <style>
+        .connections-card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .connections-summary {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #65676b;
+            margin-bottom: 16px;
+        }
+
+        .connections-columns {
+            display: grid;
+            gap: 12px;
+        }
+
+        .connections-column h3 {
+            font-size: 15px;
+            color: #1c1e21;
+            margin: 0 0 8px;
+        }
+
+        .connections-scroll {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .connection-item {
+            background: #f0f2f5;
+        }
+
+        .connection-item:hover {
+            background: #e4e6eb;
+        }
+
+        .connection-name {
+            color: #1c1e21;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <a href="/" class="logo">facebook</a>
+            <input type="text" class="search-bar" placeholder="Search Facebook">
+        </div>
+
+        <div class="header-center">
+            <a href="/" class="nav-item">🏠</a>
+            <a href="#" class="nav-item">📺</a>
+            <a href="#" class="nav-item">🛍️</a>
+            <a href="#" class="nav-item">👥</a>
+            <a href="#" class="nav-item">🎮</a>
+        </div>
+
+        <div class="header-right">
+            <a href="#"><button class="icon-btn">⊕</button></a>
+            <a href="/messages" class="icon-btn" style="text-decoration: none;">💬</a>
+            <a href="#"><button class="icon-btn">🔔</button></a>
+            <a href="/profile"><img src="/u/@ViewBag.Username/avatar" alt="Profile" class="profile-pic"></a>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Profile Header -->
+        <div class="profile-header">
+            <div class="profile-cover">
+                <img src="/themes/facebook/images/cover-photo.jpg" alt="@Model.Username" style="width: 100%; height: 100%; object-fit: cover; border-radius: 0 0 8px 8px;">
+            </div>
+
+            <div class="profile-info">
+                <img src="/u/@Model.Username/avatar" alt="@Model.Username" class="profile-picture-large">
+
+                <div class="profile-details">
+                    <h1 class="profile-name">@Model.Username</h1>
+                    <div class="profile-stats">1,234 friends</div>
+
+                    <div style="display: flex; gap: 8px; margin-top: 16px;">
+                        <img src="/themes/facebook/images/friend1.jpg" alt="Friend" style="width: 32px; height: 32px; border-radius: 50%; border: 2px solid white;">
+                        <img src="/themes/facebook/images/friend2.jpg" alt="Friend" style="width: 32px; height: 32px; border-radius: 50%; border: 2px solid white;">
+                        <img src="/themes/facebook/images/friend3.jpg" alt="Friend" style="width: 32px; height: 32px; border-radius: 50%; border: 2px solid white;">
+                        <img src="/themes/facebook/images/friend4.jpg" alt="Friend" style="width: 32px; height: 32px; border-radius: 50%; border: 2px solid white;">
+                        <img src="/themes/facebook/images/friend5.jpg" alt="Friend" style="width: 32px; height: 32px; border-radius: 50%; border: 2px solid white;">
+                    </div>
+                </div>
+            </div>
+
+            <div class="profile-actions">
+                <button class="profile-btn btn-primary">➕ Add to story</button>
+                <button class="profile-btn btn-secondary">✏️ Edit profile</button>
+                <button class="profile-btn btn-secondary">⚙️</button>
+                @await Html.PartialAsync("~/Views/Shared/_FollowActions.cshtml")
+            </div>
+
+            <nav class="profile-nav">
+                <a href="#" class="profile-nav-item active">Posts</a>
+                <a href="#" class="profile-nav-item">About</a>
+                <a href="#" class="profile-nav-item">Friends</a>
+                <a href="#" class="profile-nav-item">Photos</a>
+                <a href="#" class="profile-nav-item">Videos</a>
+                <a href="#" class="profile-nav-item">Check-ins</a>
+                <a href="#" class="profile-nav-item">More</a>
+            </nav>
+        </div>
+
+        <!-- Profile Content -->
+        <div style="display: flex; max-width: 1680px; margin: 0 auto; padding: 16px 0; gap: 32px;">
+            <!-- Left Column -->
+            <aside style="width: 360px; padding: 0 16px;">
+                <div class="post connections-card" data-profile-connections data-username="@profileUsername" style="padding: 20px; margin-bottom: 20px;">
+                    <h2 style="margin-bottom: 12px; font-size: 20px; font-weight: bold;">Connections</h2>
+                    <div class="connections-summary">
+                        <div>Followers <strong data-followers-count>0</strong></div>
+                        <div>Following <strong data-following-count>0</strong></div>
+                    </div>
+                    <div class="connections-columns">
+                        <div class="connections-column">
+                            <h3>Following (<span data-following-count>0</span>)</h3>
+                            <div class="connections-scroll" data-following-list></div>
+                        </div>
+                        <div class="connections-column">
+                            <h3>Followers (<span data-followers-count>0</span>)</h3>
+                            <div class="connections-scroll" data-followers-list></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Intro -->
+                <div class="post" style="padding: 20px;">
+                    <h2 style="margin-bottom: 16px; font-size: 20px; font-weight: bold;">Intro</h2>
+
+                    <div style="margin-bottom: 16px;">
+                        <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                            <span style="margin-right: 8px;">🏢</span>
+                            <span>Works at <strong>Tech Company</strong></span>
+                        </div>
+                        <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                            <span style="margin-right: 8px;">🎓</span>
+                            <span>Studied at <strong>University of Technology</strong></span>
+                        </div>
+                        <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                            <span style="margin-right: 8px;">📍</span>
+                            <span>Lives in <strong>San Francisco, CA</strong></span>
+                        </div>
+                        <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                            <span style="margin-right: 8px;">📍</span>
+                            <span>From <strong>@Model.LastActiveUtc</strong></span>
+                        </div>
+                        <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                            <span style="margin-right: 8px;">❤️</span>
+                            <span>Single</span>
+                        </div>
+                        <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                            <span style="margin-right: 8px;">📅</span>
+                            <span>Joined January 2018</span>
+                        </div>
+                    </div>
+
+                    <button class="btn-secondary" style="width: 100%; padding: 8px; border-radius: 6px; border: none; font-weight: 600;">Edit details</button>
+                </div>
+
+                <!-- Photos -->
+                <div class="post" style="padding: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                        <h2 style="font-size: 20px; font-weight: bold;">Photos</h2>
+                        <a href="#" style="color: #1877f2; text-decoration: none;">See all photos</a>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px;">
+                        <img src="/themes/facebook/images/photo1.jpg" alt="Photo" style="width: 100%; height: 100px; object-fit: cover; border-radius: 8px; cursor: pointer;">
+                        <img src="/themes/facebook/images/photo2.jpg" alt="Photo" style="width: 100%; height: 100px; object-fit: cover; border-radius: 8px; cursor: pointer;">
+                        <img src="/themes/facebook/images/photo3.jpg" alt="Photo" style="width: 100%; height: 100px; object-fit: cover; border-radius: 8px; cursor: pointer;">
+                        <img src="/themes/facebook/images/photo4.jpg" alt="Photo" style="width: 100%; height: 100px; object-fit: cover; border-radius: 8px; cursor: pointer;">
+                        <img src="/themes/facebook/images/photo5.jpg" alt="Photo" style="width: 100%; height: 100px; object-fit: cover; border-radius: 8px; cursor: pointer;">
+                        <img src="/themes/facebook/images/photo6.jpg" alt="Photo" style="width: 100%; height: 100px; object-fit: cover; border-radius: 8px; cursor: pointer;">
+                    </div>
+                </div>
+
+                <!-- Friends -->
+                <div class="post" style="padding: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                        <div>
+                            <h2 style="font-size: 20px; font-weight: bold;">Friends</h2>
+                            <div style="color: #65676b; font-size: 15px;">1,234 friends</div>
+                        </div>
+                        <a href="#" style="color: #1877f2; text-decoration: none;">See all friends</a>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+                        <div style="text-align: center;">
+                            <img src="/themes/facebook/images/friend1.jpg" alt="Friend" style="width: 100%; height: 100px; object-fit: cover; border-radius: 8px; margin-bottom: 4px; cursor: pointer;">
+                            <div style="font-size: 13px; font-weight: 600;">Sarah Wilson</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <img src="/themes/facebook/images/friend2.jpg" alt="Friend" style="width: 100%; height: 100px; object-fit: cover; border-radius: 8px; margin-bottom: 4px; cursor: pointer;">
+                            <div style="font-size: 13px; font-weight: 600;">Mike Johnson</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <img src="/themes/facebook/images/friend3.jpg" alt="Friend" style="width: 100%; height: 100px; object-fit: cover; border-radius: 8px; margin-bottom: 4px; cursor: pointer;">
+                            <div style="font-size: 13px; font-weight: 600;">Emma Davis</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <img src="/themes/facebook/images/friend4.jpg" alt="Friend" style="width: 100%; height: 100px; object-fit: cover; border-radius: 8px; margin-bottom: 4px; cursor: pointer;">
+                            <div style="font-size: 13px; font-weight: 600;">Alex Smith</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <img src="/themes/facebook/images/friend5.jpg" alt="Friend" style="width: 100%; height: 100px; object-fit: cover; border-radius: 8px; margin-bottom: 4px; cursor: pointer;">
+                            <div style="font-size: 13px; font-weight: 600;">Lisa Brown</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <img src="/themes/facebook/images/friend6.jpg" alt="Friend" style="width: 100%; height: 100px; object-fit: cover; border-radius: 8px; margin-bottom: 4px; cursor: pointer;">
+                            <div style="font-size: 13px; font-weight: 600;">Tom Wilson</div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Right Column - Posts -->
+            <main style="flex: 1; max-width: 680px;">
+                <!-- Create Post -->
+                <div class="create-post">
+                    <div class="create-post-top">
+                        <img src="/u/@ViewBag.Username/avatar" alt="Profile" class="profile-pic">
+                        <input type="text" class="create-post-input" placeholder="What's on your mind, @ViewBag.Username?">
+                    </div>
+                    <div class="create-post-buttons">
+                        <button class="create-post-btn">📹 Live video</button>
+                        <button class="create-post-btn">📷 Photo/video</button>
+                        <button class="create-post-btn">📝 Life event</button>
+                    </div>
+                </div>
+
+                <!-- Posts -->
+                <article class="post" data-post-id="5">
+                    <div class="post-header">
+                        <div class="post-user-info">
+                            <img src="/themes/facebook/images/profile-pic.jpg" alt="@Model.Username" class="profile-pic">
+                            <div>
+                                <div class="post-user-name">@Model.Username</div>
+                                <div class="post-time">3 hours ago · 🌍</div>
+                            </div>
+                        </div>
+                        <button class="post-menu">⋯</button>
+                    </div>
+                    <div class="post-content">
+                        <div class="post-text">Finally finished reading "The Design of Everyday Things" by Don Norman. Such an insightful book about user experience and design principles. Highly recommend it to anyone interested in design or technology! 📚💡</div>
+                        <img src="/themes/facebook/images/book-design.jpg" alt="Design book" class="post-image">
+                    </div>
+                    <div class="post-stats">
+                        <span>👍💡📚 67 people</span>
+                        <span>15 comments · 4 shares</span>
+                    </div>
+                    <div class="post-actions">
+                        <button class="post-action like-btn" data-action="like">👍 Like</button>
+                        <button class="post-action comment-btn" data-action="comment">💬 Comment</button>
+                        <button class="post-action share-btn" data-action="share">📤 Share</button>
+                    </div>
+                </article>
+
+                <article class="post" data-post-id="6">
+                    <div class="post-header">
+                        <div class="post-user-info">
+                            <img src="/themes/facebook/images/profile-pic.jpg" alt="@Model.Username" class="profile-pic">
+                            <div>
+                                <div class="post-user-name">@Model.Username</div>
+                                <div class="post-time">1 day ago · 👥</div>
+                            </div>
+                        </div>
+                        <button class="post-menu">⋯</button>
+                    </div>
+                    <div class="post-content">
+                        <div class="post-text">Had an amazing time at the tech conference today! Met so many inspiring people and learned about the latest trends in web development. The future of technology is looking bright! 🚀</div>
+                        <img src="/themes/facebook/images/tech-conference.jpg" alt="Tech conference" class="post-image">
+                    </div>
+                    <div class="post-stats">
+                        <span>👍🚀💻 142 people</span>
+                        <span>28 comments · 7 shares</span>
+                    </div>
+                    <div class="post-actions">
+                        <button class="post-action like-btn liked" data-action="like">👍 Like</button>
+                        <button class="post-action comment-btn" data-action="comment">💬 Comment</button>
+                        <button class="post-action share-btn" data-action="share">📤 Share</button>
+                    </div>
+                </article>
+
+                <article class="post" data-post-id="7">
+                    <div class="post-header">
+                        <div class="post-user-info">
+                            <img src="/themes/facebook/images/profile-pic.jpg" alt="@Model.Username" class="profile-pic">
+                            <div>
+                                <div class="post-user-name">@Model.Username</div>
+                                <div class="post-time">3 days ago · 🌍</div>
+                            </div>
+                        </div>
+                        <button class="post-menu">⋯</button>
+                    </div>
+                    <div class="post-content">
+                        <div class="post-text">Weekend coding session complete! 💻 Working on a new personal project that combines my love for technology and helping others. Can't wait to share more details soon!</div>
+                    </div>
+                    <div class="post-stats">
+                        <span>👍💻🔥 89 people</span>
+                        <span>12 comments · 2 shares</span>
+                    </div>
+                    <div class="post-actions">
+                        <button class="post-action like-btn" data-action="like">👍 Like</button>
+                        <button class="post-action comment-btn" data-action="comment">💬 Comment</button>
+                        <button class="post-action share-btn" data-action="share">📤 Share</button>
+                    </div>
+                </article>
+
+                <article class="post" data-post-id="8">
+                    <div class="post-header">
+                        <div class="post-user-info">
+                            <img src="/themes/facebook/images/profile-pic.jpg" alt="@Model.Username" class="profile-pic">
+                            <div>
+                                <div class="post-user-name">@Model.Username</div>
+                                <div class="post-time">1 week ago · 🌍</div>
+                            </div>
+                        </div>
+                        <button class="post-menu">⋯</button>
+                    </div>
+                    <div class="post-content">
+                        <div class="post-text">Grateful for all the amazing people in my life! Had a wonderful dinner with old friends tonight. Sometimes it's the simple moments that mean the most. 🍽️❤️</div>
+                        <img src="/themes/facebook/images/dinner-friends.jpg" alt="Dinner with friends" class="post-image">
+                    </div>
+                    <div class="post-stats">
+                        <span>❤️😊👥 156 people</span>
+                        <span>32 comments · 8 shares</span>
+                    </div>
+                    <div class="post-actions">
+                        <button class="post-action like-btn" data-action="like">👍 Like</button>
+                        <button class="post-action comment-btn" data-action="comment">💬 Comment</button>
+                        <button class="post-action share-btn" data-action="share">📤 Share</button>
+                    </div>
+                </article>
+            </main>
+        </div>
+    </div>
+
+    <script src="/js/connections.js"></script>
+</body>
+</html>
