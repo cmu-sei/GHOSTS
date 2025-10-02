@@ -1,7 +1,12 @@
+@model Ghosts.Socializer.Infrastructure.Post
 @{
     Layout = null;
+    ViewBag.Theme = "linkedin";
+    var currentUser = ViewBag.Username as string;
+    var currentUserLiked = !string.IsNullOrWhiteSpace(currentUser) &&
+        (Model?.Likes?.Any(l => string.Equals(l.Username, currentUser, StringComparison.OrdinalIgnoreCase)) ?? false);
+    var likedClass = currentUserLiked ? " liked" : string.Empty;
 }
-@model Ghosts.Socializer.Infrastructure.Post
 
 <!DOCTYPE html>
 <html lang="en">
@@ -116,9 +121,9 @@
 
                         <!-- Post Actions -->
                         <div class="post-actions">
-                            <button class="action-btn like-btn" data-id="@Model.Id">
+                            <button class="action-btn like-btn like-it@likedClass" data-id="@Model.Id">
                                 <span class="action-icon">👍</span>
-                                <span class="action-text">Like</span>
+                                <span class="action-text">@(currentUserLiked ? $"Liked ({Model.Likes?.Count ?? 0})" : "Like")</span>
                             </button>
                             <button class="action-btn comment-btn">
                                 <span class="action-icon">💬</span>

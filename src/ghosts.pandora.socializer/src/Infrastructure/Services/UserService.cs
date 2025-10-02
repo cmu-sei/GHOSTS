@@ -9,7 +9,7 @@ public interface IUserService
     Task<User> GetUserByUsernameAsync(string username);
     Task<User> CreateUserAsync(string username, string bio = null);
     Task<User> GetOrCreateUserAsync(string username, string bio = null);
-    Task<User> UpdateUserAsync(string username, string bio = null, string status = null);
+    Task<User> UpdateUserAsync(string username, string bio = null, string status = null, string theme = null);
     Task<bool> DeleteUserAsync(string username);
     Task<bool> UsernameExistsAsync(string username);
     Task<List<User>> SearchUsersAsync(string searchTerm, int limit = 20);
@@ -76,7 +76,7 @@ public class UserService(DataContext context) : IUserService
         return await CreateUserAsync(username, bio);
     }
 
-    public async Task<User> UpdateUserAsync(string username, string bio = null, string status = null)
+    public async Task<User> UpdateUserAsync(string username, string bio = null, string status = null, string theme = null)
     {
         var user = await context.Users.FindAsync(username);
         if (user == null)
@@ -87,6 +87,9 @@ public class UserService(DataContext context) : IUserService
 
         if (status != null)
             user.Status = status;
+
+        if (theme != null)
+            user.Theme = theme;
 
         user.LastActiveUtc = DateTime.UtcNow;
 

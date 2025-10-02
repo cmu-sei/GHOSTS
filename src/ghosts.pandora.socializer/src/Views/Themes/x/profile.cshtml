@@ -1,11 +1,76 @@
+@{
+    var profileUsername = (ViewContext.RouteData.Values["username"] as string)?.Trim();
+    if (string.IsNullOrWhiteSpace(profileUsername))
+    {
+        profileUsername = Context.Request.Cookies["username"];
+    }
+
+    profileUsername ??= "user";
+}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>John Doe (#johndoe) / X</title>
+    <title>@profileUsername (@profileUsername) / X</title>
     <link rel="stylesheet" href="css/profile.css">
     <link rel="icon" href="images/x-icon.png">
+    <style>
+        .follow-action-form {
+            margin-left: 12px;
+        }
+
+        .follow-action-button {
+            background: #1d9bf0;
+            border: none;
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 999px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .connections-columns {
+            display: grid;
+            gap: 12px;
+            margin-top: 16px;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        }
+
+        .connections-column {
+            background: #0f1419;
+            border: 1px solid #2f3336;
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .connections-column h3 {
+            margin: 0 0 12px;
+            font-size: 14px;
+            color: #e7e9ea;
+        }
+
+        .connections-scroll {
+            max-height: 220px;
+            overflow-y: auto;
+        }
+
+        .connection-item {
+            background: transparent;
+        }
+
+        .connection-item:hover {
+            background: rgba(29, 155, 240, 0.15);
+        }
+
+        .connection-name {
+            color: #e7e9ea;
+        }
+
+        .connection-bio {
+            color: #8b98a5;
+        }
+    </style>
 </head>
 <body>
     <div class="app">
@@ -56,10 +121,10 @@
                 <button class="post-button">Post</button>
             </div>
             <div class="user-info">
-                <img src="images/profile-avatar.jpg" alt="Profile" class="user-avatar">
+                <img src="/u/@profileUsername/avatar" alt="@profileUsername" class="user-avatar">
                 <div class="user-details">
-                    <div class="username">John Doe</div>
-                    <div class="handle">#johndoe</div>
+                    <div class="username">@profileUsername</div>
+                    <div class="handle">@($"@{profileUsername}")</div>
                 </div>
                 <span class="more-options">⋯</span>
             </div>
@@ -72,8 +137,8 @@
                 <div class="header-nav">
                     <button class="back-btn">←</button>
                     <div class="header-info">
-                        <h1>John Doe</h1>
-                        <span class="post-count">1,234 posts</span>
+                        <h1>@profileUsername</h1>
+                        <span class="post-count">@(Model?.Count ?? 0) posts</span>
                     </div>
                 </div>
             </div>
@@ -86,17 +151,18 @@
 
                 <div class="profile-info">
                     <div class="avatar-section">
-                        <img src="images/profile-avatar.jpg" alt="Profile" class="profile-avatar">
+                        <img src="/u/@profileUsername/avatar" alt="@profileUsername" class="profile-avatar">
                         <div class="profile-actions">
                             <button class="action-btn">⋯</button>
                             <button class="action-btn">✉️</button>
                             <button class="edit-profile-btn">Edit profile</button>
+                            @await Html.PartialAsync("~/Views/Shared/_FollowActions.cshtml")
                         </div>
                     </div>
 
                     <div class="profile-details">
-                        <h2 class="profile-name">John Doe</h2>
-                        <span class="profile-handle">#johndoe</span>
+                        <h2 class="profile-name">@profileUsername</h2>
+                        <span class="profile-handle">@($"@{profileUsername}")</span>
 
                         <div class="profile-bio">
                             Software Developer 💻 | Tech Enthusiast | Building the future one line of code at a time
@@ -105,15 +171,25 @@
                             <br>📅 Joined March 2020
                         </div>
 
-                        <div class="profile-stats">
+                        <div class="profile-stats" data-profile-connections data-username="@profileUsername">
                             <a href="#" class="stat-item">
-                                <span class="stat-number">234</span>
+                                <span class="stat-number" data-following-count>0</span>
                                 <span class="stat-label">Following</span>
                             </a>
                             <a href="#" class="stat-item">
-                                <span class="stat-number">1.2k</span>
+                                <span class="stat-number" data-followers-count>0</span>
                                 <span class="stat-label">Followers</span>
                             </a>
+                        </div>
+                        <div class="connections-columns">
+                            <div class="connections-column">
+                                <h3>Following (<span data-following-count>0</span>)</h3>
+                                <div class="connections-scroll" data-following-list></div>
+                            </div>
+                            <div class="connections-column">
+                                <h3>Followers (<span data-followers-count>0</span>)</h3>
+                                <div class="connections-scroll" data-followers-list></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -350,5 +426,6 @@
     </div>
 
     <script src="js/profile.js"></script>
+    <script src="/js/connections.js"></script>
 </body>
 </html>

@@ -1,3 +1,4 @@
+using Ghosts.Socializer.Infrastructure;
 using Ghosts.Socializer.Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,12 +16,12 @@ public class DirectMessagesController(
     {
         var username = GetOrCreateUsernameCookie(this.HttpContext);
         var user = await userService.GetOrCreateUserAsync(username);
-        var themeName = user.Theme ?? "default";
+        var themeName = await ResolveThemeAsync(user);
 
         var receivedMessages = await directMessageService.GetReceivedMessagesAsync(username);
         var sentMessages = await directMessageService.GetSentMessagesAsync(username);
 
-        ViewBag.Theme = new { Name = themeName };
+        ViewBag.Theme = themeName;
         ViewBag.Username = username;
         ViewBag.ReceivedMessages = receivedMessages;
         ViewBag.SentMessages = sentMessages;
@@ -34,7 +35,7 @@ public class DirectMessagesController(
     {
         var username = GetOrCreateUsernameCookie(this.HttpContext);
         var user = await userService.GetOrCreateUserAsync(username);
-        var themeName = user.Theme ?? "default";
+        var themeName = await ResolveThemeAsync(user);
 
         var conversation = await directMessageService.GetConversationAsync(username, partnerUsername);
 
@@ -44,7 +45,7 @@ public class DirectMessagesController(
             await directMessageService.MarkAsReadAsync(message.Id);
         }
 
-        ViewBag.Theme = new { Name = themeName };
+        ViewBag.Theme = themeName;
         ViewBag.Username = username;
         ViewBag.PartnerUsername = partnerUsername;
         ViewBag.Conversation = conversation;
@@ -78,5 +79,27 @@ public class DirectMessagesController(
     {
         await directMessageService.MarkAsReadAsync(messageId);
         return NoContent();
+    }
+
+    private async Task<string> ResolveThemeAsync(User user)
+    {
+        var cookieTheme = ThemeRead();
+        var selectedTheme = !string.IsNullOrWhiteSpace(cookieTheme)
+            ? cookieTheme
+            : user?.Theme;
+
+        if (string.IsNullOrWhiteSpace(selectedTheme))
+        {
+            selectedTheme = "default";
+        }
+
+        if (user != null && !string.Equals(user.Theme, selectedTheme, StringComparison.OrdinalIgnoreCase))
+        {
+            await userService.UpdateUserAsync(user.Username, theme: selectedTheme);
+            user.Theme = selectedTheme;
+        }
+
+        ThemeWrite(selectedTheme);
+        return selectedTheme;
     }
 }

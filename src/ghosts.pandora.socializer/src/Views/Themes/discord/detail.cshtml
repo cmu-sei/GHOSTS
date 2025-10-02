@@ -1,5 +1,12 @@
+@model Ghosts.Socializer.Infrastructure.Post
 @{
     Layout = null;
+    ViewBag.Theme = "discord";
+    var currentUser = ViewBag.Username as string;
+    var currentUserLiked = Model != null && !string.IsNullOrWhiteSpace(currentUser) &&
+        (Model.Likes?.Any(l => string.Equals(l.Username, currentUser, StringComparison.OrdinalIgnoreCase)) ?? false);
+    var likedClass = currentUserLiked ? " liked" : string.Empty;
+    var likesCount = Model?.Likes?.Count ?? 0;
 }
 
 <!DOCTYPE html>
@@ -26,35 +33,40 @@
 
             <div class="thread-content">
                 <!-- Original Message -->
-                <div class="original-message">
-                    <img src="/themes/discord/images/user1-avatar.jpg" alt="User" class="message-avatar">
+            @if (Model != null)
+            {
+                <div class="original-message" data-profile-connections data-username="@(Model.Username)">
+                    <img src="/u/@Model.Username/avatar" alt="@Model.Username" class="message-avatar">
                     <div class="message-content">
                         <div class="message-header">
-                            <span class="message-author">AliceGamer</span>
-                            <span class="message-timestamp">Today at 2:47 PM</span>
+                            <span class="message-author">@Model.Username</span>
+                            <span class="message-timestamp">@Model.CreatedUtc.ToString("MMM d, yyyy h:mm tt")</span>
                         </div>
                         <div class="message-text">
-                            Hey everyone! Just finished the new God of War game. What an incredible experience! Anyone else played it yet?
-                            <br><br>
-                            The storytelling is absolutely phenomenal and the character development is next level.
-                            I won't spoil anything but the ending had me in tears! 😭
+                            @Html.Raw(Model.Message)
                         </div>
                         <div class="message-reactions">
                             <div class="reaction">
-                                <span class="reaction-emoji">🎮</span>
-                                <span class="reaction-count">12</span>
+                                <span class="reaction-emoji">❤️</span>
+                                <span class="reaction-count">@likesCount</span>
                             </div>
-                            <div class="reaction">
-                                <span class="reaction-emoji">🔥</span>
-                                <span class="reaction-count">18</span>
-                            </div>
-                            <div class="reaction">
-                                <span class="reaction-emoji">😭</span>
-                                <span class="reaction-count">7</span>
-                            </div>
+                        </div>
+                        <div class="message-actions">
+                            <button class="message-action like-it@(likedClass)" data-id="@Model.Id" title="Add reaction">
+                                @(currentUserLiked ? "❤️ Liked" : "😀 React")
+                            </button>
                         </div>
                     </div>
                 </div>
+            }
+            else
+            {
+                <div class="original-message">
+                    <div class="message-content">
+                        <div class="message-text">This message is unavailable.</div>
+                    </div>
+                </div>
+            }
 
                 <!-- Thread Replies -->
                 <div class="thread-replies">

@@ -9,19 +9,59 @@ namespace Ghosts.Socializer.Controllers;
 [Route("/u")]
 [Route("/users")]
 [Route("/profile")]
-public class UsersController(ILogger logger, IWebHostEnvironment env, IUserService userService)
+public class UsersController(
+    ILogger logger,
+    IWebHostEnvironment env,
+    IUserService userService,
+    IPostService postService,
+    IFollowService followService)
     : BaseController(logger)
 {
     [HttpGet]
     [HttpGet("{username}")]
     public async Task<IActionResult> GetUser(string username = null)
     {
-        User user;
-        if (string.IsNullOrEmpty(username))
-            user = await userService.GetUserByUsernameAsync(CookieRead("username"));
-        else
-            user = await userService.GetUserByUsernameAsync(username);
-        return View("Profile", user);
+        var currentUsername = UserRead();
+        var targetUsername = string.IsNullOrWhiteSpace(username) ? currentUsername : username;
+
+        if (string.IsNullOrWhiteSpace(targetUsername))
+        {
+            return RedirectToAction("Index", "Home");
+        }
+
+        var user = await userService.GetUserByUsernameAsync(targetUsername);
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        var theme = ThemeRead();
+        if (string.IsNullOrWhiteSpace(theme))
+        {
+            theme = user.Theme ?? "default";
+        }
+
+        var isSelf = !string.IsNullOrWhiteSpace(currentUsername) &&
+                     string.Equals(currentUsername, user.Username, StringComparison.OrdinalIgnoreCase);
+        var isFollowing = !isSelf &&
+                          !string.IsNullOrWhiteSpace(currentUsername) &&
+                          await followService.IsFollowingAsync(currentUsername, user.Username);
+
+        ViewBag.Theme = theme;
+        ViewBag.ProfileUser = user.Username;
+        ViewBag.ProfileUsername = user.Username;
+        ViewBag.IsSelf = isSelf;
+        ViewBag.IsFollowing = isFollowing;
+
+        var viewPath = $"~/Views/Themes/{theme}/profile.cshtml";
+
+        if (string.Equals(theme, "default", StringComparison.OrdinalIgnoreCase))
+        {
+            var posts = await postService.GetPostsByUserAsync(user.Username, 100);
+            return View(viewPath, posts);
+        }
+
+        return View(viewPath, user);
     }
 
     [HttpGet("{username}/avatar")]

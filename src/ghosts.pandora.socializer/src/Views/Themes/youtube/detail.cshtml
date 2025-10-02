@@ -1,5 +1,13 @@
+@model Ghosts.Socializer.Infrastructure.Post
 @{
     Layout = null;
+    ViewBag.Theme = "youtube";
+    var currentUser = ViewBag.Username as string;
+    var currentUserLiked = Model != null && !string.IsNullOrWhiteSpace(currentUser) &&
+        (Model.Likes?.Any(l => string.Equals(l.Username, currentUser, StringComparison.OrdinalIgnoreCase)) ?? false);
+    var likedClass = currentUserLiked ? " liked" : string.Empty;
+    var likesCount = Model?.Likes?.Count ?? 0;
+    var commentsCount = Model?.Comments?.Count ?? 0;
 }
 
 <!DOCTYPE html>
@@ -7,7 +15,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Building a React App from Scratch - Complete Tutorial - YouTube</title>
+    <title>@(Model != null ? $"{Model.Username} on YouTube" : "Video")</title>
     <link rel="stylesheet" href="css/video.css">
     <link rel="icon" href="images/youtube-icon.png">
 </head>
@@ -74,14 +82,14 @@
 
                     <div class="video-metadata">
                         <div class="metadata-left">
-                            <span class="view-count">1,234,567 views</span>
-                            <span class="upload-date">Dec 15, 2024</span>
+                            <span class="view-count">@likesCount likes</span>
+                            <span class="upload-date">@Model?.CreatedUtc.ToString("MMM d, yyyy")</span>
                         </div>
                         <div class="metadata-right">
                             <div class="action-buttons">
-                                <button class="action-btn liked">
-                                    <span class="action-icon">👍</span>
-                                    <span class="action-count">12K</span>
+                                <button class="action-btn like-it@(likedClass)" data-id="@((Model?.Id ?? Guid.Empty).ToString())">
+                                    <span class="action-icon">@(currentUserLiked ? "👍" : "👍")</span>
+                                    <span class="action-count">@likesCount</span>
                                 </button>
                                 <button class="action-btn">
                                     <span class="action-icon">👎</span>
@@ -103,12 +111,12 @@
                 </div>
 
                 <!-- Channel Info -->
-                <div class="channel-info">
+                <div class="channel-info" data-profile-connections data-username="@(Model?.Username ?? "channel")">
                     <div class="channel-details">
-                        <img src="/themes/youtube/images/channel1.jpg" alt="Channel" class="channel-avatar">
+                        <img src="/u/@(Model?.Username ?? "channel")/avatar" alt="Channel" class="channel-avatar">
                         <div class="channel-text">
-                            <h3 class="channel-name">Coding Tutorials</h3>
-                            <span class="subscriber-count">1.2M subscribers</span>
+                            <h3 class="channel-name">@(Model?.Username ?? "Channel")</h3>
+                            <span class="subscriber-count"><span data-followers-count>0</span> subscribers</span>
                         </div>
                     </div>
                     <button class="subscribe-btn subscribed">
@@ -152,7 +160,7 @@
                 <!-- Comments Section -->
                 <div class="comments-section">
                     <div class="comments-header">
-                        <h3 class="comments-count">847 Comments</h3>
+                        <h3 class="comments-count">@commentsCount Comments</h3>
                         <div class="sort-comments">
                             <button class="sort-btn">
                                 <span class="sort-icon">⚏</span>
@@ -435,6 +443,9 @@
         </div>
     </div>
 
+    <script src="/js/jQuery/jquery-3.5.1.min.js"></script>
+    <script src="/js/signalr.min.js"></script>
+    <script src="/js/social.js"></script>
     <script src="js/video.js"></script>
 </body>
 </html>

@@ -1,5 +1,10 @@
 @{
     Layout = null;
+    ViewBag.Theme = "default";
+    var currentUser = ViewBag.Username as string;
+    var currentUserLiked = !string.IsNullOrWhiteSpace(currentUser) &&
+        (Model?.Likes?.Any(l => string.Equals(l.Username, currentUser, StringComparison.OrdinalIgnoreCase)) ?? false);
+    var likedClass = currentUserLiked ? " liked" : string.Empty;
 }
 @model Ghosts.Socializer.Infrastructure.Post
 
@@ -252,9 +257,9 @@
                     @Html.Raw(Model.Message)
                 </div>
                 <div class="post-actions">
-                    <span class="post-action like-action like-it" data-id="@Model.Id">
-                        ❤️ @(Model.Likes?.Count ?? 0) likes
-                    </span>
+                <span class="post-action like-action like-it@likedClass" data-id="@Model.Id">
+                    @(currentUserLiked ? "❤️ Liked" : "🤍 Like") @(Model.Likes?.Count ?? 0) likes
+                </span>
                     <span class="post-action comment-action">
                         💬 @(Model.Comments?.Count ?? 0) comments
                     </span>
@@ -314,6 +319,6 @@
 
     <script src="/lib/jquery/dist/jquery.min.js"></script>
     <script src="/js/signalr.min.js"></script>
-    <script src="/js/posts.js"></script>
+    <script src="/js/social.js"></script>
 </body>
 </html>

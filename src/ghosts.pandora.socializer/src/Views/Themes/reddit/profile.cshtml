@@ -1,11 +1,96 @@
+@{
+    var profileUsername = (ViewContext.RouteData.Values["username"] as string)?.Trim();
+    if (string.IsNullOrWhiteSpace(profileUsername))
+    {
+        profileUsername = Context.Request.Cookies["username"];
+    }
+
+    profileUsername ??= "user";
+}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>u/johndoe - Reddit</title>
+    <title>u/@profileUsername - Reddit</title>
     <link rel="stylesheet" href="css/profile.css">
     <link rel="icon" href="images/reddit-icon.png">
+    <style>
+        .follow-action-form {
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        .follow-action-button {
+            background: #ff4500;
+            border: none;
+            color: #fff;
+            padding: 8px 18px;
+            border-radius: 999px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .connections-card {
+            background: #1a1a1b;
+            border: 1px solid #343536;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 16px;
+        }
+
+        .connections-title {
+            margin: 0 0 12px;
+            font-size: 18px;
+            color: #d7dadc;
+        }
+
+        .connections-summary {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            font-size: 14px;
+            color: #818384;
+        }
+
+        .connections-columns {
+            display: grid;
+            gap: 12px;
+        }
+
+        .connections-column {
+            background: #272729;
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .connections-column h3 {
+            margin: 0 0 12px;
+            font-size: 14px;
+            color: #d7dadc;
+        }
+
+        .connections-scroll {
+            max-height: 220px;
+            overflow-y: auto;
+        }
+
+        .connection-item {
+            background: transparent;
+        }
+
+        .connection-item:hover {
+            background: rgba(255, 69, 0, 0.15);
+        }
+
+        .connection-name {
+            color: #d7dadc;
+        }
+
+        .connection-bio {
+            color: #818384;
+        }
+    </style>
 </head>
 <body>
     <div class="app">
@@ -27,8 +112,8 @@
                 <button class="header-btn">🔔</button>
                 <button class="header-btn">➕</button>
                 <div class="user-menu">
-                    <img src="images/profile-avatar.jpg" alt="Profile" class="user-avatar">
-                    <span class="username">u/johndoe</span>
+                    <img src="/u/@profileUsername/avatar" alt="@profileUsername" class="user-avatar">
+                    <span class="username">u/@profileUsername</span>
                     <span class="dropdown-arrow">▼</span>
                 </div>
             </div>
@@ -42,9 +127,9 @@
                 </div>
                 <div class="profile-info">
                     <div class="profile-left">
-                        <img src="images/profile-avatar.jpg" alt="Profile" class="profile-avatar">
+                        <img src="/u/@profileUsername/avatar" alt="@profileUsername" class="profile-avatar">
                         <div class="profile-details">
-                            <h1 class="profile-username">u/johndoe</h1>
+                            <h1 class="profile-username">u/@profileUsername</h1>
                             <div class="profile-stats">
                                 <div class="stat-item">
                                     <span class="stat-value">1.2k</span>
@@ -58,9 +143,26 @@
                         </div>
                     </div>
                     <div class="profile-right">
-                        <button class="follow-btn">Follow</button>
+                        @await Html.PartialAsync("~/Views/Shared/_FollowActions.cshtml")
                         <button class="chat-btn">Chat</button>
                         <button class="more-btn">⋯</button>
+                    </div>
+                </div>
+                <div class="connections-card" data-profile-connections data-username="@profileUsername">
+                    <h2 class="connections-title">Connections</h2>
+                    <div class="connections-summary">
+                        <span><strong data-followers-count>0</strong> followers</span>
+                        <span><strong data-following-count>0</strong> following</span>
+                    </div>
+                    <div class="connections-columns">
+                        <div class="connections-column">
+                            <h3>Following (<span data-following-count>0</span>)</h3>
+                            <div class="connections-scroll" data-following-list></div>
+                        </div>
+                        <div class="connections-column">
+                            <h3>Followers (<span data-followers-count>0</span>)</h3>
+                            <div class="connections-scroll" data-followers-list></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -85,6 +187,10 @@
                                 <div class="about-stat">
                                     <span class="about-icon">💬</span>
                                     <span class="about-text">892 Comment Karma</span>
+                                </div>
+                                <div class="about-stat">
+                                    <span class="about-icon">👥</span>
+                                    <span class="about-text"><span data-followers-count>0</span> followers • <span data-following-count>0</span> following</span>
                                 </div>
                             </div>
                         </div>
@@ -321,5 +427,6 @@
     </div>
 
     <script src="js/profile.js"></script>
+    <script src="/js/connections.js"></script>
 </body>
 </html>

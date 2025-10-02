@@ -2,6 +2,10 @@
 
 @{
     var theme = ViewBag.Theme as string ?? "default";
+    var currentUser = ViewBag.Username as string;
+    var currentUserLiked = !string.IsNullOrWhiteSpace(currentUser) &&
+        (Model.Likes?.Any(l => string.Equals(l.Username, currentUser, StringComparison.OrdinalIgnoreCase)) ?? false);
+    var likedClass = currentUserLiked ? " liked" : string.Empty;
 }
 
 @switch (theme)
@@ -32,8 +36,10 @@
                 <div>@(Model.Comments?.Count ?? 0) comments</div>
             </div>
             <div class="post-actions">
-                <button class="post-action like-btn like-it" data-id="@Model.Id">👍 Like</button>
-                <a href="/posts/@Model.Id" style="text-decoration: none"><button class="post-action comment-btn" data-action="comment">💬 Comment</button></a>
+                <button class="post-action like-btn like-it@(likedClass)" data-id="@Model.Id">
+                    @(currentUserLiked ? "👍 Liked" : "👍 Like")
+                </button>
+                <a href="/posts/@Model.Id" style="text-decoration: none"><button href="/posts/@Model.Id" class="post-action comment-btn" data-action="comment">💬 Comment</button></a>
                 <button class="post-action share-btn" data-action="share">📤 Share</button>
             </div>
         </article>
@@ -53,7 +59,9 @@
             </div>
             <div class="post-actions">
                 <div class="action-buttons">
-                    <button class="action-btn like-btn like-it" data-id="@Model.Id">❤️</button>
+                    <button class="action-btn like-btn like-it@(likedClass)" data-id="@Model.Id">
+                        @(currentUserLiked ? "❤️" : "🤍")
+                    </button>
                     <a href="/posts/@Model.Id"><button class="action-btn comment-btn">💬</button></a>
                     <button class="action-btn share-btn">📤</button>
                 </div>
@@ -89,7 +97,7 @@
                         <span class="action-icon">🔄</span>
                         <span class="action-count">0</span>
                     </button>
-                    <button class="action-btn like-it" data-id="@Model.Id">
+                    <button class="action-btn like-it@(likedClass)" data-id="@Model.Id">
                         <span class="action-icon">❤️</span>
                         <span class="action-count">@(Model.Likes?.Count ?? 0)</span>
                     </button>
@@ -122,9 +130,9 @@
                 <div class="post-text">@Html.Raw(Model.Message)</div>
             </div>
             <div class="post-actions">
-                <button class="action-btn like-btn like-it" data-id="@Model.Id">
+                <button class="action-btn like-btn like-it@(likedClass)" data-id="@Model.Id">
                     <span class="action-icon">👍</span>
-                    <span class="action-text">Like (@(Model.Likes?.Count ?? 0))</span>
+                    <span class="action-text">@(currentUserLiked ? $"Liked ({Model.Likes?.Count ?? 0})" : $"Like ({Model.Likes?.Count ?? 0})")</span>
                 </button>
                 <a href="/posts/@Model.Id"><button class="action-btn comment-btn">
                     <span class="action-icon">💬</span>
@@ -141,7 +149,7 @@
     case "reddit":
         <div class="post" data-post-id="@Model.Id">
             <div class="post-votes">
-                <button class="vote-btn upvote like-it" data-id="@Model.Id">▲</button>
+                <button class="vote-btn upvote like-it@(likedClass)" data-id="@Model.Id">▲</button>
                 <span class="vote-count">@(Model.Likes?.Count ?? 0)</span>
                 <button class="vote-btn downvote">▼</button>
             </div>
@@ -160,7 +168,7 @@
                         <span class="action-icon">💬</span>
                         <span class="action-text">@(Model.Comments?.Count ?? 0) Comments</span>
                     </button></a>
-                    <button class="action-btn like-it" data-id="@Model.Id">
+                    <button class="action-btn like-it@(likedClass)" data-id="@Model.Id">
                         <span class="action-icon">❤️</span>
                         <span class="action-text">@(Model.Likes?.Count ?? 0) Likes</span>
                     </button>
@@ -194,8 +202,8 @@
                             <span>@Model.CreatedUtc.ToString("MMM d, yyyy")</span>
                         </div>
                         <div class="video-actions">
-                            <button class="like-it" data-id="@Model.Id">
-                                ❤️ @(Model.Likes?.Count ?? 0)
+                            <button class="like-it@(likedClass)" data-id="@Model.Id">
+                                @(currentUserLiked ? "❤️" : "🤍") @(Model.Likes?.Count ?? 0)
                             </button>
                         </div>
                     </div>
@@ -232,7 +240,7 @@
                 </div>
             </div>
             <div class="message-actions">
-                <button class="message-action like-it" data-id="@Model.Id" title="Add Reaction">😀</button>
+                <button class="message-action like-it@(likedClass)" data-id="@Model.Id" title="Add Reaction">😀</button>
                 <a href="/posts/@Model.Id"><button class="message-action" title="Reply">↩️</button></a>
                 <button class="message-action" title="More">⋯</button>
             </div>
@@ -257,7 +265,7 @@
                 @Html.Raw(Model.Message)
 
                 <div class="post-additional-info inline-items">
-                    <a href="#" class="post-add-icon inline-items">
+                    <a href="#" class="post-add-icon inline-items like-it@(likedClass)" data-id="@Model.Id">
                         <svg class="olymp-heart-icon">
                             <use xlink:href="#olymp-heart-icon"></use>
                         </svg>
@@ -285,7 +293,7 @@
                     </div>
                 </div>
                 <div class="control-block-button post-control-button">
-                    <a href="#" class="btn btn-control like-it" data-id="@Model.Id">
+                    <a href="#" class="btn btn-control like-it@(likedClass)" data-id="@Model.Id">
                         <svg class="olymp-like-post-icon">
                             <use xlink:href="#olymp-like-post-icon"></use>
                         </svg>

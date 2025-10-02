@@ -1,0 +1,19 @@
+@{
+    var isSelf = ViewBag.IsSelf as bool? ?? false;
+    var isFollowing = ViewBag.IsFollowing as bool? ?? false;
+    var profileUsername = ViewBag.ProfileUsername as string ?? string.Empty;
+}
+
+@if (!isSelf && !string.IsNullOrWhiteSpace(profileUsername))
+{
+    <form method="post"
+          action="@(isFollowing ? "/unfollow" : "/follow")"
+          class="follow-action-form"
+          data-following="@(isFollowing ? "true" : "false")"
+          data-follow-username="@profileUsername">
+        <input type="hidden" name="username" value="@profileUsername" />
+        <button type="submit" class="profile-btn btn-primary follow-action-button">
+            @(isFollowing ? "Unfollow" : "Follow")
+        </button>
+    </form>
+}

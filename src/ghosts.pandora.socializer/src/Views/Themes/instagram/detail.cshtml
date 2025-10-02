@@ -1,5 +1,10 @@
 @{
     Layout = null;
+    ViewBag.Theme = "instagram";
+    var currentUser = ViewBag.Username as string;
+    var currentUserLiked = !string.IsNullOrWhiteSpace(currentUser) &&
+        (Model?.Likes?.Any(l => string.Equals(l.Username, currentUser, StringComparison.OrdinalIgnoreCase)) ?? false);
+    var likedClass = currentUserLiked ? " liked" : string.Empty;
 }
 @model Ghosts.Socializer.Infrastructure.Post
 
@@ -72,7 +77,9 @@
                     <!-- Post Actions -->
                     <div class="post-actions">
                         <div class="action-buttons">
-                            <button class="action-btn like-btn" data-id="@Model.Id">❤️</button>
+                        <button class="action-btn like-btn like-it@likedClass" data-id="@Model.Id">
+                            @(currentUserLiked ? "❤️" : "🤍")
+                        </button>
                             <button class="action-btn comment-btn">💬</button>
                             <button class="action-btn share-btn">📤</button>
                         </div>
@@ -86,7 +93,7 @@
                                 var likesCount = Model.Likes?.Count ?? 0;
                                 if (likesCount > 0)
                                 {
-                                    <span><strong>@likesCount likes</strong></span>
+                        <span><strong>@likesCount likes</strong></span>
                                 }
                                 else
                                 {
@@ -157,6 +164,9 @@
         </div>
     </div>
 
+    <script src="/js/jQuery/jquery-3.5.1.min.js"></script>
+    <script src="/js/signalr.min.js"></script>
+    <script src="/js/social.js"></script>
     <script src="/themes/instagram/js/instagram.js"></script>
 </body>
 </html>

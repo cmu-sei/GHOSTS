@@ -1,16 +1,67 @@
+@model List<Ghosts.Socializer.Infrastructure.Post>
 @{
     Layout = null;
+    var profileUsername = (ViewContext.RouteData.Values["username"] as string)?.Trim();
+    if (string.IsNullOrWhiteSpace(profileUsername))
+    {
+        profileUsername = Context.Request.Cookies["username"];
+    }
+
+    if (string.IsNullOrWhiteSpace(profileUsername))
+    {
+        profileUsername = Model?.FirstOrDefault()?.Username ?? "user";
+    }
 }
-@model List<Ghosts.Socializer.Infrastructure.Post>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>(@ViewBag.ProfileUser) • Instagram</title>
+    <title>(@profileUsername) • Instagram</title>
     <link rel="stylesheet" href="css/profile.css">
     <link rel="icon" href="images/instagram-icon.png">
+    <style>
+        .follow-action-form {
+            margin-left: 12px;
+        }
+
+        .follow-action-button {
+            background: #0095f6;
+            border: none;
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .connections-columns {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            margin-top: 16px;
+        }
+
+        .connections-column {
+            background: #fafafa;
+            border: 1px solid #dbdbdb;
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .connections-column h3 {
+            margin: 0 0 12px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .connections-scroll {
+            max-height: 220px;
+            overflow-y: auto;
+        }
+    </style>
 </head>
 <body>
     <div class="app">
@@ -33,7 +84,7 @@
                     <button class="action-btn">🧭</button>
                     <button class="action-btn">❤️</button>
                     <div class="profile-menu">
-                        <img src="images/profile-avatar.jpg" alt="Profile" class="header-avatar">
+                        <img src="/u/@profileUsername/avatar" alt="@profileUsername" class="header-avatar">
                     </div>
                 </div>
             </div>
@@ -44,29 +95,40 @@
             <!-- Profile Header -->
             <div class="profile-header">
                 <div class="profile-image">
-                    <img src="images/profile-avatar.jpg" alt="Profile" class="profile-avatar">
+                    <img src="/u/@profileUsername/avatar" alt="@profileUsername" class="profile-avatar">
                 </div>
                 <div class="profile-info">
                     <div class="profile-top">
-                        <h1 class="username">johndoe</h1>
+                        <h1 class="username">@profileUsername</h1>
                         <div class="profile-actions">
                             <button class="edit-profile-btn">Edit profile</button>
                             <button class="view-archive-btn">View archive</button>
                             <button class="settings-btn">⚙️</button>
+                            @await Html.PartialAsync("~/Views/Shared/_FollowActions.cshtml")
                         </div>
                     </div>
-                    <div class="profile-stats">
+                    <div class="profile-stats" data-profile-connections data-username="@profileUsername">
                         <div class="stat">
-                            <span class="stat-number">127</span>
+                            <span class="stat-number">@(Model?.Count ?? 0)</span>
                             <span class="stat-label">posts</span>
                         </div>
                         <div class="stat">
-                            <span class="stat-number">1,234</span>
+                            <span class="stat-number" data-followers-count>0</span>
                             <span class="stat-label">followers</span>
                         </div>
                         <div class="stat">
-                            <span class="stat-number">567</span>
+                            <span class="stat-number" data-following-count>0</span>
                             <span class="stat-label">following</span>
+                        </div>
+                    </div>
+                    <div class="connections-columns">
+                        <div class="connections-column">
+                            <h3>Following (<span data-following-count>0</span>)</h3>
+                            <div class="connections-scroll" data-following-list></div>
+                        </div>
+                        <div class="connections-column">
+                            <h3>Followers (<span data-followers-count>0</span>)</h3>
+                            <div class="connections-scroll" data-followers-list></div>
                         </div>
                     </div>
                     <div class="profile-bio">
@@ -244,5 +306,6 @@
     </div>
 
     <script src="js/profile.js"></script>
+    <script src="/js/connections.js"></script>
 </body>
 </html>

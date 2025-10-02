@@ -1,16 +1,86 @@
+@model List<Ghosts.Socializer.Infrastructure.Post>
 @{
     Layout = null;
+    var profileUsername = (ViewContext.RouteData.Values["username"] as string)?.Trim();
+    if (string.IsNullOrWhiteSpace(profileUsername))
+    {
+        profileUsername = Context.Request.Cookies["username"];
+    }
+
+    if (string.IsNullOrWhiteSpace(profileUsername))
+    {
+        profileUsername = Model?.FirstOrDefault()?.Username ?? "user";
+    }
 }
-@model List<Ghosts.Socializer.Infrastructure.Post>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@ViewBag.ProfileUser - YouTube</title>
+    <title>@profileUsername - YouTube</title>
     <link rel="stylesheet" href="/themes/youtube/css/feed.css">
     <link rel="icon" href="/themes/youtube/images/youtube-icon.png">
+    <style>
+        .follow-action-form {
+            display: inline-block;
+            margin-right: 12px;
+        }
+
+        .follow-action-button {
+            background: #ff0000;
+            border: none;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 999px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .channel-connections {
+            background: #fff;
+            border-radius: 16px;
+            padding: 24px;
+            margin-top: 24px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+        }
+
+        .connections-heading {
+            margin: 0 0 12px;
+            font-size: 20px;
+        }
+
+        .connections-summary {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #606060;
+            margin-bottom: 16px;
+        }
+
+        .connections-columns {
+            display: grid;
+            gap: 16px;
+        }
+
+        .connections-column {
+            background: #f9f9f9;
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .connections-column h3 {
+            margin: 0 0 12px;
+            font-size: 15px;
+            text-transform: uppercase;
+            color: #202020;
+        }
+
+        .connections-scroll {
+            max-height: 220px;
+            overflow-y: auto;
+        }
+    </style>
 </head>
 <body>
     <div class="app">
@@ -80,28 +150,46 @@
 
                     <div class="channel-info">
                         <div class="channel-avatar-section">
-                            <img src="/u/@ViewBag.ProfileUser/avatar" alt="@ViewBag.ProfileUser" class="channel-avatar">
+                            <img src="/u/@profileUsername/avatar" alt="@profileUsername" class="channel-avatar">
                         </div>
 
                         <div class="channel-details">
-                            <h1 class="channel-name">@ViewBag.ProfileUser</h1>
+                            <h1 class="channel-name">@profileUsername</h1>
                             <div class="channel-meta">
-                                <span class="channel-handle">@@@ViewBag.ProfileUser</span>
-                                <span class="channel-stats">1.2M subscribers • 245 videos</span>
+                                <span class="channel-handle">@($"@{profileUsername}")</span>
+                                <span class="channel-stats"><span data-followers-count>0</span> subscribers • <span data-following-count>0</span> following</span>
                             </div>
-                            <div class="channel-description">
-                                Welcome to my channel! Here you'll find amazing content about technology, lifestyle, and more.
-                                Subscribe for weekly uploads!
-                            </div>
-                        </div>
-
-                        <div class="channel-actions">
-                            <button class="btn btn-subscribe">Subscribe</button>
-                            <button class="btn btn-secondary">Join</button>
+                        <div class="channel-description">
+                            Welcome to my channel! Here you'll find amazing content about technology, lifestyle, and more.
+                            Subscribe for weekly uploads!
                         </div>
                     </div>
 
-                    <!-- Channel Navigation -->
+                    <div class="channel-actions">
+                        @await Html.PartialAsync("~/Views/Shared/_FollowActions.cshtml")
+                        <button class="btn btn-secondary">Join</button>
+                    </div>
+                </div>
+
+                <div class="channel-connections" data-profile-connections data-username="@profileUsername">
+                    <h2 class="connections-heading">Community</h2>
+                    <div class="connections-summary">
+                        <span><strong data-followers-count>0</strong> subscribers</span>
+                        <span><strong data-following-count>0</strong> following</span>
+                    </div>
+                    <div class="connections-columns">
+                        <div class="connections-column">
+                            <h3>Following (<span data-following-count>0</span>)</h3>
+                            <div class="connections-scroll" data-following-list></div>
+                        </div>
+                        <div class="connections-column">
+                            <h3>Subscribers (<span data-followers-count>0</span>)</h3>
+                            <div class="connections-scroll" data-followers-list></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Channel Navigation -->
                     <nav class="channel-nav">
                         <div class="nav-item active">HOME</div>
                         <div class="nav-item">VIDEOS</div>
@@ -223,5 +311,6 @@
     </div>
 
     <script src="/themes/youtube/js/youtube.js"></script>
+    <script src="/js/connections.js"></script>
 </body>
 </html>

@@ -29,10 +29,10 @@
         </div>
 
         <div class="header-right">
-            <button class="icon-btn">⊕</button>
+            <a href="#"><button class="icon-btn">⊕</button></a>
             <a href="/messages" class="icon-btn" style="text-decoration: none;">💬</a>
-            <button class="icon-btn">🔔</button>
-            <img src="/u/@ViewBag.Username/avatar" alt="Profile" class="profile-pic">
+            <a href="#"><button class="icon-btn">🔔</button></a>
+            <a href="/profile"><img src="/u/@ViewBag.Username/avatar" alt="Profile" class="profile-pic"></a>
         </div>
     </header>
 
@@ -116,9 +116,6 @@
                     }
                 }
             </div>
-            <a id="load-more-button" href="#" class="btn btn-control btn-more" data-load-link="items-to-load.html" data-container="newsfeed-items-grid">
-                <span>⋯</span>
-            </a>
         </main>
 
         <!-- Right Sidebar -->
@@ -134,21 +131,6 @@
                 </div>
             </div>
 
-            <div>
-                <h3 style="color: #65676b; margin-bottom: 16px;">Contacts</h3>
-                <div class="sidebar-item">
-                    <img src="/themes/facebook/images/friend1.jpg" alt="Contact" class="profile-pic">
-                    <span>Contact 1</span>
-                </div>
-                <div class="sidebar-item">
-                    <img src="/themes/facebook/images/friend2.jpg" alt="Contact" class="profile-pic">
-                    <span>Contact 2</span>
-                </div>
-                <div class="sidebar-item">
-                    <img src="/themes/facebook/images/friend3.jpg" alt="Contact" class="profile-pic">
-                    <span>Contact 3</span>
-                </div>
-            </div>
         </aside>
     </div>
 

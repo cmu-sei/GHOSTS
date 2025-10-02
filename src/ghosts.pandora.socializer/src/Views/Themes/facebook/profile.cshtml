@@ -2,15 +2,65 @@
     Layout = null;
 }
 @model Ghosts.Socializer.Infrastructure.User
+@{
+    var profileUsername = Model?.Username ?? (ViewContext.RouteData.Values["username"] as string)?.Trim();
+    if (string.IsNullOrWhiteSpace(profileUsername))
+    {
+        profileUsername = Context.Request.Cookies["username"];
+    }
+}
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@ViewBag.ProfileUser - Facebook</title>
+    <title>@profileUsername - Facebook</title>
     <link rel="stylesheet" href="/themes/facebook/css/facebook.css">
     <link rel="icon" href="/themes/facebook/images/facebook-icon.png" type="image/png">
+    <style>
+        .connections-card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .connections-summary {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #65676b;
+            margin-bottom: 16px;
+        }
+
+        .connections-columns {
+            display: grid;
+            gap: 12px;
+        }
+
+        .connections-column h3 {
+            font-size: 15px;
+            color: #1c1e21;
+            margin: 0 0 8px;
+        }
+
+        .connections-scroll {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .connection-item {
+            background: #f0f2f5;
+        }
+
+        .connection-item:hover {
+            background: #e4e6eb;
+        }
+
+        .connection-name {
+            color: #1c1e21;
+        }
+    </style>
 </head>
 <body>
     <!-- Header -->
@@ -29,10 +79,10 @@
         </div>
 
         <div class="header-right">
-            <button class="icon-btn">⊕</button>
-            <button class="icon-btn">💬</button>
-            <button class="icon-btn">🔔</button>
-            <img src="/u/@ViewBag.Username/avatar" alt="Profile" class="profile-pic">
+            <a href="#"><button class="icon-btn">⊕</button></a>
+            <a href="/messages" class="icon-btn" style="text-decoration: none;">💬</a>
+            <a href="#"><button class="icon-btn">🔔</button></a>
+            <a href="/profile"><img src="/u/@ViewBag.Username/avatar" alt="Profile" class="profile-pic"></a>
         </div>
     </header>
 
@@ -65,6 +115,7 @@
                 <button class="profile-btn btn-primary">➕ Add to story</button>
                 <button class="profile-btn btn-secondary">✏️ Edit profile</button>
                 <button class="profile-btn btn-secondary">⚙️</button>
+                @await Html.PartialAsync("~/Views/Shared/_FollowActions.cshtml")
             </div>
 
             <nav class="profile-nav">
@@ -82,6 +133,24 @@
         <div style="display: flex; max-width: 1680px; margin: 0 auto; padding: 16px 0; gap: 32px;">
             <!-- Left Column -->
             <aside style="width: 360px; padding: 0 16px;">
+                <div class="post connections-card" data-profile-connections data-username="@profileUsername" style="padding: 20px; margin-bottom: 20px;">
+                    <h2 style="margin-bottom: 12px; font-size: 20px; font-weight: bold;">Connections</h2>
+                    <div class="connections-summary">
+                        <div>Followers <strong data-followers-count>0</strong></div>
+                        <div>Following <strong data-following-count>0</strong></div>
+                    </div>
+                    <div class="connections-columns">
+                        <div class="connections-column">
+                            <h3>Following (<span data-following-count>0</span>)</h3>
+                            <div class="connections-scroll" data-following-list></div>
+                        </div>
+                        <div class="connections-column">
+                            <h3>Followers (<span data-followers-count>0</span>)</h3>
+                            <div class="connections-scroll" data-followers-list></div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Intro -->
                 <div class="post" style="padding: 20px;">
                     <h2 style="margin-bottom: 16px; font-size: 20px; font-weight: bold;">Intro</h2>
@@ -294,6 +363,6 @@
         </div>
     </div>
 
-    <script src="/themes/facebook/js/facebook.js"></script>
+    <script src="/js/connections.js"></script>
 </body>
 </html>

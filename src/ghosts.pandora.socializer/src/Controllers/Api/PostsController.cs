@@ -21,16 +21,13 @@ public class PostsController(ILogger logger, IHubContext<PostsHub> hubContext, D
     public IEnumerable<Post> Posts()
     {
         var posts = dbContext.Posts
-            .Include(x => x.Likes)
-            .Include(x=>x.Comments.OrderByDescending(c => c.CreatedUtc))
-            .Include(x => x.User)
-            .Include(x => x.Theme)
+            //.Include(x => x.Likes)
+            //.Include(x=>x.Comments.OrderByDescending(c => c.CreatedUtc))
+            //.Include(x => x.User)
             .OrderByDescending(x => x.CreatedUtc)
             .Take(applicationConfiguration.DefaultDisplay)
             .ToList();
 
-        if (Request.QueryString.HasValue && !string.IsNullOrEmpty(Request.Query["u"]))
-            ViewBag.User = Request.Query["u"];
         return posts;
     }
 
@@ -41,11 +38,8 @@ public class PostsController(ILogger logger, IHubContext<PostsHub> hubContext, D
             .Include(x => x.Likes)
             .Include(x=>x.Comments.OrderByDescending(c => c.CreatedUtc))
             .Include(x => x.User)
-            .Include(x => x.Theme)
             .FirstOrDefault(x => x.Id == id);
 
-        if (Request.QueryString.HasValue && !string.IsNullOrEmpty(Request.Query["u"]))
-            ViewBag.User = Request.Query["u"];
         return post;
     }
 

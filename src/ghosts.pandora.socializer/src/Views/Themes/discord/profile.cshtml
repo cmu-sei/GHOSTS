@@ -1,11 +1,83 @@
+@{
+    var profileUsername = (ViewContext.RouteData.Values["username"] as string)?.Trim();
+    if (string.IsNullOrWhiteSpace(profileUsername))
+    {
+        profileUsername = Context.Request.Cookies["username"];
+    }
+
+    profileUsername ??= "user";
+}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JohnDoe#1234 - Discord</title>
+    <title>@profileUsername - Discord</title>
     <link rel="stylesheet" href="css/profile.css">
     <link rel="icon" href="images/discord-icon.png">
+    <style>
+        .follow-action-form {
+            display: inline-block;
+            margin: 0 12px;
+        }
+
+        .follow-action-button {
+            background: #5865f2;
+            border: none;
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .connections-panel {
+            margin-top: 20px;
+            padding: 16px;
+            background: #2f3136;
+            border-radius: 12px;
+            border: 1px solid #202225;
+        }
+
+        .connections-columns {
+            display: grid;
+            gap: 12px;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        }
+
+        .connections-column {
+            background: #36393f;
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .connections-column h3 {
+            margin: 0 0 12px;
+            font-size: 14px;
+            color: #fff;
+        }
+
+        .connections-scroll {
+            max-height: 220px;
+            overflow-y: auto;
+        }
+
+        .connection-item {
+            background: transparent;
+        }
+
+        .connection-item:hover {
+            background: rgba(88, 101, 242, 0.2);
+        }
+
+        .connection-name {
+            color: #fff;
+        }
+
+        .connection-bio {
+            color: #b9bbbe;
+        }
+    </style>
 </head>
 <body>
     <div class="app">
@@ -23,13 +95,13 @@
                     <!-- User Info -->
                     <div class="user-section">
                         <div class="avatar-container">
-                            <img src="images/profile-avatar.jpg" alt="Profile" class="profile-avatar">
+                            <img src="/u/@profileUsername/avatar" alt="@profileUsername" class="profile-avatar">
                             <div class="status-indicator online"></div>
                         </div>
                         <div class="user-info">
                             <div class="username-section">
-                                <h2 class="display-name">JohnDoe</h2>
-                                <span class="username">#1234</span>
+                                <h2 class="display-name">@profileUsername</h2>
+                                <span class="username">Followers: <span data-followers-count>0</span> • Following: <span data-following-count>0</span></span>
                             </div>
                             <div class="user-status">
                                 <div class="status-icon">💻</div>
@@ -38,8 +110,20 @@
                         </div>
                         <div class="profile-actions">
                             <button class="action-btn primary">Send Message</button>
-                            <button class="action-btn secondary">Add Friend</button>
+                            @await Html.PartialAsync("~/Views/Shared/_FollowActions.cshtml")
                             <button class="action-btn icon-btn">⋯</button>
+                        </div>
+                    </div>
+                    <div class="connections-panel" data-profile-connections data-username="@profileUsername">
+                        <div class="connections-columns">
+                            <div class="connections-column">
+                                <h3>Following (<span data-following-count>0</span>)</h3>
+                                <div class="connections-scroll" data-following-list></div>
+                            </div>
+                            <div class="connections-column">
+                                <h3>Followers (<span data-followers-count>0</span>)</h3>
+                                <div class="connections-scroll" data-followers-list></div>
+                            </div>
                         </div>
                     </div>
 
@@ -235,5 +319,6 @@
     </div>
 
     <script src="js/profile.js"></script>
+    <script src="/js/connections.js"></script>
 </body>
 </html>

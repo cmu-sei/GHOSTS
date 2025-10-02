@@ -1,5 +1,18 @@
+@model Ghosts.Socializer.Infrastructure.Post
 @{
     Layout = null;
+    ViewBag.Theme = "reddit";
+    if (ViewBag.ProfileUsername == null && Model != null)
+    {
+        ViewBag.ProfileUsername = Model.Username;
+    }
+
+    var currentUser = ViewBag.Username as string;
+    var currentUserLiked = Model != null && !string.IsNullOrWhiteSpace(currentUser) &&
+        (Model.Likes?.Any(l => string.Equals(l.Username, currentUser, StringComparison.OrdinalIgnoreCase)) ?? false);
+    var likedClass = currentUserLiked ? " liked" : string.Empty;
+    var likesCount = Model?.Likes?.Count ?? 0;
+    var commentsCount = Model?.Comments?.Count ?? 0;
 }
 
 <!DOCTYPE html>
@@ -31,8 +44,8 @@
                 <button class="header-btn">🔔</button>
                 <button class="header-btn">➕</button>
                 <div class="user-menu">
-                    <img src="/themes/reddit/images/profile-avatar.jpg" alt="Profile" class="user-avatar">
-                    <span class="username">u/johndoe</span>
+                    <img src="/u/@(ViewBag.Username ?? "user")/avatar" alt="Profile" class="user-avatar">
+                    <span class="username">u/@(ViewBag.Username ?? "user")</span>
                     <span class="dropdown-arrow">▼</span>
                 </div>
             </div>
@@ -92,8 +105,8 @@
                 <!-- Original Post -->
                 <div class="original-post">
                     <div class="post-votes">
-                        <button class="vote-btn upvote upvoted">▲</button>
-                        <span class="vote-count">1.2k</span>
+                        <button class="vote-btn upvote like-it@likedClass" data-id="@((Model?.Id ?? Guid.Empty).ToString())">▲</button>
+                        <span class="vote-count">@likesCount</span>
                         <button class="vote-btn downvote">▼</button>
                     </div>
                     <div class="post-content">
@@ -102,22 +115,20 @@
                             <div class="post-meta">
                                 <span class="subreddit-name">r/AskReddit</span>
                                 <span class="post-info">
-                                    • Posted by u/curious_user
-                                    <span class="post-time">3 hours ago</span>
+                                    • Posted by <a href="/u/@(Model?.Username ?? "user")" class="author">u/@(Model?.Username ?? "user")</a>
+                                    <span class="post-time">@Model?.CreatedUtc.ToString("MMM d, yyyy")</span>
                                 </span>
                             </div>
                         </div>
-                        <h1 class="post-title">What's the most interesting fact you learned this week?</h1>
+                        <h1 class="post-title">Post by @(Model?.Username ?? "user")</h1>
                         <div class="post-text">
-                            I'll start: Did you know that octopuses have three hearts and blue blood? Two hearts pump blood to the gills, while the third pumps blood to the rest of the body. The blue color comes from a copper-based protein called hemocyanin instead of iron-based hemoglobin like humans have.
-                            <br><br>
-                            What fascinating facts have you discovered recently? I'm always looking to learn something new!
+                            @Html.Raw(Model?.Message ?? "Post content not available.")
                         </div>
                         <div class="post-actions">
-                            <button class="action-btn">
+                            <a href="/posts/@(Model?.Id ?? Guid.Empty)" class="action-btn">
                                 <span class="action-icon">💬</span>
-                                <span class="action-text">234 Comments</span>
-                            </button>
+                                <span class="action-text">@commentsCount Comments</span>
+                            </a>
                             <button class="action-btn">
                                 <span class="action-icon">🔗</span>
                                 <span class="action-text">Share</span>
@@ -397,6 +408,9 @@
         </div>
     </div>
 
+    <script src="/js/jQuery/jquery-3.5.1.min.js"></script>
+    <script src="/js/signalr.min.js"></script>
+    <script src="/js/social.js"></script>
     <script src="/themes/reddit/js/post.js"></script>
 </body>
 </html>

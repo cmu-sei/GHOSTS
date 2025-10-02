@@ -1,16 +1,84 @@
+@model List<Ghosts.Socializer.Infrastructure.Post>
 @{
     Layout = null;
+    var profileUsername = (ViewContext.RouteData.Values["username"] as string)?.Trim();
+    if (string.IsNullOrWhiteSpace(profileUsername))
+    {
+        profileUsername = Context.Request.Cookies["username"];
+    }
+
+    if (string.IsNullOrWhiteSpace(profileUsername))
+    {
+        profileUsername = Model?.FirstOrDefault()?.Username ?? "user";
+    }
 }
-@model List<Ghosts.Socializer.Infrastructure.Post>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@ViewBag.ProfileUser | LinkedIn</title>
+    <title>@profileUsername | LinkedIn</title>
     <link rel="stylesheet" href="/themes/linkedin/css/feed.css">
     <link rel="icon" href="/themes/linkedin/images/linkedin-icon.png">
+    <style>
+        .follow-action-form {
+            margin-left: 12px;
+        }
+
+        .follow-action-button {
+            background: #0a66c2;
+            border: none;
+            border-radius: 999px;
+            color: #fff;
+            padding: 8px 18px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .connections-card {
+            padding: 0 0 16px;
+        }
+
+        .connections-summary {
+            display: flex;
+            justify-content: space-between;
+            padding: 0 24px 8px;
+            font-size: 14px;
+            color: rgba(0, 0, 0, 0.6);
+        }
+
+        .connections-columns {
+            display: grid;
+            gap: 16px;
+            padding: 0 24px 16px;
+        }
+
+        .connections-column {
+            background: #f3f2ef;
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .connections-column h3 {
+            margin: 0 0 12px;
+            font-size: 14px;
+            color: rgba(0, 0, 0, 0.8);
+        }
+
+        .connections-scroll {
+            max-height: 220px;
+            overflow-y: auto;
+        }
+
+        .connection-item {
+            background: transparent;
+        }
+
+        .connection-item:hover {
+            background: rgba(10, 102, 194, 0.08);
+        }
+    </style>
 </head>
 <body>
     <div class="app">
@@ -64,20 +132,21 @@
 
                 <div class="profile-main-info">
                     <div class="profile-picture-container">
-                        <img src="/u/@ViewBag.ProfileUser/avatar" alt="@ViewBag.ProfileUser" class="profile-picture">
+                        <img src="/u/@profileUsername/avatar" alt="@profileUsername" class="profile-picture">
                     </div>
 
                     <div class="profile-details">
-                        <h1 class="profile-name">@ViewBag.ProfileUser</h1>
+                        <h1 class="profile-name">@profileUsername</h1>
                         <p class="profile-headline">Professional at Company</p>
                         <p class="profile-location">📍 Location</p>
-                        <p class="profile-connections">500+ connections</p>
+                        <p class="profile-connections"><span data-followers-count>0</span> followers • <span data-following-count>0</span> following</p>
                     </div>
 
                     <div class="profile-actions">
                         <button class="btn btn-primary">Connect</button>
                         <button class="btn btn-secondary">Message</button>
                         <button class="btn btn-secondary">More</button>
+                        @await Html.PartialAsync("~/Views/Shared/_FollowActions.cshtml")
                     </div>
                 </div>
             </div>
@@ -86,6 +155,24 @@
             <div class="profile-content">
                 <!-- Left Column -->
                 <aside class="profile-sidebar">
+                    <div class="profile-card connections-card" data-profile-connections data-username="@profileUsername">
+                        <h2 class="card-title">Connections</h2>
+                        <div class="connections-summary">
+                            <span><strong data-followers-count>0</strong> followers</span>
+                            <span><strong data-following-count>0</strong> following</span>
+                        </div>
+                        <div class="connections-columns">
+                            <div class="connections-column">
+                                <h3>Following (<span data-following-count>0</span>)</h3>
+                                <div class="connections-scroll" data-following-list></div>
+                            </div>
+                            <div class="connections-column">
+                                <h3>Followers (<span data-followers-count>0</span>)</h3>
+                                <div class="connections-scroll" data-followers-list></div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- About Card -->
                     <div class="profile-card">
                         <h2 class="card-title">About</h2>
@@ -260,5 +347,6 @@
     </div>
 
     <script src="/themes/linkedin/js/linkedin.js"></script>
+    <script src="/js/connections.js"></script>
 </body>
 </html>

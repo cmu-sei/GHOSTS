@@ -7,6 +7,22 @@ public class BaseController : Controller
 {
     protected readonly ILogger Logger;
 
+    public override void OnActionExecuting(ActionExecutingContext context)
+    {
+        // Ensure every request has an associated username and theme for downstream views
+        ViewBag.Username = GetOrCreateUsernameCookie(context.HttpContext);
+
+        var theme = ThemeRead();
+        if (string.IsNullOrWhiteSpace(theme))
+        {
+            theme = "default";
+        }
+
+        ViewBag.Theme = theme;
+
+        base.OnActionExecuting(context);
+    }
+
     public override void OnActionExecuted(ActionExecutedContext filterContext)
     {
         var form = string.Empty;
@@ -19,7 +35,15 @@ public class BaseController : Controller
             Request.Scheme, Request.Host, Request.Path, Request.QueryString, Request.Method,
             form);
 
-        ViewBag.Username = CookieRead("username");
+        ViewBag.Username = GetOrCreateUsernameCookie(filterContext.HttpContext);
+
+        var theme = ThemeRead();
+        if (string.IsNullOrWhiteSpace(theme))
+        {
+            theme = "default";
+        }
+
+        ViewBag.Theme = theme;
         base.OnActionExecuted(filterContext);
     }
 

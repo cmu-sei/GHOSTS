@@ -28,7 +28,8 @@ public class DataContext : DbContext
         modelBuilder.Entity<Post>()
             .HasOne(p => p.User)
             .WithMany(u => u.Posts)
-            .HasForeignKey(p => p.Username);
+            .HasForeignKey(p => p.Username)
+            .HasPrincipalKey(u => u.Username);
 
 
         modelBuilder.Entity<Like>()
@@ -39,7 +40,8 @@ public class DataContext : DbContext
         modelBuilder.Entity<Like>()
             .HasOne(l => l.User)
             .WithMany(u => u.Likes)
-            .HasForeignKey(l => l.Username);
+            .HasForeignKey(l => l.Username)
+            .HasPrincipalKey(u => u.Username);
 
         modelBuilder.Entity<Comment>()
             .HasOne(c => c.Post)
@@ -49,18 +51,37 @@ public class DataContext : DbContext
         modelBuilder.Entity<Comment>()
             .HasOne(c => c.User)
             .WithMany(u => u.Comments)
-            .HasForeignKey(c => c.Username);
+            .HasForeignKey(c => c.Username)
+            .HasPrincipalKey(u => u.Username);
 
         modelBuilder.Entity<DirectMessage>()
             .HasOne(dm => dm.FromUser)
             .WithMany(u => u.SentMessages)
-            .HasForeignKey(dm => dm.FromUsername);
+            .HasForeignKey(dm => dm.FromUsername)
+            .HasPrincipalKey(u => u.Username);
 
         modelBuilder.Entity<DirectMessage>()
             .HasOne(dm => dm.ToUser)
             .WithMany(u => u.ReceivedMessages)
-            .HasForeignKey(dm => dm.ToUsername);
+            .HasForeignKey(dm => dm.ToUsername)
+            .HasPrincipalKey(u => u.Username);
 
+        modelBuilder.Entity<Followers>()
+            .HasKey(f => new { f.Username, f.FollowerUsername });
+
+        modelBuilder.Entity<Followers>()
+            .HasOne(f => f.Followee)
+            .WithMany(u => u.Followers)
+            .HasForeignKey(f => f.Username)
+            .HasPrincipalKey(u => u.Username)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Followers>()
+            .HasOne(f => f.Follower)
+            .WithMany(u => u.Following)
+            .HasForeignKey(f => f.FollowerUsername)
+            .HasPrincipalKey(u => u.Username)
+            .OnDelete(DeleteBehavior.Restrict);
 
         // Configure indexes for common queries
         modelBuilder.Entity<Post>()
@@ -84,7 +105,23 @@ public class DataContext : DbContext
             .HasIndex(dm => new { dm.FromUsername, dm.CreatedUtc })
             .HasDatabaseName("IX_DirectMessage_FromUser_CreatedUtc");
 
+        modelBuilder.Entity<Followers>()
+            .HasIndex(f => new { f.Username, f.FollowerUsername })
+            .IsUnique()
+            .HasDatabaseName("IX_Followers_User_Follower");
 
+        modelBuilder.Entity<Followers>()
+            .HasIndex(f => f.Username)
+            .HasDatabaseName("IX_Followers_User");
+
+        modelBuilder.Entity<Followers>()
+            .HasIndex(f => f.FollowerUsername)
+            .HasDatabaseName("IX_Followers_Follower");
+
+        modelBuilder.Entity<User>()
+            .HasIndex(u => new { u.Username, u.Theme })
+            .IsUnique()
+            .HasDatabaseName("IX_User_Username_Theme_Unique");
 
         base.OnModelCreating(modelBuilder);
     }
@@ -94,11 +131,15 @@ public class DataContext : DbContext
     public DbSet<Like> Likes { get; set; }
     public DbSet<Comment> Comments { get; set; }
     public DbSet<DirectMessage> DirectMessages { get; set; }
+    public DbSet<Followers> Followers { get; set; }
 }
 
 public class User
 {
     [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public Guid Id { get; set; } = Guid.NewGuid();
+
     [Required]
     [MaxLength(50)]
     public string Username { get; set; }
@@ -124,6 +165,8 @@ public class User
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
     public virtual ICollection<DirectMessage> SentMessages { get; set; } = new List<DirectMessage>();
     public virtual ICollection<DirectMessage> ReceivedMessages { get; set; } = new List<DirectMessage>();
+    public virtual ICollection<Followers> Following { get; set; } = new List<Followers>();
+    public virtual ICollection<Followers> Followers { get; set; } = new List<Followers>();
 }
 
 
@@ -148,6 +191,23 @@ public class Post
     public virtual User User { get; set; }
     public virtual ICollection<Like> Likes { get; set; } = new List<Like>();
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
+}
+
+ [Table("followers")]
+public class Followers
+{
+    [Required]
+    [MaxLength(50)]
+    public string Username { get; set; }
+
+    [Required]
+    [MaxLength(50)]
+    public string FollowerUsername { get; set; }
+
+    public DateTime CreatedUtc { get; set; } = DateTime.UtcNow;
+
+    public virtual User Follower { get; set; }
+    public virtual User Followee { get; set; }
 }
 
 public class Like
