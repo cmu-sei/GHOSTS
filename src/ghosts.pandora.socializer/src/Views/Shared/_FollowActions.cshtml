@@ -7,7 +7,7 @@
 @if (!isSelf && !string.IsNullOrWhiteSpace(profileUsername))
 {
     <form method="post"
-          action="@(isFollowing ? "/unfollow" : "/follow")"
+          action="@(isFollowing ? "/api/relationships/unfollow" : "/api/relationships/follow")"
           class="follow-action-form"
           data-following="@(isFollowing ? "true" : "false")"
           data-follow-username="@profileUsername">

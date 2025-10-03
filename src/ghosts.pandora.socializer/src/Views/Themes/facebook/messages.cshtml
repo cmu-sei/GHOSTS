@@ -238,13 +238,24 @@
     <header class="header">
         <div class="header-left">
             <a href="/" class="logo">facebook</a>
+            <form action="/search">
+                <input type="text" name="q" class="search-bar" placeholder="Search Facebook">
+            </form>
         </div>
+
         <div class="header-center">
             <a href="/" class="nav-item">🏠</a>
-            <a href="/messages" class="nav-item active">💬</a>
+            <a href="#" class="nav-item">📺</a>
+            <a href="#" class="nav-item">🛍️</a>
+            <a href="#" class="nav-item">👥</a>
+            <a href="#" class="nav-item">🎮</a>
         </div>
+
         <div class="header-right">
-            <img src="/u/@ViewBag.Username/avatar" alt="Profile" class="profile-pic">
+            <button class="icon-btn">⊕</button>
+            <a href="/messages" class="icon-btn active">💬</a>
+            <button class="icon-btn">🔔</button>
+            <a href="/profile"><img src="/u/@ViewBag.Username/avatar" alt="Profile" class="profile-pic"></a>
         </div>
     </header>
 

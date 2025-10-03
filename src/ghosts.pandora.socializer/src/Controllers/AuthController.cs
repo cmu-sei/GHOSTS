@@ -33,7 +33,7 @@ public class AuthController(ILogger logger, IUserService userService, IThemeServ
 
         var user = await userService.GetOrCreateUserAsync(username);
 
-        string themeName = string.IsNullOrWhiteSpace(model.Theme) ? ThemeRead() : model.Theme.Trim();
+        var themeName = string.IsNullOrWhiteSpace(model.Theme) ? ThemeRead() : model.Theme.Trim();
         if (!string.IsNullOrWhiteSpace(themeName) && themeService.ThemeExists(themeName))
         {
             await userService.UpdateUserAsync(username, theme: themeName);

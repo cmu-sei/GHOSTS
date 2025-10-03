@@ -17,7 +17,9 @@
     <header class="header">
         <div class="header-left">
             <a href="/" class="logo">facebook</a>
-            <input type="text" class="search-bar" placeholder="Search Facebook">
+            <form action="/search">
+                <input type="text" name="q" class="search-bar" placeholder="Search Facebook">
+            </form>
         </div>
 
         <div class="header-center">
@@ -86,14 +88,12 @@
         <main class="feed-container">
 
             <!-- Stories -->
-            <div class="post">
-                <div style="padding: 16px;">
-                    <h3 style="margin-bottom: 16px;">Stories</h3>
-                    <div style="display: flex; gap: 8px; overflow-x: auto;">
-                        <div style="min-width: 112px; height: 200px; background: linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%); border-radius: 8px; position: relative; cursor: pointer;">
-                            <img src="/u/@ViewBag.Username/avatar" alt="Your story" style="width: 100%; height: 70%; object-fit: cover; border-radius: 8px 8px 0 0;">
-                            <div style="position: absolute; bottom: 8px; left: 8px; color: white; font-size: 12px; font-weight: 600;">Your Story</div>
-                        </div>
+            <div class="post stories-container">
+                <h3 class="stories-title">Stories</h3>
+                <div class="stories-list">
+                    <div class="story-card">
+                        <img src="/u/@ViewBag.Username/avatar" alt="Your story" class="story-image">
+                        <div class="story-label">Your Story</div>
                     </div>
                 </div>
             </div>
@@ -120,17 +120,16 @@
 
         <!-- Right Sidebar -->
         <aside class="right-sidebar">
-            <div style="margin-bottom: 24px;">
-                <h3 style="color: #65676b; margin-bottom: 16px;">Sponsored</h3>
-                <div style="display: flex; align-items: center; margin-bottom: 12px;">
-                    <img src="/themes/facebook/images/ad-placeholder.jpg" alt="Ad" style="width: 100px; height: 100px; border-radius: 8px; margin-right: 12px;">
-                    <div>
-                        <div style="font-weight: 600; margin-bottom: 4px;">Learn Web Development</div>
-                        <div style="color: #65676b; font-size: 13px;">codecademy.com</div>
+            <div class="sponsored-section">
+                <h3 class="sidebar-title">Sponsored</h3>
+                <div class="sponsored-ad">
+                    <img src="/themes/facebook/images/ad-placeholder.jpg" alt="Ad" class="ad-image">
+                    <div class="ad-content">
+                        <div class="ad-title">Learn Web Development</div>
+                        <div class="ad-url">codecademy.com</div>
                     </div>
                 </div>
             </div>
-
         </aside>
     </div>
 

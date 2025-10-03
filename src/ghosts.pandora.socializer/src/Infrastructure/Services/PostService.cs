@@ -24,6 +24,9 @@ public interface IPostService
     Task<int> GetPostCountByThemeAsync(string themeName);
     Task<int> GetPostCountByUserAsync(string username);
     Task<Dictionary<string, int>> GetPostCountsByThemeAsync();
+
+    // Search
+    Task<List<Post>> SearchPostsAsync(string query, string themeName = null, int limit = 50, int offset = 0);
 }
 
 public class PostService : IPostService
@@ -101,6 +104,38 @@ public class PostService : IPostService
             .ThenInclude(l => l.User)
             .Include(p => p.Comments)
             .ThenInclude(c => c.User)
+            .OrderByDescending(p => p.CreatedUtc)
+            .Skip(offset)
+            .Take(limit)
+            .ToListAsync();
+    }
+
+    public async Task<List<Post>> SearchPostsAsync(string query, string themeName = null, int limit = 50, int offset = 0)
+    {
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            return new List<Post>();
+        }
+
+        var normalized = query.Trim().ToLowerInvariant();
+
+        var posts = _context.Posts
+            .Include(p => p.User)
+            .Include(p => p.Likes)
+            .ThenInclude(l => l.User)
+            .Include(p => p.Comments)
+            .ThenInclude(c => c.User)
+            .Where(p => p.Message.ToLower().Contains(normalized) ||
+                       p.Username.ToLower().Contains(normalized) ||
+                       p.Comments.Any(c => c.Message.ToLower().Contains(normalized)));
+
+        if (!string.IsNullOrWhiteSpace(themeName))
+        {
+            var themeNormalized = themeName.ToLowerInvariant();
+            posts = posts.Where(p => p.Theme.ToLower() == themeNormalized);
+        }
+
+        return await posts
             .OrderByDescending(p => p.CreatedUtc)
             .Skip(offset)
             .Take(limit)

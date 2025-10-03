@@ -95,10 +95,16 @@ body {
     align-items: center;
     justify-content: center;
     transition: background-color 0.2s;
+    color: #050505;
+    text-decoration: none;
 }
 
 .icon-btn:hover {
     background-color: #d8dadf;
+}
+
+.icon-btn.active {
+    color: #1877f2;
 }
 
 .profile-pic {
@@ -423,7 +429,8 @@ body {
 
 /* Single Post Page */
 .post-detail {
-    max-width: 680px;
+    max-width: 960px;
+    min-width: 680px;
     margin: 0 auto;
 }
 
@@ -494,6 +501,90 @@ body {
 
 .comment-action:hover {
     text-decoration: underline;
+}
+
+/* Stories */
+.stories-container {
+    padding: 16px;
+}
+
+.stories-title {
+    margin-bottom: 16px;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.stories-list {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+}
+
+.story-card {
+    min-width: 112px;
+    height: 200px;
+    background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+    border-radius: 8px;
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.story-image {
+    width: 100%;
+    height: 70%;
+    object-fit: cover;
+    border-radius: 8px 8px 0 0;
+}
+
+.story-label {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* Sidebar Sponsored Section */
+.sponsored-section {
+    margin-bottom: 24px;
+}
+
+.sidebar-title {
+    color: #65676b;
+    margin-bottom: 16px;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.sponsored-ad {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.ad-image {
+    width: 100px;
+    height: 100px;
+    border-radius: 8px;
+    margin-right: 12px;
+    object-fit: cover;
+}
+
+.ad-content {
+    flex: 1;
+}
+
+.ad-title {
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: #050505;
+}
+
+.ad-url {
+    color: #65676b;
+    font-size: 13px;
 }
 
 /* Responsive */

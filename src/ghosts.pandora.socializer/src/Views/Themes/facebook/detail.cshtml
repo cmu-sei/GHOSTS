@@ -17,12 +17,14 @@
     <link rel="stylesheet" href="/themes/facebook/css/facebook.css">
     <link rel="icon" href="/themes/facebook/images/facebook-icon.png" type="image/png">
 </head>
-<body>
+<body data-theme="facebook">
     <!-- Header -->
     <header class="header">
         <div class="header-left">
             <a href="/" class="logo">facebook</a>
-            <input type="text" class="search-bar" placeholder="Search Facebook">
+            <form action="/search">
+                <input type="text" name="q" class="search-bar" placeholder="Search Facebook">
+            </form>
         </div>
 
         <div class="header-center">
@@ -34,9 +36,9 @@
         </div>
 
         <div class="header-right">
-            <a href="#"><button class="icon-btn">⊕</button></a>
-            <a href="/messages" class="icon-btn" style="text-decoration: none;">💬</a>
-            <a href="#"><button class="icon-btn">🔔</button></a>
+            <button class="icon-btn">⊕</button>
+            <a href="/messages" class="icon-btn">💬</a>
+            <button class="icon-btn">🔔</button>
             <a href="/profile"><img src="/u/@ViewBag.Username/avatar" alt="Profile" class="profile-pic"></a>
         </div>
     </header>

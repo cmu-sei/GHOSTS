@@ -19,10 +19,76 @@
     <link rel="stylesheet" href="/themes/facebook/css/facebook.css">
     <link rel="icon" href="/themes/facebook/images/facebook-icon.png" type="image/png">
     <style>
+        .profile-left-column {
+            width: 360px;
+            padding: 0 16px;
+        }
+
+        .profile-info-card {
+            padding: 20px;
+        }
+
+        .profile-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .profile-section-header h2 {
+            font-size: 20px;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .profile-section-link {
+            color: #1877f2;
+            text-decoration: none;
+        }
+
+        .profile-section-link:hover {
+            text-decoration: underline;
+        }
+
+        .profile-photos-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4px;
+        }
+
+        .profile-photo {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .profile-photo:hover {
+            opacity: 0.9;
+        }
+
+        .profile-main-column {
+            flex: 1;
+            max-width: 680px;
+        }
+
+        .profile-info-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .profile-info-icon {
+            margin-right: 8px;
+        }
+
         .connections-card {
             background: #fff;
             border-radius: 12px;
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
         }
 
         .connections-summary {
@@ -60,14 +126,24 @@
         .connection-name {
             color: #1c1e21;
         }
+
+        .profile-content-wrapper {
+            display: flex;
+            max-width: 1680px;
+            margin: 0 auto;
+            padding: 16px 0;
+            gap: 32px;
+        }
     </style>
 </head>
-<body>
+<body data-theme="facebook">
     <!-- Header -->
     <header class="header">
         <div class="header-left">
             <a href="/" class="logo">facebook</a>
-            <input type="text" class="search-bar" placeholder="Search Facebook">
+            <form action="/search">
+                <input type="text" name="q" class="search-bar" placeholder="Search Facebook">
+            </form>
         </div>
 
         <div class="header-center">
@@ -79,9 +155,9 @@
         </div>
 
         <div class="header-right">
-            <a href="#"><button class="icon-btn">⊕</button></a>
-            <a href="/messages" class="icon-btn" style="text-decoration: none;">💬</a>
-            <a href="#"><button class="icon-btn">🔔</button></a>
+            <button class="icon-btn">⊕</button>
+            <a href="/messages" class="icon-btn">💬</a>
+            <button class="icon-btn">🔔</button>
             <a href="/profile"><img src="/u/@ViewBag.Username/avatar" alt="Profile" class="profile-pic"></a>
         </div>
     </header>
@@ -99,15 +175,6 @@
 
                 <div class="profile-details">
                     <h1 class="profile-name">@Model.Username</h1>
-                    <div class="profile-stats">1,234 friends</div>
-
-                    <div style="display: flex; gap: 8px; margin-top: 16px;">
-                        <img src="/themes/facebook/images/friend1.jpg" alt="Friend" style="width: 32px; height: 32px; border-radius: 50%; border: 2px solid white;">
-                        <img src="/themes/facebook/images/friend2.jpg" alt="Friend" style="width: 32px; height: 32px; border-radius: 50%; border: 2px solid white;">
-                        <img src="/themes/facebook/images/friend3.jpg" alt="Friend" style="width: 32px; height: 32px; border-radius: 50%; border: 2px solid white;">
-                        <img src="/themes/facebook/images/friend4.jpg" alt="Friend" style="width: 32px; height: 32px; border-radius: 50%; border: 2px solid white;">
-                        <img src="/themes/facebook/images/friend5.jpg" alt="Friend" style="width: 32px; height: 32px; border-radius: 50%; border: 2px solid white;">
-                    </div>
                 </div>
             </div>
 
@@ -130,11 +197,13 @@
         </div>
 
         <!-- Profile Content -->
-        <div style="display: flex; max-width: 1680px; margin: 0 auto; padding: 16px 0; gap: 32px;">
+        <div class="profile-content-wrapper">
             <!-- Left Column -->
-            <aside style="width: 360px; padding: 0 16px;">
-                <div class="post connections-card" data-profile-connections data-username="@profileUsername" style="padding: 20px; margin-bottom: 20px;">
-                    <h2 style="margin-bottom: 12px; font-size: 20px; font-weight: bold;">Connections</h2>
+            <aside class="profile-left-column">
+                <div class="post connections-card" data-profile-connections data-username="@profileUsername">
+                    <div class="profile-section-header">
+                        <h2>Connections</h2>
+                    </div>
                     <div class="connections-summary">
                         <div>Followers <strong data-followers-count>0</strong></div>
                         <div>Following <strong data-following-count>0</strong></div>
@@ -152,109 +221,63 @@
                 </div>
 
                 <!-- Intro -->
-                <div class="post" style="padding: 20px;">
-                    <h2 style="margin-bottom: 16px; font-size: 20px; font-weight: bold;">Intro</h2>
+                <div class="post profile-info-card">
+                    <div class="profile-section-header">
+                        <h2>Intro</h2>
+                    </div>
 
                     <div style="margin-bottom: 16px;">
-                        <div style="display: flex; align-items: center; margin-bottom: 8px;">
-                            <span style="margin-right: 8px;">🏢</span>
+                        <div class="profile-info-item">
+                            <span class="profile-info-icon">🏢</span>
                             <span>Works at <strong>Tech Company</strong></span>
                         </div>
-                        <div style="display: flex; align-items: center; margin-bottom: 8px;">
-                            <span style="margin-right: 8px;">🎓</span>
+                        <div class="profile-info-item">
+                            <span class="profile-info-icon">🎓</span>
                             <span>Studied at <strong>University of Technology</strong></span>
                         </div>
-                        <div style="display: flex; align-items: center; margin-bottom: 8px;">
-                            <span style="margin-right: 8px;">📍</span>
+                        <div class="profile-info-item">
+                            <span class="profile-info-icon">📍</span>
                             <span>Lives in <strong>San Francisco, CA</strong></span>
                         </div>
-                        <div style="display: flex; align-items: center; margin-bottom: 8px;">
-                            <span style="margin-right: 8px;">📍</span>
+                        <div class="profile-info-item">
+                            <span class="profile-info-icon">📍</span>
                             <span>From <strong>@Model.LastActiveUtc</strong></span>
                         </div>
-                        <div style="display: flex; align-items: center; margin-bottom: 8px;">
-                            <span style="margin-right: 8px;">❤️</span>
+                        <div class="profile-info-item">
+                            <span class="profile-info-icon">❤️</span>
                             <span>Single</span>
                         </div>
-                        <div style="display: flex; align-items: center; margin-bottom: 8px;">
-                            <span style="margin-right: 8px;">📅</span>
+                        <div class="profile-info-item">
+                            <span class="profile-info-icon">📅</span>
                             <span>Joined January 2018</span>
                         </div>
                     </div>
 
-                    <button class="btn-secondary" style="width: 100%; padding: 8px; border-radius: 6px; border: none; font-weight: 600;">Edit details</button>
+                    <button class="btn-secondary" style="width: 100%; padding: 8px; border-radius: 6px; border: none; font-weight: 600; cursor: pointer;">Edit details</button>
                 </div>
 
                 <!-- Photos -->
-                <div class="post" style="padding: 20px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                        <h2 style="font-size: 20px; font-weight: bold;">Photos</h2>
-                        <a href="#" style="color: #1877f2; text-decoration: none;">See all photos</a>
+                <div class="post profile-info-card">
+                    <div class="profile-section-header">
+                        <h2>Photos</h2>
+                        <a href="#" class="profile-section-link">See all photos</a>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px;">
-                        <img src="/themes/facebook/images/photo1.jpg" alt="Photo" style="width: 100%; height: 100px; object-fit: cover; border-radius: 8px; cursor: pointer;">
-                        <img src="/themes/facebook/images/photo2.jpg" alt="Photo" style="width: 100%; height: 100px; object-fit: cover; border-radius: 8px; cursor: pointer;">
-                        <img src="/themes/facebook/images/photo3.jpg" alt="Photo" style="width: 100%; height: 100px; object-fit: cover; border-radius: 8px; cursor: pointer;">
-                        <img src="/themes/facebook/images/photo4.jpg" alt="Photo" style="width: 100%; height: 100px; object-fit: cover; border-radius: 8px; cursor: pointer;">
-                        <img src="/themes/facebook/images/photo5.jpg" alt="Photo" style="width: 100%; height: 100px; object-fit: cover; border-radius: 8px; cursor: pointer;">
-                        <img src="/themes/facebook/images/photo6.jpg" alt="Photo" style="width: 100%; height: 100px; object-fit: cover; border-radius: 8px; cursor: pointer;">
-                    </div>
-                </div>
-
-                <!-- Friends -->
-                <div class="post" style="padding: 20px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                        <div>
-                            <h2 style="font-size: 20px; font-weight: bold;">Friends</h2>
-                            <div style="color: #65676b; font-size: 15px;">1,234 friends</div>
-                        </div>
-                        <a href="#" style="color: #1877f2; text-decoration: none;">See all friends</a>
-                    </div>
-
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
-                        <div style="text-align: center;">
-                            <img src="/themes/facebook/images/friend1.jpg" alt="Friend" style="width: 100%; height: 100px; object-fit: cover; border-radius: 8px; margin-bottom: 4px; cursor: pointer;">
-                            <div style="font-size: 13px; font-weight: 600;">Sarah Wilson</div>
-                        </div>
-                        <div style="text-align: center;">
-                            <img src="/themes/facebook/images/friend2.jpg" alt="Friend" style="width: 100%; height: 100px; object-fit: cover; border-radius: 8px; margin-bottom: 4px; cursor: pointer;">
-                            <div style="font-size: 13px; font-weight: 600;">Mike Johnson</div>
-                        </div>
-                        <div style="text-align: center;">
-                            <img src="/themes/facebook/images/friend3.jpg" alt="Friend" style="width: 100%; height: 100px; object-fit: cover; border-radius: 8px; margin-bottom: 4px; cursor: pointer;">
-                            <div style="font-size: 13px; font-weight: 600;">Emma Davis</div>
-                        </div>
-                        <div style="text-align: center;">
-                            <img src="/themes/facebook/images/friend4.jpg" alt="Friend" style="width: 100%; height: 100px; object-fit: cover; border-radius: 8px; margin-bottom: 4px; cursor: pointer;">
-                            <div style="font-size: 13px; font-weight: 600;">Alex Smith</div>
-                        </div>
-                        <div style="text-align: center;">
-                            <img src="/themes/facebook/images/friend5.jpg" alt="Friend" style="width: 100%; height: 100px; object-fit: cover; border-radius: 8px; margin-bottom: 4px; cursor: pointer;">
-                            <div style="font-size: 13px; font-weight: 600;">Lisa Brown</div>
-                        </div>
-                        <div style="text-align: center;">
-                            <img src="/themes/facebook/images/friend6.jpg" alt="Friend" style="width: 100%; height: 100px; object-fit: cover; border-radius: 8px; margin-bottom: 4px; cursor: pointer;">
-                            <div style="font-size: 13px; font-weight: 600;">Tom Wilson</div>
-                        </div>
+                    <div class="profile-photos-grid">
+                        <img src="/themes/facebook/images/photo1.jpg" alt="Photo" class="profile-photo">
+                        <img src="/themes/facebook/images/photo2.jpg" alt="Photo" class="profile-photo">
+                        <img src="/themes/facebook/images/photo3.jpg" alt="Photo" class="profile-photo">
+                        <img src="/themes/facebook/images/photo4.jpg" alt="Photo" class="profile-photo">
+                        <img src="/themes/facebook/images/photo5.jpg" alt="Photo" class="profile-photo">
+                        <img src="/themes/facebook/images/photo6.jpg" alt="Photo" class="profile-photo">
                     </div>
                 </div>
             </aside>
 
             <!-- Right Column - Posts -->
-            <main style="flex: 1; max-width: 680px;">
+            <main class="profile-main-column">
                 <!-- Create Post -->
-                <div class="create-post">
-                    <div class="create-post-top">
-                        <img src="/u/@ViewBag.Username/avatar" alt="Profile" class="profile-pic">
-                        <input type="text" class="create-post-input" placeholder="What's on your mind, @ViewBag.Username?">
-                    </div>
-                    <div class="create-post-buttons">
-                        <button class="create-post-btn">📹 Live video</button>
-                        <button class="create-post-btn">📷 Photo/video</button>
-                        <button class="create-post-btn">📝 Life event</button>
-                    </div>
-                </div>
+                @await Html.PartialAsync("_CreatePost")
 
                 <!-- Posts -->
                 <article class="post" data-post-id="5">

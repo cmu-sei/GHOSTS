@@ -124,8 +124,6 @@ public class PostsController(ILogger logger, DataContext dbContext, IUserService
             comment.Message += $"<br/><img src=\"{imagePath}\"/>";
         }
 
-
-
         dbContext.Comments.Add(comment);
         await dbContext.SaveChangesAsync();
         return NoContent();
