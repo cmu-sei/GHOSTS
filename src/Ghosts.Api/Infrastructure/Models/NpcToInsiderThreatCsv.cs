@@ -12,7 +12,7 @@ using Ghosts.Animator.Models.InsiderThreat;
 namespace Ghosts.Api.Infrastructure.Models;
 
 [DelimitedRecord(",")]
-public class NPCToInsiderThreatCsv
+public class NpcToInsiderThreatCsv
 {
     [FieldQuoted] public Guid Id { get; set; }
     [FieldQuoted] public string Hostname { get; set; }
@@ -270,9 +270,9 @@ public class NPCToInsiderThreatCsv
     [FieldQuoted] public int GeneralPerformance { get; set; }
     [FieldQuoted] public int OverallPerformance { get; set; }
 
-    public static IEnumerable<NPCToInsiderThreatCsv> ConvertToCsv(IEnumerable<NpcRecord> npcs)
+    public static IEnumerable<NpcToInsiderThreatCsv> ConvertToCsv(IEnumerable<NpcRecord> npcs)
     {
-        var finalList = new List<NPCToInsiderThreatCsv>();
+        var finalList = new List<NpcToInsiderThreatCsv>();
         foreach (var n in npcs)
         {
             if (n.NpcProfile == null || n.NpcProfile.Accounts == null || n.NpcProfile.Address == null) continue;
@@ -280,7 +280,7 @@ public class NPCToInsiderThreatCsv
             var events = n.NpcProfile.InsiderThreat.GetAllEvents();
 
             var i = AnimatorRandom.Rand.Next(0, 99);
-            var o = new NPCToInsiderThreatCsv
+            var o = new NpcToInsiderThreatCsv
             {
                 Id = n.Id,
                 Hostname = $"user{i}",

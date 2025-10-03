@@ -43,7 +43,7 @@ namespace Ghosts.Api.Infrastructure.Data
         public DbSet<Survey.Port> Ports { get; set; }
 
         public DbSet<NpcRecord> Npcs { get; set; }
-        public DbSet<NPCIpAddress> NpcIps { get; set; }
+        public DbSet<NpcIpAddress> NpcIps { get; set; }
 
         public DbSet<NpcActivity> NpcActivities { get; set; }
 

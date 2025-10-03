@@ -9,21 +9,18 @@ using System.Reflection;
 namespace Ghosts.Api.Infrastructure.Models;
 
 [Obsolete("This will move to an Automapper map from NPC to NpcProfileSummary class")]
-public class NPCReduced
+public class NpcReduced
 {
     public Dictionary<string, string> PropertySelection { get; set; }
 
-    public NPCReduced()
+    public NpcReduced()
     {
         PropertySelection = new Dictionary<string, string>();
     }
 
-    public NPCReduced(IEnumerable<string> fieldsToReturn, NpcRecord npc)
+    public NpcReduced(IEnumerable<string> fieldsToReturn, NpcRecord npc)
     {
-        //what we'll return
         PropertySelection = new Dictionary<string, string>();
-
-        //get an npc to "rip apart"
 
         //for each field we want to return
         foreach (var fieldToReturn in fieldsToReturn)
@@ -50,11 +47,6 @@ public class NPCReduced
                 if (currentObject.GetType().GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEnumerable<>))) { }
                 PropertySelection.Add(fieldToReturn, currentObject.ToString());
             }
-
-
-            //other potential datas to look at
-            //type.GetProperties()
-            //foreach (var method in type.GetMethods())
         }
     }
 

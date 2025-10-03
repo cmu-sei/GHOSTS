@@ -5,7 +5,6 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using AutoMapper;
-using Ghosts.Api.Areas.Animator.Infrastructure.Models;
 using Ghosts.Animator.Models;
 
 namespace Ghosts.Api.Infrastructure.Models;
@@ -24,9 +23,8 @@ public class NpcRecord
     public string Campaign { get; set; }
 
     /// <summary>
-    /// Used for grouping NPCs together, e.g.
-    /// We could call this a group but in order
-    /// to be more specific we use enclave.
+    /// Used for grouping NPCs together, e.g. we could call this a group
+    /// but to differentiate from other types of groups, we use enclave.
     /// </summary>
     public string Enclave { get; set; }
 

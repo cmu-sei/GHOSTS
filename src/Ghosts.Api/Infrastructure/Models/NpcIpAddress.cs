@@ -7,7 +7,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Ghosts.Api.Infrastructure.Models;
 
 [Table("ips")]
-public class NPCIpAddress
+public class NpcIpAddress
 {
     [Key]
     public int Id { get; set; }
@@ -17,7 +17,7 @@ public class NPCIpAddress
 
     public string Enclave { get; set; }
 
-    public NPCIpAddress()
+    public NpcIpAddress()
     {
         CreatedUTC = DateTime.UtcNow;
     }
