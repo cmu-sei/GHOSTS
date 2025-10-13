@@ -13,7 +13,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@Model.User's Post - Facebook</title>
+    <title>@Model?.Username's Post - Facebook</title>
     <link rel="stylesheet" href="/themes/facebook/css/facebook.css">
     <link rel="icon" href="/themes/facebook/images/facebook-icon.png" type="image/png">
 </head>
@@ -48,42 +48,9 @@
         <!-- Post Detail -->
         <div class="post-detail">
             <!-- Main Post -->
-            <article class="post" data-post-id="@Model.Id">
-                <div class="post-header">
-                    <div class="post-user-info">
-                        <img src="/u/@Model.Username/avatar" alt="@Model.Username" class="profile-pic">
-                        <div>
-                            <div class="post-user-name"><a href="/u/@Model.Username">@Model.Username</a></div>
-                            <div class="post-time">@Model.CreatedUtc.ToString("MMM d, yyyy") · 🌍</div>
-                        </div>
-                    </div>
-                    <button class="post-menu">⋯</button>
-                </div>
-                <div class="post-content">
-                    <div class="post-text">@Html.Raw(Model.Message)</div>
-                </div>
-                <div class="post-stats">
-                    @{
-                        var likesCount = Model.Likes?.Count ?? 0;
-                        var commentsCount = Model.Comments?.Count ?? 0;
-                    }
-                    @if (likesCount > 0)
-                    {
-                        <div>👍 @likesCount people liked this</div>
-                    }
-                    @if (commentsCount > 0)
-                    {
-                        <div>@commentsCount comments</div>
-                    }
-                </div>
-                <div class="post-actions">
-                    <button class="post-action like-btn like-it@likedClass" data-id="@Model.Id">
-                        @(currentUserLiked ? "👍 Liked" : "👍 Like")
-                    </button>
-                    <button class="post-action comment-btn" data-action="comment">💬 Comment</button>
-                    <button class="post-action share-btn" data-action="share">📤 Share</button>
-                </div>
-            </article>
+            @{
+                await Html.RenderPartialAsync("_PostCard", Model);
+            }
 
             <!-- Comments Section -->
             <div class="comments-section">
