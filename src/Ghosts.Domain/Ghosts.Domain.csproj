@@ -10,9 +10,9 @@
 
 	<ItemGroup>
 		<PackageReference Include="DotNetCore.NPOI" Version="1.2.3" />
-		<PackageReference Include="HtmlAgilityPack" Version="1.11.67" />
-		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-		<PackageReference Include="NLog" Version="5.3.4" />
+		<PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+		<PackageReference Include="NLog" Version="6.0.5" />
 		<PackageReference Include="System.ComponentModel" Version="4.3.0" />
 		<PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
 		<PackageReference Include="YamlDotNet" Version="16.3.0" />
