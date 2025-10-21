@@ -71,8 +71,8 @@ public class NpcRecord
                 .ForMember(dest => dest.Employment.EmploymentRecords,
                     opt => opt.MapFrom(src => src.Employment.EmploymentRecords.FirstOrDefault()))
                 .ForMember(dest => dest.ForeignTravel.Trips,
-                opt => opt.MapFrom(src => src.ForeignTravel.Trips.FirstOrDefault()));
-        }, null);
+                    opt => opt.MapFrom(src => src.ForeignTravel.Trips.FirstOrDefault()));
+        });
 
         var mapper = new Mapper(config);
         return mapper.Map<NpcProfileSummary>(o);
