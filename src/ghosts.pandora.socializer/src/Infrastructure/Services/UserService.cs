@@ -78,7 +78,8 @@ public class UserService(DataContext context) : IUserService
 
     public async Task<User> UpdateUserAsync(string username, string bio = null, string status = null, string theme = null)
     {
-        var user = await context.Users.FindAsync(username);
+        var user = await context.Users
+            .FirstOrDefaultAsync(u => u.Username.ToLower() == username.ToLower());
         if (user == null)
             return null;
 
@@ -99,7 +100,8 @@ public class UserService(DataContext context) : IUserService
 
     public async Task<bool> DeleteUserAsync(string username)
     {
-        var user = await context.Users.FindAsync(username);
+        var user = await context.Users
+            .FirstOrDefaultAsync(u => u.Username.ToLower() == username.ToLower());
         if (user == null)
             return false;
 

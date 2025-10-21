@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="/themes/facebook/css/facebook.css">
     <link rel="icon" href="/themes/facebook/images/facebook-icon.png" type="image/png">
     <style>
+        body {padding-top:55px;}
         .chat-container {
             max-width: 900px;
             margin: 0 auto;
@@ -185,20 +186,30 @@
     </style>
 </head>
 <body data-theme="facebook">
-<br /><br />
-<!-- Header -->
-<header class="header">
-    <div class="header-left">
-        <a href="/" class="logo">facebook</a>
-    </div>
-    <div class="header-center">
-        <a href="/" class="nav-item">🏠</a>
-        <a href="/messages" class="nav-item active">💬</a>
-    </div>
-    <div class="header-right">
-        <img src="/u/@ViewBag.Username/avatar" alt="Profile" class="profile-pic">
-    </div>
-</header>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <a href="/" class="logo">facebook</a>
+            <form action="/search">
+                <input type="text" name="q" class="search-bar" placeholder="Search Facebook">
+            </form>
+        </div>
+
+        <div class="header-center">
+            <a href="/" class="nav-item">🏠</a>
+            <a href="#" class="nav-item">📺</a>
+            <a href="#" class="nav-item">🛍️</a>
+            <a href="#" class="nav-item">👥</a>
+            <a href="#" class="nav-item">🎮</a>
+        </div>
+
+        <div class="header-right">
+            <button class="icon-btn">⊕</button>
+            <a href="/messages" class="icon-btn active">💬</a>
+            <button class="icon-btn">🔔</button>
+            <a href="/profile"><img src="/u/@ViewBag.Username/avatar" alt="Profile" class="profile-pic"></a>
+        </div>
+    </header>
 
 <div class="chat-container">
     <div class="chat-header">

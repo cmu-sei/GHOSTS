@@ -66,7 +66,7 @@ public class DirectMessagesController(
         return RedirectToAction("Conversation", new { partnerUsername = toUsername });
     }
 
-    [HttpGet("/api/messages/unread")]
+    [HttpGet("unread")]
     public async Task<IActionResult> GetUnreadMessages()
     {
         var username = GetOrCreateUsernameCookie(this.HttpContext);
@@ -74,7 +74,7 @@ public class DirectMessagesController(
         return Ok(unreadMessages);
     }
 
-    [HttpPost("/api/messages/{messageId:int}/read")]
+    [HttpPost("{messageId:int}/read")]
     public async Task<IActionResult> MarkAsRead(int messageId)
     {
         await directMessageService.MarkAsReadAsync(messageId);

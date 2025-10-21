@@ -20,8 +20,7 @@ public class ClientHub(
     IClientIdService clientIdService,
     IClientResultsService clientResultsService,
     IClientSurveyService clientSurveyService,
-    IClientTimelineService clientTimelineService,
-    IClientUpdateService clientUpdateService) : Hub
+    IClientTimelineService clientTimelineService) : Hub
 {
     private static readonly Logger _log = LogManager.GetCurrentClassLogger();
     private readonly CancellationToken _ct = CancellationToken.None;

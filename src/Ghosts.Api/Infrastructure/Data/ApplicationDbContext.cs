@@ -43,9 +43,15 @@ namespace Ghosts.Api.Infrastructure.Data
         public DbSet<Survey.Port> Ports { get; set; }
 
         public DbSet<NpcRecord> Npcs { get; set; }
-        public DbSet<NPCIpAddress> NpcIps { get; set; }
+        public DbSet<NpcIpAddress> NpcIps { get; set; }
 
         public DbSet<NpcActivity> NpcActivities { get; set; }
+
+        public DbSet<NpcSocialGraph> NpcSocialGraphs { get; set; }
+        public DbSet<NpcSocialConnection> NpcSocialConnections { get; set; }
+        public DbSet<NpcInteraction> NpcInteractions { get; set; }
+        public DbSet<NpcLearning> NpcLearnings { get; set; }
+        public DbSet<NpcBelief> NpcBeliefs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -56,7 +62,52 @@ namespace Ghosts.Api.Infrastructure.Data
 
 
             modelBuilder.Entity<NpcRecord>().Property(o => o.NpcProfile).HasColumnType("jsonb");
-            modelBuilder.Entity<NpcRecord>().Property(o => o.NpcSocialGraph).HasColumnType("jsonb");
+
+            // NpcSocialGraph relationships and indexes
+            modelBuilder.Entity<NpcSocialGraph>()
+                .HasMany(sg => sg.Connections)
+                .WithOne(c => c.SocialGraph)
+                .HasForeignKey(c => c.SocialGraphId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<NpcSocialGraph>()
+                .HasMany(sg => sg.Knowledge)
+                .WithOne(k => k.SocialGraph)
+                .HasForeignKey(k => k.SocialGraphId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<NpcSocialGraph>()
+                .HasMany(sg => sg.Beliefs)
+                .WithOne(b => b.SocialGraph)
+                .HasForeignKey(b => b.SocialGraphId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<NpcSocialConnection>()
+                .HasMany(c => c.Interactions)
+                .WithOne(i => i.SocialConnection)
+                .HasForeignKey(i => i.SocialConnectionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // NpcSocialConnection indexes
+            modelBuilder.Entity<NpcSocialConnection>().HasIndex(o => o.SocialGraphId);
+            modelBuilder.Entity<NpcSocialConnection>().HasIndex(o => o.ConnectedNpcId);
+            modelBuilder.Entity<NpcSocialConnection>().HasIndex(o => new { o.SocialGraphId, o.ConnectedNpcId });
+
+            // NpcInteraction indexes
+            modelBuilder.Entity<NpcInteraction>().HasIndex(o => o.SocialConnectionId);
+            modelBuilder.Entity<NpcInteraction>().HasIndex(o => o.Step);
+
+            // NpcLearning indexes
+            modelBuilder.Entity<NpcLearning>().HasIndex(o => o.SocialGraphId);
+            modelBuilder.Entity<NpcLearning>().HasIndex(o => new { o.ToNpcId, o.FromNpcId });
+            modelBuilder.Entity<NpcLearning>().HasIndex(o => o.Step);
+            modelBuilder.Entity<NpcLearning>().HasIndex(o => o.Topic);
+
+            // NpcBelief indexes
+            modelBuilder.Entity<NpcBelief>().HasIndex(o => o.SocialGraphId);
+            modelBuilder.Entity<NpcBelief>().HasIndex(o => new { o.ToNpcId, o.FromNpcId });
+            modelBuilder.Entity<NpcBelief>().HasIndex(o => o.Step);
+            modelBuilder.Entity<NpcBelief>().HasIndex(o => o.Name);
 
             modelBuilder.Entity<Machine>().HasIndex(o => new { o.CreatedUtc });
             modelBuilder.Entity<Machine>().HasIndex(o => new { o.Status });
@@ -120,7 +171,7 @@ namespace Ghosts.Api.Infrastructure.Data
             var connectionString = configuration.GetConnectionString("DefaultConnection");
 
             var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
-            optionsBuilder.UseNpgsql(connectionString, x => x.MigrationsAssembly("ghosts.api.migrations"));
+            optionsBuilder.UseNpgsql(connectionString, x => x.MigrationsAssembly("ghosts.api"));
 
             return new ApplicationDbContext(optionsBuilder.Options);
         }

@@ -6,7 +6,7 @@ using FileHelpers;
 namespace Ghosts.Api.Infrastructure.Models;
 
 [DelimitedRecord(",")]
-public class NPCToCsv
+public class NpcToCsv
 {
     public Guid Id { get; set; }
     public string Email { get; set; }

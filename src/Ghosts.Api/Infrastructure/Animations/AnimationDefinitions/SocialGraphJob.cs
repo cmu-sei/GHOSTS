@@ -59,15 +59,15 @@ public class SocialGraphJob
         }
     }
 
-    private IEnumerable<NpcSocialGraph.SocialConnection> GetSocialConnectionFromNpc(NpcRecord npc)
+    private IEnumerable<NpcSocialConnection> GetSocialConnectionFromNpc(NpcRecord npc)
     {
-        var connection = new NpcSocialGraph.SocialConnection();
-        connection.Id = npc.Id;
+        var connection = new NpcSocialConnection();
+        connection.ConnectedNpcId = npc.Id;
         connection.Name = npc.NpcProfile.Name.ToString();
         connection.RelationshipStatus = 0;
         connection.Distance = "";
-        connection.Interactions = new List<NpcSocialGraph.Interaction>();
-        var connections = new List<NpcSocialGraph.SocialConnection>();
+        connection.Interactions = new List<NpcInteraction>();
+        var connections = new List<NpcSocialConnection>();
         connections.Add(connection);
         return connections;
     }
@@ -99,32 +99,32 @@ public class SocialGraphJob
                 var topic = TryLearn(graph, context);
                 if (!string.IsNullOrEmpty(topic))
                 {
-                    var learning = new NpcSocialGraph.Learning(graph.Id, target.Id, topic, graph.CurrentStep, 1);
+                    var learning = new NpcLearning(graph.Id, target.ConnectedNpcId, npc.Id, topic, graph.CurrentStep, 1);
                     graph.Knowledge.Add(learning);
-                    await _hub.Clients.All.SendAsync("show", graph.CurrentStep, target.Id, "knowledge",
+                    await _hub.Clients.All.SendAsync("show", graph.CurrentStep, target.ConnectedNpcId, "knowledge",
                         $"learned more about {topic} (1)", DateTime.Now.ToString(CultureInfo.InvariantCulture), _token);
 
-                    if (learning.From == npc.Id) continue; // can't improve the relationship with oneself (philosophically true?
-                    var connection = graph.Connections.FirstOrDefault(c => c.Id == learning.From);
+                    if (learning.FromNpcId == npc.Id) continue; // can't improve the relationship with oneself (philosophically true?
+                    var connection = graph.Connections.FirstOrDefault(c => c.ConnectedNpcId == learning.FromNpcId);
                     if (connection != null)
                     {
                         connection.RelationshipStatus++;
                         await Task.Delay(1500, _token);
-                        await _hub.Clients.All.SendAsync("show", graph.CurrentStep, target.Id, "relationship",
+                        await _hub.Clients.All.SendAsync("show", graph.CurrentStep, target.ConnectedNpcId, "relationship",
                             $"{npc.NpcProfile.Name} improved relationship with {target.Name}",
                             DateTime.Now.ToString(CultureInfo.InvariantCulture), _token);
                     }
                     else
                     {
-                        var newConnection = context.Npcs.FirstOrDefault(c => c.Id == learning.From);
+                        var newConnection = context.Npcs.FirstOrDefault(c => c.Id == learning.FromNpcId);
                         if (newConnection != null)
                         {
-                            graph.Connections.Add(new NpcSocialGraph.SocialConnection()
+                            graph.Connections.Add(new NpcSocialConnection()
                             {
-                                Id = newConnection.Id, Name = newConnection.NpcProfile.Name.ToString()
+                                ConnectedNpcId = newConnection.Id, Name = newConnection.NpcProfile.Name.ToString(), SocialGraphId = graph.Id
                             });
                             await Task.Delay(1500, _token);
-                            await _hub.Clients.All.SendAsync("show", graph.CurrentStep, target.Id, "relationship",
+                            await _hub.Clients.All.SendAsync("show", graph.CurrentStep, target.ConnectedNpcId, "relationship",
                                 $"{npc.NpcProfile.Name} improved relationship with {target.Name}",
                                 DateTime.Now.ToString(CultureInfo.InvariantCulture), _token);
                         }
@@ -149,10 +149,11 @@ public class SocialGraphJob
         {
             Id = npc.Id,
             Name = npc.NpcProfile.Name.ToString(),
-            Connections = connections.Select(c => new NpcSocialGraph.SocialConnection
+            Connections = connections.Select(c => new NpcSocialConnection
             {
-                Id = c.Id,
-                Name = c.NpcProfile.Name.ToString()
+                ConnectedNpcId = c.Id,
+                Name = c.NpcProfile.Name.ToString(),
+                SocialGraphId = npc.Id
             }).ToList()
         };
 

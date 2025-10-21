@@ -1,19 +1,19 @@
-using System;
-using System.Linq;
 using Ghosts.Socializer.Infrastructure;
 using Ghosts.Socializer.Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 
-namespace Ghosts.Socializer.Controllers;
+namespace Ghosts.Socializer.Controllers.Api;
 
-[ApiController]
+[Route("/api/relationships")]
+[SwaggerTag("API Functionality for users.")]
 public class RelationshipsController(
     ILogger logger,
     IFollowService followService,
     IUserService userService)
     : BaseController(logger)
 {
-    [HttpPost("/follow")]
+    [HttpPost("follow")]
     public async Task<IActionResult> Follow([FromForm] string username)
     {
         if (string.IsNullOrWhiteSpace(username))
@@ -47,7 +47,7 @@ public class RelationshipsController(
         });
     }
 
-    [HttpPost("/unfollow")]
+    [HttpPost("unfollow")]
     public async Task<IActionResult> Unfollow([FromForm] string username)
     {
         if (string.IsNullOrWhiteSpace(username))
@@ -78,7 +78,7 @@ public class RelationshipsController(
         });
     }
 
-    [HttpGet("/followers/{username}")]
+    [HttpGet("{username}/followers")]
     public async Task<IActionResult> GetFollowers(string username)
     {
         if (string.IsNullOrWhiteSpace(username))
@@ -95,7 +95,7 @@ public class RelationshipsController(
         });
     }
 
-    [HttpGet("/following/{username}")]
+    [HttpGet("{username}/following")]
     public async Task<IActionResult> GetFollowing(string username)
     {
         if (string.IsNullOrWhiteSpace(username))
@@ -112,7 +112,7 @@ public class RelationshipsController(
         });
     }
 
-    [HttpGet("/api/users/{username}/connections")]
+    [HttpGet("{username}/connections")]
     public async Task<IActionResult> GetConnections(string username)
     {
         if (string.IsNullOrWhiteSpace(username))

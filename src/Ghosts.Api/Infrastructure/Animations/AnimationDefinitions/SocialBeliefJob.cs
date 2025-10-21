@@ -93,10 +93,11 @@ public class SocialBeliefJob
             var connections = _context.Npcs.ToList().OrderBy(o => o.Enclave).ThenBy(o => o.Team).Take(10).ToList();
             foreach (var connection in connections)
             {
-                graph.Connections.Add(new NpcSocialGraph.SocialConnection
+                graph.Connections.Add(new NpcSocialConnection
                 {
-                    Id = connection.NpcProfile.Id,
-                    Name = connection.NpcProfile.Name.ToString()
+                    ConnectedNpcId = connection.NpcProfile.Id,
+                    Name = connection.NpcProfile.Name.ToString(),
+                    SocialGraphId = graph.Id
                 });
             }
 
@@ -117,7 +118,7 @@ public class SocialBeliefJob
 
         graph.CurrentStep++;
 
-        NpcSocialGraph.Belief belief = null;
+        NpcBelief belief = null;
 
         if (graph.Beliefs != null)
         {
@@ -125,26 +126,26 @@ public class SocialBeliefJob
         }
         else
         {
-            graph.Beliefs = new List<NpcSocialGraph.Belief>();
+            graph.Beliefs = new List<NpcBelief>();
         }
 
         if (belief == null)
         {
             var l = Convert.ToDecimal(_random.NextDouble() * (0.75 - 0.25) + 0.25);
-            belief = new NpcSocialGraph.Belief(graph.Id, graph.Id, Beliefs.RandomFromStringArray(), graph.CurrentStep, l,
+            belief = new NpcBelief(0, graph.Id, graph.Id, graph.Id, Beliefs.RandomFromStringArray(), graph.CurrentStep, l,
                 (decimal)0.5);
         }
 
         var bayes = new Bayes(graph.CurrentStep, belief.Likelihood, belief.Posterior, 1 - belief.Likelihood,
             1 - belief.Posterior);
-        var newBelief = new NpcSocialGraph.Belief(graph.Id, graph.Id, Beliefs.RandomFromStringArray(), graph.CurrentStep,
+        var newBelief = new NpcBelief(0, graph.Id, graph.Id, graph.Id, Beliefs.RandomFromStringArray(), graph.CurrentStep,
             belief.Likelihood, bayes.PosteriorH1);
         graph.Beliefs.Add(newBelief);
 
         //post to hub
         _activityHubContext.Clients.All.SendAsync("show",
             newBelief.Step,
-            newBelief.To.ToString(),
+            newBelief.ToNpcId.ToString(),
             "belief",
             $"{graph.Name} has updated posterior of {Math.Round(newBelief.Posterior, 2)} in {newBelief.Name}",
             DateTime.Now.ToString(CultureInfo.InvariantCulture), cancellationToken: _cancellationToken);

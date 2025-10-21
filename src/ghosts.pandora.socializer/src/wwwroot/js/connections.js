@@ -121,7 +121,7 @@
             return;
         }
 
-        fetch(`/api/users/${encodeURIComponent(username)}/connections`)
+        fetch(`/api/relationships/${encodeURIComponent(username)}/connections`)
             .then(resp => {
                 if (!resp.ok) {
                     throw new Error('Failed to load connections');

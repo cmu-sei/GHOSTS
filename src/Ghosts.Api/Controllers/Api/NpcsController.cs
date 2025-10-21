@@ -171,7 +171,7 @@ public class NpcsController(
 
         var npc = await service.GetById(npcId);
         if (npc == null) return null;
-        return new NPCReduced(fieldsToReturn, npc).PropertySelection;
+        return new NpcReduced(fieldsToReturn, npc).PropertySelection;
     }
 
     /// <summary>
@@ -202,10 +202,10 @@ public class NpcsController(
     [Obsolete("Obsolete")]
     public async Task<IActionResult> NpcsEnclaveGetCsv(string campaign, string enclave)
     {
-        var engine = new FileHelperEngine<NPCToCsv>();
+        var engine = new FileHelperEngine<NpcToCsv>();
         var list = await NpcsEnclaveGet(campaign, enclave);
 
-        var filteredList = list.Select(n => new NPCToCsv { Id = n.Id, Email = n.NpcProfile.Email }).ToList();
+        var filteredList = list.Select(n => new NpcToCsv { Id = n.Id, Email = n.NpcProfile.Email }).ToList();
 
         var stream = new MemoryStream();
         TextWriter streamWriter = new StreamWriter(stream);
@@ -251,7 +251,7 @@ public class NpcsController(
 
         foreach (var npc in npcList)
         {
-            var npcProperties = new NPCReduced(fieldsToReturn, npc).PropertySelection;
+            var npcProperties = new NpcReduced(fieldsToReturn, npc).PropertySelection;
             var name = npc.NpcProfile.Name;
             var npcName = name.ToString();
             if (npcName != null) npcDetails[npcName] = npcProperties;
@@ -296,10 +296,10 @@ public class NpcsController(
     [HttpGet("{campaign}/{enclave}/{team}/csv")]
     public async Task<IActionResult> NpcsTeamGetCsv(string campaign, string enclave, string team)
     {
-        var engine = new FileHelperEngine<NPCToCsv>();
+        var engine = new FileHelperEngine<NpcToCsv>();
         var list = await NpcsTeamGet(team, enclave, campaign);
 
-        var filteredList = list.Select(n => new NPCToCsv { Id = n.Id, Email = n.NpcProfile.Email }).ToList();
+        var filteredList = list.Select(n => new NpcToCsv { Id = n.Id, Email = n.NpcProfile.Email }).ToList();
 
         var stream = new MemoryStream();
         var streamWriter = new StreamWriter(stream);
@@ -353,7 +353,7 @@ public class NpcsController(
             }
 
             var ip = pool.RandomElement();
-            context.NpcIps.Add(new NPCIpAddress { IpAddress = ip, NpcId = npc.Id, Enclave = npc.Enclave });
+            context.NpcIps.Add(new NpcIpAddress { IpAddress = ip, NpcId = npc.Id, Enclave = npc.Enclave });
             pool.Remove(ip);
 
             s.Append("\tuser-").Append(i).Append(" = {").Append(Environment.NewLine);
@@ -460,11 +460,11 @@ public class NpcsController(
     [Obsolete("Obsolete")]
     public async Task<IActionResult> NpcsInsiderThreatGetCsv()
     {
-        var engine = new FileHelperEngine<NPCToInsiderThreatCsv>();
+        var engine = new FileHelperEngine<NpcToInsiderThreatCsv>();
         engine.HeaderText = engine.GetFileHeader();
 
         var list = await context.Npcs.ToListAsync();
-        var finalList = NPCToInsiderThreatCsv.ConvertToCsv(list.ToList());
+        var finalList = NpcToInsiderThreatCsv.ConvertToCsv(list.ToList());
 
         var stream = new MemoryStream();
         var streamWriter = new StreamWriter(stream);

@@ -3,6 +3,8 @@
 }
 @model List<Ghosts.Socializer.Infrastructure.Post>
 
+@ViewBag.Theme = "instagram";
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,128 +15,89 @@
     <link rel="icon" href="/themes/instagram/images/instagram-icon.png">
 </head>
 <body data-theme="instagram">
-    <div class="app">
-        <!-- Header -->
-        <header class="header">
-            <div class="header-container">
-                <div class="logo">
-                    <img src="/themes/instagram/images/instagram-logo.png" alt="Instagram" class="instagram-logo">
-                </div>
-                <div class="search-container">
-                    <div class="search-box">
-                        <span class="search-icon">🔍</span>
-                        <input type="text" placeholder="Search" class="search-input">
-                    </div>
-                </div>
-                <div class="header-actions">
-                    <button class="action-btn">🏠</button>
-                    <a href="/messages" class="action-btn" style="text-decoration: none;">💬</a>
-                    <button class="action-btn">➕</button>
-                    <button class="action-btn">🧭</button>
-                    <button class="action-btn">❤️</button>
-                    <div class="profile-menu">
-                        <img src="/u/@ViewBag.Username/avatar" alt="Profile" class="header-avatar">
-                    </div>
+<div class="app">
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <div class="logo">
+                <img src="/themes/instagram/images/instagram-logo.png" alt="Instagram" class="instagram-logo">
+            </div>
+            <div class="search-container">
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" placeholder="Search" class="search-input">
                 </div>
             </div>
-        </header>
-
-        <!-- Main Content -->
-        <div class="main-container">
-            <!-- Stories -->
-            <div class="stories-container">
-                <div class="stories-list">
-                    <!-- Your Story -->
-                    <div class="story-item your-story">
-                        <div class="story-avatar">
-                            <img src="/u/@ViewBag.Username/avatar" alt="Your story" class="avatar">
-                            <div class="add-story">+</div>
-                        </div>
-                        <span class="story-username">Your Story</span>
-                    </div>
-
-                    <!-- Friend Stories -->
-                    <div class="story-item">
-                        <div class="story-avatar">
-                            <img src="/themes/instagram/images/story1.jpg" alt="Friend story" class="avatar">
-                        </div>
-                        <span class="story-username">friend1</span>
-                    </div>
-                    <div class="story-item">
-                        <div class="story-avatar">
-                            <img src="/themes/instagram/images/story2.jpg" alt="Friend story" class="avatar">
-                        </div>
-                        <span class="story-username">friend2</span>
-                    </div>
-                    <div class="story-item">
-                        <div class="story-avatar">
-                            <img src="/themes/instagram/images/story3.jpg" alt="Friend story" class="avatar">
-                        </div>
-                        <span class="story-username">friend3</span>
-                    </div>
+            <div class="header-actions">
+                <button class="action-btn">🏠</button>
+                <a href="/messages" class="action-btn" style="text-decoration: none;">💬</a>
+                <button class="action-btn">➕</button>
+                <button class="action-btn">🧭</button>
+                <button class="action-btn">❤️</button>
+                <div class="profile-menu">
+                    <img src="/u/@ViewBag.Username/avatar" alt="Profile" class="header-avatar">
                 </div>
             </div>
+        </div>
+    </header>
 
-            @{
-                ViewBag.Theme = "instagram";
-            }
+    <!-- Main Content -->
+    <div class="main-container">
+        <!-- Stories -->
+        <div class="stories-container">
+            <div class="stories-list">
+                <!-- Your Story -->
+                <div class="story-item your-story">
+                    <div class="story-avatar">
+                        <img src="/u/@ViewBag.Username/avatar" alt="Your story" class="avatar">
+                        <div class="add-story">+</div>
+                    </div>
+                    <span class="story-username">Your Story</span>
+                </div>
 
-            @await Html.PartialAsync("_CreatePost")
-
-            <!-- Feed -->
-            <div class="feed" id="newsfeed-items-grid">
-                @{
-                    if (Model != null)
-                    {
-                        foreach (var post in Model)
-                        {
-                            await Html.RenderPartialAsync("_PostCard", post);
-                        }
-                    }
-                }
+                <!-- Friend Stories -->
+                <div class="story-item">
+                    <div class="story-avatar">
+                        <img src="/themes/instagram/images/story1.jpg" alt="Friend story" class="avatar">
+                    </div>
+                    <span class="story-username">friend1</span>
+                </div>
+                <div class="story-item">
+                    <div class="story-avatar">
+                        <img src="/themes/instagram/images/story2.jpg" alt="Friend story" class="avatar">
+                    </div>
+                    <span class="story-username">friend2</span>
+                </div>
+                <div class="story-item">
+                    <div class="story-avatar">
+                        <img src="/themes/instagram/images/story3.jpg" alt="Friend story" class="avatar">
+                    </div>
+                    <span class="story-username">friend3</span>
+                </div>
             </div>
         </div>
 
-        <!-- Right Sidebar -->
-        <div class="sidebar">
-            <div class="user-profile">
-                <img src="/u/@ViewBag.Username/avatar" alt="Profile" class="profile-pic">
-                <div class="user-info">
-                    <span class="username">@ViewBag.Username</span>
-                    <span class="full-name">@ViewBag.Username</span>
-                </div>
-                <button class="switch-btn">Switch</button>
-            </div>
+        @await Html.PartialAsync("_CreatePost")
 
-            <div class="suggestions">
-                <div class="suggestions-header">
-                    <span>Suggestions For You</span>
-                    <button class="see-all">See All</button>
-                </div>
-                <div class="suggestion-list">
-                    <div class="suggestion-item">
-                        <img src="/themes/instagram/images/user1.jpg" alt="User" class="suggestion-avatar">
-                        <div class="suggestion-info">
-                            <span class="suggestion-username">photographer_pro</span>
-                            <span class="suggestion-reason">Follows you</span>
-                        </div>
-                        <button class="follow-btn">Follow</button>
-                    </div>
-                    <div class="suggestion-item">
-                        <img src="/themes/instagram/images/user2.jpg" alt="User" class="suggestion-avatar">
-                        <div class="suggestion-info">
-                            <span class="suggestion-username">travel_lover</span>
-                            <span class="suggestion-reason">Suggested for you</span>
-                        </div>
-                        <button class="follow-btn">Follow</button>
-                    </div>
-                </div>
-            </div>
+        <!-- Feed -->
+        <div class="feed" id="newsfeed-items-grid">
+            @{
+                if (Model != null)
+                {
+                    foreach (var post in Model)
+                    {
+                        await Html.RenderPartialAsync("_PostCard", post);
+                    }
+                }
+            }
         </div>
     </div>
 
-    <script src="/lib/jquery/dist/jquery.min.js"></script>
-    <script src="/js/signalr.min.js"></script>
-    <script src="/js/social.js"></script>
+</div>
+
+<script src="/lib/jquery/dist/jquery.min.js"></script>
+<script src="/js/signalr.min.js"></script>
+<script src="/js/social.js"></script>
+
 </body>
 </html>
