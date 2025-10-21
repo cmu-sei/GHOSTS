@@ -137,8 +137,8 @@ namespace Ghosts.Api.Controllers
                 interactions.Links.Add(new Link
                 {
                     Start = startTime.AddMinutes(learning.Step),
-                    Source = learning.To.ToString(),
-                    Target = learning.From.ToString(),
+                    Source = learning.ToNpcId.ToString(),
+                    Target = learning.FromNpcId.ToString(),
                     End = startTime.AddMinutes(1) // Adjusting end time for links
                 });
             }
