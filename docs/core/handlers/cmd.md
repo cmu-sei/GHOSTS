@@ -1,9 +1,11 @@
 # CMD Handler Configuration
 
 ???+ info "Sample Configuration"
-    The sample configuration below is also available in the [GHOSTS GitHub repository](<https://github.com/cmu-sei/GHOSTS/blob/master/src/Ghosts.Client/Sample%20Timelines/clicks>
+    Sample command handler configurations are available in the [GHOSTS GitHub repository](https://github.com/cmu-sei/GHOSTS/tree/master/src/Ghosts.Client/Sample%20Timelines)
 
-The following is the format for a basic timeline handler:
+The CMD handler allows you to execute command-line operations as part of your NPC timeline. This can include running PowerShell scripts, batch files, or any command-line utilities available on the system.
+
+## Basic Configuration Format
 
 ```json
 {
@@ -32,9 +34,20 @@ The following is the format for a basic timeline handler:
 }
 ```
 
-In this example, the command window is launched, and the initial command of moving into the current user's Downloads folder is executed. Then, the command window is used to extract the contents of a zip file, move into the extracted folder, and list the contents of the folder. Thus, CommandArgs can be used to execute any number of commands in sequence.
+## How It Works
 
-Note that the command window is not closed after the commands are executed. This is because the command window is launched in a separate process, and the process is terminated after the commands are executed. If you want to keep the command window open, you can use the following configuration:
+In this example, a command window is launched with the following sequence:
+
+1. Navigate to the user's Downloads folder (`cd %homedrive%%homepath%\\Downloads`)
+2. Extract a zip file using PowerShell
+3. Navigate into the extracted folder
+4. List the contents of the folder
+
+The `CommandArgs` array allows you to execute multiple commands sequentially.
+
+## Command Window Behavior
+
+By default, the command window closes after execution. To keep it open, use the `/k` flag:
 
 ```json
 {
@@ -44,8 +57,59 @@ Note that the command window is not closed after the commands are executed. This
         "cd x",
         "dir"
     ],
-    "TrackableId": "<guid id from trackables table/>",
     "DelayAfter": 10,
     "DelayBefore": 10000
 }
 ```
+
+The `/k` flag keeps the command window open after executing the commands, allowing for more realistic simulation of user behavior.
+
+## Environment Variables
+
+You can use Windows environment variables in your commands:
+
+- `%HOMEDRIVE%` - User's home drive (typically `C:`)
+- `%HOMEPATH%` - User's home path
+- `%USERNAME%` - Current username
+- `%TEMP%` - Temporary files directory
+- `%PROGRAMFILES%` - Program Files directory
+
+## Common Use Cases
+
+**Execute a PowerShell Script:**
+```json
+{
+    "Command": "powershell",
+    "CommandArgs": [
+        "-ExecutionPolicy Bypass",
+        "-File C:\\scripts\\my-script.ps1"
+    ]
+}
+```
+
+**Run System Utilities:**
+```json
+{
+    "Command": "ipconfig",
+    "CommandArgs": ["/all"]
+}
+```
+
+**File Operations:**
+```json
+{
+    "Command": "xcopy",
+    "CommandArgs": [
+        "%HOMEDRIVE%%HOMEPATH%\\Documents\\*.txt",
+        "%HOMEDRIVE%%HOMEPATH%\\Backup\\",
+        "/Y"
+    ]
+}
+```
+
+## Best Practices
+
+- Use environment variables instead of hardcoded paths for better portability
+- Keep command windows open (`/k`) during active work hours for realism
+- Use `DelayBefore` and `DelayAfter` to simulate realistic user pacing
+- Combine with `TrackableId` when you need to verify specific commands were executed

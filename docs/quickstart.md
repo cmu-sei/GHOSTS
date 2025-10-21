@@ -1,24 +1,29 @@
-# **Quick Start**
+# Quick Start
 
-### 📌 **No Compilers Necessary**
+## Overview
 
-This section provides a straightforward guide to installing and configuring GHOSTS using precompiled binaries for both the server and the client. If you're exploring GHOSTS for the first time and want to see NPCs in action, jump to the [client section](#ghosts-clients). For a complete setup, it’s recommended to first install the API and then connect a client to this API instance.
+This guide provides a straightforward installation process using precompiled binaries for both the GHOSTS API server and client. No compilation required!
 
-## :material-api: **GHOSTS API Server**
+**New to GHOSTS?** If you want to quickly see NPCs in action, jump to the [GHOSTS Clients](#ghosts-clients) section. For a complete production setup, we recommend installing the API server first, then connecting clients to it.
 
-**Easy installation involves the following steps:**
+## :material-api: GHOSTS API Server
 
-1. **Install Docker:**
+The GHOSTS API server consists of four Docker containers:
 
-   Follow the [Docker installation guide](https://docs.docker.com/install/) to get Docker up and running on your system.
+- **API** - Main control and orchestration server
+- **UI** - Web interface for managing machines, groups, and timelines
+- **Postgres** - Database for storing all GHOSTS data
+- **Grafana** - Visualization dashboard for monitoring NPC activities
 
-2. **Install Docker Compose:**
+### Installation Steps
 
-   Refer to the [Docker Compose installation guide](https://docs.docker.com/compose/install/) for instructions on installing Docker Compose.
+**1. Install Docker and Docker Compose**
 
-3. **Download and Run the GHOSTS API Containers:**
+   - Install [Docker](https://docs.docker.com/install/)
+   - Install [Docker Compose](https://docs.docker.com/compose/install/)
+   - Verify installation: `docker-compose --version`
 
-   Use the provided `docker-compose.yml` file to set up the GHOSTS API containers. Execute the following commands to download the necessary files and start the containers:
+**2. Download and Run GHOSTS API Containers**
 
    ```bash
    mkdir ghosts-api
@@ -27,42 +32,82 @@ This section provides a straightforward guide to installing and configuring GHOS
    docker-compose up -d
    ```
 
-   - `mkdir ghosts-api`: Creates a directory for the API setup.
-   - `cd ghosts-api`: Navigates into the directory.
-   - `curl -O https://raw.githubusercontent.com/cmu-sei/GHOSTS/master/src/Ghosts.Api/docker-compose.yml`: Downloads the Docker Compose file.
-   - `docker-compose up -d`: Starts the containers in detached mode.
+**3. Verify the Installation**
 
-4. **Verify the API Installation:**
+   - **API**: Open [http://localhost:5000/](http://localhost:5000/) - you should see the API version and test machine entries
+   - **UI**: Open [http://localhost:8080/](http://localhost:8080/) - you should see the GHOSTS management interface
+   - **Grafana**: Open [http://localhost:3000/](http://localhost:3000/) - you should see the monitoring dashboard
 
-   After the command completes, open [http://localhost:5000/](http://localhost:5000/) in your browser. You should see the initial API page displaying the version and some test machine entries. If the page loads, your API is successfully running. If not, consult the [API troubleshooting section](core/api.md#troubleshooting) for help.
+   If any component fails to load, consult the [API troubleshooting section](core/api.md#troubleshooting).
 
-   **Note:** You will also need to configure Grafana. Ensure you set the correct ownership for the Grafana data directory (`g_data`) as specified in the Docker Compose file. Insufficient permissions often cause the Grafana container to restart repeatedly due to errors (see [API troubleshooting](core/api.md#troubleshooting) for details).
+**4. Verify All Containers Are Running**
 
-## :material-account: **GHOSTS Clients**
+   ```bash
+   docker ps -a
+   ```
 
-To use GHOSTS clients that require a browser, you need to include an automation driver in the same folder as the GHOSTS binary.
+   You should see four containers: `ghosts-api`, `ghosts-ui`, `ghosts-postgres`, and `ghosts-grafana`.
 
-- **For Firefox:** [Download the appropriate Geckodriver](https://github.com/mozilla/geckodriver/releases) for your browser version.
-- **For Chrome:** [Download the appropriate Chromedriver](https://chromedriver.chromium.org/downloads) for your browser version.
+## :material-account: GHOSTS Clients
 
-Additional setup may be required for [Outlook email automation](core/client.md).
+GHOSTS clients simulate realistic user activities on workstations. Choose between the full client (for complete simulation with real applications) or GHOSTS Lite (for lightweight network activity simulation).
 
-**Clients should generally be run as a specific user, not as an administrator or root account.**
+### Prerequisites for All Clients
 
-### :material-microsoft-windows: **Windows Client**
+**Important:** Clients should be run as a regular user account, not as administrator or root, to accurately simulate realistic user behavior.
 
-1. Ensure that the [Microsoft .NET Framework 4.6.1 runtime](https://dotnet.microsoft.com/download/dotnet-framework/net47) is installed on your client machine. You do not need the full SDK.
-2. [Download the latest Windows client](https://github.com/cmu-sei/GHOSTS/releases/latest).
-3. Extract the contents to a directory, such as `c:\exercise\ghosts`. Update the `config/application.{json|yaml}` file to connect to the previously installed API server.
+**For Browser Automation:** If your timeline includes web browsing, download the appropriate driver and place it in the same folder as the GHOSTS binary:
 
-### :material-linux: **Linux Client**
+- **Firefox**: [Download Geckodriver](https://github.com/mozilla/geckodriver/releases)
+- **Chrome**: [Download Chromedriver](https://chromedriver.chromium.org/downloads)
 
-1. Install the .NET Core runtime version 6 on your Linux machine. Only the runtime is required, not the full SDK. Follow the instructions [here](https://dotnet.microsoft.com/download) for installation.
-2. [Download the latest Linux client](https://github.com/cmu-sei/GHOSTS/releases/latest) zip file. Unzip it to a directory like `~/ghosts` for the user you intend to run GHOSTS.
+**For Email Automation:** See the [Outlook handler documentation](core/handlers/outlook.md) for additional setup requirements.
 
-**Note:** Running the Linux client as root while using web browsing may cause display issues with Gecko/Chromedriver.
+**For RDP Automation:** See the [RDP handler documentation](core/handlers/rdp.md) for AutoIt DLL registration requirements.
 
-### Ghosts Lite Clients
+### :material-microsoft-windows: Windows Client
 
-- [Ghosts Lite for Windows](https://cmu.box.com/s/2nu9fvzkpp4ku7o2d4uk82lozpkacatn)
-- [Ghosts Lite for Linux](https://cmu.box.com/s/1dy5ip3e3gm1pdo6v9dy21hd4ybe3pa2)
+**Requirements:**
+- [Microsoft .NET Framework 4.6.1 runtime or later](https://dotnet.microsoft.com/download/dotnet-framework/net47) (SDK not required)
+
+**Installation:**
+
+1. [Download the latest Windows client](https://github.com/cmu-sei/GHOSTS/releases/latest)
+2. Extract to a directory (e.g., `c:\exercise\ghosts`)
+3. Edit `config/application.json` or `config/application.yaml`:
+   ```json
+   {
+     "ApiRootUrl": "http://YOUR-API-SERVER:5000/api"
+   }
+   ```
+4. Run `ghosts.exe` to start the client
+
+### :material-linux: Linux Client
+
+**Requirements:**
+
+- [.NET 8.0 runtime](https://dotnet.microsoft.com/download) (SDK not required)
+- For Ubuntu 24.04, we recommend the [snap installation](https://learn.microsoft.com/en-us/dotnet/core/install/linux-ubuntu-install?pivots=os-linux-ubuntu-2404&tabs=dotnet8)
+
+**Installation:**
+
+1. [Download the latest Linux client](https://github.com/cmu-sei/GHOSTS/releases/latest)
+2. Extract to a directory (e.g., `~/ghosts`)
+3. Edit `config/application.yaml`:
+   ```yaml
+   ApiRootUrl: http://YOUR-API-SERVER:5000/api
+   ```
+4. Run: `dotnet ghosts.client.linux.dll`
+
+**Note:** Running as root may cause display issues with browser drivers.
+
+For running GHOSTS as a Linux service, see the [Linux service configuration documentation](core/client.md#linux-service-configuration).
+
+### GHOSTS Lite (Lightweight Alternative)
+
+GHOSTS Lite generates network activity and file operations without launching actual applications, ideal for resource-constrained environments.
+
+- [GHOSTS Lite for Windows](https://cmu.box.com/s/2nu9fvzkpp4ku7o2d4uk82lozpkacatn)
+- [GHOSTS Lite for Linux](https://cmu.box.com/s/1dy5ip3e3gm1pdo6v9dy21hd4ybe3pa2)
+
+Learn more in the [GHOSTS Lite documentation](core/lite.md).
