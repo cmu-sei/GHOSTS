@@ -24,8 +24,8 @@
 
   <ItemGroup>
     <PackageReference Include="CommandLineParser" Version="2.9.1" />
-    <PackageReference Include="HtmlAgilityPack" Version="1.12.1" />
-    <PackageReference Include="NLog" Version="5.5.0" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
+    <PackageReference Include="NLog" Version="6.0.5" />
     <PackageReference Include="FileHelpers" Version="3.5.2" />
     <PackageReference Include="Selenium.Firefox.WebDriver" Version="0.27.0" />
     <PackageReference Include="Selenium.WebDriver" Version="4.33.0" />
@@ -36,7 +36,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Ghosts.Domain\ghosts.domain.csproj" />
+    <ProjectReference Include="..\Ghosts.Domain\Ghosts.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>

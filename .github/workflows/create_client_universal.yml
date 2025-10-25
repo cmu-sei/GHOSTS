@@ -13,19 +13,19 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '8.0.x' # Use 'x' to automatically get the latest patch version
+        dotnet-version: '9.0.x' # Use 'x' to automatically get the latest patch version
     
     - name: Restore dependencies for Ghosts.Domain
-      run: dotnet restore src/Ghosts.Domain/ghosts.domain.csproj
+      run: dotnet restore src/Ghosts.Domain/Ghosts.Domain.csproj
     
-    - name: Restore dependencies for ghosts.client.universal
-      run: dotnet restore src/ghosts.client.universal/ghosts.client.universal.csproj
+    - name: Restore dependencies for Ghosts.Client.Universal
+      run: dotnet restore src/Ghosts.Client.Universal/Ghosts.Client.Universal.csproj
     
     - name: Build Ghosts.Domain
-      run: dotnet build --no-restore src/Ghosts.Domain/ghosts.domain.csproj
+      run: dotnet build --no-restore src/Ghosts.Domain/Ghosts.Domain.csproj
     
-    - name: Build ghosts.client.universal
-      run: dotnet build --no-restore src/ghosts.client.universal/ghosts.client.universal.csproj --configuration Release -o build_output/
+    - name: Build Ghosts.Client.Universal
+      run: dotnet build --no-restore src/Ghosts.Client.Universal/Ghosts.Client.Universal.csproj --configuration Release -o build_output/
       
     - name: Zip build output
       run: zip -r ghosts-client-universal-v8.0.0.zip build_output/
