@@ -15,9 +15,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="current-user" content="@ViewBag.Username">
     <title>@(Model != null ? $"{Model.Username} on YouTube" : "Video")</title>
-    <link rel="stylesheet" href="css/video.css">
-    <link rel="icon" href="images/youtube-icon.png">
+    <link rel="stylesheet" href="/themes/youtube/css/video.css?@System.Guid.NewGuid()">
+    <link rel="icon" href="/themes/youtube/images/youtube-icon.png">
 </head>
 <body>
     <div class="app">
@@ -26,7 +27,7 @@
             <div class="header-left">
                 <button class="menu-btn">☰</button>
                 <div class="logo">
-                    <img src="/themes/youtube/images/youtube-logo.png" alt="YouTube" class="youtube-logo">
+                    <a href="/"><img src="/themes/youtube/images/youtube-logo.png" alt="YouTube" class="youtube-logo"></a>
                 </div>
             </div>
             <div class="header-center">
@@ -170,13 +171,13 @@
                     </div>
 
                     <!-- Add Comment -->
-                    <div class="add-comment">
-                        <img src="/themes/youtube/images/profile-avatar.jpg" alt="Your avatar" class="comment-avatar">
+                    <div class="add-comment" data-post-id="@(Model?.Id ?? Guid.Empty)">
+                        <img src="/u/@(ViewBag.Username ?? "user")/avatar" alt="Your avatar" class="comment-avatar">
                         <div class="comment-input-container">
                             <input type="text" placeholder="Add a comment..." class="comment-input">
                             <div class="comment-actions">
                                 <button class="cancel-btn">Cancel</button>
-                                <button class="comment-btn" disabled>Comment</button>
+                                <button class="comment-btn comment-post-btn">Comment</button>
                             </div>
                         </div>
                     </div>
@@ -443,9 +444,7 @@
         </div>
     </div>
 
-    <script src="/js/jQuery/jquery-3.5.1.min.js"></script>
-    <script src="/js/signalr.min.js"></script>
-    <script src="/js/social.js"></script>
-    <script src="js/video.js"></script>
+    @await Html.PartialAsync("_Scripts")
+    <script src="/themes/youtube/js/video.js"></script>
 </body>
 </html>

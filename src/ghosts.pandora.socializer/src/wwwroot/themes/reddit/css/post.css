@@ -533,16 +533,17 @@ body {
     font-size: 14px;
     font-weight: 700;
     cursor: pointer;
-    transition: background-color 0.2s;
-    opacity: 0.5;
+    transition: all 0.2s;
 }
 
-.compose-btn:not([disabled]) {
-    opacity: 1;
-}
-
-.compose-btn:not([disabled]):hover {
+.compose-btn:hover {
     background-color: #1484d6;
+}
+
+.compose-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: #343536;
 }
 
 /* Comments Section */

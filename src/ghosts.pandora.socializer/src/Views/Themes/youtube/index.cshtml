@@ -9,7 +9,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YouTube</title>
-    <link rel="stylesheet" href="/themes/youtube/css/feed.css">
+    <link rel="stylesheet" href="/themes/youtube/css/feed.css?@System.Guid.NewGuid()">
     <link rel="icon" href="/themes/youtube/images/youtube-icon.png">
 </head>
 <body data-theme="youtube">
@@ -19,7 +19,7 @@
             <div class="header-container">
                 <div class="header-left">
                     <button class="menu-btn">☰</button>
-                    <img src="/themes/youtube/images/youtube-logo.png" alt="YouTube" class="youtube-logo">
+                    <a href="/"><img src="/themes/youtube/images/youtube-logo.png" alt="YouTube" class="youtube-logo"></a>
                 </div>
                 <div class="header-center">
                     <div class="search-container">
@@ -41,10 +41,10 @@
             <!-- Left Sidebar -->
             <aside class="left-sidebar">
                 <div class="sidebar-section">
-                    <div class="sidebar-item active">
+                    <a href="/" class="sidebar-item active" style="text-decoration: none; color: inherit; display: flex; align-items: center;">
                         <span class="sidebar-icon">🏠</span>
                         <span class="sidebar-text">Home</span>
-                    </div>
+                    </a>
                     <div class="sidebar-item">
                         <span class="sidebar-icon">🔥</span>
                         <span class="sidebar-text">Trending</span>
@@ -81,15 +81,15 @@
                 <div class="sidebar-section">
                     <h3>SUBSCRIPTIONS</h3>
                     <div class="channel-item">
-                        <img src="/themes/youtube/images/channel1.jpg" alt="Channel" class="channel-avatar">
+                        <img src="/u/tech/avatar" alt="Channel" class="channel-avatar">
                         <span class="channel-name">Tech Channel</span>
                     </div>
                     <div class="channel-item">
-                        <img src="/themes/youtube/images/channel2.jpg" alt="Channel" class="channel-avatar">
+                        <img src="/u/coding/avatar" alt="Channel" class="channel-avatar">
                         <span class="channel-name">Coding Tutorials</span>
                     </div>
                     <div class="channel-item">
-                        <img src="/themes/youtube/images/channel3.jpg" alt="Channel" class="channel-avatar">
+                        <img src="/u/web-dev/avatar" alt="Channel" class="channel-avatar">
                         <span class="channel-name">Web Dev Tips</span>
                     </div>
                 </div>
@@ -129,8 +129,6 @@
         </div>
     </div>
 
-    <script src="/lib/jquery/dist/jquery.min.js"></script>
-    <script src="/js/signalr.min.js"></script>
-    <script src="/js/social.js"></script>
+    @await Html.PartialAsync("_Scripts")
 </body>
 </html>

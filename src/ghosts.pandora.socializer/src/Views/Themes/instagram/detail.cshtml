@@ -13,8 +13,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="current-user" content="@ViewBag.Username">
     <title>@Model.User on Instagram</title>
-    <link rel="stylesheet" href="/themes/instagram/css/feed.css">
+    <link rel="stylesheet" href="/themes/instagram/css/feed.css?@System.Guid.NewGuid()">
     <link rel="icon" href="/themes/instagram/images/instagram-icon.png">
 </head>
 <body>
@@ -23,7 +24,7 @@
         <header class="header">
             <div class="header-container">
                 <div class="logo">
-                    <img src="/themes/instagram/images/instagram-logo.png" alt="Instagram" class="instagram-logo">
+                    <a href="/"><img src="/themes/instagram/images/instagram-logo.png" alt="Instagram" class="instagram-logo"></a>
                 </div>
                 <div class="search-container">
                     <div class="search-box">
@@ -32,7 +33,7 @@
                     </div>
                 </div>
                 <div class="header-actions">
-                    <button class="action-btn">🏠</button>
+                    <a href="/" class="action-btn" style="text-decoration: none;">🏠</a>
                     <button class="action-btn">💬</button>
                     <button class="action-btn">➕</button>
                     <button class="action-btn">🧭</button>
@@ -122,7 +123,7 @@
                     </div>
 
                     <!-- Add Comment -->
-                    <div class="add-comment">
+                    <div class="add-comment" data-post-id="@Model.Id">
                         <img src="/u/@ViewBag.Username/avatar" alt="Your avatar" class="comment-avatar">
                         <input type="text" placeholder="Add a comment..." class="comment-input">
                         <button class="comment-post-btn">Post</button>
@@ -164,9 +165,7 @@
         </div>
     </div>
 
-    <script src="/js/jQuery/jquery-3.5.1.min.js"></script>
-    <script src="/js/signalr.min.js"></script>
-    <script src="/js/social.js"></script>
+    @await Html.PartialAsync("_Scripts")
     <script src="/themes/instagram/js/instagram.js"></script>
 </body>
 </html>

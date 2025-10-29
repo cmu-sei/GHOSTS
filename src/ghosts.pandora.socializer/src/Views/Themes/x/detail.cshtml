@@ -20,9 +20,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="current-user" content="@ViewBag.Username">
     <title>@(Model != null ? $"{Model.Username} on X" : "Post") / X</title>
-    <link rel="stylesheet" href="css/post.css">
-    <link rel="icon" href="images/x-icon.png">
+    <link rel="stylesheet" href="/themes/x/css/post.css?@System.Guid.NewGuid()">
+    <link rel="icon" href="/themes/x/images/x-icon.png">
 </head>
 <body>
     <div class="app">
@@ -30,10 +31,10 @@
         <div class="sidebar">
             <div class="sidebar-content">
                 <div class="logo">
-                    <img src="images/x-logo.png" alt="X" class="x-logo">
+                    <a href="/"><img src="/themes/x/images/x-logo.png" alt="X" class="x-logo"></a>
                 </div>
                 <nav class="nav-menu">
-                    <a href="feed.html" class="nav-item">
+                    <a href="/" class="nav-item">
                         <span class="nav-icon">🏠</span>
                         <span class="nav-text">Home</span>
                     </a>
@@ -151,11 +152,11 @@
             </div>
 
             <!-- Reply Section -->
-            <div class="reply-section">
+            <div class="reply-section" data-post-id="@(Model?.Id ?? Guid.Empty)">
                 <div class="reply-compose">
-                    <img src="images/profile-avatar.jpg" alt="Profile" class="reply-avatar">
+                    <img src="/u/@(ViewBag.Username ?? "user")/avatar" alt="Profile" class="reply-avatar">
                     <div class="reply-content">
-                        <textarea placeholder="Post your reply" class="reply-textarea"></textarea>
+                        <textarea placeholder="Post your reply" class="reply-textarea comment-input"></textarea>
                         <div class="reply-actions">
                             <div class="reply-options">
                                 <button class="reply-option">📷</button>
@@ -163,7 +164,7 @@
                                 <button class="reply-option">📊</button>
                                 <button class="reply-option">😊</button>
                             </div>
-                            <button class="reply-btn" disabled>Reply</button>
+                            <button class="reply-btn comment-post-btn">Reply</button>
                         </div>
                     </div>
                 </div>
@@ -382,9 +383,7 @@
         </div>
     </div>
 
-    <script src="/js/jQuery/jquery-3.5.1.min.js"></script>
-    <script src="/js/signalr.min.js"></script>
-    <script src="/js/social.js"></script>
-    <script src="js/post.js"></script>
+    @await Html.PartialAsync("_Scripts")
+    <script src="/themes/x/js/post.js"></script>
 </body>
 </html>

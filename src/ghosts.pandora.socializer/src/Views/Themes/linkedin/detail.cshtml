@@ -13,8 +13,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="current-user" content="@ViewBag.Username">
     <title>@Model.User's Post | LinkedIn</title>
-    <link rel="stylesheet" href="/themes/linkedin/css/feed.css">
+    <link rel="stylesheet" href="/themes/linkedin/css/feed.css?@System.Guid.NewGuid()">
     <link rel="icon" href="/themes/linkedin/images/linkedin-icon.png">
 </head>
 <body>
@@ -23,17 +24,17 @@
         <header class="header">
             <div class="header-container">
                 <div class="header-left">
-                    <img src="/themes/linkedin/images/linkedin-logo.png" alt="LinkedIn" class="linkedin-logo">
+                    <a href="/"><img src="/themes/linkedin/images/linkedin-logo.png" alt="LinkedIn" class="linkedin-logo"></a>
                     <div class="search-container">
                         <input type="text" placeholder="Search" class="search-input">
                         <button class="search-btn">🔍</button>
                     </div>
                 </div>
                 <nav class="header-nav">
-                    <div class="nav-item active">
+                    <a href="/" class="nav-item active" style="text-decoration: none; color: inherit; display: flex; flex-direction: column; align-items: center;">
                         <span class="nav-icon">🏠</span>
                         <span class="nav-text">Home</span>
-                    </div>
+                    </a>
                     <div class="nav-item">
                         <span class="nav-icon">👥</span>
                         <span class="nav-text">My Network</span>
@@ -205,8 +206,6 @@
         </div>
     </div>
 
-    <script src="/lib/jquery/dist/jquery.min.js"></script>
-    <script src="/js/signalr.min.js"></script>
-    <script src="/js/social.js"></script>
+    @await Html.PartialAsync("_Scripts")
 </body>
 </html>

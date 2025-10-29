@@ -9,7 +9,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home / X</title>
-    <link rel="stylesheet" href="/themes/x/css/feed.css">
+    <link rel="stylesheet" href="/themes/x/css/feed.css?@System.Guid.NewGuid()">
     <link rel="icon" href="/themes/x/images/x-icon.png">
 </head>
 <body data-theme="x">
@@ -18,7 +18,7 @@
         <div class="sidebar">
             <div class="sidebar-content">
                 <div class="logo">
-                    <img src="/themes/x/images/x-logo.png" alt="X" class="x-logo">
+                    <a href="/"><img src="/themes/x/images/x-logo.png" alt="X" class="x-logo"></a>
                 </div>
                 <nav class="nav-menu">
                     <a href="/" class="nav-item active">
@@ -71,6 +71,7 @@
                     <button class="tab active">For you</button>
                     <button class="tab">Following</button>
                 </div>
+                <br/>
             </div>
 
             @{
@@ -115,20 +116,24 @@
             </div>
 
             <div class="suggestions-widget">
+                @{
+                    var user1 = Faker.Internet.UserName();
+                    var user2 = Faker.Internet.UserName();
+                }
                 <h3>Who to follow</h3>
                 <div class="suggestion-item">
-                    <img src="/themes/x/images/user1.jpg" alt="User" class="suggestion-avatar">
+                    <img src="/u/@user1/avatar" alt="User" class="suggestion-avatar">
                     <div class="suggestion-info">
-                        <div class="suggestion-name">TechGuru</div>
-                        <div class="suggestion-handle">@@techguru</div>
+                        <div class="suggestion-name">@user1</div>
+                        <div class="suggestion-handle">@@@user1</div>
                     </div>
                     <button class="follow-btn">Follow</button>
                 </div>
                 <div class="suggestion-item">
-                    <img src="/themes/x/images/user2.jpg" alt="User" class="suggestion-avatar">
+                    <img src="/u/@user2/avatar" alt="User" class="suggestion-avatar">
                     <div class="suggestion-info">
-                        <div class="suggestion-name">DevMaster</div>
-                        <div class="suggestion-handle">@@devmaster</div>
+                        <div class="suggestion-name">@user2</div>
+                        <div class="suggestion-handle">@@@user2</div>
                     </div>
                     <button class="follow-btn">Follow</button>
                 </div>
@@ -136,8 +141,6 @@
         </div>
     </div>
 
-    <script src="/lib/jquery/dist/jquery.min.js"></script>
-    <script src="/js/signalr.min.js"></script>
-    <script src="/js/social.js"></script>
+    @await Html.PartialAsync("_Scripts")
 </body>
 </html>

@@ -14,7 +14,18 @@ public static class SwaggerExtensions
             {
                 Title = "GHOSTS SOCIALIZER API",
                 Version = "v1",
-                Description = "GHOSTS Social Content Services API v1",
+                Description = """
+                              GHOSTS Social Content Services API v1.
+                              <br/><br/>
+                              Available Themes:
+                              <br/><br/>
+                              <a href='/?theme=discord'>Discord</a><br/>
+                              <a href='/?theme=facebook'>Facebook</a><br/>
+                              <a href='/?theme=instagram'>Instagram</a><br/>
+                              <a href='/?theme=linkedin'>LinkedIn</a><br/>
+                              <a href='/?theme=x'>X</a><br/>
+                              <a href='/?theme=youtube'>YouTube</a>
+                              """,
                 Contact = new OpenApiContact
                 {
                     Name = "SEI CERT GHOSTS Team",

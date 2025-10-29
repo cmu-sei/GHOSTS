@@ -11,7 +11,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Instagram</title>
-    <link rel="stylesheet" href="/themes/instagram/css/feed.css">
+    <link rel="stylesheet" href="/themes/instagram/css/feed.css?@System.Guid.NewGuid()">
     <link rel="icon" href="/themes/instagram/images/instagram-icon.png">
 </head>
 <body data-theme="instagram">
@@ -20,7 +20,7 @@
     <header class="header">
         <div class="header-container">
             <div class="logo">
-                <img src="/themes/instagram/images/instagram-logo.png" alt="Instagram" class="instagram-logo">
+                <a href="/"><img src="/themes/instagram/images/instagram-logo.png" alt="Instagram" class="instagram-logo"></a>
             </div>
             <div class="search-container">
                 <div class="search-box">
@@ -29,7 +29,7 @@
                 </div>
             </div>
             <div class="header-actions">
-                <button class="action-btn">🏠</button>
+                <a href="/" class="action-btn" style="text-decoration: none;">🏠</a>
                 <a href="/messages" class="action-btn" style="text-decoration: none;">💬</a>
                 <button class="action-btn">➕</button>
                 <button class="action-btn">🧭</button>
@@ -58,19 +58,19 @@
                 <!-- Friend Stories -->
                 <div class="story-item">
                     <div class="story-avatar">
-                        <img src="/themes/instagram/images/story1.jpg" alt="Friend story" class="avatar">
+                        <img src="/u/david-lightman/avatar" alt="Friend story" class="avatar">
                     </div>
                     <span class="story-username">friend1</span>
                 </div>
                 <div class="story-item">
                     <div class="story-avatar">
-                        <img src="/themes/instagram/images/story2.jpg" alt="Friend story" class="avatar">
+                        <img src="/u/general-berenger/avatar" alt="Friend story" class="avatar">
                     </div>
                     <span class="story-username">friend2</span>
                 </div>
                 <div class="story-item">
                     <div class="story-avatar">
-                        <img src="/themes/instagram/images/story3.jpg" alt="Friend story" class="avatar">
+                        <img src="/u/stephen+falken/avatar" alt="Friend story" class="avatar">
                     </div>
                     <span class="story-username">friend3</span>
                 </div>
@@ -95,9 +95,7 @@
 
 </div>
 
-<script src="/lib/jquery/dist/jquery.min.js"></script>
-<script src="/js/signalr.min.js"></script>
-<script src="/js/social.js"></script>
+@await Html.PartialAsync("_Scripts")
 
 </body>
 </html>
