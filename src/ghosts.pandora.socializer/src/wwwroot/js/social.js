@@ -513,8 +513,8 @@ function performSearch(query) {
 
 // Universal messaging functionality
 function initializeMessaging() {
-    // Message input handlers
-    const messageInputs = document.querySelectorAll('.message-input, .comment-input');
+    // Message input handlers (not for comments)
+    const messageInputs = document.querySelectorAll('.message-input');
     messageInputs.forEach(input => {
         input.addEventListener('keypress', function(e) {
             if (e.key === 'Enter' && !e.shiftKey && this.value.trim()) {
@@ -526,16 +526,228 @@ function initializeMessaging() {
     });
 
     // Send button handlers
-    const sendButtons = document.querySelectorAll('.send-btn, .post-comment');
+    const sendButtons = document.querySelectorAll('.send-btn');
     sendButtons.forEach(button => {
         button.addEventListener('click', function() {
-            const input = this.closest('form, .message-input-container').querySelector('input, textarea');
+            const input = this.closest('form, .message-input-container').querySelector('.message-input');
             if (input && input.value.trim()) {
                 sendMessage(input.value.trim(), input);
                 input.value = '';
             }
         });
     });
+}
+
+// Comment functionality
+function initializeComments() {
+    // Comment post button handlers
+    $(document).on('click', '.comment-post-btn', function(e) {
+        e.preventDefault();
+        const commentContainer = $(this).closest('.add-comment, .comment-input-container');
+        const input = commentContainer.find('.comment-input');
+        const commentText = input.val().trim();
+
+        if (!commentText) {
+            return;
+        }
+
+        // Get post ID from the post element
+        const postId = $(this).closest('[data-post-id]').data('post-id') ||
+                      $(this).closest('.post, .post-detail').find('[data-post-id]').data('post-id');
+
+        if (!postId) {
+            console.error('Could not find post ID');
+            showToast('Error: Could not post comment');
+            return;
+        }
+
+        console.log('Posting comment to post', postId);
+
+        // Post comment to server using FormData (controller expects [FromForm])
+        const formData = new FormData();
+        formData.append('message', commentText);
+
+        $.ajax({
+            url: `/posts/${postId}/comments`,
+            method: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                console.log('Comment posted successfully', response);
+
+                // Clear input
+                input.val('');
+
+                // Add comment to UI
+                addCommentToUI(commentText, commentContainer);
+
+                showToast('Comment posted!');
+            },
+            error: function(error) {
+                console.error('Failed to post comment:', error);
+                showToast('Failed to post comment');
+            }
+        });
+    });
+
+    // Comment input enter key handler
+    $(document).on('keypress', '.comment-input', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            $(this).siblings('.comment-post-btn').click();
+        }
+    });
+}
+
+function addCommentToUI(commentText, commentContainer) {
+    const theme = getCurrentTheme();
+    let commentsList = $('.comments-list');
+
+    // For Reddit, look for comments-section instead
+    if (commentsList.length === 0 && theme === 'reddit') {
+        commentsList = $('.comments-section');
+    }
+
+    if (commentsList.length === 0) return;
+
+    // Remove "no comments" message if it exists
+    commentsList.find('.no-comments').remove();
+
+    // Get current user (you'd get this from ViewBag or session)
+    const currentUser = $('meta[name="current-user"]').attr('content') || 'You';
+
+    let commentHTML = '';
+
+    if (theme === 'linkedin') {
+        commentHTML = `
+            <div class="comment">
+                <img src="/u/${currentUser}/avatar" alt="${currentUser}" class="comment-avatar">
+                <div class="comment-content">
+                    <div class="comment-header">
+                        <span class="comment-author">${currentUser}</span>
+                        <span class="comment-title">Professional</span>
+                        <span class="comment-time">Just now</span>
+                    </div>
+                    <div class="comment-text">${commentText}</div>
+                    <div class="comment-actions">
+                        <button class="comment-action like-action">Like</button>
+                        <button class="comment-action reply-action">Reply</button>
+                    </div>
+                </div>
+                <button class="comment-menu">⋯</button>
+            </div>
+        `;
+    } else if (theme === 'reddit') {
+        commentHTML = `
+            <div class="comment">
+                <div class="comment-vote">
+                    <button class="vote-btn upvote">▲</button>
+                    <span class="vote-count">1</span>
+                    <button class="vote-btn downvote">▼</button>
+                </div>
+                <div class="comment-content">
+                    <div class="comment-header">
+                        <img src="/u/${currentUser}/avatar" alt="${currentUser}" class="commenter-avatar">
+                        <span class="commenter-name">u/${currentUser}</span>
+                        <span class="comment-time">Just now</span>
+                    </div>
+                    <div class="comment-text">${commentText}</div>
+                    <div class="comment-actions">
+                        <button class="comment-action-btn">
+                            <span class="action-icon">↩️</span>
+                            <span class="action-text">Reply</span>
+                        </button>
+                        <button class="comment-action-btn">
+                            <span class="action-icon">🏆</span>
+                            <span class="action-text">Award</span>
+                        </button>
+                        <button class="comment-action-btn">
+                            <span class="action-icon">🔗</span>
+                            <span class="action-text">Share</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    } else if (theme === 'instagram') {
+        commentHTML = `
+            <div class="comment">
+                <img src="/u/${currentUser}/avatar" alt="${currentUser}" class="comment-avatar">
+                <div class="comment-content">
+                    <div class="comment-text">
+                        <span class="comment-username">${currentUser}</span>
+                        <span class="comment-message">${commentText}</span>
+                    </div>
+                    <div class="comment-actions">
+                        <span class="comment-time">Just now</span>
+                        <button class="comment-like">Like</button>
+                        <button class="comment-reply">Reply</button>
+                    </div>
+                </div>
+                <button class="comment-like-btn">🤍</button>
+            </div>
+        `;
+    } else if (theme === 'x') {
+        // For X (Twitter), look for replies container
+        commentsList = $('.replies');
+        if (commentsList.length === 0) return;
+
+        commentHTML = `
+            <div class="reply">
+                <img src="/u/${currentUser}/avatar" alt="${currentUser}" class="reply-avatar">
+                <div class="reply-content">
+                    <div class="reply-header">
+                        <span class="reply-name">${currentUser}</span>
+                        <span class="reply-handle">@${currentUser}</span>
+                        <span class="reply-time">· Just now</span>
+                        <span class="reply-more">⋯</span>
+                    </div>
+                    <div class="reply-text">${commentText}</div>
+                    <div class="reply-actions">
+                        <button class="action-btn">
+                            <span class="action-icon">💬</span>
+                        </button>
+                        <button class="action-btn">
+                            <span class="action-icon">🔄</span>
+                        </button>
+                        <button class="action-btn">
+                            <span class="action-icon">🤍</span>
+                        </button>
+                        <button class="action-btn">
+                            <span class="action-icon">📤</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    } else if (theme === 'youtube') {
+        commentHTML = `
+            <div class="comment">
+                <img src="/u/${currentUser}/avatar" alt="${currentUser}" class="comment-avatar">
+                <div class="comment-content">
+                    <div class="comment-header">
+                        <span class="commenter-name">${currentUser}</span>
+                        <span class="comment-time">Just now</span>
+                    </div>
+                    <div class="comment-text">${commentText}</div>
+                    <div class="comment-actions">
+                        <button class="comment-action like-action">
+                            <span class="action-icon">👍</span>
+                            <span class="like-count">0</span>
+                        </button>
+                        <button class="comment-action">
+                            <span class="action-icon">👎</span>
+                        </button>
+                        <button class="reply-btn">Reply</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // Prepend new comment to the list
+    commentsList.prepend(commentHTML);
 }
 
 function sendMessage(message, inputElement) {
@@ -731,6 +943,7 @@ $(document).ready(function() {
     initializeLikes();
     initializeSearch();
     initializeMessaging();
+    initializeComments();
     initializePostMenus();
 
     // Initialize SignalR connection
@@ -755,6 +968,7 @@ if (typeof window !== 'undefined') {
         initializeLikes,
         initializeSearch,
         initializeMessaging,
+        initializeComments,
         initializePostMenus
     };
 }

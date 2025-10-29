@@ -9,7 +9,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LinkedIn</title>
-    <link rel="stylesheet" href="/themes/linkedin/css/feed.css">
+    <link rel="stylesheet" href="/themes/linkedin/css/feed.css?@System.Guid.NewGuid()">
     <link rel="icon" href="/themes/linkedin/images/linkedin-icon.png">
 </head>
 <body data-theme="linkedin">
@@ -18,17 +18,17 @@
         <header class="header">
             <div class="header-container">
                 <div class="header-left">
-                    <img src="/themes/linkedin/images/linkedin-logo.png" alt="LinkedIn" class="linkedin-logo">
+                    <a href="/"><img src="/themes/linkedin/images/linkedin-logo.png" alt="LinkedIn" class="linkedin-logo"></a>
                     <div class="search-container">
                         <input type="text" placeholder="Search" class="search-input">
                         <button class="search-btn">🔍</button>
                     </div>
                 </div>
                 <nav class="header-nav">
-                    <div class="nav-item active">
+                    <a href="/" class="nav-item active" style="text-decoration: none; color: inherit; display: flex; flex-direction: column; align-items: center;">
                         <span class="nav-icon">🏠</span>
                         <span class="nav-text">Home</span>
-                    </div>
+                    </a>
                     <div class="nav-item">
                         <span class="nav-icon">👥</span>
                         <span class="nav-text">My Network</span>
@@ -156,7 +156,8 @@
                     </div>
                     <div class="people-list">
                         <div class="person-item">
-                            <img src="/themes/linkedin/images/person1.jpg" alt="Person" class="person-avatar">
+                            <br/>
+                            <img src="/u/sarah-wilson/avatar" alt="Person" class="profile-avatar">
                             <div class="person-info">
                                 <h4>Sarah Wilson</h4>
                                 <p>Software Engineer at TechCorp</p>
@@ -164,7 +165,8 @@
                             <button class="connect-btn">Connect</button>
                         </div>
                         <div class="person-item">
-                            <img src="/themes/linkedin/images/person2.jpg" alt="Person" class="person-avatar">
+                            <br/>
+                            <img src="/u/mike-johnson/avatar" alt="Person" class="profile-avatar">
                             <div class="person-info">
                                 <h4>Mike Johnson</h4>
                                 <p>Product Manager at StartupCo</p>
@@ -177,8 +179,6 @@
         </div>
     </div>
 
-    <script src="/lib/jquery/dist/jquery.min.js"></script>
-    <script src="/js/signalr.min.js"></script>
-    <script src="/js/social.js"></script>
+    @await Html.PartialAsync("_Scripts")
 </body>
 </html>

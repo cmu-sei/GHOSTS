@@ -20,6 +20,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="current-user" content="@ViewBag.Username">
     <title>What's the most interesting fact you learned this week? : AskReddit</title>
     <link rel="stylesheet" href="/themes/reddit/css/feed.css">
     <link rel="icon" href="/themes/reddit/images/reddit-icon.png">
@@ -158,12 +159,12 @@
                 </div>
 
                 <!-- Comment Compose -->
-                <div class="comment-compose">
-                    <img src="/themes/reddit/images/profile-avatar.jpg" alt="Profile" class="comment-avatar">
+                <div class="comment-compose" data-post-id="@(Model?.Id ?? Guid.Empty)">
+                    <img src="/u/@(ViewBag.Username ?? "user")/avatar" alt="Profile" class="comment-avatar">
                     <div class="compose-content">
-                        <textarea placeholder="What are your thoughts?" class="compose-textarea"></textarea>
+                        <textarea placeholder="What are your thoughts?" class="compose-textarea comment-input"></textarea>
                         <div class="compose-actions">
-                            <button class="compose-btn" disabled>Comment</button>
+                            <button class="compose-btn comment-post-btn">Comment</button>
                         </div>
                     </div>
                 </div>
@@ -408,9 +409,7 @@
         </div>
     </div>
 
-    <script src="/js/jQuery/jquery-3.5.1.min.js"></script>
-    <script src="/js/signalr.min.js"></script>
-    <script src="/js/social.js"></script>
+    @await Html.PartialAsync("_Scripts")
     <script src="/themes/reddit/js/post.js"></script>
 </body>
 </html>

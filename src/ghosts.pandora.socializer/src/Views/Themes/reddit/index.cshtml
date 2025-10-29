@@ -9,7 +9,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reddit</title>
-    <link rel="stylesheet" href="/themes/reddit/css/feed.css">
+    <link rel="stylesheet" href="/themes/reddit/css/feed.css?@System.Guid.NewGuid()">
     <link rel="icon" href="/themes/reddit/images/reddit-icon.png">
 </head>
 <body data-theme="reddit">
@@ -18,7 +18,7 @@
         <header class="header">
             <div class="header-container">
                 <div class="header-left">
-                    <img src="/themes/reddit/images/reddit-logo.png" alt="Reddit" class="reddit-logo">
+                    <a href="/"><img src="/themes/reddit/images/reddit-logo.png" alt="Reddit" class="reddit-logo"></a>
                     <input type="text" placeholder="Search Reddit" class="search-input">
                 </div>
                 <div class="header-right">
@@ -40,10 +40,10 @@
                 <div class="subreddit-list">
                     <div class="sidebar-section">
                         <h3>FEEDS</h3>
-                        <div class="feed-item active">
+                        <a href="/" class="feed-item active" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 8px;">
                             <span class="feed-icon">🏠</span>
                             <span class="feed-name">Home</span>
-                        </div>
+                        </a>
                         <div class="feed-item">
                             <span class="feed-icon">📈</span>
                             <span class="feed-name">Popular</span>
@@ -142,8 +142,6 @@
         </div>
     </div>
 
-    <script src="/lib/jquery/dist/jquery.min.js"></script>
-    <script src="/js/signalr.min.js"></script>
-    <script src="/js/social.js"></script>
+    @await Html.PartialAsync("_Scripts")
 </body>
 </html>
