@@ -1,9 +1,9 @@
-version: '3.6'
+version: "3.6"
 
 services:
   socializer:
-    image: dustinupdyke/ghosts-socializer:0.3.0
+    image: dustinupdyke/ghosts-socializer:1.1.1.0
     container_name: socializer
     ports:
-      - '8000:5000'
+      - "8000:5000"
     restart: always
