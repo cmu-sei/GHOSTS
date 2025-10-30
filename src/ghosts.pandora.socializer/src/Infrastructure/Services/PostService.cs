@@ -54,6 +54,46 @@ public class PostService : IPostService
             .ToListAsync();
     }
 
+    // public async Task<IReadOnlyList<Post>> GetPersonalizedFeedAsync(
+    //     string viewerUsername,
+    //     string themeName,
+    //     int limit = 50,
+    //     int offset = 0)
+    // {
+    //     var followed = await _context.Followers
+    //         .Where(f => f.FollowerUsername == viewerUsername)
+    //         .Select(f => f.Username)
+    //         .ToListAsync();
+    //
+    //     var seed = await _context.Posts
+    //         .Include(p => p.User)
+    //         .Include(p => p.Likes)
+    //         .Include(p => p.Comments)
+    //         .Where(p => p.Theme == themeName &&
+    //                     (followed.Contains(p.Username) || p.Username == viewerUsername))
+    //         .AsNoTracking()
+    //         .ToListAsync();
+    //
+    //     var now = DateTime.UtcNow;
+    //
+    //     var ranked = seed
+    //         .Select(p => new
+    //         {
+    //             Post = p,
+    //             Score =
+    //                 RecencyScore(p, now) * 0.5 +
+    //                 AffinityScore(p, viewerUsername) * 0.3 +
+    //                 EngagementScore(p) * 0.2
+    //         })
+    //         .OrderByDescending(x => x.Score)
+    //         .ThenByDescending(x => x.Post.CreatedUtc)
+    //         .Skip(offset)
+    //         .Take(limit)
+    //         .Select(x => x.Post)
+    //         .ToList();
+    //
+    //     return ranked;
+    // }
 
     public async Task<List<Post>> GetLatestPostsByThemeAsync(string themeName, int count = 100)
     {
