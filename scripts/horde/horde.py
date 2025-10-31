@@ -14,7 +14,7 @@ DB_USER = "ghosts"
 DB_PASS = "scotty@1"
 
 # Configure these
-API_URL = "http://localhost:5000"
+API_URL = "http://localhost:8000"
 OLLAMA_MODEL = "mistral:7b"
 POST_DELAY = 0  # seconds between posts
 
@@ -30,8 +30,8 @@ sites = [
 
 # Message prompts for variety //todo: expand or customize
 prompts = [
-    "Write a provocative satire about political extremism in a fictional nation called Kerbleckistan. Use sharp humor and irony to highlight absurdity.",
-    "Write about underground robots ('beepboops') who develop an obsession with donuts. Use formal British English.",
+    "Write a provocative satire about political extremism in a fictional nation called West Donovia. Use sharp humor and irony to highlight absurdity.",
+    "Write about underground robots who develop an obsession with donuts. Use formal British English.",
     "Write something deliberately awkward and cringy, like an over-the-top motivational post that slightly misses the mark.",
     "Write a reflective post about a philosophical idea—such as identity, morality, or meaning—in an accessible tone.",
     "Write an absurdist post blending political history with zombie apocalypse themes. Keep it surreal and metaphorical."
