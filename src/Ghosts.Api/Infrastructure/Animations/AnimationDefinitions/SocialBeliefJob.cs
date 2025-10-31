@@ -95,6 +95,7 @@ public class SocialBeliefJob
             {
                 graph.Connections.Add(new NpcSocialConnection
                 {
+                    Id = $"{graph.Id}:{connection.NpcProfile.Id}",
                     ConnectedNpcId = connection.NpcProfile.Id,
                     Name = connection.NpcProfile.Name.ToString(),
                     SocialGraphId = graph.Id

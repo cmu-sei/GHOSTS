@@ -37,8 +37,7 @@ public class NpcRecord
     // this is also currently jsonb
     public NpcProfile NpcProfile { get; set; }
 
-    // jsonb
-
+    [Column(TypeName = "jsonb")]
     public NpcSocialGraph NpcSocialGraph { get; set; }
 
     public static NpcRecord TransformToNpc(NpcProfile o)

@@ -7,7 +7,7 @@ namespace Ghosts.Api.Infrastructure.Models;
 
 public class NpcSocialConnection
 {
-    public int Id { get; set; }
+    public string Id { get; set; }
     public Guid SocialGraphId { get; set; }
     public Guid ConnectedNpcId { get; set; }
     public string Name { get; set; }
@@ -20,6 +20,7 @@ public class NpcSocialConnection
 
     public NpcSocialConnection()
     {
+        Id = Guid.NewGuid().ToString();
         Interactions = new List<NpcInteraction>();
     }
 }

@@ -9,9 +9,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Ghosts.Api.Controllers;
 
-[Route("view-relationships")]
+
 [Controller]
-[Produces("application/json")]
+[Route("view-relationships")]
 [ApiExplorerSettings(IgnoreApi = true)]
 public class ViewRelationshipsController(ApplicationDbContext context) : Controller
 {

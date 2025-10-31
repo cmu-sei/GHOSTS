@@ -61,15 +61,17 @@ public class SocialGraphJob
 
     private IEnumerable<NpcSocialConnection> GetSocialConnectionFromNpc(NpcRecord npc)
     {
-        var connection = new NpcSocialConnection();
-        connection.ConnectedNpcId = npc.Id;
-        connection.Name = npc.NpcProfile.Name.ToString();
-        connection.RelationshipStatus = 0;
-        connection.Distance = "";
-        connection.Interactions = new List<NpcInteraction>();
-        var connections = new List<NpcSocialConnection>();
-        connections.Add(connection);
-        return connections;
+        var connection = new NpcSocialConnection
+        {
+            Id = npc.Id.ToString(),
+            ConnectedNpcId = npc.Id,
+            Name = npc.NpcProfile.Name.ToString(),
+            RelationshipStatus = 0,
+            Distance = string.Empty,
+            Interactions = new List<NpcInteraction>()
+        };
+
+        return new List<NpcSocialConnection> { connection };
     }
 
 
@@ -121,7 +123,10 @@ public class SocialGraphJob
                         {
                             graph.Connections.Add(new NpcSocialConnection()
                             {
-                                ConnectedNpcId = newConnection.Id, Name = newConnection.NpcProfile.Name.ToString(), SocialGraphId = graph.Id
+                                Id = $"{graph.Id}:{newConnection.Id}",
+                                ConnectedNpcId = newConnection.Id,
+                                Name = newConnection.NpcProfile.Name.ToString(),
+                                SocialGraphId = graph.Id
                             });
                             await Task.Delay(1500, _token);
                             await _hub.Clients.All.SendAsync("show", graph.CurrentStep, target.ConnectedNpcId, "relationship",
@@ -151,6 +156,7 @@ public class SocialGraphJob
             Name = npc.NpcProfile.Name.ToString(),
             Connections = connections.Select(c => new NpcSocialConnection
             {
+                Id = $"{npc.Id}:{c.Id}",
                 ConnectedNpcId = c.Id,
                 Name = c.NpcProfile.Name.ToString(),
                 SocialGraphId = npc.Id

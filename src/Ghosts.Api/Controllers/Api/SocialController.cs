@@ -12,67 +12,66 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using NLog;
+using Swashbuckle.AspNetCore.Annotations;
 
-namespace Ghosts.Api.Controllers;
+namespace Ghosts.Api.Controllers.Api;
 
-[Controller]
-[Route("view-social")]
-[ApiExplorerSettings(IgnoreApi = true)]
-public class ViewSocialController(ApplicationDbContext context) : Controller
+[Produces("application/json")]
+[Route("api/[controller]")]
+public class SocialController(ApplicationDbContext context) : Controller
 {
     private static readonly Logger _log = LogManager.GetCurrentClassLogger();
     private readonly ApplicationSettings _configuration = Program.ApplicationSettings;
 
+    [ProducesResponseType(typeof(IReadOnlyList<NpcSocialGraph>), 200)]
+    [SwaggerOperation("SocialGraphsGet")]
     [HttpGet]
-    public async Task<IActionResult> Index()
+    public async Task<IReadOnlyList<NpcSocialGraph>> Index()
     {
         if (!IsSocialGraphEnabled())
         {
-            return View(); // Social graph is not enabled, return default view
+            return new List<NpcSocialGraph>();
         }
 
         var graphs = await LoadSocialGraphsAsync();
         if (graphs == null)
         {
-            return View(); // Return default view if no graphs found
+            return new List<NpcSocialGraph>();
         }
 
         _log.Info("SocialGraph loaded from disk.");
-        return View(graphs); // Return the view with the graph data
+        return graphs;
     }
 
+    [ProducesResponseType(typeof(NpcSocialGraph), 200)]
+    [SwaggerOperation("SocialGraphsGetById")]
     [HttpGet("{id}")]
-    public async Task<IActionResult> Detail(Guid id)
+    public async Task<NpcSocialGraph> Detail(Guid id)
     {
         if (!IsSocialGraphEnabled())
         {
-            return View(); // Social graph not enabled
+            return new NpcSocialGraph();
         }
 
         var graph = await LoadGraphByIdAsync(id);
         if (graph == null)
         {
-            return NotFound(); // Graph with the given ID was not found
+            return new NpcSocialGraph();
         }
 
         _log.Info("SocialGraph loaded from disk.");
-        return View(graph); // Return view with the graph data
+        return graph;
     }
 
-    [HttpGet("{id}/interactions")]
-    public IActionResult Interactions(string id)
-    {
-        ViewBag.Id = id;
-        return View();
-    }
-
+    [ProducesResponseType(typeof(FileContentResult), 200)]
+    [SwaggerOperation("SocialGraphsGetFile")]
     [HttpGet("{id}/file")]
     public async Task<IActionResult> File(Guid id)
     {
         var graph = await LoadGraphByIdAsync(id);
         if (graph == null)
         {
-            return NotFound(); // Graph not found
+            return null;
         }
 
         _log.Info("SocialGraph loaded from disk.");

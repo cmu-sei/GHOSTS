@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 
 namespace Ghosts.Api.Controllers;
 
+[Controller]
 [Route("[controller]")]
 [ApiExplorerSettings(IgnoreApi = true)]
 public class AnimationsController(IManageableHostedService animationsManager) : Controller

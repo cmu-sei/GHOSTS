@@ -3,6 +3,7 @@
 using System;
 using System.IO;
 using System.Reflection;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using Ghosts.Api.Hubs;
 using Ghosts.Api.Infrastructure;
@@ -39,7 +40,20 @@ namespace Ghosts.Api
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
+            services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseNpgsql(
+                    Configuration.GetConnectionString("DefaultConnection"),
+                    npgsqlOptions => npgsqlOptions.ConfigureDataSource(dataSourceBuilder =>
+                    {
+                        var serializerOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web)
+                        {
+                            NumberHandling = JsonNumberHandling.AllowReadingFromString
+                        };
+                        serializerOptions.Converters.Add(new JsonStringEnumConverter());
+                        dataSourceBuilder.ConfigureJsonOptions(serializerOptions);
+                    })
+                )
+            );
             NpgsqlConnection.GlobalTypeMapper.EnableDynamicJson();
 
             services.TryAddTransient<IHttpContextAccessor, HttpContextAccessor>();
