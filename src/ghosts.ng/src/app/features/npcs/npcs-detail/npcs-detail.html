@@ -1,0 +1,183 @@
+<div class="page-header">
+  <h1>NPC Details</h1>
+  <button mat-raised-button (click)="goBack()">
+    <i class="fas fa-arrow-left"></i>
+    Back to NPCs
+  </button>
+</div>
+
+@if (loading()) {
+<div class="loading">
+  <mat-spinner diameter="40"></mat-spinner>
+  <p>Loading NPC details...</p>
+</div>
+} @else if (error()) {
+<div class="error">
+  <i class="fas fa-exclamation-circle"></i>
+  <p>{{ error() }}</p>
+  <button mat-button color="primary" (click)="goBack()">
+    <i class="fas fa-arrow-left"></i>
+    Back to NPCs
+  </button>
+</div>
+} @else if (npcGraph()) {
+<!-- Detail View -->
+<div class="detail-view">
+  <mat-card class="detail-card">
+    <mat-card-header>
+      <mat-card-title>
+        <div class="detail-header">
+          <div class="npc-info">
+            @if (npcGraph()!.avatar) {
+            <img [src]="npcGraph()!.avatar" [alt]="npcGraph()!.name" class="avatar">
+            } @else {
+            <div class="avatar-placeholder">
+              <i class="fas fa-user"></i>
+            </div>
+            }
+            <span>{{ npcGraph()!.name }}</span>
+          </div>
+          <button mat-button (click)="goBack()" class="icon-button">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </mat-card-title>
+      <mat-card-subtitle>
+        @if (npcGraph()!.campaign || npcGraph()!.enclave || npcGraph()!.team) {
+        <div class="badges">
+          @if (npcGraph()!.campaign) {
+          <span class="badge">{{ npcGraph()!.campaign }}</span>
+          }
+          @if (npcGraph()!.enclave) {
+          <span class="badge">{{ npcGraph()!.enclave }}</span>
+          }
+          @if (npcGraph()!.team) {
+          <span class="badge">{{ npcGraph()!.team }}</span>
+          }
+        </div>
+        }
+        <div class="stats">
+          Current Step: {{ npcGraph()!.currentStep }} | Connections: {{ npcGraph()!.connectionCount }}
+        </div>
+      </mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      @if (loadingConnections()) {
+      <div class="loading">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Loading connection details...</p>
+      </div>
+      } @else if (connections().length === 0) {
+      <div class="empty-state">
+        <i class="fas fa-users"></i>
+        <p>No connections found for this NPC.</p>
+      </div>
+      } @else {
+      <div class="connections-detail">
+        @for (connection of connections(); track connection.id) {
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <div class="connection-header">
+                @if (connection.avatar) {
+                <img [src]="connection.avatar" [alt]="connection.name" class="connection-avatar">
+                } @else {
+                <div class="connection-avatar-placeholder">
+                  <i class="fas fa-user"></i>
+                </div>
+                }
+                <strong>{{ connection.name }}</strong>
+              </div>
+            </mat-panel-title>
+            <mat-panel-description>
+              <div class="connection-stats">
+                <span class="stat" matTooltip="Interactions">
+                  {{ connection.interactionCount }}
+                </span>
+                <span class="stat" matTooltip="Total Value">
+                  {{ connection.totalInteractionValue }}
+                </span>
+                <span [class]="'score ' + getConnectionScoreClass(connection.connectionScore)"
+                  matTooltip="Connection Score">
+                  {{ connection.connectionScore }}%
+                </span>
+              </div>
+            </mat-panel-description>
+          </mat-expansion-panel-header>
+
+          <div class="connection-detail-content">
+            <!-- Interactions -->
+            <div class="section">
+              <h4>Interactions</h4>
+              @if (connection.interactions && connection.interactions.length > 0) {
+              <div class="interactions-list">
+                @for (interaction of connection.interactions; track interaction.id) {
+                <div class="interaction-row">
+                  <span class="step">Step {{ interaction.step }}</span>
+                  @if (interaction.change === 'up') {
+                  <i class="fas fa-arrow-up change-icon up"></i>
+                  } @else if (interaction.change === 'down') {
+                  <i class="fas fa-arrow-down change-icon down"></i>
+                  } @else {
+                  <i class="fas fa-minus change-icon neutral"></i>
+                  }
+                  <span class="value">{{ interaction.value > 0 ? '+' : '' }}{{ interaction.value }}</span>
+                </div>
+                }
+              </div>
+              } @else {
+              <p class="no-data">No interactions recorded.</p>
+              }
+            </div>
+
+            <!-- Knowledge Transfers -->
+            @if (connection.knowledgeTransfers && connection.knowledgeTransfers.length > 0) {
+            <div class="section">
+              <h4>Knowledge Transfers</h4>
+              <div class="knowledge-list">
+                @for (knowledge of connection.knowledgeTransfers; track knowledge.id) {
+                @if (knowledge.value >= 0) {
+                <div class="knowledge-item">
+                  <i class="fas fa-graduation-cap"></i>
+                  <span class="topic">{{ knowledge.topic }}</span>
+                  <span class="value">+{{ knowledge.value }}</span>
+                  <span class="step">Step {{ knowledge.step }}</span>
+                </div>
+                }
+                }
+              </div>
+            </div>
+            }
+
+            <!-- Knowledge Decay -->
+            @if (hasKnowledgeDecay(connection)) {
+            <div class="section decay-section">
+              <h4>Knowledge Decay ({{ getDecayCount(connection) }})</h4>
+              <div class="decay-list">
+                @for (knowledge of connection.knowledgeTransfers; track knowledge.id) {
+                @if (knowledge.value < 0) { <div class="decay-item">
+                  <i class="fas fa-arrow-down"></i>
+                  <span class="topic">{{ knowledge.topic }}</span>
+                  <span class="value">{{ knowledge.value }}</span>
+                  <span class="step">Step {{ knowledge.step }}</span>
+              </div>
+              }
+              }
+            </div>
+          </div>
+          }
+      </div>
+      </mat-expansion-panel>
+      }
+</div>
+}
+</mat-card-content>
+<mat-card-actions>
+  <button mat-button (click)="exportInteractionMap(npcGraph()!.id)">
+    <i class="fas fa-download"></i>
+    Export Interaction Map
+  </button>
+</mat-card-actions>
+</mat-card>
+</div>
+}

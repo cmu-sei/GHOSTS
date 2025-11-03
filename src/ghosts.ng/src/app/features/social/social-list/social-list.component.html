@@ -1,0 +1,267 @@
+<div class="page-header">
+  <h1>Social Graphs - Knowledge & Interactions</h1>
+  <button mat-raised-button color="primary" (click)="loadSocialGraphs()">
+    <i class="fas fa-sync"></i>
+    Refresh
+  </button>
+</div>
+
+@if (selectedGraph()) {
+<!-- Detail View -->
+<div class="detail-view">
+  <mat-card class="detail-card">
+    <mat-card-header>
+      <mat-card-title>
+        <div class="detail-header">
+          <div class="npc-info">
+            @if (selectedGraph()!.avatar) {
+            <img [src]="selectedGraph()!.avatar" [alt]="selectedGraph()!.name" class="avatar">
+            } @else {
+            <div class="avatar-placeholder">
+              <i class="fas fa-user"></i>
+            </div>
+            }
+            <span>{{ selectedGraph()!.name }}</span>
+          </div>
+          <button mat-button (click)="closeDetails()" class="icon-button">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </mat-card-title>
+      <mat-card-subtitle>
+        @if (selectedGraph()!.campaign || selectedGraph()!.enclave || selectedGraph()!.team) {
+        <div class="badges">
+          @if (selectedGraph()!.campaign) {
+          <span class="badge">{{ selectedGraph()!.campaign }}</span>
+          }
+          @if (selectedGraph()!.enclave) {
+          <span class="badge">{{ selectedGraph()!.enclave }}</span>
+          }
+          @if (selectedGraph()!.team) {
+          <span class="badge">{{ selectedGraph()!.team }}</span>
+          }
+        </div>
+        }
+        <div class="stats">
+          Current Step: {{ selectedGraph()!.currentStep }} | Connections: {{ selectedGraph()!.connectionCount }}
+        </div>
+      </mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      @if (loadingConnections()) {
+      <div class="loading">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Loading connection details...</p>
+      </div>
+      } @else if (connections().length === 0) {
+      <div class="empty-state">
+        <i class="fas fa-users"></i>
+        <p>No connections found for this NPC.</p>
+      </div>
+      } @else {
+      <div class="connections-detail">
+        @for (connection of connections(); track connection.id) {
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <div class="connection-header">
+                @if (connection.avatar) {
+                <img [src]="connection.avatar" [alt]="connection.name" class="connection-avatar">
+                } @else {
+                <div class="connection-avatar-placeholder">
+                  <i class="fas fa-user"></i>
+                </div>
+                }
+                <strong>{{ connection.name }}</strong>
+              </div>
+            </mat-panel-title>
+            <mat-panel-description>
+              <div class="connection-stats">
+                <span class="stat" matTooltip="Interactions">
+                  {{ connection.interactionCount }}
+                </span>
+                <span class="stat" matTooltip="Total Value">
+                  {{ connection.totalInteractionValue }}
+                </span>
+                <span [class]="'score ' + getConnectionScoreClass(connection.connectionScore)"
+                  matTooltip="Connection Score">
+                  {{ connection.connectionScore }}%
+                </span>
+              </div>
+            </mat-panel-description>
+          </mat-expansion-panel-header>
+
+          <div class="connection-detail-content">
+            <!-- Interactions -->
+            <div class="section">
+              <h4>Interactions</h4>
+              @if (connection.interactions && connection.interactions.length > 0) {
+              <div class="interactions-list">
+                @for (interaction of connection.interactions; track interaction.id) {
+                <div class="interaction-row">
+                  <span class="step">Step {{ interaction.step }}</span>
+                  @if (interaction.change === 'up') {
+                  <i class="fas fa-arrow-up change-icon up"></i>
+                  } @else if (interaction.change === 'down') {
+                  <i class="fas fa-arrow-down change-icon down"></i>
+                  } @else {
+                  <i class="fas fa-minus change-icon neutral"></i>
+                  }
+                  <span class="value">{{ interaction.value > 0 ? '+' : '' }}{{ interaction.value }}</span>
+                </div>
+                }
+              </div>
+              } @else {
+              <p class="no-data">No interactions recorded.</p>
+              }
+            </div>
+
+            <!-- Knowledge Transfers -->
+            @if (connection.knowledgeTransfers && connection.knowledgeTransfers.length > 0) {
+            <div class="section">
+              <h4>Knowledge Transfers</h4>
+              <div class="knowledge-list">
+                @for (knowledge of connection.knowledgeTransfers; track knowledge.id) {
+                @if (knowledge.value >= 0) {
+                <div class="knowledge-item">
+                  <i class="fas fa-graduation-cap"></i>
+                  <span class="topic">{{ knowledge.topic }}</span>
+                  <span class="value">+{{ knowledge.value }}</span>
+                  <span class="step">Step {{ knowledge.step }}</span>
+                </div>
+                }
+                }
+              </div>
+            </div>
+            }
+
+            <!-- Knowledge Decay -->
+            @if (hasKnowledgeDecay(connection)) {
+            <div class="section decay-section">
+              <h4>Knowledge Decay ({{ getDecayCount(connection) }})</h4>
+              <div class="decay-list">
+                @for (knowledge of connection.knowledgeTransfers; track knowledge.id) {
+                @if (knowledge.value < 0) { <div class="decay-item">
+                  <i class="fas fa-arrow-down"></i>
+                  <span class="topic">{{ knowledge.topic }}</span>
+                  <span class="value">{{ knowledge.value }}</span>
+                  <span class="step">Step {{ knowledge.step }}</span>
+              </div>
+              }
+              }
+            </div>
+          </div>
+          }
+      </div>
+      </mat-expansion-panel>
+      }
+</div>
+}
+</mat-card-content>
+<mat-card-actions>
+  <button mat-button (click)="exportInteractionMap(selectedGraph()!.id)">
+    <i class="fas fa-download"></i>
+    Export Interaction Map
+  </button>
+</mat-card-actions>
+</mat-card>
+</div>
+} @else {
+<!-- List View -->
+@if (loading()) {
+<div class="loading">
+  <mat-spinner diameter="40"></mat-spinner>
+  <p>Loading social graphs...</p>
+</div>
+} @else if (error()) {
+<div class="error">
+  <i class="fas fa-exclamation-circle"></i>
+  <p>{{ error() }}</p>
+  <button mat-button color="primary" (click)="loadSocialGraphs()">
+    <i class="fas fa-sync"></i>
+    Retry
+  </button>
+</div>
+} @else if (socialGraphs().length === 0) {
+<div class="empty-state">
+  <i class="fas fa-project-diagram"></i>
+  <p>No social graphs found. Create some NPCs and run animations to see social interactions here.</p>
+</div>
+} @else {
+<div class="social-cards-grid">
+  @for (graph of socialGraphs(); track graph.id) {
+  <mat-card class="social-card" (click)="viewDetails(graph)">
+    <mat-card-header>
+      <div class="card-header-content">
+        @if (graph.avatar) {
+        <img mat-card-avatar [src]="graph.avatar" [alt]="graph.name">
+        } @else {
+        <div mat-card-avatar class="avatar-placeholder">
+          <i class="fas fa-user"></i>
+        </div>
+        }
+        <div class="header-text">
+          <mat-card-title>{{ graph.name }}</mat-card-title>
+          <mat-card-subtitle>
+            @if (graph.campaign || graph.enclave || graph.team) {
+            <div class="mini-badges">
+              @if (graph.campaign) {
+              <span class="mini-badge">{{ graph.campaign }}</span>
+              }
+              @if (graph.enclave) {
+              <span class="mini-badge">{{ graph.enclave }}</span>
+              }
+              @if (graph.team) {
+              <span class="mini-badge">{{ graph.team }}</span>
+              }
+            </div>
+            }
+          </mat-card-subtitle>
+        </div>
+      </div>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="knowledge-section">
+        <h4>Knowledge Topics</h4>
+        @if (graph.knowledgeTopics && graph.knowledgeTopics.length > 0) {
+        <mat-chip-set class="knowledge-topics">
+          @for (topic of graph.knowledgeTopics; track topic.topic) {
+          <mat-chip [class]="'knowledge-chip ' + getKnowledgeStrengthClass(topic.strength)"
+            [matTooltip]="'Value: ' + topic.totalValue + ' | Count: ' + topic.count">
+            {{ topic.topic }}
+            <span class="topic-count">{{ topic.count }}</span>
+          </mat-chip>
+          }
+        </mat-chip-set>
+        } @else {
+        <p class="no-topics">No knowledge topics yet</p>
+        }
+      </div>
+      <div class="card-footer">
+        <div class="metrics">
+          <span matTooltip="Connections">
+            <i class="fas fa-users"></i>
+            {{ graph.connectionCount }}
+          </span>
+          <span matTooltip="Beliefs">
+            <i class="fas fa-brain"></i>
+            {{ graph.beliefCount }}
+          </span>
+          <span matTooltip="Current Step">
+            <i class="fas fa-stream"></i>
+            {{ graph.currentStep }}
+          </span>
+        </div>
+      </div>
+    </mat-card-content>
+    <mat-card-actions>
+      <button mat-button color="primary">
+        <i class="fas fa-eye"></i>
+        View Details
+      </button>
+    </mat-card-actions>
+  </mat-card>
+  }
+</div>
+}
+}

@@ -1,0 +1,108 @@
+<div class="page-header">
+  <h1>Animations</h1>
+</div>
+
+<div class="animations-container">
+  <!-- Left Column: Start New Animation -->
+  <mat-card class="start-animation-card">
+    <mat-card-header>
+      <mat-card-title>Start a New Animation</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="startForm" (ngSubmit)="startAnimation()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Animation Type</mat-label>
+          <mat-select formControlName="jobType">
+            @for (jobType of jobTypes; track jobType) {
+              <mat-option [value]="jobType">{{ formatJobType(jobType) }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Job Configuration (JSON)</mat-label>
+          <textarea
+            matInput
+            formControlName="configuration"
+            rows="15"
+            placeholder="Enter JSON configuration"
+            class="json-textarea">
+          </textarea>
+        </mat-form-field>
+
+        <button
+          mat-raised-button
+          color="primary"
+          type="submit"
+          [disabled]="startForm.invalid">
+          <i class="fas fa-play"></i>
+          Start Animation
+        </button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Right Column: Running Animations -->
+  <mat-card class="running-animations-card">
+    <mat-card-header>
+      <mat-card-title>Currently Running Animations</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      @if (loading()) {
+        <div class="loading">
+          <mat-spinner diameter="40"></mat-spinner>
+          <p>Loading running animations...</p>
+        </div>
+      } @else if (error()) {
+        <div class="error">
+          <p>{{ error() }}</p>
+          <button mat-button color="primary" (click)="loadRunningJobs()">
+            <i class="fas fa-sync"></i>
+            Retry
+          </button>
+        </div>
+      } @else if (runningJobs().length === 0) {
+        <div class="empty-state">
+          <i class="fas fa-hourglass-half"></i>
+          <p>All is quiet. There are currently no running animations.</p>
+        </div>
+      } @else {
+        <div class="table-container">
+          <table mat-table [dataSource]="runningJobs()">
+            <ng-container matColumnDef="name">
+              <th mat-header-cell *matHeaderCellDef>Job Name</th>
+              <td mat-cell *matCellDef="let job">
+                <strong>{{ formatJobType(job.name) }}</strong>
+                <br>
+                <small style="color: #666;">ID: {{ job.id }} | Name: {{ job.name }}</small>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="startTime">
+              <th mat-header-cell *matHeaderCellDef>Start Time</th>
+              <td mat-cell *matCellDef="let job">
+                {{ job.startTime | date:'medium' }}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>Actions</th>
+              <td mat-cell *matCellDef="let job">
+                <button
+                  mat-raised-button
+                  color="warn"
+                  (click)="stopAnimation(job.name, job)">
+                  <i class="fas fa-stop"></i>
+                  Stop Job
+                </button>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          </table>
+        </div>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>
