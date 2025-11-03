@@ -39,6 +39,7 @@ namespace Ghosts.Api.Controllers
             {
                 Version = ApplicationDetails.Version,
                 VersionFile = ApplicationDetails.VersionFile,
+                VersionEnvironment = Environment.Version.ToString(),
                 Created = DateTime.UtcNow
             };
 
@@ -61,6 +62,7 @@ namespace Ghosts.Api.Controllers
         {
             public string Version { get; set; }
             public string VersionFile { get; set; }
+            public string VersionEnvironment { get; set; }
             public int Machines { get; set; }
             public int Groups { get; set; }
             public int Npcs { get; set; }
