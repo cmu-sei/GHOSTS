@@ -7,3 +7,4 @@ export * from './status.model';
 export * from './animation.model';
 export * from './relationship.model';
 export * from './social.model';
+export * from './scenario.model';

@@ -1,0 +1,113 @@
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+
+  h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 500;
+  }
+}
+
+.loading,
+.error,
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+
+  i {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+  }
+
+  p, h2 {
+    margin: 8px 0;
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  h2 {
+    font-size: 20px;
+    font-weight: 500;
+  }
+}
+
+.scenarios-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 24px;
+
+  .scenario-card {
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    }
+
+    mat-card-header {
+      margin-bottom: 16px;
+    }
+
+    mat-card-title {
+      font-size: 18px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    mat-card-subtitle {
+      font-size: 12px;
+      color: rgba(0, 0, 0, 0.6);
+    }
+
+    .description {
+      margin: 0 0 16px 0;
+      color: rgba(0, 0, 0, 0.7);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+
+      .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        color: rgba(0, 0, 0, 0.7);
+
+        i {
+          color: #1976d2;
+          font-size: 16px;
+          width: 16px;
+        }
+      }
+    }
+
+    mat-card-actions {
+      padding: 8px 16px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      border-top: 1px solid #e0e0e0;
+      margin-top: 16px;
+    }
+  }
+}
+
+// Button icon spacing
+button i {
+  margin-right: 6px;
+  font-size: 14px;
+}

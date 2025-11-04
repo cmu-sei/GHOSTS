@@ -1,0 +1,168 @@
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+
+  h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 500;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 12px;
+
+    button i {
+      margin-right: 6px;
+      font-size: 14px;
+    }
+  }
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+
+  p {
+    margin-top: 24px;
+    font-size: 16px;
+    color: rgba(0, 0, 0, 0.6);
+  }
+}
+
+.content {
+  mat-tab-group {
+    .content-card {
+      padding: 24px;
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: 500;
+      margin: 0 0 24px 0;
+    }
+
+    .subsection-title {
+      font-size: 16px;
+      font-weight: 500;
+      margin: 16px 0 12px 0;
+    }
+
+    .full-width {
+      width: 100%;
+      margin-bottom: 16px;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+
+      .half-width {
+        flex: 1;
+      }
+
+      .third-width {
+        flex: 1;
+      }
+    }
+
+    .form-section {
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid #e0e0e0;
+
+      h3 {
+        font-size: 16px;
+        font-weight: 500;
+        margin: 0 0 16px 0;
+      }
+    }
+
+    .list-manager {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+
+      .list-item {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        padding: 16px;
+        background: #f5f5f5;
+        border-radius: 4px;
+
+        .item-field {
+          flex: 1;
+        }
+
+        .item-field-small {
+          width: 150px;
+        }
+
+        button[mat-icon-button] {
+          flex-shrink: 0;
+        }
+      }
+
+      > button {
+        align-self: flex-start;
+        margin-top: 8px;
+      }
+    }
+
+    .checkbox-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin: 16px 0;
+    }
+
+    .timeline-table-container {
+      margin-top: 16px;
+      overflow-x: auto;
+
+      table {
+        width: 100%;
+
+        .drag-handle {
+          cursor: move;
+          color: rgba(0, 0, 0, 0.54);
+        }
+
+        .table-row {
+          &.cdk-drag-preview {
+            background: white;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+          }
+
+          &.cdk-drag-placeholder {
+            opacity: 0.3;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Button icon spacing
+button i {
+  margin-right: 6px;
+  font-size: 14px;
+}
+
+button[mat-icon-button] i {
+  margin-right: 0;
+}
+
+::ng-deep {
+  .mat-mdc-tab-body-content {
+    padding: 24px;
+  }
+}

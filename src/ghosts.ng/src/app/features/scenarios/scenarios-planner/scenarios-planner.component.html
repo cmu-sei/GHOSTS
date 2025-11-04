@@ -1,0 +1,380 @@
+<div class="page-header">
+  <h1>{{ isEditMode && scenario.name ? 'Edit Scenario: ' + scenario.name : (isEditMode ? 'Edit Scenario' : 'Create New Scenario') }}</h1>
+  <div class="header-actions">
+    <button mat-raised-button (click)="backToList()">
+      <i class="fas fa-arrow-left"></i>
+      Back to List
+    </button>
+    <button mat-raised-button color="accent" (click)="exportScenario()">
+      <i class="fas fa-download"></i>
+      Export JSON
+    </button>
+    <button mat-raised-button color="primary" (click)="saveScenario()">
+      <i class="fas fa-save"></i>
+      Save Scenario
+    </button>
+  </div>
+</div>
+
+<!-- Loading State -->
+@if (loading()) {
+<div class="loading">
+  <mat-spinner diameter="40"></mat-spinner>
+  <p>Loading scenario...</p>
+</div>
+}
+
+@if (!loading()) {
+<div class="content">
+    <mat-tab-group>
+      <!-- Scenario Parameters Tab -->
+      <mat-tab label="Scenario Parameters">
+        <div class="content-card">
+          <h2 class="section-title">Scenario Parameters</h2>
+
+          <mat-form-field class="full-width">
+            <mat-label>Scenario Name</mat-label>
+            <input matInput [(ngModel)]="scenario.name" placeholder="Enter scenario name">
+          </mat-form-field>
+
+          <mat-form-field class="full-width">
+            <mat-label>Description</mat-label>
+            <textarea matInput [(ngModel)]="scenario.description" rows="3" placeholder="Enter scenario description"></textarea>
+          </mat-form-field>
+
+          <!-- Nations Section -->
+          <div class="form-section">
+            <h3 class="subsection-title">Nations Involved</h3>
+            <div class="list-manager">
+              <div *ngFor="let nation of scenario.scenarioParameters!.nations; let i = index" class="list-item">
+                <mat-form-field class="item-field">
+                  <mat-label>Nation Name</mat-label>
+                  <input matInput [(ngModel)]="nation.name" placeholder="e.g., USA, Nation X">
+                </mat-form-field>
+                <mat-form-field class="item-field">
+                  <mat-label>Alignment</mat-label>
+                  <mat-select [(ngModel)]="nation.alignment">
+                    <mat-option value="friendly">Friendly</mat-option>
+                    <mat-option value="adversary">Adversary</mat-option>
+                    <mat-option value="neutral">Neutral</mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <button mat-icon-button color="warn" (click)="removeNation(i)">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+              <button mat-raised-button color="primary" (click)="addNation()">
+                <i class="fas fa-plus"></i> Add Nation
+              </button>
+            </div>
+          </div>
+
+          <!-- Threat Actors Section -->
+          <div class="form-section">
+            <h3>Threat Actors</h3>
+            <div class="list-manager">
+              <div *ngFor="let actor of scenario.scenarioParameters!.threatActors; let i = index" class="list-item">
+                <mat-form-field class="item-field">
+                  <mat-label>Actor Name</mat-label>
+                  <input matInput [(ngModel)]="actor.name" placeholder="e.g., GreyWolf, BlackFlag">
+                </mat-form-field>
+                <mat-form-field class="item-field-small">
+                  <mat-label>Type</mat-label>
+                  <mat-select [(ngModel)]="actor.type">
+                    <mat-option value="state">State-Sponsored</mat-option>
+                    <mat-option value="criminal">Criminal</mat-option>
+                    <mat-option value="hacktivist">Hacktivist</mat-option>
+                    <mat-option value="insider">Insider</mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <mat-form-field class="item-field-small">
+                  <mat-label>Capability (1-5)</mat-label>
+                  <input matInput type="number" [(ngModel)]="actor.capability" min="1" max="5">
+                </mat-form-field>
+                <mat-form-field class="item-field">
+                  <mat-label>MITRE TTPs (comma-separated)</mat-label>
+                  <input matInput [(ngModel)]="actor.ttpsString" placeholder="T1059,T1047">
+                </mat-form-field>
+                <button mat-icon-button color="warn" (click)="removeThreatActor(i)">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+              <button mat-raised-button color="primary" (click)="addThreatActor()">
+                <i class="fas fa-plus"></i> Add Threat Actor
+              </button>
+            </div>
+          </div>
+
+          <!-- Injects Section -->
+          <div class="form-section">
+            <h3>Injects</h3>
+            <div class="list-manager">
+              <div *ngFor="let inject of scenario.scenarioParameters!.injects; let i = index" class="list-item">
+                <mat-form-field class="item-field-small">
+                  <mat-label>Trigger</mat-label>
+                  <input matInput [(ngModel)]="inject.trigger" placeholder="e.g., T+10m, OnDetect">
+                </mat-form-field>
+                <mat-form-field class="item-field">
+                  <mat-label>Title/Description</mat-label>
+                  <input matInput [(ngModel)]="inject.title" placeholder="e.g., Phish email to finance">
+                </mat-form-field>
+                <button mat-icon-button color="warn" (click)="removeInject(i)">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+              <button mat-raised-button color="primary" (click)="addInject()">
+                <i class="fas fa-plus"></i> Add Inject
+              </button>
+            </div>
+          </div>
+
+          <!-- User Pools Section -->
+          <div class="form-section">
+            <h3>User Pools (GHOSTS Integration)</h3>
+            <div class="list-manager">
+              <div *ngFor="let pool of scenario.scenarioParameters!.userPools; let i = index" class="list-item">
+                <mat-form-field class="item-field">
+                  <mat-label>Role</mat-label>
+                  <input matInput [(ngModel)]="pool.role" placeholder="e.g., Logistics, Operations, Med Unit">
+                </mat-form-field>
+                <mat-form-field class="item-field-small">
+                  <mat-label>Count</mat-label>
+                  <input matInput type="number" [(ngModel)]="pool.count" min="1">
+                </mat-form-field>
+                <button mat-icon-button color="warn" (click)="removeUserPool(i)">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+              <button mat-raised-button color="primary" (click)="addUserPool()">
+                <i class="fas fa-plus"></i> Add User Pool
+              </button>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>Strategic Context</h3>
+            <div class="form-row">
+              <mat-form-field class="half-width">
+                <mat-label>Strategic Objectives</mat-label>
+                <textarea matInput [(ngModel)]="scenario.scenarioParameters!.objectives" rows="3"></textarea>
+              </mat-form-field>
+
+              <mat-form-field class="half-width">
+                <mat-label>Political/Economic Context</mat-label>
+                <textarea matInput [(ngModel)]="scenario.scenarioParameters!.politicalContext" rows="3"></textarea>
+              </mat-form-field>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>Rules & Victory Conditions</h3>
+            <div class="form-row">
+              <mat-form-field class="half-width">
+                <mat-label>Rules of Engagement</mat-label>
+                <textarea matInput [(ngModel)]="scenario.scenarioParameters!.rulesOfEngagement" rows="3"></textarea>
+              </mat-form-field>
+
+              <mat-form-field class="half-width">
+                <mat-label>Victory Conditions</mat-label>
+                <textarea matInput [(ngModel)]="scenario.scenarioParameters!.victoryConditions" rows="3"></textarea>
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+      </mat-tab>
+
+      <!-- Technical Environment Tab -->
+      <mat-tab label="Technical Environment">
+        <div class="content-card">
+          <h2 class="section-title">Technical Environment</h2>
+
+          <div class="form-section">
+            <h3 class="subsection-title">Range Topology</h3>
+            <mat-form-field class="full-width">
+              <mat-label>Network Topology</mat-label>
+              <textarea matInput [(ngModel)]="scenario.technicalEnvironment!.networkTopology" rows="3"
+                placeholder="Describe networks, domains, enclaves, cloud/on-prem architecture"></textarea>
+            </mat-form-field>
+          </div>
+
+          <div class="form-section">
+            <h3 class="subsection-title">Services & Assets</h3>
+            <div class="form-row">
+              <mat-form-field class="half-width">
+                <mat-label>External Services</mat-label>
+                <textarea matInput [(ngModel)]="scenario.technicalEnvironment!.services" rows="3"
+                  placeholder="e.g., Multiple X/Twitter instances, Facebook clones, Email servers"></textarea>
+              </mat-form-field>
+
+              <mat-form-field class="half-width">
+                <mat-label>Internal Assets</mat-label>
+                <textarea matInput [(ngModel)]="scenario.technicalEnvironment!.assets" rows="3"
+                  placeholder="e.g., Windows/Linux mix, Critical apps, ICS/SCADA systems"></textarea>
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+      </mat-tab>
+
+      <!-- Simulation Mechanics Tab -->
+      <mat-tab label="Simulation Mechanics">
+        <div class="content-card">
+          <h2 class="section-title">Simulation Mechanics</h2>
+
+          <div class="form-section">
+            <h3 class="subsection-title">Execution Parameters</h3>
+            <div class="form-row">
+              <mat-form-field class="third-width">
+                <mat-label>Timeline & Pacing</mat-label>
+                <mat-select [(ngModel)]="scenario.simulationMechanics!.timelineType">
+                  <mat-option value="real-time">Real-time</mat-option>
+                  <mat-option value="compressed">Compressed</mat-option>
+                  <mat-option value="turn-based">Turn-based</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field class="third-width">
+                <mat-label>Duration (hours)</mat-label>
+                <input matInput type="number" [(ngModel)]="scenario.simulationMechanics!.durationHours" min="1" max="168">
+              </mat-form-field>
+
+              <mat-form-field class="third-width">
+                <mat-label>Adjudication Engine</mat-label>
+                <mat-select [(ngModel)]="scenario.simulationMechanics!.adjudicationType">
+                  <mat-option value="manual">Manual Control</mat-option>
+                  <mat-option value="automated">Automated Models</mat-option>
+                  <mat-option value="hybrid">Hybrid Approach</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>Scenario Logic</h3>
+            <div class="form-row">
+              <mat-form-field class="half-width">
+                <mat-label>Escalation Ladder</mat-label>
+                <textarea matInput [(ngModel)]="scenario.simulationMechanics!.escalationLadder" rows="3"
+                  placeholder="Define how scenario intensity increases based on player actions"></textarea>
+              </mat-form-field>
+
+              <mat-form-field class="half-width">
+                <mat-label>Branching Logic</mat-label>
+                <textarea matInput [(ngModel)]="scenario.simulationMechanics!.branchingLogic" rows="3"
+                  placeholder="Describe how scenario branches based on player decisions"></textarea>
+              </mat-form-field>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3 class="subsection-title">Telemetry & Metrics</h3>
+            <div class="checkbox-group">
+              <mat-checkbox [(ngModel)]="scenario.simulationMechanics!.telemetry.collectLogs">System Logs</mat-checkbox>
+              <mat-checkbox [(ngModel)]="scenario.simulationMechanics!.telemetry.collectNetwork">Network Captures</mat-checkbox>
+              <mat-checkbox [(ngModel)]="scenario.simulationMechanics!.telemetry.collectEndpoint">Endpoint Activity</mat-checkbox>
+              <mat-checkbox [(ngModel)]="scenario.simulationMechanics!.telemetry.collectChat">Chat Transcripts</mat-checkbox>
+            </div>
+
+            <mat-form-field class="full-width">
+              <mat-label>Performance Metrics</mat-label>
+              <textarea matInput [(ngModel)]="scenario.simulationMechanics!.performanceMetrics" rows="2"
+                placeholder="e.g., Time-to-detect, Time-to-contain, Accuracy of identification, Communication quality"></textarea>
+            </mat-form-field>
+          </div>
+        </div>
+      </mat-tab>
+
+      <!-- Timeline Tab -->
+      <mat-tab label="Timeline">
+        <div class="content-card">
+          <h2 class="section-title">Exercise Timeline</h2>
+
+          <div class="form-row">
+            <mat-form-field class="half-width">
+              <mat-label>Exercise Duration (hours)</mat-label>
+              <input matInput type="number" [(ngModel)]="scenario.timeline!.exerciseDuration" min="1" max="168">
+            </mat-form-field>
+
+            <div class="button-group">
+              <button mat-raised-button color="primary" (click)="addTimelineEvent()">
+                <i class="fas fa-plus"></i> Add Event
+              </button>
+            </div>
+          </div>
+
+          <div class="data-table" cdkDropList (cdkDropListDropped)="drop($event)">
+            <table mat-table [dataSource]="scenario.timeline!.events" class="mat-elevation-z2">
+
+              <!-- Drag Handle Column -->
+              <ng-container matColumnDef="drag">
+                <th mat-header-cell *matHeaderCellDef></th>
+                <td mat-cell *matCellDef="let element">
+                  <i cdkDragHandle class="fas fa-grip-vertical drag-handle"></i>
+                </td>
+              </ng-container>
+
+              <!-- Time Column -->
+              <ng-container matColumnDef="time">
+                <th mat-header-cell *matHeaderCellDef>Time</th>
+                <td mat-cell *matCellDef="let element">
+                  <input type="time" [(ngModel)]="element.time" class="input-field">
+                </td>
+              </ng-container>
+
+              <!-- Number Column -->
+              <ng-container matColumnDef="number">
+                <th mat-header-cell *matHeaderCellDef>#</th>
+                <td mat-cell *matCellDef="let element">{{ element.number }}</td>
+              </ng-container>
+
+              <!-- Assigned Column -->
+              <ng-container matColumnDef="assigned">
+                <th mat-header-cell *matHeaderCellDef>Assigned</th>
+                <td mat-cell *matCellDef="let element">
+                  <mat-form-field class="select-field">
+                    <mat-select [(ngModel)]="element.assigned">
+                      <mat-option *ngFor="let role of cellRoles" [value]="role">{{ role }}</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </td>
+              </ng-container>
+
+              <!-- Description Column -->
+              <ng-container matColumnDef="description">
+                <th mat-header-cell *matHeaderCellDef>Description / Details</th>
+                <td mat-cell *matCellDef="let element">
+                  <input type="text" [(ngModel)]="element.description" class="input-field">
+                </td>
+              </ng-container>
+
+              <!-- Status Column -->
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef>Status</th>
+                <td mat-cell *matCellDef="let element">
+                  <mat-form-field class="select-field">
+                    <mat-select [(ngModel)]="element.status">
+                      <mat-option *ngFor="let status of eventStatuses" [value]="status">{{ status }}</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </td>
+              </ng-container>
+
+              <!-- Actions Column -->
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef>Actions</th>
+                <td mat-cell *matCellDef="let element; let i = index">
+                  <button mat-icon-button color="warn" (click)="deleteTimelineEvent(i)">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="timelineColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: timelineColumns;" cdkDrag class="table-row"></tr>
+            </table>
+          </div>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+}

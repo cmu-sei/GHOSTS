@@ -201,6 +201,7 @@ interface NavItem {
 })
 export class NavigationComponent {
   protected readonly navItems = signal<NavItem[]>([
+    { label: 'Scenarios', path: '/scenarios', icon: 'fa-file-alt' },
     { label: 'Machines', path: '/machines', icon: 'fa-desktop' },
     { label: 'Machine Groups', path: '/machine-groups', icon: 'fa-users-cog' },
     { label: 'Timelines', path: '/timelines', icon: 'fa-stream' },

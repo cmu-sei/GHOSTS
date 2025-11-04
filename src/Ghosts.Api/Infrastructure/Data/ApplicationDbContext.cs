@@ -1,7 +1,6 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System.IO;
-using Ghosts.Api.Areas.Animator.Infrastructure.Models;
 using Ghosts.Api.Infrastructure.Models;
 using Ghosts.Api.Infrastructure.Extensions;
 using Ghosts.Domain.Messages.MesssagesForServer;
@@ -49,6 +48,18 @@ namespace Ghosts.Api.Infrastructure.Data
 
         public DbSet<NpcActivity> NpcActivities { get; set; }
 
+        public DbSet<Scenario> Scenarios { get; set; }
+        public DbSet<ScenarioParameters> ScenarioParameters { get; set; }
+        public DbSet<Nation> Nations { get; set; }
+        public DbSet<ThreatActor> ThreatActors { get; set; }
+        public DbSet<Inject> Injects { get; set; }
+        public DbSet<UserPool> UserPools { get; set; }
+        public DbSet<TechnicalEnvironment> TechnicalEnvironments { get; set; }
+        public DbSet<Vulnerability> Vulnerabilities { get; set; }
+        public DbSet<GameMechanics> GameMechanics { get; set; }
+        public DbSet<ScenarioTimeline> ScenarioTimelines { get; set; }
+        public DbSet<ScenarioTimelineEvent> ScenarioTimelineEvents { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -94,6 +105,70 @@ namespace Ghosts.Api.Infrastructure.Data
 
             modelBuilder.Entity<NpcRecord>().Property(o => o.NpcSocialGraph).HasColumnType("jsonb");
 
+            // Scenario relationships
+            modelBuilder.Entity<Scenario>()
+                .HasOne(s => s.ScenarioParameters)
+                .WithOne(sp => sp.Scenario)
+                .HasForeignKey<ScenarioParameters>(sp => sp.ScenarioId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Scenario>()
+                .HasOne(s => s.TechnicalEnvironment)
+                .WithOne(te => te.Scenario)
+                .HasForeignKey<TechnicalEnvironment>(te => te.ScenarioId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Scenario>()
+                .HasOne(s => s.GameMechanics)
+                .WithOne(gm => gm.Scenario)
+                .HasForeignKey<GameMechanics>(gm => gm.ScenarioId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Scenario>()
+                .HasOne(s => s.ScenarioTimeline)
+                .WithOne(t => t.Scenario)
+                .HasForeignKey<ScenarioTimeline>(t => t.ScenarioId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // ScenarioParameters relationships
+            modelBuilder.Entity<ScenarioParameters>()
+                .HasMany(sp => sp.Nations)
+                .WithOne(n => n.ScenarioParameters)
+                .HasForeignKey(n => n.ScenarioParametersId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ScenarioParameters>()
+                .HasMany(sp => sp.ThreatActors)
+                .WithOne(ta => ta.ScenarioParameters)
+                .HasForeignKey(ta => ta.ScenarioParametersId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ScenarioParameters>()
+                .HasMany(sp => sp.Injects)
+                .WithOne(i => i.ScenarioParameters)
+                .HasForeignKey(i => i.ScenarioParametersId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ScenarioParameters>()
+                .HasMany(sp => sp.UserPools)
+                .WithOne(up => up.ScenarioParameters)
+                .HasForeignKey(up => up.ScenarioParametersId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // TechnicalEnvironment relationships
+            modelBuilder.Entity<TechnicalEnvironment>()
+                .HasMany(te => te.Vulnerabilities)
+                .WithOne(v => v.TechnicalEnvironment)
+                .HasForeignKey(v => v.TechnicalEnvironmentId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Timeline relationships
+            modelBuilder.Entity<ScenarioTimeline>()
+                .HasMany(t => t.ScenarioTimelineEvents)
+                .WithOne(e => e.Timeline)
+                .HasForeignKey(e => e.ScenarioTimelineId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             foreach (var entity in modelBuilder.Model.GetEntityTypes())
             {
                 entity.SetTableName(entity.GetTableName().ToCondensedLowerCase());
@@ -112,6 +187,7 @@ namespace Ghosts.Api.Infrastructure.Data
     public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<ApplicationDbContext>
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
+
         public ApplicationDbContext CreateDbContext(string[] args)
         {
             var path = $"{Directory.GetCurrentDirectory()}/../ghosts.api/";
