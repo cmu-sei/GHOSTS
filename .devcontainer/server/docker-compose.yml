@@ -1,0 +1,31 @@
+services:
+  devshell:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /workspaces/GHOSTS
+    volumes:
+      - ../..:/workspaces/GHOSTS:cached
+      - nuget:/home/vscode/.nuget/packages
+    command: sleep infinity
+    depends_on: [db] # [db, grafana]
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ghosts
+      POSTGRES_PASSWORD: ghosts
+      POSTGRES_DB: ghosts
+    ports: ["5432:5432"]
+    volumes:
+      - ghosts_pg:/var/lib/postgresql/data
+
+  # grafana:
+  #   image: grafana/grafana:11.1.0
+  #   ports: ["3000:3000"]
+  #   environment:
+  #     - GF_SECURITY_ADMIN_PASSWORD=admin
+
+volumes:
+  ghosts_pg:
+  nuget:
+  npmcache:

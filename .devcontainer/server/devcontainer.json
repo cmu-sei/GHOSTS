@@ -1,0 +1,47 @@
+{
+    "name": "ghosts-server",
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+    "features": {
+        "ghcr.io/devcontainers/features/python:1": {},
+        "ghcr.io/devcontainers/features/git:1": {},
+        "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+            "moby": true,
+            "dockerDashComposeVersion": "v2"
+        }
+    },
+    "containerEnv": {
+        "OPENAI_API_KEY": "${localEnv:OPENAI_API_KEY}",
+        "ANTHROPIC_API_KEY": "${localEnv:ANTHROPIC_API_KEY}"
+    },
+    "postCreateCommand": "bash -l .devcontainer/server/postcreate.sh",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-dotnettools.csdevkit",
+                "ms-azuretools.vscode-docker",
+                "dbaeumer.vscode-eslint",
+                "esbenp.prettier-vscode",
+                "angular.ng-template",
+                "continue.continue",
+                "anthropic.claude-vscode"
+            ],
+            "settings": {
+                "dotnet.dotnetPath": "/usr/local/share/dotnet/dotnet",
+                "omnisharp.useModernNet": true,
+                "dotnet.server.useOmnisharp": false,
+                "dotnet.preferCSharpExtension": true,
+                "dotnet.defaultSolution": "src/ghosts.api.sln"
+            }
+        }
+    },
+    "forwardPorts": [
+        5000,
+        4200,
+        3000
+    ],
+    "mounts": [
+        "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
+    ]
+}
