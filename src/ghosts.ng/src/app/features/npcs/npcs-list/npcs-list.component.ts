@@ -4,10 +4,12 @@ import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDialog } from '@angular/material/dialog';
 import { DatePipe } from '@angular/common';
 import { Npc } from '../../../core/models';
 import { NpcService } from '../../../core/services';
 import { environment } from '../../../../environments/environment';
+import { GenerateNpcsDialogComponent } from '../generate-npcs-dialog/generate-npcs-dialog.component';
 
 @Component({
   selector: 'app-npcs-list',
@@ -22,10 +24,16 @@ import { environment } from '../../../../environments/environment';
   template: `
     <div class="page-header">
       <h1>NPCs</h1>
-      <button mat-raised-button color="primary">
-        <i class="fas fa-plus"></i>
-        New NPC
-      </button>
+      <div class="header-actions">
+        <button mat-raised-button color="accent" (click)="openGenerateDialog()">
+          <i class="fas fa-users"></i>
+          Generate NPCs
+        </button>
+        <button mat-raised-button color="primary">
+          <i class="fas fa-plus"></i>
+          New NPC
+        </button>
+      </div>
     </div>
 
     @if (loading()) {
@@ -110,6 +118,15 @@ import { environment } from '../../../../environments/environment';
       font-weight: 500;
     }
 
+    .header-actions {
+      display: flex;
+      gap: 12px;
+
+      button i {
+        margin-right: 6px;
+      }
+    }
+
     .loading, .error, .empty-state {
       display: flex;
       flex-direction: column;
@@ -158,6 +175,7 @@ import { environment } from '../../../../environments/environment';
 })
 export class NpcsListComponent implements OnInit {
   private readonly npcService = inject(NpcService);
+  private readonly dialog = inject(MatDialog);
 
   protected readonly npcs = signal<Npc[]>([]);
   protected readonly loading = signal(true);
@@ -166,6 +184,19 @@ export class NpcsListComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadNpcs();
+  }
+
+  protected openGenerateDialog(): void {
+    const dialogRef = this.dialog.open(GenerateNpcsDialogComponent, {
+      width: '500px'
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        // Refresh the list after generating NPCs
+        this.loadNpcs();
+      }
+    });
   }
 
   protected loadNpcs(): void {

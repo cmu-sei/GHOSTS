@@ -32,7 +32,26 @@ export class NpcService {
   }
 
   generateNpcs(request: GenerateNpcRequest): Observable<Npc[]> {
-    return this.http.post<Npc[]>(`${this.apiUrl}/generate`, request);
+    // Transform the simple request into the API's expected GenerationConfiguration format
+    const config = {
+      campaign: request.campaign,
+      enclaves: [
+        {
+          name: request.enclave,
+          teams: [
+            {
+              name: request.team,
+              npcs: {
+                number: request.number,
+                configuration: {}
+              }
+            }
+          ]
+        }
+      ]
+    };
+
+    return this.http.post<Npc[]>(`${environment.apiUrl}/api/npcsgenerate`, config);
   }
 
   getNpcsByCampaignEnclave(campaign: string, enclave: string): Observable<Npc[]> {

@@ -328,3 +328,5 @@ output/
 
 **/.vscode/
 *.vscode*
+
+.devcontainer/certs/*

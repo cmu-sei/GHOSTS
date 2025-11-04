@@ -6,7 +6,7 @@
     <RootNamespace>Ghosts.Api</RootNamespace>
 
     <AssemblyVersion>10.0.0.0</AssemblyVersion>
-    <FileVersion>10.0.0.0</FileVersion>
+    <FileVersion>10.0.1.0</FileVersion>
 
     <Authors>GHOSTS Development Team for CERT > Software Engineering Institute > Carnegie Mellon University</Authors>
     <Company>Carnegie Mellon University</Company>
@@ -19,7 +19,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="9.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.10">
