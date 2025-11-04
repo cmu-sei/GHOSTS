@@ -2,14 +2,18 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Scenario, CreateScenario } from '../models';
-import { environment } from '../../../environments/environment';
+import { ConfigService } from './config.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ScenarioService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = `${environment.apiUrl}/scenarios`;
+  private readonly config = inject(ConfigService);
+
+  private get apiUrl(): string {
+    return `${this.config.apiUrl}/scenarios`;
+  }
 
   getScenarios(): Observable<Scenario[]> {
     return this.http.get<Scenario[]>(this.apiUrl);

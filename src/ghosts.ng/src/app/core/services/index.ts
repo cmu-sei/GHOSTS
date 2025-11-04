@@ -1,3 +1,4 @@
+export * from './config.service';
 export * from './machine.service';
 export * from './machine-group.service';
 export * from './timeline.service';
