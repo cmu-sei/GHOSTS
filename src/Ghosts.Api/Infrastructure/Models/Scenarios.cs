@@ -10,6 +10,7 @@ public class Scenario
     public string Description { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
+    public DateTime? StartedAt { get; set; }
 
     // Navigation properties
     public ScenarioParameters ScenarioParameters { get; set; }
@@ -149,6 +150,7 @@ public record ScenarioDto(
     string Description,
     DateTime CreatedAt,
     DateTime UpdatedAt,
+    DateTime? StartedAt,
     ScenarioParametersDto ScenarioParameters,
     TechnicalEnvironmentDto TechnicalEnvironment,
     GameMechanicsDto GameMechanics,

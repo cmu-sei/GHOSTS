@@ -47,7 +47,14 @@
     <mat-card-header>
       <mat-card-title>{{ scenario.name }}</mat-card-title>
       <mat-card-subtitle>
-        Updated: {{ formatDate(scenario.updatedAt) }}
+        @if (scenario.startedAt) {
+          <span class="started-badge">
+            <i class="fas fa-play-circle"></i>
+            Started: {{ formatDate(scenario.startedAt) }}
+          </span>
+        } @else {
+          <span>Updated: {{ formatDate(scenario.updatedAt) }}</span>
+        }
       </mat-card-subtitle>
     </mat-card-header>
     <mat-card-content>
@@ -82,6 +89,14 @@
       <button mat-button color="primary" (click)="editScenario(scenario.id); $event.stopPropagation()">
         <i class="fas fa-edit"></i>
         Edit
+      </button>
+      <button
+        mat-button
+        color="accent"
+        (click)="startScenario(scenario, $event)"
+        [disabled]="!!scenario.startedAt">
+        <i class="fas fa-play"></i>
+        {{ scenario.startedAt ? 'Started' : 'Start Scenario' }}
       </button>
       <button mat-button color="warn" (click)="deleteScenario(scenario, $event)">
         <i class="fas fa-trash"></i>

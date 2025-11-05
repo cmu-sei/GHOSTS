@@ -4,6 +4,7 @@ export interface Scenario {
   description: string;
   createdAt: Date;
   updatedAt: Date;
+  startedAt?: Date;
   scenarioParameters?: ScenarioParameters;
   technicalEnvironment?: TechnicalEnvironment;
   simulationMechanics?: SimulationMechanics;

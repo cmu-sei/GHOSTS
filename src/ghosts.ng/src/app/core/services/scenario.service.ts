@@ -34,4 +34,8 @@ export class ScenarioService {
   deleteScenario(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
+
+  startScenario(id: number): Observable<Scenario> {
+    return this.http.post<Scenario>(`${this.apiUrl}/${id}/start`, {});
+  }
 }

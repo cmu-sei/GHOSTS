@@ -198,6 +198,7 @@ public class Program
         app.MapHub<ClientHub>("/clientHub");
         app.MapHub<ClientHub>("/api/clientHub");
         app.MapHub<ActivityHub>("/hubs/activities");
+        app.MapHub<ActivityHub>("/api/hubs/activities");
 
         // Configure Swagger
         app.UseSwagger();

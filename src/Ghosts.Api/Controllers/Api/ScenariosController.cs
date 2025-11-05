@@ -285,6 +285,46 @@ public class ScenariosController : ControllerBase
         return NoContent();
     }
 
+    // POST: api/scenarios/5/start
+    [HttpPost("{id}/start")]
+    public async Task<ActionResult<ScenarioDto>> StartScenario(int id)
+    {
+        var scenario = await _context.Scenarios
+            .Include(s => s.ScenarioParameters)
+                .ThenInclude(sp => sp!.Nations)
+            .Include(s => s.ScenarioParameters)
+                .ThenInclude(sp => sp!.ThreatActors)
+            .Include(s => s.ScenarioParameters)
+                .ThenInclude(sp => sp!.Injects)
+            .Include(s => s.ScenarioParameters)
+                .ThenInclude(sp => sp!.UserPools)
+            .Include(s => s.TechnicalEnvironment)
+                .ThenInclude(te => te!.Vulnerabilities)
+            .Include(s => s.GameMechanics)
+            .Include(s => s.ScenarioTimeline)
+                .ThenInclude(t => t!.ScenarioTimelineEvents)
+            .FirstOrDefaultAsync(s => s.Id == id);
+
+        if (scenario == null)
+        {
+            return NotFound();
+        }
+
+        if (scenario.StartedAt != null)
+        {
+            return BadRequest(new { error = "Scenario has already been started" });
+        }
+
+        scenario.StartedAt = DateTime.UtcNow;
+        scenario.UpdatedAt = DateTime.UtcNow;
+        await _context.SaveChangesAsync();
+
+        _logger.LogInformation("Scenario {ScenarioId} ({ScenarioName}) started at {StartedAt}",
+            scenario.Id, scenario.Name, scenario.StartedAt);
+
+        return Ok(MapToDto(scenario));
+    }
+
     // Helper methods
     private static ScenarioDto MapToDto(Scenario scenario)
     {
@@ -294,6 +334,7 @@ public class ScenariosController : ControllerBase
             scenario.Description,
             scenario.CreatedAt,
             scenario.UpdatedAt,
+            scenario.StartedAt,
             scenario.ScenarioParameters != null ? new ScenarioParametersDto(
                 scenario.ScenarioParameters.Nations.Select(n => new NationDto(n.Name, n.Alignment)).ToList(),
                 scenario.ScenarioParameters.ThreatActors.Select(ta => new ThreatActorDto(

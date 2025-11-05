@@ -82,6 +82,34 @@ export class ScenariosListComponent implements OnInit {
     }
   }
 
+  protected startScenario(scenario: Scenario, event: Event): void {
+    event.stopPropagation();
+
+    if (scenario.startedAt) {
+      this.snackBar.open('This scenario has already been started', 'Close', {
+        duration: 3000
+      });
+      return;
+    }
+
+    if (confirm(`Are you sure you want to start "${scenario.name}"?`)) {
+      this.scenarioService.startScenario(scenario.id).subscribe({
+        next: (updatedScenario) => {
+          this.snackBar.open('Scenario started successfully', 'Close', {
+            duration: 3000
+          });
+          this.loadScenarios();
+        },
+        error: (error) => {
+          console.error('Error starting scenario', error);
+          this.snackBar.open('Error starting scenario', 'Close', {
+            duration: 3000
+          });
+        }
+      });
+    }
+  }
+
   protected formatDate(date: Date): string {
     return new Date(date).toLocaleDateString('en-US', {
       year: 'numeric',
