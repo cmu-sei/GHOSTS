@@ -2,11 +2,12 @@
 
 # GHOSTS NPC Framework
 
-**Realistic User Behavior Simulation for Cyber Training, Exercises, and Research**
+**Realistic User Behavior Modeling and Simulation for Cyber/Cognitive Training, Exercises, and Research**
 
+[![Version](https://img.shields.io/badge/version-9.0-green.svg)](https://github.com/cmu-sei/GHOSTS/releases)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE.md)
-[![.NET](https://img.shields.io/badge/.NET-9.0-purple.svg)](https://dotnet.microsoft.com/)
-[![Version](https://img.shields.io/badge/version-8.2-green.svg)](https://github.com/cmu-sei/GHOSTS/releases)
+[![.NET](https://img.shields.io/badge/.NET-10.0-purple.svg)](https://dotnet.microsoft.com/)
+[![Angular](https://img.shields.io/badge/Angular-20-red.svg)](https://angular.dev/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/cmu-sei/GHOSTS/pulls)
 
 [Quick Start](https://cmu-sei.github.io/GHOSTS/quickstart/) • [Documentation](https://cmu-sei.github.io/GHOSTS/) • [Issues](https://github.com/cmu-sei/GHOSTS/issues) • [Demo Video](https://www.youtube.com/watch?v=EkwK-cqwjjA)
@@ -17,37 +18,22 @@
 
 ## Overview
 
-GHOSTS is an agent orchestration framework that simulates realistic users on all types of computer systems, generating human-like activity across applications, networks, and workflows. Beyond simple automation, it can dynamically reason, chat, and create content via integrated LLMs, enabling adaptive, context-aware behavior. Designed for cyber training, research, and simulation, it produces realistic network traffic, supports complex multi-agent scenarios, and leaves behind realistic artifacts. Its modular architecture allows the addition of new agents, behaviors, and lightweight clients, making it a flexible platform for high-fidelity simulations.
+GHOSTS is an NPC (or agent) orchestration framework that models and simulates realistic users on all types of computer systems, generating human-like activity across applications, networks, and workflows. Beyond simple automation, it can dynamically reason, chat, and create content via integrated LLMs, enabling adaptive, context-aware behavior. Designed for cyber training, research, and simulation, it produces realistic network traffic, supports complex multi-agent scenarios, and leaves behind realistic artifacts. Its modular architecture allows the addition of new agents, behaviors, and lightweight clients, making it a flexible platform for high-fidelity simulations.
 
 **Watch a quick demo:** [3-minute introduction on YouTube](https://www.youtube.com/watch?v=EkwK-cqwjjA)
 
-### Key Capabilities
+---
 
-- 🌐 **Web browsing** with realistic navigation patterns
-- 📝 **Document creation and editing** (Word, Excel, PowerPoint, Notepad)
-- 📧 **Email communication** (Outlook, sending/receiving)
-- 💬 **Chat and messaging** (Pidgin, social interactions)
-- 🖥️ **Terminal commands** and system operations
-- 🔄 **File operations** (FTP, SFTP, downloads, uploads)
-- 🖱️ **UI interactions** (clicks, mouse movements)
-- 🔐 **Remote access** (RDP, SSH)
-- 🤖 **AI-powered content generation** (LLM integrations)
-- 📊 **Activity monitoring and analytics** via Grafana dashboards
+### ⭐ Show Your Support
+
+If you find GHOSTS useful for your cyber training, research, or simulation needs, please consider **starring this repository**! Your stars help:
+- 🌟 Increase visibility for others in the cybersecurity community
+- 💪 Motivate continued development and new features
+- 📈 Show that realistic NPC simulation is valuable for cyber operations
+
+[**⭐ Star this repo**](https://github.com/cmu-sei/GHOSTS) • [Watch for updates](https://github.com/cmu-sei/GHOSTS/subscription) • [Share with colleagues](https://github.com/cmu-sei/GHOSTS)
 
 ## Quick Start
-
-### Installation
-
-The fastest way to get started is using Docker Compose:
-
-```bash
-# Clone the repository
-git clone https://github.com/cmu-sei/GHOSTS.git
-cd GHOSTS
-
-# Start the GHOSTS API and supporting services
-docker-compose up -d
-```
 
 For detailed installation instructions, platform-specific builds, and configuration options, see the [Quick Start Guide](https://cmu-sei.github.io/GHOSTS/quickstart/).
 
@@ -71,8 +57,9 @@ GHOSTS consists of several integrated components that work together to create a 
 | Component | Description | Documentation |
 |-----------|-------------|---------------|
 | **GHOSTS Client** | Cross-platform agent (Windows/Linux) that executes simulated user activities | [Client Docs](https://cmu-sei.github.io/GHOSTS/core/client/) |
-| **GHOSTS API** | Central server managing clients, timelines, and activity orchestration via REST and WebSocket | [API Docs](https://cmu-sei.github.io/GHOSTS/core/api/) |
-| **GHOSTS UI** | Web-based interface for managing machines, groups, and deploying timelines | [UI Docs](https://cmu-sei.github.io/GHOSTS/core/ui/) |
+| **GHOSTS API** | Central server (.NET 10) managing clients, timelines, and activity orchestration via REST and WebSocket | [API Docs](https://cmu-sei.github.io/GHOSTS/core/api/) |
+| **GHOSTS NG** | **New!** Modern Angular 20 web interface for managing machines, groups, timelines, NPCs, and scenarios | [NG Docs](src/ghosts.ng/) |
+| **GHOSTS UI** | Next.js-based web interface for managing machines, groups, and deploying timelines | [UI Docs](https://cmu-sei.github.io/GHOSTS/core/ui/) |
 | **GHOSTS Lite** | Lightweight client version for resource-constrained environments | [Lite Docs](https://cmu-sei.github.io/GHOSTS/core/lite/) |
 
 ### Supporting Services
@@ -97,9 +84,17 @@ GHOSTS is designed for various cybersecurity and training scenarios:
 
 ## What's New
 
-### Version 8.2 (Current)
+### Version 8.3 (In Development)
 
-- **New UI** - [Web-based interface](src/ghosts.ui) for managing machines, groups, and timelines
+- **🆕 GHOSTS NG** - Modern [Angular 19 web interface](src/ghosts.ng/) with enhanced UX and comprehensive search functionality
+- **⚡ .NET 10 Upgrade** - Core API and services upgraded to .NET 10 for improved performance and latest features
+- **🎯 Enhanced Scenarios** - New scenario planning and tracking capabilities with timeline management
+- **🔍 Advanced Search** - Client-side search across machines, groups, timelines, NPCs, and scenarios
+- **🎨 Improved UI/UX** - Material Design components, responsive layouts, and streamlined workflows
+
+### Version 8.2
+
+- **New UI** - [Next.js web interface](src/ghosts.ui) for managing machines, groups, and timelines
 - **GHOSTS Lite** - [Lightweight client](src/Ghosts.Client.Lite) for resource-constrained environments
 - **LLM Integration** - AI-powered content generation (migrate to [RangerAI](https://github.com/cmu-sei/rangerai) for latest AI features)
 - **Bug Fixes** - Resolved GUID issues (#385), client path bugs (#384), and animation cancellation issues
