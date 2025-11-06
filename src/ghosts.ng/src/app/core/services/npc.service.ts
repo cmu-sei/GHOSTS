@@ -1,15 +1,19 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
 import { Npc, CreateNpcRequest, GenerateNpcRequest } from '../models';
+import { ConfigService } from './config.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class NpcService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = `${environment.apiUrl}/npcs`;
+  private readonly config = inject(ConfigService);
+
+  private get apiUrl(): string {
+    return `${this.config.apiUrl}/npcs`;
+  }
 
   getNpcs(): Observable<Npc[]> {
     return this.http.get<Npc[]>(this.apiUrl);
@@ -51,7 +55,7 @@ export class NpcService {
       ]
     };
 
-    return this.http.post<Npc[]>(`${environment.apiUrl}/api/npcsgenerate`, config);
+    return this.http.post<Npc[]>(`${this.config.apiUrl}/npcsgenerate`, config);
   }
 
   getNpcsByCampaignEnclave(campaign: string, enclave: string): Observable<Npc[]> {

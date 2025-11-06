@@ -148,6 +148,56 @@
         }
       }
     }
+
+    .data-table {
+      margin-top: 16px;
+      overflow-x: auto;
+
+      table {
+        width: 100%;
+
+        .mat-mdc-cell {
+          padding: 16px 8px;
+        }
+
+        .drag-handle {
+          cursor: move;
+          color: rgba(0, 0, 0, 0.54);
+        }
+
+        .table-input-field {
+          width: 100%;
+          margin-bottom: -1.25em;
+
+          ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+            display: none;
+          }
+        }
+
+        .select-field {
+          width: 100%;
+          margin-bottom: -1.25em;
+
+          ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+            display: none;
+          }
+        }
+
+        .table-row {
+          height: auto;
+          min-height: 60px;
+
+          &.cdk-drag-preview {
+            background: white;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+          }
+
+          &.cdk-drag-placeholder {
+            opacity: 0.3;
+          }
+        }
+      }
+    }
   }
 }
 

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, signal, computed } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
@@ -10,6 +10,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { TimelineLocalService } from '../../../core/services';
 import { LocalTimeline } from '../../../core/models';
 import { TimelineJsonDialogComponent } from '../timeline-json-dialog/timeline-json-dialog.component';
+import { SearchBarComponent } from '../../../shared/components/search-bar/search-bar.component';
 
 @Component({
   selector: 'app-timelines-list',
@@ -22,7 +23,8 @@ import { TimelineJsonDialogComponent } from '../timeline-json-dialog/timeline-js
     MatMenuModule,
     MatTooltipModule,
     MatSnackBarModule,
-    MatDialogModule
+    MatDialogModule,
+    SearchBarComponent
   ],
   template: `
     <section class="timelines-container">
@@ -38,6 +40,15 @@ import { TimelineJsonDialogComponent } from '../timeline-json-dialog/timeline-js
           </button>
         </div>
       </header>
+
+      <div class="search-container">
+        <app-search-bar (searchChange)="onSearchChange($event)"></app-search-bar>
+        @if (searchTerm()) {
+          <div class="search-results-info">
+            Showing {{ filteredTimelines().length }} of {{ timelines().length }} timelines
+          </div>
+        }
+      </div>
 
       @if (loading()) {
         <div class="loading-state">
@@ -56,7 +67,7 @@ import { TimelineJsonDialogComponent } from '../timeline-json-dialog/timeline-js
         </div>
       } @else {
         <div class="table-wrapper">
-          <table mat-table [dataSource]="timelines()" class="mat-elevation-z2">
+          <table mat-table [dataSource]="filteredTimelines()" class="mat-elevation-z2">
             <ng-container matColumnDef="name">
               <th mat-header-cell *matHeaderCellDef>Name</th>
               <td mat-cell *matCellDef="let timeline">
@@ -146,6 +157,18 @@ import { TimelineJsonDialogComponent } from '../timeline-json-dialog/timeline-js
       align-items: center;
     }
 
+    .search-container {
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .search-results-info {
+      color: rgba(0, 0, 0, 0.6);
+      font-size: 14px;
+    }
+
     .table-wrapper {
       overflow: auto;
       border-radius: 8px;
@@ -221,6 +244,20 @@ export class TimelinesListComponent implements OnInit {
   protected readonly displayedColumns = ['name', 'handlers', 'actions'];
   protected readonly timelines = signal<LocalTimeline[]>([]);
   protected readonly loading = signal(true);
+  protected readonly searchTerm = signal('');
+
+  protected readonly filteredTimelines = computed(() => {
+    const search = this.searchTerm().toLowerCase().trim();
+    if (!search) {
+      return this.timelines();
+    }
+    return this.timelines().filter(timeline =>
+      timeline.name?.toLowerCase().includes(search) ||
+      timeline.timeLineHandlers.some(handler =>
+        handler.handlerType?.toLowerCase().includes(search)
+      )
+    );
+  });
 
   private readonly timelineLocalService = inject(TimelineLocalService);
   private readonly dialog = inject(MatDialog);
@@ -228,6 +265,10 @@ export class TimelinesListComponent implements OnInit {
 
   ngOnInit(): void {
     this.refresh();
+  }
+
+  protected onSearchChange(searchTerm: string): void {
+    this.searchTerm.set(searchTerm);
   }
 
   protected refresh(): void {

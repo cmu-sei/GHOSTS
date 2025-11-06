@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { ChangeDetectionStrategy } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
@@ -10,6 +10,7 @@ import { Npc } from '../../../core/models';
 import { NpcService } from '../../../core/services';
 import { environment } from '../../../../environments/environment';
 import { GenerateNpcsDialogComponent } from '../generate-npcs-dialog/generate-npcs-dialog.component';
+import { SearchBarComponent } from '../../../shared/components/search-bar/search-bar.component';
 
 @Component({
   selector: 'app-npcs-list',
@@ -18,7 +19,8 @@ import { GenerateNpcsDialogComponent } from '../generate-npcs-dialog/generate-np
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
-    DatePipe
+    DatePipe,
+    SearchBarComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -34,6 +36,15 @@ import { GenerateNpcsDialogComponent } from '../generate-npcs-dialog/generate-np
           New NPC
         </button>
       </div>
+    </div>
+
+    <div class="search-container">
+      <app-search-bar (searchChange)="onSearchChange($event)"></app-search-bar>
+      @if (searchTerm()) {
+        <div class="search-results-info">
+          Showing {{ filteredNpcs().length }} of {{ npcs().length }} NPCs
+        </div>
+      }
     </div>
 
     @if (loading()) {
@@ -52,7 +63,7 @@ import { GenerateNpcsDialogComponent } from '../generate-npcs-dialog/generate-np
       </div>
     } @else {
       <div class="table-container">
-        <table mat-table [dataSource]="npcs()">
+        <table mat-table [dataSource]="filteredNpcs()">
           <ng-container matColumnDef="photo">
             <th mat-header-cell *matHeaderCellDef>Photo</th>
             <td mat-cell *matCellDef="let npc">
@@ -127,6 +138,18 @@ import { GenerateNpcsDialogComponent } from '../generate-npcs-dialog/generate-np
       }
     }
 
+    .search-container {
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .search-results-info {
+      color: rgba(0, 0, 0, 0.6);
+      font-size: 14px;
+    }
+
     .loading, .error, .empty-state {
       display: flex;
       flex-direction: column;
@@ -180,10 +203,32 @@ export class NpcsListComponent implements OnInit {
   protected readonly npcs = signal<Npc[]>([]);
   protected readonly loading = signal(true);
   protected readonly error = signal<string | null>(null);
+  protected readonly searchTerm = signal('');
   protected readonly displayedColumns = ['photo', 'name', 'campaign', 'enclave', 'team', 'created', 'actions'];
+
+  protected readonly filteredNpcs = computed(() => {
+    const search = this.searchTerm().toLowerCase().trim();
+    if (!search) {
+      return this.npcs();
+    }
+    return this.npcs().filter(npc => {
+      const name = this.getNpcName(npc).toLowerCase();
+      const campaign = npc.campaign?.campaign?.toLowerCase() || '';
+      const enclave = npc.enclave?.toLowerCase() || '';
+      const team = npc.team?.toLowerCase() || '';
+      return name.includes(search) ||
+             campaign.includes(search) ||
+             enclave.includes(search) ||
+             team.includes(search);
+    });
+  });
 
   ngOnInit(): void {
     this.loadNpcs();
+  }
+
+  protected onSearchChange(searchTerm: string): void {
+    this.searchTerm.set(searchTerm);
   }
 
   protected openGenerateDialog(): void {

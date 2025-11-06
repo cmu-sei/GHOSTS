@@ -1,12 +1,17 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { ChangeDetectionStrategy } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { DatePipe } from '@angular/common';
+import { Router } from '@angular/router';
 import { MachineGroup } from '../../../core/models';
 import { MachineGroupService } from '../../../core/services';
+import { SearchBarComponent } from '../../../shared/components/search-bar/search-bar.component';
 
 @Component({
   selector: 'app-machine-groups-list',
@@ -15,7 +20,11 @@ import { MachineGroupService } from '../../../core/services';
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
-    DatePipe
+    MatMenuModule,
+    MatDialogModule,
+    MatSnackBarModule,
+    DatePipe,
+    SearchBarComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -25,6 +34,15 @@ import { MachineGroupService } from '../../../core/services';
         <i class="fas fa-plus"></i>
         New Group
       </button>
+    </div>
+
+    <div class="search-container">
+      <app-search-bar (searchChange)="onSearchChange($event)"></app-search-bar>
+      @if (searchTerm()) {
+        <div class="search-results-info">
+          Showing {{ filteredMachineGroups().length }} of {{ machineGroups().length }} groups
+        </div>
+      }
     </div>
 
     @if (loading()) {
@@ -43,7 +61,7 @@ import { MachineGroupService } from '../../../core/services';
       </div>
     } @else {
       <div class="table-container">
-        <table mat-table [dataSource]="machineGroups()">
+        <table mat-table [dataSource]="filteredMachineGroups()">
           <ng-container matColumnDef="name">
             <th mat-header-cell *matHeaderCellDef>Name</th>
             <td mat-cell *matCellDef="let group">{{ group.name }}</td>
@@ -95,6 +113,18 @@ import { MachineGroupService } from '../../../core/services';
       font-weight: 500;
     }
 
+    .search-container {
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .search-results-info {
+      color: rgba(0, 0, 0, 0.6);
+      font-size: 14px;
+    }
+
     .loading, .error, .empty-state {
       display: flex;
       flex-direction: column;
@@ -140,10 +170,26 @@ export class MachineGroupsListComponent implements OnInit {
   protected readonly machineGroups = signal<MachineGroup[]>([]);
   protected readonly loading = signal(true);
   protected readonly error = signal<string | null>(null);
+  protected readonly searchTerm = signal('');
   protected readonly displayedColumns = ['name', 'machines', 'groups', 'created', 'actions'];
+
+  protected readonly filteredMachineGroups = computed(() => {
+    const search = this.searchTerm().toLowerCase().trim();
+    if (!search) {
+      return this.machineGroups();
+    }
+    return this.machineGroups().filter(group =>
+      group.name?.toLowerCase().includes(search) ||
+      group.id?.toString().includes(search)
+    );
+  });
 
   ngOnInit(): void {
     this.loadMachineGroups();
+  }
+
+  protected onSearchChange(searchTerm: string): void {
+    this.searchTerm.set(searchTerm);
   }
 
   protected loadMachineGroups(): void {

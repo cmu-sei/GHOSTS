@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -8,6 +8,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ChangeDetectionStrategy } from '@angular/core';
 import { ScenarioService } from '../../../core/services';
 import { Scenario } from '../../../core/models';
+import { SearchBarComponent } from '../../../shared/components/search-bar/search-bar.component';
 
 @Component({
   selector: 'app-scenarios-list',
@@ -17,7 +18,8 @@ import { Scenario } from '../../../core/models';
     MatButtonModule,
     MatCardModule,
     MatProgressSpinnerModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    SearchBarComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './scenarios-list.component.html',
@@ -31,9 +33,25 @@ export class ScenariosListComponent implements OnInit {
   protected readonly scenarios = signal<Scenario[]>([]);
   protected readonly loading = signal(true);
   protected readonly error = signal<string | null>(null);
+  protected readonly searchTerm = signal('');
+
+  protected readonly filteredScenarios = computed(() => {
+    const search = this.searchTerm().toLowerCase().trim();
+    if (!search) {
+      return this.scenarios();
+    }
+    return this.scenarios().filter(scenario =>
+      scenario.name?.toLowerCase().includes(search) ||
+      scenario.description?.toLowerCase().includes(search)
+    );
+  });
 
   ngOnInit(): void {
     this.loadScenarios();
+  }
+
+  protected onSearchChange(searchTerm: string): void {
+    this.searchTerm.set(searchTerm);
   }
 
   protected loadScenarios(): void {

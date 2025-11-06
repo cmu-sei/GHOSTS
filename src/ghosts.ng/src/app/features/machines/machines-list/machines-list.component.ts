@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -13,6 +13,7 @@ import { MachineService, TimelineService } from '../../../core/services';
 import { MachineJsonDialogComponent } from '../machine-json-dialog/machine-json-dialog.component';
 import { TimelineSelectorDialogComponent } from '../timeline-selector-dialog/timeline-selector-dialog.component';
 import { ActivityViewerDialogComponent } from '../activity-viewer-dialog/activity-viewer-dialog.component';
+import { SearchBarComponent } from '../../../shared/components/search-bar/search-bar.component';
 
 @Component({
   selector: 'app-machines-list',
@@ -24,7 +25,8 @@ import { ActivityViewerDialogComponent } from '../activity-viewer-dialog/activit
     MatProgressSpinnerModule,
     MatMenuModule,
     MatDialogModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    SearchBarComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -34,6 +36,15 @@ import { ActivityViewerDialogComponent } from '../activity-viewer-dialog/activit
         <i class="fas fa-plus"></i>
         New Machine
       </button>
+    </div>
+
+    <div class="search-container">
+      <app-search-bar (searchChange)="onSearchChange($event)"></app-search-bar>
+      @if (searchTerm()) {
+        <div class="search-results-info">
+          Showing {{ filteredMachines().length }} of {{ machines().length }} machines
+        </div>
+      }
     </div>
 
     @if (loading()) {
@@ -47,7 +58,7 @@ import { ActivityViewerDialogComponent } from '../activity-viewer-dialog/activit
       </div>
     } @else {
       <div class="table-container">
-        <table mat-table [dataSource]="machines()">
+        <table mat-table [dataSource]="filteredMachines()">
           <ng-container matColumnDef="id">
             <th mat-header-cell *matHeaderCellDef>ID</th>
             <td mat-cell *matCellDef="let machine">{{ machine.id }}</td>
@@ -116,6 +127,18 @@ import { ActivityViewerDialogComponent } from '../activity-viewer-dialog/activit
       margin: 0;
       font-size: 24px;
       font-weight: 500;
+    }
+
+    .search-container {
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .search-results-info {
+      color: rgba(0, 0, 0, 0.6);
+      font-size: 14px;
     }
 
     .loading, .error {
@@ -254,7 +277,20 @@ export class MachinesListComponent implements OnInit {
   protected readonly machines = signal<Machine[]>([]);
   protected readonly loading = signal(true);
   protected readonly error = signal<string | null>(null);
+  protected readonly searchTerm = signal('');
   protected readonly displayedColumns = ['id', 'name', 'status', 'actions'];
+
+  protected readonly filteredMachines = computed(() => {
+    const search = this.searchTerm().toLowerCase().trim();
+    if (!search) {
+      return this.machines();
+    }
+    return this.machines().filter(machine =>
+      machine.name?.toLowerCase().includes(search) ||
+      machine.id?.toString().includes(search) ||
+      machine.status?.toLowerCase().includes(search)
+    );
+  });
 
   ngOnInit(): void {
     this.loadMachines();
@@ -274,6 +310,10 @@ export class MachinesListComponent implements OnInit {
         this.loading.set(false);
       }
     });
+  }
+
+  protected onSearchChange(searchTerm: string): void {
+    this.searchTerm.set(searchTerm);
   }
 
   protected getStatusClass(status: MachineStatus | undefined): string {

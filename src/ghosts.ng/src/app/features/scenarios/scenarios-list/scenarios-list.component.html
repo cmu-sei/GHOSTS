@@ -6,6 +6,15 @@
   </button>
 </div>
 
+<div class="search-container">
+  <app-search-bar (searchChange)="onSearchChange($event)"></app-search-bar>
+  @if (searchTerm()) {
+    <div class="search-results-info">
+      Showing {{ filteredScenarios().length }} of {{ scenarios().length }} scenarios
+    </div>
+  }
+</div>
+
 <!-- Loading State -->
 @if (loading()) {
 <div class="loading">
@@ -42,7 +51,7 @@
 <!-- Scenarios Grid -->
 @if (!loading() && !error() && scenarios().length > 0) {
 <div class="scenarios-grid">
-  @for (scenario of scenarios(); track scenario.id) {
+  @for (scenario of filteredScenarios(); track scenario.id) {
   <mat-card class="scenario-card" (click)="editScenario(scenario.id)">
     <mat-card-header>
       <mat-card-title>{{ scenario.name }}</mat-card-title>

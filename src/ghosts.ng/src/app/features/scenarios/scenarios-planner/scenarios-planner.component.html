@@ -317,7 +317,9 @@
               <ng-container matColumnDef="time">
                 <th mat-header-cell *matHeaderCellDef>Time</th>
                 <td mat-cell *matCellDef="let element">
-                  <input type="time" [(ngModel)]="element.time" class="input-field">
+                  <mat-form-field class="table-input-field">
+                    <input matInput type="text" [(ngModel)]="element.time" placeholder="e.g., T+30m">
+                  </mat-form-field>
                 </td>
               </ng-container>
 
@@ -343,7 +345,9 @@
               <ng-container matColumnDef="description">
                 <th mat-header-cell *matHeaderCellDef>Description / Details</th>
                 <td mat-cell *matCellDef="let element">
-                  <input type="text" [(ngModel)]="element.description" class="input-field">
+                  <mat-form-field class="table-input-field">
+                    <input matInput type="text" [(ngModel)]="element.description" placeholder="Event description">
+                  </mat-form-field>
                 </td>
               </ng-container>
 
