@@ -1,8 +1,39 @@
-# GHOSTS Socializer
+# GHOSTS Socializer (with integrated PANDORA)
 
-Socializer is a dynamic social media server designed for a wide range of cybersecurity training, exercise, and simulation. It allows real and simulated users to create accounts and interact with the system using various types of payloads. This server is an ideal environment for testing, training, and conducting research in a controlled yet realistic social media context.
+**GHOSTS Socializer** is a unified web server that combines social media simulation with dynamic content generation capabilities from **GHOSTS PANDORA**. This server responds to a myriad of request types with randomized content generated in real-time, making it ideal for cybersecurity training, exercises, and simulations.
 
-**Now includes GHOSTS PANDORA functionality!** Socializer can dynamically generate realistic content for various file types on-demand, making it perfect for simulating document downloads, file sharing, and other content-heavy scenarios.
+## What is GHOSTS Socializer?
+
+Socializer is a **dual-mode** server that can operate as:
+
+1. **Social Media Platform**: A full-featured social network (Facebook, Instagram, Twitter/X, Reddit themes) with posts, users, comments, likes, direct messaging, and real-time updates
+2. **Dynamic Website**: A realistic website (news site, shopping site, sports site, entertainment site) with dynamically generated content
+3. **Content Generator**: Responds to any file request with dynamically generated, realistic content (PDFs, Office docs, images, videos, audio, executables, archives, and more)
+
+Originally two separate applications (**GHOSTS Pandora** for content generation and **GHOSTS Socializer** for social media), they are now **unified into a single application** that provides both capabilities seamlessly.
+
+### GHOSTS Pandora + Socializer = One Unified Platform
+
+| Feature | Old: GHOSTS Pandora (Python) | Old: GHOSTS Socializer | **New: Unified Socializer** |
+|---------|------------------------------|------------------------|----------------------------|
+| Dynamic content generation | ✅ | ❌ | ✅ |
+| Social media simulation | ❌ | ✅ | ✅ |
+| Website simulation | ❌ | ❌ | ✅ |
+| Payload delivery | ✅ | ❌ | ✅ |
+| Multiple themes | ❌ | ✅ | ✅ |
+| Mode switching | ❌ | ❌ | ✅ |
+| Technology | Python/FastAPI | C#/.NET | C#/.NET |
+| **Status** | **Deprecated** | **Deprecated** | **✅ Active** |
+
+**Migration Note:** If you're using the old Python-based GHOSTS Pandora or the older Socializer, see the [Migrating from GHOSTS Pandora](#migrating-from-ghosts-pandora) section below for upgrade instructions.
+
+### Use Cases
+
+- **Cybersecurity Training**: Simulate realistic web traffic and file downloads for training exercises
+- **Red Team Operations**: Generate realistic-looking documents, websites, and payloads
+- **NPC Simulation**: Used with [GHOSTS NPCs](https://github.com/cmu-sei/GHOSTS) to provide realistic browsing and download behaviors
+- **Social Engineering Testing**: Test user responses to various social media platforms and content types
+- **Malware Analysis**: Serve controlled payloads in a safe training environment
 
 Typical install is via Docker.
 
@@ -34,7 +65,32 @@ Typical install is via Docker.
 - List and verify configured payloads via API
 
 ### Pandora Dynamic Content Generation
-The integrated Pandora functionality allows the server to respond to requests for various file types with dynamically generated, realistic content:
+
+The integrated **GHOSTS Pandora** functionality allows the server to respond to **any file request** with dynamically generated, realistic content. Used in conjunction with [GHOSTS NPCs](https://github.com/cmu-sei/GHOSTS), agents can periodically download diverse content types beyond simple HTML, including documents, images, videos, and executables.
+
+#### How It Works
+
+Content can be requested in **two ways**:
+
+**1. By Directory** - Requests to specific directories automatically return that file type:
+- `/pdf/*` - Any URL starting with `/pdf` returns a PDF
+- `/doc/*` or `/docs/*` - Returns Word documents
+- `/xlsx/*` or `/sheets/*` - Returns Excel spreadsheets
+- `/ppt/*` or `/slides/*` - Returns PowerPoint presentations
+- `/img/*` or `/images/*` or `/i/*` - Returns random images
+- `/json/*` or `/api/*` - Returns JSON data
+- `/csv/*` - Returns CSV files
+- `/video/*` or `/videos/*` - Returns video files
+- `/audio/*` or `/voice/*` or `/call/*` - Returns audio files
+
+**2. By File Extension** - Any URL with a recognized file extension returns that file type:
+- `/reports/quarterly-summary.pdf` → Returns a PDF
+- `/documents/memo.docx` → Returns a Word document
+- `/data/users.json` → Returns JSON
+- `/media/video.mp4` → Returns a video file
+- `/downloads/installer.exe` → Returns an executable
+
+All content is **generated in real-time** with randomized but realistic data. Content can optionally be cached for repeat requests.
 
 #### Supported File Types
 
@@ -266,8 +322,60 @@ Configure dynamic content generation:
 
 ### Docker
 
+**Quick Start:**
 ```bash
 docker-compose up -d
+```
+
+**Docker Run with Custom Configuration:**
+```bash
+# Social media mode (Facebook)
+docker run -d -p 8000:5000 \
+  -e MODE_TYPE=social \
+  -e DEFAULT_THEME=facebook \
+  -v ./Payloads:/app/Payloads \
+  dustinupdyke/ghosts-socializer:latest
+
+# Website mode (News)
+docker run -d -p 8000:5000 \
+  -e MODE_TYPE=website \
+  -e SITE_TYPE=news \
+  -e SITE_NAME="Breaking News" \
+  -v ./Payloads:/app/Payloads \
+  dustinupdyke/ghosts-socializer:latest
+```
+
+**Docker Compose with Environment Variables:**
+```yaml
+version: "3.6"
+services:
+  socializer:
+    image: dustinupdyke/ghosts-socializer:latest
+    ports:
+      - "8000:5000"
+    environment:
+      - MODE_TYPE=social
+      - DEFAULT_THEME=instagram
+    volumes:
+      - ./Payloads:/app/Payloads
+      - ./data:/app/_data
+    restart: always
+```
+
+**Multiple Instances:**
+
+See `docker-compose.examples.yml` for examples of running multiple instances with different configurations (Facebook, Instagram, Twitter, News site, Shopping site, etc.).
+
+**Volume Mounts:**
+- `./Payloads:/app/Payloads` - Custom payload files
+- `./data:/app/_data` - Cached generated content
+- `./appsettings.json:/app/appsettings.json:ro` - Custom configuration (optional)
+
+### Building from Source
+
+```bash
+docker build -t ghosts-socializer:custom .
+docker run -d -p 8000:5000 ghosts-socializer:custom
 ```
 
 ### Development
@@ -278,6 +386,124 @@ dotnet restore
 dotnet run
 ```
 
+**With Environment Variables:**
+```bash
+export MODE_TYPE=website
+export SITE_TYPE=shopping
+dotnet run
+```
+
 The server will be available at `http://localhost:5000` (or configured port).
 
 Visit `/swagger` for API documentation.
+
+## API Documentation
+
+Interactive API documentation is available at `/swagger` when the server is running. This provides:
+- Complete endpoint reference
+- Request/response examples
+- Try-it-out functionality for testing endpoints
+- Parameter descriptions
+
+## Technology Stack
+
+**Backend:**
+- .NET 10.0 (C#)
+- ASP.NET Core MVC
+- Entity Framework Core with SQLite
+- SignalR for real-time updates
+
+**Content Generation Libraries:**
+- QuestPDF - PDF generation
+- ClosedXML - Excel spreadsheets
+- DocumentFormat.OpenXml - Word and PowerPoint documents
+- SkiaSharp - Image generation
+- SharpCompress - Archive creation (ZIP, TAR)
+- CsvHelper - CSV file generation
+
+**Frontend:**
+- Razor views with theme support
+- JavaScript for real-time updates
+- Responsive CSS for multiple device types
+
+## Migrating from GHOSTS Pandora
+
+If you're currently using the Python-based **GHOSTS Pandora** server, migrating to **GHOSTS Socializer** is straightforward:
+
+### What's Changed
+
+**Unified Application:**
+- Pandora and Socializer are now a **single application**
+- All Pandora content generation capabilities are included
+- Added social media and website simulation modes
+- Configuration via `appsettings.json` or environment variables (no more `app.config`)
+
+**Same Endpoints:**
+- All Pandora endpoints work the same way (`/pdf/*`, `/doc/*`, `/img/*`, etc.)
+- File extension routing works identically
+- Directory-based routing works identically
+
+**New Features:**
+- **Mode switching**: Choose between social media, website, or pure content generation
+- **Payload configuration**: Serve specific files at configured URLs
+- **Enhanced HTML**: Generated HTML can match social media themes or be standalone
+- **More file types**: Added OneNote, ISO, MSI, and improved video/audio support
+
+### Migration Steps
+
+1. **Replace Pandora container** with Socializer:
+   ```bash
+   # Old
+   docker run -p 80:80 dustinupdyke/ghosts-pandora:latest
+
+   # New
+   docker run -p 80:5000 -e MODE_TYPE=website dustinupdyke/ghosts-socializer:latest
+   ```
+
+2. **Update port mappings**: Socializer runs on port 5000 by default (Pandora used port 80)
+
+3. **Migrate payload files**: Copy your payload files to the `Payloads/` directory and configure in `appsettings.json`:
+   ```json
+   {
+     "Payloads": {
+       "Enabled": true,
+       "Mappings": [
+         {
+           "Url": "/payloads/malicious/document",
+           "FileName": "malware.pdf",
+           "ContentType": "application/pdf"
+         }
+       ]
+     }
+   }
+   ```
+
+4. **Configure mode**: Set `MODE_TYPE=website` to get Pandora-like behavior (pure content generation without social features)
+
+**That's it!** All existing Pandora API endpoints continue to work. GHOSTS NPCs configured to use Pandora will work seamlessly with Socializer.
+
+## About GHOSTS
+
+GHOSTS is a realistic cyber simulator designed to create realistic, non-player characters (NPCs) for training, simulation, and exercise environments. Learn more at the [GHOSTS GitHub repository](https://github.com/cmu-sei/GHOSTS).
+
+## License
+
+[DISTRIBUTION STATEMENT A] This material has been approved for public release and unlimited distribution.
+
+Copyright 2017-2025 Carnegie Mellon University. All Rights Reserved.
+
+See [LICENSE.md](LICENSE.md) file for terms.
+
+## Support and Contact
+
+For bugs, feature requests, or questions:
+- **GitHub Issues**: [github.com/cmu-sei/GHOSTS](https://github.com/cmu-sei/GHOSTS)
+- **Email**: ddupdyke [-at-] sei.cmu.edu
+
+## Contributing
+
+Contributions are welcome! Please see the [GHOSTS repository](https://github.com/cmu-sei/GHOSTS) for contribution guidelines.
+
+---
+
+**GHOSTS Socializer** - A unified platform for social media simulation and dynamic content generation by the GHOSTS Development Team @ Carnegie Mellon University
