@@ -59,7 +59,7 @@ GHOSTS consists of several integrated components that work together to create a 
 | **GHOSTS Client** | Cross-platform agent (Windows/Linux) that executes simulated user activities | [Client Docs](https://cmu-sei.github.io/GHOSTS/core/client/) |
 | **GHOSTS API** | Central server (.NET 10) managing clients, timelines, and activity orchestration via REST and WebSocket | [API Docs](https://cmu-sei.github.io/GHOSTS/core/api/) |
 | **GHOSTS NG** | **New!** Modern Angular 20 web interface for managing machines, groups, timelines, NPCs, and scenarios | [NG Docs](src/ghosts.ng/) |
-| **GHOSTS UI** | Next.js-based web interface for managing machines, groups, and deploying timelines | [UI Docs](https://cmu-sei.github.io/GHOSTS/core/ui/) |
+| **GHOSTS UI** | (Deprecated) Next.js-based web interface for managing machines, groups, and deploying timelines | [UI Docs](https://cmu-sei.github.io/GHOSTS/core/ui/) |
 | **GHOSTS Lite** | Lightweight client version for resource-constrained environments | [Lite Docs](https://cmu-sei.github.io/GHOSTS/core/lite/) |
 
 ### Supporting Services
@@ -84,7 +84,7 @@ GHOSTS is designed for various cybersecurity and training scenarios:
 
 ## What's New
 
-### Version 8.3 (In Development)
+### Version 9.0 (Currently in Development)
 
 - **🆕 GHOSTS NG** - Modern [Angular 19 web interface](src/ghosts.ng/) with enhanced UX and comprehensive search functionality
 - **⚡ .NET 10 Upgrade** - Core API and services upgraded to .NET 10 for improved performance and latest features
@@ -129,14 +129,6 @@ For complete version history, see the [releases page](https://github.com/cmu-sei
 
 Comprehensive documentation is available at [cmu-sei.github.io/GHOSTS](https://cmu-sei.github.io/GHOSTS/)
 
-**Key Documentation Sections:**
-- [Installation Guide](https://cmu-sei.github.io/GHOSTS/quickstart/)
-- [Client Configuration](https://cmu-sei.github.io/GHOSTS/core/client/)
-- [Handler Reference](https://cmu-sei.github.io/GHOSTS/core/handlers/) - Available activities and configurations
-- [Timeline Management](https://cmu-sei.github.io/GHOSTS/core/api/timelines/)
-- [Animator NPCs](https://cmu-sei.github.io/GHOSTS/animator/)
-- [Advanced Features](https://cmu-sei.github.io/GHOSTS/advanced/)
-
 ## Contributing
 
 We welcome contributions from the community! Whether it's bug reports, feature requests, documentation improvements, or code contributions, your input helps make GHOSTS better.
@@ -150,21 +142,11 @@ We welcome contributions from the community! Whether it's bug reports, feature r
 
 Please ensure your contributions align with our project goals and maintain code quality standards.
 
-## Support
-
-- **Documentation**: [https://cmu-sei.github.io/GHOSTS/](https://cmu-sei.github.io/GHOSTS/)
-- **Issues**: [GitHub Issue Tracker](https://github.com/cmu-sei/GHOSTS/issues)
-- **Contact**: Email ddupdyke@sei.cmu.edu for questions and support
-
 ## Related Projects
 
 - **[RangerAI](https://github.com/cmu-sei/rangerai)** - Advanced AI integration for GHOSTS (successor to Shadows)
 - **ANIMATOR** - Now integrated into GHOSTS core (archived)
 - **SPECTRE** - Now integrated into GHOSTS core (archived)
-
-## Acknowledgments
-
-GHOSTS is developed by the Software Engineering Institute (SEI) at Carnegie Mellon University and funded by the Department of Defense.
 
 ## License
 
@@ -178,6 +160,6 @@ Copyright 2017-2025 Carnegie Mellon University. All Rights Reserved.
 
 <div>
 
-[Website](https://cmu-sei.github.io/GHOSTS/) • [GitHub](https://github.com/cmu-sei/GHOSTS) • [Issues](https://github.com/cmu-sei/GHOSTS/issues) • [Releases](https://github.com/cmu-sei/GHOSTS/releases)
+[Docs](https://cmu-sei.github.io/GHOSTS/) • [GitHub](https://github.com/cmu-sei/GHOSTS) • [Issues](https://github.com/cmu-sei/GHOSTS/issues) • [Releases](https://github.com/cmu-sei/GHOSTS/releases)
 
 </div>
