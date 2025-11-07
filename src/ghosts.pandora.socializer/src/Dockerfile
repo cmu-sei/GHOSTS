@@ -1,5 +1,5 @@
 # multi-stage target: dev
-FROM mcr.microsoft.com/dotnet/sdk:10.0-alpine AS dev
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS dev
 
 ENV ASPNETCORE_URLS=http://*:5000 \
     ASPNETCORE_ENVIRONMENT=DEVELOPMENT
@@ -15,7 +15,17 @@ RUN dotnet publish -c Release -o /app/dist
 CMD ["dotnet", "run"]
 
 # multi-stage target: prod
-FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine AS prod
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS prod
+
+# Install SkiaSharp dependencies
+RUN apt-get update && apt-get install -y \
+    libfontconfig1 \
+    libfreetype6 \
+    libx11-6 \
+    libxcb1 \
+    libxext6 \
+    libxrender1 \
+    && rm -rf /var/lib/apt/lists/*
 
 ARG commit
 ENV COMMIT=$commit
