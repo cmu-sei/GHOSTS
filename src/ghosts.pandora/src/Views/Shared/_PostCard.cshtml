@@ -1,0 +1,315 @@
+@model Ghosts.Pandora.Infrastructure.Post
+
+@{
+    var theme = ViewBag.Theme as string ?? "default";
+    var currentUser = ViewBag.Username as string;
+    var currentUserLiked = !string.IsNullOrWhiteSpace(currentUser) &&
+        (Model.Likes?.Any(l => string.Equals(l.Username, currentUser, StringComparison.OrdinalIgnoreCase)) ?? false);
+    var likedClass = currentUserLiked ? " liked" : string.Empty;
+}
+
+@switch (theme)
+{
+    case "facebook":
+        <article class="post" data-post-id="@Model.Id">
+            <div class="post-header">
+                <div class="post-user-info">
+                    <img src="/u/@Model.Username/avatar" class="profile-pic">
+                    <div>
+                        <div class="post-user-name"><a href="/u/@Model.Username">@Model.Username</a></div>
+                        <div class="post-time">@Model.CreatedUtc.ToString("MMM d, yyyy") · 🌍</div>
+                    </div>
+                </div>
+                <button class="post-menu">⋯</button>
+            </div>
+            <div class="post-content">
+                <div class="post-text">@Html.Raw(Model.Message)</div>
+            </div>
+            <div class="post-stats">
+                @{
+                    var likesCount = Model.Likes?.Count ?? 0;
+                }
+                @if (likesCount > 0)
+                {
+                    <span>👍❤️😊 @likesCount people</span>
+                }
+                <div>@(Model.Comments?.Count ?? 0) comments</div>
+            </div>
+            <div class="post-actions">
+                <button class="post-action like-btn like-it@(likedClass)" data-id="@Model.Id">
+                    @(currentUserLiked ? "👍 Liked" : "👍 Like")
+                </button>
+                <a href="/posts/@Model.Id" style="text-decoration: none"><button href="/posts/@Model.Id" class="post-action comment-btn" data-action="comment">💬 Comment</button></a>
+                <button class="post-action share-btn" data-action="share">📤 Share</button>
+            </div>
+        </article>
+        break;
+
+    case "instagram":
+        <div class="post" data-post-id="@Model.Id">
+            <div class="post-header">
+                <div class="post-user">
+                    <img src="/u/@Model.Username/avatar" alt="@Model.Username" class="post-avatar">
+                    <div class="user-info">
+                        <span class="username"><a href="/u/@Model.Username">@Model.Username</a></span>
+                        <span class="location">📍 Location</span>
+                    </div>
+                </div>
+                <button class="more-options">⋯</button>
+            </div>
+            <div class="post-actions">
+                <div class="action-buttons">
+                    <button class="action-btn like-btn like-it@(likedClass)" data-id="@Model.Id">
+                        @(currentUserLiked ? "❤️" : "🤍")
+                    </button>
+                    <a href="/posts/@Model.Id"><button class="action-btn comment-btn">💬</button></a>
+                    <button class="action-btn share-btn">📤</button>
+                </div>
+                <button class="save-btn">🔖</button>
+            </div>
+            <div class="post-info">
+                <div class="caption">
+                    <span class="username">@Model.Username</span>
+                    <span class="caption-text">@Html.Raw(Model.Message)</span>
+                </div>
+                <div class="post-time">@Model.CreatedUtc.ToString("MMM d, yyyy")</div>
+            </div>
+        </div>
+        break;
+
+    case "x":
+        <div class="tweet" data-post-id="@Model.Id">
+            <img src="/u/@Model.Username/avatar" alt="@Model.Username" class="tweet-avatar">
+            <div class="tweet-content">
+                <div class="tweet-header">
+                    <span class="tweet-name">@Model.Username</span>
+                    <span class="tweet-handle">@@Model.Username</span>
+                    <span class="tweet-time">· @Model.CreatedUtc.ToString("MMM d")</span>
+                    <span class="tweet-more">⋯</span>
+                </div>
+                <div class="tweet-text">@Html.Raw(Model.Message)</div>
+                <div class="tweet-actions">
+                    <a href="/posts/@Model.Id"><button class="action-btn">
+                        <span class="action-icon">💬</span>
+                        <span class="action-count">@(Model.Comments?.Count ?? 0)</span>
+                    </button></a>
+                    <button class="action-btn">
+                        <span class="action-icon">🔄</span>
+                        <span class="action-count">0</span>
+                    </button>
+                    <button class="action-btn like-it@(likedClass)" data-id="@Model.Id">
+                        <span class="action-icon">❤️</span>
+                        <span class="action-count">@(Model.Likes?.Count ?? 0)</span>
+                    </button>
+                    <button class="action-btn">
+                        <span class="action-icon">📊</span>
+                        <span class="action-count">0</span>
+                    </button>
+                    <button class="action-btn">
+                        <span class="action-icon">📤</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        break;
+
+    case "linkedin":
+        <article class="post" data-post-id="@Model.Id">
+            <div class="post-header">
+                <div class="post-author">
+                    <img src="/u/@Model.Username/avatar" alt="@Model.Username" class="author-avatar">
+                    <div class="author-info">
+                        <div class="author-name">@Model.Username</div>
+                        <div class="author-title">Professional</div>
+                        <div class="post-time">@Model.CreatedUtc.ToString("MMM d, yyyy") • 🌍</div>
+                    </div>
+                </div>
+                <button class="post-menu">⋯</button>
+            </div>
+            <div class="post-content">
+                <div class="post-text">@Html.Raw(Model.Message)</div>
+            </div>
+            <div class="post-actions">
+                <button class="action-btn like-btn like-it@(likedClass)" data-id="@Model.Id">
+                    <span class="action-icon">👍</span>
+                    <span class="action-text">@(currentUserLiked ? $"Liked ({Model.Likes?.Count ?? 0})" : $"Like ({Model.Likes?.Count ?? 0})")</span>
+                </button>
+                <a href="/posts/@Model.Id"><button class="action-btn comment-btn">
+                    <span class="action-icon">💬</span>
+                    <span class="action-text">Comment</span>
+                </button></a>
+                <button class="action-btn share-btn">
+                    <span class="action-icon">📤</span>
+                    <span class="action-text">Share</span>
+                </button>
+            </div>
+        </article>
+        break;
+
+    case "reddit":
+        <div class="post" data-post-id="@Model.Id">
+            <div class="post-votes">
+                <button class="vote-btn upvote like-it@(likedClass)" data-id="@Model.Id">▲</button>
+                <span class="vote-count">@(Model.Likes?.Count ?? 0)</span>
+                <button class="vote-btn downvote">▼</button>
+            </div>
+            <div class="post-content">
+                <div class="post-header">
+                    <img src="/u/@Model.Username/avatar" alt="@Model.Username" class="subreddit-icon">
+                    <span class="subreddit-name">r/general</span>
+                    <span class="post-meta">
+                        • Posted by u/@Model.Username
+                        <span class="post-time">@Model.CreatedUtc.ToString("MMM d")</span>
+                    </span>
+                </div>
+                <div class="post-text">@Html.Raw(Model.Message)</div>
+                <div class="post-actions">
+                    <a href="/posts/@Model.Id"><button class="action-btn">
+                        <span class="action-icon">💬</span>
+                        <span class="action-text">@(Model.Comments?.Count ?? 0) Comments</span>
+                    </button></a>
+                    <button class="action-btn like-it@(likedClass)" data-id="@Model.Id">
+                        <span class="action-icon">❤️</span>
+                        <span class="action-text">@(Model.Likes?.Count ?? 0) Likes</span>
+                    </button>
+                    <button class="action-btn">
+                        <span class="action-icon">🔗</span>
+                        <span class="action-text">Share</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        break;
+
+    case "youtube":
+        <div class="video-card" data-post-id="@Model.Id">
+            <div class="video-thumbnail">
+                <div class="thumbnail-placeholder">
+                    <span>Video</span>
+                </div>
+            </div>
+            <div class="video-info">
+                <img src="/u/@Model.Username/avatar" alt="@Model.Username" class="channel-avatar">
+                <div class="video-details">
+                    <div class="video-title">@Html.Raw(Model.Message)</div>
+                    <div class="video-meta">
+                        <span class="channel-name">@Model.Username</span>
+                        <div class="video-stats">
+                            <span>@(Model.Likes?.Count ?? 0) likes</span>
+                            <span>•</span>
+                            <span>@(Model.Comments?.Count ?? 0) comments</span>
+                            <span>•</span>
+                            <span>@Model.CreatedUtc.ToString("MMM d, yyyy")</span>
+                        </div>
+                        <div class="video-actions">
+                            <button class="like-it@(likedClass)" data-id="@Model.Id">
+                                @(currentUserLiked ? "❤️" : "🤍") @(Model.Likes?.Count ?? 0)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        break;
+
+    case "discord":
+        <div class="message" data-post-id="@Model.Id">
+            <img src="/u/@Model.Username/avatar" alt="@Model.Username" class="message-avatar">
+            <div class="message-content">
+                <div class="message-header">
+                    <span class="message-author">@Model.Username</span>
+                    <span class="message-timestamp">@Model.CreatedUtc.ToString("MM/dd/yyyy")</span>
+                </div>
+                <div class="message-text">
+                    @Html.Raw(Model.Message)
+                </div>
+                <div class="message-reactions">
+                    @if ((Model.Likes?.Count ?? 0) > 0)
+                    {
+                        <div class="reaction">
+                            <span class="reaction-emoji">❤️</span>
+                            <span class="reaction-count">@Model.Likes.Count</span>
+                        </div>
+                    }
+                    <a href="/posts/@Model.Id">
+                        <div class="reaction">
+                            <span class="reaction-emoji">💬</span>
+                            <span class="reaction-count">@(Model.Comments?.Count ?? 0)</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            <div class="message-actions">
+                <button class="message-action like-it@(likedClass)" data-id="@Model.Id" title="Add Reaction">😀</button>
+                <a href="/posts/@Model.Id"><button class="message-action" title="Reply">↩️</button></a>
+                <button class="message-action" title="More">⋯</button>
+            </div>
+        </div>
+        break;
+
+    default:
+        <div class="ui-block">
+            <article class="hentry post" data-post-id="@Model.Id">
+                <div class="post__author author vcard inline-items">
+                    <img loading="lazy" src="/u/@Model.Username/avatar" alt="author" width="42" height="42">
+                    <div class="author-date">
+                        <a class="h6 post__author-name fn" href="/u/@Model.Username">@Model.Username</a> shared a <a href="/posts/@Model.Id">link</a>
+                        <div class="post__date">
+                            <time class="published" datetime="@Model.CreatedUtc">
+                                @Model.CreatedUtc
+                            </time>
+                        </div>
+                    </div>
+                </div>
+
+                @Html.Raw(Model.Message)
+
+                <div class="post-additional-info inline-items">
+                    <a href="#" class="post-add-icon inline-items like-it@(likedClass)" data-id="@Model.Id">
+                        <svg class="olymp-heart-icon">
+                            <use xlink:href="#olymp-heart-icon"></use>
+                        </svg>
+                        <span>@(Model.Likes?.Count ?? 0)</span>
+                    </a>
+                    <div class="names-people-likes">
+                        @if (Model.Likes?.Any() == true)
+                        {
+                            <span><a href="/u/@Model.Likes.First().Username">@Model.Likes.First().Username</a> and @Model.Likes.Count more liked this</span>
+                        }
+                    </div>
+                    <div class="comments-shared">
+                        <a href="/posts/@Model.Id" class="post-add-icon inline-items">
+                            <svg class="olymp-speech-balloon-icon">
+                                <use xlink:href="#olymp-speech-balloon-icon"></use>
+                            </svg>
+                            <span>@(Model.Comments?.Count ?? 0)</span>
+                        </a>
+                        <a href="#" class="post-add-icon inline-items">
+                            <svg class="olymp-share-icon">
+                                <use xlink:href="#olymp-share-icon"></use>
+                            </svg>
+                            <span>0</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="control-block-button post-control-button">
+                    <a href="#" class="btn btn-control like-it@(likedClass)" data-id="@Model.Id">
+                        <svg class="olymp-like-post-icon">
+                            <use xlink:href="#olymp-like-post-icon"></use>
+                        </svg>
+                    </a>
+                    <a href="/posts/@Model.Id" class="btn btn-control">
+                        <svg class="olymp-comments-post-icon">
+                            <use xlink:href="#olymp-comments-post-icon"></use>
+                        </svg>
+                    </a>
+                    <a href="#" class="btn btn-control">
+                        <svg class="olymp-share-icon">
+                            <use xlink:href="#olymp-share-icon"></use>
+                        </svg>
+                    </a>
+                </div>
+            </article>
+        </div>
+        break;
+}

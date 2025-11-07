@@ -1,0 +1,9 @@
+version: "3.6"
+
+services:
+  pandora:
+    image: dustinupdyke/ghosts-pandora:latest
+    container_name: pandora
+    ports:
+      - "8000:5000"
+    restart: always

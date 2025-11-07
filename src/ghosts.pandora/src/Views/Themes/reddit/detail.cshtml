@@ -1,0 +1,415 @@
+@model Ghosts.Pandora.Infrastructure.Post
+@{
+    Layout = null;
+    ViewBag.Theme = "reddit";
+    if (ViewBag.ProfileUsername == null && Model != null)
+    {
+        ViewBag.ProfileUsername = Model.Username;
+    }
+
+    var currentUser = ViewBag.Username as string;
+    var currentUserLiked = Model != null && !string.IsNullOrWhiteSpace(currentUser) &&
+        (Model.Likes?.Any(l => string.Equals(l.Username, currentUser, StringComparison.OrdinalIgnoreCase)) ?? false);
+    var likedClass = currentUserLiked ? " liked" : string.Empty;
+    var likesCount = Model?.Likes?.Count ?? 0;
+    var commentsCount = Model?.Comments?.Count ?? 0;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="current-user" content="@ViewBag.Username">
+    <title>What's the most interesting fact you learned this week? : AskReddit</title>
+    <link rel="stylesheet" href="/themes/reddit/css/feed.css">
+    <link rel="icon" href="/themes/reddit/images/reddit-icon.png">
+</head>
+<body>
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <div class="logo">
+                    <img src="/themes/reddit/images/reddit-logo.png" alt="Reddit" class="reddit-logo">
+                    <span class="reddit-text"><a href="/">reddit</a></span>
+                </div>
+                <div class="search-container">
+                    <input type="text" placeholder="Search Reddit" class="search-input">
+                    <button class="search-btn">🔍</button>
+                </div>
+            </div>
+            <div class="header-right">
+                <button class="header-btn">📈</button>
+                <button class="header-btn">💬</button>
+                <button class="header-btn">🔔</button>
+                <button class="header-btn">➕</button>
+                <div class="user-menu">
+                    <img src="/u/@(ViewBag.Username ?? "user")/avatar" alt="Profile" class="user-avatar">
+                    <span class="username">u/@(ViewBag.Username ?? "user")</span>
+                    <span class="dropdown-arrow">▼</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-container">
+            <!-- Left Sidebar -->
+            <div class="sidebar">
+                <div class="subreddit-card">
+                    <div class="subreddit-header">
+                        <img src="/themes/reddit/images/askreddit-icon.jpg" alt="AskReddit" class="subreddit-icon">
+                        <div class="subreddit-info">
+                            <h3>r/AskReddit</h3>
+                            <p>45.2M members</p>
+                        </div>
+                    </div>
+                    <div class="subreddit-description">
+                        <p>r/AskReddit is the place to ask and answer thought-provoking questions.</p>
+                    </div>
+                    <div class="subreddit-actions">
+                        <button class="join-btn joined">Joined</button>
+                        <button class="bell-btn">🔔</button>
+                    </div>
+                    <div class="subreddit-rules">
+                        <h4>Rules</h4>
+                        <ol class="rules-list">
+                            <li>Rule 1: Questions must be clear and direct</li>
+                            <li>Rule 2: No personal or professional advice requests</li>
+                            <li>Rule 3: Open ended questions only</li>
+                            <li>Rule 4: No posts asking for advice</li>
+                            <li>Rule 5: No loaded questions</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="moderators-card">
+                    <h3>Moderators</h3>
+                    <div class="moderator-list">
+                        <div class="moderator-item">
+                            <img src="/themes/reddit/images/mod1-avatar.jpg" alt="Moderator" class="mod-avatar">
+                            <span class="mod-name">u/AutoModerator</span>
+                        </div>
+                        <div class="moderator-item">
+                            <img src="/themes/reddit/images/mod2-avatar.jpg" alt="Moderator" class="mod-avatar">
+                            <span class="mod-name">u/askreddit_mod</span>
+                        </div>
+                        <div class="moderator-item">
+                            <img src="/themes/reddit/images/mod3-avatar.jpg" alt="Moderator" class="mod-avatar">
+                            <span class="mod-name">u/reddit_admin</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="main-content">
+                <!-- Original Post -->
+                <div class="original-post">
+                    <div class="post-votes">
+                        <button class="vote-btn upvote like-it@likedClass" data-id="@((Model?.Id ?? Guid.Empty).ToString())">▲</button>
+                        <span class="vote-count">@likesCount</span>
+                        <button class="vote-btn downvote">▼</button>
+                    </div>
+                    <div class="post-content">
+                        <div class="post-header">
+                            <img src="/themes/reddit/images/askreddit-icon.jpg" alt="AskReddit" class="subreddit-icon">
+                            <div class="post-meta">
+                                <span class="subreddit-name">r/AskReddit</span>
+                                <span class="post-info">
+                                    • Posted by <a href="/u/@(Model?.Username ?? "user")" class="author">u/@(Model?.Username ?? "user")</a>
+                                    <span class="post-time">@Model?.CreatedUtc.ToString("MMM d, yyyy")</span>
+                                </span>
+                            </div>
+                        </div>
+                        <h1 class="post-title">Post by @(Model?.Username ?? "user")</h1>
+                        <div class="post-text">
+                            @Html.Raw(Model?.Message ?? "Post content not available.")
+                        </div>
+                        <div class="post-actions">
+                            <a href="/posts/@(Model?.Id ?? Guid.Empty)" class="action-btn">
+                                <span class="action-icon">💬</span>
+                                <span class="action-text">@commentsCount Comments</span>
+                            </a>
+                            <button class="action-btn">
+                                <span class="action-icon">🔗</span>
+                                <span class="action-text">Share</span>
+                            </button>
+                            <button class="action-btn">
+                                <span class="action-icon">💾</span>
+                                <span class="action-text">Save</span>
+                            </button>
+                            <button class="action-btn">
+                                <span class="action-icon">⋯</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sort Comments -->
+                <div class="comments-sort">
+                    <span class="sort-label">Sort by:</span>
+                    <select class="sort-select">
+                        <option value="best">Best</option>
+                        <option value="top">Top</option>
+                        <option value="new">New</option>
+                        <option value="controversial">Controversial</option>
+                        <option value="old">Old</option>
+                        <option value="qa">Q&A</option>
+                    </select>
+                </div>
+
+                <!-- Comment Compose -->
+                <div class="comment-compose" data-post-id="@(Model?.Id ?? Guid.Empty)">
+                    <img src="/u/@(ViewBag.Username ?? "user")/avatar" alt="Profile" class="comment-avatar">
+                    <div class="compose-content">
+                        <textarea placeholder="What are your thoughts?" class="compose-textarea comment-input"></textarea>
+                        <div class="compose-actions">
+                            <button class="compose-btn comment-post-btn">Comment</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Comments -->
+                <div class="comments-section">
+                    <!-- Comment 1 -->
+                    <div class="comment">
+                        <div class="comment-vote">
+                            <button class="vote-btn upvote">▲</button>
+                            <span class="vote-count">856</span>
+                            <button class="vote-btn downvote">▼</button>
+                        </div>
+                        <div class="comment-content">
+                            <div class="comment-header">
+                                <img src="/themes/reddit/images/user1-avatar.jpg" alt="User" class="commenter-avatar">
+                                <span class="commenter-name">u/science_lover</span>
+                                <span class="comment-time">2 hours ago</span>
+                                <span class="comment-awards">🏆 x2</span>
+                            </div>
+                            <div class="comment-text">
+                                Here's a mind-blowing one: Honey never spoils! Archaeologists have found pots of honey in ancient Egyptian tombs that are over 3,000 years old and still perfectly edible. The low moisture content and acidic pH create an environment where bacteria can't survive.
+                            </div>
+                            <div class="comment-actions">
+                                <button class="comment-action-btn">
+                                    <span class="action-icon">↩️</span>
+                                    <span class="action-text">Reply</span>
+                                </button>
+                                <button class="comment-action-btn">
+                                    <span class="action-icon">🏆</span>
+                                    <span class="action-text">Award</span>
+                                </button>
+                                <button class="comment-action-btn">
+                                    <span class="action-icon">🔗</span>
+                                    <span class="action-text">Share</span>
+                                </button>
+                                <button class="comment-action-btn">
+                                    <span class="action-icon">⋯</span>
+                                </button>
+                            </div>
+
+                            <!-- Nested Comments -->
+                            <div class="nested-comments">
+                                <div class="comment nested">
+                                    <div class="comment-vote">
+                                        <button class="vote-btn upvote">▲</button>
+                                        <span class="vote-count">234</span>
+                                        <button class="vote-btn downvote">▼</button>
+                                    </div>
+                                    <div class="comment-content">
+                                        <div class="comment-header">
+                                            <img src="/themes/reddit/images/user2-avatar.jpg" alt="User" class="commenter-avatar">
+                                            <span class="commenter-name">u/history_buff</span>
+                                            <span class="comment-time">1 hour ago</span>
+                                        </div>
+                                        <div class="comment-text">
+                                            That's amazing! I read that some of that ancient honey was actually used in rituals and was considered more valuable than gold. The Egyptians also used honey for medicinal purposes.
+                                        </div>
+                                        <div class="comment-actions">
+                                            <button class="comment-action-btn">
+                                                <span class="action-icon">↩️</span>
+                                                <span class="action-text">Reply</span>
+                                            </button>
+                                            <button class="comment-action-btn">
+                                                <span class="action-icon">🏆</span>
+                                                <span class="action-text">Award</span>
+                                            </button>
+                                            <button class="comment-action-btn">
+                                                <span class="action-icon">🔗</span>
+                                                <span class="action-text">Share</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Comment 2 -->
+                    <div class="comment">
+                        <div class="comment-vote">
+                            <button class="vote-btn upvote">▲</button>
+                            <span class="vote-count">523</span>
+                            <button class="vote-btn downvote">▼</button>
+                        </div>
+                        <div class="comment-content">
+                            <div class="comment-header">
+                                <img src="/themes/reddit/images/user3-avatar.jpg" alt="User" class="commenter-avatar">
+                                <span class="commenter-name">u/space_enthusiast</span>
+                                <span class="comment-time">2 hours ago</span>
+                                <span class="comment-awards">🥇</span>
+                            </div>
+                            <div class="comment-text">
+                                I learned that neutron stars are so dense that a teaspoon of neutron star material would weigh about 6 billion tons on Earth! That's roughly the same weight as Mount Everest compressed into a teaspoon.
+                            </div>
+                            <div class="comment-actions">
+                                <button class="comment-action-btn">
+                                    <span class="action-icon">↩️</span>
+                                    <span class="action-text">Reply</span>
+                                </button>
+                                <button class="comment-action-btn">
+                                    <span class="action-icon">🏆</span>
+                                    <span class="action-text">Award</span>
+                                </button>
+                                <button class="comment-action-btn">
+                                    <span class="action-icon">🔗</span>
+                                    <span class="action-text">Share</span>
+                                </button>
+                                <button class="comment-action-btn">
+                                    <span class="action-icon">⋯</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Comment 3 -->
+                    <div class="comment">
+                        <div class="comment-vote">
+                            <button class="vote-btn upvote">▲</button>
+                            <span class="vote-count">412</span>
+                            <button class="vote-btn downvote">▼</button>
+                        </div>
+                        <div class="comment-content">
+                            <div class="comment-header">
+                                <img src="/themes/reddit/images/user4-avatar.jpg" alt="User" class="commenter-avatar">
+                                <span class="commenter-name">u/nature_facts</span>
+                                <span class="comment-time">1 hour ago</span>
+                            </div>
+                            <div class="comment-text">
+                                Trees can communicate with each other through underground networks of fungi called mycorrhizae! They can share nutrients, water, and even warning signals about insect attacks. It's like a natural internet system.
+                            </div>
+                            <div class="comment-actions">
+                                <button class="comment-action-btn">
+                                    <span class="action-icon">↩️</span>
+                                    <span class="action-text">Reply</span>
+                                </button>
+                                <button class="comment-action-btn">
+                                    <span class="action-icon">🏆</span>
+                                    <span class="action-text">Award</span>
+                                </button>
+                                <button class="comment-action-btn">
+                                    <span class="action-icon">🔗</span>
+                                    <span class="action-text">Share</span>
+                                </button>
+                                <button class="comment-action-btn">
+                                    <span class="action-icon">⋯</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Comment 4 -->
+                    <div class="comment">
+                        <div class="comment-vote">
+                            <button class="vote-btn upvote">▲</button>
+                            <span class="vote-count">298</span>
+                            <button class="vote-btn downvote">▼</button>
+                        </div>
+                        <div class="comment-content">
+                            <div class="comment-header">
+                                <img src="/themes/reddit/images/user5-avatar.jpg" alt="User" class="commenter-avatar">
+                                <span class="commenter-name">u/ocean_explorer</span>
+                                <span class="comment-time">45 minutes ago</span>
+                            </div>
+                            <div class="comment-text">
+                                The ocean produces more than 50% of the world's oxygen, not forests! Most of it comes from tiny marine plants called phytoplankton. We literally depend on microscopic ocean life for every other breath we take.
+                            </div>
+                            <div class="comment-actions">
+                                <button class="comment-action-btn">
+                                    <span class="action-icon">↩️</span>
+                                    <span class="action-text">Reply</span>
+                                </button>
+                                <button class="comment-action-btn">
+                                    <span class="action-icon">🏆</span>
+                                    <span class="action-text">Award</span>
+                                </button>
+                                <button class="comment-action-btn">
+                                    <span class="action-icon">🔗</span>
+                                    <span class="action-text">Share</span>
+                                </button>
+                                <button class="comment-action-btn">
+                                    <span class="action-icon">⋯</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Load More Comments -->
+                    <div class="load-more">
+                        <button class="load-more-btn">Load 20 more comments</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Sidebar -->
+            <div class="right-sidebar">
+                <div class="trending-card">
+                    <h3>Popular in r/AskReddit</h3>
+                    <div class="trending-post">
+                        <div class="trending-rank">1</div>
+                        <div class="trending-content">
+                            <div class="trending-title">What's something that seems obvious now but wasn't 20 years ago?</div>
+                            <div class="trending-stats">12.3k upvotes • 2.1k comments</div>
+                        </div>
+                    </div>
+                    <div class="trending-post">
+                        <div class="trending-rank">2</div>
+                        <div class="trending-content">
+                            <div class="trending-title">People who work night shifts, what's the creepiest thing you've experienced?</div>
+                            <div class="trending-stats">8.7k upvotes • 1.8k comments</div>
+                        </div>
+                    </div>
+                    <div class="trending-post">
+                        <div class="trending-rank">3</div>
+                        <div class="trending-content">
+                            <div class="trending-title">What's a life skill everyone should learn before turning 25?</div>
+                            <div class="trending-stats">6.9k upvotes • 1.2k comments</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="related-communities">
+                    <h3>Related communities</h3>
+                    <div class="community-item">
+                        <img src="/themes/reddit/images/todayilearned-icon.jpg" alt="TIL" class="community-icon">
+                        <div class="community-info">
+                            <div class="community-name">r/todayilearned</div>
+                            <div class="community-description">28.9M members</div>
+                        </div>
+                        <button class="join-btn">Join</button>
+                    </div>
+                    <div class="community-item">
+                        <img src="/themes/reddit/images/explainlikeimfive-icon.jpg" alt="ELI5" class="community-icon">
+                        <div class="community-info">
+                            <div class="community-name">r/explainlikeimfive</div>
+                            <div class="community-description">22.1M members</div>
+                        </div>
+                        <button class="join-btn">Join</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @await Html.PartialAsync("_Scripts")
+    <script src="/themes/reddit/js/post.js"></script>
+</body>
+</html>

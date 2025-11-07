@@ -1,0 +1,259 @@
+@model Ghosts.Pandora.Infrastructure.Post
+@{
+    Layout = null;
+    ViewBag.Theme = "discord";
+    var currentUser = ViewBag.Username as string;
+    var currentUserLiked = Model != null && !string.IsNullOrWhiteSpace(currentUser) &&
+        (Model.Likes?.Any(l => string.Equals(l.Username, currentUser, StringComparison.OrdinalIgnoreCase)) ?? false);
+    var likedClass = currentUserLiked ? " liked" : string.Empty;
+    var likesCount = Model?.Likes?.Count ?? 0;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Message Thread - Discord</title>
+    <link rel="stylesheet" href="/themes/discord/css/feed.css">
+    <link rel="icon" href="/themes/discord/images/discord-icon.png">
+</head>
+<body>
+    <div class="app">
+        <!-- Thread View -->
+        <div class="thread-container">
+            <div class="thread-header">
+                <button class="back-btn">←</button>
+                <div class="thread-info">
+                    <h2 class="thread-title"># general</h2>
+                    <span class="thread-subtitle">Thread</span>
+                </div>
+                <button class="close-thread">✕</button>
+            </div>
+
+            <div class="thread-content">
+                <!-- Original Message -->
+            @if (Model != null)
+            {
+                <div class="original-message" data-profile-connections data-username="@(Model.Username)">
+                    <img src="/u/@Model.Username/avatar" alt="@Model.Username" class="message-avatar">
+                    <div class="message-content">
+                        <div class="message-header">
+                            <span class="message-author">@Model.Username</span>
+                            <span class="message-timestamp">@Model.CreatedUtc.ToString("MMM d, yyyy h:mm tt")</span>
+                        </div>
+                        <div class="message-text">
+                            @Html.Raw(Model.Message)
+                        </div>
+                        <div class="message-reactions">
+                            <div class="reaction">
+                                <span class="reaction-emoji">❤️</span>
+                                <span class="reaction-count">@likesCount</span>
+                            </div>
+                        </div>
+                        <div class="message-actions">
+                            <button class="message-action like-it@(likedClass)" data-id="@Model.Id" title="Add reaction">
+                                @(currentUserLiked ? "❤️ Liked" : "😀 React")
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="original-message">
+                    <div class="message-content">
+                        <div class="message-text">This message is unavailable.</div>
+                    </div>
+                </div>
+            }
+
+                <!-- Thread Replies -->
+                <div class="thread-replies">
+                    <div class="thread-message">
+                        <img src="/themes/discord/images/user2-avatar.jpg" alt="User" class="message-avatar">
+                        <div class="message-content">
+                            <div class="message-header">
+                                <span class="message-author">TechNinja</span>
+                                <span class="message-timestamp">Today at 2:52 PM</span>
+                            </div>
+                            <div class="message-text">
+                                #AliceGamer Absolutely! I'm about halfway through and loving every minute. The combat system feels so much more refined than the previous games.
+                            </div>
+                            <div class="message-reactions">
+                                <div class="reaction">
+                                    <span class="reaction-emoji">💯</span>
+                                    <span class="reaction-count">5</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="thread-message">
+                        <img src="/themes/discord/images/user4-avatar.jpg" alt="User" class="message-avatar">
+                        <div class="message-content">
+                            <div class="message-header">
+                                <span class="message-author">DevGuru</span>
+                                <span class="message-timestamp">Today at 3:15 PM</span>
+                            </div>
+                            <div class="message-text">
+                                I've been waiting for a good excuse to pick this up! You've convinced me. Installing it now 🎮
+                            </div>
+                            <div class="message-reactions">
+                                <div class="reaction">
+                                    <span class="reaction-emoji">🎮</span>
+                                    <span class="reaction-count">3</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="thread-message">
+                        <img src="/themes/discord/images/user5-avatar.jpg" alt="User" class="message-avatar">
+                        <div class="message-content">
+                            <div class="message-header">
+                                <span class="message-author">ReactPro</span>
+                                <span class="message-timestamp">Today at 3:28 PM</span>
+                            </div>
+                            <div class="message-text">
+                                Just finished it last week! The boss fights are incredible. Make sure you explore all the side quests - they add so much to the story.
+                            </div>
+                            <div class="message-reactions">
+                                <div class="reaction">
+                                    <span class="reaction-emoji">👍</span>
+                                    <span class="reaction-count">8</span>
+                                </div>
+                                <div class="reaction">
+                                    <span class="reaction-emoji">⚔️</span>
+                                    <span class="reaction-count">4</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="thread-message">
+                        <img src="/themes/discord/images/user6-avatar.jpg" alt="User" class="message-avatar">
+                        <div class="message-content">
+                            <div class="message-header">
+                                <span class="message-author">GameMaster</span>
+                                <span class="message-timestamp">Today at 4:12 PM</span>
+                            </div>
+                            <div class="message-text">
+                                Without spoilers - does it live up to the hype? I've been on the fence about getting it.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="thread-message">
+                        <img src="/themes/discord/images/user1-avatar.jpg" alt="User" class="message-avatar">
+                        <div class="message-content">
+                            <div class="message-header">
+                                <span class="message-author">AliceGamer</span>
+                                <span class="message-timestamp">Today at 4:15 PM</span>
+                            </div>
+                            <div class="message-text">
+                                #GameMaster 100% yes! It absolutely lives up to the hype and then some. The story, gameplay, graphics - everything is top tier. Definitely worth full price.
+                            </div>
+                            <div class="message-reactions">
+                                <div class="reaction">
+                                    <span class="reaction-emoji">💯</span>
+                                    <span class="reaction-count">6</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Message Input -->
+            <div class="thread-input">
+                <div class="input-wrapper">
+                    <textarea placeholder="Reply to thread..." class="thread-message-input" rows="1"></textarea>
+                    <div class="input-actions">
+                        <button class="input-action" title="Attach File">📎</button>
+                        <button class="input-action" title="Emoji">🙂</button>
+                        <button class="send-btn" disabled>Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Thread Sidebar -->
+        <div class="thread-sidebar">
+            <div class="sidebar-section">
+                <h3 class="sidebar-title">Thread Participants</h3>
+                <div class="participants-list">
+                    <div class="participant">
+                        <img src="/themes/discord/images/user1-avatar.jpg" alt="User" class="participant-avatar">
+                        <div class="participant-info">
+                            <div class="participant-name">AliceGamer</div>
+                            <div class="participant-status">Online</div>
+                        </div>
+                    </div>
+                    <div class="participant">
+                        <img src="/themes/discord/images/user2-avatar.jpg" alt="User" class="participant-avatar">
+                        <div class="participant-info">
+                            <div class="participant-name">TechNinja</div>
+                            <div class="participant-status">Online</div>
+                        </div>
+                    </div>
+                    <div class="participant">
+                        <img src="/themes/discord/images/user4-avatar.jpg" alt="User" class="participant-avatar">
+                        <div class="participant-info">
+                            <div class="participant-name">DevGuru</div>
+                            <div class="participant-status">Online</div>
+                        </div>
+                    </div>
+                    <div class="participant">
+                        <img src="/themes/discord/images/user5-avatar.jpg" alt="User" class="participant-avatar">
+                        <div class="participant-info">
+                            <div class="participant-name">ReactPro</div>
+                            <div class="participant-status">Online</div>
+                        </div>
+                    </div>
+                    <div class="participant">
+                        <img src="/themes/discord/images/user6-avatar.jpg" alt="User" class="participant-avatar">
+                        <div class="participant-info">
+                            <div class="participant-name">GameMaster</div>
+                            <div class="participant-status">Idle</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h3 class="sidebar-title">Thread Tools</h3>
+                <div class="thread-tools">
+                    <button class="tool-btn">📌 Pin Thread</button>
+                    <button class="tool-btn">🔔 Notification Settings</button>
+                    <button class="tool-btn">🔗 Copy Thread Link</button>
+                    <button class="tool-btn">📝 Edit Thread</button>
+                    <button class="tool-btn">🗑️ Delete Thread</button>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h3 class="sidebar-title">Related Channels</h3>
+                <div class="related-channels">
+                    <div class="channel-link">
+                        <span class="channel-icon">#</span>
+                        <span class="channel-name">gaming-discussion</span>
+                    </div>
+                    <div class="channel-link">
+                        <span class="channel-icon">#</span>
+                        <span class="channel-name">game-reviews</span>
+                    </div>
+                    <div class="channel-link">
+                        <span class="channel-icon">#</span>
+                        <span class="channel-name">spoiler-talk</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/lib/jquery/dist/jquery.min.js"></script>
+    <script src="/js/signalr.min.js"></script>
+    <script src="/js/social.js"></script>
+</body>
+</html>

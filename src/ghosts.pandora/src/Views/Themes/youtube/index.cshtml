@@ -1,0 +1,134 @@
+@{
+    Layout = null;
+}
+@model List<Ghosts.Pandora.Infrastructure.Post>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube</title>
+    <link rel="stylesheet" href="/themes/youtube/css/feed.css?@System.Guid.NewGuid()">
+    <link rel="icon" href="/themes/youtube/images/youtube-icon.png">
+</head>
+<body data-theme="youtube">
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-container">
+                <div class="header-left">
+                    <button class="menu-btn">☰</button>
+                    <a href="/"><img src="/themes/youtube/images/youtube-logo.png" alt="YouTube" class="youtube-logo"></a>
+                </div>
+                <div class="header-center">
+                    <div class="search-container">
+                        <input type="text" placeholder="Search" class="search-input">
+                        <button class="search-btn">🔍</button>
+                    </div>
+                    <button class="voice-search-btn">🎤</button>
+                </div>
+                <div class="header-right">
+                    <button class="header-btn">📹</button>
+                    <button class="header-btn">🔔</button>
+                    <a href="/messages" class="header-btn" style="text-decoration: none;">💬</a>
+                    <img src="/u/@ViewBag.Username/avatar" alt="User" class="user-avatar">
+                </div>
+            </div>
+        </header>
+
+        <div class="main-container">
+            <!-- Left Sidebar -->
+            <aside class="left-sidebar">
+                <div class="sidebar-section">
+                    <a href="/" class="sidebar-item active" style="text-decoration: none; color: inherit; display: flex; align-items: center;">
+                        <span class="sidebar-icon">🏠</span>
+                        <span class="sidebar-text">Home</span>
+                    </a>
+                    <div class="sidebar-item">
+                        <span class="sidebar-icon">🔥</span>
+                        <span class="sidebar-text">Trending</span>
+                    </div>
+                    <div class="sidebar-item">
+                        <span class="sidebar-icon">📺</span>
+                        <span class="sidebar-text">Subscriptions</span>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-item">
+                        <span class="sidebar-icon">📚</span>
+                        <span class="sidebar-text">Library</span>
+                    </div>
+                    <div class="sidebar-item">
+                        <span class="sidebar-icon">🕒</span>
+                        <span class="sidebar-text">History</span>
+                    </div>
+                    <div class="sidebar-item">
+                        <span class="sidebar-icon">📹</span>
+                        <span class="sidebar-text">Your videos</span>
+                    </div>
+                    <div class="sidebar-item">
+                        <span class="sidebar-icon">⏰</span>
+                        <span class="sidebar-text">Watch later</span>
+                    </div>
+                    <div class="sidebar-item">
+                        <span class="sidebar-icon">👍</span>
+                        <span class="sidebar-text">Liked videos</span>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3>SUBSCRIPTIONS</h3>
+                    <div class="channel-item">
+                        <img src="/u/tech/avatar" alt="Channel" class="channel-avatar">
+                        <span class="channel-name">Tech Channel</span>
+                    </div>
+                    <div class="channel-item">
+                        <img src="/u/coding/avatar" alt="Channel" class="channel-avatar">
+                        <span class="channel-name">Coding Tutorials</span>
+                    </div>
+                    <div class="channel-item">
+                        <img src="/u/web-dev/avatar" alt="Channel" class="channel-avatar">
+                        <span class="channel-name">Web Dev Tips</span>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="main-content">
+                <div class="filter-bar">
+                    <button class="filter-btn active">All</button>
+                    <button class="filter-btn">Music</button>
+                    <button class="filter-btn">Gaming</button>
+                    <button class="filter-btn">News</button>
+                    <button class="filter-btn">Sports</button>
+                    <button class="filter-btn">Technology</button>
+                    <button class="filter-btn">Education</button>
+                </div>
+
+                @{
+                    ViewBag.Theme = "youtube";
+                }
+
+                @await Html.PartialAsync("_CreatePost")
+
+                <!-- Video Grid -->
+                <div class="video-grid" id="newsfeed-items-grid">
+                    @{
+                        if (Model != null)
+                        {
+                            foreach (var post in Model)
+                            {
+                                await Html.RenderPartialAsync("_PostCard", post);
+                            }
+                        }
+                    }
+                </div>
+            </main>
+        </div>
+    </div>
+
+    @await Html.PartialAsync("_Scripts")
+</body>
+</html>

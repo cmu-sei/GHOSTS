@@ -1,0 +1,138 @@
+@{
+    Layout = null;
+}
+@model List<Ghosts.Pandora.Infrastructure.Post>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facebook</title>
+    <link rel="stylesheet" href="/themes/facebook/css/facebook.css">
+    <link rel="icon" href="/themes/facebook/images/facebook-icon.png" type="image/png">
+</head>
+<body data-theme="facebook">
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <a href="/" class="logo">facebook</a>
+            <form action="/search">
+                <input type="text" name="q" class="search-bar" placeholder="Search Facebook">
+            </form>
+        </div>
+
+        <div class="header-center">
+            <a href="/" class="nav-item active">🏠</a>
+            <a href="#" class="nav-item">📺</a>
+            <a href="#" class="nav-item">🛍️</a>
+            <a href="#" class="nav-item">👥</a>
+            <a href="#" class="nav-item">🎮</a>
+        </div>
+
+        <div class="header-right">
+            <a href="#"><button class="icon-btn">⊕</button></a>
+            <a href="/messages" class="icon-btn" style="text-decoration: none;">💬</a>
+            <a href="#"><button class="icon-btn">🔔</button></a>
+            <a href="/profile"><img src="/u/@ViewBag.Username/avatar" alt="Profile" class="profile-pic"></a>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Left Sidebar -->
+        <aside class="left-sidebar">
+            <a href="/profile" class="sidebar-item">
+                <img src="/u/@ViewBag.Username/avatar" alt="Profile" class="profile-pic">
+                <span> &nbsp; @ViewBag.Username</span>
+            </a>
+            <a href="#" class="sidebar-item">
+                <div class="sidebar-icon"></div>
+                <span>Friends</span>
+            </a>
+            <a href="#" class="sidebar-item">
+                <div class="sidebar-icon"></div>
+                <span>Groups</span>
+            </a>
+            <a href="#" class="sidebar-item">
+                <div class="sidebar-icon"></div>
+                <span>Marketplace</span>
+            </a>
+            <a href="#" class="sidebar-item">
+                <div class="sidebar-icon"></div>
+                <span>Watch</span>
+            </a>
+            <a href="#" class="sidebar-item">
+                <div class="sidebar-icon"></div>
+                <span>Memories</span>
+            </a>
+            <a href="#" class="sidebar-item">
+                <div class="sidebar-icon"></div>
+                <span>Saved</span>
+            </a>
+            <a href="#" class="sidebar-item">
+                <div class="sidebar-icon"></div>
+                <span>Pages</span>
+            </a>
+            <a href="#" class="sidebar-item">
+                <div class="sidebar-icon"></div>
+                <span>Events</span>
+            </a>
+            <a href="#" class="sidebar-item">
+                <div class="sidebar-icon"></div>
+                <span>Ad Manager</span>
+            </a>
+        </aside>
+
+        <!-- Feed -->
+        <main class="feed-container">
+
+            <!-- Stories -->
+            <div class="post stories-container">
+                <h3 class="stories-title">Stories</h3>
+                <div class="stories-list">
+                    <div class="story-card">
+                        <img src="/u/@ViewBag.Username/avatar" alt="Your story" class="story-image">
+                        <div class="story-label">Your Story</div>
+                    </div>
+                </div>
+            </div>
+
+            @{
+                ViewBag.Theme = "facebook";
+            }
+
+            @await Html.PartialAsync("_CreatePost")
+
+            <div id="newsfeed-items-grid">
+                <button class="btn btn-primary btn-md-2" style="display: none" type="submit" name="submit" id="sendButton">Post Status</button>
+                @{
+                    if (Model != null)
+                    {
+                        foreach (var post in Model)
+                        {
+                            await Html.RenderPartialAsync("_PostCard", post);
+                        }
+                    }
+                }
+            </div>
+        </main>
+
+        <!-- Right Sidebar -->
+        <aside class="right-sidebar">
+            <div class="sponsored-section">
+                <h3 class="sidebar-title">Sponsored</h3>
+                <div class="sponsored-ad">
+                    <img src="/themes/facebook/images/ad-placeholder.jpg" alt="Ad" class="ad-image">
+                    <div class="ad-content">
+                        <div class="ad-title">Learn Web Development</div>
+                        <div class="ad-url">codecademy.com</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    @await Html.PartialAsync("_Scripts")
+</body>
+</html>

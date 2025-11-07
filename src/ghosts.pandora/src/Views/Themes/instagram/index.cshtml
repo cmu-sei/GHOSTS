@@ -1,0 +1,101 @@
+@{
+    Layout = null;
+}
+@model List<Ghosts.Pandora.Infrastructure.Post>
+
+@ViewBag.Theme = "instagram";
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram</title>
+    <link rel="stylesheet" href="/themes/instagram/css/feed.css?@System.Guid.NewGuid()">
+    <link rel="icon" href="/themes/instagram/images/instagram-icon.png">
+</head>
+<body data-theme="instagram">
+<div class="app">
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <div class="logo">
+                <a href="/"><img src="/themes/instagram/images/instagram-logo.png" alt="Instagram" class="instagram-logo"></a>
+            </div>
+            <div class="search-container">
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" placeholder="Search" class="search-input">
+                </div>
+            </div>
+            <div class="header-actions">
+                <a href="/" class="action-btn" style="text-decoration: none;">🏠</a>
+                <a href="/messages" class="action-btn" style="text-decoration: none;">💬</a>
+                <button class="action-btn">➕</button>
+                <button class="action-btn">🧭</button>
+                <button class="action-btn">❤️</button>
+                <div class="profile-menu">
+                    <img src="/u/@ViewBag.Username/avatar" alt="Profile" class="header-avatar">
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <!-- Stories -->
+        <div class="stories-container">
+            <div class="stories-list">
+                <!-- Your Story -->
+                <div class="story-item your-story">
+                    <div class="story-avatar">
+                        <img src="/u/@ViewBag.Username/avatar" alt="Your story" class="avatar">
+                        <div class="add-story">+</div>
+                    </div>
+                    <span class="story-username">Your Story</span>
+                </div>
+
+                <!-- Friend Stories -->
+                <div class="story-item">
+                    <div class="story-avatar">
+                        <img src="/u/david-lightman/avatar" alt="Friend story" class="avatar">
+                    </div>
+                    <span class="story-username">friend1</span>
+                </div>
+                <div class="story-item">
+                    <div class="story-avatar">
+                        <img src="/u/general-berenger/avatar" alt="Friend story" class="avatar">
+                    </div>
+                    <span class="story-username">friend2</span>
+                </div>
+                <div class="story-item">
+                    <div class="story-avatar">
+                        <img src="/u/stephen+falken/avatar" alt="Friend story" class="avatar">
+                    </div>
+                    <span class="story-username">friend3</span>
+                </div>
+            </div>
+        </div>
+
+        @await Html.PartialAsync("_CreatePost")
+
+        <!-- Feed -->
+        <div class="feed" id="newsfeed-items-grid">
+            @{
+                if (Model != null)
+                {
+                    foreach (var post in Model)
+                    {
+                        await Html.RenderPartialAsync("_PostCard", post);
+                    }
+                }
+            }
+        </div>
+    </div>
+
+</div>
+
+@await Html.PartialAsync("_Scripts")
+
+</body>
+</html>

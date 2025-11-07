@@ -1,0 +1,338 @@
+@{
+    Layout = null;
+}
+@using Ghosts.Pandora.Infrastructure
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram | Direct</title>
+    <link rel="stylesheet" href="/themes/instagram/css/feed.css">
+    <link rel="icon" href="/themes/instagram/images/instagram-icon.png">
+    <style>
+        .messages-layout {
+            display: flex;
+            height: 100vh;
+            background: #fafafa;
+        }
+
+        .messages-sidebar {
+            width: 350px;
+            background: #fff;
+            border-right: 1px solid #dbdbdb;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .messages-header {
+            padding: 20px;
+            border-bottom: 1px solid #dbdbdb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .messages-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #262626;
+        }
+
+        .new-message-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .new-message-form {
+            padding: 20px;
+            border-bottom: 1px solid #dbdbdb;
+            background: #fafafa;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #dbdbdb;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #0095f6;
+        }
+
+        .btn-send {
+            background: #0095f6;
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .btn-send:hover {
+            background: #1877f2;
+        }
+
+        .conversations-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .conversation-item {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            border-bottom: 1px solid #efefef;
+        }
+
+        .conversation-item:hover {
+            background: #fafafa;
+        }
+
+        .conversation-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            margin-right: 12px;
+        }
+
+        .conversation-info {
+            flex: 1;
+        }
+
+        .conversation-name {
+            font-weight: 600;
+            color: #262626;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .conversation-preview {
+            color: #8e8e8e;
+            font-size: 14px;
+        }
+
+        .messages-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: #fff;
+        }
+
+        .messages-content {
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        .messages-intro {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .messages-intro h1 {
+            font-size: 24px;
+            font-weight: 300;
+            color: #262626;
+            margin-bottom: 10px;
+        }
+
+        .messages-intro p {
+            color: #8e8e8e;
+            font-size: 16px;
+        }
+
+        .message-groups {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .message-group {
+            background: #fafafa;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .message-group-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #262626;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .message-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 16px;
+            padding: 12px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .message-item.sent {
+            background: #e3f2fd;
+            margin-left: 20px;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 12px;
+        }
+
+        .message-content {
+            flex: 1;
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .message-sender {
+            font-weight: 600;
+            color: #262626;
+            font-size: 14px;
+            margin-right: 8px;
+        }
+
+        .message-time {
+            color: #8e8e8e;
+            font-size: 12px;
+        }
+
+        .message-text {
+            color: #262626;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #8e8e8e;
+        }
+
+        .empty-state h2 {
+            color: #262626;
+            font-weight: 300;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body data-theme="instagram">
+    <div class="messages-layout">
+        <div class="messages-sidebar">
+            <div class="messages-header">
+                <h1 class="messages-title">@ViewBag.Username</h1>
+                <button class="new-message-btn">✏️</button>
+            </div>
+
+            <div class="new-message-form">
+                <form method="post" action="/messages/send">
+                    <input type="text" name="toUsername" class="form-input" placeholder="To: username" required>
+                    <input type="text" name="message" class="form-input" placeholder="Message..." required>
+                    <button type="submit" class="btn-send">Send</button>
+                </form>
+            </div>
+
+            @if (ViewBag.ConversationPartners != null)
+            {
+                <div class="conversations-list">
+                    @foreach (var partner in ViewBag.ConversationPartners)
+                    {
+                        <a href="/messages/conversation/@partner" class="conversation-item">
+                            <img src="/u/@partner/avatar" alt="@partner" class="conversation-avatar">
+                            <div class="conversation-info">
+                                <div class="conversation-name">@partner</div>
+                                <div class="conversation-preview">Active now</div>
+                            </div>
+                        </a>
+                    }
+                </div>
+            }
+        </div>
+
+        <div class="messages-main">
+            <div class="messages-content">
+                @if (ViewBag.ReceivedMessages != null ||
+                     ViewBag.SentMessages != null)
+                {
+                    <div class="messages-intro">
+                        <h1>Your Messages</h1>
+                        <p>Private photos and messages between you and others</p>
+                    </div>
+
+                    <div class="message-groups">
+                        @if (ViewBag.ReceivedMessages != null)
+                        {
+                            <div class="message-group">
+                                <h2 class="message-group-title">💬 Recent Messages</h2>
+                                @foreach (var message in ViewBag.ReceivedMessages)
+                                {
+                                    <div class="message-item">
+                                        <img src="/u/@message.FromUsername/avatar" alt="@message.FromUsername" class="message-avatar">
+                                        <div class="message-content">
+                                            <div class="message-header">
+                                                <span class="message-sender">@message.FromUsername</span>
+                                                <span class="message-time">@message.CreatedUtc.ToString("MMM dd")</span>
+                                            </div>
+                                            <div class="message-text">@message.Message</div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+
+                        @if (ViewBag.SentMessages != null)
+                        {
+                            <div class="message-group">
+                                <h2 class="message-group-title">📤 Sent Messages</h2>
+                                @foreach (var message in ViewBag.SentMessages)
+                                {
+                                    <div class="message-item sent">
+                                        <img src="/u/@message.ToUsername/avatar" alt="@message.ToUsername" class="message-avatar">
+                                        <div class="message-content">
+                                            <div class="message-header">
+                                                <span class="message-sender">To @message.ToUsername</span>
+                                                <span class="message-time">@message.CreatedUtc.ToString("MMM dd")</span>
+                                            </div>
+                                            <div class="message-text">@message.Message</div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="empty-state">
+                        <h2>Your Messages</h2>
+                        <p>Send private photos and messages to a friend or group.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</body>
+</html>

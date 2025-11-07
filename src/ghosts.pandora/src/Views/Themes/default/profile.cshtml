@@ -1,0 +1,401 @@
+@{
+    Layout = null;
+}
+@model List<Ghosts.Pandora.Infrastructure.Post>
+@{
+    var profileUsername = (ViewContext.RouteData.Values["username"] as string)?.Trim();
+    if (string.IsNullOrWhiteSpace(profileUsername))
+    {
+        profileUsername = Context.Request.Cookies["username"];
+    }
+
+    if (string.IsNullOrWhiteSpace(profileUsername))
+    {
+        profileUsername = Model?.FirstOrDefault()?.Username ?? "user";
+    }
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@profileUsername - Profile</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .header {
+            background: #fff;
+            border-bottom: 1px solid #ddd;
+            padding: 0 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            height: 60px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-link {
+            color: #666;
+            text-decoration: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .nav-link:hover {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        .profile-header {
+            background: #fff;
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin-bottom: 15px;
+        }
+
+        .profile-name {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .profile-connections {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            width: 100%;
+        }
+
+        .profile-stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .follow-action-form {
+            margin-top: 20px;
+        }
+
+        .follow-action-button {
+            padding: 10px 18px;
+            border-radius: 6px;
+            border: none;
+            background: linear-gradient(135deg, #2563eb, #0ea5e9);
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .posts-section {
+            margin-top: 30px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding-left: 5px;
+        }
+
+        .post {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .post-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 12px;
+        }
+
+        .post-author {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .post-time {
+            color: #666;
+            font-size: 14px;
+            margin-left: 8px;
+        }
+
+        .post-content {
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .post-actions {
+            display: flex;
+            gap: 15px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .post-action {
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .post-action:hover {
+            background-color: #f0f0f0;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .empty-state h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <nav class="nav">
+            <a href="/" class="logo">Social Platform</a>
+            <div class="nav-links">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/messages" class="nav-link">Messages</a>
+                <a href="/profile" class="nav-link">Profile</a>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="profile-header">
+            <img src="/u/@profileUsername/avatar" alt="@profileUsername" class="profile-avatar">
+            <h1 class="profile-name">@profileUsername</h1>
+            <div class="profile-connections" data-profile-connections data-username="@profileUsername">
+                <div class="profile-stats">
+                    <div class="stat">
+                        <div class="stat-number">@(Model?.Count ?? 0)</div>
+                        <div class="stat-label">Posts</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">@(Model?.Sum(p => p.Likes?.Count ?? 0) ?? 0)</div>
+                        <div class="stat-label">Likes</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number" data-followers-count>0</div>
+                        <div class="stat-label">Followers</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number" data-following-count>0</div>
+                        <div class="stat-label">Following</div>
+                    </div>
+                </div>
+                <div class="connections-wrapper">
+                    <div class="connections-group">
+                        <h3>Following (<span data-following-count>0</span>)</h3>
+                        <div class="connection-list" data-following-list></div>
+                    </div>
+                    <div class="connections-group">
+                        <h3>Followers (<span data-followers-count>0</span>)</h3>
+                        <div class="connection-list" data-followers-list></div>
+                    </div>
+                </div>
+            </div>
+
+            @await Html.PartialAsync("~/Views/Shared/_FollowActions.cshtml")
+        </div>
+
+        <div class="posts-section">
+            <h2 class="section-title">Posts by @profileUsername</h2>
+
+            @if (Model != null)
+            {
+                @foreach (var post in Model)
+                {
+                    <div class="post">
+                        <div class="post-header">
+                            <img src="/u/@post.Username/avatar" alt="@post.Username" class="post-avatar">
+                            <div>
+                                <div class="post-author">@post.Username</div>
+                                <div class="post-time">@post.CreatedUtc.ToString("MMM dd, yyyy 'at' h:mm tt")</div>
+                            </div>
+                        </div>
+                        <div class="post-content">
+                            @Html.Raw(post.Message)
+                        </div>
+                        <div class="post-actions">
+                            <span class="post-action like-it" data-id="@post.Id">
+                                ❤️ @(post.Likes?.Count ?? 0) likes
+                            </span>
+                            <span class="post-action">
+                                💬 Comments
+                            </span>
+                            <span class="post-action">
+                                🔗 Share
+                            </span>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="empty-state">
+                    <h3>No posts yet</h3>
+                    <p>@profileUsername hasn't shared anything yet.</p>
+                </div>
+            }
+        </div>
+    </div>
+
+    <script src="/lib/jquery/dist/jquery.min.js"></script>
+    <script src="/js/signalr.min.js"></script>
+    <script src="/js/posts.js"></script>
+    <script src="/js/connections.js"></script>
+
+    <style>
+        .connections-wrapper {
+            margin-top: 24px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        .connections-group {
+            background: #fff;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+        }
+
+        .connections-group h3 {
+            margin: 0 0 12px 0;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .connection-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 240px;
+            overflow-y: auto;
+        }
+
+        .connection-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: inherit;
+            padding: 6px 4px;
+            border-radius: 6px;
+        }
+
+        .connection-item:hover {
+            background: rgba(0, 123, 255, 0.08);
+        }
+
+        .connection-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .connection-meta {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .connection-name {
+            font-weight: 600;
+        }
+
+        .connection-bio {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .connection-empty {
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
+</body>
+</html>

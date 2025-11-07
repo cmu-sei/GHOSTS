@@ -1,0 +1,378 @@
+@{
+    Layout = null;
+}
+@using Ghosts.Pandora.Infrastructure
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkedIn | Messaging</title>
+    <link rel="stylesheet" href="/themes/linkedin/css/linkedin.css">
+    <link rel="icon" href="/themes/linkedin/images/linkedin-icon.png" type="image/png">
+    <style>
+        .messaging-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+            background: #f3f2ef;
+            min-height: 100vh;
+        }
+
+        .messaging-header {
+            background: #fff;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15), 0 2px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .messaging-title {
+            font-size: 28px;
+            font-weight: 400;
+            color: rgba(0, 0, 0, 0.9);
+            margin: 0 0 8px 0;
+        }
+
+        .messaging-subtitle {
+            color: rgba(0, 0, 0, 0.6);
+            font-size: 16px;
+            margin: 0;
+        }
+
+        .messaging-content {
+            display: flex;
+            gap: 24px;
+        }
+
+        .messaging-sidebar {
+            width: 320px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15), 0 2px 3px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .new-message-section {
+            padding: 24px;
+            border-bottom: 1px solid #e9e5df;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: rgba(0, 0, 0, 0.9);
+            margin-bottom: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: rgba(0, 0, 0, 0.9);
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(0, 0, 0, 0.15);
+            border-radius: 4px;
+            font-size: 14px;
+            background: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #0a66c2;
+            box-shadow: 0 0 0 2px rgba(10, 102, 194, 0.2);
+        }
+
+        .btn-primary {
+            background: #0a66c2;
+            border: none;
+            border-radius: 24px;
+            color: #fff;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.15s ease-in-out;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background: #004182;
+        }
+
+        .conversations-section {
+            padding: 20px 0;
+        }
+
+        .conversation-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 24px;
+            cursor: pointer;
+            transition: background-color 0.15s ease-in-out;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .conversation-item:hover {
+            background-color: rgba(0, 0, 0, 0.08);
+        }
+
+        .conversation-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            margin-right: 12px;
+        }
+
+        .conversation-info {
+            flex: 1;
+        }
+
+        .conversation-name {
+            font-weight: 600;
+            color: rgba(0, 0, 0, 0.9);
+            font-size: 14px;
+            margin-bottom: 2px;
+        }
+
+        .conversation-preview {
+            color: rgba(0, 0, 0, 0.6);
+            font-size: 12px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .messaging-main {
+            flex: 1;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15), 0 2px 3px rgba(0, 0, 0, 0.2);
+            padding: 24px;
+        }
+
+        .message-groups {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .message-group {
+            margin-bottom: 32px;
+        }
+
+        .message-group-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: rgba(0, 0, 0, 0.9);
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e9e5df;
+        }
+
+        .message-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 16px;
+            padding: 16px;
+            background: #f3f2ef;
+            border-radius: 8px;
+            border: 1px solid #e9e5df;
+        }
+
+        .message-item.sent {
+            background: #e7f3ff;
+            border-color: #b3d4fc;
+            margin-left: 24px;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 12px;
+        }
+
+        .message-content {
+            flex: 1;
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .message-sender {
+            font-weight: 600;
+            color: rgba(0, 0, 0, 0.9);
+            font-size: 14px;
+            margin-right: 8px;
+        }
+
+        .message-time {
+            color: rgba(0, 0, 0, 0.6);
+            font-size: 12px;
+        }
+
+        .message-text {
+            color: rgba(0, 0, 0, 0.9);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 48px 24px;
+            color: rgba(0, 0, 0, 0.6);
+        }
+
+        .empty-state h3 {
+            color: rgba(0, 0, 0, 0.9);
+            margin-bottom: 8px;
+            font-weight: 400;
+        }
+
+        .online-status {
+            width: 12px;
+            height: 12px;
+            background: #0a66c2;
+            border-radius: 50%;
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            border: 2px solid #fff;
+        }
+
+        .conversation-item {
+            position: relative;
+        }
+    </style>
+</head>
+<body data-theme="linkedin">
+    <!-- LinkedIn Header -->
+    <header class="navbar">
+        <div class="navbar-content">
+            <div class="navbar-left">
+                <a href="/" class="navbar-brand">
+                    <img src="/themes/linkedin/images/linkedin-icon.png" alt="LinkedIn" class="navbar-logo">
+                </a>
+            </div>
+            <div class="navbar-center">
+                <a href="/" class="nav-link">
+                    <span class="nav-icon">🏠</span>
+                    <span class="nav-text">Home</span>
+                </a>
+                <a href="/messages" class="nav-link active">
+                    <span class="nav-icon">💬</span>
+                    <span class="nav-text">Messaging</span>
+                </a>
+            </div>
+            <div class="navbar-right">
+                <img src="/u/@ViewBag.Username/avatar" alt="Profile" class="profile-avatar">
+            </div>
+        </div>
+    </header>
+
+    <div class="messaging-container">
+        <div class="messaging-header">
+            <h1 class="messaging-title">Messaging</h1>
+            <p class="messaging-subtitle">Connect and collaborate with your professional network</p>
+        </div>
+
+        <div class="messaging-content">
+            <div class="messaging-sidebar">
+                <div class="new-message-section">
+                    <h3 class="section-title">New Message</h3>
+                    <form method="post" action="/messages/send">
+                        <div class="form-group">
+                            <label class="form-label">To:</label>
+                            <input type="text" name="toUsername" class="form-input" placeholder="Enter name or email" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Message:</label>
+                            <input type="text" name="message" class="form-input" placeholder="Write a message..." required>
+                        </div>
+                        <button type="submit" class="btn-primary">Send Message</button>
+                    </form>
+                </div>
+
+                @if (ViewBag.ConversationPartners != null)
+                {
+                    <div class="conversations-section">
+                        @foreach (var partner in ViewBag.ConversationPartners)
+                        {
+                            <a href="/messages/conversation/@partner" class="conversation-item">
+                                <div style="position: relative;">
+                                    <img src="/u/@partner/avatar" alt="@partner" class="conversation-avatar">
+                                    <div class="online-status"></div>
+                                </div>
+                                <div class="conversation-info">
+                                    <div class="conversation-name">@partner</div>
+                                    <div class="conversation-preview">Available to connect</div>
+                                </div>
+                            </a>
+                        }
+                    </div>
+                }
+            </div>
+
+            <div class="messaging-main">
+                @if (ViewBag.ReceivedMessages != null)
+                {
+                    <div class="message-group">
+                        <h3 class="message-group-title">Recent Messages</h3>
+                        <div class="message-groups">
+                            @foreach (var message in ViewBag.ReceivedMessages)
+                            {
+                                <div class="message-item">
+                                    <img src="/u/@message.FromUsername/avatar" alt="@message.FromUsername" class="message-avatar">
+                                    <div class="message-content">
+                                        <div class="message-header">
+                                            <span class="message-sender">@message.FromUsername</span>
+                                            <span class="message-time">@message.CreatedUtc.ToString("MMM dd, yyyy • h:mm tt")</span>
+                                        </div>
+                                        <div class="message-text">@message.Message</div>
+                                    </div>
+                                </div>
+                            }
+
+                            @foreach (var message in ViewBag.SentMessages)
+                            {
+                                <div class="message-item sent">
+                                    <img src="/u/@message.ToUsername/avatar" alt="@message.ToUsername" class="message-avatar">
+                                    <div class="message-content">
+                                        <div class="message-header">
+                                            <span class="message-sender">To @message.ToUsername</span>
+                                            <span class="message-time">@message.CreatedUtc.ToString("MMM dd, yyyy • h:mm tt")</span>
+                                        </div>
+                                        <div class="message-text">@message.Message</div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="empty-state">
+                        <h3>No messages yet</h3>
+                        <p>Start building professional relationships by sending a message!</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</body>
+</html>
