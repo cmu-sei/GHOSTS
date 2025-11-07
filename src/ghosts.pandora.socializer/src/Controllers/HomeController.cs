@@ -3,13 +3,15 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Ghosts.Socializer.Hubs;
 using Ghosts.Socializer.Infrastructure;
+using Ghosts.Socializer.Infrastructure.Services;
 
 namespace Ghosts.Socializer.Controllers;
 
 [ApiExplorerSettings(IgnoreApi = true)]
 public class HomeController(
     ILogger logger, IHubContext<PostsHub> hubContext, DataContext dbContext,
-    ApplicationConfiguration applicationConfiguration)
+    ApplicationConfiguration applicationConfiguration,
+    IWebsiteGenerationService websiteGenerationService)
     : BaseController(logger)
 {
     // Catch-all for unhandled routes - must be LAST in priority
@@ -18,6 +20,28 @@ public class HomeController(
     {
         var path = Request.Path.Value ?? "";
 
+        // Check if we're in website mode
+        if (applicationConfiguration.Mode.Type.Equals("website", StringComparison.OrdinalIgnoreCase))
+        {
+            // If requesting root, serve website homepage
+            if (string.IsNullOrEmpty(path) || path == "/")
+            {
+                var homepage = websiteGenerationService.GenerateHomepage(
+                    applicationConfiguration.Mode.SiteType,
+                    applicationConfiguration.Mode.SiteName,
+                    applicationConfiguration.Mode.ArticleCount
+                );
+                return Content(homepage, "text/html");
+            }
+
+            // For other paths in website mode, generate appropriate content or 404
+            Logger.LogInformation("Website mode: serving path {Path}", path);
+
+            // Return 404 for unhandled paths in website mode
+            return NotFound();
+        }
+
+        // Social mode - original behavior
         // Log unhandled routes for debugging
         Logger.LogWarning("Unhandled route: {Path}", path);
 
@@ -42,6 +66,12 @@ public class HomeController(
     [HttpPost("{*catchall}")]
     public async Task<IActionResult> Post([FromForm] FilesController.FileInputModel model)
     {
+        // Only handle form posts - skip if not a form submission
+        if (!Request.HasFormContentType)
+        {
+            return NotFound();
+        }
+
         var queryTheme = Request.Query["theme"].ToString();
         if (string.IsNullOrEmpty(queryTheme))
             queryTheme = ThemeRead();
