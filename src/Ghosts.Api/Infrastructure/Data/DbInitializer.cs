@@ -12,7 +12,8 @@ namespace Ghosts.Api.Infrastructure.Data
     {
         public static async Task Initialize(ApplicationDbContext context, ILogger<DbInitializer> logger)
         {
-            await context.Database.EnsureCreatedAsync();
+            // Apply pending migrations (better than EnsureCreatedAsync for production)
+            await context.Database.MigrateAsync();
 
             // Check if database is already seeded
             if (await context.Scenarios.AnyAsync())

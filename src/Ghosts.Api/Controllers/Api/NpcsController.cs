@@ -419,6 +419,7 @@ public class NpcsController(
                     npc.Campaign = config.Campaign;
                     npc.Enclave = enclave.Name;
                     npc.Id = npc.NpcProfile.Id;
+                    npc.CreatedUtc = DateTime.UtcNow;
                     createdNpcs.Add(npc);
                 }
             }

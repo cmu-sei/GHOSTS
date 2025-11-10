@@ -34,6 +34,8 @@ public class NpcRecord
     /// </summary>
     public string Team { get; set; }
 
+    public DateTime CreatedUtc { get; set; }
+
     // this is also currently jsonb
     public NpcProfile NpcProfile { get; set; }
 

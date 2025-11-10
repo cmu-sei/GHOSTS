@@ -145,6 +145,7 @@ public class Program
         {
             options.SerializerSettings.Converters.Add(new TimeSpanConverter());
             options.SerializerSettings.Converters.Add(new StringEnumConverter());
+            options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
         });
 
         // Add SignalR

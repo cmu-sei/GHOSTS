@@ -80,7 +80,7 @@ import { SearchBarComponent } from '../../../shared/components/search-bar/search
 
           <ng-container matColumnDef="campaign">
             <th mat-header-cell *matHeaderCellDef>Campaign</th>
-            <td mat-cell *matCellDef="let npc">{{ npc.campaign?.campaign || '—' }}</td>
+            <td mat-cell *matCellDef="let npc">{{ npc.campaign || '—' }}</td>
           </ng-container>
 
           <ng-container matColumnDef="enclave">
@@ -213,7 +213,7 @@ export class NpcsListComponent implements OnInit {
     }
     return this.npcs().filter(npc => {
       const name = this.getNpcName(npc).toLowerCase();
-      const campaign = npc.campaign?.campaign?.toLowerCase() || '';
+      const campaign = npc.campaign?.toLowerCase() || '';
       const enclave = npc.enclave?.toLowerCase() || '';
       const team = npc.team?.toLowerCase() || '';
       return name.includes(search) ||

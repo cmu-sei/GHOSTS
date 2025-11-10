@@ -1,7 +1,7 @@
 export interface Npc {
   id?: string;
   npcProfile?: NpcProfile;
-  campaign?: CampaignInformation;
+  campaign?: string;
   enclave?: string;
   team?: string;
   machineProfile?: MachineProfile;
@@ -192,7 +192,7 @@ export interface MachineProfile {
 
 export interface CreateNpcRequest {
   npcProfile: NpcProfile;
-  campaign?: CampaignInformation;
+  campaign?: string;
   enclave?: string;
   team?: string;
   machineProfile?: MachineProfile;

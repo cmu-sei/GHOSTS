@@ -119,6 +119,7 @@ public class NpcService(ApplicationDbContext context) : INpcService
     {
         var npc = NpcRecord.TransformToNpc(Npc.Generate(MilitaryUnits.GetServiceBranch()));
         npc.Id = npc.NpcProfile.Id;
+        npc.CreatedUtc = DateTime.UtcNow;
         _context.Npcs.Add(npc);
         await _context.SaveChangesAsync();
         return npc;
@@ -128,7 +129,8 @@ public class NpcService(ApplicationDbContext context) : INpcService
     {
         var npc = new NpcRecord
         {
-            NpcProfile = npcProfile
+            NpcProfile = npcProfile,
+            CreatedUtc = DateTime.UtcNow
         };
         npc.Id = npc.NpcProfile.Id;
         _context.Npcs.Add(npc);
@@ -160,6 +162,7 @@ public class NpcService(ApplicationDbContext context) : INpcService
                     var npc = NpcRecord.TransformToNpc(Npc.Generate(new NpcGenerationConfiguration
                     { Branch = branch, PreferenceSettings = team.PreferenceSettings }));
                     npc.Id = npc.NpcProfile.Id;
+                    npc.CreatedUtc = DateTime.UtcNow;
                     npc.Team = team.Name;
                     npc.Campaign = config.Campaign;
                     npc.Enclave = enclave.Name;
@@ -226,6 +229,7 @@ public class NpcService(ApplicationDbContext context) : INpcService
             //todo: need to be sure user is aligned with the machine currentusername
 
             npc.Id = npc.NpcProfile.Id;
+            npc.CreatedUtc = DateTime.UtcNow;
             npc.MachineId = machine.Id;
             _context.Npcs.Add(npc);
             _log.Trace($"NPC created for {machine.CurrentUsername}...");
