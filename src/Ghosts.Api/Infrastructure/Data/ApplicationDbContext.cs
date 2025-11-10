@@ -45,8 +45,15 @@ namespace Ghosts.Api.Infrastructure.Data
 
         public DbSet<NpcRecord> Npcs { get; set; }
         public DbSet<NpcIpAddress> NpcIps { get; set; }
-
         public DbSet<NpcActivity> NpcActivities { get; set; }
+
+        // NPC Social Graph tables
+        public DbSet<NpcSocialGraph> NpcSocialGraphs { get; set; }
+        public DbSet<NpcSocialConnection> NpcSocialConnections { get; set; }
+        public DbSet<NpcLearning> NpcLearning { get; set; }
+        public DbSet<NpcBelief> NpcBeliefs { get; set; }
+        public DbSet<NpcPreference> NpcPreferences { get; set; }
+        public DbSet<NpcInteraction> NpcInteractions { get; set; }
 
         public DbSet<Scenario> Scenarios { get; set; }
         public DbSet<ScenarioParameters> ScenarioParameters { get; set; }
@@ -67,9 +74,54 @@ namespace Ghosts.Api.Infrastructure.Data
 
             modelBuilder.ApplyConfiguration(new MachineUpdateConfiguration());
 
-
+            // NPC Profile remains JSONB for now
             modelBuilder.Entity<NpcRecord>().Property(o => o.NpcProfile).HasColumnType("jsonb");
-            modelBuilder.Entity<NpcRecord>().Property(o => o.NpcSocialGraph).HasColumnType("jsonb");
+
+            // NPC Social Graph - Configure one-to-one relationship
+            modelBuilder.Entity<NpcRecord>()
+                .HasOne(n => n.NpcSocialGraph)
+                .WithOne(sg => sg.Npc)
+                .HasForeignKey<NpcSocialGraph>(sg => sg.Id)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // NpcSocialGraph relationships
+            modelBuilder.Entity<NpcSocialGraph>()
+                .HasMany(sg => sg.Connections)
+                .WithOne(c => c.SocialGraph)
+                .HasForeignKey(c => c.SocialGraphId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<NpcSocialGraph>()
+                .HasMany(sg => sg.Knowledge)
+                .WithOne(k => k.SocialGraph)
+                .HasForeignKey(k => k.SocialGraphId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<NpcSocialGraph>()
+                .HasMany(sg => sg.Beliefs)
+                .WithOne(b => b.SocialGraph)
+                .HasForeignKey(b => b.SocialGraphId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<NpcSocialGraph>()
+                .HasMany(sg => sg.Preferences)
+                .WithOne(p => p.SocialGraph)
+                .HasForeignKey(p => p.SocialGraphId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // NpcSocialConnection relationships
+            modelBuilder.Entity<NpcSocialConnection>()
+                .HasMany(c => c.Interactions)
+                .WithOne(i => i.SocialConnection)
+                .HasForeignKey(i => i.SocialConnectionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Indexes for NPC Social Graph tables
+            modelBuilder.Entity<NpcSocialGraph>().HasIndex(sg => sg.CurrentStep);
+            modelBuilder.Entity<NpcSocialConnection>().HasIndex(c => new { c.SocialGraphId, c.ConnectedNpcId });
+            modelBuilder.Entity<NpcLearning>().HasIndex(l => new { l.SocialGraphId, l.Topic, l.Step });
+            modelBuilder.Entity<NpcBelief>().HasIndex(b => new { b.SocialGraphId, b.Name, b.Step });
+            modelBuilder.Entity<NpcPreference>().HasIndex(p => new { p.SocialGraphId, p.Name, p.Step });
 
             modelBuilder.Entity<Machine>().HasIndex(o => new { o.CreatedUtc });
             modelBuilder.Entity<Machine>().HasIndex(o => new { o.Status });
@@ -102,8 +154,6 @@ namespace Ghosts.Api.Infrastructure.Data
             modelBuilder.Entity<Survey.Port>().HasIndex(o => new { o.SurveyId });
             modelBuilder.Entity<Survey.EventLog.EventLogEntry>().HasIndex(o => new { o.EventLogId });
             modelBuilder.Entity<Survey.Interface.InterfaceBinding>().HasIndex(o => new { o.InterfaceId });
-
-            modelBuilder.Entity<NpcRecord>().Property(o => o.NpcSocialGraph).HasColumnType("jsonb");
 
             // Scenario relationships
             modelBuilder.Entity<Scenario>()

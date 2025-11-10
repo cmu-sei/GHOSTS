@@ -12,6 +12,7 @@ using Ghosts.Api.Infrastructure.Models;
 using Ghosts.Animator.Extensions;
 using Ghosts.Api.Infrastructure.Data;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using Weighted_Randomizer;
@@ -81,14 +82,28 @@ public class SocialGraphJob
         {
             using var scope = _scopeFactory.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            var npc = context.Npcs.FirstOrDefault(n => n.Id == npcId);
+
+            // Use Include to eagerly load navigation properties
+            var npc = await context.Npcs
+                .Include(n => n.NpcSocialGraph)
+                    .ThenInclude(sg => sg.Connections)
+                .Include(n => n.NpcSocialGraph)
+                    .ThenInclude(sg => sg.Knowledge)
+                .Include(n => n.NpcSocialGraph)
+                    .ThenInclude(sg => sg.Beliefs)
+                .Include(n => n.NpcSocialGraph)
+                    .ThenInclude(sg => sg.Preferences)
+                .FirstOrDefaultAsync(n => n.Id == npcId, _token);
+
             if (npc == null) return;
 
-            var graph = npc.NpcSocialGraph ?? InitializeGraph(npc, context);
+            var graph = npc.NpcSocialGraph ?? await InitializeGraphAsync(npc, context);
             if (graph.CurrentStep > _config.AnimatorSettings.Animations.SocialGraph.MaximumSteps)
                 return;
 
             graph.CurrentStep++;
+            graph.UpdatedUtc = DateTime.UtcNow;
+
             var interactCount = _random.Value.NextDouble().GetNumberByDecreasingWeights(0, graph.Connections.Count, 0.4);
             var targets = graph.Connections.RandPick(interactCount);
 
@@ -111,6 +126,7 @@ public class SocialGraphJob
                     if (connection != null)
                     {
                         connection.RelationshipStatus++;
+                        connection.UpdatedUtc = DateTime.UtcNow;
                         await Task.Delay(1500, _token);
                         await _hub.Clients.All.SendAsync("show", graph.CurrentStep, target.ConnectedNpcId, "relationship",
                             $"{npc.NpcProfile.Name} improved relationship with {target.Name}",
@@ -118,16 +134,17 @@ public class SocialGraphJob
                     }
                     else
                     {
-                        var newConnection = context.Npcs.FirstOrDefault(c => c.Id == learning.FromNpcId);
+                        var newConnection = await context.Npcs.FirstOrDefaultAsync(c => c.Id == learning.FromNpcId, _token);
                         if (newConnection != null)
                         {
-                            graph.Connections.Add(new NpcSocialConnection()
+                            var newConn = new NpcSocialConnection()
                             {
                                 Id = $"{graph.Id}:{newConnection.Id}",
                                 ConnectedNpcId = newConnection.Id,
                                 Name = newConnection.NpcProfile.Name.ToString(),
                                 SocialGraphId = graph.Id
-                            });
+                            };
+                            graph.Connections.Add(newConn);
                             await Task.Delay(1500, _token);
                             await _hub.Clients.All.SendAsync("show", graph.CurrentStep, target.ConnectedNpcId, "relationship",
                                 $"{npc.NpcProfile.Name} improved relationship with {target.Name}",
@@ -137,8 +154,7 @@ public class SocialGraphJob
                 }
             }
 
-            npc.NpcSocialGraph = graph;
-            context.Update(npc);
+            // EF Core will track changes automatically - just save
             await context.SaveChangesAsync(_token);
         }
         catch (Exception ex)
@@ -147,9 +163,14 @@ public class SocialGraphJob
         }
     }
 
-    private NpcSocialGraph InitializeGraph(NpcRecord npc, ApplicationDbContext context)
+    private async Task<NpcSocialGraph> InitializeGraphAsync(NpcRecord npc, ApplicationDbContext context)
     {
-        var connections = context.Npcs.OrderBy(n => n.Enclave).ThenBy(n => n.Team).Take(10).ToList();
+        var connections = await context.Npcs
+            .OrderBy(n => n.Enclave)
+            .ThenBy(n => n.Team)
+            .Take(10)
+            .ToListAsync(_token);
+
         var graph = new NpcSocialGraph
         {
             Id = npc.Id,
@@ -163,9 +184,11 @@ public class SocialGraphJob
             }).ToList()
         };
 
+        // Add the graph to the context
+        context.NpcSocialGraphs.Add(graph);
         npc.NpcSocialGraph = graph;
-        context.Update(npc);
-        context.SaveChanges();
+
+        await context.SaveChangesAsync(_token);
         return graph;
     }
 

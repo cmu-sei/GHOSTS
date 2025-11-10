@@ -12,6 +12,7 @@ using Ghosts.Animator.Extensions;
 using Ghosts.Api.Infrastructure;
 using Ghosts.Api.Infrastructure.Data;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
 
@@ -80,34 +81,51 @@ public class SocialBeliefJob
 
     private void Step(NpcRecord npc)
     {
-        var graph = npc.NpcSocialGraph;
+        // Reload the NPC with navigation properties
+        var npcWithGraph = _context.Npcs
+            .Include(n => n.NpcSocialGraph)
+                .ThenInclude(sg => sg.Connections)
+            .Include(n => n.NpcSocialGraph)
+                .ThenInclude(sg => sg.Beliefs)
+            .Include(n => n.NpcSocialGraph)
+                .ThenInclude(sg => sg.Preferences)
+            .FirstOrDefault(n => n.Id == npc.Id);
+
+        if (npcWithGraph == null) return;
+
+        var graph = npcWithGraph.NpcSocialGraph;
         if (graph == null)
         {
             //need to build a list of connections for every npc
             graph = new NpcSocialGraph
             {
-                Id = npc.Id,
-                Name = npc.NpcProfile.Name.ToString()
+                Id = npcWithGraph.Id,
+                Name = npcWithGraph.NpcProfile.Name.ToString()
             };
 
-            var connections = _context.Npcs.ToList().OrderBy(o => o.Enclave).ThenBy(o => o.Team).Take(10).ToList();
+            var connections = _context.Npcs
+                .OrderBy(o => o.Enclave)
+                .ThenBy(o => o.Team)
+                .Take(10)
+                .ToList();
+
             foreach (var connection in connections)
             {
                 graph.Connections.Add(new NpcSocialConnection
                 {
-                    Id = $"{graph.Id}:{connection.NpcProfile.Id}",
-                    ConnectedNpcId = connection.NpcProfile.Id,
+                    Id = $"{graph.Id}:{connection.Id}",
+                    ConnectedNpcId = connection.Id,
                     Name = connection.NpcProfile.Name.ToString(),
                     SocialGraphId = graph.Id
                 });
             }
 
-            npc.NpcSocialGraph = graph;
-            _context.Npcs.Update(npc); // Explicitly set the state to Modified
+            _context.NpcSocialGraphs.Add(graph);
+            npcWithGraph.NpcSocialGraph = graph;
             var o = _context.SaveChanges();
             Console.WriteLine($"{o} rows were affected.");
 
-            _log.Trace($"Social graph saved for {npc.NpcProfile.Name}...");
+            _log.Trace($"Social graph saved for {npcWithGraph.NpcProfile.Name}...");
         }
 
         if (graph.CurrentStep > _configuration.AnimatorSettings.Animations.SocialBelief.MaximumSteps)
@@ -142,6 +160,7 @@ public class SocialBeliefJob
         var newBelief = new NpcBelief(0, graph.Id, graph.Id, graph.Id, Beliefs.RandomFromStringArray(), graph.CurrentStep,
             belief.Likelihood, bayes.PosteriorH1);
         graph.Beliefs.Add(newBelief);
+        graph.UpdatedUtc = DateTime.UtcNow;
 
         //post to hub
         _activityHubContext.Clients.All.SendAsync("show",
@@ -151,7 +170,7 @@ public class SocialBeliefJob
             $"{graph.Name} has updated posterior of {Math.Round(newBelief.Posterior, 2)} in {newBelief.Name}",
             DateTime.Now.ToString(CultureInfo.InvariantCulture), cancellationToken: _cancellationToken);
 
-        _context.Npcs.Update(npc); // Explicitly set the state to Modified
+        // EF Core will track changes automatically - just save
         var affectedRows = _context.SaveChanges();
         Console.WriteLine($"{affectedRows} rows were affected.");
 

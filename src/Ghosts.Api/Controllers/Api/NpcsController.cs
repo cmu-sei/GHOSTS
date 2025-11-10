@@ -508,8 +508,10 @@ public class NpcsController(
             {
                 try
                 {
-                    npcs = context.Npcs.Where(x =>
-                        x.NpcSocialGraph.Name.ToLower().StartsWith(actionRequest.Who.ToLower()));
+                    npcs = context.Npcs
+                        .Include(x => x.NpcSocialGraph)
+                        .Where(x => x.NpcSocialGraph != null &&
+                            x.NpcSocialGraph.Name.ToLower().StartsWith(actionRequest.Who.ToLower()));
                 }
                 catch
                 {

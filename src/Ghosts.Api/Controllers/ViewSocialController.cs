@@ -91,9 +91,12 @@ public class ViewSocialController(ApplicationDbContext context) : Controller
 
     private async Task<List<NpcSocialGraph>> LoadSocialGraphsAsync()
     {
-        var graphs = await context.Npcs
-            .Where(x => x.NpcSocialGraph != null)
-            .Select(x => x.NpcSocialGraph)
+        var graphs = await context.NpcSocialGraphs
+            .Include(sg => sg.Connections)
+                .ThenInclude(c => c.Interactions)
+            .Include(sg => sg.Knowledge)
+            .Include(sg => sg.Beliefs)
+            .Include(sg => sg.Preferences)
             .ToListAsync();
         return graphs;
     }
