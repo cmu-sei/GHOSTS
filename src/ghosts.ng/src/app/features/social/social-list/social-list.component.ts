@@ -140,6 +140,15 @@ export class SocialListComponent implements OnInit {
     return connection.knowledgeTransfers.filter(k => k.value < 0).length;
   }
 
+  protected getDisplayedTopics(topics: any[]): any[] {
+    // Show only first 6 topics
+    return topics.slice(0, 6);
+  }
+
+  protected getRemainingTopicsCount(topics: any[]): number {
+    return Math.max(0, topics.length - 6);
+  }
+
   private syncSelectionWithRoute(npcId: string | null): void {
     if (!npcId) {
       this.pendingNpcId = null;

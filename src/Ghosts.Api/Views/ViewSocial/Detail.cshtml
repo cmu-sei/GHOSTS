@@ -1,4 +1,4 @@
-@model Ghosts.Api.Infrastructure.Models.NpcSocialGraph
+@model Ghosts.Api.Infrastructure.Models.NpcRecord
 
 @{
     string FormatClass(int x)
@@ -40,7 +40,7 @@
         <div class="col-sm-12">
             <br/>
             <img src="/api/npcs/@Model.Id/photo" height="16" width="16" alt="profile thumbnail" />
-            Connections for <strong title="@Model.Id">@Model.Name</strong>
+            Connections for <strong title="@Model.Id">@Model.NpcProfile.Name.ToString()</strong>
             <ul>
                 <br/>
                 <table class="table">

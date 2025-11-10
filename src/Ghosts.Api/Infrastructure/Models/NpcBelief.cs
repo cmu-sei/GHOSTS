@@ -9,14 +9,14 @@ namespace Ghosts.Api.Infrastructure.Models;
 
 [Table("npcbeliefs")]
 [method: JsonConstructor]
-public class NpcBelief(int id, Guid socialGraphId, Guid toNpcId, Guid fromNpcId, string name, long step, decimal likelihood, decimal posterior)
+public class NpcBelief(int id, Guid npcId, Guid toNpcId, Guid fromNpcId, string name, long step, decimal likelihood, decimal posterior)
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; } = id;
 
     [Required]
-    public Guid SocialGraphId { get; set; } = socialGraphId;
+    public Guid NpcId { get; set; } = npcId;
 
     [Required]
     public Guid ToNpcId { get; set; } = toNpcId;
@@ -39,8 +39,8 @@ public class NpcBelief(int id, Guid socialGraphId, Guid toNpcId, Guid fromNpcId,
     public DateTime CreatedUtc { get; set; } = DateTime.UtcNow;
 
     // Navigation property
-    [ForeignKey("SocialGraphId")]
-    public virtual NpcSocialGraph SocialGraph { get; set; }
+    [ForeignKey("NpcId")]
+    public virtual NpcRecord Npc { get; set; }
 
     public NpcBelief() : this(0, Guid.Empty, Guid.Empty, Guid.Empty, string.Empty, 0, 0, 0) { }
 

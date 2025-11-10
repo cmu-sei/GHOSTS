@@ -510,9 +510,8 @@ public class NpcsController(
                 try
                 {
                     npcs = context.Npcs
-                        .Include(x => x.NpcSocialGraph)
-                        .Where(x => x.NpcSocialGraph != null &&
-                            x.NpcSocialGraph.Name.ToLower().StartsWith(actionRequest.Who.ToLower()));
+                        .Where(x => x.NpcProfile != null &&
+                            (x.NpcProfile.Name.First + " " + x.NpcProfile.Name.Last).ToLower().StartsWith(actionRequest.Who.ToLower()));
                 }
                 catch
                 {

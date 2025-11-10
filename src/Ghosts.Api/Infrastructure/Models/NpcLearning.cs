@@ -16,7 +16,7 @@ public class NpcLearning
     public int Id { get; set; }
 
     [Required]
-    public Guid SocialGraphId { get; set; }
+    public Guid NpcId { get; set; }
 
     [Required]
     public Guid ToNpcId { get; set; }
@@ -36,17 +36,17 @@ public class NpcLearning
     public DateTime CreatedUtc { get; set; }
 
     // Navigation property
-    [ForeignKey("SocialGraphId")]
-    public virtual NpcSocialGraph SocialGraph { get; set; }
+    [ForeignKey("NpcId")]
+    public virtual NpcRecord Npc { get; set; }
 
     public NpcLearning()
     {
         CreatedUtc = DateTime.UtcNow;
     }
 
-    public NpcLearning(Guid socialGraphId, Guid toNpcId, Guid fromNpcId, string topic, long step, int value)
+    public NpcLearning(Guid npcId, Guid toNpcId, Guid fromNpcId, string topic, long step, int value)
     {
-        SocialGraphId = socialGraphId;
+        NpcId = npcId;
         ToNpcId = toNpcId;
         FromNpcId = fromNpcId;
         Topic = topic;

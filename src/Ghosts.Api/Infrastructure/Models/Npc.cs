@@ -1,6 +1,7 @@
 // Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -39,8 +40,14 @@ public class NpcRecord
     // this is also currently jsonb
     public NpcProfile NpcProfile { get; set; }
 
-    // One-to-one relationship with NpcSocialGraph
-    public virtual NpcSocialGraph NpcSocialGraph { get; set; }
+    // Social graph properties (previously in NpcSocialGraph)
+    public long CurrentStep { get; set; }
+
+    // Navigation properties for social graph collections
+    public virtual ICollection<NpcSocialConnection> Connections { get; set; }
+    public virtual ICollection<NpcLearning> Knowledge { get; set; }
+    public virtual ICollection<NpcBelief> Beliefs { get; set; }
+    public virtual ICollection<NpcPreference> Preferences { get; set; }
 
     public static NpcRecord TransformToNpc(NpcProfile o)
     {
@@ -49,8 +56,12 @@ public class NpcRecord
         var n = new NpcRecord
         {
             NpcProfile = o,
-            NpcSocialGraph = new NpcSocialGraph(),
-            Id = o.Id
+            Id = o.Id,
+            Connections = new List<NpcSocialConnection>(),
+            Knowledge = new List<NpcLearning>(),
+            Beliefs = new List<NpcBelief>(),
+            Preferences = new List<NpcPreference>(),
+            CurrentStep = 0
         };
 
         return n;

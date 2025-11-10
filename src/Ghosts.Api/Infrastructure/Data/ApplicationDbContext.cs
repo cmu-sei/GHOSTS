@@ -47,8 +47,7 @@ namespace Ghosts.Api.Infrastructure.Data
         public DbSet<NpcIpAddress> NpcIps { get; set; }
         public DbSet<NpcActivity> NpcActivities { get; set; }
 
-        // NPC Social Graph tables
-        public DbSet<NpcSocialGraph> NpcSocialGraphs { get; set; }
+        // NPC Social Graph tables (now directly on NPC)
         public DbSet<NpcSocialConnection> NpcSocialConnections { get; set; }
         public DbSet<NpcLearning> NpcLearning { get; set; }
         public DbSet<NpcBelief> NpcBeliefs { get; set; }
@@ -77,36 +76,29 @@ namespace Ghosts.Api.Infrastructure.Data
             // NPC Profile remains JSONB for now
             modelBuilder.Entity<NpcRecord>().Property(o => o.NpcProfile).HasColumnType("jsonb");
 
-            // NPC Social Graph - Configure one-to-one relationship
+            // NPC relationships - social graph properties now directly on NPC
             modelBuilder.Entity<NpcRecord>()
-                .HasOne(n => n.NpcSocialGraph)
-                .WithOne(sg => sg.Npc)
-                .HasForeignKey<NpcSocialGraph>(sg => sg.Id)
+                .HasMany(n => n.Connections)
+                .WithOne(c => c.Npc)
+                .HasForeignKey(c => c.NpcId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // NpcSocialGraph relationships
-            modelBuilder.Entity<NpcSocialGraph>()
-                .HasMany(sg => sg.Connections)
-                .WithOne(c => c.SocialGraph)
-                .HasForeignKey(c => c.SocialGraphId)
+            modelBuilder.Entity<NpcRecord>()
+                .HasMany(n => n.Knowledge)
+                .WithOne(k => k.Npc)
+                .HasForeignKey(k => k.NpcId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<NpcSocialGraph>()
-                .HasMany(sg => sg.Knowledge)
-                .WithOne(k => k.SocialGraph)
-                .HasForeignKey(k => k.SocialGraphId)
+            modelBuilder.Entity<NpcRecord>()
+                .HasMany(n => n.Beliefs)
+                .WithOne(b => b.Npc)
+                .HasForeignKey(b => b.NpcId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<NpcSocialGraph>()
-                .HasMany(sg => sg.Beliefs)
-                .WithOne(b => b.SocialGraph)
-                .HasForeignKey(b => b.SocialGraphId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<NpcSocialGraph>()
-                .HasMany(sg => sg.Preferences)
-                .WithOne(p => p.SocialGraph)
-                .HasForeignKey(p => p.SocialGraphId)
+            modelBuilder.Entity<NpcRecord>()
+                .HasMany(n => n.Preferences)
+                .WithOne(p => p.Npc)
+                .HasForeignKey(p => p.NpcId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             // NpcSocialConnection relationships
@@ -116,12 +108,12 @@ namespace Ghosts.Api.Infrastructure.Data
                 .HasForeignKey(i => i.SocialConnectionId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Indexes for NPC Social Graph tables
-            modelBuilder.Entity<NpcSocialGraph>().HasIndex(sg => sg.CurrentStep);
-            modelBuilder.Entity<NpcSocialConnection>().HasIndex(c => new { c.SocialGraphId, c.ConnectedNpcId });
-            modelBuilder.Entity<NpcLearning>().HasIndex(l => new { l.SocialGraphId, l.Topic, l.Step });
-            modelBuilder.Entity<NpcBelief>().HasIndex(b => new { b.SocialGraphId, b.Name, b.Step });
-            modelBuilder.Entity<NpcPreference>().HasIndex(p => new { p.SocialGraphId, p.Name, p.Step });
+            // Indexes for NPC and Social Graph tables
+            modelBuilder.Entity<NpcRecord>().HasIndex(n => n.CurrentStep);
+            modelBuilder.Entity<NpcSocialConnection>().HasIndex(c => new { c.NpcId, c.ConnectedNpcId });
+            modelBuilder.Entity<NpcLearning>().HasIndex(l => new { l.NpcId, l.Topic, l.Step });
+            modelBuilder.Entity<NpcBelief>().HasIndex(b => new { b.NpcId, b.Name, b.Step });
+            modelBuilder.Entity<NpcPreference>().HasIndex(p => new { p.NpcId, p.Name, p.Step });
 
             modelBuilder.Entity<Machine>().HasIndex(o => new { o.CreatedUtc });
             modelBuilder.Entity<Machine>().HasIndex(o => new { o.Status });

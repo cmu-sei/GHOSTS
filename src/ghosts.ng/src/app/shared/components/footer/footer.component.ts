@@ -1,6 +1,6 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { ChangeDetectionStrategy } from '@angular/core';
-import { StatusService } from '../../../core/services';
+import { StatusService, ConfigService } from '../../../core/services';
 import { ApiStatus } from '../../../core/models';
 
 @Component({
@@ -26,7 +26,7 @@ import { ApiStatus } from '../../../core/models';
           </div>
           <div class="footer-right">
             <p class="footer-text">
-              <a href="/swagger" class="footer-link" target="_blank">API Swagger</a>
+              <a [href]="swaggerUrl()" class="footer-link" target="_blank">API Swagger</a>
               <span class="separator">|</span>
               <a [href]="grafanaUrl()" class="footer-link" target="_blank">Grafana</a>
               <span class="separator">|</span>
@@ -156,13 +156,16 @@ import { ApiStatus } from '../../../core/models';
 })
 export class FooterComponent implements OnInit {
   private readonly statusService = inject(StatusService);
+  private readonly configService = inject(ConfigService);
 
   protected readonly status = signal<ApiStatus | null>(null);
   protected readonly grafanaUrl = signal<string>('http://localhost:3000');
+  protected readonly swaggerUrl = signal<string>('http://localhost:5000/swagger');
 
   ngOnInit(): void {
     this.loadStatus();
     this.constructGrafanaUrl();
+    this.constructSwaggerUrl();
   }
 
   private loadStatus(): void {
@@ -182,5 +185,14 @@ export class FooterComponent implements OnInit {
     const hostname = window.location.hostname;
     const grafanaUrl = `${protocol}//${hostname}:3000`;
     this.grafanaUrl.set(grafanaUrl);
+  }
+
+  private constructSwaggerUrl(): void {
+    // Construct Swagger URL based on API URL
+    const apiUrl = this.configService.apiUrl;
+    // Remove '/api' from the end if present
+    const baseUrl = apiUrl.replace(/\/api$/, '');
+    const swaggerUrl = `${baseUrl}/swagger`;
+    this.swaggerUrl.set(swaggerUrl);
   }
 }

@@ -89,35 +89,35 @@ public class ViewSocialController(ApplicationDbContext context) : Controller
         return _configuration.AnimatorSettings.Animations.SocialGraph.IsEnabled;
     }
 
-    private async Task<List<NpcSocialGraph>> LoadSocialGraphsAsync()
+    private async Task<List<NpcRecord>> LoadSocialGraphsAsync()
     {
-        var graphs = await context.NpcSocialGraphs
-            .Include(sg => sg.Connections)
+        var npcs = await context.Npcs
+            .Include(n => n.Connections)
                 .ThenInclude(c => c.Interactions)
-            .Include(sg => sg.Knowledge)
-            .Include(sg => sg.Beliefs)
-            .Include(sg => sg.Preferences)
+            .Include(n => n.Knowledge)
+            .Include(n => n.Beliefs)
+            .Include(n => n.Preferences)
             .ToListAsync();
-        return graphs;
+        return npcs;
     }
 
-    private async Task<NpcSocialGraph> LoadGraphByIdAsync(Guid id)
+    private async Task<NpcRecord> LoadGraphByIdAsync(Guid id)
     {
-        var graphs = await LoadSocialGraphsAsync();
-        return graphs?.FirstOrDefault(x => x.Id == id);
+        var npcs = await LoadSocialGraphsAsync();
+        return npcs?.FirstOrDefault(x => x.Id == id);
     }
 
-    private static InteractionMap CreateInteractionMap(NpcSocialGraph graph)
+    private static InteractionMap CreateInteractionMap(NpcRecord npc)
     {
         var interactions = new InteractionMap();
-        var startTime = DateTime.Now.AddMinutes(-graph.Connections.Count).AddMinutes(-1); // Adjust start time
+        var startTime = DateTime.Now.AddMinutes(-npc.Connections.Count).AddMinutes(-1); // Adjust start time
         var endTime = DateTime.Now.AddMinutes(1); // End time
 
-        // Create a node for the main graph
-        interactions.Nodes.Add(new Node { Id = graph.Id.ToString(), Start = startTime, End = endTime });
+        // Create a node for the main NPC
+        interactions.Nodes.Add(new Node { Id = npc.Id.ToString(), Start = startTime, End = endTime });
 
         // Add nodes for each connection
-        foreach (var connection in graph.Connections ?? Enumerable.Empty<NpcSocialConnection>())
+        foreach (var connection in npc.Connections ?? Enumerable.Empty<NpcSocialConnection>())
         {
             if (connection.Interactions == null || connection.Interactions.Count < 1) continue;
 
@@ -132,7 +132,7 @@ public class ViewSocialController(ApplicationDbContext context) : Controller
         }
 
         // Add links for each knowledge entry
-        foreach (var learning in graph.Knowledge ?? Enumerable.Empty<NpcLearning>())
+        foreach (var learning in npc.Knowledge ?? Enumerable.Empty<NpcLearning>())
         {
             interactions.Links.Add(new Link
             {

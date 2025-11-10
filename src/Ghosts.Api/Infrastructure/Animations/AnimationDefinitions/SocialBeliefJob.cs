@@ -82,26 +82,19 @@ public class SocialBeliefJob
     private void Step(NpcRecord npc)
     {
         // Reload the NPC with navigation properties
-        var npcWithGraph = _context.Npcs
-            .Include(n => n.NpcSocialGraph)
-                .ThenInclude(sg => sg.Connections)
-            .Include(n => n.NpcSocialGraph)
-                .ThenInclude(sg => sg.Beliefs)
-            .Include(n => n.NpcSocialGraph)
-                .ThenInclude(sg => sg.Preferences)
+        var npcWithData = _context.Npcs
+            .Include(n => n.Connections)
+            .Include(n => n.Beliefs)
+            .Include(n => n.Preferences)
             .FirstOrDefault(n => n.Id == npc.Id);
 
-        if (npcWithGraph == null) return;
+        if (npcWithData == null) return;
 
-        var graph = npcWithGraph.NpcSocialGraph;
-        if (graph == null)
+        // Initialize connections if needed
+        if (npcWithData.Connections == null || !npcWithData.Connections.Any())
         {
             //need to build a list of connections for every npc
-            graph = new NpcSocialGraph
-            {
-                Id = npcWithGraph.Id,
-                Name = npcWithGraph.NpcProfile.Name.ToString()
-            };
+            npcWithData.Connections = new List<NpcSocialConnection>();
 
             var connections = _context.Npcs
                 .OrderBy(o => o.Enclave)
@@ -111,63 +104,60 @@ public class SocialBeliefJob
 
             foreach (var connection in connections)
             {
-                graph.Connections.Add(new NpcSocialConnection
+                npcWithData.Connections.Add(new NpcSocialConnection
                 {
-                    Id = $"{graph.Id}:{connection.Id}",
+                    Id = $"{npcWithData.Id}:{connection.Id}",
                     ConnectedNpcId = connection.Id,
                     Name = connection.NpcProfile.Name.ToString(),
-                    SocialGraphId = graph.Id
+                    NpcId = npcWithData.Id
                 });
             }
 
-            _context.NpcSocialGraphs.Add(graph);
-            npcWithGraph.NpcSocialGraph = graph;
             var o = _context.SaveChanges();
             Console.WriteLine($"{o} rows were affected.");
 
-            _log.Trace($"Social graph saved for {npcWithGraph.NpcProfile.Name}...");
+            _log.Trace($"Social connections saved for {npcWithData.NpcProfile.Name}...");
         }
 
-        if (graph.CurrentStep > _configuration.AnimatorSettings.Animations.SocialBelief.MaximumSteps)
+        if (npcWithData.CurrentStep > _configuration.AnimatorSettings.Animations.SocialBelief.MaximumSteps)
         {
-            _log.Trace($"Maximum steps met: {graph.CurrentStep - 1}. SocialBelief is exiting...");
+            _log.Trace($"Maximum steps met: {npcWithData.CurrentStep - 1}. SocialBelief is exiting...");
             _isEnabled = false;
             return;
         }
 
-        graph.CurrentStep++;
+        npcWithData.CurrentStep++;
 
         NpcBelief belief = null;
 
-        if (graph.Beliefs != null)
+        if (npcWithData.Beliefs != null)
         {
-            belief = graph.Beliefs.MaxBy(x => x.Step);
+            belief = npcWithData.Beliefs.MaxBy(x => x.Step);
         }
         else
         {
-            graph.Beliefs = new List<NpcBelief>();
+            npcWithData.Beliefs = new List<NpcBelief>();
         }
 
         if (belief == null)
         {
             var l = Convert.ToDecimal(_random.NextDouble() * (0.75 - 0.25) + 0.25);
-            belief = new NpcBelief(0, graph.Id, graph.Id, graph.Id, Beliefs.RandomFromStringArray(), graph.CurrentStep, l,
+            belief = new NpcBelief(0, npcWithData.Id, npcWithData.Id, npcWithData.Id, Beliefs.RandomFromStringArray(), npcWithData.CurrentStep, l,
                 (decimal)0.5);
         }
 
-        var bayes = new Bayes(graph.CurrentStep, belief.Likelihood, belief.Posterior, 1 - belief.Likelihood,
+        var bayes = new Bayes(npcWithData.CurrentStep, belief.Likelihood, belief.Posterior, 1 - belief.Likelihood,
             1 - belief.Posterior);
-        var newBelief = new NpcBelief(0, graph.Id, graph.Id, graph.Id, Beliefs.RandomFromStringArray(), graph.CurrentStep,
+        var newBelief = new NpcBelief(0, npcWithData.Id, npcWithData.Id, npcWithData.Id, Beliefs.RandomFromStringArray(), npcWithData.CurrentStep,
             belief.Likelihood, bayes.PosteriorH1);
-        graph.Beliefs.Add(newBelief);
-        graph.UpdatedUtc = DateTime.UtcNow;
+        npcWithData.Beliefs.Add(newBelief);
 
         //post to hub
         _activityHubContext.Clients.All.SendAsync("show",
             newBelief.Step,
             newBelief.ToNpcId.ToString(),
             "belief",
-            $"{graph.Name} has updated posterior of {Math.Round(newBelief.Posterior, 2)} in {newBelief.Name}",
+            $"{npcWithData.NpcProfile.Name} has updated posterior of {Math.Round(newBelief.Posterior, 2)} in {newBelief.Name}",
             DateTime.Now.ToString(CultureInfo.InvariantCulture), cancellationToken: _cancellationToken);
 
         // EF Core will track changes automatically - just save

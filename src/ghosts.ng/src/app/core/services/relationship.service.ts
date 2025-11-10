@@ -105,6 +105,29 @@ export class RelationshipService {
       strength: this.calculateKnowledgeStrength(data.totalValue, data.count)
     })).sort((a, b) => b.totalValue - a.totalValue);
 
+    // Aggregate preferences (defensive - handle undefined/null)
+    const preferenceMap = new Map<string, { weight: number; strength: number; count: number }>();
+    if (graph.preferences && Array.isArray(graph.preferences)) {
+      graph.preferences.forEach((p: any) => {
+        if (p && p.name) {
+          if (!preferenceMap.has(p.name)) {
+            preferenceMap.set(p.name, { weight: 0, strength: 0, count: 0 });
+          }
+          const prefData = preferenceMap.get(p.name)!;
+          prefData.weight += (p.weight || 0);
+          prefData.strength += (p.strength || 0);
+          prefData.count++;
+        }
+      });
+    }
+
+    const preferences = Array.from(preferenceMap.entries()).map(([name, data]) => ({
+      name,
+      weight: data.count > 0 ? data.weight / data.count : 0,
+      strength: data.count > 0 ? data.strength / data.count : 0,
+      count: data.count
+    })).sort((a, b) => b.strength - a.strength);
+
     const npcIdForPhoto = graph.npcId ?? graph.id;
     return {
       id: graph.id,
@@ -116,6 +139,7 @@ export class RelationshipService {
       team: graph.team,
       currentStep: graph.currentStep,
       knowledgeTopics,
+      preferences,
       connectionCount: graph.connections?.length ?? 0,
       beliefCount: graph.beliefs?.length ?? 0
     };

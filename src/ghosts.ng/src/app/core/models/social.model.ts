@@ -10,6 +10,7 @@ export interface SocialGraphSummary {
   team?: string;
   currentStep: number;
   knowledgeTopics: KnowledgeTopic[];
+  preferences: PreferenceSummary[];
   connectionCount: number;
   beliefCount: number;
 }
@@ -56,4 +57,11 @@ export interface KnowledgeDecay {
   topic: string;
   totalDecay: number;
   instances: number;
+}
+
+export interface PreferenceSummary {
+  name: string;
+  weight: number;
+  strength: number;
+  count: number;
 }

@@ -37,28 +37,20 @@ public class NpcService(ApplicationDbContext context) : INpcService
     public async Task<IEnumerable<NpcRecord>> GetAll()
     {
         return await _context.Npcs
-            .Include(n => n.NpcSocialGraph)
-                .ThenInclude(sg => sg.Connections)
-            .Include(n => n.NpcSocialGraph)
-                .ThenInclude(sg => sg.Knowledge)
-            .Include(n => n.NpcSocialGraph)
-                .ThenInclude(sg => sg.Beliefs)
-            .Include(n => n.NpcSocialGraph)
-                .ThenInclude(sg => sg.Preferences)
+            .Include(n => n.Connections)
+            .Include(n => n.Knowledge)
+            .Include(n => n.Beliefs)
+            .Include(n => n.Preferences)
             .ToListAsync();
     }
 
     public async Task<IEnumerable<NpcRecord>> GetEnclave(string campaign, string enclave)
     {
         return await _context.Npcs
-            .Include(n => n.NpcSocialGraph)
-                .ThenInclude(sg => sg.Connections)
-            .Include(n => n.NpcSocialGraph)
-                .ThenInclude(sg => sg.Knowledge)
-            .Include(n => n.NpcSocialGraph)
-                .ThenInclude(sg => sg.Beliefs)
-            .Include(n => n.NpcSocialGraph)
-                .ThenInclude(sg => sg.Preferences)
+            .Include(n => n.Connections)
+            .Include(n => n.Knowledge)
+            .Include(n => n.Beliefs)
+            .Include(n => n.Preferences)
             .Where(x => x.Campaign == campaign && x.Enclave == enclave)
             .ToListAsync();
     }
@@ -89,14 +81,10 @@ public class NpcService(ApplicationDbContext context) : INpcService
     public async Task<IEnumerable<NpcRecord>> GetTeam(string campaign, string enclave, string team)
     {
         return await _context.Npcs
-            .Include(n => n.NpcSocialGraph)
-                .ThenInclude(sg => sg.Connections)
-            .Include(n => n.NpcSocialGraph)
-                .ThenInclude(sg => sg.Knowledge)
-            .Include(n => n.NpcSocialGraph)
-                .ThenInclude(sg => sg.Beliefs)
-            .Include(n => n.NpcSocialGraph)
-                .ThenInclude(sg => sg.Preferences)
+            .Include(n => n.Connections)
+            .Include(n => n.Knowledge)
+            .Include(n => n.Beliefs)
+            .Include(n => n.Preferences)
             .Where(x => x.Campaign == campaign && x.Enclave == enclave && x.Team == team)
             .ToListAsync();
     }
@@ -104,14 +92,10 @@ public class NpcService(ApplicationDbContext context) : INpcService
     public async Task<NpcRecord> GetById(Guid id)
     {
         return await _context.Npcs
-            .Include(n => n.NpcSocialGraph)
-                .ThenInclude(sg => sg.Connections)
-            .Include(n => n.NpcSocialGraph)
-                .ThenInclude(sg => sg.Knowledge)
-            .Include(n => n.NpcSocialGraph)
-                .ThenInclude(sg => sg.Beliefs)
-            .Include(n => n.NpcSocialGraph)
-                .ThenInclude(sg => sg.Preferences)
+            .Include(n => n.Connections)
+            .Include(n => n.Knowledge)
+            .Include(n => n.Beliefs)
+            .Include(n => n.Preferences)
             .FirstOrDefaultAsync(x => x.Id == id);
     }
 
@@ -166,11 +150,6 @@ public class NpcService(ApplicationDbContext context) : INpcService
                     npc.Team = team.Name;
                     npc.Campaign = config.Campaign;
                     npc.Enclave = enclave.Name;
-                    npc.NpcSocialGraph = new NpcSocialGraph
-                    {
-                        Id = npc.Id,
-                        Name = npc.NpcProfile.Name.ToString()
-                    };
 
                     _context.Npcs.Add(npc);
                     createdNpcs.Add(npc);

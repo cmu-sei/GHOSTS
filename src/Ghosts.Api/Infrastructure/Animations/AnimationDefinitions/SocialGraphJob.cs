@@ -85,27 +85,27 @@ public class SocialGraphJob
 
             // Use Include to eagerly load navigation properties
             var npc = await context.Npcs
-                .Include(n => n.NpcSocialGraph)
-                    .ThenInclude(sg => sg.Connections)
-                .Include(n => n.NpcSocialGraph)
-                    .ThenInclude(sg => sg.Knowledge)
-                .Include(n => n.NpcSocialGraph)
-                    .ThenInclude(sg => sg.Beliefs)
-                .Include(n => n.NpcSocialGraph)
-                    .ThenInclude(sg => sg.Preferences)
+                .Include(n => n.Connections)
+                .Include(n => n.Knowledge)
+                .Include(n => n.Beliefs)
+                .Include(n => n.Preferences)
                 .FirstOrDefaultAsync(n => n.Id == npcId, _token);
 
             if (npc == null) return;
 
-            var graph = npc.NpcSocialGraph ?? await InitializeGraphAsync(npc, context);
-            if (graph.CurrentStep > _config.AnimatorSettings.Animations.SocialGraph.MaximumSteps)
+            // Initialize connections if this is a new NPC
+            if (npc.Connections == null || !npc.Connections.Any())
+            {
+                await InitializeConnectionsAsync(npc, context);
+            }
+
+            if (npc.CurrentStep > _config.AnimatorSettings.Animations.SocialGraph.MaximumSteps)
                 return;
 
-            graph.CurrentStep++;
-            graph.UpdatedUtc = DateTime.UtcNow;
+            npc.CurrentStep++;
 
-            var interactCount = _random.Value.NextDouble().GetNumberByDecreasingWeights(0, graph.Connections.Count, 0.4);
-            var targets = graph.Connections.RandPick(interactCount);
+            var interactCount = _random.Value.NextDouble().GetNumberByDecreasingWeights(0, npc.Connections.Count, 0.4);
+            var targets = npc.Connections.RandPick(interactCount);
 
             // if no one knows anyone, It's hard to get started, so "meet someone at the coffee counter"
             if(!targets.Any())
@@ -113,22 +113,22 @@ public class SocialGraphJob
 
             foreach (var target in targets)
             {
-                var topic = TryLearn(graph, context);
+                var topic = TryLearn(npc, context);
                 if (!string.IsNullOrEmpty(topic))
                 {
-                    var learning = new NpcLearning(graph.Id, target.ConnectedNpcId, npc.Id, topic, graph.CurrentStep, 1);
-                    graph.Knowledge.Add(learning);
-                    await _hub.Clients.All.SendAsync("show", graph.CurrentStep, target.ConnectedNpcId, "knowledge",
+                    var learning = new NpcLearning(npc.Id, target.ConnectedNpcId, npc.Id, topic, npc.CurrentStep, 1);
+                    npc.Knowledge.Add(learning);
+                    await _hub.Clients.All.SendAsync("show", npc.CurrentStep, target.ConnectedNpcId, "knowledge",
                         $"learned more about {topic} (1)", DateTime.Now.ToString(CultureInfo.InvariantCulture), _token);
 
                     if (learning.FromNpcId == npc.Id) continue; // can't improve the relationship with oneself (philosophically true?
-                    var connection = graph.Connections.FirstOrDefault(c => c.ConnectedNpcId == learning.FromNpcId);
+                    var connection = npc.Connections.FirstOrDefault(c => c.ConnectedNpcId == learning.FromNpcId);
                     if (connection != null)
                     {
                         connection.RelationshipStatus++;
                         connection.UpdatedUtc = DateTime.UtcNow;
                         await Task.Delay(1500, _token);
-                        await _hub.Clients.All.SendAsync("show", graph.CurrentStep, target.ConnectedNpcId, "relationship",
+                        await _hub.Clients.All.SendAsync("show", npc.CurrentStep, target.ConnectedNpcId, "relationship",
                             $"{npc.NpcProfile.Name} improved relationship with {target.Name}",
                             DateTime.Now.ToString(CultureInfo.InvariantCulture), _token);
                     }
@@ -139,14 +139,14 @@ public class SocialGraphJob
                         {
                             var newConn = new NpcSocialConnection()
                             {
-                                Id = $"{graph.Id}:{newConnection.Id}",
+                                Id = $"{npc.Id}:{newConnection.Id}",
                                 ConnectedNpcId = newConnection.Id,
                                 Name = newConnection.NpcProfile.Name.ToString(),
-                                SocialGraphId = graph.Id
+                                NpcId = npc.Id
                             };
-                            graph.Connections.Add(newConn);
+                            npc.Connections.Add(newConn);
                             await Task.Delay(1500, _token);
-                            await _hub.Clients.All.SendAsync("show", graph.CurrentStep, target.ConnectedNpcId, "relationship",
+                            await _hub.Clients.All.SendAsync("show", npc.CurrentStep, target.ConnectedNpcId, "relationship",
                                 $"{npc.NpcProfile.Name} improved relationship with {target.Name}",
                                 DateTime.Now.ToString(CultureInfo.InvariantCulture), _token);
                         }
@@ -163,7 +163,7 @@ public class SocialGraphJob
         }
     }
 
-    private async Task<NpcSocialGraph> InitializeGraphAsync(NpcRecord npc, ApplicationDbContext context)
+    private async Task InitializeConnectionsAsync(NpcRecord npc, ApplicationDbContext context)
     {
         var connections = await context.Npcs
             .OrderBy(n => n.Enclave)
@@ -171,36 +171,25 @@ public class SocialGraphJob
             .Take(10)
             .ToListAsync(_token);
 
-        var graph = new NpcSocialGraph
+        npc.Connections = connections.Select(c => new NpcSocialConnection
         {
-            Id = npc.Id,
-            Name = npc.NpcProfile.Name.ToString(),
-            Connections = connections.Select(c => new NpcSocialConnection
-            {
-                Id = $"{npc.Id}:{c.Id}",
-                ConnectedNpcId = c.Id,
-                Name = c.NpcProfile.Name.ToString(),
-                SocialGraphId = npc.Id
-            }).ToList()
-        };
-
-        // Add the graph to the context
-        context.NpcSocialGraphs.Add(graph);
-        npc.NpcSocialGraph = graph;
+            Id = $"{npc.Id}:{c.Id}",
+            ConnectedNpcId = c.Id,
+            Name = c.NpcProfile.Name.ToString(),
+            NpcId = npc.Id
+        }).ToList();
 
         await context.SaveChangesAsync(_token);
-        return graph;
     }
 
-    private string TryLearn(NpcSocialGraph graph, ApplicationDbContext context)
+    private string TryLearn(NpcRecord npc, ApplicationDbContext context)
     {
-        var npc = context.Npcs.FirstOrDefault(n => n.Id == graph.Id);
         if (npc == null) return string.Empty;
 
         var chance = _config.AnimatorSettings.Animations.SocialGraph.ChanceOfKnowledgeTransfer;
         chance += npc.NpcProfile.Education.Degrees.Count * 0.1;
         chance += npc.NpcProfile.MentalHealth.OverallPerformance * 0.1;
-        chance += graph.Knowledge.Count * 0.1;
+        chance += npc.Knowledge.Count * 0.1;
 
         if (!chance.ChanceOfThisValue()) return string.Empty;
 
@@ -208,7 +197,7 @@ public class SocialGraphJob
         foreach (var k in _knowledgeTopics)
         {
             if (!randomizer.Contains(k))
-                randomizer.Add(k, graph.Knowledge.Count(x => x.Topic == k) + 1);
+                randomizer.Add(k, npc.Knowledge.Count(x => x.Topic == k) + 1);
         }
 
         return randomizer.NextWithReplacement();

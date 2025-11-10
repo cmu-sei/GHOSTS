@@ -23,44 +23,44 @@ public class SocialController(ApplicationDbContext context) : Controller
     private static readonly Logger _log = LogManager.GetCurrentClassLogger();
     private readonly ApplicationSettings _configuration = Program.ApplicationSettings;
 
-    [ProducesResponseType(typeof(IReadOnlyList<NpcSocialGraph>), 200)]
+    [ProducesResponseType(typeof(IReadOnlyList<NpcRecord>), 200)]
     [SwaggerOperation("SocialGraphsGet")]
     [HttpGet]
-    public async Task<IReadOnlyList<NpcSocialGraph>> Index()
+    public async Task<IReadOnlyList<NpcRecord>> Index()
     {
         if (!IsSocialGraphEnabled())
         {
-            return new List<NpcSocialGraph>();
+            return new List<NpcRecord>();
         }
 
-        var graphs = await LoadSocialGraphsAsync();
-        if (graphs == null)
+        var npcs = await LoadNpcsAsync();
+        if (npcs == null)
         {
-            return new List<NpcSocialGraph>();
+            return new List<NpcRecord>();
         }
 
-        _log.Info("SocialGraph loaded from disk.");
-        return graphs;
+        _log.Info("NPCs with social data loaded from database.");
+        return npcs;
     }
 
-    [ProducesResponseType(typeof(NpcSocialGraph), 200)]
+    [ProducesResponseType(typeof(NpcRecord), 200)]
     [SwaggerOperation("SocialGraphsGetById")]
     [HttpGet("{id}")]
-    public async Task<NpcSocialGraph> Detail(Guid id)
+    public async Task<NpcRecord> Detail(Guid id)
     {
         if (!IsSocialGraphEnabled())
         {
-            return new NpcSocialGraph();
+            return new NpcRecord();
         }
 
-        var graph = await LoadGraphByIdAsync(id);
-        if (graph == null)
+        var npc = await LoadNpcByIdAsync(id);
+        if (npc == null)
         {
-            return new NpcSocialGraph();
+            return new NpcRecord();
         }
 
-        _log.Info("SocialGraph loaded from disk.");
-        return graph;
+        _log.Info("NPC with social data loaded from database.");
+        return npc;
     }
 
     [ProducesResponseType(typeof(FileContentResult), 200)]
@@ -68,14 +68,14 @@ public class SocialController(ApplicationDbContext context) : Controller
     [HttpGet("{id}/file")]
     public async Task<IActionResult> File(Guid id)
     {
-        var graph = await LoadGraphByIdAsync(id);
-        if (graph == null)
+        var npc = await LoadNpcByIdAsync(id);
+        if (npc == null)
         {
             return null;
         }
 
-        _log.Info("SocialGraph loaded from disk.");
-        var interactions = CreateInteractionMap(graph);
+        _log.Info("NPC social data loaded from database.");
+        var interactions = CreateInteractionMap(npc);
 
         var content = JsonConvert.SerializeObject(interactions); // Serialize the interaction map to JSON
         var fileBytes = Encoding.ASCII.GetBytes(content); // Convert JSON to bytes
@@ -88,35 +88,35 @@ public class SocialController(ApplicationDbContext context) : Controller
         return _configuration.AnimatorSettings.Animations.SocialGraph.IsEnabled;
     }
 
-    private async Task<List<NpcSocialGraph>> LoadSocialGraphsAsync()
+    private async Task<List<NpcRecord>> LoadNpcsAsync()
     {
-        var graphs = await context.NpcSocialGraphs
-            .Include(sg => sg.Connections)
+        var npcs = await context.Npcs
+            .Include(n => n.Connections)
                 .ThenInclude(c => c.Interactions)
-            .Include(sg => sg.Knowledge)
-            .Include(sg => sg.Beliefs)
-            .Include(sg => sg.Preferences)
+            .Include(n => n.Knowledge)
+            .Include(n => n.Beliefs)
+            .Include(n => n.Preferences)
             .ToListAsync();
-        return graphs;
+        return npcs;
     }
 
-    private async Task<NpcSocialGraph> LoadGraphByIdAsync(Guid id)
+    private async Task<NpcRecord> LoadNpcByIdAsync(Guid id)
     {
-        var graphs = await LoadSocialGraphsAsync();
-        return graphs?.FirstOrDefault(x => x.Id == id);
+        var npcs = await LoadNpcsAsync();
+        return npcs?.FirstOrDefault(x => x.Id == id);
     }
 
-    private static InteractionMap CreateInteractionMap(NpcSocialGraph graph)
+    private static InteractionMap CreateInteractionMap(NpcRecord npc)
     {
         var interactions = new InteractionMap();
-        var startTime = DateTime.Now.AddMinutes(-graph.Connections.Count).AddMinutes(-1); // Adjust start time
+        var startTime = DateTime.Now.AddMinutes(-npc.Connections.Count).AddMinutes(-1); // Adjust start time
         var endTime = DateTime.Now.AddMinutes(1); // End time
 
-        // Create a node for the main graph
-        interactions.Nodes.Add(new Node { Id = graph.Id.ToString(), Start = startTime, End = endTime });
+        // Create a node for the main NPC
+        interactions.Nodes.Add(new Node { Id = npc.Id.ToString(), Start = startTime, End = endTime });
 
         // Add nodes for each connection
-        foreach (var connection in graph.Connections ?? Enumerable.Empty<NpcSocialConnection>())
+        foreach (var connection in npc.Connections ?? Enumerable.Empty<NpcSocialConnection>())
         {
             if (connection.Interactions == null || connection.Interactions.Count < 1) continue;
 
@@ -131,7 +131,7 @@ public class SocialController(ApplicationDbContext context) : Controller
         }
 
         // Add links for each knowledge entry
-        foreach (var learning in graph.Knowledge ?? Enumerable.Empty<NpcLearning>())
+        foreach (var learning in npc.Knowledge ?? Enumerable.Empty<NpcLearning>())
         {
             interactions.Links.Add(new Link
             {

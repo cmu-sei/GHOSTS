@@ -15,7 +15,7 @@ public class NpcSocialConnection
     public string Id { get; set; }
 
     [Required]
-    public Guid SocialGraphId { get; set; }
+    public Guid NpcId { get; set; }
 
     [Required]
     public Guid ConnectedNpcId { get; set; }
@@ -33,8 +33,8 @@ public class NpcSocialConnection
     public DateTime UpdatedUtc { get; set; }
 
     // Navigation properties
-    [ForeignKey("SocialGraphId")]
-    public virtual NpcSocialGraph SocialGraph { get; set; }
+    [ForeignKey("NpcId")]
+    public virtual NpcRecord Npc { get; set; }
 
     public virtual ICollection<NpcInteraction> Interactions { get; set; }
 

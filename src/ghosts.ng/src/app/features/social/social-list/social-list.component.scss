@@ -191,6 +191,13 @@
             background-color: #fce4ec;
             color: #ad1457;
           }
+
+          &.more-chip {
+            background-color: #e0e0e0;
+            color: #616161;
+            font-weight: 600;
+            font-style: italic;
+          }
         }
       }
 
@@ -199,6 +206,50 @@
         color: rgba(0, 0, 0, 0.4);
         font-style: italic;
         margin: 0;
+      }
+    }
+
+    .preferences-section {
+      margin: 16px 0;
+
+      h4 {
+        margin: 0 0 12px 0;
+        font-size: 13px;
+        font-weight: 500;
+        color: rgba(0, 0, 0, 0.6);
+      }
+
+      .preference-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+
+        .preference-chip {
+          font-size: 10px;
+          height: 22px;
+          padding: 0 6px;
+          display: inline-flex;
+          align-items: center;
+          gap: 3px;
+          border-radius: 11px;
+          background-color: #e8eaf6;
+          color: #3f51b5;
+
+          .pref-strength {
+            background: rgba(63, 81, 181, 0.2);
+            padding: 1px 4px;
+            border-radius: 8px;
+            font-size: 9px;
+            font-weight: 600;
+          }
+
+          &.more-chip {
+            background-color: #e0e0e0;
+            color: #616161;
+            font-weight: 600;
+            font-style: italic;
+          }
+        }
       }
     }
 

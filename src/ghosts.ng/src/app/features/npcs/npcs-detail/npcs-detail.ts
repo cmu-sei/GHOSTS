@@ -87,7 +87,7 @@ export class NpcsDetail implements OnInit {
         this.loadingConnections.set(false);
         console.log('Loaded connections:', connections);
         for(const conn of connections) {
-          conn.avatar = `${this.apiUrl}/npcs/${conn.id}/photo`;
+          conn.avatar = `${this.apiUrl}/npcs/${conn.connectedNpcId}/photo`;
         }
       },
       error: (err) => {

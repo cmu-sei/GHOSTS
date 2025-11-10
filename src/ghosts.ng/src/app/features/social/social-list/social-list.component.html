@@ -225,11 +225,17 @@
         <h4>Knowledge Topics</h4>
         @if (graph.knowledgeTopics && graph.knowledgeTopics.length > 0) {
         <mat-chip-set class="knowledge-topics">
-          @for (topic of graph.knowledgeTopics; track topic.topic) {
+          @for (topic of getDisplayedTopics(graph.knowledgeTopics); track topic.topic) {
           <mat-chip [class]="'knowledge-chip ' + getKnowledgeStrengthClass(topic.strength)"
             [matTooltip]="'Value: ' + topic.totalValue + ' | Count: ' + topic.count">
             {{ topic.topic }}
             <span class="topic-count">{{ topic.count }}</span>
+          </mat-chip>
+          }
+          @if (getRemainingTopicsCount(graph.knowledgeTopics) > 0) {
+          <mat-chip class="knowledge-chip more-chip"
+            [matTooltip]="'Click to view all ' + graph.knowledgeTopics.length + ' topics'">
+            +{{ getRemainingTopicsCount(graph.knowledgeTopics) }} more
           </mat-chip>
           }
         </mat-chip-set>
@@ -237,6 +243,26 @@
         <p class="no-topics">No knowledge topics yet</p>
         }
       </div>
+
+      @if (graph.preferences && graph.preferences.length > 0) {
+      <div class="preferences-section">
+        <h4>Preferences</h4>
+        <mat-chip-set class="preference-chips">
+          @for (pref of getDisplayedTopics(graph.preferences); track pref.name) {
+          <mat-chip class="preference-chip"
+            [matTooltip]="'Strength: ' + (pref.strength * 100).toFixed(1) + '% | Weight: ' + (pref.weight * 100).toFixed(1) + '%'">
+            {{ pref.name }}
+            <span class="pref-strength">{{ (pref.strength * 100).toFixed(0) }}%</span>
+          </mat-chip>
+          }
+          @if (getRemainingTopicsCount(graph.preferences) > 0) {
+          <mat-chip class="preference-chip more-chip">
+            +{{ getRemainingTopicsCount(graph.preferences) }} more
+          </mat-chip>
+          }
+        </mat-chip-set>
+      </div>
+      }
       <div class="card-footer">
         <div class="metrics">
           <span matTooltip="Connections">
