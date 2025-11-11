@@ -61,6 +61,7 @@ export interface ContentEngineSettings {
   source: string;
   model?: string;
   apiKey?: string;
+  host?: string;
   temperature?: number;
 }
 

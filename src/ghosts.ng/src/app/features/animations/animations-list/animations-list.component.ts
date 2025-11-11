@@ -69,8 +69,9 @@ export class AnimationsListComponent implements OnInit {
       turnLength: 5000,
       maximumSteps: 100,
       contentEngine: {
-        source: "OpenAi",
-        model: "gpt-4",
+        source: "ollama",
+        model: "mistral:7b",
+        host: "http://localhost:11434",
         temperature: 0.7
       }
     },
