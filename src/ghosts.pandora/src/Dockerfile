@@ -18,7 +18,10 @@ CMD ["dotnet", "run"]
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS prod
 
 # Install SkiaSharp dependencies
-RUN apt-get update && apt-get install -y \
+RUN apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    apt-get update -o Acquire::AllowInsecureRepositories=true -o Acquire::AllowDowngradeToInsecureRepositories=true && \
+    apt-get install -y -o APT::Get::AllowUnauthenticated=true \
     libfontconfig1 \
     libfreetype6 \
     libx11-6 \
@@ -46,7 +49,7 @@ ENV ASPNETCORE_URLS=http://*:5000
 ENV MODE_TYPE=social \
     DEFAULT_THEME=facebook \
     SITE_TYPE=news \
-    SITE_NAME="Daily Chronicle" \
+    SITE_NAME="The Daily Paranormal" \
     ARTICLE_COUNT=12
 
 # To override these values, use:
