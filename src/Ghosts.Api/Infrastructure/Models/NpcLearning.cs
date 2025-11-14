@@ -7,7 +7,7 @@ using System.Text.Json.Serialization;
 
 namespace Ghosts.Api.Infrastructure.Models;
 
-[Table("npclearning")]
+[Table("npc_learning")]
 public class NpcLearning
 {
     [Key]

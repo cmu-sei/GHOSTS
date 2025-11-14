@@ -6,13 +6,15 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { MatTabsModule } from '@angular/material/tabs';
 import { ChangeDetectionStrategy } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   SocialGraphSummary,
-  ConnectionSummary
+  ConnectionSummary,
+  Npc
 } from '../../../core/models';
-import { RelationshipService } from '../../../core/services';
+import { RelationshipService, NpcService } from '../../../core/services';
 import { environment } from '../../../../environments/environment';
 
 @Component({
@@ -24,7 +26,8 @@ import { environment } from '../../../../environments/environment';
     MatButtonModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
-    MatExpansionModule
+    MatExpansionModule,
+    MatTabsModule
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './npcs-detail.html',
@@ -33,10 +36,12 @@ import { environment } from '../../../../environments/environment';
 export class NpcsDetail implements OnInit {
   private readonly apiUrl = `${environment.apiUrl}`;
   private readonly relationshipService = inject(RelationshipService);
+  private readonly npcService = inject(NpcService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
 
+  protected readonly npc = signal<Npc | null>(null);
   protected readonly npcGraph = signal<SocialGraphSummary | null>(null);
   protected readonly connections = signal<ConnectionSummary[]>([]);
   protected readonly loading = signal(true);
@@ -58,21 +63,29 @@ export class NpcsDetail implements OnInit {
     this.loading.set(true);
     this.error.set(null);
 
+    // Load full NPC profile
+    this.npcService.getNpc(npcId).subscribe({
+      next: (npc) => {
+        this.npc.set(npc);
+        this.loading.set(false);
+      },
+      error: (err) => {
+        this.error.set(err.message || 'Failed to load NPC profile');
+        this.loading.set(false);
+      }
+    });
+
+    // Load social graph summary
     this.relationshipService.getSocialGraphSummaries().subscribe({
       next: (graphs) => {
         const graph = graphs.find(g => g.npcId === npcId || g.id === npcId);
         if (graph) {
           this.npcGraph.set(graph);
-          this.loading.set(false);
           this.loadConnections(graph.id);
-        } else {
-          this.error.set('NPC not found');
-          this.loading.set(false);
         }
       },
       error: (err) => {
-        this.error.set(err.message || 'Failed to load NPC details');
-        this.loading.set(false);
+        console.error('Failed to load social graph:', err);
       }
     });
   }
@@ -132,5 +145,23 @@ export class NpcsDetail implements OnInit {
   protected getDecayCount(connection: ConnectionSummary): number {
     if (!connection.knowledgeTransfers) return 0;
     return connection.knowledgeTransfers.filter(k => k.value < 0).length;
+  }
+
+  protected getNpcPhotoUrl(npcId?: string): string {
+    return npcId ? `${this.apiUrl}/npcs/${npcId}/photo` : '';
+  }
+
+  protected getNpcName(): string {
+    const name = this.npc()?.npcProfile?.name;
+    if (!name) return 'Unknown NPC';
+    return [name.prefix, name.first, name.middle, name.last, name.suffix]
+      .filter(part => !!part && part.trim().length > 0)
+      .join(' ');
+  }
+
+  protected navigateToNpc(npcId: string): void {
+    if (npcId) {
+      this.router.navigate(['/npcs', npcId]);
+    }
   }
 }

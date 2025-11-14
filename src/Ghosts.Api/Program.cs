@@ -120,6 +120,8 @@ public class Program
         builder.Services.AddScoped<ITrackableService, TrackableService>();
         builder.Services.AddScoped<ISurveyService, SurveyService>();
         builder.Services.AddScoped<INpcService, NpcService>();
+        builder.Services.AddScoped<IScenarioService, ScenarioService>();
+        builder.Services.AddScoped<IExecutionService, ExecutionService>();
 
         builder.Services.AddScoped<IClientResultsService, ClientResultsService>();
         builder.Services.AddScoped<IClientIdService, ClientIdService>();

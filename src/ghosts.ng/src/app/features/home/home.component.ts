@@ -3,7 +3,6 @@ import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDividerModule } from '@angular/material/divider';
 import { ChangeDetectionStrategy } from '@angular/core';
-import { DatePipe, JsonPipe } from '@angular/common';
 import { ApiStatus } from '../../core/models';
 import { StatusService } from '../../core/services';
 
@@ -12,9 +11,7 @@ import { StatusService } from '../../core/services';
   imports: [
     MatCardModule,
     MatProgressSpinnerModule,
-    MatDividerModule,
-    DatePipe,
-    JsonPipe
+    MatDividerModule
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -27,34 +24,19 @@ import { StatusService } from '../../core/services';
         <h1>Welcome to GHOSTS</h1>
 
         <div class="description">
+          <p><strong>Realistic User Behavior Simulation and Orchestration for Cyber/Cognitive Training, Exercises, and Research</strong></p>
           <p>
-            GHOSTS clients simulates what anyone might do at a computer, creating documents,
-            browsing websites, and downloading files.
+            GHOSTS is an agent orchestration framework that simulates realistic users
+            on all types of computer systems, generating human-like activity across
+            applications, networks, and workflows. Beyond simple automation, it can
+            dynamically reason, chat, and create content via integrated LLMs, enabling
+            adaptive, context-aware behavior. Designed for cyber training, research,
+            and simulation, it produces realistic network traffic, supports complex
+            multi-agent scenarios, and leaves behind realistic artifacts. Its modular
+            architecture allows the addition of new agents, behaviors, and lightweight
+            clients, making it a flexible platform for high-fidelity simulations.
           </p>
-          <p>
-            Plus, GHOSTS drives all sorts of popular applications on many versions of Windows
-            and Linux machines.
-          </p>
-          <p>
-            Whether you're a friendly administrator or a powerful cyber adversary, GHOSTS can
-            replicate that agent's expected behavior.
-          </p>
-        </div>
-
-        <mat-divider class="section-divider"></mat-divider>
-
-        <div class="quick-links">
-          <h3>Quick Links</h3>
-          <div class="links-grid">
-            <a href="https://cmu-sei.github.io/GHOSTS/" target="_blank" rel="noopener noreferrer" class="link-item">
-              <span class="link-icon">📖</span>
-              <span>GHOSTS Documentation</span>
-            </a>
-            <a href="https://github.com/cmu-sei/GHOSTS" target="_blank" rel="noopener noreferrer" class="link-item">
-              <span class="link-icon">💻</span>
-              <span>GitHub Repository</span>
-            </a>
-          </div>
+          <p class="small">If you find GHOSTS useful for your needs, please consider <a href="https://github.com/cmu-sei/GHOSTS">starring the repository</a>. Otherwise, please use the quick links at right to get started.</p>
         </div>
       </div>
 
@@ -76,51 +58,56 @@ import { StatusService } from '../../core/services';
             } @else if (status()) {
               <div class="status-data">
                 <div class="status-item">
-                  <span class="status-label">Version:</span>
-                  <span class="status-value">{{ status()?.version }}</span>
-                </div>
-                <div class="status-item">
-                  <span class="status-label">File Version:</span>
-                  <span class="status-value">{{ status()?.versionFile }}</span>
-                </div>
-                <mat-divider></mat-divider>
-                <div class="status-item highlight">
                   <span class="status-label">Machines:</span>
                   <span class="status-value">{{ status()?.machines }}</span>
                 </div>
-                <div class="status-item highlight">
+                <div class="status-item">
                   <span class="status-label">Groups:</span>
                   <span class="status-value">{{ status()?.groups }}</span>
                 </div>
-                <div class="status-item highlight">
+                <div class="status-item">
                   <span class="status-label">NPCs:</span>
                   <span class="status-value">{{ status()?.npcs }}</span>
                 </div>
-                <mat-divider></mat-divider>
-                <div class="status-item">
-                  <span class="status-label">Last Updated:</span>
-                  <span class="status-value">{{ status()?.created | date:'medium' }}</span>
+                <div class="status-item version-item">
+                  <span class="status-label">Version:</span>
+                  <span class="status-value">{{ status()?.version }}</span>
+                </div>
+                <div class="status-item version-item">
+                  <span class="status-label">File Version:</span>
+                  <span class="status-value">{{ status()?.versionFile }}</span>
+                </div>
+                <div class="status-item version-item">
+                  <span class="status-label">dotnet:</span>
+                  <span class="status-value">{{ status()?.versionEnvironment }}</span>
                 </div>
               </div>
-
-              <details class="json-details">
-                <summary>View Raw JSON</summary>
-                <pre class="json-display">{{ status() | json }}</pre>
-              </details>
             }
           </mat-card-content>
         </mat-card>
+
+        <div class="quick-links">
+          <h3>Quick Links</h3>
+          <div class="links-grid">
+            <a href="https://cmu-sei.github.io/GHOSTS/" target="_blank" rel="noopener noreferrer" class="link-item">
+              <span class="link-icon">📖</span>
+              <span>Documentation</span>
+            </a>
+            <a href="https://github.com/cmu-sei/GHOSTS" target="_blank" rel="noopener noreferrer" class="link-item">
+              <span class="link-icon">💻</span>
+              <span>GitHub</span>
+            </a>
+          </div>
+        </div>
       </div>
     </div>
   `,
   styles: [`
     .home-container {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 4fr 1fr;
       gap: 32px;
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 16px;
+      padding: 24px;
     }
 
     @media (max-width: 768px) {
@@ -159,7 +146,7 @@ import { StatusService } from '../../core/services';
       font-size: 2.5rem;
       font-weight: 300;
       margin: 0;
-      color: #3f51b5;
+      color: rgba(0, 0, 0, 0.87);
     }
 
     .description {
@@ -172,42 +159,45 @@ import { StatusService } from '../../core/services';
       margin: 0 0 16px 0;
     }
 
-    .section-divider {
-      margin: 16px 0;
+    .quick-links {
+      margin-top: 24px;
+    }
+
+    .small {
+      font-size: 0.85rem;
     }
 
     .quick-links h3 {
-      font-size: 1.25rem;
-      font-weight: 500;
-      margin: 0 0 16px 0;
+      font-size: 0.95rem;
+      font-weight: normal;
+      margin: 0 0 12px 0;
     }
 
     .links-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
     }
 
     .link-item {
       display: flex;
       align-items: center;
       gap: 8px;
-      padding: 12px 16px;
+      padding: 10px 12px;
       background: #f5f5f5;
-      border-radius: 8px;
+      border-radius: 6px;
       text-decoration: none;
-      color: #3f51b5;
-      transition: all 0.3s ease;
+      color: rgba(0, 0, 0, 0.87);
+      transition: all 0.2s ease;
+      font-size: 0.85rem;
     }
 
     .link-item:hover {
-      background: #e8eaf6;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      background: #e0e0e0;
     }
 
     .link-icon {
-      font-size: 24px;
+      font-size: 18px;
     }
 
     .status-section {
@@ -221,9 +211,9 @@ import { StatusService } from '../../core/services';
     }
 
     mat-card-title {
-      font-size: 1.1rem;
-      font-weight: 500;
-      margin-bottom: 16px;
+      font-size: 0.95rem;
+      font-weight: normal;
+      margin-bottom: 12px;
     }
 
     .loading-container,
@@ -232,7 +222,7 @@ import { StatusService } from '../../core/services';
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 32px;
+      padding: 24px;
     }
 
     .error-message {
@@ -243,65 +233,32 @@ import { StatusService } from '../../core/services';
     .status-data {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 8px;
     }
 
     .status-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 8px 0;
+      padding: 4px 0;
     }
 
-    .status-item.highlight {
-      background: #f5f5f5;
-      padding: 12px 16px;
-      border-radius: 4px;
-      margin: 4px 0;
+    .status-item.version-item .status-label,
+    .status-item.version-item .status-value {
+      color: rgba(0, 0, 0, 0.4);
+      font-size: 0.8rem;
     }
 
     .status-label {
-      font-weight: 500;
+      font-weight: normal;
       color: rgba(0, 0, 0, 0.6);
-      font-size: 0.875rem;
+      font-size: 0.85rem;
     }
 
     .status-value {
-      font-weight: 600;
-      color: #3f51b5;
-      font-size: 0.95rem;
-    }
-
-    .status-item.highlight .status-value {
-      font-size: 1.25rem;
-    }
-
-    .json-details {
-      margin-top: 16px;
-      padding-top: 16px;
-      border-top: 1px solid rgba(0, 0, 0, 0.12);
-    }
-
-    .json-details summary {
-      cursor: pointer;
-      color: #3f51b5;
-      font-weight: 500;
-      user-select: none;
-    }
-
-    .json-details summary:hover {
-      text-decoration: underline;
-    }
-
-    .json-display {
-      margin-top: 12px;
-      padding: 16px;
-      background: #f5f5f5;
-      border: 1px solid #e0e0e0;
-      border-radius: 4px;
-      overflow-x: auto;
-      font-size: 0.875rem;
-      line-height: 1.5;
+      font-weight: normal;
+      color: rgba(0, 0, 0, 0.87);
+      font-size: 0.85rem;
     }
   `]
 })

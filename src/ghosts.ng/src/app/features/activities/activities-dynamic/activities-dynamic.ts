@@ -317,11 +317,43 @@ export class ActivitiesDynamicComponent implements OnInit, OnDestroy {
   private showMessageBubble(node: NetworkNode, type: string, message: any): void {
     if (!this.svg) return;
 
+    const bubbleWidth = 180;
+    const bubbleHeight = 100;
+    const offset = 51;
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
+    // Calculate x position - if node is in right half, put bubble on left side
+    let bubbleX: number;
+    if (node.x! > viewportWidth / 2) {
+      // Node is on right side, put bubble on left
+      bubbleX = node.x! - bubbleWidth - offset;
+    } else {
+      // Node is on left side, put bubble on right
+      bubbleX = node.x! + offset;
+    }
+
+    // Ensure bubble doesn't go off screen horizontally
+    if (bubbleX < 10) {
+      bubbleX = 10;
+    } else if (bubbleX + bubbleWidth > viewportWidth - 10) {
+      bubbleX = viewportWidth - bubbleWidth - 10;
+    }
+
+    // Calculate y position - prevent overflow on top and bottom
+    let bubbleY = node.y! - 30;
+    if (bubbleY < 10) {
+      bubbleY = 10;
+    } else if (bubbleY + bubbleHeight > viewportHeight - 110) {
+      // Account for bottom console (97px + some padding)
+      bubbleY = viewportHeight - bubbleHeight - 110;
+    }
+
     const box = this.svg.append('foreignObject')
-      .attr('x', node.x! + 51)
-      .attr('y', Math.max(10, node.y! - 30))
-      .attr('width', 180)
-      .attr('height', 100)
+      .attr('x', bubbleX)
+      .attr('y', bubbleY)
+      .attr('width', bubbleWidth)
+      .attr('height', bubbleHeight)
       .style('opacity', 0)
       .transition().duration(135).style('opacity', 1).selection();
 
@@ -343,9 +375,11 @@ export class ActivitiesDynamicComponent implements OnInit, OnDestroy {
       .style('padding', '6px 10px')
       .style('font-size', '12px')
       .style('box-shadow', '2px 2px 6px rgba(0,0,0,0.15)')
-      .style('width', '180px')
-      .style('overflow', 'hidden')
-      .style('text-overflow', 'ellipsis')
+      .style('width', '168px')
+      .style('max-width', '168px')
+      .style('box-sizing', 'border-box')
+      .style('overflow-wrap', 'break-word')
+      .style('word-break', 'break-word')
       .style('white-space', 'normal')
       .style('line-height', '1.4')
       .style('font-family', 'monospace')

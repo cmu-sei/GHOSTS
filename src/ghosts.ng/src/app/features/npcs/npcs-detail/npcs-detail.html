@@ -20,42 +20,583 @@
     Back to NPCs
   </button>
 </div>
-} @else if (npcGraph()) {
-<!-- Detail View -->
+} @else if (npc()) {
+<!-- Profile Detail View -->
 <div class="detail-view">
-  <mat-card class="detail-card">
+  <mat-card class="profile-card">
     <mat-card-header>
-      <mat-card-title>
-        <div class="detail-header">
-          <div class="npc-info">
-            @if (npcGraph()!.avatar) {
-            <img [src]="npcGraph()!.avatar" [alt]="npcGraph()!.name" class="avatar">
-            } @else {
-            <div class="avatar-placeholder">
-              <i class="fas fa-user"></i>
+      <div class="profile-header">
+        <div class="profile-photo">
+          <img [src]="getNpcPhotoUrl(npc()!.id)" [alt]="getNpcName()" class="avatar-large">
+        </div>
+        <div class="profile-info">
+          <h2>{{ getNpcName() }}</h2>
+          @if (npc()!.campaign || npc()!.enclave || npc()!.team) {
+          <div class="badges">
+            @if (npc()!.campaign) {
+            <span class="badge campaign">{{ npc()!.campaign }}</span>
+            }
+            @if (npc()!.enclave) {
+            <span class="badge enclave">{{ npc()!.enclave }}</span>
+            }
+            @if (npc()!.team) {
+            <span class="badge team">{{ npc()!.team }}</span>
+            }
+          </div>
+          }
+          @if (npc()!.createdUtc) {
+          <div class="created-date">
+            <i class="fas fa-calendar"></i>
+            Created: {{ npc()!.createdUtc | date:'medium' }}
+          </div>
+          }
+        </div>
+      </div>
+    </mat-card-header>
+
+    <mat-card-content>
+      <mat-tab-group>
+        <!-- Home Tab -->
+        <mat-tab label="Home">
+          <div class="tab-content">
+            <div class="info-grid">
+              @if (npc()?.npcProfile?.name?.first) {
+              <div class="info-item">
+                <label>First Name</label>
+                <div class="value">{{ npc()!.npcProfile!.name!.first }}</div>
+              </div>
+              }
+              @if (npc()?.npcProfile?.name?.last) {
+              <div class="info-item">
+                <label>Last Name</label>
+                <div class="value">{{ npc()!.npcProfile!.name!.last }}</div>
+              </div>
+              }
+              @if (npc()?.npcProfile?.biologicalSex) {
+              <div class="info-item">
+                <label>Biological Sex</label>
+                <div class="value">{{ npc()!.npcProfile!.biologicalSex }}</div>
+              </div>
+              }
+              @if (npc()?.npcProfile?.health?.height || npc()?.npcProfile?.health?.weight) {
+              <div class="info-item">
+                <label>Height / Weight</label>
+                <div class="value">
+                  {{ npc()!.npcProfile!.health!.height || '?' }}" /
+                  {{ npc()!.npcProfile!.health!.weight || '?' }} lbs.
+                </div>
+              </div>
+              }
+              @if (npc()?.npcProfile?.health?.bloodType) {
+              <div class="info-item">
+                <label>Blood Type</label>
+                <div class="value">{{ npc()!.npcProfile!.health!.bloodType }}</div>
+              </div>
+              }
+              @if (npc()?.npcProfile?.birthdate) {
+              <div class="info-item">
+                <label>Birthdate</label>
+                <div class="value">{{ npc()!.npcProfile!.birthdate | date:'shortDate' }}</div>
+              </div>
+              }
+              @if (npc()?.npcProfile?.homePhone) {
+              <div class="info-item">
+                <label>Home Phone</label>
+                <div class="value">{{ npc()!.npcProfile!.homePhone }}</div>
+              </div>
+              }
+              @if (npc()?.npcProfile?.cellPhone) {
+              <div class="info-item">
+                <label>Cell Phone</label>
+                <div class="value">{{ npc()!.npcProfile!.cellPhone }}</div>
+              </div>
+              }
+              @if (npc()?.npcProfile?.email) {
+              <div class="info-item">
+                <label>Primary Email</label>
+                <div class="value">{{ npc()!.npcProfile!.email }}</div>
+              </div>
+              }
+              @if (npc()?.npcProfile?.password) {
+              <div class="info-item">
+                <label>Password</label>
+                <div class="value">{{ npc()!.npcProfile!.password }}</div>
+              </div>
+              }
+            </div>
+
+            @if (npc()?.npcProfile?.address && npc()!.npcProfile!.address!.length > 0) {
+            <div class="section">
+              <h3>Addresses</h3>
+              @for (addr of npc()!.npcProfile!.address; track $index) {
+              <div class="address-info">
+                @if (addr.addressType) {
+                <div><strong>{{ addr.addressType }}</strong></div>
+                }
+                @if (addr.streetAddress) {
+                <div>{{ addr.streetAddress }}</div>
+                }
+                <div>
+                  @if (addr.city) {
+                  <span>{{ addr.city }}</span>
+                  }
+                  @if (addr.state) {
+                  <span>, {{ addr.state }}</span>
+                  }
+                  @if (addr.postalCode) {
+                  <span> {{ addr.postalCode }}</span>
+                  }
+                </div>
+                @if (addr.country) {
+                <div>{{ addr.country }}</div>
+                }
+              </div>
+              }
             </div>
             }
-            <span>{{ npcGraph()!.name }}</span>
+
+            @if (npc()?.npcProfile?.workstation) {
+            <div class="section">
+              <h3>Default Workstation</h3>
+              <div class="info-grid">
+                @if (npc()!.npcProfile!.workstation!.name) {
+                <div class="info-item">
+                  <label>Name</label>
+                  <div class="value">{{ npc()!.npcProfile!.workstation!.name }}</div>
+                </div>
+                }
+                @if (npc()!.npcProfile!.workstation!.ipAddress) {
+                <div class="info-item">
+                  <label>IP Address</label>
+                  <div class="value">{{ npc()!.npcProfile!.workstation!.ipAddress }}</div>
+                </div>
+                }
+                @if (npc()!.npcProfile!.workstation!.username) {
+                <div class="info-item">
+                  <label>Username</label>
+                  <div class="value">{{ npc()!.npcProfile!.workstation!.username }}</div>
+                </div>
+                }
+                @if (npc()!.npcProfile!.workstation!.domain) {
+                <div class="info-item">
+                  <label>Domain</label>
+                  <div class="value">{{ npc()!.npcProfile!.workstation!.domain }}</div>
+                </div>
+                }
+              </div>
+            </div>
+            }
+
+            @if (npc()?.npcProfile?.accounts && npc()!.npcProfile!.accounts!.length > 0) {
+            <div class="section">
+              <h3>Accounts</h3>
+              <div class="list-items">
+                @for (account of npc()!.npcProfile!.accounts; track $index) {
+                <div class="list-item">
+                  <p><strong>{{ account.username }}</strong> @ {{ account.url }}</p>
+                </div>
+                }
+              </div>
+            </div>
+            }
           </div>
-          <button mat-button (click)="goBack()" class="icon-button">
-            <i class="fas fa-times"></i>
-          </button>
-        </div>
-      </mat-card-title>
+        </mat-tab>
+
+        <!-- Education & Career Tab -->
+        <mat-tab label="Education & Career">
+          <div class="tab-content">
+            @if (npc()?.npcProfile?.education?.degrees && npc()!.npcProfile!.education!.degrees!.length > 0) {
+            <div class="section">
+              <h3>Education</h3>
+              <div class="list-items">
+                @for (degree of npc()!.npcProfile!.education!.degrees; track $index) {
+                <div class="list-item">
+                  @if (degree.level === 'HSDiploma') {
+                  <h4>High School Diploma</h4>
+                  } @else if (degree.level === 'GED') {
+                  <h4>GED</h4>
+                  } @else {
+                  <h4>{{ degree.degreeType }} in {{ degree.major }}</h4>
+                  }
+                  @if (degree.school) {
+                  <p>{{ degree.school.name }}@if (degree.school.location) { <span> ({{ degree.school.location }})</span> }</p>
+                  }
+                </div>
+                }
+              </div>
+            </div>
+            }
+
+            @if (npc()?.npcProfile?.employment?.employmentRecords && npc()!.npcProfile!.employment!.employmentRecords!.length > 0) {
+            <div class="section">
+              <h3>Employment</h3>
+              <div class="list-items">
+                @for (job of npc()!.npcProfile!.employment!.employmentRecords; track $index) {
+                <div class="list-item">
+                  <h4>{{ job.jobTitle }}@if (!job.endDate) { <span> (Current)</span> }</h4>
+                  <p>{{ job.company }}@if (job.department) { <span> - {{ job.department }}</span> }</p>
+                  @if (job.startDate || job.endDate) {
+                  <p class="detail">
+                    {{ job.startDate | date:'shortDate' }}@if (job.endDate) { <span> - {{ job.endDate | date:'shortDate' }}</span> }
+                    @if (job.employmentStatus) { <span> ({{ job.employmentStatus }})</span> }
+                  </p>
+                  }
+                  @if (job.salary) {
+                  <p class="detail">Salary: {{ job.salary | currency }}</p>
+                  }
+                </div>
+                }
+              </div>
+            </div>
+            }
+
+            @if (npc()?.npcProfile?.rank) {
+            <div class="section">
+              <h3>Military Service</h3>
+              <div class="info-grid">
+                @if (npc()!.npcProfile!.rank!.branch) {
+                <div class="info-item">
+                  <label>Branch</label>
+                  <div class="value">{{ npc()!.npcProfile!.rank!.branch }}</div>
+                </div>
+                }
+                @if (npc()!.npcProfile!.rank!.classification) {
+                <div class="info-item">
+                  <label>Classification</label>
+                  <div class="value">{{ npc()!.npcProfile!.rank!.classification }}</div>
+                </div>
+                }
+                @if (npc()!.npcProfile!.rank!.name) {
+                <div class="info-item">
+                  <label>Rank</label>
+                  <div class="value">{{ npc()!.npcProfile!.rank!.name }} ({{ npc()!.npcProfile!.rank!.abbr }})</div>
+                </div>
+                }
+                @if (npc()!.npcProfile!.rank!.pay) {
+                <div class="info-item">
+                  <label>Pay Grade</label>
+                  <div class="value">{{ npc()!.npcProfile!.rank!.pay }}</div>
+                </div>
+                }
+                @if (npc()!.npcProfile!.rank!.billet) {
+                <div class="info-item">
+                  <label>Billet</label>
+                  <div class="value">{{ npc()!.npcProfile!.rank!.billet }}</div>
+                </div>
+                }
+                @if (npc()!.npcProfile!.rank!.mos) {
+                <div class="info-item">
+                  <label>MOS</label>
+                  <div class="value">{{ npc()!.npcProfile!.rank!.mos }}</div>
+                </div>
+                }
+              </div>
+            </div>
+            }
+          </div>
+        </mat-tab>
+
+        <!-- Financial & Travel Tab -->
+        <mat-tab label="Financial & Travel">
+          <div class="tab-content">
+            @if (npc()?.npcProfile?.finances) {
+            <div class="section">
+              <h3>Finances</h3>
+              <div class="info-grid">
+                @if (npc()!.npcProfile!.finances!.netWorth !== undefined) {
+                <div class="info-item">
+                  <label>Net Worth</label>
+                  <div class="value">{{ npc()!.npcProfile!.finances!.netWorth | currency }}</div>
+                </div>
+                }
+                @if (npc()!.npcProfile!.finances!.totalDebt !== undefined) {
+                <div class="info-item">
+                  <label>Total Debt</label>
+                  <div class="value">{{ npc()!.npcProfile!.finances!.totalDebt | currency }}</div>
+                </div>
+                }
+              </div>
+              @if (npc()!.npcProfile!.finances!.creditCards && npc()!.npcProfile!.finances!.creditCards!.length > 0) {
+              <div style="margin-top: 16px;">
+                <h4>Credit Cards</h4>
+                <div class="list-items">
+                  @for (card of npc()!.npcProfile!.finances!.creditCards; track $index) {
+                  <div class="list-item">
+                    <p>{{ card.number }} ({{ card.type }})</p>
+                  </div>
+                  }
+                </div>
+              </div>
+              }
+            </div>
+            }
+
+            @if (npc()?.npcProfile?.foreignTravel?.trips && npc()!.npcProfile!.foreignTravel!.trips!.length > 0) {
+            <div class="section">
+              <h3>Foreign Travel</h3>
+              <div class="list-items">
+                @for (trip of npc()!.npcProfile!.foreignTravel!.trips; track $index) {
+                <div class="list-item">
+                  <h4>{{ trip.destination }}</h4>
+                  <p>{{ trip.country }} ({{ trip.code }})</p>
+                  @if (trip.arriveDestination || trip.departDestination) {
+                  <p class="detail">
+                    @if (trip.arriveDestination) {
+                    <span>Arrived: {{ trip.arriveDestination | date:'shortDate' }}</span>
+                    }
+                    @if (trip.departDestination) {
+                    <span> | Departed: {{ trip.departDestination | date:'shortDate' }}</span>
+                    }
+                  </p>
+                  }
+                </div>
+                }
+              </div>
+            </div>
+            }
+          </div>
+        </mat-tab>
+
+        <!-- Mental Health & Attributes Tab -->
+        <mat-tab label="Attributes & Psychology">
+          <div class="tab-content">
+            @if (npc()?.npcProfile?.attributes) {
+            <div class="section">
+              <h3>Personality Attributes</h3>
+              <div class="info-grid">
+                @for (attr of npc()!.npcProfile!.attributes | keyvalue; track attr.key) {
+                <div class="info-item">
+                  <label>{{ attr.key }}</label>
+                  <div class="value">{{ attr.value }}</div>
+                </div>
+                }
+              </div>
+            </div>
+            }
+
+            @if (npc()?.npcProfile?.mentalHealth) {
+            <div class="section">
+              <h3>Mental Health & Performance</h3>
+              <div class="info-grid">
+                @if (npc()!.npcProfile!.mentalHealth!.interpersonalSkills !== undefined) {
+                <div class="info-item">
+                  <label>Interpersonal Skills</label>
+                  <div class="value">{{ npc()!.npcProfile!.mentalHealth!.interpersonalSkills }}</div>
+                </div>
+                }
+                @if (npc()!.npcProfile!.mentalHealth!.adherenceToPolicy !== undefined) {
+                <div class="info-item">
+                  <label>Adherence to Policy</label>
+                  <div class="value">{{ npc()!.npcProfile!.mentalHealth!.adherenceToPolicy }}</div>
+                </div>
+                }
+                @if (npc()!.npcProfile!.mentalHealth!.enthusiasmAndAttitude !== undefined) {
+                <div class="info-item">
+                  <label>Enthusiasm & Attitude</label>
+                  <div class="value">{{ npc()!.npcProfile!.mentalHealth!.enthusiasmAndAttitude }}</div>
+                </div>
+                }
+                @if (npc()!.npcProfile!.mentalHealth!.openToFeedback !== undefined) {
+                <div class="info-item">
+                  <label>Open to Feedback</label>
+                  <div class="value">{{ npc()!.npcProfile!.mentalHealth!.openToFeedback }}</div>
+                </div>
+                }
+                @if (npc()!.npcProfile!.mentalHealth!.generalPerformance !== undefined) {
+                <div class="info-item">
+                  <label>General Performance</label>
+                  <div class="value">{{ npc()!.npcProfile!.mentalHealth!.generalPerformance }}</div>
+                </div>
+                }
+                @if (npc()!.npcProfile!.mentalHealth!.overallPerformance !== undefined) {
+                <div class="info-item">
+                  <label>Overall Performance</label>
+                  <div class="value">{{ npc()!.npcProfile!.mentalHealth!.overallPerformance }}</div>
+                </div>
+                }
+                @if (npc()!.npcProfile!.mentalHealth!.iq !== undefined) {
+                <div class="info-item">
+                  <label>IQ</label>
+                  <div class="value">{{ npc()!.npcProfile!.mentalHealth!.iq }}</div>
+                </div>
+                }
+                @if (npc()!.npcProfile!.mentalHealth!.happyQuotient !== undefined) {
+                <div class="info-item">
+                  <label>Happy Quotient</label>
+                  <div class="value">{{ npc()!.npcProfile!.mentalHealth!.happyQuotient }}</div>
+                </div>
+                }
+                @if (npc()!.npcProfile!.mentalHealth!.melancholyQuotient !== undefined) {
+                <div class="info-item">
+                  <label>Melancholy Quotient</label>
+                  <div class="value">{{ npc()!.npcProfile!.mentalHealth!.melancholyQuotient }}</div>
+                </div>
+                }
+              </div>
+            </div>
+            }
+
+            @if (npc()?.npcProfile?.career) {
+            <div class="section">
+              <h3>Career Profile</h3>
+              <div class="info-grid">
+                @if (npc()!.npcProfile!.career!.workEthic !== undefined) {
+                <div class="info-item">
+                  <label>Work Ethic</label>
+                  <div class="value">{{ npc()!.npcProfile!.career!.workEthic }}</div>
+                </div>
+                }
+                @if (npc()!.npcProfile!.career!.teamValue !== undefined) {
+                <div class="info-item">
+                  <label>Team Value</label>
+                  <div class="value">{{ npc()!.npcProfile!.career!.teamValue }}</div>
+                </div>
+                }
+              </div>
+              @if (npc()!.npcProfile!.career!.strengths && npc()!.npcProfile!.career!.strengths!.length > 0) {
+              <div style="margin-top: 16px;">
+                <label>Strengths</label>
+                <div class="tags">
+                  @for (strength of npc()!.npcProfile!.career!.strengths; track strength) {
+                  <span class="tag">{{ strength }}</span>
+                  }
+                </div>
+              </div>
+              }
+              @if (npc()!.npcProfile!.career!.weaknesses && npc()!.npcProfile!.career!.weaknesses!.length > 0) {
+              <div style="margin-top: 16px;">
+                <label>Weaknesses</label>
+                <div class="tags">
+                  @for (weakness of npc()!.npcProfile!.career!.weaknesses; track weakness) {
+                  <span class="tag">{{ weakness }}</span>
+                  }
+                </div>
+              </div>
+              }
+            </div>
+            }
+          </div>
+        </mat-tab>
+
+        <!-- Relationships Tab -->
+        <mat-tab label="Relationships">
+          <div class="tab-content">
+            @if (npc()?.npcProfile?.family?.members && npc()!.npcProfile!.family!.members!.length > 0) {
+            <div class="section">
+              <h3>Family</h3>
+              <div class="list-items">
+                @for (member of npc()!.npcProfile!.family!.members; track $index) {
+                <div class="list-item">
+                  <h4>{{ member.relationship }}</h4>
+                  <p>{{ member.name?.first }} {{ member.name?.last }}</p>
+                </div>
+                }
+              </div>
+            </div>
+            }
+
+            @if (npc()?.npcProfile?.relationships && npc()!.npcProfile!.relationships!.length > 0) {
+            <div class="section">
+              <h3>Extended Relationships</h3>
+              <div class="list-items">
+                @for (rel of npc()!.npcProfile!.relationships; track $index) {
+                <div class="list-item">
+                  <h4>{{ rel.type }}</h4>
+                  <p>{{ rel.with }}</p>
+                </div>
+                }
+              </div>
+            </div>
+            }
+          </div>
+        </mat-tab>
+
+        <!-- Insider Threat Tab -->
+        <mat-tab label="Insider Threat">
+          <div class="tab-content">
+            @if (npc()?.npcProfile?.insiderThreat?.access) {
+            <div class="section">
+              <h3>Access & Clearance</h3>
+              <div class="info-grid">
+                @if (npc()!.npcProfile!.insiderThreat!.access!.securityClearance) {
+                <div class="info-item">
+                  <label>Security Clearance</label>
+                  <div class="value">{{ npc()!.npcProfile!.insiderThreat!.access!.securityClearance }}</div>
+                </div>
+                }
+                @if (npc()!.npcProfile!.insiderThreat!.access!.systemsAccess) {
+                <div class="info-item">
+                  <label>Systems Access</label>
+                  <div class="value">{{ npc()!.npcProfile!.insiderThreat!.access!.systemsAccess }}</div>
+                </div>
+                }
+                @if (npc()!.npcProfile!.insiderThreat!.access!.physicalAccess) {
+                <div class="info-item">
+                  <label>Physical Access</label>
+                  <div class="value">{{ npc()!.npcProfile!.insiderThreat!.access!.physicalAccess }}</div>
+                </div>
+                }
+                @if (npc()!.npcProfile!.insiderThreat!.access!.explosivesAccess) {
+                <div class="info-item">
+                  <label>Explosives Access</label>
+                  <div class="value">{{ npc()!.npcProfile!.insiderThreat!.access!.explosivesAccess }}</div>
+                </div>
+                }
+                @if (npc()!.npcProfile!.insiderThreat!.access!.cbrnAccess) {
+                <div class="info-item">
+                  <label>CBRN Access</label>
+                  <div class="value">{{ npc()!.npcProfile!.insiderThreat!.access!.cbrnAccess }}</div>
+                </div>
+                }
+                @if (npc()!.npcProfile!.insiderThreat!.isBackgroundCheckStatusClear !== undefined) {
+                <div class="info-item">
+                  <label>Background Check Status</label>
+                  <div class="value">{{ npc()!.npcProfile!.insiderThreat!.isBackgroundCheckStatusClear ? 'Clear' : 'Not Clear' }}</div>
+                </div>
+                }
+              </div>
+            </div>
+            }
+
+            @if (npc()?.npcProfile?.insiderThreat?.events && npc()!.npcProfile!.insiderThreat!.events!.length > 0) {
+            <div class="section">
+              <h3>Insider Threat Events</h3>
+              <div class="list-items">
+                @for (event of npc()!.npcProfile!.insiderThreat!.events; track $index) {
+                <div class="list-item">
+                  <h4>{{ event.description }}</h4>
+                  @if (event.reportedBy || event.reported) {
+                  <p class="detail">
+                    @if (event.reportedBy) {
+                    <span>Reported by: {{ event.reportedBy }}</span>
+                    }
+                    @if (event.reported) {
+                    <span> on {{ event.reported | date:'shortDate' }}</span>
+                    }
+                  </p>
+                  }
+                  @if (event.correctiveAction) {
+                  <p>Corrective Action: {{ event.correctiveAction }}</p>
+                  } @else {
+                  <p class="detail">No corrective action taken</p>
+                  }
+                </div>
+                }
+              </div>
+            </div>
+            }
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Social Graph Section (existing connections detail) -->
+  @if (npcGraph()) {
+  <mat-card class="connections-card">
+    <mat-card-header>
+      <mat-card-title>Social Graph & Connections</mat-card-title>
       <mat-card-subtitle>
-        @if (npcGraph()!.campaign || npcGraph()!.enclave || npcGraph()!.team) {
-        <div class="badges">
-          @if (npcGraph()!.campaign) {
-          <span class="badge">{{ npcGraph()!.campaign }}</span>
-          }
-          @if (npcGraph()!.enclave) {
-          <span class="badge">{{ npcGraph()!.enclave }}</span>
-          }
-          @if (npcGraph()!.team) {
-          <span class="badge">{{ npcGraph()!.team }}</span>
-          }
-        </div>
-        }
         <div class="stats">
           Current Step: {{ npcGraph()!.currentStep }} | Connections: {{ npcGraph()!.connectionCount }}
         </div>
@@ -80,13 +621,19 @@
             <mat-panel-title>
               <div class="connection-header">
                 @if (connection.avatar) {
-                <img [src]="connection.avatar" [alt]="connection.name" class="connection-avatar">
+                <img [src]="connection.avatar"
+                     [alt]="connection.name"
+                     class="connection-avatar clickable"
+                     (click)="navigateToNpc(connection.connectedNpcId); $event.stopPropagation()">
                 } @else {
-                <div class="connection-avatar-placeholder">
+                <div class="connection-avatar-placeholder clickable"
+                     (click)="navigateToNpc(connection.connectedNpcId); $event.stopPropagation()">
                   <i class="fas fa-user"></i>
                 </div>
                 }
-                <strong>{{ connection.name }}</strong>
+                <strong class="connection-name" (click)="navigateToNpc(connection.connectedNpcId); $event.stopPropagation()">
+                  {{ connection.name }}
+                </strong>
               </div>
             </mat-panel-title>
             <mat-panel-description>
@@ -179,5 +726,6 @@
   </button>
 </mat-card-actions>
 </mat-card>
+}
 </div>
 }

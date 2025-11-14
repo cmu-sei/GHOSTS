@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 
 namespace Ghosts.Api.Infrastructure.Models;
 
-[Table("npcpreferences")]
+[Table("npc_preferences")]
 [method: JsonConstructor]
 public class NpcPreference(int id, Guid npcId, Guid toNpcId, Guid fromNpcId, string name, long step, decimal weight, decimal strength)
 {

@@ -10,6 +10,10 @@ export const routes: Routes = [
     loadChildren: () => import('./features/scenarios/scenarios.routes').then(m => m.SCENARIOS_ROUTES)
   },
   {
+    path: 'executions',
+    loadChildren: () => import('./features/executions/executions.routes').then(m => m.EXECUTIONS_ROUTES)
+  },
+  {
     path: 'machines',
     loadChildren: () => import('./features/machines/machines.routes').then(m => m.MACHINES_ROUTES)
   },

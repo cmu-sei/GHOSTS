@@ -7,7 +7,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Ghosts.Api.Infrastructure.Models;
 
-[Table("npcsocialconnections")]
+[Table("npc_social_connections")]
 public class NpcSocialConnection
 {
     [Key]

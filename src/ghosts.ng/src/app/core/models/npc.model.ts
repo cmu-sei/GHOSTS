@@ -10,51 +10,34 @@ export interface Npc {
 
 export interface NpcProfile {
   id?: string;
-  address?: Address;
-  birthdate?: string;
+  name?: Name;
+  address?: Address[];
   email?: string;
-  family?: Family;
-  name?: Name;
-  username?: string;
-  randomization?: number;
-  accessProfile?: AccessProfile;
-  accountActivity?: AccountActivity;
-  attributes?: Attributes;
-  bloodType?: string;
-  careerProfile?: CareerProfile;
-  criminalViolentConductHistory?: CriminalViolentConductHistory;
-  educationProfile?: EducationProfile;
-  financialConsiderations?: FinancialConsiderations;
-  foreignActivityBusinessTravel?: ForeignActivityBusinessTravel;
-  identificationNumbers?: IdentificationNumbers;
-  mentalHealth?: MentalHealth;
-  photos?: Photos;
-  physicalCharacteristics?: PhysicalCharacteristics;
-  relationshipsAssociations?: RelationshipsAssociations;
-  skillsKSAs?: string[];
-}
-
-export interface Address {
-  streetAddress?: string;
-  city?: string;
-  state?: string;
-  postalCode?: string;
-  country?: string;
-}
-
-export interface Family {
-  spouse?: Person;
-  mother?: Person;
-  father?: Person;
-  siblings?: Person[];
-  children?: Person[];
-  exSpouse?: Person[];
-}
-
-export interface Person {
-  name?: Name;
+  password?: string;
+  homePhone?: string;
+  cellPhone?: string;
+  preferences?: Preference[];
+  unit?: MilitaryUnit;
+  rank?: Rank;
+  education?: EducationProfile;
+  employment?: EmploymentProfile;
+  biologicalSex?: string;
   birthdate?: string;
-  relationship?: string;
+  health?: HealthProfile;
+  attributes?: { [key: string]: string };
+  relationships?: RelationshipProfile[];
+  family?: FamilyProfile;
+  finances?: FinancialProfile;
+  mentalHealth?: MentalHealthProfile;
+  foreignTravel?: ForeignTravelProfile;
+  career?: CareerProfile;
+  workstation?: MachineProfile;
+  insiderThreat?: InsiderThreatProfile;
+  accounts?: Account[];
+  motivationalProfile?: MotivationalProfile;
+  cac?: string;
+  photoLink?: string;
+  created?: string;
 }
 
 export interface Name {
@@ -65,129 +48,186 @@ export interface Name {
   suffix?: string;
 }
 
-export interface AccessProfile {
-  clearance?: string;
-  access?: string[];
-  explosiveAccess?: string;
-  cBRNAccess?: string;
+export interface Address {
+  addressType?: string;
+  streetAddress?: string;
+  city?: string;
+  state?: string;
+  postalCode?: string;
+  country?: string;
 }
 
-export interface AccountActivity {
-  lastLogon?: string;
-  activity?: string;
-  favoriteWebsites?: string[];
-  favoriteColor?: string;
-  favoriteFood?: string;
-  favoriteBook?: string;
+export interface Preference {
+  name?: string;
+  value?: string;
 }
 
-export interface Attributes {
-  agreeableness?: number;
-  conscientiousness?: number;
-  creativity?: number;
-  extroversion?: number;
-  neuroticism?: number;
-  openness?: number;
+export interface MilitaryUnit {
+  name?: string;
+  type?: string;
+  nick?: string;
+  hq?: string;
+  sub?: MilitaryUnit[];
+}
+
+export interface Rank {
+  branch?: string;
+  classification?: string;
+  name?: string;
+  abbr?: string;
+  pay?: string;
+  billet?: string;
+  mos?: string;
+}
+
+export interface HealthProfile {
+  height?: number; // inches
+  weight?: number; // lbs
+  bloodType?: string;
+  preferredMeal?: string;
+  medicalConditions?: MedicalCondition[];
+}
+
+export interface MedicalCondition {
+  name?: string;
+  prescriptions?: Prescription[];
+}
+
+export interface Prescription {
+  name?: string;
+}
+
+export interface EducationProfile {
+  degrees?: Degree[];
+}
+
+export interface Degree {
+  level?: string;
+  degreeType?: string;
+  major?: string;
+  school?: School;
+}
+
+export interface School {
+  name?: string;
+  location?: string;
+}
+
+export interface EmploymentProfile {
+  employmentRecords?: EmploymentRecord[];
+}
+
+export interface EmploymentRecord {
+  company?: string;
+  startDate?: string;
+  endDate?: string;
+  department?: string;
+  organization?: string;
+  jobTitle?: string;
+  level?: number;
+  salary?: number;
+  manager?: string;
+  emailSuffix?: string;
+  email?: string;
+  address?: Address;
+  phone?: string;
+  employmentStatus?: string;
+}
+
+export interface FamilyProfile {
+  members?: FamilyMember[];
+}
+
+export interface FamilyMember {
+  name?: Name;
+  relationship?: string;
+}
+
+export interface FinancialProfile {
+  netWorth?: number;
+  totalDebt?: number;
+  creditCards?: CreditCard[];
+}
+
+export interface CreditCard {
+  number?: string;
+  type?: string;
+}
+
+export interface MentalHealthProfile {
+  interpersonalSkills?: number;
+  adherenceToPolicy?: number;
+  enthusiasmAndAttitude?: number;
+  openToFeedback?: number;
+  generalPerformance?: number;
+  overallPerformance?: number;
+  iq?: number;
+  spideySense?: number;
+  senseSomethingIsWrongQuotient?: number;
+  happyQuotient?: number;
+  melancholyQuotient?: number;
+}
+
+export interface ForeignTravelProfile {
+  trips?: Trip[];
+}
+
+export interface Trip {
+  code?: string;
+  country?: string;
+  destination?: string;
+  arriveDestination?: string;
+  departDestination?: string;
+}
+
+export interface RelationshipProfile {
+  with?: string;
+  type?: string;
 }
 
 export interface CareerProfile {
-  currentJob?: Job;
-  previousJobs?: Job[];
   workEthic?: number;
   teamValue?: number;
   strengths?: string[];
   weaknesses?: string[];
 }
 
-export interface Job {
-  title?: string;
-  company?: string;
-  startDate?: string;
-  endDate?: string;
+export interface InsiderThreatProfile {
+  access?: AccessProfile;
+  isBackgroundCheckStatusClear?: boolean;
+  events?: InsiderThreatEvent[];
 }
 
-export interface CriminalViolentConductHistory {
-  hasCriminalHistory?: boolean;
-  hasViolentHistory?: boolean;
-  crimes?: Crime[];
+export interface AccessProfile {
+  explosivesAccess?: string;
+  systemsAccess?: string;
+  cbrnAccess?: string;
+  physicalAccess?: string;
+  securityClearance?: string;
 }
 
-export interface Crime {
-  type?: string;
+export interface InsiderThreatEvent {
   description?: string;
-  date?: string;
+  correctiveAction?: string;
+  reportedBy?: string;
+  reported?: string;
 }
 
-export interface EducationProfile {
-  highSchool?: Education;
-  college?: Education;
-  graduate?: Education;
+export interface Account {
+  username?: string;
+  url?: string;
 }
 
-export interface Education {
-  name?: string;
-  degree?: string;
-  major?: string;
-  graduationDate?: string;
-  gPA?: number;
-}
-
-export interface FinancialConsiderations {
-  income?: number;
-  debt?: number;
-  creditScore?: number;
-  hasFinancialIssues?: boolean;
-}
-
-export interface ForeignActivityBusinessTravel {
-  hasTravel?: boolean;
-  countries?: string[];
-}
-
-export interface IdentificationNumbers {
-  ssN?: string;
-  driversLicense?: string;
-  passport?: string;
-}
-
-export interface MentalHealth {
-  hasMentalHealthIssues?: boolean;
-  conditions?: string[];
-  insecurity?: number;
-  depression?: number;
-  anxiety?: number;
-  anger?: number;
-}
-
-export interface Photos {
-  photo?: string;
-  photoType?: string;
-}
-
-export interface PhysicalCharacteristics {
-  height?: string;
-  weight?: string;
-  hairColor?: string;
-  eyeColor?: string;
-  race?: string;
-  sex?: string;
-}
-
-export interface RelationshipsAssociations {
-  friends?: Person[];
-  enemies?: Person[];
-  colleagues?: Person[];
-}
-
-export interface CampaignInformation {
-  campaign?: string;
-  description?: string;
+export interface MotivationalProfile {
+  // Add properties as needed
 }
 
 export interface MachineProfile {
+  name?: string;
+  domain?: string;
   username?: string;
   password?: string;
-  machineId?: string;
+  ipAddress?: string;
 }
 
 export interface CreateNpcRequest {

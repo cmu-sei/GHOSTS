@@ -41,17 +41,17 @@ export interface GenerateNpcsConfig {
 
       <mat-form-field class="full-width">
         <mat-label>Campaign</mat-label>
-        <input matInput [(ngModel)]="config.campaign" placeholder="e.g., Exercise 2025" required>
+        <input matInput [(ngModel)]="config.campaign" placeholder="e.g., Modeling 2025" required>
       </mat-form-field>
 
       <mat-form-field class="full-width">
         <mat-label>Enclave</mat-label>
-        <input matInput [(ngModel)]="config.enclave" placeholder="e.g., Brigade Alpha" required>
+        <input matInput [(ngModel)]="config.enclave" placeholder="e.g., Blue, Gray, Red" required>
       </mat-form-field>
 
       <mat-form-field class="full-width">
         <mat-label>Team</mat-label>
-        <input matInput [(ngModel)]="config.team" placeholder="e.g., Engineering" required>
+        <input matInput [(ngModel)]="config.team" placeholder="e.g., Alpha, Engineering" required>
       </mat-form-field>
 
       <mat-form-field class="full-width">

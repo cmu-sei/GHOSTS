@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Ghosts.Api.Infrastructure.Models;
 
@@ -10,15 +11,16 @@ public class Scenario
     public string Description { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
-    public DateTime? StartedAt { get; set; }
 
     // Navigation properties
     public ScenarioParameters ScenarioParameters { get; set; }
     public TechnicalEnvironment TechnicalEnvironment { get; set; }
     public GameMechanics GameMechanics { get; set; }
     public ScenarioTimeline ScenarioTimeline { get; set; }
+    public ICollection<Execution> Executions { get; set; } = new List<Execution>();
 }
 
+[Table("scenario_parameters")]
 public class ScenarioParameters
 {
     public int Id { get; set; }
@@ -46,6 +48,7 @@ public class Nation
     public ScenarioParameters ScenarioParameters { get; set; }
 }
 
+[Table("threat_actors")]
 public class ThreatActor
 {
     public int Id { get; set; }
@@ -78,6 +81,7 @@ public class UserPool
     public ScenarioParameters ScenarioParameters { get; set; }
 }
 
+[Table("technical_environments")]
 public class TechnicalEnvironment
 {
     public int Id { get; set; }
@@ -102,6 +106,7 @@ public class Vulnerability
     public TechnicalEnvironment TechnicalEnvironment { get; set; }
 }
 
+[Table("game_mechanics")]
 public class GameMechanics
 {
     public int Id { get; set; }
@@ -120,6 +125,7 @@ public class GameMechanics
     public Scenario Scenario { get; set; }
 }
 
+[Table("scenario_timeline")]
 public class ScenarioTimeline
 {
     public int Id { get; set; }
@@ -130,6 +136,7 @@ public class ScenarioTimeline
     public ICollection<ScenarioTimelineEvent> ScenarioTimelineEvents { get; set; } = new List<ScenarioTimelineEvent>();
 }
 
+[Table("scenario_timeline_events")]
 public class ScenarioTimelineEvent
 {
     public int Id { get; set; }
@@ -150,7 +157,6 @@ public record ScenarioDto(
     string Description,
     DateTime CreatedAt,
     DateTime UpdatedAt,
-    DateTime? StartedAt,
     ScenarioParametersDto ScenarioParameters,
     TechnicalEnvironmentDto TechnicalEnvironment,
     GameMechanicsDto GameMechanics,

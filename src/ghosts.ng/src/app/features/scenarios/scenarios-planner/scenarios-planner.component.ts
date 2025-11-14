@@ -65,7 +65,14 @@ export class ScenariosPlannerComponent implements OnInit {
       services: '',
       assets: '',
       defenses: [],
-      vulnerabilities: []
+      vulnerabilities: [],
+      platforms: {
+        websites: [],
+        socialMedia: [],
+        emailProviders: [],
+        cloudServices: [],
+        collaborationTools: []
+      }
     },
     simulationMechanics: {
       timelineType: 'real-time',
@@ -98,6 +105,44 @@ export class ScenariosPlannerComponent implements OnInit {
   protected readonly cellRoles = ['White Cell', 'Red Team', 'Blue Team', 'Green Cell'];
   protected readonly eventStatuses = ['Pending', 'Active', 'Complete'];
   protected readonly timelineColumns = ['drag', 'time', 'number', 'assigned', 'description', 'status', 'actions'];
+
+  protected readonly availablePlatforms = {
+    websites: [
+      { name: 'CNN', value: 'cnn.com' },
+      { name: 'Wall Street Journal', value: 'wsj.com' },
+      { name: 'New York Times', value: 'nytimes.com' },
+      { name: 'BBC News', value: 'bbc.com' },
+      { name: 'Reuters', value: 'reuters.com' }
+    ],
+    socialMedia: [
+      { name: 'Facebook', value: 'facebook.com' },
+      { name: 'X (Twitter)', value: 'x.com' },
+      { name: 'Reddit', value: 'reddit.com' },
+      { name: 'LinkedIn', value: 'linkedin.com' },
+      { name: 'Discord', value: 'discord.com' },
+      { name: 'Instagram', value: 'instagram.com' }
+    ],
+    emailProviders: [
+      { name: 'Gmail', value: 'gmail.com' },
+      { name: 'Outlook', value: 'outlook.com' },
+      { name: 'Yahoo Mail', value: 'yahoo.com' },
+      { name: 'ProtonMail', value: 'protonmail.com' }
+    ],
+    cloudServices: [
+      { name: 'AWS', value: 'aws.amazon.com' },
+      { name: 'Azure', value: 'azure.microsoft.com' },
+      { name: 'Google Cloud', value: 'cloud.google.com' },
+      { name: 'Dropbox', value: 'dropbox.com' },
+      { name: 'Box', value: 'box.com' }
+    ],
+    collaborationTools: [
+      { name: 'Slack', value: 'slack.com' },
+      { name: 'Microsoft Teams', value: 'teams.microsoft.com' },
+      { name: 'Zoom', value: 'zoom.us' },
+      { name: 'Google Meet', value: 'meet.google.com' },
+      { name: 'Webex', value: 'webex.com' }
+    ]
+  };
 
   ngOnInit(): void {
     this.route.params.subscribe(params => {
@@ -226,6 +271,38 @@ export class ScenariosPlannerComponent implements OnInit {
       ...event,
       number: index + 1
     }));
+  }
+
+  // Platform management
+  protected isPlatformSelected(category: keyof typeof this.availablePlatforms, value: string): boolean {
+    const platforms = this.scenario.technicalEnvironment?.platforms;
+    if (!platforms) return false;
+    return (platforms[category] || []).includes(value);
+  }
+
+  protected togglePlatform(category: keyof typeof this.availablePlatforms, value: string): void {
+    if (!this.scenario.technicalEnvironment) {
+      return;
+    }
+
+    if (!this.scenario.technicalEnvironment.platforms) {
+      this.scenario.technicalEnvironment.platforms = {
+        websites: [],
+        socialMedia: [],
+        emailProviders: [],
+        cloudServices: [],
+        collaborationTools: []
+      };
+    }
+
+    const platforms = this.scenario.technicalEnvironment.platforms[category];
+    const index = platforms.indexOf(value);
+
+    if (index > -1) {
+      platforms.splice(index, 1);
+    } else {
+      platforms.push(value);
+    }
   }
 
   protected saveScenario(): void {

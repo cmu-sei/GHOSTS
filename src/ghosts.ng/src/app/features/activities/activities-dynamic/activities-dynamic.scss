@@ -23,6 +23,11 @@ svg {
   display: block;
   width: 100vw;
   height: 100vh;
+  overflow: visible;
+}
+
+foreignObject {
+  overflow: visible;
 }
 
 .tooltip {

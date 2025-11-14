@@ -66,6 +66,10 @@ namespace Ghosts.Api.Infrastructure.Data
         public DbSet<ScenarioTimeline> ScenarioTimelines { get; set; }
         public DbSet<ScenarioTimelineEvent> ScenarioTimelineEvents { get; set; }
 
+        public DbSet<Execution> Executions { get; set; }
+        public DbSet<ExecutionEvent> ExecutionEvents { get; set; }
+        public DbSet<ExecutionMetricSnapshot> ExecutionMetricSnapshots { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -210,6 +214,33 @@ namespace Ghosts.Api.Infrastructure.Data
                 .WithOne(e => e.Timeline)
                 .HasForeignKey(e => e.ScenarioTimelineId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // Execution relationships
+            modelBuilder.Entity<Scenario>()
+                .HasMany(s => s.Executions)
+                .WithOne(e => e.Scenario)
+                .HasForeignKey(e => e.ScenarioId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Execution>()
+                .HasMany(e => e.Events)
+                .WithOne(ev => ev.Execution)
+                .HasForeignKey(ev => ev.ExecutionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Execution>()
+                .HasMany(e => e.MetricSnapshots)
+                .WithOne(ms => ms.Execution)
+                .HasForeignKey(ms => ms.ExecutionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Execution indexes for performance
+            modelBuilder.Entity<Execution>().HasIndex(e => e.ScenarioId);
+            modelBuilder.Entity<Execution>().HasIndex(e => e.Status);
+            modelBuilder.Entity<Execution>().HasIndex(e => e.CreatedAt);
+            modelBuilder.Entity<Execution>().HasIndex(e => e.StartedAt);
+            modelBuilder.Entity<ExecutionEvent>().HasIndex(ev => new { ev.ExecutionId, ev.Timestamp });
+            modelBuilder.Entity<ExecutionMetricSnapshot>().HasIndex(ms => new { ms.ExecutionId, ms.Timestamp });
 
             foreach (var entity in modelBuilder.Model.GetEntityTypes())
             {

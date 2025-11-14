@@ -198,20 +198,86 @@
           </div>
 
           <div class="form-section">
-            <h3 class="subsection-title">Services & Assets</h3>
-            <div class="form-row">
-              <mat-form-field class="half-width">
-                <mat-label>External Services</mat-label>
-                <textarea matInput [(ngModel)]="scenario.technicalEnvironment!.services" rows="3"
-                  placeholder="e.g., Multiple X/Twitter instances, Facebook clones, Email servers"></textarea>
-              </mat-form-field>
+            <h3 class="subsection-title">Supported Platforms</h3>
 
-              <mat-form-field class="half-width">
-                <mat-label>Internal Assets</mat-label>
-                <textarea matInput [(ngModel)]="scenario.technicalEnvironment!.assets" rows="3"
-                  placeholder="e.g., Windows/Linux mix, Critical apps, ICS/SCADA systems"></textarea>
-              </mat-form-field>
+            <!-- Websites -->
+            <div class="platform-group">
+              <h4>News & Media Websites</h4>
+              <div class="checkbox-grid">
+                @for (platform of availablePlatforms.websites; track platform.value) {
+                  <mat-checkbox
+                    [checked]="isPlatformSelected('websites', platform.value)"
+                    (change)="togglePlatform('websites', platform.value)">
+                    {{ platform.name }}
+                  </mat-checkbox>
+                }
+              </div>
             </div>
+
+            <!-- Social Media -->
+            <div class="platform-group">
+              <h4>Social Media Platforms</h4>
+              <div class="checkbox-grid">
+                @for (platform of availablePlatforms.socialMedia; track platform.value) {
+                  <mat-checkbox
+                    [checked]="isPlatformSelected('socialMedia', platform.value)"
+                    (change)="togglePlatform('socialMedia', platform.value)">
+                    {{ platform.name }}
+                  </mat-checkbox>
+                }
+              </div>
+            </div>
+
+            <!-- Email Providers -->
+            <div class="platform-group">
+              <h4>Email Providers</h4>
+              <div class="checkbox-grid">
+                @for (platform of availablePlatforms.emailProviders; track platform.value) {
+                  <mat-checkbox
+                    [checked]="isPlatformSelected('emailProviders', platform.value)"
+                    (change)="togglePlatform('emailProviders', platform.value)">
+                    {{ platform.name }}
+                  </mat-checkbox>
+                }
+              </div>
+            </div>
+
+            <!-- Cloud Services -->
+            <div class="platform-group">
+              <h4>Cloud Services</h4>
+              <div class="checkbox-grid">
+                @for (platform of availablePlatforms.cloudServices; track platform.value) {
+                  <mat-checkbox
+                    [checked]="isPlatformSelected('cloudServices', platform.value)"
+                    (change)="togglePlatform('cloudServices', platform.value)">
+                    {{ platform.name }}
+                  </mat-checkbox>
+                }
+              </div>
+            </div>
+
+            <!-- Collaboration Tools -->
+            <div class="platform-group">
+              <h4>Collaboration Tools</h4>
+              <div class="checkbox-grid">
+                @for (platform of availablePlatforms.collaborationTools; track platform.value) {
+                  <mat-checkbox
+                    [checked]="isPlatformSelected('collaborationTools', platform.value)"
+                    (change)="togglePlatform('collaborationTools', platform.value)">
+                    {{ platform.name }}
+                  </mat-checkbox>
+                }
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3 class="subsection-title">Internal Assets</h3>
+            <mat-form-field class="full-width">
+              <mat-label>Internal Assets</mat-label>
+              <textarea matInput [(ngModel)]="scenario.technicalEnvironment!.assets" rows="3"
+                placeholder="e.g., Windows/Linux mix, Critical apps, ICS/SCADA systems"></textarea>
+            </mat-form-field>
           </div>
         </div>
       </mat-tab>

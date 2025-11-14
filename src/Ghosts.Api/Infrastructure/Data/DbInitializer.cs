@@ -15,6 +15,9 @@ namespace Ghosts.Api.Infrastructure.Data
             // Apply pending migrations (better than EnsureCreatedAsync for production)
             await context.Database.MigrateAsync();
 
+            // Ensure NPC Campaign/Enclave/Team columns exist (for databases created before these fields were added)
+            await EnsureNpcColumnsExist(context, logger);
+
             // Check if database is already seeded
             if (await context.Scenarios.AnyAsync())
             {
@@ -28,6 +31,55 @@ namespace Ghosts.Api.Infrastructure.Data
 
             await context.SaveChangesAsync();
             logger.LogInformation("Database seeding completed");
+        }
+
+        private static async Task EnsureNpcColumnsExist(ApplicationDbContext context, ILogger<DbInitializer> logger)
+        {
+            try
+            {
+                var connection = context.Database.GetDbConnection();
+                await connection.OpenAsync();
+
+                using var command = connection.CreateCommand();
+                command.CommandText = @"
+                    DO $$
+                    BEGIN
+                        -- Add Campaign column if it doesn't exist
+                        IF NOT EXISTS (
+                            SELECT 1 FROM information_schema.columns
+                            WHERE table_name = 'npcs' AND column_name = 'campaign'
+                        ) THEN
+                            ALTER TABLE npcs ADD COLUMN campaign TEXT;
+                            RAISE NOTICE 'Added campaign column to npcs table';
+                        END IF;
+
+                        -- Add Enclave column if it doesn't exist
+                        IF NOT EXISTS (
+                            SELECT 1 FROM information_schema.columns
+                            WHERE table_name = 'npcs' AND column_name = 'enclave'
+                        ) THEN
+                            ALTER TABLE npcs ADD COLUMN enclave TEXT;
+                            RAISE NOTICE 'Added enclave column to npcs table';
+                        END IF;
+
+                        -- Add Team column if it doesn't exist
+                        IF NOT EXISTS (
+                            SELECT 1 FROM information_schema.columns
+                            WHERE table_name = 'npcs' AND column_name = 'team'
+                        ) THEN
+                            ALTER TABLE npcs ADD COLUMN team TEXT;
+                            RAISE NOTICE 'Added team column to npcs table';
+                        END IF;
+                    END $$;
+                ";
+
+                await command.ExecuteNonQueryAsync();
+                logger.LogInformation("Verified NPC Campaign/Enclave/Team columns exist");
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Could not verify/add NPC columns, they may already exist or database may not be ready");
+            }
         }
 
         private static async Task SeedScenarios(ApplicationDbContext context, ILogger<DbInitializer> logger)

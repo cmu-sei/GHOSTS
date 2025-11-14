@@ -4,7 +4,6 @@ export interface Scenario {
   description: string;
   createdAt: Date;
   updatedAt: Date;
-  startedAt?: Date;
   scenarioParameters?: ScenarioParameters;
   technicalEnvironment?: TechnicalEnvironment;
   simulationMechanics?: SimulationMechanics;
@@ -60,6 +59,13 @@ export interface TechnicalEnvironment {
   assets?: string;
   defenses: string[];
   vulnerabilities: Vulnerability[];
+  platforms?: {
+    websites: string[];
+    socialMedia: string[];
+    emailProviders: string[];
+    cloudServices: string[];
+    collaborationTools: string[];
+  };
 }
 
 export interface Vulnerability {

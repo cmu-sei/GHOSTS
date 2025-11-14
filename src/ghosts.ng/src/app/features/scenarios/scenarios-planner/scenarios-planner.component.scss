@@ -124,6 +124,26 @@
       margin: 16px 0;
     }
 
+    .platform-group {
+      margin-bottom: 24px;
+
+      h4 {
+        font-size: 14px;
+        font-weight: 500;
+        margin: 0 0 12px 0;
+        color: rgba(0, 0, 0, 0.87);
+      }
+
+      .checkbox-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 12px;
+        padding: 12px;
+        background: #f9f9f9;
+        border-radius: 4px;
+      }
+    }
+
     .timeline-table-container {
       margin-top: 16px;
       overflow-x: auto;
