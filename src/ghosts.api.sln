@@ -17,7 +17,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ghosts.Domain", "Ghosts.Dom
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ghosts.Api", "Ghosts.Api\Ghosts.Api.csproj", "{D016B25C-5638-4668-BB54-4C5F179426DF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ghosts.Animator", "Ghosts.Animator\Ghosts.Animator.csproj", "{77488723-108A-47CD-A6CC-6F7E96D2BFDD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ghosts.Animator", "Ghosts.Animator\Ghosts.Animator.csproj", "{8C6382F4-AE80-4AE0-9D52-4A399BED54A6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,10 +33,10 @@ Global
 		{D016B25C-5638-4668-BB54-4C5F179426DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D016B25C-5638-4668-BB54-4C5F179426DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D016B25C-5638-4668-BB54-4C5F179426DF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{77488723-108A-47CD-A6CC-6F7E96D2BFDD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{77488723-108A-47CD-A6CC-6F7E96D2BFDD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{77488723-108A-47CD-A6CC-6F7E96D2BFDD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{77488723-108A-47CD-A6CC-6F7E96D2BFDD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8C6382F4-AE80-4AE0-9D52-4A399BED54A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C6382F4-AE80-4AE0-9D52-4A399BED54A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C6382F4-AE80-4AE0-9D52-4A399BED54A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C6382F4-AE80-4AE0-9D52-4A399BED54A6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

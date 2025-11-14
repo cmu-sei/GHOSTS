@@ -482,8 +482,8 @@ namespace Ghosts.Animator
             {
                 dir += GetBiologicalSex().ToString().ToLower();
             }
-            dir = Directory.GetDirectories(dir).RandomElement();
-            var file = Directory.GetFiles(dir).RandomElement();
+
+            var file = Directory.GetFiles(dir, "*", SearchOption.AllDirectories).RandomElement();
 
             return file;
         }
