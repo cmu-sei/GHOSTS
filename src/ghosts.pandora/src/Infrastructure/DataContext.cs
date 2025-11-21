@@ -6,18 +6,9 @@ namespace Ghosts.Pandora.Infrastructure;
 
 public class DataContext : DbContext
 {
-    protected readonly IConfiguration Configuration;
-
-    public DataContext(IConfiguration configuration)
+    public DataContext(DbContextOptions<DataContext> options) : base(options)
     {
-        Configuration = configuration;
         Database.EnsureCreated();
-    }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder options)
-    {
-        Directory.CreateDirectory($"{AppContext.BaseDirectory}/db");
-        options.UseSqlite($"Data Source={AppContext.BaseDirectory}/db/pandora.db");
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -130,6 +121,7 @@ public class DataContext : DbContext
     public DbSet<Comment> Comments { get; set; }
     public DbSet<DirectMessage> DirectMessages { get; set; }
     public DbSet<Followers> Followers { get; set; }
+    public DbSet<LawEnforcementRequest> LawEnforcementRequests { get; set; }
 }
 
 public class User
@@ -273,4 +265,40 @@ public class DirectMessage
 
     public virtual User FromUser { get; set; }
     public virtual User ToUser { get; set; }
+}
+
+public class LawEnforcementRequest
+{
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int Id { get; set; }
+
+    [Required]
+    [MaxLength(200)]
+    public string RequestingAgency { get; set; }
+
+    [Required]
+    [MaxLength(100)]
+    public string CaseNumber { get; set; }
+
+    [Required]
+    [MaxLength(50)]
+    public string RequestType { get; set; }
+
+    [Required]
+    [MaxLength(500)]
+    public string Subject { get; set; }
+
+    [Required]
+    [MaxLength(2000)]
+    public string Details { get; set; }
+
+    [MaxLength(50)]
+    public string Status { get; set; } = "Pending";
+
+    public DateTime CreatedUtc { get; set; } = DateTime.UtcNow;
+    public DateTime? CompletedUtc { get; set; }
+
+    [MaxLength(2000)]
+    public string Response { get; set; }
 }

@@ -12,7 +12,10 @@ public class BaseController : Controller
         // Ensure every request has an associated username and theme for downstream views
         ViewBag.Username = GetOrCreateUsernameCookie(context.HttpContext);
 
-        var theme = ThemeRead();
+        // Check query parameter first (same logic as ThemeViewLocationExpander)
+        var queryTheme = context.HttpContext.Request.Query["theme"].ToString();
+        var theme = !string.IsNullOrWhiteSpace(queryTheme) ? queryTheme : ThemeRead();
+
         if (string.IsNullOrWhiteSpace(theme))
         {
             theme = "default";

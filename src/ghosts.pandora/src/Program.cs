@@ -3,6 +3,7 @@ using Ghosts.Pandora.Infrastructure;
 using Ghosts.Pandora.Infrastructure.Middleware;
 using Ghosts.Pandora.Infrastructure.Services;
 using Ghosts.Pandora.Infrastructure.Startup.Extensions;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,7 +42,51 @@ if (!string.IsNullOrEmpty(articleCountEnv) && int.TryParse(articleCountEnv, out 
 
 builder.Services.AddSingleton(configuration);
 
-builder.Services.AddDbContext<DataContext>();
+// Configure database provider
+var databaseProvider = builder.Configuration.GetValue<string>("Database:Provider") ?? "SQLite";
+var connectionString = databaseProvider.ToUpper() switch
+{
+    "POSTGRESQL" => builder.Configuration.GetConnectionString("PostgreSQL"),
+    "SQLITE" => builder.Configuration.GetConnectionString("DefaultConnection"),
+    _ => builder.Configuration.GetConnectionString("DefaultConnection")
+};
+
+// Override from environment variables
+var dbProviderEnv = Environment.GetEnvironmentVariable("DATABASE_PROVIDER");
+if (!string.IsNullOrEmpty(dbProviderEnv))
+{
+    databaseProvider = dbProviderEnv;
+}
+
+var connectionStringEnv = Environment.GetEnvironmentVariable("CONNECTION_STRING");
+if (!string.IsNullOrEmpty(connectionStringEnv))
+{
+    connectionString = connectionStringEnv;
+}
+
+builder.Services.AddDbContext<DataContext>(options =>
+{
+    switch (databaseProvider.ToUpper())
+    {
+        case "POSTGRESQL":
+            options.UseNpgsql(connectionString);
+            break;
+        case "SQLITE":
+        default:
+            // Ensure directory exists for SQLite
+            var dbPath = connectionString?.Replace("Data Source=", "");
+            if (!string.IsNullOrEmpty(dbPath))
+            {
+                var directory = Path.GetDirectoryName(Path.Combine(AppContext.BaseDirectory, dbPath));
+                if (!string.IsNullOrEmpty(directory))
+                {
+                    Directory.CreateDirectory(directory);
+                }
+            }
+            options.UseSqlite($"Data Source={Path.Combine(AppContext.BaseDirectory, dbPath ?? "db/pandora.db")}");
+            break;
+    }
+});
 
 builder.Services
     .AddControllersWithViews()
@@ -62,6 +107,7 @@ builder.Services.AddScoped<IThemeService, ThemeService>();
 builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<IDirectMessageService, DirectMessageService>();
 builder.Services.AddScoped<IFollowService, FollowService>();
+builder.Services.AddScoped<ILawEnforcementPortalService, LawEnforcementPortalService>();
 
 // Pandora content generation services
 builder.Services.AddScoped<IPdfGenerationService, PdfGenerationService>();
@@ -110,5 +156,7 @@ logger.LogInformation(
     ApplicationDetails.Version, ApplicationDetails.VersionFile
 );
 logger.LogInformation("This server is configured for '{Mode}' and to use the '{Theme}' theme", configuration.Mode.Type, configuration.Mode.DefaultTheme);
+logger.LogInformation("Database Provider: {Provider}", databaseProvider);
+logger.LogInformation("Connection String: {ConnectionString}", connectionString?.Replace("Password=", "Password=***"));
 
 app.Run();
