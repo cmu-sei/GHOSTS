@@ -317,8 +317,8 @@ export class ActivitiesDynamicComponent implements OnInit, OnDestroy {
   private showMessageBubble(node: NetworkNode, type: string, message: any): void {
     if (!this.svg) return;
 
-    const bubbleWidth = 180;
-    const bubbleHeight = 100;
+    const bubbleWidth = 280;
+    const bubbleHeight = 200;
     const offset = 51;
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
@@ -375,14 +375,16 @@ export class ActivitiesDynamicComponent implements OnInit, OnDestroy {
       .style('padding', '6px 10px')
       .style('font-size', '12px')
       .style('box-shadow', '2px 2px 6px rgba(0,0,0,0.15)')
-      .style('width', '168px')
-      .style('max-width', '168px')
+      .style('width', '268px')
+      .style('max-width', '268px')
+      .style('max-height', '188px')
       .style('box-sizing', 'border-box')
       .style('overflow-wrap', 'break-word')
       .style('word-break', 'break-word')
       .style('white-space', 'normal')
       .style('line-height', '1.4')
       .style('font-family', 'monospace')
+      .style('overflow-y', 'auto')
       .html(html);
 
     box.transition()

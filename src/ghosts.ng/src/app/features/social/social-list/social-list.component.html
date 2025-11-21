@@ -192,33 +192,29 @@
   @for (graph of socialGraphs(); track graph.id) {
   <mat-card class="social-card" (click)="viewDetails(graph)">
     <mat-card-header>
-      <div class="card-header-content">
-        @if (graph.avatar) {
-        <img mat-card-avatar [src]="graph.avatar" [alt]="graph.name">
-        } @else {
-        <div mat-card-avatar class="avatar-placeholder">
-          <i class="fas fa-user"></i>
+      @if (graph.avatar) {
+      <img mat-card-avatar [src]="graph.avatar" [alt]="graph.name">
+      } @else {
+      <div mat-card-avatar class="avatar-placeholder">
+        <i class="fas fa-user"></i>
+      </div>
+      }
+      <mat-card-title>{{ graph.name }}</mat-card-title>
+      <mat-card-subtitle>
+        @if (graph.campaign || graph.enclave || graph.team) {
+        <div class="mini-badges">
+          @if (graph.campaign) {
+          <span class="mini-badge">{{ graph.campaign }}</span>
+          }
+          @if (graph.enclave) {
+          <span class="mini-badge">{{ graph.enclave }}</span>
+          }
+          @if (graph.team) {
+          <span class="mini-badge">{{ graph.team }}</span>
+          }
         </div>
         }
-        <div class="header-text">
-          <mat-card-title>{{ graph.name }}</mat-card-title>
-          <mat-card-subtitle>
-            @if (graph.campaign || graph.enclave || graph.team) {
-            <div class="mini-badges">
-              @if (graph.campaign) {
-              <span class="mini-badge">{{ graph.campaign }}</span>
-              }
-              @if (graph.enclave) {
-              <span class="mini-badge">{{ graph.enclave }}</span>
-              }
-              @if (graph.team) {
-              <span class="mini-badge">{{ graph.team }}</span>
-              }
-            </div>
-            }
-          </mat-card-subtitle>
-        </div>
-      </div>
+      </mat-card-subtitle>
     </mat-card-header>
     <mat-card-content>
       <div class="knowledge-section">

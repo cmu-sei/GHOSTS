@@ -82,6 +82,18 @@ export class RelationshipService {
   }
 
   private transformToSocialGraphSummary(graph: any): SocialGraphSummary {
+    // Extract name from npcProfile.name structure
+    let displayName = 'Unknown NPC';
+    if (graph.npcProfile?.name) {
+      const nameObj = graph.npcProfile.name;
+      const parts = [nameObj.first, nameObj.last].filter(p => p);
+      if (parts.length > 0) {
+        displayName = parts.join(' ');
+      }
+    } else if (graph.name) {
+      displayName = graph.name;
+    }
+
     // Aggregate knowledge topics from the Knowledge array
     const knowledgeMap = new Map<string, { count: number; totalValue: number; values: number[] }>();
 
@@ -131,8 +143,8 @@ export class RelationshipService {
     const npcIdForPhoto = graph.npcId ?? graph.id;
     return {
       id: graph.id,
-      name: graph.name,
-      npcId: graph.npcId,
+      name: displayName,
+      npcId: graph.npcId ?? graph.id,
       avatar: npcIdForPhoto ? `${this.apiUrl}/npcs/${npcIdForPhoto}/photo` : undefined,
       campaign: graph.campaign,
       enclave: graph.enclave,

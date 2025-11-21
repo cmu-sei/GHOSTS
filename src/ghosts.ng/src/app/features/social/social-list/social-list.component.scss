@@ -50,11 +50,8 @@
       box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
     }
 
-    .card-header-content {
-      display: flex;
+    mat-card-header {
       align-items: center;
-      gap: 12px;
-      width: 100%;
 
       [mat-card-avatar] {
         width: 40px;
@@ -72,40 +69,40 @@
         align-items: center;
         justify-content: center;
 
-        mat-icon {
+        i {
           font-size: 24px;
           color: #757575;
         }
       }
 
-      .header-text {
-        flex: 1;
-        overflow: hidden;
+      ::ng-deep .mat-mdc-card-header-text {
+        transform: translateY(-5px);
+      }
+    }
 
-        mat-card-title {
-          font-size: 16px;
-          margin-bottom: 4px;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
+    mat-card-title {
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
 
-        .mini-badges {
-          display: flex;
-          gap: 4px;
-          flex-wrap: wrap;
-          margin-top: 4px;
+    mat-card-subtitle {
 
-          .mini-badge {
-            display: inline-block;
-            padding: 2px 6px;
-            background-color: #e3f2fd;
-            color: #1976d2;
-            border-radius: 8px;
-            font-size: 10px;
-            font-weight: 500;
-          }
-        }
+    }
+
+    .mini-badges {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+
+      .mini-badge {
+        display: inline-block;
+        padding: 2px 6px;
+        background-color: #e3f2fd;
+        color: #1976d2;
+        border-radius: 8px;
+        font-size: 10px;
+        font-weight: 500;
       }
     }
 
