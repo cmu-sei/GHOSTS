@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Ghosts.Pandora.Infrastructure;
+using Ghosts.Pandora.Infrastructure.Models;
 using Ghosts.Pandora.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 

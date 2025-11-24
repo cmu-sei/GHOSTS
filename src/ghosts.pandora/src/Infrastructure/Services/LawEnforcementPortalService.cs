@@ -1,3 +1,4 @@
+using Ghosts.Pandora.Infrastructure.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Ghosts.Pandora.Infrastructure.Services;

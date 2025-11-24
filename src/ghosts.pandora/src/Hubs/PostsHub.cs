@@ -1,6 +1,7 @@
 using System.Globalization;
 using Microsoft.AspNetCore.SignalR;
 using Ghosts.Pandora.Infrastructure;
+using Ghosts.Pandora.Infrastructure.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Ghosts.Pandora.Hubs;

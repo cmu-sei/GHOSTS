@@ -6,7 +6,7 @@
         (Model?.Likes?.Any(l => string.Equals(l.Username, currentUser, StringComparison.OrdinalIgnoreCase)) ?? false);
     var likedClass = currentUserLiked ? " liked" : string.Empty;
 }
-@model Ghosts.Pandora.Infrastructure.Post
+@model Ghosts.Pandora.Infrastructure.Models.Post
 
 <!DOCTYPE html>
 <html lang="en">

@@ -1,3 +1,5 @@
+using Ghosts.Pandora.Infrastructure.Models;
+
 namespace Ghosts.Pandora.Infrastructure.ViewModels;
 
 using System;

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Ghosts.Pandora.Hubs;
 using Ghosts.Pandora.Infrastructure;
+using Ghosts.Pandora.Infrastructure.Models;
 using Ghosts.Pandora.Infrastructure.Services;
 
 namespace Ghosts.Pandora.Controllers;

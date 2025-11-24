@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using Ghosts.Pandora.Hubs;
 using Ghosts.Pandora.Infrastructure;
+using Ghosts.Pandora.Infrastructure.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;

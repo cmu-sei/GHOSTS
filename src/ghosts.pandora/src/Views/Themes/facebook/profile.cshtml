@@ -1,7 +1,7 @@
 @{
     Layout = null;
 }
-@model Ghosts.Pandora.Infrastructure.User
+@model Ghosts.Pandora.Infrastructure.Models.User
 @{
     var profileUsername = Model?.Username ?? (ViewContext.RouteData.Values["username"] as string)?.Trim();
     if (string.IsNullOrWhiteSpace(profileUsername))
