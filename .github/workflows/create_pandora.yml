@@ -2,9 +2,9 @@ name: Create Container Pandora
 
 on:
   workflow_dispatch:
-    branches: [ main ]
+    branches: [main]
   release:
-    types: [ "published" ]
+    types: ["published"]
 
 jobs:
   build:
@@ -24,11 +24,11 @@ jobs:
         with:
           tags: dustinupdyke/ghosts-pandora:latest
           push: true
-          context: ./src/ghosts.pandora/
-          file: ./src/ghosts.pandora/Dockerfile
-        
+          context: ./src/ghosts.pandora/src
+          file: ./src/ghosts.pandora/src/Dockerfile
+
       # - name: Save Docker image as tar
-      #   run: | 
+      #   run: |
       #     docker save dustinupdyke/ghosts-pandora:latest > ghosts-pandora.tar
 
       # - name: Upload TAR file as artifact
