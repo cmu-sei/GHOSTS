@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Ghosts.Api/Ghosts.Api.csproj" />
+    <Project Path="src/Ghosts.Animator/Ghosts.Animator.csproj" />
+    <Project Path="src/Ghosts.Domain/Ghosts.Domain.csproj" />
+    <Project Path="src/apphost/Ghosts-AppHost.csproj" />
+  </Folder>
+</Solution>

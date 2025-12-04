@@ -1,0 +1,135 @@
+<div class="page-header">
+  <h1>Automation Workflows</h1>
+  <div class="header-actions">
+    <button mat-stroked-button color="primary" type="button" (click)="refreshWorkflows()"
+      [disabled]="loadingWorkflows()">
+      <i class="fas fa-sync"></i>
+      Refresh
+    </button>
+  </div>
+</div>
+
+<div class="workflow-runner-container">
+  <mat-card class="run-workflow-card">
+    <mat-card-header>
+      <mat-card-title>Run a Workflow</mat-card-title>
+      <mat-card-subtitle>
+        Select an active workflow and define how often the Ghosts API should run it.
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="runForm" (ngSubmit)="runWorkflow()">
+        <mat-form-field appearance="outline" class="full-width" style="margin-top:15px">
+          <mat-label>Workflow</mat-label>
+          <mat-select formControlName="workflowId" [disabled]="loadingWorkflows() || workflows().length === 0">
+            @if (workflows().length === 0) {
+            <mat-option disabled>
+              No active workflows are currently available
+            </mat-option>
+            } @else {
+            @for (workflow of workflows(); track workflow.id) {
+            <mat-option [value]="workflow.id">
+              {{ workflow.name }}
+              <small class="workflow-id">ID: {{ workflow.id }}</small>
+            </mat-option>
+            }
+            }
+          </mat-select>
+
+          @if (lastUpdated()) {
+          <mat-hint>
+            Cached at {{ lastUpdated() | date:'short' }}
+          </mat-hint>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width" style="margin:30px 0 15px 0">
+          <mat-label>Cron Schedule</mat-label>
+          <input matInput formControlName="cronSchedule" placeholder="e.g. */15 * * * *" spellcheck="false">
+          <mat-hint>
+            Standard 5-field cron (minute hour day-of-month month day-of-week) or shortcuts like @daily.
+          </mat-hint>
+          @if (runForm.get('cronSchedule')?.hasError('required') && runForm.get('cronSchedule')?.touched) {
+          <mat-error>Cron schedule is required</mat-error>
+          } @else if (runForm.get('cronSchedule')?.hasError('pattern') && runForm.get('cronSchedule')?.touched) {
+          <mat-error>Enter a valid cron expression (e.g. */5 * * * *)</mat-error>
+          }
+        </mat-form-field>
+
+        <div class="form-actions">
+          <button mat-stroked-button color="primary" type="button" (click)="refreshWorkflows()"
+            [disabled]="loadingWorkflows()">
+            <i class="fas fa-sync"></i>
+            Refresh List
+          </button>
+
+          <button mat-raised-button color="primary" type="submit"
+            [disabled]="runForm.invalid || executing() || workflows().length === 0">
+            <i class="fas fa-play"></i>
+            Run Workflow
+          </button>
+        </div>
+
+        @if (executing()) {
+        <div class="executing-state">
+          <mat-spinner diameter="30"></mat-spinner>
+          <span>Triggering workflow...</span>
+        </div>
+        }
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="active-workflows-card">
+    <mat-card-header>
+      <mat-card-title>Cached Active Workflows</mat-card-title>
+      <mat-card-subtitle>
+        @if (lastUpdated()) {
+        Last checked at {{ lastUpdated() | date: 'shortTime' }}
+        } @else {
+        Not loaded yet
+        }
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      @if (loadingWorkflows()) {
+      <div class="loading">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Loading workflows from the Ghosts API...</p>
+      </div>
+      } @else if (loadError()) {
+      <div class="error">
+        <p>{{ loadError() }}</p>
+        <button mat-button color="primary" type="button" (click)="refreshWorkflows()">
+          <i class="fas fa-sync"></i>
+          Retry
+        </button>
+      </div>
+      } @else if (workflows().length === 0) {
+      <div class="empty-state">
+        <i class="fas fa-database"></i>
+        <p>No active workflows were returned by the Ghosts API.</p>
+      </div>
+      } @else {
+      <ul class="workflow-list">
+        @for (workflow of workflows(); track workflow.id) {
+        <li>
+          <div class="workflow-name">
+            {{ workflow.name }}
+            <span class="status-chip">Active</span>
+          </div>
+          <div class="workflow-meta">
+            ID: {{ workflow.id }}
+            @if (workflow.updatedAt) {
+            • Updated {{ workflow.updatedAt | date:'short' }}
+            }
+          </div>
+        </li>
+        }
+      </ul>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -1,0 +1,154 @@
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+
+  h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 600;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 12px;
+
+    button i {
+      margin-right: 6px;
+    }
+  }
+}
+
+.workflow-runner-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.run-workflow-card,
+.active-workflows-card {
+  mat-card-header {
+    margin-bottom: 8px;
+  }
+
+  mat-card-title {
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  mat-card-subtitle {
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.6);
+  }
+}
+
+.run-workflow-card {
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .full-width {
+    width: 100%;
+  }
+
+  .workflow-id {
+    display: block;
+    font-size: 11px;
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+
+    button i {
+      margin-right: 6px;
+    }
+  }
+
+  .executing-state {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: rgba(0, 0, 0, 0.7);
+  }
+}
+
+.active-workflows-card {
+  .workflow-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  li {
+    padding: 12px 16px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 8px;
+    background-color: #fafafa;
+  }
+
+  .workflow-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+  }
+
+  .workflow-meta {
+    margin-top: 6px;
+    font-size: 13px;
+    color: rgba(0, 0, 0, 0.7);
+  }
+
+  .status-chip {
+    padding: 2px 8px;
+    border-radius: 999px;
+    background-color: rgba(56, 142, 60, 0.15);
+    color: #2e7d32;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .loading,
+  .error,
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 16px;
+    text-align: center;
+    color: rgba(0, 0, 0, 0.6);
+
+    i {
+      font-size: 36px;
+      margin-bottom: 12px;
+      color: rgba(0, 0, 0, 0.4);
+    }
+
+    button {
+      margin-top: 12px;
+    }
+  }
+}
+
+::ng-deep {
+  .mat-mdc-form-field-subscript-wrapper {
+    height: 0;
+    margin-top: 4px;
+  }
+}
