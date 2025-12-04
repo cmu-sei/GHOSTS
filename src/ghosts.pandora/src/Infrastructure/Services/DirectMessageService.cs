@@ -85,16 +85,19 @@ public class DirectMessageService(DataContext context) : IDirectMessageService
 
     public async Task<IEnumerable<User>> GetConversationPartnersAsync(Guid userId)
     {
-        var partners = await context.DirectMessages
-            .Include(dm => dm.FromUser)
-            .Include(dm => dm.ToUser)
+        var partnerIds = await context.DirectMessages
             .Where(dm => dm.FromUserId == userId || dm.ToUserId == userId)
-            .Select(dm => dm.FromUserId == userId ? dm.ToUser : dm.FromUser)
-            .Where(u => u != null)
-            .GroupBy(u => u.Id)
-            .Select(g => g.First())
+            .Select(dm => dm.FromUserId == userId ? dm.ToUserId : dm.FromUserId)
+            .Distinct()
             .ToListAsync();
 
-        return partners;
+        if (partnerIds.Count == 0)
+        {
+            return Enumerable.Empty<User>();
+        }
+
+        return await context.Users
+            .Where(u => partnerIds.Contains(u.Id))
+            .ToListAsync();
     }
 }
