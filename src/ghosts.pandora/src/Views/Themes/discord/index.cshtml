@@ -1,6 +1,11 @@
 @{
     Layout = null;
 }
+
+@{
+    ViewBag.Theme = "discord";
+}
+
 @model List<Ghosts.Pandora.Infrastructure.Models.Post>
 
 <!DOCTYPE html>
@@ -193,10 +198,6 @@
 
             <!-- Messages Container -->
             <div class="messages-container">
-                @{
-                    ViewBag.Theme = "discord";
-                }
-
                 <div class="messages-list">
                     @foreach (var post in Model)
                     {
@@ -211,8 +212,19 @@
         <!-- Member List -->
         <div class="member-list">
             <div class="members-header">
-                <h3>Members — 127</h3>
+                <h3>Members — @Faker.RandomNumber.Next(25, 345)</h3>
             </div>
+
+            @{
+                var user1 = Faker.Internet.UserName();
+                var user2 = Faker.Internet.UserName();
+                var user3 = Faker.Internet.UserName();
+                var user4 = Faker.Internet.UserName();
+                var user5 = Faker.Internet.UserName();
+                var user6 = Faker.Internet.UserName();
+                var user7 = Faker.Internet.UserName();
+                var user8 = Faker.Internet.UserName();
+            }
 
             <div class="members-container">
                 <!-- Online Members -->
@@ -220,41 +232,41 @@
                     <h4 class="member-role">ONLINE — 23</h4>
                     <div class="member-list-items">
                         <div class="member-item">
-                            <img src="/u/@Faker.Internet.UserName()/avatar" alt="User" class="member-avatar">
+                            <img src="/u/@user1/avatar" alt="User" class="member-avatar">
                             <div class="member-info">
-                                <div class="member-name">AliceGamer</div>
-                                <div class="member-activity">Playing God of War</div>
+                                <div class="member-name">@user1</div>
+                                <div class="member-activity">Playing @Faker.Company.Name()</div>
                             </div>
                             <div class="member-status online"></div>
                         </div>
                         <div class="member-item">
-                            <img src="/u/@Faker.Internet.UserName()/avatar" alt="User" class="member-avatar">
+                            <img src="/u/@user2/avatar" alt="User" class="member-avatar">
                             <div class="member-info">
-                                <div class="member-name">TechNinja</div>
-                                <div class="member-activity">Listening to Spotify</div>
+                                <div class="member-name">@user2</div>
+                                <div class="member-activity">Listening to @Faker.Company.CatchPhrase()</div>
                             </div>
                             <div class="member-status online"></div>
                         </div>
                         <div class="member-item">
-                            <img src="/u/@Faker.Internet.UserName()/avatar" alt="User" class="member-avatar">
+                            <img src="/u/@user3/avatar" alt="User" class="member-avatar">
                             <div class="member-info">
-                                <div class="member-name">CodeMaster</div>
-                                <div class="member-bot-badge">BOT</div>
+                                <div class="member-name">@user3</div>
+                                <div class="member-activity">@Faker.Name.First()</div>
                             </div>
                             <div class="member-status online"></div>
                         </div>
                         <div class="member-item">
-                            <img src="/u/@Faker.Internet.UserName()/avatar" alt="User" class="member-avatar">
+                            <img src="/u/@user4/avatar" alt="User" class="member-avatar">
                             <div class="member-info">
-                                <div class="member-name">DevGuru</div>
-                                <div class="member-activity">Visual Studio Code</div>
+                                <div class="member-name">@user4</div>
+                                <div class="member-activity">@Faker.Name.First()</div>
                             </div>
                             <div class="member-status online"></div>
                         </div>
                         <div class="member-item">
-                            <img src="/u/@Faker.Internet.UserName()/avatar" alt="User" class="member-avatar">
+                            <img src="/u/@user5/avatar" alt="User" class="member-avatar">
                             <div class="member-info">
-                                <div class="member-name">ReactPro</div>
+                                <div class="member-name">@user5</div>
                             </div>
                             <div class="member-status online"></div>
                         </div>
@@ -266,23 +278,23 @@
                     <h4 class="member-role">OFFLINE — 104</h4>
                     <div class="member-list-items">
                         <div class="member-item">
-                            <img src="/u/@Faker.Internet.UserName()/avatar" alt="User" class="member-avatar offline">
+                            <img src="/u/@user6/avatar" alt="User" class="member-avatar offline">
                             <div class="member-info">
-                                <div class="member-name offline">MusicLover</div>
+                                <div class="member-name offline">@user6</div>
                             </div>
                             <div class="member-status offline"></div>
                         </div>
                         <div class="member-item">
-                            <img src="/u/@Faker.Internet.UserName()/avatar" alt="User" class="member-avatar offline">
+                            <img src="/u/@user7/avatar" alt="User" class="member-avatar offline">
                             <div class="member-info">
-                                <div class="member-name offline">GameMaster</div>
+                                <div class="member-name offline">@user7</div>
                             </div>
                             <div class="member-status offline"></div>
                         </div>
                         <div class="member-item">
-                            <img src="/u/@Faker.Internet.UserName()/avatar" alt="User" class="member-avatar offline">
+                            <img src="/u/@user8/avatar" alt="User" class="member-avatar offline">
                             <div class="member-info">
-                                <div class="member-name offline">ArtisticSoul</div>
+                                <div class="member-name offline">@user8</div>
                             </div>
                             <div class="member-status offline"></div>
                         </div>

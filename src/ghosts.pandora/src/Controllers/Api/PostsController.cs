@@ -22,9 +22,9 @@ public class PostsController(ILogger logger, IHubContext<PostsHub> hubContext, D
     public IEnumerable<Post> Posts()
     {
         var posts = dbContext.Posts
-            //.Include(x => x.Likes)
-            //.Include(x=>x.Comments.OrderByDescending(c => c.CreatedUtc))
-            //.Include(x => x.User)
+            .Include(x => x.User)
+            .Include(x => x.Likes).ThenInclude(l => l.User)
+            .Include(x=>x.Comments.OrderByDescending(c => c.CreatedUtc)).ThenInclude(c => c.User)
             .OrderByDescending(x => x.CreatedUtc)
             .Take(applicationConfiguration.DefaultDisplay)
             .ToList();
@@ -36,8 +36,8 @@ public class PostsController(ILogger logger, IHubContext<PostsHub> hubContext, D
     public Post Detail(Guid id)
     {
         var post = dbContext.Posts
-            .Include(x => x.Likes)
-            .Include(x=>x.Comments.OrderByDescending(c => c.CreatedUtc))
+            .Include(x => x.Likes).ThenInclude(l => l.User)
+            .Include(x=>x.Comments.OrderByDescending(c => c.CreatedUtc)).ThenInclude(c => c.User)
             .Include(x => x.User)
             .FirstOrDefault(x => x.Id == id);
 
@@ -73,8 +73,14 @@ public class PostsController(ILogger logger, IHubContext<PostsHub> hubContext, D
         if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(post.Message))
             return BadRequest("User and message are required.");
 
+        var theme = Request.Query["theme"].ToString();
+        if (string.IsNullOrWhiteSpace(theme))
+            theme = ThemeRead();
+        if (string.IsNullOrWhiteSpace(theme))
+            theme = "default";
+
         // Get or create user
-        var user = await dbContext.Users.FirstOrDefaultAsync(u => u.Username == username);
+        var user = await dbContext.Users.FirstOrDefaultAsync(u => u.Username == username && u.Theme == theme);
         if (user == null)
         {
             user = new User
@@ -83,6 +89,7 @@ public class PostsController(ILogger logger, IHubContext<PostsHub> hubContext, D
                 Bio = $"User {username}",
                 Avatar = $"/u/{username}/avatar",
                 Status = "online",
+                Theme = theme,
                 CreatedUtc = DateTime.UtcNow,
                 LastActiveUtc = DateTime.UtcNow
             };
@@ -91,11 +98,13 @@ public class PostsController(ILogger logger, IHubContext<PostsHub> hubContext, D
         }
 
         post.Username = user.Username;
-        post.Theme = user.Theme;
+        post.UserId = user.Id;
+        post.Theme = theme;
+        post.CreatedOnUrl = Request.Path.Value;
 
         // has the same user tried to post the same message within the past x minutes?
         if (dbContext.Posts.Any(p => p.Message.Equals(post.Message, StringComparison.CurrentCultureIgnoreCase)
-                                && p.Username == user.Username
+                                && p.UserId == user.Id
                                 && p.CreatedUtc > post.CreatedUtc.AddMinutes(-applicationConfiguration.MinutesToCheckForDuplicatePost)))
         {
             Logger.LogInformation("Client is posting duplicates: {PostUser}", username);

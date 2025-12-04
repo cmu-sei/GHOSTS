@@ -29,23 +29,38 @@ public class UsersController(
             return RedirectToAction("Index", "Home");
         }
 
-        var user = await userService.GetUserByUsernameAsync(targetUsername);
+        var requestedTheme = HttpContext.Request.Query["theme"].ToString();
+        var theme = !string.IsNullOrWhiteSpace(requestedTheme) ? requestedTheme : ThemeRead();
+        var user = await userService.GetUserByUsernameAsync(targetUsername, theme);
+        if (user == null)
+        {
+            user = await userService.GetUserByUsernameAsync(targetUsername);
+            theme = user?.Theme ?? theme;
+        }
+
         if (user == null)
         {
             return NotFound();
         }
 
-        var theme = ThemeRead();
         if (string.IsNullOrWhiteSpace(theme))
         {
             theme = user.Theme ?? "default";
         }
 
+        ThemeWrite(theme);
+
         var isSelf = !string.IsNullOrWhiteSpace(currentUsername) &&
                      string.Equals(currentUsername, user.Username, StringComparison.OrdinalIgnoreCase);
-        var isFollowing = !isSelf &&
-                          !string.IsNullOrWhiteSpace(currentUsername) &&
-                          await followService.IsFollowingAsync(currentUsername, user.Username);
+        var isFollowing = false;
+        if (!isSelf && !string.IsNullOrWhiteSpace(currentUsername))
+        {
+            var currentUser = await userService.GetUserByUsernameAsync(currentUsername, theme);
+            if (currentUser != null)
+            {
+                isFollowing = await followService.IsFollowingAsync(currentUser.Id, user.Id);
+            }
+        }
 
         ViewBag.Theme = theme;
         ViewBag.ProfileUser = user.Username;
@@ -57,7 +72,7 @@ public class UsersController(
 
         if (string.Equals(theme, "default", StringComparison.OrdinalIgnoreCase))
         {
-            var posts = await postService.GetPostsByUserAsync(user.Username, 100);
+            var posts = await postService.GetPostsByUserAndThemeAsync(user.Username, theme, 100);
             return View(viewPath, posts);
         }
 

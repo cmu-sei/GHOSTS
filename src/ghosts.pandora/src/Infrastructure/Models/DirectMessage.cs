@@ -11,12 +11,10 @@ public class DirectMessage
     public int Id { get; set; }
 
     [Required]
-    [MaxLength(50)]
-    public string FromUsername { get; set; }
+    public Guid FromUserId { get; set; }
 
     [Required]
-    [MaxLength(50)]
-    public string ToUsername { get; set; }
+    public Guid ToUserId { get; set; }
 
 
     [Required]
@@ -28,4 +26,10 @@ public class DirectMessage
 
     public virtual User FromUser { get; set; }
     public virtual User ToUser { get; set; }
+
+    [NotMapped]
+    public string FromUsername => FromUser?.Username ?? string.Empty;
+
+    [NotMapped]
+    public string ToUsername => ToUser?.Username ?? string.Empty;
 }

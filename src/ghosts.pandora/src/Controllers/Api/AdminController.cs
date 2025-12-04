@@ -50,9 +50,15 @@ public class AdminController(ILogger logger, DataContext dbContext) : BaseContro
                     Avatar = $"/u/{username}/avatar",
                     Status = "online",
                     CreatedUtc = DateTime.UtcNow,
-                    LastActiveUtc = DateTime.UtcNow
+                    LastActiveUtc = DateTime.UtcNow,
+                    Theme = "default"
                 };
                 dbContext.Users.Add(user);
+                await dbContext.SaveChangesAsync();
+            }
+            else if (string.IsNullOrWhiteSpace(user.Theme))
+            {
+                user.Theme = "default";
                 await dbContext.SaveChangesAsync();
             }
 
@@ -61,6 +67,7 @@ public class AdminController(ILogger logger, DataContext dbContext) : BaseContro
                 Id = Guid.NewGuid(),
                 CreatedUtc = DateTime.MinValue.Add(TimeSpan.FromTicks(min.Ticks + (long)(r.NextDouble() * (DateTime.Now.Ticks - min.Ticks)))),
                 Username = user.Username,
+                UserId = user.Id,
                 Theme = user.Theme,
                 Message = Faker.Lorem.Sentence(15)
             };

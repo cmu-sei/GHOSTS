@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace Ghosts.Pandora.Infrastructure.Models;
 
@@ -30,11 +31,24 @@ public class User
     public DateTime LastActiveUtc { get; set; } = DateTime.UtcNow;
 
     // Navigation properties
+    [JsonIgnore]
     public virtual ICollection<Post> Posts { get; set; } = new List<Post>();
+
+    [JsonIgnore]
     public virtual ICollection<Like> Likes { get; set; } = new List<Like>();
+
+    [JsonIgnore]
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
+
+    [JsonIgnore]
     public virtual ICollection<DirectMessage> SentMessages { get; set; } = new List<DirectMessage>();
+
+    [JsonIgnore]
     public virtual ICollection<DirectMessage> ReceivedMessages { get; set; } = new List<DirectMessage>();
+
+    [JsonIgnore]
     public virtual ICollection<Followers> Following { get; set; } = new List<Followers>();
+
+    [JsonIgnore]
     public virtual ICollection<Followers> Followers { get; set; } = new List<Followers>();
 }

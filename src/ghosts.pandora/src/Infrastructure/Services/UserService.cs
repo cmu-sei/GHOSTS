@@ -6,14 +6,14 @@ namespace Ghosts.Pandora.Infrastructure.Services;
 public interface IUserService
 {
     Task<List<User>> GetAllUsersAsync();
-    Task<User> GetUserByIdAsync(string username);
-    Task<User> GetUserByUsernameAsync(string username);
-    Task<User> CreateUserAsync(string username, string bio = null);
-    Task<User> GetOrCreateUserAsync(string username, string bio = null);
-    Task<User> UpdateUserAsync(string username, string bio = null, string status = null, string theme = null);
-    Task<bool> DeleteUserAsync(string username);
-    Task<bool> UsernameExistsAsync(string username);
-    Task<List<User>> SearchUsersAsync(string searchTerm, int limit = 20);
+    Task<User> GetUserByIdAsync(Guid id);
+    Task<User> GetUserByUsernameAsync(string username, string theme = null);
+    Task<User> CreateUserAsync(string username, string theme, string bio = null);
+    Task<User> GetOrCreateUserAsync(string username, string theme, string bio = null);
+    Task<User> UpdateUserAsync(string username, string theme = null, string bio = null, string status = null, string newTheme = null);
+    Task<bool> DeleteUserAsync(string username, string theme = null);
+    Task<bool> UsernameExistsAsync(string username, string theme = null);
+    Task<List<User>> SearchUsersAsync(string searchTerm, string theme = null, int limit = 20);
 }
 
 public class UserService(DataContext context) : IUserService
@@ -25,29 +25,43 @@ public class UserService(DataContext context) : IUserService
             .ToListAsync();
     }
 
-    public async Task<User> GetUserByIdAsync(string username)
+    public async Task<User> GetUserByIdAsync(Guid id)
     {
         return await context.Users
             .Include(u => u.Posts)
             .Include(u => u.Likes)
             .Include(u => u.Comments)
-            .FirstOrDefaultAsync(u => u.Username == username);
+            .FirstOrDefaultAsync(u => u.Id == id);
     }
 
-    public async Task<User> GetUserByUsernameAsync(string username)
+    public async Task<User> GetUserByUsernameAsync(string username, string theme = null)
     {
-        return await context.Users
+        if (string.IsNullOrWhiteSpace(username))
+            return null;
+
+        var normalizedUsername = username.Trim().ToLowerInvariant();
+        var query = context.Users
             .Include(u => u.Posts)
             .Include(u => u.Likes)
             .Include(u => u.Comments)
-            .FirstOrDefaultAsync(u => u.Username.ToLower() == username.ToLower());
-    }
+            .Where(u => u.Username.ToLower() == normalizedUsername);
 
-    public async Task<User> CreateUserAsync(string username, string bio = null)
-    {
-        if (await UsernameExistsAsync(username))
+        var normalizedTheme = NormalizeThemeKey(theme);
+        if (!string.IsNullOrWhiteSpace(normalizedTheme))
         {
-            return await GetUserByUsernameAsync(username);
+            query = query.Where(u => u.Theme.ToLower() == normalizedTheme);
+        }
+
+        return await query.FirstOrDefaultAsync();
+    }
+
+    public async Task<User> CreateUserAsync(string username, string theme, string bio = null)
+    {
+        var normalizedTheme = NormalizeTheme(theme);
+
+        if (await UsernameExistsAsync(username, normalizedTheme))
+        {
+            return await GetUserByUsernameAsync(username, normalizedTheme);
         }
 
         var user = new User
@@ -55,6 +69,7 @@ public class UserService(DataContext context) : IUserService
             Username = username,
             Bio = bio ?? $"User {username}",
             Avatar = $"/u/{username}/avatar",
+            Theme = normalizedTheme,
             CreatedUtc = DateTime.UtcNow,
             LastActiveUtc = DateTime.UtcNow,
             Status = "Active"
@@ -66,21 +81,33 @@ public class UserService(DataContext context) : IUserService
         return user;
     }
 
-    public async Task<User> GetOrCreateUserAsync(string username, string bio = null)
+    public async Task<User> GetOrCreateUserAsync(string username, string theme, string bio = null)
     {
-        var existingUser = await GetUserByUsernameAsync(username);
+        var normalizedTheme = NormalizeTheme(theme);
+        var existingUser = await GetUserByUsernameAsync(username, normalizedTheme);
         if (existingUser != null)
         {
             return existingUser;
         }
 
-        return await CreateUserAsync(username, bio);
+        return await CreateUserAsync(username, normalizedTheme, bio);
     }
 
-    public async Task<User> UpdateUserAsync(string username, string bio = null, string status = null, string theme = null)
+    public async Task<User> UpdateUserAsync(string username, string theme = null, string bio = null, string status = null, string newTheme = null)
     {
-        var user = await context.Users
-            .FirstOrDefaultAsync(u => u.Username.ToLower() == username.ToLower());
+        if (string.IsNullOrWhiteSpace(username))
+            return null;
+
+        var normalizedUsername = username.Trim().ToLowerInvariant();
+        var query = context.Users.Where(u => u.Username.ToLower() == normalizedUsername);
+
+        var normalizedTheme = NormalizeThemeKey(theme);
+        if (!string.IsNullOrWhiteSpace(normalizedTheme))
+        {
+            query = query.Where(u => u.Theme.ToLower() == normalizedTheme);
+        }
+
+        var user = await query.FirstOrDefaultAsync();
         if (user == null)
             return null;
 
@@ -90,8 +117,8 @@ public class UserService(DataContext context) : IUserService
         if (status != null)
             user.Status = status;
 
-        if (theme != null)
-            user.Theme = theme;
+        if (newTheme != null)
+            user.Theme = NormalizeTheme(newTheme);
 
         user.LastActiveUtc = DateTime.UtcNow;
 
@@ -99,10 +126,9 @@ public class UserService(DataContext context) : IUserService
         return user;
     }
 
-    public async Task<bool> DeleteUserAsync(string username)
+    public async Task<bool> DeleteUserAsync(string username, string theme = null)
     {
-        var user = await context.Users
-            .FirstOrDefaultAsync(u => u.Username.ToLower() == username.ToLower());
+        var user = await GetUserByUsernameAsync(username, theme);
         if (user == null)
             return false;
 
@@ -111,17 +137,47 @@ public class UserService(DataContext context) : IUserService
         return true;
     }
 
-    public async Task<bool> UsernameExistsAsync(string username)
+    public async Task<bool> UsernameExistsAsync(string username, string theme = null)
     {
-        return await context.Users
-            .AnyAsync(u => u.Username.ToLower() == username.ToLower());
+        if (string.IsNullOrWhiteSpace(username))
+            return false;
+
+        var normalizedUsername = username.Trim().ToLowerInvariant();
+        var query = context.Users.Where(u => u.Username.ToLower() == normalizedUsername);
+
+        var normalizedTheme = NormalizeThemeKey(theme);
+        if (!string.IsNullOrWhiteSpace(normalizedTheme))
+        {
+            query = query.Where(u => u.Theme.ToLower() == normalizedTheme);
+        }
+
+        return await query.AnyAsync();
     }
 
-    public async Task<List<User>> SearchUsersAsync(string searchTerm, int limit = 20)
+    public async Task<List<User>> SearchUsersAsync(string searchTerm, string theme = null, int limit = 20)
     {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            return new List<User>();
+        }
+
+        var normalizedTerm = searchTerm.Trim().ToLowerInvariant();
+        var normalizedTheme = NormalizeThemeKey(theme);
         return await context.Users
-            .Where(u => u.Username.ToLower().Contains(searchTerm.ToLower()))
+            .Where(u => u.Username.ToLower().Contains(normalizedTerm))
+            .Where(u => string.IsNullOrWhiteSpace(normalizedTheme) ||
+                        u.Theme.ToLower() == normalizedTheme)
             .Take(limit)
             .ToListAsync();
+    }
+
+    private static string NormalizeTheme(string theme)
+    {
+        return string.IsNullOrWhiteSpace(theme) ? "default" : theme.Trim();
+    }
+
+    private static string NormalizeThemeKey(string theme)
+    {
+        return string.IsNullOrWhiteSpace(theme) ? null : theme.Trim().ToLowerInvariant();
     }
 }

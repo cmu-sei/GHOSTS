@@ -5,36 +5,36 @@ namespace Ghosts.Pandora.Infrastructure.Services;
 
 public interface IFollowService
 {
-    Task<bool> FollowAsync(string followerUsername, string followeeUsername);
-    Task<bool> UnfollowAsync(string followerUsername, string followeeUsername);
-    Task<bool> IsFollowingAsync(string followerUsername, string followeeUsername);
-    Task<int> GetFollowerCountAsync(string username);
-    Task<int> GetFollowingCountAsync(string username);
-    Task<List<User>> GetFollowersAsync(string username, int limit = 50);
-    Task<List<User>> GetFollowingAsync(string username, int limit = 50);
+    Task<bool> FollowAsync(Guid followerUserId, Guid followeeUserId);
+    Task<bool> UnfollowAsync(Guid followerUserId, Guid followeeUserId);
+    Task<bool> IsFollowingAsync(Guid followerUserId, Guid followeeUserId);
+    Task<int> GetFollowerCountAsync(Guid userId);
+    Task<int> GetFollowingCountAsync(Guid userId);
+    Task<List<User>> GetFollowersAsync(Guid userId, int limit = 50);
+    Task<List<User>> GetFollowingAsync(Guid userId, int limit = 50);
 }
 
 public class FollowService(DataContext context) : IFollowService
 {
-    public async Task<bool> FollowAsync(string followerUsername, string followeeUsername)
+    public async Task<bool> FollowAsync(Guid followerUserId, Guid followeeUserId)
     {
-        if (string.IsNullOrWhiteSpace(followerUsername) || string.IsNullOrWhiteSpace(followeeUsername))
+        if (followerUserId == Guid.Empty || followeeUserId == Guid.Empty)
             return false;
 
-        if (string.Equals(followerUsername, followeeUsername, StringComparison.OrdinalIgnoreCase))
+        if (followerUserId == followeeUserId)
             return false;
 
         var exists = await context.Followers.AnyAsync(f =>
-            f.FollowerUsername.ToLower() == followerUsername.ToLower() &&
-            f.Username.ToLower() == followeeUsername.ToLower());
+            f.FollowerUserId == followerUserId &&
+            f.UserId == followeeUserId);
 
         if (exists)
             return false;
 
         var follow = new Followers
         {
-            FollowerUsername = followerUsername,
-            Username = followeeUsername,
+            FollowerUserId = followerUserId,
+            UserId = followeeUserId,
             CreatedUtc = DateTime.UtcNow
         };
 
@@ -43,14 +43,14 @@ public class FollowService(DataContext context) : IFollowService
         return true;
     }
 
-    public async Task<bool> UnfollowAsync(string followerUsername, string followeeUsername)
+    public async Task<bool> UnfollowAsync(Guid followerUserId, Guid followeeUserId)
     {
-        if (string.IsNullOrWhiteSpace(followerUsername) || string.IsNullOrWhiteSpace(followeeUsername))
+        if (followerUserId == Guid.Empty || followeeUserId == Guid.Empty)
             return false;
 
         var follow = await context.Followers.FirstOrDefaultAsync(f =>
-            f.FollowerUsername.ToLower() == followerUsername.ToLower() &&
-            f.Username.ToLower() == followeeUsername.ToLower());
+            f.FollowerUserId == followerUserId &&
+            f.UserId == followeeUserId);
 
         if (follow == null)
             return false;
@@ -60,41 +60,41 @@ public class FollowService(DataContext context) : IFollowService
         return true;
     }
 
-    public async Task<bool> IsFollowingAsync(string followerUsername, string followeeUsername)
+    public async Task<bool> IsFollowingAsync(Guid followerUserId, Guid followeeUserId)
     {
-        if (string.IsNullOrWhiteSpace(followerUsername) || string.IsNullOrWhiteSpace(followeeUsername))
+        if (followerUserId == Guid.Empty || followeeUserId == Guid.Empty)
             return false;
 
         return await context.Followers.AnyAsync(f =>
-            f.FollowerUsername.ToLower() == followerUsername.ToLower() &&
-            f.Username.ToLower() == followeeUsername.ToLower());
+            f.FollowerUserId == followerUserId &&
+            f.UserId == followeeUserId);
     }
 
-    public async Task<int> GetFollowerCountAsync(string username)
+    public async Task<int> GetFollowerCountAsync(Guid userId)
     {
-        if (string.IsNullOrWhiteSpace(username))
+        if (userId == Guid.Empty)
             return 0;
 
         return await context.Followers.CountAsync(f =>
-            f.Username.ToLower() == username.ToLower());
+            f.UserId == userId);
     }
 
-    public async Task<int> GetFollowingCountAsync(string username)
+    public async Task<int> GetFollowingCountAsync(Guid userId)
     {
-        if (string.IsNullOrWhiteSpace(username))
+        if (userId == Guid.Empty)
             return 0;
 
         return await context.Followers.CountAsync(f =>
-            f.FollowerUsername.ToLower() == username.ToLower());
+            f.FollowerUserId == userId);
     }
 
-    public async Task<List<User>> GetFollowersAsync(string username, int limit = 50)
+    public async Task<List<User>> GetFollowersAsync(Guid userId, int limit = 50)
     {
-        if (string.IsNullOrWhiteSpace(username))
+        if (userId == Guid.Empty)
             return new List<User>();
 
         return await context.Followers
-            .Where(f => f.Username.ToLower() == username.ToLower())
+            .Where(f => f.UserId == userId)
             .Include(f => f.Follower)
             .OrderByDescending(f => f.CreatedUtc)
             .Take(limit)
@@ -102,13 +102,13 @@ public class FollowService(DataContext context) : IFollowService
             .ToListAsync();
     }
 
-    public async Task<List<User>> GetFollowingAsync(string username, int limit = 50)
+    public async Task<List<User>> GetFollowingAsync(Guid userId, int limit = 50)
     {
-        if (string.IsNullOrWhiteSpace(username))
+        if (userId == Guid.Empty)
             return new List<User>();
 
         return await context.Followers
-            .Where(f => f.FollowerUsername.ToLower() == username.ToLower())
+            .Where(f => f.FollowerUserId == userId)
             .Include(f => f.Followee)
             .OrderByDescending(f => f.CreatedUtc)
             .Take(limit)

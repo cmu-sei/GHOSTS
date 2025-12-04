@@ -7,15 +7,19 @@ namespace Ghosts.Pandora.Infrastructure.Models;
 public class Followers
 {
     [Required]
-    [MaxLength(50)]
-    public string Username { get; set; }
+    public Guid UserId { get; set; }
 
     [Required]
-    [MaxLength(50)]
-    public string FollowerUsername { get; set; }
+    public Guid FollowerUserId { get; set; }
 
     public DateTime CreatedUtc { get; set; } = DateTime.UtcNow;
 
     public virtual User Follower { get; set; }
     public virtual User Followee { get; set; }
+
+    [NotMapped]
+    public string Username => Followee?.Username ?? string.Empty;
+
+    [NotMapped]
+    public string FollowerUsername => Follower?.Username ?? string.Empty;
 }

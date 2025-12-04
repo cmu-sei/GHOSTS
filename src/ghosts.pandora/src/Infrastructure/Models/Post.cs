@@ -10,6 +10,9 @@ public class Post
     public Guid Id { get; set; } = Guid.NewGuid();
 
     [Required]
+    public Guid UserId { get; set; }
+
+    [Required]
     public string Username { get; set; }
 
     [Required]
@@ -18,6 +21,9 @@ public class Post
 
     [MaxLength(50)]
     public string Theme { get; set; } = "default";
+
+    [MaxLength(500)]
+    public string CreatedOnUrl { get; set; }
 
     public DateTime CreatedUtc { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedUtc { get; set; } = DateTime.UtcNow;

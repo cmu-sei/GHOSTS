@@ -124,13 +124,13 @@
 
     case "discord":
         <div class="message-input-container">
-            <form method="post" action="/">
+            <form method="post">
                 <input type="hidden" name="theme" value="discord">
                 <input type="hidden" name="user" value="@username">
                 <div class="message-input-wrapper">
                     <button type="button" class="attachment-btn">📎</button>
                     <div class="input-area">
-                        <textarea name="message" placeholder="Message #general" class="message-input" rows="1" required></textarea>
+                        <input type="text" name="message" placeholder="Message #general" class="message-input" required />
                         <div class="input-actions">
                             <button type="button" class="input-action" title="Gift Nitro">🎁</button>
                             <button type="button" class="input-action" title="GIF">GIF</button>
@@ -141,6 +141,39 @@
                     </div>
                 </div>
             </form>
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const form = document.querySelector('.message-input-container form');
+                    const input = form.querySelector('.message-input');
+
+                    form.addEventListener('submit', function (e) {
+                        e.preventDefault(); // stop normal form POST
+
+                        const data = new FormData(form);
+
+                        fetch(form.action || window.location.href, {
+                            method: "POST",
+                            body: data
+                        })
+                        .then(res => {
+                            if (res.status === 204 || res.ok) {
+                                window.location.reload();   // success → refresh
+                            } else {
+                                console.log("Unexpected response:", res.status);
+                            }
+                        })
+                        .catch(err => console.error("POST failed:", err));
+                    });
+
+                    input.addEventListener('keydown', function (e) {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            if (!input.value.trim()) return;
+                            form.requestSubmit();  // triggers the custom handler above
+                        }
+                    });
+                });
+            </script>
         </div>
         break;
 

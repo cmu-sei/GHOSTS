@@ -31,28 +31,15 @@ public class AuthController(ILogger logger, IUserService userService, IThemeServ
 
         var username = model.Username.Trim();
 
-        var user = await userService.GetOrCreateUserAsync(username);
+        var requestedTheme = string.IsNullOrWhiteSpace(model.Theme) ? ThemeRead() : model.Theme.Trim();
+        if (string.IsNullOrWhiteSpace(requestedTheme) || !themeService.ThemeExists(requestedTheme))
+        {
+            requestedTheme = "default";
+        }
 
-        var themeName = string.IsNullOrWhiteSpace(model.Theme) ? ThemeRead() : model.Theme.Trim();
-        if (!string.IsNullOrWhiteSpace(themeName) && themeService.ThemeExists(themeName))
-        {
-            await userService.UpdateUserAsync(username, theme: themeName);
-            ThemeWrite(themeName);
-        }
-        else if (!string.IsNullOrWhiteSpace(ThemeRead()))
-        {
-            themeName = ThemeRead();
-        }
-        else if (!string.IsNullOrWhiteSpace(user?.Theme))
-        {
-            themeName = user.Theme;
-            ThemeWrite(themeName);
-        }
-        else
-        {
-            themeName = "default";
-            ThemeWrite(themeName);
-        }
+        ThemeWrite(requestedTheme);
+
+        await userService.GetOrCreateUserAsync(username, requestedTheme);
 
         UserWrite(username);
 

@@ -18,8 +18,8 @@ public interface IPostService
     // General queries
     Task<List<Post>> GetAllPostsAsync(int limit = 50, int offset = 0);
     Task<Post> GetPostByIdAsync(Guid postId);
-    Task<Post> CreatePostAsync(string username, string themeName, string message);
-    Task<bool> DeletePostAsync(Guid postId, string username);
+    Task<Post> CreatePostAsync(Guid userId, string username, string themeName, string message);
+    Task<bool> DeletePostAsync(Guid postId, Guid userId);
 
     // Statistics
     Task<int> GetPostCountByThemeAsync(string themeName);
@@ -194,12 +194,13 @@ public class PostService : IPostService
             .FirstOrDefaultAsync(p => p.Id == postId);
     }
 
-    public async Task<Post> CreatePostAsync(string username, string themeName, string message)
+    public async Task<Post> CreatePostAsync(Guid userId, string username, string themeName, string message)
     {
         var post = new Post
         {
             Id = Guid.NewGuid(),
             Username = username,
+            UserId = userId,
             Theme = themeName,
             Message = message,
             CreatedUtc = DateTime.UtcNow
@@ -211,10 +212,10 @@ public class PostService : IPostService
         return await GetPostByIdAsync(post.Id);
     }
 
-    public async Task<bool> DeletePostAsync(Guid postId, string username)
+    public async Task<bool> DeletePostAsync(Guid postId, Guid userId)
     {
         var post = await _context.Posts
-            .FirstOrDefaultAsync(p => p.Id == postId && p.Username == username);
+            .FirstOrDefaultAsync(p => p.Id == postId && p.UserId == userId);
 
         if (post == null)
             return false;

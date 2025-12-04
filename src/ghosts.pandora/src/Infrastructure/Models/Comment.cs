@@ -11,7 +11,7 @@ public class Comment
     public int Id { get; set; }
 
     [Required]
-    public string Username { get; set; }
+    public Guid UserId { get; set; }
 
     [Required]
     public Guid PostId { get; set; }
@@ -25,4 +25,7 @@ public class Comment
 
     public virtual User User { get; set; }
     public virtual Post Post { get; set; }
+
+    [NotMapped]
+    public string Username => User?.Username ?? string.Empty;
 }

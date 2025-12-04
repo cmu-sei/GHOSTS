@@ -26,7 +26,7 @@ public class SearchController(ILogger logger, IUserService userService, IPostSer
 
         if (!string.IsNullOrWhiteSpace(q))
         {
-            viewModel.Users = await userService.SearchUsersAsync(q, limit: 50);
+            viewModel.Users = await userService.SearchUsersAsync(q, theme, limit: 50);
             viewModel.Posts = await postService.SearchPostsAsync(q, theme, limit: 50);
         }
 

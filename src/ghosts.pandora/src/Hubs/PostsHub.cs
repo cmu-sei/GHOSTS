@@ -26,14 +26,21 @@ public class PostsHub(DataContext dbContext) : Hub
                 Bio = $"User {user}",
                 Avatar = $"/u/{user}/avatar",
                 Status = "online",
+                Theme = "default",
             };
             dbContext.Users.Add(dbUser);
+            await dbContext.SaveChangesAsync();
+        }
+        else if (string.IsNullOrWhiteSpace(dbUser.Theme))
+        {
+            dbUser.Theme = "default";
             await dbContext.SaveChangesAsync();
         }
 
         var post = new Post
         {
             Username = dbUser.Username,
+            UserId = dbUser.Id,
             Theme = dbUser.Theme,
             Message = message,
             CreatedUtc = DateTime.UtcNow

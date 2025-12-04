@@ -28,21 +28,23 @@ public class RelationshipsController(
             return BadRequest("Unable to determine current user.");
         }
 
-        if (string.Equals(follower, username, StringComparison.OrdinalIgnoreCase))
+        var theme = ResolveThemeName();
+
+        var followerUser = await userService.GetOrCreateUserAsync(follower, theme);
+        var followeeUser = await userService.GetOrCreateUserAsync(username, theme);
+
+        if (followerUser.Id == followeeUser.Id)
         {
             return BadRequest("You cannot follow yourself.");
         }
 
-        await userService.GetOrCreateUserAsync(follower);
-        await userService.GetOrCreateUserAsync(username);
-
-        var created = await followService.FollowAsync(follower, username);
-        var followerCount = await followService.GetFollowerCountAsync(username);
+        var created = await followService.FollowAsync(followerUser.Id, followeeUser.Id);
+        var followerCount = await followService.GetFollowerCountAsync(followeeUser.Id);
 
         return Ok(new
         {
             follower,
-            followee = username,
+            followee = followeeUser.Username,
             success = created,
             followers = followerCount
         });
@@ -62,18 +64,27 @@ public class RelationshipsController(
             return BadRequest("Unable to determine current user.");
         }
 
-        if (string.Equals(follower, username, StringComparison.OrdinalIgnoreCase))
+        var theme = ResolveThemeName();
+        var followerUser = await userService.GetUserByUsernameAsync(follower, theme);
+        var followeeUser = await userService.GetUserByUsernameAsync(username, theme);
+
+        if (followerUser == null || followeeUser == null)
+        {
+            return NotFound("User not found in this theme.");
+        }
+
+        if (followerUser.Id == followeeUser.Id)
         {
             return BadRequest("You cannot unfollow yourself.");
         }
 
-        var removed = await followService.UnfollowAsync(follower, username);
-        var followerCount = await followService.GetFollowerCountAsync(username);
+        var removed = await followService.UnfollowAsync(followerUser.Id, followeeUser.Id);
+        var followerCount = await followService.GetFollowerCountAsync(followeeUser.Id);
 
         return Ok(new
         {
             follower,
-            followee = username,
+            followee = followeeUser.Username,
             success = removed,
             followers = followerCount
         });
@@ -87,7 +98,14 @@ public class RelationshipsController(
             return BadRequest("Username is required.");
         }
 
-        var followers = await followService.GetFollowersAsync(username);
+        var theme = ResolveThemeName();
+        var user = await userService.GetUserByUsernameAsync(username, theme);
+        if (user == null)
+        {
+            return NotFound("User not found.");
+        }
+
+        var followers = await followService.GetFollowersAsync(user.Id);
         return Ok(new
         {
             username,
@@ -104,7 +122,14 @@ public class RelationshipsController(
             return BadRequest("Username is required.");
         }
 
-        var following = await followService.GetFollowingAsync(username);
+        var theme = ResolveThemeName();
+        var user = await userService.GetUserByUsernameAsync(username, theme);
+        if (user == null)
+        {
+            return NotFound("User not found.");
+        }
+
+        var following = await followService.GetFollowingAsync(user.Id);
         return Ok(new
         {
             username,
@@ -121,8 +146,15 @@ public class RelationshipsController(
             return BadRequest("Username is required.");
         }
 
-        var followers = await followService.GetFollowersAsync(username, 200);
-        var following = await followService.GetFollowingAsync(username, 200);
+        var theme = ResolveThemeName();
+        var user = await userService.GetUserByUsernameAsync(username, theme);
+        if (user == null)
+        {
+            return NotFound("User not found.");
+        }
+
+        var followers = await followService.GetFollowersAsync(user.Id, 200);
+        var following = await followService.GetFollowingAsync(user.Id, 200);
 
         Func<User, object> projection = user => new
         {
@@ -139,5 +171,18 @@ public class RelationshipsController(
             followers = followers.Select(projection).ToArray(),
             following = following.Select(projection).ToArray()
         });
+    }
+
+    private string ResolveThemeName()
+    {
+        var queryTheme = HttpContext.Request.Query["theme"].ToString();
+        var theme = !string.IsNullOrWhiteSpace(queryTheme) ? queryTheme : ThemeRead();
+        if (string.IsNullOrWhiteSpace(theme))
+        {
+            theme = "default";
+        }
+
+        ThemeWrite(theme);
+        return theme;
     }
 }

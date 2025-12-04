@@ -55,9 +55,14 @@ public class HomeController(
         }
 
         var theme = ThemeRead();
+        if (string.IsNullOrWhiteSpace(theme))
+        {
+            theme = "default";
+        }
         var posts = dbContext.Posts
-            .Include(x=>x.Comments.OrderByDescending(c => c.CreatedUtc))
-            .Include(x=>x.Likes)
+            .Include(x => x.User)
+            .Include(x=>x.Comments.OrderByDescending(c => c.CreatedUtc)).ThenInclude(c => c.User)
+            .Include(x=>x.Likes).ThenInclude(l => l.User)
             .Where(x=>x.Theme == theme)
             .OrderByDescending(x=>x.CreatedUtc).ToList();
 
@@ -76,6 +81,8 @@ public class HomeController(
         var queryTheme = Request.Query["theme"].ToString();
         if (string.IsNullOrEmpty(queryTheme))
             queryTheme = ThemeRead();
+        if (string.IsNullOrWhiteSpace(queryTheme))
+            queryTheme = "default";
 
         var post = new Post
         {
@@ -110,7 +117,7 @@ public class HomeController(
             return BadRequest("User and message are required.");
 
         // Get or create user
-        var user = await dbContext.Users.FirstOrDefaultAsync(u => u.Username == username);
+        var user = await dbContext.Users.FirstOrDefaultAsync(u => u.Username == username && u.Theme == queryTheme);
         if (user == null)
         {
             user = new User
@@ -128,12 +135,14 @@ public class HomeController(
         }
 
         post.Username = user.Username;
+        post.UserId = user.Id;
         post.Theme = queryTheme;
+        post.CreatedOnUrl = Request.Path.Value;
 
         // has the same user tried to post the same message within the past x minutes?
         if (dbContext.Posts.Any(p =>
                 p.Message.ToLower() == post.Message.ToLower()
-                && p.Username == user.Username
+                && p.UserId == user.Id
                 && p.CreatedUtc > post.CreatedUtc.AddMinutes(-applicationConfiguration.MinutesToCheckForDuplicatePost)))
         {
             Logger.LogInformation("Client is posting duplicates: {PostUser}", username);

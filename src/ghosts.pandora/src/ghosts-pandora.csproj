@@ -8,10 +8,10 @@
         <RootNamespace>Ghosts.Pandora</RootNamespace>
         <noWarn>8618</noWarn>
 
-        <ReleaseVersion>1.1.0.0</ReleaseVersion>
-        <Version>1.1.1.0</Version>
-        <AssemblyVersion>1.1.1.0</AssemblyVersion>
-        <FileVersion>1.1.1.0</FileVersion>
+        <ReleaseVersion>1.2.0.0</ReleaseVersion>
+        <Version>1.2.1.0</Version>
+        <AssemblyVersion>1.2.1.0</AssemblyVersion>
+        <FileVersion>1.2.1.0</FileVersion>
         <SynchReleaseVersion>false</SynchReleaseVersion>
 
         <Authors>GHOSTS Development Team @ Carnegie Mellon University</Authors>

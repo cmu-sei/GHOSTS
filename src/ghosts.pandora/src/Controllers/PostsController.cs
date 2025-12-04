@@ -17,9 +17,14 @@ public class PostsController(ILogger logger, DataContext dbContext, IUserService
     public IActionResult Index()
     {
         var theme = ThemeRead();
+        if (string.IsNullOrWhiteSpace(theme))
+        {
+            theme = "default";
+        }
         var posts = dbContext.Posts
-            .Include(x=>x.Comments.OrderByDescending(c => c.CreatedUtc))
-            .Include(x=>x.Likes)
+            .Include(x => x.User)
+            .Include(x=>x.Comments.OrderByDescending(c => c.CreatedUtc)).ThenInclude(c => c.User)
+            .Include(x=>x.Likes).ThenInclude(l => l.User)
             .Where(x=>x.Theme == theme)
             .OrderByDescending(x=>x.CreatedUtc).ToList();
 
@@ -30,9 +35,14 @@ public class PostsController(ILogger logger, DataContext dbContext, IUserService
     public IActionResult Detail(Guid id)
     {
         var theme = ThemeRead();
+        if (string.IsNullOrWhiteSpace(theme))
+        {
+            theme = "default";
+        }
         var post = dbContext.Posts
-            .Include(x=>x.Comments.OrderByDescending(c => c.CreatedUtc))
-            .Include(x=>x.Likes)
+            .Include(x => x.User)
+            .Include(x=>x.Comments.OrderByDescending(c => c.CreatedUtc)).ThenInclude(c => c.User)
+            .Include(x=>x.Likes).ThenInclude(l => l.User)
             .FirstOrDefault(x=>x.Theme == theme && x.Id == id);
 
         return View("Detail", post);
@@ -41,20 +51,28 @@ public class PostsController(ILogger logger, DataContext dbContext, IUserService
     [HttpGet("{id:guid}/likes")]
     public IEnumerable<Like> GetLikes(Guid id)
     {
-        return dbContext.Likes.Where(x => x.PostId == id).ToArray();
+        return dbContext.Likes
+            .Include(l => l.User)
+            .Where(x => x.PostId == id)
+            .ToArray();
     }
 
     [HttpPost("{id:guid}/likes")]
     public async Task<IActionResult> Like(Guid id)
     {
         var username = GetOrCreateUsernameCookie(this.HttpContext);
+        var theme = ThemeRead();
+        if (string.IsNullOrWhiteSpace(theme))
+        {
+            theme = "default";
+        }
 
-        await userService.CreateUserAsync(username);
+        var user = await userService.GetOrCreateUserAsync(username, theme);
 
         var like = new Like
         {
             PostId = id,
-            Username = username,
+            UserId = user.Id,
             CreatedUtc = DateTime.UtcNow
         };
 
@@ -66,19 +84,27 @@ public class PostsController(ILogger logger, DataContext dbContext, IUserService
     [HttpGet("{id:guid}/comments")]
     public IEnumerable<Comment> GetComments(Guid id)
     {
-        return dbContext.Comments.Where(x => x.PostId == id).ToArray();
+        return dbContext.Comments
+            .Include(c => c.User)
+            .Where(x => x.PostId == id)
+            .ToArray();
     }
 
     [HttpPost("{id:guid}/comments")]
     public async Task<IActionResult> Comment(Guid id, [FromForm] FilesController.FileInputModel model)
     {
         var username = GetOrCreateUsernameCookie(this.HttpContext);
-        await userService.CreateUserAsync(username);
+        var theme = ThemeRead();
+        if (string.IsNullOrWhiteSpace(theme))
+        {
+            theme = "default";
+        }
+        var user = await userService.GetOrCreateUserAsync(username, theme);
 
         var comment = new Comment
         {
             PostId = id,
-            Username = username,
+            UserId = user.Id,
             CreatedUtc = DateTime.UtcNow,
         };
 

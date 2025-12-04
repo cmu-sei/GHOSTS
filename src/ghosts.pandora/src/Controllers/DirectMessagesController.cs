@@ -1,6 +1,7 @@
 using Ghosts.Pandora.Infrastructure.Models;
 using Ghosts.Pandora.Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq;
 
 namespace Ghosts.Pandora.Controllers;
 
@@ -15,17 +16,18 @@ public class DirectMessagesController(
     public async Task<IActionResult> Index()
     {
         var username = GetOrCreateUsernameCookie(this.HttpContext);
-        var user = await userService.GetOrCreateUserAsync(username);
-        var themeName = await ResolveThemeAsync(user);
+        var themeName = ResolveThemeName();
+        var user = await userService.GetOrCreateUserAsync(username, themeName);
 
-        var receivedMessages = await directMessageService.GetReceivedMessagesAsync(username);
-        var sentMessages = await directMessageService.GetSentMessagesAsync(username);
+        var receivedMessages = await directMessageService.GetReceivedMessagesAsync(user.Id);
+        var sentMessages = await directMessageService.GetSentMessagesAsync(user.Id);
 
         ViewBag.Theme = themeName;
         ViewBag.Username = username;
         ViewBag.ReceivedMessages = receivedMessages;
         ViewBag.SentMessages = sentMessages;
-        ViewBag.ConversationPartners = await directMessageService.GetConversationPartnersAsync(username);
+        var partners = await directMessageService.GetConversationPartnersAsync(user.Id);
+        ViewBag.ConversationPartners = partners.Select(p => p.Username).ToArray();
 
         return View($"~/Views/Themes/{themeName}/messages.cshtml");
     }
@@ -34,20 +36,21 @@ public class DirectMessagesController(
     public async Task<IActionResult> Conversation(string partnerUsername)
     {
         var username = GetOrCreateUsernameCookie(this.HttpContext);
-        var user = await userService.GetOrCreateUserAsync(username);
-        var themeName = await ResolveThemeAsync(user);
+        var themeName = ResolveThemeName();
+        var user = await userService.GetOrCreateUserAsync(username, themeName);
+        var partner = await userService.GetOrCreateUserAsync(partnerUsername, themeName);
 
-        var conversation = await directMessageService.GetConversationAsync(username, partnerUsername);
+        var conversation = await directMessageService.GetConversationAsync(user.Id, partner.Id);
 
         // Mark messages as read
-        foreach (var message in conversation.Where(m => m.ToUsername == username && m.ReadUtc == null))
+        foreach (var message in conversation.Where(m => m.ToUserId == user.Id && m.ReadUtc == null))
         {
             await directMessageService.MarkAsReadAsync(message.Id);
         }
 
         ViewBag.Theme = themeName;
         ViewBag.Username = username;
-        ViewBag.PartnerUsername = partnerUsername;
+        ViewBag.PartnerUsername = partner.Username;
         ViewBag.Conversation = conversation;
 
         return View($"~/Views/Themes/{themeName}/conversation.cshtml");
@@ -57,11 +60,12 @@ public class DirectMessagesController(
     public async Task<IActionResult> SendMessage(string toUsername, string message)
     {
         var fromUsername = GetOrCreateUsernameCookie(this.HttpContext);
+        var themeName = ResolveThemeName();
 
-        await userService.CreateUserAsync(fromUsername);
-        await userService.CreateUserAsync(toUsername);
+        var fromUser = await userService.GetOrCreateUserAsync(fromUsername, themeName);
+        var toUser = await userService.GetOrCreateUserAsync(toUsername, themeName);
 
-        await directMessageService.SendMessageAsync(fromUsername, toUsername, message);
+        await directMessageService.SendMessageAsync(fromUser.Id, toUser.Id, message);
 
         return RedirectToAction("Conversation", new { partnerUsername = toUsername });
     }
@@ -70,7 +74,9 @@ public class DirectMessagesController(
     public async Task<IActionResult> GetUnreadMessages()
     {
         var username = GetOrCreateUsernameCookie(this.HttpContext);
-        var unreadMessages = await directMessageService.GetUnreadMessagesAsync(username);
+        var themeName = ResolveThemeName();
+        var user = await userService.GetOrCreateUserAsync(username, themeName);
+        var unreadMessages = await directMessageService.GetUnreadMessagesAsync(user.Id);
         return Ok(unreadMessages);
     }
 
@@ -81,22 +87,17 @@ public class DirectMessagesController(
         return NoContent();
     }
 
-    private async Task<string> ResolveThemeAsync(User user)
+    private string ResolveThemeName()
     {
         var cookieTheme = ThemeRead();
-        var selectedTheme = !string.IsNullOrWhiteSpace(cookieTheme)
-            ? cookieTheme
-            : user?.Theme;
+        var queryTheme = HttpContext.Request.Query["theme"].ToString();
+        var selectedTheme = !string.IsNullOrWhiteSpace(queryTheme)
+            ? queryTheme
+            : cookieTheme;
 
         if (string.IsNullOrWhiteSpace(selectedTheme))
         {
             selectedTheme = "default";
-        }
-
-        if (user != null && !string.Equals(user.Theme, selectedTheme, StringComparison.OrdinalIgnoreCase))
-        {
-            await userService.UpdateUserAsync(user.Username, theme: selectedTheme);
-            user.Theme = selectedTheme;
         }
 
         ThemeWrite(selectedTheme);
