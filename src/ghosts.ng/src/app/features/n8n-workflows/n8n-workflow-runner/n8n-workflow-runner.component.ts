@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -12,7 +12,7 @@ import { ChangeDetectionStrategy } from '@angular/core';
 import { N8nWorkflowService } from '../../../core/services';
 import { N8nWorkflow } from '../../../core/models';
 
-const CRON_EXPRESSION = /^(@(yearly|monthly|weekly|daily|hourly|reboot))|((\S+\s+){4}\S+)$/i;
+const CRON_EXPRESSION = /^(@(yearly|annually|monthly|weekly|daily|hourly|reboot))|((\S+\s+){4,5}\S+)$/i;
 
 @Component({
   selector: 'app-n8n-workflow-runner',
@@ -43,6 +43,10 @@ export class N8nWorkflowRunnerComponent implements OnInit {
   protected readonly loadError = signal<string | null>(null);
   protected readonly lastUpdated = signal<Date | null>(null);
   protected readonly executing = signal(false);
+  protected readonly stoppingWorkflowId = signal<string | null>(null);
+  protected readonly webhookWorkflows = computed(() =>
+    this.workflows().filter(workflow => workflow.triggerType === 'webhook' && workflow.active)
+  );
 
   protected readonly runForm = this.fb.group({
     workflowId: [null as string | number | null, Validators.required],
@@ -65,8 +69,10 @@ export class N8nWorkflowRunnerComponent implements OnInit {
         this.workflows.set(workflows);
         this.lastUpdated.set(new Date());
 
-        if (!this.runForm.value.workflowId && workflows.length > 0) {
-          this.runForm.patchValue({ workflowId: workflows[0].id });
+        const webhookWorkflows = this.webhookWorkflows();
+        const initialWorkflow = webhookWorkflows.length > 0 ? webhookWorkflows[0] : null;
+        if (!this.runForm.value.workflowId || !this.isWorkflowSelectable(this.runForm.value.workflowId)) {
+          this.runForm.patchValue({ workflowId: initialWorkflow?.id ?? null });
         }
 
         this.loadingWorkflows.set(false);
@@ -90,6 +96,7 @@ export class N8nWorkflowRunnerComponent implements OnInit {
 
     const workflowId = this.runForm.value.workflowId;
     const cronSchedule = this.runForm.value.cronSchedule?.trim();
+    const selectedWorkflow = this.findWorkflowById(workflowId);
 
     if (!workflowId) {
       this.snackBar.open('Invalid workflow selected', 'Close', { duration: 3000 });
@@ -101,10 +108,21 @@ export class N8nWorkflowRunnerComponent implements OnInit {
       return;
     }
 
+    if (selectedWorkflow?.triggerType !== 'webhook') {
+      this.snackBar.open('Only webhook workflows can be scheduled', 'Close', { duration: 4000 });
+      return;
+    }
+
+    if (!selectedWorkflow.webhookUrl) {
+      this.snackBar.open('Selected workflow is missing a webhook URL', 'Close', { duration: 4000 });
+      return;
+    }
+
     this.executing.set(true);
 
-    this.workflowService.runWorkflow(workflowId, cronSchedule).subscribe({
+    this.workflowService.runWorkflow(workflowId, cronSchedule, selectedWorkflow.webhookUrl).subscribe({
       next: (response) => {
+        this.updateWorkflowRunningState(workflowId, true);
         const message = response.executionId
           ? `Workflow schedule ${response.executionId} saved`
           : 'Workflow schedule saved';
@@ -123,5 +141,57 @@ export class N8nWorkflowRunnerComponent implements OnInit {
         this.executing.set(false);
       }
     });
+  }
+
+  protected stopWorkflow(workflowId: string | number): void {
+    const id = String(workflowId);
+    this.stoppingWorkflowId.set(id);
+
+    this.workflowService.stopWorkflow(workflowId).subscribe({
+      next: () => {
+        this.updateWorkflowRunningState(workflowId, false);
+        this.snackBar.open('Workflow schedule stopped', 'Close', { duration: 4000 });
+      },
+      error: (err) => {
+        this.snackBar.open(
+          err?.message || 'Failed to stop workflow',
+          'Close',
+          { duration: 5000 }
+        );
+        this.stoppingWorkflowId.set(null);
+      },
+      complete: () => {
+        this.stoppingWorkflowId.set(null);
+      }
+    });
+  }
+
+  private updateWorkflowRunningState(workflowId: string | number, isRunning: boolean): void {
+    const targetId = String(workflowId);
+    this.workflows.update((current) =>
+      current.map(workflow =>
+        String(workflow.id) === targetId
+          ? { ...workflow, isRunning }
+          : workflow
+      )
+    );
+  }
+
+  private findWorkflowById(workflowId: string | number | null | undefined): N8nWorkflow | undefined {
+    if (workflowId === null || workflowId === undefined) {
+      return undefined;
+    }
+
+    const id = String(workflowId);
+    return this.workflows().find(workflow => String(workflow.id) === id);
+  }
+
+  private isWorkflowSelectable(workflowId: string | number | null | undefined): boolean {
+    if (workflowId === null || workflowId === undefined) {
+      return false;
+    }
+
+    const id = String(workflowId);
+    return this.webhookWorkflows().some(workflow => String(workflow.id) === id);
   }
 }

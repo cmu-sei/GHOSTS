@@ -105,6 +105,16 @@
     align-items: center;
     gap: 8px;
     font-weight: 600;
+
+    .workflow-link {
+      color: #1976d2;
+      text-decoration: none;
+      font-weight: 600;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
   }
 
   .workflow-meta {
@@ -121,6 +131,21 @@
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.05em;
+
+    &.running {
+      background-color: rgba(255, 152, 0, 0.2);
+      color: #ef6c00;
+    }
+
+    &.trigger {
+      background-color: rgba(33, 150, 243, 0.15);
+      color: #1e88e5;
+    }
+
+    &.inactive {
+      background-color: rgba(244, 67, 54, 0.15);
+      color: #d32f2f;
+    }
   }
 
   .loading,

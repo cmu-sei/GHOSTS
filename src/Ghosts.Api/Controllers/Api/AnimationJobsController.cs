@@ -69,7 +69,7 @@ public class AnimationJobsController(IServiceProvider serviceProvider) : Control
 
         var jsonPieces = new List<string>();
 
-        // 2. For each workflow, grab its full JSON and stash the raw string
+        // 2. For each workflow, grab its full JSON and add running status
         foreach (var wf in data.EnumerateArray())
         {
             var id = wf.GetProperty("id").GetString();
@@ -79,13 +79,90 @@ public class AnimationJobsController(IServiceProvider serviceProvider) : Control
 
             var wfJson = await wfResp.Content.ReadAsStringAsync(cancellationToken);
 
-            // wfJson is already valid JSON; do NOT parse it, just collect it
-            jsonPieces.Add(wfJson);
+            // Parse the JSON, add isRunning field, and serialize back
+            var wfDoc = JsonDocument.Parse(wfJson);
+            var isRunning = _animationsManager.IsWorkflowRunning(id);
+
+            // Build a new JSON object with the isRunning field
+            using var stream = new System.IO.MemoryStream();
+            await using (var writer = new Utf8JsonWriter(stream))
+            {
+                writer.WriteStartObject();
+
+                // Copy all existing properties
+                foreach (var property in wfDoc.RootElement.EnumerateObject())
+                {
+                    property.WriteTo(writer);
+                }
+
+                // Add isRunning property
+                writer.WriteBoolean("isRunning", isRunning);
+                writer.WriteString("apiUrl", apiUrl);
+
+                writer.WriteEndObject();
+            }
+
+            var modifiedJson = System.Text.Encoding.UTF8.GetString(stream.ToArray());
+            jsonPieces.Add(modifiedJson);
         }
 
         // 3. Manually build a JSON array of those workflow JSON objects
         var json = "[" + string.Join(",", jsonPieces) + "]";
 
         return Content(json, "application/json");
+    }
+
+    [SwaggerOperation("WorkflowsControl")]
+    [HttpPost("workflows")]
+    public async Task<IActionResult> WorkflowsControl([FromBody] WorkflowControl workflowControl, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrEmpty(workflowControl.Id))
+            return BadRequest("Workflow ID is required");
+
+        if (string.IsNullOrEmpty(workflowControl.WebhookUrl))
+            return BadRequest("Webhook URL is required");
+
+        if (string.IsNullOrEmpty(workflowControl.Schedule))
+            return BadRequest("Schedule is required");
+
+        try
+        {
+            await _animationsManager.StartWorkflowJob(workflowControl.Id, workflowControl.WebhookUrl, workflowControl.Schedule, cancellationToken);
+            return Ok(new { message = $"Workflow {workflowControl.Id} scheduled successfully", workflowId = workflowControl.Id, webhookUrl = workflowControl.WebhookUrl, schedule = workflowControl.Schedule });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
+
+    [SwaggerOperation("WorkflowsStop")]
+    [HttpPost("workflows/stop")]
+    public async Task<IActionResult> WorkflowsStop([FromBody] WorkflowStop workflowStop, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrEmpty(workflowStop.Id))
+            return BadRequest("Workflow ID is required");
+
+        try
+        {
+            await _animationsManager.StopWorkflowJob(workflowStop.Id);
+            return Ok(new { message = $"Workflow {workflowStop.Id} stopped successfully", workflowId = workflowStop.Id });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
+
+    public class WorkflowControl
+    {
+        public string Id { get; set; }
+        public string WebhookUrl { get; set; }
+        public string Schedule { get; set; }
+    }
+
+    public class WorkflowStop
+    {
+        public string Id { get; set; }
     }
 }

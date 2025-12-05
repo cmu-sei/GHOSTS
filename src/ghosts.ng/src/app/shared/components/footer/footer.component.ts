@@ -159,8 +159,8 @@ export class FooterComponent implements OnInit {
   private readonly configService = inject(ConfigService);
 
   protected readonly status = signal<ApiStatus | null>(null);
-  protected readonly grafanaUrl = signal<string>('http://localhost:3000');
-  protected readonly swaggerUrl = signal<string>('http://localhost:5000/swagger');
+  protected readonly grafanaUrl = signal<string>('');
+  protected readonly swaggerUrl = signal<string>('');
 
   ngOnInit(): void {
     this.loadStatus();

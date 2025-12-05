@@ -99,6 +99,13 @@
         <i class="fas fa-play"></i>
         Execute
       </button>
+      <button
+        mat-button
+        color="accent"
+        (click)="exportScenario(scenario, $event)">
+        <i class="fas fa-file-export"></i>
+        Export
+      </button>
       <button mat-button color="warn" (click)="deleteScenario(scenario, $event)">
         <i class="fas fa-trash"></i>
         Delete

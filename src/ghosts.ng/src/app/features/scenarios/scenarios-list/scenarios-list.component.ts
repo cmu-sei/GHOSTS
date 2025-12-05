@@ -107,6 +107,20 @@ export class ScenariosListComponent implements OnInit {
     });
   }
 
+  protected exportScenario(scenario: Scenario, event: Event): void {
+    event.stopPropagation();
+
+    const markdown = this.buildScenarioMarkdown(scenario);
+    const blob = new Blob([markdown], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${this.slugify(scenario.name)}.md`;
+    link.click();
+    URL.revokeObjectURL(url);
+    link.remove();
+  }
+
   protected formatDate(date: Date): string {
     return new Date(date).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -115,5 +129,85 @@ export class ScenariosListComponent implements OnInit {
       hour: '2-digit',
       minute: '2-digit'
     });
+  }
+
+  private buildScenarioMarkdown(scenario: Scenario): string {
+    const lines: string[] = [];
+    lines.push(`# ${scenario.name}`);
+    lines.push('');
+    lines.push(scenario.description || 'No description provided.');
+    lines.push('');
+    lines.push(`- **Updated:** ${this.formatDate(scenario.updatedAt)}`);
+    lines.push('');
+
+    if (scenario.scenarioParameters) {
+      lines.push('## Scenario Parameters');
+      lines.push('');
+      const { nations = [], threatActors = [], injects = [], userPools = [] } = scenario.scenarioParameters;
+
+      if (nations.length) {
+        lines.push('### Nations');
+        nations.forEach(nation => lines.push(`- ${nation.name} (${nation.alignment})`));
+        lines.push('');
+      }
+
+      if (threatActors.length) {
+        lines.push('### Threat Actors');
+        threatActors.forEach(actor => {
+          const ttps = actor.ttps?.length ? ` | TTPs: ${actor.ttps.join(', ')}` : '';
+          lines.push(`- ${actor.name} (${actor.type}) - Capability ${actor.capability}${ttps}`);
+        });
+        lines.push('');
+      }
+
+      if (injects.length) {
+        lines.push('### Injects');
+        injects.forEach(inject => lines.push(`- **${inject.trigger}**: ${inject.title}`));
+        lines.push('');
+      }
+
+      if (userPools.length) {
+        lines.push('### User Pools');
+        userPools.forEach(pool => lines.push(`- ${pool.role}: ${pool.count}`));
+        lines.push('');
+      }
+    }
+
+    if (scenario.simulationMechanics) {
+      const sim = scenario.simulationMechanics;
+      lines.push('## Simulation Mechanics');
+      lines.push('');
+      lines.push(`- Timeline: ${sim.timelineType}`);
+      lines.push(`- Duration: ${sim.durationHours} hours`);
+      lines.push(`- Adjudication: ${sim.adjudicationType}`);
+      if (sim.escalationLadder) {
+        lines.push(`- Escalation Ladder: ${sim.escalationLadder}`);
+      }
+      if (sim.branchingLogic) {
+        lines.push(`- Branching Logic: ${sim.branchingLogic}`);
+      }
+      if (sim.performanceMetrics) {
+        lines.push(`- Performance Metrics: ${sim.performanceMetrics}`);
+      }
+      lines.push('');
+    }
+
+    if (scenario.timeline?.events?.length) {
+      lines.push('## Timeline Events');
+      lines.push('');
+      scenario.timeline.events.forEach(event => {
+        lines.push(`- **${event.time}** (${event.assigned}) - ${event.description} [${event.status}]`);
+      });
+      lines.push('');
+    }
+
+    return lines.join('\n').trim() + '\n';
+  }
+
+  private slugify(value: string): string {
+    return value?.toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .replace(/-{2,}/g, '-') || 'scenario';
   }
 }

@@ -1,5 +1,5 @@
 <div class="page-header">
-  <h1>Automation Workflows</h1>
+  <h1>RangerAI Automation Integration</h1>
   <div class="header-actions">
     <button mat-stroked-button color="primary" type="button" (click)="refreshWorkflows()"
       [disabled]="loadingWorkflows()">
@@ -22,13 +22,13 @@
       <form [formGroup]="runForm" (ngSubmit)="runWorkflow()">
         <mat-form-field appearance="outline" class="full-width" style="margin-top:15px">
           <mat-label>Workflow</mat-label>
-          <mat-select formControlName="workflowId" [disabled]="loadingWorkflows() || workflows().length === 0">
-            @if (workflows().length === 0) {
+          <mat-select formControlName="workflowId" [disabled]="loadingWorkflows() || webhookWorkflows().length === 0">
+            @if (webhookWorkflows().length === 0) {
             <mat-option disabled>
-              No active workflows are currently available
+              No webhook workflows are currently available
             </mat-option>
             } @else {
-            @for (workflow of workflows(); track workflow.id) {
+            @for (workflow of webhookWorkflows(); track workflow.id) {
             <mat-option [value]="workflow.id">
               {{ workflow.name }}
               <small class="workflow-id">ID: {{ workflow.id }}</small>
@@ -42,18 +42,21 @@
             Cached at {{ lastUpdated() | date:'short' }}
           </mat-hint>
           }
+          <mat-hint align="end">
+            Only workflows with webhook triggers can be scheduled.
+          </mat-hint>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width" style="margin:30px 0 15px 0">
           <mat-label>Cron Schedule</mat-label>
           <input matInput formControlName="cronSchedule" placeholder="e.g. */15 * * * *" spellcheck="false">
           <mat-hint>
-            Standard 5-field cron (minute hour day-of-month month day-of-week) or shortcuts like @daily.
+            Standard 5- or 6-field cron (with optional seconds) or shortcuts like @daily.
           </mat-hint>
           @if (runForm.get('cronSchedule')?.hasError('required') && runForm.get('cronSchedule')?.touched) {
           <mat-error>Cron schedule is required</mat-error>
           } @else if (runForm.get('cronSchedule')?.hasError('pattern') && runForm.get('cronSchedule')?.touched) {
-          <mat-error>Enter a valid cron expression (e.g. */5 * * * *)</mat-error>
+          <mat-error>Enter a valid cron expression (e.g. 0 */5 * * * *)</mat-error>
           }
         </mat-form-field>
 
@@ -65,7 +68,7 @@
           </button>
 
           <button mat-raised-button color="primary" type="submit"
-            [disabled]="runForm.invalid || executing() || workflows().length === 0">
+            [disabled]="runForm.invalid || executing() || webhookWorkflows().length === 0">
             <i class="fas fa-play"></i>
             Run Workflow
           </button>
@@ -83,7 +86,7 @@
 
   <mat-card class="active-workflows-card">
     <mat-card-header>
-      <mat-card-title>Cached Active Workflows</mat-card-title>
+      <mat-card-title>Workflows</mat-card-title>
       <mat-card-subtitle>
         @if (lastUpdated()) {
         Last checked at {{ lastUpdated() | date: 'shortTime' }}
@@ -97,7 +100,7 @@
       @if (loadingWorkflows()) {
       <div class="loading">
         <mat-spinner diameter="40"></mat-spinner>
-        <p>Loading workflows from the Ghosts API...</p>
+        <p>Loading workflows...</p>
       </div>
       } @else if (loadError()) {
       <div class="error">
@@ -110,15 +113,31 @@
       } @else if (workflows().length === 0) {
       <div class="empty-state">
         <i class="fas fa-database"></i>
-        <p>No active workflows were returned by the Ghosts API.</p>
+        <p>No workflows were returned.</p>
       </div>
       } @else {
       <ul class="workflow-list">
         @for (workflow of workflows(); track workflow.id) {
         <li>
           <div class="workflow-name">
-            {{ workflow.name }}
-            <span class="status-chip">Active</span>
+            <a class="workflow-link" [href]="workflow.n8nUrl" target="_blank" rel="noopener">
+              {{ workflow.name }}
+            </a>
+            <span class="status-chip" [class.inactive]="!workflow.active">
+              {{ workflow.active ? 'Active' : 'Inactive' }}
+            </span>
+            @if (workflow.isRunning) {
+            <span class="status-chip running">Running</span>
+            }
+            @if (workflow.triggerType) {
+            <span class="status-chip trigger">
+              {{
+              workflow.triggerType === 'webhook' ? 'Webhook' :
+              workflow.triggerType === 'chat' ? 'Chat' :
+              workflow.triggerType === 'form' ? 'Form' : 'Unknown'
+              }}
+            </span>
+            }
           </div>
           <div class="workflow-meta">
             ID: {{ workflow.id }}
@@ -126,6 +145,20 @@
             • Updated {{ workflow.updatedAt | date:'short' }}
             }
           </div>
+          @if (workflow.description) {
+          <p class="workflow-description">
+            {{ workflow.description }}
+          </p>
+          }
+          @if (workflow.isRunning) {
+          <div class="workflow-actions">
+            <button mat-stroked-button color="warn" type="button" (click)="stopWorkflow(workflow.id)"
+              [disabled]="stoppingWorkflowId() === (workflow.id + '')">
+              <i class="fas fa-stop-circle"></i>
+              Stop
+            </button>
+          </div>
+          }
         </li>
         }
       </ul>

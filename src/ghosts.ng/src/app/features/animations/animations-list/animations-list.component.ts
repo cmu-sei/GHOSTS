@@ -11,7 +11,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ChangeDetectionStrategy } from '@angular/core';
 import { JobInfo, AnimationJobTypes, AnimationStartRequest, AnimationStopRequest } from '../../../core/models';
-import { AnimationService } from '../../../core/services';
+import { AnimationService, ConfigService } from '../../../core/services';
 
 @Component({
   selector: 'app-animations-list',
@@ -37,6 +37,7 @@ export class AnimationsListComponent implements OnInit {
   private readonly animationService = inject(AnimationService);
   private readonly fb = inject(FormBuilder);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly configService = inject(ConfigService);
 
   protected readonly runningJobs = signal<JobInfo[]>([]);
   protected readonly loading = signal(true);
@@ -46,76 +47,7 @@ export class AnimationsListComponent implements OnInit {
 
   protected startForm!: FormGroup;
 
-  private readonly defaultConfigs: Record<AnimationJobTypes, any> = {
-    [AnimationJobTypes.SOCIALGRAPH]: {
-      isEnabled: true,
-      isMultiThreaded: true,
-      isInteracting: true,
-      turnLength: 5000,
-      maximumSteps: 100,
-      chanceOfKnowledgeTransfer: 0.75,
-      decay: {
-        isEnabled: true,
-        rate: 0.05
-      }
-    },
-    [AnimationJobTypes.SOCIALSHARING]: {
-      isEnabled: true,
-      isMultiThreaded: true,
-      isInteracting: true,
-      isSendingTimelinesToGhostsApi: true,
-      isSendingTimelinesDirectToSocializer: false,
-      postUrl: "http://localhost:5000/api/timelines",
-      turnLength: 5000,
-      maximumSteps: 100,
-      contentEngine: {
-        source: "ollama",
-        model: "mistral:7b",
-        host: "http://localhost:11434",
-        temperature: 0.7
-      }
-    },
-    [AnimationJobTypes.SOCIALBELIEF]: {
-      isEnabled: true,
-      isMultiThreaded: true,
-      isInteracting: true,
-      turnLength: 5000,
-      maximumSteps: 100
-    },
-    [AnimationJobTypes.CHAT]: {
-      isEnabled: true,
-      isMultiThreaded: true,
-      isInteracting: true,
-      isSendingTimelinesToGhostsApi: true,
-      turnLength: 5000,
-      maximumSteps: 100,
-      percentReplyVsNew: 50,
-      postProbabilities: {
-        "text": 70,
-        "image": 20,
-        "link": 10
-      },
-      postUrl: "http://localhost:5000/api/chat",
-      contentEngine: {
-        source: "OpenAi",
-        model: "gpt-4",
-        temperature: 0.7
-      }
-    },
-    [AnimationJobTypes.FULLAUTONOMY]: {
-      isEnabled: true,
-      isMultiThreaded: true,
-      isInteracting: true,
-      isSendingTimelinesToGhostsApi: true,
-      turnLength: 5000,
-      maximumSteps: 100,
-      contentEngine: {
-        source: "OpenAi",
-        model: "gpt-4",
-        temperature: 0.7
-      }
-    }
-  };
+  private readonly defaultConfigs = this.createDefaultConfigs();
 
   ngOnInit(): void {
     this.initForm();
@@ -229,5 +161,92 @@ export class AnimationsListComponent implements OnInit {
 
   protected formatJobType(type: string): string {
     return type.replace(/([A-Z])/g, ' $1').trim();
+  }
+
+  private createDefaultConfigs(): Record<AnimationJobTypes, any> {
+    const apiUrl = this.configService.apiUrl.replace(/\/$/, '');
+    const timelinesUrl = `${apiUrl}/timelines`;
+    const chatUrl = `${apiUrl}/chat`;
+    const windowOrigin = this.getWindowOrigin();
+    const ollamaHost = `${windowOrigin}:11434`;
+
+    return {
+      [AnimationJobTypes.SOCIALGRAPH]: {
+        isEnabled: true,
+        isMultiThreaded: true,
+        isInteracting: true,
+        turnLength: 5000,
+        maximumSteps: 100,
+        chanceOfKnowledgeTransfer: 0.75,
+        decay: {
+          isEnabled: true,
+          rate: 0.05
+        }
+      },
+      [AnimationJobTypes.SOCIALSHARING]: {
+        isEnabled: true,
+        isMultiThreaded: true,
+        isInteracting: true,
+        isSendingTimelinesToGhostsApi: true,
+        isSendingTimelinesDirectToSocializer: false,
+        postUrl: timelinesUrl,
+        turnLength: 5000,
+        maximumSteps: 100,
+        contentEngine: {
+          source: 'ollama',
+          model: 'mistral:7b',
+          host: ollamaHost,
+          temperature: 0.7
+        }
+      },
+      [AnimationJobTypes.SOCIALBELIEF]: {
+        isEnabled: true,
+        isMultiThreaded: true,
+        isInteracting: true,
+        turnLength: 5000,
+        maximumSteps: 100
+      },
+      [AnimationJobTypes.CHAT]: {
+        isEnabled: true,
+        isMultiThreaded: true,
+        isInteracting: true,
+        isSendingTimelinesToGhostsApi: true,
+        turnLength: 5000,
+        maximumSteps: 100,
+        percentReplyVsNew: 50,
+        postProbabilities: {
+          text: 70,
+          image: 20,
+          link: 10
+        },
+        postUrl: chatUrl,
+        contentEngine: {
+          source: 'OpenAi',
+          model: 'gpt-4',
+          temperature: 0.7
+        }
+      },
+      [AnimationJobTypes.FULLAUTONOMY]: {
+        isEnabled: true,
+        isMultiThreaded: true,
+        isInteracting: true,
+        isSendingTimelinesToGhostsApi: true,
+        turnLength: 5000,
+        maximumSteps: 100,
+        contentEngine: {
+          source: 'OpenAi',
+          model: 'gpt-4',
+          temperature: 0.7
+        }
+      }
+    };
+  }
+
+  private getWindowOrigin(): string {
+    if (typeof window === 'undefined') {
+      return 'http://localhost';
+    }
+
+    return `${window.location.protocol}//${window.location.hostname}`;
   }
 }

@@ -208,7 +208,7 @@ export class NavigationComponent {
     { label: 'Timelines', path: '/timelines', icon: 'fa-stream' },
     { label: 'NPCs', path: '/npcs', icon: 'fa-user' },
     { label: 'Animations', path: '/animations', icon: 'fa-play-circle' },
-    { label: 'n8n Workflows', path: '/n8n-workflows', icon: 'fa-project-diagram' },
+    { label: 'RangerAI', path: '/n8n-workflows', icon: 'fa-project-diagram' },
     {
       label: 'Activities',
       icon: 'fa-chart-bar',
