@@ -57,13 +57,15 @@ public class DirectMessagesController(
     }
 
     [HttpPost("send")]
-    public async Task<IActionResult> SendMessage(string toUsername, string message)
+    public async Task<IActionResult> SendMessage(string toUsername, string message, string fromUsername, string theme)
     {
-        var fromUsername = GetOrCreateUsernameCookie(this.HttpContext);
-        var themeName = ResolveThemeName();
+        if(string.IsNullOrEmpty(fromUsername))
+            fromUsername = GetOrCreateUsernameCookie(this.HttpContext);
+        if(string.IsNullOrEmpty(theme))
+            theme = ResolveThemeName();
 
-        var fromUser = await userService.GetOrCreateUserAsync(fromUsername, themeName);
-        var toUser = await userService.GetOrCreateUserAsync(toUsername, themeName);
+        var fromUser = await userService.GetOrCreateUserAsync(fromUsername, theme);
+        var toUser = await userService.GetOrCreateUserAsync(toUsername, theme);
 
         await directMessageService.SendMessageAsync(fromUser.Id, toUser.Id, message);
 
