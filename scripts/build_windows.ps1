@@ -25,45 +25,64 @@ if (Test-Path $t -PathType Container) {
     Remove-Item -Path $t -Recurse -Force -Confirm:$false
 } 
 
-$msbuild = "& 'C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\msbuild.exe'"
-$args = " ..\src\ghosts.windows.sln /nologo /v:minimal /p:configuration=$configuration"
-$build = "$msbuild $args"
-Invoke-Expression $build
-
-$g = (Invoke-Expression "& '..\src\ghosts.client.windows\bin\$configuration\geckodriver.exe' --version").split("(")[0]
-$c = (Invoke-Expression "& '..\src\ghosts.client.windows\bin\$configuration\chromedriver.exe' --version").split("(")[0]
-
-Write-Host "  x32 build completed. Preparing package..." -ForegroundColor Green
-Write-Host "    $g" -ForegroundColor Green
-Write-Host "    $c" -ForegroundColor Green
-if (-not [string]::IsNullOrWhiteSpace($config)) {
-    Write-Host "  Copying external config for ..\src\ghosts.client.windows\bin\$configuration\config..." -ForegroundColor Green
-    Remove-Item -Path "..\src\ghosts.client.windows\bin\$configuration\config" -Recurse -Force -Confirm:$false
-    Copy-Item -Path $config -Destination "..\src\ghosts.client.windows\bin\$configuration\config" -Recurse -Force
+$possiblePaths = @(
+    "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\msbuild.exe",
+    "C:\Program Files\Microsoft Visual Studio\2022\Professional\MSBuild\Current\Bin\msbuild.exe"
+)
+$msbuildPath = $possiblePaths | Where-Object { Test-Path $_ } | Select-Object -First 1
+if (-not $msbuildPath) {
+    Write-Error "Could not find msbuild.exe in standard locations."
+    exit 1
 }
-Rename-Item -Path "..\src\ghosts.client.windows\bin\$configuration" -NewName "ghosts-client-x32-v$release_version"
-Compress-Archive -Path "..\src\ghosts.client.windows\bin\ghosts.client.windows-x32-v$release_version" -DestinationPath "..\src\ghosts.client.windows\bin\ghosts-client-x32-v$release_version.zip"
-Write-Host "  x32 package complete..." -ForegroundColor Green
+$msbuild = "& '$msbuildPath'"
 
-$args = " ..\src\ghosts.client.windows.sln /nologo /v:minimal /p:configuration=$configuration /p:Platform=x64"
-$build = "$msbuild $args"
-Invoke-Expression $build
-Write-Host "  x64 build completed. Preparing package..." -ForegroundColor Green
-Write-Host "    $g" -ForegroundColor Green
-Write-Host "    $c" -ForegroundColor Green
-if (-not [string]::IsNullOrWhiteSpace($config)) {
-    Write-Host "  Copying external config for ..\src\ghosts.client.windows\bin\x64\$configuration\config..." -ForegroundColor Green
-    Remove-Item -Path "..\src\ghosts.client.windows\bin\x64\$configuration\config" -Recurse -Force -Confirm:$false
-    Copy-Item -Path $config -Destination "..\src\ghosts.client.windows\bin\x64\$configuration\config" -Recurse -Force
+$platforms = @(
+    @{ Name="x32"; PlatformParam=""; PathPrefix="" },
+    @{ Name="x64"; PlatformParam="/p:Platform=x64"; PathPrefix="x64\" }
+)
+
+foreach ($p in $platforms) {
+    $platformName = $p.Name
+    $platformParam = $p.PlatformParam
+    $pathPrefix = $p.PathPrefix
+    
+    $buildArgs = " ..\src\ghosts.client.windows.sln /t:Rebuild /restore /nologo /v:minimal /p:configuration=$configuration $platformParam"
+    $build = "$msbuild $buildArgs"
+    Invoke-Expression $build
+
+    $binPath = "..\src\ghosts.client.windows\bin\$pathPrefix$configuration"
+    
+    $g = (Invoke-Expression "& '$binPath\geckodriver.exe' --version").split("(")[0]
+    $c = (Invoke-Expression "& '$binPath\chromedriver.exe' --version").split("(")[0]
+
+    Write-Host "  $platformName build completed. Preparing package..." -ForegroundColor Green
+    Write-Host "    $g" -ForegroundColor Green
+    Write-Host "    $c" -ForegroundColor Green
+
+    if (-not [string]::IsNullOrWhiteSpace($config)) {
+        Write-Host "  Copying external config for $binPath\config..." -ForegroundColor Green
+        if (Test-Path "$binPath\config") {
+            Remove-Item -Path "$binPath\config" -Recurse -Force -Confirm:$false
+        }
+        Copy-Item -Path $config -Destination "$binPath\config" -Recurse -Force
+    }
+
+    # Wait for file handles to be released
+    Start-Sleep -Seconds 1
+
+    $packageName = "ghosts-client-$platformName-v$release_version"
+    Rename-Item -Path $binPath -NewName $packageName
+    
+    $currentPackagePath = "..\src\ghosts.client.windows\bin\$pathPrefix$packageName"
+    Compress-Archive -Path $currentPackagePath -DestinationPath "..\src\ghosts.client.windows\bin\$packageName.zip"
+    
+    Write-Host "  $platformName package complete..." -ForegroundColor Green
+
+    if ($pathPrefix -ne "") {
+        Move-Item -Path $currentPackagePath -Destination "..\src\ghosts.client.windows\bin\$packageName"
+        $prefixDir = $pathPrefix.Trim("\")
+        Remove-Item -Path "..\src\ghosts.client.windows\bin\$prefixDir" -Recurse -Force -Confirm:$false
+    }
 }
-Rename-Item -Path "..\src\ghosts.client.windows\bin\x64\$configuration" -NewName "ghosts-client-x64-v$release_version"
-Compress-Archive -Path "..\src\ghosts.client.windows\bin\x64\ghosts-client-x64-v$release_version" -DestinationPath "..\src\ghosts.client.windows\bin\ghosts-client-x64-v$release_version.zip"
-
-Write-Host "  x64 package complete..." -ForegroundColor Green
-
-
-# clean up folder structure for x64
-Move-Item -Path "..\src\ghosts.client.windows\bin\x64\ghosts-client-x64-v$release_version" -Destination "..\src\ghosts.client.windows\bin\ghosts-client-x64-v$release_version"
-Remove-Item -Path "..\src\ghosts.client.windows\bin\x64" -Recurse -Force -Confirm:$false
 
 Write-Host "All packages completed." -ForegroundColor Green
