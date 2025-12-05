@@ -46,7 +46,7 @@ public class DirectMessagesController(
             .Include(dm => dm.FromUser)
             .Include(dm => dm.ToUser)
             .Where(x=>x.FromUser.Id == id || x.ToUser.Id == id)
-            .OrderByDescending(x => x.CreatedUtc)
+            .OrderBy(x => x.CreatedUtc)
             .Take(applicationConfiguration.DefaultDisplay)
             .ToList();
 
@@ -68,7 +68,7 @@ public class DirectMessagesController(
             .Include(dm => dm.ToUser)
             .Where(x=> (x.FromUser.Username == username && x.FromUser.Theme == theme)
                        || (x.ToUser.Username == username && x.ToUser.Theme == theme))
-            .OrderByDescending(x => x.CreatedUtc)
+            .OrderBy(x => x.CreatedUtc)
             .Take(applicationConfiguration.DefaultDisplay)
             .ToList();
 

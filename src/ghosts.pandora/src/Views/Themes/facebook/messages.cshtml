@@ -300,37 +300,58 @@
             </div>
 
             <div class="messages-main">
-                @if (ViewBag.ReceivedMessages != null)
+                @{
+                    var allMessages = new List<dynamic>();
+                    if (ViewBag.ReceivedMessages != null)
+                    {
+                        foreach (var msg in ViewBag.ReceivedMessages)
+                        {
+                            allMessages.Add(new { Message = msg, IsReceived = true });
+                        }
+                    }
+                    if (ViewBag.SentMessages != null)
+                    {
+                        foreach (var msg in ViewBag.SentMessages)
+                        {
+                            allMessages.Add(new { Message = msg, IsReceived = false });
+                        }
+                    }
+                    allMessages = allMessages.OrderBy(m => m.Message.CreatedUtc).ToList();
+                }
+
+                @if (allMessages.Any())
                 {
                     <div class="message-group">
                         <h3 class="message-group-title">Recent Messages</h3>
                         <div class="message-groups">
-                            @foreach (var message in ViewBag.ReceivedMessages)
+                            @foreach (var item in allMessages)
                             {
-                                <div class="message-item">
-                                    <img src="/u/@message.FromUsername/avatar" alt="@message.FromUsername" class="message-avatar">
-                                    <div class="message-content">
-                                        <div class="message-header">
-                                            <span class="message-sender">@message.FromUsername</span>
-                                            <span class="message-time">@message.CreatedUtc.ToString("MMM dd, h:mm tt")</span>
+                                if (item.IsReceived)
+                                {
+                                    <div class="message-item">
+                                        <img src="/u/@item.Message.FromUsername/avatar" alt="@item.Message.FromUsername" class="message-avatar">
+                                        <div class="message-content">
+                                            <div class="message-header">
+                                                <span class="message-sender">@item.Message.FromUsername</span>
+                                                <span class="message-time">@item.Message.CreatedUtc.ToString("MMM dd, h:mm tt")</span>
+                                            </div>
+                                            <div class="message-text">@item.Message.Message</div>
                                         </div>
-                                        <div class="message-text">@message.Message</div>
                                     </div>
-                                </div>
-                            }
-
-                            @foreach (var message in ViewBag.SentMessages)
-                            {
-                                <div class="message-item sent">
-                                    <img src="/u/@message.ToUsername/avatar" alt="@message.ToUsername" class="message-avatar">
-                                    <div class="message-content">
-                                        <div class="message-header">
-                                            <span class="message-sender">To @message.ToUsername</span>
-                                            <span class="message-time">@message.CreatedUtc.ToString("MMM dd, h:mm tt")</span>
+                                }
+                                else
+                                {
+                                    <div class="message-item sent">
+                                        <img src="/u/@item.Message.FromUsername/avatar" alt="@item.Message.FromUsername" class="message-avatar">
+                                        <div class="message-content">
+                                            <div class="message-header">
+                                                <span class="message-sender">@item.Message.FromUsername</span>
+                                                <span class="message-time">@item.Message.CreatedUtc.ToString("MMM dd, h:mm tt")</span>
+                                            </div>
+                                            <div class="message-text">@item.Message.Message</div>
                                         </div>
-                                        <div class="message-text">@message.Message</div>
                                     </div>
-                                </div>
+                                }
                             }
                         </div>
                     </div>
