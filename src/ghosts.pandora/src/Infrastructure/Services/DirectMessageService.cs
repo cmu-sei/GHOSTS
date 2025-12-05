@@ -85,19 +85,30 @@ public class DirectMessageService(DataContext context) : IDirectMessageService
 
     public async Task<IEnumerable<User>> GetConversationPartnersAsync(Guid userId)
     {
-        var partnerIds = await context.DirectMessages
+        var partnersWithLastMessage = await context.DirectMessages
             .Where(dm => dm.FromUserId == userId || dm.ToUserId == userId)
-            .Select(dm => dm.FromUserId == userId ? dm.ToUserId : dm.FromUserId)
-            .Distinct()
+            .GroupBy(dm => dm.FromUserId == userId ? dm.ToUserId : dm.FromUserId)
+            .Select(g => new
+            {
+                PartnerId = g.Key,
+                LastMessageTime = g.Max(dm => dm.CreatedUtc)
+            })
+            .OrderByDescending(p => p.LastMessageTime)
             .ToListAsync();
 
-        if (partnerIds.Count == 0)
+        if (partnersWithLastMessage.Count == 0)
         {
             return Enumerable.Empty<User>();
         }
 
-        return await context.Users
+        var partnerIds = partnersWithLastMessage.Select(p => p.PartnerId).ToList();
+        var users = await context.Users
             .Where(u => partnerIds.Contains(u.Id))
             .ToListAsync();
+
+        // Maintain the order from the query
+        return partnerIds
+            .Select(id => users.First(u => u.Id == id))
+            .ToList();
     }
 }
