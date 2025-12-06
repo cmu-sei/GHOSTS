@@ -46,11 +46,11 @@ foreach ($p in $platforms) {
     $platformParam = $p.PlatformParam
     $pathPrefix = $p.PathPrefix
     
-    $buildArgs = " ..\src\ghosts.client.windows.sln /t:Rebuild /restore /nologo /v:minimal /p:configuration=$configuration $platformParam"
+    $buildArgs = " ..\src\Ghosts.Client.Windows.sln /t:Rebuild /restore /nologo /v:minimal /p:configuration=$configuration $platformParam"
     $build = "$msbuild $buildArgs"
     Invoke-Expression $build
 
-    $binPath = "..\src\ghosts.client.windows\bin\$pathPrefix$configuration"
+    $binPath = "..\src\Ghosts.Client.Windows\bin\$pathPrefix$configuration"
     
     $g = (Invoke-Expression "& '$binPath\geckodriver.exe' --version").split("(")[0]
     $c = (Invoke-Expression "& '$binPath\chromedriver.exe' --version").split("(")[0]
