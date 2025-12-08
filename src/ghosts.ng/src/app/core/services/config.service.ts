@@ -4,6 +4,7 @@ import { firstValueFrom } from 'rxjs';
 
 export interface AppConfig {
   apiUrl: string;
+  n8nApiUrl: string;
 }
 
 @Injectable({
@@ -26,7 +27,8 @@ export class ConfigService {
       console.warn('Failed to load config.json, using defaults', error);
       // Fallback to localhost for local development
       this.config = {
-        apiUrl: 'http://localhost:5000/api'
+        apiUrl: 'http://localhost:5000/api',
+        n8nApiUrl: 'http://localhost:5678'
       };
     }
 
@@ -35,5 +37,9 @@ export class ConfigService {
 
   get apiUrl(): string {
     return this.config?.apiUrl || 'http://localhost:5000/api';
+  }
+
+  get n8nApiUrl(): string {
+    return this.config?.n8nApiUrl || 'http://localhost:5678';
   }
 }

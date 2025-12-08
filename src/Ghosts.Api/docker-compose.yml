@@ -6,14 +6,15 @@ networks:
     driver: bridge
 services:
   ghostsui:
-    image: dustinupdyke/ghosts-ui
-    container_name: ghosts-ui
+    image: dustinupdyke/ghosts-ng
+    container_name: ghosts-ng
     ports:
-      - '8080:8080'
+      - "4200:80"
     networks:
       - ghosts-network
     environment:
-      GHOSTS_API_URL: http://ghosts-api:5000
+      API_URL: ${WEB_API_URL:-http://host.docker.internal:5000/api}
+      N8N_API_URL: ${WEB_N8N_API_URL:-http://host.docker.internal:5678}
   postgres:
     image: postgres:16.8
     container_name: ghosts-postgres
@@ -25,12 +26,12 @@ services:
       - ./_db:/var/lib/postgresql/data
     logging:
       options:
-        max-size: '100m'
-        max-file: '5'
+        max-size: "100m"
+        max-file: "5"
     ports:
-      - '5432:5432'
+      - "5432:5432"
     healthcheck:
-      test: [ 'CMD-SHELL', 'pg_isready -U ghosts' ]
+      test: ["CMD-SHELL", "pg_isready -U ghosts"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -43,7 +44,10 @@ services:
     depends_on:
       - postgres
     ports:
-      - '5000:5000'
+      - "5000:5000"
+    environment:
+      N8N_API_URL: ${N8N_API_URL:-http://host.docker.internal:5678/api/v1/workflows}
+      N8N_API_KEY: ${N8N_API_KEY:-replace-me}
     networks:
       - ghosts-network
     restart: always
@@ -53,7 +57,7 @@ services:
     depends_on:
       - postgres
     ports:
-      - '3000:3000'
+      - "3000:3000"
     networks:
       - ghosts-network
     restart: always
