@@ -1,6 +1,6 @@
 using System.Reflection;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 
 namespace Ghosts.Pandora.Infrastructure.Startup.Extensions;
 

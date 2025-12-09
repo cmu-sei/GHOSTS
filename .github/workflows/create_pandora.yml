@@ -24,15 +24,5 @@ jobs:
         with:
           tags: dustinupdyke/ghosts-pandora:latest
           push: true
-          context: ./src/ghosts.pandora/src
-          file: ./src/ghosts.pandora/src/Dockerfile
-
-      # - name: Save Docker image as tar
-      #   run: |
-      #     docker save dustinupdyke/ghosts-pandora:latest > ghosts-pandora.tar
-
-      # - name: Upload TAR file as artifact
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: ghosts-pandora
-      #     path: ghosts-pandora.tar
+          context: ./src/Ghosts.Pandora/src
+          file: ./src/Ghosts.Pandora/src/Dockerfile

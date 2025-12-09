@@ -4,14 +4,14 @@
         <TargetFramework>net10.0</TargetFramework>
         <Nullable>disable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
-        <AssemblyName>ghosts-pandora</AssemblyName>
+        <AssemblyName>Ghosts.Pandora</AssemblyName>
         <RootNamespace>Ghosts.Pandora</RootNamespace>
         <noWarn>8618</noWarn>
 
         <ReleaseVersion>1.2.0.0</ReleaseVersion>
         <Version>1.2.1.0</Version>
         <AssemblyVersion>1.2.1.0</AssemblyVersion>
-        <FileVersion>1.2.4.0</FileVersion>
+        <FileVersion>1.2.6.0</FileVersion>
         <SynchReleaseVersion>false</SynchReleaseVersion>
 
         <Authors>GHOSTS Development Team @ Carnegie Mellon University</Authors>
@@ -19,16 +19,16 @@
         <Product>GHOSTS PANDORA</Product>
         <Description>GHOSTS PANDORA - please email ddupdyke [-at-] sei.cmu.edu with bugs/requests/other</Description>
         <Copyright>Carnegie Mellon University 2022</Copyright>
-        <LangVersion>14</LangVersion>
+        <LangVersion>latest</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
       <PackageReference Include="Faker.Net" Version="2.0.163" />
-      <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="9.0.10" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.10" />
-      <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.2" />
-      <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.6" />
-      <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="9.0.6" />
+      <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="10.0.0" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.0" />
+      <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
+      <PackageReference Include="Swashbuckle.AspNetCore" Version="10.0.1" />
+      <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="10.0.1" />
 
       <!-- Pandora Content Generation Packages -->
       <PackageReference Include="QuestPDF" Version="2025.7.4" />
@@ -36,12 +36,11 @@
       <PackageReference Include="DocumentFormat.OpenXml" Version="3.3.0" />
       <PackageReference Include="SkiaSharp" Version="3.119.1" />
       <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="3.119.1" />
-      <PackageReference Include="SharpCompress" Version="0.41.0" />
+      <PackageReference Include="SharpCompress" Version="0.42.1" />
       <PackageReference Include="CsvHelper" Version="33.1.0" />
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Services\" />
       <Folder Include="Views\Themes\" />
       <Folder Include="wwwroot\images\u\" />
     </ItemGroup>

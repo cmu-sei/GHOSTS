@@ -280,7 +280,7 @@ function getPostTemplate(theme, id, user, message, created) {
     return templates[theme] || templates.default;
 }
 
-connection.on("SendMessage", function (id, user, message, created) {
+connection.on("SendMessage", function (id, user, theme, message, created) {
     // does user div exist and have a value?
     let u = $("#user");
     if(u.val()) {

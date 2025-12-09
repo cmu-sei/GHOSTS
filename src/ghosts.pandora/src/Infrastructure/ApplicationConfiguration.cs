@@ -14,6 +14,8 @@ public class ApplicationConfiguration
     public PayloadsConfig Payloads { get; set; } = new();
     public PandoraConfig Pandora { get; set; } = new();
 
+    public GhostsConfig Ghosts { get; set; }
+
     public class CleanupJobConfig
     {
         public int Hours { get; set; }
@@ -98,6 +100,11 @@ public class ApplicationConfiguration
     public class VoiceGenerationConfig
     {
         public bool Enabled { get; set; } = false;
+    }
+
+    public class GhostsConfig
+    {
+        public string ApiUrl { get; set; }
     }
 }
 

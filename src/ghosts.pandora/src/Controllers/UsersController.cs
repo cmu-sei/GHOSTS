@@ -1,4 +1,3 @@
-using Ghosts.Pandora.Infrastructure;
 using Ghosts.Pandora.Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -72,7 +71,7 @@ public class UsersController(
 
         if (string.Equals(theme, "default", StringComparison.OrdinalIgnoreCase))
         {
-            var posts = await postService.GetPostsByUserAndThemeAsync(user.Username, theme, 100);
+            var posts = await postService.GetPostsByUserAndTheme(user.Username, theme, 100);
             return View(viewPath, posts);
         }
 

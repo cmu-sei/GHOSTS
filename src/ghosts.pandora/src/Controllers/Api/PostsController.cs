@@ -2,16 +2,17 @@
 using Ghosts.Pandora.Hubs;
 using Ghosts.Pandora.Infrastructure;
 using Ghosts.Pandora.Infrastructure.Models;
+using Ghosts.Pandora.Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Ghosts.Pandora.Controllers.Api;
 
 [Route("/api/posts")]
 [SwaggerTag("API Functionality for posts")]
-public class PostsController(ILogger logger, IHubContext<PostsHub> hubContext, DataContext dbContext, ApplicationConfiguration applicationConfiguration) : BaseController(logger)
+public class PostsController(ILogger logger, IHubContext<PostsHub> hubContext, IPostService service,
+    IUserService userService, ApplicationConfiguration applicationConfiguration) : BaseController(logger)
 {
     [SwaggerOperation(
         Summary = "Retrieve all posts",
@@ -19,29 +20,15 @@ public class PostsController(ILogger logger, IHubContext<PostsHub> hubContext, D
         OperationId = "GetPosts")]
     [ProducesResponseType(typeof(IEnumerable<Post>), (int)HttpStatusCode.OK)]
     [HttpGet]
-    public IEnumerable<Post> Posts()
+    public async Task<IEnumerable<Post>> Posts()
     {
-        var posts = dbContext.Posts
-            .Include(x => x.User)
-            .Include(x => x.Likes).ThenInclude(l => l.User)
-            .Include(x=>x.Comments.OrderByDescending(c => c.CreatedUtc)).ThenInclude(c => c.User)
-            .OrderByDescending(x => x.CreatedUtc)
-            .Take(applicationConfiguration.DefaultDisplay)
-            .ToList();
-
-        return posts;
+        return await service.GetAllPosts(applicationConfiguration.DefaultDisplay, 0);
     }
 
     [HttpGet("{id:guid}/detail")]
-    public Post Detail(Guid id)
+    public async Task<Post> Detail(Guid id)
     {
-        var post = dbContext.Posts
-            .Include(x => x.Likes).ThenInclude(l => l.User)
-            .Include(x=>x.Comments.OrderByDescending(c => c.CreatedUtc)).ThenInclude(c => c.User)
-            .Include(x => x.User)
-            .FirstOrDefault(x => x.Id == id);
-
-        return post;
+        return await service.GetPostById(id);
     }
 
     [HttpPost]
@@ -80,36 +67,12 @@ public class PostsController(ILogger logger, IHubContext<PostsHub> hubContext, D
             theme = "default";
 
         // Get or create user
-        var user = await dbContext.Users.FirstOrDefaultAsync(u => u.Username == username && u.Theme == theme);
-        if (user == null)
-        {
-            user = new User
-            {
-                Username = username,
-                Bio = $"User {username}",
-                Avatar = $"/u/{username}/avatar",
-                Status = "online",
-                Theme = theme,
-                CreatedUtc = DateTime.UtcNow,
-                LastActiveUtc = DateTime.UtcNow
-            };
-            dbContext.Users.Add(user);
-            await dbContext.SaveChangesAsync();
-        }
+        var user = await userService.GetOrCreateUserAsync(username, theme);
 
         post.Username = user.Username;
         post.UserId = user.Id;
         post.Theme = theme;
         post.CreatedOnUrl = Request.Path.Value;
-
-        // has the same user tried to post the same message within the past x minutes?
-        if (dbContext.Posts.Any(p => p.Message.Equals(post.Message, StringComparison.CurrentCultureIgnoreCase)
-                                && p.UserId == user.Id
-                                && p.CreatedUtc > post.CreatedUtc.AddMinutes(-applicationConfiguration.MinutesToCheckForDuplicatePost)))
-        {
-            Logger.LogInformation("Client is posting duplicates: {PostUser}", username);
-            return NoContent();
-        }
 
         var imagePath = string.Empty;
         if (model.File != null)
@@ -146,12 +109,11 @@ public class PostsController(ILogger logger, IHubContext<PostsHub> hubContext, D
             post.Message += $" <img src=\"{imagePath}\"/>";
         }
 
-        dbContext.Posts.Add(post);
-        await dbContext.SaveChangesAsync();
+        await service.CreatePost(user.Id, user.Username, user.Theme, post.Message);
 
         UserWrite(username);
 
-        await hubContext.Clients.All.SendAsync("SendMessage", post.Id, username, post.Message, post.CreatedUtc);
+        await hubContext.Clients.All.SendAsync("SendMessage", post.Id, username, theme, post.Message, post.CreatedUtc);
 
         return NoContent();
     }

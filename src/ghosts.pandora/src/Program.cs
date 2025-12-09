@@ -40,6 +40,12 @@ if (!string.IsNullOrEmpty(articleCountEnv) && int.TryParse(articleCountEnv, out 
     configuration.Mode.ArticleCount = articleCount;
 }
 
+var ghostsApiUrl = Environment.GetEnvironmentVariable("GHOSTS_API_URL");
+if (!string.IsNullOrEmpty(ghostsApiUrl))
+{
+    configuration.Ghosts.ApiUrl = ghostsApiUrl;
+}
+
 builder.Services.AddSingleton(configuration);
 
 // Configure database provider
@@ -107,6 +113,7 @@ builder.Services.AddScoped<IThemeService, ThemeService>();
 builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<IDirectMessageService, DirectMessageService>();
 builder.Services.AddScoped<IFollowService, FollowService>();
+builder.Services.AddScoped<IGhostsService, GhostsService>();
 builder.Services.AddScoped<ILawEnforcementPortalService, LawEnforcementPortalService>();
 
 // Pandora content generation services
@@ -157,6 +164,5 @@ logger.LogInformation(
 );
 logger.LogInformation("This server is configured for '{Mode}' and to use the '{Theme}' theme", configuration.Mode.Type, configuration.Mode.DefaultTheme);
 logger.LogInformation("Database Provider: {Provider}", databaseProvider);
-logger.LogInformation("Connection String: {ConnectionString}", connectionString?.Replace("Password=", "Password=***"));
 
 app.Run();

@@ -2,7 +2,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ghosts-pandora", "src\ghosts-pandora.csproj", "{9AC6EFE0-6896-4CB4-9AFD-06988BD79D29}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ghosts.Pandora", "src\Ghosts.Pandora.csproj", "{D104FA4D-585E-45FE-AA63-E1C059294691}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -10,10 +10,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{9AC6EFE0-6896-4CB4-9AFD-06988BD79D29}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9AC6EFE0-6896-4CB4-9AFD-06988BD79D29}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9AC6EFE0-6896-4CB4-9AFD-06988BD79D29}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9AC6EFE0-6896-4CB4-9AFD-06988BD79D29}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D104FA4D-585E-45FE-AA63-E1C059294691}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D104FA4D-585E-45FE-AA63-E1C059294691}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D104FA4D-585E-45FE-AA63-E1C059294691}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D104FA4D-585E-45FE-AA63-E1C059294691}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

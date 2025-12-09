@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Ghosts.Api.Areas.Animator.Infrastructure.Models;
 using Ghosts.Api.Infrastructure.Models;
 using Ghosts.Animator;
 using Ghosts.Animator.Models;
@@ -19,8 +18,11 @@ public interface INpcService
     public Task<IEnumerable<NpcRecord>> GetAll();
     public Task<IEnumerable<NpcRecord>> GetEnclave(string campaign, string enclave);
     public Task<IEnumerable<NpcNameId>> GetListAsync();
+    public Task SaveListAsync(Guid id, string username, string originUrl);
     public Task<IEnumerable<NpcRecord>> GetTeam(string campaign, string enclave, string team);
     public Task<NpcRecord> GetById(Guid id);
+    public Task<IEnumerable<NpcActivity>> GetActivity(Guid id);
+    public Task<NpcActivity> CreateActivity(Guid id, string activityType, string detail);
     public Task<IEnumerable<NpcRecord>> Create(GenerationConfiguration config, CancellationToken ct);
     public Task<NpcRecord> CreateOne();
     Task<NpcRecord> CreateOne(NpcProfile npc);
@@ -66,6 +68,16 @@ public class NpcService(ApplicationDbContext context) : INpcService
             .ToListAsync();
     }
 
+    public async Task SaveListAsync(Guid id, string username, string originUrl)
+    {
+        var npc = NpcRecord.TransformToNpc(Npc.Generate(MilitaryUnits.GetServiceBranch()));
+        npc.Id = id;
+        npc.NpcProfile.Accounts = new List<AccountsProfile.Account> { new() { Username = username, Url = originUrl } };
+        npc.CreatedUtc = DateTime.UtcNow;
+        _context.Npcs.Add(npc);
+        await _context.SaveChangesAsync();
+    }
+
     public async Task<IEnumerable<NpcNameId>> GetListAsync(string campaign)
     {
         return await _context.Npcs
@@ -97,6 +109,30 @@ public class NpcService(ApplicationDbContext context) : INpcService
             .Include(n => n.Beliefs)
             .Include(n => n.Preferences)
             .FirstOrDefaultAsync(x => x.Id == id);
+    }
+
+    public async Task<IEnumerable<NpcActivity>> GetActivity(Guid id)
+    {
+        return _context.NpcActivities.Where(x => x.NpcId == id);
+    }
+
+    public async Task<NpcActivity> CreateActivity(Guid id, string activityType, string detail)
+    {
+        var npcActivity = new NpcActivity
+        {
+            NpcId = id,
+            Detail = detail,
+            CreatedUtc = DateTime.UtcNow
+        };
+        if (Enum.TryParse<NpcActivity.ActivityTypes>(activityType, true, out var value))
+        {
+            npcActivity.ActivityType = value;
+        }
+
+        _context.NpcActivities.Add(npcActivity);
+        await _context.SaveChangesAsync();
+
+        return npcActivity;
     }
 
     public async Task<NpcRecord> CreateOne()

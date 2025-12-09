@@ -910,7 +910,7 @@ function showToast(message) {
 }
 
 // SignalR message handling
-connection.on("SendMessage", function (id, user, message, created) {
+connection.on("SendMessage", function (id, user, theme, message, created) {
     const userInput = $("#user");
     const shouldShowMessage = !userInput.val() || userInput.val() === user;
 

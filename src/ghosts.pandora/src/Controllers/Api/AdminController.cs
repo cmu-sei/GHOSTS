@@ -1,26 +1,26 @@
 ﻿using System.Net;
-using Ghosts.Pandora.Infrastructure;
 using Ghosts.Pandora.Infrastructure.Models;
+using Ghosts.Pandora.Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Ghosts.Pandora.Controllers.Api;
 
 [Route("/api/admin")]
 [SwaggerTag("Administration functions")]
-public class AdminController(ILogger logger, DataContext dbContext) : BaseController(logger)
+public class AdminController(ILogger logger, IPostService service, IUserService userService) : BaseController(logger)
 {
     [SwaggerOperation(
         Summary = "Resets server by deleting all posts",
         Description = "Deletes all server data.",
-        OperationId = "GetPosts")]
+        OperationId = "ResetServer")]
     [ProducesResponseType(typeof(IEnumerable<Post>), (int)HttpStatusCode.OK)]
     [HttpDelete("delete")]
     public async Task<IActionResult> Delete()
     {
-        dbContext.Posts.RemoveRange(dbContext.Posts);
-        await dbContext.SaveChangesAsync();
+        // await service.RemovePosts();
+        // foreach(var user in await userService.GetAllUsersAsync())
+        //     await userService.DeleteUserAsync(user.Username);
         return NoContent();
     }
 
@@ -30,7 +30,7 @@ public class AdminController(ILogger logger, DataContext dbContext) : BaseContro
         OperationId = "GetPosts")]
     [ProducesResponseType(typeof(IEnumerable<Post>), (int)HttpStatusCode.OK)]
     [HttpPost("generate/{n}")]
-    public async Task<IActionResult> Generate(int n)
+    public async Task<IActionResult> Generate(int n, string theme)
     {
         var r = new Random();
 
@@ -40,27 +40,7 @@ public class AdminController(ILogger logger, DataContext dbContext) : BaseContro
             var username = Faker.Internet.UserName();
 
             // Get or create user
-            var user = await dbContext.Users.FirstOrDefaultAsync(u => u.Username == username);
-            if (user == null)
-            {
-                user = new User
-                {
-                    Username = username,
-                    Bio = $"User {username}",
-                    Avatar = $"/u/{username}/avatar",
-                    Status = "online",
-                    CreatedUtc = DateTime.UtcNow,
-                    LastActiveUtc = DateTime.UtcNow,
-                    Theme = "default"
-                };
-                dbContext.Users.Add(user);
-                await dbContext.SaveChangesAsync();
-            }
-            else if (string.IsNullOrWhiteSpace(user.Theme))
-            {
-                user.Theme = "default";
-                await dbContext.SaveChangesAsync();
-            }
+            var user = await userService.GetOrCreateUserAsync(username, theme);
 
             var post = new Post
             {
@@ -71,9 +51,8 @@ public class AdminController(ILogger logger, DataContext dbContext) : BaseContro
                 Theme = user.Theme,
                 Message = Faker.Lorem.Sentence(15)
             };
-            dbContext.Posts.Add(post);
+            await service.CreatePost(post.UserId, user.Username, post.Theme, post.Message);
         }
-        await dbContext.SaveChangesAsync();
 
         return NoContent();
     }

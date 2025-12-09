@@ -1,7 +1,5 @@
-using Ghosts.Pandora.Infrastructure.Models;
 using Ghosts.Pandora.Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;
-using System.Linq;
 
 namespace Ghosts.Pandora.Controllers;
 
@@ -67,7 +65,7 @@ public class DirectMessagesController(
         var fromUser = await userService.GetOrCreateUserAsync(fromUsername, theme);
         var toUser = await userService.GetOrCreateUserAsync(toUsername, theme);
 
-        await directMessageService.SendMessageAsync(fromUser.Id, toUser.Id, message);
+        await directMessageService.CreateMessageAsync(fromUser.Id, toUser.Id, message);
 
         return RedirectToAction("Conversation", new { partnerUsername = toUsername });
     }

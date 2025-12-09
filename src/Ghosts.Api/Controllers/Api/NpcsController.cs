@@ -6,14 +6,10 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using FileHelpers;
-using Ghosts.Api.Areas.Animator.Infrastructure.Models;
 using Ghosts.Api.Infrastructure.Models;
 using Ghosts.Api.Infrastructure.Services;
-using Ghosts.Animator;
 using Ghosts.Animator.Extensions;
 using Ghosts.Animator.Models;
 using Ghosts.Api.Hubs;
@@ -22,10 +18,8 @@ using Ghosts.Api.Infrastructure.Extensions;
 using Ghosts.Domain.Code;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore;
 using NLog;
 using Swashbuckle.AspNetCore.Annotations;
-using Swashbuckle.AspNetCore.Filters;
 
 namespace Ghosts.Api.Controllers.Api;
 
@@ -54,14 +48,14 @@ public class NpcsController(
     }
 
     /// <summary>
-    /// Returns all generated NPCs in the system (caution, could return a very large amount of data)
+    /// Creates an NPC
     /// </summary>
-    /// <returns>IEnumerable&lt;NpcProfile&gt;</returns>
-    [ProducesResponseType(typeof(ActionResult<IEnumerable<NpcRecord>>), (int)HttpStatusCode.OK)]
-    [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(ActionResult<IEnumerable<NpcRecord>>))]
+    /// <returns>NpcProfile</returns>
+    [ProducesResponseType(typeof(ActionResult<NpcRecord>), (int)HttpStatusCode.OK)]
+    [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(ActionResult<NpcRecord>))]
     [SwaggerOperation("NpcsCreate")]
     [HttpPost]
-    public async Task<ActionResult<IEnumerable<NpcRecord>>> NpcsCreate(NpcProfile npc)
+    public async Task<ActionResult<NpcRecord>> NpcsCreate(NpcProfile npc)
     {
         return Ok(await service.CreateOne(npc));
     }
@@ -79,6 +73,16 @@ public class NpcsController(
         return Ok(await service.GetListAsync());
     }
 
+    [ProducesResponseType(typeof(ActionResult<NpcNameId>), (int)HttpStatusCode.OK)]
+    [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(ActionResult<NpcNameId>))]
+    [SwaggerOperation("NpcsSaveList")]
+    [HttpPost("list")]
+    public async Task<ActionResult<NpcNameId>> NpcsSaveList(Guid id, string username, string originUrl)
+    {
+        await service.SaveListAsync(id, username, originUrl);
+        return Ok(new NpcNameId() { Id = id, Name = username });
+    }
+
     /// <summary>
     /// Get NPC by specific Id
     /// </summary>
@@ -92,6 +96,25 @@ public class NpcsController(
     {
         return Ok(await service.GetById(id));
     }
+
+    [ProducesResponseType(typeof(ActionResult<IEnumerable<NpcActivity>>), (int)HttpStatusCode.OK)]
+    [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(ActionResult<IEnumerable<NpcActivity>>))]
+    [SwaggerOperation("NpcsGetActivityById")]
+    [HttpGet("{id:guid}/activity")]
+    public async Task<ActionResult<IEnumerable<NpcActivity>>> NpcGetActivity(Guid id)
+    {
+        return Ok(await service.GetActivity(id));
+    }
+
+    [ProducesResponseType(typeof(ActionResult<NpcActivity>), (int)HttpStatusCode.OK)]
+    [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(ActionResult<NpcActivity>))]
+    [SwaggerOperation("NpcsCreateActivityById")]
+    [HttpPost("{id:guid}/activity")]
+    public async Task<ActionResult<NpcActivity>> NpcCreateActivity(Guid id, string activityType, string detail)
+    {
+        return Ok(await service.CreateActivity(id,  activityType, detail));
+    }
+
 
     /// <summary>
     /// Delete NPC by specific Id
@@ -154,27 +177,6 @@ public class NpcsController(
     }
 
     /// <summary>
-    /// Get a subset of details about a specific NPC
-    /// </summary>
-    /// <param name="npcId"></param>
-    /// <param name="fieldsToReturn"></param>
-    /// <returns></returns>
-    [HttpPost("npc/{npcId:guid}")]
-    [Obsolete("Obsolete")]
-    [SwaggerOperation("NpcsGetReducedFields")]
-    public async Task<object> NpcsGetReducedFields(Guid npcId, [FromBody] string[] fieldsToReturn)
-    {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
-
-        var npc = await service.GetById(npcId);
-        if (npc == null) return null;
-        return new NpcReduced(fieldsToReturn, npc).PropertySelection;
-    }
-
-    /// <summary>
     /// Gets all NPCs by from a specific enclave that is part of a specific campaign
     /// </summary>
     /// <param name="enclave">The name of the enclave</param>
@@ -187,33 +189,6 @@ public class NpcsController(
     public async Task<IEnumerable<NpcRecord>> NpcsEnclaveGet(string campaign, string enclave)
     {
         return await service.GetEnclave(campaign, enclave);
-    }
-
-    /// <summary>
-    /// Gets the csv output of a query
-    /// </summary>
-    /// <param name="enclave">The name of the enclave</param>
-    /// <param name="campaign">The name of the campaign the enclave is part of</param>
-    /// <returns></returns>
-    [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.OK)]
-    [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(IActionResult))]
-    [SwaggerOperation("NpcsEnclaveGetCsv")]
-    [HttpGet("{campaign}/{enclave}/csv")]
-    [Obsolete("Obsolete")]
-    public async Task<IActionResult> NpcsEnclaveGetCsv(string campaign, string enclave)
-    {
-        var engine = new FileHelperEngine<NpcToCsv>();
-        var list = await NpcsEnclaveGet(campaign, enclave);
-
-        var filteredList = list.Select(n => new NpcToCsv { Id = n.Id, Email = n.NpcProfile.Email }).ToList();
-
-        var stream = new MemoryStream();
-        TextWriter streamWriter = new StreamWriter(stream);
-        engine.WriteStream(streamWriter, filteredList);
-        await streamWriter.FlushAsync();
-        stream.Seek(0, SeekOrigin.Begin);
-
-        return File(stream, "text/csv", $"{Guid.NewGuid()}.csv");
     }
 
     /// <summary>
@@ -234,39 +209,6 @@ public class NpcsController(
     }
 
     /// <summary>
-    /// Get a CSV file containing all of the requested properties of NPCs in an enclave
-    /// </summary>
-    /// <param name="campaign"></param>
-    /// <param name="enclave"></param>
-    /// <param name="fieldsToReturn"></param>
-    /// <returns></returns>
-    [HttpPost("{campaign}/{enclave}/custom")]
-    [Obsolete("Obsolete")]
-    [SwaggerOperation("NpcsEnclaveReducedFields")]
-    public async Task<IActionResult> NpcsEnclaveReducedFields(string campaign, string enclave,
-        [FromBody] string[] fieldsToReturn)
-    {
-        var npcList = await NpcsEnclaveGet(campaign, enclave);
-        var npcDetails = new Dictionary<string, Dictionary<string, string>>();
-
-        foreach (var npc in npcList)
-        {
-            var npcProperties = new NpcReduced(fieldsToReturn, npc).PropertySelection;
-            var name = npc.NpcProfile.Name;
-            var npcName = name.ToString();
-            if (npcName != null) npcDetails[npcName] = npcProperties;
-        }
-
-        var enclaveCsv = new EnclaveReducedCsv(fieldsToReturn, npcDetails);
-        var stream = new MemoryStream();
-        var streamWriter = new StreamWriter(stream);
-        await streamWriter.WriteAsync(enclaveCsv.CsvData);
-        await streamWriter.FlushAsync();
-        stream.Seek(0, SeekOrigin.Begin);
-        return File(stream, "text/csv", $"{Guid.NewGuid()}.csv");
-    }
-
-    /// <summary>
     /// Gets all NPCs by from a specific team in a specific enclave that is part of a specific campaign
     /// </summary>
     /// <param name="team">The name of the team</param>
@@ -280,200 +222,6 @@ public class NpcsController(
     public async Task<IEnumerable<NpcRecord>> NpcsTeamGet(string campaign, string enclave, string team)
     {
         return await service.GetTeam(campaign, enclave, team);
-    }
-
-    /// <summary>
-    /// Gets the csv output of a query
-    /// </summary>
-    /// <param name="team">The name of the team</param>
-    /// <param name="enclave">The name of the enclave the team is in</param>
-    /// <param name="campaign">The name of the campaign the enclave is part of</param>
-    /// <returns></returns>
-    [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.OK)]
-    [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(IActionResult))]
-    [SwaggerOperation("NpcsTeamGetCsv")]
-    [Obsolete("Obsolete")]
-    [HttpGet("{campaign}/{enclave}/{team}/csv")]
-    public async Task<IActionResult> NpcsTeamGetCsv(string campaign, string enclave, string team)
-    {
-        var engine = new FileHelperEngine<NpcToCsv>();
-        var list = await NpcsTeamGet(team, enclave, campaign);
-
-        var filteredList = list.Select(n => new NpcToCsv { Id = n.Id, Email = n.NpcProfile.Email }).ToList();
-
-        var stream = new MemoryStream();
-        var streamWriter = new StreamWriter(stream);
-        engine.WriteStream(streamWriter, filteredList);
-        await streamWriter.FlushAsync();
-        stream.Seek(0, SeekOrigin.Begin);
-
-        return File(stream, "text/csv", $"{Guid.NewGuid()}.csv");
-    }
-
-    /// <summary>
-    /// Gets the tfvars output of a team of NPCs
-    /// </summary>
-    /// <param name="configuration"></param>
-    /// <returns></returns>
-    [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.OK)]
-    [ProducesResponseType((int)HttpStatusCode.BadRequest, Type = typeof(string))]
-    [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(IActionResult))]
-    [SwaggerResponse((int)HttpStatusCode.BadRequest, Type = typeof(string))]
-    [Obsolete("Obsolete")]
-    [SwaggerOperation("NpcsTfVarsGet")]
-    [HttpPost("tfvars")]
-    public async Task<IActionResult> NpcsTfVarsGet(TfVarsConfiguration configuration)
-    {
-        if (!ModelState.IsValid || configuration == null || !configuration.IsValid())
-        {
-            return BadRequest(ModelState);
-        }
-
-        var s = new StringBuilder("users = {").Append(Environment.NewLine);
-        var list = (await NpcsTeamGet(configuration.Campaign, configuration.Enclave, configuration.Team)).ToList();
-
-        var pool = configuration.GetIpPool();
-        foreach (var item in pool)
-            if (context.NpcIps.Any(o => o.IpAddress == item && o.Enclave == configuration.Enclave))
-                pool.Remove(item);
-
-        if (pool.Count < list.Count())
-        {
-            throw new ArgumentException("There are not enough unused ip addresses for the number of NPCs selected");
-        }
-
-        var i = 0;
-        foreach (var npc in list)
-        {
-            var n = string.Empty;
-            foreach (var c in npc.NpcProfile.Finances.CreditCards)
-            {
-                n = c.Number;
-                break;
-            }
-
-            var ip = pool.RandomElement();
-            context.NpcIps.Add(new NpcIpAddress { IpAddress = ip, NpcId = npc.Id, Enclave = npc.Enclave });
-            pool.Remove(ip);
-
-            s.Append("\tuser-").Append(i).Append(" = {").Append(Environment.NewLine);
-            s.Append("\t\tipaddr = ").Append(ip).Append(Environment.NewLine);
-            s.Append("\t\tmask = ").Append(configuration.Mask).Append(Environment.NewLine);
-            s.Append("\t\tgateway = ").Append(configuration.Gateway).Append(Environment.NewLine);
-            s.Append("\t\ttitle = ").Append(npc.NpcProfile.Rank.Abbr).Append(Environment.NewLine);
-            s.Append("\t\tfirst = ").Append(npc.NpcProfile.Name.First).Append(Environment.NewLine);
-            s.Append("\t\tlast = ").Append(npc.NpcProfile.Name.Last).Append(Environment.NewLine);
-            s.Append("\t\taddress = ").Append(npc.NpcProfile.Address[0].Address1).Append(Environment.NewLine);
-            s.Append("\t\tcity = ").Append(npc.NpcProfile.Address[0].City).Append(Environment.NewLine);
-            s.Append("\t\tstate = ").Append(npc.NpcProfile.Address[0].State).Append(Environment.NewLine);
-            s.Append("\t\tzip = ").Append(npc.NpcProfile.Address[0].PostalCode).Append(Environment.NewLine);
-            s.Append("\t\temail = ").Append(npc.NpcProfile.Email).Append(Environment.NewLine);
-            s.Append("\t\tpassword = ").Append(npc.NpcProfile.Password).Append(Environment.NewLine);
-            s.Append("\t\tcreditcard = ").Append(n).Append(Environment.NewLine);
-            s.Append("\t}").Append(Environment.NewLine);
-            s.Append(Environment.NewLine);
-            i++;
-        }
-
-        await context.SaveChangesAsync();
-
-        return File(Encoding.UTF8.GetBytes
-                (s.ToString()), "text/tfvars", $"{Guid.NewGuid()}.tfvars");
-    }
-
-    /// <summary>
-    /// Create an insider threat specific NPC build
-    /// </summary>
-    /// <param name="config"></param>
-    /// <param name="ct"></param>
-    /// <returns></returns>
-    [ProducesResponseType(typeof(IEnumerable<NpcRecord>), (int)HttpStatusCode.OK)]
-    [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(IEnumerable<NpcRecord>))]
-    [SwaggerRequestExample(typeof(InsiderThreatGenerationConfiguration),
-        typeof(InsiderThreatGenerationConfigurationExample))]
-    [SwaggerOperation("NpcsInsiderThreatCreate")]
-    [HttpPost("insiderThreat")]
-    [Obsolete("Obsolete")]
-    [ProducesResponseType((int)HttpStatusCode.BadRequest, Type = typeof(string))]
-    [SwaggerResponse((int)HttpStatusCode.BadRequest, Type = typeof(string))]
-    public async Task<ActionResult<IEnumerable<NpcRecord>>> NpcsInsiderThreatCreate(
-        InsiderThreatGenerationConfiguration config, CancellationToken ct)
-    {
-        if (!ModelState.IsValid || config?.Enclaves == null)
-        {
-            return BadRequest(ModelState);
-        }
-
-        var createdNpcs = new List<NpcRecord>();
-        foreach (var enclave in config.Enclaves)
-        {
-            if (enclave.Teams == null) continue;
-            foreach (var team in enclave.Teams)
-            {
-                if (team.Npcs == null) continue;
-                for (var i = 0; i < team.Npcs.Number; i++)
-                {
-                    var branch = team.Npcs.Configuration.Branch ?? MilitaryUnits.GetServiceBranch();
-                    var npc = NpcRecord.TransformToNpc(Npc.Generate(branch));
-                    npc.Team = team.Name;
-                    npc.Campaign = config.Campaign;
-                    npc.Enclave = enclave.Name;
-                    npc.Id = npc.NpcProfile.Id;
-                    npc.CreatedUtc = DateTime.UtcNow;
-                    createdNpcs.Add(npc);
-                }
-            }
-        }
-
-        foreach (var npc in createdNpcs)
-        {
-            foreach (var job in npc.NpcProfile.Employment.EmploymentRecords)
-            {
-                //get same company departments and highest ranked in that department
-
-                var managerList = createdNpcs.Where(x => x.Id != npc.Id
-                                                         && x.NpcProfile.Employment.EmploymentRecords.Any(o =>
-                                                             o.Company == job.Company
-                                                             && o.Department == job.Department
-                                                             && o.Level >= job.Level)).ToList();
-
-                if (managerList.Count != 0)
-                {
-                    var manager = managerList.RandomElement();
-                    job.Manager = manager.Id;
-                }
-            }
-        }
-
-        context.Npcs.AddRange(createdNpcs);
-        await context.SaveChangesAsync(ct);
-        return createdNpcs;
-    }
-
-    /// <summary>
-    /// Export insider threat specific csv file
-    /// </summary>
-    /// <returns></returns>
-    [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.OK)]
-    [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(IActionResult))]
-    [SwaggerOperation("NpcsInsiderThreatGetCsv")]
-    [HttpGet("insiderThreat/csv")]
-    [Obsolete("Obsolete")]
-    public async Task<IActionResult> NpcsInsiderThreatGetCsv()
-    {
-        var engine = new FileHelperEngine<NpcToInsiderThreatCsv>();
-        engine.HeaderText = engine.GetFileHeader();
-
-        var list = await context.Npcs.ToListAsync();
-        var finalList = NpcToInsiderThreatCsv.ConvertToCsv(list.ToList());
-
-        var stream = new MemoryStream();
-        var streamWriter = new StreamWriter(stream);
-        engine.WriteStream(streamWriter, finalList);
-        await streamWriter.FlushAsync();
-        stream.Seek(0, SeekOrigin.Begin);
-
-        return File(stream, "text/csv", $"insider_threat_{Guid.NewGuid()}.csv");
     }
 
     /// <summary>

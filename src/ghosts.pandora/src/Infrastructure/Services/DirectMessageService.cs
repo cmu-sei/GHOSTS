@@ -6,18 +6,42 @@ namespace Ghosts.Pandora.Infrastructure.Services;
 
 public interface IDirectMessageService
 {
-    Task<DirectMessage> SendMessageAsync(Guid fromUserId, Guid toUserId, string message);
+    Task<DirectMessage> CreateMessageAsync(Guid fromUserId, Guid toUserId, string message);
     Task<IEnumerable<DirectMessage>> GetConversationAsync(Guid userId1, Guid userId2);
     Task<IEnumerable<DirectMessage>> GetReceivedMessagesAsync(Guid userId);
     Task<IEnumerable<DirectMessage>> GetSentMessagesAsync(Guid userId);
     Task<IEnumerable<DirectMessage>> GetUnreadMessagesAsync(Guid userId);
     Task MarkAsReadAsync(int messageId);
     Task<IEnumerable<User>> GetConversationPartnersAsync(Guid userId);
+    Task<IEnumerable<DirectMessage>> GetAll(int take);
+    Task<IEnumerable<DirectMessage>> GetByUsername(string username, string theme, int take);
 }
 
-public class DirectMessageService(DataContext context) : IDirectMessageService
+public class DirectMessageService(DataContext context, IGhostsService ghostsService) : IDirectMessageService
 {
-    public async Task<DirectMessage> SendMessageAsync(Guid fromUserId, Guid toUserId, string message)
+    public async Task<IEnumerable<DirectMessage>> GetAll(int take)
+    {
+        return await context.DirectMessages
+            .Include(dm => dm.FromUser)
+            .Include(dm => dm.ToUser)
+            .OrderByDescending(x => x.CreatedUtc)
+            .Take(take)
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<DirectMessage>> GetByUsername(string username, string theme, int take)
+    {
+        return await context.DirectMessages
+            .Include(dm => dm.FromUser)
+            .Include(dm => dm.ToUser)
+            .Where(x=> (x.FromUser.Username == username && x.FromUser.Theme == theme)
+                       || (x.ToUser.Username == username && x.ToUser.Theme == theme))
+            .OrderBy(x => x.CreatedUtc)
+            .Take(take)
+            .ToListAsync();
+    }
+
+    public async Task<DirectMessage> CreateMessageAsync(Guid fromUserId, Guid toUserId, string message)
     {
         var directMessage = new DirectMessage
         {
@@ -29,6 +53,10 @@ public class DirectMessageService(DataContext context) : IDirectMessageService
 
         context.DirectMessages.Add(directMessage);
         await context.SaveChangesAsync();
+
+        if (ghostsService.IsActive())
+            await ghostsService.CreateDirectMessage(directMessage);
+
         return directMessage;
     }
 

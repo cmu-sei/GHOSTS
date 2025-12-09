@@ -1,8 +1,8 @@
 using System.Net;
 using Ghosts.Pandora.Infrastructure;
 using Ghosts.Pandora.Infrastructure.Models;
+using Ghosts.Pandora.Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Ghosts.Pandora.Controllers.Api;
@@ -11,8 +11,9 @@ namespace Ghosts.Pandora.Controllers.Api;
 [SwaggerTag("API Functionality for DMs")]
 public class DirectMessagesController(
     ILogger logger,
-    DataContext dbContext,
-    ApplicationConfiguration applicationConfiguration) : BaseController(logger)
+    ApplicationConfiguration applicationConfiguration,
+    IDirectMessageService service,
+    IUserService userService) : BaseController(logger)
 {
     [SwaggerOperation(
         Summary = "Retrieve all DMs",
@@ -20,16 +21,9 @@ public class DirectMessagesController(
         OperationId = "GetDirectMessages")]
     [ProducesResponseType(typeof(IEnumerable<DirectMessage>), (int)HttpStatusCode.OK)]
     [HttpGet]
-    public IEnumerable<DirectMessage> Get()
+    public async Task<IEnumerable<DirectMessage>> Get()
     {
-        var list = dbContext.DirectMessages
-            .Include(dm => dm.FromUser)
-            .Include(dm => dm.ToUser)
-            .OrderByDescending(x => x.CreatedUtc)
-            .Take(applicationConfiguration.DefaultDisplay)
-            .ToList();
-
-        return list;
+        return await service.GetAll(applicationConfiguration.DefaultDisplay);
     }
 
     [SwaggerOperation(
@@ -38,19 +32,9 @@ public class DirectMessagesController(
         OperationId = "GetDirectMessagesById")]
     [ProducesResponseType(typeof(IEnumerable<DirectMessage>), (int)HttpStatusCode.OK)]
     [HttpGet("id/{id}")]
-    public IEnumerable<DirectMessage> GetById(Guid id)
+    public async Task<IEnumerable<DirectMessage>> GetById(Guid id)
     {
-        List<DirectMessage> list;
-
-        list = dbContext.DirectMessages
-            .Include(dm => dm.FromUser)
-            .Include(dm => dm.ToUser)
-            .Where(x=>x.FromUser.Id == id || x.ToUser.Id == id)
-            .OrderBy(x => x.CreatedUtc)
-            .Take(applicationConfiguration.DefaultDisplay)
-            .ToList();
-
-        return list;
+        return await service.GetReceivedMessagesAsync(id);
     }
 
     [SwaggerOperation(
@@ -59,20 +43,9 @@ public class DirectMessagesController(
         OperationId = "GetDirectMessagesByUsername")]
     [ProducesResponseType(typeof(IEnumerable<DirectMessage>), (int)HttpStatusCode.OK)]
     [HttpGet("username/{username}")]
-    public IEnumerable<DirectMessage> GetByUsername(string username, string theme)
+    public async Task<IEnumerable<DirectMessage>> GetByUsername(string username, string theme)
     {
-        List<DirectMessage> list;
-
-        list = dbContext.DirectMessages
-            .Include(dm => dm.FromUser)
-            .Include(dm => dm.ToUser)
-            .Where(x=> (x.FromUser.Username == username && x.FromUser.Theme == theme)
-                       || (x.ToUser.Username == username && x.ToUser.Theme == theme))
-            .OrderBy(x => x.CreatedUtc)
-            .Take(applicationConfiguration.DefaultDisplay)
-            .ToList();
-
-        return list;
+        return await service.GetByUsername(username, theme, applicationConfiguration.DefaultDisplay);
     }
 
     [SwaggerOperation(
@@ -88,6 +61,8 @@ public class DirectMessagesController(
             return BadRequest("A message payload is required.");
         }
 
+        await service.CreateMessageAsync(model.FromUserId, model.ToUserId, model.Message);
+
         var directMessage = new DirectMessage
         {
             FromUserId = model.FromUserId,
@@ -96,22 +71,7 @@ public class DirectMessagesController(
             CreatedUtc = model.CreatedUtc == default ? DateTime.UtcNow : model.CreatedUtc
         };
 
-        var fromExists = await dbContext.Users.AnyAsync(u => u.Id == directMessage.FromUserId);
-        var toExists = await dbContext.Users.AnyAsync(u => u.Id == directMessage.ToUserId);
-
-        if (!fromExists || !toExists)
-        {
-            return BadRequest("Valid to and from users are required.");
-        }
-
-        await dbContext.DirectMessages.AddAsync(directMessage);
-        await dbContext.SaveChangesAsync();
-        var persisted = await dbContext.DirectMessages
-            .Include(dm => dm.FromUser)
-            .Include(dm => dm.ToUser)
-            .FirstOrDefaultAsync(dm => dm.Id == directMessage.Id);
-
-        return Ok(persisted ?? directMessage);
+        return Ok(directMessage);
     }
 
     [SwaggerOperation(
@@ -127,25 +87,10 @@ public class DirectMessagesController(
             return BadRequest("A message payload is required.");
         }
 
-        // get users by theme
-        var from = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == model.FromUserName && x.Theme == model.Theme);
-        var to = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == model.ToUserName && x.Theme == model.Theme);
+        var from = await userService.GetOrCreateUserAsync(model.FromUserName, model.Theme);
+        var to = await userService.GetOrCreateUserAsync(model.ToUserName, model.Theme);
 
-        if (from == null)
-        {
-            var user = new User { Username = model.FromUserName, Theme = model.Theme, CreatedUtc = DateTime.UtcNow };
-            await dbContext.Users.AddAsync(user);
-            await dbContext.SaveChangesAsync();
-            from = user;
-        }
-
-        if (to == null)
-        {
-            var user = new User { Username = model.ToUserName, Theme = model.Theme, CreatedUtc = DateTime.UtcNow };
-            await dbContext.Users.AddAsync(user);
-            await dbContext.SaveChangesAsync();
-            to = user;
-        }
+        await service.CreateMessageAsync(from.Id, to.Id, model.Message);
 
         var directMessage = new DirectMessage
         {
@@ -155,14 +100,7 @@ public class DirectMessagesController(
             CreatedUtc = model.CreatedUtc == default ? DateTime.UtcNow : model.CreatedUtc
         };
 
-        await dbContext.DirectMessages.AddAsync(directMessage);
-        await dbContext.SaveChangesAsync();
-        var persisted = await dbContext.DirectMessages
-            .Include(dm => dm.FromUser)
-            .Include(dm => dm.ToUser)
-            .FirstOrDefaultAsync(dm => dm.Id == directMessage.Id);
-
-        return Ok(persisted ?? directMessage);
+        return Ok(directMessage);
     }
 
     public class DirectMessageByUsernameViewModel

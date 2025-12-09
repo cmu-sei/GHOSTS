@@ -61,4 +61,4 @@ ENV MODE_TYPE=social \
 
 EXPOSE 5000
 
-CMD ["dotnet", "ghosts-pandora.dll"]
+CMD ["dotnet", "Ghosts.Pandora.dll"]

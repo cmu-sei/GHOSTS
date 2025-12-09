@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore;
 using Ghosts.Pandora.Hubs;
 using Ghosts.Pandora.Infrastructure;
 using Ghosts.Pandora.Infrastructure.Models;
@@ -10,14 +9,15 @@ namespace Ghosts.Pandora.Controllers;
 
 [ApiExplorerSettings(IgnoreApi = true)]
 public class HomeController(
-    ILogger logger, IHubContext<PostsHub> hubContext, DataContext dbContext,
+    ILogger logger, IHubContext<PostsHub> hubContext,
+    IPostService postService, IUserService userService,
     ApplicationConfiguration applicationConfiguration,
     IWebsiteGenerationService websiteGenerationService)
     : BaseController(logger)
 {
     // Catch-all for unhandled routes - must be LAST in priority
     [HttpGet("{*catchall}")]
-    public IActionResult CatchAll()
+    public async Task<IActionResult> CatchAll()
     {
         var path = Request.Path.Value ?? "";
 
@@ -59,12 +59,7 @@ public class HomeController(
         {
             theme = "default";
         }
-        var posts = dbContext.Posts
-            .Include(x => x.User)
-            .Include(x=>x.Comments.OrderByDescending(c => c.CreatedUtc)).ThenInclude(c => c.User)
-            .Include(x=>x.Likes).ThenInclude(l => l.User)
-            .Where(x=>x.Theme == theme)
-            .OrderByDescending(x=>x.CreatedUtc).ToList();
+        var posts = await postService.GetLatestPostsByTheme(theme);
 
         return View("Index", posts);
     }
@@ -117,37 +112,12 @@ public class HomeController(
             return BadRequest("User and message are required.");
 
         // Get or create user
-        var user = await dbContext.Users.FirstOrDefaultAsync(u => u.Username == username && u.Theme == queryTheme);
-        if (user == null)
-        {
-            user = new User
-            {
-                Username = username,
-                Bio = $"User {username}",
-                Avatar = $"/u/{username}/avatar",
-                Status = "online",
-                Theme = queryTheme,
-                CreatedUtc = DateTime.UtcNow,
-                LastActiveUtc = DateTime.UtcNow
-            };
-            dbContext.Users.Add(user);
-            await dbContext.SaveChangesAsync();
-        }
+        var user = await userService.GetOrCreateUserAsync(username, queryTheme);
 
         post.Username = user.Username;
         post.UserId = user.Id;
         post.Theme = queryTheme;
         post.CreatedOnUrl = Request.Path.Value;
-
-        // has the same user tried to post the same message within the past x minutes?
-        if (dbContext.Posts.Any(p =>
-                p.Message.ToLower() == post.Message.ToLower()
-                && p.UserId == user.Id
-                && p.CreatedUtc > post.CreatedUtc.AddMinutes(-applicationConfiguration.MinutesToCheckForDuplicatePost)))
-        {
-            Logger.LogInformation("Client is posting duplicates: {PostUser}", username);
-            return NoContent();
-        }
 
         var imagePath = string.Empty;
         if (model.File != null)
@@ -184,12 +154,11 @@ public class HomeController(
             post.Message += $"<br/><img src=\"{imagePath}\"/>";
         }
 
-        dbContext.Posts.Add(post);
-        await dbContext.SaveChangesAsync();
+        await postService.CreatePost(post);
 
         UserWrite(username);
 
-        await hubContext.Clients.All.SendAsync("SendMessage", post.Id, username, post.Message, post.CreatedUtc);
+        await hubContext.Clients.All.SendAsync("SendMessage", post.Id, username, this.ThemeRead(), post.Message, post.CreatedUtc);
 
         return NoContent();
     }

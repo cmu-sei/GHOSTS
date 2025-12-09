@@ -1,8 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using Ghosts.Pandora.Infrastructure;
 using Ghosts.Pandora.Infrastructure.Models;
 using Ghosts.Pandora.Infrastructure.Services;
-using Microsoft.EntityFrameworkCore;
 
 namespace Ghosts.Pandora.Controllers;
 
@@ -11,50 +9,39 @@ namespace Ghosts.Pandora.Controllers;
 [Route("/r/{subreddit}")]
 [Route("/post")]
 [Route("/posts")]
-public class PostsController(ILogger logger, DataContext dbContext, IUserService userService) : BaseController(logger)
+public class PostsController(ILogger logger, IPostService service, IUserService userService) : BaseController(logger)
 {
     [HttpGet]
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
         var theme = ThemeRead();
         if (string.IsNullOrWhiteSpace(theme))
         {
             theme = "default";
         }
-        var posts = dbContext.Posts
-            .Include(x => x.User)
-            .Include(x=>x.Comments.OrderByDescending(c => c.CreatedUtc)).ThenInclude(c => c.User)
-            .Include(x=>x.Likes).ThenInclude(l => l.User)
-            .Where(x=>x.Theme == theme)
-            .OrderByDescending(x=>x.CreatedUtc).ToList();
 
+        var posts = await service.GetPostsByTheme(theme);
         return View("Index", posts);
     }
 
     [HttpGet("{id:guid}")]
-    public IActionResult Detail(Guid id)
+    public async Task<IActionResult> Detail(Guid id)
     {
         var theme = ThemeRead();
         if (string.IsNullOrWhiteSpace(theme))
         {
             theme = "default";
         }
-        var post = dbContext.Posts
-            .Include(x => x.User)
-            .Include(x=>x.Comments.OrderByDescending(c => c.CreatedUtc)).ThenInclude(c => c.User)
-            .Include(x=>x.Likes).ThenInclude(l => l.User)
-            .FirstOrDefault(x=>x.Theme == theme && x.Id == id);
+
+        var post = await service.GetPostById(id);
 
         return View("Detail", post);
     }
 
     [HttpGet("{id:guid}/likes")]
-    public IEnumerable<Like> GetLikes(Guid id)
+    public async Task<IEnumerable<Like>> GetLikes(Guid id)
     {
-        return dbContext.Likes
-            .Include(l => l.User)
-            .Where(x => x.PostId == id)
-            .ToArray();
+        return await service.GetLikes(id);
     }
 
     [HttpPost("{id:guid}/likes")]
@@ -69,25 +56,14 @@ public class PostsController(ILogger logger, DataContext dbContext, IUserService
 
         var user = await userService.GetOrCreateUserAsync(username, theme);
 
-        var like = new Like
-        {
-            PostId = id,
-            UserId = user.Id,
-            CreatedUtc = DateTime.UtcNow
-        };
-
-        dbContext.Likes.Add(like);
-        await dbContext.SaveChangesAsync();
+        await service.LikePost(id, user.Id);
         return NoContent();
     }
 
     [HttpGet("{id:guid}/comments")]
-    public IEnumerable<Comment> GetComments(Guid id)
+    public async Task<IEnumerable<Comment>> GetComments(Guid id)
     {
-        return dbContext.Comments
-            .Include(c => c.User)
-            .Where(x => x.PostId == id)
-            .ToArray();
+        return await service.GetComments(id);
     }
 
     [HttpPost("{id:guid}/comments")]
@@ -151,8 +127,7 @@ public class PostsController(ILogger logger, DataContext dbContext, IUserService
             comment.Message += $"<br/><img src=\"{imagePath}\"/>";
         }
 
-        dbContext.Comments.Add(comment);
-        await dbContext.SaveChangesAsync();
+        await service.CreateComment(comment.PostId, comment.UserId, comment.Message);
         return NoContent();
     }
 }

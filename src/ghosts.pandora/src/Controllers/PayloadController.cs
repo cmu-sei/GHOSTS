@@ -6,23 +6,17 @@ namespace Ghosts.Pandora.Controllers;
 
 [ApiController]
 [SwaggerTag("Payload delivery endpoints for configured files")]
-public class PayloadController : BaseController
+public class PayloadController(
+    ILogger<PayloadController> logger,
+    ApplicationConfiguration configuration)
+    : BaseController(logger)
 {
-    private readonly ApplicationConfiguration _configuration;
-
-    public PayloadController(
-        ILogger<PayloadController> logger,
-        ApplicationConfiguration configuration) : base(logger)
-    {
-        _configuration = configuration;
-    }
-
     [HttpGet("/payloads/{**path}")]
     [HttpPost("/payloads/{**path}")]
     [SwaggerOperation(Summary = "Serve configured payload files", Tags = new[] { "Payloads" })]
     public IActionResult ServePayload(string path)
     {
-        if (!_configuration.Payloads.Enabled)
+        if (!configuration.Payloads.Enabled)
         {
             Logger.LogWarning("Payloads are disabled");
             return NotFound("Payloads are not enabled");
@@ -32,7 +26,7 @@ public class PayloadController : BaseController
         Logger.LogInformation("Payload request for path: {Path}", requestPath);
 
         // Find matching payload configuration
-        var payload = _configuration.Payloads.Mappings
+        var payload = configuration.Payloads.Mappings
             .FirstOrDefault(p => requestPath.StartsWith(p.Url, StringComparison.OrdinalIgnoreCase));
 
         if (payload == null)
@@ -42,7 +36,7 @@ public class PayloadController : BaseController
         }
 
         // Construct file path
-        var payloadDir = Path.Combine(Directory.GetCurrentDirectory(), _configuration.Payloads.PayloadDirectory);
+        var payloadDir = Path.Combine(Directory.GetCurrentDirectory(), configuration.Payloads.PayloadDirectory);
         var filePath = Path.Combine(payloadDir, payload.FileName);
 
         Logger.LogInformation("Serving payload file: {FilePath} with content type: {ContentType}",
@@ -77,24 +71,24 @@ public class PayloadController : BaseController
     [SwaggerOperation(Summary = "List all configured payloads", Tags = new[] { "Payloads" })]
     public IActionResult ListPayloads()
     {
-        if (!_configuration.Payloads.Enabled)
+        if (!configuration.Payloads.Enabled)
         {
             return NotFound("Payloads are not enabled");
         }
 
         return Ok(new
         {
-            enabled = _configuration.Payloads.Enabled,
-            payloadDirectory = _configuration.Payloads.PayloadDirectory,
-            count = _configuration.Payloads.Mappings.Count,
-            payloads = _configuration.Payloads.Mappings.Select(p => new
+            enabled = configuration.Payloads.Enabled,
+            payloadDirectory = configuration.Payloads.PayloadDirectory,
+            count = configuration.Payloads.Mappings.Count,
+            payloads = configuration.Payloads.Mappings.Select(p => new
             {
                 url = p.Url,
                 fileName = p.FileName,
                 contentType = p.ContentType,
                 exists = System.IO.File.Exists(Path.Combine(
                     Directory.GetCurrentDirectory(),
-                    _configuration.Payloads.PayloadDirectory,
+                    configuration.Payloads.PayloadDirectory,
                     p.FileName))
             })
         });
