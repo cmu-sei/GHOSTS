@@ -113,7 +113,10 @@ public class NpcService(ApplicationDbContext context) : INpcService
 
     public async Task<IEnumerable<NpcActivity>> GetActivity(Guid id)
     {
-        return _context.NpcActivities.Where(x => x.NpcId == id);
+        return await _context.NpcActivities
+            .Where(x => x.NpcId == id)
+            .OrderByDescending(x => x.CreatedUtc)
+            .ToListAsync();
     }
 
     public async Task<NpcActivity> CreateActivity(Guid id, string activityType, string detail)
@@ -251,6 +254,6 @@ public class NpcService(ApplicationDbContext context) : INpcService
         }
 
         await _context.SaveChangesAsync();
-        _log.Trace($"NPCs created for each username in machines");
+        _log.Trace("NPCs created for each username in machines");
     }
 }

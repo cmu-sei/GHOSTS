@@ -68,8 +68,8 @@ public class ExecutionsController : ControllerBase
     [HttpGet("{id}/events")]
     public async Task<ActionResult<IEnumerable<ExecutionEventDto>>> GetExecutionEvents(
         int id,
-        [FromQuery] string? eventType = null,
-        [FromQuery] int? limit = 100,
+        [FromQuery] string eventType = null,
+        [FromQuery] int limit = 100,
         CancellationToken ct = default)
     {
         try
@@ -386,7 +386,7 @@ public class ExecutionsController : ControllerBase
         return new ExecutionDto(
             execution.Id,
             execution.ScenarioId,
-            execution.Scenario?.Name ?? "Unknown",
+            execution.Scenario.Name ?? "Unknown",
             execution.Name,
             execution.Description,
             execution.Status.ToString(),

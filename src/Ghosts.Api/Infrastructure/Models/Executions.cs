@@ -77,7 +77,7 @@ public class Execution
     public string ErrorDetails { get; set; } = "{}";
 
     // Navigation properties
-    public Scenario Scenario { get; set; }
+    public Scenario Scenario { get; set; } = null!;
     public ICollection<ExecutionEvent> Events { get; set; } = new List<ExecutionEvent>();
     public ICollection<ExecutionMetricSnapshot> MetricSnapshots { get; set; } = new List<ExecutionMetricSnapshot>();
 }
@@ -153,7 +153,7 @@ public class ExecutionEvent
     /// </summary>
     public string Severity { get; set; } = "Info";
 
-    public Execution Execution { get; set; }
+    public Execution Execution { get; set; } = null!;
 }
 
 /// <summary>
@@ -190,7 +190,7 @@ public class ExecutionMetricSnapshot
     /// </summary>
     public string Metrics { get; set; } = "{}";
 
-    public Execution Execution { get; set; }
+    public Execution Execution { get; set; } = null!;
 }
 
 // Request/Response DTOs
