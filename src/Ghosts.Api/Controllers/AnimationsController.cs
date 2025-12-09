@@ -2,6 +2,7 @@
 
 using Ghosts.Api.Infrastructure.Animations;
 using Ghosts.Api.Infrastructure;
+using Ghosts.Api.Infrastructure.Models;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 

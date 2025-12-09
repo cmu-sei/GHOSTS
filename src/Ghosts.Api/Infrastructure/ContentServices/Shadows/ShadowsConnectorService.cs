@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Ghosts.Api.Infrastructure.Extensions;
 using Ghosts.Api.Infrastructure;
+using Ghosts.Api.Infrastructure.Models;
 using Newtonsoft.Json;
 using NLog;
 using JsonSerializer = System.Text.Json.JsonSerializer;

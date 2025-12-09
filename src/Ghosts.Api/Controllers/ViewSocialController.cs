@@ -41,7 +41,7 @@ public class ViewSocialController(ApplicationDbContext context) : Controller
         return View(graphs); // Return the view with the graph data
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id:guid}")]
     public async Task<IActionResult> Detail(Guid id)
     {
         if (!IsSocialGraphEnabled())
@@ -59,14 +59,14 @@ public class ViewSocialController(ApplicationDbContext context) : Controller
         return View(graph); // Return view with the graph data
     }
 
-    [HttpGet("{id}/interactions")]
-    public IActionResult Interactions(string id)
+    [HttpGet("{id:guid}/interactions")]
+    public IActionResult Interactions(Guid id)
     {
         ViewBag.Id = id;
         return View();
     }
 
-    [HttpGet("{id}/file")]
+    [HttpGet("{id:guid}/file")]
     public async Task<IActionResult> File(Guid id)
     {
         var graph = await LoadGraphByIdAsync(id);

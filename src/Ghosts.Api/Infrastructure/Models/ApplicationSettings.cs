@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Ghosts.Api.Infrastructure;
+namespace Ghosts.Api.Infrastructure.Models;
 
 public class ApplicationSettings
 {

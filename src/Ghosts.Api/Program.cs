@@ -12,6 +12,7 @@ using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Api.Infrastructure.Extensions;
 using Ghosts.Api.Infrastructure.Filters;
 using Ghosts.Api.Infrastructure.Formatters;
+using Ghosts.Api.Infrastructure.Models;
 using Ghosts.Api.Infrastructure.Services;
 using Ghosts.Api.Infrastructure.Services.ClientServices;
 using Ghosts.Domain.Code;

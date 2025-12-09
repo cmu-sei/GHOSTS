@@ -2,12 +2,11 @@
 
 using System;
 using System.Collections.Generic;
-using Ghosts.Api.Infrastructure.Models;
 using Ghosts.Animator.Enums;
 using Ghosts.Animator.Models;
 using Swashbuckle.AspNetCore.Filters;
 
-namespace Ghosts.Api.Areas.Animator.Infrastructure.Models;
+namespace Ghosts.Api.Infrastructure.Models;
 
 public class InsiderThreatGenerationConfiguration
 {

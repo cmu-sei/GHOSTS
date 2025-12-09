@@ -2,7 +2,7 @@
 
 using System;
 
-namespace Ghosts.Api.Areas.Animator.Infrastructure;
+namespace Ghosts.Api.Infrastructure;
 
 public class Bayes
 {

@@ -11,6 +11,7 @@ using Ghosts.Api.Infrastructure.Animations.AnimationDefinitions;
 using Ghosts.Api.Infrastructure.Extensions;
 using Ghosts.Api;
 using Ghosts.Api.Infrastructure;
+using Ghosts.Api.Infrastructure.Models;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
