@@ -27,7 +27,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi;
 using Newtonsoft.Json.Converters;
 using NLog;
-using Npgsql;
 using Swashbuckle.AspNetCore.Filters;
 
 namespace Ghosts.Api;
@@ -35,7 +34,7 @@ namespace Ghosts.Api;
 public class Program
 {
     private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-    public const int ApiVersion = 10;
+    public const int ApiVersion = 9;
 
     public static ApplicationSettings ApplicationSettings { get; set; }
 
@@ -69,12 +68,12 @@ public class Program
                         };
                         serializerOptions.Converters.Add(new JsonStringEnumConverter());
                         dataSourceBuilder.ConfigureJsonOptions(serializerOptions);
+                        dataSourceBuilder.EnableDynamicJson();
                     });
                     npgsqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
                 }
             );
         });
-        NpgsqlConnection.GlobalTypeMapper.EnableDynamicJson();
 
         // Configure services
         builder.Services.TryAddTransient<IHttpContextAccessor, HttpContextAccessor>();
@@ -87,7 +86,7 @@ public class Program
             {
                 Version = $"v{ApiVersion}",
                 Title = "GHOSTS API",
-                Description = $"GHOSTS API v{ApiVersion} - Assembly: {ApplicationDetails.Version}",
+                Description = $"GHOSTS API v{ApiVersion} - Assembly: {ApplicationDetails.Version} ({ApplicationDetails.VersionFile})",
                 Contact = new OpenApiContact
                 {
                     Name = "Dustin Updyke",
