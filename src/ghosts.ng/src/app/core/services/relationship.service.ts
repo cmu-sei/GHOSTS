@@ -2,7 +2,6 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { environment } from '../../../environments/environment';
 import {
   SocialGraphWithDetails,
   RelationshipSummary,
@@ -10,13 +9,18 @@ import {
   SocialGraphSummary,
   ConnectionSummary
 } from '../models';
+import { ConfigService } from './config.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RelationshipService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = `${environment.apiUrl}`;
+  private readonly configService = inject(ConfigService);
+
+  private get apiUrl(): string {
+    return this.configService.apiUrl;
+  }
 
   // Get all social graphs
   getAllSocialGraphs(): Observable<SocialGraphWithDetails[]> {

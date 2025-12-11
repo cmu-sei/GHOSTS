@@ -5,7 +5,7 @@ networks:
   ghosts-network:
     driver: bridge
 services:
-  ghostsui:
+  ghosts-ng:
     image: dustinupdyke/ghosts-ng
     container_name: ghosts-ng
     ports:
@@ -51,6 +51,19 @@ services:
     networks:
       - ghosts-network
     restart: always
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:latest
+    container_name: ghosts-n8n
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE=true
+      - N8N_SECURE_COOKIE=false
+    volumes:
+      - ./n8n_data:/home/node/.n8n
+    networks:
+      - ghosts-network
+    restart: unless-stopped
   grafana:
     image: grafana/grafana
     container_name: ghosts-grafana

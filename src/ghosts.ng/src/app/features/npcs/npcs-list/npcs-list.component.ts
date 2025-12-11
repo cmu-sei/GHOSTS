@@ -8,7 +8,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { DatePipe } from '@angular/common';
 import { Npc } from '../../../core/models';
 import { NpcService } from '../../../core/services';
-import { environment } from '../../../../environments/environment';
+import { ConfigService } from '../../../core/services/config.service';
 import { GenerateNpcsDialogComponent } from '../generate-npcs-dialog/generate-npcs-dialog.component';
 import { SearchBarComponent } from '../../../shared/components/search-bar/search-bar.component';
 
@@ -198,6 +198,7 @@ import { SearchBarComponent } from '../../../shared/components/search-bar/search
 })
 export class NpcsListComponent implements OnInit {
   private readonly npcService = inject(NpcService);
+  private readonly configService = inject(ConfigService);
   private readonly dialog = inject(MatDialog);
 
   protected readonly npcs = signal<Npc[]>([]);
@@ -272,6 +273,6 @@ export class NpcsListComponent implements OnInit {
   }
 
   protected getNpcPhotoUrl(npcId: string | undefined): string {
-    return npcId ? `${environment.apiUrl}/npcs/${npcId}/photo` : '';
+    return npcId ? `${this.configService.apiUrl}/npcs/${npcId}/photo` : '';
   }
 }

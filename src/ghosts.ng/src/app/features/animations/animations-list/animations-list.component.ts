@@ -244,7 +244,7 @@ export class AnimationsListComponent implements OnInit {
 
   private getWindowOrigin(): string {
     if (typeof window === 'undefined') {
-      return 'http://localhost';
+      throw new Error('Window is not defined. Cannot determine origin.');
     }
 
     return `${window.location.protocol}//${window.location.hostname}`;

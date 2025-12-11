@@ -1,7 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
 import {
   Activity,
   ActivityQueryParams,
@@ -10,13 +9,18 @@ import {
   NpcNameId,
   AiActionRequest
 } from '../models';
+import { ConfigService } from './config.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ActivityService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = `${environment.apiUrl}`;
+  private readonly configService = inject(ConfigService);
+
+  private get apiUrl(): string {
+    return this.configService.apiUrl;
+  }
 
   // Machine Activities
   getActivities(params: ActivityQueryParams): Observable<Activity[]> {

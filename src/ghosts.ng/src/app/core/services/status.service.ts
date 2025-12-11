@@ -2,16 +2,20 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { shareReplay } from 'rxjs/operators';
-import { environment } from '../../../environments/environment';
 import { ApiStatus } from '../models/status.model';
+import { ConfigService } from './config.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class StatusService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = environment.apiUrl.replace('/api', ''); // Base URL without /api suffix
+  private readonly configService = inject(ConfigService);
   private statusCache$?: Observable<ApiStatus>;
+
+  private get apiUrl(): string {
+    return this.configService.apiUrl.replace('/api', ''); // Base URL without /api suffix
+  }
 
   getStatus(): Observable<ApiStatus> {
     // Cache for 60 seconds to match API behavior

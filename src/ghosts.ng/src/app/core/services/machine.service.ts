@@ -1,15 +1,19 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
 import { Machine, CreateMachineRequest, UpdateMachineRequest } from '../models';
+import { ConfigService } from './config.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class MachineService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = `${environment.apiUrl}/machines`;
+  private readonly configService = inject(ConfigService);
+
+  private get apiUrl(): string {
+    return `${this.configService.apiUrl}/machines`;
+  }
 
   getMachines(): Observable<Machine[]> {
     return this.http.get<Machine[]>(this.apiUrl);

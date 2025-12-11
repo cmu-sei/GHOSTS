@@ -14,8 +14,7 @@ import {
   ConnectionSummary,
   Npc
 } from '../../../core/models';
-import { RelationshipService, NpcService } from '../../../core/services';
-import { environment } from '../../../../environments/environment';
+import { RelationshipService, NpcService, ConfigService } from '../../../core/services';
 
 @Component({
   selector: 'app-npcs-detail',
@@ -34,8 +33,12 @@ import { environment } from '../../../../environments/environment';
   styleUrl: './npcs-detail.scss'
 })
 export class NpcsDetail implements OnInit {
-  private readonly apiUrl = `${environment.apiUrl}`;
+  private readonly configService = inject(ConfigService);
   private readonly relationshipService = inject(RelationshipService);
+
+  private get apiUrl(): string {
+    return this.configService.apiUrl;
+  }
   private readonly npcService = inject(NpcService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);

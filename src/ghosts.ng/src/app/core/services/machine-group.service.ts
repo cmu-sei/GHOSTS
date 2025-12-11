@@ -1,7 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
 import {
   MachineGroup,
   CreateMachineGroupRequest,
@@ -9,13 +8,18 @@ import {
   AddMachineToGroupRequest,
   RemoveMachineFromGroupRequest
 } from '../models';
+import { ConfigService } from './config.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class MachineGroupService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = `${environment.apiUrl}/machinegroups`;
+  private readonly configService = inject(ConfigService);
+
+  private get apiUrl(): string {
+    return `${this.configService.apiUrl}/machinegroups`;
+  }
 
   getMachineGroups(): Observable<MachineGroup[]> {
     return this.http.get<MachineGroup[]>(this.apiUrl);

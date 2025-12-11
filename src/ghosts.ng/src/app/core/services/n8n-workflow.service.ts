@@ -2,7 +2,6 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
-import { environment } from '../../../environments/environment';
 import {
   N8nWorkflow,
   N8nWorkflowListResponse,
@@ -10,16 +9,27 @@ import {
   WorkflowControl,
   WorkflowTriggerType
 } from '../models';
+import { ConfigService } from './config.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class N8nWorkflowService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = `${environment.apiUrl}/animations/workflows`;
-  private readonly n8nBaseUrl = this.buildN8nBaseUrl(environment.n8nApiUrl);
-  private readonly webhookBaseUrl = this.buildWebhookBaseUrl(this.n8nBaseUrl);
+  private readonly configService = inject(ConfigService);
   private activeWorkflowsCache: N8nWorkflow[] | null = null;
+
+  private get apiUrl(): string {
+    return `${this.configService.apiUrl}/animations/workflows`;
+  }
+
+  private get n8nBaseUrl(): string | undefined {
+    return this.buildN8nBaseUrl(this.configService.n8nApiUrl);
+  }
+
+  private get webhookBaseUrl(): string | undefined {
+    return this.buildWebhookBaseUrl(this.n8nBaseUrl);
+  }
 
   getActiveWorkflows(forceRefresh = false): Observable<N8nWorkflow[]> {
     if (!forceRefresh && this.activeWorkflowsCache) {

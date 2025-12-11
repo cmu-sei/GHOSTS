@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import * as d3 from 'd3';
 import * as signalR from '@microsoft/signalr';
 import { NpcService } from '../../../core/services/npc.service';
-import { environment } from '../../../../environments/environment';
+import { ConfigService } from '../../../core/services/config.service';
 
 interface NetworkNode extends d3.SimulationNodeDatum {
   id: string;
@@ -32,6 +32,7 @@ interface MoodState {
 })
 export class ActivitiesDynamicComponent implements OnInit, OnDestroy {
   private readonly npcService = inject(NpcService);
+  private readonly configService = inject(ConfigService);
   private readonly elementRef = inject(ElementRef);
   private connection?: signalR.HubConnection;
   private simulation?: d3.Simulation<NetworkNode, NetworkLink>;
@@ -62,7 +63,7 @@ export class ActivitiesDynamicComponent implements OnInit, OnDestroy {
             id: npc.id!,
             name: this.formatNpcName(npc.npcProfile?.name),
             knowledge: [],
-            image: `${environment.apiUrl}/npcs/${npc.id}/photo`
+            image: `${this.configService.apiUrl}/npcs/${npc.id}/photo`
           }));
 
         // Create initial links (sequential connections)
@@ -221,7 +222,7 @@ export class ActivitiesDynamicComponent implements OnInit, OnDestroy {
 
   private initializeSignalR(): void {
     this.connection = new signalR.HubConnectionBuilder()
-      .withUrl(`${environment.apiUrl}/hubs/activities`)
+      .withUrl(`${this.configService.apiUrl}/hubs/activities`)
       .configureLogging(signalR.LogLevel.Information)
       .withAutomaticReconnect()
       .build();

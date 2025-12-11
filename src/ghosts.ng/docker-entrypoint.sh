@@ -1,18 +1,18 @@
-#!/usr/bin/env sh
-set -eu
+#!/bin/sh
+set -e
 
-HTML_ROOT=${HTML_ROOT:-/usr/share/nginx/html}
-ASSETS_DIR="${HTML_ROOT}/assets"
+CONFIG_FILE=/usr/share/nginx/html/assets/config.json
 API_URL_VAL=${API_URL:-/api}
+N8N_API_URL_VAL=${N8N_API_URL:-http://localhost:5678}
 
-# Ensure target exists
-mkdir -p "$ASSETS_DIR"
+# Write config.json
+cat > $CONFIG_FILE <<EOF
+{
+  "apiUrl": "$API_URL_VAL",
+  "n8nApiUrl": "$N8N_API_URL_VAL"
+}
+EOF
 
-# Write config atomically
-TMP="$(mktemp)"
-printf '{\n  "apiUrl": "%s"\n}\n' "$API_URL_VAL" > "$TMP"
-mv "$TMP" "${ASSETS_DIR}/config.json"
+echo "Generated $CONFIG_FILE with apiUrl=$API_URL_VAL and n8nApiUrl=$N8N_API_URL_VAL"
 
-echo "Generated ${ASSETS_DIR}/config.json with apiUrl=${API_URL_VAL}"
-
-exec nginx -g 'daemon off;'
+exec "$@"

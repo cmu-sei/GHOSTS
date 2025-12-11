@@ -16,7 +16,7 @@ import { interval, Subscription } from 'rxjs';
 import { switchMap, startWith } from 'rxjs/operators';
 import { NpcRecord, AiActionRequest } from '../../../core/models';
 import { ActivityService } from '../../../core/services';
-import { environment } from '../../../../environments/environment';
+import { ConfigService } from '../../../core/services/config.service';
 
 @Component({
   selector: 'app-activities-list',
@@ -42,6 +42,7 @@ import { environment } from '../../../../environments/environment';
 })
 export class ActivitiesListComponent implements OnInit, OnDestroy {
   private readonly activityService = inject(ActivityService);
+  private readonly configService = inject(ConfigService);
   private readonly fb = inject(FormBuilder);
   private readonly snackBar = inject(MatSnackBar);
 
@@ -206,6 +207,6 @@ export class ActivitiesListComponent implements OnInit, OnDestroy {
 
   protected getNpcAvatar(npc: NpcRecord): string | null {
     // Use API endpoint for NPC photo
-    return npc.id ? `${environment.apiUrl}/npcs/${npc.id}/photo` : null;
+    return npc.id ? `${this.configService.apiUrl}/npcs/${npc.id}/photo` : null;
   }
 }

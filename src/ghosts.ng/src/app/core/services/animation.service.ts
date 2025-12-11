@@ -1,20 +1,24 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
 import {
   JobInfo,
   AnimationStartRequest,
   AnimationStopRequest,
   AnimationJobTypes
 } from '../models';
+import { ConfigService } from './config.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AnimationService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = `${environment.apiUrl}/animations`;
+  private readonly configService = inject(ConfigService);
+
+  private get apiUrl(): string {
+    return `${this.configService.apiUrl}/animations`;
+  }
 
   getRunningJobs(): Observable<JobInfo[]> {
     return this.http.get<JobInfo[]>(`${this.apiUrl}/jobs`);

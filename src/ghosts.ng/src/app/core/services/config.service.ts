@@ -19,27 +19,31 @@ export class ConfigService {
       return this.config;
     }
 
-    try {
-      this.config = await firstValueFrom(
-        this.http.get<AppConfig>('/assets/config.json')
-      );
-    } catch (error) {
-      console.warn('Failed to load config.json, using defaults', error);
-      // Fallback to localhost for local development
-      this.config = {
-        apiUrl: 'http://localhost:5000/api',
-        n8nApiUrl: 'http://localhost:5678'
-      };
-    }
+    this.config = await firstValueFrom(
+      this.http.get<AppConfig>('/assets/config.json')
+    );
 
     return this.config;
   }
 
   get apiUrl(): string {
-    return this.config?.apiUrl || 'http://localhost:5000/api';
+    if (!this.config?.apiUrl) {
+      throw new Error('Config not loaded. Call loadConfig() first.');
+    }
+    return this.config.apiUrl;
   }
 
   get n8nApiUrl(): string {
-    return this.config?.n8nApiUrl || 'http://localhost:5678';
+    if (!this.config?.n8nApiUrl) {
+      throw new Error('Config not loaded. Call loadConfig() first.');
+    }
+    return this.config.n8nApiUrl;
+  }
+
+  getConfig(): AppConfig {
+    if (!this.config) {
+      throw new Error('Config not loaded. Call loadConfig() first.');
+    }
+    return this.config;
   }
 }
