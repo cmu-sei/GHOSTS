@@ -105,6 +105,7 @@ public class ApplicationConfiguration
     public class GhostsConfig
     {
         public string ApiUrl { get; set; }
+        public string WorkflowsUrl { get; set; }
     }
 }
 

@@ -13,7 +13,8 @@
     <link rel="stylesheet" href="/themes/facebook/css/facebook.css">
     <link rel="icon" href="/themes/facebook/images/facebook-icon.png" type="image/png">
     <style>
-        body {padding-top:55px;}
+        body {padding-top: 55px;}
+
         .messages-container {
             max-width: 1200px;
             margin: 0 auto;
@@ -236,136 +237,145 @@
     </style>
 </head>
 <body data-theme="facebook">
-    <!-- Header -->
-    <header class="header">
-        <div class="header-left">
-            <a href="/" class="logo">facebook</a>
-            <form action="/search">
-                <input type="text" name="q" class="search-bar" placeholder="Search Facebook">
-            </form>
-        </div>
+<!-- Header -->
+<header class="header">
+    <div class="header-left">
+        <a href="/" class="logo">facebook</a>
+        <form action="/search">
+            <input type="text" name="q" class="search-bar" placeholder="Search Facebook">
+        </form>
+    </div>
 
-        <div class="header-center">
-            <a href="/" class="nav-item">🏠</a>
-            <a href="#" class="nav-item">📺</a>
-            <a href="#" class="nav-item">🛍️</a>
-            <a href="#" class="nav-item">👥</a>
-            <a href="#" class="nav-item">🎮</a>
-        </div>
+    <div class="header-center">
+        <a href="/" class="nav-item">🏠</a>
+        <a href="#" class="nav-item">📺</a>
+        <a href="#" class="nav-item">🛍️</a>
+        <a href="#" class="nav-item">👥</a>
+        <a href="#" class="nav-item">🎮</a>
+    </div>
 
-        <div class="header-right">
-            <button class="icon-btn">⊕</button>
-            <a href="/messages" class="icon-btn active">💬</a>
-            <button class="icon-btn">🔔</button>
-            <a href="/profile"><img src="/u/@ViewBag.Username/avatar" alt="Profile" class="profile-pic"></a>
-        </div>
-    </header>
+    <div class="header-right">
+        <button class="icon-btn">⊕</button>
+        <a href="/messages" class="icon-btn active">💬</a>
+        <button class="icon-btn">🔔</button>
+        <a href="/profile"><img src="/u/@ViewBag.Username/avatar" alt="Profile" class="profile-pic"></a>
+    </div>
+</header>
 
-    <div class="messages-container">
-        <div class="messages-header">
-            <h1 class="messages-title">Messages</h1>
-            <p class="messages-subtitle">Send and receive private messages</p>
-        </div>
+<div class="messages-container">
+    <div class="messages-header">
+        <h1 class="messages-title">Messages</h1>
+        <p class="messages-subtitle">Send and receive private messages</p>
+    </div>
 
-        <div class="messages-content">
-            <div class="messages-sidebar">
-                <div class="new-message-form">
-                    <form method="post" action="/messages/send">
-                        <div class="form-group">
-                            <label class="form-label">To:</label>
-                            <input type="text" name="toUsername" class="form-input" placeholder="Enter username" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Message:</label>
-                            <input type="text" name="message" class="form-input" placeholder="Type your message..." required>
-                        </div>
-                        <button type="submit" class="btn-primary">Send Message</button>
-                    </form>
+    <div class="messages-content">
+        <div class="messages-sidebar">
+            <div class="new-message-form">
+                <form method="post" action="/messages/send">
+                    <div class="form-group">
+                        <label class="form-label">To:</label>
+                        <input type="text" name="toUsername" class="form-input" placeholder="Enter username" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Message:</label>
+                        <input type="text" name="message" class="form-input" placeholder="Type your message..."
+                               required>
+                    </div>
+                    <button type="submit" class="btn-primary">Send Message</button>
+                </form>
+            </div>
+
+            @if (ViewBag.ConversationPartners != null)
+            {
+                <div class="conversations-list">
+                    @foreach (var partner in ViewBag.ConversationPartners)
+                    {
+                        <a href="/messages/chat?fromUsername=@ViewBag.Username&toUsername=@partner&theme=@ViewBag.Theme&workflowId=@ViewBag.WorkflowId"
+                           class="conversation-item" target="chat">
+                            <img src="/u/@partner/avatar" alt="@partner" class="conversation-avatar">
+                            <div class="conversation-info">
+                                <div class="conversation-name">@partner</div>
+                                <div class="conversation-preview">Click to view conversation</div>
+                            </div>
+                        </a>
+                    }
                 </div>
+            }
+        </div>
 
-                @if (ViewBag.ConversationPartners != null)
+        <div class="messages-main">
+            @{
+                var allMessages = new List<dynamic>();
+                if (ViewBag.ReceivedMessages != null)
                 {
-                    <div class="conversations-list">
-                        @foreach (var partner in ViewBag.ConversationPartners)
-                        {
-                            <a href="/messages/conversation/@partner?fromUsername=@ViewBag.Username&toUsername=@partner&theme=@ViewBag.Theme" class="conversation-item">
-                                <img src="/u/@partner/avatar" alt="@partner" class="conversation-avatar">
-                                <div class="conversation-info">
-                                    <div class="conversation-name">@partner</div>
-                                    <div class="conversation-preview">Click to view conversation</div>
-                                </div>
-                            </a>
-                        }
-                    </div>
-                }
-            </div>
-
-            <div class="messages-main">
-                @{
-                    var allMessages = new List<dynamic>();
-                    if (ViewBag.ReceivedMessages != null)
+                    foreach (var msg in ViewBag.ReceivedMessages)
                     {
-                        foreach (var msg in ViewBag.ReceivedMessages)
-                        {
-                            allMessages.Add(new { Message = msg, IsReceived = true });
-                        }
+                        allMessages.Add(new { Message = msg, IsReceived = true });
                     }
-                    if (ViewBag.SentMessages != null)
-                    {
-                        foreach (var msg in ViewBag.SentMessages)
-                        {
-                            allMessages.Add(new { Message = msg, IsReceived = false });
-                        }
-                    }
-                    allMessages = allMessages.OrderBy(m => m.Message.CreatedUtc).ToList();
                 }
 
-                @if (allMessages.Any())
+                if (ViewBag.SentMessages != null)
                 {
-                    <div class="message-group">
-                        <h3 class="message-group-title">Recent Messages</h3>
-                        <div class="message-groups">
-                            @foreach (var item in allMessages)
+                    foreach (var msg in ViewBag.SentMessages)
+                    {
+                        allMessages.Add(new { Message = msg, IsReceived = false });
+                    }
+                }
+
+                allMessages = allMessages.OrderBy(m => m.Message.CreatedUtc).ToList();
+            }
+
+            @if (allMessages.Any())
+            {
+                <div class="message-group">
+                    <h3 class="message-group-title">Recent Messages</h3>
+                    <a class="message-groups">
+                        @foreach (var item in allMessages)
+                        {
+                            if (item.IsReceived)
                             {
-                                if (item.IsReceived)
-                                {
-                                    <div class="message-item">
-                                        <img src="/u/@item.Message.FromUsername/avatar" alt="@item.Message.FromUsername" class="message-avatar">
-                                        <div class="message-content">
-                                            <div class="message-header">
-                                                <span class="message-sender">@item.Message.FromUsername</span>
-                                                <span class="message-time">@item.Message.CreatedUtc.ToString("MMM dd, h:mm tt")</span>
-                                            </div>
-                                            <div class="message-text">@item.Message.Message</div>
+                                <a href="/messages/conversation/@item.Message.FromUsername?fromUsername=@ViewBag.Username&toUsername=@item.Message.FromUsername&theme=@ViewBag.Theme"
+                                   class="message-item">
+                                    <img src="/u/@item.Message.FromUsername/avatar" alt="@item.Message.FromUsername"
+                                         class="message-avatar">
+                                    <div class="message-content">
+                                        <div class="message-header">
+                                            <span class="message-sender">@item.Message.FromUsername</span>
+                                            <span
+                                                class="message-time">@item.Message.CreatedUtc.ToString("MMM dd, h:mm tt")</span>
                                         </div>
+                                        <div class="message-text">@item.Message.Message</div>
                                     </div>
-                                }
-                                else
-                                {
-                                    <div class="message-item sent">
-                                        <img src="/u/@item.Message.FromUsername/avatar" alt="@item.Message.FromUsername" class="message-avatar">
-                                        <div class="message-content">
-                                            <div class="message-header">
-                                                <span class="message-sender">@item.Message.FromUsername</span>
-                                                <span class="message-time">@item.Message.CreatedUtc.ToString("MMM dd, h:mm tt")</span>
-                                            </div>
-                                            <div class="message-text">@item.Message.Message</div>
-                                        </div>
-                                    </div>
-                                }
+                                </a>
                             }
-                        </div>
-                    </div>
-                }
-                else
-                {
-                    <div class="empty-state">
-                        <h3>No messages yet</h3>
-                        <p>Start a conversation by sending a message!</p>
-                    </div>
-                }
-            </div>
+                            else
+                            {
+                                <a href="/messages/conversation/@item.Message.ToUsername?fromUsername=@ViewBag.Username&toUsername=@item.Message.ToUsername&theme=@ViewBag.Theme"
+                                   class="message-item sent">
+                                    <img src="/u/@item.Message.FromUsername/avatar" alt="@item.Message.FromUsername"
+                                         class="message-avatar">
+                                    <div class="message-content">
+                                        <div class="message-header">
+                                            <span class="message-sender">@item.Message.FromUsername</span>
+                                            <span
+                                                class="message-time">@item.Message.CreatedUtc.ToString("MMM dd, h:mm tt")</span>
+                                        </div>
+                                        <div class="message-text">@item.Message.Message</div>
+                                    </div>
+                                </a>
+                            }
+                        }
+                </div>
+            }
+            else
+            {
+                <div class="empty-state">
+                    <h3>No messages yet</h3>
+                    <p>Start a conversation by sending a message!</p>
+                </div>
+            }
         </div>
     </div>
+</div>
 </body>
 </html>

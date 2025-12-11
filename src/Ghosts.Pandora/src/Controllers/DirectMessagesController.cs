@@ -1,3 +1,4 @@
+using Ghosts.Pandora.Infrastructure;
 using Ghosts.Pandora.Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -6,12 +7,13 @@ namespace Ghosts.Pandora.Controllers;
 [ApiExplorerSettings(IgnoreApi = true)]
 [Route("/messages")]
 public class DirectMessagesController(
-    ILogger logger, IDirectMessageService directMessageService, IUserService userService)
+    ILogger logger, IDirectMessageService directMessageService,
+    IUserService userService, ApplicationConfiguration applicationConfiguration)
     : BaseController(logger)
 {
     // Main messages route - theme determined by cookie
     [HttpGet]
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index([FromQuery(Name = "workflowId")] string workflowId = "5e56a263-3a40-44bd-bc9d-1cfb3bc2a87d")
     {
         var username = GetOrCreateUsernameCookie(this.HttpContext);
         var themeName = ResolveThemeName();
@@ -20,6 +22,7 @@ public class DirectMessagesController(
         var receivedMessages = await directMessageService.GetReceivedMessagesAsync(user.Id);
         var sentMessages = await directMessageService.GetSentMessagesAsync(user.Id);
 
+        ViewBag.WorkflowId = workflowId;
         ViewBag.Theme = themeName;
         ViewBag.Username = username;
         ViewBag.ReceivedMessages = receivedMessages;
@@ -78,6 +81,25 @@ public class DirectMessagesController(
         var user = await userService.GetOrCreateUserAsync(username, themeName);
         var unreadMessages = await directMessageService.GetUnreadMessagesAsync(user.Id);
         return Ok(unreadMessages);
+    }
+
+    [HttpGet("chat")]
+    public async Task<IActionResult> RealTimeChat(
+        [FromQuery(Name = "workflowId")] string workflowId = "5e56a263-3a40-44bd-bc9d-1cfb3bc2a87d",
+        [FromQuery(Name = "fromUsername")] string from = "",
+        [FromQuery(Name = "toUsername")] string to = "")
+    {
+        var username = GetOrCreateUsernameCookie(this.HttpContext);
+        var themeName = ResolveThemeName();
+
+        ViewBag.Theme = themeName;
+        ViewBag.Username = username;
+        ViewBag.WorkflowId = workflowId;
+        ViewBag.From = from;
+        ViewBag.To = to;
+        ViewBag.WorkflowsUrl = applicationConfiguration.Ghosts.WorkflowsUrl;
+
+        return View($"~/Views/Themes/{themeName}/chat.cshtml");
     }
 
     [HttpPost("{messageId:int}/read")]
