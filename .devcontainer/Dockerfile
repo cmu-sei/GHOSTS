@@ -1,17 +1,21 @@
-# .devcontainer/server/Dockerfile
-FROM mcr.microsoft.com/devcontainers/dotnet:1-10.0
+FROM mcr.microsoft.com/devcontainers/dotnet:10.0
 
+ARG TARGETARCH
+
+# Switch to root for configuring image
 USER root
-ENV DEBIAN_FRONTEND=noninteractive
 
-# Install Node.js 22.x (required for Angular 20)
-RUN set -eux; \
-    apt-get update; \
-    apt-get install -y --no-install-recommends curl ca-certificates; \
-    curl -fsSL https://deb.nodesource.com/setup_22.x | bash -; \
-    apt-get install -y nodejs; \
-    npm install -g npm@latest; \
-    rm -rf /var/lib/apt/lists/*
+# Custom Cert Support
+COPY ./certs /usr/local/share/ca-certificates/custom/
+RUN find /usr/local/share/ca-certificates/custom -type f ! -name '*.crt' -delete \
+  && if find /usr/local/share/ca-certificates/custom -type f -name '*.crt' -print -quit | grep -q .; then \
+  update-ca-certificates; \
+  fi
+
+ENV NODE_EXTRA_CA_CERTS=/etc/ssl/certs/ca-certificates.crt \
+  AWS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt \
+  REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt \
+  PIP_CERT=/etc/ssl/certs/ca-certificates.crt
 
 # Switch back to vscode user
 USER vscode

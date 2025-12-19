@@ -4,24 +4,24 @@ set -euo pipefail
 # Show git dirty status in zsh prompt
 git config devcontainers-theme.show-dirty 1
 
-# Navigate to src directory and restore/build the API
-echo "========================================="
-echo "Restoring and building GHOSTS API..."
-echo "========================================="
-cd src
-dotnet restore ghosts.api.sln
-dotnet build ghosts.api.sln --no-restore
+sudo chown -R $(whoami): /home/vscode/.microsoft
 
-# Install Angular CLI 20 and setup Angular project
 echo ""
 echo "========================================="
-echo "Installing Angular CLI 20..."
+echo "Installing Microsoft Aspire..."
 echo "========================================="
-sudo npm install -g @angular/cli@20
+dotnet tool install -g Aspire.Cli
+
+# Install Angular CLI 21 and setup Angular project
+echo ""
+echo "========================================="
+echo "Installing Angular CLI 21..."
+echo "========================================="
+npm install -g @angular/cli@latest
 
 echo ""
 echo "Installing Angular dependencies..."
-cd ghosts.ng
+cd src/ghosts.ng
 npm install
 cd ../..
 

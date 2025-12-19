@@ -1,21 +1,35 @@
 {
-    "name": "ghosts-server",
+    "name": "ghosts development",
     "build": {
         "dockerfile": "Dockerfile"
     },
+    "runArgs": [
+        "--name",
+        "ghosts-dev"
+    ],
     "features": {
-        "ghcr.io/devcontainers/features/python:1": {},
+        "ghcr.io/devcontainers/features/common-utils:2": {
+            "configureZshAsDefaultShell": true
+        },
+        "ghcr.io/devcontainers/features/node:1": {},
+        "ghcr.io/devcontainers/features/python:1": {
+            "version": "3.12"
+        },
         "ghcr.io/devcontainers/features/git:1": {},
         "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
             "moby": true,
             "dockerDashComposeVersion": "v2"
-        }
+        },
+        "ghcr.io/devcontainers/features/aws-cli:1": {},
+        "ghcr.io/anthropics/devcontainer-features/claude-code:1.0": {}
     },
     "containerEnv": {
         "OPENAI_API_KEY": "${localEnv:OPENAI_API_KEY}",
         "ANTHROPIC_API_KEY": "${localEnv:ANTHROPIC_API_KEY}"
     },
-    "postCreateCommand": "bash -l .devcontainer/server/postcreate.sh",
+    "mounts": [
+        "source=ghosts-dev-microsoft,target=/home/vscode/.microsoft,type=volume" // persist usersecrets across container rebuilds
+    ],
     "customizations": {
         "vscode": {
             "extensions": [
@@ -41,7 +55,5 @@
         4200,
         3000
     ],
-    "mounts": [
-        "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
-    ]
+    "postCreateCommand": "bash -l .devcontainer/postcreate.sh"
 }
