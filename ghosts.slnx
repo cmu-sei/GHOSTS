@@ -1,6 +1,6 @@
 <Solution>
-    <Project Path="src/Ghosts.Api/Ghosts.Api.csproj" />
-    <Project Path="src/Ghosts.Animator/Ghosts.Animator.csproj" />
-    <Project Path="src/Ghosts.Domain/Ghosts.Domain.csproj" />
-    <Project Path="src/apphost/Ghosts-AppHost.csproj" />
+    <Project Path="/workspaces/GHOSTS/src/Ghosts.Api/Ghosts.Api.csproj" />
+    <Project Path="/workspaces/GHOSTS/src/Ghosts.Animator/Ghosts.Animator.csproj" />
+    <Project Path="/workspaces/GHOSTS/src/Ghosts.Domain/Ghosts.Domain.csproj" />
+    <Project Path="/workspaces/GHOSTS/src/apphost/Ghosts-AppHost.csproj" />
 </Solution>

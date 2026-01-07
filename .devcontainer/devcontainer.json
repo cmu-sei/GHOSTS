@@ -37,7 +37,8 @@
                 "angular.ng-template",
                 "continue.continue",
                 "anthropic.claude-vscode",
-                "microsoft-aspire.aspire-vscode"
+                "microsoft-aspire.aspire-vscode",
+                "pflannery.vscode-versionlens"
             ],
             "settings": {
                 "editor.formatOnSave": true,
