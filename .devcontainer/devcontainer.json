@@ -16,10 +16,7 @@
             "version": "3.12"
         },
         "ghcr.io/devcontainers/features/git:1": {},
-        "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
-            "moby": true,
-            "dockerDashComposeVersion": "v2"
-        },
+        "ghcr.io/devcontainers/features/docker-in-docker:2": {},
         "ghcr.io/devcontainers/features/aws-cli:1": {},
         "ghcr.io/anthropics/devcontainer-features/claude-code:1.0": {}
     },
@@ -39,21 +36,18 @@
                 "esbenp.prettier-vscode",
                 "angular.ng-template",
                 "continue.continue",
-                "anthropic.claude-vscode"
+                "anthropic.claude-vscode",
+                "microsoft-aspire.aspire-vscode"
             ],
             "settings": {
-                "dotnet.dotnetPath": "/usr/local/share/dotnet/dotnet",
-                "omnisharp.useModernNet": true,
-                "dotnet.server.useOmnisharp": false,
-                "dotnet.preferCSharpExtension": true,
+                "editor.formatOnSave": true,
+                "files.insertFinalNewline": true,
+                "files.eol": "\n",
+                "files.trimTrailingWhitespace": true,
+                "npm.packageManager": "npm",
                 "dotnet.defaultSolution": "src/ghosts.api.sln"
             }
         }
     },
-    "forwardPorts": [
-        5000,
-        4200,
-        3000
-    ],
     "postCreateCommand": "bash -l .devcontainer/postcreate.sh"
 }

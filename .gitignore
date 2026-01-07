@@ -330,3 +330,7 @@ output/
 *.vscode*
 
 .devcontainer/certs/*
+.devcontainer/aws.env
+
+*.claude/*
+.claude/settings.local.json
