@@ -8,7 +8,7 @@ Requests==2.32.4
 torch==2.8.0
 transformers==4.53.0
 docx2txt==0.8
-pypdf==6.4.0
+pypdf==6.6.0
 chromadb==0.4.24
 tqdm
 pipdeptree
