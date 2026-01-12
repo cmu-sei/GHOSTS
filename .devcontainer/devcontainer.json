@@ -25,7 +25,7 @@
         "ANTHROPIC_API_KEY": "${localEnv:ANTHROPIC_API_KEY}"
     },
     "mounts": [
-        "source=ghosts-dev-microsoft,target=/home/vscode/.microsoft,type=volume" // persist usersecrets across container rebuilds
+        "source=ghosts-dev-microsoft,target=/home/vscode/.microsoft,type=volume"
     ],
     "customizations": {
         "vscode": {

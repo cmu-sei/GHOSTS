@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Ghosts.Api.Infrastructure.Animations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using NLog;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Ghosts.Api.Controllers.Api;
@@ -17,14 +18,15 @@ namespace Ghosts.Api.Controllers.Api;
 [Produces("application/json")]
 public class AnimationJobsController(IServiceProvider serviceProvider) : Controller
 {
+    private static Logger _log = LogManager.GetCurrentClassLogger();
     private readonly AnimationsManager _animationsManager = serviceProvider.GetRequiredService<IManageableHostedService>() as AnimationsManager;
 
     [SwaggerOperation("AnimationJobsGet")]
     [HttpGet("jobs")]
     public IEnumerable<JobInfo> Get(CancellationToken cancellationToken)
-     {
-         return _animationsManager.GetRunningJobs();
-     }
+    {
+        return _animationsManager.GetRunningJobs();
+    }
 
     [HttpPost("start")]
     public IActionResult Start(AnimationConfiguration configuration, [FromForm] string jobConfiguration)
@@ -53,6 +55,8 @@ public class AnimationJobsController(IServiceProvider serviceProvider) : Control
 
         if (string.IsNullOrEmpty(apiKey))
             throw new InvalidOperationException("N8N_API_KEY environment variable is not set.");
+
+        _log.Info($"Fetching workflows from N8N at {apiUrl} with key {apiKey.Substring(0, 8)}...");
 
         var http = new HttpClient();
         http.DefaultRequestHeaders.Clear();

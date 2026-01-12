@@ -35,22 +35,31 @@ interface NavItem {
       <nav class="nav-links">
         @for (item of navItems(); track item.path || item.label) {
           @if (item.children && item.children.length > 0) {
-            <button
-              mat-button
-              [matMenuTriggerFor]="menu"
-              class="nav-link">
-              <i class="fas {{item.icon}}"></i>
-              <span>{{item.label}}</span>
-              <i class="fas fa-chevron-down dropdown-icon"></i>
-            </button>
-            <mat-menu #menu="matMenu">
-              @for (child of item.children; track child.path) {
-                <a mat-menu-item [routerLink]="child.path" [target]="child.target || '_self'">
-                  <i class="fas {{child.icon}}"></i>
-                  <span>{{child.label}}</span>
-                </a>
-              }
-            </mat-menu>
+            <div class="nav-item-group">
+              <a
+                mat-button
+                [routerLink]="item.path"
+                routerLinkActive="active"
+                [routerLinkActiveOptions]="{ exact: false }"
+                class="nav-link nav-link-with-menu">
+                <i class="fas {{item.icon}}"></i>
+                <span>{{item.label}}</span>
+              </a>
+              <button
+                mat-button
+                [matMenuTriggerFor]="menu"
+                class="nav-link nav-dropdown-trigger">
+                <i class="fas fa-chevron-down"></i>
+              </button>
+              <mat-menu #menu="matMenu">
+                @for (child of item.children; track child.path) {
+                  <a mat-menu-item [routerLink]="child.path" [target]="child.target || '_self'">
+                    <i class="fas {{child.icon}}"></i>
+                    <span>{{child.label}}</span>
+                  </a>
+                }
+              </mat-menu>
+            </div>
           } @else {
             <a
               mat-button
@@ -141,6 +150,12 @@ interface NavItem {
       display: none; /* Chrome, Safari, Edge */
     }
 
+    .nav-item-group {
+      display: flex;
+      align-items: center;
+      gap: 0;
+    }
+
     .nav-link {
       color: rgba(255, 255, 255, 0.87) !important;
       white-space: nowrap;
@@ -161,10 +176,32 @@ interface NavItem {
       background-color: rgba(255, 255, 255, 0.1) !important;
     }
 
+    .nav-link-with-menu {
+      border-top-right-radius: 0 !important;
+      border-bottom-right-radius: 0 !important;
+    }
+
+    .nav-dropdown-trigger {
+      min-width: 36px !important;
+      padding: 0 8px !important;
+      border-top-left-radius: 0 !important;
+      border-bottom-left-radius: 0 !important;
+      border-left: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .nav-dropdown-trigger i {
+      margin-right: 0;
+      font-size: 10px;
+    }
+
     .dropdown-icon {
       margin-left: 4px;
       font-size: 10px;
       opacity: 0.8;
+    }
+
+    ::ng-deep .mat-mdc-menu-item i {
+      margin-right: 12px;
     }
 
     .main-content {
@@ -183,6 +220,10 @@ interface NavItem {
         gap: 2px;
       }
 
+      .nav-item-group {
+        gap: 0;
+      }
+
       .nav-link {
         font-size: 13px;
         padding: 0 8px;
@@ -196,6 +237,11 @@ interface NavItem {
         margin-right: 0;
         font-size: 18px;
       }
+
+      .nav-dropdown-trigger {
+        min-width: 32px !important;
+        padding: 0 6px !important;
+      }
     }
   `]
 })
@@ -203,20 +249,32 @@ export class NavigationComponent {
   protected readonly navItems = signal<NavItem[]>([
     { label: 'Scenarios', path: '/scenarios', icon: 'fa-file-alt' },
     { label: 'Executions', path: '/executions', icon: 'fa-play' },
-    { label: 'Machines', path: '/machines', icon: 'fa-desktop' },
-    { label: 'Machine Groups', path: '/machine-groups', icon: 'fa-users-cog' },
-    { label: 'Timelines', path: '/timelines', icon: 'fa-stream' },
-    { label: 'NPCs', path: '/npcs', icon: 'fa-user' },
-    { label: 'Animations', path: '/animations', icon: 'fa-play-circle' },
-    { label: 'RangerAI', path: '/n8n-workflows', icon: 'fa-project-diagram' },
     {
-      label: 'Activities',
-      icon: 'fa-chart-bar',
+      label: 'NPCs',
+      path: '/npcs',
+      icon: 'fa-user',
       children: [
-        { label: 'Overview', path: '/activities', icon: 'fa-list' },
-        { label: 'Live Network', path: '/activities/dynamic', icon: 'fa-project-diagram', target: '_blank' }
+        { label: 'Activities Overview', path: '/activities', icon: 'fa-list' },
+        { label: 'Live Network', path: '/activities/dynamic', icon: 'fa-project-diagram', target: '_blank' },
+        { label: 'Social', path: '/social', icon: 'fa-users' }
       ]
     },
-    { label: 'Social', path: '/social', icon: 'fa-users' }
+    {
+      label: 'Timelines',
+      path: '/timelines',
+      icon: 'fa-stream',
+      children: [
+        { label: 'Machines', path: '/machines', icon: 'fa-desktop' },
+        { label: 'Machine Groups', path: '/machine-groups', icon: 'fa-users-cog' }
+      ]
+    },
+    {
+      label: 'RangerAI',
+      path: '/n8n-workflows',
+      icon: 'fa-project-diagram',
+      children: [
+        { label: 'Animations', path: '/animations', icon: 'fa-play-circle' }
+      ]
+    }
   ]);
 }

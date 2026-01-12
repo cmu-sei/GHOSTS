@@ -334,3 +334,4 @@ output/
 
 *.claude/*
 .claude/settings.local.json
+src/apphost/n8n_data/*
