@@ -1,7 +1,7 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
-var postgresUsername = builder.AddParameter("PostgresUsername", "postgres", false);
-var postgresPassword = builder.AddParameter("PostgresPassword", "postgres", false);
+var postgresUsername = builder.AddParameter("PostgresUsername", "ghosts", false);
+var postgresPassword = builder.AddParameter("PostgresPassword", "scotty@1", false);
 
 var postgres = builder.AddPostgres("postgres", userName: postgresUsername, password: postgresPassword)
     .WithDataVolume()
@@ -12,7 +12,8 @@ var postgres = builder.AddPostgres("postgres", userName: postgresUsername, passw
         pgAdmin.WithEndpoint("http", endpoint => endpoint.Port = 33000);
     });
 
-var db = postgres.AddDatabase("ghosts", "ghosts");
+var db = postgres.AddDatabase("ghosts");
+var dbPandora = postgres.AddDatabase("pandora");
 
 var qdrant = builder.AddContainer("qdrant", "qdrant/qdrant")
     .WithContainerName("qdrant")
@@ -29,6 +30,17 @@ var n8n = builder.AddContainer("n8n", "docker.n8n.io/n8nio/n8n")
     .WithBindMount("n8n_data", "/home/node/.n8n", isReadOnly: false)
     .WithLifetime(ContainerLifetime.Persistent);
 
+var facebook = builder.AddContainer("facebook", "dustinupdyke/ghosts-pandora")
+    .WithContainerName("facebook")
+    .WaitFor(postgres)
+    .WithEnvironment(
+         "ConnectionStrings__Default",
+        $"Host=postgres;Port=5432;Database=pandora;Username={postgresUsername};Password={postgresPassword}"
+    )
+    .WithHttpEndpoint(port: 8800, targetPort: 5000, name: "http")
+    .WithEnvironment("MODE_TYPE", "social")
+    .WithEnvironment("DEFAULT_THEME", "facebook");
+
 var api = builder.AddProject<Projects.Ghosts_Api>("api")
     .WaitFor(postgres)
     .WithReference(db, "DefaultConnection")
@@ -37,7 +49,7 @@ var api = builder.AddProject<Projects.Ghosts_Api>("api")
     {
         ctx.EnvironmentVariables["N8N_API_URL"] = n8n.GetEndpoint("http").Url + "/api/v1/workflows";
     })
-    .WithEnvironment("N8N_API_KEY", "supersecretkey");
+    .WithEnvironment("N8N_API_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyMjYzOGVmNi1lMDliLTRiZGMtYWQ0NC0xOWI3OTE0ZjkxNmMiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzY4MjU1Mjg1fQ.10cejVHaxSQoUqyPd0kiz9FRyBi0xM1IGRuMICjQ3DA");
 
 var frontend = builder.AddJavaScriptApp("frontend", "../ghosts.ng", "start")
     .WithHttpEndpoint(port: 4200, env: "PORT", isProxied: false)
