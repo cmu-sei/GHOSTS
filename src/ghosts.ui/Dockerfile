@@ -11,9 +11,9 @@ WORKDIR /app
 RUN apk add --no-cache python3 make gcc g++
 
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm ci --legacy-peer-deps
 
-RUN npm install sharp
+RUN npm install sharp --legacy-peer-deps
 
 # Stage for building the nextjs app
 FROM base AS builder

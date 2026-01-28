@@ -1,14 +1,4 @@
 {
-  "__inputs": [
-    {
-      "name": "DS_GHOSTS",
-      "label": "ghosts",
-      "description": "",
-      "type": "datasource",
-      "pluginId": "postgres",
-      "pluginName": "PostgreSQL"
-    }
-  ],
   "__requires": [
     {
       "type": "grafana",
@@ -65,7 +55,7 @@
       "colorBackground": true,
       "colorValue": false,
       "colors": ["#0a50a1", "#594f4f", "#d44a3a"],
-      "datasource": "${DS_GHOSTS}",
+      "datasource": "ghosts",
       "format": "none",
       "gauge": {
         "maxValue": 100,
@@ -142,7 +132,7 @@
       "colorBackground": true,
       "colorValue": false,
       "colors": ["#299c46", "#629e51", "#d44a3a"],
-      "datasource": "${DS_GHOSTS}",
+      "datasource": "ghosts",
       "decimals": null,
       "format": "short",
       "gauge": {
@@ -220,7 +210,7 @@
       "colorBackground": true,
       "colorValue": false,
       "colors": ["#299c46", "#5195ce", "#d44a3a"],
-      "datasource": "${DS_GHOSTS}",
+      "datasource": "ghosts",
       "format": "short",
       "gauge": {
         "maxValue": 100,
@@ -296,7 +286,7 @@
       "colorBackground": true,
       "colorValue": false,
       "colors": ["#299c46", "#e24d42", "#d44a3a"],
-      "datasource": "${DS_GHOSTS}",
+      "datasource": "ghosts",
       "format": "short",
       "gauge": {
         "maxValue": 100,
@@ -375,7 +365,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_GHOSTS}",
+      "datasource": "ghosts",
       "fill": 1,
       "gridPos": {
         "h": 7,
@@ -482,7 +472,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_GHOSTS}",
+      "datasource": "ghosts",
       "fill": 1,
       "gridPos": {
         "h": 7,
@@ -564,7 +554,7 @@
     },
     {
       "columns": [],
-      "datasource": "${DS_GHOSTS}",
+      "datasource": "ghosts",
       "fontSize": "100%",
       "gridPos": {
         "h": 9,
@@ -613,7 +603,7 @@
     },
     {
       "columns": [],
-      "datasource": "${DS_GHOSTS}",
+      "datasource": "ghosts",
       "fontSize": "100%",
       "gridPos": {
         "h": 9,
