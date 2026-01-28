@@ -26,10 +26,13 @@ namespace Ghosts.Client.Handlers
             record.Handler = report.Handler;
             record.Command = report.Command;
             record.CommandArg = report.Arg;
-            record.Result = report.Result.RemoveNonAscii(); //added this because some people using non-en OS'es have logged non-recoverable errors w/o thiss
+            record.Result = report.Result.RemoveNonAscii(); //added this because some people using non-en OS'es have logged non-recoverable errors w/o this
 
             if (!string.IsNullOrEmpty(report.Trackable))
+            {
                 record.TrackableId = report.Trackable;
+                Log.Trace($"Trackable:{report.Trackable}");
+            }
 
             var o = JsonConvert.SerializeObject(record,
                 Formatting.None,
