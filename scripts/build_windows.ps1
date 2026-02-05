@@ -9,7 +9,7 @@ $configuration = "release" # release || debug
 
 # release version is determined by the project file release version parameter
 $r = ""
-foreach($line in Get-Content "..\src\ghosts.client.windows\Properties\AssemblyInfo.cs") {
+foreach($line in Get-Content "..\src\Ghosts.Client.Windows\Properties\AssemblyInfo.cs") {
     if($line.StartsWith("[assembly: AssemblyVersion(")){
         $r = $line.Replace("[assembly: AssemblyVersion(", "").Replace(")]", "").Replace("`"","")
         break
@@ -25,13 +25,20 @@ if (Test-Path $t -PathType Container) {
     Remove-Item -Path $t -Recurse -Force -Confirm:$false
 } 
 
-$possiblePaths = @(
-    "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\msbuild.exe",
-    "C:\Program Files\Microsoft Visual Studio\2022\Professional\MSBuild\Current\Bin\msbuild.exe"
-)
-$msbuildPath = $possiblePaths | Where-Object { Test-Path $_ } | Select-Object -First 1
+$vsRoot = "C:\Program Files\Microsoft Visual Studio"
+$msbuildPath = $null
+
+if (Test-Path $vsRoot) {
+    $msbuildPath = Get-ChildItem -Path $vsRoot -Directory | ForEach-Object {
+        Get-ChildItem -Path $_.FullName -Directory | ForEach-Object {
+            $path = Join-Path $_.FullName "MSBuild\Current\Bin\msbuild.exe"
+            if (Test-Path $path) { $path }
+        }
+    } | Select-Object -First 1
+}
+
 if (-not $msbuildPath) {
-    Write-Error "Could not find msbuild.exe in standard locations."
+    Write-Error "Could not find msbuild.exe in $vsRoot."
     exit 1
 }
 $msbuild = "& '$msbuildPath'"
