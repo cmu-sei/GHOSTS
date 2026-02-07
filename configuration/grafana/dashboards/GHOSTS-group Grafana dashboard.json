@@ -24,7 +24,7 @@
       "colorBackground": true,
       "colorValue": false,
       "colors": ["#0a50a1", "#594f4f", "#d44a3a"],
-      "datasource": "ghosts",
+      "datasource": null,
       "format": "none",
       "gauge": {
         "maxValue": 100,
@@ -120,7 +120,7 @@
       "colorBackground": true,
       "colorValue": false,
       "colors": ["#299c46", "#629e51", "#d44a3a"],
-      "datasource": "ghosts",
+      "datasource": null,
       "decimals": null,
       "format": "short",
       "gauge": {
@@ -217,7 +217,7 @@
       "colorBackground": true,
       "colorValue": false,
       "colors": ["#299c46", "#5195ce", "#d44a3a"],
-      "datasource": "ghosts",
+      "datasource": null,
       "format": "short",
       "gauge": {
         "maxValue": 100,
@@ -312,7 +312,7 @@
       "colorBackground": true,
       "colorValue": false,
       "colors": ["#299c46", "#e24d42", "#d44a3a"],
-      "datasource": "ghosts",
+      "datasource": null,
       "format": "short",
       "gauge": {
         "maxValue": 100,
@@ -410,7 +410,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "ghosts",
+      "datasource": null,
       "fill": 1,
       "gridPos": {
         "h": 7,
@@ -575,7 +575,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "ghosts",
+      "datasource": null,
       "fill": 1,
       "gridPos": {
         "h": 7,
@@ -677,7 +677,7 @@
     },
     {
       "columns": [],
-      "datasource": "ghosts",
+      "datasource": null,
       "fontSize": "100%",
       "gridPos": {
         "h": 9,
@@ -745,7 +745,7 @@
     },
     {
       "columns": [],
-      "datasource": "ghosts",
+      "datasource": null,
       "fontSize": "100%",
       "gridPos": {
         "h": 9,

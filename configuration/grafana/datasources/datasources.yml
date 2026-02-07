@@ -7,12 +7,12 @@ deleteDatasources:
 # # datasources to create
 datasources:
 - name: ghosts
+  isDefault: true
   type: postgres
   url: ghosts-postgres:5432
-  database: ghosts
   user: ghosts
   secureJsonData:
     password: scotty@1
-  isDefault: true
   jsonData:
+    database: ghosts
     sslmode: disable
