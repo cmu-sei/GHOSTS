@@ -115,7 +115,7 @@
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-unicorn": "^23.0.0",
     "find-unused-sass-variables": "^3.0.0",
-    "glob": "^9.0.0",
+    "glob": "^12.0.0",
     "hammer-simulator": "0.0.1",
     "hugo-bin": "^0.117.1",
     "ip": "^2.0.1",
@@ -143,7 +143,7 @@
     "stylelint": "^13.8.0",
     "stylelint-config-twbs-bootstrap": "^2.1.0",
     "terser": "5.1.0",
-    "vnu-jar": "26.1.11"
+    "vnu-jar": "26.2.1"
   },
   "files": [
     "dist/{css,js}/*.{css,js,map}",
