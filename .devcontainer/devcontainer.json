@@ -17,12 +17,7 @@
         },
         "ghcr.io/devcontainers/features/git:1": {},
         "ghcr.io/devcontainers/features/docker-in-docker:2": {},
-        "ghcr.io/devcontainers/features/aws-cli:1": {},
-        "ghcr.io/anthropics/devcontainer-features/claude-code:1.0": {}
-    },
-    "containerEnv": {
-        "OPENAI_API_KEY": "${localEnv:OPENAI_API_KEY}",
-        "ANTHROPIC_API_KEY": "${localEnv:ANTHROPIC_API_KEY}"
+        "ghcr.io/devcontainers/features/aws-cli:1": {}
     },
     "mounts": [
         "source=ghosts-dev-microsoft,target=/home/vscode/.microsoft,type=volume"
@@ -50,5 +45,6 @@
             }
         }
     },
-    "postCreateCommand": "bash -l .devcontainer/postcreate.sh"
+    "postCreateCommand": "bash -l .devcontainer/postcreate.sh",
+    "postStartCommand": "bash -l .devcontainer/poststart.sh"
 }

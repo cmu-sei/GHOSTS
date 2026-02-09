@@ -1,8 +1,6 @@
 FROM mcr.microsoft.com/devcontainers/dotnet:10.0
 
 ARG TARGETARCH
-
-# Switch to root for configuring image
 USER root
 
 # Custom Cert Support
@@ -12,10 +10,12 @@ RUN find /usr/local/share/ca-certificates/custom -type f ! -name '*.crt' -delete
   update-ca-certificates; \
   fi
 
+# Remove the flotsam around Yarn
+RUN rm -f /etc/apt/sources.list.d/yarn.list /etc/apt/sources.list.d/yarn*.list
+
 ENV NODE_EXTRA_CA_CERTS=/etc/ssl/certs/ca-certificates.crt \
   AWS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt \
   REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt \
   PIP_CERT=/etc/ssl/certs/ca-certificates.crt
 
-# Switch back to vscode user
 USER vscode

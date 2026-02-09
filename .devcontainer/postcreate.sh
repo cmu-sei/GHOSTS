@@ -74,27 +74,15 @@ echo "Installing Python packages..."
 echo "========================================="
 pip install --no-cache-dir --break-system-packages openai anthropic
 
+
+echo ""
+echo "========================================="
+echo "Installing Claude Code..."
+echo "========================================="
+curl -fsSL https://claude.ai/install.sh | bash
+
 echo ""
 echo "========================================="
 echo "Setup completed successfully!"
 echo "========================================="
 
-# Welcome message
-cat <<'EOF'
-
-
-                   ('-. .-.               .-')    .-') _     .-')
-                 ( OO )  /              ( OO ). (  OO) )   ( OO ).
-        ,----.    ,--. ,--. .-'),-----. (_)---\_)/     '._ (_)---\_)
-       '  .-./-') |  | |  |( OO'  .-.  '/    _ | |'--...__)/    _ |
-       |  |_( O- )|   .|  |/   |  | |  |\  :` `. '--.  .--'\  :` `.
-       |  | .--, \|       |\_) |  |\|  | '..`''.)   |  |    '..`''.)
-      (|  | '. (_/|  .-.  |  \ |  | |  |.-._)   \   |  |   .-._)   \
-       |  '--'  | |  | |  |   `'  '-'  '\       /   |  |   \       /
-       `------'  `--' `--'     `-----'  `-----'    `--'    `-----'
-
-              Welcome to the GHOSTS Development Container!
-
-Type Ctrl-Shift-` (backtick) to open a new terminal and get started building. 🤓👻
-
-EOF
