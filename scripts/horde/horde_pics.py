@@ -7,6 +7,9 @@ import mimetypes
 import json
 from io import BytesIO
 from datetime import datetime
+# faker
+from faker import Faker
+fake = Faker()
 
 # --- Config ---
 sites = [
@@ -18,7 +21,7 @@ sites = [
     "linkedin",
     "youtube",
 ]
-API_URL = "http://localhost:8000"
+API_URL = "http://localhost:8800"
 IMG_DIR = "/tmp"   # local fallback directory
 SAVE_DIR = "/tmp/images"
 SCENARIO_FILE = "cyber-exercise-scenario.json"
@@ -26,6 +29,8 @@ OLLAMA_URL = "http://localhost:11434/api/generate"
 OLLAMA_MODEL = "llama3.2"
 
 # --- Scenario & Knowledge Levels ---
+
+
 def load_scenario():
     """Load scenario from JSON file."""
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -37,6 +42,7 @@ def load_scenario():
 
     with open(scenario_path, 'r') as f:
         return json.load(f)
+
 
 def select_knowledge_level():
     """Select a knowledge level based on realistic distribution."""
@@ -50,6 +56,7 @@ def select_knowledge_level():
         return "department"
     else:
         return "limited"
+
 
 def call_ollama(prompt):
     """Call Ollama API to generate text."""
@@ -71,20 +78,30 @@ def call_ollama(prompt):
         return None
 
 # --- Utils ---
+
+
 def generate_search_query_and_post(scenario=None):
     """Generate both a Pexels search query and a realistic social media post message."""
     knowledge = select_knowledge_level()
 
     # Fallback data if scenario not available or Ollama fails
     fallback_data = [
-        {"query": "industrial control panel buttons displays", "post": "Running diagnostics on the PLCs again"},
-        {"query": "server room equipment racks", "post": "Late night troubleshooting network issues"},
-        {"query": "SCADA monitoring station multiple screens", "post": "Another anomaly to investigate today"},
-        {"query": "engineering workstation computer monitors", "post": "Reviewing process logs from last night"},
-        {"query": "conference room presentation whiteboard", "post": "Long briefing about system changes"},
-        {"query": "industrial facility control room", "post": "Monitoring systems all shift"},
-        {"query": "office desk laptop coffee", "post": "Engineers seem really busy today"},
-        {"query": "security badge access control", "post": "Lots of people here late tonight"},
+        {"query": "industrial control panel buttons displays",
+            "post": "Running diagnostics on the PLCs again"},
+        {"query": "server room equipment racks",
+            "post": "Late night troubleshooting network issues"},
+        {"query": "SCADA monitoring station multiple screens",
+            "post": "Another anomaly to investigate today"},
+        {"query": "engineering workstation computer monitors",
+            "post": "Reviewing process logs from last night"},
+        {"query": "conference room presentation whiteboard",
+            "post": "Long briefing about system changes"},
+        {"query": "industrial facility control room",
+            "post": "Monitoring systems all shift"},
+        {"query": "office desk laptop coffee",
+            "post": "Engineers seem really busy today"},
+        {"query": "security badge access control",
+            "post": "Lots of people here late tonight"},
     ]
 
     if not scenario:
@@ -183,6 +200,7 @@ Post:"""
 
     return search_query, post_message
 
+
 def save_image(img_bytes, filename):
     """Save image bytes to disk under downloads/ with a unique filename."""
     os.makedirs(SAVE_DIR, exist_ok=True)
@@ -195,6 +213,8 @@ def save_image(img_bytes, filename):
     return path
 
 # --- Pexels ---
+
+
 def find_image_url(query, pexels_key):
     headers = {"Authorization": pexels_key}
     resp = requests.get(
@@ -210,17 +230,22 @@ def find_image_url(query, pexels_key):
         return None
     return random.choice(data["photos"])["src"]["medium"]
 
+
 def download_image(url):
     resp = requests.get(url, stream=True, timeout=10, verify=False)
     resp.raise_for_status()
     content_type = resp.headers.get("Content-Type", "application/octet-stream")
-    ext = mimetypes.guess_extension(content_type.split(";")[0].strip()) or ".jpg"
+    ext = mimetypes.guess_extension(
+        content_type.split(";")[0].strip()) or ".jpg"
     filename = url.split("/")[-1].split("?")[0] or f"image{ext}"
     return resp.content, content_type, filename
 
 # --- Local ---
+
+
 def get_random_local_image():
-    files = [f for f in os.listdir(IMG_DIR) if os.path.isfile(os.path.join(IMG_DIR, f))]
+    files = [f for f in os.listdir(
+        IMG_DIR) if os.path.isfile(os.path.join(IMG_DIR, f))]
     if not files:
         raise RuntimeError("No images in directory")
     img_path = os.path.join(IMG_DIR, random.choice(files))
@@ -229,15 +254,20 @@ def get_random_local_image():
         return f.read(), mime, os.path.basename(img_path)
 
 # --- Poster ---
+
+
 def post_message_and_image(username, message, img_bytes, content_type, filename):
     files = {"file": (filename, BytesIO(img_bytes), content_type)}
     data = {"u": username, "m": message}
-    resp = requests.post(API_URL + "?theme=" + random.choice(sites), files=files, data=data)
+    resp = requests.post(API_URL + "?theme=" +
+                         random.choice(sites), files=files, data=data)
     print(f"[{resp.status_code}] u={username} m={message[:50]} img={filename} ({content_type})")
     print("Response:", resp.text[:200])
     return resp
 
 # --- Main ---
+
+
 def main(mode, pexels_key):
     # Load scenario once at startup
     print("Loading scenario...")
@@ -249,8 +279,9 @@ def main(mode, pexels_key):
 
     while True:
         try:
-            username = f"user{random.randint(1000,9999)}"
-            search_query, post_message = generate_search_query_and_post(scenario)
+            username = fake.user_name()
+            search_query, post_message = generate_search_query_and_post(
+                scenario)
 
             if mode == "local":
                 img_bytes, mime, filename = get_random_local_image()
@@ -261,13 +292,15 @@ def main(mode, pexels_key):
                     print(f"Image from Pexels: {img_url}")
                     img_bytes, mime, filename = download_image(img_url)
                 else:
-                    print(f"No Pexels image found for '{search_query}', falling back to local")
+                    print(
+                        f"No Pexels image found for '{search_query}', falling back to local")
                     img_bytes, mime, filename = get_random_local_image()
 
             local_path = save_image(img_bytes, filename)
             print(f"Saved image to {local_path}")
 
-            post_message_and_image(username, post_message, img_bytes, mime, filename)
+            post_message_and_image(
+                username, post_message, img_bytes, mime, filename)
             time.sleep(3)
 
         except KeyboardInterrupt:
@@ -277,13 +310,15 @@ def main(mode, pexels_key):
             print(f"Error: {e}")
             time.sleep(5)
 
+
 if __name__ == "__main__":
     # print(len(sys.argv))
     # print(sys.argv[0])
     # print(sys.argv[1])
 
-    mode = "web" #sys.argv[1] if len(sys.argv) > 1 else "web"
+    mode = "web"  # sys.argv[1] if len(sys.argv) > 1 else "web"
     pexels_key = sys.argv[1] if len(sys.argv) > 0 else sys.exit(1)
+    print(f"Running in {mode} mode with Pexels key {pexels_key[:8]}...")
     if mode not in ("local", "web"):
         print("Usage: python run.py [local|web]")
         sys.exit(1)
