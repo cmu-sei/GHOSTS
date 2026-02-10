@@ -18,6 +18,7 @@ public class Scenario
     public GameMechanics GameMechanics { get; set; }
     public ScenarioTimeline ScenarioTimeline { get; set; }
     public ICollection<Execution> Executions { get; set; } = new List<Execution>();
+    public virtual ICollection<NpcRecord> Npcs { get; set; } = new List<NpcRecord>();
 }
 
 [Table("scenario_parameters")]

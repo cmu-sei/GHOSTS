@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
@@ -10,6 +11,7 @@ using System.Threading.Tasks;
 using Ghosts.Api.Infrastructure.Models;
 using Ghosts.Api.Infrastructure.Services;
 using Microsoft.Extensions.Logging;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Ghosts.Api.Controllers.Api;
 
@@ -18,11 +20,13 @@ namespace Ghosts.Api.Controllers.Api;
 public class ScenariosController : ControllerBase
 {
     private readonly IScenarioService _scenarioService;
+    private readonly INpcService _npcService;
     private readonly ILogger<ScenariosController> _logger;
 
-    public ScenariosController(IScenarioService scenarioService, ILogger<ScenariosController> logger)
+    public ScenariosController(IScenarioService scenarioService, INpcService npcService, ILogger<ScenariosController> logger)
     {
         _scenarioService = scenarioService;
+        _npcService = npcService;
         _logger = logger;
     }
 
@@ -115,6 +119,29 @@ public class ScenariosController : ControllerBase
         {
             _logger.LogError(ex, "Error deleting scenario {ScenarioId}", id);
             return StatusCode(500, new { error = "Error deleting scenario" });
+        }
+    }
+
+    /// <summary>
+    /// Get all NPCs associated with a specific scenario
+    /// </summary>
+    /// <param name="scenarioId">The scenario ID</param>
+    /// <returns>List of NPCs bound to the scenario</returns>
+    [ProducesResponseType(typeof(ActionResult<IEnumerable<NpcRecord>>), (int)HttpStatusCode.OK)]
+    [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(ActionResult<IEnumerable<NpcRecord>>))]
+    [SwaggerOperation("GetScenarioNpcs")]
+    [HttpGet("{scenarioId}/npcs")]
+    public async Task<ActionResult<IEnumerable<NpcRecord>>> GetScenarioNpcs(int scenarioId)
+    {
+        try
+        {
+            var npcs = await _npcService.GetByScenarioId(scenarioId);
+            return Ok(npcs);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting NPCs for scenario {ScenarioId}", scenarioId);
+            return StatusCode(500, new { error = "Error retrieving scenario NPCs" });
         }
     }
 

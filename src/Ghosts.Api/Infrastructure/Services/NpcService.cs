@@ -29,6 +29,7 @@ public interface INpcService
     public Task DeleteById(Guid id);
     public Task<IEnumerable<string>> GetKeys(string key);
     public Task SyncWithMachineUsernames();
+    public Task<IEnumerable<NpcRecord>> GetByScenarioId(int scenarioId);
 }
 
 public class NpcService(ApplicationDbContext context) : INpcService
@@ -156,6 +157,15 @@ public class NpcService(ApplicationDbContext context) : INpcService
             CreatedUtc = DateTime.UtcNow
         };
         npc.Id = npc.NpcProfile.Id;
+
+        // Check if ScenarioId is provided in Attributes dictionary
+        if (npcProfile.Attributes != null &&
+            npcProfile.Attributes.TryGetValue("ScenarioId", out var scenarioIdStr) &&
+            int.TryParse(scenarioIdStr, out var scenarioId))
+        {
+            npc.ScenarioId = scenarioId;
+        }
+
         _context.Npcs.Add(npc);
         await _context.SaveChangesAsync();
         return npc;
@@ -255,5 +265,16 @@ public class NpcService(ApplicationDbContext context) : INpcService
 
         await _context.SaveChangesAsync();
         _log.Trace("NPCs created for each username in machines");
+    }
+
+    public async Task<IEnumerable<NpcRecord>> GetByScenarioId(int scenarioId)
+    {
+        return await _context.Npcs
+            .Include(n => n.Connections)
+            .Include(n => n.Knowledge)
+            .Include(n => n.Beliefs)
+            .Include(n => n.Preferences)
+            .Where(x => x.ScenarioId == scenarioId)
+            .ToListAsync();
     }
 }

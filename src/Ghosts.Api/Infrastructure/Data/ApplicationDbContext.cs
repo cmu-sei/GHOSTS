@@ -112,8 +112,16 @@ namespace Ghosts.Api.Infrastructure.Data
                 .HasForeignKey(i => i.SocialConnectionId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            // NPC-Scenario relationship (optional, nullable foreign key)
+            modelBuilder.Entity<NpcRecord>()
+                .HasOne(n => n.Scenario)
+                .WithMany(s => s.Npcs)
+                .HasForeignKey(n => n.ScenarioId)
+                .OnDelete(DeleteBehavior.SetNull);
+
             // Indexes for NPC and Social Graph tables
             modelBuilder.Entity<NpcRecord>().HasIndex(n => n.CurrentStep);
+            modelBuilder.Entity<NpcRecord>().HasIndex(n => n.ScenarioId);
             modelBuilder.Entity<NpcSocialConnection>().HasIndex(c => new { c.NpcId, c.ConnectedNpcId });
             modelBuilder.Entity<NpcLearning>().HasIndex(l => new { l.NpcId, l.Topic, l.Step });
             modelBuilder.Entity<NpcBelief>().HasIndex(b => new { b.NpcId, b.Name, b.Step });

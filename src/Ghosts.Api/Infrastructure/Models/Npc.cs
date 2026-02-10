@@ -19,6 +19,11 @@ public class NpcRecord
     public Guid? MachineId { get; set; }
 
     /// <summary>
+    /// Optional association with a scenario for scenario-scoped operations
+    /// </summary>
+    public int? ScenarioId { get; set; }
+
+    /// <summary>
     /// Used for grouping NPCs together, e.g. 2020, 2021
     /// </summary>
     public string Campaign { get; set; }
@@ -48,6 +53,9 @@ public class NpcRecord
     public virtual ICollection<NpcLearning> Knowledge { get; set; }
     public virtual ICollection<NpcBelief> Beliefs { get; set; }
     public virtual ICollection<NpcPreference> Preferences { get; set; }
+
+    // Navigation property for scenario association
+    public virtual Scenario Scenario { get; set; }
 
     public static NpcRecord TransformToNpc(NpcProfile o)
     {
