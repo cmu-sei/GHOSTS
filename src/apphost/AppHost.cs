@@ -1,3 +1,5 @@
+using System.Runtime.InteropServices;
+
 var builder = DistributedApplication.CreateBuilder(args);
 
 var postgresUsername = builder.AddParameter("PostgresUsername", "ghosts", false);
@@ -19,16 +21,20 @@ var qdrant = builder.AddContainer("qdrant", "qdrant/qdrant")
     .WithContainerName("qdrant")
     .WithHttpEndpoint(port: 6333, targetPort: 6333, name: "http");
 
-var facebook = builder.AddContainer("facebook", "dustinupdyke/ghosts-pandora")
-    .WithContainerName("facebook")
+// Workaround: SkiaSharp.NativeAssets.Linux 3.x native lib references FreeType symbols
+// but doesn't declare libfreetype as a NEEDED dependency, so LD_PRELOAD is required on ARM64
+var freetypeLib = RuntimeInformation.OSArchitecture == Architecture.Arm64
+    ? "/lib/aarch64-linux-gnu/libfreetype.so.6"
+    : "";
+
+var facebook = builder.AddProject<Projects.Ghosts_Pandora>("facebook")
     .WaitFor(postgres)
-    .WithEnvironment(
-         "ConnectionStrings__Default",
-        $"Host=postgres;Port=5432;Database=pandora;Username={postgresUsername};Password={postgresPassword}"
-    )
-    .WithHttpEndpoint(port: 8800, targetPort: 5000, name: "http")
+    .WithReference(dbPandora, "PostgreSQL")
+    .WithEnvironment("DATABASE_PROVIDER", "PostgreSQL")
     .WithEnvironment("MODE_TYPE", "social")
-    .WithEnvironment("DEFAULT_THEME", "facebook");
+    .WithEnvironment("DEFAULT_THEME", "facebook")
+    .WithEnvironment("LD_PRELOAD", freetypeLib)
+    .WithHttpEndpoint(port: 8800, name: "http");
 
 var api = builder.AddProject<Projects.Ghosts_Api>("api")
     .WaitFor(postgres)

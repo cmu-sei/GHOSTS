@@ -17,6 +17,7 @@
     <ProjectReference Include="/workspaces/GHOSTS/src/Ghosts.Api/Ghosts.Api.csproj" />
     <ProjectReference Include="/workspaces/GHOSTS/src/Ghosts.Domain/Ghosts.Domain.csproj" />
     <ProjectReference Include="/workspaces/GHOSTS/src/Ghosts.Animator/Ghosts.Animator.csproj" />
+    <ProjectReference Include="/workspaces/GHOSTS/src/Ghosts.Pandora/src/Ghosts.Pandora.csproj" />
   </ItemGroup>
 
 </Project>
