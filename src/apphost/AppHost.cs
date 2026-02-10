@@ -67,6 +67,15 @@ api.WithEnvironment(ctx =>
     })
     .WithEnvironment("N8N_API_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlNzdmMTRjOS04YWEwLTQyMzItYTMwMi1mYmI4ZTFjYTIzZjEiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzcwNzI5NjgyfQ.EzAB89jNWBYgFMwc3CLQ8osZcmv99soIk-k2L5iRZ00");
 
+var grafana = builder.AddContainer("grafana", "grafana/grafana")
+    .WithHttpEndpoint(port: 3000, targetPort: 3000, name: "http")
+    .WithContainerName("grafana")
+    .WithLifetime(ContainerLifetime.Persistent)
+    .WithBindMount("../../configuration/grafana/datasources", "/etc/grafana/provisioning/datasources", isReadOnly: true)
+    .WithBindMount("../../configuration/grafana/dashboards", "/etc/grafana/provisioning/dashboards", isReadOnly: true)
+    .WithVolume("grafana-data", "/var/lib/grafana")
+    .WaitFor(postgres);
+
 var frontend = builder.AddJavaScriptApp("frontend", "../ghosts.ng", "start")
     .WithHttpEndpoint(port: 4200, env: "PORT", isProxied: false)
     .WithUrlForEndpoint("http", url =>
