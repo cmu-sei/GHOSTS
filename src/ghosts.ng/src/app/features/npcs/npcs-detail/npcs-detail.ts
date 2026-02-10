@@ -12,9 +12,10 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   SocialGraphSummary,
   ConnectionSummary,
-  Npc
+  Npc,
+  Scenario
 } from '../../../core/models';
-import { RelationshipService, NpcService, ConfigService } from '../../../core/services';
+import { RelationshipService, NpcService, ConfigService, ScenarioService } from '../../../core/services';
 
 @Component({
   selector: 'app-npcs-detail',
@@ -35,6 +36,7 @@ import { RelationshipService, NpcService, ConfigService } from '../../../core/se
 export class NpcsDetail implements OnInit {
   private readonly configService = inject(ConfigService);
   private readonly relationshipService = inject(RelationshipService);
+  private readonly scenarioService = inject(ScenarioService);
 
   private get apiUrl(): string {
     return this.configService.apiUrl;
@@ -47,11 +49,18 @@ export class NpcsDetail implements OnInit {
   protected readonly npc = signal<Npc | null>(null);
   protected readonly npcGraph = signal<SocialGraphSummary | null>(null);
   protected readonly connections = signal<ConnectionSummary[]>([]);
+  protected readonly scenarios = signal<Scenario[]>([]);
   protected readonly loading = signal(true);
   protected readonly loadingConnections = signal(false);
   protected readonly error = signal<string | null>(null);
 
   ngOnInit(): void {
+    // Load scenarios for display
+    this.scenarioService.getScenarios().subscribe({
+      next: (scenarios) => this.scenarios.set(scenarios),
+      error: (err) => console.error('Failed to load scenarios', err)
+    });
+
     this.route.paramMap
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(params => {
@@ -166,5 +175,11 @@ export class NpcsDetail implements OnInit {
     if (npcId) {
       this.router.navigate(['/npcs', npcId]);
     }
+  }
+
+  protected getScenarioName(scenarioId: number | undefined): string | null {
+    if (!scenarioId) return null;
+    const scenario = this.scenarios().find(s => s.id === scenarioId);
+    return scenario?.name || `Scenario #${scenarioId}`;
   }
 }

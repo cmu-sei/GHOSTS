@@ -31,10 +31,13 @@
         </div>
         <div class="profile-info">
           <h2>{{ getNpcName() }}</h2>
-          @if (npc()!.campaign || npc()!.enclave || npc()!.team) {
+          @if (npc()!.campaign || npc()!.enclave || npc()!.team || npc()!.scenarioId) {
           <div class="badges">
             @if (npc()!.campaign) {
             <span class="badge campaign">{{ npc()!.campaign }}</span>
+            }
+            @if (getScenarioName(npc()!.scenarioId)) {
+            <span class="badge scenario">{{ getScenarioName(npc()!.scenarioId) }}</span>
             }
             @if (npc()!.enclave) {
             <span class="badge enclave">{{ npc()!.enclave }}</span>

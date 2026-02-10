@@ -295,7 +295,9 @@ export class ScenariosPlannerComponent implements OnInit {
       };
     }
 
-    const platforms = this.scenario.technicalEnvironment.platforms[category];
+    const platforms = this.scenario.technicalEnvironment.platforms?.[category];
+    if (!platforms) return;
+
     const index = platforms.indexOf(value);
 
     if (index > -1) {

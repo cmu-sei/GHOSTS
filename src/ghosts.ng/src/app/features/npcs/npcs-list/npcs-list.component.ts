@@ -6,8 +6,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialog } from '@angular/material/dialog';
 import { DatePipe } from '@angular/common';
-import { Npc } from '../../../core/models';
-import { NpcService } from '../../../core/services';
+import { Npc, Scenario } from '../../../core/models';
+import { NpcService, ScenarioService } from '../../../core/services';
 import { ConfigService } from '../../../core/services/config.service';
 import { GenerateNpcsDialogComponent } from '../generate-npcs-dialog/generate-npcs-dialog.component';
 import { SearchBarComponent } from '../../../shared/components/search-bar/search-bar.component';
@@ -30,10 +30,6 @@ import { SearchBarComponent } from '../../../shared/components/search-bar/search
         <button mat-raised-button color="accent" (click)="openGenerateDialog()">
           <i class="fas fa-users"></i>
           Generate NPCs
-        </button>
-        <button mat-raised-button color="primary">
-          <i class="fas fa-plus"></i>
-          New NPC
         </button>
       </div>
     </div>
@@ -91,6 +87,11 @@ import { SearchBarComponent } from '../../../shared/components/search-bar/search
           <ng-container matColumnDef="team">
             <th mat-header-cell *matHeaderCellDef>Team</th>
             <td mat-cell *matCellDef="let npc">{{ npc.team || '—' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="scenario">
+            <th mat-header-cell *matHeaderCellDef>Scenario</th>
+            <td mat-cell *matCellDef="let npc">{{ getScenarioName(npc.scenarioId) }}</td>
           </ng-container>
 
           <ng-container matColumnDef="created">
@@ -198,14 +199,22 @@ import { SearchBarComponent } from '../../../shared/components/search-bar/search
 })
 export class NpcsListComponent implements OnInit {
   private readonly npcService = inject(NpcService);
+  private readonly scenarioService = inject(ScenarioService);
   private readonly configService = inject(ConfigService);
   private readonly dialog = inject(MatDialog);
 
   protected readonly npcs = signal<Npc[]>([]);
+  protected readonly scenarios = signal<Scenario[]>([]);
   protected readonly loading = signal(true);
   protected readonly error = signal<string | null>(null);
   protected readonly searchTerm = signal('');
-  protected readonly displayedColumns = ['photo', 'name', 'campaign', 'enclave', 'team', 'created', 'actions'];
+  protected readonly displayedColumns = ['photo', 'name', 'campaign', 'enclave', 'team', 'scenario', 'created', 'actions'];
+
+  protected readonly scenarioMap = computed(() => {
+    const map = new Map<number, string>();
+    this.scenarios().forEach(s => map.set(s.id, s.name));
+    return map;
+  });
 
   protected readonly filteredNpcs = computed(() => {
     const search = this.searchTerm().toLowerCase().trim();
@@ -225,7 +234,15 @@ export class NpcsListComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    this.loadScenarios();
     this.loadNpcs();
+  }
+
+  private loadScenarios(): void {
+    this.scenarioService.getScenarios().subscribe({
+      next: (scenarios) => this.scenarios.set(scenarios),
+      error: (err) => console.error('Failed to load scenarios', err)
+    });
   }
 
   protected onSearchChange(searchTerm: string): void {
@@ -274,5 +291,12 @@ export class NpcsListComponent implements OnInit {
 
   protected getNpcPhotoUrl(npcId: string | undefined): string {
     return npcId ? `${this.configService.apiUrl}/npcs/${npcId}/photo` : '';
+  }
+
+  protected getScenarioName(scenarioId: number | undefined): string {
+    if (!scenarioId) {
+      return '—';
+    }
+    return this.scenarioMap().get(scenarioId) || `Scenario #${scenarioId}`;
   }
 }

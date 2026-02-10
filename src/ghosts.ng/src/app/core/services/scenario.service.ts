@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Scenario, CreateScenario } from '../models';
+import { Scenario, CreateScenario } from '../models/scenario.model';
 import { ConfigService } from './config.service';
 
 @Injectable({
@@ -33,9 +33,5 @@ export class ScenarioService {
 
   deleteScenario(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
-  }
-
-  startScenario(id: number): Observable<Scenario> {
-    return this.http.post<Scenario>(`${this.apiUrl}/${id}/start`, {});
   }
 }

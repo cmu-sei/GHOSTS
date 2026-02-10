@@ -199,6 +199,7 @@ public class NpcService(ApplicationDbContext context) : INpcService
                     npc.Team = team.Name;
                     npc.Campaign = config.Campaign;
                     npc.Enclave = enclave.Name;
+                    npc.ScenarioId = config.ScenarioId;
 
                     _context.Npcs.Add(npc);
                     createdNpcs.Add(npc);

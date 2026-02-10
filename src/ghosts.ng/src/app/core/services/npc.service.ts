@@ -39,6 +39,7 @@ export class NpcService {
     // Transform the simple request into the API's expected GenerationConfiguration format
     const config = {
       campaign: request.campaign,
+      scenarioId: request.scenarioId,
       enclaves: [
         {
           name: request.enclave,

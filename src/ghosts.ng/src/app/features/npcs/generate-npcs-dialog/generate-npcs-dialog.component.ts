@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -6,13 +6,16 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { NpcService } from '../../../core/services';
+import { MatSelectModule } from '@angular/material/select';
+import { NpcService, ScenarioService } from '../../../core/services';
+import { Scenario } from '../../../core/models';
 
 export interface GenerateNpcsConfig {
   campaign: string;
   enclave: string;
   team: string;
   number: number;
+  scenarioId?: number;
 }
 
 @Component({
@@ -25,7 +28,8 @@ export interface GenerateNpcsConfig {
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatSelectModule
   ],
   template: `
     <h2 mat-dialog-title>Generate NPCs</h2>
@@ -41,7 +45,17 @@ export interface GenerateNpcsConfig {
 
       <mat-form-field class="full-width">
         <mat-label>Campaign</mat-label>
-        <input matInput [(ngModel)]="config.campaign" placeholder="e.g., Modeling 2025" required>
+        <input matInput [(ngModel)]="config.campaign" placeholder="e.g., Modeling 2026" required>
+      </mat-form-field>
+
+      <mat-form-field class="full-width">
+        <mat-label>Scenario (Optional)</mat-label>
+        <mat-select [(ngModel)]="config.scenarioId" placeholder="Select a scenario">
+          <mat-option [value]="undefined">None</mat-option>
+          @for (scenario of scenarios(); track scenario.id) {
+            <mat-option [value]="scenario.id">{{ scenario.name }}</mat-option>
+          }
+        </mat-select>
       </mat-form-field>
 
       <mat-form-field class="full-width">
@@ -121,19 +135,33 @@ export interface GenerateNpcsConfig {
     }
   `]
 })
-export class GenerateNpcsDialogComponent {
+export class GenerateNpcsDialogComponent implements OnInit {
   private readonly dialogRef = inject(MatDialogRef<GenerateNpcsDialogComponent>);
   private readonly npcService = inject(NpcService);
+  private readonly scenarioService = inject(ScenarioService);
 
   protected config: GenerateNpcsConfig = {
     campaign: '',
     enclave: '',
     team: '',
-    number: 10
+    number: 10,
+    scenarioId: undefined
   };
 
   protected generating = signal(false);
   protected error = signal<string | null>(null);
+  protected scenarios = signal<Scenario[]>([]);
+
+  ngOnInit(): void {
+    this.loadScenarios();
+  }
+
+  private loadScenarios(): void {
+    this.scenarioService.getScenarios().subscribe({
+      next: (scenarios) => this.scenarios.set(scenarios),
+      error: (err) => console.error('Failed to load scenarios', err)
+    });
+  }
 
   protected isValid(): boolean {
     return !!(
@@ -157,7 +185,8 @@ export class GenerateNpcsDialogComponent {
       campaign: this.config.campaign,
       enclave: this.config.enclave,
       team: this.config.team,
-      number: this.config.number
+      number: this.config.number,
+      scenarioId: this.config.scenarioId || undefined
     }).subscribe({
       next: (npcs) => {
         this.generating.set(false);

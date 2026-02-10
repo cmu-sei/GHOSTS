@@ -6,17 +6,9 @@ export interface Scenario {
   updatedAt: Date;
   scenarioParameters?: ScenarioParameters;
   technicalEnvironment?: TechnicalEnvironment;
-  simulationMechanics?: SimulationMechanics;
+  gameMechanics?: GameMechanics;
   timeline?: ScenarioTimeline;
-}
-
-export interface CreateScenario {
-  name: string;
-  description: string;
-  scenarioParameters?: ScenarioParameters;
-  technicalEnvironment?: TechnicalEnvironment;
-  simulationMechanics?: SimulationMechanics;
-  timeline?: ScenarioTimeline;
+  simulationMechanics?: GameMechanics; // alias for gameMechanics
 }
 
 export interface ScenarioParameters {
@@ -24,23 +16,23 @@ export interface ScenarioParameters {
   threatActors: ThreatActor[];
   injects: Inject[];
   userPools: UserPool[];
-  objectives?: string;
-  politicalContext?: string;
-  rulesOfEngagement?: string;
-  victoryConditions?: string;
+  objectives: string;
+  politicalContext: string;
+  rulesOfEngagement: string;
+  victoryConditions: string;
 }
 
 export interface Nation {
   name: string;
-  alignment: string; // friendly, adversary, neutral
+  alignment: string;
 }
 
 export interface ThreatActor {
   name: string;
-  type: string; // state, criminal, hacktivist, insider
+  type: string;
   capability: number;
   ttps: string[];
-  ttpsString?: string; // Helper property for editing
+  ttpsString?: string; // For editing purposes
 }
 
 export interface Inject {
@@ -54,18 +46,19 @@ export interface UserPool {
 }
 
 export interface TechnicalEnvironment {
-  networkTopology?: string;
-  services?: string;
-  assets?: string;
+  networkTopology: string;
+  services: string;
+  assets: string;
+  platforms?: {
+    websites?: string[];
+    socialMedia?: string[];
+    emailProviders?: string[];
+    cloudServices?: string[];
+    collaborationTools?: string[];
+    [key: string]: string[] | undefined;
+  };
   defenses: string[];
   vulnerabilities: Vulnerability[];
-  platforms?: {
-    websites: string[];
-    socialMedia: string[];
-    emailProviders: string[];
-    cloudServices: string[];
-    collaborationTools: string[];
-  };
 }
 
 export interface Vulnerability {
@@ -74,14 +67,14 @@ export interface Vulnerability {
   severity: string;
 }
 
-export interface SimulationMechanics {
-  timelineType: string; // real-time, compressed, turn-based
+export interface GameMechanics {
+  timelineType: string;
   durationHours: number;
-  adjudicationType: string; // manual, automated, hybrid
-  escalationLadder?: string;
-  branchingLogic?: string;
+  adjudicationType: string;
+  escalationLadder: string;
+  branchingLogic: string;
   telemetry: Telemetry;
-  performanceMetrics?: string;
+  performanceMetrics: string;
 }
 
 export interface Telemetry {
@@ -99,7 +92,22 @@ export interface ScenarioTimeline {
 export interface ScenarioTimelineEvent {
   time: string;
   number: number;
-  assigned: string; // White Cell, Red Team, Blue Team, Green Cell
+  assigned: string;
   description: string;
-  status: string; // Pending, Active, Complete
+  status: string;
+}
+
+export interface CreateScenario {
+  name: string;
+  description: string;
+  scenarioParameters: ScenarioParameters;
+  technicalEnvironment: TechnicalEnvironment;
+  gameMechanics?: GameMechanics;
+  simulationMechanics?: GameMechanics; // Alias for gameMechanics used in UI
+  timeline: ScenarioTimeline;
+}
+
+export interface ScenarioListItem {
+  id: number;
+  name: string;
 }

@@ -1,6 +1,7 @@
 export interface Npc {
   id?: string;
   npcProfile?: NpcProfile;
+  scenarioId?: number;
   campaign?: string;
   enclave?: string;
   team?: string;
@@ -243,4 +244,5 @@ export interface GenerateNpcRequest {
   enclave: string;
   team: string;
   number: number;
+  scenarioId?: number;
 }
