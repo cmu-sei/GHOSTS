@@ -94,7 +94,7 @@ public class HomeController(
             break;
         }
 
-        if (string.IsNullOrEmpty(username))
+        if (string.IsNullOrWhiteSpace(username))
         {
             username = Faker.Internet.UserName();
             UserWrite(username);
