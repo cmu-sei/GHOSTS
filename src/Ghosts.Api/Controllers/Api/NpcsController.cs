@@ -8,13 +8,13 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using Ghosts.Api.Infrastructure.Models;
-using Ghosts.Api.Infrastructure.Services;
 using Ghosts.Animator.Extensions;
 using Ghosts.Animator.Models;
 using Ghosts.Api.Hubs;
 using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Api.Infrastructure.Extensions;
+using Ghosts.Api.Infrastructure.Models;
+using Ghosts.Api.Infrastructure.Services;
 using Ghosts.Domain.Code;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -73,16 +73,6 @@ public class NpcsController(
         return Ok(await service.GetListAsync());
     }
 
-    [ProducesResponseType(typeof(ActionResult<NpcNameId>), (int)HttpStatusCode.OK)]
-    [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(ActionResult<NpcNameId>))]
-    [SwaggerOperation("NpcsSaveList")]
-    [HttpPost("list")]
-    public async Task<ActionResult<NpcNameId>> NpcsSaveList(Guid id, string username, string originUrl)
-    {
-        await service.SaveListAsync(id, username, originUrl);
-        return Ok(new NpcNameId() { Id = id, Name = username });
-    }
-
     /// <summary>
     /// Get NPC by specific Id
     /// </summary>
@@ -112,7 +102,7 @@ public class NpcsController(
     [HttpPost("{id:guid}/activity")]
     public async Task<ActionResult<NpcActivity>> NpcCreateActivity(Guid id, string activityType, string detail)
     {
-        return Ok(await service.CreateActivity(id,  activityType, detail));
+        return Ok(await service.CreateActivity(id, activityType, detail));
     }
 
 
