@@ -488,6 +488,13 @@ namespace Ghosts.Animator
             return file;
         }
 
+        public static string GetPhotoUrl(BiologicalSex sex)
+        {
+            var dir = $"config/photos/{sex.ToString().ToLower()}";
+            var file = Directory.GetFiles(dir, "*", SearchOption.AllDirectories).RandomElement();
+            return file;
+        }
+
         /*
          //Old GetWeight function
      public static int GetWeight()
