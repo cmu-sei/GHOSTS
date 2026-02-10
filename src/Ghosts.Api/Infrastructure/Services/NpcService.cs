@@ -23,6 +23,10 @@ public interface INpcService
     public Task<NpcRecord> GetById(Guid id);
     public Task<IEnumerable<NpcActivity>> GetActivity(Guid id);
     public Task<NpcActivity> CreateActivity(Guid id, string activityType, string detail);
+    public Task<IEnumerable<NpcPreference>> GetPreferences(Guid id);
+    public Task<NpcPreference> CreatePreference(Guid id, Guid toNpcId, Guid fromNpcId, string name, long step, decimal weight, decimal strength);
+    public Task<IEnumerable<NpcSocialConnection>> GetConnections(Guid id);
+    public Task<NpcSocialConnection> CreateConnection(Guid id, Guid connectedNpcId, string name, string distance, int relationshipStatus);
     public Task<IEnumerable<NpcRecord>> Create(GenerationConfiguration config, CancellationToken ct);
     public Task<NpcRecord> CreateOne();
     Task<NpcRecord> CreateOne(NpcProfile npc);
@@ -137,6 +141,62 @@ public class NpcService(ApplicationDbContext context) : INpcService
         await _context.SaveChangesAsync();
 
         return npcActivity;
+    }
+
+    public async Task<IEnumerable<NpcPreference>> GetPreferences(Guid id)
+    {
+        return await _context.NpcPreferences
+            .Where(x => x.NpcId == id)
+            .OrderByDescending(x => x.CreatedUtc)
+            .ToListAsync();
+    }
+
+    public async Task<NpcPreference> CreatePreference(Guid id, Guid toNpcId, Guid fromNpcId, string name, long step, decimal weight, decimal strength)
+    {
+        var npcPreference = new NpcPreference
+        {
+            NpcId = id,
+            ToNpcId = toNpcId,
+            FromNpcId = fromNpcId,
+            Name = name,
+            Step = step,
+            Weight = weight,
+            Strength = strength,
+            CreatedUtc = DateTime.UtcNow
+        };
+
+        _context.NpcPreferences.Add(npcPreference);
+        await _context.SaveChangesAsync();
+
+        return npcPreference;
+    }
+
+    public async Task<IEnumerable<NpcSocialConnection>> GetConnections(Guid id)
+    {
+        return await _context.NpcSocialConnections
+            .Where(x => x.NpcId == id)
+            .OrderByDescending(x => x.UpdatedUtc)
+            .ToListAsync();
+    }
+
+    public async Task<NpcSocialConnection> CreateConnection(Guid id, Guid connectedNpcId, string name, string distance, int relationshipStatus)
+    {
+        var npcConnection = new NpcSocialConnection
+        {
+            Id = Guid.NewGuid().ToString(),
+            NpcId = id,
+            ConnectedNpcId = connectedNpcId,
+            Name = name,
+            Distance = distance,
+            RelationshipStatus = relationshipStatus,
+            CreatedUtc = DateTime.UtcNow,
+            UpdatedUtc = DateTime.UtcNow
+        };
+
+        _context.NpcSocialConnections.Add(npcConnection);
+        await _context.SaveChangesAsync();
+
+        return npcConnection;
     }
 
     public async Task<NpcRecord> CreateOne()

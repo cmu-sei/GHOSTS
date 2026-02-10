@@ -23,6 +23,24 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace Ghosts.Api.Controllers.Api;
 
+public class CreatePreferenceRequest
+{
+    public Guid ToNpcId { get; set; }
+    public Guid FromNpcId { get; set; }
+    public string Name { get; set; }
+    public long Step { get; set; }
+    public decimal Weight { get; set; }
+    public decimal Strength { get; set; }
+}
+
+public class CreateConnectionRequest
+{
+    public Guid ConnectedNpcId { get; set; }
+    public string Name { get; set; }
+    public string Distance { get; set; }
+    public int RelationshipStatus { get; set; }
+}
+
 [ApiController]
 [Produces("application/json")]
 [Route("api/[controller]")]
@@ -87,6 +105,11 @@ public class NpcsController(
         return Ok(await service.GetById(id));
     }
 
+    /// <summary>
+    /// Get all activity records for a specific NPC
+    /// </summary>
+    /// <param name="id">The NPC ID</param>
+    /// <returns>IEnumerable&lt;NpcActivity&gt;</returns>
     [ProducesResponseType(typeof(ActionResult<IEnumerable<NpcActivity>>), (int)HttpStatusCode.OK)]
     [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(ActionResult<IEnumerable<NpcActivity>>))]
     [SwaggerOperation("NpcsGetActivityById")]
@@ -96,6 +119,13 @@ public class NpcsController(
         return Ok(await service.GetActivity(id));
     }
 
+    /// <summary>
+    /// Create a new activity record for a specific NPC
+    /// </summary>
+    /// <param name="id">The NPC ID</param>
+    /// <param name="activityType">The type of activity</param>
+    /// <param name="detail">Activity details</param>
+    /// <returns>NpcActivity</returns>
     [ProducesResponseType(typeof(ActionResult<NpcActivity>), (int)HttpStatusCode.OK)]
     [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(ActionResult<NpcActivity>))]
     [SwaggerOperation("NpcsCreateActivityById")]
@@ -105,6 +135,48 @@ public class NpcsController(
         return Ok(await service.CreateActivity(id, activityType, detail));
     }
 
+    /// <summary>
+    /// Get all preferences for a specific NPC
+    /// </summary>
+    /// <param name="id">The NPC ID</param>
+    /// <returns>IEnumerable&lt;NpcPreference&gt;</returns>
+    [ProducesResponseType(typeof(ActionResult<IEnumerable<NpcPreference>>), (int)HttpStatusCode.OK)]
+    [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(ActionResult<IEnumerable<NpcPreference>>))]
+    [SwaggerOperation("NpcsGetPreferencesById")]
+    [HttpGet("{id:guid}/preferences")]
+    public async Task<ActionResult<IEnumerable<NpcPreference>>> NpcGetPreferences(Guid id)
+    {
+        return Ok(await service.GetPreferences(id));
+    }
+
+    [ProducesResponseType(typeof(ActionResult<NpcPreference>), (int)HttpStatusCode.OK)]
+    [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(ActionResult<NpcPreference>))]
+    [SwaggerOperation("NpcsCreatePreferenceById")]
+    [HttpPost("{id:guid}/preferences")]
+    public async Task<ActionResult<NpcPreference>> NpcCreatePreference(Guid id, [FromBody] CreatePreferenceRequest request)
+    {
+        return Ok(await service.CreatePreference(id, request.ToNpcId, request.FromNpcId,
+            request.Name, request.Step, request.Weight, request.Strength));
+    }
+
+    [ProducesResponseType(typeof(ActionResult<IEnumerable<NpcSocialConnection>>), (int)HttpStatusCode.OK)]
+    [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(ActionResult<IEnumerable<NpcSocialConnection>>))]
+    [SwaggerOperation("NpcsGetConnectionsById")]
+    [HttpGet("{id:guid}/connections")]
+    public async Task<ActionResult<IEnumerable<NpcSocialConnection>>> NpcGetConnections(Guid id)
+    {
+        return Ok(await service.GetConnections(id));
+    }
+
+    [ProducesResponseType(typeof(ActionResult<NpcSocialConnection>), (int)HttpStatusCode.OK)]
+    [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(ActionResult<NpcSocialConnection>))]
+    [SwaggerOperation("NpcsCreateConnectionById")]
+    [HttpPost("{id:guid}/connections")]
+    public async Task<ActionResult<NpcSocialConnection>> NpcCreateConnection(Guid id, [FromBody] CreateConnectionRequest request)
+    {
+        return Ok(await service.CreateConnection(id, request.ConnectedNpcId,
+            request.Name, request.Distance, request.RelationshipStatus));
+    }
 
     /// <summary>
     /// Delete NPC by specific Id
