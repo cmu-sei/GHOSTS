@@ -56,6 +56,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Remove="wwwroot\lib\fontawesome\svgs\**\*.svg" />
+  </ItemGroup>
+
+  <ItemGroup>
     <_ContentIncludedByDefault Remove="Areas\Animator\config\address_international_cities.json" />
     <_ContentIncludedByDefault Remove="Areas\Animator\config\bmi.json" />
     <_ContentIncludedByDefault Remove="Areas\Animator\config\chat.json" />
