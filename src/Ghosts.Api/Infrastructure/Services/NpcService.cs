@@ -27,6 +27,10 @@ public interface INpcService
     public Task<NpcPreference> CreatePreference(Guid id, Guid toNpcId, Guid fromNpcId, string name, long step, decimal weight, decimal strength);
     public Task<IEnumerable<NpcSocialConnection>> GetConnections(Guid id);
     public Task<NpcSocialConnection> CreateConnection(Guid id, Guid connectedNpcId, string name, string distance, int relationshipStatus);
+    public Task<IEnumerable<NpcLearning>> GetKnowledge(Guid id);
+    public Task<NpcLearning> CreateKnowledge(Guid id, Guid toNpcId, Guid fromNpcId, string topic, long step, int value);
+    public Task<IEnumerable<NpcBelief>> GetBeliefs(Guid id);
+    public Task<NpcBelief> CreateBelief(Guid id, Guid toNpcId, Guid fromNpcId, string name, long step, decimal likelihood, decimal posterior);
     public Task<IEnumerable<NpcRecord>> Create(GenerationConfiguration config, CancellationToken ct);
     public Task<NpcRecord> CreateOne();
     Task<NpcRecord> CreateOne(NpcProfile npc);
@@ -151,6 +155,17 @@ public class NpcService(ApplicationDbContext context) : INpcService
             .ToListAsync();
     }
 
+    /// <summary>
+    /// Creates a new preference record for a specific NPC
+    /// </summary>
+    /// <param name="id">The NPC ID</param>
+    /// <param name="toNpcId">Target NPC ID</param>
+    /// <param name="fromNpcId">Source NPC ID</param>
+    /// <param name="name">Preference name/topic</param>
+    /// <param name="step">Simulation step</param>
+    /// <param name="weight">Base weight/importance (0.0-1.0)</param>
+    /// <param name="strength">Current strength value</param>
+    /// <returns>The created NpcPreference</returns>
     public async Task<NpcPreference> CreatePreference(Guid id, Guid toNpcId, Guid fromNpcId, string name, long step, decimal weight, decimal strength)
     {
         var npcPreference = new NpcPreference
@@ -171,6 +186,11 @@ public class NpcService(ApplicationDbContext context) : INpcService
         return npcPreference;
     }
 
+    /// <summary>
+    /// Gets all social connections for a specific NPC, ordered by most recently updated
+    /// </summary>
+    /// <param name="id">The NPC ID</param>
+    /// <returns>Collection of NpcSocialConnection records</returns>
     public async Task<IEnumerable<NpcSocialConnection>> GetConnections(Guid id)
     {
         return await _context.NpcSocialConnections
@@ -179,6 +199,15 @@ public class NpcService(ApplicationDbContext context) : INpcService
             .ToListAsync();
     }
 
+    /// <summary>
+    /// Creates a new social connection between two NPCs
+    /// </summary>
+    /// <param name="id">The NPC ID (source of the connection)</param>
+    /// <param name="connectedNpcId">The connected NPC ID (target)</param>
+    /// <param name="name">Connection/relationship name</param>
+    /// <param name="distance">Physical or social distance</param>
+    /// <param name="relationshipStatus">Status code for the relationship</param>
+    /// <returns>The created NpcSocialConnection</returns>
     public async Task<NpcSocialConnection> CreateConnection(Guid id, Guid connectedNpcId, string name, string distance, int relationshipStatus)
     {
         var npcConnection = new NpcSocialConnection
@@ -197,6 +226,71 @@ public class NpcService(ApplicationDbContext context) : INpcService
         await _context.SaveChangesAsync();
 
         return npcConnection;
+    }
+
+    public async Task<IEnumerable<NpcLearning>> GetKnowledge(Guid id)
+    {
+        return await _context.NpcLearning
+            .Where(x => x.NpcId == id)
+            .OrderByDescending(x => x.CreatedUtc)
+            .ToListAsync();
+    }
+
+    public async Task<NpcLearning> CreateKnowledge(Guid id, Guid toNpcId, Guid fromNpcId, string topic, long step, int value)
+    {
+        var npcKnowledge = new NpcLearning(id, toNpcId, fromNpcId, topic, step, value)
+        {
+            CreatedUtc = DateTime.UtcNow
+        };
+
+        _context.NpcLearning.Add(npcKnowledge);
+        await _context.SaveChangesAsync();
+
+        return npcKnowledge;
+    }
+
+    /// <summary>
+    /// Gets all beliefs for a specific NPC, ordered by most recent
+    /// </summary>
+    /// <param name="id">The NPC ID</param>
+    /// <returns>Collection of NpcBelief records</returns>
+    public async Task<IEnumerable<NpcBelief>> GetBeliefs(Guid id)
+    {
+        return await _context.NpcBeliefs
+            .Where(x => x.NpcId == id)
+            .OrderByDescending(x => x.CreatedUtc)
+            .ToListAsync();
+    }
+
+    /// <summary>
+    /// Creates a new belief record for a specific NPC
+    /// </summary>
+    /// <param name="id">The NPC ID</param>
+    /// <param name="toNpcId">Target NPC ID</param>
+    /// <param name="fromNpcId">Source NPC ID</param>
+    /// <param name="name">Belief statement</param>
+    /// <param name="step">Simulation step</param>
+    /// <param name="likelihood">Base likelihood value</param>
+    /// <param name="posterior">Bayesian posterior probability</param>
+    /// <returns>The created NpcBelief</returns>
+    public async Task<NpcBelief> CreateBelief(Guid id, Guid toNpcId, Guid fromNpcId, string name, long step, decimal likelihood, decimal posterior)
+    {
+        var npcBelief = new NpcBelief
+        {
+            NpcId = id,
+            ToNpcId = toNpcId,
+            FromNpcId = fromNpcId,
+            Name = name,
+            Step = step,
+            Likelihood = likelihood,
+            Posterior = posterior,
+            CreatedUtc = DateTime.UtcNow
+        };
+
+        _context.NpcBeliefs.Add(npcBelief);
+        await _context.SaveChangesAsync();
+
+        return npcBelief;
     }
 
     public async Task<NpcRecord> CreateOne()

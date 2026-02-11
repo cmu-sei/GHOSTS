@@ -41,6 +41,25 @@ public class CreateConnectionRequest
     public int RelationshipStatus { get; set; }
 }
 
+public class CreateKnowledgeRequest
+{
+    public Guid ToNpcId { get; set; }
+    public Guid FromNpcId { get; set; }
+    public string Topic { get; set; }
+    public long Step { get; set; }
+    public int Value { get; set; }
+}
+
+public class CreateBeliefRequest
+{
+    public Guid ToNpcId { get; set; }
+    public Guid FromNpcId { get; set; }
+    public string Name { get; set; }
+    public long Step { get; set; }
+    public decimal Likelihood { get; set; }
+    public decimal Posterior { get; set; }
+}
+
 [ApiController]
 [Produces("application/json")]
 [Route("api/[controller]")]
@@ -176,6 +195,66 @@ public class NpcsController(
     {
         return Ok(await service.CreateConnection(id, request.ConnectedNpcId,
             request.Name, request.Distance, request.RelationshipStatus));
+    }
+
+    /// <summary>
+    /// Get all knowledge/learning records for a specific NPC
+    /// </summary>
+    /// <param name="id">The NPC ID</param>
+    /// <returns>IEnumerable&lt;NpcLearning&gt;</returns>
+    [ProducesResponseType(typeof(ActionResult<IEnumerable<NpcLearning>>), (int)HttpStatusCode.OK)]
+    [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(ActionResult<IEnumerable<NpcLearning>>))]
+    [SwaggerOperation("NpcsGetKnowledgeById")]
+    [HttpGet("{id:guid}/knowledge")]
+    public async Task<ActionResult<IEnumerable<NpcLearning>>> NpcGetKnowledge(Guid id)
+    {
+        return Ok(await service.GetKnowledge(id));
+    }
+
+    /// <summary>
+    /// Create a new knowledge/learning record for a specific NPC
+    /// </summary>
+    /// <param name="id">The NPC ID</param>
+    /// <param name="request">Knowledge creation request</param>
+    /// <returns>NpcLearning</returns>
+    [ProducesResponseType(typeof(ActionResult<NpcLearning>), (int)HttpStatusCode.OK)]
+    [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(ActionResult<NpcLearning>))]
+    [SwaggerOperation("NpcsCreateKnowledgeById")]
+    [HttpPost("{id:guid}/knowledge")]
+    public async Task<ActionResult<NpcLearning>> NpcCreateKnowledge(Guid id, [FromBody] CreateKnowledgeRequest request)
+    {
+        return Ok(await service.CreateKnowledge(id, request.ToNpcId, request.FromNpcId,
+            request.Topic, request.Step, request.Value));
+    }
+
+    /// <summary>
+    /// Get all beliefs for a specific NPC
+    /// </summary>
+    /// <param name="id">The NPC ID</param>
+    /// <returns>IEnumerable&lt;NpcBelief&gt;</returns>
+    [ProducesResponseType(typeof(ActionResult<IEnumerable<NpcBelief>>), (int)HttpStatusCode.OK)]
+    [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(ActionResult<IEnumerable<NpcBelief>>))]
+    [SwaggerOperation("NpcsGetBeliefsById")]
+    [HttpGet("{id:guid}/beliefs")]
+    public async Task<ActionResult<IEnumerable<NpcBelief>>> NpcGetBeliefs(Guid id)
+    {
+        return Ok(await service.GetBeliefs(id));
+    }
+
+    /// <summary>
+    /// Create a new belief record for a specific NPC
+    /// </summary>
+    /// <param name="id">The NPC ID</param>
+    /// <param name="request">Belief creation request</param>
+    /// <returns>NpcBelief</returns>
+    [ProducesResponseType(typeof(ActionResult<NpcBelief>), (int)HttpStatusCode.OK)]
+    [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(ActionResult<NpcBelief>))]
+    [SwaggerOperation("NpcsCreateBeliefById")]
+    [HttpPost("{id:guid}/beliefs")]
+    public async Task<ActionResult<NpcBelief>> NpcCreateBelief(Guid id, [FromBody] CreateBeliefRequest request)
+    {
+        return Ok(await service.CreateBelief(id, request.ToNpcId, request.FromNpcId,
+            request.Name, request.Step, request.Likelihood, request.Posterior));
     }
 
     /// <summary>
