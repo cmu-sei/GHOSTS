@@ -13,6 +13,8 @@
 
 </div>
 
+[GHOSTS 9 is in active development — see announcement here](https://github.com/cmu-sei/GHOSTS/discussions/582).
+
 ---
 
 ## Overview
