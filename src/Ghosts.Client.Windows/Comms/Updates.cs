@@ -340,7 +340,7 @@ public static class Updates
 
             using (var client = HttpClientBuilder.Build(machine))
             {
-                var content = new StringContent(JsonConvert.SerializeObject(payload));
+                var content = new StringContent(payload);
                 content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
 
                 var response = await client.PostAsync(postUrl, content);
@@ -416,7 +416,7 @@ public static class Updates
 
             using (var client = HttpClientBuilder.Build(machine))
             {
-                var content = new StringContent(JsonConvert.SerializeObject(payload));
+                var content = new StringContent(payload);
                 content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
 
                 var response = await client.PostAsync(postUrl, content);
