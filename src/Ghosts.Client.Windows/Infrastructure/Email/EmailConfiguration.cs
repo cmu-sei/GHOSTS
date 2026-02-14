@@ -88,14 +88,15 @@ public class EmailConfiguration
 
         if (this.Subject.Equals("random", StringComparison.InvariantCultureIgnoreCase))
         {
+            this.Id = emailContent.Id;
             this.Subject = emailContent.Subject;
         }
 
         this.Body = emailConfigArray[5].ToString();
         if (this.Body.Equals("random", StringComparison.InvariantCultureIgnoreCase))
         {
+            this.Id = emailContent.Id;
             this.Body = emailContent.Body;
-
             this.Body += GetFooter();
         }
 
@@ -154,7 +155,7 @@ public class EmailConfiguration
 
         var f = File.ReadAllText(ApplicationDetails.ConfigurationFiles.EmailsFooter);
         f = f.Replace("{{from}}", this.From);
-        f = f.Replace("{{now}}", DateTime.Now.ToLongDateString());
+        f = f.Replace("{{now}}", DateTime.Now.ToString()); // Use current culture
         f = f.Replace("{{id}}", this.Id.ToString());
         f = f.Replace("{{email}}", email);
         f = f.Replace("{{samaccountname}}", samAccountName);
