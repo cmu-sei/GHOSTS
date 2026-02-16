@@ -80,7 +80,7 @@ var frontend = builder.AddJavaScriptApp("frontend", "../Ghosts.Frontend", "start
     .WithHttpEndpoint(port: 4200, env: "PORT", isProxied: false)
     .WithUrlForEndpoint("http", url =>
     {
-        url.DisplayText = "Ghosts UI";
+        url.DisplayText = "Ghosts Frontend";
         url.Url = "http://localhost:4200/";
     });
 //.WithNpmPackageInstallation();
