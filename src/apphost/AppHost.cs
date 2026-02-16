@@ -83,6 +83,5 @@ var frontend = builder.AddJavaScriptApp("frontend", "../Ghosts.Frontend", "start
         url.DisplayText = "Ghosts Frontend";
         url.Url = "http://localhost:4200/";
     });
-//.WithNpmPackageInstallation();
 
 builder.Build().Run();
