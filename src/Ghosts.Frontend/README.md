@@ -1,4 +1,4 @@
-# GHOSTS Angular UI (ghosts.ng)
+# GHOSTS Frontend (Ghosts.Frontend)
 
 A modern Angular 20 application for managing the GHOSTS framework.
 

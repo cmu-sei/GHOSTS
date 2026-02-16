@@ -5,9 +5,9 @@ networks:
   ghosts-network:
     driver: bridge
 services:
-  ghosts-ng:
-    image: dustinupdyke/ghosts-ng
-    container_name: ghosts-ng
+  ghosts-frontend:
+    image: dustinupdyke/ghosts-frontend
+    container_name: ghosts-frontend
     ports:
       - "4200:80"
     networks:

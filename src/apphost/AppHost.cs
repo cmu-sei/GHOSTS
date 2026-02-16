@@ -76,7 +76,7 @@ var grafana = builder.AddContainer("grafana", "grafana/grafana")
     .WithVolume("grafana-data", "/var/lib/grafana")
     .WaitFor(postgres);
 
-var frontend = builder.AddJavaScriptApp("frontend", "../ghosts.ng", "start")
+var frontend = builder.AddJavaScriptApp("frontend", "../Ghosts.Frontend", "start")
     .WithHttpEndpoint(port: 4200, env: "PORT", isProxied: false)
     .WithUrlForEndpoint("http", url =>
     {

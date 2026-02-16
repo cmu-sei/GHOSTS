@@ -58,7 +58,7 @@ GHOSTS consists of several integrated components that work together to create a 
 |-----------|-------------|---------------|
 | **GHOSTS Client** | Cross-platform agent (Windows/Linux) that executes simulated user activities | [Client Docs](https://cmu-sei.github.io/GHOSTS/core/client/) |
 | **GHOSTS API** | Central server (.NET 10) managing clients, timelines, and activity orchestration via REST and WebSocket | [API Docs](https://cmu-sei.github.io/GHOSTS/core/api/) |
-| **GHOSTS NG** | **New!** Modern Angular 20 web interface for managing machines, groups, timelines, NPCs, and scenarios | [NG Docs](src/ghosts.ng/) |
+| **GHOSTS Frontend** | **New!** Modern Angular 20 web interface for managing machines, groups, timelines, NPCs, and scenarios | [NG Docs](src/Ghosts.Frontend/) |
 | **GHOSTS UI** | (Deprecated) Next.js-based web interface for managing machines, groups, and deploying timelines | [UI Docs](https://cmu-sei.github.io/GHOSTS/core/ui/) |
 | **GHOSTS Lite** | Lightweight client version for resource-constrained environments | [Lite Docs](https://cmu-sei.github.io/GHOSTS/core/lite/) |
 
@@ -86,7 +86,7 @@ GHOSTS is designed for various cybersecurity and training scenarios:
 
 ### Version 9.0 (Currently in Development)
 
-- **🆕 GHOSTS NG** - Modern [Angular 19 web interface](src/ghosts.ng/) with enhanced UX and comprehensive search functionality
+- **🆕 GHOSTS Frontend** - Modern [Angular 19 web interface](src/Ghosts.Frontend/) with enhanced UX and comprehensive search functionality
 - **⚡ .NET 10 Upgrade** - Core API and services upgraded to .NET 10 for improved performance and latest features
 - **🎯 Enhanced Scenarios** - New scenario planning and tracking capabilities with timeline management
 - **🔍 Advanced Search** - Client-side search across machines, groups, timelines, NPCs, and scenarios

@@ -63,7 +63,7 @@ npm install -g @angular/cli@latest
 
 echo ""
 echo "Installing Angular dependencies..."
-cd src/ghosts.ng
+cd src/Ghosts.Frontend
 npm install
 cd ../..
 

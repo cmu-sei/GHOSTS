@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "ghosts.ng": {
+    "Ghosts.Frontend": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -66,10 +66,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "ghosts.ng:build:production"
+              "buildTarget": "Ghosts.Frontend:build:production"
             },
             "development": {
-              "buildTarget": "ghosts.ng:build:development"
+              "buildTarget": "Ghosts.Frontend:build:development"
             }
           },
           "defaultConfiguration": "development"

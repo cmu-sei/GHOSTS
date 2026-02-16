@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 GHOSTS is an NPC (Non-Player Character) orchestration framework for modeling and simulating realistic user behavior on and off a computer. It is a monorepo, and consists of:
 
 - A .NET 10 API server (command & control)
-- A modern Angular 20 web interface (ghosts.ng)
+- A modern Angular 20 web interface (Ghosts.Frontend)
 - Cross-platform clients (Windows, Linux, and Universal) that execute "timelines" (activity definitions)
 - Supporting services for NPC persona generation (Animator)
 - Content generation (Pandora) for websites and social media platforms
@@ -16,7 +16,7 @@ GHOSTS is an NPC (Non-Player Character) orchestration framework for modeling and
 - .NET 10 (API/Server), .NET 4.6.2 (Windows Client), .NET 8 (Lite/Universal Clients)
 - PostgreSQL database
 - SignalR (WebSocket) for real-time client-server communication
-- Angular 20 with Material Design (ghosts.ng UI)
+- Angular 20 with Material Design (Ghosts.Frontend UI)
 - Entity Framework Core + Npgsql
 
 ## Project Structure
@@ -30,7 +30,7 @@ The main components live in `src/`:
 - **Ghosts.Client.Lite/** - Lightweight .NET 8 client for resource-constrained environments
 - **Ghosts.Animator/** - NPC persona generation engine
 - **Ghosts.Pandora/** - Content generation server (fake web content, blog posts)
-- **ghosts.ng/** - Angular 20 web UI for managing machines, timelines, NPCs, scenarios
+- **Ghosts.Frontend/** - Angular 20 web UI for managing machines, timelines, NPCs, scenarios
 - **apphost/** - Aspire application host infrastructure
 - **tools/** - Utility tools (email generator, load tester, machine adder)
 
@@ -58,10 +58,10 @@ dotnet ef database update
 dotnet run
 ```
 
-### Angular UI (ghosts.ng)
+### Angular UI (Ghosts.Frontend)
 
 ```bash
-# Install dependencies (from src/ghosts.ng/)
+# Install dependencies (from src/Ghosts.Frontend/)
 npm install
 
 # Start development server
@@ -368,7 +368,7 @@ API Server
 - `BackgroundQueue` - Async task queue
 - Dependency injection in `Program.cs`
 
-### Angular UI (ghosts.ng)
+### Angular UI (Ghosts.Frontend)
 
 **Structure:**
 - `src/app/` - Main Angular application
@@ -410,7 +410,7 @@ API Server
 dotnet test src/Ghosts.Api.sln
 
 # Run Angular tests
-cd src/ghosts.ng
+cd src/Ghosts.Frontend
 npm test
 ```
 
@@ -427,7 +427,7 @@ npm test
    - Check logs in `logs/` directory
 
 3. **UI Development:**
-   - `cd src/ghosts.ng`
+   - `cd src/Ghosts.Frontend`
    - `npm start` for development server
    - Hot reload enabled for rapid iteration
 
