@@ -166,13 +166,48 @@
           "color": {
             "mode": "palette-classic"
           },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Avg Posterior",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 15,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
           "mappings": [],
+          "max": 1,
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
                 "color": "green",
-                "value": 0
+                "value": null
               },
               {
                 "color": "red",
@@ -191,7 +226,6 @@
       },
       "id": 10,
       "options": {
-        "displayMode": "gradient",
         "legend": {
           "calcs": [
             "mean",
@@ -203,19 +237,10 @@
           "placement": "right",
           "showLegend": true
         },
-        "maxVizHeight": 300,
-        "minVizHeight": 16,
-        "minVizWidth": 8,
-        "namePlacement": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [],
-          "fields": "",
-          "values": false
-        },
-        "showUnfilled": true,
-        "sizing": "auto",
-        "valueMode": "color"
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
       },
       "pluginVersion": "12.3.2",
       "targets": [
@@ -225,14 +250,249 @@
             "type": "postgres",
             "uid": "ghosts"
           },
+          "editorMode": "code",
           "format": "time_series",
           "hide": false,
-          "rawSql": "SELECT\n  step as time,\n  name as metric,\n  AVG(posterior)::numeric(10,4) as value\nFROM\n  npc_beliefs\nGROUP BY\n  step, name\nORDER BY\n  step",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  MIN(b.createdutc) as time,\n  b.name as metric,\n  AVG(b.posterior)::numeric(10,4) as value\nFROM npc_beliefs b\nWHERE $__timeFilter(b.createdutc)\nGROUP BY b.step, b.name\nORDER BY time",
           "refId": "A"
         }
       ],
-      "title": "BELIEF POSTERIOR EVOLUTION (by Step)",
-      "type": "bargauge"
+      "title": "BELIEF POSTERIOR EVOLUTION (Population Avg by Belief)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "ghosts"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Posterior",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "pointSize": 4,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "max": 1,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 12
+      },
+      "id": 11,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "12.3.2",
+      "targets": [
+        {
+          "alias": "",
+          "datasource": {
+            "type": "postgres",
+            "uid": "ghosts"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "SELECT\n  b.createdutc as time,\n  n.npcprofile->>'name' || ' — ' || b.name as metric,\n  b.posterior::numeric(10,4) as value\nFROM npc_beliefs b\nJOIN npcs n ON b.npcid = n.id\nWHERE $__timeFilter(b.createdutc)\nORDER BY time",
+          "refId": "A"
+        }
+      ],
+      "title": "INDIVIDUAL NPC BELIEF JOURNEYS",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "ghosts"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Count",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 30,
+            "gradientMode": "scheme",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Believers"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Non-Believers"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 22
+      },
+      "id": 13,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "12.3.2",
+      "targets": [
+        {
+          "alias": "",
+          "datasource": {
+            "type": "postgres",
+            "uid": "ghosts"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "SELECT\n  MIN(b.createdutc) as time,\n  SUM(CASE WHEN b.posterior > 0.5 THEN 1 ELSE 0 END) as \"Believers\",\n  SUM(CASE WHEN b.posterior <= 0.5 THEN 1 ELSE 0 END) as \"Non-Believers\"\nFROM npc_beliefs b\nWHERE $__timeFilter(b.createdutc)\nGROUP BY b.step\nORDER BY time",
+          "refId": "A"
+        }
+      ],
+      "title": "BELIEVERS vs NON-BELIEVERS OVER TIME",
+      "type": "timeseries"
     },
     {
       "datasource": {
@@ -286,7 +546,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 12
+        "y": 30
       },
       "id": 12,
       "options": {
@@ -552,7 +812,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 12
+        "y": 30
       },
       "id": 20,
       "options": {
@@ -766,7 +1026,7 @@
         "h": 9,
         "w": 24,
         "x": 0,
-        "y": 20
+        "y": 38
       },
       "id": 22,
       "options": {
