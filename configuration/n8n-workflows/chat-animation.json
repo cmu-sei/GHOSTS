@@ -1,0 +1,448 @@
+{
+  "name": "GHOSTS Chat Animation",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "*/8 * * * *"
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=SELECT * FROM npcs ORDER BY RANDOM() LIMIT {{ Math.floor(Math.random() * 8) + 3 }}",
+        "options": {}
+      },
+      "id": "get-npcs",
+      "name": "Get Random NPCs",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [450, 300],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "GHOSTS PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "split-npcs",
+      "name": "Split NPCs",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const npc = $input.item.json;\n\n// Decide between new message or reply\nconst isReply = Math.random() < 0.3; // 30% chance of reply\n\nreturn {\n  json: {\n    npcId: npc.id,\n    npcName: `${npc.npc_profile?.Name?.FirstName} ${npc.npc_profile?.Name?.LastName}`,\n    npcEmail: npc.npc_profile?.Email || npc.npc_profile?.Name?.FirstName,\n    isReply: isReply,\n    npcProfile: npc.npc_profile\n  }\n};"
+      },
+      "id": "decide-action",
+      "name": "Decide Action Type",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [850, 300],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "is-reply",
+              "leftValue": "={{ $json.isReply }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-reply",
+      "name": "Is Reply?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=http://host.docker.internal:8065/api/v4/channels",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer YOUR_MATTERMOST_TOKEN"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "get-channels",
+      "name": "Get Mattermost Channels",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1250, 200],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const channels = $input.all();\nif (channels.length > 0 && channels[0].json && Array.isArray(channels[0].json)) {\n  // Pick random channel\n  const channelList = channels[0].json;\n  const randomChannel = channelList[Math.floor(Math.random() * channelList.length)];\n  return {\n    json: {\n      channelId: randomChannel.id,\n      channelName: randomChannel.display_name\n    }\n  };\n}\n\n// Fallback to default channel\nreturn {\n  json: {\n    channelId: 'default-channel-id',\n    channelName: 'general'\n  }\n};"
+      },
+      "id": "select-channel",
+      "name": "Select Random Channel",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1450, 200],
+      "alwaysOutputData": true,
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://host.docker.internal:11434/api/generate",
+        "authentication": "none",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "llama3.2"
+            },
+            {
+              "name": "prompt",
+              "value": "=Generate a brief, professional chat message (1-2 sentences) from {{ $('Decide Action Type').item.json.npcName }}, who works as {{ $('Decide Action Type').item.json.npcProfile.Career?.Title || 'professional' }}. The message should be relevant to a work chat channel. Only return the message text."
+            },
+            {
+              "name": "stream",
+              "value": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "generate-message",
+      "name": "Generate Chat Message",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1650, 200],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const messages = [\n  'Quick update on the project status',\n  'Does anyone have experience with this issue?',\n  'Great work on the recent deployment!',\n  'Reminder: team meeting at 2pm',\n  'Just pushed the latest changes',\n  'Thanks for the help with that bug',\n  'Looking forward to the demo tomorrow',\n  'Can someone review my PR when you get a chance?'\n];\n\nreturn {\n  json: {\n    response: messages[Math.floor(Math.random() * messages.length)]\n  }\n};"
+      },
+      "id": "generate-fallback",
+      "name": "Generate Fallback Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1650, 400],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const npc = $('Decide Action Type').item.json;\nconst channel = $('Select Random Channel').item.json;\nlet messageText;\n\n// Try to get from Ollama first\nconst ollamaResult = $('Generate Chat Message').all();\nif (ollamaResult.length > 0 && ollamaResult[0].json.response) {\n  messageText = ollamaResult[0].json.response.trim();\n} else {\n  // Use fallback\n  const fallbackResult = $('Generate Fallback Message').item.json;\n  messageText = fallbackResult.response;\n}\n\nreturn {\n  json: {\n    npcId: npc.npcId,\n    npcName: npc.npcName,\n    npcEmail: npc.npcEmail,\n    channelId: channel.channelId,\n    channelName: channel.channelName,\n    message: messageText,\n    timestamp: new Date().toISOString()\n  }\n};"
+      },
+      "id": "prepare-post",
+      "name": "Prepare Post Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1850, 300],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://host.docker.internal:8065/api/v4/posts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "channel_id",
+              "value": "={{ $json.channelId }}"
+            },
+            {
+              "name": "message",
+              "value": "={{ $json.message }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer YOUR_MATTERMOST_TOKEN"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "post-to-mattermost",
+      "name": "Post to Mattermost",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2050, 200],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=INSERT INTO npc_activities (npc_id, activity_type, detail, created_utc)\nVALUES (\n  '{{ $json.npcId }}',\n  'ChatMessage',\n  'Posted to {{ $json.channelName }}: {{ $json.message.replace(\"'\", \"''\") }}',\n  NOW()\n)",
+        "options": {}
+      },
+      "id": "save-activity",
+      "name": "Save Chat Activity",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [2050, 400],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "GHOSTS PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://host.docker.internal:5000/activityHub",
+        "authentication": "none",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "method",
+              "value": "show"
+            },
+            {
+              "name": "step",
+              "value": "1"
+            },
+            {
+              "name": "npcId",
+              "value": "={{ $json.npcId }}"
+            },
+            {
+              "name": "type",
+              "value": "chat"
+            },
+            {
+              "name": "message",
+              "value": "=posted in {{ $json.channelName }}"
+            },
+            {
+              "name": "timestamp",
+              "value": "={{ $json.timestamp }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "notify-hub",
+      "name": "Notify Activity Hub",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2250, 300]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Random NPCs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Random NPCs": {
+      "main": [
+        [
+          {
+            "node": "Split NPCs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split NPCs": {
+      "main": [
+        [
+          {
+            "node": "Decide Action Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Decide Action Type": {
+      "main": [
+        [
+          {
+            "node": "Is Reply?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Reply?": {
+      "main": [
+        [
+          {
+            "node": "Get Mattermost Channels",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Mattermost Channels",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Mattermost Channels": {
+      "main": [
+        [
+          {
+            "node": "Select Random Channel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select Random Channel": {
+      "main": [
+        [
+          {
+            "node": "Generate Chat Message",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Generate Fallback Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Chat Message": {
+      "main": [
+        [
+          {
+            "node": "Prepare Post Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Fallback Message": {
+      "main": [
+        [
+          {
+            "node": "Prepare Post Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Post Data": {
+      "main": [
+        [
+          {
+            "node": "Post to Mattermost",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Save Chat Activity",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post to Mattermost": {
+      "main": [
+        [
+          {
+            "node": "Notify Activity Hub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Chat Activity": {
+      "main": [
+        [
+          {
+            "node": "Notify Activity Hub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify Activity Hub": {
+      "main": [
+        [
+          {
+            "node": "Split NPCs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2026-02-11T00:00:00.000Z",
+  "versionId": "1"
+}
