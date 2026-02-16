@@ -151,7 +151,11 @@ public class NpcsController(
     [HttpPost("{id:guid}/activity")]
     public async Task<ActionResult<NpcActivity>> NpcCreateActivity(Guid id, string activityType, string detail)
     {
-        return Ok(await service.CreateActivity(id, activityType, detail));
+        var result = await service.CreateActivity(id, activityType, detail);
+        await activityHubContext.Clients.All.SendAsync("show",
+            "1", id.ToString(), activityType ?? "activity", detail ?? "",
+            DateTime.Now.ToString(CultureInfo.InvariantCulture));
+        return Ok(result);
     }
 
     /// <summary>
@@ -174,8 +178,13 @@ public class NpcsController(
     [HttpPost("{id:guid}/preferences")]
     public async Task<ActionResult<NpcPreference>> NpcCreatePreference(Guid id, [FromBody] CreatePreferenceRequest request)
     {
-        return Ok(await service.CreatePreference(id, request.ToNpcId, request.FromNpcId,
-            request.Name, request.Step, request.Weight, request.Strength));
+        var result = await service.CreatePreference(id, request.ToNpcId, request.FromNpcId,
+            request.Name, request.Step, request.Weight, request.Strength);
+        await activityHubContext.Clients.All.SendAsync("show",
+            request.Step, id.ToString(), "preference",
+            $"preference updated: {request.Name}",
+            DateTime.Now.ToString(CultureInfo.InvariantCulture));
+        return Ok(result);
     }
 
     [ProducesResponseType(typeof(ActionResult<IEnumerable<NpcSocialConnection>>), (int)HttpStatusCode.OK)]
@@ -193,8 +202,13 @@ public class NpcsController(
     [HttpPost("{id:guid}/connections")]
     public async Task<ActionResult<NpcSocialConnection>> NpcCreateConnection(Guid id, [FromBody] CreateConnectionRequest request)
     {
-        return Ok(await service.CreateConnection(id, request.ConnectedNpcId,
-            request.Name, request.Distance, request.RelationshipStatus));
+        var result = await service.CreateConnection(id, request.ConnectedNpcId,
+            request.Name, request.Distance, request.RelationshipStatus);
+        await activityHubContext.Clients.All.SendAsync("show",
+            "1", id.ToString(), "relationship",
+            $"new connection with {request.Name}",
+            DateTime.Now.ToString(CultureInfo.InvariantCulture));
+        return Ok(result);
     }
 
     /// <summary>
@@ -223,8 +237,13 @@ public class NpcsController(
     [HttpPost("{id:guid}/knowledge")]
     public async Task<ActionResult<NpcLearning>> NpcCreateKnowledge(Guid id, [FromBody] CreateKnowledgeRequest request)
     {
-        return Ok(await service.CreateKnowledge(id, request.ToNpcId, request.FromNpcId,
-            request.Topic, request.Step, request.Value));
+        var result = await service.CreateKnowledge(id, request.ToNpcId, request.FromNpcId,
+            request.Topic, request.Step, request.Value);
+        await activityHubContext.Clients.All.SendAsync("show",
+            request.Step, id.ToString(), "knowledge",
+            $"learned more about {request.Topic} ({request.Value})",
+            DateTime.Now.ToString(CultureInfo.InvariantCulture));
+        return Ok(result);
     }
 
     /// <summary>
@@ -253,8 +272,13 @@ public class NpcsController(
     [HttpPost("{id:guid}/beliefs")]
     public async Task<ActionResult<NpcBelief>> NpcCreateBelief(Guid id, [FromBody] CreateBeliefRequest request)
     {
-        return Ok(await service.CreateBelief(id, request.ToNpcId, request.FromNpcId,
-            request.Name, request.Step, request.Likelihood, request.Posterior));
+        var result = await service.CreateBelief(id, request.ToNpcId, request.FromNpcId,
+            request.Name, request.Step, request.Likelihood, request.Posterior);
+        await activityHubContext.Clients.All.SendAsync("show",
+            request.Step, id.ToString(), "belief",
+            $"updated posterior of {Math.Round(request.Posterior, 2)} in {request.Name}",
+            DateTime.Now.ToString(CultureInfo.InvariantCulture));
+        return Ok(result);
     }
 
     /// <summary>

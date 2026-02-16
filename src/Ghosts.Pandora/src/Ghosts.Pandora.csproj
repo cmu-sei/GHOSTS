@@ -8,6 +8,9 @@
         <RootNamespace>Ghosts.Pandora</RootNamespace>
         <noWarn>8618</noWarn>
 
+        <!-- Disable automatic wwwroot content inclusion to prevent duplicates -->
+        <EnableDefaultContentItems>false</EnableDefaultContentItems>
+
         <ReleaseVersion>1.2.0.0</ReleaseVersion>
         <Version>1.2.1.0</Version>
         <AssemblyVersion>1.2.1.0</AssemblyVersion>
@@ -21,6 +24,15 @@
         <Copyright>Carnegie Mellon University 2022</Copyright>
         <LangVersion>latest</LangVersion>
     </PropertyGroup>
+
+    <!-- Manually include content items that EnableDefaultContentItems would have included -->
+    <ItemGroup>
+        <Content Include="wwwroot\**" />
+        <Content Include="**\*.cshtml" />
+        <Content Include="**\*.css" Exclude="**\*.cshtml.css" />
+        <Content Include="**\*.js" />
+        <None Remove="**\*.cshtml" />
+    </ItemGroup>
 
     <ItemGroup>
       <PackageReference Include="Faker.Net" Version="2.0.163" />
@@ -40,10 +52,11 @@
       <PackageReference Include="CsvHelper" Version="33.1.0" />
     </ItemGroup>
 
-    <ItemGroup>
+    <!-- Folder includes removed to prevent duplicate content items -->
+    <!--<ItemGroup>
       <Folder Include="Views\Themes\" />
       <Folder Include="wwwroot\images\u\" />
-    </ItemGroup>
+    </ItemGroup>-->
 
     <ItemGroup>
       <_ContentIncludedByDefault Remove="Views\Home\Detail.cshtml" />
