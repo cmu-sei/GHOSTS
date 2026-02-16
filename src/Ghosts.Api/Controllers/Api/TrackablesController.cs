@@ -17,10 +17,10 @@ namespace Ghosts.Api.Controllers.Api
         private readonly ITrackableService _service = service;
 
         /// <summary>
-        /// Gets all trackables in the system
+        /// Gets all trackable history records in the system
         /// </summary>
         /// <param name="ct">Cancellation Token</param>
-        /// <returns>List of Trackables</returns>
+        /// <returns>List of HistoryTrackable records</returns>
         [SwaggerOperation("TrackablesGetAll")]
         [HttpGet]
         public async Task<IActionResult> GetTrackables(CancellationToken ct)
@@ -30,6 +30,12 @@ namespace Ghosts.Api.Controllers.Api
             return Ok(list);
         }
 
+        /// <summary>
+        /// Gets trackable history for a specific trackable ID
+        /// </summary>
+        /// <param name="id">Trackable ID</param>
+        /// <param name="ct">Cancellation Token</param>
+        /// <returns>List of HistoryTrackable records for the specified ID</returns>
         [SwaggerOperation("TrackablesGetHistoryById")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetTrackableHistory([FromRoute] Guid id, CancellationToken ct)
