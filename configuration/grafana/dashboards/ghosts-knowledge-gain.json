@@ -461,7 +461,7 @@
           "format": "time_series",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT\n  $__timeGroup(createdutc, '1h', 0),\n  topic,\n  COUNT(DISTINCT npcid) as value\nFROM\n  npc_learning\nWHERE\n  $__timeFilter(createdutc)\nGROUP BY\n  time, topic\nORDER BY\n  time",
+          "rawSql": "SELECT\n  $__timeGroup(createdutc, '1h', 0),\n  topic as metric,\n  COUNT(DISTINCT npcid) as value\nFROM\n  npc_learning\nWHERE\n  $__timeFilter(createdutc)\nGROUP BY\n  time, topic\nORDER BY\n  time",
           "refId": "A",
           "sql": {
             "columns": [
@@ -873,7 +873,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\n  n.npcprofile->>'name' AS teacher_name,\n  COUNT(DISTINCT l.npcid) AS students_taught,\n  COUNT(DISTINCT l.topic) AS unique_topics,\n  SUM(l.value) AS total_knowledge_value\nFROM\n  npc_learning l\n  INNER JOIN npcs n ON l.fromnpcid = n.id\nWHERE\n  l.createdutc >= $__timeFrom()::timestamptz\n  AND l.createdutc <= $__timeTo()::timestamptz\nGROUP BY\n  n.id, n.npcprofile->>'name'\nORDER BY\n  students_taught DESC\nLIMIT 50",
+          "rawSql": "SELECT\n  CONCAT_WS(' ', n.npcprofile->'name'->>'first', n.npcprofile->'name'->>'last') AS teacher_name,\n  COUNT(DISTINCT l.npcid) AS students_taught,\n  COUNT(DISTINCT l.topic) AS unique_topics,\n  SUM(l.value) AS total_knowledge_value\nFROM\n  npc_learning l\n  INNER JOIN npcs n ON l.fromnpcid = n.id\nWHERE\n  l.createdutc >= $__timeFrom()::timestamptz\n  AND l.createdutc <= $__timeTo()::timestamptz\nGROUP BY\n  n.id, n.npcprofile->'name'->>'first', n.npcprofile->'name'->>'last'\nORDER BY\n  students_taught DESC\nLIMIT 50",
           "refId": "A",
           "sql": {
             "columns": [

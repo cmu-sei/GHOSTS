@@ -462,7 +462,7 @@
           "format": "time_series",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT\n  $__timeGroup(createdutc, '1h', 0),\n  name,\n  AVG(strength)::numeric(10,4) as value\nFROM\n  npc_preferences\nWHERE\n  $__timeFilter(createdutc)\nGROUP BY\n  time, name\nORDER BY\n  time",
+          "rawSql": "SELECT\n  $__timeGroup(createdutc, '1h', 0),\n  name as metric,\n  AVG(strength)::numeric(10,4) as value\nFROM\n  npc_preferences\nWHERE\n  $__timeFilter(createdutc)\nGROUP BY\n  time, name\nORDER BY\n  time",
           "refId": "A",
           "sql": {
             "columns": [
@@ -638,7 +638,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\n  n.npcprofile->>'name' AS influencer_name,\n  p.name AS preference_influenced,\n  COUNT(DISTINCT p.npcid) AS npcs_influenced\nFROM\n  npc_preferences p\n  INNER JOIN npcs n ON p.fromnpcid = n.id\nWHERE\n  p.createdutc >= $__timeFrom()::timestamptz\n  AND p.createdutc <= $__timeTo()::timestamptz\n  AND p.fromnpcid IS NOT NULL\nGROUP BY\n  n.id, n.npcprofile->>'name', p.name\nORDER BY\n  npcs_influenced DESC\nLIMIT 50",
+          "rawSql": "SELECT\n  CONCAT_WS(' ', n.npcprofile->'name'->>'first', n.npcprofile->'name'->>'last') AS influencer_name,\n  p.name AS preference_influenced,\n  COUNT(DISTINCT p.npcid) AS npcs_influenced\nFROM\n  npc_preferences p\n  INNER JOIN npcs n ON p.fromnpcid = n.id\nWHERE\n  p.createdutc >= $__timeFrom()::timestamptz\n  AND p.createdutc <= $__timeTo()::timestamptz\n  AND p.fromnpcid IS NOT NULL\nGROUP BY\n  n.id, n.npcprofile->'name'->>'first', n.npcprofile->'name'->>'last', p.name\nORDER BY\n  npcs_influenced DESC\nLIMIT 50",
           "refId": "A",
           "sql": {
             "columns": [

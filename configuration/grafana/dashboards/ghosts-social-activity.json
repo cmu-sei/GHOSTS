@@ -713,7 +713,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\n  n.npcprofile->>'name' AS npc_name,\n  a.activitytype,\n  COUNT(*) AS count\nFROM\n  npc_activity a\n  INNER JOIN npcs n ON a.npcid = n.id\nWHERE\n  $__timeFilter(a.createdutc)\nGROUP BY\n  n.id, n.npcprofile->>'name', a.activitytype\nORDER BY\n  count DESC\nLIMIT 50",
+          "rawSql": "SELECT\n  CONCAT_WS(' ', n.npcprofile->'name'->>'first', n.npcprofile->'name'->>'last') AS npc_name,\n  a.activitytype,\n  COUNT(*) AS count\nFROM\n  npc_activity a\n  INNER JOIN npcs n ON a.npcid = n.id\nWHERE\n  $__timeFilter(a.createdutc)\nGROUP BY\n  n.id, n.npcprofile->'name'->>'first', n.npcprofile->'name'->>'last', a.activitytype\nORDER BY\n  count DESC\nLIMIT 50",
           "refId": "A",
           "sql": {
             "columns": [

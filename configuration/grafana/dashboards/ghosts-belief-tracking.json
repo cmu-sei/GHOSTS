@@ -356,7 +356,7 @@
           "format": "time_series",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT\n  b.createdutc as time,\n  n.npcprofile->>'name' || ' — ' || b.name as metric,\n  b.posterior::numeric(10,4) as value\nFROM npc_beliefs b\nJOIN npcs n ON b.npcid = n.id\nWHERE $__timeFilter(b.createdutc)\nORDER BY time",
+          "rawSql": "SELECT\n  b.createdutc as time,\n  CONCAT_WS(' ', n.npcprofile->'name'->>'first', n.npcprofile->'name'->>'last') || ' — ' || b.name as metric,\n  b.posterior::numeric(10,4) as value\nFROM npc_beliefs b\nJOIN npcs n ON b.npcid = n.id\nWHERE $__timeFilter(b.createdutc)\nORDER BY time",
           "refId": "A"
         }
       ],
@@ -1044,7 +1044,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\n  n.npcprofile->>'name' AS influencer_name,\n  b.name AS belief_influenced,\n  COUNT(DISTINCT b.npcid) AS npcs_influenced,\n  AVG(b.posterior)::numeric(10,4) AS avg_posterior_of_influenced\nFROM\n  npc_beliefs b\n  INNER JOIN npcs n ON b.fromnpcid = n.id\nWHERE\n  b.fromnpcid IS NOT NULL\n  AND b.step = (SELECT MAX(step) FROM npc_beliefs)\nGROUP BY\n  n.id, n.npcprofile->>'name', b.name\nORDER BY\n  npcs_influenced DESC\nLIMIT 50",
+          "rawSql": "SELECT\n  CONCAT_WS(' ', n.npcprofile->'name'->>'first', n.npcprofile->'name'->>'last') AS influencer_name,\n  b.name AS belief_influenced,\n  COUNT(DISTINCT b.npcid) AS npcs_influenced,\n  AVG(b.posterior)::numeric(10,4) AS avg_posterior_of_influenced\nFROM\n  npc_beliefs b\n  INNER JOIN npcs n ON b.fromnpcid = n.id\nWHERE\n  b.fromnpcid IS NOT NULL\n  AND b.step = (SELECT MAX(step) FROM npc_beliefs)\nGROUP BY\n  n.id, n.npcprofile->'name'->>'first', n.npcprofile->'name'->>'last', b.name\nORDER BY\n  npcs_influenced DESC\nLIMIT 50",
           "refId": "A",
           "sql": {
             "columns": [

@@ -663,7 +663,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\n  n.npcprofile->>'name' AS npc_name,\n  COUNT(DISTINCT c.connectednpcid) AS connection_count,\n  AVG(c.relationshipstatus)::numeric(10,2) AS avg_relationship_strength\nFROM\n  npc_social_connections c\n  INNER JOIN npcs n ON c.npcid = n.id\nWHERE\n  c.createdutc <= NOW()\nGROUP BY\n  n.id, n.npcprofile->>'name'\nORDER BY\n  connection_count DESC\nLIMIT 50",
+          "rawSql": "SELECT\n  CONCAT_WS(' ', n.npcprofile->'name'->>'first', n.npcprofile->'name'->>'last') AS npc_name,\n  COUNT(DISTINCT c.connectednpcid) AS connection_count,\n  AVG(c.relationshipstatus)::numeric(10,2) AS avg_relationship_strength\nFROM\n  npc_social_connections c\n  INNER JOIN npcs n ON c.npcid = n.id\nWHERE\n  c.createdutc <= NOW()\nGROUP BY\n  n.id, n.npcprofile->'name'->>'first', n.npcprofile->'name'->>'last'\nORDER BY\n  connection_count DESC\nLIMIT 50",
           "refId": "A",
           "sql": {
             "columns": [
