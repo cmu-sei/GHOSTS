@@ -1,0 +1,183 @@
+{
+  "name": "Loop Over Agents - Connections",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {
+          "reset": false
+        }
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -208,
+        144
+      ],
+      "id": "578dd21c-c9f7-4adb-a484-ef0541daf3c3",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "path": "2ce0663c-5402-4f5b-b405-04bdcd72c9d4",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -656,
+        144
+      ],
+      "id": "6e3a1171-e483-4744-a1f8-b055ddb4f6a3",
+      "name": "Webhook",
+      "webhookId": "2ce0663c-5402-4f5b-b405-04bdcd72c9d4"
+    },
+    {
+      "parameters": {
+        "url": "http://host.docker.internal:5000/api/npcs/list",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -416,
+        144
+      ],
+      "id": "ae4c0e5d-6a2d-41e9-a777-bbcf847dc287",
+      "name": "Get all NPCs"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -672,
+        368
+      ],
+      "id": "ea088905-fd20-4819-9ba6-729a56fded6b",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://host.docker.internal:5000/api/npcs/{{ $('Loop Over Items').item.json.id }}/connections",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json-patch+json",
+        "body": "={\n   \"connectedNpcId\": \"{{ $json.connectedNpcId }}\",\n   \"name\": \"\",\n   \"distance\": {{ $json.distance }},\n   \"relationshipStatus\": {{ $json.relationshipStatus }}\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        400,
+        160
+      ],
+      "id": "1f148712-3c72-4430-aaf1-91e8c65fb387",
+      "name": "Post API Preference Update"
+    },
+    {
+      "parameters": {
+        "jsCode": "// n8n Function node\n\n// Grab items from the node named: \"Get all NPCs\"\nconst npcs = $('Get all NPCs').all();\n\n// Pick a random NPC item\nconst pick = npcs[Math.floor(Math.random() * npcs.length)];\n\n// Try common id locations\nconst connectedNpcId =\n  pick.json.id ??\n  pick.json.npcId ??\n  pick.json.npc?.id ??\n  pick.json.NpcId ??\n  pick.json.Id;\n\n// Build payload for next node\nconst payload = {\n  \n  connectedNpcId,\n  distance: 1,              // use number, not \"1\"\n  relationshipStatus: 0\n};\n\n// Send to next node\nreturn [{ json: payload }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        128,
+        160
+      ],
+      "id": "7f051dbf-76b8-4e88-9136-74c2ff36b638",
+      "name": "Code in JavaScript"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get all NPCs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get all NPCs": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get all NPCs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post API Preference Update": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Post API Preference Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "a07bd42f-5e75-45a2-a4b9-4fdfa3bebc48",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8c7476ca19c683810b409378867cced101ccb763954f2e556a24d7e45cc001d7"
+  },
+  "id": "USwxYIxcYJNEONvy",
+  "tags": []
+}

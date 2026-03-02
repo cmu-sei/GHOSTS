@@ -1,0 +1,377 @@
+{
+  "name": "GHOSTS Post to Social Media",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {
+          "reset": false
+        }
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -208,
+        144
+      ],
+      "id": "22c9b742-6411-4cc7-ad80-9260209a2a46",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "path": "super-looper",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -656,
+        144
+      ],
+      "id": "6bffe3ad-d468-46d1-92f9-ac9f7c832a30",
+      "name": "Webhook",
+      "webhookId": "0db3234a-2ef5-43b1-ada8-754634d39e74"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=This is my personal profile in json format: {{ $json.toJsonString() }}. \n\nWrite a short social media post that I might put on facebook about myself.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        320,
+        96
+      ],
+      "id": "72567048-4c06-4cd2-93cb-75fc6a4d7a42",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "mistral:7b",
+        "options": {
+          "temperature": 0.7
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        128,
+        368
+      ],
+      "id": "68805031-93fd-440b-8b49-d85392c2d95c",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "CSnCZgwAaP2zik7o",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "http://host.docker.internal:5000/api/npcs/list",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -416,
+        144
+      ],
+      "id": "0050a449-5e6f-4d00-855a-ab6463b741c4",
+      "name": "Get all NPCs"
+    },
+    {
+      "parameters": {
+        "url": "=http://host.docker.internal:5000/api/npcs/{{ $json.id }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "d50d91b7-3e2d-45a7-8c8d-1ad2a5adb56d",
+      "name": "Get NPC detail"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:8800",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "theme",
+              "value": "facebook"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8"
+            },
+            {
+              "name": "Accept-Language",
+              "value": "en-US,en;q=0.9"
+            },
+            {
+              "name": "Cache-Control",
+              "value": "no-cache"
+            },
+            {
+              "name": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "name": "Origin",
+              "value": "http://host.docker.internal:8800"
+            },
+            {
+              "name": "Pragma",
+              "value": "no-cache"
+            },
+            {
+              "name": "Referer",
+              "value": "http://host.docker.internal:8800/?theme=facebook"
+            },
+            {
+              "name": "Sec-Fetch-Dest",
+              "value": "document"
+            },
+            {
+              "name": "Sec-Fetch-Mode",
+              "value": "navigate"
+            },
+            {
+              "name": "Sec-Fetch-Site",
+              "value": "same-origin"
+            },
+            {
+              "name": "Sec-Fetch-User",
+              "value": "?1"
+            },
+            {
+              "name": "Sec-GPC",
+              "value": "1"
+            },
+            {
+              "name": "Upgrade-Insecure-Requests",
+              "value": "1"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "dnt",
+              "value": "1"
+            },
+            {
+              "name": "sec-ch-ua",
+              "value": "\"Brave\";v=\"141\", \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"141\""
+            },
+            {
+              "name": "sec-ch-ua-mobile",
+              "value": "?0"
+            },
+            {
+              "name": "sec-ch-ua-platform",
+              "value": "\"macOS\""
+            },
+            {
+              "name": "Cookie",
+              "value": "rl_page_init_referrer=RudderEncrypt%3AU2FsdGVkX19d3Klwtd7Sg7k59U6E0LlD%2BYblI%2FxH9jw%3D; rl_page_init_referring_domain=RudderEncrypt%3AU2FsdGVkX19NBmdZXlvzkk5drBSK3iMQZmYUd8CwJKY%3D; n8n-auth=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImVjMmJiMGZhLTRmNzAtNGMzZC04MTRhLTllYmRjYjEwYjE2ZiIsImhhc2giOiJCL2JjYzgvMDJEIiwiYnJvd3NlcklkIjoibGZzYzJUTEFNM0ZQcUVYNXppaUxRSWxrRU5ITDFQcFMrZm9XdytEL0JYOD0iLCJ1c2VkTWZhIjpmYWxzZSwiaWF0IjoxNzY0OTM5NDkzLCJleHAiOjE3NjU1NDQyOTN9.Jgz9mJkZXiOiVs9-FAZY3Ruc_AVOIRl4M5dC1g1nadk; rl_anonymous_id=RudderEncrypt%3AU2FsdGVkX1%2BibSlKovro9OGlRrDBq2uRUjHce586WVSrdh6sLE7eOcGMlyLkNWGgfe7K4Zt9RbC2QDjb12pTAg%3D%3D; rl_user_id=RudderEncrypt%3AU2FsdGVkX19BtFOXnbccm5Tw7%2BxDXWayaX%2BKKHFp2nypzTq2XHaEermlILYmbUtTsW9BwuudCGapA5hBx7vw3sakxxyBVSQ5dPgOlTuG0Zr8mTJBi1%2BYYs9DeFUnD33I8skH6l%2FR%2FYGOYEzwanufpJxnXQRO2uQIngUQTdc940w%3D; rl_trait=RudderEncrypt%3AU2FsdGVkX1%2FHq7ZHmsD%2FABOMfn6697crO0tVOINjuypTPc5HVCqNhNu8Fu6NNc8HULRWIbKS9RI%2Faj6My3lBDrYWznesdw73PsG6YmBYs8wyIDtmXgZN%2FHjTyB%2Bk9%2Fbky6Qq%2FvAVXEomtnO5V2lRzCYwQq01JFIaCLIG%2FWw%2BfIc%3D; username=lorenzo; .AspNetCore.Antiforgery.VyLW6ORzMgk=CfDJ8GdvUzGolmtJrXTbEcNTyfHKRL7G5wcBEw0C9unSfaNJJ4nT9pTGl-90DKL3VAAuen_mSTfIj0IfaIAO-JBJxsjrNs8Ilii_eGmzLoBikqu7kvNeVjRY5OfKcAXj4FoK5WyCtaS4PCG9Ut3xnuufWas; theme=facebook; rl_session=RudderEncrypt%3AU2FsdGVkX1%2FMMHMBRID%2BDWpmtxd8j0rPm1pa9ukBOi62hlUMAxv0biclehND%2FcC0cFtmRnP4ufqLUVsYIQDAkdKbOP1SgE%2FS85byaHyloBTYtgiIhSLmch%2FE9%2FgRy8uHy6oyaM6qGN8j967iQV1TsA%3D%3D"
+            },
+            {
+              "name": "cookie",
+              "value": "rl_page_init_referrer=RudderEncrypt%3AU2FsdGVkX19d3Klwtd7Sg7k59U6E0LlD%2BYblI%2FxH9jw%3D;rl_page_init_referring_domain=RudderEncrypt%3AU2FsdGVkX19NBmdZXlvzkk5drBSK3iMQZmYUd8CwJKY%3D;n8n-auth=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImVjMmJiMGZhLTRmNzAtNGMzZC04MTRhLTllYmRjYjEwYjE2ZiIsImhhc2giOiJCL2JjYzgvMDJEIiwiYnJvd3NlcklkIjoibGZzYzJUTEFNM0ZQcUVYNXppaUxRSWxrRU5ITDFQcFMrZm9XdytEL0JYOD0iLCJ1c2VkTWZhIjpmYWxzZSwiaWF0IjoxNzY0OTM5NDkzLCJleHAiOjE3NjU1NDQyOTN9.Jgz9mJkZXiOiVs9-FAZY3Ruc_AVOIRl4M5dC1g1nadk;rl_anonymous_id=RudderEncrypt%3AU2FsdGVkX1%2BibSlKovro9OGlRrDBq2uRUjHce586WVSrdh6sLE7eOcGMlyLkNWGgfe7K4Zt9RbC2QDjb12pTAg%3D%3D;rl_user_id=RudderEncrypt%3AU2FsdGVkX19BtFOXnbccm5Tw7%2BxDXWayaX%2BKKHFp2nypzTq2XHaEermlILYmbUtTsW9BwuudCGapA5hBx7vw3sakxxyBVSQ5dPgOlTuG0Zr8mTJBi1%2BYYs9DeFUnD33I8skH6l%2FR%2FYGOYEzwanufpJxnXQRO2uQIngUQTdc940w%3D;rl_trait=RudderEncrypt%3AU2FsdGVkX1%2FHq7ZHmsD%2FABOMfn6697crO0tVOINjuypTPc5HVCqNhNu8Fu6NNc8HULRWIbKS9RI%2Faj6My3lBDrYWznesdw73PsG6YmBYs8wyIDtmXgZN%2FHjTyB%2Bk9%2Fbky6Qq%2FvAVXEomtnO5V2lRzCYwQq01JFIaCLIG%2FWw%2BfIc%3D;username=lorenzo;.AspNetCore.Antiforgery.VyLW6ORzMgk=CfDJ8GdvUzGolmtJrXTbEcNTyfHKRL7G5wcBEw0C9unSfaNJJ4nT9pTGl-90DKL3VAAuen_mSTfIj0IfaIAO-JBJxsjrNs8Ilii_eGmzLoBikqu7kvNeVjRY5OfKcAXj4FoK5WyCtaS4PCG9Ut3xnuufWas;theme=facebook;rl_session=RudderEncrypt%3AU2FsdGVkX1%2FMMHMBRID%2BDWpmtxd8j0rPm1pa9ukBOi62hlUMAxv0biclehND%2FcC0cFtmRnP4ufqLUVsYIQDAkdKbOP1SgE%2FS85byaHyloBTYtgiIhSLmch%2FE9%2FgRy8uHy6oyaM6qGN8j967iQV1TsA%3D%3D;"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "user",
+              "value": "={{ $('Loop Over Items').item.json.name }}"
+            },
+            {
+              "name": "message",
+              "value": "={{ $json.output }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        608,
+        480
+      ],
+      "id": "578b764f-d92f-45e2-a808-764e9753fdae",
+      "name": "Post to Pandora"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -672,
+        368
+      ],
+      "id": "d37f7596-90a6-46bd-97e7-ed9122219295",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://host.docker.internal:5000/api/npcs/{{ $('Loop Over Items').item.json.id }}/activity",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "activityType",
+              "value": "SocialMediaPost"
+            },
+            {
+              "name": "detail",
+              "value": "={{ $('AI Agent').item.json.output }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -368,
+        464
+      ],
+      "id": "d4985969-0ffe-4bd0-8355-e40488ea081a",
+      "name": "Post API Update"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Get NPC detail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get all NPCs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Post to Pandora",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get all NPCs": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get NPC detail": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post to Pandora": {
+      "main": [
+        [
+          {
+            "node": "Post API Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get all NPCs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post API Update": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "e4b06279-cb9f-49f3-b20f-79c25887e288",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8c7476ca19c683810b409378867cced101ccb763954f2e556a24d7e45cc001d7"
+  },
+  "id": "1Du5K75VZeDr5wjtJW-YZ",
+  "tags": []
+}
