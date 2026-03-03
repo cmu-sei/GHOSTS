@@ -45,6 +45,7 @@
             }
         }
     },
+    "forwardPorts": [8000],
     "postCreateCommand": "bash -l .devcontainer/postcreate.sh",
     "postStartCommand": "bash -l .devcontainer/poststart.sh"
 }

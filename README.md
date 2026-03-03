@@ -24,137 +24,150 @@ GHOSTS is an NPC (or agent) orchestration framework that models and simulates re
 
 ---
 
-### ⭐ Show Your Support
-
-If you find GHOSTS useful for your cyber training, research, or simulation needs, please consider **starring this repository**! Your stars help:
-- 🌟 Increase visibility for others in the cybersecurity community
-- 💪 Motivate continued development and new features
-- 📈 Show that realistic NPC simulation is valuable for cyber operations
-
-[**⭐ Star this repo**](https://github.com/cmu-sei/GHOSTS) • [Watch for updates](https://github.com/cmu-sei/GHOSTS/subscription) • [Share with colleagues](https://github.com/cmu-sei/GHOSTS)
-
 ## Quick Start
 
-For detailed installation instructions, platform-specific builds, and configuration options, see the [Quick Start Guide](https://cmu-sei.github.io/GHOSTS/quickstart/).
+```bash
+mkdir ghosts && cd ghosts
+curl -O https://raw.githubusercontent.com/cmu-sei/GHOSTS/master/src/Ghosts.Api/docker-compose.yml
+docker compose up -d
+```
 
-### Basic Usage
+| Service | URL | Notes |
+|---------|-----|-------|
+| GHOSTS Frontend | http://localhost:4200 | Angular management UI |
+| GHOSTS API | http://localhost:5000 | REST API + Swagger at `/swagger` |
+| Grafana | http://localhost:3000 | Activity dashboards |
+| n8n | http://localhost:5678 | Workflow automation |
+| PostgreSQL | localhost:5432 | Database (`ghosts`/`scotty@1`) |
 
-1. **Deploy the API Server** - Use Docker Compose or deploy to your infrastructure
-2. **Install Clients** - Deploy GHOSTS clients on Windows or Linux machines
-3. **Configure Timelines** - Define activities through the UI or API
-4. **Monitor Activity** - View real-time NPC behavior through Grafana dashboards
+Then [install a client](https://cmu-sei.github.io/GHOSTS/quickstart/#ghosts-clients) on each machine you want to simulate and point it at `http://YOUR-API-HOST:5000/api`.
 
-See the [full documentation](https://cmu-sei.github.io/GHOSTS/) for detailed configuration and usage examples.
+For full setup instructions see the [Quick Start Guide](https://cmu-sei.github.io/GHOSTS/quickstart/).
 
 ---
 
 ## Architecture
 
-GHOSTS consists of several integrated components that work together to create a realistic simulation environment:
-
 ### Core Components
 
-| Component | Description | Documentation |
-|-----------|-------------|---------------|
-| **GHOSTS Client** | Cross-platform agent (Windows/Linux) that executes simulated user activities | [Client Docs](https://cmu-sei.github.io/GHOSTS/core/client/) |
-| **GHOSTS API** | Central server (.NET 10) managing clients, timelines, and activity orchestration via REST and WebSocket | [API Docs](https://cmu-sei.github.io/GHOSTS/core/api/) |
-| **GHOSTS Frontend** | **New!** Modern Angular 20 web interface for managing machines, groups, timelines, NPCs, and scenarios | [NG Docs](src/Ghosts.Frontend/) |
-| **GHOSTS UI** | (Deprecated) Next.js-based web interface for managing machines, groups, and deploying timelines | [UI Docs](https://cmu-sei.github.io/GHOSTS/core/ui/) |
-| **GHOSTS Lite** | Lightweight client version for resource-constrained environments | [Lite Docs](https://cmu-sei.github.io/GHOSTS/core/lite/) |
+| Component | Tech | Description |
+|-----------|------|-------------|
+| **Ghosts.Api** | .NET 10 | Central command-and-control server. REST API, SignalR WebSocket hub, NPC orchestration, scenario management. |
+| **Ghosts.Frontend** | Angular 20 | Web UI for managing machines, groups, timelines, NPCs, scenarios, and workflow automation. |
+| **Ghosts.Client.Windows** | .NET Framework 4.6.2 | Full-featured Windows client with Office automation, browser control, SSH, RDP, and 27+ activity handlers. |
+| **Ghosts.Client.Universal** | .NET 9 | Cross-platform client for Linux/Windows with 38+ handlers. |
+| **Ghosts.Client.Lite** | .NET 8 | Lightweight client for resource-constrained environments. |
+| **Ghosts.Domain** | .NET Standard 2.0 | Shared library: timeline models, handler base classes, client configuration. |
 
 ### Supporting Services
 
-| Service | Description | Documentation |
-|---------|-------------|---------------|
-| **Animator** | Generates realistic NPC personas with attributes, relationships, and social networks | [Animator Docs](https://cmu-sei.github.io/GHOSTS/animator/) |
-| **Pandora** | Content generation server providing dynamic web content and responses | [Pandora Docs](https://cmu-sei.github.io/GHOSTS/content/pandora/) |
-| **Socializer** | Simulated social media platform for realistic social interactions | [Socializer Docs](https://cmu-sei.github.io/GHOSTS/content/social/) |
-| **Grafana Integration** | Real-time monitoring and visualization of NPC activities | [Grafana Docs](https://cmu-sei.github.io/GHOSTS/core/grafana/) |
+| Service | Tech | Description |
+|---------|------|-------------|
+| **Ghosts.Animator** | .NET Standard 2.0 | NPC persona generation engine (names, careers, social networks, beliefs). |
+| **Ghosts.Pandora** | .NET 10 | Dynamic content generation server for realistic web content, blog posts, and documents. |
+| **n8n** | Docker | Workflow automation platform. GHOSTS API can schedule and trigger n8n workflows via webhook. |
+| **Grafana** | Docker | Real-time dashboards for NPC activity, health metrics, and timeline execution. |
 
-## Use Cases
+### Infrastructure
 
-GHOSTS is designed for various cybersecurity and training scenarios:
+| Component | Description |
+|-----------|-------------|
+| **apphost** | .NET Aspire application host for local development orchestration. |
+| **PostgreSQL 16** | Primary data store for all machines, timelines, NPCs, activities, and survey data. |
 
-- **Cyber Training & Exercises** - Populate training environments with realistic user activity
-- **Red Team Operations** - Generate believable background noise during security assessments
-- **Blue Team Training** - Create realistic network traffic for detection and analysis practice
-- **Research & Development** - Test security tools and detection algorithms with realistic data
-- **Cyber Range Development** - Build immersive environments with autonomous NPCs
-- **Simulation & Modeling** - Generate realistic network behavior patterns for analysis
+---
 
-## What's New
+## Repository Layout
 
-### Version 9.0 (Currently in Development)
+```
+src/
+├── Ghosts.Api/            # .NET 10 API server + docker-compose.yml
+├── Ghosts.Domain/         # Shared domain library (netstandard2.0)
+├── Ghosts.Frontend/       # Angular 20 management UI
+├── Ghosts.Client.Windows/ # .NET 4.6.2 Windows client
+├── Ghosts.Client.Universal/ # .NET 9 cross-platform client
+├── Ghosts.Client.Lite/    # .NET 8 lightweight client
+├── Ghosts.Animator/       # NPC persona generation
+├── Ghosts.Pandora/        # Content generation server
+├── apphost/               # .NET Aspire host
+└── tools/                 # Utilities (load tester, machine adder, email generator)
+scripts/
+├── build_windows.ps1      # Build Windows client
+├── build_universal.py     # Build Universal client
+└── horde/                 # Bulk operation scripts
+docs/                      # MkDocs documentation source
+```
 
-- **🆕 GHOSTS Frontend** - Modern [Angular 19 web interface](src/Ghosts.Frontend/) with enhanced UX and comprehensive search functionality
-- **⚡ .NET 10 Upgrade** - Core API and services upgraded to .NET 10 for improved performance and latest features
-- **🎯 Enhanced Scenarios** - New scenario planning and tracking capabilities with timeline management
-- **🔍 Advanced Search** - Client-side search across machines, groups, timelines, NPCs, and scenarios
-- **🎨 Improved UI/UX** - Material Design components, responsive layouts, and streamlined workflows
+---
 
-### Version 8.2
+## What's New in Version 9
 
-- **New UI** - [Next.js web interface](src/ghosts.ui) for managing machines, groups, and timelines
-- **GHOSTS Lite** - [Lightweight client](src/Ghosts.Client.Lite) for resource-constrained environments
-- **LLM Integration** - AI-powered content generation (migrate to [RangerAI](https://github.com/cmu-sei/rangerai) for latest AI features)
-- **Bug Fixes** - Resolved GUID issues (#385), client path bugs (#384), and animation cancellation issues
-- **Documentation Updates** - Enhanced animation documentation
-
-### Version 8.0 Major Changes
-
-> **⚠️ Breaking Changes**: Version 8.0 introduced breaking changes requiring a fresh installation. No upgrade path from previous versions.
-
-**Key Updates:**
-- Merged ANIMATOR and SPECTRE into core platform (both now archived)
-- Migrated from MongoDB to PostgreSQL for better performance
-- WebSocket support for real-time NPC connectivity
-- Simplified Docker Compose deployment
-- Reorganized API endpoints
-- Enhanced timeline configuration with random delays
+- **Angular 20 Frontend** — New primary management UI replacing the previous Next.js interface. Includes machines, groups, timelines, NPCs, scenarios, animations, belief explorer, operations dashboard, and RangerAI/n8n workflow scheduling.
+- **.NET 10** — API and Pandora upgraded to .NET 10.
+- **n8n Integration** — Built-in support for scheduling and monitoring n8n workflow executions with a live activity log via SignalR.
+- **Operations Dashboard** — Real-time overview of NPC activity and system health.
+- **Belief Explorer** — Visualize and track NPC cognitive state evolution over time.
+- **Enhanced Scenario Management** — Improved scenario planning, execution tracking, and timeline assignment.
+- **Aspire Host** — Optional .NET Aspire application host for local development with service discovery.
 
 <details>
-<summary>View Version 8.1 Changes</summary>
+<summary>Version 8.x history</summary>
 
-- GHOSTS LITE beta release
-- API cleanup for machine updates and groups
-- Simplified JSON object structures
-- Improved machine group management
-- Enhanced timeline delivery system
+### Version 8.2
+- GHOSTS UI (Next.js) — now replaced by the Angular 20 frontend in v9.
+- GHOSTS Lite beta release.
+- LLM/Shadows integration — superseded by [RangerAI](https://github.com/cmu-sei/rangerai).
+- Bug fixes: default GUID (#385), client path (#384), animation cancellation token.
+
+### Version 8.1
+- GHOSTS Lite beta.
+- API cleanup for machine updates and groups.
+- Simplified JSON payloads.
+- Timeline delivery by machine and by group.
+
+### Version 8.0 (breaking — fresh install required)
+- ANIMATOR and SPECTRE merged into core; both archived.
+- Migrated from MongoDB to PostgreSQL.
+- WebSocket (SignalR) support; clients are now always-connected.
+- Single `docker-compose.yml` for the full stack.
+- API endpoints reorganized.
+- Random delay support in timelines.
 
 </details>
 
-For complete version history, see the [releases page](https://github.com/cmu-sei/GHOSTS/releases).
+---
 
-## Documentation
+## Use Cases
 
-Comprehensive documentation is available at [cmu-sei.github.io/GHOSTS](https://cmu-sei.github.io/GHOSTS/)
+- **Cyber Training & Exercises** — Populate training environments with realistic user activity.
+- **Red Team Operations** — Generate believable background noise during security assessments.
+- **Blue Team Training** — Create realistic network traffic for detection and analysis practice.
+- **Research & Development** — Test security tools and detection algorithms with realistic data.
+- **Cognitive Range Development** — Build immersive environments with autonomous NPCs that reason and interact.
+
+---
 
 ## Contributing
 
-We welcome contributions from the community! Whether it's bug reports, feature requests, documentation improvements, or code contributions, your input helps make GHOSTS better.
+1. Report bugs and request features via the [GitHub issue tracker](https://github.com/cmu-sei/GHOSTS/issues).
+2. Fork, create a feature branch, and submit a pull request.
+3. Documentation improvements are always welcome.
 
-### How to Contribute
-
-1. **Report Issues** - Use the [GitHub issue tracker](https://github.com/cmu-sei/GHOSTS/issues) for bugs and feature requests
-2. **Submit Pull Requests** - Fork the repository, create a feature branch, and submit a PR
-3. **Improve Documentation** - Help enhance guides, examples, and API documentation
-4. **Share Use Cases** - Tell us how you're using GHOSTS in your environment
-
-Please ensure your contributions align with our project goals and maintain code quality standards.
+---
 
 ## Related Projects
 
-- **[RangerAI](https://github.com/cmu-sei/rangerai)** - Advanced AI integration for GHOSTS (successor to Shadows)
-- **ANIMATOR** - Now integrated into GHOSTS core (archived)
-- **SPECTRE** - Now integrated into GHOSTS core (archived)
+- **[RangerAI](https://github.com/cmu-sei/rangerai)** — AI/LLM integration layer for GHOSTS (successor to Shadows).
+
+---
 
 ## License
 
-This project is licensed under the MIT License. See [LICENSE.md](LICENSE.md) for full details.
+MIT License. See [LICENSE.md](LICENSE.md) for full details.
 
 **Distribution Statement**: [DISTRIBUTION STATEMENT A] This material has been approved for public release and unlimited distribution.
 
-Copyright 2017-2025 Carnegie Mellon University. All Rights Reserved.
+Copyright 2017–2025 Carnegie Mellon University. All Rights Reserved.
 
 ---
 

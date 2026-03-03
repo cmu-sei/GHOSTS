@@ -72,7 +72,7 @@ echo ""
 echo "========================================="
 echo "Installing Python packages..."
 echo "========================================="
-pip install --no-cache-dir --break-system-packages openai anthropic
+pip install --no-cache-dir --break-system-packages openai anthropic mkdocs-material
 
 
 echo ""
