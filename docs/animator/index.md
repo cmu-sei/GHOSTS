@@ -15,9 +15,9 @@ Animator brings NPCs to life in two ways:
 
     Animator creates the initial NPC profile, including details such as name, address, career, finances, and family members. Based on configuration, it can place users in a multi-level organizational structure, and establish relationships between users.
 
-2. **Animation Jobs**
+2. **Animation Workflows**
 
-    Via jobs that can be run during training and exercise events, Animator can update the NPC's preferences, beliefs, and relationships. This enables dynamic NPCs that change over time.
+    Via n8n workflows that can be run during training and exercise events, Animator can update the NPC's preferences, beliefs, and relationships. This enables dynamic NPCs that change over time. Animations are now implemented as n8n workflows, providing a visual, flexible, and extensible approach to NPC behavior automation.
 
 At its core, Animator is a realistic user detail generator. It creates sufficiently realistic identities with verbose portfolios of personal information. Each NPC has numerous categories of details and metadata that define who they are. Information is generated using sourced datasets to distribute characteristics realistically. As we like to say, it creates "NPCs so real, they sell for a premium on the dark web."[^1]
 
@@ -38,10 +38,11 @@ Since Animator is now integrated into the GHOSTS API, you access it through:
    - View and edit NPC details, organizational structure, and relationships
    - See the [UI documentation](../core/ui.md#npcs) for details
 
-**3. Animator Jobs** (via UI or API)
+**3. Animation Workflows** (via n8n)
 
-   - Schedule jobs to update NPC behaviors dynamically
-   - See the [Jobs documentation](jobs.md) for configuration details
+   - Create and manage n8n workflows to update NPC behaviors dynamically
+   - Workflows can update preferences, beliefs, relationships, and trigger NPC actions
+   - See the [Animation Workflows documentation](jobs.md) for configuration details
 
 ## Prerequisites
 

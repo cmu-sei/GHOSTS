@@ -124,14 +124,13 @@ nav:
       - Grafana: core/grafana.md
   - Frontend UI:
       - core/ui.md
-  - Animations:
+  - Animator & Workflows:
       - animator/index.md
-      - Animation Jobs: animator/jobs.md
-      - Running Animations: animator/run.md
+      - Animation Workflows: animator/jobs.md
+      - Running Workflows: animator/run.md
   - Content Servers:
       - content/index.md
       - Pandora: content/pandora.md
-      - Pandora Social: content/social.md
   # - Advanced:
   #     - advanced/index.md
   #     - Cyclone: advanced/cyclone.md
