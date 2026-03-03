@@ -1,15 +1,19 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { ChangeDetectionStrategy } from '@angular/core';
+import { Router } from '@angular/router';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatDialog } from '@angular/material/dialog';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { DatePipe } from '@angular/common';
 import { Npc, Scenario } from '../../../core/models';
 import { NpcService, ScenarioService } from '../../../core/services';
 import { ConfigService } from '../../../core/services/config.service';
 import { GenerateNpcsDialogComponent } from '../generate-npcs-dialog/generate-npcs-dialog.component';
+import { NpcJsonDialogComponent } from '../npc-json-dialog/npc-json-dialog.component';
 import { SearchBarComponent } from '../../../shared/components/search-bar/search-bar.component';
 
 @Component({
@@ -19,6 +23,9 @@ import { SearchBarComponent } from '../../../shared/components/search-bar/search
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    MatMenuModule,
+    MatDialogModule,
+    MatSnackBarModule,
     DatePipe,
     SearchBarComponent
   ],
@@ -104,9 +111,27 @@ import { SearchBarComponent } from '../../../shared/components/search-bar/search
           <ng-container matColumnDef="actions">
             <th mat-header-cell *matHeaderCellDef>Actions</th>
             <td mat-cell *matCellDef="let npc">
-              <button mat-button class="icon-button">
+              <button
+                mat-button
+                class="icon-button"
+                [matMenuTriggerFor]="actionsMenu"
+                aria-label="NPC actions">
                 <i class="fas fa-ellipsis-v"></i>
               </button>
+              <mat-menu #actionsMenu="matMenu">
+                <button mat-menu-item (click)="viewDetails(npc)">
+                  <i class="fas fa-user"></i>
+                  <span>View Details</span>
+                </button>
+                <button mat-menu-item (click)="viewJson(npc)">
+                  <i class="fas fa-code"></i>
+                  <span>View Raw JSON</span>
+                </button>
+                <button mat-menu-item (click)="deleteNpc(npc)">
+                  <i class="fas fa-trash" style="color: #f44336;"></i>
+                  <span>Delete</span>
+                </button>
+              </mat-menu>
             </td>
           </ng-container>
 
@@ -202,6 +227,8 @@ export class NpcsListComponent implements OnInit {
   private readonly scenarioService = inject(ScenarioService);
   private readonly configService = inject(ConfigService);
   private readonly dialog = inject(MatDialog);
+  private readonly snackBar = inject(MatSnackBar);
+  private readonly router = inject(Router);
 
   protected readonly npcs = signal<Npc[]>([]);
   protected readonly scenarios = signal<Scenario[]>([]);
@@ -298,5 +325,36 @@ export class NpcsListComponent implements OnInit {
       return '—';
     }
     return this.scenarioMap().get(scenarioId) || `Scenario #${scenarioId}`;
+  }
+
+  protected viewDetails(npc: Npc): void {
+    this.router.navigate(['/npcs', npc.id]);
+  }
+
+  protected viewJson(npc: Npc): void {
+    this.dialog.open(NpcJsonDialogComponent, {
+      width: '720px',
+      data: npc,
+      autoFocus: false,
+      restoreFocus: false
+    });
+  }
+
+  protected deleteNpc(npc: Npc): void {
+    const name = this.getNpcName(npc);
+    const confirmed = window.confirm(`Delete NPC "${name}"?`);
+    if (!confirmed) {
+      return;
+    }
+
+    this.npcService.deleteNpc(npc.id!).subscribe({
+      next: () => {
+        this.snackBar.open(`NPC "${name}" deleted`, undefined, { duration: 2500 });
+        this.loadNpcs();
+      },
+      error: (err) => {
+        this.snackBar.open(`Failed to delete NPC: ${err.message}`, undefined, { duration: 3500 });
+      }
+    });
   }
 }
