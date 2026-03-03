@@ -35,7 +35,7 @@ export class ConfigService {
 
   get n8nApiUrl(): string {
     if (!this.config?.n8nApiUrl) {
-      throw new Error('Config not loaded. Call loadConfig() first.');
+      throw new Error('n8nApiUrl is not set in config.json.');
     }
     return this.config.n8nApiUrl;
   }

@@ -165,4 +165,71 @@
       }
     </mat-card-content>
   </mat-card>
+
+  <mat-card class="execution-log-card">
+    <mat-card-header>
+      <mat-card-title>Live Execution Log</mat-card-title>
+      <mat-card-subtitle>
+        <span class="hub-status" [class.connected]="hubConnected()">
+          <span class="hub-dot"></span>
+          {{ hubConnected() ? 'Connected' : 'Disconnected' }}
+        </span>
+        &nbsp;— showing the last {{ executions().length }} of up to 50 executions
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      @if (executions().length === 0) {
+      <div class="log-empty">
+        <i class="fas fa-satellite-dish"></i>
+        <p>Waiting for workflow executions&hellip;</p>
+        <p class="log-empty-hint">Executions will appear here in real time as scheduled workflows fire.</p>
+      </div>
+      } @else {
+      <div class="log-toolbar">
+        <button mat-button color="warn" type="button" (click)="clearLog()">
+          <i class="fas fa-trash-alt"></i> Clear
+        </button>
+      </div>
+      <div class="log-scroll">
+        <table class="log-table">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Workflow</th>
+              <th>HTTP</th>
+              <th>Status</th>
+              <th>Detail</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (entry of executions(); track entry.timestamp) {
+            <tr [class.log-row-fail]="!entry.success">
+              <td class="log-time">{{ entry.timestamp | date:'HH:mm:ss' }}</td>
+              <td class="log-name">{{ entry.workflowName }}</td>
+              <td class="log-code">
+                @if (entry.statusCode) {
+                  {{ entry.statusCode }}
+                } @else {
+                  <span class="log-na">—</span>
+                }
+              </td>
+              <td>
+                <span class="status-chip" [class.log-fail]="!entry.success">
+                  {{ entry.success ? 'OK' : 'Failed' }}
+                </span>
+              </td>
+              <td class="log-detail">
+                @if (entry.error) {
+                  <span class="log-error-text" [title]="entry.error">{{ entry.error }}</span>
+                }
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      }
+    </mat-card-content>
+  </mat-card>
 </div>

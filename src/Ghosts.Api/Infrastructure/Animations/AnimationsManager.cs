@@ -4,6 +4,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Ghosts.Api.Hubs;
@@ -61,10 +62,11 @@ public enum AnimationJobTypes
     FULLAUTONOMY
 }
 
-public class AnimationsManager(IHubContext<ActivityHub> activityHubContext, IServiceScopeFactory scopeFactory) : IManageableHostedService
+public class AnimationsManager(IHubContext<ActivityHub> activityHubContext, IServiceScopeFactory scopeFactory, IHttpClientFactory httpClientFactory) : IManageableHostedService
 {
     private static readonly Logger _log = LogManager.GetCurrentClassLogger();
     private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
+    private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
 
     private readonly ApplicationSettings _configuration = Program.ApplicationSettings;
     private readonly Random _random = Random.Shared;
@@ -546,13 +548,15 @@ public class AnimationsManager(IHubContext<ActivityHub> activityHubContext, ISer
         {
             WorkflowId = workflowId,
             WebhookUrl = webhookUrl,
-            Schedule = schedule
+            Schedule = schedule,
+            N8nApiUrl = Environment.GetEnvironmentVariable("N8N_API_URL"),
+            N8nApiKey = Environment.GetEnvironmentVariable("N8N_API_KEY")
         };
 
         var thread = new Thread(() =>
         {
             Thread.CurrentThread.IsBackground = true;
-            _ = new AnimationDefinitions.WorkflowJob(config, _activityHubContext, cts.Token);
+            _ = new AnimationDefinitions.WorkflowJob(config, _activityHubContext, _httpClientFactory, cts.Token);
         });
 
         _workflowJobs.TryAdd(workflowId, (thread, cts));

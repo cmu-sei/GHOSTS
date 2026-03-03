@@ -133,6 +133,9 @@ public class Program
         builder.Services.AddScoped<MachineUpdateExample>();
         builder.Services.AddSwaggerExamplesFromAssemblyOf<MachineUpdateExample>();
 
+        // HTTP client factory
+        builder.Services.AddHttpClient();
+
         // Background services
         builder.Services.AddSingleton<IBackgroundQueue, BackgroundQueue>();
         builder.Services.AddSingleton<IHostedService, QueueSyncService>();

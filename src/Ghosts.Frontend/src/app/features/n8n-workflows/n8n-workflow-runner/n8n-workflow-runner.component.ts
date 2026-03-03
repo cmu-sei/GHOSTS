@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, computed, inject, signal } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -9,10 +9,22 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ChangeDetectionStrategy } from '@angular/core';
+import * as signalR from '@microsoft/signalr';
 import { N8nWorkflowService } from '../../../core/services';
 import { N8nWorkflow } from '../../../core/models';
+import { ConfigService } from '../../../core/services/config.service';
 
 const CRON_EXPRESSION = /^(@(yearly|annually|monthly|weekly|daily|hourly|reboot))|((\S+\s+){4,5}\S+)$/i;
+const MAX_LOG_ENTRIES = 50;
+
+interface WorkflowExecution {
+  workflowId: string;
+  workflowName: string;
+  timestamp: Date;
+  success: boolean;
+  statusCode?: number;
+  error?: string;
+}
 
 @Component({
   selector: 'app-n8n-workflow-runner',
@@ -33,10 +45,12 @@ const CRON_EXPRESSION = /^(@(yearly|annually|monthly|weekly|daily|hourly|reboot)
   styleUrls: ['./n8n-workflow-runner.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class N8nWorkflowRunnerComponent implements OnInit {
+export class N8nWorkflowRunnerComponent implements OnInit, OnDestroy {
   private readonly workflowService = inject(N8nWorkflowService);
   private readonly fb = inject(FormBuilder);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly configService = inject(ConfigService);
+  private connection?: signalR.HubConnection;
 
   protected readonly workflows = signal<N8nWorkflow[]>([]);
   protected readonly loadingWorkflows = signal(false);
@@ -44,6 +58,9 @@ export class N8nWorkflowRunnerComponent implements OnInit {
   protected readonly lastUpdated = signal<Date | null>(null);
   protected readonly executing = signal(false);
   protected readonly stoppingWorkflowId = signal<string | null>(null);
+  protected readonly executions = signal<WorkflowExecution[]>([]);
+  protected readonly hubConnected = signal(false);
+
   protected readonly webhookWorkflows = computed(() =>
     this.workflows().filter(workflow => workflow.triggerType === 'webhook' && workflow.active)
   );
@@ -58,6 +75,11 @@ export class N8nWorkflowRunnerComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadWorkflows();
+    this.connectHub();
+  }
+
+  ngOnDestroy(): void {
+    this.connection?.stop();
   }
 
   protected loadWorkflows(forceRefresh = false): void {
@@ -121,13 +143,9 @@ export class N8nWorkflowRunnerComponent implements OnInit {
     this.executing.set(true);
 
     this.workflowService.runWorkflow(workflowId, cronSchedule, selectedWorkflow.webhookUrl).subscribe({
-      next: (response) => {
+      next: () => {
         this.updateWorkflowRunningState(workflowId, true);
-        const message = response.executionId
-          ? `Workflow schedule ${response.executionId} saved`
-          : 'Workflow schedule saved';
-
-        this.snackBar.open(message, 'Close', { duration: 4000 });
+        this.snackBar.open('Workflow schedule saved', 'Close', { duration: 4000 });
       },
       error: (err) => {
         this.snackBar.open(
@@ -164,6 +182,38 @@ export class N8nWorkflowRunnerComponent implements OnInit {
         this.stoppingWorkflowId.set(null);
       }
     });
+  }
+
+  protected clearLog(): void {
+    this.executions.set([]);
+  }
+
+  private connectHub(): void {
+    this.connection = new signalR.HubConnectionBuilder()
+      .withUrl(`${this.configService.apiUrl}/hubs/activities`)
+      .configureLogging(signalR.LogLevel.Warning)
+      .withAutomaticReconnect()
+      .build();
+
+    this.connection.onreconnected(() => this.hubConnected.set(true));
+    this.connection.onclose(() => this.hubConnected.set(false));
+
+    this.connection.on('workflow-executed', (event: { workflowId: string; timestamp: string; success: boolean; statusCode?: number; error?: string }) => {
+      const workflowName = this.workflows().find(w => String(w.id) === String(event.workflowId))?.name ?? `Workflow ${event.workflowId}`;
+      const entry: WorkflowExecution = {
+        workflowId: event.workflowId,
+        workflowName,
+        timestamp: new Date(event.timestamp),
+        success: event.success,
+        statusCode: event.statusCode,
+        error: event.error
+      };
+      this.executions.update(current => [entry, ...current].slice(0, MAX_LOG_ENTRIES));
+    });
+
+    this.connection.start()
+      .then(() => this.hubConnected.set(true))
+      .catch(() => this.hubConnected.set(false));
   }
 
   private updateWorkflowRunningState(workflowId: string | number, isRunning: boolean): void {
