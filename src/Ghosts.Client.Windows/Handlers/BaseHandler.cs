@@ -41,7 +41,7 @@ namespace Ghosts.Client.Handlers
                     NullValueHandling = NullValueHandling.Ignore
                 });
 
-            _timelineLog.Info($"TIMELINE|{DateTime.UtcNow:MM/dd/yyyy hh:mm:ss tt}|{o}");
+            _timelineLog.Info($"TIMELINE|{DateTime.UtcNow:MM/dd/yyyy HH:mm:ss.fff}Z|{o}");
 
         }
 

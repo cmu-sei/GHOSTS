@@ -96,15 +96,14 @@ namespace Ghosts.Client.Handlers
 
         public void Command(TimelineHandler handler, TimelineEvent timelineEvent, string command)
         {
-            var replacements = handler.HandlerArgs["replace"];
-
+            var replacements = handler.HandlerArgs.ContainsKey("replace") ? handler.HandlerArgs["replace"] : new JArray();
             foreach (var replacement in JArray.FromObject(replacements))
             {
                 foreach (var o in replacement)
                 {
-                    command = Regex.Replace(command, "{" + ((JProperty)o).Name.ToString() + "}", ((Newtonsoft.Json.Linq.JArray)((JProperty)o).Value).PickRandom().ToString());
+                    command = Regex.Replace(command, "{" + ((JProperty) o).Name.ToString() + "}",
+                        ((Newtonsoft.Json.Linq.JArray) ((JProperty) o).Value).PickRandom().ToString());
                 }
-
             }
 
             var results = Command(command);
