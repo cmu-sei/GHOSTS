@@ -1,4 +1,4 @@
-Flask==3.0.2
+Flask==3.1.3
 gradio==5.31.0
 imaginairy==14.2.0
 langchain==0.3.0
