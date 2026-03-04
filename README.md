@@ -14,7 +14,7 @@
 
 </div>
 
-[GHOSTS 9 is in active development — see announcement here](https://github.com/cmu-sei/GHOSTS/discussions/582).
+[GHOSTS 9 is released, but *still* in active development — see announcement here](https://github.com/cmu-sei/GHOSTS/discussions/582).
 
 ---
 
@@ -104,13 +104,46 @@ docs/                      # MkDocs documentation source
 
 ## What's New in Version 9
 
-- **Angular 20 Frontend** — New primary management UI replacing the previous Next.js interface. Includes machines, groups, timelines, NPCs, scenarios, animations, belief explorer, operations dashboard, and RangerAI/n8n workflow scheduling.
-- **.NET 10** — API and Pandora upgraded to .NET 10.
-- **n8n Integration** — Built-in support for scheduling and monitoring n8n workflow executions with a live activity log via SignalR.
-- **Operations Dashboard** — Real-time overview of NPC activity and system health.
-- **Belief Explorer** — Visualize and track NPC cognitive state evolution over time.
-- **Enhanced Scenario Management** — Improved scenario planning, execution tracking, and timeline assignment.
-- **Aspire Host** — Optional .NET Aspire application host for local development with service discovery.
+### 🎨 Complete UI Rewrite: Angular 20 Frontend
+
+Replaced the Next.js interface with a modern, full-featured Angular 20 management application:
+
+- **Operations Dashboard** — Real-time overview of connected machines, active NPC animations, and recent timeline executions
+- **Belief Explorer** — Visualize and track NPC cognitive state evolution over simulation steps
+- **NPC Action Menu** — Enhanced NPC management with improved controls for persona generation and social graph visualization
+- **Workflow Scheduler** — Schedule and monitor n8n workflows with live execution logs and real-time status updates
+- **Enhanced Timeline Management** — Streamlined creation, assignment, and deployment of timelines to machines and groups
+- **Scenario Management** — Define, execute, and track training scenarios with improved planning and execution tracking
+
+### ⚡ Platform Modernization
+
+- **.NET 10 Upgrade** — API (`Ghosts.Api`) and Pandora content server migrated to .NET 10 with latest dependency updates
+- **.NET Aspire Host** — Optional application host for local development with integrated service discovery and health dashboards
+- **Grafana Provisioning** — Pre-configured dashboards for cognitive range monitoring, NPC activity, and belief systems
+
+### 🤖 Enhanced Cognitive Capabilities
+
+- **Belief System** — NPCs now maintain belief states that evolve over time based on interactions and experiences
+- **Knowledge Graphs** — Track NPC learning and knowledge acquisition with visualization tools
+- **Social Connections API** — New endpoints for managing NPC relationships, preferences, and social networks
+- **Improved Social Graph** — Enhanced visualization and management of NPC social networks and connections
+
+### 🔄 Workflow Automation
+
+- **n8n Integration** — Native workflow automation platform integration with:
+  - Cron-scheduled workflow execution
+  - Real-time monitoring with HTTP status and response preview
+  - Base workflow templates included
+  - Environment variable configuration for API URL and authentication
+
+### 🐛 Bug Fixes & Improvements
+
+- Fixed trackables history endpoint (#581)
+- Improved username generation (proper formatting, removes spaces)
+- Resolved SVG asset build issues
+- Animation cancellation token improvements
+- NPCs can now be tied to specific scenarios
+- Timeline delivery improvements (by machine and by group)
 
 <details>
 <summary>Version 8.x history</summary>
