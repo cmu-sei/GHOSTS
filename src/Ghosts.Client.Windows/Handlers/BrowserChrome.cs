@@ -286,7 +286,10 @@ namespace Ghosts.Client.Handlers
                 options.AddArguments($"--load-extension={Program.Configuration.ChromeExtensions}");
             }
             
-            var driver = new ChromeDriver(options);
+            var service = ChromeDriverService.CreateDefaultService(AppDomain.CurrentDomain.BaseDirectory);
+            service.HideCommandPromptWindow = true;
+            var driver = new ChromeDriver(service, options);
+
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
             return driver;
         }

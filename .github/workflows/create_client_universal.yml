@@ -16,17 +16,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '9.0.x'
-
-    - name: Extract version
-      id: version
-      run: |
-        if [[ $GITHUB_EVENT_NAME == 'release' ]]; then
-          echo "version=$(echo ${GITHUB_REF#refs/tags/})" >> $GITHUB_ENV
-        else
-          echo "version=latest" >> $GITHUB_ENV
-        fi
-      shell: bash
+        dotnet-version: '9.0.x' # Use 'x' to automatically get the latest patch version
 
     - name: Restore dependencies for Ghosts.Domain
       run: dotnet restore src/Ghosts.Domain/ghosts.domain.csproj

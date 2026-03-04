@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using FileHelpers;
 using Ghosts.Domain.Code;
@@ -14,6 +15,7 @@ namespace Ghosts.Client.Infrastructure.Email;
 
 public class EmailContentManager
 {
+    public Guid Id { private set; get; }
     public string Subject { private set; get; }
     public string Body { private set; get; }
     public ClientConfiguration Configuration { private set; get; }
@@ -52,8 +54,25 @@ public class EmailContentManager
         var o = this.Content[_random.Next(0, total)];
         this.Configuration = Program.Configuration;
 
+        if (Guid.TryParse(o.Id, out var parsedGuid))
+        {
+            this.Id = parsedGuid;
+        }
+        else
+        {
+            this.Id = CreateGuidFromString(o.Id);
+        }
+        
         this.Subject = ReplaceTokens(o.Subject);
         this.Body = Parse(o.Body);
+    }
+
+    private static Guid CreateGuidFromString(string s)
+    {
+        var bytes = Encoding.UTF8.GetBytes(s);
+        using var md5 = MD5.Create();
+        var hash = md5.ComputeHash(bytes);
+        return new Guid(hash);
     }
 
     public void LoadEmailFile()
@@ -121,7 +140,7 @@ public class EmailContentManager
             s.Replace(t, token.Value);
         }
 
-        var o = s.ToString().Replace("\\n", Environment.NewLine).Trim('"').Trim(' ').Trim('"');
+        var o = s.ToString().Replace("\\n", Environment.NewLine).Trim(' ');
         o = o.RemoveFirstLines(3);
 
         if (o.StartsWith("Subject:", StringComparison.InvariantCultureIgnoreCase))
@@ -172,8 +191,11 @@ public class EmailReplyManager
 [DelimitedRecord("|")]
 internal class EmailContent
 {
+    [FieldQuoted]
     public string Id { get; set; }
+    [FieldQuoted]
     public string Subject { get; set; }
+    [FieldQuoted]
     public string Body { get; set; }
 }
 

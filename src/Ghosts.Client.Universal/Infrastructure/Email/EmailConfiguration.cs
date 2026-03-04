@@ -84,12 +84,14 @@ public class EmailConfiguration
 
         if (Subject.Equals("random", StringComparison.InvariantCultureIgnoreCase))
         {
+            Id = emailContent.Id;
             Subject = emailContent.Subject;
         }
 
         Body = emailConfigArray[5].ToString();
         if (Body.Equals("random", StringComparison.InvariantCultureIgnoreCase))
         {
+            Id = emailContent.Id;
             Body = emailContent.Body;
 
             Body +=
