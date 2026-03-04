@@ -167,7 +167,7 @@ MIT License. See [LICENSE.md](LICENSE.md) for full details.
 
 **Distribution Statement**: [DISTRIBUTION STATEMENT A] This material has been approved for public release and unlimited distribution.
 
-Copyright 2017–2025 Carnegie Mellon University. All Rights Reserved.
+Copyright 2017–2026 Carnegie Mellon University. All Rights Reserved.
 
 ---
 

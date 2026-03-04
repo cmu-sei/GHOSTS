@@ -1,6 +1,6 @@
 GHOSTS - NPC Automation Platform
 
-Copyright 2018 Carnegie Mellon University. All Rights Reserved.
+Copyright 2017-2026 Carnegie Mellon University. All Rights Reserved.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
@@ -16,7 +16,7 @@ NO WARRANTY. THIS CARNEGIE MELLON UNIVERSITY AND SOFTWARE ENGINEERING INSTITUTE 
 
 [DISTRIBUTION STATEMENT A] This material has been approved for public release and unlimited distribution.  Please see Copyright notice for non-US Government use and distribution.
 
-Carnegie Mellon® and CERT® are registered in the U.S. Patent and Trademark Office by Carnegie Mellon University.
+Carnegie Mellonï¿½ï¿½andï¿½CERTï¿½ï¿½are registered in the U.S. Patent and Trademark Office by Carnegie Mellon University.
 
 This Software includes and/or makes use of the following Third-Party Software subject to its own license:
 
