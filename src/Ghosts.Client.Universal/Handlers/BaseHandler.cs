@@ -90,6 +90,6 @@ public abstract class BaseHandler : IHandler
                 NullValueHandling = NullValueHandling.Ignore
             });
 
-        _timelineLog.Info($"TIMELINE|{DateTime.UtcNow}|{o}");
+        _timelineLog.Info($"TIMELINE|{DateTime.UtcNow:MM/dd/yyyy HH:mm:ss.fff}Z|{o}");
     }
 }
