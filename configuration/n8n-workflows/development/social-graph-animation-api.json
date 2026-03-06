@@ -126,7 +126,7 @@
         "authentication": "none",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"connectedNpcId\": \"{{ $json.connectedNpcId }}\",\n  \"name\": \"{{ $json.name }}\",\n  \"distance\": \"\",\n  \"relationshipStatus\": 0\n}",
+        "jsonBody": "={\n  \"connectedNpcId\": \"{{ $json.connectedNpcId }}\",\n  \"name\": \"{{ $json.name }}\",\n  \"distance\": \"\",\n  \"relationshipStatus\": 0.0\n}",
         "options": {}
       },
       "id": "create-connection",

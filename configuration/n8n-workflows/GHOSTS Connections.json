@@ -86,7 +86,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// n8n Function node\n\n// Grab items from the node named: \"Get all NPCs\"\nconst npcs = $('Get all NPCs').all();\n\n// Pick a random NPC item\nconst pick = npcs[Math.floor(Math.random() * npcs.length)];\n\n// Try common id locations\nconst connectedNpcId =\n  pick.json.id ??\n  pick.json.npcId ??\n  pick.json.npc?.id ??\n  pick.json.NpcId ??\n  pick.json.Id;\n\n// Build payload for next node\nconst payload = {\n  \n  connectedNpcId,\n  distance: 1,              // use number, not \"1\"\n  relationshipStatus: 0\n};\n\n// Send to next node\nreturn [{ json: payload }];\n"
+        "jsCode": "// n8n Function node\n\n// Grab items from the node named: \"Get all NPCs\"\nconst npcs = $('Get all NPCs').all();\n\n// Pick a random NPC item\nconst pick = npcs[Math.floor(Math.random() * npcs.length)];\n\n// Try common id locations\nconst connectedNpcId =\n  pick.json.id ??\n  pick.json.npcId ??\n  pick.json.npc?.id ??\n  pick.json.NpcId ??\n  pick.json.Id;\n\n// Build payload for next node\n// Relationship status: -1.0 (bad) to 1.0 (perfect)\nconst payload = {\n  \n  connectedNpcId,\n  distance: 1,              // use number, not \"1\"\n  relationshipStatus: Math.random() * 0.4 - 0.2  // Random start between -0.2 and 0.2\n};\n\n// Send to next node\nreturn [{ json: payload }];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,

@@ -17,7 +17,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 5,
+  "id": 3,
   "links": [],
   "panels": [
     {
@@ -251,7 +251,7 @@
           "format": "table",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT AVG(relationshipstatus)::numeric(10,2) FROM npc_social_connections WHERE createdutc <= NOW();",
+          "rawSql": "SELECT COALESCE(AVG(relationshipstatus)::numeric(10,2), 0) as value FROM npc_social_connections;",
           "refId": "A",
           "sql": {
             "columns": [
@@ -336,7 +336,7 @@
           "format": "table",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(*) FROM npc_interactions WHERE $__timeFilter(createdutc);",
+          "rawSql": "SELECT COUNT(*) as value FROM npc_interactions;",
           "refId": "A",
           "sql": {
             "columns": [
@@ -642,7 +642,7 @@
         ]
       },
       "gridPos": {
-        "h": 9,
+        "h": 17,
         "w": 12,
         "x": 0,
         "y": 12
@@ -663,7 +663,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\n  CONCAT_WS(' ', n.npcprofile->'name'->>'first', n.npcprofile->'name'->>'last') AS npc_name,\n  COUNT(DISTINCT c.connectednpcid) AS connection_count,\n  AVG(c.relationshipstatus)::numeric(10,2) AS avg_relationship_strength\nFROM\n  npc_social_connections c\n  INNER JOIN npcs n ON c.npcid = n.id\nWHERE\n  c.createdutc <= NOW()\nGROUP BY\n  n.id, n.npcprofile->'name'->>'first', n.npcprofile->'name'->>'last'\nORDER BY\n  connection_count DESC\nLIMIT 50",
+          "rawSql": "SELECT\n  CONCAT_WS(' ', n.npcprofile->'name'->>'first', n.npcprofile->'name'->>'last') AS npc_name,\n  COUNT(DISTINCT c.connectednpcid) AS connection_count,\n  COALESCE(AVG(c.relationshipstatus)::numeric(10,2), 0) AS avg_relationship_strength\nFROM\n  npc_social_connections c\n  INNER JOIN npcs n ON c.npcid = n.id\nGROUP BY\n  n.id, n.npcprofile->'name'->>'first', n.npcprofile->'name'->>'last'\nORDER BY\n  connection_count DESC\nLIMIT 50",
           "refId": "A",
           "sql": {
             "columns": [
@@ -731,12 +731,12 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "relationship_status"
+              "options": "npc_name"
             },
             "properties": [
               {
                 "id": "displayName",
-                "value": "Relationship Status"
+                "value": "NPC"
               },
               {
                 "id": "unit",
@@ -754,12 +754,12 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "count"
+              "options": "connection_count"
             },
             "properties": [
               {
                 "id": "displayName",
-                "value": "Count"
+                "value": "Connections"
               },
               {
                 "id": "unit",
@@ -789,11 +789,60 @@
                     },
                     {
                       "color": "rgba(237, 129, 40, 0.89)",
-                      "value": 10
+                      "value": 5
                     },
                     {
                       "color": "rgba(245, 54, 54, 0.9)",
-                      "value": 50
+                      "value": 15
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "avg_relationship_strength"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Avg Strength"
+              },
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "custom.align"
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "rgba(245, 54, 54, 0.9)",
+                      "value": 0
+                    },
+                    {
+                      "color": "rgba(237, 129, 40, 0.89)",
+                      "value": 2
+                    },
+                    {
+                      "color": "rgba(50, 172, 45, 0.97)",
+                      "value": 4
                     }
                   ]
                 }
@@ -803,12 +852,12 @@
         ]
       },
       "gridPos": {
-        "h": 9,
+        "h": 17,
         "w": 12,
         "x": 12,
         "y": 12
       },
-      "id": 22,
+      "id": 21,
       "options": {
         "cellHeight": "sm",
         "showHeader": true
@@ -824,7 +873,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\n  relationshipstatus,\n  COUNT(*) AS count\nFROM\n  npc_social_connections\nWHERE\n  createdutc <= NOW()\nGROUP BY\n  relationshipstatus\nORDER BY\n  relationshipstatus",
+          "rawSql": "SELECT\n  CONCAT_WS(' ', n.npcprofile->'name'->>'first', n.npcprofile->'name'->>'last') AS npc_name,\n  COUNT(DISTINCT c.connectednpcid) AS connection_count,\n  COALESCE(AVG(c.relationshipstatus)::numeric(10,2), 0) AS avg_relationship_strength\nFROM\n  npc_social_connections c\n  INNER JOIN npcs n ON c.npcid = n.id\nGROUP BY\n  n.id, n.npcprofile->'name'->>'first', n.npcprofile->'name'->>'last'\nORDER BY\n  connection_count ASC\nLIMIT 50",
           "refId": "A",
           "sql": {
             "columns": [
@@ -845,7 +894,7 @@
           }
         }
       ],
-      "title": "RELATIONSHIP STATUS DISTRIBUTION",
+      "title": "LEAST CONNECTED NPCs",
       "transformations": [
         {
           "id": "merge",

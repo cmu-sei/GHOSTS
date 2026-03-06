@@ -38,7 +38,10 @@ public class CreateConnectionRequest
     public Guid ConnectedNpcId { get; set; }
     public string Name { get; set; }
     public string Distance { get; set; }
-    public int RelationshipStatus { get; set; }
+    /// <summary>
+    /// Relationship quality from -1.0 (bad) to 1.0 (perfect)
+    /// </summary>
+    public decimal RelationshipStatus { get; set; }
 }
 
 public class CreateKnowledgeRequest

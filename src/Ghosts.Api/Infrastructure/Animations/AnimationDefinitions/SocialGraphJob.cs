@@ -125,11 +125,14 @@ public class SocialGraphJob
                     var connection = npc.Connections.FirstOrDefault(c => c.ConnectedNpcId == learning.FromNpcId);
                     if (connection != null)
                     {
-                        connection.RelationshipStatus++;
+                        // Relationship improves or degrades randomly on scale from -1.0 to 1.0
+                        var change = (decimal)(_random.Value.NextDouble() * 0.2 - 0.05); // Random change between -0.05 and +0.15
+                        connection.RelationshipStatus = Math.Max(-1.0m, Math.Min(1.0m, connection.RelationshipStatus + change));
                         connection.UpdatedUtc = DateTime.UtcNow;
                         await Task.Delay(1500, _token);
+                        var direction = change > 0 ? "improved" : "declined";
                         await _hub.Clients.All.SendAsync("show", npc.CurrentStep, target.ConnectedNpcId, "relationship",
-                            $"{npc.NpcProfile.Name} improved relationship with {target.Name}",
+                            $"{npc.NpcProfile.Name} {direction} relationship with {target.Name} (now {connection.RelationshipStatus:F2})",
                             DateTime.Now.ToString(CultureInfo.InvariantCulture), _token);
                     }
                     else

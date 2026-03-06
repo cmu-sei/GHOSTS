@@ -93,7 +93,7 @@
           "hide": false,
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(*) FROM machines;",
+          "rawSql": "SELECT COUNT(*) FROM npcs;",
           "refId": "A",
           "select": [
             [

@@ -26,7 +26,7 @@ public interface INpcService
     public Task<IEnumerable<NpcPreference>> GetPreferences(Guid id);
     public Task<NpcPreference> CreatePreference(Guid id, Guid toNpcId, Guid fromNpcId, string name, long step, decimal weight, decimal strength);
     public Task<IEnumerable<NpcSocialConnection>> GetConnections(Guid id);
-    public Task<NpcSocialConnection> CreateConnection(Guid id, Guid connectedNpcId, string name, string distance, int relationshipStatus);
+    public Task<NpcSocialConnection> CreateConnection(Guid id, Guid connectedNpcId, string name, string distance, decimal relationshipStatus);
     public Task<IEnumerable<NpcLearning>> GetKnowledge(Guid id);
     public Task<NpcLearning> CreateKnowledge(Guid id, Guid toNpcId, Guid fromNpcId, string topic, long step, int value);
     public Task<IEnumerable<NpcBelief>> GetBeliefs(Guid id);
@@ -68,13 +68,15 @@ public class NpcService(ApplicationDbContext context) : INpcService
 
     public async Task<IEnumerable<NpcNameId>> GetListAsync()
     {
-        return await _context.Npcs
-            .Select(item => new NpcNameId
-            {
-                Id = item.Id,
-                Name = $"{item.NpcProfile.Name.First} {item.NpcProfile.Name.Last}"
-            })
-            .ToListAsync();
+        // Load NPCs first, then project in memory to properly deserialize JSONB
+        var npcs = await _context.Npcs.ToListAsync();
+        return npcs.Select(item => new NpcNameId
+        {
+            Id = item.Id,
+            Name = item.NpcProfile?.Name != null
+                ? $"{item.NpcProfile.Name.First} {item.NpcProfile.Name.Last}".Trim()
+                : "Unknown"
+        }).ToList();
     }
 
     public async Task SaveListAsync(Guid id, string username, string originUrl)
@@ -89,14 +91,17 @@ public class NpcService(ApplicationDbContext context) : INpcService
 
     public async Task<IEnumerable<NpcNameId>> GetListAsync(string campaign)
     {
-        return await _context.Npcs
+        // Load NPCs first, then project in memory to properly deserialize JSONB
+        var npcs = await _context.Npcs
             .Where(x => x.Campaign == campaign)
-            .Select(item => new NpcNameId
-            {
-                Id = item.Id,
-                Name = $"{item.NpcProfile.Name.First} {item.NpcProfile.Name.Last}"
-            })
             .ToListAsync();
+        return npcs.Select(item => new NpcNameId
+        {
+            Id = item.Id,
+            Name = item.NpcProfile?.Name != null
+                ? $"{item.NpcProfile.Name.First} {item.NpcProfile.Name.Last}".Trim()
+                : "Unknown"
+        }).ToList();
     }
 
     public async Task<IEnumerable<NpcRecord>> GetTeam(string campaign, string enclave, string team)
@@ -206,9 +211,9 @@ public class NpcService(ApplicationDbContext context) : INpcService
     /// <param name="connectedNpcId">The connected NPC ID (target)</param>
     /// <param name="name">Connection/relationship name</param>
     /// <param name="distance">Physical or social distance</param>
-    /// <param name="relationshipStatus">Status code for the relationship</param>
+    /// <param name="relationshipStatus">Relationship quality from -1.0 (bad) to 1.0 (perfect)</param>
     /// <returns>The created NpcSocialConnection</returns>
-    public async Task<NpcSocialConnection> CreateConnection(Guid id, Guid connectedNpcId, string name, string distance, int relationshipStatus)
+    public async Task<NpcSocialConnection> CreateConnection(Guid id, Guid connectedNpcId, string name, string distance, decimal relationshipStatus)
     {
         var npcConnection = new NpcSocialConnection
         {
@@ -295,12 +300,34 @@ public class NpcService(ApplicationDbContext context) : INpcService
 
     public async Task<NpcRecord> CreateOne()
     {
-        var npc = NpcRecord.TransformToNpc(Npc.Generate(MilitaryUnits.GetServiceBranch()));
-        npc.Id = npc.NpcProfile.Id;
-        npc.CreatedUtc = DateTime.UtcNow;
-        _context.Npcs.Add(npc);
-        await _context.SaveChangesAsync();
-        return npc;
+        const int maxAttempts = 5;
+        Exception lastException = null;
+
+        for (int attempt = 1; attempt <= maxAttempts; attempt++)
+        {
+            try
+            {
+                var npc = NpcRecord.TransformToNpc(Npc.Generate(MilitaryUnits.GetServiceBranch()));
+                npc.Id = npc.NpcProfile.Id;
+                npc.CreatedUtc = DateTime.UtcNow;
+                _context.Npcs.Add(npc);
+                await _context.SaveChangesAsync();
+                return npc;
+            }
+            catch (Exception ex)
+            {
+                lastException = ex;
+                _log.Warn($"Failed to create NPC, attempt {attempt}/{maxAttempts}: {ex.Message}");
+                if (attempt < maxAttempts)
+                {
+                    // Brief delay before retry
+                    await Task.Delay(100);
+                }
+            }
+        }
+
+        _log.Error($"Failed to create NPC after {maxAttempts} attempts");
+        throw new Exception($"Failed to create NPC after {maxAttempts} attempts", lastException);
     }
 
     public async Task<NpcRecord> CreateOne(NpcProfile npcProfile)
@@ -342,22 +369,46 @@ public class NpcService(ApplicationDbContext context) : INpcService
                     _log.Warn("Cannot generate more than 25 NPCs at a time, sorry.");
                     team.Npcs.Number = 25;
                 }
-                for (var i = 0; i < team.Npcs.Number; i++)
-                {
-                    var last = t.ElapsedMilliseconds;
-                    var branch = team.Npcs.Configuration?.Branch ?? MilitaryUnits.GetServiceBranch();
-                    var npc = NpcRecord.TransformToNpc(Npc.Generate(new NpcGenerationConfiguration
-                    { Branch = branch, PreferenceSettings = team.PreferenceSettings }));
-                    npc.Id = npc.NpcProfile.Id;
-                    npc.CreatedUtc = DateTime.UtcNow;
-                    npc.Team = team.Name;
-                    npc.Campaign = config.Campaign;
-                    npc.Enclave = enclave.Name;
-                    npc.ScenarioId = config.ScenarioId;
 
-                    _context.Npcs.Add(npc);
-                    createdNpcs.Add(npc);
-                    _log.Trace($"{i} generated in {t.ElapsedMilliseconds - last} ms");
+                var successfulCount = 0;
+                var attempts = 0;
+                const int maxAttemptsPerNpc = 5;
+
+                // Keep generating until we have the requested number
+                while (successfulCount < team.Npcs.Number)
+                {
+                    try
+                    {
+                        var last = t.ElapsedMilliseconds;
+                        var branch = team.Npcs.Configuration?.Branch ?? MilitaryUnits.GetServiceBranch();
+                        var npc = NpcRecord.TransformToNpc(Npc.Generate(new NpcGenerationConfiguration
+                        { Branch = branch, PreferenceSettings = team.PreferenceSettings }));
+                        npc.Id = npc.NpcProfile.Id;
+                        npc.CreatedUtc = DateTime.UtcNow;
+                        npc.Team = team.Name;
+                        npc.Campaign = config.Campaign;
+                        npc.Enclave = enclave.Name;
+                        npc.ScenarioId = config.ScenarioId;
+
+                        _context.Npcs.Add(npc);
+                        createdNpcs.Add(npc);
+                        successfulCount++;
+                        attempts = 0; // Reset attempts counter after success
+                        _log.Trace($"NPC {successfulCount}/{team.Npcs.Number} generated in {t.ElapsedMilliseconds - last} ms");
+                    }
+                    catch (Exception ex)
+                    {
+                        attempts++;
+                        _log.Warn($"Failed to generate NPC {successfulCount + 1}/{team.Npcs.Number}, attempt {attempts}/{maxAttemptsPerNpc}: {ex.Message}");
+
+                        // If we've exceeded max attempts for this NPC, log and move on
+                        if (attempts >= maxAttemptsPerNpc)
+                        {
+                            _log.Error($"Failed to generate NPC after {maxAttemptsPerNpc} attempts. Skipping. Total successful: {successfulCount}/{team.Npcs.Number}");
+                            attempts = 0; // Reset for next NPC
+                            // Note: We don't increment successfulCount, so we'll keep trying
+                        }
+                    }
                 }
             }
         }

@@ -27,7 +27,10 @@ public class NpcSocialConnection
     [MaxLength(50)]
     public string Distance { get; set; }
 
-    public int RelationshipStatus { get; set; }
+    /// <summary>
+    /// Relationship quality on a scale from -1.0 (bad) to 1.0 (perfect)
+    /// </summary>
+    public decimal RelationshipStatus { get; set; }
 
     public DateTime CreatedUtc { get; set; }
     public DateTime UpdatedUtc { get; set; }
