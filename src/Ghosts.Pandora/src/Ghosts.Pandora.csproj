@@ -1,0 +1,73 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>disable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <AssemblyName>Ghosts.Pandora</AssemblyName>
+        <RootNamespace>Ghosts.Pandora</RootNamespace>
+        <noWarn>8618</noWarn>
+
+        <!-- Disable automatic wwwroot content inclusion to prevent duplicates -->
+        <EnableDefaultContentItems>false</EnableDefaultContentItems>
+
+        <ReleaseVersion>9.0.0.0</ReleaseVersion>
+        <Version>9.0.0.0</Version>
+        <AssemblyVersion>9.0.0.0</AssemblyVersion>
+        <FileVersion>9.0.0.0</FileVersion>
+        <SynchReleaseVersion>false</SynchReleaseVersion>
+
+        <Authors>GHOSTS Development Team @ Carnegie Mellon University</Authors>
+        <Company>Carnegie Mellon University</Company>
+        <Product>GHOSTS PANDORA</Product>
+        <Description>GHOSTS PANDORA - please email ddupdyke [-at-] sei.cmu.edu with bugs/requests/other</Description>
+        <Copyright>Carnegie Mellon University 2022</Copyright>
+        <LangVersion>latest</LangVersion>
+    </PropertyGroup>
+
+    <!-- Manually include content items that EnableDefaultContentItems would have included -->
+    <ItemGroup>
+        <Content Include="wwwroot\**" />
+        <Content Include="**\*.cshtml" />
+        <Content Include="**\*.css" Exclude="**\*.cshtml.css" />
+        <Content Include="**\*.js" />
+        <None Remove="**\*.cshtml" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Faker.Net" Version="2.0.163" />
+      <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="10.0.0" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.0" />
+      <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
+      <PackageReference Include="Swashbuckle.AspNetCore" Version="10.0.1" />
+      <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="10.0.1" />
+
+      <!-- Pandora Content Generation Packages -->
+      <PackageReference Include="QuestPDF" Version="2025.7.4" />
+      <PackageReference Include="ClosedXML" Version="0.105.0" />
+      <PackageReference Include="DocumentFormat.OpenXml" Version="3.3.0" />
+      <PackageReference Include="SkiaSharp" Version="3.119.1" />
+      <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="3.119.1" />
+      <PackageReference Include="SharpCompress" Version="0.42.1" />
+      <PackageReference Include="CsvHelper" Version="33.1.0" />
+    </ItemGroup>
+
+    <!-- Folder includes removed to prevent duplicate content items -->
+    <!--<ItemGroup>
+      <Folder Include="Views\Themes\" />
+      <Folder Include="wwwroot\images\u\" />
+    </ItemGroup>-->
+
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="Views\Home\Detail.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Home\Index.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Posts\Detail.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Users\Index.cshtml" />
+      <_ContentIncludedByDefault Remove="wwwroot\themes\facebook\js\facebook.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\themes\instagram\js\feed.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\themes\reddit\js\feed.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\themes\reddit\js\post.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\themes\reddit\js\profile.js" />
+    </ItemGroup>
+
+</Project>

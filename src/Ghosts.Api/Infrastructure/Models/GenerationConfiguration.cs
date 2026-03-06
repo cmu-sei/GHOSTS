@@ -17,6 +17,8 @@ public class GenerationConfiguration
     public string Campaign { get; set; }
     // Enclaves are specific subnets of a range, (or a larger number of people)
     public IList<EnclaveConfiguration> Enclaves { get; set; }
+    // Optional scenario ID to associate generated NPCs with a specific scenario
+    public int? ScenarioId { get; set; }
 }
 
 public class EnclaveConfiguration

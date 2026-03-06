@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Ghosts.Api.Areas.Animator.Infrastructure.Models;
 using Ghosts.Api.Infrastructure.Models;
 using Ghosts.Animator;
 using Ghosts.Animator.Models;
@@ -19,14 +18,26 @@ public interface INpcService
     public Task<IEnumerable<NpcRecord>> GetAll();
     public Task<IEnumerable<NpcRecord>> GetEnclave(string campaign, string enclave);
     public Task<IEnumerable<NpcNameId>> GetListAsync();
+    public Task SaveListAsync(Guid id, string username, string originUrl);
     public Task<IEnumerable<NpcRecord>> GetTeam(string campaign, string enclave, string team);
     public Task<NpcRecord> GetById(Guid id);
+    public Task<IEnumerable<NpcActivity>> GetActivity(Guid id);
+    public Task<NpcActivity> CreateActivity(Guid id, string activityType, string detail);
+    public Task<IEnumerable<NpcPreference>> GetPreferences(Guid id);
+    public Task<NpcPreference> CreatePreference(Guid id, Guid toNpcId, Guid fromNpcId, string name, long step, decimal weight, decimal strength);
+    public Task<IEnumerable<NpcSocialConnection>> GetConnections(Guid id);
+    public Task<NpcSocialConnection> CreateConnection(Guid id, Guid connectedNpcId, string name, string distance, decimal relationshipStatus);
+    public Task<IEnumerable<NpcLearning>> GetKnowledge(Guid id);
+    public Task<NpcLearning> CreateKnowledge(Guid id, Guid toNpcId, Guid fromNpcId, string topic, long step, int value);
+    public Task<IEnumerable<NpcBelief>> GetBeliefs(Guid id);
+    public Task<NpcBelief> CreateBelief(Guid id, Guid toNpcId, Guid fromNpcId, string name, long step, decimal likelihood, decimal posterior);
     public Task<IEnumerable<NpcRecord>> Create(GenerationConfiguration config, CancellationToken ct);
     public Task<NpcRecord> CreateOne();
     Task<NpcRecord> CreateOne(NpcProfile npc);
     public Task DeleteById(Guid id);
     public Task<IEnumerable<string>> GetKeys(string key);
     public Task SyncWithMachineUsernames();
+    public Task<IEnumerable<NpcRecord>> GetByScenarioId(int scenarioId);
 }
 
 public class NpcService(ApplicationDbContext context) : INpcService
@@ -36,63 +47,306 @@ public class NpcService(ApplicationDbContext context) : INpcService
 
     public async Task<IEnumerable<NpcRecord>> GetAll()
     {
-        return await _context.Npcs.ToListAsync();
+        return await _context.Npcs
+            .Include(n => n.Connections)
+            .Include(n => n.Knowledge)
+            .Include(n => n.Beliefs)
+            .Include(n => n.Preferences)
+            .ToListAsync();
     }
 
     public async Task<IEnumerable<NpcRecord>> GetEnclave(string campaign, string enclave)
     {
-        return await _context.Npcs.Where(x => x.Campaign == campaign && x.Enclave == enclave).ToListAsync();
+        return await _context.Npcs
+            .Include(n => n.Connections)
+            .Include(n => n.Knowledge)
+            .Include(n => n.Beliefs)
+            .Include(n => n.Preferences)
+            .Where(x => x.Campaign == campaign && x.Enclave == enclave)
+            .ToListAsync();
     }
 
     public async Task<IEnumerable<NpcNameId>> GetListAsync()
     {
-        return await _context.Npcs
-            .Select(item => new NpcNameId
-            {
-                Id = item.Id,
-                Name = $"{item.NpcProfile.Name.First} {item.NpcProfile.Name.Last}"
-            })
-            .ToListAsync();
+        // Load NPCs first, then project in memory to properly deserialize JSONB
+        var npcs = await _context.Npcs.ToListAsync();
+        return npcs.Select(item => new NpcNameId
+        {
+            Id = item.Id,
+            Name = item.NpcProfile?.Name != null
+                ? $"{item.NpcProfile.Name.First} {item.NpcProfile.Name.Last}".Trim()
+                : "Unknown"
+        }).ToList();
+    }
+
+    public async Task SaveListAsync(Guid id, string username, string originUrl)
+    {
+        var npc = NpcRecord.TransformToNpc(Npc.Generate(MilitaryUnits.GetServiceBranch()));
+        npc.Id = id;
+        npc.NpcProfile.Accounts = new List<AccountsProfile.Account> { new() { Username = username, Url = originUrl } };
+        npc.CreatedUtc = DateTime.UtcNow;
+        _context.Npcs.Add(npc);
+        await _context.SaveChangesAsync();
     }
 
     public async Task<IEnumerable<NpcNameId>> GetListAsync(string campaign)
     {
-        return await _context.Npcs
+        // Load NPCs first, then project in memory to properly deserialize JSONB
+        var npcs = await _context.Npcs
             .Where(x => x.Campaign == campaign)
-            .Select(item => new NpcNameId
-            {
-                Id = item.Id,
-                Name = $"{item.NpcProfile.Name.First} {item.NpcProfile.Name.Last}"
-            })
             .ToListAsync();
+        return npcs.Select(item => new NpcNameId
+        {
+            Id = item.Id,
+            Name = item.NpcProfile?.Name != null
+                ? $"{item.NpcProfile.Name.First} {item.NpcProfile.Name.Last}".Trim()
+                : "Unknown"
+        }).ToList();
     }
 
     public async Task<IEnumerable<NpcRecord>> GetTeam(string campaign, string enclave, string team)
     {
-        return await _context.Npcs.Where(x => x.Campaign == campaign && x.Enclave == enclave && x.Team == team).ToListAsync();
+        return await _context.Npcs
+            .Include(n => n.Connections)
+            .Include(n => n.Knowledge)
+            .Include(n => n.Beliefs)
+            .Include(n => n.Preferences)
+            .Where(x => x.Campaign == campaign && x.Enclave == enclave && x.Team == team)
+            .ToListAsync();
     }
 
     public async Task<NpcRecord> GetById(Guid id)
     {
-        return await _context.Npcs.FirstOrDefaultAsync(x => x.Id == id);
+        return await _context.Npcs
+            .Include(n => n.Connections)
+            .Include(n => n.Knowledge)
+            .Include(n => n.Beliefs)
+            .Include(n => n.Preferences)
+            .FirstOrDefaultAsync(x => x.Id == id);
+    }
+
+    public async Task<IEnumerable<NpcActivity>> GetActivity(Guid id)
+    {
+        return await _context.NpcActivities
+            .Where(x => x.NpcId == id)
+            .OrderByDescending(x => x.CreatedUtc)
+            .ToListAsync();
+    }
+
+    public async Task<NpcActivity> CreateActivity(Guid id, string activityType, string detail)
+    {
+        var npcActivity = new NpcActivity
+        {
+            NpcId = id,
+            Detail = detail,
+            CreatedUtc = DateTime.UtcNow
+        };
+        if (Enum.TryParse<NpcActivity.ActivityTypes>(activityType, true, out var value))
+        {
+            npcActivity.ActivityType = value;
+        }
+
+        _context.NpcActivities.Add(npcActivity);
+        await _context.SaveChangesAsync();
+
+        return npcActivity;
+    }
+
+    public async Task<IEnumerable<NpcPreference>> GetPreferences(Guid id)
+    {
+        return await _context.NpcPreferences
+            .Where(x => x.NpcId == id)
+            .OrderByDescending(x => x.CreatedUtc)
+            .ToListAsync();
+    }
+
+    /// <summary>
+    /// Creates a new preference record for a specific NPC
+    /// </summary>
+    /// <param name="id">The NPC ID</param>
+    /// <param name="toNpcId">Target NPC ID</param>
+    /// <param name="fromNpcId">Source NPC ID</param>
+    /// <param name="name">Preference name/topic</param>
+    /// <param name="step">Simulation step</param>
+    /// <param name="weight">Base weight/importance (0.0-1.0)</param>
+    /// <param name="strength">Current strength value</param>
+    /// <returns>The created NpcPreference</returns>
+    public async Task<NpcPreference> CreatePreference(Guid id, Guid toNpcId, Guid fromNpcId, string name, long step, decimal weight, decimal strength)
+    {
+        var npcPreference = new NpcPreference
+        {
+            NpcId = id,
+            ToNpcId = toNpcId,
+            FromNpcId = fromNpcId,
+            Name = name,
+            Step = step,
+            Weight = weight,
+            Strength = strength,
+            CreatedUtc = DateTime.UtcNow
+        };
+
+        _context.NpcPreferences.Add(npcPreference);
+        await _context.SaveChangesAsync();
+
+        return npcPreference;
+    }
+
+    /// <summary>
+    /// Gets all social connections for a specific NPC, ordered by most recently updated
+    /// </summary>
+    /// <param name="id">The NPC ID</param>
+    /// <returns>Collection of NpcSocialConnection records</returns>
+    public async Task<IEnumerable<NpcSocialConnection>> GetConnections(Guid id)
+    {
+        return await _context.NpcSocialConnections
+            .Where(x => x.NpcId == id)
+            .OrderByDescending(x => x.UpdatedUtc)
+            .ToListAsync();
+    }
+
+    /// <summary>
+    /// Creates a new social connection between two NPCs
+    /// </summary>
+    /// <param name="id">The NPC ID (source of the connection)</param>
+    /// <param name="connectedNpcId">The connected NPC ID (target)</param>
+    /// <param name="name">Connection/relationship name</param>
+    /// <param name="distance">Physical or social distance</param>
+    /// <param name="relationshipStatus">Relationship quality from -1.0 (bad) to 1.0 (perfect)</param>
+    /// <returns>The created NpcSocialConnection</returns>
+    public async Task<NpcSocialConnection> CreateConnection(Guid id, Guid connectedNpcId, string name, string distance, decimal relationshipStatus)
+    {
+        var npcConnection = new NpcSocialConnection
+        {
+            Id = Guid.NewGuid().ToString(),
+            NpcId = id,
+            ConnectedNpcId = connectedNpcId,
+            Name = name,
+            Distance = distance,
+            RelationshipStatus = relationshipStatus,
+            CreatedUtc = DateTime.UtcNow,
+            UpdatedUtc = DateTime.UtcNow
+        };
+
+        _context.NpcSocialConnections.Add(npcConnection);
+        await _context.SaveChangesAsync();
+
+        return npcConnection;
+    }
+
+    public async Task<IEnumerable<NpcLearning>> GetKnowledge(Guid id)
+    {
+        return await _context.NpcLearning
+            .Where(x => x.NpcId == id)
+            .OrderByDescending(x => x.CreatedUtc)
+            .ToListAsync();
+    }
+
+    public async Task<NpcLearning> CreateKnowledge(Guid id, Guid toNpcId, Guid fromNpcId, string topic, long step, int value)
+    {
+        var npcKnowledge = new NpcLearning(id, toNpcId, fromNpcId, topic, step, value)
+        {
+            CreatedUtc = DateTime.UtcNow
+        };
+
+        _context.NpcLearning.Add(npcKnowledge);
+        await _context.SaveChangesAsync();
+
+        return npcKnowledge;
+    }
+
+    /// <summary>
+    /// Gets all beliefs for a specific NPC, ordered by most recent
+    /// </summary>
+    /// <param name="id">The NPC ID</param>
+    /// <returns>Collection of NpcBelief records</returns>
+    public async Task<IEnumerable<NpcBelief>> GetBeliefs(Guid id)
+    {
+        return await _context.NpcBeliefs
+            .Where(x => x.NpcId == id)
+            .OrderByDescending(x => x.CreatedUtc)
+            .ToListAsync();
+    }
+
+    /// <summary>
+    /// Creates a new belief record for a specific NPC
+    /// </summary>
+    /// <param name="id">The NPC ID</param>
+    /// <param name="toNpcId">Target NPC ID</param>
+    /// <param name="fromNpcId">Source NPC ID</param>
+    /// <param name="name">Belief statement</param>
+    /// <param name="step">Simulation step</param>
+    /// <param name="likelihood">Base likelihood value</param>
+    /// <param name="posterior">Bayesian posterior probability</param>
+    /// <returns>The created NpcBelief</returns>
+    public async Task<NpcBelief> CreateBelief(Guid id, Guid toNpcId, Guid fromNpcId, string name, long step, decimal likelihood, decimal posterior)
+    {
+        var npcBelief = new NpcBelief
+        {
+            NpcId = id,
+            ToNpcId = toNpcId,
+            FromNpcId = fromNpcId,
+            Name = name,
+            Step = step,
+            Likelihood = likelihood,
+            Posterior = posterior,
+            CreatedUtc = DateTime.UtcNow
+        };
+
+        _context.NpcBeliefs.Add(npcBelief);
+        await _context.SaveChangesAsync();
+
+        return npcBelief;
     }
 
     public async Task<NpcRecord> CreateOne()
     {
-        var npc = NpcRecord.TransformToNpc(Npc.Generate(MilitaryUnits.GetServiceBranch()));
-        npc.Id = npc.NpcProfile.Id;
-        _context.Npcs.Add(npc);
-        await _context.SaveChangesAsync();
-        return npc;
+        const int maxAttempts = 5;
+        Exception lastException = null;
+
+        for (int attempt = 1; attempt <= maxAttempts; attempt++)
+        {
+            try
+            {
+                var npc = NpcRecord.TransformToNpc(Npc.Generate(MilitaryUnits.GetServiceBranch()));
+                npc.Id = npc.NpcProfile.Id;
+                npc.CreatedUtc = DateTime.UtcNow;
+                _context.Npcs.Add(npc);
+                await _context.SaveChangesAsync();
+                return npc;
+            }
+            catch (Exception ex)
+            {
+                lastException = ex;
+                _log.Warn($"Failed to create NPC, attempt {attempt}/{maxAttempts}: {ex.Message}");
+                if (attempt < maxAttempts)
+                {
+                    // Brief delay before retry
+                    await Task.Delay(100);
+                }
+            }
+        }
+
+        _log.Error($"Failed to create NPC after {maxAttempts} attempts");
+        throw new Exception($"Failed to create NPC after {maxAttempts} attempts", lastException);
     }
 
     public async Task<NpcRecord> CreateOne(NpcProfile npcProfile)
     {
         var npc = new NpcRecord
         {
-            NpcProfile = npcProfile
+            NpcProfile = npcProfile,
+            CreatedUtc = DateTime.UtcNow
         };
         npc.Id = npc.NpcProfile.Id;
+
+        // Check if ScenarioId is provided in Attributes dictionary
+        if (npcProfile.Attributes != null &&
+            npcProfile.Attributes.TryGetValue("ScenarioId", out var scenarioIdStr) &&
+            int.TryParse(scenarioIdStr, out var scenarioId))
+        {
+            npc.ScenarioId = scenarioId;
+        }
+
         _context.Npcs.Add(npc);
         await _context.SaveChangesAsync();
         return npc;
@@ -115,21 +369,46 @@ public class NpcService(ApplicationDbContext context) : INpcService
                     _log.Warn("Cannot generate more than 25 NPCs at a time, sorry.");
                     team.Npcs.Number = 25;
                 }
-                for (var i = 0; i < team.Npcs.Number; i++)
-                {
-                    var last = t.ElapsedMilliseconds;
-                    var branch = team.Npcs.Configuration?.Branch ?? MilitaryUnits.GetServiceBranch();
-                    var npc = NpcRecord.TransformToNpc(Npc.Generate(new NpcGenerationConfiguration
-                    { Branch = branch, PreferenceSettings = team.PreferenceSettings }));
-                    npc.Id = npc.NpcProfile.Id;
-                    npc.Team = team.Name;
-                    npc.Campaign = config.Campaign;
-                    npc.Enclave = enclave.Name;
-                    npc.NpcSocialGraph = new NpcSocialGraph { Id = npc.Id };
 
-                    _context.Npcs.Add(npc);
-                    createdNpcs.Add(npc);
-                    _log.Trace($"{i} generated in {t.ElapsedMilliseconds - last} ms");
+                var successfulCount = 0;
+                var attempts = 0;
+                const int maxAttemptsPerNpc = 5;
+
+                // Keep generating until we have the requested number
+                while (successfulCount < team.Npcs.Number)
+                {
+                    try
+                    {
+                        var last = t.ElapsedMilliseconds;
+                        var branch = team.Npcs.Configuration?.Branch ?? MilitaryUnits.GetServiceBranch();
+                        var npc = NpcRecord.TransformToNpc(Npc.Generate(new NpcGenerationConfiguration
+                        { Branch = branch, PreferenceSettings = team.PreferenceSettings }));
+                        npc.Id = npc.NpcProfile.Id;
+                        npc.CreatedUtc = DateTime.UtcNow;
+                        npc.Team = team.Name;
+                        npc.Campaign = config.Campaign;
+                        npc.Enclave = enclave.Name;
+                        npc.ScenarioId = config.ScenarioId;
+
+                        _context.Npcs.Add(npc);
+                        createdNpcs.Add(npc);
+                        successfulCount++;
+                        attempts = 0; // Reset attempts counter after success
+                        _log.Trace($"NPC {successfulCount}/{team.Npcs.Number} generated in {t.ElapsedMilliseconds - last} ms");
+                    }
+                    catch (Exception ex)
+                    {
+                        attempts++;
+                        _log.Warn($"Failed to generate NPC {successfulCount + 1}/{team.Npcs.Number}, attempt {attempts}/{maxAttemptsPerNpc}: {ex.Message}");
+
+                        // If we've exceeded max attempts for this NPC, log and move on
+                        if (attempts >= maxAttemptsPerNpc)
+                        {
+                            _log.Error($"Failed to generate NPC after {maxAttemptsPerNpc} attempts. Skipping. Total successful: {successfulCount}/{team.Npcs.Number}");
+                            attempts = 0; // Reset for next NPC
+                            // Note: We don't increment successfulCount, so we'll keep trying
+                        }
+                    }
                 }
             }
         }
@@ -184,12 +463,24 @@ public class NpcService(ApplicationDbContext context) : INpcService
             //todo: need to be sure user is aligned with the machine currentusername
 
             npc.Id = npc.NpcProfile.Id;
+            npc.CreatedUtc = DateTime.UtcNow;
             npc.MachineId = machine.Id;
             _context.Npcs.Add(npc);
             _log.Trace($"NPC created for {machine.CurrentUsername}...");
         }
 
         await _context.SaveChangesAsync();
-        _log.Trace($"NPCs created for each username in machines");
+        _log.Trace("NPCs created for each username in machines");
+    }
+
+    public async Task<IEnumerable<NpcRecord>> GetByScenarioId(int scenarioId)
+    {
+        return await _context.Npcs
+            .Include(n => n.Connections)
+            .Include(n => n.Knowledge)
+            .Include(n => n.Beliefs)
+            .Include(n => n.Preferences)
+            .Where(x => x.ScenarioId == scenarioId)
+            .ToListAsync();
     }
 }

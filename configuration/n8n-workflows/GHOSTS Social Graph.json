@@ -1,0 +1,446 @@
+{
+  "name": "GHOSTS Social Graph",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "*/5 * * * *"
+            }
+          ]
+        }
+      },
+      "id": "b8c72b96-ab29-4a1d-931c-c47be07a3803",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -2080,
+        736
+      ]
+    },
+    {
+      "parameters": {
+        "url": "http://host.docker.internal:5000/api/npcs/list",
+        "options": {}
+      },
+      "id": "bdf0bc40-8254-4442-a16d-8860d6dd183c",
+      "name": "Get NPC List",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1856,
+        576
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get all incoming items\nconst items = $input.all();\n\n// Case 1: HTTP returned ONE item containing an array\nlet npcs;\nif (items.length === 1 && Array.isArray(items[0].json)) {\n  npcs = [...items[0].json];\n}\n// Case 2: Multiple items already split\nelse {\n  npcs = items.map(i => i.json);\n}\n\n// Fisher–Yates shuffle\nfor (let i = npcs.length - 1; i > 0; i--) {\n  const j = Math.floor(Math.random() * (i + 1));\n  [npcs[i], npcs[j]] = [npcs[j], npcs[i]];\n}\n\n// Select up to 10\nconst selected = npcs.slice(0, 10);\n\n// Return as n8n items\nreturn selected.map(npc => ({ json: npc }));\n"
+      },
+      "id": "424e6eb9-48c5-4953-bcc3-6879d939c35e",
+      "name": "Select Random NPCs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1648,
+        576
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "f2988713-cd63-4223-8faf-25c5ea45c909",
+      "name": "Split NPCs",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -1408,
+        -32
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=http://host.docker.internal:5000/api/npcs/{{ $json.id }}/connections",
+        "options": {}
+      },
+      "id": "abdac659-73cb-47ec-9df4-d0c5aa10574f",
+      "name": "Get Connections",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1008,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "no-connections",
+              "leftValue": "={{ $json.length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "4337fe2a-a2cc-4ace-a118-c55064eb0354",
+      "name": "Has Connections?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -1056,
+        576
+      ]
+    },
+    {
+      "parameters": {
+        "url": "http://host.docker.internal:5000/api/npcs/list",
+        "options": {}
+      },
+      "id": "92fcb08f-16f0-4983-a0b2-594bb7f93f6e",
+      "name": "Get Potential Connections",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -848,
+        464
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const npcId = $('Split NPCs').item.json.id;\nconst allNpcs = $input.item.json;\n\n// Filter out self and take first 10\nconst connections = allNpcs\n  .filter(n => n.id !== npcId)\n  .slice(0, 10);\n\nreturn connections.map(conn => ({\n  json: {\n    npcId: npcId,\n    connectedNpcId: conn.id,\n    name: conn.name\n  }\n}));"
+      },
+      "id": "d1a1245d-4400-4e2b-88b9-dd821103bcf7",
+      "name": "Prepare Initial Connections",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -656,
+        464
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://host.docker.internal:5000/api/npcs/{{ $json.npcId }}/connections",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"connectedNpcId\": \"{{ $json.connectedNpcId }}\",\n  \"name\": \"{{ $json.name }}\",\n  \"distance\": \"\",\n  \"relationshipStatus\": 0.0\n}",
+        "options": {}
+      },
+      "id": "5764fc82-03e2-4dff-9757-329cd7ac6f82",
+      "name": "Create Connection via API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -448,
+        464
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nif (!items || items.length === 0) {\n  return [];\n}\n\nlet npcConnections;\n\n// Case 1: HTTP returned ONE item containing an array\nif (items.length === 1 && Array.isArray(items[0].json)) {\n  npcConnections = [...items[0].json];\n}\n// Case 2: Already multiple items\nelse {\n  npcConnections = items.map(i => i.json);\n}\n\n// Weighted random selection\nconst maxInteract = npcConnections.length;\nlet interactCount = 0;\nlet prob = 0.4;\n\nfor (let i = 0; i < maxInteract; i++) {\n  if (Math.random() < prob) interactCount++;\n  prob *= 0.6;\n}\n\nif (interactCount === 0) interactCount = 1;\n\n// Fisher–Yates shuffle\nfor (let i = npcConnections.length - 1; i > 0; i--) {\n  const j = Math.floor(Math.random() * (i + 1));\n  [npcConnections[i], npcConnections[j]] = [npcConnections[j], npcConnections[i]];\n}\n\nconst selected = npcConnections.slice(\n  0,\n  Math.min(interactCount, npcConnections.length)\n);\n\nreturn selected.map(item => ({ json: item }));\n"
+      },
+      "id": "f2f18e15-f79b-4c14-9c93-a5d29c51973c",
+      "name": "Select Random Targets",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -848,
+        672
+      ],
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "url": "=http://host.docker.internal:5000/api/npcs/{{ $json.id }}/knowledge",
+        "options": {}
+      },
+      "id": "6ce5eab2-c9ed-4089-8e0d-29bc924fb21f",
+      "name": "Get NPC Knowledge",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -656,
+        672
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const topics = [\n  'cybersecurity','cloud computing','artificial intelligence',\n  'data science','devops','networking','programming',\n  'system administration','database management','security operations'\n];\n\n\nconst topic = topics[Math.floor(Math.random() * topics.length)];\n\nreturn {\n  json: {\n    npcId: $('Set Id').first().json.id,\n    fromNpcId: $('Select Random Targets').first().json.connectedNpcId,\n    toNpcId: $('Set Id').first().json.id,\n    topic,\n    step: Date.now(),\n    value: 1,\n    targetName: ''\n  }\n};\n"
+      },
+      "id": "1dce8bf1-1b45-4ecf-a026-18b3a48de6cd",
+      "name": "Process Learning",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -448,
+        672
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://host.docker.internal:5000/api/npcs/{{ $('Set Id').first().json.id }}/knowledge",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"toNpcId\": \"{{ $json.npcId }}\",\n  \"fromNpcId\": \"{{ $json.fromNpcId }}\",\n  \"topic\": \"{{ $json.topic }}\",\n  \"step\": {{ $json.step }},\n  \"value\": {{ $json.value }}\n}",
+        "options": {}
+      },
+      "id": "66bd18e7-9488-4fea-85a4-b6b32f94dc61",
+      "name": "Save Learning via API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -256,
+        672
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "15df98c8-89b7-44ed-80c0-90343b46505d",
+              "name": "id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1152,
+        -208
+      ],
+      "id": "d3416d65-a913-4f1c-ad49-c543d2385d8b",
+      "name": "Set Id"
+    },
+    {
+      "parameters": {
+        "path": "social_graph",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -2096,
+        304
+      ],
+      "id": "c9091b62-0aa7-494d-b65b-b629efcbb069",
+      "name": "Webhook",
+      "webhookId": "8e2967b8-f1fe-4f1b-a6c2-2ecb26a455ab"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get NPC List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get NPC List": {
+      "main": [
+        [
+          {
+            "node": "Select Random NPCs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select Random NPCs": {
+      "main": [
+        [
+          {
+            "node": "Split NPCs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split NPCs": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Set Id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Connections": {
+      "main": [
+        [
+          {
+            "node": "Has Connections?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Connections?": {
+      "main": [
+        [
+          {
+            "node": "Get Potential Connections",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Select Random Targets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Potential Connections": {
+      "main": [
+        [
+          {
+            "node": "Prepare Initial Connections",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Initial Connections": {
+      "main": [
+        [
+          {
+            "node": "Create Connection via API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Connection via API": {
+      "main": [
+        [
+          {
+            "node": "Split NPCs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select Random Targets": {
+      "main": [
+        [
+          {
+            "node": "Get NPC Knowledge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get NPC Knowledge": {
+      "main": [
+        [
+          {
+            "node": "Process Learning",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Learning": {
+      "main": [
+        [
+          {
+            "node": "Save Learning via API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Learning via API": {
+      "main": [
+        [
+          {
+            "node": "Split NPCs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Id": {
+      "main": [
+        [
+          {
+            "node": "Get Connections",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get NPC List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "ccd7de47-58ee-4009-bc00-ceeedc230ea2",
+  "meta": {
+    "instanceId": "8c7476ca19c683810b409378867cced101ccb763954f2e556a24d7e45cc001d7"
+  },
+  "id": "Lla1icFpY1t2fRgDAREQ3",
+  "tags": []
+}

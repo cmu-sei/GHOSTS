@@ -3,20 +3,17 @@ networks:
     driver: bridge
 
 services:
-  ghosts-ui:
-    build:
-      context: ../ghosts.ui
-      dockerfile: Dockerfile
-    container_name: ghosts-ui
-    depends_on:
-      - ghosts-api
+  ghosts-frontend:
+    image: dustinupdyke/ghosts-frontend
+    container_name: ghosts-frontend
     ports:
-      - '8080:8080'
+      - "4200:80"
     networks:
       - ghosts-network
     environment:
-      GHOSTS_API_URL: http://ghosts-api:5000
-  ghosts-postgres:
+      API_URL: ${WEB_API_URL:-http://host.docker.internal:5000/api}
+      N8N_API_URL: ${WEB_N8N_API_URL:-http://host.docker.internal:5678}
+  postgres:
     image: postgres:16.8
     container_name: ghosts-postgres
     environment:
@@ -27,12 +24,12 @@ services:
       - ghosts-postgres-data:/var/lib/postgresql/data
     logging:
       options:
-        max-size: '100m'
-        max-file: '5'
+        max-size: "100m"
+        max-file: "5"
     ports:
-      - '5432:5432'
+      - "5432:5432"
     healthcheck:
-      test: [ 'CMD-SHELL', 'pg_isready -U ghosts' ]
+      test: ["CMD-SHELL", "pg_isready -U ghosts"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -48,11 +45,27 @@ services:
       ghosts-postgres:
         condition: service_healthy
     ports:
-      - '5000:5000'
+      - "5000:5000"
+    environment:
+      N8N_API_URL: ${N8N_API_URL:-http://host.docker.internal:5678/api/v1/workflows}
+      N8N_API_KEY: ${N8N_API_KEY:-replace-me}
     networks:
       - ghosts-network
     restart: always
-  ghosts-grafana:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:latest
+    container_name: ghosts-n8n
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE=true
+      - N8N_SECURE_COOKIE=false
+    volumes:
+      - ./n8n_data:/home/node/.n8n
+    networks:
+      - ghosts-network
+    restart: unless-stopped
+  grafana:
     image: grafana/grafana
     container_name: ghosts-grafana
     depends_on:
@@ -65,7 +78,7 @@ services:
       - GF_AUTH_DISABLE_LOGIN_FORM=true
       - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/etc/grafana/provisioning/dashboards/GHOSTS-5-default Grafana dashboard.json
     ports:
-      - '3000:3000'
+      - "3000:3000"
     networks:
       - ghosts-network
     restart: always

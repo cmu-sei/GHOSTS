@@ -1,0 +1,243 @@
+{
+  "name": "GHOSTS Preferences",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {
+          "reset": false
+        }
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -208,
+        144
+      ],
+      "id": "d8cf2b3d-6444-478a-8232-28a4aa97b278",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "path": "94358d00-953d-4e63-b050-47ffbb67e15f",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -656,
+        144
+      ],
+      "id": "95e5af26-e2ef-4cea-b51f-033dde7cfada",
+      "name": "Webhook",
+      "webhookId": "94358d00-953d-4e63-b050-47ffbb67e15f"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are given a personal profile as JSON:\n\n{{ $json.toJsonString() }}\n\nTask:\n- Infer ONE concrete personal preference for something.\n- Choose a strength from -100 (strong dislike) to 100 (strong like).\n- The preference must be specific (not generic traits like “technology” or “learning”). The preference should not include the word \"preference\" or anything similar.\n\nOutput rules:\n- Output VALID JSON only.\n- Do not include explanations or extra text.\n\nExamples:\n- Printer A\n- Pickles\n- Facebook\n\nRequired output format (THIS IS LAW!):\n{\n  \"key\": \"<the name of the preference>\",\n  \"value\": <integer from -100 to 100>\n}\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        320,
+        96
+      ],
+      "id": "9c94f2bf-821c-4915-9b0a-d0f3cb44fb6b",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "mistral:7b",
+        "options": {
+          "temperature": 0.7
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        128,
+        368
+      ],
+      "id": "f11e7f68-21d6-46ad-938b-d05350e507f9",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "CSnCZgwAaP2zik7o",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "http://host.docker.internal:5000/api/npcs/list",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -416,
+        144
+      ],
+      "id": "7c1d966d-4e6d-4abb-91cf-8cd7c03bc730",
+      "name": "Get all NPCs"
+    },
+    {
+      "parameters": {
+        "url": "=http://host.docker.internal:5000/api/npcs/{{ $json.id }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "5dfaee84-68d2-4aed-a2a9-fa8f075b1027",
+      "name": "Get NPC detail"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -672,
+        368
+      ],
+      "id": "8c3cd10f-4ccf-4351-85f4-a3a4a7c3c86c",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://host.docker.internal:5000/api/npcs/{{ $('Get NPC detail').item.json.id }}/preferences",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json-patch+json",
+        "body": "={ \"name\": \"{{ JSON.parse($json.output).key }}\",   \"strength\": {{ JSON.parse($json.output).value }}\n }",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        608,
+        480
+      ],
+      "id": "611e63d3-2e5a-40f7-a826-597b85165cb9",
+      "name": "Post API Preference Update"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Get NPC detail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get all NPCs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Post API Preference Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get all NPCs": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get NPC detail": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get all NPCs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post API Preference Update": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "e7cce604-557f-49de-a1de-616b36537ede",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8c7476ca19c683810b409378867cced101ccb763954f2e556a24d7e45cc001d7"
+  },
+  "id": "u1aZGHN6FbEHsuyN",
+  "tags": []
+}

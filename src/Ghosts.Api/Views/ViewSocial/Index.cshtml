@@ -1,4 +1,4 @@
-@model List<Ghosts.Api.Infrastructure.Models.NpcSocialGraph>
+@model List<Ghosts.Api.Infrastructure.Models.NpcRecord>
 
 @{
     string GetStyle(int count)
@@ -54,7 +54,7 @@
                 {
                     <li class="list-group-item">
                         <img src="/api/npcs/@agent.Id/photo" height="16" width="16" alt="Profile thumbnail"/>
-                        @agent.Name / <a href="view-relationships/profile/@agent.Id">Profile</a> / <a href="view-social/@agent.Id">Social Graph</a>
+                        @agent.NpcProfile.Name.ToString() / <a href="view-relationships/profile/@agent.Id">Profile</a> / <a href="view-social/@agent.Id">Social Graph</a>
                         <div class="d-flex flex-wrap small">
                             @foreach (var learning in agent.Knowledge.GroupBy(x => x.Topic).OrderBy(x => x.Key))
                             {

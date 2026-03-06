@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Mvc;
 namespace Ghosts.Api.Controllers;
 
 [Controller]
-[Produces("application/json")]
 [Route("view-activities")]
 [ApiExplorerSettings(IgnoreApi = true)]
 public class ViewActivitiesController(ApplicationDbContext context) : Controller

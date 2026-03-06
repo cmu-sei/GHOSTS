@@ -11,6 +11,7 @@ using Ghosts.Api.Infrastructure.ContentServices;
 using Ghosts.Animator.Extensions;
 using Ghosts.Api.Infrastructure;
 using Ghosts.Api.Infrastructure.Data;
+using Ghosts.Api.Infrastructure.Models;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;

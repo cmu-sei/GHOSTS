@@ -1,0 +1,178 @@
+<div class="page-header">
+  <h1>NPC Activities</h1>
+  <div class="header-actions">
+    <button mat-raised-button color="accent" routerLink="/activities/dynamic">
+      <i class="fas fa-project-diagram"></i>
+      Live Network
+    </button>
+    <button mat-raised-button color="primary" (click)="loadNpcs()">
+      <i class="fas fa-sync"></i>
+      Refresh
+    </button>
+  </div>
+</div>
+
+<!-- Command Panel -->
+<mat-card class="command-card">
+  <mat-card-header>
+    <mat-card-title>Send AI Command to NPCs</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <form [formGroup]="commandForm" (ngSubmit)="sendCommand()">
+      <div class="form-grid">
+        <mat-form-field appearance="outline">
+          <mat-label>Handler</mat-label>
+          <mat-select formControlName="handler">
+            @for (handler of handlers; track handler) {
+              <mat-option [value]="handler">{{ handler }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Target NPC</mat-label>
+          <input matInput formControlName="who" placeholder="Name or 'random'">
+          <mat-hint>Enter NPC name or 'random' for random selection</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Scale</mat-label>
+          <input matInput type="number" formControlName="scale" min="1">
+          <mat-hint>Number of NPCs (>1 = random selection)</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Action</mat-label>
+          <textarea
+            matInput
+            formControlName="action"
+            rows="2"
+            placeholder="Describe the action to perform">
+          </textarea>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Reasoning (Optional)</mat-label>
+          <input matInput formControlName="reasoning" placeholder="Why this action?">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Sentiment (Optional)</mat-label>
+          <input matInput formControlName="sentiment" placeholder="Emotional context">
+        </mat-form-field>
+      </div>
+
+      <button
+        mat-raised-button
+        color="primary"
+        type="submit"
+        [disabled]="commandForm.invalid">
+        <i class="fas fa-paper-plane"></i>
+        Send Command
+      </button>
+    </form>
+  </mat-card-content>
+</mat-card>
+
+<!-- Activities Table -->
+<mat-card class="activities-card">
+  <mat-card-header>
+    <mat-card-title>Real-time Activity Monitor</mat-card-title>
+    <mat-card-subtitle>Auto-refreshes every 5 seconds</mat-card-subtitle>
+  </mat-card-header>
+  <mat-card-content>
+    @if (loading()) {
+      <div class="loading">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Loading NPC activities...</p>
+      </div>
+    } @else if (error()) {
+      <div class="error">
+        <i class="fas fa-exclamation-circle"></i>
+        <p>{{ error() }}</p>
+        <button mat-button color="primary" (click)="loadNpcs()">
+          <i class="fas fa-sync"></i>
+          Retry
+        </button>
+      </div>
+    } @else if (npcs().length === 0) {
+      <div class="empty-state">
+        <i class="fas fa-users"></i>
+        <p>No NPCs found. Create some NPCs to see their activities here.</p>
+      </div>
+    } @else {
+      <div class="table-container">
+        <table mat-table [dataSource]="npcs()">
+          <!-- Avatar Column -->
+          <ng-container matColumnDef="avatar">
+            <th mat-header-cell *matHeaderCellDef>Avatar</th>
+            <td mat-cell *matCellDef="let npc">
+              @if (getNpcAvatar(npc)) {
+                <img [src]="getNpcAvatar(npc)" [alt]="getNpcName(npc)" class="avatar">
+              } @else {
+                <div class="avatar-placeholder">
+                  <i class="fas fa-user"></i>
+                </div>
+              }
+            </td>
+          </ng-container>
+
+          <!-- Name Column -->
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>NPC Name</th>
+            <td mat-cell *matCellDef="let npc">
+              <div class="npc-info">
+                <strong>{{ getNpcName(npc) }}</strong>
+                @if (npc.campaign || npc.enclave || npc.team) {
+                  <small>
+                    @if (npc.campaign) {
+                      <span class="badge">{{ npc.campaign }}</span>
+                    }
+                    @if (npc.enclave) {
+                      <span class="badge">{{ npc.enclave }}</span>
+                    }
+                    @if (npc.team) {
+                      <span class="badge">{{ npc.team }}</span>
+                    }
+                  </small>
+                }
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Activity Column -->
+          <ng-container matColumnDef="activity">
+            <th mat-header-cell *matHeaderCellDef>Last Activity</th>
+            <td mat-cell *matCellDef="let npc">
+              <div class="activity-info">
+                <i
+                  [class]="'fas ' + getActivityIcon(npc.lastActivityType) + ' activity-icon ' + getActivityIconClass(npc.lastActivityType)"
+                  [matTooltip]="npc.lastActivityType || 'No activity'"
+                  matTooltipPosition="above">
+                </i>
+                <span class="activity-text">
+                  {{ npc.lastActivity || 'No recent activity' }}
+                </span>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Time Column -->
+          <ng-container matColumnDef="time">
+            <th mat-header-cell *matHeaderCellDef>Time</th>
+            <td mat-cell *matCellDef="let npc">
+              @if (npc.lastActivityTime) {
+                <span class="time-text">{{ npc.lastActivityTime | date:'short' }}</span>
+              } @else {
+                <span class="time-text muted">—</span>
+              }
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="activity-row"></tr>
+        </table>
+      </div>
+    }
+  </mat-card-content>
+</mat-card>

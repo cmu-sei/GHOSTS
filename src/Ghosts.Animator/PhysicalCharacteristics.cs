@@ -482,9 +482,16 @@ namespace Ghosts.Animator
             {
                 dir += GetBiologicalSex().ToString().ToLower();
             }
-            dir = Directory.GetDirectories(dir).RandomElement();
-            var file = Directory.GetFiles(dir).RandomElement();
 
+            var file = Directory.GetFiles(dir, "*", SearchOption.AllDirectories).RandomElement();
+
+            return file;
+        }
+
+        public static string GetPhotoUrl(BiologicalSex sex)
+        {
+            var dir = $"config/photos/{sex.ToString().ToLower()}";
+            var file = Directory.GetFiles(dir, "*", SearchOption.AllDirectories).RandomElement();
             return file;
         }
 
