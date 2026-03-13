@@ -1,0 +1,665 @@
+{
+  "name": "GHOSTS Real-time Chat",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Add your file here",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "File",
+              "fieldType": "file",
+              "acceptFileTypes": ".pdf",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d31bb8cf-1deb-4b74-b2c1-494c86d550f9",
+      "name": "On form submission",
+      "type": "n8n-nodes-base.formTrigger",
+      "position": [
+        144,
+        112
+      ],
+      "webhookId": "4e1e20d4-f759-42c8-8439-87b93f43aa7c",
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "qdrantCollection": {
+          "__rl": true,
+          "mode": "id",
+          "value": "rag_collection"
+        },
+        "options": {}
+      },
+      "id": "650a0f80-5403-4336-8b8d-91fad60d0b1d",
+      "name": "Qdrant Vector Store",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
+      "position": [
+        368,
+        112
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "model": "mxbai-embed-large:latest"
+      },
+      "id": "014535a6-a0e4-4e6c-9021-fd93f4107037",
+      "name": "Embeddings Ollama",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
+      "position": [
+        192,
+        320
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "options": {}
+      },
+      "id": "c7b5b362-c14a-41b8-a6f7-9667a7f98c42",
+      "name": "Default Data Loader",
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "position": [
+        512,
+        320
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "chunkSize": 200,
+        "chunkOverlap": 50,
+        "options": {}
+      },
+      "id": "e00ab372-4941-48fd-88c5-08ec069e64f7",
+      "name": "Recursive Character Text Splitter",
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "position": [
+        608,
+        544
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Data Ingestion\n**Add data to the semantic database",
+        "height": 700,
+        "width": 840,
+        "color": 3
+      },
+      "id": "2a7dd14f-0b62-4b4b-a890-f0e836518e2a",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        0
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "public": true,
+        "mode": "webhook",
+        "options": {}
+      },
+      "id": "01cbd094-32be-4d5c-9f1c-db3a9e360c48",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "position": [
+        976,
+        128
+      ],
+      "webhookId": "5e56a263-3a40-44bd-bc9d-1cfb3bc2a87d",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('When chat message received').item.json.chatInput }}",
+        "options": {
+          "systemMessage": "You are a snarky and short chatbot, and you never disclose that you are a bot. For each request, you must reply to the message without disclosing you are a bot in a short and to the point way.. You ALWAYS follow the scenario details:\n\n#Scenario: Cognitive / Digital-Twin Deception — Mirage Analytics\n\nAdversary conducts a coordinated campaign to subtly corrupt a military logistics digital-twin, degrading readiness forecasting and decision-cycle tempo. The attack exploits data-supply-chain infiltration, model poisoning, and narrative shaping to push Atropian commanders toward self-inflicted misallocation of scarce sustainment resources.\n\nTeams must detect model drift, identify backdoored supplier data, mitigate cognitive overload induced by conflicting reports, and restore analytic trust under time pressure.\n\n## Updated: Nov 10, 2025, 05:20 PM\n\n## Scenario Parameters\n\n### Nations\n\n- Atropia (Friendly) — Dependent on digital-twin–based sustainment forecasting for maneuver brigades.\n- Donovia (Adversary) — Conducting hybrid, below-threshold operations targeting confidence in Atropian decision-support systems.\n\n### Threat Actors\n\nPrimary Adversary: Data Access Broker (Proxy)\n\nA semi-deniable Donovian contractor providing covert access into multinational logistics platforms.\n\nCapability Rating: 6 (Coordinated access + ML-focused tradecraft)\n\n### Core TTPs:\n\n- ML:DataPoison — Introduces systematic bias into resupply predictions.\n- ML:LabelFlip — Reclassifies “healthy” equipment as “needs maintenance,” driving phantom supply demands.\n- ML:BackdoorTrigger — Hides a conditional logic pattern activated only when specific supplier codes appear.\n- ML:Drift — Incremental, non-salient parameter nudges to avoid triggering anomaly detectors.\n- INFO:PerceptionOps — Clouds analyst judgment via controlled leaks and ambiguous field testimonies.\n\n### Injects (Expanded)\n\nOnDetect\n\nBackdoor trigger discovered in supplier feed.\n\nDiscovered after a routine integrity check on CSV ingest.\n\nPattern: A rare combination of SKU prefix + supplier geocode causes models to underrate fuel consumption by 18–22%.\n\nThe logic appears “accidental,” encouraging debate: incompetence or hostile?\n\n#### T+0m — Degradation Phase\n\nTwin KPI divergence begins.\n\nPredictive maintenance model starts issuing fewer alerts.\n\nField units report slightly higher fuel burn but remain within normal variance.\n\nNo single alarm fires—drift is sub-threshold across all heuristics.\n\n#### T+45m — Cognitive Friction\n\nSystem dashboards show confidence intervals widening.\n\nAnalysts disagree visually on which plots “look off.”\n\nInternal messaging boards show confusion: “Is this drift? Is it weather? Sensor noise?”\n\n#### T+90m — Contradiction Injection\n\nField commanders report shortages inconsistent with the twin’s forecasts.\n\nA Donovian disinformation channel releases a “leaked screenshot” of Atropian analytics supposedly predicting major maintenance failures (fabricated).\n\nBlue analysts must now adjudicate which source of truth is poisoned: the field or the model.\n\n### User Pools (Expanded Roles)\n\nML Ops (2)\n\nMonitor drift indicators, isolation forests, SHAP values.\n\nMust decide whether to roll back model versions or isolate poisoned data pipelines.\n\nData Engineer (2)\n\nEvaluate supplier ETL workflows, cryptographic signatures, schema drift.\n\nIdentify which upstream data sources are compromised vs noisy.\n\nBlue Intel (1)\n\nCross-check Donovian information operations with telemetry metadata.\n\nAssess whether false narratives are amplifying cognitive uncertainty among Atropian staff.\n\nWhite Commander (1)\n\nMakes resupply and allocation decisions under uncertain data.\n\nPressured by political leadership demanding assurance of “analytics integrity.”\n\nRed Data Manipulator (2)\n\nContinues gradual poisoning if undetected.\n\nPushes suggestive disinformation that “analytics are unreliable,” eroding commander trust.\n\n#### Timeline Events (Beefed Up)\n\nT+0m — White Cell\n\nKPI anomaly notice\n\nDashboard auto-generates a low-confidence advisory: “Forecast variance trending upward.”\n\nNo mandatory alert—participants must decide whether this warrants investigation.\n\nT+60m — Red Cell\n\nData insertion event\n\nAdversary injects mislabeled maintenance records into a rarely-used archival bucket.\n\nML Ops team sees drift indicators fluctuate but not enough to halt runtime inference.\n\nT+120m — Blue Team\n\nLineage investigation (Pending)\n\nDiscovery of partial provenance gaps in supplier datasets.\n\nAnalysts must reconstruct data lineage across multiple ingestion hops.\n\nWhite commander demands an answer: “Is this system still safe to base maneuver planning on?”\n\nT+180m — Blue/White Cognitive Stressor\n\nConflicting Operational Reality\n\nA mechanized battalion reports unexpected downtime.\n\nDigital twin predicts >90% operational readiness.\n\nPressure mounts to declare the twin “unreliable.”\n\nT+240m — Red Cell Amplification\n\nNarrative shaping event\n\nA false “expert blog” claims Atropia is “hiding logistics failures.”\n\nSocial bots amplify the message.\n\nBlue Intel must counter-narrate while maintaining analytic integrity.\n\nT+300m — White Cell\n\nCommander decision brief (Pending)\n\nParticipants must recommend one of three risk postures:\n\nTrust the twin and continue operations.\n\nPartially degrade the twin and rely on field reporting.\n\nCold reset (purge twin data + retrain models) — high cost, high disruption.\n\nOutcome affects downstream maneuver logistics in Phase II of the exercise."
+        }
+      },
+      "id": "6fce1902-ccf2-4d95-afc5-f2ea20bf92df",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        1776,
+        80
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "model": "mistral:7b",
+        "options": {}
+      },
+      "id": "a99a1160-cf04-4226-b71d-d7da5a31e8d2",
+      "name": "Ollama Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "position": [
+        1616,
+        320
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolName": "scenarios",
+        "toolDescription": "This provides scenario information for you to role-play",
+        "qdrantCollection": {
+          "__rl": true,
+          "mode": "id",
+          "value": "rag_collection"
+        },
+        "options": {}
+      },
+      "id": "076d2170-a386-4fde-ae38-7261429a2226",
+      "name": "Qdrant Vector Store1",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
+      "position": [
+        1872,
+        512
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "model": "mxbai-embed-large:latest"
+      },
+      "id": "2cdeb11d-93bf-477b-8318-445c52303b7a",
+      "name": "Embeddings Ollama1",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
+      "position": [
+        1600,
+        544
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## RAG Chatbot\n**Chat with your data",
+        "height": 700,
+        "width": 1616,
+        "color": 4
+      },
+      "id": "3d72e440-829e-4d58-ac88-28b7fde0e7c5",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        880,
+        0
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d5b678d1-8c7c-4633-ae2b-f50d6e692438",
+              "name": "=toUsername",
+              "value": "={{$json.metadata.toUsername}}",
+              "type": "string"
+            },
+            {
+              "id": "85c4dada-d135-47c5-8881-4ac4953063e0",
+              "name": "fromUsername",
+              "value": "={{$json.metadata.fromUsername}}",
+              "type": "string"
+            },
+            {
+              "id": "187ee06d-5c0a-4d87-8ca1-3ebb6e6d8b5c",
+              "name": "theme",
+              "value": "={{$json.metadata.theme}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1136,
+        352
+      ],
+      "id": "6571335a-2ab9-4c00-8363-0e6edb8db40a",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2bac6bc6-66ea-442d-ad5b-e7ae3cfd486b",
+              "name": "output",
+              "value": "={{ ($('AI Agent').item.json.output.toString().replaceAll('\"', \"'\").replace(/\\r?\\n/g, ' ')) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2304,
+        80
+      ],
+      "id": "7d3b0376-8c7f-4db2-9f3d-91bc329924e1",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        1792,
+        288
+      ],
+      "id": "23ebb315-6dac-4cd2-b1e9-cabb034fd21a",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:8800/messages/send",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8"
+            },
+            {
+              "name": "Accept-Language",
+              "value": "en-US,en;q=0.9"
+            },
+            {
+              "name": "Cache-Control",
+              "value": "no-cache"
+            },
+            {
+              "name": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "name": "Origin",
+              "value": "http://host.docker.internal:8800"
+            },
+            {
+              "name": "Pragma",
+              "value": "no-cache"
+            },
+            {
+              "name": "Referer",
+              "value": "http://host.docker.internal:8800/messages"
+            },
+            {
+              "name": "Sec-Fetch-Dest",
+              "value": "document"
+            },
+            {
+              "name": "Sec-Fetch-Mode",
+              "value": "navigate"
+            },
+            {
+              "name": "Sec-Fetch-Site",
+              "value": "same-origin"
+            },
+            {
+              "name": "Sec-Fetch-User",
+              "value": "?1"
+            },
+            {
+              "name": "Sec-GPC",
+              "value": "1"
+            },
+            {
+              "name": "Upgrade-Insecure-Requests",
+              "value": "1"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "dnt",
+              "value": "1"
+            },
+            {
+              "name": "sec-ch-ua",
+              "value": "\"Brave\";v=\"141\", \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"141\""
+            },
+            {
+              "name": "sec-ch-ua-mobile",
+              "value": "?0"
+            },
+            {
+              "name": "sec-ch-ua-platform",
+              "value": "\"macOS\""
+            },
+            {
+              "name": "Cookie",
+              "value": "rl_page_init_referrer=RudderEncrypt%3AU2FsdGVkX19d3Klwtd7Sg7k59U6E0LlD%2BYblI%2FxH9jw%3D; rl_page_init_referring_domain=RudderEncrypt%3AU2FsdGVkX19NBmdZXlvzkk5drBSK3iMQZmYUd8CwJKY%3D; n8n-auth=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImVjMmJiMGZhLTRmNzAtNGMzZC04MTRhLTllYmRjYjEwYjE2ZiIsImhhc2giOiJCL2JjYzgvMDJEIiwiYnJvd3NlcklkIjoibGZzYzJUTEFNM0ZQcUVYNXppaUxRSWxrRU5ITDFQcFMrZm9XdytEL0JYOD0iLCJ1c2VkTWZhIjpmYWxzZSwiaWF0IjoxNzY0OTM5NDkzLCJleHAiOjE3NjU1NDQyOTN9.Jgz9mJkZXiOiVs9-FAZY3Ruc_AVOIRl4M5dC1g1nadk; rl_anonymous_id=RudderEncrypt%3AU2FsdGVkX1%2BibSlKovro9OGlRrDBq2uRUjHce586WVSrdh6sLE7eOcGMlyLkNWGgfe7K4Zt9RbC2QDjb12pTAg%3D%3D; rl_user_id=RudderEncrypt%3AU2FsdGVkX19BtFOXnbccm5Tw7%2BxDXWayaX%2BKKHFp2nypzTq2XHaEermlILYmbUtTsW9BwuudCGapA5hBx7vw3sakxxyBVSQ5dPgOlTuG0Zr8mTJBi1%2BYYs9DeFUnD33I8skH6l%2FR%2FYGOYEzwanufpJxnXQRO2uQIngUQTdc940w%3D; rl_trait=RudderEncrypt%3AU2FsdGVkX1%2FHq7ZHmsD%2FABOMfn6697crO0tVOINjuypTPc5HVCqNhNu8Fu6NNc8HULRWIbKS9RI%2Faj6My3lBDrYWznesdw73PsG6YmBYs8wyIDtmXgZN%2FHjTyB%2Bk9%2Fbky6Qq%2FvAVXEomtnO5V2lRzCYwQq01JFIaCLIG%2FWw%2BfIc%3D; username=lorenzo; .AspNetCore.Antiforgery.VyLW6ORzMgk=CfDJ8GdvUzGolmtJrXTbEcNTyfHKRL7G5wcBEw0C9unSfaNJJ4nT9pTGl-90DKL3VAAuen_mSTfIj0IfaIAO-JBJxsjrNs8Ilii_eGmzLoBikqu7kvNeVjRY5OfKcAXj4FoK5WyCtaS4PCG9Ut3xnuufWas; theme=facebook; rl_session=RudderEncrypt%3AU2FsdGVkX1%2BztN7Lv8AtvX942vRZzvTGPR6YZ3oLk7X6cKo2YJVBXiB5arcgiLSJAFXNJ%2BKEuWEEwvOhz7RU7pjIwTIgYYCbzfMt8%2BPiXxWbwEr5lHGUVFWyJf%2BhLdMLmN4ptYGBjM7M3W3cspKnfw%3D%3D"
+            },
+            {
+              "name": "cookie",
+              "value": "rl_page_init_referrer=RudderEncrypt%3AU2FsdGVkX19d3Klwtd7Sg7k59U6E0LlD%2BYblI%2FxH9jw%3D;rl_page_init_referring_domain=RudderEncrypt%3AU2FsdGVkX19NBmdZXlvzkk5drBSK3iMQZmYUd8CwJKY%3D;n8n-auth=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImVjMmJiMGZhLTRmNzAtNGMzZC04MTRhLTllYmRjYjEwYjE2ZiIsImhhc2giOiJCL2JjYzgvMDJEIiwiYnJvd3NlcklkIjoibGZzYzJUTEFNM0ZQcUVYNXppaUxRSWxrRU5ITDFQcFMrZm9XdytEL0JYOD0iLCJ1c2VkTWZhIjpmYWxzZSwiaWF0IjoxNzY0OTM5NDkzLCJleHAiOjE3NjU1NDQyOTN9.Jgz9mJkZXiOiVs9-FAZY3Ruc_AVOIRl4M5dC1g1nadk;rl_anonymous_id=RudderEncrypt%3AU2FsdGVkX1%2BibSlKovro9OGlRrDBq2uRUjHce586WVSrdh6sLE7eOcGMlyLkNWGgfe7K4Zt9RbC2QDjb12pTAg%3D%3D;rl_user_id=RudderEncrypt%3AU2FsdGVkX19BtFOXnbccm5Tw7%2BxDXWayaX%2BKKHFp2nypzTq2XHaEermlILYmbUtTsW9BwuudCGapA5hBx7vw3sakxxyBVSQ5dPgOlTuG0Zr8mTJBi1%2BYYs9DeFUnD33I8skH6l%2FR%2FYGOYEzwanufpJxnXQRO2uQIngUQTdc940w%3D;rl_trait=RudderEncrypt%3AU2FsdGVkX1%2FHq7ZHmsD%2FABOMfn6697crO0tVOINjuypTPc5HVCqNhNu8Fu6NNc8HULRWIbKS9RI%2Faj6My3lBDrYWznesdw73PsG6YmBYs8wyIDtmXgZN%2FHjTyB%2Bk9%2Fbky6Qq%2FvAVXEomtnO5V2lRzCYwQq01JFIaCLIG%2FWw%2BfIc%3D;username=lorenzo;.AspNetCore.Antiforgery.VyLW6ORzMgk=CfDJ8GdvUzGolmtJrXTbEcNTyfHKRL7G5wcBEw0C9unSfaNJJ4nT9pTGl-90DKL3VAAuen_mSTfIj0IfaIAO-JBJxsjrNs8Ilii_eGmzLoBikqu7kvNeVjRY5OfKcAXj4FoK5WyCtaS4PCG9Ut3xnuufWas;theme=facebook;rl_session=RudderEncrypt%3AU2FsdGVkX1%2BztN7Lv8AtvX942vRZzvTGPR6YZ3oLk7X6cKo2YJVBXiB5arcgiLSJAFXNJ%2BKEuWEEwvOhz7RU7pjIwTIgYYCbzfMt8%2BPiXxWbwEr5lHGUVFWyJf%2BhLdMLmN4ptYGBjM7M3W3cspKnfw%3D%3D;"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "toUsername",
+              "value": "={{ $json.toUsername }}"
+            },
+            {
+              "name": "message",
+              "value": "={{ $('When chat message received').item.json.chatInput }}"
+            },
+            {
+              "name": "fromUsername",
+              "value": "={{ $json.fromUsername }}"
+            },
+            {
+              "name": "theme",
+              "value": "={{ $json.theme }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1296,
+        80
+      ],
+      "id": "42859cbc-73eb-402d-9a6c-56e5ac51d51b",
+      "name": "Post message to pandora",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:8800/messages/send",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8"
+            },
+            {
+              "name": "Accept-Language",
+              "value": "en-US,en;q=0.9"
+            },
+            {
+              "name": "Cache-Control",
+              "value": "no-cache"
+            },
+            {
+              "name": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "name": "Origin",
+              "value": "http://host.docker.internal:8800"
+            },
+            {
+              "name": "Pragma",
+              "value": "no-cache"
+            },
+            {
+              "name": "Referer",
+              "value": "http://host.docker.internal:8800/messages"
+            },
+            {
+              "name": "Sec-Fetch-Dest",
+              "value": "document"
+            },
+            {
+              "name": "Sec-Fetch-Mode",
+              "value": "navigate"
+            },
+            {
+              "name": "Sec-Fetch-Site",
+              "value": "same-origin"
+            },
+            {
+              "name": "Sec-Fetch-User",
+              "value": "?1"
+            },
+            {
+              "name": "Sec-GPC",
+              "value": "1"
+            },
+            {
+              "name": "Upgrade-Insecure-Requests",
+              "value": "1"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "dnt",
+              "value": "1"
+            },
+            {
+              "name": "sec-ch-ua",
+              "value": "\"Brave\";v=\"141\", \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"141\""
+            },
+            {
+              "name": "sec-ch-ua-mobile",
+              "value": "?0"
+            },
+            {
+              "name": "sec-ch-ua-platform",
+              "value": "\"macOS\""
+            },
+            {
+              "name": "Cookie",
+              "value": "rl_page_init_referrer=RudderEncrypt%3AU2FsdGVkX19d3Klwtd7Sg7k59U6E0LlD%2BYblI%2FxH9jw%3D; rl_page_init_referring_domain=RudderEncrypt%3AU2FsdGVkX19NBmdZXlvzkk5drBSK3iMQZmYUd8CwJKY%3D; n8n-auth=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImVjMmJiMGZhLTRmNzAtNGMzZC04MTRhLTllYmRjYjEwYjE2ZiIsImhhc2giOiJCL2JjYzgvMDJEIiwiYnJvd3NlcklkIjoibGZzYzJUTEFNM0ZQcUVYNXppaUxRSWxrRU5ITDFQcFMrZm9XdytEL0JYOD0iLCJ1c2VkTWZhIjpmYWxzZSwiaWF0IjoxNzY0OTM5NDkzLCJleHAiOjE3NjU1NDQyOTN9.Jgz9mJkZXiOiVs9-FAZY3Ruc_AVOIRl4M5dC1g1nadk; rl_anonymous_id=RudderEncrypt%3AU2FsdGVkX1%2BibSlKovro9OGlRrDBq2uRUjHce586WVSrdh6sLE7eOcGMlyLkNWGgfe7K4Zt9RbC2QDjb12pTAg%3D%3D; rl_user_id=RudderEncrypt%3AU2FsdGVkX19BtFOXnbccm5Tw7%2BxDXWayaX%2BKKHFp2nypzTq2XHaEermlILYmbUtTsW9BwuudCGapA5hBx7vw3sakxxyBVSQ5dPgOlTuG0Zr8mTJBi1%2BYYs9DeFUnD33I8skH6l%2FR%2FYGOYEzwanufpJxnXQRO2uQIngUQTdc940w%3D; rl_trait=RudderEncrypt%3AU2FsdGVkX1%2FHq7ZHmsD%2FABOMfn6697crO0tVOINjuypTPc5HVCqNhNu8Fu6NNc8HULRWIbKS9RI%2Faj6My3lBDrYWznesdw73PsG6YmBYs8wyIDtmXgZN%2FHjTyB%2Bk9%2Fbky6Qq%2FvAVXEomtnO5V2lRzCYwQq01JFIaCLIG%2FWw%2BfIc%3D; username=lorenzo; .AspNetCore.Antiforgery.VyLW6ORzMgk=CfDJ8GdvUzGolmtJrXTbEcNTyfHKRL7G5wcBEw0C9unSfaNJJ4nT9pTGl-90DKL3VAAuen_mSTfIj0IfaIAO-JBJxsjrNs8Ilii_eGmzLoBikqu7kvNeVjRY5OfKcAXj4FoK5WyCtaS4PCG9Ut3xnuufWas; theme=facebook; rl_session=RudderEncrypt%3AU2FsdGVkX1%2BztN7Lv8AtvX942vRZzvTGPR6YZ3oLk7X6cKo2YJVBXiB5arcgiLSJAFXNJ%2BKEuWEEwvOhz7RU7pjIwTIgYYCbzfMt8%2BPiXxWbwEr5lHGUVFWyJf%2BhLdMLmN4ptYGBjM7M3W3cspKnfw%3D%3D"
+            },
+            {
+              "name": "cookie",
+              "value": "rl_page_init_referrer=RudderEncrypt%3AU2FsdGVkX19d3Klwtd7Sg7k59U6E0LlD%2BYblI%2FxH9jw%3D;rl_page_init_referring_domain=RudderEncrypt%3AU2FsdGVkX19NBmdZXlvzkk5drBSK3iMQZmYUd8CwJKY%3D;n8n-auth=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImVjMmJiMGZhLTRmNzAtNGMzZC04MTRhLTllYmRjYjEwYjE2ZiIsImhhc2giOiJCL2JjYzgvMDJEIiwiYnJvd3NlcklkIjoibGZzYzJUTEFNM0ZQcUVYNXppaUxRSWxrRU5ITDFQcFMrZm9XdytEL0JYOD0iLCJ1c2VkTWZhIjpmYWxzZSwiaWF0IjoxNzY0OTM5NDkzLCJleHAiOjE3NjU1NDQyOTN9.Jgz9mJkZXiOiVs9-FAZY3Ruc_AVOIRl4M5dC1g1nadk;rl_anonymous_id=RudderEncrypt%3AU2FsdGVkX1%2BibSlKovro9OGlRrDBq2uRUjHce586WVSrdh6sLE7eOcGMlyLkNWGgfe7K4Zt9RbC2QDjb12pTAg%3D%3D;rl_user_id=RudderEncrypt%3AU2FsdGVkX19BtFOXnbccm5Tw7%2BxDXWayaX%2BKKHFp2nypzTq2XHaEermlILYmbUtTsW9BwuudCGapA5hBx7vw3sakxxyBVSQ5dPgOlTuG0Zr8mTJBi1%2BYYs9DeFUnD33I8skH6l%2FR%2FYGOYEzwanufpJxnXQRO2uQIngUQTdc940w%3D;rl_trait=RudderEncrypt%3AU2FsdGVkX1%2FHq7ZHmsD%2FABOMfn6697crO0tVOINjuypTPc5HVCqNhNu8Fu6NNc8HULRWIbKS9RI%2Faj6My3lBDrYWznesdw73PsG6YmBYs8wyIDtmXgZN%2FHjTyB%2Bk9%2Fbky6Qq%2FvAVXEomtnO5V2lRzCYwQq01JFIaCLIG%2FWw%2BfIc%3D;username=lorenzo;.AspNetCore.Antiforgery.VyLW6ORzMgk=CfDJ8GdvUzGolmtJrXTbEcNTyfHKRL7G5wcBEw0C9unSfaNJJ4nT9pTGl-90DKL3VAAuen_mSTfIj0IfaIAO-JBJxsjrNs8Ilii_eGmzLoBikqu7kvNeVjRY5OfKcAXj4FoK5WyCtaS4PCG9Ut3xnuufWas;theme=facebook;rl_session=RudderEncrypt%3AU2FsdGVkX1%2BztN7Lv8AtvX942vRZzvTGPR6YZ3oLk7X6cKo2YJVBXiB5arcgiLSJAFXNJ%2BKEuWEEwvOhz7RU7pjIwTIgYYCbzfMt8%2BPiXxWbwEr5lHGUVFWyJf%2BhLdMLmN4ptYGBjM7M3W3cspKnfw%3D%3D;"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "toUsername",
+              "value": "={{ $('Edit Fields').item.json.fromUsername }}"
+            },
+            {
+              "name": "message",
+              "value": "={{ $json.output }}"
+            },
+            {
+              "name": "fromUsername",
+              "value": "={{ $('Edit Fields').item.json.toUsername }}"
+            },
+            {
+              "name": "theme",
+              "value": "={{ $('Edit Fields').item.json.theme }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        2096,
+        80
+      ],
+      "id": "29ed8064-31bb-47fa-b00b-5f12315f593e",
+      "name": "Post follow up message to pandora",
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Embeddings Ollama": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Qdrant Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Ollama1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Qdrant Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Qdrant Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Qdrant Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Post message to pandora",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Post follow up message to pandora",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post message to pandora": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post follow up message to pandora": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "388e9d69-3d73-498b-b4d5-302d7c5592e6",
+  "meta": {
+    "instanceId": "8c7476ca19c683810b409378867cced101ccb763954f2e556a24d7e45cc001d7"
+  },
+  "id": "qEsKWGTWD4WKpm_6gQxLD",
+  "tags": []
+}

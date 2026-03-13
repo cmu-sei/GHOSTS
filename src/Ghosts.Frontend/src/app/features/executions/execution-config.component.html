@@ -1,0 +1,300 @@
+@if (loading()) {
+<div class="loading">
+  <mat-spinner diameter="40"></mat-spinner>
+  <p>Loading scenario...</p>
+</div>
+} @else if (scenario(); as scenario) {
+<div class="page-header">
+  <div>
+    <h1>Configure Execution</h1>
+    <p class="subtitle">Scenario: {{ scenario.name }}</p>
+  </div>
+  <div class="header-actions">
+    <button mat-button (click)="onCancel()" [disabled]="submitting()">
+      Cancel
+    </button>
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="onExecute()"
+      [disabled]="!activityProfileValid || !config().name || submitting()"
+    >
+      @if (submitting()) {
+        <mat-spinner diameter="16" style="display: inline-block; margin-right: 8px;"></mat-spinner>
+      } @else {
+        <i class="fas fa-play"></i>
+      }
+      {{ config().autoStart ? 'Execute & Start' : 'Create Execution' }}
+    </button>
+  </div>
+</div>
+
+<div class="config-container">
+  <div class="config-section">
+    <h3>Execution Details</h3>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Execution Name</mat-label>
+      <input
+        matInput
+        [(ngModel)]="config().name"
+        placeholder="Enter execution name"
+        [disabled]="submitting()"
+      />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Description</mat-label>
+      <textarea
+        matInput
+        [(ngModel)]="config().description"
+        rows="2"
+        placeholder="Optional description"
+        [disabled]="submitting()"
+      ></textarea>
+    </mat-form-field>
+
+    <mat-checkbox [(ngModel)]="config().autoStart" class="full-width" [disabled]="submitting()">
+      Auto-start execution after creation
+    </mat-checkbox>
+  </div>
+
+  <div class="config-section">
+    <h3>Simulation Parameters</h3>
+
+    <div class="slider-field">
+      <label>
+        Time Scale Multiplier
+        <i
+          class="fas fa-info-circle"
+          matTooltip="Multiplier for simulation time progression. 2.0 = twice as fast, 0.5 = half speed"
+        ></i>
+      </label>
+      <mat-slider
+        min="0.1"
+        max="5.0"
+        step="0.1"
+        [discrete]="true"
+        [showTickMarks]="true"
+        [disabled]="submitting()"
+      >
+        <input matSliderThumb [(ngModel)]="config().timeScaleMultiplier" />
+      </mat-slider>
+      <span class="slider-value">{{
+        formatMultiplier(config().timeScaleMultiplier)
+      }}</span>
+    </div>
+
+    <div class="slider-field">
+      <label>
+        Feed Size
+        <i
+          class="fas fa-info-circle"
+          matTooltip="Number of posts shown in each NPC's feed"
+        ></i>
+      </label>
+      <mat-slider min="10" max="100" step="5" [discrete]="true" [disabled]="submitting()">
+        <input matSliderThumb [(ngModel)]="config().feedSize" />
+      </mat-slider>
+      <span class="slider-value">{{ config().feedSize }} posts</span>
+    </div>
+
+    <div class="slider-field">
+      <label>
+        Random Seed
+        <i
+          class="fas fa-info-circle"
+          matTooltip="Seed for reproducible randomness. Leave empty for non-deterministic"
+        ></i>
+      </label>
+      <div class="seed-input-group">
+        <mat-form-field appearance="outline" class="seed-input">
+          <mat-label>Seed Value</mat-label>
+          <input
+            matInput
+            type="number"
+            [(ngModel)]="config().randomSeed"
+            placeholder="Random"
+            [disabled]="submitting()"
+          />
+        </mat-form-field>
+        <button
+          mat-raised-button
+          type="button"
+          (click)="generateRandomSeed()"
+          [disabled]="submitting()"
+        >
+          <i class="fas fa-dice"></i> Generate
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="config-section">
+    <h3>
+      Activity Profiles
+      <span
+        class="profile-total"
+        [class.invalid]="!activityProfileValid"
+      >
+        Total: {{ activityProfileTotal.toFixed(1) }}%
+        @if (!activityProfileValid) {
+          <i class="fas fa-exclamation-triangle"></i>
+        }
+      </span>
+    </h3>
+    <p class="section-description">
+      Distribution of NPC activity levels (must total 100%)
+      <button
+        mat-button
+        type="button"
+        (click)="normalizeActivityProfiles()"
+        class="normalize-btn"
+        [disabled]="submitting()"
+      >
+        <i class="fas fa-balance-scale"></i> Normalize
+      </button>
+    </p>
+
+    <div class="slider-field">
+      <label>
+        Heavy Users (5-10 posts/day)
+        <i
+          class="fas fa-info-circle"
+          matTooltip="Very active users who post frequently and see ~80% of content"
+        ></i>
+      </label>
+      <mat-slider min="0" max="100" step="1" [discrete]="true" [disabled]="submitting()">
+        <input
+          matSliderThumb
+          [(ngModel)]="config().activityProfiles.heavyUser"
+        />
+      </mat-slider>
+      <span class="slider-value">{{
+        formatPercentage(config().activityProfiles.heavyUser)
+      }}</span>
+    </div>
+
+    <div class="slider-field">
+      <label>
+        Regular Users (1-3 posts/day)
+        <i
+          class="fas fa-info-circle"
+          matTooltip="Moderately active users who see ~40% of content"
+        ></i>
+      </label>
+      <mat-slider min="0" max="100" step="1" [discrete]="true" [disabled]="submitting()">
+        <input
+          matSliderThumb
+          [(ngModel)]="config().activityProfiles.regularUser"
+        />
+      </mat-slider>
+      <span class="slider-value">{{
+        formatPercentage(config().activityProfiles.regularUser)
+      }}</span>
+    </div>
+
+    <div class="slider-field">
+      <label>
+        Casual Users (few times/week)
+        <i
+          class="fas fa-info-circle"
+          matTooltip="Occasionally active users who see ~15% of content"
+        ></i>
+      </label>
+      <mat-slider min="0" max="100" step="1" [discrete]="true" [disabled]="submitting()">
+        <input
+          matSliderThumb
+          [(ngModel)]="config().activityProfiles.casualUser"
+        />
+      </mat-slider>
+      <span class="slider-value">{{
+        formatPercentage(config().activityProfiles.casualUser)
+      }}</span>
+    </div>
+
+    <div class="slider-field">
+      <label>
+        Lurkers (rarely post)
+        <i
+          class="fas fa-info-circle"
+          matTooltip="Passive consumers who read but rarely engage, see ~60% of content"
+        ></i>
+      </label>
+      <mat-slider min="0" max="100" step="1" [discrete]="true" [disabled]="submitting()">
+        <input matSliderThumb [(ngModel)]="config().activityProfiles.lurker" />
+      </mat-slider>
+      <span class="slider-value">{{
+        formatPercentage(config().activityProfiles.lurker)
+      }}</span>
+    </div>
+  </div>
+
+  <div class="config-section">
+    <h3>Engagement & Virality Weights</h3>
+    <p class="section-description">
+      Adjust how NPCs interact with content and how content spreads
+    </p>
+
+    <div class="slider-field">
+      <label>
+        Engagement Affinity Weight
+        <i
+          class="fas fa-info-circle"
+          matTooltip="Base probability multiplier for NPCs engaging with posts (0.0 = never, 1.0 = always)"
+        ></i>
+      </label>
+      <mat-slider min="0" max="1" step="0.05" [discrete]="true" [disabled]="submitting()">
+        <input
+          matSliderThumb
+          [(ngModel)]="config().engagementAffinityWeight"
+        />
+      </mat-slider>
+      <span class="slider-value">{{
+        formatWeight(config().engagementAffinityWeight)
+      }}</span>
+    </div>
+
+    <div class="slider-field">
+      <label>
+        Viral Threshold Multiplier
+        <i
+          class="fas fa-info-circle"
+          matTooltip="Adjusts how easily content goes viral. Higher = harder to go viral"
+        ></i>
+      </label>
+      <mat-slider min="0.25" max="4.0" step="0.25" [discrete]="true" [disabled]="submitting()">
+        <input
+          matSliderThumb
+          [(ngModel)]="config().viralThresholdMultiplier"
+        />
+      </mat-slider>
+      <span class="slider-value">{{
+        formatMultiplier(config().viralThresholdMultiplier)
+      }}</span>
+    </div>
+
+    <div class="slider-field">
+      <label>
+        Topic Alignment Weight
+        <i
+          class="fas fa-info-circle"
+          matTooltip="How strongly NPCs prefer content matching their beliefs/interests (0.0 = ignore, 1.0 = only aligned content)"
+        ></i>
+      </label>
+      <mat-slider min="0" max="1" step="0.05" [discrete]="true" [disabled]="submitting()">
+        <input matSliderThumb [(ngModel)]="config().topicAlignmentWeight" />
+      </mat-slider>
+      <span class="slider-value">{{
+        formatWeight(config().topicAlignmentWeight)
+      }}</span>
+    </div>
+  </div>
+
+  <div class="config-actions">
+    <button mat-button type="button" (click)="resetToDefaults()" [disabled]="submitting()">
+      <i class="fas fa-undo"></i> Reset to Defaults
+    </button>
+  </div>
+</div>
+}

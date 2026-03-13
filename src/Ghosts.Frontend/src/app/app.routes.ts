@@ -1,0 +1,52 @@
+import { Routes } from '@angular/router';
+
+export const routes: Routes = [
+  {
+    path: '',
+    loadChildren: () => import('./features/home/home.routes').then(m => m.HOME_ROUTES)
+  },
+  {
+    path: 'scenarios',
+    loadChildren: () => import('./features/scenarios/scenarios.routes').then(m => m.SCENARIOS_ROUTES)
+  },
+  {
+    path: 'executions',
+    loadChildren: () => import('./features/executions/executions.routes').then(m => m.EXECUTIONS_ROUTES)
+  },
+  {
+    path: 'machines',
+    loadChildren: () => import('./features/machines/machines.routes').then(m => m.MACHINES_ROUTES)
+  },
+  {
+    path: 'machine-groups',
+    loadChildren: () => import('./features/machine-groups/machine-groups.routes').then(m => m.MACHINE_GROUPS_ROUTES)
+  },
+  {
+    path: 'timelines',
+    loadChildren: () => import('./features/timelines/timelines.routes').then(m => m.TIMELINES_ROUTES)
+  },
+  {
+    path: 'npcs',
+    loadChildren: () => import('./features/npcs/npcs.routes').then(m => m.NPCS_ROUTES)
+  },
+  {
+    path: 'animations',
+    loadChildren: () => import('./features/animations/animations.routes').then(m => m.ANIMATIONS_ROUTES)
+  },
+  {
+    path: 'n8n-workflows',
+    loadChildren: () => import('./features/n8n-workflows/n8n-workflows.routes').then(m => m.N8N_WORKFLOWS_ROUTES)
+  },
+  {
+    path: 'activities',
+    loadChildren: () => import('./features/activities/activities.routes').then(m => m.ACTIVITIES_ROUTES)
+  },
+  {
+    path: 'social',
+    loadChildren: () => import('./features/social/social.routes').then(m => m.SOCIAL_ROUTES)
+  },
+  {
+    path: '**',
+    redirectTo: ''
+  }
+];

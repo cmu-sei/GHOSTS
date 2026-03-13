@@ -1,0 +1,312 @@
+{
+  "name": "GHOSTS Social Sharing Animation",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "*/15 * * * *"
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=SELECT * FROM npcs ORDER BY RANDOM() LIMIT {{ Math.floor(Math.random() * 15) + 5 }}",
+        "options": {}
+      },
+      "id": "get-npcs",
+      "name": "Get Random NPCs",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [450, 300],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "GHOSTS PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "split-npcs",
+      "name": "Split NPCs",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://host.docker.internal:11434/api/generate",
+        "authentication": "none",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "llama3.2"
+            },
+            {
+              "name": "prompt",
+              "value": "=Generate a short social media post (max 280 characters) from the perspective of {{ $json.npc_profile.Name.FirstName }} {{ $json.npc_profile.Name.LastName }}, who works as {{ $json.npc_profile.Career.Title }} in {{ $json.npc_profile.Career.Company }}. The post should be realistic and professional. Only return the post text, nothing else."
+            },
+            {
+              "name": "stream",
+              "value": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "generate-content-ollama",
+      "name": "Generate Content (Ollama)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [850, 200],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Fallback content generation if Ollama fails\nconst npc = $input.item.json;\n\nconst templates = [\n  'Just finished working on {topic}. Interesting stuff!',\n  'Thoughts on {topic} today...',\n  'Quick update: making progress on {topic}',\n  'Learning more about {topic} every day',\n  'Excited about the possibilities with {topic}'\n];\n\nconst topics = [\n  'project updates', 'team collaboration', 'new technologies',\n  'process improvements', 'innovation', 'best practices'\n];\n\nconst template = templates[Math.floor(Math.random() * templates.length)];\nconst topic = topics[Math.floor(Math.random() * topics.length)];\nconst text = template.replace('{topic}', topic);\n\nreturn {\n  json: {\n    ...npc,\n    tweetText: text\n  }\n};"
+      },
+      "id": "generate-content-fallback",
+      "name": "Generate Content (Fallback)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [850, 400],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const npc = $('Split NPCs').item.json;\nlet tweetText;\n\n// Try to get from Ollama first\nconst ollamaResult = $('Generate Content (Ollama)').all();\nif (ollamaResult.length > 0 && ollamaResult[0].json.response) {\n  tweetText = ollamaResult[0].json.response.trim();\n} else {\n  // Use fallback\n  const fallbackResult = $('Generate Content (Fallback)').item.json;\n  tweetText = fallbackResult.tweetText;\n}\n\n// Truncate if too long\nif (tweetText.length > 280) {\n  tweetText = tweetText.substring(0, 277) + '...';\n}\n\nreturn {\n  json: {\n    npcId: npc.id,\n    npcEmail: npc.npc_profile?.Email || npc.npc_profile?.Name?.FirstName,\n    npcName: `${npc.npc_profile?.Name?.FirstName} ${npc.npc_profile?.Name?.LastName}`,\n    tweetText: tweetText\n  }\n};"
+      },
+      "id": "merge-content",
+      "name": "Merge Content",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1050, 300],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://host.docker.internal:5555/",
+        "authentication": "none",
+        "sendBody": true,
+        "sendBodyAs": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "user",
+              "value": "={{ $json.npcEmail }}"
+            },
+            {
+              "name": "message",
+              "value": "={{ $json.tweetText }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "post-to-socializer",
+      "name": "Post to Socializer",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1250, 200],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=INSERT INTO npc_activities (npc_id, activity_type, detail, created_utc)\nVALUES (\n  '{{ $json.npcId }}',\n  'SocialMediaPost',\n  '{{ $json.tweetText.replace(\"'\", \"''\") }}',\n  NOW()\n)",
+        "options": {}
+      },
+      "id": "save-activity",
+      "name": "Save Activity",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [1250, 400],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "GHOSTS PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://host.docker.internal:5000/activityHub",
+        "authentication": "none",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "method",
+              "value": "show"
+            },
+            {
+              "name": "step",
+              "value": "1"
+            },
+            {
+              "name": "npcId",
+              "value": "={{ $json.npcId }}"
+            },
+            {
+              "name": "type",
+              "value": "social"
+            },
+            {
+              "name": "message",
+              "value": "={{ $json.tweetText }}"
+            },
+            {
+              "name": "timestamp",
+              "value": "={{ new Date().toISOString() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "notify-hub",
+      "name": "Notify Activity Hub",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1450, 300]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Random NPCs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Random NPCs": {
+      "main": [
+        [
+          {
+            "node": "Split NPCs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split NPCs": {
+      "main": [
+        [
+          {
+            "node": "Generate Content (Ollama)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Generate Content (Fallback)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Content (Ollama)": {
+      "main": [
+        [
+          {
+            "node": "Merge Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Content (Fallback)": {
+      "main": [
+        [
+          {
+            "node": "Merge Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Content": {
+      "main": [
+        [
+          {
+            "node": "Post to Socializer",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Save Activity",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post to Socializer": {
+      "main": [
+        [
+          {
+            "node": "Notify Activity Hub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Activity": {
+      "main": [
+        [
+          {
+            "node": "Notify Activity Hub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify Activity Hub": {
+      "main": [
+        [
+          {
+            "node": "Split NPCs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2026-02-11T00:00:00.000Z",
+  "versionId": "1"
+}

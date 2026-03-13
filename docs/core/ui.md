@@ -1,100 +1,154 @@
-# GHOSTS UI
+# GHOSTS Frontend
 
-A UI for the GHOSTS API, providing interfaces for:
+The GHOSTS Frontend is an Angular 20 single-page application that provides a management interface for the GHOSTS framework. It communicates with the GHOSTS API via REST and SignalR WebSocket.
 
-- Viewing and managing machines and machine groups controlled by the GHOSTS API
-- Creating and managing timeLines that we can then send to machines or machine groups
-- Viewer for Npcs
+**Docker image:** `dustinupdyke/ghosts-frontend` (port 4200 / 80 inside container)
+**Source:** `src/Ghosts.Frontend/`
 
-For any machine or machine group, we can use the UI to deploy new timelines, or view activities. For machine groups, we can create or manage the machines in the group. For timelines, we can view the activities in the timeline, or deploy new activities. It also provides a management interface for timelines as well.
+---
 
-## Install
+## Installation
 
-The easiest way to run the GHOSTS UI is to use Docker. The following is an example we would add to the ghosts `docker-compose.yml` file that will run the GHOSTS UI and the GHOSTS API together:
+The frontend is included in the standard `docker-compose.yml`. No separate setup is required.
+
+To run it standalone:
 
 ```yaml
-ghostsui:
-    image: dustinupdyke/ghosts-ui
-    container_name: ghosts-ui
-    ports:
-      - '8080:8080'
-    networks:
-      - ghosts-network
-    environment:
-      GHOSTS_API_URL: http://ghosts-api:5000
+ghosts-frontend:
+  image: dustinupdyke/ghosts-frontend
+  container_name: ghosts-frontend
+  ports:
+    - "4200:80"
+  environment:
+    API_URL: http://YOUR-API-HOST:5000/api
+    N8N_API_URL: http://YOUR-N8N-HOST:5678
 ```
 
-## Functions
+### Local Development
 
-This first screen is part of the user interface for managing machines within a network simulation or exercise environment, likely related to the GHOSTS framework or a similar system. 
+```bash
+cd src/Ghosts.Frontend
+npm install
+npm start        # serves on http://localhost:4200 with hot reload
+npm run build    # production build to dist/
+npm test         # run unit tests
+```
+
+Edit `src/assets/config.json` to point at your API:
+
+```json
+{
+  "apiUrl": "http://localhost:5000/api",
+  "n8nApiUrl": "http://localhost:5678"
+}
+```
+
+---
+
+## Features
 
 ### Machines
 
-![Machines](../../assets/screens/ui/machines.png)
+View all registered GHOSTS client machines. From the machine list you can:
 
-Here's an explanation of the various elements seen here:
-
-New Machine Button: This button allows you to create or add a new machine to the simulation environment.
-
-Search raw JSON: This input field allows you to perform a search within the machine data using raw JSON queries. It provides a more advanced way to filter or find specific data points.
-
-Machine List:
-
-- Id: This column displays the unique identifier for each machine.
-- Name: This column displays the name of the machine. In this case, it is labeled as string, which might be a placeholder or default value.
-- Status: This column shows the current status of the machine. The status Down indicates that the machine is not currently active or reachable.
-
-There are also functions to delete the machine, run a particular timeline on that machine, view its activity, or view its JSON representation.
+- Search by name, ID, or status
+- View a machine's full activity history
+- Push a new timeline update to a specific machine
+- Add machines to groups
+- View the machine's current timeline and survey data
 
 ### Machine Groups
 
-![Machine Groups](../../assets/screens/ui/machine-groups.png)
+Organize machines into groups for bulk operations:
 
-New Machine Group Button: This button allows you to create or add a new machine group to the simulation environment. Machine groups can be used to collectively manage multiple machines with similar roles or functions.
-
-Machine Group List:
-
-- Id: This column displays the unique identifier for each machine group.
-
-- Name: This column displays the name of the machine group. In this case, it is labeled as string-*, which might be a placeholder or default value, suggesting it is a pattern-based naming convention.
-
-- View Machines (0): This button opens a view to see all the machines currently in this group. The number in parentheses indicates that there are currently no machines in this group.
-
-- Add Machines (1): This button allows you to add machines to the group. The number in parentheses suggests that there is one machine that could be added or is pending addition to this group.
-
-More (Three-dot Menu): This button likely provides additional options such as deleting a grouping, running a timeline on a group of machines, viewing their activity or JSON representation.
+- Create, rename, and delete groups
+- Add or remove machines from a group
+- Deploy a timeline to all machines in a group simultaneously
 
 ### Timelines
 
-![Timelines](../../assets/screens/ui/timelines.png)
+Browse and manage timeline templates:
 
-This screen is part of the user interface for managing timelines within a network simulation or exercise environment.
+- View all timeline handler definitions
+- Create new timelines or edit existing ones
+- Assign a timeline to a specific machine or group
 
-- Name: This column displays the name of each timeline. In the example shown, the timeline is named baseline win workstation timeline, which suggests it is a baseline or standard sequence of events for a Windows workstation.
-
-- Timeline Handlers: This column shows the handler or the specific application/component associated with executing the timeline. In this case, the handler is BrowserFirefox, indicating that this timeline is likely related to actions performed in the Firefox browser.
-
-Actions (Three-dot Menu): This button provides access to deleting or editing a timeline, or viewing its JSON representation.
-
+See [timeline configuration](api/timelines.md) for the timeline JSON format.
 
 ### NPCs
 
-![NPCs](../../assets/screens/ui/npcs.png)
+Manage generated NPC personas:
 
-This screen is part of the user interface for managing NPCs (Non-Player Characters) within a network simulation or exercise environment. 
+- Browse all NPCs with their profile attributes (name, rank, unit, career, etc.)
+- View an NPC's social connections and relationships
+- Generate new NPCs using the Animator (configurable count and parameters)
+- View and assign NPC actions via the NPC action menu
 
-Generate Random NPCs Button: This button allows you to generate NPCs automatically with random attributes. This can be useful for populating the environment quickly with varied NPCs.
+### Scenarios
 
-NPC List:
+Plan and track training/exercise scenarios:
 
-- Id: This column displays the unique identifier for each NPC. The IDs are represented as UUIDs, which ensure that each NPC has a distinct identifier within the system.
+- Create scenarios with associated parameters and injects
+- Run scenarios and monitor execution events in real time
+- Review execution history and metric snapshots
 
-- First Name: This column shows the first name of the NPC. In this case, the NPCs listed have names like Richard, Collie, Ferdinande, Moyra, and Emylee.
+### Animations
 
-- Machine: This column likely shows the machine or environment to which the NPC is assigned. This association would define where or how the NPC interacts within the simulation.
+Start and stop the server-side animation jobs that drive autonomous NPC behavior:
 
-- Campaign: This column indicates the campaign or scenario in which the NPC is participating. All NPCs listed are part of Exercise Season 2024, suggesting they are involved in the same simulation or training exercise.
+| Job | Description |
+|-----|-------------|
+| Social Graph | Evolves NPC relationship networks |
+| Social Sharing | NPCs share content across a social platform |
+| Social Belief | NPC beliefs evolve based on interactions |
+| Chat | NPCs engage in LLM-powered conversations |
+| Full Autonomy | NPCs make fully autonomous decisions |
 
-- Enclave: This column shows the organization or unit to which the NPC belongs. In this case, all NPCs are part of Brigade Abbott Inc and Sons.
+Each job can be started with custom configuration and stopped independently.
 
-- Team: This column indicates the specific team within the enclave to which the NPC belongs. All NPCs listed are part of the Engineering team, which might define their role or tasks within the simulation.
+### Operations Dashboard
+
+Real-time overview showing:
+
+- Connected machine count and status
+- Currently running animation jobs
+- Recent timeline execution activity
+
+### Belief Explorer
+
+Inspect individual NPC belief states:
+
+- Browse beliefs by NPC
+- View belief values and how they have changed over simulation steps
+- Filter by topic or time range
+
+### RangerAI / n8n Workflow Scheduling
+
+Schedule n8n webhook-triggered workflows on a cron schedule:
+
+- Browse active n8n workflows fetched from the n8n API
+- Select a webhook workflow and set a cron schedule (5- or 6-field)
+- The GHOSTS API calls the workflow's current webhook URL at each scheduled time
+- A live execution log (via SignalR) shows each result: timestamp, workflow name, HTTP status, and any error detail
+- Stop a running schedule at any time
+
+**Prerequisites:** Set `N8N_API_URL` and `N8N_API_KEY` environment variables on the GHOSTS API container. Workflows must be **Active** in n8n (the toggle in the n8n workflow editor) before scheduling.
+
+---
+
+## Real-Time Updates
+
+The frontend maintains a SignalR WebSocket connection to `/api/hubs/activities` for:
+
+- Live NPC animation events (social graph updates, belief changes, chat messages)
+- Workflow execution results from the scheduler
+- Machine connectivity events
+
+---
+
+## Architecture Notes
+
+- **Standalone Angular components** throughout — no NgModules.
+- **Signals** (`signal()`, `computed()`) used for reactive state; compatible with `ChangeDetectionStrategy.OnPush`.
+- **Material Design** components via `@angular/material`.
+- Runtime configuration is loaded from `/assets/config.json` before the application bootstraps, making it possible to inject environment-specific URLs into the Docker image at startup via the `docker-entrypoint.sh` script.

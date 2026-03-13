@@ -1,0 +1,319 @@
+{
+  "name": "GHOSTS Full Autonomy Animation",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "*/20 * * * *"
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=SELECT * FROM npcs ORDER BY RANDOM() LIMIT {{ Math.floor(Math.random() * 15) + 5 }}",
+        "options": {}
+      },
+      "id": "get-npcs",
+      "name": "Get Random NPCs",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [450, 300],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "GHOSTS PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "split-npcs",
+      "name": "Split NPCs",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=SELECT detail, created_utc FROM npc_activities WHERE npc_id = '{{ $json.id }}' ORDER BY created_utc DESC LIMIT 10",
+        "options": {}
+      },
+      "id": "get-history",
+      "name": "Get NPC History",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [850, 300],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "GHOSTS PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const npc = $('Split NPCs').item.json;\nconst history = $input.all().map(item => item.json);\n\n// Build context from NPC profile and history\nconst profile = npc.npc_profile || {};\nconst name = `${profile.Name?.FirstName || 'User'} ${profile.Name?.LastName || ''}`;\nconst title = profile.Career?.Title || 'professional';\nconst company = profile.Career?.Company || 'their organization';\n\n// Format history\nlet historyText = '';\nif (history.length > 0) {\n  historyText = '\\n\\nRecent activity:\\n' + history.map(h => `- ${h.detail}`).join('\\n');\n}\n\nconst prompt = `You are ${name}, a ${title} at ${company}. Based on your role and recent activity, what would be your next realistic action or thought?${historyText}\n\nProvide a single, brief sentence describing what you would do or think next. Be realistic and professional.`;\n\nreturn {\n  json: {\n    npcId: npc.id,\n    npcName: name,\n    prompt: prompt\n  }\n};"
+      },
+      "id": "build-prompt",
+      "name": "Build Context Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1050, 300],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://host.docker.internal:11434/api/generate",
+        "authentication": "none",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "llama3.2"
+            },
+            {
+              "name": "prompt",
+              "value": "={{ $json.prompt }}"
+            },
+            {
+              "name": "stream",
+              "value": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "generate-action-ollama",
+      "name": "Generate Next Action (Ollama)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1250, 200],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const actions = [\n  'reviewing project documentation',\n  'preparing for team meeting',\n  'checking emails',\n  'working on current tasks',\n  'updating project status',\n  'collaborating with team members',\n  'researching best practices',\n  'planning next sprint',\n  'documenting recent work',\n  'attending virtual standup'\n];\n\nreturn {\n  json: {\n    response: actions[Math.floor(Math.random() * actions.length)]\n  }\n};"
+      },
+      "id": "generate-action-fallback",
+      "name": "Generate Action (Fallback)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1250, 400],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const npcId = $('Build Context Prompt').item.json.npcId;\nlet nextAction;\n\n// Try to get from Ollama first\nconst ollamaResult = $('Generate Next Action (Ollama)').all();\nif (ollamaResult.length > 0 && ollamaResult[0].json.response) {\n  nextAction = ollamaResult[0].json.response.trim();\n} else {\n  // Use fallback\n  const fallbackResult = $('Generate Action (Fallback)').item.json;\n  nextAction = fallbackResult.response;\n}\n\n// Clean up the action text\nnextAction = nextAction.replace(/[\\r\\n]+/g, ' ').trim();\nif (nextAction.length > 500) {\n  nextAction = nextAction.substring(0, 497) + '...';\n}\n\nreturn {\n  json: {\n    npcId: npcId,\n    nextAction: nextAction,\n    timestamp: new Date().toISOString()\n  }\n};"
+      },
+      "id": "merge-action",
+      "name": "Merge Action",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1450, 300],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=INSERT INTO npc_activities (npc_id, activity_type, detail, created_utc)\nVALUES (\n  '{{ $json.npcId }}',\n  'AutonomousAction',\n  '{{ $json.nextAction.replace(\"'\", \"''\") }}',\n  NOW()\n)",
+        "options": {}
+      },
+      "id": "save-action",
+      "name": "Save Action",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [1650, 300],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "GHOSTS PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://host.docker.internal:5000/activityHub",
+        "authentication": "none",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "method",
+              "value": "show"
+            },
+            {
+              "name": "step",
+              "value": "1"
+            },
+            {
+              "name": "npcId",
+              "value": "={{ $json.npcId }}"
+            },
+            {
+              "name": "type",
+              "value": "autonomy"
+            },
+            {
+              "name": "message",
+              "value": "={{ $json.nextAction }}"
+            },
+            {
+              "name": "timestamp",
+              "value": "={{ $json.timestamp }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "notify-hub",
+      "name": "Notify Activity Hub",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1850, 300]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Random NPCs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Random NPCs": {
+      "main": [
+        [
+          {
+            "node": "Split NPCs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split NPCs": {
+      "main": [
+        [
+          {
+            "node": "Get NPC History",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get NPC History": {
+      "main": [
+        [
+          {
+            "node": "Build Context Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Context Prompt": {
+      "main": [
+        [
+          {
+            "node": "Generate Next Action (Ollama)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Generate Action (Fallback)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Next Action (Ollama)": {
+      "main": [
+        [
+          {
+            "node": "Merge Action",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Action (Fallback)": {
+      "main": [
+        [
+          {
+            "node": "Merge Action",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Action": {
+      "main": [
+        [
+          {
+            "node": "Save Action",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Action": {
+      "main": [
+        [
+          {
+            "node": "Notify Activity Hub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify Activity Hub": {
+      "main": [
+        [
+          {
+            "node": "Split NPCs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2026-02-11T00:00:00.000Z",
+  "versionId": "1"
+}

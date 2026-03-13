@@ -272,8 +272,8 @@ public class Outlookv2 : BaseHandler
                             
                             break;
                         case "read":
-                            
-                            if (ReadViaOutlook())
+
+                            if (ReadViaOutlook(timelineEvent))
                             {
                                 Log.Trace("Outlookv2:: Read email");
                                 _totalErrorCount = 0;  //zero on success
@@ -732,7 +732,7 @@ public class Outlookv2 : BaseHandler
         return retval;  //eventually may want to do something with these attachments
     }
 
-    private bool ReadViaOutlook()
+    private bool ReadViaOutlook(TimelineEvent timelineEvent)
     {
         try
         {
@@ -749,7 +749,7 @@ public class Outlookv2 : BaseHandler
                     // mark as read
                     folderItem.UnRead = false;
                     folderItem.Display(false);
-                    DownloadAttachments(folderItem);
+                    HandleAttachmentsAndLinks(folderItem, timelineEvent);
                     Thread.Sleep(10000);
                     folderItem.Close(Microsoft.Office.Interop.Outlook.OlInspectorClose.olDiscard);
                     return true;
@@ -758,7 +758,7 @@ public class Outlookv2 : BaseHandler
                 {
                     throw;  //pass up
                 }
-                catch { 
+                catch {
                     //ignore others
                 }
             }
@@ -776,7 +776,7 @@ public class Outlookv2 : BaseHandler
                         folderItem = item as MailItem;
                         if (folderItem == null) continue;
                         folderItem.Display(false);
-                        DownloadAttachments(folderItem);
+                        HandleAttachmentsAndLinks(folderItem, timelineEvent);
                         Thread.Sleep(10000);
                         folderItem.Close(Microsoft.Office.Interop.Outlook.OlInspectorClose.olDiscard);
                         return true;
@@ -805,40 +805,65 @@ public class Outlookv2 : BaseHandler
         return false;
     }
 
-
-    private bool ClickRandomLink(TimelineEvent timelineEvent)
+    private void HandleAttachmentsAndLinks(MailItem folderItem, TimelineEvent timelineEvent)
     {
-        try
+        var savedFiles = DownloadAttachments(folderItem);
+
+        // Run saved attachments based on download-probability
+        if (savedFiles != null && _downloadProbability > 0)
         {
-            var folderItemsRaw = _folderInbox.Items;
-            var folderItems = new List<MailItem>();
-            foreach (MailItem folderItem in folderItemsRaw)
+            foreach (var filePath in savedFiles)
             {
-                folderItems.Add(folderItem);
+                if (_random.Next(0, 100) <= _downloadProbability)
+                {
+                    try
+                    {
+                        Log.Trace($"Outlookv2:: Executing attachment {filePath}");
+                        System.Diagnostics.Process.Start(filePath);
+                        Report(new ReportItem { Handler = "Outlookv2", Command = "execute-attachment", Arg = filePath, Trackable = timelineEvent.TrackableId });
+                    }
+                    catch (ThreadAbortException)
+                    {
+                        throw;
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Trace($"Outlookv2:: Error executing attachment {filePath}");
+                        Log.Error(e);
+                    }
+                }
             }
+        }
 
-            var filteredEmails = folderItems.Where(x => x.BodyFormat == OlBodyFormat.olFormatHTML && x.HTMLBody.Contains("<a href="));
-            var mailItem = filteredEmails.PickRandom();
-
-            //check deny list
-            var list = DenyListManager.RemoveDeniedFromList(mailItem.HTMLBody.GetHrefUrls());
-            if (list.Any())
+        // Click a link in the email based on click-probability
+        if (_clickProbability > 0 && _random.Next(0, 100) <= _clickProbability)
+        {
+            try
             {
-                list.PickRandom().OpenUrl();
+                if (folderItem.BodyFormat == OlBodyFormat.olFormatHTML && folderItem.HTMLBody.Contains("<a href="))
+                {
+                    var list = DenyListManager.RemoveDeniedFromList(folderItem.HTMLBody.GetHrefUrls());
+                    if (list.Any())
+                    {
+                        var url = list.PickRandom();
+                        Log.Trace($"Outlookv2:: Clicking link {url}");
+                        url.OpenUrl();
+                        Report(new ReportItem { Handler = "Outlookv2", Command = "click-link", Arg = url, Trackable = timelineEvent.TrackableId });
+                    }
+                }
+            }
+            catch (ThreadAbortException)
+            {
+                throw;
+            }
+            catch (Exception e)
+            {
+                Log.Trace("Outlookv2:: Error clicking link in email");
+                Log.Error(e);
             }
         }
-        catch (ThreadAbortException)
-        {
-            throw;  //pass up
-        }
-        catch (Exception e)
-        {
-            Log.Error(e);
-            return false;
-        }
-
-        return true;
     }
+
 
     private bool Navigate(IEnumerable<object> config)
     {

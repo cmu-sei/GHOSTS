@@ -18,6 +18,17 @@ namespace Ghosts.Animator
             }
         }
 
+        public static Models.NameProfile GetName(BiologicalSex sex)
+        {
+            switch (AnimatorRandom.Rand.Next(4))
+            {
+                case 0: return new Models.NameProfile { Prefix = GetPrefix(), First = GetFirstName(sex), Last = GetLastName() };
+                case 1: return new Models.NameProfile { First = GetFirstName(sex), Last = GetLastName(), Suffix = GetSuffix() };
+                case 2: return new Models.NameProfile { First = GetFirstName(sex), Last = GetLastName(), Middle = GetFirstName(sex) };
+                default: return new Models.NameProfile { First = GetFirstName(sex), Last = GetLastName() };
+            }
+        }
+
         public static string GetFirstName()
         {
             var file = $"config/names_{PhysicalCharacteristics.GetBiologicalSex().ToString().ToLower()}.txt";

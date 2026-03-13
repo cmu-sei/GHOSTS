@@ -1,0 +1,281 @@
+{
+  "name": "GHOSTS Social Sharing Animation (API)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "*/15 * * * *"
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "http://host.docker.internal:5000/api/npcs/list",
+        "authentication": "none",
+        "options": {}
+      },
+      "id": "get-npc-list",
+      "name": "Get NPC List",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Random select 5-20 NPCs\nconst npcs = $input.item.json;\nconst count = Math.floor(Math.random() * 15) + 5;\nfor (let i = npcs.length - 1; i > 0; i--) {\n  const j = Math.floor(Math.random() * (i + 1));\n  [npcs[i], npcs[j]] = [npcs[j], npcs[i]];\n}\nconst selected = npcs.slice(0, count);\n\nreturn selected.map(npc => ({ json: npc }));"
+      },
+      "id": "select-random-npcs",
+      "name": "Select Random NPCs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [650, 300],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "split-npcs",
+      "name": "Split NPCs",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=http://host.docker.internal:5000/api/npcs/{{ $json.id }}",
+        "authentication": "none",
+        "options": {}
+      },
+      "id": "get-full-npc",
+      "name": "Get Full NPC Profile",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:11434/api/generate",
+        "authentication": "none",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"llama3.2\",\n  \"prompt\": \"Generate a short social media post (max 280 characters) from the perspective of {{ $json.npcProfile?.Name?.FirstName || 'a professional' }} {{ $json.npcProfile?.Name?.LastName || '' }}, who works as {{ $json.npcProfile?.Career?.Title || 'professional' }}. The post should be realistic and professional. Only return the post text, nothing else.\",\n  \"stream\": false\n}",
+        "options": {}
+      },
+      "id": "generate-content-ollama",
+      "name": "Generate Content (Ollama)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1250, 200],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const templates = [\n  'Just finished working on {topic}. Interesting stuff!',\n  'Thoughts on {topic} today...',\n  'Quick update: making progress on {topic}',\n  'Learning more about {topic} every day',\n  'Excited about the possibilities with {topic}'\n];\n\nconst topics = [\n  'project updates', 'team collaboration', 'new technologies',\n  'process improvements', 'innovation', 'best practices'\n];\n\nconst template = templates[Math.floor(Math.random() * templates.length)];\nconst topic = topics[Math.floor(Math.random() * topics.length)];\nconst text = template.replace('{topic}', topic);\n\nreturn {\n  json: {\n    response: text\n  }\n};"
+      },
+      "id": "generate-content-fallback",
+      "name": "Generate Content (Fallback)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1250, 400],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const npc = $('Get Full NPC Profile').item.json;\nlet tweetText;\n\n// Try Ollama first\nconst ollamaResult = $('Generate Content (Ollama)').all();\nif (ollamaResult.length > 0 && ollamaResult[0].json.response) {\n  tweetText = ollamaResult[0].json.response.trim();\n} else {\n  // Use fallback\n  const fallbackResult = $('Generate Content (Fallback)').item.json;\n  tweetText = fallbackResult.response;\n}\n\n// Truncate if too long\nif (tweetText.length > 280) {\n  tweetText = tweetText.substring(0, 277) + '...';\n}\n\nreturn {\n  json: {\n    npcId: npc.id,\n    npcEmail: npc.npcProfile?.Email || npc.npcProfile?.Name?.FirstName || 'user',\n    npcName: npc.name,\n    tweetText: tweetText\n  }\n};"
+      },
+      "id": "merge-content",
+      "name": "Merge Content",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1450, 300],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:5555/",
+        "authentication": "none",
+        "sendBody": true,
+        "sendBodyAs": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "user",
+              "value": "={{ $json.npcEmail }}"
+            },
+            {
+              "name": "message",
+              "value": "={{ $json.tweetText }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "post-to-socializer",
+      "name": "Post to Socializer",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1650, 200],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://host.docker.internal:5000/api/npcs/{{ $json.npcId }}/activity?activityType=SocialMediaPost&detail={{ encodeURIComponent($json.tweetText) }}",
+        "authentication": "none",
+        "options": {}
+      },
+      "id": "save-activity",
+      "name": "Save Activity via API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1650, 400]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get NPC List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get NPC List": {
+      "main": [
+        [
+          {
+            "node": "Select Random NPCs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select Random NPCs": {
+      "main": [
+        [
+          {
+            "node": "Split NPCs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split NPCs": {
+      "main": [
+        [
+          {
+            "node": "Get Full NPC Profile",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Full NPC Profile": {
+      "main": [
+        [
+          {
+            "node": "Generate Content (Ollama)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Generate Content (Fallback)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Content (Ollama)": {
+      "main": [
+        [
+          {
+            "node": "Merge Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Content (Fallback)": {
+      "main": [
+        [
+          {
+            "node": "Merge Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Content": {
+      "main": [
+        [
+          {
+            "node": "Post to Socializer",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Save Activity via API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post to Socializer": {
+      "main": [
+        [
+          {
+            "node": "Split NPCs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Activity via API": {
+      "main": [
+        [
+          {
+            "node": "Split NPCs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2026-02-11T00:00:00.000Z",
+  "versionId": "1"
+}

@@ -1,0 +1,231 @@
+{
+  "name": "GHOSTS Belief",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "*/10 * * * *"
+            }
+          ]
+        }
+      },
+      "id": "ef1b49a8-4ff0-4218-89d4-bdadfcc0de98",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "http://host.docker.internal:5000/api/npcs/list",
+        "options": {}
+      },
+      "id": "48501b3a-05f9-4067-bf55-d859110a13a9",
+      "name": "Get NPC List",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        208,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get all items as an array of { json: ... }\nconst items = $input.all();\n\n// Shuffle items in-place\nfor (let i = items.length - 1; i > 0; i--) {\n  const j = Math.floor(Math.random() * (i + 1));\n  [items[i], items[j]] = [items[j], items[i]];\n}\n\n// Take 10 (or fewer if not enough)\nreturn items.slice(0, 10);\n"
+      },
+      "id": "b193a5f3-1595-4027-90e4-d0990ea8cada",
+      "name": "Select Random NPCs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        0
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "60aaa092-fd98-4f75-ba5c-168a0046263a",
+      "name": "Split NPCs",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        608,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=http://host.docker.internal:5000/api/npcs/{{ $json.id }}/beliefs",
+        "options": {}
+      },
+      "id": "5736842c-326f-47a1-920a-8b4a53d67e2e",
+      "name": "Get NPC Beliefs",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        880,
+        -144
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const beliefs = [\n  'I should vote for candidate A',\n  'I should vote for candidate B',\n  'Strong passwords are essential',\n  'Regular software updates matter',\n  'Public Wi-Fi is risky',\n  'Antivirus software is a must',\n  'Encryption protects data',\n  'Phishing attacks are common',\n  'Two-factor authentication helps',\n  'Social engineering is a threat'\n];\n\nconst npc = $('Split NPCs').item.json;\nconst npcBeliefs = $input.all();\nconst currentStep = Date.now(); // Use timestamp as step\n\nlet belief;\nlet likelihood;\nlet posterior;\n\nif (npcBeliefs.length > 0 && npcBeliefs[0].json && npcBeliefs[0].json.length > 0) {\n  // Sort by step (newest first) and get latest\n  const sorted = npcBeliefs[0].json.sort((a, b) => b.step - a.step);\n  const latest = sorted[0];\n  \n  likelihood = latest.likelihood;\n  const priorPosterior = latest.posterior;\n  \n  // Bayesian update: P(H|E) = P(E|H) * P(H) / P(E)\n  const numerator = likelihood * priorPosterior;\n  const denominator = numerator + ((1 - likelihood) * (1 - priorPosterior));\n  posterior = numerator / denominator;\n  \n  belief = latest.name;\n} else {\n  // Create initial belief\n  likelihood = Math.random() * 0.5 + 0.25; // Random between 0.25 and 0.75\n  posterior = 0.5; // Start neutral\n  belief = beliefs[Math.floor(Math.random() * beliefs.length)];\n}\n\nreturn [{\n  json: {\n    npcId: npc.id,\n    name: belief,\n    step: currentStep,\n    likelihood: likelihood,\n    posterior: posterior\n  }\n}];"
+      },
+      "id": "5848176b-d823-4707-9526-d598798e0918",
+      "name": "Calculate Belief Update",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1008,
+        0
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://host.docker.internal:5000/api/npcs/{{ $json.npcId }}/beliefs",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"toNpcId\": \"{{ $json.npcId }}\",\n  \"fromNpcId\": \"{{ $json.npcId }}\",\n  \"name\": \"{{ $json.name }}\",\n  \"step\": {{ $json.step }},\n  \"likelihood\": {{ $json.likelihood }},\n  \"posterior\": {{ $json.posterior }}\n}",
+        "options": {}
+      },
+      "id": "33eea987-58f7-4ede-b796-2f32db1a05d1",
+      "name": "Save Belief via API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1200,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "path": "beliefs",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -64,
+        256
+      ],
+      "id": "b221f04f-f36c-4e35-a4db-5322856a01a4",
+      "name": "Webhook",
+      "webhookId": "1ed7a104-e1b3-4955-b1ca-515a6001bd67"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get NPC List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get NPC List": {
+      "main": [
+        [
+          {
+            "node": "Select Random NPCs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select Random NPCs": {
+      "main": [
+        [
+          {
+            "node": "Split NPCs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split NPCs": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Get NPC Beliefs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get NPC Beliefs": {
+      "main": [
+        [
+          {
+            "node": "Calculate Belief Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Belief Update": {
+      "main": [
+        [
+          {
+            "node": "Save Belief via API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Belief via API": {
+      "main": [
+        [
+          {
+            "node": "Split NPCs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get NPC List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "cec33344-e2cf-4978-bc77-ef8e6d52bfa5",
+  "meta": {
+    "instanceId": "8c7476ca19c683810b409378867cced101ccb763954f2e556a24d7e45cc001d7"
+  },
+  "id": "ogQvNLYI4EwBz1fTbkCFo",
+  "tags": []
+}

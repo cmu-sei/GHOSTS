@@ -1,12 +1,13 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System.IO;
-using Ghosts.Api.Areas.Animator.Infrastructure.Models;
 using Ghosts.Api.Infrastructure.Models;
 using Ghosts.Api.Infrastructure.Extensions;
 using Ghosts.Domain.Messages.MesssagesForServer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.Extensions.Configuration;
 using NLog;
 
@@ -44,14 +45,30 @@ namespace Ghosts.Api.Infrastructure.Data
 
         public DbSet<NpcRecord> Npcs { get; set; }
         public DbSet<NpcIpAddress> NpcIps { get; set; }
-
         public DbSet<NpcActivity> NpcActivities { get; set; }
 
-        public DbSet<NpcSocialGraph> NpcSocialGraphs { get; set; }
+        // NPC Social Graph tables (now directly on NPC)
         public DbSet<NpcSocialConnection> NpcSocialConnections { get; set; }
-        public DbSet<NpcInteraction> NpcInteractions { get; set; }
-        public DbSet<NpcLearning> NpcLearnings { get; set; }
+        public DbSet<NpcLearning> NpcLearning { get; set; }
         public DbSet<NpcBelief> NpcBeliefs { get; set; }
+        public DbSet<NpcPreference> NpcPreferences { get; set; }
+        public DbSet<NpcInteraction> NpcInteractions { get; set; }
+
+        public DbSet<Scenario> Scenarios { get; set; }
+        public DbSet<ScenarioParameters> ScenarioParameters { get; set; }
+        public DbSet<Nation> Nations { get; set; }
+        public DbSet<ThreatActor> ThreatActors { get; set; }
+        public DbSet<Inject> Injects { get; set; }
+        public DbSet<UserPool> UserPools { get; set; }
+        public DbSet<TechnicalEnvironment> TechnicalEnvironments { get; set; }
+        public DbSet<Vulnerability> Vulnerabilities { get; set; }
+        public DbSet<GameMechanics> GameMechanics { get; set; }
+        public DbSet<ScenarioTimeline> ScenarioTimelines { get; set; }
+        public DbSet<ScenarioTimelineEvent> ScenarioTimelineEvents { get; set; }
+
+        public DbSet<Execution> Executions { get; set; }
+        public DbSet<ExecutionEvent> ExecutionEvents { get; set; }
+        public DbSet<ExecutionMetricSnapshot> ExecutionMetricSnapshots { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -60,54 +77,55 @@ namespace Ghosts.Api.Infrastructure.Data
 
             modelBuilder.ApplyConfiguration(new MachineUpdateConfiguration());
 
-
+            // NPC Profile remains JSONB for now
             modelBuilder.Entity<NpcRecord>().Property(o => o.NpcProfile).HasColumnType("jsonb");
 
-            // NpcSocialGraph relationships and indexes
-            modelBuilder.Entity<NpcSocialGraph>()
-                .HasMany(sg => sg.Connections)
-                .WithOne(c => c.SocialGraph)
-                .HasForeignKey(c => c.SocialGraphId)
+            // NPC relationships - social graph properties now directly on NPC
+            modelBuilder.Entity<NpcRecord>()
+                .HasMany(n => n.Connections)
+                .WithOne(c => c.Npc)
+                .HasForeignKey(c => c.NpcId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<NpcSocialGraph>()
-                .HasMany(sg => sg.Knowledge)
-                .WithOne(k => k.SocialGraph)
-                .HasForeignKey(k => k.SocialGraphId)
+            modelBuilder.Entity<NpcRecord>()
+                .HasMany(n => n.Knowledge)
+                .WithOne(k => k.Npc)
+                .HasForeignKey(k => k.NpcId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<NpcSocialGraph>()
-                .HasMany(sg => sg.Beliefs)
-                .WithOne(b => b.SocialGraph)
-                .HasForeignKey(b => b.SocialGraphId)
+            modelBuilder.Entity<NpcRecord>()
+                .HasMany(n => n.Beliefs)
+                .WithOne(b => b.Npc)
+                .HasForeignKey(b => b.NpcId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<NpcRecord>()
+                .HasMany(n => n.Preferences)
+                .WithOne(p => p.Npc)
+                .HasForeignKey(p => p.NpcId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // NpcSocialConnection relationships
             modelBuilder.Entity<NpcSocialConnection>()
                 .HasMany(c => c.Interactions)
                 .WithOne(i => i.SocialConnection)
                 .HasForeignKey(i => i.SocialConnectionId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // NpcSocialConnection indexes
-            modelBuilder.Entity<NpcSocialConnection>().HasIndex(o => o.SocialGraphId);
-            modelBuilder.Entity<NpcSocialConnection>().HasIndex(o => o.ConnectedNpcId);
-            modelBuilder.Entity<NpcSocialConnection>().HasIndex(o => new { o.SocialGraphId, o.ConnectedNpcId });
+            // NPC-Scenario relationship (optional, nullable foreign key)
+            modelBuilder.Entity<NpcRecord>()
+                .HasOne(n => n.Scenario)
+                .WithMany(s => s.Npcs)
+                .HasForeignKey(n => n.ScenarioId)
+                .OnDelete(DeleteBehavior.SetNull);
 
-            // NpcInteraction indexes
-            modelBuilder.Entity<NpcInteraction>().HasIndex(o => o.SocialConnectionId);
-            modelBuilder.Entity<NpcInteraction>().HasIndex(o => o.Step);
-
-            // NpcLearning indexes
-            modelBuilder.Entity<NpcLearning>().HasIndex(o => o.SocialGraphId);
-            modelBuilder.Entity<NpcLearning>().HasIndex(o => new { o.ToNpcId, o.FromNpcId });
-            modelBuilder.Entity<NpcLearning>().HasIndex(o => o.Step);
-            modelBuilder.Entity<NpcLearning>().HasIndex(o => o.Topic);
-
-            // NpcBelief indexes
-            modelBuilder.Entity<NpcBelief>().HasIndex(o => o.SocialGraphId);
-            modelBuilder.Entity<NpcBelief>().HasIndex(o => new { o.ToNpcId, o.FromNpcId });
-            modelBuilder.Entity<NpcBelief>().HasIndex(o => o.Step);
-            modelBuilder.Entity<NpcBelief>().HasIndex(o => o.Name);
+            // Indexes for NPC and Social Graph tables
+            modelBuilder.Entity<NpcRecord>().HasIndex(n => n.CurrentStep);
+            modelBuilder.Entity<NpcRecord>().HasIndex(n => n.ScenarioId);
+            modelBuilder.Entity<NpcSocialConnection>().HasIndex(c => new { c.NpcId, c.ConnectedNpcId });
+            modelBuilder.Entity<NpcLearning>().HasIndex(l => new { l.NpcId, l.Topic, l.Step });
+            modelBuilder.Entity<NpcBelief>().HasIndex(b => new { b.NpcId, b.Name, b.Step });
+            modelBuilder.Entity<NpcPreference>().HasIndex(p => new { p.NpcId, p.Name, p.Step });
 
             modelBuilder.Entity<Machine>().HasIndex(o => new { o.CreatedUtc });
             modelBuilder.Entity<Machine>().HasIndex(o => new { o.Status });
@@ -141,6 +159,97 @@ namespace Ghosts.Api.Infrastructure.Data
             modelBuilder.Entity<Survey.EventLog.EventLogEntry>().HasIndex(o => new { o.EventLogId });
             modelBuilder.Entity<Survey.Interface.InterfaceBinding>().HasIndex(o => new { o.InterfaceId });
 
+            // Scenario relationships
+            modelBuilder.Entity<Scenario>()
+                .HasOne(s => s.ScenarioParameters)
+                .WithOne(sp => sp.Scenario)
+                .HasForeignKey<ScenarioParameters>(sp => sp.ScenarioId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Scenario>()
+                .HasOne(s => s.TechnicalEnvironment)
+                .WithOne(te => te.Scenario)
+                .HasForeignKey<TechnicalEnvironment>(te => te.ScenarioId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Scenario>()
+                .HasOne(s => s.GameMechanics)
+                .WithOne(gm => gm.Scenario)
+                .HasForeignKey<GameMechanics>(gm => gm.ScenarioId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Scenario>()
+                .HasOne(s => s.ScenarioTimeline)
+                .WithOne(t => t.Scenario)
+                .HasForeignKey<ScenarioTimeline>(t => t.ScenarioId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // ScenarioParameters relationships
+            modelBuilder.Entity<ScenarioParameters>()
+                .HasMany(sp => sp.Nations)
+                .WithOne(n => n.ScenarioParameters)
+                .HasForeignKey(n => n.ScenarioParametersId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ScenarioParameters>()
+                .HasMany(sp => sp.ThreatActors)
+                .WithOne(ta => ta.ScenarioParameters)
+                .HasForeignKey(ta => ta.ScenarioParametersId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ScenarioParameters>()
+                .HasMany(sp => sp.Injects)
+                .WithOne(i => i.ScenarioParameters)
+                .HasForeignKey(i => i.ScenarioParametersId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ScenarioParameters>()
+                .HasMany(sp => sp.UserPools)
+                .WithOne(up => up.ScenarioParameters)
+                .HasForeignKey(up => up.ScenarioParametersId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // TechnicalEnvironment relationships
+            modelBuilder.Entity<TechnicalEnvironment>()
+                .HasMany(te => te.Vulnerabilities)
+                .WithOne(v => v.TechnicalEnvironment)
+                .HasForeignKey(v => v.TechnicalEnvironmentId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Timeline relationships
+            modelBuilder.Entity<ScenarioTimeline>()
+                .HasMany(t => t.ScenarioTimelineEvents)
+                .WithOne(e => e.Timeline)
+                .HasForeignKey(e => e.ScenarioTimelineId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Execution relationships
+            modelBuilder.Entity<Scenario>()
+                .HasMany(s => s.Executions)
+                .WithOne(e => e.Scenario)
+                .HasForeignKey(e => e.ScenarioId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Execution>()
+                .HasMany(e => e.Events)
+                .WithOne(ev => ev.Execution)
+                .HasForeignKey(ev => ev.ExecutionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Execution>()
+                .HasMany(e => e.MetricSnapshots)
+                .WithOne(ms => ms.Execution)
+                .HasForeignKey(ms => ms.ExecutionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Execution indexes for performance
+            modelBuilder.Entity<Execution>().HasIndex(e => e.ScenarioId);
+            modelBuilder.Entity<Execution>().HasIndex(e => e.Status);
+            modelBuilder.Entity<Execution>().HasIndex(e => e.CreatedAt);
+            modelBuilder.Entity<Execution>().HasIndex(e => e.StartedAt);
+            modelBuilder.Entity<ExecutionEvent>().HasIndex(ev => new { ev.ExecutionId, ev.Timestamp });
+            modelBuilder.Entity<ExecutionMetricSnapshot>().HasIndex(ms => new { ms.ExecutionId, ms.Timestamp });
+
             foreach (var entity in modelBuilder.Model.GetEntityTypes())
             {
                 entity.SetTableName(entity.GetTableName().ToCondensedLowerCase());
@@ -159,6 +268,7 @@ namespace Ghosts.Api.Infrastructure.Data
     public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<ApplicationDbContext>
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
+
         public ApplicationDbContext CreateDbContext(string[] args)
         {
             var path = $"{Directory.GetCurrentDirectory()}/../ghosts.api/";
@@ -171,7 +281,19 @@ namespace Ghosts.Api.Infrastructure.Data
             var connectionString = configuration.GetConnectionString("DefaultConnection");
 
             var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
-            optionsBuilder.UseNpgsql(connectionString, x => x.MigrationsAssembly("ghosts.api"));
+            optionsBuilder.UseNpgsql(connectionString, npgsqlOptions =>
+            {
+                npgsqlOptions.MigrationsAssembly("ghosts.api");
+                npgsqlOptions.ConfigureDataSource(dataSourceBuilder =>
+                {
+                    var serializerOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web)
+                    {
+                        NumberHandling = JsonNumberHandling.AllowReadingFromString
+                    };
+                    serializerOptions.Converters.Add(new JsonStringEnumConverter());
+                    dataSourceBuilder.ConfigureJsonOptions(serializerOptions);
+                });
+            });
 
             return new ApplicationDbContext(optionsBuilder.Options);
         }

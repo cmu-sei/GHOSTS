@@ -13,7 +13,7 @@ namespace Ghosts.Api.Infrastructure.Services
 {
     public interface ITrackableService
     {
-        Task<List<Trackable>> GetAsync(CancellationToken ct);
+        Task<List<HistoryTrackable>> GetAsync(CancellationToken ct);
         Task<List<HistoryTrackable>> GetActivityByTrackableId(Guid trackableId, CancellationToken ct);
     }
 
@@ -21,9 +21,9 @@ namespace Ghosts.Api.Infrastructure.Services
     {
         private readonly ApplicationDbContext _context = context;
 
-        public async Task<List<Trackable>> GetAsync(CancellationToken ct)
+        public async Task<List<HistoryTrackable>> GetAsync(CancellationToken ct)
         {
-            return await _context.Trackables.ToListAsync(ct);
+            return await _context.HistoryTrackables.OrderByDescending(o => o.CreatedUtc).ToListAsync(ct);
         }
 
         public async Task<List<HistoryTrackable>> GetActivityByTrackableId(Guid trackableId, CancellationToken ct)

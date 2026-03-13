@@ -1,0 +1,257 @@
+{
+  "name": "GHOSTS Social Belief Animation",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "*/10 * * * *"
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM npcs ORDER BY RANDOM() LIMIT 10",
+        "options": {}
+      },
+      "id": "get-npcs",
+      "name": "Get Random NPCs",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [450, 300],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "GHOSTS PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "split-npcs",
+      "name": "Split NPCs",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=SELECT * FROM npc_beliefs WHERE npc_id = '{{ $json.id }}' ORDER BY step DESC LIMIT 1",
+        "options": {}
+      },
+      "id": "get-latest-belief",
+      "name": "Get Latest Belief",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [850, 300],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "GHOSTS PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const beliefs = [\n  'I should vote for candidate A',\n  'I should vote for candidate B',\n  'Strong passwords are essential',\n  'Regular software updates matter',\n  'Public Wi-Fi is risky',\n  'Antivirus software is a must',\n  'Encryption protects data',\n  'Phishing attacks are common',\n  'Two-factor authentication helps',\n  'Social engineering is a threat'\n];\n\nconst npc = $('Get Random NPCs').item.json;\nconst latestBeliefs = $input.all();\nconst currentStep = npc.current_step + 1;\n\nlet belief;\nlet likelihood;\nlet posterior;\n\nif (latestBeliefs.length > 0) {\n  // Update existing belief using Bayesian inference\n  const latest = latestBeliefs[0].json;\n  likelihood = latest.likelihood;\n  const priorPosterior = latest.posterior;\n  \n  // Bayesian update: P(H|E) = P(E|H) * P(H) / P(E)\n  // Simplified: new_posterior = (likelihood * prior) / ((likelihood * prior) + ((1-likelihood) * (1-prior)))\n  const numerator = likelihood * priorPosterior;\n  const denominator = numerator + ((1 - likelihood) * (1 - priorPosterior));\n  posterior = numerator / denominator;\n  \n  belief = latest.name;\n} else {\n  // Create initial belief\n  likelihood = Math.random() * 0.5 + 0.25; // Random between 0.25 and 0.75\n  posterior = 0.5; // Start neutral\n  belief = beliefs[Math.floor(Math.random() * beliefs.length)];\n}\n\nreturn [{\n  json: {\n    npcId: npc.id,\n    fromNpcId: npc.id,\n    toNpcId: npc.id,\n    name: belief,\n    step: currentStep,\n    likelihood: likelihood,\n    posterior: posterior\n  }\n}];"
+      },
+      "id": "calculate-belief",
+      "name": "Calculate Belief Update",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1050, 300],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=INSERT INTO npc_beliefs (npc_id, from_npc_id, to_npc_id, name, step, likelihood, posterior, created_utc)\nVALUES (\n  '{{ $json.npcId }}',\n  '{{ $json.fromNpcId }}',\n  '{{ $json.toNpcId }}',\n  '{{ $json.name }}',\n  {{ $json.step }},\n  {{ $json.likelihood }},\n  {{ $json.posterior }},\n  NOW()\n)",
+        "options": {}
+      },
+      "id": "save-belief",
+      "name": "Save Belief",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [1250, 300],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "GHOSTS PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://host.docker.internal:5000/activityHub",
+        "authentication": "none",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "method",
+              "value": "show"
+            },
+            {
+              "name": "step",
+              "value": "={{ $json.step }}"
+            },
+            {
+              "name": "npcId",
+              "value": "={{ $json.toNpcId }}"
+            },
+            {
+              "name": "type",
+              "value": "belief"
+            },
+            {
+              "name": "message",
+              "value": "=updated posterior of {{ Math.round($json.posterior * 100) / 100 }} in {{ $json.name }}"
+            },
+            {
+              "name": "timestamp",
+              "value": "={{ new Date().toISOString() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "notify-hub",
+      "name": "Notify Activity Hub",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1450, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=UPDATE npcs SET current_step = current_step + 1 WHERE id = '{{ $('Get Random NPCs').item.json.id }}'",
+        "options": {}
+      },
+      "id": "update-step",
+      "name": "Update NPC Step",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [1650, 300],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "GHOSTS PostgreSQL"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Random NPCs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Random NPCs": {
+      "main": [
+        [
+          {
+            "node": "Split NPCs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split NPCs": {
+      "main": [
+        [
+          {
+            "node": "Get Latest Belief",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Latest Belief": {
+      "main": [
+        [
+          {
+            "node": "Calculate Belief Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Belief Update": {
+      "main": [
+        [
+          {
+            "node": "Save Belief",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Belief": {
+      "main": [
+        [
+          {
+            "node": "Notify Activity Hub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify Activity Hub": {
+      "main": [
+        [
+          {
+            "node": "Update NPC Step",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update NPC Step": {
+      "main": [
+        [
+          {
+            "node": "Split NPCs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2026-02-11T00:00:00.000Z",
+  "versionId": "1"
+}

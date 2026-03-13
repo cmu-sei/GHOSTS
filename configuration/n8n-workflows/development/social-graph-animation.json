@@ -1,0 +1,413 @@
+{
+  "name": "GHOSTS Social Graph Animation",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "*/5 * * * *"
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM npcs ORDER BY RANDOM() LIMIT 10",
+        "options": {}
+      },
+      "id": "get-npcs",
+      "name": "Get Random NPCs",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [450, 300],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "GHOSTS PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "split-npcs",
+      "name": "Split NPCs",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=SELECT * FROM npc_social_connections WHERE npc_id = '{{ $json.id }}'",
+        "options": {}
+      },
+      "id": "get-connections",
+      "name": "Get NPC Connections",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [850, 300],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "GHOSTS PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "no-connections",
+              "leftValue": "={{ $json.length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-connections",
+      "name": "Has Connections?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=INSERT INTO npc_social_connections (id, npc_id, connected_npc_id, name, relationship_status, created_utc, updated_utc)\nSELECT \n  '{{ $('Get Random NPCs').item.json.id }}:' || id,\n  '{{ $('Get Random NPCs').item.json.id }}',\n  id,\n  npc_profile->>'Name',\n  0,\n  NOW(),\n  NOW()\nFROM npcs \nWHERE id != '{{ $('Get Random NPCs').item.json.id }}'\nORDER BY enclave, team\nLIMIT 10",
+        "options": {}
+      },
+      "id": "create-connections",
+      "name": "Create Initial Connections",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [1250, 200],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "GHOSTS PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const npcConnections = $input.all();\n\n// Weighted random selection (decreasing weights)\nconst maxInteract = npcConnections.length;\nlet interactCount = 0;\nlet prob = 0.4;\n\nfor (let i = 0; i < maxInteract; i++) {\n  if (Math.random() < prob) {\n    interactCount++;\n  }\n  prob *= 0.6; // Decreasing probability\n}\n\nif (interactCount === 0) interactCount = 1;\n\n// Fisher-Yates shuffle and select\nfor (let i = npcConnections.length - 1; i > 0; i--) {\n  const j = Math.floor(Math.random() * (i + 1));\n  [npcConnections[i], npcConnections[j]] = [npcConnections[j], npcConnections[i]];\n}\nconst selected = npcConnections.slice(0, interactCount);\n\nreturn selected.map(item => ({ json: item.json }));"
+      },
+      "id": "select-targets",
+      "name": "Select Random Targets",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1250, 400],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=SELECT topic FROM npc_learning WHERE npc_id = '{{ $('Get Random NPCs').item.json.id }}'",
+        "options": {}
+      },
+      "id": "get-knowledge",
+      "name": "Get NPC Knowledge",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [1450, 400],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "GHOSTS PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Knowledge topics\nconst topics = [\n  'cybersecurity', 'cloud computing', 'artificial intelligence',\n  'data science', 'devops', 'networking', 'programming',\n  'system administration', 'database management', 'security operations'\n];\n\nconst npc = $('Get Random NPCs').item.json;\nconst target = $input.item.json;\nconst existingKnowledge = $('Get NPC Knowledge').all();\n\n// Calculate learning chance\nlet chanceOfLearning = 0.3; // Base chance\nif (npc.npc_profile?.Education?.Degrees) {\n  chanceOfLearning += npc.npc_profile.Education.Degrees.length * 0.1;\n}\nif (npc.npc_profile?.MentalHealth?.OverallPerformance) {\n  chanceOfLearning += npc.npc_profile.MentalHealth.OverallPerformance * 0.1;\n}\nchanceOfLearning += existingKnowledge.length * 0.01;\n\n// Try to learn\nif (Math.random() < chanceOfLearning) {\n  // Weighted selection based on existing knowledge\n  const weights = {};\n  topics.forEach(topic => {\n    const count = existingKnowledge.filter(k => k.json.topic === topic).length;\n    weights[topic] = count + 1;\n  });\n  \n  const totalWeight = Object.values(weights).reduce((a, b) => a + b, 0);\n  let random = Math.random() * totalWeight;\n  let selectedTopic = topics[0];\n  \n  for (const topic of topics) {\n    random -= weights[topic];\n    if (random <= 0) {\n      selectedTopic = topic;\n      break;\n    }\n  }\n  \n  return [{\n    json: {\n      npcId: npc.id,\n      fromNpcId: target.connected_npc_id,\n      toNpcId: npc.id,\n      topic: selectedTopic,\n      step: npc.current_step + 1,\n      score: 1,\n      targetConnectionId: target.id,\n      targetName: target.name\n    }\n  }];\n}\n\nreturn [];"
+      },
+      "id": "process-learning",
+      "name": "Process Learning",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1650, 400],
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=INSERT INTO npc_learning (npc_id, from_npc_id, to_npc_id, topic, step, score, created_utc)\nVALUES (\n  '{{ $json.npcId }}',\n  '{{ $json.fromNpcId }}',\n  '{{ $json.toNpcId }}',\n  '{{ $json.topic }}',\n  {{ $json.step }},\n  {{ $json.score }},\n  NOW()\n)",
+        "options": {}
+      },
+      "id": "save-learning",
+      "name": "Save Learning",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [1850, 400],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "GHOSTS PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=UPDATE npc_social_connections \nSET relationship_status = relationship_status + 1, updated_utc = NOW()\nWHERE id = '{{ $json.targetConnectionId }}'",
+        "options": {}
+      },
+      "id": "improve-relationship",
+      "name": "Improve Relationship",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [2050, 400],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "GHOSTS PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://host.docker.internal:5000/activityHub",
+        "authentication": "none",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "method",
+              "value": "show"
+            },
+            {
+              "name": "step",
+              "value": "={{ $json.step }}"
+            },
+            {
+              "name": "npcId",
+              "value": "={{ $json.toNpcId }}"
+            },
+            {
+              "name": "type",
+              "value": "knowledge"
+            },
+            {
+              "name": "message",
+              "value": "=learned more about {{ $json.topic }} (1)"
+            },
+            {
+              "name": "timestamp",
+              "value": "={{ new Date().toISOString() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "notify-hub",
+      "name": "Notify Activity Hub",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2250, 400]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=UPDATE npcs SET current_step = current_step + 1 WHERE id = '{{ $('Get Random NPCs').item.json.id }}'",
+        "options": {}
+      },
+      "id": "update-step",
+      "name": "Update NPC Step",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [2450, 400],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "GHOSTS PostgreSQL"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Random NPCs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Random NPCs": {
+      "main": [
+        [
+          {
+            "node": "Split NPCs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split NPCs": {
+      "main": [
+        [
+          {
+            "node": "Get NPC Connections",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get NPC Connections": {
+      "main": [
+        [
+          {
+            "node": "Has Connections?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Connections?": {
+      "main": [
+        [
+          {
+            "node": "Create Initial Connections",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Select Random Targets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Initial Connections": {
+      "main": [
+        [
+          {
+            "node": "Split NPCs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select Random Targets": {
+      "main": [
+        [
+          {
+            "node": "Get NPC Knowledge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get NPC Knowledge": {
+      "main": [
+        [
+          {
+            "node": "Process Learning",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Learning": {
+      "main": [
+        [
+          {
+            "node": "Save Learning",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Learning": {
+      "main": [
+        [
+          {
+            "node": "Improve Relationship",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Improve Relationship": {
+      "main": [
+        [
+          {
+            "node": "Notify Activity Hub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify Activity Hub": {
+      "main": [
+        [
+          {
+            "node": "Update NPC Step",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update NPC Step": {
+      "main": [
+        [
+          {
+            "node": "Split NPCs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2026-02-11T00:00:00.000Z",
+  "versionId": "1"
+}
