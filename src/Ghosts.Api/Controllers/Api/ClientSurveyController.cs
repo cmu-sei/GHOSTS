@@ -22,13 +22,13 @@ namespace Ghosts.Api.Controllers.Api
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
 
         /// <summary>
-        /// Clients post an encrypted survey results to this endpoint
+        /// Clients post survey results to this endpoint
         /// </summary>
-        /// <param name="transmission">The encrypted survey result</param>
+        /// <param name="transmission">The client survey result</param>
         /// <param name="ct">Cancellation Token</param>
         /// <returns>204 No Content on success</returns>
-        [SwaggerOperation("ClientSurveyCreateSecure")]
-        [HttpPost("secure")]
+        [SwaggerOperation("ClientSurveyCreate")]
+        [HttpPost]
         public async Task<IActionResult> Index([FromBody] Survey transmission, CancellationToken ct)
         {
             var ok = await surveyService.ProcessSurveyAsync(HttpContext, transmission, ct);
@@ -36,13 +36,13 @@ namespace Ghosts.Api.Controllers.Api
         }
 
         /// <summary>
-        /// Clients post survey results to this endpoint
+        /// Clients post an encrypted survey results to this endpoint
         /// </summary>
-        /// <param name="value">The client survey result</param>
+        /// <param name="value">The encrypted survey result</param>
         /// <param name="ct">Cancellation Token</param>
         /// <returns>204 No Content on success</returns>
-        [SwaggerOperation("ClientSurveyCreate")]
-        [HttpPost]
+        [SwaggerOperation("ClientSurveyCreateSecure")]
+        [HttpPost("secure")]
         public async Task<IActionResult> Secure([FromBody] EncryptedPayload value, CancellationToken ct)
         {
             var ok = await surveyService.ProcessEncryptedSurveyAsync(HttpContext, value, ct);

@@ -207,7 +207,9 @@ public static class Updates
             return;
 
         var fileName = ApplicationDetails.LogFiles.ClientUpdates;
-        var postUrl = Program.ConfigurationUrls.Results;
+        var postUrl = Program.Configuration.ClientResults.IsSecure
+            ? Program.ConfigurationUrls.Results + "/secure"
+            : Program.ConfigurationUrls.Results;
 
         var machine = new ResultMachine();
         GuestInfoVars.Load(machine);
@@ -367,7 +369,9 @@ public static class Updates
 
         try
         {
-            postUrl = Program.ConfigurationUrls.Survey;
+            postUrl = Program.Configuration.Survey.IsSecure
+                ? Program.ConfigurationUrls.Survey + "/secure"
+                : Program.ConfigurationUrls.Survey;
         }
         catch
         {
