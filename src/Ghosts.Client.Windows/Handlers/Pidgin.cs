@@ -515,6 +515,9 @@ namespace Ghosts.Client.Handlers
                 var windHandle = Winuser.FindWindow("gdkWindowToplevel", windowTitle);
                 Winuser.SetForegroundWindow(windHandle);
                 var msg = messages.MessageNext();
+                // Escape SendKeys special characters in the message text so they are
+                // sent as literal keystrokes rather than interpreted as modifiers.
+                msg = EscapeForSendKeys(msg);
                 if (EmojiProbability > _random.Next(0, 100))
                 {
                     var numEmojis = _random.Next(1, 5);
@@ -551,10 +554,12 @@ namespace Ghosts.Client.Handlers
             var plist = Process.GetProcessesByName("Pidgin");
             foreach (var process in plist)
             {
-                if (process.MainWindowTitle.Contains("@"))
+                var title = process.MainWindowTitle;
+                if (!string.IsNullOrEmpty(title) && title != "Buddy List" && title != "Pidgin"
+                    && !ErrorWindowTitles.Contains(title) && !MiscWindowTitles.Contains(title))
                 {
                     //assume this is the IM chat window
-                    return process.MainWindowTitle;
+                    return title;
                 }
             }
             return null;
@@ -592,6 +597,24 @@ namespace Ghosts.Client.Handlers
 
             }
             return Winuser.FindWindow("gdkWindowToplevel", "Buddy List");
+        }
+
+        /// <summary>
+        /// Escape special SendKeys characters so they are sent as literal keystrokes.
+        /// Must handle braces first via a placeholder to avoid double-escaping.
+        /// </summary>
+        private static string EscapeForSendKeys(string text)
+        {
+            // Replace braces with placeholders first to avoid corrupting later replacements
+            text = text.Replace("{", "\x01").Replace("}", "\x02");
+            text = text.Replace("\x01", "{{}").Replace("\x02", "{}}");
+            text = text.Replace("+", "{+}")
+                       .Replace("^", "{^}")
+                       .Replace("%", "{%}")
+                       .Replace("~", "{~}")
+                       .Replace("(", "{(}")
+                       .Replace(")", "{)}");
+            return text;
         }
     }
 }
