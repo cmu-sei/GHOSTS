@@ -37,7 +37,7 @@
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="9.0.6" />
     <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="9.0.1" />
     <PackageReference Include="Faker.Net" Version="2.0.163" />
-    <PackageReference Include="AutoMapper" Version="15.0.1" />
+    <PackageReference Include="AutoMapper" Version="16.1.1" />
     <PackageReference Include="FileHelpers" Version="3.5.2" />
     <PackageReference Include="RestSharp" Version="112.1.0" />
     <PackageReference Include="Betalgo.OpenAI" Version="8.7.2" />
