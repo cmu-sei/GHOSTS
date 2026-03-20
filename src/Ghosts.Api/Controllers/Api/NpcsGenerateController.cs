@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using Ghosts.Api.Areas.Animator.Infrastructure.Models;
 using Ghosts.Api.Infrastructure.Models;
 using Ghosts.Api.Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;

@@ -1,0 +1,405 @@
+@{
+    Layout = null;
+}
+@using Ghosts.Pandora.Infrastructure
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>reddit: Chat with u/@ViewBag.PartnerUsername</title>
+    <link rel="stylesheet" href="/themes/reddit/css/reddit.css">
+    <link rel="icon" href="/themes/reddit/images/reddit-icon.png" type="image/png">
+    <style>
+        .chat-layout {
+            background: #dae0e6;
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        .chat-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: #ff4500;
+            color: #fff;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            padding: 8px;
+            margin-right: 12px;
+            border-radius: 4px;
+            font-size: 16px;
+            transition: background-color 0.1s;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .chat-user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 4px;
+            margin-right: 12px;
+        }
+
+        .chat-user-info h1 {
+            font-size: 16px;
+            font-weight: 500;
+            margin: 0 0 2px 0;
+        }
+
+        .chat-user-info h1::before {
+            content: "u/";
+            opacity: 0.8;
+        }
+
+        .chat-user-karma {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .chat-messages {
+            min-height: 500px;
+            max-height: 600px;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: #f8f9fa;
+        }
+
+        .chat-message {
+            display: flex;
+            align-items: flex-start;
+            max-width: 75%;
+            background: #fff;
+            border-radius: 4px;
+            border-left: 4px solid #edeff1;
+            padding: 12px;
+        }
+
+        .chat-message.sent {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+            background: #ffe8d6;
+            border-left-color: #ff4500;
+        }
+
+        .chat-message.received {
+            align-self: flex-start;
+        }
+
+        .vote-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0 8px;
+            min-width: 24px;
+        }
+
+        .vote-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #878a8c;
+            font-size: 14px;
+            padding: 2px;
+            transition: color 0.1s;
+        }
+
+        .vote-btn:hover {
+            color: #ff4500;
+        }
+
+        .vote-count {
+            font-size: 10px;
+            font-weight: 700;
+            color: #1c1c1c;
+            margin: 2px 0;
+        }
+
+        .chat-message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            margin: 0 8px;
+        }
+
+        .chat-message-content {
+            flex: 1;
+        }
+
+        .chat-message-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .chat-message-author {
+            font-weight: 500;
+            color: #1c1c1c;
+            font-size: 12px;
+            margin-right: 8px;
+        }
+
+        .chat-message-author::before {
+            content: "u/";
+            color: #787c7e;
+        }
+
+        .chat-message-time {
+            color: #787c7e;
+            font-size: 10px;
+        }
+
+        .chat-message-text {
+            background: #f6f7f8;
+            padding: 8px 12px;
+            border-radius: 4px;
+            color: #1c1c1c;
+            font-size: 14px;
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+
+        .chat-message.sent .chat-message-text {
+            background: #fff;
+        }
+
+        .chat-input-container {
+            background: #f6f7f8;
+            padding: 16px 20px;
+            border-top: 1px solid #edeff1;
+        }
+
+        .chat-input-form {
+            display: flex;
+            align-items: center;
+            background: #fff;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            padding: 8px 12px;
+        }
+
+        .chat-input {
+            flex: 1;
+            border: none;
+            background: none;
+            font-size: 14px;
+            padding: 8px 0;
+            outline: none;
+            resize: none;
+            max-height: 100px;
+            font-family: 'IBM Plex Sans', sans-serif;
+        }
+
+        .chat-input::placeholder {
+            color: #787c7e;
+        }
+
+        .chat-send-btn {
+            background: #ff4500;
+            border: none;
+            border-radius: 4px;
+            color: #fff;
+            padding: 8px 16px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-left: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: background-color 0.1s;
+        }
+
+        .chat-send-btn:hover {
+            background: #dc3900;
+        }
+
+        .empty-chat {
+            text-align: center;
+            padding: 48px 20px;
+            color: #787c7e;
+            margin: auto;
+        }
+
+        .empty-chat h3 {
+            color: #1c1c1c;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .thread-info {
+            background: #fffbf0;
+            border: 1px solid #ffcc02;
+            border-radius: 4px;
+            padding: 12px;
+            margin-bottom: 16px;
+            font-size: 12px;
+            color: #1c1c1c;
+        }
+
+        .thread-info-title {
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .awards-section {
+            display: flex;
+            gap: 4px;
+            margin-top: 4px;
+        }
+
+        .award {
+            background: #ffcc02;
+            color: #1c1c1c;
+            font-size: 10px;
+            padding: 2px 4px;
+            border-radius: 2px;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body data-theme="reddit">
+    <!-- Reddit Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <a href="/" class="logo-link">
+                    <img src="/themes/reddit/images/reddit-icon.png" alt="reddit" class="reddit-logo">
+                    <span class="reddit-text">reddit</span>
+                </a>
+            </div>
+            <div class="header-center">
+                <div class="search-bar">
+                    <input type="text" placeholder="Search Reddit" class="search-input">
+                </div>
+            </div>
+            <div class="header-right">
+                <a href="/" class="nav-button">Home</a>
+                <a href="/messages" class="nav-button active">Messages</a>
+                <img src="/u/@ViewBag.Username/avatar" alt="Profile" class="user-avatar">
+            </div>
+        </div>
+    </header>
+
+    <div class="chat-layout">
+        <div class="chat-container">
+            <div class="chat-header">
+                <button class="back-btn" onclick="window.location.href='/messages'">←</button>
+                <img src="/u/@ViewBag.PartnerUsername/avatar" alt="@ViewBag.PartnerUsername" class="chat-user-avatar">
+                <div class="chat-user-info">
+                    <h1>@ViewBag.PartnerUsername</h1>
+                    <div class="chat-user-karma">+2,547 karma • Redditor for 2 years</div>
+                </div>
+            </div>
+
+            <div class="chat-messages">
+                <div class="thread-info">
+                    <div class="thread-info-title">Private Message Thread</div>
+                    <div>This is a private conversation between you and u/@ViewBag.PartnerUsername</div>
+                    <div class="awards-section">
+                        <span class="award">👑 GOLD</span>
+                        <span class="award">🥈 SILVER</span>
+                    </div>
+                </div>
+
+                @if (ViewBag.Conversation != null)
+                {
+                    @foreach (var message in ViewBag.Conversation)
+                    {
+                        <div class="chat-message @(message.FromUsername == ViewBag.Username ? "sent" : "received")">
+                            <div class="vote-section">
+                                <button class="vote-btn">▲</button>
+                                <div class="vote-count">1</div>
+                                <button class="vote-btn">▼</button>
+                            </div>
+                            <img src="/u/@(message.FromUsername == ViewBag.Username ? ViewBag.Username : ViewBag.PartnerUsername)/avatar"
+                                 alt="@(message.FromUsername == ViewBag.Username ? ViewBag.Username : ViewBag.PartnerUsername)"
+                                 class="chat-message-avatar">
+                            <div class="chat-message-content">
+                                <div class="chat-message-header">
+                                    <span class="chat-message-author">@(message.FromUsername == ViewBag.Username ? ViewBag.Username : ViewBag.PartnerUsername)</span>
+                                    <span class="chat-message-time">
+                                        @message.CreatedUtc.ToString("MMM dd") • @message.CreatedUtc.ToString("h:mm tt")@(message.ReadUtc != null ? " • Read" : "")
+                                    </span>
+                                </div>
+                                <div class="chat-message-text">@message.Message</div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="empty-chat">
+                        <h3>Start a conversation with u/@ViewBag.PartnerUsername</h3>
+                        <p>Send the first message to begin this thread!</p>
+                    </div>
+                }
+            </div>
+
+            <div class="chat-input-container">
+                <form method="post" action="/messages/send" class="chat-input-form">
+                    <input type="hidden" name="toUsername" value="@ViewBag.PartnerUsername">
+                    <textarea name="message" class="chat-input" placeholder="What's your reply?" required rows="1"></textarea>
+                    <button type="submit" class="chat-send-btn">Reply</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="/lib/jquery/dist/jquery.min.js"></script>
+    <script>
+        // Auto-scroll to bottom of messages
+        $('.chat-messages').scrollTop($('.chat-messages')[0].scrollHeight);
+
+        // Auto-resize textarea
+        $('.chat-input').on('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+        });
+
+        // Submit on Enter
+        $('.chat-input').on('keypress', function(e) {
+            if (e.which === 13 && !e.shiftKey) {
+                e.preventDefault();
+                $(this).closest('form').submit();
+            }
+        });
+
+        // Vote button interactions
+        $('.vote-btn').click(function(e) {
+            e.preventDefault();
+            $(this).css('color', '#ff4500');
+            var count = $(this).siblings('.vote-count');
+            var currentCount = parseInt(count.text());
+
+            if ($(this).text() === '▲') {
+                count.text(currentCount + 1);
+            } else {
+                count.text(Math.max(0, currentCount - 1));
+            }
+
+            setTimeout(() => {
+                $(this).css('color', '#878a8c');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

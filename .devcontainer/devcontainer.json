@@ -1,0 +1,51 @@
+{
+    "name": "ghosts development",
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+    "runArgs": [
+        "--name",
+        "ghosts-dev"
+    ],
+    "features": {
+        "ghcr.io/devcontainers/features/common-utils:2": {
+            "configureZshAsDefaultShell": true
+        },
+        "ghcr.io/devcontainers/features/node:1": {},
+        "ghcr.io/devcontainers/features/python:1": {
+            "version": "3.12"
+        },
+        "ghcr.io/devcontainers/features/git:1": {},
+        "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+        "ghcr.io/devcontainers/features/aws-cli:1": {}
+    },
+    "mounts": [
+        "source=ghosts-dev-microsoft,target=/home/vscode/.microsoft,type=volume"
+    ],
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-dotnettools.csdevkit",
+                "ms-azuretools.vscode-docker",
+                "dbaeumer.vscode-eslint",
+                "esbenp.prettier-vscode",
+                "angular.ng-template",
+                "continue.continue",
+                "anthropic.claude-vscode",
+                "microsoft-aspire.aspire-vscode",
+                "pflannery.vscode-versionlens"
+            ],
+            "settings": {
+                "editor.formatOnSave": true,
+                "files.insertFinalNewline": true,
+                "files.eol": "\n",
+                "files.trimTrailingWhitespace": true,
+                "npm.packageManager": "npm",
+                "dotnet.defaultSolution": "src/ghosts.api.sln"
+            }
+        }
+    },
+    "forwardPorts": [8000],
+    "postCreateCommand": "bash -l .devcontainer/postcreate.sh",
+    "postStartCommand": "bash -l .devcontainer/poststart.sh"
+}

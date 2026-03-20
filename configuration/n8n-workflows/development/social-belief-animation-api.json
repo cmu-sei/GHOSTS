@@ -1,0 +1,185 @@
+{
+  "name": "GHOSTS Social Belief Animation (API)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "*/10 * * * *"
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "http://host.docker.internal:5000/api/npcs/list",
+        "authentication": "none",
+        "options": {}
+      },
+      "id": "get-npc-list",
+      "name": "Get NPC List",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get all NPCs and shuffle, take 10\nconst npcs = $input.item.json;\nfor (let i = npcs.length - 1; i > 0; i--) {\n  const j = Math.floor(Math.random() * (i + 1));\n  [npcs[i], npcs[j]] = [npcs[j], npcs[i]];\n}\nconst selected = npcs.slice(0, 10);\n\nreturn selected.map(npc => ({ json: npc }));"
+      },
+      "id": "select-random-npcs",
+      "name": "Select Random NPCs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [650, 300],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "split-npcs",
+      "name": "Split NPCs",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=http://host.docker.internal:5000/api/npcs/{{ $json.id }}/beliefs",
+        "authentication": "none",
+        "options": {}
+      },
+      "id": "get-beliefs",
+      "name": "Get NPC Beliefs",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const beliefs = [\n  'I should vote for candidate A',\n  'I should vote for candidate B',\n  'Strong passwords are essential',\n  'Regular software updates matter',\n  'Public Wi-Fi is risky',\n  'Antivirus software is a must',\n  'Encryption protects data',\n  'Phishing attacks are common',\n  'Two-factor authentication helps',\n  'Social engineering is a threat'\n];\n\nconst npc = $('Split NPCs').item.json;\nconst npcBeliefs = $input.all();\nconst currentStep = Date.now(); // Use timestamp as step\n\nlet belief;\nlet likelihood;\nlet posterior;\n\nif (npcBeliefs.length > 0 && npcBeliefs[0].json && npcBeliefs[0].json.length > 0) {\n  // Sort by step (newest first) and get latest\n  const sorted = npcBeliefs[0].json.sort((a, b) => b.step - a.step);\n  const latest = sorted[0];\n  \n  likelihood = latest.likelihood;\n  const priorPosterior = latest.posterior;\n  \n  // Bayesian update: P(H|E) = P(E|H) * P(H) / P(E)\n  const numerator = likelihood * priorPosterior;\n  const denominator = numerator + ((1 - likelihood) * (1 - priorPosterior));\n  posterior = numerator / denominator;\n  \n  belief = latest.name;\n} else {\n  // Create initial belief\n  likelihood = Math.random() * 0.5 + 0.25; // Random between 0.25 and 0.75\n  posterior = 0.5; // Start neutral\n  belief = beliefs[Math.floor(Math.random() * beliefs.length)];\n}\n\nreturn [{\n  json: {\n    npcId: npc.id,\n    name: belief,\n    step: currentStep,\n    likelihood: likelihood,\n    posterior: posterior\n  }\n}];"
+      },
+      "id": "calculate-belief",
+      "name": "Calculate Belief Update",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1250, 300],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://host.docker.internal:5000/api/npcs/{{ $json.npcId }}/beliefs",
+        "authentication": "none",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"toNpcId\": \"{{ $json.npcId }}\",\n  \"fromNpcId\": \"{{ $json.npcId }}\",\n  \"name\": \"{{ $json.name }}\",\n  \"step\": {{ $json.step }},\n  \"likelihood\": {{ $json.likelihood }},\n  \"posterior\": {{ $json.posterior }}\n}",
+        "options": {}
+      },
+      "id": "save-belief",
+      "name": "Save Belief via API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1450, 300]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get NPC List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get NPC List": {
+      "main": [
+        [
+          {
+            "node": "Select Random NPCs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select Random NPCs": {
+      "main": [
+        [
+          {
+            "node": "Split NPCs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split NPCs": {
+      "main": [
+        [
+          {
+            "node": "Get NPC Beliefs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get NPC Beliefs": {
+      "main": [
+        [
+          {
+            "node": "Calculate Belief Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Belief Update": {
+      "main": [
+        [
+          {
+            "node": "Save Belief via API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Belief via API": {
+      "main": [
+        [
+          {
+            "node": "Split NPCs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2026-02-11T00:00:00.000Z",
+  "versionId": "1"
+}

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Ghosts.Api.Hubs;
@@ -11,6 +12,7 @@ using Ghosts.Api.Infrastructure.Animations.AnimationDefinitions;
 using Ghosts.Api.Infrastructure.Extensions;
 using Ghosts.Api;
 using Ghosts.Api.Infrastructure;
+using Ghosts.Api.Infrastructure.Models;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -27,6 +29,10 @@ public interface IManageableHostedService : IHostedService
 
     Task StartJob(AnimationConfiguration config, CancellationToken cancellationToken);
     Task StopJob(string jobId);
+
+    Task StartWorkflowJob(string workflowId, string webhookUrl, string schedule, CancellationToken cancellationToken);
+    Task StopWorkflowJob(string workflowId);
+    bool IsWorkflowRunning(string workflowId);
 
     IEnumerable<JobInfo> GetRunningJobs();
 
@@ -56,10 +62,11 @@ public enum AnimationJobTypes
     FULLAUTONOMY
 }
 
-public class AnimationsManager(IHubContext<ActivityHub> activityHubContext, IServiceScopeFactory scopeFactory) : IManageableHostedService
+public class AnimationsManager(IHubContext<ActivityHub> activityHubContext, IServiceScopeFactory scopeFactory, IHttpClientFactory httpClientFactory) : IManageableHostedService
 {
     private static readonly Logger _log = LogManager.GetCurrentClassLogger();
     private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
+    private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
 
     private readonly ApplicationSettings _configuration = Program.ApplicationSettings;
     private readonly Random _random = Random.Shared;
@@ -77,6 +84,9 @@ public class AnimationsManager(IHubContext<ActivityHub> activityHubContext, ISer
 
     private readonly IHubContext<ActivityHub> _activityHubContext = activityHubContext;
     private readonly ConcurrentDictionary<string, JobInfo> _jobs = new();
+
+    // Workflow job tracking
+    private readonly ConcurrentDictionary<string, (Thread thread, CancellationTokenSource cts)> _workflowJobs = new();
 
     public string GetOutput(AnimationJobTypes job)
     {
@@ -154,6 +164,19 @@ public class AnimationsManager(IHubContext<ActivityHub> activityHubContext, ISer
         catch
         {
             // ignore
+        }
+
+        // Stop all workflow jobs
+        foreach (var workflowId in _workflowJobs.Keys.ToArray())
+        {
+            try
+            {
+                _ = StopWorkflowJob(workflowId);
+            }
+            catch
+            {
+                // ignore
+            }
         }
 
         _log.Info("Animations stopped.");
@@ -507,5 +530,71 @@ public class AnimationsManager(IHubContext<ActivityHub> activityHubContext, ISer
         {
             _log.Trace(e);
         }
+    }
+
+    public Task StartWorkflowJob(string workflowId, string webhookUrl, string schedule, CancellationToken cancellationToken)
+    {
+        _log.Info($"Starting workflow job for workflow {workflowId} with schedule {schedule}");
+
+        // Check if already running
+        if (_workflowJobs.ContainsKey(workflowId))
+        {
+            _log.Warn($"Workflow {workflowId} is already running");
+            return Task.CompletedTask;
+        }
+
+        var cts = new CancellationTokenSource();
+        var config = new AnimationDefinitions.WorkflowJobConfiguration
+        {
+            WorkflowId = workflowId,
+            WebhookUrl = webhookUrl,
+            Schedule = schedule,
+            N8nApiUrl = Environment.GetEnvironmentVariable("N8N_API_URL"),
+            N8nApiKey = Environment.GetEnvironmentVariable("N8N_API_KEY")
+        };
+
+        var thread = new Thread(() =>
+        {
+            Thread.CurrentThread.IsBackground = true;
+            _ = new AnimationDefinitions.WorkflowJob(config, _activityHubContext, _httpClientFactory, cts.Token);
+        });
+
+        _workflowJobs.TryAdd(workflowId, (thread, cts));
+        AddJob($"WORKFLOW_{workflowId}");
+        thread.Start();
+
+        return Task.CompletedTask;
+    }
+
+    public Task StopWorkflowJob(string workflowId)
+    {
+        _log.Info($"Stopping workflow job {workflowId}");
+
+        if (_workflowJobs.TryRemove(workflowId, out var jobInfo))
+        {
+            try
+            {
+                jobInfo.cts.Cancel();
+                jobInfo.thread?.Join(TimeSpan.FromSeconds(5)); // Wait up to 5 seconds for graceful shutdown
+                jobInfo.cts.Dispose();
+                RemoveJob($"WORKFLOW_{workflowId}");
+                _log.Info($"Workflow job {workflowId} stopped successfully");
+            }
+            catch (Exception ex)
+            {
+                _log.Error(ex, $"Error stopping workflow job {workflowId}");
+            }
+        }
+        else
+        {
+            _log.Warn($"Workflow job {workflowId} not found");
+        }
+
+        return Task.CompletedTask;
+    }
+
+    public bool IsWorkflowRunning(string workflowId)
+    {
+        return _workflowJobs.ContainsKey(workflowId);
     }
 }

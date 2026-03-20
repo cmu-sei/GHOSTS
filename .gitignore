@@ -328,3 +328,10 @@ output/
 
 **/.vscode/
 *.vscode*
+
+.devcontainer/certs/*
+.devcontainer/aws.env
+
+*.claude/*
+.claude/settings.local.json
+src/apphost/n8n_data/*

@@ -1,237 +1,232 @@
-# Setting Up the GHOSTS API
+# GHOSTS API
 
-_Updated on October 30, 2024_
+The GHOSTS API is the central command-and-control server for the GHOSTS framework. It manages clients, distributes timelines, records activity, stores NPC data, and exposes a REST API plus a SignalR WebSocket hub.
 
-The GHOSTS API enables centralized control and orchestration of non-player characters (NPCs) within a deployment. It provides logging, reporting, and management capabilities for individual machines, machine groups, or entire deployments.
+---
 
-## Architecture Overview
+## Stack Overview
 
-The GHOSTS API consists of four components, each running in its own Docker container:
+The API stack runs as five Docker containers:
 
-- **GHOSTS API** - RESTful API for configuring and managing NPCs, machines, and timelines
-- **GHOSTS UI** - Web interface for visualizing and managing your GHOSTS deployment
-- **Postgres** - Database for storing all GHOSTS data (machines, NPCs, timelines, activities)
-- **Grafana** - Dashboard for monitoring and analyzing NPC activities in real-time
+| Container | Image | Port | Purpose |
+|-----------|-------|------|---------|
+| `ghosts-api` | `dustinupdyke/ghosts` | 5000 | .NET 10 REST API + SignalR |
+| `ghosts-frontend` | `dustinupdyke/ghosts-frontend` | 4200 | Angular 20 management UI |
+| `ghosts-postgres` | `postgres:16.8` | 5432 | PostgreSQL 16 database |
+| `ghosts-n8n` | `docker.n8n.io/n8nio/n8n` | 5678 | n8n workflow automation |
+| `ghosts-grafana` | `grafana/grafana` | 3000 | Activity dashboards |
 
-## Installation Steps
+---
 
-### Step 1 — Choose Where to Host the API
+## Installation
 
-Select an appropriate host for your GHOSTS API deployment:
+### Step 1 — Choose a Host
 
-- **Testing/Development**: Your local machine is sufficient
-- **Training/Exercises**: Use a dedicated server, VM, or cloud instance
-- **Production**: Consider container orchestration platforms like AWS ECS, Kubernetes, or Docker Swarm
+- **Development / testing**: your local machine
+- **Training exercises**: a dedicated server, VM, or cloud instance
+- **Production**: a container orchestration platform (AWS ECS, Kubernetes, Docker Swarm)
 
-**System Requirements:**
+**Minimum requirements:**
 
-- Docker and Docker Compose installed
-- Minimum 4GB RAM (8GB+ recommended for larger deployments)
-- 20GB disk space
-- Network access from client machines to API server
+- Docker and Docker Compose v2+
+- 4 GB RAM (8 GB+ recommended)
+- 20 GB disk space
+- Ports 3000, 4200, 5000, 5432, and 5678 available
 
-### Step 2 — Install Docker and Docker Compose
-
-Install the required software on your API host:
-
-1. **Install Docker**: Follow the [Docker installation guide](https://docs.docker.com/install/)
-2. **Install Docker Compose**: Follow the [Docker Compose installation guide](https://docs.docker.com/compose/install/)
-
-**Verify Installation:**
+### Step 2 — Deploy
 
 ```bash
-docker --version
-docker-compose --version
-```
-
-Both commands should return version information if properly installed.
-
-### Step 3 — Deploy the GHOSTS API
-
-Create a directory for the GHOSTS deployment and download the Docker Compose configuration:
-
-```bash
-mkdir ghosts-api
-cd ghosts-api
+mkdir ghosts && cd ghosts
 curl -O https://raw.githubusercontent.com/cmu-sei/GHOSTS/master/src/Ghosts.Api/docker-compose.yml
+docker compose up -d
 ```
 
-Start all containers:
-
-```bash
-docker-compose up -d
-```
-
-The `-d` flag runs containers in detached mode (in the background).
-
-**Verify All Containers Are Running:**
+Verify:
 
 ```bash
 docker ps -a
 ```
 
-You should see four containers: `ghosts-api`, `ghosts-ui`, `ghosts-postgres`, and `ghosts-grafana`.
+All five containers should be in a running state. PostgreSQL needs ~15 seconds on first start; the API will retry the connection automatically.
 
-![Running Containers](../images/installing-the-api-running-containers.png)
+### Step 3 — Verify
 
-### Step 4 — Verify the Installation
+| URL | Expected |
+|-----|----------|
+| http://localhost:5000 | API home page |
+| http://localhost:5000/swagger | Swagger UI (API v9) |
+| http://localhost:4200 | Angular management frontend |
+| http://localhost:3000 | Grafana (default: `admin`/`admin`) |
+| http://localhost:5678 | n8n workflow editor |
 
-Test each component to ensure proper deployment:
+---
 
-**1. GHOSTS API (Port 5000)**
+## Configuration
 
-Open [http://localhost:5000](http://localhost:5000) in your browser. You should see the API home page displaying:
+### Environment Variables
 
-- API version information
-- Several test machine entries
-- Links to various API endpoints
+Set these in a `.env` file alongside `docker-compose.yml` or directly in your container environment:
 
-![Success!](../images/installing-the-api-success.png)
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `N8N_API_URL` | `http://host.docker.internal:5678/api/v1/workflows` | n8n REST API endpoint (used by the API to list and validate workflows) |
+| `N8N_API_KEY` | `replace-me` | n8n API key for authenticating workflow API calls |
+| `WEB_API_URL` | `http://host.docker.internal:5000/api` | GHOSTS API URL served to the frontend container |
+| `WEB_N8N_API_URL` | `http://host.docker.internal:5678` | n8n base URL served to the frontend container |
 
-**2. GHOSTS UI (Port 8080)**
+### appsettings.json (Advanced)
 
-Open [http://localhost:8080](http://localhost:8080) to access the web management interface. See the [UI documentation](ui.md) for usage details.
+Key settings in `Ghosts.Api/appsettings.json`:
 
-**3. Grafana Dashboard (Port 3000)**
-
-Open [http://localhost:3000](http://localhost:3000) to access the monitoring dashboard. Default credentials are typically `admin/admin` (you'll be prompted to change the password on first login). See the [Grafana documentation](grafana.md) for configuration details.
-
-## Managing the API
-
-### Starting and Stopping
-
-```bash
-# Stop all containers
-docker-compose down
-
-# Start all containers
-docker-compose up -d
-
-# Restart a specific container
-docker-compose restart ghosts-api
-
-# View container logs
-docker-compose logs -f ghosts-api
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Host=ghosts-postgres;Port=5432;Database=ghosts;User Id=ghosts;Password=scotty@1;"
+  },
+  "ApplicationSettings": {
+    "OfflineAfterMinutes": 30,
+    "MatchMachinesBy": "name",
+    "AnimatorSettings": {
+      "Animations": {
+        "IsEnabled": true
+      }
+    }
+  },
+  "CorsPolicy": {
+    "Origins": ["http://localhost:4200"]
+  }
+}
 ```
 
-### Updating GHOSTS
+Override values for production via environment variables or a mounted `appsettings.Production.json`.
 
-To update to the latest version:
+---
+
+## Managing the Stack
 
 ```bash
-docker-compose down
-docker-compose pull
-docker-compose up -d
+# Stop
+docker compose down
+
+# Update to latest images
+docker compose pull && docker compose up -d
+
+# Restart a specific service
+docker compose restart ghosts-api
+
+# Follow API logs
+docker compose logs -f ghosts-api
 ```
 
 ### Data Persistence
 
-All data is stored in Docker volumes:
-- `postgres_data` - Database containing machines, NPCs, timelines, and activities
-- `grafana_data` - Grafana configuration and dashboards
+| Directory | Contents |
+|-----------|----------|
+| `./_db` | PostgreSQL data (machines, NPCs, timelines, activities) |
+| `./_g` | Grafana dashboards and configuration |
+| `./n8n_data` | n8n workflows and credentials |
 
-These volumes persist across container restarts and updates.
+**Reset the database (destroys all data):**
+
+```bash
+docker compose down && rm -rf ./_db && docker compose up -d
+```
+
+---
+
+## API Reference
+
+Interactive documentation is available at `http://YOUR-API-HOST:5000/swagger` when the API is running.
+
+### Client Endpoints
+
+Used by deployed GHOSTS client agents:
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| POST | `/api/clientid` | Machine self-registration |
+| GET/POST | `/api/clientupdates` | Fetch pending timeline updates |
+| POST | `/api/clientresults` | Submit activity results |
+| POST | `/api/clienttimeline` | Submit active timeline |
+| POST | `/api/clientsurvey` | Submit system survey data |
+
+### Management Endpoints
+
+Used by the frontend and operators:
+
+| Resource | Base Path |
+|----------|-----------|
+| Machines | `/api/machines` |
+| Machine Groups | `/api/machinegroups` |
+| Timelines | `/api/timelines` |
+| Machine Timelines | `/api/machinetimelines` |
+| Machine Updates | `/api/machineupdates` |
+| NPCs | `/api/npcs` |
+| NPC Generation | `/api/npcs/generate` |
+| Scenarios | `/api/scenarios` |
+| Executions | `/api/executions` |
+| Trackables | `/api/trackables` |
+| Surveys | `/api/surveys` |
+| Webhooks | `/api/webhooks` |
+| Animation Jobs | `/api/animations/jobs` |
+| n8n Workflows | `/api/animations/workflows` |
+
+### SignalR Hub
+
+Clients connect to `/clientHub` (WebSocket). Hub methods:
+
+| Method | Direction | Purpose |
+|--------|-----------|---------|
+| `SendId` | Client → Server | Machine identification on connect |
+| `SendResults` | Client → Server | Timeline execution results |
+| `SendSurvey` | Client → Server | System survey data |
+| `SendHeartbeat` | Client → Server | Keep-alive |
+| `ReceiveId` | Server → Client | Returns machine GUID after registration |
+
+The frontend connects to `/api/hubs/activities` for real-time animation and workflow events.
+
+---
 
 ## Troubleshooting
 
-### API Home Page Shows Error
+### API returns database error on startup
 
-![API Home Page Error](../images/installing-the-api-error.png)
+PostgreSQL takes ~15 seconds to initialize on first run. The API retries automatically — wait and refresh.
 
-**Cause**: The Postgres database container is not running or not accessible.
-
-**Solution**:
-
-1. Check if the Postgres container is running:
-   ```bash
-   docker ps -a | grep postgres
-   ```
-
-2. Check Postgres logs for errors:
-   ```bash
-   docker logs ghosts-postgres
-   ```
-
-3. Restart the Postgres container:
-   ```bash
-   docker-compose restart ghosts-postgres
-   ```
-
-4. If the container repeatedly restarts, check for permission issues with the data volume.
-
-### Social Graph Link Shows Error
-
-![API Social Graph Page Error](../images/installing-the-api-social-error.png)
-
-**Cause**: No social network has been created yet.
-
-**Solution**: This is normal for new installations. Social networks are created when you generate NPCs using the Animator functionality. See the [Animator documentation](../animator/index.md) for details.
-
-### Grafana Container Keeps Restarting
-
-**Cause**: Insufficient permissions on the Grafana data directory.
-
-**Solution**:
-
-1. Check the ownership of the Grafana data directory:
-   ```bash
-   ls -la | grep grafana
-   ```
-
-2. Set the correct ownership (the exact user ID may vary based on your `docker-compose.yml`):
-   ```bash
-   sudo chown -R 472:472 grafana_data
-   ```
-
-3. Restart the Grafana container:
-   ```bash
-   docker-compose restart ghosts-grafana
-   ```
-
-### Cannot Connect from Client to API
-
-**Cause**: Network connectivity or firewall issues.
-
-**Solution**:
-
-1. Verify the API is accessible from the client machine:
-   ```bash
-   curl http://YOUR-API-SERVER:5000/api
-   ```
-
-2. Check firewall rules on the API server to ensure ports 5000, 8080, and 3000 are accessible.
-
-3. Ensure the client's `application.json` or `application.yaml` has the correct API URL:
-   ```json
-   {
-     "ApiRootUrl": "http://YOUR-API-SERVER:5000/api"
-   }
-   ```
-
-### Container Logs Show "Connection Refused" Errors
-
-**Cause**: Containers are trying to communicate before all services are ready.
-
-**Solution**: This is typically a timing issue during startup. Wait 30-60 seconds and check if the errors persist. If they do:
+If it persists, check PostgreSQL logs:
 
 ```bash
-docker-compose restart
+docker compose logs ghosts-postgres
 ```
 
-### Need to Reset the Database
+### Cannot connect from a client to the API
 
-**Warning**: This will delete all machines, NPCs, timelines, and activity data.
+1. Confirm the API is reachable from the client machine:
+   ```bash
+   curl http://YOUR-API-HOST:5000/api
+   ```
+2. Ensure port 5000 is open in the firewall on the API host.
+3. Check `config/application.json` (or `application.yaml`) on the client has the correct `ApiRootUrl`.
+
+### Grafana container keeps restarting
+
+Check ownership of the `_g` directory:
 
 ```bash
-docker-compose down
-docker volume rm ghosts-api_postgres_data
-docker-compose up -d
+sudo chown -R 472:472 ./_g
+docker compose restart ghosts-grafana
 ```
+
+### Social graph page shows no data
+
+This is expected on fresh installations. Social graphs are created when NPCs are generated and animations are run. See [Animator documentation](../animator/index.md).
+
+---
 
 ## Next Steps
 
-- Configure [client machines](client.md) to connect to your API
-- Explore the [UI](ui.md) to manage machines and timelines
-- Set up [Grafana dashboards](grafana.md) for monitoring
+- Connect [client machines](client.md)
+- Explore the [Frontend](ui.md) for machine and timeline management
+- Configure [Grafana dashboards](grafana.md)
 - Learn about [timeline configuration](api/timelines.md)
-- Generate NPCs using [Animator](../animator/index.md)
+- Generate NPCs with the [Animator](../animator/index.md)

@@ -1,0 +1,172 @@
+@model Ghosts.Pandora.Infrastructure.ViewModels.SearchResultsViewModel
+@{
+    Layout = null;
+    var query = Model?.Query ?? string.Empty;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Search - @query</title>
+    <link rel="stylesheet" href="/themes/youtube/css/feed.css">
+    <style>
+        body {
+            background: #0f0f0f;
+            color: #f1f1f1;
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            padding: 12px 24px;
+            background: #202020;
+            border-bottom: 1px solid #303030;
+        }
+        .header .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .search-container {
+            max-width: 1100px;
+            margin: 24px auto;
+            padding: 0 16px 40px;
+        }
+        .search-card {
+            background: #181818;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+        .search-form {
+            display: flex;
+            gap: 12px;
+        }
+        .search-form input {
+            flex: 1;
+            background: #121212;
+            border: 1px solid #303030;
+            border-radius: 24px;
+            color: #f1f1f1;
+            padding: 12px 16px;
+        }
+        .search-form button {
+            background: #ff0000;
+            color: #fff;
+            border: none;
+            border-radius: 24px;
+            padding: 12px 24px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        h2 {
+            font-size: 18px;
+            margin-bottom: 16px;
+        }
+        .results-grid {
+            display: grid;
+            gap: 16px;
+        }
+        .result-card {
+            display: flex;
+            gap: 16px;
+            background: #202020;
+            border-radius: 12px;
+            padding: 16px;
+        }
+        .result-card a {
+            color: inherit;
+            text-decoration: none;
+        }
+        .thumbnail-placeholder {
+            width: 160px;
+            height: 90px;
+            background: #333;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #aaa;
+            font-size: 14px;
+        }
+        .empty-state {
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <img src="/themes/youtube/images/youtube-logo.png" alt="YouTube" class="youtube-logo">
+        </div>
+    </div>
+
+    <div class="search-container">
+        <div class="search-card">
+            <form class="search-form" method="get" action="/search">
+                <input type="text" name="q" value="@query" placeholder="Search" />
+                <button type="submit">Search</button>
+            </form>
+        </div>
+
+        <div class="search-card">
+            <h2>Channels</h2>
+            @if (Model?.HasQuery == true && Model.Users?.Count > 0)
+            {
+                <div class="results-grid">
+                    @foreach (var user in Model.Users)
+                    {
+                        <div class="result-card">
+                            <div class="thumbnail-placeholder">Channel</div>
+                            <div>
+                                <a href="/u/@user.Username"><strong>@user.Username</strong></a>
+                                <p>@(string.IsNullOrWhiteSpace(user.Bio) ? "No description." : user.Bio)</p>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else if (Model?.HasQuery == true)
+            {
+                <div class="empty-state">No channels found.</div>
+            }
+            else
+            {
+                <div class="empty-state">Search for channels to get started.</div>
+            }
+        </div>
+
+        <div class="search-card">
+            <h2>Videos</h2>
+            @if (Model?.HasQuery == true && Model.Posts?.Count > 0)
+            {
+                <div class="results-grid">
+                    @foreach (var post in Model.Posts)
+                    {
+                        <div class="result-card">
+                            <div class="thumbnail-placeholder">Video</div>
+                            <div>
+                                <a href="/posts/@post.Id"><strong>@post.Username</strong></a>
+                                <p>@Html.Raw(post.Message)</p>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else if (Model?.HasQuery == true)
+            {
+                <div class="empty-state">No videos matched "@query".</div>
+            }
+            else
+            {
+                <div class="empty-state">Search to discover videos.</div>
+            }
+        </div>
+    </div>
+
+    <script src="/js/social.js"></script>
+</body>
+</html>

@@ -1,0 +1,280 @@
+<div class="page-header">
+  <h1>Social Graphs & Relationships</h1>
+  <div class="header-actions">
+    <button mat-raised-button (click)="loadSocialGraphs()">
+      <i class="fas fa-sync"></i>
+      Refresh
+    </button>
+    <button mat-raised-button color="primary" (click)="exportCSV()">
+      <i class="fas fa-download"></i>
+      Export CSV
+    </button>
+  </div>
+</div>
+
+@if (selectedGraph()) {
+  <!-- Detail View -->
+  <mat-card class="detail-card">
+    <mat-card-header>
+      <mat-card-title>
+        <div class="detail-header">
+          <span>{{ selectedGraph()!.name }}</span>
+          <button mat-button (click)="closeDetails()" class="icon-button">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </mat-card-title>
+      <mat-card-subtitle>
+        @if (selectedGraph()!.campaign || selectedGraph()!.enclave || selectedGraph()!.team) {
+          <div class="badges">
+            @if (selectedGraph()!.campaign) {
+              <span class="badge">{{ selectedGraph()!.campaign }}</span>
+            }
+            @if (selectedGraph()!.enclave) {
+              <span class="badge">{{ selectedGraph()!.enclave }}</span>
+            }
+            @if (selectedGraph()!.team) {
+              <span class="badge">{{ selectedGraph()!.team }}</span>
+            }
+          </div>
+        }
+        <div class="stats">
+          Step: {{ selectedGraph()!.currentStep }}
+        </div>
+      </mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <mat-tab-group>
+        <!-- Connections Tab -->
+        <mat-tab label="Connections ({{ getConnectionCount(selectedGraph()!) }})">
+          @if (selectedGraph()!.connections && selectedGraph()!.connections!.length > 0) {
+            <div class="connections-container">
+              @for (connection of selectedGraph()!.connections; track connection.id) {
+                <mat-expansion-panel>
+                  <mat-expansion-panel-header>
+                    <mat-panel-title>
+                      <div class="connection-title">
+                        <strong>{{ connection.name }}</strong>
+                        <mat-chip [class]="'status-' + getRelationshipStatusClass(connection.relationshipStatus)">
+                          {{ getRelationshipStatusLabel(connection.relationshipStatus) }} ({{ connection.relationshipStatus }})
+                        </mat-chip>
+                      </div>
+                    </mat-panel-title>
+                    <mat-panel-description>
+                      <div class="connection-stats">
+                        <span matTooltip="Number of interactions">
+                          <i class="fas fa-exchange-alt"></i>
+                          {{ connection.interactionCount || 0 }}
+                        </span>
+                        <span matTooltip="Connection score">
+                          <i class="fas fa-chart-line"></i>
+                          {{ getConnectionScore(connection) }}
+                        </span>
+                        @if (getInteractionTrend(connection) === 'up') {
+                          <i class="fas fa-arrow-up trend-up" matTooltip="Relationship improving"></i>
+                        } @else if (getInteractionTrend(connection) === 'down') {
+                          <i class="fas fa-arrow-down trend-down" matTooltip="Relationship declining"></i>
+                        } @else {
+                          <i class="fas fa-minus trend-neutral" matTooltip="Relationship stable"></i>
+                        }
+                      </div>
+                    </mat-panel-description>
+                  </mat-expansion-panel-header>
+
+                  <div class="connection-details">
+                    @if (connection.distance) {
+                      <p><strong>Distance:</strong> {{ connection.distance }}</p>
+                    }
+
+                    @if (connection.interactions && connection.interactions.length > 0) {
+                      <div class="interactions-section">
+                        <h4>Interactions</h4>
+                        <div class="interactions-list">
+                          @for (interaction of connection.interactions; track interaction.id) {
+                            <div class="interaction-item">
+                              <span class="step">Step {{ interaction.step }}</span>
+                              <div class="value-bar" [style.width.%]="interaction.value">
+                                <span>{{ interaction.value }}</span>
+                              </div>
+                            </div>
+                          }
+                        </div>
+                      </div>
+                    } @else {
+                      <p class="no-data">No interactions recorded yet.</p>
+                    }
+                  </div>
+                </mat-expansion-panel>
+              }
+            </div>
+          } @else {
+            <div class="empty-state">
+              <i class="fas fa-users"></i>
+              <p>No connections found.</p>
+            </div>
+          }
+        </mat-tab>
+
+        <!-- Knowledge Tab -->
+        <mat-tab label="Knowledge ({{ getKnowledgeTopicCount(selectedGraph()!) }})">
+          @if (getGroupedKnowledge(selectedGraph()!).length > 0) {
+            <div class="knowledge-container">
+              @for (knowledge of getGroupedKnowledge(selectedGraph()!); track knowledge.topic) {
+                <div class="knowledge-item" [class]="getKnowledgeStrengthClass(knowledge.total)">
+                  <span class="topic">{{ knowledge.topic }}</span>
+                  <span class="value">{{ knowledge.total }}</span>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="empty-state">
+              <i class="fas fa-graduation-cap"></i>
+              <p>No knowledge recorded yet.</p>
+            </div>
+          }
+        </mat-tab>
+
+        <!-- Beliefs Tab -->
+        <mat-tab label="Beliefs ({{ getBeliefsCount(selectedGraph()!) }})">
+          @if (selectedGraph()!.beliefs && selectedGraph()!.beliefs!.length > 0) {
+            <div class="beliefs-container">
+              <table mat-table [dataSource]="selectedGraph()!.beliefs!">
+                <ng-container matColumnDef="name">
+                  <th mat-header-cell *matHeaderCellDef>Belief</th>
+                  <td mat-cell *matCellDef="let belief">{{ belief.name }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="about">
+                  <th mat-header-cell *matHeaderCellDef>About</th>
+                  <td mat-cell *matCellDef="let belief">{{ belief.toNpcName || belief.toNpcId }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="likelihood">
+                  <th mat-header-cell *matHeaderCellDef>Likelihood</th>
+                  <td mat-cell *matCellDef="let belief">{{ belief.likelihood | number:'1.2-2' }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="posterior">
+                  <th mat-header-cell *matHeaderCellDef>Posterior</th>
+                  <td mat-cell *matCellDef="let belief">{{ belief.posterior | number:'1.2-2' }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="step">
+                  <th mat-header-cell *matHeaderCellDef>Step</th>
+                  <td mat-cell *matCellDef="let belief">{{ belief.step }}</td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="['name', 'about', 'likelihood', 'posterior', 'step']"></tr>
+                <tr mat-row *matRowDef="let row; columns: ['name', 'about', 'likelihood', 'posterior', 'step'];"></tr>
+              </table>
+            </div>
+          } @else {
+            <div class="empty-state">
+              <i class="fas fa-brain"></i>
+              <p>No beliefs recorded yet.</p>
+            </div>
+          }
+        </mat-tab>
+      </mat-tab-group>
+    </mat-card-content>
+  </mat-card>
+} @else {
+  <!-- List View -->
+  <mat-card class="list-card">
+    <mat-card-header>
+      <mat-card-title>All Social Graphs</mat-card-title>
+      <mat-card-subtitle>Click on any graph to view detailed relationships</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      @if (loading()) {
+        <div class="loading">
+          <mat-spinner diameter="40"></mat-spinner>
+          <p>Loading social graphs...</p>
+        </div>
+      } @else if (error()) {
+        <div class="error">
+          <i class="fas fa-exclamation-circle"></i>
+          <p>{{ error() }}</p>
+          <button mat-button color="primary" (click)="loadSocialGraphs()">
+            <i class="fas fa-sync"></i>
+            Retry
+          </button>
+        </div>
+      } @else if (socialGraphs().length === 0) {
+        <div class="empty-state">
+          <i class="fas fa-project-diagram"></i>
+          <p>No social graphs found. Create some NPCs to see their relationships here.</p>
+        </div>
+      } @else {
+        <div class="table-container">
+          <table mat-table [dataSource]="socialGraphs()">
+            <ng-container matColumnDef="name">
+              <th mat-header-cell *matHeaderCellDef>NPC Name</th>
+              <td mat-cell *matCellDef="let graph">
+                <div class="npc-info">
+                  <strong>{{ graph.name }}</strong>
+                  @if (graph.campaign || graph.enclave || graph.team) {
+                    <div class="badges">
+                      @if (graph.campaign) {
+                        <span class="badge">{{ graph.campaign }}</span>
+                      }
+                      @if (graph.enclave) {
+                        <span class="badge">{{ graph.enclave }}</span>
+                      }
+                      @if (graph.team) {
+                        <span class="badge">{{ graph.team }}</span>
+                      }
+                    </div>
+                  }
+                  @if (getGroupedKnowledge(graph).length > 0) {
+                    <div class="knowledge-inline">
+                      @for (knowledge of getGroupedKnowledge(graph); track knowledge.topic) {
+                        <span class="knowledge-chip" [class]="getKnowledgeStrengthClass(knowledge.total)">
+                          {{ knowledge.topic }} {{ knowledge.total }}
+                        </span>
+                      }
+                    </div>
+                  }
+                </div>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="connections">
+              <th mat-header-cell *matHeaderCellDef>Connections</th>
+              <td mat-cell *matCellDef="let graph">
+                <span class="metric">{{ getConnectionCount(graph) }}</span>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="knowledge">
+              <th mat-header-cell *matHeaderCellDef>Knowledge Topics</th>
+              <td mat-cell *matCellDef="let graph">
+                <span class="metric">{{ getKnowledgeTopicCount(graph) }}</span>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="beliefs">
+              <th mat-header-cell *matHeaderCellDef>Beliefs</th>
+              <td mat-cell *matCellDef="let graph">
+                <span class="metric">{{ getBeliefsCount(graph) }}</span>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>Actions</th>
+              <td mat-cell *matCellDef="let graph">
+                <button mat-raised-button color="primary" (click)="viewDetails(graph)">
+                  <i class="fas fa-eye"></i>
+                  View Details
+                </button>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          </table>
+        </div>
+      }
+    </mat-card-content>
+  </mat-card>
+}

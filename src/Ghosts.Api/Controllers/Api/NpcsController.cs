@@ -6,28 +6,62 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using FileHelpers;
-using Ghosts.Api.Areas.Animator.Infrastructure.Models;
-using Ghosts.Api.Infrastructure.Models;
-using Ghosts.Api.Infrastructure.Services;
-using Ghosts.Animator;
 using Ghosts.Animator.Extensions;
 using Ghosts.Animator.Models;
 using Ghosts.Api.Hubs;
 using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Api.Infrastructure.Extensions;
+using Ghosts.Api.Infrastructure.Models;
+using Ghosts.Api.Infrastructure.Services;
 using Ghosts.Domain.Code;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore;
 using NLog;
 using Swashbuckle.AspNetCore.Annotations;
-using Swashbuckle.AspNetCore.Filters;
 
 namespace Ghosts.Api.Controllers.Api;
+
+public class CreatePreferenceRequest
+{
+    public Guid ToNpcId { get; set; }
+    public Guid FromNpcId { get; set; }
+    public string Name { get; set; }
+    public long Step { get; set; }
+    public decimal Weight { get; set; }
+    public decimal Strength { get; set; }
+}
+
+public class CreateConnectionRequest
+{
+    public Guid ConnectedNpcId { get; set; }
+    public string Name { get; set; }
+    public string Distance { get; set; }
+    /// <summary>
+    /// Relationship quality from -1.0 (bad) to 1.0 (perfect)
+    /// </summary>
+    public decimal RelationshipStatus { get; set; }
+}
+
+public class CreateKnowledgeRequest
+{
+    public Guid ToNpcId { get; set; }
+    public Guid FromNpcId { get; set; }
+    public string Topic { get; set; }
+    public long Step { get; set; }
+    public int Value { get; set; }
+}
+
+public class CreateBeliefRequest
+{
+    public Guid ToNpcId { get; set; }
+    public Guid FromNpcId { get; set; }
+    public string Name { get; set; }
+    public long Step { get; set; }
+    public decimal Likelihood { get; set; }
+    public decimal Posterior { get; set; }
+}
 
 [ApiController]
 [Produces("application/json")]
@@ -54,14 +88,14 @@ public class NpcsController(
     }
 
     /// <summary>
-    /// Returns all generated NPCs in the system (caution, could return a very large amount of data)
+    /// Creates an NPC
     /// </summary>
-    /// <returns>IEnumerable&lt;NpcProfile&gt;</returns>
-    [ProducesResponseType(typeof(ActionResult<IEnumerable<NpcRecord>>), (int)HttpStatusCode.OK)]
-    [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(ActionResult<IEnumerable<NpcRecord>>))]
+    /// <returns>NpcProfile</returns>
+    [ProducesResponseType(typeof(ActionResult<NpcRecord>), (int)HttpStatusCode.OK)]
+    [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(ActionResult<NpcRecord>))]
     [SwaggerOperation("NpcsCreate")]
     [HttpPost]
-    public async Task<ActionResult<IEnumerable<NpcRecord>>> NpcsCreate(NpcProfile npc)
+    public async Task<ActionResult<NpcRecord>> NpcsCreate(NpcProfile npc)
     {
         return Ok(await service.CreateOne(npc));
     }
@@ -91,6 +125,163 @@ public class NpcsController(
     public async Task<ActionResult<NpcRecord>> NpcsGetById(Guid id)
     {
         return Ok(await service.GetById(id));
+    }
+
+    /// <summary>
+    /// Get all activity records for a specific NPC
+    /// </summary>
+    /// <param name="id">The NPC ID</param>
+    /// <returns>IEnumerable&lt;NpcActivity&gt;</returns>
+    [ProducesResponseType(typeof(ActionResult<IEnumerable<NpcActivity>>), (int)HttpStatusCode.OK)]
+    [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(ActionResult<IEnumerable<NpcActivity>>))]
+    [SwaggerOperation("NpcsGetActivityById")]
+    [HttpGet("{id:guid}/activity")]
+    public async Task<ActionResult<IEnumerable<NpcActivity>>> NpcGetActivity(Guid id)
+    {
+        return Ok(await service.GetActivity(id));
+    }
+
+    /// <summary>
+    /// Create a new activity record for a specific NPC
+    /// </summary>
+    /// <param name="id">The NPC ID</param>
+    /// <param name="activityType">The type of activity</param>
+    /// <param name="detail">Activity details</param>
+    /// <returns>NpcActivity</returns>
+    [ProducesResponseType(typeof(ActionResult<NpcActivity>), (int)HttpStatusCode.OK)]
+    [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(ActionResult<NpcActivity>))]
+    [SwaggerOperation("NpcsCreateActivityById")]
+    [HttpPost("{id:guid}/activity")]
+    public async Task<ActionResult<NpcActivity>> NpcCreateActivity(Guid id, string activityType, string detail)
+    {
+        var result = await service.CreateActivity(id, activityType, detail);
+        await activityHubContext.Clients.All.SendAsync("show",
+            "1", id.ToString(), activityType ?? "activity", detail ?? "",
+            DateTime.Now.ToString(CultureInfo.InvariantCulture));
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Get all preferences for a specific NPC
+    /// </summary>
+    /// <param name="id">The NPC ID</param>
+    /// <returns>IEnumerable&lt;NpcPreference&gt;</returns>
+    [ProducesResponseType(typeof(ActionResult<IEnumerable<NpcPreference>>), (int)HttpStatusCode.OK)]
+    [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(ActionResult<IEnumerable<NpcPreference>>))]
+    [SwaggerOperation("NpcsGetPreferencesById")]
+    [HttpGet("{id:guid}/preferences")]
+    public async Task<ActionResult<IEnumerable<NpcPreference>>> NpcGetPreferences(Guid id)
+    {
+        return Ok(await service.GetPreferences(id));
+    }
+
+    [ProducesResponseType(typeof(ActionResult<NpcPreference>), (int)HttpStatusCode.OK)]
+    [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(ActionResult<NpcPreference>))]
+    [SwaggerOperation("NpcsCreatePreferenceById")]
+    [HttpPost("{id:guid}/preferences")]
+    public async Task<ActionResult<NpcPreference>> NpcCreatePreference(Guid id, [FromBody] CreatePreferenceRequest request)
+    {
+        var result = await service.CreatePreference(id, request.ToNpcId, request.FromNpcId,
+            request.Name, request.Step, request.Weight, request.Strength);
+        await activityHubContext.Clients.All.SendAsync("show",
+            request.Step, id.ToString(), "preference",
+            $"preference updated: {request.Name}",
+            DateTime.Now.ToString(CultureInfo.InvariantCulture));
+        return Ok(result);
+    }
+
+    [ProducesResponseType(typeof(ActionResult<IEnumerable<NpcSocialConnection>>), (int)HttpStatusCode.OK)]
+    [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(ActionResult<IEnumerable<NpcSocialConnection>>))]
+    [SwaggerOperation("NpcsGetConnectionsById")]
+    [HttpGet("{id:guid}/connections")]
+    public async Task<ActionResult<IEnumerable<NpcSocialConnection>>> NpcGetConnections(Guid id)
+    {
+        return Ok(await service.GetConnections(id));
+    }
+
+    [ProducesResponseType(typeof(ActionResult<NpcSocialConnection>), (int)HttpStatusCode.OK)]
+    [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(ActionResult<NpcSocialConnection>))]
+    [SwaggerOperation("NpcsCreateConnectionById")]
+    [HttpPost("{id:guid}/connections")]
+    public async Task<ActionResult<NpcSocialConnection>> NpcCreateConnection(Guid id, [FromBody] CreateConnectionRequest request)
+    {
+        var result = await service.CreateConnection(id, request.ConnectedNpcId,
+            request.Name, request.Distance, request.RelationshipStatus);
+        await activityHubContext.Clients.All.SendAsync("show",
+            "1", id.ToString(), "relationship",
+            $"new connection with {request.Name}",
+            DateTime.Now.ToString(CultureInfo.InvariantCulture));
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Get all knowledge/learning records for a specific NPC
+    /// </summary>
+    /// <param name="id">The NPC ID</param>
+    /// <returns>IEnumerable&lt;NpcLearning&gt;</returns>
+    [ProducesResponseType(typeof(ActionResult<IEnumerable<NpcLearning>>), (int)HttpStatusCode.OK)]
+    [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(ActionResult<IEnumerable<NpcLearning>>))]
+    [SwaggerOperation("NpcsGetKnowledgeById")]
+    [HttpGet("{id:guid}/knowledge")]
+    public async Task<ActionResult<IEnumerable<NpcLearning>>> NpcGetKnowledge(Guid id)
+    {
+        return Ok(await service.GetKnowledge(id));
+    }
+
+    /// <summary>
+    /// Create a new knowledge/learning record for a specific NPC
+    /// </summary>
+    /// <param name="id">The NPC ID</param>
+    /// <param name="request">Knowledge creation request</param>
+    /// <returns>NpcLearning</returns>
+    [ProducesResponseType(typeof(ActionResult<NpcLearning>), (int)HttpStatusCode.OK)]
+    [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(ActionResult<NpcLearning>))]
+    [SwaggerOperation("NpcsCreateKnowledgeById")]
+    [HttpPost("{id:guid}/knowledge")]
+    public async Task<ActionResult<NpcLearning>> NpcCreateKnowledge(Guid id, [FromBody] CreateKnowledgeRequest request)
+    {
+        var result = await service.CreateKnowledge(id, request.ToNpcId, request.FromNpcId,
+            request.Topic, request.Step, request.Value);
+        await activityHubContext.Clients.All.SendAsync("show",
+            request.Step, id.ToString(), "knowledge",
+            $"learned more about {request.Topic} ({request.Value})",
+            DateTime.Now.ToString(CultureInfo.InvariantCulture));
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Get all beliefs for a specific NPC
+    /// </summary>
+    /// <param name="id">The NPC ID</param>
+    /// <returns>IEnumerable&lt;NpcBelief&gt;</returns>
+    [ProducesResponseType(typeof(ActionResult<IEnumerable<NpcBelief>>), (int)HttpStatusCode.OK)]
+    [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(ActionResult<IEnumerable<NpcBelief>>))]
+    [SwaggerOperation("NpcsGetBeliefsById")]
+    [HttpGet("{id:guid}/beliefs")]
+    public async Task<ActionResult<IEnumerable<NpcBelief>>> NpcGetBeliefs(Guid id)
+    {
+        return Ok(await service.GetBeliefs(id));
+    }
+
+    /// <summary>
+    /// Create a new belief record for a specific NPC
+    /// </summary>
+    /// <param name="id">The NPC ID</param>
+    /// <param name="request">Belief creation request</param>
+    /// <returns>NpcBelief</returns>
+    [ProducesResponseType(typeof(ActionResult<NpcBelief>), (int)HttpStatusCode.OK)]
+    [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(ActionResult<NpcBelief>))]
+    [SwaggerOperation("NpcsCreateBeliefById")]
+    [HttpPost("{id:guid}/beliefs")]
+    public async Task<ActionResult<NpcBelief>> NpcCreateBelief(Guid id, [FromBody] CreateBeliefRequest request)
+    {
+        var result = await service.CreateBelief(id, request.ToNpcId, request.FromNpcId,
+            request.Name, request.Step, request.Likelihood, request.Posterior);
+        await activityHubContext.Clients.All.SendAsync("show",
+            request.Step, id.ToString(), "belief",
+            $"updated posterior of {Math.Round(request.Posterior, 2)} in {request.Name}",
+            DateTime.Now.ToString(CultureInfo.InvariantCulture));
+        return Ok(result);
     }
 
     /// <summary>
@@ -154,27 +345,6 @@ public class NpcsController(
     }
 
     /// <summary>
-    /// Get a subset of details about a specific NPC
-    /// </summary>
-    /// <param name="npcId"></param>
-    /// <param name="fieldsToReturn"></param>
-    /// <returns></returns>
-    [HttpPost("npc/{npcId:guid}")]
-    [Obsolete("Obsolete")]
-    [SwaggerOperation("NpcsGetReducedFields")]
-    public async Task<object> NpcsGetReducedFields(Guid npcId, [FromBody] string[] fieldsToReturn)
-    {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
-
-        var npc = await service.GetById(npcId);
-        if (npc == null) return null;
-        return new NpcReduced(fieldsToReturn, npc).PropertySelection;
-    }
-
-    /// <summary>
     /// Gets all NPCs by from a specific enclave that is part of a specific campaign
     /// </summary>
     /// <param name="enclave">The name of the enclave</param>
@@ -187,33 +357,6 @@ public class NpcsController(
     public async Task<IEnumerable<NpcRecord>> NpcsEnclaveGet(string campaign, string enclave)
     {
         return await service.GetEnclave(campaign, enclave);
-    }
-
-    /// <summary>
-    /// Gets the csv output of a query
-    /// </summary>
-    /// <param name="enclave">The name of the enclave</param>
-    /// <param name="campaign">The name of the campaign the enclave is part of</param>
-    /// <returns></returns>
-    [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.OK)]
-    [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(IActionResult))]
-    [SwaggerOperation("NpcsEnclaveGetCsv")]
-    [HttpGet("{campaign}/{enclave}/csv")]
-    [Obsolete("Obsolete")]
-    public async Task<IActionResult> NpcsEnclaveGetCsv(string campaign, string enclave)
-    {
-        var engine = new FileHelperEngine<NpcToCsv>();
-        var list = await NpcsEnclaveGet(campaign, enclave);
-
-        var filteredList = list.Select(n => new NpcToCsv { Id = n.Id, Email = n.NpcProfile.Email }).ToList();
-
-        var stream = new MemoryStream();
-        TextWriter streamWriter = new StreamWriter(stream);
-        engine.WriteStream(streamWriter, filteredList);
-        await streamWriter.FlushAsync();
-        stream.Seek(0, SeekOrigin.Begin);
-
-        return File(stream, "text/csv", $"{Guid.NewGuid()}.csv");
     }
 
     /// <summary>
@@ -234,39 +377,6 @@ public class NpcsController(
     }
 
     /// <summary>
-    /// Get a CSV file containing all of the requested properties of NPCs in an enclave
-    /// </summary>
-    /// <param name="campaign"></param>
-    /// <param name="enclave"></param>
-    /// <param name="fieldsToReturn"></param>
-    /// <returns></returns>
-    [HttpPost("{campaign}/{enclave}/custom")]
-    [Obsolete("Obsolete")]
-    [SwaggerOperation("NpcsEnclaveReducedFields")]
-    public async Task<IActionResult> NpcsEnclaveReducedFields(string campaign, string enclave,
-        [FromBody] string[] fieldsToReturn)
-    {
-        var npcList = await NpcsEnclaveGet(campaign, enclave);
-        var npcDetails = new Dictionary<string, Dictionary<string, string>>();
-
-        foreach (var npc in npcList)
-        {
-            var npcProperties = new NpcReduced(fieldsToReturn, npc).PropertySelection;
-            var name = npc.NpcProfile.Name;
-            var npcName = name.ToString();
-            if (npcName != null) npcDetails[npcName] = npcProperties;
-        }
-
-        var enclaveCsv = new EnclaveReducedCsv(fieldsToReturn, npcDetails);
-        var stream = new MemoryStream();
-        var streamWriter = new StreamWriter(stream);
-        await streamWriter.WriteAsync(enclaveCsv.CsvData);
-        await streamWriter.FlushAsync();
-        stream.Seek(0, SeekOrigin.Begin);
-        return File(stream, "text/csv", $"{Guid.NewGuid()}.csv");
-    }
-
-    /// <summary>
     /// Gets all NPCs by from a specific team in a specific enclave that is part of a specific campaign
     /// </summary>
     /// <param name="team">The name of the team</param>
@@ -280,199 +390,6 @@ public class NpcsController(
     public async Task<IEnumerable<NpcRecord>> NpcsTeamGet(string campaign, string enclave, string team)
     {
         return await service.GetTeam(campaign, enclave, team);
-    }
-
-    /// <summary>
-    /// Gets the csv output of a query
-    /// </summary>
-    /// <param name="team">The name of the team</param>
-    /// <param name="enclave">The name of the enclave the team is in</param>
-    /// <param name="campaign">The name of the campaign the enclave is part of</param>
-    /// <returns></returns>
-    [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.OK)]
-    [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(IActionResult))]
-    [SwaggerOperation("NpcsTeamGetCsv")]
-    [Obsolete("Obsolete")]
-    [HttpGet("{campaign}/{enclave}/{team}/csv")]
-    public async Task<IActionResult> NpcsTeamGetCsv(string campaign, string enclave, string team)
-    {
-        var engine = new FileHelperEngine<NpcToCsv>();
-        var list = await NpcsTeamGet(team, enclave, campaign);
-
-        var filteredList = list.Select(n => new NpcToCsv { Id = n.Id, Email = n.NpcProfile.Email }).ToList();
-
-        var stream = new MemoryStream();
-        var streamWriter = new StreamWriter(stream);
-        engine.WriteStream(streamWriter, filteredList);
-        await streamWriter.FlushAsync();
-        stream.Seek(0, SeekOrigin.Begin);
-
-        return File(stream, "text/csv", $"{Guid.NewGuid()}.csv");
-    }
-
-    /// <summary>
-    /// Gets the tfvars output of a team of NPCs
-    /// </summary>
-    /// <param name="configuration"></param>
-    /// <returns></returns>
-    [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.OK)]
-    [ProducesResponseType((int)HttpStatusCode.BadRequest, Type = typeof(string))]
-    [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(IActionResult))]
-    [SwaggerResponse((int)HttpStatusCode.BadRequest, Type = typeof(string))]
-    [Obsolete("Obsolete")]
-    [SwaggerOperation("NpcsTfVarsGet")]
-    [HttpPost("tfvars")]
-    public async Task<IActionResult> NpcsTfVarsGet(TfVarsConfiguration configuration)
-    {
-        if (!ModelState.IsValid || configuration == null || !configuration.IsValid())
-        {
-            return BadRequest(ModelState);
-        }
-
-        var s = new StringBuilder("users = {").Append(Environment.NewLine);
-        var list = (await NpcsTeamGet(configuration.Campaign, configuration.Enclave, configuration.Team)).ToList();
-
-        var pool = configuration.GetIpPool();
-        foreach (var item in pool)
-            if (context.NpcIps.Any(o => o.IpAddress == item && o.Enclave == configuration.Enclave))
-                pool.Remove(item);
-
-        if (pool.Count < list.Count())
-        {
-            throw new ArgumentException("There are not enough unused ip addresses for the number of NPCs selected");
-        }
-
-        var i = 0;
-        foreach (var npc in list)
-        {
-            var n = string.Empty;
-            foreach (var c in npc.NpcProfile.Finances.CreditCards)
-            {
-                n = c.Number;
-                break;
-            }
-
-            var ip = pool.RandomElement();
-            context.NpcIps.Add(new NpcIpAddress { IpAddress = ip, NpcId = npc.Id, Enclave = npc.Enclave });
-            pool.Remove(ip);
-
-            s.Append("\tuser-").Append(i).Append(" = {").Append(Environment.NewLine);
-            s.Append("\t\tipaddr = ").Append(ip).Append(Environment.NewLine);
-            s.Append("\t\tmask = ").Append(configuration.Mask).Append(Environment.NewLine);
-            s.Append("\t\tgateway = ").Append(configuration.Gateway).Append(Environment.NewLine);
-            s.Append("\t\ttitle = ").Append(npc.NpcProfile.Rank.Abbr).Append(Environment.NewLine);
-            s.Append("\t\tfirst = ").Append(npc.NpcProfile.Name.First).Append(Environment.NewLine);
-            s.Append("\t\tlast = ").Append(npc.NpcProfile.Name.Last).Append(Environment.NewLine);
-            s.Append("\t\taddress = ").Append(npc.NpcProfile.Address[0].Address1).Append(Environment.NewLine);
-            s.Append("\t\tcity = ").Append(npc.NpcProfile.Address[0].City).Append(Environment.NewLine);
-            s.Append("\t\tstate = ").Append(npc.NpcProfile.Address[0].State).Append(Environment.NewLine);
-            s.Append("\t\tzip = ").Append(npc.NpcProfile.Address[0].PostalCode).Append(Environment.NewLine);
-            s.Append("\t\temail = ").Append(npc.NpcProfile.Email).Append(Environment.NewLine);
-            s.Append("\t\tpassword = ").Append(npc.NpcProfile.Password).Append(Environment.NewLine);
-            s.Append("\t\tcreditcard = ").Append(n).Append(Environment.NewLine);
-            s.Append("\t}").Append(Environment.NewLine);
-            s.Append(Environment.NewLine);
-            i++;
-        }
-
-        await context.SaveChangesAsync();
-
-        return File(Encoding.UTF8.GetBytes
-                (s.ToString()), "text/tfvars", $"{Guid.NewGuid()}.tfvars");
-    }
-
-    /// <summary>
-    /// Create an insider threat specific NPC build
-    /// </summary>
-    /// <param name="config"></param>
-    /// <param name="ct"></param>
-    /// <returns></returns>
-    [ProducesResponseType(typeof(IEnumerable<NpcRecord>), (int)HttpStatusCode.OK)]
-    [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(IEnumerable<NpcRecord>))]
-    [SwaggerRequestExample(typeof(InsiderThreatGenerationConfiguration),
-        typeof(InsiderThreatGenerationConfigurationExample))]
-    [SwaggerOperation("NpcsInsiderThreatCreate")]
-    [HttpPost("insiderThreat")]
-    [Obsolete("Obsolete")]
-    [ProducesResponseType((int)HttpStatusCode.BadRequest, Type = typeof(string))]
-    [SwaggerResponse((int)HttpStatusCode.BadRequest, Type = typeof(string))]
-    public async Task<ActionResult<IEnumerable<NpcRecord>>> NpcsInsiderThreatCreate(
-        InsiderThreatGenerationConfiguration config, CancellationToken ct)
-    {
-        if (!ModelState.IsValid || config?.Enclaves == null)
-        {
-            return BadRequest(ModelState);
-        }
-
-        var createdNpcs = new List<NpcRecord>();
-        foreach (var enclave in config.Enclaves)
-        {
-            if (enclave.Teams == null) continue;
-            foreach (var team in enclave.Teams)
-            {
-                if (team.Npcs == null) continue;
-                for (var i = 0; i < team.Npcs.Number; i++)
-                {
-                    var branch = team.Npcs.Configuration.Branch ?? MilitaryUnits.GetServiceBranch();
-                    var npc = NpcRecord.TransformToNpc(Npc.Generate(branch));
-                    npc.Team = team.Name;
-                    npc.Campaign = config.Campaign;
-                    npc.Enclave = enclave.Name;
-                    npc.Id = npc.NpcProfile.Id;
-                    createdNpcs.Add(npc);
-                }
-            }
-        }
-
-        foreach (var npc in createdNpcs)
-        {
-            foreach (var job in npc.NpcProfile.Employment.EmploymentRecords)
-            {
-                //get same company departments and highest ranked in that department
-
-                var managerList = createdNpcs.Where(x => x.Id != npc.Id
-                                                         && x.NpcProfile.Employment.EmploymentRecords.Any(o =>
-                                                             o.Company == job.Company
-                                                             && o.Department == job.Department
-                                                             && o.Level >= job.Level)).ToList();
-
-                if (managerList.Count != 0)
-                {
-                    var manager = managerList.RandomElement();
-                    job.Manager = manager.Id;
-                }
-            }
-        }
-
-        context.Npcs.AddRange(createdNpcs);
-        await context.SaveChangesAsync(ct);
-        return createdNpcs;
-    }
-
-    /// <summary>
-    /// Export insider threat specific csv file
-    /// </summary>
-    /// <returns></returns>
-    [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.OK)]
-    [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(IActionResult))]
-    [SwaggerOperation("NpcsInsiderThreatGetCsv")]
-    [HttpGet("insiderThreat/csv")]
-    [Obsolete("Obsolete")]
-    public async Task<IActionResult> NpcsInsiderThreatGetCsv()
-    {
-        var engine = new FileHelperEngine<NpcToInsiderThreatCsv>();
-        engine.HeaderText = engine.GetFileHeader();
-
-        var list = await context.Npcs.ToListAsync();
-        var finalList = NpcToInsiderThreatCsv.ConvertToCsv(list.ToList());
-
-        var stream = new MemoryStream();
-        var streamWriter = new StreamWriter(stream);
-        engine.WriteStream(streamWriter, finalList);
-        await streamWriter.FlushAsync();
-        stream.Seek(0, SeekOrigin.Begin);
-
-        return File(stream, "text/csv", $"insider_threat_{Guid.NewGuid()}.csv");
     }
 
     /// <summary>
@@ -508,8 +425,9 @@ public class NpcsController(
             {
                 try
                 {
-                    npcs = context.Npcs.Where(x =>
-                        x.NpcSocialGraph.Name.ToLower().StartsWith(actionRequest.Who.ToLower()));
+                    npcs = context.Npcs
+                        .Where(x => x.NpcProfile != null &&
+                            (x.NpcProfile.Name.First + " " + x.NpcProfile.Name.Last).ToLower().StartsWith(actionRequest.Who.ToLower()));
                 }
                 catch
                 {

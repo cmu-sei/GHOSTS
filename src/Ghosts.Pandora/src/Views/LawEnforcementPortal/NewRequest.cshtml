@@ -1,0 +1,249 @@
+@{
+    Layout = null;
+    var error = ViewBag.Error as string;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Law Enforcement Portal - New Request</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" />
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+        .header {
+            background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
+            border-bottom: 1px solid rgba(59, 130, 246, 0.3);
+            padding: 20px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .badge {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 600;
+            color: #3b82f6;
+        }
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.15s ease;
+        }
+        .btn-secondary {
+            background: rgba(148, 163, 184, 0.2);
+            color: #e2e8f0;
+            border: 1px solid rgba(148, 163, 184, 0.3);
+        }
+        .btn-secondary:hover {
+            background: rgba(148, 163, 184, 0.3);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            width: 100%;
+            margin-top: 8px;
+        }
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 32px;
+        }
+        .form-card {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 12px;
+            padding: 32px;
+        }
+        .form-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin: 0 0 8px 0;
+            color: #e2e8f0;
+        }
+        .form-subtitle {
+            font-size: 14px;
+            color: #94a3b8;
+            margin: 0 0 32px 0;
+        }
+        .field {
+            margin-bottom: 24px;
+        }
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #cbd5e1;
+            font-size: 14px;
+        }
+        .required {
+            color: #ef4444;
+        }
+        input[type="text"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            background: rgba(15, 23, 42, 0.6);
+            color: #e2e8f0;
+            font-size: 15px;
+            font-family: inherit;
+            box-sizing: border-box;
+        }
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        input[type="text"]:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+        }
+        .error {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.5);
+            color: #fca5a5;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            font-size: 14px;
+        }
+        .form-footer {
+            display: flex;
+            gap: 12px;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid rgba(148, 163, 184, 0.2);
+        }
+        .help-text {
+            font-size: 13px;
+            color: #94a3b8;
+            margin-top: 6px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <div class="badge">🛡️</div>
+            <h1>Law Enforcement Portal</h1>
+        </div>
+        <div>
+            <a href="/law-enforcement/dashboard" class="btn btn-secondary">← Back to Dashboard</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="form-card">
+            <h2 class="form-title">New Information Request</h2>
+            <p class="form-subtitle">Submit a formal request for information or records</p>
+
+            @if (!string.IsNullOrEmpty(error))
+            {
+                <div class="error">@error</div>
+            }
+
+            <form method="post" action="/law-enforcement/new-request">
+                <div class="field">
+                    <label for="RequestingAgency">
+                        Requesting Agency <span class="required">*</span>
+                    </label>
+                    <input type="text" id="RequestingAgency" name="RequestingAgency"
+                           placeholder="e.g., FBI, Local Police Department, State Bureau"
+                           required />
+                    <div class="help-text">Full name of the law enforcement agency making the request</div>
+                </div>
+
+                <div class="field">
+                    <label for="CaseNumber">
+                        Case Number <span class="required">*</span>
+                    </label>
+                    <input type="text" id="CaseNumber" name="CaseNumber"
+                           placeholder="e.g., 2024-INV-00123"
+                           required />
+                    <div class="help-text">Official case or investigation reference number</div>
+                </div>
+
+                <div class="field">
+                    <label for="RequestType">
+                        Request Type <span class="required">*</span>
+                    </label>
+                    <select id="RequestType" name="RequestType" required>
+                        <option value="">Select a type...</option>
+                        <option value="User Information">User Information</option>
+                        <option value="Content Records">Content Records</option>
+                        <option value="Account Activity">Account Activity</option>
+                        <option value="Message History">Message History</option>
+                        <option value="IP/Location Data">IP/Location Data</option>
+                        <option value="Preservation Request">Preservation Request</option>
+                        <option value="Emergency Disclosure">Emergency Disclosure</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <div class="help-text">Category of information being requested</div>
+                </div>
+
+                <div class="field">
+                    <label for="Subject">
+                        Subject/Target <span class="required">*</span>
+                    </label>
+                    <input type="text" id="Subject" name="Subject"
+                           placeholder="e.g., Username, Email, Profile URL"
+                           required />
+                    <div class="help-text">Username, identifier, or subject of the investigation</div>
+                </div>
+
+                <div class="field">
+                    <label for="Details">
+                        Request Details <span class="required">*</span>
+                    </label>
+                    <textarea id="Details" name="Details"
+                              placeholder="Provide detailed information about what data is being requested and why..."
+                              required></textarea>
+                    <div class="help-text">Specific details about the information needed, time period, and legal basis</div>
+                </div>
+
+                <div class="form-footer">
+                    <button type="submit" class="btn btn-primary">Submit Request</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

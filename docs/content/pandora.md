@@ -3,7 +3,12 @@
 ???+ info "Pandora is part of GHOSTS"
     [Pandora is within the GHOSTS Source Code Repository](https://github.com/cmu-sei/GHOSTS/tree/master/src/ghosts.pandora) hosted on GitHub.
 
-GHOSTS PANDORA is a web server that responds to a myriad of request types with randomized content generated in real-time. Used in conjunction with [GHOSTS](https://github.com/cmu-sei/GHOSTS) NPCs, the two can provide for agents that are periodically downloading content other than simple HTML and associated image, CSS, and js files.
+GHOSTS PANDORA is a web server that responds to a myriad of request types with randomized content generated in real-time. It can operate in two modes:
+
+1. **Standard Mode** - Serves randomly-generated content for various file types (HTML, PDF, Office documents, images, etc.)
+2. **Social Mode** - Enables POST/PUT/DELETE operations for social media simulation where NPCs can share content, images, and interact with each other
+
+The mode is controlled by configuration, making Pandora a unified content server for all GHOSTS content generation needs. Used in conjunction with [GHOSTS](https://github.com/cmu-sei/GHOSTS) NPCs, Pandora provides agents with realistic content to download, post, and interact with beyond simple HTML and associated image, CSS, and js files.
 
 ![Pandora](../../assets/screens/pandora.gif)
 
@@ -75,7 +80,21 @@ All unhandled request types, urls without a specific file indicator, or requests
 - `/blog/d/2022/12/4/blog_title-text`
 - `/hello/index.html`
 
-### Hiding malicious payloads for red-teaming
+## Social Mode
+
+When configured for social media simulation, Pandora enables NPCs to interact with a realistic social platform. Social mode supports:
+
+| Request                                                                       | Response                                                                      |
+| ----------------------------------------------------------------------------- | ------------------------------------------------------------------            |
+| `POST` /images                                                                | :material-check: responds with a url to the saved image file                  |
+| `POST` /                                                                      | :material-check: responds with a randomly-generated streamed video            |
+| `POST` /users/michelle_smith/af2d00aa-4a89-4af3-baff-1746b556e7a1/            | :material-check: responds with a reply to the original user's social post     |
+
+**Configuration:**
+
+Switch between standard and social mode by setting the appropriate environment variables or configuration file settings. See the repository's configuration examples for details on toggling social mode features.
+
+## Hiding malicious payloads for red-teaming
 
 Pandora also can hide payloads in a particular request for things like red-teaming and such. This is done in the configuration file, and looks like this:
 

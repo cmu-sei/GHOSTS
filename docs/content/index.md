@@ -10,7 +10,7 @@ GHOSTS content servers are an evolving part of the framework. They exist for sev
 
 ### Air-gapped networks
 
-Many ranges have no access to the wider internet. In these cases, recreating a reasonable facsimile of the internet is key to the training experience. While there are many systems that do this well, we often want to augment the scenario with a wider array of URL traffic, or we want to introduce more of certain kinds of content going across the wire. PANDORA was created to address these concerns. Shortly later, we added a social server as well.
+Many ranges have no access to the wider internet. In these cases, recreating a reasonable facsimile of the internet is key to the training experience. While there are many systems that do this well, we often want to augment the scenario with a wider array of URL traffic, or we want to introduce more of certain kinds of content going across the wire. PANDORA was created to address these concerns, providing both standard content generation and social media simulation capabilities through simple configuration changes.
 
 ### Having to know valid URLs
 

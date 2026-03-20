@@ -18,6 +18,10 @@ public class NpcActivity
     public enum ActivityTypes
     {
         SocialMediaPost = 0,
+        SocialMediaLike = 1,
+        SocialMediaComment = 2,
+        SocialMediaFollow = 3,
+        SocialMediaDirectMessage = 5,
         NextAction = 10
     }
 }

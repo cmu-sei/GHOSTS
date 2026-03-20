@@ -1,8 +1,0 @@
-.DS_Store
-*/.DS_Store
-venv
-.venv
-.vscode
-__pycache__
-_config/
-_config/*

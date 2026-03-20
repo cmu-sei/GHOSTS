@@ -1,0 +1,157 @@
+<div class="page-header">
+  <h1>Executions</h1>
+  <button mat-raised-button color="primary" (click)="loadExecutions()">
+    <i class="fas fa-sync"></i>
+    Refresh
+  </button>
+</div>
+
+<div class="search-container">
+  <app-search-bar (searchChange)="onSearchChange($event)"></app-search-bar>
+  @if (searchTerm()) {
+    <div class="search-results-info">
+      Showing {{ filteredExecutions().length }} of {{ executions().length }} executions
+    </div>
+  }
+</div>
+
+<!-- Loading State -->
+@if (loading()) {
+<div class="loading">
+  <mat-spinner diameter="40"></mat-spinner>
+  <p>Loading executions...</p>
+</div>
+}
+
+<!-- Empty State -->
+@if (!loading() && executions().length === 0) {
+<div class="empty-state">
+  <i class="fas fa-play-circle"></i>
+  <h2>No executions yet</h2>
+  <p>Execute a scenario to create your first execution run</p>
+  <a mat-raised-button color="primary" routerLink="/scenarios">
+    <i class="fas fa-file-alt"></i>
+    View Scenarios
+  </a>
+</div>
+}
+
+<!-- Executions Grid -->
+@if (!loading() && executions().length > 0) {
+<div class="executions-grid">
+  @for (execution of filteredExecutions(); track execution.id) {
+  <mat-card class="execution-card" (click)="viewExecution(execution.id)">
+    <mat-card-header>
+      <mat-card-title>
+        {{ execution.name }}
+        <span class="status-badge" [ngClass]="getStatusColor(execution.status)">
+          <i class="fas {{ getStatusIcon(execution.status) }}"></i>
+          {{ execution.status }}
+        </span>
+      </mat-card-title>
+      <mat-card-subtitle>
+        Scenario: {{ execution.scenarioName }}
+      </mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="execution-stats">
+        <div class="stat-item">
+          <i class="fas fa-calendar-plus"></i>
+          <div class="stat-content">
+            <span class="stat-label">Created</span>
+            <span class="stat-value">{{ formatDate(execution.createdAt) }}</span>
+          </div>
+        </div>
+
+        @if (execution.startedAt) {
+        <div class="stat-item">
+          <i class="fas fa-play"></i>
+          <div class="stat-content">
+            <span class="stat-label">Started</span>
+            <span class="stat-value">{{ formatDate(execution.startedAt) }}</span>
+          </div>
+        </div>
+        }
+
+        @if (execution.completedAt) {
+        <div class="stat-item">
+          <i class="fas fa-check"></i>
+          <div class="stat-content">
+            <span class="stat-label">Completed</span>
+            <span class="stat-value">{{ formatDate(execution.completedAt) }}</span>
+          </div>
+        </div>
+        }
+
+        @if (execution.durationSeconds) {
+        <div class="stat-item">
+          <i class="fas fa-clock"></i>
+          <div class="stat-content">
+            <span class="stat-label">Duration</span>
+            <span class="stat-value">{{ formatDuration(execution.durationSeconds) }}</span>
+          </div>
+        </div>
+        }
+
+        <div class="stat-item">
+          <i class="fas fa-history"></i>
+          <div class="stat-content">
+            <span class="stat-label">Events</span>
+            <span class="stat-value">{{ execution.eventCount }}</span>
+          </div>
+        </div>
+
+        <div class="stat-item">
+          <i class="fas fa-chart-line"></i>
+          <div class="stat-content">
+            <span class="stat-label">Snapshots</span>
+            <span class="stat-value">{{ execution.snapshotCount }}</span>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+    <mat-card-actions>
+      <button mat-button color="primary" (click)="viewExecution(execution.id); $event.stopPropagation()">
+        <i class="fas fa-eye"></i>
+        View
+      </button>
+
+      @if (canStart(execution.status)) {
+      <button mat-button color="accent" (click)="startExecution(execution.id, $event)">
+        <i class="fas fa-play"></i>
+        Start
+      </button>
+      }
+
+      @if (canPause(execution.status)) {
+      <button mat-button (click)="pauseExecution(execution.id, $event)">
+        <i class="fas fa-pause"></i>
+        Pause
+      </button>
+      }
+
+      @if (canStop(execution.status)) {
+      <button mat-button color="warn" (click)="stopExecution(execution.id, $event)">
+        <i class="fas fa-stop"></i>
+        Stop
+      </button>
+      }
+
+      @if (!isTerminal(execution.status)) {
+      <button mat-button (click)="cancelExecution(execution.id, $event)">
+        <i class="fas fa-ban"></i>
+        Cancel
+      </button>
+      }
+
+      @if (canDelete(execution.status)) {
+      <button mat-button color="warn" (click)="deleteExecution(execution, $event)">
+        <i class="fas fa-trash"></i>
+        Delete
+      </button>
+      }
+    </mat-card-actions>
+  </mat-card>
+  }
+</div>
+}

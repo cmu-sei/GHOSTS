@@ -1,0 +1,303 @@
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  gap: 1rem;
+
+  p {
+    margin: 0;
+    color: #666;
+  }
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 1rem;
+
+  button, a {
+    white-space: nowrap;
+  }
+}
+
+.execution-info {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.5rem 1rem;
+  font-size: 0.875rem;
+
+  dt {
+    font-weight: 600;
+    margin: 0;
+    white-space: nowrap;
+    color: #495057;
+  }
+
+  dd {
+    margin: 0;
+    color: #212529;
+  }
+}
+
+.status-badge {
+  padding: 0.35rem 0.85rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: white;
+  border-radius: 50rem !important;
+  margin-right: 0.5rem;
+
+  &.badge-success {
+    background-color: #28a745;
+  }
+
+  &.badge-warning {
+    background-color: #ffc107;
+    color: #212529;
+  }
+
+  &.badge-info {
+    background-color: #17a2b8;
+  }
+
+  &.badge-danger {
+    background-color: #dc3545;
+  }
+
+  &.badge-secondary {
+    background-color: #6c757d;
+  }
+
+  &.badge-light {
+    background-color: #f8f9fa;
+    color: #212529;
+  }
+}
+
+pre {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 0.25rem;
+  padding: 1rem;
+  max-height: 400px;
+  overflow: auto;
+
+  code {
+    font-size: 0.875rem;
+    color: #212529;
+  }
+}
+
+.card {
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+mat-tab-group {
+  margin-top: 24px;
+
+  .content-card {
+    padding: 24px;
+  }
+}
+
+::ng-deep {
+  .mat-mdc-tab-body-content {
+    padding: 24px;
+  }
+
+  .mat-mdc-tab-label-content i.fas {
+    margin-right: 12px;
+  }
+
+  .mdc-tab__content i {
+    margin-right: 12px;
+  }
+}
+
+details {
+  summary {
+    font-size: 0.875rem;
+    color: #0d6efd;
+    user-select: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+// Tab content styling
+.tab-content {
+  .alert {
+    border-radius: 0.5rem;
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+
+    &.alert-success {
+      background-color: #d1e7dd;
+      color: #0f5132;
+
+      .text-success-emphasis {
+        color: #0a3622;
+      }
+    }
+
+    &.alert-info {
+      background-color: #cff4fc;
+      color: #055160;
+    }
+  }
+
+  .card {
+    border: 1px solid #dee2e6;
+    transition: box-shadow 0.2s ease;
+
+    &:hover {
+      box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  .card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    padding: 0.75rem 1rem;
+
+    &.bg-danger {
+      border-bottom-color: rgba(220, 53, 69, 0.2);
+    }
+
+    &.bg-primary {
+      border-bottom-color: rgba(13, 110, 253, 0.2);
+    }
+  }
+
+  .card-title {
+    font-size: 1rem;
+
+    i {
+      margin-right: 0.5rem;
+      color: #0d6efd;
+    }
+  }
+
+  .card-body {
+    padding: 1rem;
+  }
+}
+
+// Placeholder content styling
+.placeholder-content {
+  color: #6c757d;
+
+  .list-unstyled {
+    li {
+      padding: 0.25rem 0;
+
+      i {
+        width: 1.25rem;
+      }
+    }
+  }
+
+  &.text-center {
+    i.fa-3x {
+      opacity: 0.3;
+    }
+
+    i.fa-2x {
+      opacity: 0.4;
+    }
+  }
+}
+
+// Network stats grid
+.network-stats {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.5rem 1rem;
+  font-size: 0.875rem;
+
+  dt {
+    font-weight: 600;
+    margin: 0;
+  }
+
+  dd {
+    margin: 0;
+  }
+}
+
+// Activity feed specific styling
+.activity-feed {
+  max-height: 400px;
+  overflow-y: auto;
+  background-color: #f8f9fa;
+}
+
+// Table styling
+.table {
+  font-size: 0.875rem;
+  width: 100%;
+  margin-bottom: 0;
+
+  thead {
+    &.table-light {
+      background-color: #f8f9fa;
+      border-bottom: 2px solid #dee2e6;
+
+      th {
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+        color: #495057;
+        padding: 1rem 1rem;
+
+        &:first-child {
+          padding-left: 1.5rem;
+        }
+
+        &:last-child {
+          padding-right: 1.5rem;
+        }
+      }
+    }
+  }
+
+  tbody {
+    tr {
+      border-bottom: 1px solid #dee2e6;
+
+      &:hover {
+        background-color: rgba(0, 123, 255, 0.03);
+      }
+
+      &:last-child {
+        border-bottom: none;
+      }
+    }
+
+    td {
+      vertical-align: middle;
+      padding: 1rem 1rem;
+
+      &:first-child {
+        padding-left: 1.5rem;
+      }
+
+      &:last-child {
+        padding-right: 1.5rem;
+      }
+    }
+  }
+
+  .badge {
+    font-size: 0.75rem;
+    padding: 0.35rem 0.6rem;
+    font-weight: 500;
+  }
+}

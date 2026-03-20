@@ -11,11 +11,9 @@ namespace Ghosts.Api.Hubs;
 
 public class ActivityHub : Hub
 {
-    internal static Logger _log = LogManager.GetCurrentClassLogger();
+    private static readonly Logger _log = LogManager.GetCurrentClassLogger();
 
     private static readonly ConnectionMapping<string> _connections = new();
-
-    public ActivityHub() { }
 
     public override Task OnConnectedAsync()
     {

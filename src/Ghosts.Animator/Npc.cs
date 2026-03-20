@@ -47,7 +47,7 @@ namespace Ghosts.Animator
             NpcProfile.Address.Add(Address.GetHomeAddress());
 
             if (string.IsNullOrEmpty(config.Username))
-                NpcProfile.Name = Name.GetName();
+                NpcProfile.Name = Name.GetName(NpcProfile.BiologicalSex);
             else
                 NpcProfile.SetName(config.Username);
 
@@ -82,7 +82,7 @@ namespace Ghosts.Animator
 
             NpcProfile.InsiderThreat = InsiderThreat.GetInsiderThreatProfile();
 
-            NpcProfile.PhotoLink = PhysicalCharacteristics.GetPhotoUrl();
+            NpcProfile.PhotoLink = PhysicalCharacteristics.GetPhotoUrl(NpcProfile.BiologicalSex);
 
             NpcProfile.Attributes = AttributesService.GetAttributes();
 
