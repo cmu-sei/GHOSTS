@@ -9,7 +9,6 @@ datasources:
     type: postgres
     access: proxy
     url: ghosts-postgres:5432
-    database: ghosts
     user: ghosts
     secureJsonData:
       password: 'scotty@1'
