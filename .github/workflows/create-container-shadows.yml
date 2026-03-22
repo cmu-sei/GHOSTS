@@ -1,5 +1,0 @@
-# Shadows has been deprecated. See https://github.com/cmu-sei/rangerai for the successor project.
-# This workflow is disabled — the src/ghosts.shadows directory has been removed.
-#
-# name: Create Container Shadows
-# on: (disabled)

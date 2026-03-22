@@ -1,0 +1,62 @@
+name: Client Lite
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'src/Ghosts.Client.Lite/**'
+      - 'src/Ghosts.Domain/**'
+      - '.github/workflows/client-lite.yml'
+  pull_request:
+    paths:
+      - 'src/Ghosts.Client.Lite/**'
+      - 'src/Ghosts.Domain/**'
+      - '.github/workflows/client-lite.yml'
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Lite Client
+    if: github.event_name != 'release'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Build
+        run: dotnet build src/Ghosts.Client.Lite/src/Ghosts.Client.Lite.csproj --configuration Release
+
+  release:
+    name: Publish ${{ matrix.runtime }}
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    strategy:
+      matrix:
+        runtime: [linux-x64, linux-x86, win-x64, win-x86]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Publish
+        run: |
+          dotnet publish src/Ghosts.Client.Lite/src/Ghosts.Client.Lite.csproj \
+            -c Release -r ${{ matrix.runtime }} --self-contained false \
+            -o publish/${{ matrix.runtime }}
+
+      - name: Package
+        run: zip -r ghosts-client-lite-${{ matrix.runtime }}.zip publish/${{ matrix.runtime }}/
+
+      - name: Upload release asset
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "${{ github.event.release.tag_name }}" ghosts-client-lite-${{ matrix.runtime }}.zip
