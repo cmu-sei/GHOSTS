@@ -1,4 +1,6 @@
 {
+  "bootstrap-sha": "837bbc760ded97aedc879c06ea27df5d095769e2",
+  "relase-as": "9.0.1",
   "release-type": "node",
   "extra-files": [
     {
