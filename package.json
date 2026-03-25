@@ -1,0 +1,6 @@
+{
+  "name": "ghosts",
+  "version": "9.0.0",
+  "description": "GHOSTS NPC orchestration framework",
+  "private": true
+}

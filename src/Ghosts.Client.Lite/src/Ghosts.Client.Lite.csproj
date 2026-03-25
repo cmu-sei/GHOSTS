@@ -13,19 +13,19 @@
         <Description>GHOSTS NPC Orchestration Platform - please email ddupdyke[at]sei.cmu.edu with bugs/requests/other</Description>
         <Copyright>Carnegie Mellon University 2017</Copyright>
 
-        <Version>9.0.0.0</Version>
-        <AssemblyVersion>9.0.0.0</AssemblyVersion>
-        <ReleaseVersion>9.0.0.0</ReleaseVersion>
-        <FileVersion>9.0.0.0</FileVersion>
+        <Version>9.0.0</Version>
+        <AssemblyVersion>9.0.0</AssemblyVersion>
+        <ReleaseVersion>9.0.0</ReleaseVersion>
+        <FileVersion>9.0.0</FileVersion>
 
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="HtmlAgilityPack" Version="1.11.67" />
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.3"/>
-        <PackageReference Include="NLog" Version="5.3.4" />
+        <PackageReference Include="HtmlAgilityPack" Version="1.12.4"/>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.4"/>
+        <PackageReference Include="NLog" Version="6.0.6"/>
         <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.1"/>
-        <PackageReference Include="Quartz" Version="3.9.0" />
+        <PackageReference Include="Quartz" Version="3.9.0"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -41,7 +41,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\Ghosts.Domain\ghosts.domain.csproj" />
+      <ProjectReference Include="..\..\Ghosts.Domain\Ghosts.Domain.csproj"/>
     </ItemGroup>
 
 </Project>

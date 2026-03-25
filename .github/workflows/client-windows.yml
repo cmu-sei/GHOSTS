@@ -1,0 +1,84 @@
+name: Client Windows
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'src/Ghosts.Client.Windows/**'
+      - 'src/Ghosts.Domain/**'
+      - '.github/workflows/client-windows.yml'
+  pull_request:
+    paths:
+      - 'src/Ghosts.Client.Windows/**'
+      - 'src/Ghosts.Domain/**'
+      - '.github/workflows/client-windows.yml'
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Windows Client
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # dotnet SDK needed to restore Ghosts.Domain (SDK-style, netstandard2.0)
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - uses: microsoft/setup-msbuild@v2
+
+      - name: Build x32
+        run: msbuild src/Ghosts.Client.Windows/Ghosts.Client.csproj /t:Rebuild /restore /nologo /v:minimal /p:Configuration=Release
+
+      - name: Build x64
+        run: msbuild src/Ghosts.Client.Windows/Ghosts.Client.csproj /t:Rebuild /restore /nologo /v:minimal /p:Configuration=Release /p:Platform=x64
+
+      - name: Upload x32 artifact
+        if: github.event_name == 'release'
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-x32
+          path: src/Ghosts.Client.Windows/bin/Release/
+
+      - name: Upload x64 artifact
+        if: github.event_name == 'release'
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-x64
+          path: src/Ghosts.Client.Windows/bin/x64/Release/
+
+  publish:
+    name: Release Windows Client
+    needs: build
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: windows-x32
+          path: artifacts/x32
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: windows-x64
+          path: artifacts/x64
+
+      - name: Package
+        run: |
+          cd artifacts
+          zip -r ../ghosts-client-windows-x32.zip x32/
+          zip -r ../ghosts-client-windows-x64.zip x64/
+
+      - name: Upload to release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "${{ github.event.release.tag_name }}" \
+            ghosts-client-windows-x32.zip \
+            ghosts-client-windows-x64.zip \
+            -R ${{ github.repository }}
