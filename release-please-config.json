@@ -1,0 +1,75 @@
+{
+  "release-type": "node",
+  "extra-files": [
+    {
+      "type": "yaml",
+      "path": "CITATION.cff",
+      "jsonpath": "$.version"
+    },
+    {
+      "type": "json",
+      "path": "src/Ghosts.Frontend/package.json",
+      "jsonpath": "$.version"
+    },
+    {
+      "type": "generic",
+      "path": "src/Ghosts.Api/Ghosts.Api.csproj",
+      "patterns": [
+        {"expression": "<AssemblyVersion>(\\d+\\.\\d+\\.\\d+)\\.0<\\/AssemblyVersion>"},
+        {"expression": "<FileVersion>(\\d+\\.\\d+\\.\\d+)\\.0<\\/FileVersion>"}
+      ]
+    },
+    {
+      "type": "generic",
+      "path": "src/Ghosts.Domain/Ghosts.Domain.csproj",
+      "patterns": [
+        {"expression": "<AssemblyVersion>(\\d+\\.\\d+\\.\\d+)\\.0<\\/AssemblyVersion>"},
+        {"expression": "<FileVersion>(\\d+\\.\\d+\\.\\d+)\\.0<\\/FileVersion>"}
+      ]
+    },
+    {
+      "type": "generic",
+      "path": "src/Ghosts.Animator/Ghosts.Animator.csproj",
+      "patterns": [
+        {"expression": "<AssemblyVersion>(\\d+\\.\\d+\\.\\d+)\\.0<\\/AssemblyVersion>"},
+        {"expression": "<FileVersion>(\\d+\\.\\d+\\.\\d+)\\.0<\\/FileVersion>"}
+      ]
+    },
+    {
+      "type": "generic",
+      "path": "src/Ghosts.Pandora/src/Ghosts.Pandora.csproj",
+      "patterns": [
+        {"expression": "<Version>(\\d+\\.\\d+\\.\\d+)\\.0<\\/Version>"},
+        {"expression": "<ReleaseVersion>(\\d+\\.\\d+\\.\\d+)\\.0<\\/ReleaseVersion>"},
+        {"expression": "<AssemblyVersion>(\\d+\\.\\d+\\.\\d+)\\.0<\\/AssemblyVersion>"},
+        {"expression": "<FileVersion>(\\d+\\.\\d+\\.\\d+)\\.0<\\/FileVersion>"}
+      ]
+    },
+    {
+      "type": "generic",
+      "path": "src/Ghosts.Client.Universal/Ghosts.Client.Universal.csproj",
+      "patterns": [
+        {"expression": "<Version>(\\d+\\.\\d+\\.\\d+)\\.0<\\/Version>"},
+        {"expression": "<ReleaseVersion>(\\d+\\.\\d+\\.\\d+)\\.0<\\/ReleaseVersion>"},
+        {"expression": "<AssemblyVersion>(\\d+\\.\\d+\\.\\d+)\\.0<\\/AssemblyVersion>"}
+      ]
+    },
+    {
+      "type": "generic",
+      "path": "src/Ghosts.Client.Lite/src/Ghosts.Client.Lite.csproj",
+      "patterns": [
+        {"expression": "<Version>(\\d+\\.\\d+\\.\\d+)\\.0<\\/Version>"},
+        {"expression": "<ReleaseVersion>(\\d+\\.\\d+\\.\\d+)\\.0<\\/ReleaseVersion>"},
+        {"expression": "<AssemblyVersion>(\\d+\\.\\d+\\.\\d+)\\.0<\\/AssemblyVersion>"},
+        {"expression": "<FileVersion>(\\d+\\.\\d+\\.\\d+)\\.0<\\/FileVersion>"}
+      ]
+    },
+    {
+      "type": "generic",
+      "path": "src/Ghosts.Client.Windows/Properties/AssemblyInfo.cs",
+      "patterns": [
+        {"expression": "AssemblyVersion\\(\"(\\d+\\.\\d+\\.\\d+)\\.0\"\\)"}
+      ]
+    }
+  ]
+}
