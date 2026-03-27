@@ -1,0 +1,205 @@
+<div class="enrichment-container">
+  <h2>Threat Enrichment</h2>
+  <p class="subtitle">Add ATT&CK techniques and threat actor groups to your scenario</p>
+  @if (!loading() && getThreatActorEntities().length === 0) {
+  <div class="warning-banner">
+    <mat-icon>warning</mat-icon>
+    <div>
+      <strong>No Threat Actor entities found!</strong>
+      <p>Go to the <strong>Entities</strong> tab to add ThreatActor entities, or search for threat groups below to create one automatically.</p>
+    </div>
+  </div>
+  }
+
+  @if (loading()) {
+  <div class="loading">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Loading enrichment data...</p>
+  </div>
+  } @else {
+  <div class="enrichment-workspace">
+    <div class="enrichment-search">
+      <mat-card class="entity-selector-card">
+        <mat-card-header>
+          <mat-card-title>Target Entity</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <mat-form-field appearance="fill" class="full-width">
+            <mat-label>Select Entity (Threat Actors)</mat-label>
+            <mat-select [(value)]="selectedEntityId">
+              <mat-option value="">Global (No specific entity)</mat-option>
+              <mat-optgroup label="Threat Actors">
+                @for (entity of getThreatActorEntities(); track entity.id) {
+                <mat-option [value]="entity.id">{{ entity.name }}</mat-option>
+                }
+              </mat-optgroup>
+              <mat-optgroup label="Other Entities">
+                @for (entity of getNonThreatActorEntities(); track entity.id) {
+                <mat-option [value]="entity.id">{{ entity.name }} ({{ entity.entityType }})</mat-option>
+                }
+              </mat-optgroup>
+            </mat-select>
+          </mat-form-field>
+          <p class="hint">
+            <mat-icon class="hint-icon">info</mat-icon>
+            Select a Threat Actor entity to apply ATT&CK techniques and groups. Threat Actors are listed first.
+          </p>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-tab-group class="search-tabs">
+        <mat-tab label="ATT&CK Techniques">
+          <mat-card class="search-card">
+            <mat-card-content>
+              <form [formGroup]="techniqueSearchForm" (ngSubmit)="searchTechniques()">
+                <mat-form-field appearance="fill" class="full-width">
+                  <mat-label>Search Techniques</mat-label>
+                  <input
+                    matInput
+                    formControlName="query"
+                    placeholder="e.g., phishing, lateral movement" />
+                  <button mat-icon-button matSuffix type="submit" [disabled]="searching()">
+                    <mat-icon>search</mat-icon>
+                  </button>
+                </mat-form-field>
+              </form>
+
+              @if (searching()) {
+              <div class="searching">
+                <mat-spinner diameter="30"></mat-spinner>
+              </div>
+              } @else if (techniques().length > 0) {
+              <div class="results-list">
+                @for (technique of techniques(); track technique.id) {
+                <div class="result-item">
+                  <div class="result-header">
+                    <strong>{{ technique.id }}</strong>
+                    <span class="result-name">{{ technique.name }}</span>
+                  </div>
+                  <div class="result-meta">
+                    <mat-chip>{{ technique.tactics }}</mat-chip>
+                    @if (technique.isSubtechnique) {
+                    <mat-chip color="accent">Sub-technique</mat-chip>
+                    }
+                  </div>
+                  <button
+                    mat-raised-button
+                    color="primary"
+                    size="small"
+                    (click)="applyTechnique(technique.id)">
+                    <mat-icon>add</mat-icon>
+                    Apply
+                  </button>
+                </div>
+                }
+              </div>
+              } @else {
+              <div class="empty-hint">
+                <mat-icon>info</mat-icon>
+                <p>Search for MITRE ATT&CK techniques to enrich your scenario</p>
+              </div>
+              }
+            </mat-card-content>
+          </mat-card>
+        </mat-tab>
+
+        <mat-tab label="Threat Actor Groups">
+          <mat-card class="search-card">
+            <mat-card-content>
+              <form [formGroup]="groupSearchForm" (ngSubmit)="searchGroups()">
+                <mat-form-field appearance="fill" class="full-width">
+                  <mat-label>Search Groups</mat-label>
+                  <input matInput formControlName="query" placeholder="e.g., APT28, Lazarus" />
+                  <button mat-icon-button matSuffix type="submit" [disabled]="searching()">
+                    <mat-icon>search</mat-icon>
+                  </button>
+                </mat-form-field>
+              </form>
+
+              @if (searching()) {
+              <div class="searching">
+                <mat-spinner diameter="30"></mat-spinner>
+              </div>
+              } @else if (groups().length > 0) {
+              <div class="results-list">
+                @for (group of groups(); track group.id) {
+                <div class="result-item">
+                  <div class="result-header">
+                    <strong>{{ group.id }}</strong>
+                    <span class="result-name">{{ group.name }}</span>
+                  </div>
+                  <div class="result-meta">
+                    @if (group.aliases) {
+                    <span class="aliases">Aliases: {{ group.aliases }}</span>
+                    }
+                    <span class="technique-count">{{ group.techniqueCount }} techniques</span>
+                  </div>
+                  <button
+                    mat-raised-button
+                    color="primary"
+                    size="small"
+                    (click)="applyGroup(group.id)">
+                    <mat-icon>add</mat-icon>
+                    Apply
+                  </button>
+                </div>
+                }
+              </div>
+              } @else {
+              <div class="empty-hint">
+                <mat-icon>info</mat-icon>
+                <p>Search for threat actor groups to add to your scenario</p>
+              </div>
+              }
+            </mat-card-content>
+          </mat-card>
+        </mat-tab>
+      </mat-tab-group>
+    </div>
+
+    <div class="enrichment-list">
+      <mat-card class="enrichments-card">
+        <mat-card-header>
+          <mat-card-title>Applied Enrichments ({{ enrichments().length }})</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          @if (enrichments().length === 0) {
+          <div class="empty-state">
+            <mat-icon>info</mat-icon>
+            <p>No enrichments applied yet. Search and apply techniques or groups from the left.</p>
+          </div>
+          } @else {
+          <div class="enrichments-list">
+            @for (enrichment of enrichments(); track enrichment.id) {
+            <div class="enrichment-item">
+              <div class="enrichment-header">
+                <div>
+                  <strong>{{ enrichment.externalId }}</strong>
+                  <span class="enrichment-name">{{ enrichment.name }}</span>
+                </div>
+                <button
+                  mat-icon-button
+                  color="warn"
+                  (click)="deleteEnrichment(enrichment.id)"
+                  matTooltip="Delete">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+              <div class="enrichment-body">
+                <p class="enrichment-description">{{ enrichment.description }}</p>
+                <div class="enrichment-meta">
+                  <mat-chip>{{ enrichment.enrichmentType }}</mat-chip>
+                  <mat-chip>{{ enrichment.source }}</mat-chip>
+                  <mat-chip>{{ getEntityName(enrichment.entityId) }}</mat-chip>
+                </div>
+              </div>
+            </div>
+            }
+          </div>
+          }
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+  }
+</div>

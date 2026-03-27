@@ -1,0 +1,107 @@
+.builder-shell {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.builder-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 2rem;
+  background: white;
+  border-bottom: 1px solid #e0e0e0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 500;
+  }
+
+  .scenario-id {
+    color: #666;
+    font-size: 0.9rem;
+  }
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem;
+
+  p {
+    margin-top: 1rem;
+    color: #666;
+  }
+}
+
+.builder-stepper {
+  flex: 1;
+  overflow: auto;
+
+  ::ng-deep .mat-horizontal-stepper-header-container {
+    background: #f5f5f5;
+  }
+
+  ::ng-deep .mat-horizontal-content-container {
+    padding: 2rem;
+    overflow-x: hidden;
+  }
+}
+
+.stepper-actions {
+  margin-top: 2rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  padding-top: 1rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.assistant-toggle {
+  position: fixed;
+  bottom: 5rem;
+  right: 2rem;
+  z-index: 1000;
+  background-color: #7b2cbf !important; // Purple
+  color: white;
+
+  &:hover {
+    background-color: #9d4edd !important; // Lighter purple on hover
+  }
+
+  .ghost-icon {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    filter: brightness(0) invert(1); // Make the ghost logo white
+  }
+}
+
+.assistant-panel {
+  position: fixed;
+  bottom: 8rem;
+  right: 2rem;
+  width: 400px;
+  height: 500px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  padding: 1.5rem;
+  z-index: 999;
+
+  h3 {
+    margin: 0 0 1rem 0;
+    font-size: 1.2rem;
+    font-weight: 500;
+  }
+
+  .assistant-placeholder {
+    color: #999;
+    font-style: italic;
+  }
+}

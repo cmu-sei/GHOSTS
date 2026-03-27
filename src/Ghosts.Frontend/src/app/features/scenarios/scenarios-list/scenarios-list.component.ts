@@ -100,6 +100,11 @@ export class ScenariosListComponent implements OnInit {
     }
   }
 
+  protected openBuilder(id: number, event: Event): void {
+    event.stopPropagation();
+    this.router.navigate(['/scenarios', id, 'builder']);
+  }
+
   protected executeScenario(scenario: Scenario, event: Event): void {
     event.stopPropagation();
     this.router.navigate(['/executions/new'], {

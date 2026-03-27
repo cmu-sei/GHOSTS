@@ -123,6 +123,13 @@ public class Program
         builder.Services.AddScoped<IScenarioService, ScenarioService>();
         builder.Services.AddScoped<IExecutionService, ExecutionService>();
 
+        // Scenario Builder services
+        builder.Services.AddScoped<IScenarioSourceService, ScenarioSourceService>();
+        builder.Services.AddScoped<IScenarioGraphService, ScenarioGraphService>();
+        builder.Services.AddScoped<IScenarioExtractionService, ScenarioExtractionService>();
+        builder.Services.AddScoped<IScenarioEnrichmentService, ScenarioEnrichmentService>();
+        builder.Services.AddScoped<IScenarioCompilerService, ScenarioCompilerService>();
+
         builder.Services.AddScoped<IClientResultsService, ClientResultsService>();
         builder.Services.AddScoped<IClientIdService, ClientIdService>();
         builder.Services.AddScoped<IClientSurveyService, ClientSurveyService>();
@@ -205,6 +212,8 @@ public class Program
         app.MapHub<ClientHub>("/api/clientHub");
         app.MapHub<ActivityHub>("/hubs/activities");
         app.MapHub<ActivityHub>("/api/hubs/activities");
+        app.MapHub<ScenarioBuilderHub>("/hubs/scenarioBuilder");
+        app.MapHub<ScenarioBuilderHub>("/api/hubs/scenarioBuilder");
 
         // Configure Swagger
         app.UseSwagger();

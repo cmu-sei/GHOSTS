@@ -1,0 +1,280 @@
+.graph-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.graph-header {
+  margin-bottom: 1rem;
+
+  h2 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.8rem;
+    font-weight: 500;
+  }
+
+  .subtitle {
+    color: #666;
+    margin: 0;
+  }
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem;
+
+  p {
+    margin-top: 1rem;
+    color: #666;
+  }
+}
+
+.graph-workspace {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 1rem;
+  height: calc(100vh - 250px);
+  min-height: 600px;
+
+  &.has-detail {
+    grid-template-columns: 300px 1fr 350px;
+  }
+}
+
+.graph-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  overflow-y: auto;
+
+  mat-card {
+    background: #ffffff;
+    color: #333333;
+    border: 1px solid #e0e0e0;
+  }
+
+  mat-card-title {
+    color: #1976d2;
+  }
+
+  label {
+    color: #666666;
+  }
+}
+
+.controls-card,
+.legend-card {
+  mat-card-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+  }
+}
+
+.control-section {
+  margin-bottom: 1.5rem;
+
+  .control-label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: #333;
+  }
+
+  .confidence-slider {
+    width: 100%;
+  }
+
+  .threshold-value {
+    display: block;
+    text-align: center;
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: #666;
+  }
+}
+
+.type-checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  mat-checkbox {
+    .type-indicator {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 0.5rem;
+    }
+  }
+}
+
+.reset-button {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.legend-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+
+  .legend-circle {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  }
+}
+
+.legend-note {
+  padding-top: 1rem;
+  border-top: 1px solid #e0e0e0;
+  font-size: 0.75rem;
+  color: #666666;
+  line-height: 1.6;
+}
+
+.graph-main {
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.graph-svg-container {
+  width: 100%;
+  height: 100%;
+
+  ::ng-deep svg {
+    cursor: grab;
+
+    &:active {
+      cursor: grabbing;
+    }
+
+    line {
+      pointer-events: none;
+      opacity: 0.6;
+    }
+
+    circle {
+      transition: all 0.2s ease;
+      filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.3));
+
+      &:hover {
+        stroke-width: 3;
+        filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.6));
+        transform: scale(1.1);
+      }
+    }
+
+    text {
+      user-select: none;
+      fill: #333333;
+      text-shadow: none;
+      font-size: 10px;
+      font-weight: 500;
+    }
+  }
+}
+
+.detail-panel {
+  overflow-y: auto;
+}
+
+.detail-card {
+  height: 100%;
+
+  mat-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  mat-card-title {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+  }
+
+  .entity-type-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    color: white;
+    font-weight: 500;
+    width: fit-content;
+  }
+}
+
+.detail-section {
+  margin-bottom: 1.5rem;
+
+  label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    color: #666;
+    font-size: 0.875rem;
+  }
+
+  p {
+    margin: 0;
+    color: #333;
+  }
+
+  .properties-json {
+    background: #f5f5f5;
+    padding: 0.75rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    overflow-x: auto;
+    margin: 0;
+  }
+}
+
+.detail-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e0e0e0;
+
+  button {
+    flex: 1;
+  }
+}
+
+@media (max-width: 1400px) {
+  .graph-workspace {
+    grid-template-columns: 250px 1fr;
+
+    .detail-panel {
+      position: fixed;
+      right: 1rem;
+      top: 200px;
+      width: 320px;
+      z-index: 100;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
+  }
+}

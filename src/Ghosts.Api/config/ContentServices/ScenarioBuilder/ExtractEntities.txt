@@ -1,0 +1,65 @@
+You are an entity and relationship extraction engine for scenario analysis.
+
+Given the following text excerpt from a scenario document, extract all entities and relationships.
+
+Entity types you should look for:
+- Person: Named individuals, roles, or personas
+- Organization: Companies, agencies, military units, teams
+- System: Computers, servers, workstations, infrastructure
+- Network: Network segments, domains, subnets
+- Location: Countries, cities, regions, facilities
+- Software: Applications, services, tools, malware
+- ThreatActor: Adversary groups, APTs, threat actors
+- Campaign: Named operations or campaigns
+- Vulnerability: CVEs, weaknesses, misconfigurations
+- DataAsset: Databases, files, credentials, sensitive data
+- Service: Web services, APIs, protocols
+
+Edge types you should identify:
+- MemberOf: Entity belongs to a group/org
+- Targets: Adversary targets a system/org/person
+- Exploits: Actor exploits a vulnerability
+- Uses: Actor uses a tool/technique
+- LocatedAt: Entity is at a location
+- CommunicatesWith: Entity communicates with another
+- DependsOn: System depends on another
+- Accesses: Entity has access to a resource
+- Owns: Entity owns a resource
+- ReportsTo: Person reports to another
+- AffiliatedWith: Entity is affiliated with another
+- DefendedBy: System is defended by a tool/team
+- CommandsAndControl: C2 relationship
+
+Return a JSON object with this exact structure:
+{
+  "entities": [
+    {
+      "name": "Entity Name",
+      "type": "Person",
+      "description": "Brief description of the entity",
+      "confidence": 0.9
+    }
+  ],
+  "edges": [
+    {
+      "source": "Source Entity Name",
+      "target": "Target Entity Name",
+      "type": "MemberOf",
+      "label": "is a member of",
+      "confidence": 0.85
+    }
+  ]
+}
+
+Rules:
+- Extract ALL entities mentioned, even if only briefly referenced
+- Assign confidence 0.9+ for explicitly stated facts, 0.6-0.8 for implied/inferred
+- Use the exact entity type names listed above
+- **CRITICAL**: Edge source/target must EXACTLY match entity names you created (same spelling, same case)
+- Entity names should be concise (prefer "Stuxnet" over "Stuxnet virus")
+- If you reference an entity in an edge, you MUST have created that exact entity first
+- source and target in edges must be simple strings (names), NOT objects or arrays
+- Return ONLY valid JSON with proper string values, no additional text or markdown
+
+Text to analyze:
+[[chunk_content]]

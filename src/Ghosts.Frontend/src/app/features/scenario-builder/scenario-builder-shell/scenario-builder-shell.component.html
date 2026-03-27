@@ -1,0 +1,87 @@
+<div class="builder-shell">
+  <div class="builder-header">
+    <button mat-icon-button (click)="backToScenarios()" matTooltip="Back to Scenarios">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h1>Scenario Builder</h1>
+    @if (scenarioId()) {
+    <span class="scenario-id">Scenario #{{ scenarioId() }}</span>
+    }
+  </div>
+
+  @if (loading()) {
+  <div class="loading">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Loading scenario builder...</p>
+  </div>
+  }
+
+  @if (!loading() && scenarioId()) {
+  <mat-stepper [linear]="false" #stepper class="builder-stepper" (selectionChange)="onStepChange($event)">
+    <mat-step label="Sources">
+      <app-builder-sources [scenarioId]="scenarioId()!"></app-builder-sources>
+      <div class="stepper-actions">
+        <button mat-button matStepperNext>Next: Extraction</button>
+      </div>
+    </mat-step>
+
+    <mat-step label="Extraction">
+      <app-builder-extraction [scenarioId]="scenarioId()!"></app-builder-extraction>
+      <div class="stepper-actions">
+        <button mat-button matStepperPrevious>Back</button>
+        <button mat-button matStepperNext>Next: Entities</button>
+      </div>
+    </mat-step>
+
+    <mat-step label="Entities">
+      <app-builder-entities [scenarioId]="scenarioId()!"></app-builder-entities>
+      <div class="stepper-actions">
+        <button mat-button matStepperPrevious>Back</button>
+        <button mat-button matStepperNext>Next: Graph</button>
+      </div>
+    </mat-step>
+
+    <mat-step label="Graph">
+      <app-builder-graph [scenarioId]="scenarioId()!"></app-builder-graph>
+      <div class="stepper-actions">
+        <button mat-button matStepperPrevious>Back</button>
+        <button mat-button matStepperNext>Next: Enrichment</button>
+      </div>
+    </mat-step>
+
+    <mat-step label="Enrichment">
+      <app-builder-enrichment [scenarioId]="scenarioId()!"></app-builder-enrichment>
+      <div class="stepper-actions">
+        <button mat-button matStepperPrevious>Back</button>
+        <button mat-button matStepperNext>Next: Compile</button>
+      </div>
+    </mat-step>
+
+    <mat-step label="Compile">
+      <app-builder-compile [scenarioId]="scenarioId()!"></app-builder-compile>
+      <div class="stepper-actions">
+        <button mat-button matStepperPrevious>Back</button>
+      </div>
+    </mat-step>
+  </mat-stepper>
+  }
+
+  <button
+    mat-fab
+    class="assistant-toggle"
+    (click)="toggleAssistant()"
+    matTooltip="AI Assistant">
+    @if (assistantOpen()) {
+      <mat-icon>close</mat-icon>
+    } @else {
+      <img src="ghosts.png" alt="GHOSTS Assistant" class="ghost-icon" />
+    }
+  </button>
+
+  @if (assistantOpen()) {
+  <div class="assistant-panel">
+    <h3>AI Assistant</h3>
+    <p class="assistant-placeholder">Assistant chat interface coming soon...</p>
+  </div>
+  }
+</div>

@@ -95,6 +95,13 @@
       <button
         mat-button
         color="accent"
+        (click)="openBuilder(scenario.id, $event)">
+        <i class="fas fa-project-diagram"></i>
+        Builder
+      </button>
+      <button
+        mat-button
+        color="accent"
         (click)="executeScenario(scenario, $event)">
         <i class="fas fa-play"></i>
         Execute

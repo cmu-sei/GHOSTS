@@ -12,9 +12,6 @@ namespace Ghosts.Api.Infrastructure.Data
     {
         public static async Task Initialize(ApplicationDbContext context, ILogger<DbInitializer> logger)
         {
-            // Apply pending migrations (better than EnsureCreatedAsync for production)
-            await context.Database.MigrateAsync();
-
             // Ensure NPC Campaign/Enclave/Team columns exist (for databases created before these fields were added)
             await EnsureNpcColumnsExist(context, logger);
 

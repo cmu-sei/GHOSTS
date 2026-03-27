@@ -13,7 +13,7 @@ services:
     environment:
       API_URL: ${WEB_API_URL:-http://host.docker.internal:5000/api}
       N8N_API_URL: ${WEB_N8N_API_URL:-http://host.docker.internal:5678}
-  postgres:
+  ghosts-postgres:
     image: postgres:16.8
     container_name: ghosts-postgres
     environment:

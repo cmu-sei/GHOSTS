@@ -1,0 +1,145 @@
+<div class="graph-container">
+  <div class="graph-header">
+    <h2>Knowledge Graph</h2>
+    <p class="subtitle">Interactive visualization of scenario entities and relationships</p>
+  </div>
+
+  @if (loading()) {
+  <div class="loading">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Loading graph data...</p>
+  </div>
+  } @else {
+  <div class="graph-workspace" [class.has-detail]="selectedNode()">
+    <div class="graph-controls">
+      <mat-card class="controls-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>tune</mat-icon>
+            Filters
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <form [formGroup]="filterForm">
+            <div class="control-section">
+              <label class="control-label">Confidence Threshold</label>
+              <mat-slider
+                min="0"
+                max="1"
+                step="0.1"
+                discrete
+                [displayWith]="formatConfidence"
+                class="confidence-slider">
+                <input matSliderThumb formControlName="confidenceThreshold" />
+              </mat-slider>
+              <span class="threshold-value"
+                >{{ (filterForm.value.confidenceThreshold * 100).toFixed(0) }}%</span
+              >
+            </div>
+
+            <div class="control-section">
+              <label class="control-label">Entity Types</label>
+              <div class="type-checkboxes">
+                @for (type of entityTypes; track type) {
+                <mat-checkbox
+                  [checked]="filterForm.value.selectedTypes.includes(type)"
+                  (change)="onTypeToggle(type, $event.checked)">
+                  <span class="type-indicator" [style.background-color]="getEntityColor(type)"></span>
+                  {{ type }}
+                </mat-checkbox>
+                }
+              </div>
+            </div>
+
+            <button mat-raised-button color="primary" (click)="resetView()" class="reset-button">
+              <mat-icon>center_focus_strong</mat-icon>
+              Reset View
+            </button>
+          </form>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="legend-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>info</mat-icon>
+            Legend
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="legend-items">
+            @for (type of entityTypes; track type) {
+            <div class="legend-item">
+              <span class="legend-circle" [style.background-color]="getEntityColor(type)"></span>
+              <span>{{ type }}</span>
+            </div>
+            }
+          </div>
+          <div class="legend-note">
+            <strong>Node size:</strong> Based on connections<br />
+            <strong>Dashed lines:</strong> Low confidence (&lt; 50%)
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <div class="graph-main">
+      <div class="graph-svg-container"></div>
+    </div>
+
+    @if (selectedNode()) {
+    <div class="detail-panel">
+      <mat-card class="detail-card">
+        <mat-card-header>
+          <mat-card-title>
+            <span
+              class="entity-type-badge"
+              [style.background-color]="getEntityColor(selectedNode()!.entityType)">
+              {{ selectedNode()!.entityType }}
+            </span>
+            {{ selectedNode()!.name }}
+          </mat-card-title>
+          <button mat-icon-button (click)="closeDetailPanel()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="detail-section">
+            <label>Description</label>
+            <p>{{ selectedNode()!.description || 'No description' }}</p>
+          </div>
+
+          <div class="detail-section">
+            <label>Confidence</label>
+            <p>{{ (selectedNode()!.confidence * 100).toFixed(0) }}%</p>
+          </div>
+
+          <div class="detail-section">
+            <label>Origin</label>
+            <p>{{ selectedNode()!.origin }}</p>
+          </div>
+
+          @if (selectedNode()!.properties) {
+          <div class="detail-section">
+            <label>Properties</label>
+            <pre class="properties-json">{{ selectedNode()!.properties }}</pre>
+          </div>
+          }
+
+          <div class="detail-actions">
+            <button mat-button color="primary">
+              <mat-icon>edit</mat-icon>
+              Edit Entity
+            </button>
+            <button mat-button color="accent">
+              <mat-icon>add_link</mat-icon>
+              Add Relationship
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+    }
+  </div>
+  }
+</div>

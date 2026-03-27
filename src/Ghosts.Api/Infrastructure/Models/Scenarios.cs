@@ -19,6 +19,14 @@ public class Scenario
     public ScenarioTimeline ScenarioTimeline { get; set; }
     public ICollection<Execution> Executions { get; set; } = new List<Execution>();
     public virtual ICollection<NpcRecord> Npcs { get; set; } = new List<NpcRecord>();
+
+    // Scenario Builder navigation properties
+    public string BuilderStatus { get; set; } = "None"; // None, Sources, Extracted, Enriched, Compiled
+    public ICollection<ScenarioSource> Sources { get; set; } = new List<ScenarioSource>();
+    public ICollection<ScenarioEntity> Entities { get; set; } = new List<ScenarioEntity>();
+    public ICollection<ScenarioEdge> Edges { get; set; } = new List<ScenarioEdge>();
+    public ICollection<ScenarioEnrichment> Enrichments { get; set; } = new List<ScenarioEnrichment>();
+    public ICollection<ScenarioCompilation> Compilations { get; set; } = new List<ScenarioCompilation>();
 }
 
 [Table("scenario_parameters")]
