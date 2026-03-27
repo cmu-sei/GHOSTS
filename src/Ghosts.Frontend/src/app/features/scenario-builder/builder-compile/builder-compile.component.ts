@@ -1,6 +1,7 @@
 import { Component, Input, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -42,11 +43,13 @@ export class BuilderCompileComponent implements OnInit {
   private readonly builderService = inject(ScenarioBuilderService);
   private readonly fb = inject(FormBuilder);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly router = inject(Router);
 
   protected readonly compilations = signal<ScenarioCompilation[]>([]);
   protected readonly loading = signal(true);
   protected readonly compiling = signal(false);
   protected readonly selectedPackage = signal<any>(null);
+  protected readonly lastCompileSucceeded = signal(false);
 
   protected compileForm!: FormGroup;
 
@@ -93,6 +96,7 @@ export class BuilderCompileComponent implements OnInit {
         console.log('Compilation completed:', compilation);
         this.snackBar.open('Compilation completed successfully', 'Close', { duration: 3000 });
         this.compiling.set(false);
+        this.lastCompileSucceeded.set(true);
         this.compileForm.patchValue({ name: '' });
         this.loadCompilations();
       },
@@ -119,6 +123,10 @@ export class BuilderCompileComponent implements OnInit {
 
   protected closePackageView(): void {
     this.selectedPackage.set(null);
+  }
+
+  protected reviewScenarioForm(): void {
+    this.router.navigate(['/scenarios', this.scenarioId]);
   }
 
   protected downloadPackage(compilationId: number): void {

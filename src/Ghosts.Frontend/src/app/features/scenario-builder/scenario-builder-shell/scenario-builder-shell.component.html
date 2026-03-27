@@ -66,22 +66,4 @@
   </mat-stepper>
   }
 
-  <button
-    mat-fab
-    class="assistant-toggle"
-    (click)="toggleAssistant()"
-    matTooltip="AI Assistant">
-    @if (assistantOpen()) {
-      <mat-icon>close</mat-icon>
-    } @else {
-      <img src="ghosts.png" alt="GHOSTS Assistant" class="ghost-icon" />
-    }
-  </button>
-
-  @if (assistantOpen()) {
-  <div class="assistant-panel">
-    <h3>AI Assistant</h3>
-    <p class="assistant-placeholder">Assistant chat interface coming soon...</p>
-  </div>
-  }
 </div>

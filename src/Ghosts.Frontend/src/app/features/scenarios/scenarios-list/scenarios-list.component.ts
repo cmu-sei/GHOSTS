@@ -5,6 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatMenuModule } from '@angular/material/menu';
 import { ChangeDetectionStrategy } from '@angular/core';
 import { ScenarioService } from '../../../core/services';
 import { Scenario } from '../../../core/models';
@@ -19,6 +20,7 @@ import { SearchBarComponent } from '../../../shared/components/search-bar/search
     MatCardModule,
     MatProgressSpinnerModule,
     MatSnackBarModule,
+    MatMenuModule,
     SearchBarComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -71,8 +73,21 @@ export class ScenariosListComponent implements OnInit {
     });
   }
 
-  protected createNewScenario(): void {
+  protected createNewScenarioManual(): void {
     this.router.navigate(['/scenarios', 'new']);
+  }
+
+  protected createNewScenario(): void {
+    this.scenarioService.createScenario({
+      name: 'New Scenario',
+      description: '',
+      scenarioParameters: { nations: [], threatActors: [], injects: [], userPools: [], objectives: '', politicalContext: '', rulesOfEngagement: '', victoryConditions: '' },
+      technicalEnvironment: { networkTopology: '', services: '', assets: '', defenses: [], vulnerabilities: [] },
+      timeline: { exerciseDuration: 8, events: [] }
+    }).subscribe({
+      next: (scenario) => this.router.navigate(['/scenarios', scenario.id, 'builder']),
+      error: () => this.snackBar.open('Failed to create scenario', 'Close', { duration: 3000 })
+    });
   }
 
   protected editScenario(id: number): void {

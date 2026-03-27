@@ -52,7 +52,7 @@
 
 .scenarios-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(520px, 1fr));
   gap: 24px;
 
   .scenario-card {
@@ -119,7 +119,7 @@
     mat-card-actions {
       padding: 8px 16px;
       display: flex;
-      justify-content: flex-end;
+      justify-content: center;
       gap: 8px;
       border-top: 1px solid #e0e0e0;
       margin-top: 16px;
@@ -131,4 +131,23 @@
 button i {
   margin-right: 6px;
   font-size: 14px;
+}
+
+.builder-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.7rem;
+  font-weight: normal;
+  background: #e8f5e9;
+  border: 1px solid #a5d6a7;
+  color: #2e7d32;
+  border-radius: 12px;
+  padding: 2px 8px;
+  margin-left: 8px;
+  vertical-align: middle;
+
+  i {
+    font-size: 10px;
+  }
 }

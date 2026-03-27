@@ -62,6 +62,20 @@
             }
           </button>
         </form>
+
+        @if (lastCompileSucceeded()) {
+        <div class="compile-success-callout">
+          <mat-icon>check_circle</mat-icon>
+          <div class="callout-text">
+            <strong>Scenario form pre-populated</strong>
+            <p>Threat actors, nations, injects, technical environment, and timeline events have been filled in from your graph. Review and complete the remaining fields (objectives, rules of engagement, simulation mechanics) in the scenario form.</p>
+          </div>
+          <button mat-raised-button color="primary" (click)="reviewScenarioForm()">
+            <mat-icon>edit</mat-icon>
+            Review Scenario Form
+          </button>
+        </div>
+        }
       </mat-card-content>
     </mat-card>
 

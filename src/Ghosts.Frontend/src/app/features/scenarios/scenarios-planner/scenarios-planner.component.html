@@ -26,6 +26,21 @@
 
 @if (!loading()) {
 <div class="content">
+
+  @if (builderStatus() === 'Compiled') {
+  <div class="builder-populated-banner">
+    <i class="fas fa-project-diagram"></i>
+    <div class="banner-text">
+      <strong>Pre-populated from Scenario Builder</strong>
+      <span>Threat actors, nations, injects, technical environment, and timeline events were filled in automatically. Fields requiring manual completion are marked below.</span>
+    </div>
+    <button mat-stroked-button (click)="openBuilder()">
+      <i class="fas fa-project-diagram"></i>
+      Back to Builder
+    </button>
+  </div>
+  }
+
     <mat-tab-group>
       <!-- Scenario Parameters Tab -->
       <mat-tab label="Scenario Parameters">
@@ -44,7 +59,11 @@
 
           <!-- Nations Section -->
           <div class="form-section">
-            <h3 class="subsection-title">Nations Involved</h3>
+            <h3 class="subsection-title">Nations Involved
+              @if (builderStatus() === 'Compiled' && scenario.scenarioParameters!.nations.length > 0) {
+              <span class="needs-manual-badge"><i class="fas fa-pencil-alt"></i> Review alignments</span>
+              }
+            </h3>
             <div class="list-manager">
               <div *ngFor="let nation of scenario.scenarioParameters!.nations; let i = index" class="list-item">
                 <mat-form-field class="item-field">
@@ -152,7 +171,11 @@
           </div>
 
           <div class="form-section">
-            <h3>Strategic Context</h3>
+            <h3>Strategic Context
+              @if (builderStatus() === 'Compiled') {
+              <span class="needs-manual-badge"><i class="fas fa-pencil-alt"></i> Requires manual completion</span>
+              }
+            </h3>
             <div class="form-row">
               <mat-form-field class="half-width">
                 <mat-label>Strategic Objectives</mat-label>
@@ -167,7 +190,11 @@
           </div>
 
           <div class="form-section">
-            <h3>Rules & Victory Conditions</h3>
+            <h3>Rules & Victory Conditions
+              @if (builderStatus() === 'Compiled') {
+              <span class="needs-manual-badge"><i class="fas fa-pencil-alt"></i> Requires manual completion</span>
+              }
+            </h3>
             <div class="form-row">
               <mat-form-field class="half-width">
                 <mat-label>Rules of Engagement</mat-label>
@@ -286,6 +313,13 @@
       <mat-tab label="Simulation Mechanics">
         <div class="content-card">
           <h2 class="section-title">Simulation Mechanics</h2>
+
+          @if (builderStatus() === 'Compiled') {
+          <div class="manual-completion-note">
+            <i class="fas fa-info-circle"></i>
+            <span>This section could not be determined from the scenario graph and requires manual completion.</span>
+          </div>
+          }
 
           <div class="form-section">
             <h3 class="subsection-title">Execution Parameters</h3>

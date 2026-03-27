@@ -218,3 +218,40 @@
     overflow-x: auto;
   }
 }
+
+.compile-success-callout {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: #e8f5e9;
+  border: 1px solid #a5d6a7;
+  border-radius: 6px;
+  padding: 14px 16px;
+  margin-top: 16px;
+
+  mat-icon {
+    color: #2e7d32;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .callout-text {
+    flex: 1;
+
+    strong {
+      display: block;
+      color: #1b5e20;
+      margin-bottom: 4px;
+    }
+
+    p {
+      margin: 0;
+      color: #33691e;
+      font-size: 0.875rem;
+    }
+  }
+
+  button {
+    flex-shrink: 0;
+  }
+}

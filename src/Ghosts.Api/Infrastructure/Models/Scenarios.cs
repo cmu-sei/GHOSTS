@@ -169,7 +169,8 @@ public record ScenarioDto(
     ScenarioParametersDto ScenarioParameters,
     TechnicalEnvironmentDto TechnicalEnvironment,
     GameMechanicsDto GameMechanics,
-    TimelineDto Timeline
+    TimelineDto Timeline,
+    string BuilderStatus
 );
 
 public record CreateScenarioDto(
