@@ -227,7 +227,8 @@ export const ENTITY_TYPES = [
 export const EDGE_TYPES = [
   'MemberOf', 'Targets', 'Exploits', 'Uses', 'LocatedAt',
   'CommunicatesWith', 'DependsOn', 'Accesses', 'Owns',
-  'ReportsTo', 'AffiliatedWith', 'DefendedBy', 'CommandsAndControl', 'Custom'
+  'ReportsTo', 'AffiliatedWith', 'DefendedBy', 'CommandsAndControl',
+  'AttributedTo', 'Conducts', 'Delivers', 'Impacts', 'Custom'
 ] as const;
 
 export const ENTITY_COLORS: Record<string, string> = {

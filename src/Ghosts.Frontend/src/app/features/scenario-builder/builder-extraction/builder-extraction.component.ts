@@ -121,6 +121,7 @@ export class BuilderExtractionComponent implements OnInit, OnDestroy {
     this.builderService.extractAll(this.scenarioId).subscribe({
       next: (result) => {
         this.extractionResult.set(result);
+        this.extracting.set(false);
         this.snackBar.open('Extraction completed', 'Close', { duration: 3000 });
       },
       error: (error) => {

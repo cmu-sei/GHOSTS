@@ -106,6 +106,7 @@ export interface CreateScenario {
   gameMechanics?: GameMechanics;
   simulationMechanics?: GameMechanics; // Alias for gameMechanics used in UI
   timeline: ScenarioTimeline;
+  builderStatus?: string;
 }
 
 export interface ScenarioListItem {

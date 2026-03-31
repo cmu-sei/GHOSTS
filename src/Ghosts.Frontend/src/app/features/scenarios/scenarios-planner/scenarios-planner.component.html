@@ -38,6 +38,9 @@
       <i class="fas fa-project-diagram"></i>
       Back to Builder
     </button>
+    <button mat-icon-button (click)="dismissBuilderPrompts()" title="Dismiss all review prompts">
+      <i class="fas fa-times"></i>
+    </button>
   </div>
   }
 
@@ -61,7 +64,7 @@
           <div class="form-section">
             <h3 class="subsection-title">Nations Involved
               @if (builderStatus() === 'Compiled' && scenario.scenarioParameters!.nations.length > 0) {
-              <span class="needs-manual-badge"><i class="fas fa-pencil-alt"></i> Review alignments</span>
+              <span class="needs-manual-badge" title="Click to dismiss" (click)="dismissBuilderPrompts()"><i class="fas fa-pencil-alt"></i> Review alignments <i class="fas fa-times badge-dismiss"></i></span>
               }
             </h3>
             <div class="list-manager">
@@ -173,7 +176,7 @@
           <div class="form-section">
             <h3>Strategic Context
               @if (builderStatus() === 'Compiled') {
-              <span class="needs-manual-badge"><i class="fas fa-pencil-alt"></i> Requires manual completion</span>
+              <span class="needs-manual-badge" title="Click to dismiss" (click)="dismissBuilderPrompts()"><i class="fas fa-pencil-alt"></i> Requires manual completion <i class="fas fa-times badge-dismiss"></i></span>
               }
             </h3>
             <div class="form-row">
@@ -192,7 +195,7 @@
           <div class="form-section">
             <h3>Rules & Victory Conditions
               @if (builderStatus() === 'Compiled') {
-              <span class="needs-manual-badge"><i class="fas fa-pencil-alt"></i> Requires manual completion</span>
+              <span class="needs-manual-badge" title="Click to dismiss" (click)="dismissBuilderPrompts()"><i class="fas fa-pencil-alt"></i> Requires manual completion <i class="fas fa-times badge-dismiss"></i></span>
               }
             </h3>
             <div class="form-row">

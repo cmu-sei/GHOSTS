@@ -193,6 +193,13 @@ export class ScenariosPlannerComponent implements OnInit {
     this.router.navigate(['/scenarios']);
   }
 
+  protected dismissBuilderPrompts(): void {
+    this.builderStatus.set('Reviewed');
+    if (this.scenarioId) {
+      this.scenarioService.updateScenario(this.scenarioId, { ...this.scenario, builderStatus: 'Reviewed' }).subscribe();
+    }
+  }
+
   protected openBuilder(): void {
     this.router.navigate(['/scenarios', this.scenarioId, 'builder']);
   }

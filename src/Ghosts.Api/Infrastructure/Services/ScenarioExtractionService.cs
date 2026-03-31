@@ -436,10 +436,12 @@ Edge format:
 {{
   ""source"": ""Source Entity Name"",
   ""target"": ""Target Entity Name"",
-  ""type"": ""MemberOf|Targets|Exploits|Uses|LocatedAt|CommunicatesWith|DependsOn|Accesses|Owns|ReportsTo|AffiliatedWith|DefendedBy|CommandsAndControls|Custom"",
+  ""type"": ""MemberOf|Targets|Exploits|Uses|LocatedAt|CommunicatesWith|DependsOn|Accesses|Owns|ReportsTo|AffiliatedWith|DefendedBy|CommandsAndControl|AttributedTo|Conducts|Delivers|Impacts|Custom"",
   ""label"": ""Relationship description"",
   ""confidence"": 0.0-1.0
 }}
+
+CRITICAL: Every entity MUST connect to at least one other entity via an edge. Create edges for all attribution, targeting, tool usage, and impact relationships. Prefer more edges over fewer.
 
 Text to analyze:
 {content}

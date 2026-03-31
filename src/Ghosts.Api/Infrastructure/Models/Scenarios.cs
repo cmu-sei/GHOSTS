@@ -188,7 +188,8 @@ public record UpdateScenarioDto(
     ScenarioParametersDto ScenarioParameters,
     TechnicalEnvironmentDto TechnicalEnvironment,
     GameMechanicsDto GameMechanics,
-    TimelineDto Timeline
+    TimelineDto Timeline,
+    string? BuilderStatus = null
 );
 
 public record ScenarioParametersDto(

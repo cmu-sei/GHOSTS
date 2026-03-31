@@ -145,6 +145,8 @@ namespace Ghosts.Api.Infrastructure.Services
             scenario.Name = dto.Name;
             scenario.Description = dto.Description;
             scenario.UpdatedAt = DateTime.UtcNow;
+            if (dto.BuilderStatus != null)
+                scenario.BuilderStatus = dto.BuilderStatus;
 
             // Update ScenarioParameters
             if (dto.ScenarioParameters != null)
