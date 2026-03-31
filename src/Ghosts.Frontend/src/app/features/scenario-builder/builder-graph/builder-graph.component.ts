@@ -86,6 +86,7 @@ export class BuilderGraphComponent implements OnInit, OnDestroy {
   private width = 0;
   private height = 0;
   private isInitialized = false;
+  private hasInitiallyFit = false;
 
   ngOnInit(): void {
     this.initFilterForm();
@@ -132,7 +133,7 @@ export class BuilderGraphComponent implements OnInit, OnDestroy {
     });
 
     this.filterForm.valueChanges.subscribe(() => {
-      this.updateVisualization();
+      this.updateVisualization(0.05);
     });
   }
 
@@ -206,6 +207,7 @@ export class BuilderGraphComponent implements OnInit, OnDestroy {
   }
 
   private buildVisualization(container: Element): void {
+    this.hasInitiallyFit = false;
 
     // Clear existing SVG
     d3.select(container).selectAll('*').remove();
@@ -283,13 +285,16 @@ export class BuilderGraphComponent implements OnInit, OnDestroy {
           .id((d) => d.id)
           .distance(100)
       )
-      .force('charge', d3.forceManyBody().strength(-300))
+      .force('charge', d3.forceManyBody().strength(-500))
       .force('center', d3.forceCenter(this.width / 2, this.height / 2))
-      .force('collision', d3.forceCollide<GraphNode>().radius((d) => d.radius + 5))
+      .force('collision', d3.forceCollide<GraphNode>().radius((d) => d.radius + 15).strength(1))
       .on('end', () => {
         // Freeze the graph once layout converges — nothing moves at rest
         this.simulation?.stop();
-        this.zoomToFit();
+        if (!this.hasInitiallyFit) {
+          this.hasInitiallyFit = true;
+          this.zoomToFit();
+        }
       });
 
     // Create link elements
@@ -297,7 +302,7 @@ export class BuilderGraphComponent implements OnInit, OnDestroy {
     const nodeGroup = g.append('g').attr('class', 'nodes');
     const labelGroup = g.append('g').attr('class', 'labels');
 
-    this.updateVisualization();
+    this.updateVisualization(1);
   }
 
   private prepareGraphData(): void {
@@ -326,7 +331,7 @@ export class BuilderGraphComponent implements OnInit, OnDestroy {
     });
   }
 
-  private updateVisualization(): void {
+  private updateVisualization(alpha = 0.05): void {
     if (!this.svg || !this.simulation) return;
 
     const { confidenceThreshold, selectedTypes } = this.filterForm.value;
@@ -355,8 +360,7 @@ export class BuilderGraphComponent implements OnInit, OnDestroy {
         .id((d) => d.id)
         .distance(150)
     );
-    // Low alpha so filters don't cause big jumps
-    this.simulation.alpha(0.05).restart();
+    this.simulation.alpha(alpha).restart();
 
     // Update link elements
     const linkGroup = this.svg.select('.links');
@@ -393,10 +397,10 @@ export class BuilderGraphComponent implements OnInit, OnDestroy {
       .attr('stroke', '#fff')
       .attr('stroke-width', 1.5)
       .attr('stroke-opacity', 0.8)
-      .style('cursor', 'pointer')
-      .call(this.drag(this.simulation) as any);
+      .style('cursor', 'pointer');
 
-    const nodeMerge = nodeEnter.merge(node);
+    const nodeMerge = nodeEnter.merge(node)
+      .call(this.drag(this.simulation) as any);
 
     // Update label elements
     const labelGroup = this.svg.select('.labels');
@@ -444,7 +448,8 @@ export class BuilderGraphComponent implements OnInit, OnDestroy {
         dragStartX = event.x;
         dragStartY = event.y;
         isDragging = false;
-        // Pin the node but don't reheat the simulation yet
+        // Restart immediately so ticks fire and the node follows the pointer from the first pixel
+        if (!event.active) simulation.alphaTarget(0.3).restart();
         d.fx = d.x;
         d.fy = d.y;
       })
@@ -454,8 +459,6 @@ export class BuilderGraphComponent implements OnInit, OnDestroy {
           const dy = event.y - dragStartY;
           if (Math.sqrt(dx * dx + dy * dy) >= CLICK_THRESHOLD) {
             isDragging = true;
-            // Only reheat once actual dragging begins, and keep it gentle
-            if (!event.active) simulation.alphaTarget(0.05).restart();
           }
         }
         d.fx = event.x;

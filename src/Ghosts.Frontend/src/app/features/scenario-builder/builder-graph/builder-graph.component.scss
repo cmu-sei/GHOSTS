@@ -49,6 +49,7 @@
   flex-direction: column;
   gap: 1rem;
   overflow-y: auto;
+  overflow-x: hidden;
 
   mat-card {
     background: #ffffff;
@@ -62,16 +63,6 @@
 
   label {
     color: #666666;
-  }
-}
-
-.controls-card,
-.legend-card {
-  mat-card-title {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 1rem;
   }
 }
 
@@ -117,36 +108,6 @@
 .reset-button {
   width: 100%;
   margin-top: 1rem;
-}
-
-.legend-items {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-
-  .legend-circle {
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    border: 2px solid #fff;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-  }
-}
-
-.legend-note {
-  padding-top: 1rem;
-  border-top: 1px solid #e0e0e0;
-  font-size: 0.75rem;
-  color: #666666;
-  line-height: 1.6;
 }
 
 .graph-main {

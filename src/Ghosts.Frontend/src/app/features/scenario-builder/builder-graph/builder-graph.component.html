@@ -59,28 +59,6 @@
         </mat-card-content>
       </mat-card>
 
-      <mat-card class="legend-card">
-        <mat-card-header>
-          <mat-card-title>
-            <mat-icon>info</mat-icon>
-            Legend
-          </mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="legend-items">
-            @for (type of entityTypes; track type) {
-            <div class="legend-item">
-              <span class="legend-circle" [style.background-color]="getEntityColor(type)"></span>
-              <span>{{ type }}</span>
-            </div>
-            }
-          </div>
-          <div class="legend-note">
-            <strong>Node size:</strong> Based on connections<br />
-            <strong>Dashed lines:</strong> Low confidence (&lt; 50%)
-          </div>
-        </mat-card-content>
-      </mat-card>
     </div>
 
     <div class="graph-main">

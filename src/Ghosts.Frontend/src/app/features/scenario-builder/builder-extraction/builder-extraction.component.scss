@@ -140,6 +140,21 @@
     border-left: 4px solid #4caf50;
   }
 
+  &.low-entity-warning {
+    background-color: #fff8e1;
+    border-left: 4px solid #ff9800;
+
+    .warning-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+
+      mat-icon { color: #ff9800; margin-top: 2px; flex-shrink: 0; }
+      strong { color: #e65100; display: block; margin-bottom: 4px; }
+      p { margin: 0; color: #bf360c; font-size: 0.875rem; }
+    }
+  }
+
   mat-card-title {
     display: flex;
     align-items: center;

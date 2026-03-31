@@ -53,6 +53,7 @@ export class BuilderExtractionComponent implements OnInit, OnDestroy {
   protected readonly extracting = signal(false);
   protected readonly extractionResult = signal<ExtractionResult | null>(null);
   protected readonly extractionProgress = signal<ExtractionProgress | null>(null);
+  protected readonly totalEntityCount = signal<number | null>(null);
 
   ngOnInit(): void {
     this.loadSources();
@@ -111,6 +112,17 @@ export class BuilderExtractionComponent implements OnInit, OnDestroy {
   // Public method to reload sources when step becomes active
   public refresh(): void {
     this.loadSources();
+    this.loadEntityCount();
+  }
+
+  private loadEntityCount(): void {
+    this.builderService.getGraphStats(this.scenarioId).subscribe({
+      next: (stats) => {
+        const total = Object.values(stats).reduce((sum, n) => sum + n, 0);
+        this.totalEntityCount.set(total);
+      },
+      error: () => { /* non-critical */ }
+    });
   }
 
   protected extractAll(): void {
@@ -123,6 +135,7 @@ export class BuilderExtractionComponent implements OnInit, OnDestroy {
         this.extractionResult.set(result);
         this.extracting.set(false);
         this.snackBar.open('Extraction completed', 'Close', { duration: 3000 });
+        this.loadEntityCount();
       },
       error: (error) => {
         console.error('Error during extraction', error);

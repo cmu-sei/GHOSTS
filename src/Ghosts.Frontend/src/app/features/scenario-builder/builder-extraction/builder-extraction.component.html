@@ -77,6 +77,20 @@
     </mat-card-content>
   </mat-card>
 
+  @if (totalEntityCount() !== null && totalEntityCount()! < 10 && !extracting()) {
+  <mat-card class="result-card warn low-entity-warning">
+    <mat-card-content>
+      <div class="warning-row">
+        <mat-icon>warning</mat-icon>
+        <div>
+          <strong>Low entity count ({{ totalEntityCount() }} total)</strong>
+          <p>The graph has fewer than 10 entities. Consider adding more source content and re-running extraction for richer results.</p>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  }
+
   @if (extractionResult()) {
   <mat-card class="result-card success">
     <mat-card-header>
