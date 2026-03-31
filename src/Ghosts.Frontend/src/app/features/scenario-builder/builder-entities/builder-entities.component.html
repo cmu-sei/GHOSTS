@@ -19,10 +19,12 @@
       </div>
     </div>
     <div class="header-actions">
+      @if (!showAddForm()) {
       <button mat-raised-button color="primary" (click)="toggleAddForm()">
-        <mat-icon>{{ showAddForm() ? 'close' : 'add' }}</mat-icon>
-        {{ showAddForm() ? 'Cancel' : 'Add Entity' }}
+        <mat-icon>add</mat-icon>
+        Add Entity
       </button>
+      }
       @if (selectedEntities().size === 2) {
       <button mat-raised-button color="accent" (click)="mergeSelectedEntities()">
         <mat-icon>merge</mat-icon>
@@ -31,73 +33,6 @@
       }
     </div>
   </div>
-
-  @if (showAddForm()) {
-  <mat-card class="entity-form-card">
-    <mat-card-header>
-      <mat-card-title>{{ isEditing() ? 'Edit' : 'Add' }} Entity</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      <form [formGroup]="entityForm">
-        <div class="form-row">
-          <mat-form-field appearance="fill" class="form-field">
-            <mat-label>Name</mat-label>
-            <input matInput formControlName="name" placeholder="Entity name" />
-          </mat-form-field>
-
-          <mat-form-field appearance="fill" class="form-field">
-            <mat-label>Type</mat-label>
-            <mat-select formControlName="entityType">
-              @for (type of entityTypes; track type) {
-              <mat-option [value]="type">
-                <span [style.color]="getEntityColor(type)">●</span>
-                {{ type }}
-              </mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-
-          <mat-form-field appearance="fill" class="form-field">
-            <mat-label>Confidence</mat-label>
-            <input
-              matInput
-              type="number"
-              formControlName="confidence"
-              min="0"
-              max="1"
-              step="0.1" />
-          </mat-form-field>
-        </div>
-
-        <mat-form-field appearance="fill" class="full-width">
-          <mat-label>Description</mat-label>
-          <textarea
-            matInput
-            formControlName="description"
-            rows="3"
-            placeholder="Entity description..."></textarea>
-        </mat-form-field>
-
-        <mat-form-field appearance="fill" class="full-width">
-          <mat-label>Properties (JSON)</mat-label>
-          <textarea
-            matInput
-            formControlName="properties"
-            rows="3"
-            placeholder='{"key": "value"}'></textarea>
-        </mat-form-field>
-
-        <div class="form-actions">
-          @if (isEditing()) {
-          <button mat-raised-button color="primary" (click)="updateEntity()">Update Entity</button>
-          } @else {
-          <button mat-raised-button color="primary" (click)="createEntity()">Create Entity</button>
-          }
-        </div>
-      </form>
-    </mat-card-content>
-  </mat-card>
-  }
 
   <mat-card class="entities-list-card">
     <mat-card-header>
@@ -212,4 +147,75 @@
       }
     </mat-card-content>
   </mat-card>
+
+  @if (showAddForm()) {
+  <mat-card class="entity-form-card" #entityFormCard>
+    <mat-card-header>
+      <mat-card-title>{{ isEditing() ? 'Edit' : 'Add' }} Entity</mat-card-title>
+      <button mat-icon-button (click)="toggleAddForm()" style="margin-left:auto">
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="entityForm">
+        <div class="form-row">
+          <mat-form-field appearance="fill" class="form-field">
+            <mat-label>Name</mat-label>
+            <input matInput formControlName="name" placeholder="Entity name" />
+          </mat-form-field>
+
+          <mat-form-field appearance="fill" class="form-field">
+            <mat-label>Type</mat-label>
+            <mat-select formControlName="entityType">
+              @for (type of entityTypes; track type) {
+              <mat-option [value]="type">
+                <span [style.color]="getEntityColor(type)">●</span>
+                {{ type }}
+              </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="fill" class="form-field">
+            <mat-label>Confidence</mat-label>
+            <input
+              matInput
+              type="number"
+              formControlName="confidence"
+              min="0"
+              max="1"
+              step="0.1" />
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Description</mat-label>
+          <textarea
+            matInput
+            formControlName="description"
+            rows="2"
+            placeholder="Entity description..."></textarea>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Properties (JSON)</mat-label>
+          <textarea
+            matInput
+            formControlName="properties"
+            rows="2"
+            placeholder='{"key": "value"}'></textarea>
+        </mat-form-field>
+
+        <div class="form-actions">
+          @if (isEditing()) {
+          <button mat-raised-button color="primary" (click)="updateEntity()">Update Entity</button>
+          } @else {
+          <button mat-raised-button color="primary" (click)="createEntity()">Create Entity</button>
+          }
+          <button mat-button (click)="toggleAddForm()">Cancel</button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+  }
 </div>

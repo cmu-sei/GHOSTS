@@ -3,10 +3,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Api.Infrastructure.Models;
+using Ghosts.Api.Infrastructure.Services.ClientServices;
+using Ghosts.Domain;
 using Microsoft.EntityFrameworkCore;
 using NLog;
 using System.Text.Json;
@@ -32,14 +34,29 @@ namespace Ghosts.Api.Infrastructure.Services
         Task SetErrorAsync(int id, JsonElement error, CancellationToken ct);
     }
 
-    public class ExecutionService(ApplicationDbContext context) : IExecutionService
+    /// <summary>
+    /// Accepts DbContext (base) so that both production (ApplicationDbContext) and
+    /// test (TestDbContext) instances can be injected without relational-provider friction.
+    /// </summary>
+    public class ExecutionService(DbContext context, IClientHubService clientHubService) : IExecutionService
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        private readonly ApplicationDbContext _context = context;
+        private readonly DbContext _context = context;
+        private readonly IClientHubService _clientHubService = clientHubService;
+
+        // ── Convenience accessors ──────────────────────────────────────────────
+        private DbSet<Execution> Executions => _context.Set<Execution>();
+        private DbSet<Scenario> Scenarios => _context.Set<Scenario>();
+        private DbSet<ExecutionEvent> ExecutionEvents => _context.Set<ExecutionEvent>();
+        private DbSet<ExecutionMetricSnapshot> ExecutionMetricSnapshots => _context.Set<ExecutionMetricSnapshot>();
+        private DbSet<ScenarioCompilation> ScenarioCompilations => _context.Set<ScenarioCompilation>();
+        private DbSet<ScenarioNpcAssignment> ScenarioNpcAssignments => _context.Set<ScenarioNpcAssignment>();
+        private DbSet<ScenarioTimelineEvent> ScenarioTimelineEvents => _context.Set<ScenarioTimelineEvent>();
+        private DbSet<MachineUpdate> MachineUpdates => _context.Set<MachineUpdate>();
 
         public async Task<List<ExecutionSummaryDto>> GetAllAsync(int? scenarioId, CancellationToken ct)
         {
-            var query = _context.Executions
+            var query = Executions
                 .Include(e => e.Scenario)
                 .Include(e => e.Events)
                 .Include(e => e.MetricSnapshots)
@@ -78,7 +95,7 @@ namespace Ghosts.Api.Infrastructure.Services
 
         public async Task<Execution> GetByIdAsync(int id, CancellationToken ct)
         {
-            var execution = await _context.Executions
+            var execution = await Executions
                 .Include(e => e.Scenario)
                 .FirstOrDefaultAsync(e => e.Id == id, ct);
 
@@ -93,16 +110,14 @@ namespace Ghosts.Api.Infrastructure.Services
 
         public async Task<Execution> CreateAsync(CreateExecutionDto dto, CancellationToken ct)
         {
-            // Verify scenario exists
-            var scenario = await _context.Scenarios.FindAsync(dto.ScenarioId);
+            var scenario = await Scenarios.FindAsync(dto.ScenarioId);
             if (scenario == null)
             {
                 _log.Error($"Scenario not found: {dto.ScenarioId}");
                 throw new InvalidOperationException($"Scenario with id {dto.ScenarioId} not found");
             }
 
-            // Generate default name if not provided
-            var executionCount = await _context.Executions.CountAsync(e => e.ScenarioId == dto.ScenarioId, ct);
+            var executionCount = await Executions.CountAsync(e => e.ScenarioId == dto.ScenarioId, ct);
             var executionName = string.IsNullOrEmpty(dto.Name)
                 ? $"{scenario.Name} - Run {executionCount + 1}"
                 : dto.Name;
@@ -120,9 +135,8 @@ namespace Ghosts.Api.Infrastructure.Services
                 ErrorDetails = "{}"
             };
 
-            _context.Executions.Add(execution);
+            Executions.Add(execution);
 
-            // Add initial event
             var initialEvent = new ExecutionEvent
             {
                 ExecutionId = execution.Id,
@@ -143,63 +157,44 @@ namespace Ghosts.Api.Infrastructure.Services
 
             _log.Info($"Created execution: {execution.Id} - {execution.Name} for scenario {dto.ScenarioId}");
 
-            // Reload with scenario
             return await GetByIdAsync(execution.Id, ct);
         }
 
         public async Task<Execution> UpdateAsync(int id, UpdateExecutionDto dto, CancellationToken ct)
         {
-            var execution = await _context.Executions.FindAsync(id);
+            var execution = await Executions.FindAsync(id);
             if (execution == null)
             {
                 _log.Error($"Execution not found: {id}");
                 throw new InvalidOperationException("Execution not found");
             }
 
-            if (!string.IsNullOrEmpty(dto.Name))
-            {
-                execution.Name = dto.Name;
-            }
-
-            if (dto.Description != null)
-            {
-                execution.Description = dto.Description;
-            }
-
-            if (dto.ParameterOverrides != null)
-            {
-                execution.ParameterOverrides = dto.ParameterOverrides;
-            }
-
-            if (dto.Configuration != null)
-            {
-                execution.Configuration = dto.Configuration;
-            }
+            if (!string.IsNullOrEmpty(dto.Name)) execution.Name = dto.Name;
+            if (dto.Description != null) execution.Description = dto.Description;
+            if (dto.ParameterOverrides != null) execution.ParameterOverrides = dto.ParameterOverrides;
+            if (dto.Configuration != null) execution.Configuration = dto.Configuration;
 
             await _context.SaveChangesAsync(ct);
-
             _log.Info($"Updated execution: {id}");
-
             return await GetByIdAsync(id, ct);
         }
 
         public async Task DeleteAsync(int id, CancellationToken ct)
         {
-            var execution = await _context.Executions.FindAsync(id);
+            var execution = await Executions.FindAsync(id);
             if (execution == null)
             {
                 _log.Error($"Execution not found: {id}");
                 throw new InvalidOperationException("Execution not found");
             }
 
-            // Only allow deletion of non-active executions
             if (execution.Status == ExecutionStatus.Running || execution.Status == ExecutionStatus.Paused)
             {
                 _log.Error($"Cannot delete running or paused execution: {id}");
                 throw new InvalidOperationException("Cannot delete a running or paused execution. Stop it first.");
             }
 
-            _context.Executions.Remove(execution);
+            Executions.Remove(execution);
 
             var operation = await _context.SaveChangesAsync(ct);
             if (operation < 1)
@@ -221,29 +216,182 @@ namespace Ghosts.Api.Infrastructure.Services
                 throw new InvalidOperationException($"Cannot start execution with status {execution.Status}");
             }
 
+            // ── Guard 1: a completed compilation must exist ──────────────────
+            var compilation = await ScenarioCompilations
+                .Where(c => c.ScenarioId == execution.ScenarioId && c.Status == "Completed")
+                .OrderByDescending(c => c.CompletedAt)
+                .FirstOrDefaultAsync(ct);
+
+            if (compilation == null)
+            {
+                throw new InvalidOperationException(
+                    "Cannot start execution: no completed compilation exists for this scenario. " +
+                    "Use the Scenario Builder to compile the scenario first.");
+            }
+
+            // ── Guard 2: NPC-to-machine assignments must exist ───────────────
+            var assignments = await ScenarioNpcAssignments
+                .Where(a => a.CompilationId == compilation.Id)
+                .ToListAsync(ct);
+
+            if (assignments.Count == 0)
+            {
+                throw new InvalidOperationException(
+                    "Cannot start execution: no NPC-to-machine assignments found for the selected compilation. " +
+                    "Assign machines to compiled NPCs in the Scenario Builder before starting.");
+            }
+
+            // ── Load scenario timeline events ────────────────────────────────
+            var timelineEvents = await ScenarioTimelineEvents
+                .Where(e => e.Timeline.ScenarioId == execution.ScenarioId)
+                .OrderBy(e => e.Number)
+                .ToListAsync(ct);
+
+            // ── Deploy: create MachineUpdate per assignment ──────────────────
+            var deployedCount = 0;
+            var deployErrors = new List<string>();
+
+            foreach (var assignment in assignments)
+            {
+                try
+                {
+                    var timeline = BuildTimelineForNpc(assignment.NpcId, execution.Id, timelineEvents);
+
+                    var machineUpdate = new MachineUpdate
+                    {
+                        MachineId = assignment.MachineId,
+                        Status = StatusType.Active,
+                        Update = timeline,
+                        ActiveUtc = DateTime.UtcNow,
+                        CreatedUtc = DateTime.UtcNow,
+                        Type = UpdateClientConfig.UpdateType.TimelinePartial
+                    };
+
+                    // Attempt real-time delivery; fall back to DB polling path
+                    var delivered = await _clientHubService.SendUpdate(assignment.MachineId, machineUpdate);
+                    if (!delivered)
+                    {
+                        MachineUpdates.Add(machineUpdate);
+                        _log.Debug($"[Execution {id}] NPC {assignment.NpcId} → machine {assignment.MachineId}: queued in DB (no active socket)");
+                    }
+                    else
+                    {
+                        _log.Debug($"[Execution {id}] NPC {assignment.NpcId} → machine {assignment.MachineId}: delivered via websocket");
+                    }
+
+                    deployedCount++;
+                }
+                catch (Exception ex)
+                {
+                    var msg = $"Failed to deploy NPC {assignment.NpcId} to machine {assignment.MachineId}: {ex.Message}";
+                    _log.Warn(msg);
+                    deployErrors.Add(msg);
+                }
+            }
+
+            // Require at least one successful deployment
+            if (deployedCount == 0)
+            {
+                var errorSummary = string.Join("; ", deployErrors);
+                throw new InvalidOperationException(
+                    $"Execution start failed: all {assignments.Count} deployment(s) failed. Errors: {errorSummary}");
+            }
+
+            // ── Transition state ─────────────────────────────────────────────
             execution.Status = ExecutionStatus.Running;
             if (execution.StartedAt == null)
             {
                 execution.StartedAt = DateTime.UtcNow;
             }
 
-            // Add event
             var startEvent = new ExecutionEvent
             {
                 ExecutionId = execution.Id,
                 Timestamp = DateTime.UtcNow,
                 EventType = "StatusChange",
                 Description = "Execution started",
-                Data = JsonSerializer.Serialize(new { status = "Running", timestamp = DateTime.UtcNow }),
-                Severity = "Info"
+                Data = JsonSerializer.Serialize(new
+                {
+                    status = "Running",
+                    timestamp = DateTime.UtcNow,
+                    compilationId = compilation.Id,
+                    deploymentsAttempted = assignments.Count,
+                    deploymentsSucceeded = deployedCount,
+                    deployErrors
+                }),
+                Severity = deployErrors.Count > 0 ? "Warning" : "Info"
             };
-            _context.ExecutionEvents.Add(startEvent);
+            ExecutionEvents.Add(startEvent);
 
             await _context.SaveChangesAsync(ct);
 
-            _log.Info($"Started execution: {id}");
+            _log.Info($"Started execution {id}: deployed to {deployedCount}/{assignments.Count} machines" +
+                      (deployErrors.Count > 0 ? $" ({deployErrors.Count} errors)" : ""));
 
             return execution;
+        }
+
+        /// <summary>
+        /// Builds a GHOSTS-native Timeline for an NPC from the scenario's timeline events.
+        /// Uses NpcSystem handler so the client knows it is operating in NPC-driven mode.
+        /// </summary>
+        private static Timeline BuildTimelineForNpc(
+            Guid npcId,
+            int executionId,
+            List<ScenarioTimelineEvent> scenarioEvents)
+        {
+            var ghostsEvents = new List<TimelineEvent>();
+
+            foreach (var evt in scenarioEvents)
+            {
+                ghostsEvents.Add(new TimelineEvent
+                {
+                    Command = "npc-scenario-action",
+                    CommandArgs = new List<object>
+                    {
+                        $"execution:{executionId}",
+                        $"event:{evt.Number}",
+                        evt.Description ?? string.Empty
+                    },
+                    DelayBefore = ParseTimeOffsetMs(evt.Time),
+                    DelayAfter = 0
+                });
+            }
+
+            // Ensure at least one event
+            if (ghostsEvents.Count == 0)
+            {
+                ghostsEvents.Add(new TimelineEvent
+                {
+                    Command = "npc-scenario-action",
+                    CommandArgs = new List<object> { $"execution:{executionId}", "event:1", "default" },
+                    DelayBefore = 0,
+                    DelayAfter = 60000
+                });
+            }
+
+            var handler = new TimelineHandler
+            {
+                HandlerType = HandlerType.NpcSystem,
+                Initial = $"scenario-execution:{executionId}:npc:{npcId}"
+            };
+            handler.TimeLineEvents.AddRange(ghostsEvents);
+
+            return new Timeline
+            {
+                Id = Guid.NewGuid(),
+                Status = Timeline.TimelineStatus.Run,
+                TimeLineHandlers = new List<TimelineHandler> { handler }
+            };
+        }
+
+        /// <summary>Parses "T+15m" → 900000 ms. Returns 0 for any unparseable input.</summary>
+        public static int ParseTimeOffsetMs(string? time)
+        {
+            if (string.IsNullOrWhiteSpace(time)) return 0;
+            var m = Regex.Match(time, @"T\+(\d+)m", RegexOptions.IgnoreCase);
+            if (!m.Success) return 0;
+            return int.Parse(m.Groups[1].Value) * 60_000;
         }
 
         public async Task<Execution> PauseAsync(int id, CancellationToken ct)
@@ -258,8 +406,7 @@ namespace Ghosts.Api.Infrastructure.Services
 
             execution.Status = ExecutionStatus.Paused;
 
-            // Add event
-            var pauseEvent = new ExecutionEvent
+            ExecutionEvents.Add(new ExecutionEvent
             {
                 ExecutionId = execution.Id,
                 Timestamp = DateTime.UtcNow,
@@ -267,13 +414,10 @@ namespace Ghosts.Api.Infrastructure.Services
                 Description = "Execution paused",
                 Data = JsonSerializer.Serialize(new { status = "Paused", timestamp = DateTime.UtcNow }),
                 Severity = "Info"
-            };
-            _context.ExecutionEvents.Add(pauseEvent);
+            });
 
             await _context.SaveChangesAsync(ct);
-
             _log.Info($"Paused execution: {id}");
-
             return execution;
         }
 
@@ -292,8 +436,7 @@ namespace Ghosts.Api.Infrastructure.Services
             execution.Status = failed ? ExecutionStatus.Failed : ExecutionStatus.Completed;
             execution.CompletedAt = DateTime.UtcNow;
 
-            // Add event
-            var stopEvent = new ExecutionEvent
+            ExecutionEvents.Add(new ExecutionEvent
             {
                 ExecutionId = execution.Id,
                 Timestamp = DateTime.UtcNow,
@@ -301,13 +444,10 @@ namespace Ghosts.Api.Infrastructure.Services
                 Description = failed ? "Execution failed" : "Execution completed",
                 Data = JsonSerializer.Serialize(new { status = execution.Status.ToString(), timestamp = DateTime.UtcNow }),
                 Severity = failed ? "Error" : "Info"
-            };
-            _context.ExecutionEvents.Add(stopEvent);
+            });
 
             await _context.SaveChangesAsync(ct);
-
             _log.Info($"Stopped execution: {id} with status {execution.Status}");
-
             return execution;
         }
 
@@ -326,8 +466,7 @@ namespace Ghosts.Api.Infrastructure.Services
             execution.Status = ExecutionStatus.Cancelled;
             execution.CompletedAt = DateTime.UtcNow;
 
-            // Add event
-            var cancelEvent = new ExecutionEvent
+            ExecutionEvents.Add(new ExecutionEvent
             {
                 ExecutionId = execution.Id,
                 Timestamp = DateTime.UtcNow,
@@ -335,39 +474,32 @@ namespace Ghosts.Api.Infrastructure.Services
                 Description = "Execution cancelled by user",
                 Data = JsonSerializer.Serialize(new { status = "Cancelled", timestamp = DateTime.UtcNow }),
                 Severity = "Warning"
-            };
-            _context.ExecutionEvents.Add(cancelEvent);
+            });
 
             await _context.SaveChangesAsync(ct);
-
             _log.Info($"Cancelled execution: {id}");
-
             return execution;
         }
 
         public async Task<List<ExecutionEvent>> GetEventsAsync(int id, string eventType, int? limit, CancellationToken ct)
         {
-            var query = _context.ExecutionEvents
+            var query = ExecutionEvents
                 .Where(e => e.ExecutionId == id)
                 .OrderByDescending(e => e.Timestamp)
                 .AsQueryable();
 
             if (!string.IsNullOrEmpty(eventType))
-            {
                 query = query.Where(e => e.EventType == eventType);
-            }
 
             if (limit.HasValue && limit.Value > 0)
-            {
                 query = query.Take(limit.Value);
-            }
 
             return await query.ToListAsync(ct);
         }
 
         public async Task<ExecutionEvent> AddEventAsync(int id, CreateExecutionEventDto dto, CancellationToken ct)
         {
-            var execution = await _context.Executions.FindAsync(id);
+            var execution = await Executions.FindAsync(id);
             if (execution == null)
             {
                 _log.Error($"Execution not found: {id}");
@@ -384,30 +516,27 @@ namespace Ghosts.Api.Infrastructure.Services
                 Severity = dto.Severity ?? "Info"
             };
 
-            _context.ExecutionEvents.Add(executionEvent);
+            ExecutionEvents.Add(executionEvent);
             await _context.SaveChangesAsync(ct);
-
             return executionEvent;
         }
 
         public async Task<List<ExecutionMetricSnapshot>> GetMetricsAsync(int id, int? limit, CancellationToken ct)
         {
-            var query = _context.ExecutionMetricSnapshots
+            var query = ExecutionMetricSnapshots
                 .Where(ms => ms.ExecutionId == id)
                 .OrderByDescending(ms => ms.Timestamp)
                 .AsQueryable();
 
             if (limit.HasValue && limit.Value > 0)
-            {
                 query = query.Take(limit.Value);
-            }
 
             return await query.ToListAsync(ct);
         }
 
         public async Task<ExecutionMetricSnapshot> AddMetricSnapshotAsync(int id, JsonElement metrics, CancellationToken ct)
         {
-            var execution = await _context.Executions.FindAsync(id);
+            var execution = await Executions.FindAsync(id);
             if (execution == null)
             {
                 _log.Error($"Execution not found: {id}");
@@ -426,15 +555,14 @@ namespace Ghosts.Api.Infrastructure.Services
                 Metrics = metrics.GetRawText()
             };
 
-            _context.ExecutionMetricSnapshots.Add(snapshot);
+            ExecutionMetricSnapshots.Add(snapshot);
             await _context.SaveChangesAsync(ct);
-
             return snapshot;
         }
 
         public async Task UpdateMetricsAsync(int id, JsonElement metrics, CancellationToken ct)
         {
-            var execution = await _context.Executions.FindAsync(id);
+            var execution = await Executions.FindAsync(id);
             if (execution == null)
             {
                 _log.Error($"Execution not found: {id}");
@@ -447,7 +575,7 @@ namespace Ghosts.Api.Infrastructure.Services
 
         public async Task SetErrorAsync(int id, JsonElement error, CancellationToken ct)
         {
-            var execution = await _context.Executions.FindAsync(id);
+            var execution = await Executions.FindAsync(id);
             if (execution == null)
             {
                 _log.Error($"Execution not found: {id}");
@@ -458,8 +586,7 @@ namespace Ghosts.Api.Infrastructure.Services
             execution.Status = ExecutionStatus.Failed;
             execution.CompletedAt = DateTime.UtcNow;
 
-            // Add error event
-            var errorEvent = new ExecutionEvent
+            ExecutionEvents.Add(new ExecutionEvent
             {
                 ExecutionId = id,
                 Timestamp = DateTime.UtcNow,
@@ -467,11 +594,9 @@ namespace Ghosts.Api.Infrastructure.Services
                 Description = "Execution encountered an error",
                 Data = error.GetRawText(),
                 Severity = "Error"
-            };
-            _context.ExecutionEvents.Add(errorEvent);
+            });
 
             await _context.SaveChangesAsync(ct);
-
             _log.Error($"Execution {id} failed with error: {error.GetRawText()}");
         }
     }

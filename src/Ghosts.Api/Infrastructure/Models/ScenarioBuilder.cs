@@ -312,3 +312,45 @@ public record AssistantResponseDto(string Response, string Action, object Action
 
 // Extraction result
 public record ExtractionResultDto(int EntitiesCreated, int EdgesCreated, int ChunksProcessed, List<string> Errors);
+
+// ──────────────────────────────────────────────
+// NPC-to-Machine assignment (scoped to a compilation)
+// ──────────────────────────────────────────────
+
+[Table("scenario_npc_assignments")]
+public class ScenarioNpcAssignment
+{
+    public int Id { get; set; }
+    public int ScenarioId { get; set; }
+    public int CompilationId { get; set; }
+
+    /// <summary>NPC that will be deployed</summary>
+    public Guid NpcId { get; set; }
+
+    /// <summary>Registered machine that will execute the NPC's timeline</summary>
+    public Guid MachineId { get; set; }
+
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    // Navigation
+    public Scenario Scenario { get; set; }
+    public ScenarioCompilation Compilation { get; set; }
+}
+
+// NPC Assignment DTOs
+public record NpcAssignmentDto(
+    int Id, int CompilationId,
+    Guid NpcId, string NpcName,
+    Guid MachineId, string MachineName,
+    DateTime CreatedAt);
+
+public record CreateNpcAssignmentDto(Guid NpcId, Guid MachineId);
+
+public record NpcForAssignmentDto(
+    Guid NpcId, string NpcName, string EntityName,
+    Guid? AssignedMachineId, string AssignedMachineName,
+    int? AssignmentId);
+
+public record DeploymentReadinessDto(
+    bool IsReady, int TotalNpcs, int AssignedNpcs, int UnassignedNpcs,
+    List<string> Issues);

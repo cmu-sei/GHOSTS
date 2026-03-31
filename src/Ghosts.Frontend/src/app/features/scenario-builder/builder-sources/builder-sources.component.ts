@@ -13,6 +13,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ChangeDetectionStrategy } from '@angular/core';
 import { ScenarioBuilderService } from '../../../core/services/scenario-builder.service';
+import { ScenarioService } from '../../../core/services/scenario.service';
 import { ScenarioSource } from '../../../core/models/scenario-builder.model';
 
 @Component({
@@ -40,6 +41,7 @@ export class BuilderSourcesComponent implements OnInit {
   @Input({ required: true }) scenarioId!: number;
 
   private readonly builderService = inject(ScenarioBuilderService);
+  private readonly scenarioService = inject(ScenarioService);
   private readonly fb = inject(FormBuilder);
   private readonly snackBar = inject(MatSnackBar);
 
@@ -86,10 +88,13 @@ export class BuilderSourcesComponent implements OnInit {
 
   protected addTextSource(): void {
     if (this.textForm.invalid) return;
+    const isFirst = this.sources().length === 0;
+    const sourceName = this.textForm.value.name as string;
 
     this.builderService.addText(this.scenarioId, this.textForm.value).subscribe({
       next: () => {
         this.snackBar.open('Text source added', 'Close', { duration: 2000 });
+        if (isFirst) this.renameScenarioFromSource(sourceName);
         this.textForm.reset();
         this.loadSources();
       },
@@ -102,10 +107,13 @@ export class BuilderSourcesComponent implements OnInit {
 
   protected addUrlSource(): void {
     if (this.urlForm.invalid) return;
+    const isFirst = this.sources().length === 0;
+    const sourceName = this.urlForm.value.name as string;
 
     this.builderService.addUrl(this.scenarioId, this.urlForm.value).subscribe({
       next: () => {
         this.snackBar.open('URL source added', 'Close', { duration: 2000 });
+        if (isFirst) this.renameScenarioFromSource(sourceName);
         this.urlForm.reset();
         this.loadSources();
       },
@@ -150,10 +158,14 @@ export class BuilderSourcesComponent implements OnInit {
   private uploadFile(): void {
     const file = this.selectedFile();
     if (!file) return;
+    const isFirst = this.sources().length === 0;
+    // Derive name from filename: strip extension, replace separators
+    const baseName = file.name.replace(/\.[^.]+$/, '');
 
     this.builderService.uploadFile(this.scenarioId, file).subscribe({
       next: () => {
         this.snackBar.open('File uploaded successfully', 'Close', { duration: 2000 });
+        if (isFirst) this.renameScenarioFromSource(baseName);
         this.selectedFile.set(null);
         this.loadSources();
       },
@@ -161,6 +173,31 @@ export class BuilderSourcesComponent implements OnInit {
         console.error('Error uploading file', error);
         this.snackBar.open('Failed to upload file', 'Close', { duration: 3000 });
       },
+    });
+  }
+
+  /** Rename the scenario after the first source is added, if it still has the placeholder name. */
+  private renameScenarioFromSource(rawName: string): void {
+    const derived = rawName
+      .replace(/[-_]+/g, ' ')
+      .replace(/\b\w/g, c => c.toUpperCase())
+      .trim();
+    if (!derived) return;
+
+    this.scenarioService.getScenario(this.scenarioId).subscribe({
+      next: (scenario) => {
+        // Only overwrite if still using the auto-generated placeholder
+        if (!scenario.name?.match(/^Scenario [A-Z]/)) return;
+        this.scenarioService.updateScenario(this.scenarioId, {
+          ...scenario,
+          name: derived,
+          scenarioParameters: scenario.scenarioParameters || { nations: [], threatActors: [], injects: [], userPools: [], objectives: '', politicalContext: '', rulesOfEngagement: '', victoryConditions: '' },
+          technicalEnvironment: scenario.technicalEnvironment || { networkTopology: '', services: '', assets: '', defenses: [], vulnerabilities: [] },
+          timeline: scenario.timeline || { exerciseDuration: 0, events: [] }
+        })
+          .subscribe({ error: () => {} }); // best-effort, silent on failure
+      },
+      error: () => {}
     });
   }
 

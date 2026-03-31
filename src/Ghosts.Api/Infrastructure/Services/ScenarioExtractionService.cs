@@ -35,6 +35,8 @@ namespace Ghosts.Api.Infrastructure.Services
         private readonly IConfiguration _configuration = configuration;
         private readonly IHubContext<ScenarioBuilderHub> _hubContext = hubContext;
 
+        // ── Public API ────────────────────────────────────────────────────────
+
         public async Task<ExtractionResultDto> ExtractAllAsync(int scenarioId, CancellationToken ct)
         {
             _log.Info($"Starting extraction for all chunks in scenario {scenarioId}");
@@ -45,10 +47,7 @@ namespace Ghosts.Api.Infrastructure.Services
                 .FirstOrDefaultAsync(s => s.Id == scenarioId, ct);
 
             if (scenario == null)
-            {
-                _log.Error($"Scenario not found: {scenarioId}");
                 throw new InvalidOperationException("Scenario not found");
-            }
 
             var pendingChunks = scenario.Sources
                 .SelectMany(s => s.Chunks)
@@ -59,68 +58,186 @@ namespace Ghosts.Api.Infrastructure.Services
 
             _log.Info($"Found {pendingChunks.Count} pending chunks to extract");
 
-            // Send initial progress notification
+            if (pendingChunks.Count == 0)
+                return new ExtractionResultDto(0, 0, 0, new List<string>());
+
             await SendProgressNotification(scenarioId, "started", 0, pendingChunks.Count, 0, 0);
 
-            var totalEntitiesCreated = 0;
-            var totalEdgesCreated = 0;
-            var totalChunksProcessed = 0;
-            var allErrors = new List<string>();
+            // ── Phase 1: parallel LLM calls ───────────────────────────────────
+            // Concurrency default = 2 (safe for local Ollama; raise for cloud APIs)
+            var concurrency = int.TryParse(_configuration["ScenarioBuilder:ExtractionConcurrency"], out var c) && c > 0 ? c : 2;
+            var semaphore = new SemaphoreSlim(concurrency);
 
-            foreach (var chunk in pendingChunks)
+            var llmTasks = pendingChunks.Select(chunk => Task.Run(async () =>
             {
+                await semaphore.WaitAsync(ct);
                 try
                 {
-                    var result = await ExtractChunkAsync(chunk.Id, ct);
-                    totalEntitiesCreated += result.EntitiesCreated;
-                    totalEdgesCreated += result.EdgesCreated;
-                    totalChunksProcessed += result.ChunksProcessed;
-                    allErrors.AddRange(result.Errors);
-
-                    // Send progress update after each chunk
-                    await SendProgressNotification(
-                        scenarioId,
-                        "processing",
-                        totalChunksProcessed,
-                        pendingChunks.Count,
-                        totalEntitiesCreated,
-                        totalEdgesCreated);
+                    _log.Debug($"LLM call starting for chunk {chunk.Id}");
+                    var prompt = await BuildExtractionPromptAsync(chunk, ct);
+                    var llmResponse = await CallLlmAsync(prompt, ct);
+                    var result = ParseExtractionResponse(llmResponse, out var parseErrors);
+                    _log.Debug($"LLM call completed for chunk {chunk.Id}: {result.Entities?.Count ?? 0} entities, {result.Edges?.Count ?? 0} edges");
+                    return (chunk, result, parseErrors, failed: false);
                 }
                 catch (Exception ex)
                 {
-                    _log.Error(ex, $"Failed to extract chunk {chunk.Id}");
-                    allErrors.Add($"Chunk {chunk.Id}: {ex.Message}");
+                    _log.Error(ex, $"LLM call failed for chunk {chunk.Id}");
+                    return (chunk, new ExtractionResponse(), new List<string> { ex.Message }, failed: true);
+                }
+                finally
+                {
+                    semaphore.Release();
+                }
+            }, ct)).ToList();
+
+            var llmResults = await Task.WhenAll(llmTasks);
+
+            // ── Phase 2: sequential batch writes ─────────────────────────────
+            // Load all existing entities once (not per-chunk)
+            var existingEntities = await _context.ScenarioEntities
+                .Where(e => e.ScenarioId == scenarioId)
+                .ToDictionaryAsync(e => e.Name.ToLower(), e => e, ct);
+
+            // entityIdMap: entity name (lower) → Guid — used for edge resolution
+            var entityIdMap = existingEntities.ToDictionary(
+                kvp => kvp.Key, kvp => kvp.Value.Id, StringComparer.OrdinalIgnoreCase);
+
+            // Load existing edges into a hash set for fast dedup
+            var existingEdgeKeys = await _context.ScenarioEdges
+                .Where(e => e.ScenarioId == scenarioId)
+                .Select(e => new { e.SourceEntityId, e.TargetEntityId, e.EdgeType })
+                .ToListAsync(ct);
+            var existingEdgeSet = new HashSet<(Guid, Guid, string)>(
+                existingEdgeKeys.Select(e => (e.SourceEntityId, e.TargetEntityId, e.EdgeType)));
+
+            var allErrors = new List<string>();
+            var totalEntitiesCreated = 0;
+            var chunkEdgeWork = new List<(ScenarioSourceChunk chunk, List<ExtractedEdge> edges)>();
+
+            foreach (var (chunk, result, errors, failed) in llmResults)
+            {
+                allErrors.AddRange(errors);
+
+                if (failed)
+                {
+                    chunk.ExtractionStatus = "Failed";
+                    continue;
+                }
+
+                // Upsert entities into the in-memory dict + EF tracking
+                foreach (var entity in result.Entities ?? new List<ExtractedEntity>())
+                {
+                    if (string.IsNullOrWhiteSpace(entity.Name)) continue;
+                    var nameLower = entity.Name.ToLower().Trim();
+
+                    if (existingEntities.TryGetValue(nameLower, out var existing))
+                    {
+                        // Merge type if new
+                        if (!string.IsNullOrEmpty(entity.Type) &&
+                            !existing.EntityType.Contains(entity.Type, StringComparison.OrdinalIgnoreCase))
+                        {
+                            var merged = existing.EntityType
+                                .Split('|', StringSplitOptions.RemoveEmptyEntries)
+                                .Concat(entity.Type.Split('|', StringSplitOptions.RemoveEmptyEntries))
+                                .Distinct(StringComparer.OrdinalIgnoreCase);
+                            existing.EntityType = string.Join("|", merged);
+                            existing.UpdatedAt = DateTime.UtcNow;
+                        }
+                        // Raise confidence if better
+                        if (entity.Confidence > existing.Confidence)
+                        {
+                            existing.Confidence = entity.Confidence;
+                            existing.Description = entity.Description ?? existing.Description;
+                            existing.UpdatedAt = DateTime.UtcNow;
+                        }
+                    }
+                    else
+                    {
+                        var newEntity = new ScenarioEntity
+                        {
+                            ScenarioId = scenarioId,
+                            Name = entity.Name.Trim(),
+                            EntityType = entity.Type,
+                            Description = entity.Description ?? string.Empty,
+                            Confidence = entity.Confidence,
+                            Origin = "Extracted",
+                            SourceId = chunk.Source.Id,
+                            SourceChunkId = chunk.Id,
+                            IsReviewed = false,
+                            CreatedAt = DateTime.UtcNow,
+                            UpdatedAt = DateTime.UtcNow
+                        };
+                        _context.ScenarioEntities.Add(newEntity);
+                        // Register in dict so subsequent chunks see this entity
+                        existingEntities[nameLower] = newEntity;
+                        entityIdMap[nameLower] = newEntity.Id; // EF sets Id on Add
+                        totalEntitiesCreated++;
+                    }
+                }
+
+                chunk.ExtractionStatus = "Completed";
+                chunkEdgeWork.Add((chunk, result.Edges ?? new List<ExtractedEdge>()));
+            }
+
+            // One save for all entity upserts and chunk status updates
+            await _context.SaveChangesAsync(ct);
+
+            // Rebuild map now that all Guids are stable
+            entityIdMap = existingEntities.ToDictionary(
+                kvp => kvp.Key, kvp => kvp.Value.Id, StringComparer.OrdinalIgnoreCase);
+
+            // Process edges
+            var totalEdgesCreated = 0;
+            foreach (var (chunk, edges) in chunkEdgeWork)
+            {
+                foreach (var edge in edges)
+                {
+                    var sourceId = ResolveEntityId(edge.Source, entityIdMap);
+                    var targetId = ResolveEntityId(edge.Target, entityIdMap);
+
+                    if (sourceId == Guid.Empty || targetId == Guid.Empty) continue;
+
+                    var key = (sourceId, targetId, edge.Type);
+                    if (!existingEdgeSet.Add(key)) continue; // already exists or duplicate in batch
+
+                    _context.ScenarioEdges.Add(new ScenarioEdge
+                    {
+                        ScenarioId = scenarioId,
+                        SourceEntityId = sourceId,
+                        TargetEntityId = targetId,
+                        EdgeType = edge.Type,
+                        Label = edge.Label ?? edge.Type,
+                        Confidence = edge.Confidence,
+                        Origin = "Extracted",
+                        SourceId = chunk.Source.Id,
+                        SourceChunkId = chunk.Id,
+                        IsReviewed = false,
+                        CreatedAt = DateTime.UtcNow
+                    });
+                    totalEdgesCreated++;
                 }
             }
 
-            // Check if all chunks are completed
-            var allChunksCompleted = await _context.ScenarioSourceChunks
+            // One save for all edges
+            await _context.SaveChangesAsync(ct);
+
+            // Update scenario builder status
+            var allDone = await _context.ScenarioSourceChunks
                 .Where(c => c.ScenarioId == scenarioId)
                 .AllAsync(c => c.ExtractionStatus == "Completed" || c.ExtractionStatus == "Failed", ct);
 
-            if (allChunksCompleted)
+            if (allDone)
             {
                 scenario.BuilderStatus = "Extracted";
                 await _context.SaveChangesAsync(ct);
-                _log.Info($"All chunks extracted for scenario {scenarioId}, updated status to Extracted");
             }
 
-            _log.Info($"Extraction completed: {totalEntitiesCreated} entities, {totalEdgesCreated} edges, {totalChunksProcessed} chunks processed");
+            _log.Info($"Extraction completed: {totalEntitiesCreated} entities, {totalEdgesCreated} edges, {pendingChunks.Count} chunks processed");
 
-            // Send completion notification
-            await SendProgressNotification(
-                scenarioId,
-                "completed",
-                totalChunksProcessed,
-                pendingChunks.Count,
-                totalEntitiesCreated,
-                totalEdgesCreated);
+            await SendProgressNotification(scenarioId, "completed", pendingChunks.Count, pendingChunks.Count, totalEntitiesCreated, totalEdgesCreated);
 
-            return new ExtractionResultDto(
-                totalEntitiesCreated,
-                totalEdgesCreated,
-                totalChunksProcessed,
-                allErrors);
+            return new ExtractionResultDto(totalEntitiesCreated, totalEdgesCreated, pendingChunks.Count, allErrors);
         }
 
         public async Task<ExtractionResultDto> ExtractChunkAsync(int chunkId, CancellationToken ct)
@@ -132,10 +249,7 @@ namespace Ghosts.Api.Infrastructure.Services
                 .FirstOrDefaultAsync(c => c.Id == chunkId, ct);
 
             if (chunk == null)
-            {
-                _log.Error($"Chunk not found: {chunkId}");
                 throw new InvalidOperationException("Chunk not found");
-            }
 
             chunk.ExtractionStatus = "Processing";
             await _context.SaveChangesAsync(ct);
@@ -146,105 +260,115 @@ namespace Ghosts.Api.Infrastructure.Services
 
             try
             {
-                // Build extraction prompt
                 var prompt = await BuildExtractionPromptAsync(chunk, ct);
-
-                // Call LLM
                 var llmResponse = await CallLlmAsync(prompt, ct);
 
                 if (string.IsNullOrWhiteSpace(llmResponse))
-                {
                     throw new InvalidOperationException("LLM returned empty response");
-                }
 
-                // Parse JSON response
                 var extractionResult = ParseExtractionResponse(llmResponse, out var parseErrors);
                 errors.AddRange(parseErrors);
 
-                // Store entities - build map from ALL existing entities first to prevent duplicates
+                // Load all existing entities once for this scenario
                 var existingEntities = await _context.ScenarioEntities
                     .Where(e => e.ScenarioId == chunk.ScenarioId)
-                    .ToDictionaryAsync(e => e.Name.ToLower(), e => e.Id, ct);
+                    .ToDictionaryAsync(e => e.Name.ToLower(), e => e, ct);
 
-                var entityIdMap = new Dictionary<string, Guid>(StringComparer.OrdinalIgnoreCase);
-                foreach (var kvp in existingEntities)
-                {
-                    entityIdMap[kvp.Key] = kvp.Value;
-                }
+                var entityIdMap = existingEntities.ToDictionary(
+                    kvp => kvp.Key, kvp => kvp.Value.Id, StringComparer.OrdinalIgnoreCase);
 
+                // Upsert all entities, batch into context
                 foreach (var entity in extractionResult.Entities ?? new List<ExtractedEntity>())
                 {
-                    try
+                    if (string.IsNullOrWhiteSpace(entity.Name)) continue;
+                    var nameLower = entity.Name.ToLower().Trim();
+
+                    if (existingEntities.TryGetValue(nameLower, out var existing))
                     {
-                        var storedEntity = await StoreEntityAsync(chunk.ScenarioId, chunk.Source.Id, chunkId, entity, ct);
-                        entityIdMap[entity.Name] = storedEntity.Id;
-                        if (storedEntity.CreatedAt >= DateTime.UtcNow.AddSeconds(-5))
+                        if (!string.IsNullOrEmpty(entity.Type) &&
+                            !existing.EntityType.Contains(entity.Type, StringComparison.OrdinalIgnoreCase))
                         {
-                            // Only count as "created" if it's newly created (not updated)
-                            entitiesCreated++;
+                            var merged = existing.EntityType
+                                .Split('|', StringSplitOptions.RemoveEmptyEntries)
+                                .Concat(entity.Type.Split('|', StringSplitOptions.RemoveEmptyEntries))
+                                .Distinct(StringComparer.OrdinalIgnoreCase);
+                            existing.EntityType = string.Join("|", merged);
+                            existing.UpdatedAt = DateTime.UtcNow;
+                        }
+                        if (entity.Confidence > existing.Confidence)
+                        {
+                            existing.Confidence = entity.Confidence;
+                            existing.Description = entity.Description ?? existing.Description;
+                            existing.UpdatedAt = DateTime.UtcNow;
                         }
                     }
-                    catch (Exception ex)
+                    else
                     {
-                        _log.Warn(ex, $"Failed to store entity: {entity.Name}");
-                        errors.Add($"Entity {entity.Name}: {ex.Message}");
+                        var newEntity = new ScenarioEntity
+                        {
+                            ScenarioId = chunk.ScenarioId,
+                            Name = entity.Name.Trim(),
+                            EntityType = entity.Type,
+                            Description = entity.Description ?? string.Empty,
+                            Confidence = entity.Confidence,
+                            Origin = "Extracted",
+                            SourceId = chunk.Source.Id,
+                            SourceChunkId = chunkId,
+                            IsReviewed = false,
+                            CreatedAt = DateTime.UtcNow,
+                            UpdatedAt = DateTime.UtcNow
+                        };
+                        _context.ScenarioEntities.Add(newEntity);
+                        existingEntities[nameLower] = newEntity;
+                        entitiesCreated++;
                     }
                 }
 
-                // Store edges with fuzzy matching
+                // One save for all entities
+                await _context.SaveChangesAsync(ct);
+
+                // Rebuild map with stable IDs
+                entityIdMap = existingEntities.ToDictionary(
+                    kvp => kvp.Key, kvp => kvp.Value.Id, StringComparer.OrdinalIgnoreCase);
+
+                // Load existing edges for dedup
+                var existingEdgeKeys = await _context.ScenarioEdges
+                    .Where(e => e.ScenarioId == chunk.ScenarioId)
+                    .Select(e => new { e.SourceEntityId, e.TargetEntityId, e.EdgeType })
+                    .ToListAsync(ct);
+                var existingEdgeSet = new HashSet<(Guid, Guid, string)>(
+                    existingEdgeKeys.Select(e => (e.SourceEntityId, e.TargetEntityId, e.EdgeType)));
+
                 foreach (var edge in extractionResult.Edges ?? new List<ExtractedEdge>())
                 {
-                    try
+                    var sourceId = ResolveEntityId(edge.Source, entityIdMap);
+                    var targetId = ResolveEntityId(edge.Target, entityIdMap);
+
+                    if (sourceId == Guid.Empty || targetId == Guid.Empty) continue;
+
+                    var key = (sourceId, targetId, edge.Type);
+                    if (!existingEdgeSet.Add(key)) continue;
+
+                    _context.ScenarioEdges.Add(new ScenarioEdge
                     {
-                        Guid sourceId = Guid.Empty;
-                        Guid targetId = Guid.Empty;
-
-                        // Try to find source entity
-                        if (!entityIdMap.TryGetValue(edge.Source, out sourceId))
-                        {
-                            // Try fuzzy match
-                            var matchedSourceName = FindBestEntityNameMatch(edge.Source, entityIdMap.Keys);
-                            if (!string.IsNullOrEmpty(matchedSourceName))
-                            {
-                                entityIdMap.TryGetValue(matchedSourceName, out sourceId);
-                                _log.Debug($"Fuzzy matched source '{edge.Source}' to '{matchedSourceName}'");
-                            }
-                        }
-
-                        // Try to find target entity
-                        if (!entityIdMap.TryGetValue(edge.Target, out targetId))
-                        {
-                            // Try fuzzy match
-                            var matchedTargetName = FindBestEntityNameMatch(edge.Target, entityIdMap.Keys);
-                            if (!string.IsNullOrEmpty(matchedTargetName))
-                            {
-                                entityIdMap.TryGetValue(matchedTargetName, out targetId);
-                                _log.Debug($"Fuzzy matched target '{edge.Target}' to '{matchedTargetName}'");
-                            }
-                        }
-
-                        // Only create edge if both entities were found
-                        if (sourceId != Guid.Empty && targetId != Guid.Empty)
-                        {
-                            await StoreEdgeAsync(chunk.ScenarioId, chunk.Source.Id, chunkId, sourceId, targetId, edge, ct);
-                            edgesCreated++;
-                        }
-                        else
-                        {
-                            var missing = sourceId == Guid.Empty && targetId == Guid.Empty ? "both" :
-                                         sourceId == Guid.Empty ? "source" : "target";
-                            _log.Debug($"Skipping edge {edge.Source} -> {edge.Target}: {missing} entity not found");
-                            // Silently skip - these are normal when LLM references entities loosely
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        _log.Warn(ex, $"Failed to store edge: {edge.Source} -> {edge.Target}");
-                        errors.Add($"Edge {edge.Source} -> {edge.Target}: {ex.Message}");
-                    }
+                        ScenarioId = chunk.ScenarioId,
+                        SourceEntityId = sourceId,
+                        TargetEntityId = targetId,
+                        EdgeType = edge.Type,
+                        Label = edge.Label ?? edge.Type,
+                        Confidence = edge.Confidence,
+                        Origin = "Extracted",
+                        SourceId = chunk.Source.Id,
+                        SourceChunkId = chunkId,
+                        IsReviewed = false,
+                        CreatedAt = DateTime.UtcNow
+                    });
+                    edgesCreated++;
                 }
 
                 chunk.ExtractionStatus = "Completed";
+
+                // One save for all edges + status
                 await _context.SaveChangesAsync(ct);
 
                 _log.Info($"Chunk {chunkId} extraction completed: {entitiesCreated} entities, {edgesCreated} edges");
@@ -260,16 +384,31 @@ namespace Ghosts.Api.Infrastructure.Services
             return new ExtractionResultDto(entitiesCreated, edgesCreated, 1, errors);
         }
 
-        // Helper methods
+        // ── Helpers ───────────────────────────────────────────────────────────
+
+        private Guid ResolveEntityId(string name, Dictionary<string, Guid> entityIdMap)
+        {
+            if (string.IsNullOrWhiteSpace(name)) return Guid.Empty;
+
+            if (entityIdMap.TryGetValue(name, out var id)) return id;
+            if (entityIdMap.TryGetValue(name.ToLower(), out id)) return id;
+
+            var best = FindBestEntityNameMatch(name, entityIdMap.Keys);
+            if (!string.IsNullOrEmpty(best))
+            {
+                entityIdMap.TryGetValue(best, out id);
+                _log.Debug($"Fuzzy matched '{name}' to '{best}'");
+                return id;
+            }
+
+            return Guid.Empty;
+        }
 
         private async Task<string> BuildExtractionPromptAsync(ScenarioSourceChunk chunk, CancellationToken ct)
         {
             var templatePath = Path.Combine(
                 AppDomain.CurrentDomain.BaseDirectory,
-                "config",
-                "ContentServices",
-                "ScenarioBuilder",
-                "ExtractEntities.txt");
+                "config", "ContentServices", "ScenarioBuilder", "ExtractEntities.txt");
 
             if (!File.Exists(templatePath))
             {
@@ -297,7 +436,7 @@ Edge format:
 {{
   ""source"": ""Source Entity Name"",
   ""target"": ""Target Entity Name"",
-  ""type"": ""MemberOf|Targets|Exploits|Uses|LocatedAt|CommunicatesWith|DependsOn|Accesses|Owns|ReportsTo|AffiliatedWith|DefendedBy|CommandsAndControl|Custom"",
+  ""type"": ""MemberOf|Targets|Exploits|Uses|LocatedAt|CommunicatesWith|DependsOn|Accesses|Owns|ReportsTo|AffiliatedWith|DefendedBy|CommandsAndControls|Custom"",
   ""label"": ""Relationship description"",
   ""confidence"": 0.0-1.0
 }}
@@ -314,7 +453,6 @@ Return only valid JSON.";
 
             try
             {
-                // Get content engine settings from ScenarioBuilder configuration
                 var contentEngineSettings = new ApplicationSettings.AnimatorSettingsDetail.ContentEngineSettings
                 {
                     Source = _configuration["ScenarioBuilder:ContentEngine:Source"] ?? "ollama",
@@ -325,14 +463,10 @@ Return only valid JSON.";
                 var contentService = new ContentCreationService(contentEngineSettings);
 
                 if (contentService.FormatterService == null)
-                {
                     throw new InvalidOperationException("Content service formatter is not available");
-                }
 
                 var result = await contentService.FormatterService.ExecuteQuery(prompt);
-
                 _log.Debug($"LLM returned {result?.Length ?? 0} characters");
-
                 return result;
             }
             catch (Exception ex)
@@ -348,7 +482,6 @@ Return only valid JSON.";
 
             try
             {
-                // Try to find JSON in the response (LLM might return markdown or extra text)
                 var jsonStart = llmResponse.IndexOf('{');
                 var jsonEnd = llmResponse.LastIndexOf('}');
 
@@ -356,11 +489,8 @@ Return only valid JSON.";
                 {
                     var jsonContent = llmResponse.Substring(jsonStart, jsonEnd - jsonStart + 1);
 
-                    // Log the JSON for debugging
                     if (jsonContent.Length < 5000)
-                    {
                         _log.Debug($"Parsing JSON response: {jsonContent.Substring(0, Math.Min(500, jsonContent.Length))}...");
-                    }
 
                     var options = new JsonSerializerOptions
                     {
@@ -378,20 +508,11 @@ Return only valid JSON.";
                         return new ExtractionResponse();
                     }
 
-                    // Clean up any malformed edges (where source/target might be null or non-string)
                     if (result.Edges != null)
                     {
-                        var validEdges = new List<ExtractedEdge>();
-                        foreach (var edge in result.Edges)
-                        {
-                            if (string.IsNullOrWhiteSpace(edge.Source) || string.IsNullOrWhiteSpace(edge.Target))
-                            {
-                                errors.Add($"Skipped edge with empty source or target");
-                                continue;
-                            }
-                            validEdges.Add(edge);
-                        }
-                        result.Edges = validEdges;
+                        result.Edges = result.Edges
+                            .Where(e => !string.IsNullOrWhiteSpace(e.Source) && !string.IsNullOrWhiteSpace(e.Target))
+                            .ToList();
                     }
 
                     _log.Info($"Parsed {result.Entities?.Count ?? 0} entities and {result.Edges?.Count ?? 0} edges from LLM response");
@@ -406,131 +527,85 @@ Return only valid JSON.";
             {
                 _log.Warn(ex, "Failed to parse LLM response as JSON");
                 errors.Add($"JSON parsing error: {ex.Message}");
-
-                // Try to log a snippet of what failed
                 if (llmResponse.Length < 1000)
-                {
                     _log.Debug($"Failed JSON content: {llmResponse}");
-                }
-
                 return new ExtractionResponse();
             }
         }
 
-        private async Task<ScenarioEntity> StoreEntityAsync(
-            int scenarioId,
-            int sourceId,
-            int chunkId,
-            ExtractedEntity entity,
-            CancellationToken ct)
+        private async Task SendProgressNotification(
+            int scenarioId, string status,
+            int chunksProcessed, int totalChunks,
+            int entitiesCreated, int edgesCreated)
         {
-            // Check if entity already exists (case-insensitive name match ONLY - ignore type)
-            var existingEntity = await _context.ScenarioEntities
-                .FirstOrDefaultAsync(e =>
-                    e.ScenarioId == scenarioId &&
-                    e.Name.ToLower() == entity.Name.ToLower(),
-                    ct);
-
-            if (existingEntity != null)
+            try
             {
-                // Merge entity types if different
-                if (!string.IsNullOrEmpty(entity.Type) &&
-                    !existingEntity.EntityType.Contains(entity.Type, StringComparison.OrdinalIgnoreCase))
+                var connections = ScenarioBuilderHub.GetConnections();
+                var progressData = new
                 {
-                    // Add the new type to existing types (separated by |)
-                    var existingTypes = existingEntity.EntityType.Split('|', StringSplitOptions.RemoveEmptyEntries);
-                    var newTypes = entity.Type.Split('|', StringSplitOptions.RemoveEmptyEntries);
-                    var allTypes = existingTypes.Concat(newTypes).Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
-                    existingEntity.EntityType = string.Join("|", allTypes);
-                    existingEntity.UpdatedAt = DateTime.UtcNow;
-                    _log.Debug($"Merged entity type for {existingEntity.Name}: {existingEntity.EntityType}");
-                }
+                    scenarioId, status, chunksProcessed, totalChunks,
+                    entitiesCreated, edgesCreated, timestamp = DateTime.UtcNow
+                };
 
-                // Update if new confidence is higher
-                if (entity.Confidence > existingEntity.Confidence)
-                {
-                    existingEntity.Confidence = entity.Confidence;
-                    existingEntity.Description = entity.Description ?? existingEntity.Description;
-                    existingEntity.UpdatedAt = DateTime.UtcNow;
-                    _log.Debug($"Updated existing entity {existingEntity.Name} with higher confidence");
-                }
+                var targets = connections.GetConnections(scenarioId.ToString())
+                    .Concat(connections.GetConnections("all"));
 
-                await _context.SaveChangesAsync(ct);
-                return existingEntity;
+                foreach (var connectionId in targets)
+                    await _hubContext.Clients.Client(connectionId).SendAsync("extractionProgress", progressData);
             }
-
-            // Create new entity
-            var newEntity = new ScenarioEntity
+            catch (Exception ex)
             {
-                ScenarioId = scenarioId,
-                Name = entity.Name,
-                EntityType = entity.Type,
-                Description = entity.Description ?? string.Empty,
-                Confidence = entity.Confidence,
-                Origin = "Extracted",
-                SourceId = sourceId,
-                SourceChunkId = chunkId,
-                IsReviewed = false,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            };
-
-            _context.ScenarioEntities.Add(newEntity);
-            await _context.SaveChangesAsync(ct);
-
-            _log.Debug($"Created new entity {newEntity.Name} ({newEntity.EntityType})");
-
-            return newEntity;
+                _log.Warn(ex, "Failed to send progress notification");
+            }
         }
 
-        private async Task<ScenarioEdge> StoreEdgeAsync(
-            int scenarioId,
-            int sourceId,
-            int chunkId,
-            Guid sourceEntityId,
-            Guid targetEntityId,
-            ExtractedEdge edge,
-            CancellationToken ct)
+        private static string FindBestEntityNameMatch(string searchName, IEnumerable<string> entityNames)
         {
-            // Check if edge already exists
-            var existingEdge = await _context.ScenarioEdges
-                .FirstOrDefaultAsync(e =>
-                    e.ScenarioId == scenarioId &&
-                    e.SourceEntityId == sourceEntityId &&
-                    e.TargetEntityId == targetEntityId &&
-                    e.EdgeType == edge.Type,
-                    ct);
+            if (string.IsNullOrWhiteSpace(searchName)) return string.Empty;
 
-            if (existingEdge != null)
+            var searchLower = searchName.ToLower().Trim();
+            var entityList = entityNames.ToList();
+
+            var exact = entityList.FirstOrDefault(e => e.Equals(searchName, StringComparison.OrdinalIgnoreCase));
+            if (exact != null) return exact;
+
+            var contains = entityList.FirstOrDefault(e =>
+                e.Contains(searchName, StringComparison.OrdinalIgnoreCase) ||
+                searchName.Contains(e, StringComparison.OrdinalIgnoreCase));
+            if (contains != null) return contains;
+
+            var searchWords = searchLower
+                .Split(new[] { ' ', '-', '_', ',' }, StringSplitOptions.RemoveEmptyEntries)
+                .Where(w => w.Length > 2).ToList();
+
+            if (searchWords.Any())
             {
-                _log.Debug($"Edge already exists: {edge.Source} -> {edge.Target}");
-                return existingEdge;
+                var bestMatch = entityList
+                    .Select(e => new
+                    {
+                        Name = e,
+                        Words = e.ToLower().Split(new[] { ' ', '-', '_', ',' }, StringSplitOptions.RemoveEmptyEntries)
+                                 .Where(w => w.Length > 2).ToList()
+                    })
+                    .Select(e => new
+                    {
+                        e.Name,
+                        Score = searchWords.Count(sw => e.Words.Contains(sw)) +
+                                e.Words.Count(ew => searchWords.Contains(ew))
+                    })
+                    .Where(x => x.Score > 0)
+                    .OrderByDescending(x => x.Score)
+                    .FirstOrDefault();
+
+                if (bestMatch != null && bestMatch.Score >= searchWords.Count / 2)
+                    return bestMatch.Name;
             }
 
-            var newEdge = new ScenarioEdge
-            {
-                ScenarioId = scenarioId,
-                SourceEntityId = sourceEntityId,
-                TargetEntityId = targetEntityId,
-                EdgeType = edge.Type,
-                Label = edge.Label ?? edge.Type,
-                Confidence = edge.Confidence,
-                Origin = "Extracted",
-                SourceId = sourceId,
-                SourceChunkId = chunkId,
-                IsReviewed = false,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            _context.ScenarioEdges.Add(newEdge);
-            await _context.SaveChangesAsync(ct);
-
-            _log.Debug($"Created new edge {edge.Source} -> {edge.Target} ({edge.Type})");
-
-            return newEdge;
+            return string.Empty;
         }
 
-        // Internal DTOs for parsing LLM response
+        // ── Internal DTOs ────────────────────────────────────────────────────
+
         private class ExtractionResponse
         {
             public List<ExtractedEntity> Entities { get; set; } = new List<ExtractedEntity>();
@@ -553,13 +628,13 @@ Return only valid JSON.";
             public string Source
             {
                 get => _source;
-                set => _source = value?.ToString() ?? string.Empty; // Handle if LLM sends object
+                set => _source = value?.ToString() ?? string.Empty;
             }
 
             public string Target
             {
                 get => _target;
-                set => _target = value?.ToString() ?? string.Empty; // Handle if LLM sends object
+                set => _target = value?.ToString() ?? string.Empty;
             }
 
             public string Type { get; set; } = "Custom";
@@ -567,98 +642,6 @@ Return only valid JSON.";
             public decimal Confidence { get; set; } = 0.8m;
         }
 
-        private async Task SendProgressNotification(
-            int scenarioId,
-            string status,
-            int chunksProcessed,
-            int totalChunks,
-            int entitiesCreated,
-            int edgesCreated)
-        {
-            try
-            {
-                var connections = ScenarioBuilderHub.GetConnections();
-                var scenarioConnections = connections.GetConnections(scenarioId.ToString());
-                var allConnections = connections.GetConnections("all");
-
-                var progressData = new
-                {
-                    scenarioId,
-                    status,
-                    chunksProcessed,
-                    totalChunks,
-                    entitiesCreated,
-                    edgesCreated,
-                    timestamp = DateTime.UtcNow
-                };
-
-                foreach (var connectionId in scenarioConnections.Concat(allConnections))
-                {
-                    await _hubContext.Clients.Client(connectionId).SendAsync("extractionProgress", progressData);
-                }
-
-                _log.Debug($"Sent extraction progress for scenario {scenarioId}: {status} - {chunksProcessed}/{totalChunks} chunks");
-            }
-            catch (Exception ex)
-            {
-                _log.Warn(ex, "Failed to send progress notification");
-            }
-        }
-
-        private static string FindBestEntityNameMatch(string searchName, IEnumerable<string> entityNames)
-        {
-            if (string.IsNullOrWhiteSpace(searchName)) return string.Empty;
-
-            var searchLower = searchName.ToLower().Trim();
-            var entityList = entityNames.ToList();
-
-            // Try exact match (case-insensitive)
-            var exact = entityList.FirstOrDefault(e => e.Equals(searchName, StringComparison.OrdinalIgnoreCase));
-            if (exact != null) return exact;
-
-            // Try contains match (search is contained in entity name, or vice versa)
-            var contains = entityList.FirstOrDefault(e =>
-                e.Contains(searchName, StringComparison.OrdinalIgnoreCase) ||
-                searchName.Contains(e, StringComparison.OrdinalIgnoreCase));
-            if (contains != null) return contains;
-
-            // Try word-based matching (for multi-word entities)
-            var searchWords = searchLower.Split(new[] { ' ', '-', '_', ',' }, StringSplitOptions.RemoveEmptyEntries)
-                .Where(w => w.Length > 2) // Ignore short words like "of", "the"
-                .ToList();
-
-            if (searchWords.Any())
-            {
-                var bestMatch = entityList
-                    .Select(e => new
-                    {
-                        Name = e,
-                        Words = e.ToLower().Split(new[] { ' ', '-', '_', ',' }, StringSplitOptions.RemoveEmptyEntries)
-                            .Where(w => w.Length > 2)
-                            .ToList()
-                    })
-                    .Select(e => new
-                    {
-                        e.Name,
-                        Score = searchWords.Count(sw => e.Words.Contains(sw)) +
-                               e.Words.Count(ew => searchWords.Contains(ew))
-                    })
-                    .Where(x => x.Score > 0)
-                    .OrderByDescending(x => x.Score)
-                    .FirstOrDefault();
-
-                if (bestMatch != null && bestMatch.Score >= searchWords.Count / 2)
-                {
-                    return bestMatch.Name;
-                }
-            }
-
-            return string.Empty;
-        }
-
-        /// <summary>
-        /// Lenient JSON converter that handles malformed LLM responses gracefully
-        /// </summary>
         private class LenientExtractionResponseConverter : JsonConverter<ExtractionResponse>
         {
             public override ExtractionResponse Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
@@ -670,130 +653,76 @@ Return only valid JSON.";
                 };
 
                 if (reader.TokenType != JsonTokenType.StartObject)
-                {
                     return result;
-                }
 
                 using var doc = JsonDocument.ParseValue(ref reader);
                 var root = doc.RootElement;
 
-                // Parse entities array
                 if (root.TryGetProperty("entities", out var entitiesElement) && entitiesElement.ValueKind == JsonValueKind.Array)
                 {
-                    foreach (var entityElement in entitiesElement.EnumerateArray())
+                    foreach (var el in entitiesElement.EnumerateArray())
                     {
                         try
                         {
                             var entity = new ExtractedEntity();
-
-                            if (entityElement.TryGetProperty("name", out var nameEl) && nameEl.ValueKind == JsonValueKind.String)
+                            if (el.TryGetProperty("name", out var nameEl) && nameEl.ValueKind == JsonValueKind.String)
                                 entity.Name = nameEl.GetString() ?? string.Empty;
-
-                            if (entityElement.TryGetProperty("type", out var typeEl) && typeEl.ValueKind == JsonValueKind.String)
+                            if (el.TryGetProperty("type", out var typeEl) && typeEl.ValueKind == JsonValueKind.String)
                                 entity.Type = typeEl.GetString() ?? "Custom";
-
-                            if (entityElement.TryGetProperty("description", out var descEl) && descEl.ValueKind == JsonValueKind.String)
+                            if (el.TryGetProperty("description", out var descEl) && descEl.ValueKind == JsonValueKind.String)
                                 entity.Description = descEl.GetString();
-
-                            if (entityElement.TryGetProperty("confidence", out var confEl) && confEl.ValueKind == JsonValueKind.Number)
+                            if (el.TryGetProperty("confidence", out var confEl) && confEl.ValueKind == JsonValueKind.Number)
                                 entity.Confidence = confEl.GetDecimal();
 
-                            // Only add if entity has a name
                             if (!string.IsNullOrWhiteSpace(entity.Name))
-                            {
                                 result.Entities.Add(entity);
-                            }
                         }
-                        catch
-                        {
-                            // Skip malformed entity
-                            continue;
-                        }
+                        catch { /* skip malformed */ }
                     }
                 }
 
-                // Parse edges array
                 if (root.TryGetProperty("edges", out var edgesElement) && edgesElement.ValueKind == JsonValueKind.Array)
                 {
-                    foreach (var edgeElement in edgesElement.EnumerateArray())
+                    foreach (var el in edgesElement.EnumerateArray())
                     {
                         try
                         {
                             var edge = new ExtractedEdge();
-
-                            // Handle source - can be string, object, or array
-                            if (edgeElement.TryGetProperty("source", out var sourceEl))
-                            {
-                                edge.Source = ExtractStringValue(sourceEl);
-                            }
-
-                            // Handle target - can be string, object, or array
-                            if (edgeElement.TryGetProperty("target", out var targetEl))
-                            {
-                                edge.Target = ExtractStringValue(targetEl);
-                            }
-
-                            if (edgeElement.TryGetProperty("type", out var typeEl) && typeEl.ValueKind == JsonValueKind.String)
+                            if (el.TryGetProperty("source", out var sourceEl)) edge.Source = ExtractStringValue(sourceEl);
+                            if (el.TryGetProperty("target", out var targetEl)) edge.Target = ExtractStringValue(targetEl);
+                            if (el.TryGetProperty("type", out var typeEl) && typeEl.ValueKind == JsonValueKind.String)
                                 edge.Type = typeEl.GetString() ?? "Custom";
-
-                            if (edgeElement.TryGetProperty("label", out var labelEl) && labelEl.ValueKind == JsonValueKind.String)
+                            if (el.TryGetProperty("label", out var labelEl) && labelEl.ValueKind == JsonValueKind.String)
                                 edge.Label = labelEl.GetString();
-
-                            if (edgeElement.TryGetProperty("confidence", out var confEl) && confEl.ValueKind == JsonValueKind.Number)
+                            if (el.TryGetProperty("confidence", out var confEl) && confEl.ValueKind == JsonValueKind.Number)
                                 edge.Confidence = confEl.GetDecimal();
 
-                            // Only add if edge has both source and target
                             if (!string.IsNullOrWhiteSpace(edge.Source) && !string.IsNullOrWhiteSpace(edge.Target))
-                            {
                                 result.Edges.Add(edge);
-                            }
                         }
-                        catch
-                        {
-                            // Skip malformed edge
-                            continue;
-                        }
+                        catch { /* skip malformed */ }
                     }
                 }
 
                 return result;
             }
 
-            private static string ExtractStringValue(JsonElement element)
+            private static string ExtractStringValue(JsonElement element) => element.ValueKind switch
             {
-                switch (element.ValueKind)
-                {
-                    case JsonValueKind.String:
-                        return element.GetString() ?? string.Empty;
-
-                    case JsonValueKind.Object:
-                        // If it's an object, try to get a "name" or "id" property
-                        if (element.TryGetProperty("name", out var nameEl) && nameEl.ValueKind == JsonValueKind.String)
-                            return nameEl.GetString() ?? string.Empty;
-                        if (element.TryGetProperty("id", out var idEl) && idEl.ValueKind == JsonValueKind.String)
-                            return idEl.GetString() ?? string.Empty;
-                        // Otherwise return the raw JSON
-                        return element.GetRawText();
-
-                    case JsonValueKind.Array:
-                        // If it's an array, try to get the first string element
-                        var arr = element.EnumerateArray().FirstOrDefault();
-                        if (arr.ValueKind == JsonValueKind.String)
-                            return arr.GetString() ?? string.Empty;
-                        return string.Empty;
-
-                    case JsonValueKind.Number:
-                        return element.ToString();
-
-                    default:
-                        return string.Empty;
-                }
-            }
+                JsonValueKind.String => element.GetString() ?? string.Empty,
+                JsonValueKind.Object =>
+                    element.TryGetProperty("name", out var n) && n.ValueKind == JsonValueKind.String ? n.GetString() ?? string.Empty :
+                    element.TryGetProperty("id", out var i) && i.ValueKind == JsonValueKind.String ? i.GetString() ?? string.Empty :
+                    element.GetRawText(),
+                JsonValueKind.Array =>
+                    element.EnumerateArray().FirstOrDefault() is { ValueKind: JsonValueKind.String } first
+                        ? first.GetString() ?? string.Empty : string.Empty,
+                JsonValueKind.Number => element.ToString(),
+                _ => string.Empty
+            };
 
             public override void Write(Utf8JsonWriter writer, ExtractionResponse value, JsonSerializerOptions options)
-            {
-                JsonSerializer.Serialize(writer, value, options);
-            }
+                => JsonSerializer.Serialize(writer, value, options);
         }
     }
 }

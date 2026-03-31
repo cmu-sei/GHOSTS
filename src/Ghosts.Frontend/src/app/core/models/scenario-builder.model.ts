@@ -79,6 +79,33 @@ export interface ScenarioCompilation {
   errorMessage: string;
 }
 
+export interface NpcForAssignment {
+  npcId: string;
+  npcName: string;
+  entityName: string;
+  assignedMachineId: string | null;
+  assignedMachineName: string | null;
+  assignmentId: number | null;
+}
+
+export interface NpcAssignment {
+  id: number;
+  compilationId: number;
+  npcId: string;
+  npcName: string;
+  machineId: string;
+  machineName: string;
+  createdAt: string;
+}
+
+export interface DeploymentReadiness {
+  isReady: boolean;
+  totalNpcs: number;
+  assignedNpcs: number;
+  unassignedNpcs: number;
+  issues: string[];
+}
+
 export interface ExtractionResult {
   entitiesCreated: number;
   edgesCreated: number;

@@ -7,7 +7,8 @@ import {
   ScenarioGraph, ScenarioEnrichment, ScenarioCompilation, ExtractionResult,
   CreateTextSource, CreateUrlSource, CreateEntity, UpdateEntity, CreateEdge,
   ApplyTechnique, ApplyGroup, CompileRequest,
-  AssistantRequest, AssistantResponse
+  AssistantRequest, AssistantResponse,
+  NpcForAssignment, NpcAssignment, DeploymentReadiness
 } from '../models/scenario-builder.model';
 
 @Injectable({ providedIn: 'root' })
@@ -151,6 +152,29 @@ export class ScenarioBuilderService {
 
   deleteCompilation(scenarioId: number, compilationId: number): Observable<void> {
     return this.http.delete<void>(`${this.builderUrl(scenarioId)}/compilations/${compilationId}`);
+  }
+
+  // ── NPC-to-machine assignments ──
+
+  getNpcsForAssignment(scenarioId: number, compilationId: number): Observable<NpcForAssignment[]> {
+    return this.http.get<NpcForAssignment[]>(
+      `${this.builderUrl(scenarioId)}/compilations/${compilationId}/npcs`);
+  }
+
+  createAssignment(scenarioId: number, compilationId: number, npcId: string, machineId: string): Observable<NpcAssignment> {
+    return this.http.post<NpcAssignment>(
+      `${this.builderUrl(scenarioId)}/compilations/${compilationId}/assignments`,
+      { npcId, machineId });
+  }
+
+  deleteAssignment(scenarioId: number, compilationId: number, assignmentId: number): Observable<void> {
+    return this.http.delete<void>(
+      `${this.builderUrl(scenarioId)}/compilations/${compilationId}/assignments/${assignmentId}`);
+  }
+
+  getDeploymentReadiness(scenarioId: number, compilationId: number): Observable<DeploymentReadiness> {
+    return this.http.get<DeploymentReadiness>(
+      `${this.builderUrl(scenarioId)}/compilations/${compilationId}/readiness`);
   }
 
   // ── Assistant ──

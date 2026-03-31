@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, inject, signal } from '@angular/core';
+import { Component, Input, OnInit, ViewChild, ElementRef, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -68,6 +68,8 @@ export class BuilderEntitiesComponent implements OnInit {
   protected readonly editingEntity = signal<ScenarioEntity | null>(null);
   protected readonly selectedEntities = signal<Set<string>>(new Set());
 
+  @ViewChild('entityFormCard') entityFormCardRef?: ElementRef;
+
   protected entityForm!: FormGroup;
   protected showAddForm = signal(false);
 
@@ -122,7 +124,15 @@ export class BuilderEntitiesComponent implements OnInit {
     this.showAddForm.update((show) => !show);
     if (!this.showAddForm()) {
       this.entityForm.reset({ entityType: 'Person', confidence: 0.8 });
+    } else {
+      this.scrollToForm();
     }
+  }
+
+  private scrollToForm(): void {
+    setTimeout(() => {
+      this.entityFormCardRef?.nativeElement?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 50);
   }
 
   protected createEntity(): void {
@@ -151,6 +161,7 @@ export class BuilderEntitiesComponent implements OnInit {
       confidence: entity.confidence,
     });
     this.showAddForm.set(true);
+    this.scrollToForm();
   }
 
   protected updateEntity(): void {

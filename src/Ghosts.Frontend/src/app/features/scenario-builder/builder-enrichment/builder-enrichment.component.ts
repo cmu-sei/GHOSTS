@@ -204,6 +204,10 @@ export class BuilderEnrichmentComponent implements OnInit {
     });
   }
 
+  public refresh(): void {
+    this.loadData();
+  }
+
   protected getEntityName(entityId: string | null): string {
     if (!entityId) return 'Global';
     const entity = this.entities().find((e) => e.id === entityId);

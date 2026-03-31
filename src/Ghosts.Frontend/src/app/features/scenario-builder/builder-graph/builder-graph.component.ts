@@ -1,6 +1,6 @@
 import { Component, Input, OnInit, OnDestroy, ElementRef, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import * as d3 from 'd3';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -19,6 +19,7 @@ import {
   ScenarioEntity,
   ScenarioEdge,
   ENTITY_TYPES,
+  EDGE_TYPES,
   ENTITY_COLORS,
 } from '../../../core/models/scenario-builder.model';
 
@@ -64,10 +65,16 @@ export class BuilderGraphComponent implements OnInit, OnDestroy {
 
   protected readonly loading = signal(true);
   protected readonly selectedNode = signal<ScenarioEntity | null>(null);
+  protected readonly editMode = signal(false);
+  protected readonly relationshipMode = signal(false);
+  protected readonly saving = signal(false);
   protected readonly entityTypes = ENTITY_TYPES;
+  protected readonly edgeTypes = EDGE_TYPES;
   protected readonly entityColors = ENTITY_COLORS;
 
   protected filterForm!: FormGroup;
+  protected editForm!: FormGroup;
+  protected relationshipForm!: FormGroup;
 
   private svg?: d3.Selection<SVGSVGElement, unknown, null, undefined>;
   private simulation?: d3.Simulation<GraphNode, GraphLink>;
@@ -81,6 +88,8 @@ export class BuilderGraphComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.initFilterForm();
+    this.initEditForm();
+    this.initRelationshipForm();
     this.loadGraphData();
     this.isInitialized = true;
   }
@@ -95,6 +104,24 @@ export class BuilderGraphComponent implements OnInit, OnDestroy {
     console.log('Refreshing graph data, isInitialized:', this.isInitialized);
     this.retryCount = 0; // Reset retry counter
     this.loadGraphData();
+  }
+
+  private initEditForm(): void {
+    this.editForm = this.fb.group({
+      name: ['', [Validators.required]],
+      entityType: [''],
+      description: [''],
+      confidence: [0.8],
+    });
+  }
+
+  private initRelationshipForm(): void {
+    this.relationshipForm = this.fb.group({
+      targetEntityId: ['', Validators.required],
+      edgeType: ['Uses', Validators.required],
+      label: [''],
+      confidence: [0.8],
+    });
   }
 
   private initFilterForm(): void {
@@ -322,7 +349,8 @@ export class BuilderGraphComponent implements OnInit, OnDestroy {
         .id((d) => d.id)
         .distance(150)
     );
-    this.simulation.alpha(0.3).restart();
+    // Low alpha so filters don't cause big jumps
+    this.simulation.alpha(0.05).restart();
 
     // Update link elements
     const linkGroup = this.svg.select('.links');
@@ -360,7 +388,6 @@ export class BuilderGraphComponent implements OnInit, OnDestroy {
       .attr('stroke-width', 1.5)
       .attr('stroke-opacity', 0.8)
       .style('cursor', 'pointer')
-      .on('click', (event, d) => this.onNodeClick(d))
       .call(this.drag(this.simulation) as any);
 
     const nodeMerge = nodeEnter.merge(node);
@@ -400,9 +427,15 @@ export class BuilderGraphComponent implements OnInit, OnDestroy {
   }
 
   private drag(simulation: d3.Simulation<GraphNode, GraphLink>) {
+    let dragStartX = 0;
+    let dragStartY = 0;
+    const CLICK_THRESHOLD = 4; // pixels — below this it's a click, not a drag
+
     return d3
       .drag<SVGCircleElement, GraphNode>()
       .on('start', (event, d) => {
+        dragStartX = event.x;
+        dragStartY = event.y;
         if (!event.active) simulation.alphaTarget(0.3).restart();
         d.fx = d.x;
         d.fy = d.y;
@@ -413,17 +446,116 @@ export class BuilderGraphComponent implements OnInit, OnDestroy {
       })
       .on('end', (event, d) => {
         if (!event.active) simulation.alphaTarget(0);
-        d.fx = null;
-        d.fy = null;
+        const dx = event.x - dragStartX;
+        const dy = event.y - dragStartY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist < CLICK_THRESHOLD) {
+          // This was a click, not a drag — release the pin and fire click
+          d.fx = null;
+          d.fy = null;
+          this.onNodeClick(d);
+        } else {
+          // Actual drag — pin the node where the user dropped it
+          d.fx = event.x;
+          d.fy = event.y;
+        }
       });
   }
 
   private onNodeClick(node: GraphNode): void {
     this.selectedNode.set(node.entity);
+    this.editMode.set(false);
+    this.relationshipMode.set(false);
   }
 
   protected closeDetailPanel(): void {
     this.selectedNode.set(null);
+    this.editMode.set(false);
+    this.relationshipMode.set(false);
+  }
+
+  protected startEdit(): void {
+    const entity = this.selectedNode();
+    if (!entity) return;
+    this.editForm.patchValue({
+      name: entity.name,
+      entityType: entity.entityType,
+      description: entity.description,
+      confidence: entity.confidence,
+    });
+    this.relationshipMode.set(false);
+    this.editMode.set(true);
+  }
+
+  protected cancelEdit(): void {
+    this.editMode.set(false);
+    this.relationshipMode.set(false);
+  }
+
+  protected saveEdit(): void {
+    const entity = this.selectedNode();
+    if (!entity || this.editForm.invalid) return;
+    this.saving.set(true);
+
+    const dto = {
+      ...this.editForm.value,
+      isReviewed: entity.isReviewed,
+    };
+
+    this.builderService.updateEntity(this.scenarioId, entity.id, dto).subscribe({
+      next: (updated) => {
+        this.selectedNode.set(updated);
+        this.editMode.set(false);
+        this.saving.set(false);
+        this.snackBar.open('Entity updated', 'Close', { duration: 2000 });
+        this.loadGraphData();
+      },
+      error: () => {
+        this.saving.set(false);
+        this.snackBar.open('Failed to update entity', 'Close', { duration: 3000 });
+      },
+    });
+  }
+
+  protected startAddRelationship(): void {
+    this.relationshipForm.reset({ edgeType: 'Uses', confidence: 0.8 });
+    this.editMode.set(false);
+    this.relationshipMode.set(true);
+  }
+
+  protected saveRelationship(): void {
+    const entity = this.selectedNode();
+    if (!entity || this.relationshipForm.invalid) return;
+    this.saving.set(true);
+
+    const { targetEntityId, edgeType, label, confidence } = this.relationshipForm.value;
+
+    this.builderService.createEdge(this.scenarioId, {
+      sourceEntityId: entity.id,
+      targetEntityId,
+      edgeType,
+      label: label || edgeType,
+      weight: 1,
+      confidence,
+    }).subscribe({
+      next: () => {
+        this.relationshipMode.set(false);
+        this.saving.set(false);
+        this.snackBar.open('Relationship added', 'Close', { duration: 2000 });
+        this.loadGraphData();
+      },
+      error: () => {
+        this.saving.set(false);
+        this.snackBar.open('Failed to add relationship', 'Close', { duration: 3000 });
+      },
+    });
+  }
+
+  protected getOtherNodes(): GraphNode[] {
+    const selected = this.selectedNode();
+    if (!selected) return this.allNodes;
+    return this.allNodes.filter(n => n.id !== selected.id);
   }
 
   protected getEntityColor(type: string): string {

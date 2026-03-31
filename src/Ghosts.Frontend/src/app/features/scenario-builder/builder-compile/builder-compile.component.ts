@@ -1,20 +1,25 @@
 import { Component, Input, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ChangeDetectionStrategy } from '@angular/core';
 import { ScenarioBuilderService } from '../../../core/services/scenario-builder.service';
-import { ScenarioCompilation } from '../../../core/models/scenario-builder.model';
+import { MachineService } from '../../../core/services/machine.service';
+import { ScenarioCompilation, NpcForAssignment, DeploymentReadiness } from '../../../core/models/scenario-builder.model';
+import { Machine } from '../../../core/models';
 
 @Component({
   selector: 'app-builder-compile',
@@ -22,16 +27,19 @@ import { ScenarioCompilation } from '../../../core/models/scenario-builder.model
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    FormsModule,
     MatCardModule,
     MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
+    MatSelectModule,
     MatCheckboxModule,
     MatIconModule,
     MatChipsModule,
     MatProgressSpinnerModule,
     MatSnackBarModule,
     MatDialogModule,
+    MatTooltipModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './builder-compile.component.html',
@@ -41,6 +49,7 @@ export class BuilderCompileComponent implements OnInit {
   @Input({ required: true }) scenarioId!: number;
 
   private readonly builderService = inject(ScenarioBuilderService);
+  private readonly machineService = inject(MachineService);
   private readonly fb = inject(FormBuilder);
   private readonly snackBar = inject(MatSnackBar);
   private readonly router = inject(Router);
@@ -51,11 +60,24 @@ export class BuilderCompileComponent implements OnInit {
   protected readonly selectedPackage = signal<any>(null);
   protected readonly lastCompileSucceeded = signal(false);
 
+  // Assignment state
+  protected readonly expandedAssignmentCompilationId = signal<number | null>(null);
+  protected readonly npcsForAssignment = signal<NpcForAssignment[]>([]);
+  protected readonly machines = signal<Machine[]>([]);
+  protected readonly readiness = signal<DeploymentReadiness | null>(null);
+  protected readonly assignmentLoading = signal(false);
+  /** tracks selected machineId per npcId for the assignment dropdowns */
+  protected readonly pendingSelections = signal<Record<string, string>>({});
+
   protected compileForm!: FormGroup;
 
   ngOnInit(): void {
     this.initForm();
     this.loadCompilations();
+    this.machineService.getMachines().subscribe({
+      next: (machines) => this.machines.set(machines),
+      error: () => { /* machines load is best-effort */ }
+    });
   }
 
   private initForm(): void {
@@ -84,16 +106,13 @@ export class BuilderCompileComponent implements OnInit {
 
   protected compile(): void {
     if (this.compileForm.invalid) {
-      console.warn('Compile form is invalid', this.compileForm.errors);
       this.snackBar.open('Please fill in all required fields', 'Close', { duration: 3000 });
       return;
     }
 
-    console.log('Starting compilation with data:', this.compileForm.value);
     this.compiling.set(true);
     this.builderService.compile(this.scenarioId, this.compileForm.value).subscribe({
       next: (compilation) => {
-        console.log('Compilation completed:', compilation);
         this.snackBar.open('Compilation completed successfully', 'Close', { duration: 3000 });
         this.compiling.set(false);
         this.lastCompileSucceeded.set(true);
@@ -108,6 +127,89 @@ export class BuilderCompileComponent implements OnInit {
       },
     });
   }
+
+  // ── Assignment panel ──────────────────────────────────────────────────────
+
+  protected toggleAssignPanel(compilationId: number): void {
+    if (this.expandedAssignmentCompilationId() === compilationId) {
+      this.expandedAssignmentCompilationId.set(null);
+      return;
+    }
+    this.expandedAssignmentCompilationId.set(compilationId);
+    this.loadNpcsAndReadiness(compilationId);
+  }
+
+  private loadNpcsAndReadiness(compilationId: number): void {
+    this.assignmentLoading.set(true);
+    this.npcsForAssignment.set([]);
+    this.readiness.set(null);
+    this.pendingSelections.set({});
+
+    this.builderService.getNpcsForAssignment(this.scenarioId, compilationId).subscribe({
+      next: (npcs) => {
+        this.npcsForAssignment.set(npcs);
+        // pre-populate pending selections from current assignments
+        const sel: Record<string, string> = {};
+        npcs.forEach(n => { if (n.assignedMachineId) sel[n.npcId] = n.assignedMachineId; });
+        this.pendingSelections.set(sel);
+        this.assignmentLoading.set(false);
+        this.refreshReadiness(compilationId);
+      },
+      error: (err) => {
+        console.error('Error loading NPCs for assignment', err);
+        this.snackBar.open('Failed to load NPCs', 'Close', { duration: 3000 });
+        this.assignmentLoading.set(false);
+      }
+    });
+  }
+
+  private refreshReadiness(compilationId: number): void {
+    this.builderService.getDeploymentReadiness(this.scenarioId, compilationId).subscribe({
+      next: (r) => this.readiness.set(r),
+      error: () => { /* non-critical */ }
+    });
+  }
+
+  protected onMachineSelected(compilationId: number, npcId: string, machineId: string | null): void {
+    if (machineId === null) {
+      // User selected "-- unassigned --": find and delete the existing assignment
+      const npc = this.npcsForAssignment().find(n => n.npcId === npcId);
+      if (!npc?.assignmentId) {
+        // Nothing assigned yet — just clear the pending selection
+        const sel = { ...this.pendingSelections() };
+        delete sel[npcId];
+        this.pendingSelections.set(sel);
+        return;
+      }
+      this.builderService.deleteAssignment(this.scenarioId, compilationId, npc.assignmentId).subscribe({
+        next: () => {
+          this.snackBar.open('Assignment removed', 'Close', { duration: 2000 });
+          const sel = { ...this.pendingSelections() };
+          delete sel[npcId];
+          this.pendingSelections.set(sel);
+          this.loadNpcsAndReadiness(compilationId);
+        },
+        error: (err) => {
+          console.error('Error removing assignment', err);
+          this.snackBar.open('Failed to remove assignment', 'Close', { duration: 3000 });
+        }
+      });
+      return;
+    }
+
+    this.builderService.createAssignment(this.scenarioId, compilationId, npcId, machineId).subscribe({
+      next: () => {
+        this.snackBar.open('Assignment saved', 'Close', { duration: 2000 });
+        this.loadNpcsAndReadiness(compilationId);
+      },
+      error: (err) => {
+        console.error('Error saving assignment', err);
+        this.snackBar.open('Failed to save assignment', 'Close', { duration: 3000 });
+      }
+    });
+  }
+
+  // ── Other ─────────────────────────────────────────────────────────────────
 
   protected viewPackage(compilationId: number): void {
     this.builderService.getPackage(this.scenarioId, compilationId).subscribe({

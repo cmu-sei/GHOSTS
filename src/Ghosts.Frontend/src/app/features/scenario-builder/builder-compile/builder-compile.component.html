@@ -142,11 +142,79 @@
                 <mat-icon>download</mat-icon>
                 Download JSON
               </button>
+              @if (compilation.status === 'Completed') {
+              <button
+                mat-button
+                color="accent"
+                (click)="toggleAssignPanel(compilation.id)"
+                matTooltip="Assign compiled NPCs to registered machines before executing">
+                <mat-icon>{{ expandedAssignmentCompilationId() === compilation.id ? 'expand_less' : 'computer' }}</mat-icon>
+                Assign to Machines
+              </button>
+              }
               <button mat-button color="warn" (click)="deleteCompilation(compilation.id)">
                 <mat-icon>delete</mat-icon>
                 Delete
               </button>
             </div>
+
+            <!-- NPC-to-machine assignment panel -->
+            @if (expandedAssignmentCompilationId() === compilation.id) {
+            <div class="assignment-panel">
+              <h4>
+                <mat-icon>computer</mat-icon>
+                NPC to Machine Assignments
+              </h4>
+
+              @if (readiness()) {
+              <div class="readiness-banner" [class.ready]="readiness()!.isReady" [class.not-ready]="!readiness()!.isReady">
+                <mat-icon>{{ readiness()!.isReady ? 'check_circle' : 'warning' }}</mat-icon>
+                <span>
+                  {{ readiness()!.isReady ? 'Ready to execute' : 'Not ready' }} &mdash;
+                  {{ readiness()!.assignedNpcs }}/{{ readiness()!.totalNpcs }} NPCs assigned
+                </span>
+                @if (!readiness()!.isReady && readiness()!.issues.length > 0) {
+                <ul class="issues-list">
+                  @for (issue of readiness()!.issues; track issue) {
+                  <li>{{ issue }}</li>
+                  }
+                </ul>
+                }
+              </div>
+              }
+
+              @if (assignmentLoading()) {
+              <div class="loading-inline">
+                <mat-spinner diameter="24"></mat-spinner>
+                <span>Loading NPCs...</span>
+              </div>
+              } @else if (npcsForAssignment().length === 0) {
+              <p class="empty-state-small">No NPCs in this compilation.</p>
+              } @else {
+              <div class="npc-assignment-list">
+                @for (npc of npcsForAssignment(); track npc.npcId) {
+                <div class="npc-row">
+                  <span class="npc-name">
+                    <mat-icon>person</mat-icon>
+                    {{ npc.npcName || npc.entityName }}
+                  </span>
+                  <mat-form-field appearance="outline" class="machine-select">
+                    <mat-label>Machine</mat-label>
+                    <mat-select
+                      [ngModel]="pendingSelections()[npc.npcId] || null"
+                      (ngModelChange)="onMachineSelected(compilation.id, npc.npcId, $event)">
+                      <mat-option [value]="null">-- unassigned --</mat-option>
+                      @for (machine of machines(); track machine.id) {
+                      <mat-option [value]="machine.id">{{ machine.name }}</mat-option>
+                      }
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+                }
+              </div>
+              }
+            </div>
+            }
           </div>
           }
         </div>

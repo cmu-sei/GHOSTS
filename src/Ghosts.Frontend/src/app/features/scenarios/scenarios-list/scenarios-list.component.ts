@@ -78,8 +78,10 @@ export class ScenariosListComponent implements OnInit {
   }
 
   protected createNewScenario(): void {
+    const name = `Scenario ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+
     this.scenarioService.createScenario({
-      name: 'New Scenario',
+      name,
       description: '',
       scenarioParameters: { nations: [], threatActors: [], injects: [], userPools: [], objectives: '', politicalContext: '', rulesOfEngagement: '', victoryConditions: '' },
       technicalEnvironment: { networkTopology: '', services: '', assets: '', defenses: [], vulnerabilities: [] },

@@ -126,16 +126,84 @@
           </div>
           }
 
+          @if (!editMode() && !relationshipMode()) {
           <div class="detail-actions">
-            <button mat-button color="primary">
+            <button mat-button color="primary" (click)="startEdit()">
               <mat-icon>edit</mat-icon>
               Edit Entity
             </button>
-            <button mat-button color="accent">
+            <button mat-button color="accent" (click)="startAddRelationship()">
               <mat-icon>add_link</mat-icon>
               Add Relationship
             </button>
           </div>
+          }
+
+          @if (editMode()) {
+          <form [formGroup]="editForm" class="inline-form">
+            <h4 class="inline-form-title">Edit Entity</h4>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Name</mat-label>
+              <input matInput formControlName="name" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Type</mat-label>
+              <mat-select formControlName="entityType">
+                @for (type of entityTypes; track type) {
+                <mat-option [value]="type">
+                  <span [style.color]="getEntityColor(type)">●</span> {{ type }}
+                </mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Description</mat-label>
+              <textarea matInput formControlName="description" rows="2"></textarea>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Confidence</mat-label>
+              <input matInput type="number" formControlName="confidence" min="0" max="1" step="0.1" />
+            </mat-form-field>
+            <div class="inline-form-actions">
+              <button mat-raised-button color="primary" (click)="saveEdit()" [disabled]="editForm.invalid || saving()">
+                {{ saving() ? 'Saving…' : 'Save' }}
+              </button>
+              <button mat-button (click)="cancelEdit()">Cancel</button>
+            </div>
+          </form>
+          }
+
+          @if (relationshipMode()) {
+          <form [formGroup]="relationshipForm" class="inline-form">
+            <h4 class="inline-form-title">Add Relationship</h4>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Target Entity</mat-label>
+              <mat-select formControlName="targetEntityId">
+                @for (node of getOtherNodes(); track node.id) {
+                <mat-option [value]="node.id">{{ node.entity.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Relationship Type</mat-label>
+              <mat-select formControlName="edgeType">
+                @for (type of edgeTypes; track type) {
+                <mat-option [value]="type">{{ type }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Label (optional)</mat-label>
+              <input matInput formControlName="label" placeholder="e.g. deployed, targeted" />
+            </mat-form-field>
+            <div class="inline-form-actions">
+              <button mat-raised-button color="accent" (click)="saveRelationship()" [disabled]="relationshipForm.invalid || saving()">
+                {{ saving() ? 'Saving…' : 'Add' }}
+              </button>
+              <button mat-button (click)="cancelEdit()">Cancel</button>
+            </div>
+          </form>
+          }
         </mat-card-content>
       </mat-card>
     </div>

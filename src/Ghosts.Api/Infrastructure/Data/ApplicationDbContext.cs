@@ -85,6 +85,7 @@ namespace Ghosts.Api.Infrastructure.Data
         public DbSet<ScenarioEdge> ScenarioEdges { get; set; }
         public DbSet<ScenarioEnrichment> ScenarioEnrichments { get; set; }
         public DbSet<ScenarioCompilation> ScenarioCompilations { get; set; }
+        public DbSet<ScenarioNpcAssignment> ScenarioNpcAssignments { get; set; }
 
         // MITRE ATT&CK reference data
         public DbSet<AttackTechnique> AttackTechniques { get; set; }
@@ -375,6 +376,26 @@ namespace Ghosts.Api.Infrastructure.Data
             modelBuilder.Entity<ScenarioEnrichment>().HasIndex(e => e.ScenarioId);
             modelBuilder.Entity<ScenarioEnrichment>().HasIndex(e => e.EntityId);
             modelBuilder.Entity<ScenarioCompilation>().HasIndex(c => c.ScenarioId);
+
+            // NPC assignments – scoped to a compilation
+            modelBuilder.Entity<ScenarioNpcAssignment>()
+                .HasOne(a => a.Scenario)
+                .WithMany()
+                .HasForeignKey(a => a.ScenarioId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ScenarioNpcAssignment>()
+                .HasOne(a => a.Compilation)
+                .WithMany()
+                .HasForeignKey(a => a.CompilationId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ScenarioNpcAssignment>()
+                .HasIndex(a => new { a.CompilationId, a.NpcId })
+                .IsUnique(); // one machine per NPC per compilation
+
+            modelBuilder.Entity<ScenarioNpcAssignment>().HasIndex(a => a.ScenarioId);
+            modelBuilder.Entity<ScenarioNpcAssignment>().HasIndex(a => a.MachineId);
 
             // ── ATT&CK reference data relationships ──
 

@@ -2,12 +2,15 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Api.Infrastructure.Models;
 using Ghosts.Api.Infrastructure.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using NLog;
 
 namespace Ghosts.Api.Controllers.Api
@@ -19,7 +22,8 @@ namespace Ghosts.Api.Controllers.Api
         IScenarioGraphService graphService,
         IScenarioExtractionService extractionService,
         IScenarioEnrichmentService enrichmentService,
-        IScenarioCompilerService compilerService) : ControllerBase
+        IScenarioCompilerService compilerService,
+        ApplicationDbContext dbContext) : ControllerBase
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
 
@@ -551,6 +555,191 @@ namespace Ghosts.Api.Controllers.Api
             catch (InvalidOperationException)
             {
                 return NotFound();
+            }
+        }
+
+        // ──────────────────────────────────────────────
+        // NPC-to-Machine Assignments
+        // ──────────────────────────────────────────────
+
+        /// <summary>
+        /// List NPCs from a compilation alongside their current machine assignments.
+        /// </summary>
+        [HttpGet("compilations/{compilationId}/npcs")]
+        public async Task<ActionResult> GetNpcsForAssignment(int scenarioId, int compilationId, CancellationToken ct)
+        {
+            try
+            {
+                // Verify compilation belongs to this scenario
+                var compilation = await dbContext.ScenarioCompilations
+                    .FirstOrDefaultAsync(c => c.Id == compilationId && c.ScenarioId == scenarioId, ct);
+                if (compilation == null) return NotFound("Compilation not found");
+
+                // Load compiled NPCs (Person entities that have an NpcId)
+                var entities = await dbContext.ScenarioEntities
+                    .Where(e => e.ScenarioId == scenarioId && e.EntityType == "Person" && e.NpcId != null)
+                    .ToListAsync(ct);
+
+                // Load existing assignments for this compilation
+                var assignments = await dbContext.ScenarioNpcAssignments
+                    .Where(a => a.CompilationId == compilationId)
+                    .ToListAsync(ct);
+
+                // Load machine names for assigned machines
+                var machineIds = assignments.Select(a => a.MachineId).Distinct().ToList();
+                var machines = await dbContext.Machines
+                    .Where(m => machineIds.Contains(m.Id))
+                    .Select(m => new { m.Id, m.Name, m.FQDN })
+                    .ToListAsync(ct);
+
+                var result = entities.Select(e =>
+                {
+                    var assignment = assignments.FirstOrDefault(a => a.NpcId == e.NpcId!.Value);
+                    string machineName = null;
+                    if (assignment != null)
+                    {
+                        var machine = machines.FirstOrDefault(m => m.Id == assignment.MachineId);
+                        machineName = machine?.Name ?? machine?.FQDN ?? assignment.MachineId.ToString();
+                    }
+
+                    return new NpcForAssignmentDto(
+                        e.NpcId!.Value,
+                        e.Name,
+                        e.Name,
+                        assignment?.MachineId,
+                        machineName,
+                        assignment?.Id);
+                }).ToList();
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _log.Error(ex, $"Error getting NPCs for compilation {compilationId}");
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Assign a compiled NPC to a machine. Replaces any existing assignment for this NPC in this compilation.
+        /// </summary>
+        [HttpPost("compilations/{compilationId}/assignments")]
+        public async Task<ActionResult> CreateAssignment(
+            int scenarioId, int compilationId,
+            [FromBody] CreateNpcAssignmentDto dto, CancellationToken ct)
+        {
+            try
+            {
+                var compilation = await dbContext.ScenarioCompilations
+                    .FirstOrDefaultAsync(c => c.Id == compilationId && c.ScenarioId == scenarioId, ct);
+                if (compilation == null) return NotFound("Compilation not found");
+
+                // Verify the NPC exists and belongs to this scenario
+                var entity = await dbContext.ScenarioEntities
+                    .FirstOrDefaultAsync(e => e.ScenarioId == scenarioId && e.NpcId == dto.NpcId, ct);
+                if (entity == null)
+                    return BadRequest($"NPC {dto.NpcId} not found in scenario {scenarioId}");
+
+                // Verify the machine exists
+                var machine = await dbContext.Machines.FindAsync(dto.MachineId);
+                if (machine == null)
+                    return BadRequest($"Machine {dto.MachineId} not found");
+
+                // Upsert: remove existing assignment for this NPC in this compilation
+                var existing = await dbContext.ScenarioNpcAssignments
+                    .FirstOrDefaultAsync(a => a.CompilationId == compilationId && a.NpcId == dto.NpcId, ct);
+                if (existing != null)
+                    dbContext.ScenarioNpcAssignments.Remove(existing);
+
+                var assignment = new ScenarioNpcAssignment
+                {
+                    ScenarioId = scenarioId,
+                    CompilationId = compilationId,
+                    NpcId = dto.NpcId,
+                    MachineId = dto.MachineId,
+                    CreatedAt = DateTime.UtcNow
+                };
+                dbContext.ScenarioNpcAssignments.Add(assignment);
+                await dbContext.SaveChangesAsync(ct);
+
+                var machineName = machine.Name ?? machine.FQDN ?? dto.MachineId.ToString();
+                return Ok(new NpcAssignmentDto(
+                    assignment.Id, compilationId,
+                    dto.NpcId, entity.Name,
+                    dto.MachineId, machineName,
+                    assignment.CreatedAt));
+            }
+            catch (Exception ex)
+            {
+                _log.Error(ex, $"Error creating assignment for compilation {compilationId}");
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Remove an NPC-to-machine assignment.
+        /// </summary>
+        [HttpDelete("compilations/{compilationId}/assignments/{assignmentId}")]
+        public async Task<ActionResult> DeleteAssignment(
+            int scenarioId, int compilationId, int assignmentId, CancellationToken ct)
+        {
+            try
+            {
+                var assignment = await dbContext.ScenarioNpcAssignments
+                    .FirstOrDefaultAsync(a => a.Id == assignmentId && a.CompilationId == compilationId, ct);
+                if (assignment == null) return NotFound();
+
+                dbContext.ScenarioNpcAssignments.Remove(assignment);
+                await dbContext.SaveChangesAsync(ct);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _log.Error(ex, $"Error deleting assignment {assignmentId}");
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Returns deployment readiness: how many compiled NPCs have machines assigned.
+        /// </summary>
+        [HttpGet("compilations/{compilationId}/readiness")]
+        public async Task<ActionResult> GetDeploymentReadiness(int scenarioId, int compilationId, CancellationToken ct)
+        {
+            try
+            {
+                var compilation = await dbContext.ScenarioCompilations
+                    .FirstOrDefaultAsync(c => c.Id == compilationId && c.ScenarioId == scenarioId, ct);
+                if (compilation == null) return NotFound("Compilation not found");
+
+                var totalNpcs = await dbContext.ScenarioEntities
+                    .CountAsync(e => e.ScenarioId == scenarioId && e.EntityType == "Person" && e.NpcId != null, ct);
+
+                var assignedNpcs = await dbContext.ScenarioNpcAssignments
+                    .CountAsync(a => a.CompilationId == compilationId, ct);
+
+                var issues = new System.Collections.Generic.List<string>();
+
+                if (compilation.Status != "Completed")
+                    issues.Add($"Compilation status is '{compilation.Status}' (must be 'Completed')");
+
+                if (totalNpcs == 0)
+                    issues.Add("No NPCs were generated during compilation");
+
+                if (assignedNpcs < totalNpcs)
+                    issues.Add($"{totalNpcs - assignedNpcs} NPC(s) have no machine assigned");
+
+                return Ok(new DeploymentReadinessDto(
+                    IsReady: issues.Count == 0,
+                    TotalNpcs: totalNpcs,
+                    AssignedNpcs: assignedNpcs,
+                    UnassignedNpcs: totalNpcs - assignedNpcs,
+                    Issues: issues));
+            }
+            catch (Exception ex)
+            {
+                _log.Error(ex, $"Error getting readiness for compilation {compilationId}");
+                return StatusCode(500, ex.Message);
             }
         }
     }

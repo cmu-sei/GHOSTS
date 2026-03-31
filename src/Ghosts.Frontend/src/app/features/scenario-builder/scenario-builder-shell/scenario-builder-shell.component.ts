@@ -42,6 +42,7 @@ export class ScenarioBuilderShellComponent implements OnInit {
   @ViewChild(BuilderExtractionComponent) extractionComponent?: BuilderExtractionComponent;
   @ViewChild(BuilderEntitiesComponent) entitiesComponent?: BuilderEntitiesComponent;
   @ViewChild(BuilderGraphComponent) graphComponent?: BuilderGraphComponent;
+  @ViewChild(BuilderEnrichmentComponent) enrichmentComponent?: BuilderEnrichmentComponent;
 
   protected readonly scenarioId = signal<number | null>(null);
   protected readonly loading = signal(true);
@@ -79,6 +80,9 @@ export class ScenarioBuilderShellComponent implements OnInit {
       case 3: // Graph step
         // Use setTimeout to ensure DOM is ready
         setTimeout(() => this.graphComponent?.refresh(), 100);
+        break;
+      case 4: // Enrichment step
+        this.enrichmentComponent?.refresh();
         break;
     }
   }
