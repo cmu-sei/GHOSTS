@@ -3,6 +3,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Ghosts.Api.Infrastructure.Data;
@@ -86,12 +89,30 @@ namespace Ghosts.Api.Infrastructure.Services
 
         public async Task<ScenarioSource> AddUrlAsync(int scenarioId, CreateScenarioSourceUrlDto dto, CancellationToken ct)
         {
+            // Fetch the page content from the URL
+            var fetchedContent = string.Empty;
+            try
+            {
+                using var httpClient = new HttpClient();
+                httpClient.Timeout = TimeSpan.FromSeconds(30);
+                httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent",
+                    "Mozilla/5.0 (compatible; GHOSTS/ScenarioBuilder)");
+                var html = await httpClient.GetStringAsync(dto.Url, ct);
+                fetchedContent = StripHtml(html);
+                _log.Info($"Fetched {fetchedContent.Length} characters from URL: {dto.Url}");
+            }
+            catch (Exception ex)
+            {
+                _log.Warn(ex, $"Failed to fetch URL content from {dto.Url}");
+                throw new InvalidOperationException($"Could not fetch URL content: {ex.Message}", ex);
+            }
+
             var source = new ScenarioSource
             {
                 ScenarioId = scenarioId,
                 Name = dto.Name,
                 SourceType = "Url",
-                Content = dto.Url,
+                Content = fetchedContent,
                 Status = "Uploaded",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -108,7 +129,38 @@ namespace Ghosts.Api.Infrastructure.Services
 
             _log.Info($"Created URL source: {source.Id} - {source.Name}");
 
-            return source;
+            // Auto-chunk the fetched content
+            await ChunkSourceAsync(source.Id, ct);
+
+            // Reload with chunks
+            return await GetByIdAsync(source.Id, ct);
+        }
+
+        private static string StripHtml(string html)
+        {
+            if (string.IsNullOrWhiteSpace(html)) return string.Empty;
+
+            // Remove script and style blocks entirely
+            var text = Regex.Replace(html,
+                @"<(script|style)[^>]*>[\s\S]*?</(script|style)>", " ",
+                RegexOptions.IgnoreCase);
+
+            // Replace block-level tags with newlines
+            text = Regex.Replace(text,
+                @"</(p|div|li|tr|h[1-6]|br|blockquote)[^>]*>", "\n",
+                RegexOptions.IgnoreCase);
+
+            // Strip remaining tags
+            text = Regex.Replace(text, @"<[^>]+>", " ");
+
+            // Decode HTML entities
+            text = WebUtility.HtmlDecode(text);
+
+            // Collapse whitespace
+            text = Regex.Replace(text, @"[ \t]+", " ");
+            text = Regex.Replace(text, @"\n{3,}", "\n\n");
+
+            return text.Trim();
         }
 
         public async Task<ScenarioSource> UploadFileAsync(int scenarioId, string fileName, string mimeType, byte[] fileData, string textContent, CancellationToken ct)
