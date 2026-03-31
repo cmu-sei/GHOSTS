@@ -33,8 +33,7 @@ var facebook = builder.AddProject<Projects.Ghosts_Pandora>("facebook")
     .WithEnvironment("DATABASE_PROVIDER", "PostgreSQL")
     .WithEnvironment("MODE_TYPE", "social")
     .WithEnvironment("DEFAULT_THEME", "facebook")
-    .WithEnvironment("LD_PRELOAD", freetypeLib)
-    .WithHttpEndpoint(port: 8800, name: "http");
+    .WithEnvironment("LD_PRELOAD", freetypeLib);
 
 var api = builder.AddProject<Projects.Ghosts_Api>("api")
     .WaitFor(postgres)
@@ -77,12 +76,10 @@ var grafana = builder.AddContainer("grafana", "grafana/grafana")
     .WaitFor(postgres);
 
 var frontend = builder.AddJavaScriptApp("frontend", "../Ghosts.Frontend", "start")
-    .WithHttpEndpoint(port: 4200, env: "PORT", isProxied: false)
-    .WithUrlForEndpoint("http", url =>
-    {
-        url.DisplayText = "Ghosts Frontend";
-        url.Url = "http://localhost:4200/";
-    });
+    .WaitFor(api)
+    .WithEnvironment("PORT", "4200")
+    .WithHttpEndpoint(port: 4200, name: "frontend-http", isProxied: false)
+    .WithExternalHttpEndpoints();
 
 var docs = builder.AddExecutable("docs", "mkdocs", "../../", "serve", "--dev-addr=0.0.0.0:8000")
     .WithHttpEndpoint(port: 8000, name: "http", isProxied: false)
