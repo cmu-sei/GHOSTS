@@ -175,13 +175,11 @@
     }
 
     circle {
-      transition: all 0.2s ease;
       filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.3));
 
       &:hover {
         stroke-width: 3;
         filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.6));
-        transform: scale(1.1);
       }
     }
 

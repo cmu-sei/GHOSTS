@@ -78,6 +78,7 @@ export class BuilderGraphComponent implements OnInit, OnDestroy {
 
   private svg?: d3.Selection<SVGSVGElement, unknown, null, undefined>;
   private simulation?: d3.Simulation<GraphNode, GraphLink>;
+  private zoom?: d3.ZoomBehavior<SVGSVGElement, unknown>;
   private allNodes: GraphNode[] = [];
   private allLinks: GraphLink[] = [];
   private entities: ScenarioEntity[] = [];
@@ -242,14 +243,14 @@ export class BuilderGraphComponent implements OnInit, OnDestroy {
       .style('pointer-events', 'none');
 
     // Add zoom behavior
-    const zoom = d3
+    this.zoom = d3
       .zoom<SVGSVGElement, unknown>()
       .scaleExtent([0.1, 4])
       .on('zoom', (event) => {
         g.attr('transform', event.transform);
       });
 
-    this.svg.call(zoom as any);
+    this.svg.call(this.zoom as any);
 
     // Create container group for zoom/pan
     const g = this.svg.append('g');
@@ -284,7 +285,12 @@ export class BuilderGraphComponent implements OnInit, OnDestroy {
       )
       .force('charge', d3.forceManyBody().strength(-300))
       .force('center', d3.forceCenter(this.width / 2, this.height / 2))
-      .force('collision', d3.forceCollide<GraphNode>().radius((d) => d.radius + 5));
+      .force('collision', d3.forceCollide<GraphNode>().radius((d) => d.radius + 5))
+      .on('end', () => {
+        // Freeze the graph once layout converges — nothing moves at rest
+        this.simulation?.stop();
+        this.zoomToFit();
+      });
 
     // Create link elements
     const linkGroup = g.append('g').attr('class', 'links');
@@ -429,6 +435,7 @@ export class BuilderGraphComponent implements OnInit, OnDestroy {
   private drag(simulation: d3.Simulation<GraphNode, GraphLink>) {
     let dragStartX = 0;
     let dragStartY = 0;
+    let isDragging = false;
     const CLICK_THRESHOLD = 4; // pixels — below this it's a click, not a drag
 
     return d3
@@ -436,21 +443,28 @@ export class BuilderGraphComponent implements OnInit, OnDestroy {
       .on('start', (event, d) => {
         dragStartX = event.x;
         dragStartY = event.y;
-        if (!event.active) simulation.alphaTarget(0.3).restart();
+        isDragging = false;
+        // Pin the node but don't reheat the simulation yet
         d.fx = d.x;
         d.fy = d.y;
       })
       .on('drag', (event, d) => {
+        if (!isDragging) {
+          const dx = event.x - dragStartX;
+          const dy = event.y - dragStartY;
+          if (Math.sqrt(dx * dx + dy * dy) >= CLICK_THRESHOLD) {
+            isDragging = true;
+            // Only reheat once actual dragging begins, and keep it gentle
+            if (!event.active) simulation.alphaTarget(0.05).restart();
+          }
+        }
         d.fx = event.x;
         d.fy = event.y;
       })
       .on('end', (event, d) => {
         if (!event.active) simulation.alphaTarget(0);
-        const dx = event.x - dragStartX;
-        const dy = event.y - dragStartY;
-        const dist = Math.sqrt(dx * dx + dy * dy);
 
-        if (dist < CLICK_THRESHOLD) {
+        if (!isDragging) {
           // This was a click, not a drag — release the pin and fire click
           d.fx = null;
           d.fy = null;
@@ -563,14 +577,49 @@ export class BuilderGraphComponent implements OnInit, OnDestroy {
   }
 
   protected resetView(): void {
-    if (!this.svg) return;
+    this.zoomToFit();
+  }
+
+  private zoomToFit(duration = 750): void {
+    if (!this.svg || !this.zoom || this.allNodes.length === 0) return;
+
+    const padding = 60;
+
+    // Compute bounding box of all nodes
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    for (const node of this.allNodes) {
+      if (node.x == null || node.y == null) continue;
+      const r = node.radius;
+      minX = Math.min(minX, node.x - r);
+      minY = Math.min(minY, node.y - r);
+      maxX = Math.max(maxX, node.x + r);
+      maxY = Math.max(maxY, node.y + r);
+    }
+
+    if (!isFinite(minX)) return;
+
+    const bboxWidth = maxX - minX;
+    const bboxHeight = maxY - minY;
+    if (bboxWidth === 0 || bboxHeight === 0) return;
+
+    const scale = Math.min(
+      (this.width - padding * 2) / bboxWidth,
+      (this.height - padding * 2) / bboxHeight,
+      4 // don't exceed max zoom
+    );
+
+    const cx = (minX + maxX) / 2;
+    const cy = (minY + maxY) / 2;
+
+    const transform = d3.zoomIdentity
+      .translate(this.width / 2, this.height / 2)
+      .scale(scale)
+      .translate(-cx, -cy);
+
     this.svg
       .transition()
-      .duration(750)
-      .call(
-        d3.zoom<SVGSVGElement, unknown>().transform as any,
-        d3.zoomIdentity
-      );
+      .duration(duration)
+      .call(this.zoom.transform as any, transform);
   }
 
   protected onTypeToggle(type: string, checked: boolean): void {
