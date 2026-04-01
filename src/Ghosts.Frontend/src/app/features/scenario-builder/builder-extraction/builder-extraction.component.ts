@@ -173,4 +173,12 @@ export class BuilderExtractionComponent implements OnInit, OnDestroy {
         return '';
     }
   }
+
+  protected isNullRefError(msg: string): boolean {
+    return msg?.toLowerCase().includes('object reference not set');
+  }
+
+  protected filteredErrors(errors: string[]): string[] {
+    return errors.filter(e => !this.isNullRefError(e));
+  }
 }

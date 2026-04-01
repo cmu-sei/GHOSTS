@@ -11,6 +11,7 @@ export interface ScenarioSource {
   errorMessage: string;
   createdAt: string;
   chunkCount: number;
+  contentPreview: string;
 }
 
 export interface ScenarioSourceChunk {

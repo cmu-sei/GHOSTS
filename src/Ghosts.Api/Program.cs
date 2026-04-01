@@ -48,6 +48,7 @@ public class Program
         _log.Info(msg);
 
         ApiDetails.LoadConfiguration();
+        LoadDotEnv();
 
         var builder = WebApplication.CreateBuilder(args);
 
@@ -224,5 +225,34 @@ public class Program
         });
 
         app.Run();
+    }
+
+    private static void LoadDotEnv()
+    {
+        var envFile = Path.Combine(AppContext.BaseDirectory, ".env");
+        if (!File.Exists(envFile))
+            envFile = Path.Combine(Directory.GetCurrentDirectory(), ".env");
+        if (!File.Exists(envFile))
+            return;
+
+        foreach (var line in File.ReadAllLines(envFile))
+        {
+            var trimmed = line.Trim();
+            if (trimmed.Length == 0 || trimmed.StartsWith('#'))
+                continue;
+
+            var idx = trimmed.IndexOf('=');
+            if (idx <= 0)
+                continue;
+
+            var key = trimmed[..idx].Trim();
+            var value = trimmed[(idx + 1)..].Trim().Trim('"').Trim('\'');
+
+            // Only set if not already present — real env vars take precedence
+            if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable(key)))
+                Environment.SetEnvironmentVariable(key, value);
+        }
+
+        _log.Info("Loaded environment variables from .env file");
     }
 }

@@ -459,7 +459,8 @@ Return only valid JSON.";
                 {
                     Source = _configuration["ScenarioBuilder:ContentEngine:Source"] ?? "ollama",
                     Model = _configuration["ScenarioBuilder:ContentEngine:Model"] ?? "llama3.1",
-                    Host = _configuration["ScenarioBuilder:ContentEngine:Host"] ?? "http://localhost:11434"
+                    Host = _configuration["ScenarioBuilder:ContentEngine:Host"] ?? "http://localhost:11434",
+                    AwsRegion = _configuration["ScenarioBuilder:ContentEngine:AwsRegion"]
                 };
 
                 var contentService = new ContentCreationService(contentEngineSettings);

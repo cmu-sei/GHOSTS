@@ -117,6 +117,10 @@ public class ApplicationSettings
             public string Source { get; set; }
             public string Model { get; set; }
             public string Host { get; set; }
+            // AWS Bedrock: region only — credentials must be supplied via
+            // AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY environment variables
+            // or the default credential chain (IAM role, ~/.aws/credentials, etc.)
+            public string AwsRegion { get; set; }
         }
     }
 }

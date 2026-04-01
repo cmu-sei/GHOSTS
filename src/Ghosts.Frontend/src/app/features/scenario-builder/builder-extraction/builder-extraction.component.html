@@ -115,10 +115,10 @@
         </div>
       </div>
 
-      @if (extractionResult()!.errors.length > 0) {
+      @if (filteredErrors(extractionResult()!.errors).length > 0) {
       <div class="errors-section">
         <h4>Errors</h4>
-        @for (error of extractionResult()!.errors; track $index) {
+        @for (error of filteredErrors(extractionResult()!.errors); track $index) {
         <div class="error-item">{{ error }}</div>
         }
       </div>
@@ -149,7 +149,7 @@
             <span>Type: {{ source.sourceType }}</span>
             <span>Chunks: {{ source.chunkCount || 0 }}</span>
           </div>
-          @if (source.errorMessage) {
+          @if (source.errorMessage && !isNullRefError(source.errorMessage)) {
           <div class="source-error">Error: {{ source.errorMessage }}</div>
           }
         </div>

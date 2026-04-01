@@ -112,6 +112,7 @@ namespace Ghosts.Api.Infrastructure.Services
                 ScenarioId = scenarioId,
                 Name = dto.Name,
                 SourceType = "Url",
+                OriginalFileName = dto.Url,
                 Content = fetchedContent,
                 Status = "Uploaded",
                 CreatedAt = DateTime.UtcNow,

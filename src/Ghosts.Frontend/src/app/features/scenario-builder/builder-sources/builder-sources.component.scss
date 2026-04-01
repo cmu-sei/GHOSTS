@@ -110,3 +110,25 @@
     font-size: 0.75rem;
   }
 }
+
+.preview-cell {
+  max-width: 280px;
+
+  .url-preview {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.8rem;
+    color: #1976d2;
+  }
+
+  .text-preview {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.8rem;
+    color: #555;
+  }
+}

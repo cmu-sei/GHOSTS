@@ -40,7 +40,8 @@ namespace Ghosts.Api.Controllers.Api
                 var dtos = sources.ConvertAll(s => new ScenarioSourceDto(
                     s.Id, s.Name, s.SourceType, s.MimeType,
                     s.OriginalFileName, s.FileSizeBytes, s.Status,
-                    s.ErrorMessage, s.CreatedAt, s.Chunks?.Count ?? 0));
+                    s.ErrorMessage, s.CreatedAt, s.Chunks?.Count ?? 0,
+                    s.SourceType == "Url" ? s.OriginalFileName : (s.Content?.Length > 100 ? s.Content[..100] + "…" : s.Content ?? "")));
                 return Ok(dtos);
             }
             catch (Exception ex)
@@ -59,7 +60,8 @@ namespace Ghosts.Api.Controllers.Api
                 return Ok(new ScenarioSourceDto(
                     source.Id, source.Name, source.SourceType, source.MimeType,
                     source.OriginalFileName, source.FileSizeBytes, source.Status,
-                    source.ErrorMessage, source.CreatedAt, source.Chunks?.Count ?? 0));
+                    source.ErrorMessage, source.CreatedAt, source.Chunks?.Count ?? 0,
+                    source.SourceType == "Url" ? source.OriginalFileName : (source.Content?.Length > 100 ? source.Content[..100] + "…" : source.Content ?? "")));
             }
             catch (InvalidOperationException)
             {
@@ -76,7 +78,8 @@ namespace Ghosts.Api.Controllers.Api
                 return CreatedAtAction(nameof(GetSource), new { scenarioId, id = source.Id },
                     new ScenarioSourceDto(source.Id, source.Name, source.SourceType, source.MimeType,
                         source.OriginalFileName, source.FileSizeBytes, source.Status,
-                        source.ErrorMessage, source.CreatedAt, source.Chunks?.Count ?? 0));
+                        source.ErrorMessage, source.CreatedAt, source.Chunks?.Count ?? 0,
+                        source.Content?.Length > 100 ? source.Content[..100] + "…" : source.Content ?? ""));
             }
             catch (Exception ex)
             {
@@ -94,7 +97,8 @@ namespace Ghosts.Api.Controllers.Api
                 return CreatedAtAction(nameof(GetSource), new { scenarioId, id = source.Id },
                     new ScenarioSourceDto(source.Id, source.Name, source.SourceType, source.MimeType,
                         source.OriginalFileName, source.FileSizeBytes, source.Status,
-                        source.ErrorMessage, source.CreatedAt, source.Chunks?.Count ?? 0));
+                        source.ErrorMessage, source.CreatedAt, source.Chunks?.Count ?? 0,
+                        source.OriginalFileName ?? ""));
             }
             catch (Exception ex)
             {
@@ -129,7 +133,8 @@ namespace Ghosts.Api.Controllers.Api
                 return CreatedAtAction(nameof(GetSource), new { scenarioId, id = source.Id },
                     new ScenarioSourceDto(source.Id, source.Name, source.SourceType, source.MimeType,
                         source.OriginalFileName, source.FileSizeBytes, source.Status,
-                        source.ErrorMessage, source.CreatedAt, source.Chunks?.Count ?? 0));
+                        source.ErrorMessage, source.CreatedAt, source.Chunks?.Count ?? 0,
+                        source.Content?.Length > 100 ? source.Content[..100] + "…" : source.Content ?? ""));
             }
             catch (Exception ex)
             {

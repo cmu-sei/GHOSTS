@@ -244,7 +244,7 @@ public record CreateScenarioSourceUrlDto(string Name, string Url);
 public record ScenarioSourceDto(
     int Id, string Name, string SourceType, string MimeType,
     string OriginalFileName, long FileSizeBytes, string Status,
-    string ErrorMessage, DateTime CreatedAt, int ChunkCount);
+    string ErrorMessage, DateTime CreatedAt, int ChunkCount, string ContentPreview);
 
 public record ScenarioSourceChunkDto(
     int Id, int SourceId, int ChunkIndex, string Content,

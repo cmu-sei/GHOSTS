@@ -47,7 +47,7 @@ export class BuilderSourcesComponent implements OnInit {
 
   protected readonly sources = signal<ScenarioSource[]>([]);
   protected readonly loading = signal(true);
-  protected readonly displayedColumns = ['name', 'type', 'status', 'chunks', 'actions'];
+  protected readonly displayedColumns = ['name', 'type', 'preview', 'status', 'chunks', 'actions'];
   protected readonly dragOver = signal(false);
 
   protected textForm!: FormGroup;
