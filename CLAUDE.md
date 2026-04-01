@@ -255,6 +255,13 @@ Hub methods clients can call:
 - `Execution` / `ExecutionEvent` / `ExecutionMetricSnapshot` - Scenario run tracking
 - `Nation` / `ThreatActor` / `Inject` - Scenario context
 
+**Scenario Builder (graph-based):**
+- `scenario_sources` / `scenario_source_chunks` - Ingested content
+- `scenario_entities` / `scenario_edges` - Extracted knowledge graph
+- `scenario_enrichments` - MITRE ATT&CK mappings
+- `scenario_compilations` - Compiled output
+- `scenario_npc_assignments` - Maps compiled NPCs to specific machines for deployment
+
 **Administrative:**
 - `Trackable` - Observable action definitions
 - `Webhook` - External integrations
@@ -283,6 +290,8 @@ Hub methods clients can call:
 - `ScenariosController` / `ExecutionsController` - Scenario management
 - `AnimationsController` / `AnimationJobsController` - Animator job control
 - `WebhooksController` - Webhook configuration
+- `ScenarioBuilderController` - Full graph scenario workflow: sources, extraction, entities, edges, enrichment, compilation, NPC-to-machine assignment, and deployment readiness
+- `AttackController` - MITRE ATT&CK data import and search
 
 **Documentation:** Swagger/OpenAPI at `/swagger/v9/swagger.json`
 
@@ -343,9 +352,13 @@ Provides dynamic web content for realistic browser simulation:
 
 **LLM Integration:**
 - Configured via `appsettings.json` → `ScenarioBuilder:ContentEngine`
-- Supports Ollama, OpenAI, or other providers via `ContentCreationService`
+- `ContentCreationService` routes to one of four providers based on `Source`:
+  - `ollama` - Local Ollama instance; `OLLAMA_HOST` / `OLLAMA_MODEL` env vars override config
+  - `openai` - OpenAI API
+  - `bedrock` - AWS Bedrock via `AWSSDK.BedrockRuntime`; uses default AWS credential chain (env vars → `~/.aws/credentials` → IAM role) and region from `AwsRegion` → `AWS_DEFAULT_REGION` → `us-east-1`
 - Extraction prompt: `config/ContentServices/ScenarioBuilder/ExtractEntities.txt`
 - Returns structured JSON with entities and edges
+- `.env` files in the binary directory are auto-loaded at startup (existing env vars take precedence)
 
 **Real-time Updates (SignalR):**
 - `ScenarioBuilderHub` at `/api/hubs/scenarioBuilder`
@@ -392,6 +405,19 @@ Provides dynamic web content for realistic browser simulation:
       "Source": "ollama",
       "Host": "http://host.docker.internal:11434",
       "Model": "mistral:7b"
+    }
+  }
+}
+```
+
+For AWS Bedrock:
+```json
+{
+  "ScenarioBuilder": {
+    "ContentEngine": {
+      "Source": "bedrock",
+      "Model": "us.anthropic.claude-sonnet-4-5",
+      "AwsRegion": "us-east-1"
     }
   }
 }
@@ -475,6 +501,10 @@ API Server
 - **Warning Banners**: Alert when no ThreatActor entities exist for enrichment
 - **Graph Debugging**: Console logging for troubleshooting D3.js rendering issues
 - **Responsive Grid**: 2-column layout expands to 3 when node selected in graph
+- **File Drag-Drop**: Sources page supports drag-and-drop file upload with MIME type handling
+- **Auto-rename**: Scenario name is automatically derived from the first source added
+- **Live Extraction**: Real-time entity/edge counts during extraction; warns if < 10 entities found
+- **NPC Assignment**: After compilation, assign generated NPCs to specific machines with deployment readiness check
 
 ## Configuration Files
 
