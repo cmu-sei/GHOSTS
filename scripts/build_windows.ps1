@@ -19,7 +19,7 @@ foreach($line in Get-Content "..\src\Ghosts.Client.Windows\Properties\AssemblyIn
 $release_version = $r.split(".")[0..2] -join "."
 Write-Host "Preparing to build and package $release_version"
 
-$t = "..\src\ghosts.client.windows\bin"
+$t = "..\src\Ghosts.Client.Windows\bin"
 if (Test-Path $t -PathType Container) { 
     Write-Host "Removing $t"
     Remove-Item -Path $t -Recurse -Force -Confirm:$false
@@ -53,7 +53,7 @@ foreach ($p in $platforms) {
     $platformParam = $p.PlatformParam
     $pathPrefix = $p.PathPrefix
     
-    $buildArgs = " ..\src\Ghosts.Client.Windows.sln /t:Rebuild /restore /nologo /v:minimal /p:configuration=$configuration $platformParam"
+    $buildArgs = " ..\src\Ghosts.Client.Windows\Ghosts.Client.csproj /t:Rebuild /restore /nologo /v:minimal /p:configuration=$configuration $platformParam"
     $build = "$msbuild $buildArgs"
     Invoke-Expression $build
 
@@ -80,15 +80,15 @@ foreach ($p in $platforms) {
     $packageName = "ghosts-client-$platformName-v$release_version"
     Rename-Item -Path $binPath -NewName $packageName
     
-    $currentPackagePath = "..\src\ghosts.client.windows\bin\$pathPrefix$packageName"
-    Compress-Archive -Path $currentPackagePath -DestinationPath "..\src\ghosts.client.windows\bin\$packageName.zip"
+    $currentPackagePath = "..\src\Ghosts.Client.Windows\bin\$pathPrefix$packageName"
+    Compress-Archive -Path $currentPackagePath -DestinationPath "..\src\Ghosts.Client.Windows\bin\$packageName.zip"
     
     Write-Host "  $platformName package complete..." -ForegroundColor Green
 
     if ($pathPrefix -ne "") {
-        Move-Item -Path $currentPackagePath -Destination "..\src\ghosts.client.windows\bin\$packageName"
+        Move-Item -Path $currentPackagePath -Destination "..\src\Ghosts.Client.Windows\bin\$packageName"
         $prefixDir = $pathPrefix.Trim("\")
-        Remove-Item -Path "..\src\ghosts.client.windows\bin\$prefixDir" -Recurse -Force -Confirm:$false
+        Remove-Item -Path "..\src\Ghosts.Client.Windows\bin\$prefixDir" -Recurse -Force -Confirm:$false
     }
 }
 

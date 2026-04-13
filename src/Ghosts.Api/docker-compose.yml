@@ -1,16 +1,14 @@
-networks:
-  ghosts-network:
-    driver: bridge
 
 services:
   ghosts-frontend:
-    image: dustinupdyke/ghosts-frontend
+    build:
+      context: ../Ghosts.Frontend
+      dockerfile: Dockerfile
     container_name: ghosts-frontend
     ports:
       - "4200:80"
-    networks:
-      - ghosts-network
     environment:
+      # API_URL must be reachable by the browser, not by Docker — use the host's address
       API_URL: ${WEB_API_URL:-http://host.docker.internal:5000/api}
       N8N_API_URL: ${WEB_N8N_API_URL:-http://host.docker.internal:5678}
   ghosts-postgres:
@@ -33,9 +31,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
-    networks:
-      - ghosts-network
-    restart: always
+    restart: unless-stopped
+
   ghosts-api:
     build:
       context: ..
@@ -47,12 +44,11 @@ services:
     ports:
       - "5000:5000"
     environment:
-      N8N_API_URL: ${N8N_API_URL:-http://host.docker.internal:5678/api/v1/workflows}
+      N8N_API_URL: ${N8N_API_URL:-http://ghosts-n8n:5678/api/v1/workflows}
       N8N_API_KEY: ${N8N_API_KEY:-replace-me}
-    networks:
-      - ghosts-network
-    restart: always
-  n8n:
+    restart: unless-stopped
+
+  ghosts-n8n:
     image: docker.n8n.io/n8nio/n8n:latest
     container_name: ghosts-n8n
     ports:
@@ -62,10 +58,9 @@ services:
       - N8N_SECURE_COOKIE=false
     volumes:
       - ./n8n_data:/home/node/.n8n
-    networks:
-      - ghosts-network
     restart: unless-stopped
-  grafana:
+
+  ghosts-grafana:
     image: grafana/grafana
     container_name: ghosts-grafana
     depends_on:
@@ -76,17 +71,14 @@ services:
       - GF_AUTH_ANONYMOUS_ENABLED=true
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
       - GF_AUTH_DISABLE_LOGIN_FORM=true
-      - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/etc/grafana/provisioning/dashboards/GHOSTS-5-default Grafana dashboard.json
+      - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/etc/grafana/provisioning/dashboards/GHOSTS-default Grafana dashboard.json
     ports:
       - "3000:3000"
-    networks:
-      - ghosts-network
-    restart: always
+    restart: unless-stopped
     volumes:
       - ghosts-grafana-data:/var/lib/grafana
       - ../../configuration/grafana/datasources:/etc/grafana/provisioning/datasources
       - ../../configuration/grafana/dashboards:/etc/grafana/provisioning/dashboards
-    entrypoint: [ "/run.sh" ]
 
 volumes:
   ghosts-postgres-data:
