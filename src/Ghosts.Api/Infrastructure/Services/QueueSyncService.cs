@@ -207,6 +207,7 @@ namespace Ghosts.Api.Infrastructure.Services
                             switch (type)
                             {
                                 case "TIMELINE":
+                                    // TODO: Wire IEvidenceProcessor here for client-reported social activity (v1.1)
                                     var timeline = new HistoryTimeline
                                     {
                                         Command = data.Command,

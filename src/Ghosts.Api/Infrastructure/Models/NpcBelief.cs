@@ -38,9 +38,14 @@ public class NpcBelief(int id, Guid npcId, Guid toNpcId, Guid fromNpcId, string 
 
     public DateTime CreatedUtc { get; set; } = DateTime.UtcNow;
 
-    // Navigation property
+    public int? ExecutionId { get; set; }
+
+    // Navigation properties
     [ForeignKey("NpcId")]
     public virtual NpcRecord Npc { get; set; }
+
+    [ForeignKey("ExecutionId")]
+    public virtual Execution Execution { get; set; }
 
     public NpcBelief() : this(0, Guid.Empty, Guid.Empty, Guid.Empty, string.Empty, 0, 0, 0) { }
 

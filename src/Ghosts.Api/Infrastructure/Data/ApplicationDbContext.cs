@@ -87,6 +87,8 @@ namespace Ghosts.Api.Infrastructure.Data
         public DbSet<ScenarioCompilation> ScenarioCompilations { get; set; }
         public DbSet<ScenarioNpcAssignment> ScenarioNpcAssignments { get; set; }
 
+        public DbSet<Hypothesis> Hypotheses { get; set; }
+
         // MITRE ATT&CK reference data
         public DbSet<AttackTechnique> AttackTechniques { get; set; }
         public DbSet<AttackGroup> AttackGroups { get; set; }
@@ -147,7 +149,15 @@ namespace Ghosts.Api.Infrastructure.Data
             modelBuilder.Entity<NpcSocialConnection>().HasIndex(c => new { c.NpcId, c.ConnectedNpcId });
             modelBuilder.Entity<NpcLearning>().HasIndex(l => new { l.NpcId, l.Topic, l.Step });
             modelBuilder.Entity<NpcBelief>().HasIndex(b => new { b.NpcId, b.Name, b.Step });
+            modelBuilder.Entity<NpcBelief>().HasIndex(b => b.ExecutionId);
+            modelBuilder.Entity<NpcBelief>()
+                .HasOne(b => b.Execution)
+                .WithMany()
+                .HasForeignKey(b => b.ExecutionId)
+                .OnDelete(DeleteBehavior.SetNull);
             modelBuilder.Entity<NpcPreference>().HasIndex(p => new { p.NpcId, p.Name, p.Step });
+
+            modelBuilder.Entity<Hypothesis>().HasIndex(h => h.IsActive);
 
             modelBuilder.Entity<Machine>().HasIndex(o => new { o.CreatedUtc });
             modelBuilder.Entity<Machine>().HasIndex(o => new { o.Status });

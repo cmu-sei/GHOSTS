@@ -131,6 +131,7 @@ public class Program
         builder.Services.AddScoped<IScenarioExtractionService, ScenarioExtractionService>();
         builder.Services.AddScoped<IScenarioEnrichmentService, ScenarioEnrichmentService>();
         builder.Services.AddScoped<IScenarioCompilerService, ScenarioCompilerService>();
+        builder.Services.AddScoped<IEvidenceProcessor, EvidenceProcessorService>();
 
         builder.Services.AddScoped<IClientResultsService, ClientResultsService>();
         builder.Services.AddScoped<IClientIdService, ClientIdService>();
@@ -182,7 +183,7 @@ public class Program
                 var context = services.GetRequiredService<ApplicationDbContext>();
                 var dbInitializerLogger = services.GetRequiredService<ILogger<DbInitializer>>();
 
-                DbInitializer.Initialize(context, dbInitializerLogger).Wait();
+                DbInitializer.Initialize(context, dbInitializerLogger, services).Wait();
             }
             catch (Exception ex)
             {

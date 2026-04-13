@@ -49,7 +49,8 @@ export class ScenarioBuilderShellComponent implements OnInit {
   protected readonly assistantOpen = signal(false);
 
   ngOnInit(): void {
-    const id = this.route.snapshot.paramMap.get('id');
+    // Get 'id' from parent route since we're using loadChildren
+    const id = this.route.parent?.snapshot.paramMap.get('id') ?? this.route.snapshot.paramMap.get('id');
     if (id) {
       this.scenarioId.set(+id);
       this.loading.set(false);

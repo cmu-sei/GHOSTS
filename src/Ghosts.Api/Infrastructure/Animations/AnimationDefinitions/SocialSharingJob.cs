@@ -34,6 +34,7 @@ namespace Ghosts.Api.Infrastructure.Animations.AnimationDefinitions
         private readonly ApplicationDbContext _context;
         private readonly IMachineUpdateService _updateService;
         private readonly IFormatterService _formatterService;
+        private readonly IEvidenceProcessor _evidenceProcessor;
         private static readonly string[] ar = new[] { "user", "usr", "u", "uid", "user_id", "u_id" };
 
         public SocialSharingJob(ApplicationSettings configuration, IServiceScopeFactory scopeFactory, Random random,
@@ -50,6 +51,7 @@ namespace Ghosts.Api.Infrastructure.Animations.AnimationDefinitions
 
                 _cancellationToken = cancellationToken;
                 _updateService = innerScope.ServiceProvider.GetRequiredService<IMachineUpdateService>();
+                _evidenceProcessor = innerScope.ServiceProvider.GetService<IEvidenceProcessor>();
 
                 _formatterService =
                     new ContentCreationService(_configuration.AnimatorSettings.Animations.SocialSharing.ContentEngine).FormatterService;
@@ -220,6 +222,16 @@ namespace Ghosts.Api.Infrastructure.Animations.AnimationDefinitions
 
             await _context.NpcActivities.AddRangeAsync(activities, _cancellationToken);
             await _context.SaveChangesAsync(_cancellationToken);
+
+            // Process social posts as evidence for belief tracking
+            if (_evidenceProcessor != null)
+            {
+                foreach (var activity in activities)
+                {
+                    await _evidenceProcessor.ProcessSocialEvidenceAsync(
+                        activity.NpcId, activity.Detail, activity.ActivityType, _cancellationToken);
+                }
+            }
         }
     }
 }
