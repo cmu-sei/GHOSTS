@@ -9,6 +9,7 @@ using Ghosts.Animator;
 using Ghosts.Animator.Models;
 using Ghosts.Api.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using NLog;
 
 namespace Ghosts.Api.Infrastructure.Services;
@@ -40,10 +41,11 @@ public interface INpcService
     public Task<IEnumerable<NpcRecord>> GetByScenarioId(int scenarioId);
 }
 
-public class NpcService(ApplicationDbContext context) : INpcService
+public class NpcService(ApplicationDbContext context, IEvidenceProcessor evidenceProcessor) : INpcService
 {
     private static readonly Logger _log = LogManager.GetCurrentClassLogger();
     private readonly ApplicationDbContext _context = context;
+    private readonly IEvidenceProcessor _evidenceProcessor = evidenceProcessor;
 
     public async Task<IEnumerable<NpcRecord>> GetAll()
     {
@@ -148,6 +150,24 @@ public class NpcService(ApplicationDbContext context) : INpcService
 
         _context.NpcActivities.Add(npcActivity);
         await _context.SaveChangesAsync();
+
+        // Process social evidence for belief tracking
+        if (npcActivity.ActivityType == NpcActivity.ActivityTypes.SocialMediaPost)
+        {
+            try
+            {
+                await _evidenceProcessor.ProcessSocialEvidenceAsync(
+                    npcActivity.NpcId,
+                    npcActivity.Detail,
+                    npcActivity.ActivityType,
+                    CancellationToken.None);
+            }
+            catch (Exception ex)
+            {
+                _log.Error(ex, $"Error processing social evidence for activity {npcActivity.Id}");
+                // Don't fail the activity creation if evidence processing fails
+            }
+        }
 
         return npcActivity;
     }

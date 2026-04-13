@@ -34,16 +34,19 @@ public class EvidenceProcessorService(ApplicationDbContext context) : IEvidenceP
 
         try
         {
-            // 1. Load author NPC to get ScenarioId
+            // 1. Load author NPC to get ScenarioId (optional)
             var author = await _context.Npcs.AsNoTracking()
                 .FirstOrDefaultAsync(n => n.Id == authorNpcId, ct);
-            if (author?.ScenarioId == null) return;
+            if (author == null) return;
 
-            // 2. Find running execution for this scenario
-            var execution = await _context.Executions
-                .FirstOrDefaultAsync(e => e.ScenarioId == author.ScenarioId
-                    && e.Status == ExecutionStatus.Running, ct);
-            if (execution == null) return;
+            // 2. Find running execution for this scenario (optional — beliefs tracked globally if none)
+            Execution execution = null;
+            if (author.ScenarioId != null)
+            {
+                execution = await _context.Executions
+                    .FirstOrDefaultAsync(e => e.ScenarioId == author.ScenarioId
+                        && e.Status == ExecutionStatus.Running, ct);
+            }
 
             // 3. Load active hypotheses (execution-scoped or global)
             var hypotheses = await GetActiveHypothesesAsync(execution, ct);
@@ -90,7 +93,7 @@ public class EvidenceProcessorService(ApplicationDbContext context) : IEvidenceP
                         Step = step,
                         Likelihood = likelihoodH1,
                         Posterior = bayes.PosteriorH1,
-                        ExecutionId = execution.Id,
+                        ExecutionId = execution?.Id,
                         CreatedUtc = DateTime.UtcNow
                     });
                 }
@@ -114,6 +117,14 @@ public class EvidenceProcessorService(ApplicationDbContext context) : IEvidenceP
 
     private async Task<List<Hypothesis>> GetActiveHypothesesAsync(Execution execution, CancellationToken ct)
     {
+        // No execution — load all globally active hypotheses
+        if (execution == null)
+        {
+            return await _context.Hypotheses
+                .Where(h => h.IsActive)
+                .ToListAsync(ct);
+        }
+
         // Check if execution specifies active hypothesis IDs
         int[] hypothesisIds = null;
         try
