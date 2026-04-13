@@ -1,0 +1,115 @@
+{
+  "bootstrap-sha": "837bbc760ded97aedc879c06ea27df5d095769e2",
+  "packages": {
+    ".": {
+      "release-type": "node",
+      "include-component-in-tag": false,
+      "extra-files": [
+        {
+          "type": "yaml",
+          "path": "CITATION.cff",
+          "jsonpath": "$.version"
+        },
+        {
+          "type": "json",
+          "path": "src/Ghosts.Frontend/package.json",
+          "jsonpath": "$.version"
+        },
+        {
+          "type": "xml",
+          "path": "src/Ghosts.Api/Ghosts.Api.csproj",
+          "xpath": "//AssemblyVersion"
+        },
+        {
+          "type": "xml",
+          "path": "src/Ghosts.Api/Ghosts.Api.csproj",
+          "xpath": "//FileVersion"
+        },
+        {
+          "type": "xml",
+          "path": "src/Ghosts.Domain/Ghosts.Domain.csproj",
+          "xpath": "//AssemblyVersion"
+        },
+        {
+          "type": "xml",
+          "path": "src/Ghosts.Domain/Ghosts.Domain.csproj",
+          "xpath": "//FileVersion"
+        },
+        {
+          "type": "xml",
+          "path": "src/Ghosts.Animator/Ghosts.Animator.csproj",
+          "xpath": "//AssemblyVersion"
+        },
+        {
+          "type": "xml",
+          "path": "src/Ghosts.Animator/Ghosts.Animator.csproj",
+          "xpath": "//FileVersion"
+        },
+        {
+          "type": "xml",
+          "path": "src/Ghosts.Pandora/src/Ghosts.Pandora.csproj",
+          "xpath": "//Version"
+        },
+        {
+          "type": "xml",
+          "path": "src/Ghosts.Pandora/src/Ghosts.Pandora.csproj",
+          "xpath": "//ReleaseVersion"
+        },
+        {
+          "type": "xml",
+          "path": "src/Ghosts.Pandora/src/Ghosts.Pandora.csproj",
+          "xpath": "//AssemblyVersion"
+        },
+        {
+          "type": "xml",
+          "path": "src/Ghosts.Pandora/src/Ghosts.Pandora.csproj",
+          "xpath": "//FileVersion"
+        },
+        {
+          "type": "xml",
+          "path": "src/Ghosts.Client.Universal/Ghosts.Client.Universal.csproj",
+          "xpath": "//Version"
+        },
+        {
+          "type": "xml",
+          "path": "src/Ghosts.Client.Universal/Ghosts.Client.Universal.csproj",
+          "xpath": "//ReleaseVersion"
+        },
+        {
+          "type": "xml",
+          "path": "src/Ghosts.Client.Universal/Ghosts.Client.Universal.csproj",
+          "xpath": "//AssemblyVersion"
+        },
+        {
+          "type": "xml",
+          "path": "src/Ghosts.Client.Universal/Ghosts.Client.Universal.csproj",
+          "xpath": "//FileVersion"
+        },
+        {
+          "type": "xml",
+          "path": "src/Ghosts.Client.Lite/src/Ghosts.Client.Lite.csproj",
+          "xpath": "//Version"
+        },
+        {
+          "type": "xml",
+          "path": "src/Ghosts.Client.Lite/src/Ghosts.Client.Lite.csproj",
+          "xpath": "//ReleaseVersion"
+        },
+        {
+          "type": "xml",
+          "path": "src/Ghosts.Client.Lite/src/Ghosts.Client.Lite.csproj",
+          "xpath": "//AssemblyVersion"
+        },
+        {
+          "type": "xml",
+          "path": "src/Ghosts.Client.Lite/src/Ghosts.Client.Lite.csproj",
+          "xpath": "//FileVersion"
+        },
+        {
+          "type": "generic",
+          "path": "src/Ghosts.Client.Windows/Properties/AssemblyInfo.cs"
+        }
+      ]
+    }
+  }
+}
