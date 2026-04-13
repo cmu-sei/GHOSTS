@@ -2,6 +2,7 @@
 
 using System;
 using System.Threading.Tasks;
+using Ghosts.Api.Infrastructure.ContentServices.Bedrock;
 using Ghosts.Api.Infrastructure.ContentServices.Ollama;
 using Ghosts.Api.Infrastructure.ContentServices.OpenAi;
 using Ghosts.Api.Infrastructure.ContentServices.Shadows;
@@ -18,6 +19,7 @@ public class ContentCreationService
     private readonly OpenAiFormatterService _openAiFormatterService;
     private readonly OllamaFormatterService _ollamaFormatterService;
     private readonly ShadowsFormatterService _shadowsFormatterService;
+    private readonly BedrockFormatterService _bedrockFormatterService;
     public IFormatterService FormatterService;
 
     public ContentCreationService(ApplicationSettings.AnimatorSettingsDetail.ContentEngineSettings configuration)
@@ -42,6 +44,11 @@ public class ContentCreationService
         {
             _shadowsFormatterService = new ShadowsFormatterService(_configuration);
             FormatterService = _shadowsFormatterService;
+        }
+        else if (_configuration.Source.Equals("bedrock", StringComparison.CurrentCultureIgnoreCase))
+        {
+            _bedrockFormatterService = new BedrockFormatterService(_configuration);
+            FormatterService = _bedrockFormatterService;
         }
 
         _log.Trace($"Content service configured for {_configuration.Source} on {_configuration.Host} running {_configuration.Model}");

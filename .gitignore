@@ -332,6 +332,13 @@ output/
 .devcontainer/certs/*
 .devcontainer/aws.env
 
+# Environment / secrets files — never commit credentials
+.env
+.env.*
+!.env.example
+*.env
+
 *.claude/*
 .claude/settings.local.json
 src/apphost/n8n_data/*
+src/Ghosts.Api/config/AttackData/enterprise-attack.json

@@ -8,7 +8,9 @@ using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Ghosts.Api.Infrastructure.Models;
+using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Api.Infrastructure.Services;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Ghosts.Api.Controllers.Api;
@@ -18,11 +20,13 @@ namespace Ghosts.Api.Controllers.Api;
 public class ExecutionsController : ControllerBase
 {
     private readonly IExecutionService _executionService;
+    private readonly ApplicationDbContext _dbContext;
     private readonly ILogger<ExecutionsController> _logger;
 
-    public ExecutionsController(IExecutionService executionService, ILogger<ExecutionsController> logger)
+    public ExecutionsController(IExecutionService executionService, ApplicationDbContext dbContext, ILogger<ExecutionsController> logger)
     {
         _executionService = executionService;
+        _dbContext = dbContext;
         _logger = logger;
     }
 
@@ -377,6 +381,52 @@ public class ExecutionsController : ControllerBase
         {
             _logger.LogError(ex, "Error setting error details for execution {ExecutionId}", id);
             return StatusCode(500, new { error = "Error setting execution error" });
+        }
+    }
+
+    // GET: api/executions/5/beliefs
+    [HttpGet("{id}/beliefs")]
+    public async Task<IActionResult> GetExecutionBeliefs(
+        int id,
+        [FromQuery] Guid? npcId,
+        [FromQuery] string hypothesis,
+        CancellationToken ct)
+    {
+        try
+        {
+            var query = _dbContext.NpcBeliefs
+                .Where(b => b.ExecutionId == id)
+                .AsQueryable();
+
+            if (npcId.HasValue)
+                query = query.Where(b => b.NpcId == npcId.Value);
+
+            if (!string.IsNullOrEmpty(hypothesis))
+                query = query.Where(b => b.Name == hypothesis);
+
+            var beliefs = await query
+                .OrderBy(b => b.NpcId)
+                .ThenBy(b => b.Name)
+                .ThenBy(b => b.Step)
+                .Select(b => new
+                {
+                    b.Id,
+                    b.NpcId,
+                    b.FromNpcId,
+                    Hypothesis = b.Name,
+                    b.Step,
+                    b.Likelihood,
+                    b.Posterior,
+                    b.CreatedUtc
+                })
+                .ToListAsync(ct);
+
+            return Ok(beliefs);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting beliefs for execution {ExecutionId}", id);
+            return StatusCode(500, new { error = "Error retrieving execution beliefs" });
         }
     }
 

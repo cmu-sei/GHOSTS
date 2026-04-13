@@ -1,22 +1,25 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
+using System.IO;
 using System.Threading.Tasks;
 using Ghosts.Api.Infrastructure.Models;
+using Ghosts.Api.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Ghosts.Api.Infrastructure.Data
 {
     public class DbInitializer
     {
-        public static async Task Initialize(ApplicationDbContext context, ILogger<DbInitializer> logger)
+        public static async Task Initialize(ApplicationDbContext context, ILogger<DbInitializer> logger, IServiceProvider serviceProvider)
         {
-            // Apply pending migrations (better than EnsureCreatedAsync for production)
-            await context.Database.MigrateAsync();
-
             // Ensure NPC Campaign/Enclave/Team columns exist (for databases created before these fields were added)
             await EnsureNpcColumnsExist(context, logger);
+
+            // Import MITRE ATT&CK data if not already loaded
+            await ImportMitreAttackData(context, logger, serviceProvider);
 
             // Check if database is already seeded
             if (await context.Scenarios.AnyAsync())
@@ -79,6 +82,40 @@ namespace Ghosts.Api.Infrastructure.Data
             catch (Exception ex)
             {
                 logger.LogWarning(ex, "Could not verify/add NPC columns, they may already exist or database may not be ready");
+            }
+        }
+
+        private static async Task ImportMitreAttackData(ApplicationDbContext context, ILogger<DbInitializer> logger, IServiceProvider serviceProvider)
+        {
+            try
+            {
+                // Check if MITRE data is already loaded
+                if (await context.AttackTechniques.AnyAsync())
+                {
+                    logger.LogInformation("MITRE ATT&CK data already loaded");
+                    return;
+                }
+
+                logger.LogInformation("Loading MITRE ATT&CK data...");
+
+                var stixPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config", "AttackData", "enterprise-attack.json");
+                if (!File.Exists(stixPath))
+                {
+                    logger.LogWarning($"MITRE ATT&CK data file not found at {stixPath}. Skipping MITRE data import.");
+                    return;
+                }
+
+                // Get the enrichment service from DI
+                using var scope = serviceProvider.CreateScope();
+                var enrichmentService = scope.ServiceProvider.GetRequiredService<IScenarioEnrichmentService>();
+
+                await enrichmentService.ImportAttackDataAsync(stixPath, default);
+
+                logger.LogInformation("MITRE ATT&CK data loaded successfully");
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error loading MITRE ATT&CK data. Scenario Builder enrichment features may not work properly.");
             }
         }
 

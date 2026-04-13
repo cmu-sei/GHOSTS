@@ -1,0 +1,191 @@
+<div class="graph-container">
+  <div class="graph-header">
+    <h2>Knowledge Graph</h2>
+    <p class="subtitle">Interactive visualization of scenario entities and relationships</p>
+  </div>
+
+  @if (loading()) {
+  <div class="loading">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Loading graph data...</p>
+  </div>
+  } @else {
+  <div class="graph-workspace" [class.has-detail]="selectedNode()">
+    <div class="graph-controls">
+      <mat-card class="controls-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>tune</mat-icon>
+            Filters
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <form [formGroup]="filterForm">
+            <div class="control-section">
+              <label class="control-label">Confidence Threshold</label>
+              <mat-slider
+                min="0"
+                max="1"
+                step="0.1"
+                discrete
+                [displayWith]="formatConfidence"
+                class="confidence-slider">
+                <input matSliderThumb formControlName="confidenceThreshold" />
+              </mat-slider>
+              <span class="threshold-value"
+                >{{ (filterForm.value.confidenceThreshold * 100).toFixed(0) }}%</span
+              >
+            </div>
+
+            <div class="control-section">
+              <label class="control-label">Entity Types</label>
+              <div class="type-checkboxes">
+                @for (type of entityTypes; track type) {
+                <mat-checkbox
+                  [checked]="filterForm.value.selectedTypes.includes(type)"
+                  (change)="onTypeToggle(type, $event.checked)">
+                  <span class="type-indicator" [style.background-color]="getEntityColor(type)"></span>
+                  {{ type }}
+                </mat-checkbox>
+                }
+              </div>
+            </div>
+
+            <button mat-raised-button color="primary" (click)="resetView()" class="reset-button">
+              <mat-icon>center_focus_strong</mat-icon>
+              Reset View
+            </button>
+          </form>
+        </mat-card-content>
+      </mat-card>
+
+    </div>
+
+    <div class="graph-main">
+      <div class="graph-svg-container"></div>
+    </div>
+
+    @if (selectedNode()) {
+    <div class="detail-panel">
+      <mat-card class="detail-card">
+        <mat-card-header>
+          <mat-card-title>
+            <span
+              class="entity-type-badge"
+              [style.background-color]="getEntityColor(selectedNode()!.entityType)">
+              {{ selectedNode()!.entityType }}
+            </span>
+            {{ selectedNode()!.name }}
+          </mat-card-title>
+          <button mat-icon-button (click)="closeDetailPanel()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="detail-section">
+            <label>Description</label>
+            <p>{{ selectedNode()!.description || 'No description' }}</p>
+          </div>
+
+          <div class="detail-section">
+            <label>Confidence</label>
+            <p>{{ (selectedNode()!.confidence * 100).toFixed(0) }}%</p>
+          </div>
+
+          <div class="detail-section">
+            <label>Origin</label>
+            <p>{{ selectedNode()!.origin }}</p>
+          </div>
+
+          @if (selectedNode()!.properties) {
+          <div class="detail-section">
+            <label>Properties</label>
+            <pre class="properties-json">{{ selectedNode()!.properties }}</pre>
+          </div>
+          }
+
+          @if (!editMode() && !relationshipMode()) {
+          <div class="detail-actions">
+            <button mat-button color="primary" (click)="startEdit()">
+              <mat-icon>edit</mat-icon>
+              Edit Entity
+            </button>
+            <button mat-button color="accent" (click)="startAddRelationship()">
+              <mat-icon>add_link</mat-icon>
+              Add Relationship
+            </button>
+          </div>
+          }
+
+          @if (editMode()) {
+          <form [formGroup]="editForm" class="inline-form">
+            <h4 class="inline-form-title">Edit Entity</h4>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Name</mat-label>
+              <input matInput formControlName="name" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Type</mat-label>
+              <mat-select formControlName="entityType">
+                @for (type of entityTypes; track type) {
+                <mat-option [value]="type">
+                  <span [style.color]="getEntityColor(type)">●</span> {{ type }}
+                </mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Description</mat-label>
+              <textarea matInput formControlName="description" rows="2"></textarea>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Confidence</mat-label>
+              <input matInput type="number" formControlName="confidence" min="0" max="1" step="0.1" />
+            </mat-form-field>
+            <div class="inline-form-actions">
+              <button mat-raised-button color="primary" (click)="saveEdit()" [disabled]="editForm.invalid || saving()">
+                {{ saving() ? 'Saving…' : 'Save' }}
+              </button>
+              <button mat-button (click)="cancelEdit()">Cancel</button>
+            </div>
+          </form>
+          }
+
+          @if (relationshipMode()) {
+          <form [formGroup]="relationshipForm" class="inline-form">
+            <h4 class="inline-form-title">Add Relationship</h4>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Target Entity</mat-label>
+              <mat-select formControlName="targetEntityId">
+                @for (node of getOtherNodes(); track node.id) {
+                <mat-option [value]="node.id">{{ node.entity.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Relationship Type</mat-label>
+              <mat-select formControlName="edgeType">
+                @for (type of edgeTypes; track type) {
+                <mat-option [value]="type">{{ type }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Label (optional)</mat-label>
+              <input matInput formControlName="label" placeholder="e.g. deployed, targeted" />
+            </mat-form-field>
+            <div class="inline-form-actions">
+              <button mat-raised-button color="accent" (click)="saveRelationship()" [disabled]="relationshipForm.invalid || saving()">
+                {{ saving() ? 'Saving…' : 'Add' }}
+              </button>
+              <button mat-button (click)="cancelEdit()">Cancel</button>
+            </div>
+          </form>
+          }
+        </mat-card-content>
+      </mat-card>
+    </div>
+    }
+  </div>
+  }
+</div>

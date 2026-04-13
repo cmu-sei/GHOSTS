@@ -1,0 +1,162 @@
+<div class="extraction-container">
+  <h2>Extract Entities</h2>
+  <p class="subtitle">Run extraction to identify entities and relationships from your sources</p>
+
+  @if (loading()) {
+  <div class="loading">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Loading extraction status...</p>
+  </div>
+  } @else {
+  <mat-card class="extraction-card">
+    <mat-card-header>
+      <mat-card-title>Extraction Status</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="status-summary">
+        <div class="stat">
+          <span class="stat-label">Total Sources</span>
+          <span class="stat-value">{{ sources().length }}</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Total Chunks</span>
+          <span class="stat-value">{{ getTotalChunks() }}</span>
+        </div>
+      </div>
+
+      <div class="progress-section">
+        <mat-progress-bar mode="determinate" [value]="getProgressValue()"></mat-progress-bar>
+        <p class="progress-text">{{ getProgressValue().toFixed(0) }}% Complete</p>
+      </div>
+
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="extractAll()"
+        [disabled]="extracting() || sources().length === 0"
+        class="extract-button">
+        @if (extracting()) {
+        <mat-spinner diameter="20" style="display: inline-block; margin-right: 8px"></mat-spinner>
+        Extracting...
+        } @else {
+        <mat-icon>psychology</mat-icon>
+        Extract All Sources
+        }
+      </button>
+
+      @if (extractionProgress()) {
+      <div class="live-progress">
+        <div class="progress-header">
+          <mat-icon>sync</mat-icon>
+          <h4>Live Extraction Progress</h4>
+        </div>
+        <div class="progress-details">
+          <div class="progress-stat">
+            <span class="label">Status:</span>
+            <span class="value">{{ extractionProgress()!.status }}</span>
+          </div>
+          <div class="progress-stat">
+            <span class="label">Chunks:</span>
+            <span class="value">{{ extractionProgress()!.chunksProcessed }} / {{ extractionProgress()!.totalChunks }}</span>
+          </div>
+          <div class="progress-stat">
+            <span class="label">Entities:</span>
+            <span class="value">{{ extractionProgress()!.entitiesCreated }}</span>
+          </div>
+          <div class="progress-stat">
+            <span class="label">Relationships:</span>
+            <span class="value">{{ extractionProgress()!.edgesCreated }}</span>
+          </div>
+        </div>
+        <mat-progress-bar
+          mode="determinate"
+          [value]="(extractionProgress()!.chunksProcessed / extractionProgress()!.totalChunks) * 100">
+        </mat-progress-bar>
+      </div>
+      }
+    </mat-card-content>
+  </mat-card>
+
+  @if (totalEntityCount() !== null && totalEntityCount()! < 10 && !extracting()) {
+  <mat-card class="result-card warn low-entity-warning">
+    <mat-card-content>
+      <div class="warning-row">
+        <mat-icon>warning</mat-icon>
+        <div>
+          <strong>Low entity count ({{ totalEntityCount() }} total)</strong>
+          <p>The graph has fewer than 10 entities. Consider adding more source content and re-running extraction for richer results.</p>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  }
+
+  @if (extractionResult()) {
+  <mat-card class="result-card success">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>check_circle</mat-icon>
+        Extraction Complete
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="result-stats">
+        <div class="result-stat">
+          <span class="result-label">Entities Created</span>
+          <span class="result-value">{{ extractionResult()!.entitiesCreated }}</span>
+        </div>
+        <div class="result-stat">
+          <span class="result-label">Relationships Created</span>
+          <span class="result-value">{{ extractionResult()!.edgesCreated }}</span>
+        </div>
+        <div class="result-stat">
+          <span class="result-label">Chunks Processed</span>
+          <span class="result-value">{{ extractionResult()!.chunksProcessed }}</span>
+        </div>
+      </div>
+
+      @if (filteredErrors(extractionResult()!.errors).length > 0) {
+      <div class="errors-section">
+        <h4>Errors</h4>
+        @for (error of filteredErrors(extractionResult()!.errors); track $index) {
+        <div class="error-item">{{ error }}</div>
+        }
+      </div>
+      }
+    </mat-card-content>
+  </mat-card>
+  }
+
+  <mat-card class="sources-detail-card">
+    <mat-card-header>
+      <mat-card-title>Source Details</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      @if (sources().length === 0) {
+      <div class="empty-state">
+        <mat-icon>info</mat-icon>
+        <p>No sources available. Add sources in the previous step.</p>
+      </div>
+      } @else {
+      <div class="sources-list">
+        @for (source of sources(); track source.id) {
+        <div class="source-item">
+          <div class="source-header">
+            <h4>{{ source.name }}</h4>
+            <mat-chip [color]="getStatusColor(source.status)">{{ source.status }}</mat-chip>
+          </div>
+          <div class="source-info">
+            <span>Type: {{ source.sourceType }}</span>
+            <span>Chunks: {{ source.chunkCount || 0 }}</span>
+          </div>
+          @if (source.errorMessage && !isNullRefError(source.errorMessage)) {
+          <div class="source-error">Error: {{ source.errorMessage }}</div>
+          }
+        </div>
+        }
+      </div>
+      }
+    </mat-card-content>
+  </mat-card>
+  }
+</div>

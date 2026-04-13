@@ -1,9 +1,20 @@
 <div class="page-header">
   <h1>Scenarios</h1>
-  <button mat-raised-button color="primary" (click)="createNewScenario()">
+  <button mat-raised-button color="primary" [matMenuTriggerFor]="newScenarioMenu">
     <i class="fas fa-plus"></i>
-    Create New Scenario
+    New Scenario
+    <i class="fas fa-caret-down" style="margin-left:6px;margin-right:0"></i>
   </button>
+  <mat-menu #newScenarioMenu="matMenu">
+    <button mat-menu-item (click)="createNewScenario()">
+      <i class="fas fa-project-diagram"></i>
+      <span>Use Scenario Builder</span>
+    </button>
+    <button mat-menu-item (click)="createNewScenarioManual()">
+      <i class="fas fa-edit"></i>
+      <span>Manual Entry</span>
+    </button>
+  </mat-menu>
 </div>
 
 <div class="search-container">
@@ -41,9 +52,10 @@
   <i class="fas fa-folder-open"></i>
   <h2>No scenarios yet</h2>
   <p>Create your first cyber exercise scenario to get started</p>
-  <button mat-raised-button color="primary" (click)="createNewScenario()">
+  <button mat-raised-button color="primary" [matMenuTriggerFor]="newScenarioMenu">
     <i class="fas fa-plus"></i>
-    Create New Scenario
+    New Scenario
+    <i class="fas fa-caret-down" style="margin-left:6px;margin-right:0"></i>
   </button>
 </div>
 }
@@ -54,7 +66,14 @@
   @for (scenario of filteredScenarios(); track scenario.id) {
   <mat-card class="scenario-card" (click)="editScenario(scenario.id)">
     <mat-card-header>
-      <mat-card-title>{{ scenario.name }}</mat-card-title>
+      <mat-card-title>
+        {{ scenario.name }}
+        @if (scenario.builderStatus && scenario.builderStatus !== 'None') {
+        <span class="builder-badge" [title]="'Builder status: ' + scenario.builderStatus">
+          <i class="fas fa-project-diagram"></i> {{ scenario.builderStatus }}
+        </span>
+        }
+      </mat-card-title>
       <mat-card-subtitle>
         <span>Updated: {{ formatDate(scenario.updatedAt) }}</span>
       </mat-card-subtitle>
@@ -91,6 +110,13 @@
       <button mat-button color="primary" (click)="editScenario(scenario.id); $event.stopPropagation()">
         <i class="fas fa-edit"></i>
         Edit
+      </button>
+      <button
+        mat-button
+        color="accent"
+        (click)="openBuilder(scenario.id, $event)">
+        <i class="fas fa-project-diagram"></i>
+        Builder
       </button>
       <button
         mat-button

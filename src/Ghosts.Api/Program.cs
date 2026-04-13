@@ -48,6 +48,7 @@ public class Program
         _log.Info(msg);
 
         ApiDetails.LoadConfiguration();
+        LoadDotEnv();
 
         var builder = WebApplication.CreateBuilder(args);
 
@@ -121,7 +122,16 @@ public class Program
         builder.Services.AddScoped<ISurveyService, SurveyService>();
         builder.Services.AddScoped<INpcService, NpcService>();
         builder.Services.AddScoped<IScenarioService, ScenarioService>();
+        builder.Services.AddScoped<DbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
         builder.Services.AddScoped<IExecutionService, ExecutionService>();
+
+        // Scenario Builder services
+        builder.Services.AddScoped<IScenarioSourceService, ScenarioSourceService>();
+        builder.Services.AddScoped<IScenarioGraphService, ScenarioGraphService>();
+        builder.Services.AddScoped<IScenarioExtractionService, ScenarioExtractionService>();
+        builder.Services.AddScoped<IScenarioEnrichmentService, ScenarioEnrichmentService>();
+        builder.Services.AddScoped<IScenarioCompilerService, ScenarioCompilerService>();
+        builder.Services.AddScoped<IEvidenceProcessor, EvidenceProcessorService>();
 
         builder.Services.AddScoped<IClientResultsService, ClientResultsService>();
         builder.Services.AddScoped<IClientIdService, ClientIdService>();
@@ -173,7 +183,7 @@ public class Program
                 var context = services.GetRequiredService<ApplicationDbContext>();
                 var dbInitializerLogger = services.GetRequiredService<ILogger<DbInitializer>>();
 
-                DbInitializer.Initialize(context, dbInitializerLogger).Wait();
+                DbInitializer.Initialize(context, dbInitializerLogger, services).Wait();
             }
             catch (Exception ex)
             {
@@ -205,6 +215,8 @@ public class Program
         app.MapHub<ClientHub>("/api/clientHub");
         app.MapHub<ActivityHub>("/hubs/activities");
         app.MapHub<ActivityHub>("/api/hubs/activities");
+        app.MapHub<ScenarioBuilderHub>("/hubs/scenarioBuilder");
+        app.MapHub<ScenarioBuilderHub>("/api/hubs/scenarioBuilder");
 
         // Configure Swagger
         app.UseSwagger();
@@ -214,5 +226,34 @@ public class Program
         });
 
         app.Run();
+    }
+
+    private static void LoadDotEnv()
+    {
+        var envFile = Path.Combine(AppContext.BaseDirectory, ".env");
+        if (!File.Exists(envFile))
+            envFile = Path.Combine(Directory.GetCurrentDirectory(), ".env");
+        if (!File.Exists(envFile))
+            return;
+
+        foreach (var line in File.ReadAllLines(envFile))
+        {
+            var trimmed = line.Trim();
+            if (trimmed.Length == 0 || trimmed.StartsWith('#'))
+                continue;
+
+            var idx = trimmed.IndexOf('=');
+            if (idx <= 0)
+                continue;
+
+            var key = trimmed[..idx].Trim();
+            var value = trimmed[(idx + 1)..].Trim().Trim('"').Trim('\'');
+
+            // Only set if not already present — real env vars take precedence
+            if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable(key)))
+                Environment.SetEnvironmentVariable(key, value);
+        }
+
+        _log.Info("Loaded environment variables from .env file");
     }
 }

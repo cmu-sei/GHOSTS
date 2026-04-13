@@ -255,6 +255,13 @@ Hub methods clients can call:
 - `Execution` / `ExecutionEvent` / `ExecutionMetricSnapshot` - Scenario run tracking
 - `Nation` / `ThreatActor` / `Inject` - Scenario context
 
+**Scenario Builder (graph-based):**
+- `scenario_sources` / `scenario_source_chunks` - Ingested content
+- `scenario_entities` / `scenario_edges` - Extracted knowledge graph
+- `scenario_enrichments` - MITRE ATT&CK mappings
+- `scenario_compilations` - Compiled output
+- `scenario_npc_assignments` - Maps compiled NPCs to specific machines for deployment
+
 **Administrative:**
 - `Trackable` - Observable action definitions
 - `Webhook` - External integrations
@@ -283,6 +290,8 @@ Hub methods clients can call:
 - `ScenariosController` / `ExecutionsController` - Scenario management
 - `AnimationsController` / `AnimationJobsController` - Animator job control
 - `WebhooksController` - Webhook configuration
+- `ScenarioBuilderController` - Full graph scenario workflow: sources, extraction, entities, edges, enrichment, compilation, NPC-to-machine assignment, and deployment readiness
+- `AttackController` - MITRE ATT&CK data import and search
 
 **Documentation:** Swagger/OpenAPI at `/swagger/v9/swagger.json`
 
@@ -312,6 +321,114 @@ Provides dynamic web content for realistic browser simulation:
 - Environment variable configuration (`MODE_TYPE`, `SITE_TYPE`, `ARTICLE_COUNT`)
 - Generates fake blog posts, news articles, social content
 - Separate web service (not embedded in API)
+
+### Scenario Builder - Knowledge Graph Scenario Construction
+
+**Scenario Builder** is a MiroFish-inspired knowledge graph system for building threat scenarios from unstructured text. It uses LLM-powered entity extraction, MITRE ATT&CK enrichment, and graph visualization to transform intelligence reports into actionable scenarios.
+
+**Architecture Flow:**
+1. **Sources** - Ingest text, URLs, or files
+2. **Chunking** - Split content into token-sized chunks
+3. **Extraction** - LLM extracts entities and relationships
+4. **Review** - Manual review/merge/edit entities
+5. **Graph** - D3.js force-directed visualization
+6. **Enrichment** - Map to MITRE ATT&CK techniques and threat groups
+7. **Compilation** - Generate GHOSTS timelines and scenarios
+
+**Database Schema (PostgreSQL):**
+- `scenario_sources` - Text, URL, or file sources
+- `scenario_source_chunks` - Chunked content with extraction status
+- `scenario_entities` - Extracted entities (Person, Organization, ThreatActor, System, etc.)
+- `scenario_edges` - Relationships between entities (Targets, Uses, Exploits, etc.)
+- `scenario_enrichments` - MITRE ATT&CK technique/group mappings
+- `scenario_compilations` - Compiled output scenarios
+
+**Key Services:**
+- `ScenarioSourceService` - Source ingestion and chunking
+- `ScenarioExtractionService` - LLM-powered entity/relationship extraction
+- `ScenarioGraphService` - Graph data retrieval and manipulation
+- `ScenarioEnrichmentService` - MITRE ATT&CK integration
+- `ScenarioCompilerService` - Scenario compilation to timelines
+
+**LLM Integration:**
+- Configured via `appsettings.json` → `ScenarioBuilder:ContentEngine`
+- `ContentCreationService` routes to one of four providers based on `Source`:
+  - `ollama` - Local Ollama instance; `OLLAMA_HOST` / `OLLAMA_MODEL` env vars override config
+  - `openai` - OpenAI API
+  - `bedrock` - AWS Bedrock via `AWSSDK.BedrockRuntime`; uses default AWS credential chain (env vars → `~/.aws/credentials` → IAM role) and region from `AwsRegion` → `AWS_DEFAULT_REGION` → `us-east-1`
+- Extraction prompt: `config/ContentServices/ScenarioBuilder/ExtractEntities.txt`
+- Returns structured JSON with entities and edges
+- `.env` files in the binary directory are auto-loaded at startup (existing env vars take precedence)
+
+**Real-time Updates (SignalR):**
+- `ScenarioBuilderHub` at `/api/hubs/scenarioBuilder`
+- Broadcasts extraction progress: status, chunks processed, entities/edges created
+- Frontend subscribes with `scenarioId` query parameter
+- Automatic reconnection and progress tracking
+
+**MITRE ATT&CK Integration:**
+- Import via `AttackController.ImportData()` from STIX JSON
+- Stores techniques (835+), groups (187+), relationships (4,362+)
+- Search endpoints for techniques and threat actor groups
+- Apply enrichments to entities for scenario context
+
+**Entity Types:**
+- Person, Organization, System, Network, Location
+- Software, ThreatActor, Campaign, Vulnerability
+- DataAsset, Service, and Custom
+
+**Edge Types:**
+- MemberOf, Targets, Exploits, Uses, LocatedAt
+- CommunicatesWith, DependsOn, Accesses, Owns
+- ReportsTo, AffiliatedWith, DefendedBy, CommandsAndControl
+
+**Extraction Improvements (2026-03-26):**
+- **Entity Deduplication**: Entities with same name but different types merge (e.g., "Stuxnet" as Software|Malware)
+- **Fuzzy Matching**: Handles LLM inconsistencies (e.g., "Stuxnet" vs "Stuxnet virus")
+- **Lenient JSON Parser**: Gracefully handles malformed LLM responses (objects as strings, extra quotes, arrays)
+- **Pre-loading**: Loads all existing entities before processing to prevent duplicates
+- **Real-time Progress**: WebSocket updates during extraction with live entity/edge counts
+
+**UI Components (Angular):**
+- `builder-sources` - Add text/URL/file sources
+- `builder-extraction` - Run LLM extraction with live progress
+- `builder-entities` - Review, edit, merge, delete entities
+- `builder-graph` - D3.js force-directed graph visualization
+- `builder-enrichment` - Search and apply MITRE ATT&CK data
+- `builder-compile` - Generate GHOSTS scenarios
+
+**Configuration:**
+```json
+{
+  "ScenarioBuilder": {
+    "ContentEngine": {
+      "Source": "ollama",
+      "Host": "http://host.docker.internal:11434",
+      "Model": "mistral:7b"
+    }
+  }
+}
+```
+
+For AWS Bedrock:
+```json
+{
+  "ScenarioBuilder": {
+    "ContentEngine": {
+      "Source": "bedrock",
+      "Model": "us.anthropic.claude-sonnet-4-5",
+      "AwsRegion": "us-east-1"
+    }
+  }
+}
+```
+
+**Development Notes:**
+- Copy config files to build output: `config/ContentServices/ScenarioBuilder/` and `config/AttackData/`
+- LLM must return valid JSON with `entities[]` and `edges[]` arrays
+- Entity names should be concise and consistent
+- Edge source/target must exactly match entity names (case-insensitive)
+- Graph requires entities and edges to render - run extraction first
 
 ## Key Design Patterns
 
@@ -376,6 +493,18 @@ API Server
 - `src/app/services/` - API communication services
 - Material Design components throughout
 - SignalR HubConnection for real-time updates
+
+**Scenario Builder UI Features:**
+- **Entity Type Chips**: Bootstrap-style outline chips with colored borders (not filled backgrounds)
+- **Guidance & Help**: Info boxes explaining workflows on Entities and Enrichment pages
+- **ThreatActor Filtering**: Enrichment dropdown prioritizes ThreatActor/Organization/Campaign entities
+- **Warning Banners**: Alert when no ThreatActor entities exist for enrichment
+- **Graph Debugging**: Console logging for troubleshooting D3.js rendering issues
+- **Responsive Grid**: 2-column layout expands to 3 when node selected in graph
+- **File Drag-Drop**: Sources page supports drag-and-drop file upload with MIME type handling
+- **Auto-rename**: Scenario name is automatically derived from the first source added
+- **Live Extraction**: Real-time entity/edge counts during extraction; warns if < 10 entities found
+- **NPC Assignment**: After compilation, assign generated NPCs to specific machines with deployment readiness check
 
 ## Configuration Files
 

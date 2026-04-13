@@ -5,8 +5,8 @@
     <AssemblyName>ghosts.api</AssemblyName>
     <RootNamespace>Ghosts.Api</RootNamespace>
 
-    <AssemblyVersion>9.0.0</AssemblyVersion>
-    <FileVersion>9.0.0</FileVersion>
+    <AssemblyVersion>9.0.0.0</AssemblyVersion>
+    <FileVersion>9.0.180.0</FileVersion>
 
     <Authors>GHOSTS Development Team for CERT > Software Engineering Institute > Carnegie Mellon University</Authors>
     <Company>Carnegie Mellon University</Company>
@@ -40,6 +40,7 @@
     <PackageReference Include="FileHelpers" Version="3.5.2" />
     <PackageReference Include="RestSharp" Version="113.0.0" />
     <PackageReference Include="Betalgo.OpenAI" Version="8.7.2" />
+    <PackageReference Include="AWSSDK.BedrockRuntime" Version="3.7.402.14" />
     <PackageReference Include="WeightedRandomizer" Version="2.0.1" />
     <PackageReference Include="ncrontab" Version="3.4.0" />
   </ItemGroup>
@@ -52,6 +53,9 @@
   <ItemGroup>
     <Content Update="nlog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update=".env" Condition="Exists('.env')">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
 
@@ -157,6 +161,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="config\photos\default.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="config\AttackData\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="config\ContentServices\**\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

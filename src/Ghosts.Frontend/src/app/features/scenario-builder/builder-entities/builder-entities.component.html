@@ -1,0 +1,221 @@
+<div class="entities-container">
+  <div class="header-section">
+    <div>
+      <h2>Review Entities</h2>
+      <p class="subtitle">Review and edit extracted entities before building the graph</p>
+      <div class="help-text">
+        <mat-icon class="help-icon">info</mat-icon>
+        <div>
+          <p><strong>What to do here:</strong></p>
+          <ul>
+            <li><strong>Review</strong> the entities extracted from your sources</li>
+            <li><strong>Edit</strong> entities to fix names, types, or descriptions</li>
+            <li><strong>Merge</strong> duplicate entities by selecting 2 and clicking "Merge Selected"</li>
+            <li><strong>Add</strong> missing entities manually if the extraction missed anything important</li>
+            <li><strong>Delete</strong> irrelevant entities to clean up the graph</li>
+          </ul>
+          <p class="next-step">Once satisfied, proceed to the <strong>Graph</strong> tab to visualize relationships.</p>
+        </div>
+      </div>
+    </div>
+    <div class="header-actions">
+      @if (!showAddForm()) {
+      <button mat-raised-button color="primary" (click)="toggleAddForm()">
+        <mat-icon>add</mat-icon>
+        Add Entity
+      </button>
+      }
+      @if (selectedEntities().size === 2) {
+      <button mat-raised-button color="accent" (click)="mergeSelectedEntities()">
+        <mat-icon>merge</mat-icon>
+        Merge Selected
+      </button>
+      }
+    </div>
+  </div>
+
+  <mat-card class="entities-list-card">
+    <mat-card-header>
+      <mat-card-title>
+        Entities
+        @if (filteredEntities().length !== entities().length) {
+        <span class="filter-count"
+          >({{ filteredEntities().length }} of {{ entities().length }})</span
+        >
+        } @else {
+        <span class="filter-count">({{ entities().length }})</span>
+        }
+      </mat-card-title>
+      <div class="filter-section">
+        <mat-form-field appearance="fill">
+          <mat-label>Filter by Type</mat-label>
+          <mat-select [(value)]="selectedType" (selectionChange)="onTypeFilterChange($event.value)">
+            <mat-option value="">All Types</mat-option>
+            @for (type of entityTypes; track type) {
+            <mat-option [value]="type">
+              <span [style.color]="getEntityColor(type)">●</span>
+              {{ type }}
+            </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </mat-card-header>
+    <mat-card-content>
+      @if (loading()) {
+      <div class="loading">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
+      } @else if (filteredEntities().length === 0) {
+      <div class="empty-state">
+        <mat-icon>info</mat-icon>
+        <p>No entities found. Run extraction in the previous step.</p>
+      </div>
+      } @else {
+      <table mat-table [dataSource]="filteredEntities()" class="entities-table">
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Name</th>
+          <td mat-cell *matCellDef="let entity">
+            <mat-checkbox
+              [checked]="selectedEntities().has(entity.id)"
+              (change)="toggleEntitySelection(entity.id)"
+              class="select-checkbox"></mat-checkbox>
+            {{ entity.name }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="type">
+          <th mat-header-cell *matHeaderCellDef>Type</th>
+          <td mat-cell *matCellDef="let entity">
+            <span class="entity-type-chip" [style.border-color]="getEntityColor(entity.entityType)" [style.color]="getEntityColor(entity.entityType)">
+              {{ entity.entityType }}
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="description">
+          <th mat-header-cell *matHeaderCellDef>Description</th>
+          <td mat-cell *matCellDef="let entity">
+            <span class="truncate">{{ entity.description || '-' }}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="confidence">
+          <th mat-header-cell *matHeaderCellDef>Confidence</th>
+          <td mat-cell *matCellDef="let entity">
+            <span [class.low-confidence]="entity.confidence < 0.5">
+              {{ (entity.confidence * 100).toFixed(0) }}%
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="origin">
+          <th mat-header-cell *matHeaderCellDef>Origin</th>
+          <td mat-cell *matCellDef="let entity">
+            <mat-chip>{{ entity.origin }}</mat-chip>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="reviewed">
+          <th mat-header-cell *matHeaderCellDef>Reviewed</th>
+          <td mat-cell *matCellDef="let entity">
+            <mat-icon [class.reviewed]="entity.isReviewed">
+              {{ entity.isReviewed ? 'check_circle' : 'radio_button_unchecked' }}
+            </mat-icon>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let entity">
+            <button mat-icon-button color="primary" (click)="editEntity(entity)" matTooltip="Edit">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              color="warn"
+              (click)="deleteEntity(entity.id)"
+              matTooltip="Delete">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+      }
+    </mat-card-content>
+  </mat-card>
+
+  @if (showAddForm()) {
+  <mat-card class="entity-form-card" #entityFormCard>
+    <mat-card-header>
+      <mat-card-title>{{ isEditing() ? 'Edit' : 'Add' }} Entity</mat-card-title>
+      <button mat-icon-button (click)="toggleAddForm()" style="margin-left:auto">
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="entityForm">
+        <div class="form-row">
+          <mat-form-field appearance="fill" class="form-field">
+            <mat-label>Name</mat-label>
+            <input matInput formControlName="name" placeholder="Entity name" />
+          </mat-form-field>
+
+          <mat-form-field appearance="fill" class="form-field">
+            <mat-label>Type</mat-label>
+            <mat-select formControlName="entityType">
+              @for (type of entityTypes; track type) {
+              <mat-option [value]="type">
+                <span [style.color]="getEntityColor(type)">●</span>
+                {{ type }}
+              </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="fill" class="form-field">
+            <mat-label>Confidence</mat-label>
+            <input
+              matInput
+              type="number"
+              formControlName="confidence"
+              min="0"
+              max="1"
+              step="0.1" />
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Description</mat-label>
+          <textarea
+            matInput
+            formControlName="description"
+            rows="2"
+            placeholder="Entity description..."></textarea>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Properties (JSON)</mat-label>
+          <textarea
+            matInput
+            formControlName="properties"
+            rows="2"
+            placeholder='{"key": "value"}'></textarea>
+        </mat-form-field>
+
+        <div class="form-actions">
+          @if (isEditing()) {
+          <button mat-raised-button color="primary" (click)="updateEntity()">Update Entity</button>
+          } @else {
+          <button mat-raised-button color="primary" (click)="createEntity()">Create Entity</button>
+          }
+          <button mat-button (click)="toggleAddForm()">Cancel</button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+  }
+</div>

@@ -9,6 +9,7 @@ export interface Scenario {
   gameMechanics?: GameMechanics;
   timeline?: ScenarioTimeline;
   simulationMechanics?: GameMechanics; // alias for gameMechanics
+  builderStatus?: string; // None, Sources, Extracted, Enriched, Compiled
 }
 
 export interface ScenarioParameters {
@@ -105,6 +106,7 @@ export interface CreateScenario {
   gameMechanics?: GameMechanics;
   simulationMechanics?: GameMechanics; // Alias for gameMechanics used in UI
   timeline: ScenarioTimeline;
+  builderStatus?: string;
 }
 
 export interface ScenarioListItem {

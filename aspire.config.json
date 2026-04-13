@@ -1,0 +1,5 @@
+{
+    "appHost": {
+        "path": "src/apphost/Ghosts-AppHost.csproj"
+    }
+}

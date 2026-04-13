@@ -46,6 +46,7 @@ export class ScenariosPlannerComponent implements OnInit {
   protected scenarioId: number | null = null;
   protected isEditMode = false;
   protected loading = signal(false);
+  protected builderStatus = signal<string>('None');
 
   protected scenario: CreateScenario = {
     name: '',
@@ -159,6 +160,7 @@ export class ScenariosPlannerComponent implements OnInit {
     this.loading.set(true);
     this.scenarioService.getScenario(id).subscribe({
       next: (scenario) => {
+        this.builderStatus.set(scenario.builderStatus ?? 'None');
         this.scenario = {
           name: scenario.name,
           description: scenario.description,
@@ -189,6 +191,17 @@ export class ScenariosPlannerComponent implements OnInit {
 
   protected backToList(): void {
     this.router.navigate(['/scenarios']);
+  }
+
+  protected dismissBuilderPrompts(): void {
+    this.builderStatus.set('Reviewed');
+    if (this.scenarioId) {
+      this.scenarioService.updateScenario(this.scenarioId, { ...this.scenario, builderStatus: 'Reviewed' }).subscribe();
+    }
+  }
+
+  protected openBuilder(): void {
+    this.router.navigate(['/scenarios', this.scenarioId, 'builder']);
   }
 
   // Nation management

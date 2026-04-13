@@ -193,7 +193,8 @@ public class ScenariosController : ControllerBase
             scenario.ScenarioTimeline != null ? new TimelineDto(
                 scenario.ScenarioTimeline.ExerciseDuration,
                 scenario.ScenarioTimeline.ScenarioTimelineEvents.Select(e => new TimelineEventDto(e.Time, e.Number, e.Assigned, e.Description, e.Status)).ToList()
-            ) : null
+            ) : null,
+            scenario.BuilderStatus ?? "None"
         );
     }
 

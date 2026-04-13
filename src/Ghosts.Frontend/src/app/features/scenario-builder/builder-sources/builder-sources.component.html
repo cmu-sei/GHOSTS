@@ -1,0 +1,166 @@
+<div class="sources-container">
+  <h2>Add Sources</h2>
+  <p class="subtitle">Add documents, URLs, or text to extract scenario entities from</p>
+
+  <div class="add-sources-section">
+    <!-- Text Input -->
+    <mat-card class="input-card">
+      <mat-card-header>
+        <mat-card-title>Add Text Content</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="textForm" (ngSubmit)="addTextSource()">
+          <mat-form-field appearance="fill" class="full-width">
+            <mat-label>Name</mat-label>
+            <input matInput formControlName="name" placeholder="e.g., Red Team Report" />
+          </mat-form-field>
+
+          <mat-form-field appearance="fill" class="full-width">
+            <mat-label>Content</mat-label>
+            <textarea
+              matInput
+              formControlName="content"
+              rows="8"
+              placeholder="Paste your text content here..."></textarea>
+          </mat-form-field>
+
+          <button mat-raised-button color="primary" type="submit" [disabled]="textForm.invalid">
+            <mat-icon>add</mat-icon>
+            Add Text
+          </button>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- URL Input -->
+    <mat-card class="input-card">
+      <mat-card-header>
+        <mat-card-title>Add URL</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="urlForm" (ngSubmit)="addUrlSource()">
+          <mat-form-field appearance="fill" class="full-width">
+            <mat-label>Name</mat-label>
+            <input matInput formControlName="name" placeholder="e.g., Threat Intel Article" />
+          </mat-form-field>
+
+          <mat-form-field appearance="fill" class="full-width">
+            <mat-label>URL</mat-label>
+            <input matInput formControlName="url" placeholder="https://example.com/article" />
+          </mat-form-field>
+
+          <button mat-raised-button color="primary" type="submit" [disabled]="urlForm.invalid">
+            <mat-icon>link</mat-icon>
+            Add URL
+          </button>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- File Upload -->
+    <mat-card class="input-card">
+      <mat-card-header>
+        <mat-card-title>Upload File</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div
+          class="file-drop-zone"
+          [class.drag-over]="dragOver()"
+          (dragover)="onDragOver($event)"
+          (dragleave)="onDragLeave($event)"
+          (drop)="onDrop($event)">
+          <mat-icon class="upload-icon">cloud_upload</mat-icon>
+          <p>Drag and drop a file here</p>
+          <p class="or-text">or</p>
+          <label for="file-input" class="file-input-label">
+            <button mat-raised-button color="primary" type="button" (click)="fileInput.click()">
+              <mat-icon>attach_file</mat-icon>
+              Choose File
+            </button>
+          </label>
+          <input
+            #fileInput
+            type="file"
+            id="file-input"
+            style="display: none"
+            (change)="onFileSelected($event)" />
+          @if (selectedFile()) {
+          <p class="selected-file">Selected: {{ selectedFile()!.name }}</p>
+          }
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Sources List -->
+  <mat-card class="sources-list-card">
+    <mat-card-header>
+      <mat-card-title>Existing Sources</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      @if (loading()) {
+      <div class="loading">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
+      } @else if (sources().length === 0) {
+      <div class="empty-state">
+        <mat-icon>folder_open</mat-icon>
+        <p>No sources yet. Add your first source above.</p>
+      </div>
+      } @else {
+      <table mat-table [dataSource]="sources()" class="sources-table">
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Name</th>
+          <td mat-cell *matCellDef="let source">{{ source.name }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="type">
+          <th mat-header-cell *matHeaderCellDef>Type</th>
+          <td mat-cell *matCellDef="let source">
+            <mat-chip>{{ source.sourceType }}</mat-chip>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="preview">
+          <th mat-header-cell *matHeaderCellDef>Preview</th>
+          <td mat-cell *matCellDef="let source" class="preview-cell">
+            @if (source.sourceType === 'Url') {
+              <a [href]="source.contentPreview" target="_blank" rel="noopener noreferrer" class="url-preview">{{ source.contentPreview }}</a>
+            } @else {
+              <span class="text-preview">{{ source.contentPreview }}</span>
+            }
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let source">
+            <mat-chip [color]="getStatusColor(source.status)">{{ source.status }}</mat-chip>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="chunks">
+          <th mat-header-cell *matHeaderCellDef>Chunks</th>
+          <td mat-cell *matCellDef="let source">{{ source.chunkCount || 0 }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let source">
+            <button
+              mat-icon-button
+              color="warn"
+              (click)="deleteSource(source.id)"
+              matTooltip="Delete">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

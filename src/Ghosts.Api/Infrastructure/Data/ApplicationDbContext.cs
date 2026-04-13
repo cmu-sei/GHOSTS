@@ -20,6 +20,14 @@ namespace Ghosts.Api.Infrastructure.Data
             Database.EnsureCreated();
         }
 
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            base.OnConfiguring(optionsBuilder);
+            // Suppress pending model changes warning - empty migrations indicate model is in sync
+            optionsBuilder.ConfigureWarnings(warnings =>
+                warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
+        }
+
         public DbSet<Machine> Machines { get; set; }
         public DbSet<Group> Groups { get; set; }
         public DbSet<GroupMachine> GroupMachines { get; set; }
@@ -69,6 +77,22 @@ namespace Ghosts.Api.Infrastructure.Data
         public DbSet<Execution> Executions { get; set; }
         public DbSet<ExecutionEvent> ExecutionEvents { get; set; }
         public DbSet<ExecutionMetricSnapshot> ExecutionMetricSnapshots { get; set; }
+
+        // Scenario Builder tables
+        public DbSet<ScenarioSource> ScenarioSources { get; set; }
+        public DbSet<ScenarioSourceChunk> ScenarioSourceChunks { get; set; }
+        public DbSet<ScenarioEntity> ScenarioEntities { get; set; }
+        public DbSet<ScenarioEdge> ScenarioEdges { get; set; }
+        public DbSet<ScenarioEnrichment> ScenarioEnrichments { get; set; }
+        public DbSet<ScenarioCompilation> ScenarioCompilations { get; set; }
+        public DbSet<ScenarioNpcAssignment> ScenarioNpcAssignments { get; set; }
+
+        public DbSet<Hypothesis> Hypotheses { get; set; }
+
+        // MITRE ATT&CK reference data
+        public DbSet<AttackTechnique> AttackTechniques { get; set; }
+        public DbSet<AttackGroup> AttackGroups { get; set; }
+        public DbSet<AttackGroupTechnique> AttackGroupTechniques { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -125,7 +149,15 @@ namespace Ghosts.Api.Infrastructure.Data
             modelBuilder.Entity<NpcSocialConnection>().HasIndex(c => new { c.NpcId, c.ConnectedNpcId });
             modelBuilder.Entity<NpcLearning>().HasIndex(l => new { l.NpcId, l.Topic, l.Step });
             modelBuilder.Entity<NpcBelief>().HasIndex(b => new { b.NpcId, b.Name, b.Step });
+            modelBuilder.Entity<NpcBelief>().HasIndex(b => b.ExecutionId);
+            modelBuilder.Entity<NpcBelief>()
+                .HasOne(b => b.Execution)
+                .WithMany()
+                .HasForeignKey(b => b.ExecutionId)
+                .OnDelete(DeleteBehavior.SetNull);
             modelBuilder.Entity<NpcPreference>().HasIndex(p => new { p.NpcId, p.Name, p.Step });
+
+            modelBuilder.Entity<Hypothesis>().HasIndex(h => h.IsActive);
 
             modelBuilder.Entity<Machine>().HasIndex(o => new { o.CreatedUtc });
             modelBuilder.Entity<Machine>().HasIndex(o => new { o.Status });
@@ -249,6 +281,158 @@ namespace Ghosts.Api.Infrastructure.Data
             modelBuilder.Entity<Execution>().HasIndex(e => e.StartedAt);
             modelBuilder.Entity<ExecutionEvent>().HasIndex(ev => new { ev.ExecutionId, ev.Timestamp });
             modelBuilder.Entity<ExecutionMetricSnapshot>().HasIndex(ms => new { ms.ExecutionId, ms.Timestamp });
+
+            // ── Scenario Builder relationships ──
+
+            // Scenario → Sources
+            modelBuilder.Entity<Scenario>()
+                .HasMany(s => s.Sources)
+                .WithOne(src => src.Scenario)
+                .HasForeignKey(src => src.ScenarioId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Scenario → Entities
+            modelBuilder.Entity<Scenario>()
+                .HasMany(s => s.Entities)
+                .WithOne(e => e.Scenario)
+                .HasForeignKey(e => e.ScenarioId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Scenario → Edges
+            modelBuilder.Entity<Scenario>()
+                .HasMany(s => s.Edges)
+                .WithOne(e => e.Scenario)
+                .HasForeignKey(e => e.ScenarioId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Scenario → Enrichments
+            modelBuilder.Entity<Scenario>()
+                .HasMany(s => s.Enrichments)
+                .WithOne(e => e.Scenario)
+                .HasForeignKey(e => e.ScenarioId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Scenario → Compilations
+            modelBuilder.Entity<Scenario>()
+                .HasMany(s => s.Compilations)
+                .WithOne(c => c.Scenario)
+                .HasForeignKey(c => c.ScenarioId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Source → Chunks
+            modelBuilder.Entity<ScenarioSource>()
+                .HasMany(s => s.Chunks)
+                .WithOne(c => c.Source)
+                .HasForeignKey(c => c.SourceId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Entity → Edges (outgoing and incoming)
+            modelBuilder.Entity<ScenarioEntity>()
+                .HasMany(e => e.OutgoingEdges)
+                .WithOne(edge => edge.SourceEntity)
+                .HasForeignKey(edge => edge.SourceEntityId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ScenarioEntity>()
+                .HasMany(e => e.IncomingEdges)
+                .WithOne(edge => edge.TargetEntity)
+                .HasForeignKey(edge => edge.TargetEntityId)
+                .OnDelete(DeleteBehavior.Restrict); // avoid multiple cascade paths
+
+            // Entity → NPC (optional, SetNull)
+            modelBuilder.Entity<ScenarioEntity>()
+                .HasOne(e => e.Npc)
+                .WithMany()
+                .HasForeignKey(e => e.NpcId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            // Entity → Source provenance (optional)
+            modelBuilder.Entity<ScenarioEntity>()
+                .HasOne(e => e.Source)
+                .WithMany()
+                .HasForeignKey(e => e.SourceId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<ScenarioEntity>()
+                .HasOne(e => e.SourceChunk)
+                .WithMany()
+                .HasForeignKey(e => e.SourceChunkId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            // Enrichment → Entity (optional)
+            modelBuilder.Entity<ScenarioEnrichment>()
+                .HasOne(e => e.Entity)
+                .WithMany()
+                .HasForeignKey(e => e.EntityId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            // JSONB columns for builder entities
+            modelBuilder.Entity<ScenarioEntity>().Property(e => e.Properties).HasColumnType("jsonb");
+            modelBuilder.Entity<ScenarioEdge>().Property(e => e.Properties).HasColumnType("jsonb");
+            modelBuilder.Entity<ScenarioEnrichment>().Property(e => e.Data).HasColumnType("jsonb");
+            modelBuilder.Entity<ScenarioCompilation>().Property(e => e.PackageData).HasColumnType("jsonb");
+
+            // Scenario Builder indexes
+            modelBuilder.Entity<ScenarioSource>().HasIndex(s => s.ScenarioId);
+            modelBuilder.Entity<ScenarioSourceChunk>().HasIndex(c => c.SourceId);
+            modelBuilder.Entity<ScenarioSourceChunk>().HasIndex(c => new { c.ScenarioId, c.ExtractionStatus });
+            modelBuilder.Entity<ScenarioEntity>().HasIndex(e => e.ScenarioId);
+            modelBuilder.Entity<ScenarioEntity>().HasIndex(e => new { e.ScenarioId, e.EntityType });
+            modelBuilder.Entity<ScenarioEntity>().HasIndex(e => e.NpcId);
+            modelBuilder.Entity<ScenarioEntity>().HasIndex(e => e.ExternalId);
+            modelBuilder.Entity<ScenarioEdge>().HasIndex(e => e.ScenarioId);
+            modelBuilder.Entity<ScenarioEdge>().HasIndex(e => e.SourceEntityId);
+            modelBuilder.Entity<ScenarioEdge>().HasIndex(e => e.TargetEntityId);
+            modelBuilder.Entity<ScenarioEnrichment>().HasIndex(e => e.ScenarioId);
+            modelBuilder.Entity<ScenarioEnrichment>().HasIndex(e => e.EntityId);
+            modelBuilder.Entity<ScenarioCompilation>().HasIndex(c => c.ScenarioId);
+
+            // NPC assignments – scoped to a compilation
+            modelBuilder.Entity<ScenarioNpcAssignment>()
+                .HasOne(a => a.Scenario)
+                .WithMany()
+                .HasForeignKey(a => a.ScenarioId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ScenarioNpcAssignment>()
+                .HasOne(a => a.Compilation)
+                .WithMany()
+                .HasForeignKey(a => a.CompilationId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ScenarioNpcAssignment>()
+                .HasIndex(a => new { a.CompilationId, a.NpcId })
+                .IsUnique(); // one machine per NPC per compilation
+
+            modelBuilder.Entity<ScenarioNpcAssignment>().HasIndex(a => a.ScenarioId);
+            modelBuilder.Entity<ScenarioNpcAssignment>().HasIndex(a => a.MachineId);
+
+            // ── ATT&CK reference data relationships ──
+
+            // Technique self-reference (parent → subtechniques)
+            modelBuilder.Entity<AttackTechnique>()
+                .HasOne(t => t.Parent)
+                .WithMany(t => t.Subtechniques)
+                .HasForeignKey(t => t.ParentId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            // Group-Technique junction composite key
+            modelBuilder.Entity<AttackGroupTechnique>()
+                .HasKey(gt => new { gt.GroupId, gt.TechniqueId });
+
+            modelBuilder.Entity<AttackGroupTechnique>()
+                .HasOne(gt => gt.Group)
+                .WithMany(g => g.TechniqueUsages)
+                .HasForeignKey(gt => gt.GroupId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<AttackGroupTechnique>()
+                .HasOne(gt => gt.Technique)
+                .WithMany(t => t.GroupUsages)
+                .HasForeignKey(gt => gt.TechniqueId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<AttackTechnique>().HasIndex(t => t.Tactics);
 
             foreach (var entity in modelBuilder.Model.GetEntityTypes())
             {

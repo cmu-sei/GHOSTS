@@ -8,6 +8,9 @@
 // FontAwesome
 @import '@fortawesome/fontawesome-free/css/all.min.css';
 
+// Material Icons (local, no CDN)
+@import 'material-icons/iconfont/material-icons.css';
+
 $ghosts-theme: mat.define-theme((
   color: (
     theme-type: light,
