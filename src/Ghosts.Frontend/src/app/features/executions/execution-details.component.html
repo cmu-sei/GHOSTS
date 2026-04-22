@@ -22,6 +22,9 @@
           <a [routerLink]="['/executions']" mat-stroked-button>
             <i class="fas fa-arrow-left"></i> Back
           </a>
+          <a [routerLink]="['/executions', exec.id, 'map']" mat-stroked-button color="primary">
+            <i class="fas fa-map-marked-alt"></i> Map
+          </a>
           @if (canStart(exec.status)) {
           <button mat-raised-button color="primary" (click)="startExecution()">
             <i class="fas fa-play"></i> Start

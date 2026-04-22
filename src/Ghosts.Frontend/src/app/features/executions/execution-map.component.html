@@ -1,0 +1,301 @@
+<div class="exec-map">
+  <!-- Full-bleed map -->
+  <div #mapContainer class="map-canvas"></div>
+
+  <!-- deck.gl hover tooltip -->
+  @if (hoverInfo(); as hover) {
+    <div
+      class="deck-tooltip"
+      [style.left.px]="hover.x + 12"
+      [style.top.px]="hover.y - 12"
+    >
+      <strong>{{ hover.label }}</strong>
+      <span class="tt-sub">{{ hover.featureType }} &middot; {{ hover.status }}</span>
+    </div>
+  }
+
+  <!-- Floating back pill — top left -->
+  <a class="fab fab-back" [routerLink]="['/executions', executionId()]">
+    <i class="fas fa-arrow-left"></i>
+    <span>Back</span>
+  </a>
+
+  <!-- Floating search — top center -->
+  <div class="search-float">
+    <i class="fas fa-search"></i>
+    <input
+      type="text"
+      placeholder="Search features..."
+      [value]="searchQuery()"
+      (input)="onSearchInput($event)"
+      (keydown.enter)="executeSearch()"
+      (focus)="searchFocused.set(true)"
+      (blur)="onSearchBlur()"
+    />
+    @if (searchQuery()) {
+      <button class="search-x" (click)="clearSearch()"><i class="fas fa-times"></i></button>
+    }
+    @if (searchResults().length > 0 && searchFocused()) {
+      <div class="search-dropdown">
+        @for (r of searchResults(); track r.entityId) {
+          <button class="search-hit" (mousedown)="flyToResult(r)">
+            <span class="hit-icon" [style.color]="getLayerColor(r.featureType)"><i class="fas" [class]="getFeatureIcon(r.featureType)"></i></span>
+            <span class="hit-body">
+              <span class="hit-label">{{ r.label }}</span>
+              <span class="hit-meta">{{ r.featureType }} &middot; {{ r.category }}</span>
+            </span>
+          </button>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Floating controls — top right -->
+  <div class="ctrl-stack">
+    @if (execution(); as exec) {
+      <span class="exec-badge" [class]="'st-' + exec.status.toLowerCase()">{{ exec.status }}</span>
+    }
+    <button class="ctrl-btn" (click)="refreshData()" title="Refresh">
+      <i class="fas fa-sync-alt" [class.spinning]="loading()"></i>
+    </button>
+    <button class="ctrl-btn" [class.on]="liveRefresh()" (click)="toggleLiveRefresh()" title="Live refresh">
+      <i class="fas fa-broadcast-tower"></i>
+    </button>
+    <button class="ctrl-btn" (click)="fitBounds()" title="Fit bounds">
+      <i class="fas fa-expand"></i>
+    </button>
+  </div>
+
+  <!-- Floating layer panel — left -->
+  <div class="layer-panel" [class.open]="panelOpen()">
+    <button class="panel-tab" (click)="panelOpen.set(!panelOpen())">
+      <i class="fas fa-layer-group"></i>
+      @if (!panelOpen()) {
+        <span class="tab-count">{{ layers().length }}</span>
+      }
+    </button>
+
+    @if (panelOpen()) {
+      <div class="panel-inner">
+        <div class="panel-head">
+          <span>Layers</span>
+          <button class="panel-close" (click)="panelOpen.set(false)"><i class="fas fa-times"></i></button>
+        </div>
+
+        <div class="panel-scroll">
+          <!-- Layer toggles -->
+          @for (layer of layers(); track layer.layerId) {
+            <label class="lyr-row">
+              <span class="lyr-dot" [style.background]="getLayerColor(layer.featureType)"></span>
+              <span class="lyr-name">{{ layer.label }}</span>
+              <span class="lyr-ct">{{ layer.featureCount }}</span>
+              <span class="toggle-track" [class.on]="isLayerVisible(layer.layerId)" (click)="$event.preventDefault(); toggleLayer(layer.layerId)">
+                <span class="toggle-thumb"></span>
+              </span>
+            </label>
+          }
+          <label class="lyr-row">
+            <span class="lyr-dot" style="background:#64748b"></span>
+            <span class="lyr-name">Connections</span>
+            <span class="lyr-ct">{{ connectionCount() }}</span>
+            <span class="toggle-track" [class.on]="showConnections()" (click)="$event.preventDefault(); toggleConnections()">
+              <span class="toggle-thumb"></span>
+            </span>
+          </label>
+
+          <!-- Filters -->
+          <div class="filter-section">
+            <span class="filter-label">Status</span>
+            <select (change)="onStatusFilterChange($event)">
+              <option value="">All</option>
+              <option value="Online">Online</option>
+              <option value="Active">Active</option>
+              <option value="Degraded">Degraded</option>
+              <option value="Compromised">Compromised</option>
+              <option value="Alert">Alert</option>
+              <option value="Offline">Offline</option>
+            </select>
+          </div>
+          <div class="filter-section">
+            <span class="filter-label">Team</span>
+            <select (change)="onTeamFilterChange($event)">
+              <option value="">All</option>
+              <option value="Blue Team">Blue Team</option>
+              <option value="Red Team">Red Team</option>
+              <option value="White Cell">White Cell</option>
+            </select>
+          </div>
+
+          <!-- Legend -->
+          <div class="legend-section">
+            <span class="legend-title">Status Legend</span>
+            <div class="legend-grid">
+              <span class="lg-item"><span class="lg-dot" style="background:#22c55e"></span>Online</span>
+              <span class="lg-item"><span class="lg-dot" style="background:#3b82f6"></span>Active</span>
+              <span class="lg-item"><span class="lg-dot" style="background:#f59e0b"></span>Degraded</span>
+              <span class="lg-item"><span class="lg-dot" style="background:#ef4444"></span>Compromised</span>
+              <span class="lg-item"><span class="lg-dot" style="background:#f97316"></span>Alert</span>
+              <span class="lg-item"><span class="lg-dot" style="background:#6b7280"></span>Offline</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Timeline bar — floating bottom -->
+  @if (timelineInfo(); as tl) {
+    @if (tl.totalEvents > 0) {
+      <div class="timeline-float">
+        <button class="tl-btn" (click)="timelineReset()" title="Reset"><i class="fas fa-step-backward"></i></button>
+        <button class="tl-btn" (click)="timelinePlay()" title="Play / Pause">
+          <i class="fas" [class.fa-play]="!timelinePlaying()" [class.fa-pause]="timelinePlaying()"></i>
+        </button>
+        <button class="tl-btn tl-speed" (click)="cyclePlaybackSpeed()" title="Playback speed">{{ getSpeedLabel() }}</button>
+        <div class="tl-track">
+          <div class="tl-bars">
+            @for (bucket of tl.buckets; track $index) {
+              <div
+                class="tl-bar"
+                [style.height.%]="getBarHeight(bucket.count, tl)"
+                [class.lit]="$index <= timelineIndex()"
+                [title]="formatBucketTooltip(bucket)"
+              ></div>
+            }
+          </div>
+          <input
+            type="range"
+            class="tl-slider"
+            [min]="0"
+            [max]="tl.buckets.length - 1"
+            [value]="timelineIndex()"
+            (input)="onTimelineChange($event)"
+          />
+        </div>
+        <span class="tl-time">{{ getCurrentTimeLabel() }}</span>
+        <span class="tl-count">{{ getVisibleEventCount() }}/{{ tl.totalEvents }}</span>
+      </div>
+    }
+  }
+
+  <!-- Floating details card — right -->
+  @if (selectedEntity(); as entity) {
+    <div class="detail-card">
+      <div class="dc-head">
+        <span class="dc-icon" [style.color]="getLayerColor(entity.featureType)">
+          <i class="fas" [class]="getFeatureIcon(entity.featureType)"></i>
+        </span>
+        <div class="dc-title">
+          <span class="dc-name">{{ entity.label }}</span>
+          <span class="dc-sub">{{ entity.featureType }} &middot; <span [style.color]="getStatusColor(entity.status)">{{ entity.status }}</span></span>
+        </div>
+        <button class="dc-close" (click)="selectedEntity.set(null)"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="dc-body">
+        <!-- Quick stats -->
+        <div class="dc-stats">
+          @if (entity.category) {
+            <div class="dc-stat"><span class="stat-k">Category</span><span class="stat-v">{{ entity.category }}</span></div>
+          }
+          @if (entity.team) {
+            <div class="dc-stat"><span class="stat-k">Team</span><span class="stat-v">{{ entity.team }}</span></div>
+          }
+          <div class="dc-stat">
+            <span class="stat-k">Coordinates</span>
+            <span class="stat-v mono">{{ entity.latitude.toFixed(4) }}, {{ entity.longitude.toFixed(4) }}</span>
+          </div>
+        </div>
+
+        @if (entity.description) {
+          <p class="dc-desc">{{ entity.description }}</p>
+        }
+
+        @if (objectKeys(entity.properties).length > 0) {
+          <div class="dc-section">
+            <span class="dc-section-title">Properties</span>
+            @for (key of objectKeys(entity.properties); track key) {
+              <div class="dc-kv">
+                <span class="kv-k">{{ key }}</span>
+                <span class="kv-v">{{ entity.properties[key] }}</span>
+              </div>
+            }
+          </div>
+        }
+
+        @if (entity.relatedEntities.length > 0) {
+          <div class="dc-section">
+            <span class="dc-section-title">Connected</span>
+            @for (rel of entity.relatedEntities; track rel.entityId) {
+              <button class="dc-rel" (click)="selectEntity(rel.featureType, rel.entityId)">
+                <i class="fas" [class]="getFeatureIcon(rel.featureType)" [style.color]="getLayerColor(rel.featureType)"></i>
+                <span>{{ rel.label }}</span>
+                <span class="rel-type">{{ rel.relationshipType }}</span>
+              </button>
+            }
+          </div>
+        }
+
+        @if (entity.recentEvents.length > 0) {
+          <div class="dc-section">
+            <span class="dc-section-title">Events</span>
+            @for (evt of entity.recentEvents; track evt.id) {
+              <div class="dc-evt">
+                <span class="evt-sev" [class]="'sev-' + evt.severity.toLowerCase()">{{ evt.severity }}</span>
+                <span class="evt-text">{{ evt.description }}</span>
+                <span class="evt-time">{{ formatTimeLabel(evt.timestamp) }}</span>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Event feed — floating lower left -->
+  @if (timelineInfo(); as tl) {
+    @if (tl.totalEvents > 0) {
+      <div class="event-feed" [class.collapsed]="!eventFeedOpen()">
+        <div class="ef-head">
+          <i class="fas fa-stream"></i>
+          <span class="ef-title">Event Feed</span>
+          <span class="ef-count">{{ getVisibleEvents().length }}</span>
+          <button class="ef-toggle" (click)="eventFeedOpen.set(!eventFeedOpen())">
+            <i class="fas" [class.fa-chevron-down]="eventFeedOpen()" [class.fa-chevron-up]="!eventFeedOpen()"></i>
+          </button>
+        </div>
+        @if (eventFeedOpen()) {
+          <div class="ef-scroll">
+            @for (evt of getVisibleEvents(); track $index) {
+              <div class="ef-entry" [class.ef-new]="$index === 0" (click)="flyToEvent(evt)">
+                <div class="ef-entry-head">
+                  <span class="evt-sev" [class]="'sev-' + evt.status.toLowerCase()">{{ evt.status }}</span>
+                  <span class="ef-label">{{ evt.label }}</span>
+                  <span class="ef-time">{{ evt.time }}</span>
+                </div>
+                @if (evt.description) {
+                  <p class="ef-desc">{{ evt.description }}</p>
+                }
+                @if (evt.category) {
+                  <span class="ef-tactic" [style.color]="getCategoryColor(evt.category)" [style.border-color]="getCategoryColor(evt.category)">
+                    {{ formatCategoryLabel(evt.category) }}
+                  </span>
+                }
+              </div>
+            }
+            @if (getVisibleEvents().length === 0) {
+              <div class="ef-empty">
+                <i class="fas fa-hourglass-start"></i>
+                <span>Waiting for events...</span>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  }
+
+  <!-- Loading overlay -->
+  @if (loading()) {
+    <div class="load-indicator"><div class="pulse-ring"></div></div>
+  }
+</div>
