@@ -16,7 +16,7 @@ NO WARRANTY. THIS CARNEGIE MELLON UNIVERSITY AND SOFTWARE ENGINEERING INSTITUTE 
 
 [DISTRIBUTION STATEMENT A] This material has been approved for public release and unlimited distribution.  Please see Copyright notice for non-US Government use and distribution.
 
-Carnegie Mellon��and�CERT��are registered in the U.S. Patent and Trademark Office by Carnegie Mellon University.
+Carnegie Mellon and CERT are registered in the U.S. Patent and Trademark Office by Carnegie Mellon University.
 
 This Software includes and/or makes use of the following Third-Party Software subject to its own license:
 
