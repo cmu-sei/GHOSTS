@@ -402,12 +402,46 @@ If you need to track the outcome of a specific timeline event (such as verifying
 
 ### Can I reset a client on a machine?
 
-Yes, launching a new instance of GHOSTS will automatically kill the previous one along with all associated tasks (e.g., Word, PowerShell instances). Only one instance of GHOSTS will run on a client machine at a time. You can also run the `kill-ghosts.bat` script, included in the distribution, to clean up any previous instances.
+Yes, launching a new instance of GHOSTS will automatically kill the previous one along with all associated tasks (e.g., Word, PowerShell instances). Only one instance of GHOSTS will run on a client machine at a time.
+
+**Windows:** Run the `kill-ghosts.bat` script included in the distribution.
+
+**Linux/macOS:** Run the `kill-ghosts.sh` script:
+```bash
+chmod +x kill-ghosts.sh
+./kill-ghosts.sh
+```
+
+Both scripts stop the GHOSTS client and any browser/driver processes it spawned.
+
+### Universal/Linux Client Won't Start
+
+- **Check .NET version:** Run `dotnet --version` and confirm .NET 9 (or later) is installed. The Universal client does not run on .NET 8.
+- **Permission denied:** Ensure `ghosts.client.universal.dll` is readable. Do not run as root — browser drivers may fail under root.
+- **Missing libicu:** On minimal Linux images, install ICU: `sudo apt install libicu-dev` (Debian/Ubuntu) or `sudo dnf install libicu` (Fedora/RHEL).
+- **Configuration errors:** Verify `config/application.yaml` exists and `ApiRootUrl` points to a reachable API (include the `/api` suffix).
+
+### Windows Client: .NET Framework Not Found
+
+If you see an error like "This application requires .NET Framework 4.6.1 or later":
+
+1. Download the [.NET Framework 4.6.1 runtime](https://go.microsoft.com/fwlink/?LinkId=2099467).
+2. Run the installer and restart the machine.
+3. Verify with: `reg query "HKLM\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full" /v Release`
+
+### Client Reports "Connection Refused" to API
+
+1. Verify the API is running: `curl http://YOUR-API-HOST:5000/api`
+2. Check that the URL in `config/application.{json|yaml}` includes the `/api` suffix.
+3. If running Docker, ensure the client can reach the host — `host.docker.internal` only works from within Docker, not from external machines. Use the host's actual IP.
+4. Check firewall rules on port 5000.
 
 ### Determining the running version of the client
 
-You can check the client version by running:
-
 ```bash
+# Windows
 ghosts.exe --version
+
+# Universal
+dotnet ghosts.client.universal.dll --version
 ```

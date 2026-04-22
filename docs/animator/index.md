@@ -31,7 +31,7 @@ Since Animator is now integrated into the GHOSTS API, you access it through:
    - Programmatic access to all Animator functions
    - See API documentation at `http://localhost:5000/swagger`
 
-**2. GHOSTS UI** (Port 8080)
+**2. GHOSTS UI** (Port 4200)
 
    - Visual interface for generating and managing NPCs
    - Click "Generate Random NPCs" to create new characters
@@ -50,7 +50,7 @@ Animator is included when you install the GHOSTS API. If you haven't already:
 
 1. Follow the [API installation guide](../core/api.md)
 2. Ensure all containers are running: `docker ps -a`
-3. Access the UI at `http://localhost:8080`
+3. Access the UI at `http://localhost:4200`
 
 ## Use Cases
 
@@ -143,7 +143,7 @@ Use this for social network analysis research, organizational simulations, or re
 
 ## Generating NPCs via UI
 
-1. Navigate to `http://localhost:8080`
+1. Navigate to `http://localhost:4200`
 2. Click on the "NPCs" section
 3. Click "Generate Random NPCs"
 4. Configure generation parameters:

@@ -172,7 +172,7 @@ GHOSTS LITE integrates with the GHOSTS API and UI, allowing you to:
 - Monitor network traffic patterns
 - Collect activity logs centrally
 
-Access the GHOSTS UI at `http://YOUR-API-SERVER:8080` to manage your GHOSTS LITE clients.
+Access the GHOSTS UI at `http://YOUR-API-SERVER:4200` to manage your GHOSTS LITE clients.
 
 ## Troubleshooting
 

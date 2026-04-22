@@ -14,7 +14,7 @@
 
 </div>
 
-[GHOSTS 9 is released, but *still* in active development — see announcement here](https://github.com/cmu-sei/GHOSTS/discussions/582).
+> **Status:** GHOSTS 9 is released but under active development. The API, domain models, and Docker Compose stack are stable and used in production exercises. Individual client handlers and newer features (Scenario Builder, n8n integration) are evolving. Expect changes in minor releases until 10.0. See the [v9 announcement](https://github.com/cmu-sei/GHOSTS/discussions/582) for details.
 
 ---
 
@@ -40,7 +40,10 @@ docker compose up -d
 | GHOSTS API | http://localhost:5000 | REST API + Swagger at `/swagger` |
 | Grafana | http://localhost:3000 | Activity dashboards |
 | n8n | http://localhost:5678 | Workflow automation |
-| PostgreSQL | localhost:5432 | Database (`ghosts`/`scotty@1`) |
+| PostgreSQL | localhost:5432 | Database |
+
+> **First run:** Copy `.env.example` to `.env` and set `POSTGRES_PASSWORD` before starting.
+> See [src/Ghosts.Api/.env.example](src/Ghosts.Api/.env.example) for all available variables.
 
 Then [install a client](https://cmu-sei.github.io/GHOSTS/quickstart/#ghosts-clients) on each machine you want to simulate and point it at `http://YOUR-API-HOST:5000/api`.
 
@@ -182,11 +185,25 @@ Replaced the Next.js interface with a modern, full-featured Angular 20 managemen
 
 ---
 
+## Choosing a Client
+
+GHOSTS ships three clients. The hope is to replace the Windows client with the Universal client in future releases, as it supports modern development practices. Until that time, pick the one that matches your environment:
+
+| Client | Runtime | OS | Best For |
+|--------|---------|----|----------|
+| **Windows** | [.NET Framework 4.6.1+](https://go.microsoft.com/fwlink/?LinkId=2099467) | Windows 7/10/11, Server 2012+ | Full application automation (Office, browsers, RDP). Use when participants observe the desktop. |
+| **Universal** | [.NET 9](https://dotnet.microsoft.com/download/dotnet/9.0) | Windows, Linux, macOS | Cross-platform with 38+ handlers. Default choice for Linux or mixed environments. |
+| **Lite** | [.NET 8](https://dotnet.microsoft.com/download/dotnet/8.0) | Windows, Linux | Lightweight network traffic generation without launching real apps. Best for high NPC density on limited hardware. |
+
+> **Not sure?** Start with **Universal**. It covers the widest range of handlers and runs everywhere. Switch to **Windows** only if you need Office/Outlook automation, or **Lite** if you need hundreds of NPCs on a single host.
+
+## Security
+
+See [SECURITY.md](SECURITY.md) for the vulnerability reporting process, supported versions, and scope.
+
 ## Contributing
 
-1. Report bugs and request features via the [GitHub issue tracker](https://github.com/cmu-sei/GHOSTS/issues).
-2. Fork, create a feature branch, and submit a pull request.
-3. Documentation improvements are always welcome.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide.
 
 ---
 
