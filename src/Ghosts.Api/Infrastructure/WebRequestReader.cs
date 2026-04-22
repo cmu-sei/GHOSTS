@@ -12,6 +12,7 @@ namespace Ghosts.Api.Infrastructure
     public static partial class WebRequestReader
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
+
         public static Machine GetMachine(HttpContext context)
         {
             try
@@ -30,10 +31,11 @@ namespace Ghosts.Api.Infrastructure
                     StatusUp = Machine.UpDownStatus.Up
                 };
 
-                m.Name = m.Name.ToLower();
-                m.FQDN = m.FQDN.ToLower();
-                m.Host = m.Host.ToLower();
-                m.ResolvedHost = m.ResolvedHost.ToLower();
+                // Defensive hardening: Ensure transformations don't crash on missing headers
+                m.Name = m.Name?.ToLower();
+                m.FQDN = m.FQDN?.ToLower();
+                m.Host = m.Host?.ToLower();
+                m.ResolvedHost = m.ResolvedHost?.ToLower();
 
                 return m;
             }
@@ -46,6 +48,12 @@ namespace Ghosts.Api.Infrastructure
 
         private static string CheckIfBase64Encoded(string raw)
         {
+            // Guard clause: Prevent ArgumentNullException in the Regex engine
+            if (string.IsNullOrEmpty(raw))
+            {
+                return raw;
+            }
+
             var reg = MyRegex();
             return reg.IsMatch(raw) ? Base64Encoder.Base64Decode(raw) : raw;
         }
