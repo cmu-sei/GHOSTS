@@ -959,6 +959,39 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#universallinux-client-wont-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Universal/Linux Client Won't Start
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#windows-client-net-framework-not-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Windows Client: .NET Framework Not Found
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#client-reports-connection-refused-to-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Client Reports "Connection Refused" to API
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#determining-the-running-version-of-the-client" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2734,10 +2767,40 @@
 <li><strong>Just-In-Time Activities</strong>: Clients also support just-in-time activities. Any files placed in the <code>instance/timeline/in</code> folder will be picked up, executed, and then moved to the <code>out</code> folder once complete. This doesn’t affect the default timeline.</li>
 </ul>
 <h3 id="can-i-reset-a-client-on-a-machine">Can I reset a client on a machine?<a class="headerlink" href="#can-i-reset-a-client-on-a-machine" title="Permanent link">&para;</a></h3>
-<p>Yes, launching a new instance of GHOSTS will automatically kill the previous one along with all associated tasks (e.g., Word, PowerShell instances). Only one instance of GHOSTS will run on a client machine at a time. You can also run the <code>kill-ghosts.bat</code> script, included in the distribution, to clean up any previous instances.</p>
+<p>Yes, launching a new instance of GHOSTS will automatically kill the previous one along with all associated tasks (e.g., Word, PowerShell instances). Only one instance of GHOSTS will run on a client machine at a time.</p>
+<p><strong>Windows:</strong> Run the <code>kill-ghosts.bat</code> script included in the distribution.</p>
+<p><strong>Linux/macOS:</strong> Run the <code>kill-ghosts.sh</code> script:
+<div class="highlight"><pre><span></span><code>chmod<span class="w"> </span>+x<span class="w"> </span>kill-ghosts.sh
+./kill-ghosts.sh
+</code></pre></div></p>
+<p>Both scripts stop the GHOSTS client and any browser/driver processes it spawned.</p>
+<h3 id="universallinux-client-wont-start">Universal/Linux Client Won't Start<a class="headerlink" href="#universallinux-client-wont-start" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Check .NET version:</strong> Run <code>dotnet --version</code> and confirm .NET 9 (or later) is installed. The Universal client does not run on .NET 8.</li>
+<li><strong>Permission denied:</strong> Ensure <code>ghosts.client.universal.dll</code> is readable. Do not run as root — browser drivers may fail under root.</li>
+<li><strong>Missing libicu:</strong> On minimal Linux images, install ICU: <code>sudo apt install libicu-dev</code> (Debian/Ubuntu) or <code>sudo dnf install libicu</code> (Fedora/RHEL).</li>
+<li><strong>Configuration errors:</strong> Verify <code>config/application.yaml</code> exists and <code>ApiRootUrl</code> points to a reachable API (include the <code>/api</code> suffix).</li>
+</ul>
+<h3 id="windows-client-net-framework-not-found">Windows Client: .NET Framework Not Found<a class="headerlink" href="#windows-client-net-framework-not-found" title="Permanent link">&para;</a></h3>
+<p>If you see an error like "This application requires .NET Framework 4.6.1 or later":</p>
+<ol>
+<li>Download the <a href="https://go.microsoft.com/fwlink/?LinkId=2099467">.NET Framework 4.6.1 runtime</a>.</li>
+<li>Run the installer and restart the machine.</li>
+<li>Verify with: <code>reg query "HKLM\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full" /v Release</code></li>
+</ol>
+<h3 id="client-reports-connection-refused-to-api">Client Reports "Connection Refused" to API<a class="headerlink" href="#client-reports-connection-refused-to-api" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Verify the API is running: <code>curl http://YOUR-API-HOST:5000/api</code></li>
+<li>Check that the URL in <code>config/application.{json|yaml}</code> includes the <code>/api</code> suffix.</li>
+<li>If running Docker, ensure the client can reach the host — <code>host.docker.internal</code> only works from within Docker, not from external machines. Use the host's actual IP.</li>
+<li>Check firewall rules on port 5000.</li>
+</ol>
 <h3 id="determining-the-running-version-of-the-client">Determining the running version of the client<a class="headerlink" href="#determining-the-running-version-of-the-client" title="Permanent link">&para;</a></h3>
-<p>You can check the client version by running:</p>
-<div class="highlight"><pre><span></span><code>ghosts.exe<span class="w"> </span>--version
+<div class="highlight"><pre><span></span><code><span class="c1"># Windows</span>
+ghosts.exe<span class="w"> </span>--version
+
+<span class="c1"># Universal</span>
+dotnet<span class="w"> </span>ghosts.client.universal.dll<span class="w"> </span>--version
 </code></pre></div>
 
 

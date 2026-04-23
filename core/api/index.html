@@ -2430,8 +2430,8 @@ docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> 
 </tr>
 <tr>
 <td><code>N8N_API_KEY</code></td>
-<td><code>replace-me</code></td>
-<td>n8n API key for authenticating workflow API calls</td>
+<td><em>(empty)</em></td>
+<td>n8n API key — <strong>required</strong> for workflow scheduling. Generate in n8n: Settings &gt; API &gt; Create API Key.</td>
 </tr>
 <tr>
 <td><code>WEB_API_URL</code></td>
@@ -2442,6 +2442,11 @@ docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> 
 <td><code>WEB_N8N_API_URL</code></td>
 <td><code>http://host.docker.internal:5678</code></td>
 <td>n8n base URL served to the frontend container</td>
+</tr>
+<tr>
+<td><code>POSTGRES_PASSWORD</code></td>
+<td><code>scotty@1</code></td>
+<td>PostgreSQL password. <strong>Change this</strong> for any non-local deployment.</td>
 </tr>
 </tbody>
 </table>
