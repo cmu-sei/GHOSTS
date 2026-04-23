@@ -893,7 +893,7 @@
     "list": []
   },
   "time": {
-    "from": "now-24h",
+    "from": "now-2d",
     "to": "now"
   },
   "timepicker": {},

@@ -124,6 +124,7 @@ public class Program
         builder.Services.AddScoped<IScenarioService, ScenarioService>();
         builder.Services.AddScoped<DbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
         builder.Services.AddScoped<IExecutionService, ExecutionService>();
+        builder.Services.AddScoped<IExecutionMapService, ExecutionMapService>();
 
         // Scenario Builder services
         builder.Services.AddScoped<IScenarioSourceService, ScenarioSourceService>();

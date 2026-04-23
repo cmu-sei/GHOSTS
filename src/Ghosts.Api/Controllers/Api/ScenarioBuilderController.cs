@@ -3,8 +3,11 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Packaging;
 using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Api.Infrastructure.Models;
 using Ghosts.Api.Infrastructure.Services;
@@ -12,6 +15,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NLog;
+using UglyToad.PdfPig;
 
 namespace Ghosts.Api.Controllers.Api
 {
@@ -120,12 +124,7 @@ namespace Ghosts.Api.Controllers.Api
                 await file.CopyToAsync(ms, ct);
                 var fileData = ms.ToArray();
 
-                // Extract text content from file (plain text for now)
-                string textContent;
-                using (var reader = new StreamReader(file.OpenReadStream()))
-                {
-                    textContent = await reader.ReadToEndAsync(ct);
-                }
+                var textContent = ExtractText(fileData, file.ContentType, file.FileName);
 
                 var source = await sourceService.UploadFileAsync(
                     scenarioId, file.FileName, file.ContentType, fileData, textContent, ct);
@@ -746,6 +745,79 @@ namespace Ghosts.Api.Controllers.Api
                 _log.Error(ex, $"Error getting readiness for compilation {compilationId}");
                 return StatusCode(500, ex.Message);
             }
+        }
+
+        // ──────────────────────────────────────────────
+        // File text extraction
+        // ──────────────────────────────────────────────
+
+        private static string ExtractText(byte[] data, string mimeType, string fileName)
+        {
+            var ext = Path.GetExtension(fileName)?.ToLowerInvariant();
+
+            try
+            {
+                var raw = ext switch
+                {
+                    ".pdf" => ExtractPdf(data),
+                    ".docx" => ExtractDocx(data),
+                    ".xlsx" => ExtractXlsx(data),
+                    _ when mimeType.StartsWith("text/", StringComparison.OrdinalIgnoreCase) =>
+                        Encoding.UTF8.GetString(data),
+                    _ => Encoding.UTF8.GetString(data)
+                };
+
+                return SanitizeForPostgres(raw);
+            }
+            catch (Exception ex)
+            {
+                LogManager.GetCurrentClassLogger()
+                    .Warn(ex, $"Text extraction failed for {fileName} ({mimeType}), falling back to raw UTF-8");
+                return SanitizeForPostgres(Encoding.UTF8.GetString(data));
+            }
+        }
+
+        private static string ExtractPdf(byte[] data)
+        {
+            using var doc = PdfDocument.Open(data);
+            var sb = new StringBuilder();
+            foreach (var page in doc.GetPages())
+            {
+                sb.AppendLine(page.Text);
+            }
+            return sb.ToString();
+        }
+
+        private static string ExtractDocx(byte[] data)
+        {
+            using var ms = new MemoryStream(data);
+            using var doc = WordprocessingDocument.Open(ms, false);
+            var body = doc.MainDocumentPart?.Document?.Body;
+            return body?.InnerText ?? string.Empty;
+        }
+
+        private static string ExtractXlsx(byte[] data)
+        {
+            using var ms = new MemoryStream(data);
+            using var workbook = new XLWorkbook(ms);
+            var sb = new StringBuilder();
+            foreach (var ws in workbook.Worksheets)
+            {
+                sb.AppendLine(ws.Name);
+                foreach (var row in ws.RowsUsed())
+                {
+                    var cells = row.CellsUsed().Select(c => c.GetFormattedString());
+                    sb.AppendLine(string.Join('\t', cells));
+                }
+                sb.AppendLine();
+            }
+            return sb.ToString();
+        }
+
+        private static string SanitizeForPostgres(string text)
+        {
+            if (string.IsNullOrEmpty(text)) return string.Empty;
+            return text.Replace("\0", "");
         }
     }
 }

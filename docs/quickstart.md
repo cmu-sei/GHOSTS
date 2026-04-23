@@ -6,6 +6,9 @@ This guide covers deploying the GHOSTS API stack and connecting clients to it. N
 
 **New to GHOSTS?** Start with the API stack first, then connect one or more clients.
 
+???+ info "Stability"
+    GHOSTS 9 is released and actively used in production exercises. The **API**, **domain models**, **Docker Compose stack**, and **Windows/Universal clients** are stable. Newer features — **Scenario Builder**, **n8n integration**, and **Belief Engine** — are under active development and may change between minor releases.
+
 ---
 
 ## :material-api: GHOSTS API Stack
@@ -69,7 +72,8 @@ The compose file uses these defaults, which can be overridden with a `.env` file
 | `WEB_API_URL` | `http://host.docker.internal:5000/api` | API URL used by the frontend container |
 | `WEB_N8N_API_URL` | `http://host.docker.internal:5678` | n8n URL used by the frontend container |
 | `N8N_API_URL` | `http://host.docker.internal:5678/api/v1/workflows` | n8n REST API URL used by the API container |
-| `N8N_API_KEY` | `replace-me` | n8n API key — set this before using workflow scheduling |
+| `N8N_API_KEY` | *(empty)* | n8n API key — **required** for workflow scheduling. Generate one in n8n: Settings > API > Create API Key. |
+| `POSTGRES_PASSWORD` | `scotty@1` | PostgreSQL password. **Change this** for any non-local deployment. |
 
 ### Managing the Stack
 
@@ -109,6 +113,16 @@ docker compose up -d
 
 GHOSTS clients simulate realistic user activity on target machines. Install one client per machine you want to simulate.
 
+### Which Client Should I Use?
+
+| Client | Runtime | OS | Best For |
+|--------|---------|----|----------|
+| **Windows** | [.NET Framework 4.6.1+](https://go.microsoft.com/fwlink/?LinkId=2099467) | Windows 7/10/11, Server 2012+ | Full Office/browser/RDP automation. Use when participants observe the desktop. |
+| **Universal** | [.NET 9](https://dotnet.microsoft.com/download/dotnet/9.0) | Windows, Linux, macOS | Cross-platform, 38+ handlers. **Default choice** for Linux or mixed environments. |
+| **Lite** | [.NET 8](https://dotnet.microsoft.com/download/dotnet/8.0) | Windows, Linux | Lightweight traffic generation without real apps. Run 100-500+ NPCs per host. |
+
+> **Not sure?** Start with **Universal**. Switch to **Windows** only if you need Office automation, or to **Lite** if you need high NPC density on limited hardware.
+
 ### Prerequisites
 
 Run clients as a **regular user account**, not as administrator or root, to produce realistic behavior and avoid permission issues with browser drivers.
@@ -120,7 +134,7 @@ For browser automation, place the appropriate WebDriver binary in the same direc
 
 ### :material-microsoft-windows: Windows Client
 
-**Requirements:** .NET Framework 4.6.1 runtime or later (runtime only, SDK not required).
+**Requirements:** [.NET Framework 4.6.1 runtime](https://go.microsoft.com/fwlink/?LinkId=2099467) or later (runtime only, SDK not required).
 
 1. [Download the latest Windows client](https://github.com/cmu-sei/GHOSTS/releases/latest)
 2. Extract to a directory (e.g., `C:\ghosts`)

@@ -89,6 +89,9 @@ namespace Ghosts.Api.Infrastructure.Data
 
         public DbSet<Hypothesis> Hypotheses { get; set; }
 
+        // Execution Map spatial metadata
+        public DbSet<MapFeature> MapFeatures { get; set; }
+
         // MITRE ATT&CK reference data
         public DbSet<AttackTechnique> AttackTechniques { get; set; }
         public DbSet<AttackGroup> AttackGroups { get; set; }
@@ -433,6 +436,15 @@ namespace Ghosts.Api.Infrastructure.Data
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<AttackTechnique>().HasIndex(t => t.Tactics);
+
+            // ── Map Feature indexes ──
+            modelBuilder.Entity<MapFeature>().Property(e => e.Properties).HasColumnType("jsonb");
+            modelBuilder.Entity<MapFeature>().Property(e => e.Geometry).HasColumnType("jsonb");
+            modelBuilder.Entity<MapFeature>().HasIndex(e => new { e.FeatureType, e.ExecutionId });
+            modelBuilder.Entity<MapFeature>().HasIndex(e => new { e.EntityId, e.FeatureType });
+            modelBuilder.Entity<MapFeature>().HasIndex(e => e.ScenarioId);
+            modelBuilder.Entity<MapFeature>().HasIndex(e => e.ExecutionId);
+            modelBuilder.Entity<MapFeature>().HasIndex(e => e.ValidFrom);
 
             foreach (var entity in modelBuilder.Model.GetEntityTypes())
             {

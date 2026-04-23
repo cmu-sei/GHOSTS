@@ -17,7 +17,7 @@ services:
     environment:
       POSTGRES_DB: ghosts
       POSTGRES_USER: ghosts
-      POSTGRES_PASSWORD: scotty@1
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-scotty@1}
     volumes:
       - ghosts-postgres-data:/var/lib/postgresql/data
     logging:

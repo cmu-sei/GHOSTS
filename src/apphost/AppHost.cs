@@ -33,7 +33,8 @@ var facebook = builder.AddProject<Projects.Ghosts_Pandora>("facebook")
     .WithEnvironment("DATABASE_PROVIDER", "PostgreSQL")
     .WithEnvironment("MODE_TYPE", "social")
     .WithEnvironment("DEFAULT_THEME", "facebook")
-    .WithEnvironment("LD_PRELOAD", freetypeLib);
+    .WithEnvironment("LD_PRELOAD", freetypeLib)
+    .WithExternalHttpEndpoints();
 
 var api = builder.AddProject<Projects.Ghosts_Api>("api")
     .WaitFor(postgres)

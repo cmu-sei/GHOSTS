@@ -216,85 +216,71 @@ namespace Ghosts.Api.Infrastructure.Services
                 throw new InvalidOperationException($"Cannot start execution with status {execution.Status}");
             }
 
-            // ── Guard 1: a completed compilation must exist ──────────────────
+            // ── Optional deployment: compile + assign if available ──────────
             var compilation = await ScenarioCompilations
                 .Where(c => c.ScenarioId == execution.ScenarioId && c.Status == "Completed")
                 .OrderByDescending(c => c.CompletedAt)
                 .FirstOrDefaultAsync(ct);
 
-            if (compilation == null)
-            {
-                throw new InvalidOperationException(
-                    "Cannot start execution: no completed compilation exists for this scenario. " +
-                    "Use the Scenario Builder to compile the scenario first.");
-            }
-
-            // ── Guard 2: NPC-to-machine assignments must exist ───────────────
-            var assignments = await ScenarioNpcAssignments
-                .Where(a => a.CompilationId == compilation.Id)
-                .ToListAsync(ct);
-
-            if (assignments.Count == 0)
-            {
-                throw new InvalidOperationException(
-                    "Cannot start execution: no NPC-to-machine assignments found for the selected compilation. " +
-                    "Assign machines to compiled NPCs in the Scenario Builder before starting.");
-            }
-
-            // ── Load scenario timeline events ────────────────────────────────
-            var timelineEvents = await ScenarioTimelineEvents
-                .Where(e => e.Timeline.ScenarioId == execution.ScenarioId)
-                .OrderBy(e => e.Number)
-                .ToListAsync(ct);
-
-            // ── Deploy: create MachineUpdate per assignment ──────────────────
             var deployedCount = 0;
             var deployErrors = new List<string>();
+            int? compilationId = null;
+            var assignmentCount = 0;
 
-            foreach (var assignment in assignments)
+            if (compilation != null)
             {
-                try
+                compilationId = compilation.Id;
+
+                var assignments = await ScenarioNpcAssignments
+                    .Where(a => a.CompilationId == compilation.Id)
+                    .ToListAsync(ct);
+
+                assignmentCount = assignments.Count;
+
+                if (assignments.Count > 0)
                 {
-                    var timeline = BuildTimelineForNpc(assignment.NpcId, execution.Id, timelineEvents);
+                    var timelineEvents = await ScenarioTimelineEvents
+                        .Where(e => e.Timeline.ScenarioId == execution.ScenarioId)
+                        .OrderBy(e => e.Number)
+                        .ToListAsync(ct);
 
-                    var machineUpdate = new MachineUpdate
+                    foreach (var assignment in assignments)
                     {
-                        MachineId = assignment.MachineId,
-                        Status = StatusType.Active,
-                        Update = timeline,
-                        ActiveUtc = DateTime.UtcNow,
-                        CreatedUtc = DateTime.UtcNow,
-                        Type = UpdateClientConfig.UpdateType.TimelinePartial
-                    };
+                        try
+                        {
+                            var timeline = BuildTimelineForNpc(assignment.NpcId, execution.Id, timelineEvents);
 
-                    // Attempt real-time delivery; fall back to DB polling path
-                    var delivered = await _clientHubService.SendUpdate(assignment.MachineId, machineUpdate);
-                    if (!delivered)
-                    {
-                        MachineUpdates.Add(machineUpdate);
-                        _log.Debug($"[Execution {id}] NPC {assignment.NpcId} → machine {assignment.MachineId}: queued in DB (no active socket)");
+                            var machineUpdate = new MachineUpdate
+                            {
+                                MachineId = assignment.MachineId,
+                                Status = StatusType.Active,
+                                Update = timeline,
+                                ActiveUtc = DateTime.UtcNow,
+                                CreatedUtc = DateTime.UtcNow,
+                                Type = UpdateClientConfig.UpdateType.TimelinePartial
+                            };
+
+                            var delivered = await _clientHubService.SendUpdate(assignment.MachineId, machineUpdate);
+                            if (!delivered)
+                            {
+                                MachineUpdates.Add(machineUpdate);
+                                _log.Debug($"[Execution {id}] NPC {assignment.NpcId} → machine {assignment.MachineId}: queued in DB (no active socket)");
+                            }
+                            else
+                            {
+                                _log.Debug($"[Execution {id}] NPC {assignment.NpcId} → machine {assignment.MachineId}: delivered via websocket");
+                            }
+
+                            deployedCount++;
+                        }
+                        catch (Exception ex)
+                        {
+                            var msg = $"Failed to deploy NPC {assignment.NpcId} to machine {assignment.MachineId}: {ex.Message}";
+                            _log.Warn(msg);
+                            deployErrors.Add(msg);
+                        }
                     }
-                    else
-                    {
-                        _log.Debug($"[Execution {id}] NPC {assignment.NpcId} → machine {assignment.MachineId}: delivered via websocket");
-                    }
-
-                    deployedCount++;
                 }
-                catch (Exception ex)
-                {
-                    var msg = $"Failed to deploy NPC {assignment.NpcId} to machine {assignment.MachineId}: {ex.Message}";
-                    _log.Warn(msg);
-                    deployErrors.Add(msg);
-                }
-            }
-
-            // Require at least one successful deployment
-            if (deployedCount == 0)
-            {
-                var errorSummary = string.Join("; ", deployErrors);
-                throw new InvalidOperationException(
-                    $"Execution start failed: all {assignments.Count} deployment(s) failed. Errors: {errorSummary}");
             }
 
             // ── Transition state ─────────────────────────────────────────────
@@ -314,8 +300,8 @@ namespace Ghosts.Api.Infrastructure.Services
                 {
                     status = "Running",
                     timestamp = DateTime.UtcNow,
-                    compilationId = compilation.Id,
-                    deploymentsAttempted = assignments.Count,
+                    compilationId,
+                    deploymentsAttempted = assignmentCount,
                     deploymentsSucceeded = deployedCount,
                     deployErrors
                 }),
@@ -325,8 +311,15 @@ namespace Ghosts.Api.Infrastructure.Services
 
             await _context.SaveChangesAsync(ct);
 
-            _log.Info($"Started execution {id}: deployed to {deployedCount}/{assignments.Count} machines" +
-                      (deployErrors.Count > 0 ? $" ({deployErrors.Count} errors)" : ""));
+            if (assignmentCount > 0)
+            {
+                _log.Info($"Started execution {id}: deployed to {deployedCount}/{assignmentCount} machines" +
+                          (deployErrors.Count > 0 ? $" ({deployErrors.Count} errors)" : ""));
+            }
+            else
+            {
+                _log.Info($"Started execution {id}: no NPC assignments to deploy (scenario not compiled or no assignments)");
+            }
 
             return execution;
         }

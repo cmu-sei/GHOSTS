@@ -16,6 +16,13 @@ export const EXECUTIONS_ROUTES: Routes = [
       ),
   },
   {
+    path: ':id/map',
+    loadComponent: () =>
+      import('./execution-map.component').then(
+        (m) => m.ExecutionMapComponent
+      ),
+  },
+  {
     path: ':id',
     loadComponent: () =>
       import('./execution-details.component').then(

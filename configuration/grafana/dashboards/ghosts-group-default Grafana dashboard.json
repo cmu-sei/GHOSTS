@@ -952,7 +952,7 @@
     ]
   },
   "time": {
-    "from": "now-90d",
+    "from": "now-2d",
     "to": "now"
   },
   "timepicker": {
