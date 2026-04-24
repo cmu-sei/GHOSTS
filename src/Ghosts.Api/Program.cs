@@ -122,6 +122,7 @@ public class Program
         builder.Services.AddScoped<ISurveyService, SurveyService>();
         builder.Services.AddScoped<INpcService, NpcService>();
         builder.Services.AddScoped<IScenarioService, ScenarioService>();
+        builder.Services.AddScoped<IObjectiveService, ObjectiveService>();
         builder.Services.AddScoped<DbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
         builder.Services.AddScoped<IExecutionService, ExecutionService>();
         builder.Services.AddScoped<IExecutionMapService, ExecutionMapService>();

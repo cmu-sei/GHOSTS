@@ -79,8 +79,9 @@ $transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 .fab {
   position: absolute;
   z-index: 10;
-  display: flex;
+  display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   padding: 8px 14px;
   background: $glass;
@@ -96,6 +97,9 @@ $transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   transition: background $transition, border-color $transition;
   box-shadow: $shadow;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  line-height: 1;
 
   &:hover {
     background: $glass-hover;
@@ -103,7 +107,14 @@ $transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     color: $text;
   }
 
-  i { font-size: 12px; }
+  &:focus, &:focus-visible {
+    outline: none;
+  }
+
+  &:visited { color: $text; }
+  &:active { color: $text; }
+
+  i { font-size: 12px; line-height: 1; }
 }
 
 .fab-back {

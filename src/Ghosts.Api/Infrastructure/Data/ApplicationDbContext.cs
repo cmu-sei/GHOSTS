@@ -87,6 +87,8 @@ namespace Ghosts.Api.Infrastructure.Data
         public DbSet<ScenarioCompilation> ScenarioCompilations { get; set; }
         public DbSet<ScenarioNpcAssignment> ScenarioNpcAssignments { get; set; }
 
+        public DbSet<Objective> Objectives { get; set; }
+
         public DbSet<Hypothesis> Hypotheses { get; set; }
 
         // Execution Map spatial metadata
@@ -284,6 +286,29 @@ namespace Ghosts.Api.Infrastructure.Data
             modelBuilder.Entity<Execution>().HasIndex(e => e.StartedAt);
             modelBuilder.Entity<ExecutionEvent>().HasIndex(ev => new { ev.ExecutionId, ev.Timestamp });
             modelBuilder.Entity<ExecutionMetricSnapshot>().HasIndex(ms => new { ms.ExecutionId, ms.Timestamp });
+
+            // ── Objectives relationships ──
+
+            modelBuilder.Entity<Scenario>()
+                .HasMany(s => s.Objectives)
+                .WithOne(o => o.Scenario)
+                .HasForeignKey(o => o.ScenarioId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<Objective>()
+                .HasMany(o => o.Children)
+                .WithOne(o => o.Parent)
+                .HasForeignKey(o => o.ParentId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Objective>().HasIndex(o => o.ScenarioId);
+            modelBuilder.Entity<Objective>().HasIndex(o => o.Status);
+            modelBuilder.Entity<Objective>().HasIndex(o => o.Type);
+            modelBuilder.Entity<Objective>().HasIndex(o => o.ParentId);
+
+            modelBuilder.Entity<ScenarioTimelineEvent>()
+                .Property(e => e.ObjectiveIds)
+                .HasColumnName("objective_ids");
 
             // ── Scenario Builder relationships ──
 

@@ -247,6 +247,7 @@ interface NavItem {
 })
 export class NavigationComponent {
   protected readonly navItems = signal<NavItem[]>([
+    { label: 'Objectives', path: '/objectives', icon: 'fa-bullseye' },
     { label: 'Scenarios', path: '/scenarios', icon: 'fa-file-alt' },
     { label: 'Executions', path: '/executions', icon: 'fa-play' },
     {

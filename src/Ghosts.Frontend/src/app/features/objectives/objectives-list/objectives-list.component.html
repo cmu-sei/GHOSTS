@@ -1,0 +1,443 @@
+<div class="page-header">
+  <h1>Objectives</h1>
+  <button mat-raised-button color="primary" (click)="openNewForm()" [disabled]="showNewForm()">
+    <i class="fas fa-plus"></i>
+    New Objective
+  </button>
+</div>
+
+<!-- Stats Bar -->
+@if (!loading() && objectives().length > 0) {
+<div class="stats-bar">
+  <div class="stat">
+    <span class="stat-value">{{ stats().total }}</span>
+    <span class="stat-label">Objectives</span>
+  </div>
+  <div class="stat">
+    <span class="stat-value active">{{ stats().active }}</span>
+    <span class="stat-label">Active</span>
+  </div>
+  <div class="stat">
+    <span class="stat-value achieved">{{ stats().achieved }}</span>
+    <span class="stat-label">Achieved</span>
+  </div>
+  <div class="stat">
+    <span class="stat-value">{{ stats().children }}</span>
+    <span class="stat-label">Sub-items</span>
+  </div>
+  <div class="stat">
+    <span class="stat-value trained">{{ stats().trained }}</span>
+    <span class="stat-label">Trained</span>
+  </div>
+</div>
+}
+
+<!-- Inline New Objective Form -->
+@if (showNewForm()) {
+<mat-card class="new-form-card">
+  <div class="inline-form">
+    <div class="form-row">
+      <mat-form-field class="form-field-grow">
+        <mat-label>Name</mat-label>
+        <input matInput [(ngModel)]="newObjective.name" placeholder="e.g., Defend network perimeter" (keydown.enter)="saveNew()">
+      </mat-form-field>
+      <mat-form-field class="form-field-type">
+        <mat-label>Type</mat-label>
+        <mat-select [(ngModel)]="newObjective.type">
+          @for (type of objectiveTypes; track type.value) {
+            <mat-option [value]="type.value">{{ type.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field class="form-field-priority">
+        <mat-label>Priority</mat-label>
+        <mat-select [(ngModel)]="newObjective.priority">
+          <mat-option [value]="1">1 - Critical</mat-option>
+          <mat-option [value]="2">2 - High</mat-option>
+          <mat-option [value]="3">3 - Medium</mat-option>
+          <mat-option [value]="4">4 - Low</mat-option>
+          <mat-option [value]="5">5 - Minimal</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+    <div class="form-row">
+      <mat-form-field class="form-field-grow">
+        <mat-label>Description</mat-label>
+        <input matInput [(ngModel)]="newObjective.description" placeholder="What should participants accomplish?">
+      </mat-form-field>
+      <mat-form-field class="form-field-grow">
+        <mat-label>Success Criteria</mat-label>
+        <input matInput [(ngModel)]="newObjective.successCriteria" placeholder="How will you know this is met?">
+      </mat-form-field>
+    </div>
+    <div class="form-actions">
+      <button mat-raised-button color="primary" [disabled]="!newObjective.name.trim()" (click)="saveNew()">
+        <i class="fas fa-check"></i> Create
+      </button>
+      <button mat-button (click)="cancelNew()">Cancel</button>
+    </div>
+  </div>
+</mat-card>
+}
+
+<!-- Filters -->
+<div class="filter-bar">
+  <mat-form-field class="filter-search" appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Search</mat-label>
+    <i class="fas fa-search" matPrefix style="margin: 0 8px; color: rgba(0,0,0,0.4); font-size: 14px"></i>
+    <input matInput [ngModel]="searchTerm()" (ngModelChange)="onSearchChange($event)" placeholder="Filter objectives..." autocomplete="off">
+  </mat-form-field>
+  <mat-form-field class="filter-select" appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Type</mat-label>
+    <mat-select [value]="filterType()" (selectionChange)="filterType.set($event.value)">
+      <mat-option value="">All</mat-option>
+      @for (type of objectiveTypes; track type.value) {
+        <mat-option [value]="type.value">{{ type.label }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+  <mat-form-field class="filter-select" appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Status</mat-label>
+    <mat-select [value]="filterStatus()" (selectionChange)="filterStatus.set($event.value)">
+      <mat-option value="">All</mat-option>
+      @for (status of objectiveStatuses; track status.value) {
+        <mat-option [value]="status.value">{{ status.label }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+  @if (searchTerm() || filterType() || filterStatus()) {
+    <span class="filter-info">{{ filteredObjectives().length }} of {{ objectives().length }}</span>
+  }
+</div>
+
+<!-- Loading -->
+@if (loading()) {
+<div class="loading">
+  <mat-spinner diameter="40"></mat-spinner>
+  <p>Loading objectives...</p>
+</div>
+}
+
+<!-- Error -->
+@if (error() && !loading()) {
+<div class="error">
+  <i class="fas fa-exclamation-circle"></i>
+  <p>{{ error() }}</p>
+  <button mat-raised-button color="primary" (click)="loadObjectives()">
+    <i class="fas fa-sync"></i> Retry
+  </button>
+</div>
+}
+
+<!-- Empty State -->
+@if (!loading() && !error() && objectives().length === 0 && !showNewForm()) {
+<div class="empty-state">
+  <i class="fas fa-bullseye"></i>
+  <h2>No objectives yet</h2>
+  <p>Define what your exercise or training should achieve. Objectives can be formal METs/JMETs, mission rehearsals, onboarding of new operators, or tool training goals. Add sub-objectives to break them into performance measures and individual tasks.</p>
+  <button mat-raised-button color="primary" (click)="openNewForm()">
+    <i class="fas fa-plus"></i> Create First Objective
+  </button>
+</div>
+}
+
+<!-- Objectives List -->
+@if (!loading() && !error() && objectives().length > 0) {
+<div class="objectives-list">
+  @for (objective of filteredObjectives(); track objective.id) {
+  <mat-card class="objective-card" [class.expanded]="isExpanded(objective.id)" (click)="toggleExpand(objective.id)">
+
+    <div class="card-header">
+      <div class="header-left">
+        <i class="fas fa-chevron-right expand-icon" [class.rotated]="isExpanded(objective.id)"></i>
+        <span class="priority-badge" [matTooltip]="getPriorityLabel(objective.priority)">P{{ objective.priority }}</span>
+        <span class="type-chip" [matTooltip]="getTypeDescription(objective.type)">{{ getTypeLabel(objective.type) }}</span>
+        <span class="objective-name">{{ objective.name }}</span>
+      </div>
+      <div class="header-right">
+        @if (objective.children?.length) {
+          <span class="task-progress" [matTooltip]="getChildProgress(objective) + '% trained'">
+            <span class="progress-bar">
+              <span class="progress-fill" [style.width.%]="getChildProgress(objective)"></span>
+            </span>
+            {{ getTrainedCount(objective) }}/{{ getTotalDescendants(objective) }} trained
+          </span>
+        }
+        <button mat-button class="status-button" [style.color]="getStatusColor(objective.status)"
+          [matMenuTriggerFor]="statusMenu" (click)="$event.stopPropagation()">
+          <i class="fas fa-circle" style="font-size: 8px; margin-right: 4px"></i>
+          {{ objective.status }}
+          <i class="fas fa-caret-down" style="margin-left: 4px; font-size: 10px"></i>
+        </button>
+        <mat-menu #statusMenu="matMenu">
+          @for (s of objectiveStatuses; track s.value) {
+            <button mat-menu-item (click)="updateObjectiveStatus(objective, s.value, $event)">
+              <i class="fas fa-circle" [style.color]="s.color" style="font-size: 8px; margin-right: 8px"></i>
+              {{ s.label }}
+            </button>
+          }
+        </mat-menu>
+        <button mat-icon-button (click)="startEdit(objective, $event)" matTooltip="Edit">
+          <i class="fas fa-edit"></i>
+        </button>
+        <button mat-icon-button color="warn" (click)="deleteObjective(objective, $event)" matTooltip="Delete">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+    </div>
+
+    @if (isExpanded(objective.id)) {
+    <div class="card-body" (click)="$event.stopPropagation()">
+
+      <!-- Inline Edit Form -->
+      @if (editingId() === objective.id) {
+      <div class="edit-form">
+        <div class="form-row">
+          <mat-form-field class="form-field-grow">
+            <mat-label>Name</mat-label>
+            <input matInput [(ngModel)]="editForm.name" (keydown.enter)="saveEdit(objective.id)">
+          </mat-form-field>
+          <mat-form-field class="form-field-type">
+            <mat-label>Type</mat-label>
+            <mat-select [(ngModel)]="editForm.type">
+              @for (type of objectiveTypes; track type.value) {
+                <mat-option [value]="type.value">{{ type.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field class="form-field-priority">
+            <mat-label>Priority</mat-label>
+            <mat-select [(ngModel)]="editForm.priority">
+              <mat-option [value]="1">1 - Critical</mat-option>
+              <mat-option [value]="2">2 - High</mat-option>
+              <mat-option [value]="3">3 - Medium</mat-option>
+              <mat-option [value]="4">4 - Low</mat-option>
+              <mat-option [value]="5">5 - Minimal</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field class="form-field-status">
+            <mat-label>Status</mat-label>
+            <mat-select [(ngModel)]="editForm.status">
+              @for (s of objectiveStatuses; track s.value) {
+                <mat-option [value]="s.value">{{ s.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="form-row">
+          <mat-form-field class="form-field-grow">
+            <mat-label>Description</mat-label>
+            <input matInput [(ngModel)]="editForm.description">
+          </mat-form-field>
+          <mat-form-field class="form-field-grow">
+            <mat-label>Success Criteria</mat-label>
+            <input matInput [(ngModel)]="editForm.successCriteria">
+          </mat-form-field>
+          <mat-form-field class="form-field-assigned">
+            <mat-label>Assigned</mat-label>
+            <input matInput [(ngModel)]="editForm.assigned">
+          </mat-form-field>
+        </div>
+        <div class="form-actions">
+          <button mat-raised-button color="primary" [disabled]="!editForm.name?.trim()" (click)="saveEdit(objective.id)">
+            <i class="fas fa-check"></i> Save
+          </button>
+          <button mat-button (click)="cancelEdit()">Cancel</button>
+        </div>
+      </div>
+      } @else {
+        @if (objective.description) {
+          <p class="description">{{ objective.description }}</p>
+        }
+
+        @if (objective.successCriteria) {
+          <div class="criteria-section">
+            <strong>Success Criteria:</strong> {{ objective.successCriteria }}
+          </div>
+        }
+
+        <div class="meta-row">
+          @if (objective.assigned) {
+            <span class="meta-item"><i class="fas fa-user"></i> {{ objective.assigned }}</span>
+          }
+          <span class="meta-item"><i class="fas fa-calendar"></i> Created {{ formatDate(objective.createdAt) }}</span>
+          <span class="meta-item"><i class="fas fa-sync"></i> Updated {{ formatDate(objective.updatedAt) }}</span>
+        </div>
+      }
+
+      <!-- Children tree -->
+      <div class="children-section">
+        <div class="children-header">
+          <h4>Sub-objectives</h4>
+          <button mat-stroked-button color="primary" (click)="startAddChild(objective.id, $event)">
+            <i class="fas fa-plus"></i> Add Sub-objective
+          </button>
+        </div>
+
+        <!-- Add child form -->
+        @if (addingChildToId() === objective.id) {
+        <div class="add-child-form">
+          <div class="form-row">
+            <mat-form-field class="form-field-grow">
+              <mat-label>Name</mat-label>
+              <input matInput [(ngModel)]="newChild.name" placeholder="e.g., Performance Measure 1" (keydown.enter)="saveChild(objective)">
+            </mat-form-field>
+            <mat-form-field class="form-field-grow">
+              <mat-label>Description</mat-label>
+              <input matInput [(ngModel)]="newChild.description">
+            </mat-form-field>
+            <mat-form-field class="form-field-assigned">
+              <mat-label>Assigned</mat-label>
+              <input matInput [(ngModel)]="newChild.assigned">
+            </mat-form-field>
+          </div>
+          <div class="form-actions">
+            <button mat-raised-button color="primary" [disabled]="!newChild.name.trim()" (click)="saveChild(objective)">
+              <i class="fas fa-check"></i> Add
+            </button>
+            <button mat-button (click)="cancelAddChild()">Cancel</button>
+          </div>
+        </div>
+        }
+
+        @if (objective.children?.length) {
+        <div class="tree-table">
+          <div class="tree-header-row">
+            <span class="tree-col-name">Name</span>
+            <span class="tree-col-assigned">Assigned</span>
+            <span class="tree-col-score">Score</span>
+            <span class="tree-col-status">Status</span>
+            <span class="tree-col-actions"></span>
+          </div>
+          <ng-container *ngTemplateOutlet="childrenTree; context: { $implicit: objective.children, depth: 0 }"></ng-container>
+        </div>
+        } @else if (addingChildToId() !== objective.id) {
+          <p class="no-children">No sub-objectives yet. Break this objective into performance measures or tasks.</p>
+        }
+      </div>
+    </div>
+    }
+
+  </mat-card>
+  }
+</div>
+}
+
+<!-- Recursive tree template -->
+<ng-template #childrenTree let-children let-depth="depth">
+  @for (child of children; track child.id) {
+  <div class="tree-row" [style.--depth]="depth">
+    <span class="tree-col-name">
+      <span class="tree-indent" [style.width.px]="depth * 24"></span>
+      @if (child.children?.length) {
+        <i class="fas fa-chevron-right tree-expand" [class.rotated]="isExpanded(child.id)"
+          (click)="toggleExpand(child.id)"></i>
+      } @else {
+        <span class="tree-leaf-spacer"></span>
+      }
+      <span class="child-name" [class.has-children]="child.children?.length">{{ child.name }}</span>
+      @if (child.description) {
+        <span class="child-desc">{{ child.description }}</span>
+      }
+    </span>
+    <span class="tree-col-assigned">{{ child.assigned }}</span>
+    <span class="tree-col-score">
+      <div class="score-buttons">
+        @for (score of taskScores; track score.value) {
+          <button
+            class="score-btn"
+            [class.active]="child.score === score.value"
+            [style.--score-color]="score.color"
+            [matTooltip]="score.label"
+            (click)="updateScore(child, score.value, $event)">
+            {{ score.value }}
+          </button>
+        }
+      </div>
+    </span>
+    <span class="tree-col-status">
+      <button mat-button class="inline-status-btn" [style.color]="getStatusColor(child.status)"
+        [matMenuTriggerFor]="childStatusMenu">
+        {{ child.status }}
+        <i class="fas fa-caret-down" style="margin-left: 2px; font-size: 10px"></i>
+      </button>
+      <mat-menu #childStatusMenu="matMenu">
+        @for (s of objectiveStatuses; track s.value) {
+          <button mat-menu-item (click)="updateObjectiveStatus(child, s.value, $event)">
+            <i class="fas fa-circle" [style.color]="s.color" style="font-size: 8px; margin-right: 8px"></i>
+            {{ s.label }}
+          </button>
+        }
+      </mat-menu>
+    </span>
+    <span class="tree-col-actions">
+      <button mat-icon-button (click)="startAddChild(child.id, $event)" matTooltip="Add child">
+        <i class="fas fa-plus" style="font-size: 12px"></i>
+      </button>
+      <button mat-icon-button (click)="startEdit(child, $event)" matTooltip="Edit">
+        <i class="fas fa-edit" style="font-size: 12px"></i>
+      </button>
+      <button mat-icon-button color="warn" (click)="deleteObjective(child, $event)" matTooltip="Delete">
+        <i class="fas fa-trash" style="font-size: 12px"></i>
+      </button>
+    </span>
+  </div>
+
+  <!-- Inline edit for child -->
+  @if (editingId() === child.id) {
+  <div class="tree-row-edit" [style.padding-left.px]="(depth * 24) + 32">
+    <div class="form-row">
+      <mat-form-field class="form-field-grow">
+        <mat-label>Name</mat-label>
+        <input matInput [(ngModel)]="editForm.name" (keydown.enter)="saveEdit(child.id)">
+      </mat-form-field>
+      <mat-form-field class="form-field-grow">
+        <mat-label>Description</mat-label>
+        <input matInput [(ngModel)]="editForm.description">
+      </mat-form-field>
+      <mat-form-field class="form-field-assigned">
+        <mat-label>Assigned</mat-label>
+        <input matInput [(ngModel)]="editForm.assigned">
+      </mat-form-field>
+    </div>
+    <div class="form-actions">
+      <button mat-raised-button color="primary" [disabled]="!editForm.name?.trim()" (click)="saveEdit(child.id)">
+        <i class="fas fa-check"></i> Save
+      </button>
+      <button mat-button (click)="cancelEdit()">Cancel</button>
+    </div>
+  </div>
+  }
+
+  <!-- Add child form for this child -->
+  @if (addingChildToId() === child.id) {
+  <div class="tree-row-edit" [style.padding-left.px]="((depth + 1) * 24) + 32">
+    <div class="form-row">
+      <mat-form-field class="form-field-grow">
+        <mat-label>Name</mat-label>
+        <input matInput [(ngModel)]="newChild.name" (keydown.enter)="saveChild(child)">
+      </mat-form-field>
+      <mat-form-field class="form-field-grow">
+        <mat-label>Description</mat-label>
+        <input matInput [(ngModel)]="newChild.description">
+      </mat-form-field>
+      <mat-form-field class="form-field-assigned">
+        <mat-label>Assigned</mat-label>
+        <input matInput [(ngModel)]="newChild.assigned">
+      </mat-form-field>
+    </div>
+    <div class="form-actions">
+      <button mat-raised-button color="primary" [disabled]="!newChild.name.trim()" (click)="saveChild(child)">
+        <i class="fas fa-check"></i> Add
+      </button>
+      <button mat-button (click)="cancelAddChild()">Cancel</button>
+    </div>
+  </div>
+  }
+
+  <!-- Recurse into children -->
+  @if (child.children?.length && isExpanded(child.id)) {
+    <ng-container *ngTemplateOutlet="childrenTree; context: { $implicit: child.children, depth: depth + 1 }"></ng-container>
+  }
+  }
+</ng-template>

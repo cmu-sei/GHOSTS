@@ -96,6 +96,7 @@ export interface ScenarioTimelineEvent {
   assigned: string;
   description: string;
   status: string;
+  objectiveIds?: number[];
 }
 
 export interface CreateScenario {

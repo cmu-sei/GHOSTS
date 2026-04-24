@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Ghosts.Api.Infrastructure.Data;
@@ -259,7 +260,8 @@ namespace Ghosts.Api.Infrastructure.Services
                         Number = e.Number,
                         Assigned = e.Assigned,
                         Description = e.Description,
-                        Status = e.Status
+                        Status = e.Status,
+                        ObjectiveIds = e.ObjectiveIds?.Count > 0 ? JsonSerializer.Serialize(e.ObjectiveIds) : null
                     }).ToList();
                 }
                 else
@@ -363,7 +365,8 @@ namespace Ghosts.Api.Infrastructure.Services
                     Number = e.Number,
                     Assigned = e.Assigned,
                     Description = e.Description,
-                    Status = e.Status
+                    Status = e.Status,
+                    ObjectiveIds = e.ObjectiveIds?.Count > 0 ? JsonSerializer.Serialize(e.ObjectiveIds) : null
                 }).ToList()
             };
         }

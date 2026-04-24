@@ -88,6 +88,11 @@ public class ScenariosController : ControllerBase
     {
         try
         {
+            if (dto.Timeline?.Events != null)
+            {
+                foreach (var e in dto.Timeline.Events)
+                    _logger.LogWarning("Event #{Num} objectiveIds={ObjIds}", e.Number, e.ObjectiveIds != null ? string.Join(",", e.ObjectiveIds) : "none");
+            }
             await _scenarioService.UpdateAsync(id, dto, ct);
             return NoContent();
         }
@@ -192,7 +197,9 @@ public class ScenariosController : ControllerBase
             ) : null,
             scenario.ScenarioTimeline != null ? new TimelineDto(
                 scenario.ScenarioTimeline.ExerciseDuration,
-                scenario.ScenarioTimeline.ScenarioTimelineEvents.Select(e => new TimelineEventDto(e.Time, e.Number, e.Assigned, e.Description, e.Status)).ToList()
+                scenario.ScenarioTimeline.ScenarioTimelineEvents.Select(e => new TimelineEventDto(e.Time, e.Number, e.Assigned, e.Description, e.Status,
+                    !string.IsNullOrEmpty(e.ObjectiveIds) ? JsonSerializer.Deserialize<List<int>>(e.ObjectiveIds) : new List<int>()
+                )).ToList()
             ) : null,
             scenario.BuilderStatus ?? "None"
         );

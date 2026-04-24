@@ -13,8 +13,8 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { ChangeDetectionStrategy } from '@angular/core';
-import { ScenarioService } from '../../../core/services';
-import { CreateScenario, ScenarioTimelineEvent, Scenario } from '../../../core/models';
+import { ScenarioService, ObjectiveService } from '../../../core/services';
+import { CreateScenario, ScenarioTimelineEvent, Scenario, Objective } from '../../../core/models';
 
 @Component({
   selector: 'app-scenarios-planner',
@@ -40,6 +40,7 @@ import { CreateScenario, ScenarioTimelineEvent, Scenario } from '../../../core/m
 })
 export class ScenariosPlannerComponent implements OnInit {
   private readonly scenarioService = inject(ScenarioService);
+  private readonly objectiveService = inject(ObjectiveService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
 
@@ -103,9 +104,10 @@ export class ScenariosPlannerComponent implements OnInit {
     }
   };
 
-  protected readonly cellRoles = ['White Cell', 'Red Team', 'Blue Team', 'Green Cell'];
+  protected readonly cellRoles = ['None', 'White Cell', 'Red Team', 'Blue Team', 'Green Cell'];
   protected readonly eventStatuses = ['Pending', 'Active', 'Complete'];
-  protected readonly timelineColumns = ['drag', 'time', 'number', 'assigned', 'description', 'status', 'actions'];
+  protected readonly timelineColumns = ['drag', 'time', 'number', 'assigned', 'description', 'objective', 'status', 'actions'];
+  protected scenarioObjectives = signal<Objective[]>([]);
 
   protected readonly availablePlatforms = {
     websites: [
@@ -152,12 +154,34 @@ export class ScenariosPlannerComponent implements OnInit {
         this.scenarioId = +id;
         this.isEditMode = true;
         this.loadScenario(this.scenarioId);
+      } else {
+        this.loadAllObjectives();
       }
     });
   }
 
+  private loadAllObjectives(): void {
+    this.objectiveService.getAll().subscribe({
+      next: (objectives) => this.scenarioObjectives.set(this.flattenObjectives(objectives)),
+      error: () => this.scenarioObjectives.set([])
+    });
+  }
+
+  private flattenObjectives(objectives: Objective[]): Objective[] {
+    const result: Objective[] = [];
+    const walk = (list: Objective[], depth: number) => {
+      for (const o of list) {
+        result.push({ ...o, name: ' '.repeat(depth * 3) + o.name });
+        if (o.children?.length) walk(o.children, depth + 1);
+      }
+    };
+    walk(objectives, 0);
+    return result;
+  }
+
   protected loadScenario(id: number): void {
     this.loading.set(true);
+    this.loadAllObjectives();
     this.scenarioService.getScenario(id).subscribe({
       next: (scenario) => {
         this.builderStatus.set(scenario.builderStatus ?? 'None');
@@ -166,7 +190,7 @@ export class ScenariosPlannerComponent implements OnInit {
           description: scenario.description,
           scenarioParameters: scenario.scenarioParameters || this.scenario.scenarioParameters,
           technicalEnvironment: scenario.technicalEnvironment || this.scenario.technicalEnvironment,
-          simulationMechanics: scenario.simulationMechanics || this.scenario.simulationMechanics,
+          simulationMechanics: scenario.gameMechanics || scenario.simulationMechanics || this.scenario.simulationMechanics,
           timeline: scenario.timeline || this.scenario.timeline
         };
 
@@ -176,6 +200,14 @@ export class ScenariosPlannerComponent implements OnInit {
             ...actor,
             ttpsString: actor.ttps.join(',')
           } as any));
+        }
+
+        // Ensure objectiveIds are always arrays
+        if (this.scenario.timeline?.events) {
+          this.scenario.timeline.events = this.scenario.timeline.events.map(e => ({
+            ...e,
+            objectiveIds: e.objectiveIds ?? []
+          }));
         }
 
         this.loading.set(false);
@@ -196,7 +228,7 @@ export class ScenariosPlannerComponent implements OnInit {
   protected dismissBuilderPrompts(): void {
     this.builderStatus.set('Reviewed');
     if (this.scenarioId) {
-      this.scenarioService.updateScenario(this.scenarioId, { ...this.scenario, builderStatus: 'Reviewed' }).subscribe();
+      this.scenarioService.updateScenario(this.scenarioId, { ...this.scenario, gameMechanics: this.scenario.simulationMechanics, builderStatus: 'Reviewed' }).subscribe();
     }
   }
 
@@ -262,7 +294,8 @@ export class ScenariosPlannerComponent implements OnInit {
       number: this.scenario.timeline!.events.length + 1,
       assigned: 'White Cell',
       description: 'New event',
-      status: 'Pending'
+      status: 'Pending',
+      objectiveIds: []
     };
     this.scenario.timeline!.events = [...this.scenario.timeline!.events, newEvent];
   }
@@ -335,6 +368,8 @@ export class ScenariosPlannerComponent implements OnInit {
       });
     }
 
+    scenarioToSave.gameMechanics = scenarioToSave.simulationMechanics;
+
     if (this.isEditMode && this.scenarioId) {
       // Update existing scenario
       this.scenarioService.updateScenario(this.scenarioId, scenarioToSave).subscribe({
@@ -362,6 +397,32 @@ export class ScenariosPlannerComponent implements OnInit {
         }
       });
     }
+  }
+
+  protected onObjectivesChanged(): void {
+    if (this.isEditMode && this.scenarioId) {
+      this.autoSaveScenario();
+    }
+  }
+
+  private autoSaveScenario(): void {
+    if (!this.scenarioId) return;
+    const scenarioToSave = { ...this.scenario };
+    if (scenarioToSave.scenarioParameters) {
+      scenarioToSave.scenarioParameters.threatActors = scenarioToSave.scenarioParameters.threatActors.map(actor => {
+        const ttpsString = (actor as any).ttpsString || '';
+        return {
+          name: actor.name,
+          type: actor.type,
+          capability: actor.capability,
+          ttps: ttpsString ? ttpsString.split(',').map((t: string) => t.trim()).filter((t: string) => t) : []
+        };
+      });
+    }
+    scenarioToSave.gameMechanics = scenarioToSave.simulationMechanics;
+    this.scenarioService.updateScenario(this.scenarioId, scenarioToSave).subscribe({
+      error: (error) => console.error('Auto-save failed', error)
+    });
   }
 
   protected exportScenario(): void {

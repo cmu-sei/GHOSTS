@@ -27,6 +27,7 @@ public class Scenario
     public ICollection<ScenarioEdge> Edges { get; set; } = new List<ScenarioEdge>();
     public ICollection<ScenarioEnrichment> Enrichments { get; set; } = new List<ScenarioEnrichment>();
     public ICollection<ScenarioCompilation> Compilations { get; set; } = new List<ScenarioCompilation>();
+    public ICollection<Objective> Objectives { get; set; } = new List<Objective>();
 }
 
 [Table("scenario_parameters")]
@@ -155,6 +156,7 @@ public class ScenarioTimelineEvent
     public string Assigned { get; set; } = string.Empty; // White Cell, Red Team, Blue Team, Green Cell
     public string Description { get; set; } = string.Empty;
     public string Status { get; set; } = "Pending"; // Pending, Active, Complete
+    public string ObjectiveIds { get; set; } // JSON array of objective IDs, e.g. "[1,2,3]"
 
     public ScenarioTimeline Timeline { get; set; }
 }
@@ -248,5 +250,6 @@ public record TimelineEventDto(
     int Number,
     string Assigned,
     string Description,
-    string Status
+    string Status,
+    List<int> ObjectiveIds = null
 );
