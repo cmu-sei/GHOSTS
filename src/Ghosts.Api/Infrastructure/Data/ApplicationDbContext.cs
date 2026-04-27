@@ -148,18 +148,20 @@ namespace Ghosts.Api.Infrastructure.Data
                 .HasForeignKey(n => n.ScenarioId)
                 .OnDelete(DeleteBehavior.SetNull);
 
+            // NPC-Execution relationship (optional, nullable foreign key)
+            modelBuilder.Entity<NpcRecord>()
+                .HasOne(n => n.Execution)
+                .WithMany()
+                .HasForeignKey(n => n.ExecutionId)
+                .OnDelete(DeleteBehavior.SetNull);
+
             // Indexes for NPC and Social Graph tables
             modelBuilder.Entity<NpcRecord>().HasIndex(n => n.CurrentStep);
             modelBuilder.Entity<NpcRecord>().HasIndex(n => n.ScenarioId);
+            modelBuilder.Entity<NpcRecord>().HasIndex(n => n.ExecutionId);
             modelBuilder.Entity<NpcSocialConnection>().HasIndex(c => new { c.NpcId, c.ConnectedNpcId });
             modelBuilder.Entity<NpcLearning>().HasIndex(l => new { l.NpcId, l.Topic, l.Step });
             modelBuilder.Entity<NpcBelief>().HasIndex(b => new { b.NpcId, b.Name, b.Step });
-            modelBuilder.Entity<NpcBelief>().HasIndex(b => b.ExecutionId);
-            modelBuilder.Entity<NpcBelief>()
-                .HasOne(b => b.Execution)
-                .WithMany()
-                .HasForeignKey(b => b.ExecutionId)
-                .OnDelete(DeleteBehavior.SetNull);
             modelBuilder.Entity<NpcPreference>().HasIndex(p => new { p.NpcId, p.Name, p.Step });
 
             modelBuilder.Entity<Hypothesis>().HasIndex(h => h.IsActive);

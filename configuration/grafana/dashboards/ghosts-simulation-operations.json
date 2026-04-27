@@ -89,7 +89,7 @@
           "format": "table",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(*) FROM executions;",
+          "rawSql": "SELECT COUNT(*) FROM executions WHERE (${execution:raw} = 0 OR id = ${execution:raw});",
           "refId": "A"
         }
       ],
@@ -153,7 +153,7 @@
           "format": "table",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(*) FROM executions WHERE status = 1;",
+          "rawSql": "SELECT COUNT(*) FROM executions WHERE status = 1 AND (${execution:raw} = 0 OR id = ${execution:raw});",
           "refId": "A"
         }
       ],
@@ -217,7 +217,7 @@
           "format": "table",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(*) FROM executions WHERE status = 2;",
+          "rawSql": "SELECT COUNT(*) FROM executions WHERE status = 2 AND (${execution:raw} = 0 OR id = ${execution:raw});",
           "refId": "A"
         }
       ],
@@ -281,7 +281,7 @@
           "format": "table",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(*) FROM executions WHERE status = 3;",
+          "rawSql": "SELECT COUNT(*) FROM executions WHERE status = 3 AND (${execution:raw} = 0 OR id = ${execution:raw});",
           "refId": "A"
         }
       ],
@@ -345,7 +345,7 @@
           "format": "table",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(*) FROM executions WHERE status IN (4, 5);",
+          "rawSql": "SELECT COUNT(*) FROM executions WHERE status IN (4, 5) AND (${execution:raw} = 0 OR id = ${execution:raw});",
           "refId": "A"
         }
       ],
@@ -634,7 +634,7 @@
           "format": "table",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT\n  e.name,\n  s.name AS scenario_name,\n  e.status,\n  e.createdat,\n  e.startedat,\n  e.completedat,\n  COALESCE(ev.event_count, 0) AS event_count\nFROM executions e\nLEFT JOIN scenarios s ON e.scenarioid = s.id\nLEFT JOIN (\n  SELECT executionid, COUNT(*) AS event_count\n  FROM execution_events\n  GROUP BY executionid\n) ev ON ev.executionid = e.id\nORDER BY e.createdat DESC\nLIMIT 20;",
+          "rawSql": "SELECT\n  e.name,\n  s.name AS scenario_name,\n  e.status,\n  e.createdat,\n  e.startedat,\n  e.completedat,\n  COALESCE(ev.event_count, 0) AS event_count\nFROM executions e\nLEFT JOIN scenarios s ON e.scenarioid = s.id\nLEFT JOIN (\n  SELECT executionid, COUNT(*) AS event_count\n  FROM execution_events\n  WHERE (${execution:raw} = 0 OR executionid = ${execution:raw})\nGROUP BY executionid\n) ev ON ev.executionid = e.id\nORDER BY e.createdat DESC\nLIMIT 20;",
           "refId": "A"
         }
       ],
@@ -2051,7 +2051,7 @@
           "format": "table",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(*) FROM npc_social_connections;",
+          "rawSql": "SELECT COUNT(*) FROM npc_social_connections JOIN npcs n ON npc_social_connections.npcid = n.id WHERE (${execution:raw} = 0 OR n.executionid = ${execution:raw});",
           "refId": "A"
         }
       ],
@@ -2115,7 +2115,7 @@
           "format": "table",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(*) FROM npc_beliefs;",
+          "rawSql": "SELECT COUNT(*) FROM npc_beliefs JOIN npcs n ON npc_beliefs.npcid = n.id WHERE (${execution:raw} = 0 OR n.executionid = ${execution:raw});",
           "refId": "A"
         }
       ],
@@ -2179,7 +2179,7 @@
           "format": "table",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(*) FROM npc_learning;",
+          "rawSql": "SELECT COUNT(*) FROM npc_learning JOIN npcs n ON npc_learning.npcid = n.id WHERE (${execution:raw} = 0 OR n.executionid = ${execution:raw});",
           "refId": "A"
         }
       ],
@@ -2243,7 +2243,7 @@
           "format": "table",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(*) FROM npc_activity;",
+          "rawSql": "SELECT COUNT(*) FROM npc_activity JOIN npcs n ON npc_activity.npcid = n.id WHERE (${execution:raw} = 0 OR n.executionid = ${execution:raw});",
           "refId": "A"
         }
       ],
@@ -2307,7 +2307,7 @@
           "format": "table",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(*) FROM npc_preferences;",
+          "rawSql": "SELECT COUNT(*) FROM npc_preferences JOIN npcs n ON npc_preferences.npcid = n.id WHERE (${execution:raw} = 0 OR n.executionid = ${execution:raw});",
           "refId": "A"
         }
       ],
@@ -2410,7 +2410,7 @@
           "format": "time_series",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT $__timeGroup(createdutc, '1h', 0), COUNT(*) AS \"Beliefs\" FROM npc_beliefs WHERE $__timeFilter(createdutc) GROUP BY time ORDER BY time",
+          "rawSql": "SELECT $__timeGroup(createdutc, '1h', 0), COUNT(*) AS \"Beliefs\" FROM npc_beliefs JOIN npcs n ON npc_beliefs.npcid = n.id WHERE $__timeFilter(createdutc)  AND (${execution:raw} = 0 OR n.executionid = ${execution:raw})\nGROUP BY time ORDER BY time",
           "refId": "A"
         },
         {
@@ -2423,7 +2423,7 @@
           "format": "time_series",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT $__timeGroup(createdutc, '1h', 0), COUNT(*) AS \"Connections\" FROM npc_social_connections WHERE $__timeFilter(createdutc) GROUP BY time ORDER BY time",
+          "rawSql": "SELECT $__timeGroup(createdutc, '1h', 0), COUNT(*) AS \"Connections\" FROM npc_social_connections JOIN npcs n ON npc_social_connections.npcid = n.id WHERE $__timeFilter(createdutc)  AND (${execution:raw} = 0 OR n.executionid = ${execution:raw})\nGROUP BY time ORDER BY time",
           "refId": "B"
         },
         {
@@ -2436,7 +2436,7 @@
           "format": "time_series",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT $__timeGroup(createdutc, '1h', 0), COUNT(*) AS \"Learning\" FROM npc_learning WHERE $__timeFilter(createdutc) GROUP BY time ORDER BY time",
+          "rawSql": "SELECT $__timeGroup(createdutc, '1h', 0), COUNT(*) AS \"Learning\" FROM npc_learning JOIN npcs n ON npc_learning.npcid = n.id WHERE $__timeFilter(createdutc)  AND (${execution:raw} = 0 OR n.executionid = ${execution:raw})\nGROUP BY time ORDER BY time",
           "refId": "C"
         },
         {
@@ -2449,7 +2449,7 @@
           "format": "time_series",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT $__timeGroup(createdutc, '1h', 0), COUNT(*) AS \"Activities\" FROM npc_activity WHERE $__timeFilter(createdutc) GROUP BY time ORDER BY time",
+          "rawSql": "SELECT $__timeGroup(createdutc, '1h', 0), COUNT(*) AS \"Activities\" FROM npc_activity JOIN npcs n ON npc_activity.npcid = n.id WHERE $__timeFilter(createdutc)  AND (${execution:raw} = 0 OR n.executionid = ${execution:raw})\nGROUP BY time ORDER BY time",
           "refId": "D"
         },
         {
@@ -2462,7 +2462,7 @@
           "format": "time_series",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT $__timeGroup(createdutc, '1h', 0), COUNT(*) AS \"Preferences\" FROM npc_preferences WHERE $__timeFilter(createdutc) GROUP BY time ORDER BY time",
+          "rawSql": "SELECT $__timeGroup(createdutc, '1h', 0), COUNT(*) AS \"Preferences\" FROM npc_preferences JOIN npcs n ON npc_preferences.npcid = n.id WHERE $__timeFilter(createdutc)  AND (${execution:raw} = 0 OR n.executionid = ${execution:raw})\nGROUP BY time ORDER BY time",
           "refId": "E"
         }
       ],
@@ -2621,7 +2621,7 @@
           "format": "time_series",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT\n  $__timeGroup(timestamp, '1h', 0),\n  severity AS metric,\n  COUNT(*) AS value\nFROM execution_events\nWHERE $__timeFilter(timestamp)\nGROUP BY time, severity\nORDER BY time",
+          "rawSql": "SELECT\n  $__timeGroup(timestamp, '1h', 0),\n  severity AS metric,\n  COUNT(*) AS value\nFROM execution_events\nWHERE $__timeFilter(timestamp)\n AND (${execution:raw} = 0 OR executionid = ${execution:raw})\nGROUP BY time, severity\nORDER BY time",
           "refId": "A"
         }
       ],
@@ -2791,7 +2791,7 @@
           "format": "table",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT\n  e.name AS execution_name,\n  ev.timestamp,\n  ev.eventtype,\n  ev.severity,\n  ev.description\nFROM execution_events ev\nJOIN executions e ON ev.executionid = e.id\nWHERE $__timeFilter(ev.timestamp)\nORDER BY ev.timestamp DESC\nLIMIT 100;",
+          "rawSql": "SELECT\n  e.name AS execution_name,\n  ev.timestamp,\n  ev.eventtype,\n  ev.severity,\n  ev.description\nFROM execution_events ev\nJOIN executions e ON ev.executionid = e.id\nWHERE $__timeFilter(ev.timestamp)\n AND (${execution:raw} = 0 OR ev.executionid = ${execution:raw})\nORDER BY ev.timestamp DESC\nLIMIT 100;",
           "refId": "A"
         }
       ],
@@ -2817,7 +2817,33 @@
     "executions"
   ],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "allValue": "0",
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "${DS_GHOSTS}"
+        },
+        "definition": "",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Execution",
+        "multi": false,
+        "name": "execution",
+        "options": [],
+        "query": "SELECT e.name || ' (' || to_char(e.createdat, 'YYYY-MM-DD') || ')' as __text, e.id::text as __value FROM executions e ORDER BY e.createdat DESC",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      }
+    ]
   },
   "time": {
     "from": "now-2d",

@@ -39,13 +39,12 @@ public class EvidenceProcessorService(ApplicationDbContext context) : IEvidenceP
                 .FirstOrDefaultAsync(n => n.Id == authorNpcId, ct);
             if (author == null) return;
 
-            // 2. Find running execution for this scenario (optional — beliefs tracked globally if none)
+            // 2. Find execution for this NPC (optional — beliefs tracked globally if none)
             Execution execution = null;
-            if (author.ScenarioId != null)
+            if (author.ExecutionId != null)
             {
                 execution = await _context.Executions
-                    .FirstOrDefaultAsync(e => e.ScenarioId == author.ScenarioId
-                        && e.Status == ExecutionStatus.Running, ct);
+                    .FirstOrDefaultAsync(e => e.Id == author.ExecutionId, ct);
             }
 
             // 3. Load active hypotheses (execution-scoped or global)
@@ -93,7 +92,6 @@ public class EvidenceProcessorService(ApplicationDbContext context) : IEvidenceP
                         Step = step,
                         Likelihood = likelihoodH1,
                         Posterior = bayes.PosteriorH1,
-                        ExecutionId = execution?.Id,
                         CreatedUtc = DateTime.UtcNow
                     });
                 }

@@ -3,6 +3,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Ghosts.Api.Infrastructure.Models;
 using Ghosts.Api.Infrastructure.Services;
@@ -19,17 +22,14 @@ namespace Ghosts.Api.Infrastructure.Data
             // Ensure NPC Campaign/Enclave/Team columns exist (for databases created before these fields were added)
             await EnsureNpcColumnsExist(context, logger);
 
+            // Ensure NPC tables have execution_id column for per-execution filtering
+            await EnsureNpcExecutionIdColumns(context, logger);
+
             // Import MITRE ATT&CK data if not already loaded
             await ImportMitreAttackData(context, logger, serviceProvider);
 
-            // Seed scenarios if not already present
-            if (!await context.Scenarios.AnyAsync())
-            {
-                logger.LogInformation("Seeding database with sample scenarios...");
-                await SeedScenarios(context, logger);
-                await context.SaveChangesAsync();
-                logger.LogInformation("Scenario seeding completed");
-            }
+            // Seed all exercise data from config/SeedData/seed.json (scenarios, objectives, NPCs, etc.)
+            await SeedFromJson(context, logger);
 
             // Ensure the map_features table exists (EnsureCreated is a no-op for existing DBs)
             await EnsureMapFeaturesTableExists(context, logger);
@@ -87,6 +87,61 @@ namespace Ghosts.Api.Infrastructure.Data
             }
         }
 
+        private static async Task EnsureNpcExecutionIdColumns(ApplicationDbContext context, ILogger<DbInitializer> logger)
+        {
+            try
+            {
+                var connection = context.Database.GetDbConnection();
+                if (connection.State != System.Data.ConnectionState.Open)
+                    await connection.OpenAsync();
+
+                // Add executionid to npcs table (the single source of truth)
+                using (var cmd = connection.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                        DO $$
+                        BEGIN
+                            IF NOT EXISTS (
+                                SELECT 1 FROM information_schema.columns
+                                WHERE table_name = 'npcs' AND column_name = 'executionid'
+                            ) THEN
+                                ALTER TABLE npcs ADD COLUMN executionid INTEGER REFERENCES executions(id) ON DELETE SET NULL;
+                                CREATE INDEX ix_npcs_executionid ON npcs (executionid);
+                                RAISE NOTICE 'Added executionid column to npcs';
+                            END IF;
+                        END $$;
+                    ";
+                    await cmd.ExecuteNonQueryAsync();
+                }
+
+                // Drop executionid from child tables (now inferred via NPC join)
+                var childTables = new[] { "npc_activity", "npc_learning", "npc_preferences", "npc_social_connections", "npc_interactions", "npc_beliefs" };
+                foreach (var table in childTables)
+                {
+                    using var cmd = connection.CreateCommand();
+                    cmd.CommandText = $@"
+                        DO $$
+                        BEGIN
+                            IF EXISTS (
+                                SELECT 1 FROM information_schema.columns
+                                WHERE table_name = '{table}' AND column_name = 'executionid'
+                            ) THEN
+                                ALTER TABLE {table} DROP COLUMN executionid;
+                                RAISE NOTICE 'Dropped executionid column from {table}';
+                            END IF;
+                        END $$;
+                    ";
+                    await cmd.ExecuteNonQueryAsync();
+                }
+
+                logger.LogInformation("Verified NPC execution_id on npcs table, removed from child tables");
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Could not verify/migrate NPC execution_id columns");
+            }
+        }
+
         private static async Task ImportMitreAttackData(ApplicationDbContext context, ILogger<DbInitializer> logger, IServiceProvider serviceProvider)
         {
             try
@@ -121,613 +176,579 @@ namespace Ghosts.Api.Infrastructure.Data
             }
         }
 
-        private static async Task SeedScenarios(ApplicationDbContext context, ILogger<DbInitializer> logger)
+        // ===== Unified Seed from JSON =====
+
+        private static async Task SeedFromJson(ApplicationDbContext context, ILogger<DbInitializer> logger)
         {
-            var scenarios = new[]
+            var seedPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config", "SeedData", "seed.json");
+            if (!File.Exists(seedPath))
             {
-                // Classic cyber (2)
-                CreateAptIntrusionScenario(),
-                CreateRansomwareScenario(),
+                logger.LogInformation("No seed file at {Path} — skipping", seedPath);
+                return;
+            }
 
-                // Influence / IO (DATEWORLD, 2)
-                CreateInfluenceAmberVeil(),     // Limaria → Gorgas/Atropia narrative ops
-                CreateInfluenceIronOrchard(),   // Limarian agrarian unrest leveraged by proxies
+            var alreadySeeded = await context.Scenarios.AnyAsync() || await context.Npcs.AnyAsync();
+            if (alreadySeeded)
+            {
+                logger.LogInformation("Database already has scenario/NPC data — skipping seed");
+                return;
+            }
 
-                // Next-gen / hybrid (3)
-                CreateNextGenAutonomyConvoy(),  // Autonomy misrouting + EMS spoof + human-in-the-loop
-                CreateNextGenCognitiveTwin(),   // Digital-twin corruption + model poisoning
-                CreateNextGenSpacePntSpoofing() // Space/PNT spoofing with civil-military spillover
-            };
+            logger.LogInformation("Loading seed data from {Path}...", seedPath);
 
-            await context.Scenarios.AddRangeAsync(scenarios);
-            logger.LogInformation("Added {Count} sample scenarios", scenarios.Length);
+            try
+            {
+                var json = await File.ReadAllTextAsync(seedPath);
+                var opts = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true,
+                    NumberHandling = JsonNumberHandling.AllowReadingFromString
+                };
+                var seed = JsonSerializer.Deserialize<SeedFile>(json, opts);
+                if (seed == null) return;
+
+                var now = DateTime.UtcNow;
+
+                // --- Scenarios ---
+                var scenarioMap = new Dictionary<string, int>(); // name → db id
+                if (seed.Scenarios?.Count > 0)
+                {
+                    foreach (var s in seed.Scenarios)
+                    {
+                        var scenario = new Scenario
+                        {
+                            Name = s.Name,
+                            Description = s.Description,
+                            CreatedAt = now.AddDays(-28),
+                            UpdatedAt = now.AddDays(-28),
+                            ScenarioParameters = new ScenarioParameters
+                            {
+                                Objectives = s.ScenarioParameters?.Objectives,
+                                PoliticalContext = s.ScenarioParameters?.PoliticalContext,
+                                RulesOfEngagement = s.ScenarioParameters?.RulesOfEngagement,
+                                VictoryConditions = s.ScenarioParameters?.VictoryConditions,
+                                Nations = s.ScenarioParameters?.Nations?.Select(n => new Nation { Name = n.Name, Alignment = n.Alignment }).ToList() ?? new List<Nation>(),
+                                ThreatActors = s.ScenarioParameters?.ThreatActors?.Select(t => new ThreatActor { Name = t.Name, Type = t.Type, Capability = t.Capability, Ttps = t.Ttps }).ToList() ?? new List<ThreatActor>(),
+                                Injects = s.ScenarioParameters?.Injects?.Select(i => new Inject { Trigger = i.Trigger, Title = i.Title }).ToList() ?? new List<Inject>(),
+                                UserPools = s.ScenarioParameters?.UserPools?.Select(u => new UserPool { Role = u.Role, Count = u.Count }).ToList() ?? new List<UserPool>()
+                            },
+                            TechnicalEnvironment = s.TechnicalEnvironment == null ? null : new TechnicalEnvironment
+                            {
+                                NetworkTopology = s.TechnicalEnvironment.NetworkTopology,
+                                Services = s.TechnicalEnvironment.Services,
+                                Assets = s.TechnicalEnvironment.Assets,
+                                Defenses = s.TechnicalEnvironment.Defenses,
+                                Vulnerabilities = s.TechnicalEnvironment.Vulnerabilities?.Select(v => new Vulnerability { Asset = v.Asset, Cve = v.Cve, Severity = v.Severity }).ToList() ?? new List<Vulnerability>()
+                            },
+                            GameMechanics = s.GameMechanics == null ? null : new GameMechanics
+                            {
+                                TimelineType = s.GameMechanics.TimelineType,
+                                DurationHours = s.GameMechanics.DurationHours,
+                                AdjudicationType = s.GameMechanics.AdjudicationType,
+                                EscalationLadder = s.GameMechanics.EscalationLadder,
+                                BranchingLogic = s.GameMechanics.BranchingLogic,
+                                CollectLogs = s.GameMechanics.CollectLogs,
+                                CollectNetwork = s.GameMechanics.CollectNetwork,
+                                CollectEndpoint = s.GameMechanics.CollectEndpoint,
+                                CollectChat = s.GameMechanics.CollectChat,
+                                PerformanceMetrics = s.GameMechanics.PerformanceMetrics
+                            },
+                            ScenarioTimeline = s.ScenarioTimeline == null ? null : new ScenarioTimeline
+                            {
+                                ExerciseDuration = s.ScenarioTimeline.ExerciseDuration,
+                                ScenarioTimelineEvents = s.ScenarioTimeline.Events?.Select((e, idx) => new ScenarioTimelineEvent
+                                {
+                                    Time = e.Time,
+                                    Number = e.Number > 0 ? e.Number : idx + 1,
+                                    Assigned = e.Assigned,
+                                    Description = e.Description,
+                                    Status = e.Status ?? "Pending"
+                                }).ToList() ?? new List<ScenarioTimelineEvent>()
+                            }
+                        };
+                        context.Scenarios.Add(scenario);
+                        await context.SaveChangesAsync();
+                        scenarioMap[scenario.Name] = scenario.Id;
+                    }
+                    logger.LogInformation("Seeded {Count} scenarios", seed.Scenarios.Count);
+                }
+
+                // --- Objectives ---
+                if (seed.Objectives?.Count > 0)
+                {
+                    var objectiveMap = new Dictionary<string, int>(); // "scenarioName|objectiveName" → db id
+                    // First pass: top-level (no parent)
+                    foreach (var o in seed.Objectives.Where(x => string.IsNullOrEmpty(x.ParentName)))
+                    {
+                        var scenarioId = scenarioMap.GetValueOrDefault(o.ScenarioName);
+                        var obj = new Objective
+                        {
+                            ScenarioId = scenarioId > 0 ? scenarioId : null,
+                            Name = o.Name,
+                            Description = o.Description,
+                            Type = o.Type ?? "MET",
+                            Status = "Active",
+                            Score = "U",
+                            Priority = o.Priority,
+                            SuccessCriteria = o.SuccessCriteria,
+                            Assigned = o.Assigned,
+                            CreatedAt = now,
+                            UpdatedAt = now
+                        };
+                        context.Objectives.Add(obj);
+                        await context.SaveChangesAsync();
+                        objectiveMap[$"{o.ScenarioName}|{o.Name}"] = obj.Id;
+                    }
+                    // Second pass: children
+                    foreach (var o in seed.Objectives.Where(x => !string.IsNullOrEmpty(x.ParentName)))
+                    {
+                        var scenarioId = scenarioMap.GetValueOrDefault(o.ScenarioName);
+                        var parentId = objectiveMap.GetValueOrDefault($"{o.ScenarioName}|{o.ParentName}");
+                        var obj = new Objective
+                        {
+                            ScenarioId = scenarioId > 0 ? scenarioId : null,
+                            ParentId = parentId > 0 ? parentId : null,
+                            Name = o.Name,
+                            Description = o.Description,
+                            Type = o.Type ?? "Rehearsal",
+                            Status = "Active",
+                            Score = "U",
+                            Priority = o.Priority,
+                            SuccessCriteria = o.SuccessCriteria,
+                            Assigned = o.Assigned,
+                            CreatedAt = now,
+                            UpdatedAt = now
+                        };
+                        context.Objectives.Add(obj);
+                    }
+                    await context.SaveChangesAsync();
+                    logger.LogInformation("Seeded {Count} objectives", seed.Objectives.Count);
+                }
+
+                // --- Machines ---
+                if (seed.Machines?.Count > 0)
+                {
+                    foreach (var m in seed.Machines)
+                    {
+                        context.Machines.Add(new Machine
+                        {
+                            Id = Guid.Parse(m.Id),
+                            Name = m.Name,
+                            FQDN = m.Fqdn,
+                            Host = m.Host,
+                            HostIp = m.HostIp,
+                            IPAddress = m.HostIp,
+                            CurrentUsername = m.CurrentUsername,
+                            ClientVersion = m.ClientVersion,
+                            StatusUp = (Machine.UpDownStatus)m.StatusUp,
+                            LastReportedUtc = now.AddHours(-1)
+                        });
+                    }
+                    await context.SaveChangesAsync();
+                    logger.LogInformation("Seeded {Count} machines", seed.Machines.Count);
+                }
+
+                // --- NPCs ---
+                if (seed.Npcs?.Count > 0)
+                {
+                    foreach (var n in seed.Npcs)
+                    {
+                        context.Npcs.Add(new NpcRecord
+                        {
+                            Id = Guid.Parse(n.Id),
+                            Campaign = n.Campaign,
+                            Enclave = n.Enclave,
+                            Team = n.Team,
+                            CreatedUtc = now.AddDays(-2),
+                            NpcProfile = n.NpcProfile
+                        });
+                    }
+                    await context.SaveChangesAsync();
+                    logger.LogInformation("Seeded {Count} NPCs", seed.Npcs.Count);
+                }
+
+                // --- Timeline History ---
+                if (seed.TimelineHistory?.Count > 0)
+                {
+                    foreach (var t in seed.TimelineHistory)
+                    {
+                        context.HistoryTimeline.Add(new HistoryTimeline
+                        {
+                            MachineId = Guid.Parse(t.MachineId),
+                            Handler = t.Handler,
+                            Command = t.Command,
+                            CommandArg = t.CommandArg ?? "",
+                            Result = t.Result ?? "",
+                            CreatedUtc = now.AddHours(t.OffsetHours)
+                        });
+                    }
+                    await context.SaveChangesAsync();
+                    logger.LogInformation("Seeded {Count} timeline events", seed.TimelineHistory.Count);
+                }
+
+                // --- Health History ---
+                if (seed.HealthHistory?.Count > 0)
+                {
+                    foreach (var h in seed.HealthHistory)
+                    {
+                        context.HistoryHealth.Add(new HistoryHealth
+                        {
+                            MachineId = Guid.Parse(h.MachineId),
+                            Internet = h.Internet,
+                            Permissions = h.Permissions,
+                            ExecutionTime = h.ExecutionTime,
+                            CreatedUtc = now.AddHours(h.OffsetHours)
+                        });
+                    }
+                    await context.SaveChangesAsync();
+                    logger.LogInformation("Seeded {Count} health records", seed.HealthHistory.Count);
+                }
+
+                // --- Machine History ---
+                if (seed.MachineHistory?.Count > 0)
+                {
+                    foreach (var mh in seed.MachineHistory)
+                    {
+                        context.HistoryMachine.Add(new Machine.MachineHistoryItem
+                        {
+                            MachineId = Guid.Parse(mh.MachineId),
+                            Type = (Machine.MachineHistoryItem.HistoryType)mh.Type,
+                            Object = mh.Object ?? "{}",
+                            CreatedUtc = now.AddHours(mh.OffsetHours)
+                        });
+                    }
+                    await context.SaveChangesAsync();
+                    logger.LogInformation("Seeded {Count} machine history records", seed.MachineHistory.Count);
+                }
+
+                // --- Social Connections ---
+                if (seed.SocialConnections?.Count > 0)
+                {
+                    foreach (var c in seed.SocialConnections)
+                    {
+                        context.NpcSocialConnections.Add(new NpcSocialConnection
+                        {
+                            Id = c.Id,
+                            NpcId = Guid.Parse(c.NpcId),
+                            ConnectedNpcId = Guid.Parse(c.ConnectedNpcId),
+                            Name = c.Name,
+                            Distance = c.Distance,
+                            RelationshipStatus = c.RelationshipStatus,
+                            CreatedUtc = now.AddHours(c.OffsetHours),
+                            UpdatedUtc = now.AddHours(c.OffsetHours)
+                        });
+                    }
+                    await context.SaveChangesAsync();
+                    logger.LogInformation("Seeded {Count} social connections", seed.SocialConnections.Count);
+                }
+
+                // --- Interactions ---
+                if (seed.Interactions?.Count > 0)
+                {
+                    foreach (var i in seed.Interactions)
+                    {
+                        context.NpcInteractions.Add(new NpcInteraction
+                        {
+                            SocialConnectionId = i.SocialConnectionId,
+                            Step = i.Step,
+                            Value = i.Value,
+                            CreatedUtc = now.AddHours(i.OffsetHours)
+                        });
+                    }
+                    await context.SaveChangesAsync();
+                    logger.LogInformation("Seeded {Count} interactions", seed.Interactions.Count);
+                }
+
+                // --- Activities ---
+                if (seed.Activities?.Count > 0)
+                {
+                    foreach (var a in seed.Activities)
+                    {
+                        context.NpcActivities.Add(new NpcActivity
+                        {
+                            NpcId = Guid.Parse(a.NpcId),
+                            ActivityType = (NpcActivity.ActivityTypes)a.ActivityType,
+                            Detail = a.Detail,
+                            CreatedUtc = now.AddHours(a.OffsetHours)
+                        });
+                    }
+                    await context.SaveChangesAsync();
+                    logger.LogInformation("Seeded {Count} activities", seed.Activities.Count);
+                }
+
+                // --- Beliefs ---
+                if (seed.Beliefs?.Count > 0)
+                {
+                    foreach (var b in seed.Beliefs)
+                    {
+                        context.NpcBeliefs.Add(new NpcBelief
+                        {
+                            NpcId = Guid.Parse(b.NpcId),
+                            ToNpcId = Guid.Parse(b.ToNpcId),
+                            FromNpcId = Guid.Parse(b.FromNpcId),
+                            Name = b.Name,
+                            Step = b.Step,
+                            Likelihood = b.Likelihood,
+                            Posterior = b.Posterior,
+                            CreatedUtc = now.AddHours(b.OffsetHours)
+                        });
+                    }
+                    await context.SaveChangesAsync();
+                    logger.LogInformation("Seeded {Count} beliefs", seed.Beliefs.Count);
+                }
+
+                // --- Learning ---
+                if (seed.Learning?.Count > 0)
+                {
+                    foreach (var l in seed.Learning)
+                    {
+                        context.NpcLearning.Add(new NpcLearning(
+                            Guid.Parse(l.NpcId),
+                            Guid.Parse(l.ToNpcId),
+                            Guid.Parse(l.FromNpcId),
+                            l.Topic,
+                            l.Step,
+                            l.Value
+                        ) { CreatedUtc = now.AddHours(l.OffsetHours) });
+                    }
+                    await context.SaveChangesAsync();
+                    logger.LogInformation("Seeded {Count} learning records", seed.Learning.Count);
+                }
+
+                // --- Preferences ---
+                if (seed.Preferences?.Count > 0)
+                {
+                    foreach (var p in seed.Preferences)
+                    {
+                        context.NpcPreferences.Add(new NpcPreference(
+                            0,
+                            Guid.Parse(p.NpcId),
+                            Guid.Parse(p.ToNpcId),
+                            Guid.Parse(p.FromNpcId),
+                            p.Name,
+                            p.Step,
+                            p.Weight,
+                            p.Strength
+                        ) { CreatedUtc = now.AddHours(p.OffsetHours) });
+                    }
+                    await context.SaveChangesAsync();
+                    logger.LogInformation("Seeded {Count} preferences", seed.Preferences.Count);
+                }
+
+                logger.LogInformation("Seed data loaded successfully");
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to load seed data from {Path}", seedPath);
+            }
         }
 
-        // ===== Classic Cyber =====
+        // ===== Seed DTOs =====
 
-        private static Scenario CreateAptIntrusionScenario()
+        private class SeedFile
         {
-            return new Scenario
-            {
-                Name = "APT Intrusion — Quiet Anchor",
-                Description = "Suspected state actor establishes foothold via email infrastructure, blends into admin traffic, and hunts long-term access. Blue team must detect, contain, and evict without disrupting mission ops.",
-                CreatedAt = DateTime.UtcNow.AddDays(-28),
-                UpdatedAt = DateTime.UtcNow.AddDays(-28),
-                ScenarioParameters = new ScenarioParameters
-                {
-                    Objectives = "Detect initial access; map persistence; contain lateral movement; preserve forensics; eradicate C2; restore services with minimal downtime.",
-                    PoliticalContext = "Heightened tensions; premature attribution risks diplomatic fallout.",
-                    RulesOfEngagement = "Blue: defensive only. Red: maintain persistence and stage exfil. White: injects and adjudication.",
-                    VictoryConditions = "All persistence removed within 48h; no confirmed exfiltration; core services uptime ≥ 95%.",
-                    Nations = new[]
-                    {
-                        new Nation { Name = "Atropia", Alignment = "friendly" },
-                        new Nation { Name = "Donovia", Alignment = "adversary" }
-                    },
-                    ThreatActors = new[]
-                    {
-                        new ThreatActor
-                        {
-                            Name = "State-aligned APT (Donovian)",
-                            Type = "state",
-                            Capability = 9,
-                            Ttps = "T1566.001,T1078,T1003,T1021.001,T1059.001,T1071.001,T1041"
-                        }
-                    },
-                    Injects = new[]
-                    {
-                        new Inject { Trigger = "T+30m", Title = "Suspicious OAuth grant on mail tenant" },
-                        new Inject { Trigger = "T+2h", Title = "Service account password reset alert" },
-                        new Inject { Trigger = "T+4h", Title = "Odd PowerShell transcript artifact" },
-                        new Inject { Trigger = "OnDetect", Title = "Attempted log tampering on DC" }
-                    },
-                    UserPools = new[]
-                    {
-                        new UserPool { Role = "SOC Analyst", Count = 4 },
-                        new UserPool { Role = "Incident Commander", Count = 1 },
-                        new UserPool { Role = "Red Team Operator", Count = 2 },
-                        new UserPool { Role = "White Cell Controller", Count = 2 }
-                    }
-                },
-                TechnicalEnvironment = new TechnicalEnvironment
-                {
-                    NetworkTopology = "Enterprise network with DMZ, segmented user/server/admin nets, SaaS email.",
-                    Services = "AD, Exchange/365, Web apps, DBs, File shares, VPN",
-                    Assets = "180 workstations, 40 servers, 4 DCs",
-                    Defenses = "[\"SIEM\",\"EDR\",\"Firewall\",\"IDS/IPS\",\"Email gateway\",\"Proxy\"]",
-                    Vulnerabilities = new[]
-                    {
-                        new Vulnerability { Asset = "Mail Tenant", Cve = "Legacy-Auth-Enabled", Severity = "High" },
-                        new Vulnerability { Asset = "DC", Cve = "CVE-2020-1472", Severity = "Critical" },
-                        new Vulnerability { Asset = "VPN", Cve = "Weak-MFA-Policy", Severity = "High" }
-                    }
-                },
-                GameMechanics = new GameMechanics
-                {
-                    TimelineType = "compressed",
-                    DurationHours = 8,
-                    AdjudicationType = "hybrid",
-                    EscalationLadder = "Detection → Containment → Investigation → Eradication → Recovery",
-                    BranchingLogic = "If no detection by T+4h, attacker deploys backup C2 and credentials; if detected, attacker swaps to living-off-the-land.",
-                    CollectLogs = true,
-                    CollectNetwork = true,
-                    CollectEndpoint = true,
-                    CollectChat = true,
-                    PerformanceMetrics = "MTTD, MTTC, hosts compromised, privilege level removed, false positives"
-                },
-                ScenarioTimeline = new ScenarioTimeline
-                {
-                    ExerciseDuration = 480,
-                    ScenarioTimelineEvents = new[]
-                    {
-                        new ScenarioTimelineEvent { Time = "T+0m", Number = 1, Assigned = "Red Team", Description = "Initial phish; OAuth consent link", Status = "Pending" },
-                        new ScenarioTimelineEvent { Time = "T+30m", Number = 2, Assigned = "White Cell", Description = "User reports odd MFA prompt", Status = "Pending" },
-                        new ScenarioTimelineEvent { Time = "T+2h", Number = 3, Assigned = "Red Team", Description = "Service account pivot", Status = "Pending" },
-                        new ScenarioTimelineEvent { Time = "T+4h", Number = 4, Assigned = "Blue Team", Description = "Detection window—SIEM correlation", Status = "Pending" },
-                        new ScenarioTimelineEvent { Time = "T+6h", Number = 5, Assigned = "White Cell", Description = "Adjudication: containment effectiveness", Status = "Pending" },
-                        new ScenarioTimelineEvent { Time = "T+8h", Number = 6, Assigned = "White Cell", Description = "Hot wash", Status = "Pending" }
-                    }
-                }
-            };
+            public List<SeedScenario> Scenarios { get; set; }
+            public List<SeedObjective> Objectives { get; set; }
+            public List<SeedMachine> Machines { get; set; }
+            public List<SeedNpc> Npcs { get; set; }
+            public List<SeedTimelineHistory> TimelineHistory { get; set; }
+            public List<SeedHealthHistory> HealthHistory { get; set; }
+            public List<SeedMachineHistory> MachineHistory { get; set; }
+            public List<SeedSocialConnection> SocialConnections { get; set; }
+            public List<SeedInteraction> Interactions { get; set; }
+            public List<SeedActivity> Activities { get; set; }
+            public List<SeedBelief> Beliefs { get; set; }
+            public List<SeedLearning> Learning { get; set; }
+            public List<SeedPreference> Preferences { get; set; }
         }
 
-        private static Scenario CreateRansomwareScenario()
+        private class SeedScenario
         {
-            return new Scenario
-            {
-                Name = "Ransomware — Grey Ledger",
-                Description = "Rapidly spreading encryption event stresses decision-making under regulatory pressure and incomplete backups.",
-                CreatedAt = DateTime.UtcNow.AddDays(-20),
-                UpdatedAt = DateTime.UtcNow.AddDays(-20),
-                ScenarioParameters = new ScenarioParameters
-                {
-                    Objectives = "Contain spread; identify patient zero; recover Tier-0/1 systems; manage exec/media comms.",
-                    PoliticalContext = "Publicly traded; disclosure clock running.",
-                    RulesOfEngagement = "Blue: full IR. Red: maximize blast radius. Green: exec/media/board.",
-                    VictoryConditions = "Contain ≤ 2h; restore critical services ≤ 24h; no ransom paid.",
-                    Nations = new[] { new Nation { Name = "Atropia", Alignment = "friendly" } },
-                    ThreatActors = new[]
-                    {
-                        new ThreatActor
-                        {
-                            Name = "REvil-style crew",
-                            Type = "criminal",
-                            Capability = 7,
-                            Ttps = "T1486,T1490,T1489,T1047,T1059.001,T1021.002,T1070.004"
-                        }
-                    },
-                    Injects = new[]
-                    {
-                        new Inject { Trigger = "T+0m", Title = "Helpdesk flooded: encrypted files" },
-                        new Inject { Trigger = "T+1h", Title = "DB server encryption" },
-                        new Inject { Trigger = "T+2h", Title = "Media inquiry" },
-                        new Inject { Trigger = "T+4h", Title = "Ransom doubles" }
-                    },
-                    UserPools = new[]
-                    {
-                        new UserPool { Role = "IR Lead", Count = 1 },
-                        new UserPool { Role = "Analyst", Count = 3 },
-                        new UserPool { Role = "Red Operator", Count = 1 },
-                        new UserPool { Role = "Green Exec/Media", Count = 2 },
-                        new UserPool { Role = "White Cell", Count = 2 }
-                    }
-                },
-                TechnicalEnvironment = new TechnicalEnvironment
-                {
-                    NetworkTopology = "Flat with remote VPN; cloud backups.",
-                    Services = "Files, Email, ERP, DB, Backup",
-                    Assets = "100 workstations, 20 servers",
-                    Defenses = "[\"Firewall\",\"AV\",\"Cloud backup\",\"Email filtering\"]",
-                    Vulnerabilities = new[]
-                    {
-                        new Vulnerability { Asset = "RDP", Cve = "CVE-2019-0708", Severity = "Critical" },
-                        new Vulnerability { Asset = "Backup", Cve = "Misconfigured-Access", Severity = "High" }
-                    }
-                },
-                GameMechanics = new GameMechanics
-                {
-                    TimelineType = "real-time",
-                    DurationHours = 6,
-                    AdjudicationType = "manual",
-                    EscalationLadder = "Detection → Containment → Exec brief → Recovery → Restoration",
-                    BranchingLogic = "If containment fails, backups get hit; if payment considered, legal/ethics injects fire.",
-                    CollectLogs = true,
-                    CollectNetwork = false,
-                    CollectEndpoint = true,
-                    CollectChat = true,
-                    PerformanceMetrics = "Time to containment, % encrypted, recovery time, comms quality"
-                },
-                ScenarioTimeline = new ScenarioTimeline
-                {
-                    ExerciseDuration = 360,
-                    ScenarioTimelineEvents = new[]
-                    {
-                        new ScenarioTimelineEvent { Time = "T+0m", Number = 1, Assigned = "Red Team", Description = "Encryption starts", Status = "Pending" },
-                        new ScenarioTimelineEvent { Time = "T+30m", Number = 2, Assigned = "White Cell", Description = "Helpdesk overload inject", Status = "Pending" },
-                        new ScenarioTimelineEvent { Time = "T+1h", Number = 3, Assigned = "Green Cell", Description = "CEO demands brief", Status = "Pending" },
-                        new ScenarioTimelineEvent { Time = "T+2h", Number = 4, Assigned = "White Cell", Description = "Media inquiry", Status = "Pending" },
-                        new ScenarioTimelineEvent { Time = "T+6h", Number = 5, Assigned = "White Cell", Description = "Debrief", Status = "Pending" }
-                    }
-                }
-            };
+            public string Name { get; set; }
+            public string Description { get; set; }
+            public SeedScenarioParameters ScenarioParameters { get; set; }
+            public SeedTechnicalEnvironment TechnicalEnvironment { get; set; }
+            public SeedGameMechanics GameMechanics { get; set; }
+            public SeedScenarioTimeline ScenarioTimeline { get; set; }
         }
 
-        // ===== Influence / IO (DATEWORLD) =====
-
-        private static Scenario CreateInfluenceAmberVeil()
+        private class SeedScenarioParameters
         {
-            return new Scenario
-            {
-                Name = "Amber Veil — Coalition Friction",
-                Description = "Limarian operators seed distrust in Gorgas border towns, reframing Atropian aid as covert annexation. Synthetic veterans groups and deepfake audio drive protests that disrupt joint logistics.",
-                CreatedAt = DateTime.UtcNow.AddDays(-12),
-                UpdatedAt = DateTime.UtcNow.AddDays(-12),
-                ScenarioParameters = new ScenarioParameters
-                {
-                    Objectives = "Detect/attribute influence network; protect convoy legitimacy; maintain coalition cohesion; counter-narratives without backfire.",
-                    PoliticalContext = "Atropia–Gorgas humanitarian corridor under scrutiny; Limaria domestic politics volatile.",
-                    RulesOfEngagement = "Blue: information defense, legal constraints. Red: influence amplification, plausible deniability. White: civ/NGO/media injects.",
-                    VictoryConditions = "Convoys run on schedule; protest intensity reduced; credible attribution brief delivered.",
-                    Nations = new[]
-                    {
-                        new Nation { Name = "Atropia", Alignment = "friendly" },
-                        new Nation { Name = "Gorgas", Alignment = "friendly" },
-                        new Nation { Name = "Limaria", Alignment = "adversary" }
-                    },
-                    ThreatActors = new[]
-                    {
-                        new ThreatActor
-                        {
-                            Name = "Limarian IO Cell",
-                            Type = "state-proxy",
-                            Capability = 6,
-                            Ttps = "AMITT:S-SeedRumor,AMITT:A-AuthHack,AMITT:D-DeepfakeAudio,AMITT:M-MemeWarfare"
-                        }
-                    },
-                    Injects = new[]
-                    {
-                        new Inject { Trigger = "T+0m", Title = "Hashtag storm targets aid convoy" },
-                        new Inject { Trigger = "T+45m", Title = "Deepfake audio of 'Atropian general' leaks" },
-                        new Inject { Trigger = "T+2h", Title = "NGO statement misquoted by bots" },
-                        new Inject { Trigger = "OnCounter", Title = "Narrative backfire risk: 'censorship' claims" }
-                    },
-                    UserPools = new[]
-                    {
-                        new UserPool { Role = "InfoOps Analyst", Count = 3 },
-                        new UserPool { Role = "Legal/Policy Advisor", Count = 1 },
-                        new UserPool { Role = "Coalition Liaison", Count = 1 },
-                        new UserPool { Role = "Red IO Operator", Count = 2 },
-                        new UserPool { Role = "White Media/NGO", Count = 2 }
-                    }
-                },
-                TechnicalEnvironment = new TechnicalEnvironment
-                {
-                    NetworkTopology = "Open social platforms + encrypted chat monitoring feeds; OSINT tooling.",
-                    Services = "Media monitoring, Bot detection, Crisis comms",
-                    Assets = "Convoy schedule data, Public affairs channels",
-                    Defenses = "[\"OSINT dashboards\",\"Bot classifiers\",\"Rapid comms playbook\"]",
-                    Vulnerabilities = new[]
-                    {
-                        new Vulnerability { Asset = "Public Affairs", Cve = "Slow-Approval-Cycle", Severity = "High" },
-                        new Vulnerability { Asset = "Convoy Info", Cve = "Over-Disclosure", Severity = "Medium" }
-                    }
-                },
-                GameMechanics = new GameMechanics
-                {
-                    TimelineType = "compressed",
-                    DurationHours = 4,
-                    AdjudicationType = "manual",
-                    EscalationLadder = "Narrative detection → Attribution → Counter-messaging → Community engagement",
-                    BranchingLogic = "Heavy-handed takedowns increase backlash; community partner outreach reduces volatility.",
-                    CollectLogs = false,
-                    CollectNetwork = false,
-                    CollectEndpoint = false,
-                    CollectChat = true,
-                    PerformanceMetrics = "Narrative reach, bot/troll suppression, protest size, convoy delays"
-                },
-                ScenarioTimeline = new ScenarioTimeline
-                {
-                    ExerciseDuration = 240,
-                    ScenarioTimelineEvents = new[]
-                    {
-                        new ScenarioTimelineEvent { Time = "T+0m", Number = 1, Assigned = "Red Team", Description = "Coordinated hashtag surge", Status = "Pending" },
-                        new ScenarioTimelineEvent { Time = "T+45m", Number = 2, Assigned = "White Cell", Description = "Deepfake drop", Status = "Pending" },
-                        new ScenarioTimelineEvent { Time = "T+2h", Number = 3, Assigned = "Blue Team", Description = "Counter-narrative and partner outreach", Status = "Pending" },
-                        new ScenarioTimelineEvent { Time = "T+4h", Number = 4, Assigned = "White Cell", Description = "After-action and metrics", Status = "Pending" }
-                    }
-                }
-            };
+            public string Objectives { get; set; }
+            public string PoliticalContext { get; set; }
+            public string RulesOfEngagement { get; set; }
+            public string VictoryConditions { get; set; }
+            public List<SeedNation> Nations { get; set; }
+            public List<SeedThreatActor> ThreatActors { get; set; }
+            public List<SeedInject> Injects { get; set; }
+            public List<SeedUserPool> UserPools { get; set; }
         }
 
-        private static Scenario CreateInfluenceIronOrchard()
+        private class SeedNation { public string Name { get; set; } public string Alignment { get; set; } }
+        private class SeedThreatActor { public string Name { get; set; } public string Type { get; set; } public int Capability { get; set; } public string Ttps { get; set; } }
+        private class SeedInject { public string Trigger { get; set; } public string Title { get; set; } }
+        private class SeedUserPool { public string Role { get; set; } public int Count { get; set; } }
+
+        private class SeedTechnicalEnvironment
         {
-            return new Scenario
-            {
-                Name = "Iron Orchard — Food Sovereignty Flashpoint",
-                Description = "Limarian farming protests gain viral traction after forged export data suggests Atropia is siphoning grain. Roadblocks threaten a Gorgas–Atropia relief corridor.",
-                CreatedAt = DateTime.UtcNow.AddDays(-11),
-                UpdatedAt = DateTime.UtcNow.AddDays(-11),
-                ScenarioParameters = new ScenarioParameters
-                {
-                    Objectives = "Validate/kill forged datasets; sustain corridor throughput; de-escalate unrest; preserve civil liberties.",
-                    PoliticalContext = "Election season in Limaria; Donovian media echoing unrest.",
-                    RulesOfEngagement = "Blue: data transparency, community comms. Red: data forgery, influencer amplification.",
-                    VictoryConditions = "Corridor ≥ 80% capacity; forged data publicly discredited by neutral validators.",
-                    Nations = new[]
-                    {
-                        new Nation { Name = "Limaria", Alignment = "neutral" },
-                        new Nation { Name = "Atropia", Alignment = "friendly" },
-                        new Nation { Name = "Gorgas", Alignment = "friendly" },
-                        new Nation { Name = "Donovia", Alignment = "adversary" }
-                    },
-                    ThreatActors = new[]
-                    {
-                        new ThreatActor
-                        {
-                            Name = "Proxy Media Fronts",
-                            Type = "state-proxy",
-                            Capability = 5,
-                            Ttps = "AMITT:F-ForgedStats,AMITT:I-InfluencerAstroturf,AMITT:V-VideoRemix"
-                        }
-                    },
-                    Injects = new[]
-                    {
-                        new Inject { Trigger = "T+0m", Title = "Viral 'export ledger' spreadsheet" },
-                        new Inject { Trigger = "T+1h", Title = "Drone 'seizure' video surfaces" },
-                        new Inject { Trigger = "T+3h", Title = "Independent fact-checker weighs in" }
-                    },
-                    UserPools = new[]
-                    {
-                        new UserPool { Role = "Data Forensics", Count = 2 },
-                        new UserPool { Role = "Community Liaison", Count = 2 },
-                        new UserPool { Role = "Red IO Cell", Count = 2 },
-                        new UserPool { Role = "White Observers/Media", Count = 2 }
-                    }
-                },
-                TechnicalEnvironment = new TechnicalEnvironment
-                {
-                    NetworkTopology = "Open web + municipal comms; logistics tracking feeds.",
-                    Services = "Data portal, Fact-checking hub, Social listening",
-                    Assets = "Corridor schedules, Freight telemetry",
-                    Defenses = "[\"Public data provenance\",\"Chain-of-custody for videos\"]",
-                    Vulnerabilities = new[]
-                    {
-                        new Vulnerability { Asset = "Telemetry", Cve = "Unverified-Screenshots", Severity = "Medium" }
-                    }
-                },
-                GameMechanics = new GameMechanics
-                {
-                    TimelineType = "compressed",
-                    DurationHours = 4,
-                    AdjudicationType = "manual",
-                    EscalationLadder = "Detection → Transparency release → Third-party validation → Community engagement",
-                    BranchingLogic = "If transparency lags, unrest grows; if partners endorse, narratives collapse.",
-                    CollectLogs = false,
-                    CollectNetwork = false,
-                    CollectEndpoint = false,
-                    CollectChat = true,
-                    PerformanceMetrics = "Throughput %, protest dispersion time, neutral-party endorsements"
-                },
-                ScenarioTimeline = new ScenarioTimeline
-                {
-                    ExerciseDuration = 240,
-                    ScenarioTimelineEvents = new[]
-                    {
-                        new ScenarioTimelineEvent { Time = "T+0m", Number = 1, Assigned = "Red Team", Description = "Release forged ledger", Status = "Pending" },
-                        new ScenarioTimelineEvent { Time = "T+1h", Number = 2, Assigned = "White Cell", Description = "Drone clip inject", Status = "Pending" },
-                        new ScenarioTimelineEvent { Time = "T+3h", Number = 3, Assigned = "Blue Team", Description = "Data provenance briefing", Status = "Pending" },
-                        new ScenarioTimelineEvent { Time = "T+4h", Number = 4, Assigned = "White Cell", Description = "Hot wash", Status = "Pending" }
-                    }
-                }
-            };
+            public string NetworkTopology { get; set; }
+            public string Services { get; set; }
+            public string Assets { get; set; }
+            public string Defenses { get; set; }
+            public List<SeedVulnerability> Vulnerabilities { get; set; }
         }
 
-        // ===== Next-Gen / Hybrid =====
+        private class SeedVulnerability { public string Asset { get; set; } public string Cve { get; set; } public string Severity { get; set; } }
 
-        private static Scenario CreateNextGenAutonomyConvoy()
+        private class SeedGameMechanics
         {
-            return new Scenario
-            {
-                Name = "Autonomy Misrouting — Phantom Detour",
-                Description = "Mixed human/robotic convoy is misrouted by adversary EMS/PNT spoofing and spoofed 'authority' messages. Teams must detect manipulation, re-route safely, and communicate under uncertainty.",
-                CreatedAt = DateTime.UtcNow.AddDays(-8),
-                UpdatedAt = DateTime.UtcNow.AddDays(-8),
-                ScenarioParameters = new ScenarioParameters
-                {
-                    Objectives = "Detect spoofed advisories; validate PNT; regain convoy control; maintain safety and tempo.",
-                    PoliticalContext = "Civilian traffic impacted; municipal authorities cautious.",
-                    RulesOfEngagement = "Blue: cyber/EM defenses, comms. Red: spoof/spear-phish/false signage. White: safety adjudication.",
-                    VictoryConditions = "Convoy arrives within tolerance; no safety incidents; credible incident report delivered.",
-                    Nations = new[]
-                    {
-                        new Nation { Name = "Gorgas", Alignment = "friendly" },
-                        new Nation { Name = "Limaria", Alignment = "adversary" }
-                    },
-                    ThreatActors = new[]
-                    {
-                        new ThreatActor
-                        {
-                            Name = "Hybrid EW/IO Cell",
-                            Type = "state",
-                            Capability = 7,
-                            Ttps = "T1598.003,T1557.002,AMITT:A-FakeAuthority,EW:PNT-Spoof"
-                        }
-                    },
-                    Injects = new[]
-                    {
-                        new Inject { Trigger = "T+0m", Title = "Emergency detour SMS signed 'Municipal Ops'" },
-                        new Inject { Trigger = "T+30m", Title = "GPS divergence between convoy units" },
-                        new Inject { Trigger = "T+1h", Title = "Social posts claim 'accident on primary route'" }
-                    },
-                    UserPools = new[]
-                    {
-                        new UserPool { Role = "Convoy Commander", Count = 1 },
-                        new UserPool { Role = "Autonomy Engineer", Count = 2 },
-                        new UserPool { Role = "Blue EW/Cyber", Count = 2 },
-                        new UserPool { Role = "Red Operator", Count = 2 },
-                        new UserPool { Role = "White Safety", Count = 1 }
-                    }
-                },
-                TechnicalEnvironment = new TechnicalEnvironment
-                {
-                    NetworkTopology = "Vehicle mesh + LTE/MCX backhaul; GPS/GNSS receivers; roadside units.",
-                    Services = "Fleet mgmt, Maps, OTA updates, V2X",
-                    Assets = "Autonomous shuttles, Command vehicle, RSUs",
-                    Defenses = "[\"PNT anomaly detection\",\"Message signing\",\"Geofencing\",\"Manual override SOPs\"]",
-                    Vulnerabilities = new[]
-                    {
-                        new Vulnerability { Asset = "V2X", Cve = "Weak-Origin-Auth", Severity = "High" },
-                        new Vulnerability { Asset = "Nav Stack", Cve = "Overtrust-Map-Updates", Severity = "Medium" }
-                    }
-                },
-                GameMechanics = new GameMechanics
-                {
-                    TimelineType = "real-time",
-                    DurationHours = 3,
-                    AdjudicationType = "hybrid",
-                    EscalationLadder = "Anomaly detection → Source validation → Route correction → Public comms",
-                    BranchingLogic = "If spoof not caught, convoy enters choke point; if caught, safe reroute with time penalty.",
-                    CollectLogs = true,
-                    CollectNetwork = true,
-                    CollectEndpoint = false,
-                    CollectChat = true,
-                    PerformanceMetrics = "Arrival delay, safety incidents, correct spoof attribution, comms latency"
-                },
-                ScenarioTimeline = new ScenarioTimeline
-                {
-                    ExerciseDuration = 180,
-                    ScenarioTimelineEvents = new[]
-                    {
-                        new ScenarioTimelineEvent { Time = "T+0m", Number = 1, Assigned = "Red Team", Description = "Spoof detour advisory", Status = "Pending" },
-                        new ScenarioTimelineEvent { Time = "T+30m", Number = 2, Assigned = "Blue Team", Description = "Detect PNT anomalies", Status = "Pending" },
-                        new ScenarioTimelineEvent { Time = "T+120m", Number = 3, Assigned = "White Cell", Description = "Safety adjudication checkpoint", Status = "Pending" }
-                    }
-                }
-            };
+            public string TimelineType { get; set; }
+            public int DurationHours { get; set; }
+            public string AdjudicationType { get; set; }
+            public string EscalationLadder { get; set; }
+            public string BranchingLogic { get; set; }
+            public bool CollectLogs { get; set; }
+            public bool CollectNetwork { get; set; }
+            public bool CollectEndpoint { get; set; }
+            public bool CollectChat { get; set; }
+            public string PerformanceMetrics { get; set; }
         }
 
-        private static Scenario CreateNextGenCognitiveTwin()
+        private class SeedScenarioTimeline
         {
-            return new Scenario
-            {
-                Name = "Cognitive/Digital-Twin — Mirage Analytics",
-                Description = "Adversary poisons training data for a logistics digital-twin, biasing forecast models. Teams must detect drift, quarantine tainted data, and restore trustworthy analytics.",
-                CreatedAt = DateTime.UtcNow.AddDays(-7),
-                UpdatedAt = DateTime.UtcNow.AddDays(-7),
-                ScenarioParameters = new ScenarioParameters
-                {
-                    Objectives = "Detect model/data drift; trace data lineage; rebuild models; communicate uncertainty to commanders.",
-                    PoliticalContext = "Stakeholders rely on the twin for resource allocation.",
-                    RulesOfEngagement = "Blue: data forensics/ML ops. Red: subtle poisoning, realistic noise. White: decision-maker injects.",
-                    VictoryConditions = "Model accuracy restored; contaminated streams identified; decision brief delivered with calibrated confidence.",
-                    Nations = new[]
-                    {
-                        new Nation { Name = "Atropia", Alignment = "friendly" },
-                        new Nation { Name = "Donovia", Alignment = "adversary" }
-                    },
-                    ThreatActors = new[]
-                    {
-                        new ThreatActor
-                        {
-                            Name = "Data Access Broker",
-                            Type = "proxy",
-                            Capability = 6,
-                            Ttps = "ML:DataPoison,ML:LabelFlip,ML:BackdoorTrigger,ML:Drift"
-                        }
-                    },
-                    Injects = new[]
-                    {
-                        new Inject { Trigger = "T+0m", Title = "KPIs degrade quietly; no single alarm" },
-                        new Inject { Trigger = "T+90m", Title = "Conflicting reports from field vs twin" },
-                        new Inject { Trigger = "OnDetect", Title = "Backdoor trigger discovered in supplier feed" }
-                    },
-                    UserPools = new[]
-                    {
-                        new UserPool { Role = "ML Ops", Count = 2 },
-                        new UserPool { Role = "Data Engineer", Count = 2 },
-                        new UserPool { Role = "Blue Intel", Count = 1 },
-                        new UserPool { Role = "Red Data Manipulator", Count = 2 },
-                        new UserPool { Role = "White Commander", Count = 1 }
-                    }
-                },
-                TechnicalEnvironment = new TechnicalEnvironment
-                {
-                    NetworkTopology = "Data lake + ETL + feature store + model serving.",
-                    Services = "Forecasting, Optimization, Dashboards",
-                    Assets = "Pipelines, Datasets, Models, Lineage graphs",
-                    Defenses = "[\"Canary models\",\"Data validation\",\"Lineage tracking\",\"Backtesting\"]",
-                    Vulnerabilities = new[]
-                    {
-                        new Vulnerability { Asset = "Supplier Feed", Cve = "No-Content-Signature", Severity = "High" },
-                        new Vulnerability { Asset = "ETL", Cve = "Insufficient-Data-Contracts", Severity = "Medium" }
-                    }
-                },
-                GameMechanics = new GameMechanics
-                {
-                    TimelineType = "compressed",
-                    DurationHours = 5,
-                    AdjudicationType = "manual",
-                    EscalationLadder = "Drift detection → Source tracing → Model rebuild → Confidence briefing",
-                    BranchingLogic = "If poisoning persists, forecast error drives bad deployment orders.",
-                    CollectLogs = true,
-                    CollectNetwork = false,
-                    CollectEndpoint = false,
-                    CollectChat = true,
-                    PerformanceMetrics = "Time to detect drift, % contaminated sources isolated, post-fix MAPE"
-                },
-                ScenarioTimeline = new ScenarioTimeline
-                {
-                    ExerciseDuration = 300,
-                    ScenarioTimelineEvents = new[]
-                    {
-                        new ScenarioTimelineEvent { Time = "T+0m", Number = 1, Assigned = "White Cell", Description = "KPI anomaly notice", Status = "Pending" },
-                        new ScenarioTimelineEvent { Time = "T+120m", Number = 2, Assigned = "Blue Team", Description = "Lineage investigation", Status = "Pending" },
-                        new ScenarioTimelineEvent { Time = "T+300m", Number = 3, Assigned = "White Cell", Description = "Commander decision brief", Status = "Pending" }
-                    }
-                }
-            };
+            public int ExerciseDuration { get; set; }
+            public List<SeedTimelineEvent> Events { get; set; }
         }
 
-        private static Scenario CreateNextGenSpacePntSpoofing()
+        private class SeedTimelineEvent
         {
-            return new Scenario
-            {
-                Name = "Space/PNT — Quiet Sky",
-                Description = "Localized GNSS spoofing degrades timing and navigation across civil and mission systems. Teams must isolate the source, implement holdover strategies, and coordinate with civil authorities.",
-                CreatedAt = DateTime.UtcNow.AddDays(-6),
-                UpdatedAt = DateTime.UtcNow.AddDays(-6),
-                ScenarioParameters = new ScenarioParameters
-                {
-                    Objectives = "Detect PNT anomalies; switch to resilient timing; coordinate spectrum monitoring; maintain critical services.",
-                    PoliticalContext = "Civil aviation and finance timing impacted; public scrutiny high.",
-                    RulesOfEngagement = "Blue: technical mitigation + public comms. Red: mobile spoofers + deception. White: regulator/aviation/finance injects.",
-                    VictoryConditions = "Critical services stay within timing SLA; spoofing geo-localized and suppressed; transparent public report.",
-                    Nations = new[]
-                    {
-                        new Nation { Name = "Gorgas", Alignment = "friendly" },
-                        new Nation { Name = "Unknown Proxies", Alignment = "adversary" }
-                    },
-                    ThreatActors = new[]
-                    {
-                        new ThreatActor
-                        {
-                            Name = "PNT Disruption Cell",
-                            Type = "state-proxy",
-                            Capability = 6,
-                            Ttps = "EW:PNT-Spoof,EW:Jamming,OPS:Mobile-Emitter"
-                        }
-                    },
-                    Injects = new[]
-                    {
-                        new Inject { Trigger = "T+0m", Title = "Airport reports RNAV deviations" },
-                        new Inject { Trigger = "T+45m", Title = "Finance NTP drift alarms" },
-                        new Inject { Trigger = "T+2h", Title = "Public rumor of 'satellite hack'" }
-                    },
-                    UserPools = new[]
-                    {
-                        new UserPool { Role = "PNT Engineer", Count = 2 },
-                        new UserPool { Role = "Network/Sys", Count = 2 },
-                        new UserPool { Role = "Blue EW", Count = 1 },
-                        new UserPool { Role = "Red EW Cell", Count = 2 },
-                        new UserPool { Role = "White Regulator/Media", Count = 2 }
-                    }
-                },
-                TechnicalEnvironment = new TechnicalEnvironment
-                {
-                    NetworkTopology = "Critical infra timing nets + aviation approach aids + finance DCs.",
-                    Services = "NTP/PTP, RNAV/RNP, Monitoring",
-                    Assets = "Stratum servers, GNSS receivers, Spectrum sensors",
-                    Defenses = "[\"Holdover clocks\",\"Multi-constellation receivers\",\"Angle-of-arrival sensors\"]",
-                    Vulnerabilities = new[]
-                    {
-                        new Vulnerability { Asset = "Receivers", Cve = "Single-Constellation-Trust", Severity = "High" },
-                        new Vulnerability { Asset = "Timing", Cve = "No-Holdover-Policy", Severity = "Medium" }
-                    }
-                },
-                GameMechanics = new GameMechanics
-                {
-                    TimelineType = "real-time",
-                    DurationHours = 4,
-                    AdjudicationType = "hybrid",
-                    EscalationLadder = "Anomaly → Localization → Mitigation → Public brief",
-                    BranchingLogic = "If localization fails, wide commercial impact escalates public risk.",
-                    CollectLogs = true,
-                    CollectNetwork = true,
-                    CollectEndpoint = false,
-                    CollectChat = true,
-                    PerformanceMetrics = "Timing SLA adherence, localization accuracy, incident comms quality"
-                },
-                ScenarioTimeline = new ScenarioTimeline
-                {
-                    ExerciseDuration = 240,
-                    ScenarioTimelineEvents = new[]
-                    {
-                        new ScenarioTimelineEvent { Time = "T+0m", Number = 1, Assigned = "White Cell", Description = "Aviation deviation report", Status = "Pending" },
-                        new ScenarioTimelineEvent { Time = "T+90m", Number = 2, Assigned = "Blue Team", Description = "PNT mitigation rollout", Status = "Pending" },
-                        new ScenarioTimelineEvent { Time = "T+240m", Number = 3, Assigned = "White Cell", Description = "Public/Regulator briefing", Status = "Pending" }
-                    }
-                }
-            };
+            public string Time { get; set; }
+            public int Number { get; set; }
+            public string Assigned { get; set; }
+            public string Description { get; set; }
+            public string Status { get; set; }
+        }
+
+        private class SeedObjective
+        {
+            public string ScenarioName { get; set; }
+            public string ParentName { get; set; }
+            public string Name { get; set; }
+            public string Description { get; set; }
+            public string Type { get; set; }
+            public int Priority { get; set; }
+            public string SuccessCriteria { get; set; }
+            public string Assigned { get; set; }
+        }
+
+        private class SeedMachine
+        {
+            public string Id { get; set; }
+            public string Name { get; set; }
+            public string Fqdn { get; set; }
+            public string Host { get; set; }
+            public string HostIp { get; set; }
+            public string CurrentUsername { get; set; }
+            public string ClientVersion { get; set; }
+            public int StatusUp { get; set; }
+        }
+
+        private class SeedNpc
+        {
+            public string Id { get; set; }
+            public string Campaign { get; set; }
+            public string Enclave { get; set; }
+            public string Team { get; set; }
+            public Ghosts.Animator.Models.NpcProfile NpcProfile { get; set; }
+        }
+
+        private class SeedTimelineHistory
+        {
+            public string MachineId { get; set; }
+            public string Handler { get; set; }
+            public string Command { get; set; }
+            public string CommandArg { get; set; }
+            public string Result { get; set; }
+            public double OffsetHours { get; set; }
+        }
+
+        private class SeedHealthHistory
+        {
+            public string MachineId { get; set; }
+            public bool Internet { get; set; }
+            public bool Permissions { get; set; }
+            public long ExecutionTime { get; set; }
+            public double OffsetHours { get; set; }
+        }
+
+        private class SeedMachineHistory
+        {
+            public string MachineId { get; set; }
+            public int Type { get; set; }
+            public string Object { get; set; }
+            public double OffsetHours { get; set; }
+        }
+
+        private class SeedSocialConnection
+        {
+            public string Id { get; set; }
+            public string NpcId { get; set; }
+            public string ConnectedNpcId { get; set; }
+            public string Name { get; set; }
+            public string Distance { get; set; }
+            public decimal RelationshipStatus { get; set; }
+            public double OffsetHours { get; set; }
+        }
+
+        private class SeedInteraction
+        {
+            public string SocialConnectionId { get; set; }
+            public long Step { get; set; }
+            public int Value { get; set; }
+            public double OffsetHours { get; set; }
+        }
+
+        private class SeedActivity
+        {
+            public string NpcId { get; set; }
+            public int ActivityType { get; set; }
+            public string Detail { get; set; }
+            public double OffsetHours { get; set; }
+        }
+
+        private class SeedBelief
+        {
+            public string NpcId { get; set; }
+            public string ToNpcId { get; set; }
+            public string FromNpcId { get; set; }
+            public string Name { get; set; }
+            public long Step { get; set; }
+            public decimal Likelihood { get; set; }
+            public decimal Posterior { get; set; }
+            public double OffsetHours { get; set; }
+        }
+
+        private class SeedLearning
+        {
+            public string NpcId { get; set; }
+            public string ToNpcId { get; set; }
+            public string FromNpcId { get; set; }
+            public string Topic { get; set; }
+            public long Step { get; set; }
+            public int Value { get; set; }
+            public double OffsetHours { get; set; }
+        }
+
+        private class SeedPreference
+        {
+            public string NpcId { get; set; }
+            public string ToNpcId { get; set; }
+            public string FromNpcId { get; set; }
+            public string Name { get; set; }
+            public long Step { get; set; }
+            public decimal Weight { get; set; }
+            public decimal Strength { get; set; }
+            public double OffsetHours { get; set; }
         }
         // ===== Map Feature Table Creation =====
 

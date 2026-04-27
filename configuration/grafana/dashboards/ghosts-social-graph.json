@@ -81,7 +81,7 @@
           "format": "table",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(*) FROM npc_social_connections WHERE $__timeFilter(createdutc);",
+          "rawSql": "SELECT COUNT(*) FROM npc_social_connections JOIN npcs n ON npc_social_connections.npcid = n.id WHERE $__timeFilter(createdutc) AND (${execution:raw} = 0 OR n.executionid = ${execution:raw});",
           "refId": "A",
           "sql": {
             "columns": [
@@ -166,7 +166,7 @@
           "format": "table",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "WITH stats AS (\n  SELECT\n    COUNT(DISTINCT npcid) AS node_count,\n    COUNT(*) AS edge_count\n  FROM npc_social_connections\n  WHERE createdutc <= NOW()\n)\nSELECT\n  CASE\n    WHEN node_count < 2 THEN 0\n    ELSE ROUND(edge_count::numeric / (node_count * (node_count - 1)), 4)\n  END AS value\nFROM stats;",
+          "rawSql": "WITH stats AS (\n  SELECT\n    COUNT(DISTINCT npcid) AS node_count,\n    COUNT(*) AS edge_count\n  FROM npc_social_connections JOIN npcs n ON npc_social_connections.npcid = n.id\n  WHERE createdutc <= NOW() AND (${execution:raw} = 0 OR n.executionid = ${execution:raw})\n)\nSELECT\n  CASE\n    WHEN node_count < 2 THEN 0\n    ELSE ROUND(edge_count::numeric / (node_count * (node_count - 1)), 4)\n  END AS value\nFROM stats;",
           "refId": "A",
           "sql": {
             "columns": [
@@ -251,7 +251,7 @@
           "format": "table",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT COALESCE(AVG(relationshipstatus)::numeric(10,2), 0) as value FROM npc_social_connections;",
+          "rawSql": "SELECT COALESCE(AVG(relationshipstatus)::numeric(10,2), 0) as value FROM npc_social_connections JOIN npcs n ON npc_social_connections.npcid = n.id WHERE (${execution:raw} = 0 OR n.executionid = ${execution:raw});",
           "refId": "A",
           "sql": {
             "columns": [
@@ -336,7 +336,7 @@
           "format": "table",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(*) as value FROM npc_interactions;",
+          "rawSql": "SELECT COUNT(*) as value FROM npc_interactions JOIN npc_social_connections sc ON npc_interactions.socialconnectionid = sc.id JOIN npcs n ON sc.npcid = n.id WHERE (${execution:raw} = 0 OR n.executionid = ${execution:raw});",
           "refId": "A",
           "sql": {
             "columns": [
@@ -461,7 +461,7 @@
           "format": "time_series",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT\n  $__timeGroup(createdutc, '1h', 0),\n  COUNT(*) as \"Connections\"\nFROM\n  npc_social_connections\nWHERE\n  $__timeFilter(createdutc)\nGROUP BY\n  time\nORDER BY\n  time",
+          "rawSql": "SELECT\n  $__timeGroup(createdutc, '1h', 0),\n  COUNT(*) as \"Connections\"\nFROM\n  npc_social_connections JOIN npcs n ON npc_social_connections.npcid = n.id\nWHERE\n  $__timeFilter(createdutc)\n AND (${execution:raw} = 0 OR n.executionid = ${execution:raw})\nGROUP BY\n  time\nORDER BY\n  time",
           "refId": "A",
           "sql": {
             "columns": [
@@ -663,7 +663,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\n  CONCAT_WS(' ', n.npcprofile->'name'->>'first', n.npcprofile->'name'->>'last') AS npc_name,\n  COUNT(DISTINCT c.connectednpcid) AS connection_count,\n  COALESCE(AVG(c.relationshipstatus)::numeric(10,2), 0) AS avg_relationship_strength\nFROM\n  npc_social_connections c\n  INNER JOIN npcs n ON c.npcid = n.id\nGROUP BY\n  n.id, n.npcprofile->'name'->>'first', n.npcprofile->'name'->>'last'\nORDER BY\n  connection_count DESC\nLIMIT 50",
+          "rawSql": "SELECT\n  CONCAT_WS(' ', n.npcprofile->'name'->>'first', n.npcprofile->'name'->>'last') AS npc_name,\n  COUNT(DISTINCT c.connectednpcid) AS connection_count,\n  COALESCE(AVG(c.relationshipstatus)::numeric(10,2), 0) AS avg_relationship_strength\nFROM\n  npc_social_connections c\n  INNER JOIN npcs n ON c.npcid = n.id\nWHERE (${execution:raw} = 0 OR n.executionid = ${execution:raw})\nGROUP BY\n  n.id, n.npcprofile->'name'->>'first', n.npcprofile->'name'->>'last'\nORDER BY\n  connection_count DESC\nLIMIT 50",
           "refId": "A",
           "sql": {
             "columns": [
@@ -873,7 +873,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\n  CONCAT_WS(' ', n.npcprofile->'name'->>'first', n.npcprofile->'name'->>'last') AS npc_name,\n  COUNT(DISTINCT c.connectednpcid) AS connection_count,\n  COALESCE(AVG(c.relationshipstatus)::numeric(10,2), 0) AS avg_relationship_strength\nFROM\n  npc_social_connections c\n  INNER JOIN npcs n ON c.npcid = n.id\nGROUP BY\n  n.id, n.npcprofile->'name'->>'first', n.npcprofile->'name'->>'last'\nORDER BY\n  connection_count ASC\nLIMIT 50",
+          "rawSql": "SELECT\n  CONCAT_WS(' ', n.npcprofile->'name'->>'first', n.npcprofile->'name'->>'last') AS npc_name,\n  COUNT(DISTINCT c.connectednpcid) AS connection_count,\n  COALESCE(AVG(c.relationshipstatus)::numeric(10,2), 0) AS avg_relationship_strength\nFROM\n  npc_social_connections c\n  INNER JOIN npcs n ON c.npcid = n.id\nWHERE (${execution:raw} = 0 OR n.executionid = ${execution:raw})\nGROUP BY\n  n.id, n.npcprofile->'name'->>'first', n.npcprofile->'name'->>'last'\nORDER BY\n  connection_count ASC\nLIMIT 50",
           "refId": "A",
           "sql": {
             "columns": [
@@ -915,7 +915,33 @@
     "graph"
   ],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "allValue": "0",
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "${DS_GHOSTS}"
+        },
+        "definition": "",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Execution",
+        "multi": false,
+        "name": "execution",
+        "options": [],
+        "query": "SELECT e.name || ' (' || to_char(e.createdat, 'YYYY-MM-DD') || ')' as __text, e.id::text as __value FROM executions e ORDER BY e.createdat DESC",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      }
+    ]
   },
   "time": {
     "from": "now-2d",

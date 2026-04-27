@@ -395,7 +395,7 @@ public class ExecutionsController : ControllerBase
         try
         {
             var query = _dbContext.NpcBeliefs
-                .Where(b => b.ExecutionId == id)
+                .Where(b => b.Npc.ExecutionId == id)
                 .AsQueryable();
 
             if (npcId.HasValue)

@@ -24,6 +24,12 @@ public class NpcRecord
     public int? ScenarioId { get; set; }
 
     /// <summary>
+    /// Optional association with a specific execution run.
+    /// NULL = global/ambient NPC, set = tied to that execution.
+    /// </summary>
+    public int? ExecutionId { get; set; }
+
+    /// <summary>
     /// Used for grouping NPCs together, e.g. 2020, 2021
     /// </summary>
     public string Campaign { get; set; }
@@ -54,8 +60,9 @@ public class NpcRecord
     public virtual ICollection<NpcBelief> Beliefs { get; set; }
     public virtual ICollection<NpcPreference> Preferences { get; set; }
 
-    // Navigation property for scenario association
+    // Navigation properties for scenario/execution association
     public virtual Scenario Scenario { get; set; }
+    public virtual Execution Execution { get; set; }
 
     public static NpcRecord TransformToNpc(NpcProfile o)
     {

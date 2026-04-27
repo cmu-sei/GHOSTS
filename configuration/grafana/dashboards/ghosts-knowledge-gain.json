@@ -81,7 +81,7 @@
           "format": "table",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(*) FROM npc_learning WHERE $__timeFilter(createdutc);",
+          "rawSql": "SELECT COUNT(*) FROM npc_learning JOIN npcs n ON npc_learning.npcid = n.id WHERE $__timeFilter(createdutc) AND (${execution:raw} = 0 OR n.executionid = ${execution:raw});",
           "refId": "A",
           "sql": {
             "columns": [
@@ -166,7 +166,7 @@
           "format": "table",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(DISTINCT topic) FROM npc_learning WHERE $__timeFilter(createdutc);",
+          "rawSql": "SELECT COUNT(DISTINCT topic) FROM npc_learning JOIN npcs n ON npc_learning.npcid = n.id WHERE $__timeFilter(createdutc) AND (${execution:raw} = 0 OR n.executionid = ${execution:raw});",
           "refId": "A",
           "sql": {
             "columns": [
@@ -251,7 +251,7 @@
           "format": "table",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(DISTINCT npcid) FROM npc_learning WHERE $__timeFilter(createdutc);",
+          "rawSql": "SELECT COUNT(DISTINCT npcid) FROM npc_learning JOIN npcs n ON npc_learning.npcid = n.id WHERE $__timeFilter(createdutc) AND (${execution:raw} = 0 OR n.executionid = ${execution:raw});",
           "refId": "A",
           "sql": {
             "columns": [
@@ -336,7 +336,7 @@
           "format": "table",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT SUM(value) FROM npc_learning WHERE $__timeFilter(createdutc);",
+          "rawSql": "SELECT SUM(value) FROM npc_learning JOIN npcs n ON npc_learning.npcid = n.id WHERE $__timeFilter(createdutc) AND (${execution:raw} = 0 OR n.executionid = ${execution:raw});",
           "refId": "A",
           "sql": {
             "columns": [
@@ -461,7 +461,7 @@
           "format": "time_series",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT\n  $__timeGroup(createdutc, '1h', 0),\n  topic as metric,\n  COUNT(DISTINCT npcid) as value\nFROM\n  npc_learning\nWHERE\n  $__timeFilter(createdutc)\nGROUP BY\n  time, topic\nORDER BY\n  time",
+          "rawSql": "SELECT\n  $__timeGroup(createdutc, '1h', 0),\n  topic as metric,\n  COUNT(DISTINCT npcid) as value\nFROM\n  npc_learning JOIN npcs n ON npc_learning.npcid = n.id\nWHERE\n  $__timeFilter(createdutc)\n AND (${execution:raw} = 0 OR n.executionid = ${execution:raw})\nGROUP BY\n  time, topic\nORDER BY\n  time",
           "refId": "A",
           "sql": {
             "columns": [
@@ -614,7 +614,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\n  topic,\n  COUNT(DISTINCT npcid) AS learner_count\nFROM\n  npc_learning\nWHERE\n  $__timeFilter(createdutc)\nGROUP BY\n  topic\nORDER BY\n  learner_count DESC\nLIMIT 20",
+          "rawSql": "SELECT\n  topic,\n  COUNT(DISTINCT npcid) AS learner_count\nFROM\n  npc_learning JOIN npcs n ON npc_learning.npcid = n.id\nWHERE\n  $__timeFilter(createdutc)\n AND (${execution:raw} = 0 OR n.executionid = ${execution:raw})\nGROUP BY\n  topic\nORDER BY\n  learner_count DESC\nLIMIT 20",
           "refId": "A",
           "sql": {
             "columns": [
@@ -873,7 +873,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\n  CONCAT_WS(' ', n.npcprofile->'name'->>'first', n.npcprofile->'name'->>'last') AS teacher_name,\n  COUNT(DISTINCT l.npcid) AS students_taught,\n  COUNT(DISTINCT l.topic) AS unique_topics,\n  SUM(l.value) AS total_knowledge_value\nFROM\n  npc_learning l\n  INNER JOIN npcs n ON l.fromnpcid = n.id\nWHERE\n  l.createdutc >= $__timeFrom()::timestamptz\n  AND l.createdutc <= $__timeTo()::timestamptz\nGROUP BY\n  n.id, n.npcprofile->'name'->>'first', n.npcprofile->'name'->>'last'\nORDER BY\n  students_taught DESC\nLIMIT 50",
+          "rawSql": "SELECT\n  CONCAT_WS(' ', n.npcprofile->'name'->>'first', n.npcprofile->'name'->>'last') AS teacher_name,\n  COUNT(DISTINCT l.npcid) AS students_taught,\n  COUNT(DISTINCT l.topic) AS unique_topics,\n  SUM(l.value) AS total_knowledge_value\nFROM\n  npc_learning l\n  INNER JOIN npcs n ON l.fromnpcid = n.id\nWHERE\n  l.createdutc >= $__timeFrom()::timestamptz\n  AND l.createdutc <= $__timeTo()::timestamptz\n AND (${execution:raw} = 0 OR n.executionid = ${execution:raw})\nGROUP BY\n  n.id, n.npcprofile->'name'->>'first', n.npcprofile->'name'->>'last'\nORDER BY\n  students_taught DESC\nLIMIT 50",
           "refId": "A",
           "sql": {
             "columns": [
@@ -915,7 +915,33 @@
     "learning"
   ],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "allValue": "0",
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "${DS_GHOSTS}"
+        },
+        "definition": "",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Execution",
+        "multi": false,
+        "name": "execution",
+        "options": [],
+        "query": "SELECT e.name || ' (' || to_char(e.createdat, 'YYYY-MM-DD') || ')' as __text, e.id::text as __value FROM executions e ORDER BY e.createdat DESC",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      }
+    ]
   },
   "time": {
     "from": "now-2d",

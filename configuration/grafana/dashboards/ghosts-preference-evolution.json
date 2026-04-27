@@ -81,7 +81,7 @@
           "format": "table",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(*) FROM npc_preferences WHERE $__timeFilter(createdutc);",
+          "rawSql": "SELECT COUNT(*) FROM npc_preferences JOIN npcs n ON npc_preferences.npcid = n.id WHERE $__timeFilter(createdutc) AND (${execution:raw} = 0 OR n.executionid = ${execution:raw});",
           "refId": "A",
           "sql": {
             "columns": [
@@ -166,7 +166,7 @@
           "format": "table",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(DISTINCT name) FROM npc_preferences WHERE $__timeFilter(createdutc);",
+          "rawSql": "SELECT COUNT(DISTINCT name) FROM npc_preferences JOIN npcs n ON npc_preferences.npcid = n.id WHERE $__timeFilter(createdutc) AND (${execution:raw} = 0 OR n.executionid = ${execution:raw});",
           "refId": "A",
           "sql": {
             "columns": [
@@ -251,7 +251,7 @@
           "format": "table",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT AVG(strength)::numeric(10,4) FROM npc_preferences WHERE $__timeFilter(createdutc);",
+          "rawSql": "SELECT AVG(strength)::numeric(10,4) FROM npc_preferences JOIN npcs n ON npc_preferences.npcid = n.id WHERE $__timeFilter(createdutc) AND (${execution:raw} = 0 OR n.executionid = ${execution:raw});",
           "refId": "A",
           "sql": {
             "columns": [
@@ -336,7 +336,7 @@
           "format": "table",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(DISTINCT npcid) FROM npc_preferences WHERE $__timeFilter(createdutc);",
+          "rawSql": "SELECT COUNT(DISTINCT npcid) FROM npc_preferences JOIN npcs n ON npc_preferences.npcid = n.id WHERE $__timeFilter(createdutc) AND (${execution:raw} = 0 OR n.executionid = ${execution:raw});",
           "refId": "A",
           "sql": {
             "columns": [
@@ -462,7 +462,7 @@
           "format": "time_series",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT\n  $__timeGroup(createdutc, '1h', 0),\n  name as metric,\n  AVG(strength)::numeric(10,4) as value\nFROM\n  npc_preferences\nWHERE\n  $__timeFilter(createdutc)\nGROUP BY\n  time, name\nORDER BY\n  time",
+          "rawSql": "SELECT\n  $__timeGroup(createdutc, '1h', 0),\n  name as metric,\n  AVG(strength)::numeric(10,4) as value\nFROM\n  npc_preferences JOIN npcs n ON npc_preferences.npcid = n.id\nWHERE\n  $__timeFilter(createdutc)\n AND (${execution:raw} = 0 OR n.executionid = ${execution:raw})\nGROUP BY\n  time, name\nORDER BY\n  time",
           "refId": "A",
           "sql": {
             "columns": [
@@ -638,7 +638,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\n  CONCAT_WS(' ', n.npcprofile->'name'->>'first', n.npcprofile->'name'->>'last') AS influencer_name,\n  p.name AS preference_influenced,\n  COUNT(DISTINCT p.npcid) AS npcs_influenced\nFROM\n  npc_preferences p\n  INNER JOIN npcs n ON p.fromnpcid = n.id\nWHERE\n  p.createdutc >= $__timeFrom()::timestamptz\n  AND p.createdutc <= $__timeTo()::timestamptz\n  AND p.fromnpcid IS NOT NULL\nGROUP BY\n  n.id, n.npcprofile->'name'->>'first', n.npcprofile->'name'->>'last', p.name\nORDER BY\n  npcs_influenced DESC\nLIMIT 50",
+          "rawSql": "SELECT\n  CONCAT_WS(' ', n.npcprofile->'name'->>'first', n.npcprofile->'name'->>'last') AS influencer_name,\n  p.name AS preference_influenced,\n  COUNT(DISTINCT p.npcid) AS npcs_influenced\nFROM\n  npc_preferences p\n  INNER JOIN npcs n ON p.fromnpcid = n.id\nWHERE\n  p.createdutc >= $__timeFrom()::timestamptz\n  AND p.createdutc <= $__timeTo()::timestamptz\n  AND p.fromnpcid IS NOT NULL\n AND (${execution:raw} = 0 OR n.executionid = ${execution:raw})\nGROUP BY\n  n.id, n.npcprofile->'name'->>'first', n.npcprofile->'name'->>'last', p.name\nORDER BY\n  npcs_influenced DESC\nLIMIT 50",
           "refId": "A",
           "sql": {
             "columns": [
@@ -848,7 +848,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\n  name,\n  AVG(strength)::numeric(10,4) AS avg_strength,\n  COUNT(DISTINCT npcid) AS npc_count\nFROM\n  npc_preferences\nWHERE\n  $__timeFilter(createdutc)\nGROUP BY\n  name\nORDER BY\n  npc_count DESC\nLIMIT 20",
+          "rawSql": "SELECT\n  name,\n  AVG(strength)::numeric(10,4) AS avg_strength,\n  COUNT(DISTINCT npcid) AS npc_count\nFROM\n  npc_preferences JOIN npcs n ON npc_preferences.npcid = n.id\nWHERE\n  $__timeFilter(createdutc)\n AND (${execution:raw} = 0 OR n.executionid = ${execution:raw})\nGROUP BY\n  name\nORDER BY\n  npc_count DESC\nLIMIT 20",
           "refId": "A",
           "sql": {
             "columns": [
@@ -890,7 +890,33 @@
     "evolution"
   ],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "allValue": "0",
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "${DS_GHOSTS}"
+        },
+        "definition": "",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Execution",
+        "multi": false,
+        "name": "execution",
+        "options": [],
+        "query": "SELECT e.name || ' (' || to_char(e.createdat, 'YYYY-MM-DD') || ')' as __text, e.id::text as __value FROM executions e ORDER BY e.createdat DESC",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      }
+    ]
   },
   "time": {
     "from": "now-2d",

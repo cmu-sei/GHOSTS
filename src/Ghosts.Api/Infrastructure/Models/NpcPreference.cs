@@ -51,7 +51,7 @@ public class NpcPreference(int id, Guid npcId, Guid toNpcId, Guid fromNpcId, str
 
     public DateTime CreatedUtc { get; set; } = DateTime.UtcNow;
 
-    // Navigation property
+    // Navigation properties
     [ForeignKey("NpcId")]
     public virtual NpcRecord Npc { get; set; }
 
