@@ -2410,7 +2410,7 @@
           "format": "time_series",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT $__timeGroup(createdutc, '1h', 0), COUNT(*) AS \"Beliefs\" FROM npc_beliefs JOIN npcs n ON npc_beliefs.npcid = n.id WHERE $__timeFilter(createdutc)  AND (${execution:raw} = 0 OR n.executionid = ${execution:raw})\nGROUP BY time ORDER BY time",
+          "rawSql": "SELECT $__timeGroup(npc_beliefs.createdutc, '1h', 0), COUNT(*) AS \"Beliefs\" FROM npc_beliefs JOIN npcs n ON npc_beliefs.npcid = n.id WHERE $__timeFilter(npc_beliefs.createdutc)  AND (${execution:raw} = 0 OR n.executionid = ${execution:raw})\nGROUP BY time ORDER BY time",
           "refId": "A"
         },
         {
@@ -2423,7 +2423,7 @@
           "format": "time_series",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT $__timeGroup(createdutc, '1h', 0), COUNT(*) AS \"Connections\" FROM npc_social_connections JOIN npcs n ON npc_social_connections.npcid = n.id WHERE $__timeFilter(createdutc)  AND (${execution:raw} = 0 OR n.executionid = ${execution:raw})\nGROUP BY time ORDER BY time",
+          "rawSql": "SELECT $__timeGroup(npc_social_connections.createdutc, '1h', 0), COUNT(*) AS \"Connections\" FROM npc_social_connections JOIN npcs n ON npc_social_connections.npcid = n.id WHERE $__timeFilter(npc_social_connections.createdutc)  AND (${execution:raw} = 0 OR n.executionid = ${execution:raw})\nGROUP BY time ORDER BY time",
           "refId": "B"
         },
         {
@@ -2436,7 +2436,7 @@
           "format": "time_series",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT $__timeGroup(createdutc, '1h', 0), COUNT(*) AS \"Learning\" FROM npc_learning JOIN npcs n ON npc_learning.npcid = n.id WHERE $__timeFilter(createdutc)  AND (${execution:raw} = 0 OR n.executionid = ${execution:raw})\nGROUP BY time ORDER BY time",
+          "rawSql": "SELECT $__timeGroup(npc_learning.createdutc, '1h', 0), COUNT(*) AS \"Learning\" FROM npc_learning JOIN npcs n ON npc_learning.npcid = n.id WHERE $__timeFilter(npc_learning.createdutc)  AND (${execution:raw} = 0 OR n.executionid = ${execution:raw})\nGROUP BY time ORDER BY time",
           "refId": "C"
         },
         {
@@ -2449,7 +2449,7 @@
           "format": "time_series",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT $__timeGroup(createdutc, '1h', 0), COUNT(*) AS \"Activities\" FROM npc_activity JOIN npcs n ON npc_activity.npcid = n.id WHERE $__timeFilter(createdutc)  AND (${execution:raw} = 0 OR n.executionid = ${execution:raw})\nGROUP BY time ORDER BY time",
+          "rawSql": "SELECT $__timeGroup(npc_activity.createdutc, '1h', 0), COUNT(*) AS \"Activities\" FROM npc_activity JOIN npcs n ON npc_activity.npcid = n.id WHERE $__timeFilter(npc_activity.createdutc)  AND (${execution:raw} = 0 OR n.executionid = ${execution:raw})\nGROUP BY time ORDER BY time",
           "refId": "D"
         },
         {
@@ -2462,7 +2462,7 @@
           "format": "time_series",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT $__timeGroup(createdutc, '1h', 0), COUNT(*) AS \"Preferences\" FROM npc_preferences JOIN npcs n ON npc_preferences.npcid = n.id WHERE $__timeFilter(createdutc)  AND (${execution:raw} = 0 OR n.executionid = ${execution:raw})\nGROUP BY time ORDER BY time",
+          "rawSql": "SELECT $__timeGroup(npc_preferences.createdutc, '1h', 0), COUNT(*) AS \"Preferences\" FROM npc_preferences JOIN npcs n ON npc_preferences.npcid = n.id WHERE $__timeFilter(npc_preferences.createdutc)  AND (${execution:raw} = 0 OR n.executionid = ${execution:raw})\nGROUP BY time ORDER BY time",
           "refId": "E"
         }
       ],

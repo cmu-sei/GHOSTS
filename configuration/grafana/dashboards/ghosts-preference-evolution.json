@@ -81,7 +81,7 @@
           "format": "table",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(*) FROM npc_preferences JOIN npcs n ON npc_preferences.npcid = n.id WHERE $__timeFilter(createdutc) AND (${execution:raw} = 0 OR n.executionid = ${execution:raw});",
+          "rawSql": "SELECT COUNT(*) FROM npc_preferences JOIN npcs n ON npc_preferences.npcid = n.id WHERE $__timeFilter(npc_preferences.createdutc) AND (${execution:raw} = 0 OR n.executionid = ${execution:raw});",
           "refId": "A",
           "sql": {
             "columns": [
@@ -166,7 +166,7 @@
           "format": "table",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(DISTINCT name) FROM npc_preferences JOIN npcs n ON npc_preferences.npcid = n.id WHERE $__timeFilter(createdutc) AND (${execution:raw} = 0 OR n.executionid = ${execution:raw});",
+          "rawSql": "SELECT COUNT(DISTINCT name) FROM npc_preferences JOIN npcs n ON npc_preferences.npcid = n.id WHERE $__timeFilter(npc_preferences.createdutc) AND (${execution:raw} = 0 OR n.executionid = ${execution:raw});",
           "refId": "A",
           "sql": {
             "columns": [
@@ -251,7 +251,7 @@
           "format": "table",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT AVG(strength)::numeric(10,4) FROM npc_preferences JOIN npcs n ON npc_preferences.npcid = n.id WHERE $__timeFilter(createdutc) AND (${execution:raw} = 0 OR n.executionid = ${execution:raw});",
+          "rawSql": "SELECT AVG(strength)::numeric(10,4) FROM npc_preferences JOIN npcs n ON npc_preferences.npcid = n.id WHERE $__timeFilter(npc_preferences.createdutc) AND (${execution:raw} = 0 OR n.executionid = ${execution:raw});",
           "refId": "A",
           "sql": {
             "columns": [
@@ -336,7 +336,7 @@
           "format": "table",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(DISTINCT npcid) FROM npc_preferences JOIN npcs n ON npc_preferences.npcid = n.id WHERE $__timeFilter(createdutc) AND (${execution:raw} = 0 OR n.executionid = ${execution:raw});",
+          "rawSql": "SELECT COUNT(DISTINCT npcid) FROM npc_preferences JOIN npcs n ON npc_preferences.npcid = n.id WHERE $__timeFilter(npc_preferences.createdutc) AND (${execution:raw} = 0 OR n.executionid = ${execution:raw});",
           "refId": "A",
           "sql": {
             "columns": [
@@ -462,7 +462,7 @@
           "format": "time_series",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT\n  $__timeGroup(createdutc, '1h', 0),\n  name as metric,\n  AVG(strength)::numeric(10,4) as value\nFROM\n  npc_preferences JOIN npcs n ON npc_preferences.npcid = n.id\nWHERE\n  $__timeFilter(createdutc)\n AND (${execution:raw} = 0 OR n.executionid = ${execution:raw})\nGROUP BY\n  time, name\nORDER BY\n  time",
+          "rawSql": "SELECT\n  $__timeGroup(npc_preferences.createdutc, '1h', 0),\n  name as metric,\n  AVG(strength)::numeric(10,4) as value\nFROM\n  npc_preferences JOIN npcs n ON npc_preferences.npcid = n.id\nWHERE\n  $__timeFilter(npc_preferences.createdutc)\n AND (${execution:raw} = 0 OR n.executionid = ${execution:raw})\nGROUP BY\n  time, name\nORDER BY\n  time",
           "refId": "A",
           "sql": {
             "columns": [
@@ -848,7 +848,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\n  name,\n  AVG(strength)::numeric(10,4) AS avg_strength,\n  COUNT(DISTINCT npcid) AS npc_count\nFROM\n  npc_preferences JOIN npcs n ON npc_preferences.npcid = n.id\nWHERE\n  $__timeFilter(createdutc)\n AND (${execution:raw} = 0 OR n.executionid = ${execution:raw})\nGROUP BY\n  name\nORDER BY\n  npc_count DESC\nLIMIT 20",
+          "rawSql": "SELECT\n  name,\n  AVG(strength)::numeric(10,4) AS avg_strength,\n  COUNT(DISTINCT npcid) AS npc_count\nFROM\n  npc_preferences JOIN npcs n ON npc_preferences.npcid = n.id\nWHERE\n  $__timeFilter(npc_preferences.createdutc)\n AND (${execution:raw} = 0 OR n.executionid = ${execution:raw})\nGROUP BY\n  name\nORDER BY\n  npc_count DESC\nLIMIT 20",
           "refId": "A",
           "sql": {
             "columns": [

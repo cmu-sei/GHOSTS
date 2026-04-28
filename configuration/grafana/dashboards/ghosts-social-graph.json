@@ -81,7 +81,7 @@
           "format": "table",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(*) FROM npc_social_connections JOIN npcs n ON npc_social_connections.npcid = n.id WHERE $__timeFilter(createdutc) AND (${execution:raw} = 0 OR n.executionid = ${execution:raw});",
+          "rawSql": "SELECT COUNT(*) FROM npc_social_connections JOIN npcs n ON npc_social_connections.npcid = n.id WHERE $__timeFilter(npc_social_connections.createdutc) AND (${execution:raw} = 0 OR n.executionid = ${execution:raw});",
           "refId": "A",
           "sql": {
             "columns": [
@@ -461,7 +461,7 @@
           "format": "time_series",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT\n  $__timeGroup(createdutc, '1h', 0),\n  COUNT(*) as \"Connections\"\nFROM\n  npc_social_connections JOIN npcs n ON npc_social_connections.npcid = n.id\nWHERE\n  $__timeFilter(createdutc)\n AND (${execution:raw} = 0 OR n.executionid = ${execution:raw})\nGROUP BY\n  time\nORDER BY\n  time",
+          "rawSql": "SELECT\n  $__timeGroup(npc_social_connections.createdutc, '1h', 0),\n  COUNT(*) as \"Connections\"\nFROM\n  npc_social_connections JOIN npcs n ON npc_social_connections.npcid = n.id\nWHERE\n  $__timeFilter(npc_social_connections.createdutc)\n AND (${execution:raw} = 0 OR n.executionid = ${execution:raw})\nGROUP BY\n  time\nORDER BY\n  time",
           "refId": "A",
           "sql": {
             "columns": [

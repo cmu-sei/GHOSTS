@@ -81,7 +81,7 @@
           "format": "table",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(*) FROM npc_learning JOIN npcs n ON npc_learning.npcid = n.id WHERE $__timeFilter(createdutc) AND (${execution:raw} = 0 OR n.executionid = ${execution:raw});",
+          "rawSql": "SELECT COUNT(*) FROM npc_learning JOIN npcs n ON npc_learning.npcid = n.id WHERE $__timeFilter(npc_learning.createdutc) AND (${execution:raw} = 0 OR n.executionid = ${execution:raw});",
           "refId": "A",
           "sql": {
             "columns": [
@@ -166,7 +166,7 @@
           "format": "table",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(DISTINCT topic) FROM npc_learning JOIN npcs n ON npc_learning.npcid = n.id WHERE $__timeFilter(createdutc) AND (${execution:raw} = 0 OR n.executionid = ${execution:raw});",
+          "rawSql": "SELECT COUNT(DISTINCT topic) FROM npc_learning JOIN npcs n ON npc_learning.npcid = n.id WHERE $__timeFilter(npc_learning.createdutc) AND (${execution:raw} = 0 OR n.executionid = ${execution:raw});",
           "refId": "A",
           "sql": {
             "columns": [
@@ -251,7 +251,7 @@
           "format": "table",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(DISTINCT npcid) FROM npc_learning JOIN npcs n ON npc_learning.npcid = n.id WHERE $__timeFilter(createdutc) AND (${execution:raw} = 0 OR n.executionid = ${execution:raw});",
+          "rawSql": "SELECT COUNT(DISTINCT npcid) FROM npc_learning JOIN npcs n ON npc_learning.npcid = n.id WHERE $__timeFilter(npc_learning.createdutc) AND (${execution:raw} = 0 OR n.executionid = ${execution:raw});",
           "refId": "A",
           "sql": {
             "columns": [
@@ -336,7 +336,7 @@
           "format": "table",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT SUM(value) FROM npc_learning JOIN npcs n ON npc_learning.npcid = n.id WHERE $__timeFilter(createdutc) AND (${execution:raw} = 0 OR n.executionid = ${execution:raw});",
+          "rawSql": "SELECT SUM(value) FROM npc_learning JOIN npcs n ON npc_learning.npcid = n.id WHERE $__timeFilter(npc_learning.createdutc) AND (${execution:raw} = 0 OR n.executionid = ${execution:raw});",
           "refId": "A",
           "sql": {
             "columns": [
@@ -461,7 +461,7 @@
           "format": "time_series",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT\n  $__timeGroup(createdutc, '1h', 0),\n  topic as metric,\n  COUNT(DISTINCT npcid) as value\nFROM\n  npc_learning JOIN npcs n ON npc_learning.npcid = n.id\nWHERE\n  $__timeFilter(createdutc)\n AND (${execution:raw} = 0 OR n.executionid = ${execution:raw})\nGROUP BY\n  time, topic\nORDER BY\n  time",
+          "rawSql": "SELECT\n  $__timeGroup(npc_learning.createdutc, '1h', 0),\n  topic as metric,\n  COUNT(DISTINCT npcid) as value\nFROM\n  npc_learning JOIN npcs n ON npc_learning.npcid = n.id\nWHERE\n  $__timeFilter(npc_learning.createdutc)\n AND (${execution:raw} = 0 OR n.executionid = ${execution:raw})\nGROUP BY\n  time, topic\nORDER BY\n  time",
           "refId": "A",
           "sql": {
             "columns": [
@@ -614,7 +614,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\n  topic,\n  COUNT(DISTINCT npcid) AS learner_count\nFROM\n  npc_learning JOIN npcs n ON npc_learning.npcid = n.id\nWHERE\n  $__timeFilter(createdutc)\n AND (${execution:raw} = 0 OR n.executionid = ${execution:raw})\nGROUP BY\n  topic\nORDER BY\n  learner_count DESC\nLIMIT 20",
+          "rawSql": "SELECT\n  topic,\n  COUNT(DISTINCT npcid) AS learner_count\nFROM\n  npc_learning JOIN npcs n ON npc_learning.npcid = n.id\nWHERE\n  $__timeFilter(npc_learning.createdutc)\n AND (${execution:raw} = 0 OR n.executionid = ${execution:raw})\nGROUP BY\n  topic\nORDER BY\n  learner_count DESC\nLIMIT 20",
           "refId": "A",
           "sql": {
             "columns": [
