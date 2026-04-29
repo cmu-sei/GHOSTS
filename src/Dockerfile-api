@@ -20,6 +20,11 @@ ENV COMMIT=$commit
 COPY --from=dev /app/dist /app
 WORKDIR /app
 
+# Install Playwright Chromium browser and OS dependencies for headless URL fetching
+RUN dotnet tool install --global PowerShell && \
+    ~/.dotnet/tools/pwsh playwright.ps1 install chromium --with-deps && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
 LABEL "product"="GHOSTS API"
 LABEL "maintainer"="Dustin Updyke <ddupdyke[-@-]sei.cmu.edu>"
 LABEL "version"="Browse to /swagger"
