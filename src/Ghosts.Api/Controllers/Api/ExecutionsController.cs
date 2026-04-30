@@ -384,6 +384,68 @@ public class ExecutionsController : ControllerBase
         }
     }
 
+    // GET: api/executions/5/timeline-items
+    [HttpGet("{id}/timeline-items")]
+    public async Task<ActionResult<IEnumerable<ExecutionTimelineItemDto>>> GetTimelineItems(int id, CancellationToken ct)
+    {
+        try
+        {
+            var items = await _executionService.GetTimelineItemsAsync(id, ct);
+            return Ok(items.Select(MapTimelineItemToDto));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting timeline items for execution {ExecutionId}", id);
+            return StatusCode(500, new { error = "Error retrieving timeline items" });
+        }
+    }
+
+    // POST: api/executions/5/timeline-items/3/complete
+    [HttpPost("{id}/timeline-items/{itemId}/complete")]
+    public async Task<ActionResult<ExecutionTimelineItemDto>> CompleteTimelineItem(
+        int id, int itemId, CompleteTimelineItemDto dto, CancellationToken ct)
+    {
+        try
+        {
+            var item = await _executionService.CompleteTimelineItemAsync(id, itemId, dto, ct);
+            return Ok(MapTimelineItemToDto(item));
+        }
+        catch (InvalidOperationException ex)
+        {
+            if (ex.Message.Contains("not found"))
+                return NotFound(new { error = ex.Message });
+            return BadRequest(new { error = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error completing timeline item {ItemId} for execution {ExecutionId}", itemId, id);
+            return StatusCode(500, new { error = "Error completing timeline item" });
+        }
+    }
+
+    // POST: api/executions/5/timeline-items/3/report
+    [HttpPost("{id}/timeline-items/{itemId}/report")]
+    public async Task<ActionResult<ExecutionTimelineItemDto>> ReportTimelineItemResult(
+        int id, int itemId, [FromBody] JsonElement resultData, CancellationToken ct)
+    {
+        try
+        {
+            var item = await _executionService.ReportTimelineItemResultAsync(id, itemId, resultData, ct);
+            return Ok(MapTimelineItemToDto(item));
+        }
+        catch (InvalidOperationException ex)
+        {
+            if (ex.Message.Contains("not found"))
+                return NotFound(new { error = ex.Message });
+            return BadRequest(new { error = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error reporting result for timeline item {ItemId} in execution {ExecutionId}", itemId, id);
+            return StatusCode(500, new { error = "Error reporting timeline item result" });
+        }
+    }
+
     // GET: api/executions/5/beliefs
     [HttpGet("{id}/beliefs")]
     public async Task<IActionResult> GetExecutionBeliefs(
@@ -447,6 +509,26 @@ public class ExecutionsController : ControllerBase
             execution.Configuration,
             execution.Metrics,
             execution.ErrorDetails
+        );
+    }
+
+    private static ExecutionTimelineItemDto MapTimelineItemToDto(ExecutionTimelineItem item)
+    {
+        return new ExecutionTimelineItemDto(
+            item.Id,
+            item.ExecutionId,
+            item.SourceTimelineEventId,
+            item.Time,
+            item.Number,
+            item.Assigned,
+            item.Description,
+            item.Status,
+            item.AutomationKind,
+            item.CompletedBy,
+            item.Notes,
+            item.ResultData,
+            item.CreatedAt,
+            item.CompletedAt
         );
     }
 }

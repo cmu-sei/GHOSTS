@@ -219,6 +219,8 @@ public class Program
         app.MapHub<ActivityHub>("/api/hubs/activities");
         app.MapHub<ScenarioBuilderHub>("/hubs/scenarioBuilder");
         app.MapHub<ScenarioBuilderHub>("/api/hubs/scenarioBuilder");
+        app.MapHub<ExecutionHub>("/hubs/execution");
+        app.MapHub<ExecutionHub>("/api/hubs/execution");
 
         // Configure Swagger
         app.UseSwagger();

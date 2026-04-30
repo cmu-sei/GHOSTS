@@ -80,6 +80,7 @@ public class Execution
     public Scenario Scenario { get; set; } = null!;
     public ICollection<ExecutionEvent> Events { get; set; } = new List<ExecutionEvent>();
     public ICollection<ExecutionMetricSnapshot> MetricSnapshots { get; set; } = new List<ExecutionMetricSnapshot>();
+    public ICollection<ExecutionTimelineItem> TimelineItems { get; set; } = new List<ExecutionTimelineItem>();
 }
 
 /// <summary>
@@ -193,6 +194,36 @@ public class ExecutionMetricSnapshot
     public Execution Execution { get; set; } = null!;
 }
 
+/// <summary>
+/// A snapshot of a ScenarioTimelineEvent scoped to a specific execution run.
+/// Created when an execution is created; tracks independent per-run status.
+/// </summary>
+[Table("execution_timeline_items")]
+public class ExecutionTimelineItem
+{
+    public int Id { get; set; }
+    public int ExecutionId { get; set; }
+
+    /// <summary>
+    /// Original ScenarioTimelineEvent ID this was copied from (nullable for manually added items)
+    /// </summary>
+    public int? SourceTimelineEventId { get; set; }
+
+    public string Time { get; set; } = string.Empty;
+    public int Number { get; set; }
+    public string Assigned { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public string Status { get; set; } = "Pending"; // Pending, Queued, Deployed, Completed, Failed, Skipped
+    public string AutomationKind { get; set; } = "Manual"; // Manual, MachineUpdate
+    public string? CompletedBy { get; set; }
+    public string? Notes { get; set; }
+    public string ResultData { get; set; } = "{}";
+    public DateTime CreatedAt { get; set; }
+    public DateTime? CompletedAt { get; set; }
+
+    public Execution Execution { get; set; } = null!;
+}
+
 // Request/Response DTOs
 
 public record ExecutionDto(
@@ -263,4 +294,27 @@ public record ExecutionSummaryDto(
     string ScenarioName,
     int EventCount,
     int SnapshotCount
+);
+
+public record ExecutionTimelineItemDto(
+    int Id,
+    int ExecutionId,
+    int? SourceTimelineEventId,
+    string Time,
+    int Number,
+    string Assigned,
+    string Description,
+    string Status,
+    string AutomationKind,
+    string? CompletedBy,
+    string? Notes,
+    string ResultData,
+    DateTime CreatedAt,
+    DateTime? CompletedAt
+);
+
+public record CompleteTimelineItemDto(
+    string Status, // Completed, Failed, Skipped
+    string? Notes,
+    string? CompletedBy
 );

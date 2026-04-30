@@ -51,31 +51,29 @@
   border-radius: 50rem !important;
   margin-right: 0.5rem;
 
-  &.badge-success {
-    background-color: #28a745;
-  }
+  &.badge-success { background-color: #28a745; }
+  &.badge-warning { background-color: #ffc107; color: #212529; }
+  &.badge-info { background-color: #17a2b8; }
+  &.badge-danger { background-color: #dc3545; }
+  &.badge-secondary { background-color: #6c757d; }
+  &.badge-light { background-color: #f8f9fa; color: #212529; }
+}
 
-  &.badge-warning {
-    background-color: #ffc107;
-    color: #212529;
-  }
+// Timeline item status badges
+.item-completed { background-color: #28a745; color: white; }
+.item-failed { background-color: #dc3545; color: white; }
+.item-skipped { background-color: #6c757d; color: white; }
+.item-deployed { background-color: #0d6efd; color: white; }
+.item-queued { background-color: #fd7e14; color: white; }
+.item-pending { background-color: #e9ecef; color: #495057; }
 
-  &.badge-info {
-    background-color: #17a2b8;
-  }
-
-  &.badge-danger {
-    background-color: #dc3545;
-  }
-
-  &.badge-secondary {
-    background-color: #6c757d;
-  }
-
-  &.badge-light {
-    background-color: #f8f9fa;
-    color: #212529;
-  }
+// Timeline summary chips
+.timeline-summary {
+  .chip-pending { --mdc-chip-elevated-container-color: #e9ecef; }
+  .chip-queued { --mdc-chip-elevated-container-color: #fff3cd; }
+  .chip-completed { --mdc-chip-elevated-container-color: #d1e7dd; }
+  .chip-failed { --mdc-chip-elevated-container-color: #f8d7da; }
+  .chip-skipped { --mdc-chip-elevated-container-color: #e2e3e5; }
 }
 
 pre {
@@ -130,112 +128,11 @@ details {
   }
 }
 
-// Tab content styling
-.tab-content {
-  .alert {
-    border-radius: 0.5rem;
-    border: none;
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-
-    &.alert-success {
-      background-color: #d1e7dd;
-      color: #0f5132;
-
-      .text-success-emphasis {
-        color: #0a3622;
-      }
-    }
-
-    &.alert-info {
-      background-color: #cff4fc;
-      color: #055160;
-    }
+.empty-state {
+  i {
+    opacity: 0.3;
+    display: block;
   }
-
-  .card {
-    border: 1px solid #dee2e6;
-    transition: box-shadow 0.2s ease;
-
-    &:hover {
-      box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
-    }
-  }
-
-  .card-header {
-    background-color: #f8f9fa;
-    border-bottom: 1px solid #dee2e6;
-    padding: 0.75rem 1rem;
-
-    &.bg-danger {
-      border-bottom-color: rgba(220, 53, 69, 0.2);
-    }
-
-    &.bg-primary {
-      border-bottom-color: rgba(13, 110, 253, 0.2);
-    }
-  }
-
-  .card-title {
-    font-size: 1rem;
-
-    i {
-      margin-right: 0.5rem;
-      color: #0d6efd;
-    }
-  }
-
-  .card-body {
-    padding: 1rem;
-  }
-}
-
-// Placeholder content styling
-.placeholder-content {
-  color: #6c757d;
-
-  .list-unstyled {
-    li {
-      padding: 0.25rem 0;
-
-      i {
-        width: 1.25rem;
-      }
-    }
-  }
-
-  &.text-center {
-    i.fa-3x {
-      opacity: 0.3;
-    }
-
-    i.fa-2x {
-      opacity: 0.4;
-    }
-  }
-}
-
-// Network stats grid
-.network-stats {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 0.5rem 1rem;
-  font-size: 0.875rem;
-
-  dt {
-    font-weight: 600;
-    margin: 0;
-  }
-
-  dd {
-    margin: 0;
-  }
-}
-
-// Activity feed specific styling
-.activity-feed {
-  max-height: 400px;
-  overflow-y: auto;
-  background-color: #f8f9fa;
 }
 
 // Table styling
@@ -244,27 +141,16 @@ details {
   width: 100%;
   margin-bottom: 0;
 
-  thead {
-    &.table-light {
-      background-color: #f8f9fa;
-      border-bottom: 2px solid #dee2e6;
+  thead.table-light {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
 
-      th {
-        font-weight: 600;
-        text-transform: uppercase;
-        font-size: 0.75rem;
-        letter-spacing: 0.5px;
-        color: #495057;
-        padding: 1rem 1rem;
-
-        &:first-child {
-          padding-left: 1.5rem;
-        }
-
-        &:last-child {
-          padding-right: 1.5rem;
-        }
-      }
+    th {
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.5px;
+      color: #495057;
     }
   }
 
@@ -283,15 +169,6 @@ details {
 
     td {
       vertical-align: middle;
-      padding: 1rem 1rem;
-
-      &:first-child {
-        padding-left: 1.5rem;
-      }
-
-      &:last-child {
-        padding-right: 1.5rem;
-      }
     }
   }
 
@@ -299,5 +176,50 @@ details {
     font-size: 0.75rem;
     padding: 0.35rem 0.6rem;
     font-weight: 500;
+  }
+}
+
+.btn-sm {
+  font-size: 0.8rem;
+  padding: 4px 12px;
+}
+
+// Completion dialog overlay
+.completion-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.completion-dialog {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  width: 480px;
+  max-width: 90vw;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+
+  h3 {
+    margin: 0 0 4px 0;
+    font-size: 1.25rem;
+  }
+
+  .full-width {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+
+  .dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 16px;
   }
 }

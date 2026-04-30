@@ -1,78 +1,120 @@
-import { Component, OnInit, signal, inject, OnDestroy } from '@angular/core';
+import { Component, OnInit, signal, inject, OnDestroy, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatChipsModule } from '@angular/material/chips';
 import { ExecutionService } from '../../core/services/execution.service';
+import { ExecutionHubService, ExecutionHubMessage } from '../../core/services/execution-hub.service';
 import {
   Execution,
   ExecutionEvent,
   ExecutionMetricSnapshot,
+  ExecutionTimelineItem,
 } from '../../core/models/execution.model';
-import { interval, Subscription } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-execution-details',
   standalone: true,
-  imports: [CommonModule, RouterModule, MatButtonModule, MatProgressSpinnerModule, MatTabsModule],
+  imports: [
+    CommonModule,
+    RouterModule,
+    FormsModule,
+    MatButtonModule,
+    MatProgressSpinnerModule,
+    MatTabsModule,
+    MatSnackBarModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatChipsModule,
+  ],
   templateUrl: './execution-details.component.html',
   styleUrls: ['./execution-details.component.scss'],
 })
 export class ExecutionDetailsComponent implements OnInit, OnDestroy {
   private readonly executionService = inject(ExecutionService);
+  private readonly executionHub = inject(ExecutionHubService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly snackBar = inject(MatSnackBar);
 
   execution = signal<Execution | null>(null);
   events = signal<ExecutionEvent[]>([]);
   metrics = signal<ExecutionMetricSnapshot[]>([]);
+  timelineItems = signal<ExecutionTimelineItem[]>([]);
   loading = signal(false);
 
-  private refreshSubscription?: Subscription;
+  // Manual completion dialog state
+  completionDialogOpen = signal(false);
+  completionItem = signal<ExecutionTimelineItem | null>(null);
+  completionStatus = signal<'Completed' | 'Failed' | 'Skipped'>('Completed');
+  completionNotes = signal('');
+  completionBy = signal('exercise-admin');
+
+  private hubSub?: Subscription;
+  private executionId = 0;
+
+  protected itemCounts = computed(() => {
+    const items = this.timelineItems();
+    return {
+      total: items.length,
+      pending: items.filter(i => i.status === 'Pending').length,
+      queued: items.filter(i => i.status === 'Queued' || i.status === 'Deployed').length,
+      completed: items.filter(i => i.status === 'Completed').length,
+      failed: items.filter(i => i.status === 'Failed').length,
+      skipped: items.filter(i => i.status === 'Skipped').length,
+      manual: items.filter(i => i.automationKind === 'Manual').length,
+      automated: items.filter(i => i.automationKind === 'MachineUpdate').length,
+    };
+  });
 
   ngOnInit(): void {
-    const id = Number(this.route.snapshot.paramMap.get('id'));
-    if (id) {
-      this.loadExecution(id);
-      this.loadEvents(id);
-      this.loadMetrics(id);
-
-      // Auto-refresh if execution is running
-      this.startAutoRefresh(id);
+    this.executionId = Number(this.route.snapshot.paramMap.get('id'));
+    if (this.executionId) {
+      this.loadAll();
+      this.connectWebSocket();
     }
   }
 
   ngOnDestroy(): void {
-    this.stopAutoRefresh();
+    this.hubSub?.unsubscribe();
+    this.executionHub.disconnect();
   }
 
-  private startAutoRefresh(id: number): void {
-    this.refreshSubscription = interval(5000)
-      .pipe(
-        switchMap(() => this.executionService.getExecution(id))
-      )
-      .subscribe({
-        next: (execution) => {
-          this.execution.set(execution);
-
-          // Stop auto-refresh if execution reaches terminal state
-          if (this.isTerminal(execution.status)) {
-            this.stopAutoRefresh();
-            // Reload events and metrics one last time
-            this.loadEvents(id);
-            this.loadMetrics(id);
-          }
-        },
-        error: (error) => {
-          console.error('Error refreshing execution:', error);
-        },
-      });
+  private loadAll(): void {
+    this.loadExecution(this.executionId);
+    this.loadEvents(this.executionId);
+    this.loadMetrics(this.executionId);
+    this.loadTimelineItems(this.executionId);
   }
 
-  private stopAutoRefresh(): void {
-    this.refreshSubscription?.unsubscribe();
+  private connectWebSocket(): void {
+    this.executionHub.connect(this.executionId);
+    this.hubSub = this.executionHub.updates$.subscribe((msg: ExecutionHubMessage) => {
+      if (msg.updateType === 'StatusChange') {
+        this.snackBar.open(`Execution status: ${msg.data.status}`, 'Close', { duration: 3000 });
+        this.loadExecution(this.executionId);
+        this.loadEvents(this.executionId);
+
+        if (this.isTerminal(msg.data.status)) {
+          this.executionHub.disconnect();
+        }
+      } else if (msg.updateType === 'TimelineItemUpdate') {
+        this.snackBar.open(`Timeline item updated: ${msg.data.status}`, 'Close', { duration: 2000 });
+        this.loadTimelineItems(this.executionId);
+        this.loadEvents(this.executionId);
+      }
+    });
   }
 
   loadExecution(id: number): void {
@@ -82,8 +124,7 @@ export class ExecutionDetailsComponent implements OnInit, OnDestroy {
         this.execution.set(execution);
         this.loading.set(false);
       },
-      error: (error) => {
-        console.error('Error loading execution:', error);
+      error: () => {
         this.loading.set(false);
       },
     });
@@ -91,23 +132,19 @@ export class ExecutionDetailsComponent implements OnInit, OnDestroy {
 
   loadEvents(id: number): void {
     this.executionService.getExecutionEvents(id, undefined, 100).subscribe({
-      next: (events) => {
-        this.events.set(events);
-      },
-      error: (error) => {
-        console.error('Error loading events:', error);
-      },
+      next: (events) => this.events.set(events),
     });
   }
 
   loadMetrics(id: number): void {
     this.executionService.getExecutionMetrics(id, 100).subscribe({
-      next: (metrics) => {
-        this.metrics.set(metrics);
-      },
-      error: (error) => {
-        console.error('Error loading metrics:', error);
-      },
+      next: (metrics) => this.metrics.set(metrics),
+    });
+  }
+
+  loadTimelineItems(id: number): void {
+    this.executionService.getTimelineItems(id).subscribe({
+      next: (items) => this.timelineItems.set(items),
     });
   }
 
@@ -118,11 +155,12 @@ export class ExecutionDetailsComponent implements OnInit, OnDestroy {
     this.executionService.startExecution(execution.id).subscribe({
       next: (updated) => {
         this.execution.set(updated);
-        this.startAutoRefresh(execution.id);
+        this.loadTimelineItems(execution.id);
+        this.loadEvents(execution.id);
+        this.snackBar.open('Execution started', 'Close', { duration: 2000 });
       },
       error: (error) => {
-        console.error('Error starting execution:', error);
-        alert('Failed to start execution. ' + (error.error?.error || ''));
+        this.snackBar.open('Failed to start: ' + (error.error?.error || ''), 'Close', { duration: 3000 });
       },
     });
   }
@@ -134,10 +172,10 @@ export class ExecutionDetailsComponent implements OnInit, OnDestroy {
     this.executionService.pauseExecution(execution.id).subscribe({
       next: (updated) => {
         this.execution.set(updated);
+        this.snackBar.open('Execution paused', 'Close', { duration: 2000 });
       },
       error: (error) => {
-        console.error('Error pausing execution:', error);
-        alert('Failed to pause execution. ' + (error.error?.error || ''));
+        this.snackBar.open('Failed to pause: ' + (error.error?.error || ''), 'Close', { duration: 3000 });
       },
     });
   }
@@ -150,11 +188,10 @@ export class ExecutionDetailsComponent implements OnInit, OnDestroy {
       this.executionService.stopExecution(execution.id).subscribe({
         next: (updated) => {
           this.execution.set(updated);
-          this.stopAutoRefresh();
+          this.snackBar.open('Execution stopped', 'Close', { duration: 2000 });
         },
         error: (error) => {
-          console.error('Error stopping execution:', error);
-          alert('Failed to stop execution. ' + (error.error?.error || ''));
+          this.snackBar.open('Failed to stop: ' + (error.error?.error || ''), 'Close', { duration: 3000 });
         },
       });
     }
@@ -168,11 +205,10 @@ export class ExecutionDetailsComponent implements OnInit, OnDestroy {
       this.executionService.cancelExecution(execution.id).subscribe({
         next: (updated) => {
           this.execution.set(updated);
-          this.stopAutoRefresh();
+          this.snackBar.open('Execution cancelled', 'Close', { duration: 2000 });
         },
         error: (error) => {
-          console.error('Error cancelling execution:', error);
-          alert('Failed to cancel execution. ' + (error.error?.error || ''));
+          this.snackBar.open('Failed to cancel: ' + (error.error?.error || ''), 'Close', { duration: 3000 });
         },
       });
     }
@@ -182,23 +218,56 @@ export class ExecutionDetailsComponent implements OnInit, OnDestroy {
     const execution = this.execution();
     if (!execution) return;
 
-    if (
-      confirm(
-        `Are you sure you want to delete execution "${execution.name}"?`
-      )
-    ) {
+    if (confirm(`Are you sure you want to delete execution "${execution.name}"?`)) {
       this.executionService.deleteExecution(execution.id).subscribe({
-        next: () => {
-          this.router.navigate(['/executions']);
-        },
+        next: () => this.router.navigate(['/executions']),
         error: (error) => {
-          console.error('Error deleting execution:', error);
-          alert('Failed to delete execution. ' + (error.error?.error || ''));
+          this.snackBar.open('Failed to delete: ' + (error.error?.error || ''), 'Close', { duration: 3000 });
         },
       });
     }
   }
 
+  // Manual completion dialog
+  openCompletionDialog(item: ExecutionTimelineItem): void {
+    this.completionItem.set(item);
+    this.completionStatus.set('Completed');
+    this.completionNotes.set('');
+    this.completionBy.set('exercise-admin');
+    this.completionDialogOpen.set(true);
+  }
+
+  closeCompletionDialog(): void {
+    this.completionDialogOpen.set(false);
+    this.completionItem.set(null);
+  }
+
+  submitCompletion(): void {
+    const item = this.completionItem();
+    const execution = this.execution();
+    if (!item || !execution) return;
+
+    this.executionService
+      .completeTimelineItem(execution.id, item.id, {
+        status: this.completionStatus(),
+        notes: this.completionNotes() || undefined,
+        completedBy: this.completionBy() || 'exercise-admin',
+      })
+      .subscribe({
+        next: () => {
+          this.snackBar.open(`Item #${item.number} marked ${this.completionStatus()}`, 'Close', { duration: 2000 });
+          this.closeCompletionDialog();
+          this.loadTimelineItems(execution.id);
+          this.loadEvents(execution.id);
+          this.loadExecution(execution.id);
+        },
+        error: (error) => {
+          this.snackBar.open('Failed: ' + (error.error?.error || ''), 'Close', { duration: 3000 });
+        },
+      });
+  }
+
+  // Helpers
   formatDate(dateString?: string): string {
     if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleString();
@@ -218,12 +287,16 @@ export class ExecutionDetailsComponent implements OnInit, OnDestroy {
     const minutes = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
 
-    if (hours > 0) {
-      return `${hours}h ${minutes}m ${secs}s`;
-    } else if (minutes > 0) {
-      return `${minutes}m ${secs}s`;
-    } else {
-      return `${secs}s`;
+    if (hours > 0) return `${hours}h ${minutes}m ${secs}s`;
+    if (minutes > 0) return `${minutes}m ${secs}s`;
+    return `${secs}s`;
+  }
+
+  formatJson(jsonString: string): string {
+    try {
+      return JSON.stringify(JSON.parse(jsonString), null, 2);
+    } catch {
+      return jsonString;
     }
   }
 
@@ -235,41 +308,34 @@ export class ExecutionDetailsComponent implements OnInit, OnDestroy {
     }
   }
 
-  formatJson(jsonString: string): string {
-    try {
-      return JSON.stringify(JSON.parse(jsonString), null, 2);
-    } catch {
-      return jsonString;
+  getStatusClass(status: string): string {
+    switch (status) {
+      case 'Running': return 'badge-success';
+      case 'Paused': return 'badge-warning';
+      case 'Completed': return 'badge-info';
+      case 'Failed': return 'badge-danger';
+      case 'Cancelled': return 'badge-secondary';
+      default: return 'badge-light';
     }
   }
 
-  getStatusClass(status: string): string {
+  getItemStatusClass(status: string): string {
     switch (status) {
-      case 'Running':
-        return 'badge-success';
-      case 'Paused':
-        return 'badge-warning';
-      case 'Completed':
-        return 'badge-info';
-      case 'Failed':
-        return 'badge-danger';
-      case 'Cancelled':
-        return 'badge-secondary';
-      default:
-        return 'badge-light';
+      case 'Completed': return 'item-completed';
+      case 'Failed': return 'item-failed';
+      case 'Skipped': return 'item-skipped';
+      case 'Deployed': return 'item-deployed';
+      case 'Queued': return 'item-queued';
+      default: return 'item-pending';
     }
   }
 
   getSeverityClass(severity: string): string {
     switch (severity.toLowerCase()) {
-      case 'error':
-        return 'bg-danger text-white';
-      case 'warning':
-        return 'bg-warning text-dark';
-      case 'info':
-        return 'bg-info text-white';
-      default:
-        return 'bg-secondary text-white';
+      case 'error': return 'bg-danger text-white';
+      case 'warning': return 'bg-warning text-dark';
+      case 'info': return 'bg-info text-white';
+      default: return 'bg-secondary text-white';
     }
   }
 
@@ -286,17 +352,18 @@ export class ExecutionDetailsComponent implements OnInit, OnDestroy {
   }
 
   canDelete(status: string): boolean {
-    return (
-      status === 'Created' ||
-      status === 'Completed' ||
-      status === 'Failed' ||
-      status === 'Cancelled'
-    );
+    return status === 'Created' || status === 'Completed' || status === 'Failed' || status === 'Cancelled';
   }
 
   isTerminal(status: string): boolean {
-    return (
-      status === 'Completed' || status === 'Failed' || status === 'Cancelled'
-    );
+    return status === 'Completed' || status === 'Failed' || status === 'Cancelled';
+  }
+
+  canCompleteItem(item: ExecutionTimelineItem): boolean {
+    return !['Completed', 'Failed', 'Skipped'].includes(item.status);
+  }
+
+  isItemTerminal(status: string): boolean {
+    return ['Completed', 'Failed', 'Skipped'].includes(status);
   }
 }

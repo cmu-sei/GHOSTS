@@ -72,3 +72,34 @@ export interface CreateExecutionEventRequest {
   data?: string;
   severity?: string;
 }
+
+export interface ExecutionTimelineItem {
+  id: number;
+  executionId: number;
+  sourceTimelineEventId?: number;
+  time: string;
+  number: number;
+  assigned: string;
+  description: string;
+  status: TimelineItemStatus;
+  automationKind: 'Manual' | 'MachineUpdate';
+  completedBy?: string;
+  notes?: string;
+  resultData: string;
+  createdAt: string;
+  completedAt?: string;
+}
+
+export type TimelineItemStatus =
+  | 'Pending'
+  | 'Queued'
+  | 'Deployed'
+  | 'Completed'
+  | 'Failed'
+  | 'Skipped';
+
+export interface CompleteTimelineItemRequest {
+  status: 'Completed' | 'Failed' | 'Skipped';
+  notes?: string;
+  completedBy?: string;
+}

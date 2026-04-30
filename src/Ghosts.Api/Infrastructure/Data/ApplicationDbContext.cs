@@ -77,6 +77,7 @@ namespace Ghosts.Api.Infrastructure.Data
         public DbSet<Execution> Executions { get; set; }
         public DbSet<ExecutionEvent> ExecutionEvents { get; set; }
         public DbSet<ExecutionMetricSnapshot> ExecutionMetricSnapshots { get; set; }
+        public DbSet<ExecutionTimelineItem> ExecutionTimelineItems { get; set; }
 
         // Scenario Builder tables
         public DbSet<ScenarioSource> ScenarioSources { get; set; }
@@ -281,6 +282,12 @@ namespace Ghosts.Api.Infrastructure.Data
                 .HasForeignKey(ms => ms.ExecutionId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<Execution>()
+                .HasMany(e => e.TimelineItems)
+                .WithOne(ti => ti.Execution)
+                .HasForeignKey(ti => ti.ExecutionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             // Execution indexes for performance
             modelBuilder.Entity<Execution>().HasIndex(e => e.ScenarioId);
             modelBuilder.Entity<Execution>().HasIndex(e => e.Status);
@@ -288,6 +295,8 @@ namespace Ghosts.Api.Infrastructure.Data
             modelBuilder.Entity<Execution>().HasIndex(e => e.StartedAt);
             modelBuilder.Entity<ExecutionEvent>().HasIndex(ev => new { ev.ExecutionId, ev.Timestamp });
             modelBuilder.Entity<ExecutionMetricSnapshot>().HasIndex(ms => new { ms.ExecutionId, ms.Timestamp });
+            modelBuilder.Entity<ExecutionTimelineItem>().HasIndex(ti => new { ti.ExecutionId, ti.Number });
+            modelBuilder.Entity<ExecutionTimelineItem>().HasIndex(ti => ti.Status);
 
             // ── Objectives relationships ──
 
