@@ -1,13 +1,8 @@
 name: Client Lite
 
 on:
-  push:
-    branches: [master]
-    paths:
-      - 'src/Ghosts.Client.Lite/**'
-      - 'src/Ghosts.Domain/**'
-      - '.github/workflows/client-lite.yml'
   pull_request:
+    branches: [master]
     paths:
       - 'src/Ghosts.Client.Lite/**'
       - 'src/Ghosts.Domain/**'

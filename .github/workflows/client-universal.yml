@@ -1,13 +1,8 @@
 name: Client Universal
 
 on:
-  push:
-    branches: [master]
-    paths:
-      - 'src/Ghosts.Client.Universal/**'
-      - 'src/Ghosts.Domain/**'
-      - '.github/workflows/client-universal.yml'
   pull_request:
+    branches: [master]
     paths:
       - 'src/Ghosts.Client.Universal/**'
       - 'src/Ghosts.Domain/**'

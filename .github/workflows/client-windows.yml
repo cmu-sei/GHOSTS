@@ -1,13 +1,8 @@
 name: Client Windows
 
 on:
-  push:
-    branches: [master]
-    paths:
-      - 'src/Ghosts.Client.Windows/**'
-      - 'src/Ghosts.Domain/**'
-      - '.github/workflows/client-windows.yml'
   pull_request:
+    branches: [master]
     paths:
       - 'src/Ghosts.Client.Windows/**'
       - 'src/Ghosts.Domain/**'
