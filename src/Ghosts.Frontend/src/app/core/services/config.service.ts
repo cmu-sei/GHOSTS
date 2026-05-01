@@ -5,6 +5,7 @@ import { firstValueFrom } from 'rxjs';
 export interface AppConfig {
   apiUrl: string;
   n8nApiUrl: string;
+  grafanaUrl: string;
 }
 
 @Injectable({
@@ -38,6 +39,13 @@ export class ConfigService {
       throw new Error('n8nApiUrl is not set in config.json.');
     }
     return this.config.n8nApiUrl;
+  }
+
+  get grafanaUrl(): string {
+    if (!this.config?.grafanaUrl) {
+      throw new Error('grafanaUrl is not set in config.json.');
+    }
+    return this.config.grafanaUrl;
   }
 
   getConfig(): AppConfig {

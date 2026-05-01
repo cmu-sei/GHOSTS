@@ -74,6 +74,11 @@ var grafana = builder.AddContainer("grafana", "grafana/grafana")
     .WithBindMount("../../configuration/grafana/datasources", "/etc/grafana/provisioning/datasources", isReadOnly: true)
     .WithBindMount("../../configuration/grafana/dashboards", "/etc/grafana/provisioning/dashboards", isReadOnly: true)
     .WithVolume("grafana-data", "/var/lib/grafana")
+    .WithEnvironment("GF_AUTH_ANONYMOUS_ENABLED", "true")
+    .WithEnvironment("GF_AUTH_ANONYMOUS_ORG_ROLE", "Admin")
+    .WithEnvironment("GF_AUTH_DISABLE_LOGIN_FORM", "true")
+    .WithEnvironment("GF_SECURITY_ALLOW_EMBEDDING", "true")
+    .WithEnvironment("GF_SECURITY_X_FRAME_OPTIONS", "")
     .WaitFor(postgres);
 
 var frontend = builder.AddJavaScriptApp("frontend", "../Ghosts.Frontend", "start")

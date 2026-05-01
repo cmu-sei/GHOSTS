@@ -11,6 +11,7 @@ services:
       # API_URL must be reachable by the browser, not by Docker — use the host's address
       API_URL: ${WEB_API_URL:-http://host.docker.internal:5000/api}
       N8N_API_URL: ${WEB_N8N_API_URL:-http://host.docker.internal:5678}
+      GRAFANA_URL: ${WEB_GRAFANA_URL:-http://host.docker.internal:3000}
   ghosts-postgres:
     image: postgres:16.8
     container_name: ghosts-postgres
@@ -71,6 +72,8 @@ services:
       - GF_AUTH_ANONYMOUS_ENABLED=true
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
       - GF_AUTH_DISABLE_LOGIN_FORM=true
+      - GF_SECURITY_ALLOW_EMBEDDING=true
+      - GF_SECURITY_X_FRAME_OPTIONS=
       - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/etc/grafana/provisioning/dashboards/GHOSTS-default Grafana dashboard.json
     ports:
       - "3000:3000"

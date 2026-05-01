@@ -1,150 +1,23 @@
-@if (loading()) {
-<div class="loading-container">
-  <mat-spinner diameter="40"></mat-spinner>
-  <p>Loading assessment data...</p>
-</div>
-} @else {
 <div class="container-fluid">
   <div class="page-header">
     <div>
       <h1>Assessment</h1>
       <p class="subtitle">
-        Last updated: {{ lastRefresh().toLocaleTimeString() }}
+        Panels served by
+        <a [href]="grafanaUrl" target="_blank" rel="noopener">Grafana</a>
       </p>
     </div>
-    <div class="header-actions">
-      <button mat-stroked-button (click)="refresh()">
-        <i class="fas fa-sync-alt"></i> Refresh
-      </button>
-    </div>
   </div>
 
-  <!-- KPI cards row -->
-  <div class="kpi-row">
-    <div class="kpi-card">
-      <div class="kpi-value green">{{ onlineCount() }}</div>
-      <div class="kpi-label">Machines Online</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-value red">{{ offlineCount() }}</div>
-      <div class="kpi-label">Machines Offline</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-value blue">{{ runningExecutions() }}</div>
-      <div class="kpi-label">Running Executions</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-value green">{{ completedExecutions() }}</div>
-      <div class="kpi-label">Completed</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-value red">{{ failedExecutions() }}</div>
-      <div class="kpi-label">Failed</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-value muted">{{ activities().length }}</div>
-      <div class="kpi-label">Recent Activities</div>
-    </div>
-  </div>
-
-  <!-- Charts row -->
-  <div class="charts-row">
-    <div class="chart-card">
-      <h3>Machine Status</h3>
-      @if (totalMachines() === 0) {
-      <div class="empty-chart">
-        <i class="fas fa-desktop"></i>
-        <span>No machines registered</span>
-      </div>
-      } @else {
-      <div id="machine-status-chart" class="chart-container donut-chart"></div>
-      }
-    </div>
-
-    <div class="chart-card">
-      <h3>Execution Status</h3>
-      @if (executions().length === 0) {
-      <div class="empty-chart">
-        <i class="fas fa-play"></i>
-        <span>No executions yet</span>
-      </div>
-      } @else {
-      <div id="execution-status-chart" class="chart-container donut-chart"></div>
-      }
-    </div>
-
-    <div class="chart-card wide">
-      <h3>Handler Activity</h3>
-      @if (topHandlers().length === 0) {
-      <div class="empty-chart">
-        <i class="fas fa-tasks"></i>
-        <span>No activity data</span>
-      </div>
-      } @else {
-      <div id="handler-chart" class="chart-container bar-chart"></div>
-      }
-    </div>
-  </div>
-
-  <!-- Timeline chart (full width) -->
-  <div class="chart-card full-width">
-    <h3>Activity Over Time</h3>
-    @if (activities().length === 0) {
-    <div class="empty-chart">
-      <i class="fas fa-chart-area"></i>
-      <span>Activity data populates as machines report in</span>
-    </div>
-    } @else {
-    <div id="activity-timeline" class="chart-container timeline-chart"></div>
-    }
-  </div>
-
-  <!-- Recent machines table -->
-  <div class="chart-card full-width">
-    <h3>Machines</h3>
-    @if (machines().length === 0) {
-    <div class="empty-chart">
-      <i class="fas fa-desktop"></i>
-      <span>No machines registered</span>
-    </div>
-    } @else {
-    <div class="table-responsive">
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Status</th>
-            <th>Name</th>
-            <th>Host</th>
-            <th>Domain</th>
-            <th>Client Version</th>
-            <th>Last Report</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (m of machines(); track m.id) {
-          <tr>
-            <td>
-              <span class="status-dot" [class.online]="m.online" [class.offline]="!m.online"></span>
-            </td>
-            <td>{{ m.name }}</td>
-            <td>{{ m.host || m.fQDN || '-' }}</td>
-            <td>{{ m.domain || '-' }}</td>
-            <td>{{ m.clientVersion || '-' }}</td>
-            <td class="text-muted small">
-              @if (m.lastReportedUtc) {
-              {{ m.minutesSinceReport < 1 ? 'Just now' :
-                 m.minutesSinceReport < 60 ? (m.minutesSinceReport | number:'1.0-0') + 'm ago' :
-                 (m.minutesSinceReport / 60 | number:'1.0-0') + 'h ago' }}
-              } @else {
-              Never
-              }
-            </td>
-          </tr>
-          }
-        </tbody>
-      </table>
+  <div class="panel-grid">
+    @for (entry of panels; track entry.panel.panelId) {
+    <div class="panel-wrapper" [class.stat-panel]="entry.panel.height === '120px'">
+      <iframe
+        [src]="entry.url"
+        [style.height]="entry.panel.height"
+        frameborder="0"
+      ></iframe>
     </div>
     }
   </div>
 </div>
-}
