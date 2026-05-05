@@ -25,8 +25,8 @@ public class Orchestrator
     private static readonly Logger _log = LogManager.GetCurrentClassLogger();
     private static DateTime _lastRead = DateTime.MinValue;
     private static Timeline _defaultTimeline;
-    private FileSystemWatcher _timelineWatcher;
-    private FileSystemWatcher _stopfileWatcher; //watches for changes to config/stop.txt indicating a stop request
+    private static FileSystemWatcher _timelineWatcher { get; set; }
+    private static FileSystemWatcher _stopfileWatcher { get; set; } //watches for changes to config/stop.txt indicating a stop request
     private bool _isSafetyNetRunning;
     //private bool _isTempCleanerRunning;
 
@@ -54,16 +54,18 @@ public class Orchestrator
             //     _isTempCleanerRunning = true;
             // }
 
+
             var dirName = TimelineBuilder.TimelineFilePath().DirectoryName;
+            _log.Trace($"In Orchestrator:Run, Timeline directory name: {dirName}");
             // now watch that file for changes
             if (_timelineWatcher == null &&
                 dirName != null) //you can change this to a bool if you want but checks if the object has been created
             {
-                _log.Trace("Timeline watcher starting and is null...");
                 _timelineWatcher = new FileSystemWatcher(dirName)
                 {
                     Filter = Path.GetFileName(TimelineBuilder.TimelineFilePath().Name)
                 };
+                _log.Trace("Timeline watcher starting and is null...");
                 _log.Trace($"watching {Path.GetFileName(TimelineBuilder.TimelineFilePath().Name)}");
                 _timelineWatcher.NotifyFilter = NotifyFilters.LastWrite;
                 _timelineWatcher.EnableRaisingEvents = true;
@@ -153,16 +155,21 @@ public class Orchestrator
     private void RunEx(Timeline timeline)
     {
         WhatsInstalled();
+        _log.Trace($"Entering Orchestrator: RunEx ");
         foreach (var handler in timeline.TimeLineHandlers)
         {
+             _log.Trace($"In Orchestrator: RunEx, launching {handler.HandlerType.ToString()} ");
             ThreadLaunch(timeline, handler);
         }
+        _log.Trace($"Exiting Orchestrator: RunEx ");
     }
 
     public void RunCommand(Timeline timeline, TimelineHandler handler)
     {
         WhatsInstalled();
+         _log.Trace($"Entering Orchestrator: RunCommand ");
         ThreadLaunch(timeline, handler);
+        _log.Trace($"Exiting Orchestrator: RunCommand ");
     }
 
     public void RunCommandCron(Timeline timeline, TimelineHandler handler)
@@ -189,7 +196,10 @@ public class Orchestrator
         }
 
         var instance = (IHandler)Activator.CreateInstance(handlerType, timeline, handler, token);
-        return instance?.Run();
+        TaskCreationOptions options = (handler.Loop) ? TaskCreationOptions.LongRunning :  TaskCreationOptions.None;
+        TaskFactory factory = new TaskFactory(options, TaskContinuationOptions.None);
+        return factory.StartNew(() => instance?.Run(), token);
+
     }
 
     ///here lies technical debt
@@ -404,6 +414,7 @@ public class Orchestrator
             _log.Info(exc);
         }
     }
+
 
     private void OnChanged(object source, FileSystemEventArgs e)
     {

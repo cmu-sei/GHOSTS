@@ -4,6 +4,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Ghosts.Client.Universal.Infrastructure;
+using Ghosts.Client.Universal.TimelineManager;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
@@ -47,6 +48,7 @@ namespace Ghosts.Client.Universal.Handlers;
                         while (true)
                         {
                             ExecuteEvents(this.Handler);
+                            Token.ThrowIfCancellationRequested();
                         }
                     }
                     else
@@ -54,6 +56,10 @@ namespace Ghosts.Client.Universal.Handlers;
                         ExecuteEvents(this.Handler);
                     }
                 }
+            }
+            catch (OperationCanceledException)
+            {
+                _log.Trace($"{GetType().Name} handler cancelled.");
             }
             catch (ThreadAbortException)
             {
@@ -73,7 +79,6 @@ namespace Ghosts.Client.Universal.Handlers;
                 {
                     //pass
                 }
-
                 try
                 {
                     Driver.Dispose();
@@ -82,23 +87,21 @@ namespace Ghosts.Client.Universal.Handlers;
                 {
                     //pass
                 }
-                KillBrowser();
 
-                if (Restart)
+                try 
                 {
-                    DoRestart();
+                KillBrowser();
+                } catch
+                {
+                    
                 }
+                
             }
 
             return Task.CompletedTask;
         }
 
-        public virtual void DoRestart()
-        {
-            Thread.Sleep(2000);
-            _ = new BrowserChrome(this.Timeline, this.Handler, this.Token);
-        }
-
+        
         internal static IWebDriver GetDriver(TimelineHandler handler)
         {
             var options = new ChromeOptions();
@@ -227,8 +230,17 @@ namespace Ghosts.Client.Universal.Handlers;
             {
                 options.AddArguments($"--load-extension={Program.Configuration.ChromeExtensions}");
             }
-
-            var driver = new ChromeDriver(options);
+            ChromeDriver driver;
+            try
+            {
+                driver = new ChromeDriver(options);
+            }
+            catch
+            {
+                _log.Trace(
+                "Chrome Driver could not be instantiated. Does the proper driver exist? Are you running as a user and not root? Sometimes running the driver directly will uncover the underlaying issue.");
+                throw;
+            }
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
             return driver;
         }

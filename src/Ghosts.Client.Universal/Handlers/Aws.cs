@@ -20,8 +20,9 @@ public class Aws(Timeline timeline, TimelineHandler handler, CancellationToken t
         {
             WorkingHours.Is(this.Handler);
 
-            if (timelineEvent.DelayBeforeActual > 0)
-                Thread.Sleep(timelineEvent.DelayBeforeActual);
+            if (timelineEvent.DelayBeforeActual > 0) {
+                if (Token.WaitHandle.WaitOne(timelineEvent.DelayBeforeActual)) Token.ThrowIfCancellationRequested();
+            }
 
             switch (timelineEvent.Command)
             {
@@ -40,7 +41,7 @@ public class Aws(Timeline timeline, TimelineHandler handler, CancellationToken t
             }
 
             if (timelineEvent.DelayAfterActual <= 0) continue;
-            Thread.Sleep(timelineEvent.DelayAfterActual);
+            if (Token.WaitHandle.WaitOne(timelineEvent.DelayAfterActual)) Token.ThrowIfCancellationRequested();
         }
 
         return Task.CompletedTask;

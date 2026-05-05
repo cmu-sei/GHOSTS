@@ -48,8 +48,8 @@ namespace Ghosts.Client.Handlers
 
             base.Init(callingHandler, callingDriver, aversion);
             NewMailXpath = "//span[text()='New']//parent::span//parent::button";
-            ToRecipientsXpath = "//span[text()='To']//parent::button//following::div//child::input";
-            CcRecipientsXpath = "//span[text()='Cc']//parent::button//following::div//child::input";
+            ToRecipientsXpath = "//button[starts-with(@aria-label,'To button')]//following::div//child::input[@aria-label='To']";
+            CcRecipientsXpath = "//button[starts-with(@aria-label,'Cc button')]//following::div//child::input[@aria-label='Cc']";
             SubjectXpath = "//input[@placeholder='Add a subject']";
             EmailBodyXpath = "//div[@aria-label='Message body']";
             SendButtonXpath = "//button[@aria-label='Send']";
@@ -415,7 +415,7 @@ namespace Ghosts.Client.Handlers
                         Log.Trace($"WebOutlook:: Unable to find body field in reply email form, mail will not be sent.");
                         return false;
                     }
-                    if (Driver is OpenQA.Selenium.Chrome.ChromeDriver)
+                    if ((Driver is OpenQA.Selenium.Chrome.ChromeDriver) || (Driver is OpenQA.Selenium.Edge.EdgeDriver))
                     {
                         BrowserHelperSupport.ElementClick(Driver, targetElement);  //needed for Chrome
                         Thread.Sleep(300);
@@ -723,7 +723,7 @@ namespace Ghosts.Client.Handlers
                     Log.Trace($"WebOutlook:: Unable to find To: field in new email form, mail will not be sent.");
                     return false;
                 }
-                if (Driver is OpenQA.Selenium.Chrome.ChromeDriver)
+                if ((Driver is OpenQA.Selenium.Chrome.ChromeDriver) || (Driver is OpenQA.Selenium.Edge.EdgeDriver))
                 {
                     BrowserHelperSupport.ElementClick(Driver, targetElement);  //needed for Chrome
                     Thread.Sleep(300);
@@ -740,7 +740,7 @@ namespace Ghosts.Client.Handlers
                         Log.Trace($"WebOutlook:: Unable to find To: field in new email form, mail will not be sent.");
                         return false;
                     }
-                    if (Driver is OpenQA.Selenium.Chrome.ChromeDriver)
+                    if ((Driver is OpenQA.Selenium.Chrome.ChromeDriver) || (Driver is OpenQA.Selenium.Edge.EdgeDriver))
                     {
                         BrowserHelperSupport.ElementClick(Driver, targetElement);  //needed for Chrome
                         Thread.Sleep(300);
@@ -757,7 +757,7 @@ namespace Ghosts.Client.Handlers
                     Log.Trace($"WebOutlook:: Unable to find Subject: field in new email form, mail will not be sent.");
                     return false;
                 }
-                if (Driver is OpenQA.Selenium.Chrome.ChromeDriver)
+                if ((Driver is OpenQA.Selenium.Chrome.ChromeDriver) || (Driver is OpenQA.Selenium.Edge.EdgeDriver))
                 {
                     BrowserHelperSupport.ElementClick(Driver, targetElement);  //needed for Chrome
                     Thread.Sleep(300);
@@ -787,7 +787,7 @@ namespace Ghosts.Client.Handlers
                         Log.Trace($"WebOutlook:: Unable to find body field in new email form, mail will not be sent.");
                         return false;
                     }
-                    if (Driver is OpenQA.Selenium.Chrome.ChromeDriver)
+                    if ((Driver is OpenQA.Selenium.Chrome.ChromeDriver) || (Driver is OpenQA.Selenium.Edge.EdgeDriver))
                     {
                         BrowserHelperSupport.ElementClick(Driver, targetElement);  //needed for Chrome
                         Thread.Sleep(300);
@@ -1170,6 +1170,10 @@ namespace Ghosts.Client.Handlers
                         }
                         catch (Exception e)
                         {
+                            if (e is ThreadAbortException || e is ThreadInterruptedException)
+                            {
+                                throw e;
+                            }
                             //ignore any exceptions
                         }
 
@@ -1576,6 +1580,10 @@ namespace Ghosts.Client.Handlers
                             }
                             catch (System.Exception e)
                             {
+                                if (e is ThreadAbortException || e is ThreadInterruptedException)
+                                {
+                                    throw e;
+                                }
                                 Log.Trace($"WebOutlook:: Error parsing outlook outlook-email-domain-addresses list , outlook browser action will not be executed.");
                                 baseHandler.OutlookAbort = true;
                                 Log.Error(e);
@@ -1592,6 +1600,10 @@ namespace Ghosts.Client.Handlers
                             }
                             catch (System.Exception e)
                             {
+                                if (e is ThreadAbortException || e is ThreadInterruptedException)
+                                {
+                                    throw e;
+                                }
                                 Log.Trace($"WebOutlook:: Error parsing outlook credentials file {credFname} , outlook browser action will not be executed.");
                                 baseHandler.OutlookAbort = true;
                                 Log.Error(e);
@@ -1607,6 +1619,10 @@ namespace Ghosts.Client.Handlers
                             }
                             catch (System.Exception e)
                             {
+                                if (e is ThreadAbortException || e is ThreadInterruptedException)
+                                {
+                                    throw e;
+                                }
                                 Log.Trace($"WebOutlook:: Error parsing outlook credentials , outlook browser action will not be executed.");
                                 baseHandler.OutlookAbort = true;
                                 Log.Error(e);

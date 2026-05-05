@@ -21,7 +21,7 @@ public class Print(Timeline entireTimeline, TimelineHandler timelineHandler, Can
 
             if (timelineEvent.DelayBeforeActual > 0)
             {
-                Thread.Sleep(timelineEvent.DelayBeforeActual);
+                if (Token.WaitHandle.WaitOne(timelineEvent.DelayBeforeActual)) Token.ThrowIfCancellationRequested();
             }
 
             _log.Trace($"Print Job: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfterActual}");
@@ -30,7 +30,7 @@ public class Print(Timeline entireTimeline, TimelineHandler timelineHandler, Can
 
             if (timelineEvent.DelayAfterActual > 0)
             {
-                Thread.Sleep(timelineEvent.DelayAfterActual);
+                if (Token.WaitHandle.WaitOne(timelineEvent.DelayAfterActual)) Token.ThrowIfCancellationRequested();
             }
         }
 
@@ -39,7 +39,7 @@ public class Print(Timeline entireTimeline, TimelineHandler timelineHandler, Can
 
     public void ProcessCommand(TimelineHandler handler, TimelineEvent timelineEvent, string command)
     {
-        Thread.Sleep(1000);
+        if (Token.WaitHandle.WaitOne(1000)) Token.ThrowIfCancellationRequested();
 
         try
         {
@@ -58,23 +58,31 @@ public class Print(Timeline entireTimeline, TimelineHandler timelineHandler, Can
                 try
                 {
                     process.WaitForInputIdle();
-                    Thread.Sleep(3000);
+                    if (Token.WaitHandle.WaitOne(3000)) Token.ThrowIfCancellationRequested();
                     if (false == process.CloseMainWindow())
                     {
                         process.SafeKill();
                     }
                 }
-                catch
+                catch (Exception e)
                 {
-                    //
+                    if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+                    {
+                        throw;
+                    }
+                    // ignore
                 }
 
                 Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = command, Trackable = timelineEvent.TrackableId });
             }
         }
-        catch (Exception exception)
+        catch (Exception e)
         {
-            _log.Error(exception);
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+            {
+                throw;
+            }
+            _log.Error(e);
         }
     }
 }

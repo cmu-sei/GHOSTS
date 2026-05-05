@@ -19,7 +19,9 @@ public class Reboot(Timeline entireTimeline, TimelineHandler timelineHandler, Ca
             WorkingHours.Is(this.Handler);
 
             if (timelineEvent.DelayBeforeActual > 0)
-                Thread.Sleep(timelineEvent.DelayBeforeActual);
+            {
+                if (Token.WaitHandle.WaitOne(timelineEvent.DelayBeforeActual)) Token.ThrowIfCancellationRequested();
+            }
 
             _log.Trace($"Reboot: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfterActual}");
 

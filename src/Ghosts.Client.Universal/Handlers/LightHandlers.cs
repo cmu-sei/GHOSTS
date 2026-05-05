@@ -18,17 +18,17 @@ public class LightHandlers
     internal static readonly Logger _log = LogManager.GetCurrentClassLogger();
 
     private static string GetSavePath(Type cls, TimelineHandler handler, TimelineEvent timelineEvent,
-        string fileExtension)
+        string fileExtension, CancellationToken token)
     {
         _log.Trace($"{cls} event - {timelineEvent}");
         WorkingHours.Is(handler);
 
         if (timelineEvent.DelayBeforeActual > 0)
         {
-            Thread.Sleep(timelineEvent.DelayBeforeActual);
+            if (token.WaitHandle.WaitOne(timelineEvent.DelayBeforeActual)) token.ThrowIfCancellationRequested();
         }
 
-        Thread.Sleep(3000);
+        if (token.WaitHandle.WaitOne(3000)) token.ThrowIfCancellationRequested();
 
         var rand = RandomFilename.Generate();
 
@@ -63,6 +63,10 @@ public class LightHandlers
         }
         catch (Exception e)
         {
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+            {
+                throw;
+            }
             _log.Debug(e);
         }
 
@@ -82,7 +86,7 @@ public class LightHandlers
             {
                 foreach (var timelineEvent in this.Handler.TimeLineEvents)
                 {
-                    var path = GetSavePath(typeof(LightExcelHandler), this.Handler, timelineEvent, "docx");
+                    var path = GetSavePath(typeof(LightExcelHandler), this.Handler, timelineEvent, "docx", cancellationToken);
 
                     var list = RandomText.GetDictionary.GetDictionaryList();
                     using (var rt = new RandomText(list))
@@ -107,6 +111,10 @@ public class LightHandlers
             }
             catch (Exception e)
             {
+                if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+                {
+                    throw;
+                }
                 _log.Error(e);
             }
 
@@ -291,7 +299,7 @@ public class LightHandlers
             {
                 foreach (var timelineEvent in this.Handler.TimeLineEvents)
                 {
-                    var path = GetSavePath(typeof(LightExcelHandler), this.Handler, timelineEvent, "xlsx");
+                    var path = GetSavePath(typeof(LightExcelHandler), this.Handler, timelineEvent, "xlsx", cancellationToken);
 
                     var list = RandomText.GetDictionary.GetDictionaryList();
                     using (var rt = new RandomText(list))
@@ -312,6 +320,10 @@ public class LightHandlers
             }
             catch (Exception e)
             {
+                if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+                {
+                    throw;
+                }
                 _log.Error(e);
             }
 

@@ -82,8 +82,12 @@ namespace Ghosts.Client.Handlers
                 BrowserHelperSupport.MoveToElementAndClick(Driver, targetElement); //click advanced 
                 Thread.Sleep(500);
             }
-            catch
+            catch (Exception e)
             {
+                if (e is ThreadAbortException || e is ThreadInterruptedException)
+                {
+                    throw e;
+                }
                 return; //return if not present
             }
             try { 
@@ -92,7 +96,12 @@ namespace Ghosts.Client.Handlers
                 Thread.Sleep(1000);
                 return;
             }
-            catch { }
+            catch (Exception e) {
+                if (e is ThreadAbortException || e is ThreadInterruptedException)
+                {
+                    throw e;
+                }
+            }
             //look for return button
             try
             {
@@ -101,7 +110,13 @@ namespace Ghosts.Client.Handlers
                 Thread.Sleep(1000);
                 
             }
-            catch { }
+            catch (Exception e)
+            {
+                if (e is ThreadAbortException || e is ThreadInterruptedException)
+                {
+                    throw e;
+                }
+            }
 
         }
 
@@ -131,8 +146,12 @@ namespace Ghosts.Client.Handlers
                     {
                         Driver.Navigate().GoToUrl(handler.Initial);
                     }
-                    catch
+                    catch (Exception e)
                     {
+                        if (e is ThreadAbortException || e is ThreadInterruptedException)
+                        {
+                            throw e;
+                        }
                         //ignore
                     }
 
@@ -143,8 +162,12 @@ namespace Ghosts.Client.Handlers
                             this.UserAgentString = JS.ExecuteScript("return navigator.userAgent").ToString();
                         }
                     }
-                    catch
+                    catch (Exception e)
                     {
+                        if (e is ThreadAbortException || e is ThreadInterruptedException)
+                        {
+                            throw e;
+                        }
                         //ignore
                     }
 
@@ -193,8 +216,12 @@ namespace Ghosts.Client.Handlers
                 }
                 catch { }
 
-                ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.GeckoDriver);
-                ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.Firefox);
+                try
+                {
+                    ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.GeckoDriver);
+                    ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.Firefox);
+                }
+                catch { }
 
                 if (this.Restart)
                 {

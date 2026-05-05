@@ -30,8 +30,9 @@ public class Cmd(Timeline entireTimeline, TimelineHandler timelineHandler, Cance
         {
             WorkingHours.Is(handler);
 
-            if (timelineEvent.DelayBeforeActual > 0)
-                Thread.Sleep(timelineEvent.DelayBeforeActual);
+            if (timelineEvent.DelayBeforeActual > 0) {
+                    if (Token.WaitHandle.WaitOne(timelineEvent.DelayBeforeActual)) Token.ThrowIfCancellationRequested();
+            }
 
             _log.Trace($"Command line: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfterActual}");
 
@@ -44,7 +45,7 @@ public class Cmd(Timeline entireTimeline, TimelineHandler timelineHandler, Cance
                         {
                             //skipping this command
                             _log.Trace($"Command choice skipped due to execution probability");
-                            Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, this.JitterFactor));
+                            if (Token.WaitHandle.WaitOne(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, this.JitterFactor))) Token.ThrowIfCancellationRequested();
                             continue;
                         }
 
@@ -53,8 +54,7 @@ public class Cmd(Timeline entireTimeline, TimelineHandler timelineHandler, Cance
                         {
                             ProcessCommand(handler, timelineEvent, cmd.ToString());
                         }
-
-                        Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, this.JitterFactor));
+                        if (Token.WaitHandle.WaitOne(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, this.JitterFactor))) Token.ThrowIfCancellationRequested();
                     }
                 default:
                     ProcessCommand(handler, timelineEvent, timelineEvent.Command);
@@ -66,7 +66,7 @@ public class Cmd(Timeline entireTimeline, TimelineHandler timelineHandler, Cance
             }
 
             if (timelineEvent.DelayAfterActual > 0)
-                Thread.Sleep(timelineEvent.DelayAfterActual);
+                if (Token.WaitHandle.WaitOne(timelineEvent.DelayAfterActual)) Token.ThrowIfCancellationRequested();
         }
 
         return Task.CompletedTask;
@@ -74,7 +74,7 @@ public class Cmd(Timeline entireTimeline, TimelineHandler timelineHandler, Cance
 
     public void ProcessCommand(TimelineHandler handler, TimelineEvent timelineEvent, string command)
     {
-        var results = ProcessCommand(command);
+        var results = ProcessCommand(command, Token);
         Report(new ReportItem
         {
             Handler = handler.HandlerType.ToString(),
@@ -84,7 +84,7 @@ public class Cmd(Timeline entireTimeline, TimelineHandler timelineHandler, Cance
         });
     }
 
-    public static string ProcessCommand(string command)
+    public static string ProcessCommand(string command, CancellationToken token)
     {
         _log.Trace($"Spawning cmd.exe with command {command}");
 
@@ -100,7 +100,7 @@ public class Cmd(Timeline entireTimeline, TimelineHandler timelineHandler, Cance
         var output = process.StandardOutput.ReadToEnd();
         process.WaitForExit();
         // Console.Write(output);
-        Thread.Sleep(1000);
+        if (token.WaitHandle.WaitOne(1000)) token.ThrowIfCancellationRequested();
 
         return output;
     }

@@ -72,7 +72,7 @@ public abstract class BaseBrowserHandler(Timeline timeline, TimelineHandler hand
 
                 if (timelineEvent.DelayBeforeActual > 0)
                 {
-                    Thread.Sleep(timelineEvent.DelayBeforeActual);
+                    if (Token.WaitHandle.WaitOne(timelineEvent.DelayBeforeActual)) Token.ThrowIfCancellationRequested();
                 }
 
                 RequestConfiguration config;
@@ -93,7 +93,7 @@ public abstract class BaseBrowserHandler(Timeline timeline, TimelineHandler hand
                         foreach (var site in timelineEvent.CommandArgs)
                         {
                             Task.Factory.StartNew(() => LaunchThread(handler, timelineEvent, site.ToString()));
-                            Thread.Sleep(5000);
+                            if (Token.WaitHandle.WaitOne(5000)) Token.ThrowIfCancellationRequested();
                             i++;
 
                             if (i >= taskMax)
@@ -109,7 +109,7 @@ public abstract class BaseBrowserHandler(Timeline timeline, TimelineHandler hand
                         {
                             if (_outlookHelper == null)
                             {
-                                _outlookHelper = OutlookHelper.MakeHelper(this, Driver, handler, _log);
+                                _outlookHelper = OutlookHelper.MakeHelper(this, Driver, handler, _log, Token);
                                 if (_outlookHelper == null) OutlookAbort = true;
                             }
 
@@ -120,9 +120,12 @@ public abstract class BaseBrowserHandler(Timeline timeline, TimelineHandler hand
                                 if (Restart)
                                 {
                                     _log.Trace($"WebOutlook:: Restart requested for {BrowserType} , restarting...");
+                                    
                                     if (_outlookHelper.LastException != null)
                                     {
-                                        throw (_outlookHelper.LastException); //restarts everything
+                                        var e = _outlookHelper.LastException;
+                                        _outlookHelper = null;
+                                        throw (e); //restarts everything
                                     }
                                     else
                                     {
@@ -139,7 +142,7 @@ public abstract class BaseBrowserHandler(Timeline timeline, TimelineHandler hand
                         {
                             if (_socialHelper == null)
                             {
-                                _socialHelper = SocialHelper.MakeHelper(this, Driver, handler, _log);
+                                _socialHelper = SocialHelper.MakeHelper(this, Driver, handler, _log, Token);
                                 if (_socialHelper == null) SocialAbort = true;
                             }
 
@@ -163,7 +166,7 @@ public abstract class BaseBrowserHandler(Timeline timeline, TimelineHandler hand
                         {
                             if (_sharePointHelper == null)
                             {
-                                _sharePointHelper = SharepointHelper.MakeHelper(this, Driver, handler, _log);
+                                _sharePointHelper = SharepointHelper.MakeHelper(this, Driver, handler, _log, Token);
                                 if (_sharePointHelper == null) SharePointAbort = true;
                             }
 
@@ -175,7 +178,8 @@ public abstract class BaseBrowserHandler(Timeline timeline, TimelineHandler hand
                                 {
                                     _sharePointHelper = null; //remove the helper
                                     _log.Trace($"Sharepoint:: Restart requested for {BrowserType} , restarting...");
-                                    return; //restart has been requested
+                                     // do a hard restart
+                                    throw new Exception("Restarting SharePoint Browser");
                                 }
                             }
                         }
@@ -186,7 +190,7 @@ public abstract class BaseBrowserHandler(Timeline timeline, TimelineHandler hand
                         {
                             if (_blogHelper == null)
                             {
-                                _blogHelper = BlogHelper.MakeHelper(this, Driver, handler, _log);
+                                _blogHelper = BlogHelper.MakeHelper(this, Driver, handler, _log, Token);
                                 if (_blogHelper == null) BlogAbort = true; //failed to create a helper
                             }
 
@@ -235,7 +239,7 @@ public abstract class BaseBrowserHandler(Timeline timeline, TimelineHandler hand
                                 Arg = string.Join(",", timelineEvent.CommandArgs),
                                 Trackable = timelineEvent.TrackableId
                             });
-                            Thread.Sleep(1000);
+                            if (Token.WaitHandle.WaitOne(1000)) Token.ThrowIfCancellationRequested();
                         }
 
                         break;
@@ -280,16 +284,16 @@ public abstract class BaseBrowserHandler(Timeline timeline, TimelineHandler hand
                             Convert.ToInt32(timelineEvent.CommandArgs[1]));
                         break;
                 }
-
+                Token.ThrowIfCancellationRequested();
                 if (timelineEvent.DelayAfterActual > 0)
                 {
-                    Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, JitterFactor));
+                    if (Token.WaitHandle.WaitOne(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, JitterFactor))) Token.ThrowIfCancellationRequested();
                 }
             }
         }
         catch (Exception e)
         {
-            if (e is ThreadAbortException || e is ThreadInterruptedException)
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
             {
                 _log.Trace($"Thread aborted, {BrowserType} closing...");
                 throw;
@@ -320,7 +324,8 @@ public abstract class BaseBrowserHandler(Timeline timeline, TimelineHandler hand
             if (BrowserProcessTag == null) return; //no process tag, don't know which browser(s) to kill
 
             // this will kill all processes that have the BrowserProcessTag as part of their command string
-            var command = $"ps -x -o pid,cmd | grep '{BrowserProcessTag}' | cut -f 2 -d ' ' | xargs kill";
+            // get pid, cmd | search for browser tag | use awk to remove leading white space | cut first value which is PID | kill
+            var command = "ps -ao pid,cmd | grep '" + BrowserProcessTag + "' |  awk '{$1=$1;print}' | cut -f 1 -d ' ' | xargs kill";
 
             var p = new Process();
             //p.EnableRaisingEvents = false;
@@ -452,7 +457,7 @@ public abstract class BaseBrowserHandler(Timeline timeline, TimelineHandler hand
                             }
                             catch (Exception e)
                             {
-                                if (e is ThreadAbortException || e is ThreadInterruptedException)
+                                if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
                                 {
                                     _log.Trace($"Thread aborted, {BrowserType} closing...");
                                     throw;
@@ -475,8 +480,7 @@ public abstract class BaseBrowserHandler(Timeline timeline, TimelineHandler hand
                                     return;
                                 }
                             }
-
-                            Thread.Sleep(timelineEvent.DelayAfterActual);
+                            if (Token.WaitHandle.WaitOne(timelineEvent.DelayAfterActual)) Token.ThrowIfCancellationRequested();
                         }
                     }
                 }
@@ -496,8 +500,7 @@ public abstract class BaseBrowserHandler(Timeline timeline, TimelineHandler hand
                     return;
                 }
             }
-
-            Thread.Sleep(timelineEvent.DelayAfterActual);
+            if (Token.WaitHandle.WaitOne(timelineEvent.DelayAfterActual)) Token.ThrowIfCancellationRequested();
         }
     }
 
@@ -530,7 +533,7 @@ public abstract class BaseBrowserHandler(Timeline timeline, TimelineHandler hand
             {
                 //skipping this link
                 _log.Trace($"Timeline choice skipped due to browse probability");
-                Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, JitterFactor));
+                if (Token.WaitHandle.WaitOne(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, JitterFactor))) Token.ThrowIfCancellationRequested();
                 continue;
             }
 
@@ -546,8 +549,7 @@ public abstract class BaseBrowserHandler(Timeline timeline, TimelineHandler hand
                     Arg = config.ToString(),
                     Trackable = timelineEvent.TrackableId
                 });
-                Thread.Sleep(timelineEvent.DelayAfterActual);
-
+                if (Token.WaitHandle.WaitOne(timelineEvent.DelayAfterActual)) Token.ThrowIfCancellationRequested();
                 if (_stickiness > 0)
                 {
                     //now some percentage of the time should stay on this site
@@ -580,7 +582,7 @@ public abstract class BaseBrowserHandler(Timeline timeline, TimelineHandler hand
                             }
                             catch (Exception e)
                             {
-                                if (e is ThreadAbortException || e is ThreadInterruptedException)
+                                if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
                                 {
                                     _log.Trace($"Thread aborted, {BrowserType} closing...");
                                     throw;
@@ -604,8 +606,7 @@ public abstract class BaseBrowserHandler(Timeline timeline, TimelineHandler hand
                                     return;
                                 }
                             }
-
-                            Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, JitterFactor));
+                            if (Token.WaitHandle.WaitOne(timelineEvent.DelayAfterActual)) Token.ThrowIfCancellationRequested();
                         }
                     }
                 }
@@ -625,8 +626,7 @@ public abstract class BaseBrowserHandler(Timeline timeline, TimelineHandler hand
                     return;
                 }
             }
-
-            Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, JitterFactor));
+            if (Token.WaitHandle.WaitOne(timelineEvent.DelayAfterActual)) Token.ThrowIfCancellationRequested();
         }
     }
 
@@ -704,7 +704,7 @@ public abstract class BaseBrowserHandler(Timeline timeline, TimelineHandler hand
             }
             else
             {
-                BrowserHelperSupport.MoveToElementAndClick(Driver, targetElement);
+                BrowserHelperSupport.MoveToElementAndClick(Driver, targetElement, Token);
             }
 
             _actionsCount++;
@@ -712,7 +712,7 @@ public abstract class BaseBrowserHandler(Timeline timeline, TimelineHandler hand
         }
         catch (Exception e)
         {
-            if (e is ThreadAbortException || e is ThreadInterruptedException)
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
             {
                 throw;
             }
@@ -776,13 +776,13 @@ public abstract class BaseBrowserHandler(Timeline timeline, TimelineHandler hand
         foreach (var textareaElement in textareaElements)
         {
             HandleTextareaElement(textareaElement);
-            Thread.Sleep(2000);
+            if (Token.WaitHandle.WaitOne(2000)) Token.ThrowIfCancellationRequested();
         }
 
         if (submitElement != null)
         {
-            BrowserHelperSupport.MoveToElementAndClick(Driver, submitElement);
-            Thread.Sleep(3000);
+            BrowserHelperSupport.MoveToElementAndClick(Driver, submitElement, Token);
+            if (Token.WaitHandle.WaitOne(3000)) Token.ThrowIfCancellationRequested();
             return true;
         }
 
@@ -823,7 +823,7 @@ public abstract class BaseBrowserHandler(Timeline timeline, TimelineHandler hand
         }
         catch (Exception e)
         {
-            if (e is ThreadAbortException || e is ThreadInterruptedException)
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
             {
                 throw;
             }
@@ -864,7 +864,7 @@ public abstract class BaseBrowserHandler(Timeline timeline, TimelineHandler hand
         }
         catch (Exception e)
         {
-            if (e is ThreadAbortException or ThreadInterruptedException)
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
             {
                 throw;
             }

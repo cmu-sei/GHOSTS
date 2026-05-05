@@ -4,6 +4,7 @@ using System;
 using System.Text.RegularExpressions;
 using Ghosts.Client.Universal.Infrastructure;
 using Ghosts.Client.Universal.Infrastructure.Browser;
+using System.Threading;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Newtonsoft.Json;
@@ -23,6 +24,7 @@ public abstract partial class BlogHelper : BrowserHelper
     private int _replyProbability = -1;
     private Credentials _credentials;
     private string _state = "initial";
+    public CancellationToken token;
     public string site { get; set; }
     public string header { get; set; }
     public string username { get; set; }
@@ -32,7 +34,7 @@ public abstract partial class BlogHelper : BrowserHelper
     public BlogContentManager contentManager;
 
     public static BlogHelper MakeHelper(BaseBrowserHandler callingHandler, IWebDriver callingDriver,
-        TimelineHandler handler, Logger tlog)
+        TimelineHandler handler, Logger tlog, CancellationToken atoken)
     {
         BlogHelper helper = null;
 
@@ -40,7 +42,7 @@ public abstract partial class BlogHelper : BrowserHelper
         if (handler.HandlerArgs.TryGetValue("blog-version", out var value))
         {
             var version = value.ToString();
-            if (version == "drupal") helper = new BlogHelperDrupal(callingHandler, callingDriver);
+            if (version == "drupal") helper = new BlogHelperDrupal(callingHandler, callingDriver, atoken);
             if (helper == null)
             {
                 tlog.Trace(
@@ -56,11 +58,12 @@ public abstract partial class BlogHelper : BrowserHelper
         return helper;
     }
 
-    public void Init(BaseBrowserHandler parent, IWebDriver currentDriver)
+    public void Init(BaseBrowserHandler parent, IWebDriver currentDriver, CancellationToken atoken)
     {
         baseHandler = parent;
         contentManager = new BlogContentManager();
         Driver = currentDriver;
+        token = atoken;
     }
 
     private static bool CheckProbabilityVar(string name, int value)

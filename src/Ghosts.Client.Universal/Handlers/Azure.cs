@@ -19,8 +19,9 @@ public class Azure(Timeline timeline, TimelineHandler handler, CancellationToken
         {
             WorkingHours.Is(this.Handler);
 
-            if (timelineEvent.DelayBeforeActual > 0)
-                Thread.Sleep(timelineEvent.DelayBeforeActual);
+            if (timelineEvent.DelayBeforeActual > 0) {
+                if (Token.WaitHandle.WaitOne(timelineEvent.DelayBeforeActual)) Token.ThrowIfCancellationRequested();
+            }
 
             switch (timelineEvent.Command)
             {
@@ -39,7 +40,7 @@ public class Azure(Timeline timeline, TimelineHandler handler, CancellationToken
             }
 
             if (timelineEvent.DelayAfterActual <= 0) continue;
-            Thread.Sleep(timelineEvent.DelayAfterActual);
+            if (Token.WaitHandle.WaitOne(timelineEvent.DelayAfterActual)) Token.ThrowIfCancellationRequested();
         }
 
         return Task.CompletedTask;

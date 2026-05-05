@@ -23,9 +23,9 @@ namespace Ghosts.Client.Universal.Handlers;
 /// </summary>
 public class SocialHelperV1 : SocialHelper
 {
-    public SocialHelperV1(BaseBrowserHandler callingHandler, IWebDriver callingDriver, string aversion)
+    public SocialHelperV1(BaseBrowserHandler callingHandler, IWebDriver callingDriver, string aversion, CancellationToken atoken)
     {
-        base.Init(callingHandler, callingDriver, aversion);
+        base.Init(callingHandler, callingDriver, aversion, atoken);
     }
 
 
@@ -45,9 +45,17 @@ public class SocialHelperV1 : SocialHelper
             var targetElement = Driver.FindElement(By.XPath("//img[@title='SOCIALIZER']"));
             foundSocializer = true;
         }
-        catch (ThreadAbortException)
+        
+        catch (System.Exception e)
         {
-            throw; //pass up
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+            {
+                 throw; //pass up
+            }
+            Log.Trace(
+                $"Social:: Unable to do initial login for site {site}, url may be malformed. Social browser action will not be executed.");
+            Log.Error(e);
+            return false;
         }
 
         return foundSocializer;
@@ -65,7 +73,7 @@ public class SocialHelperV1 : SocialHelper
         if (targetElement != null)
         {
             BrowserHelperSupport.ElementClick(Driver, targetElement);
-            Thread.Sleep(500);
+            if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
             Log.Trace($"Social:: Successfully browsed post on site {site}.");
         }
 
@@ -79,7 +87,7 @@ public class SocialHelperV1 : SocialHelper
         if (targetElement != null)
         {
             BrowserHelperSupport.ElementClick(Driver, targetElement);
-            Thread.Sleep(500);
+            if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
             Log.Trace($"Social:: Successfully liked post on site {site}.");
         }
 
@@ -101,7 +109,7 @@ public class SocialHelperV1 : SocialHelper
                 Driver.FindElement(By.XPath(
                     "//label[text()='Share what you are thinking here...']//following-sibling::textarea"));
             targetElement.SendKeys(postContent);
-            Thread.Sleep(500);
+            if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
             var targetName = "";
             if (userName != null) targetName = userName; //always use this if specified
             else
@@ -120,7 +128,7 @@ public class SocialHelperV1 : SocialHelper
                     By.XPath("//label[text()='Share what you are thinking here...']//following-sibling::input"));
             targetElement.Clear(); //clear the name before sending another one
             targetElement.SendKeys(targetName);
-            Thread.Sleep(500);
+            if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
             if (action == "postWimage")
             {
                 // get the image file
@@ -158,10 +166,10 @@ public class SocialHelperV1 : SocialHelper
                     if (targetElement != null)
                     {
                         BrowserHelperSupport.ElementClick(Driver, targetElement);
-                        Thread.Sleep(500);
+                        if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
                         //filechoice window is open
                         AttachFile(imageFile);
-                        Thread.Sleep(500);
+                        if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
                     }
                 }
             }
@@ -170,7 +178,7 @@ public class SocialHelperV1 : SocialHelper
             targetElement = Driver.FindElement(By.XPath("//button[@id='sendButton']"));
             Actions actions = new Actions(Driver);
             actions.MoveToElement(targetElement).Click().Perform();
-            Thread.Sleep(500);
+            if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
             Log.Trace($"Social:: Successfully added post on site {site}.");
             postCount += 1;
         }
@@ -197,6 +205,8 @@ public abstract partial class SocialHelper : BrowserHelper
     public System.Exception LastException;
 
     public List<string> topicDirs = null;
+
+    public CancellationToken token;
 
     private string _state = "initial";
     public int errorCount = 0;
@@ -245,9 +255,9 @@ public abstract partial class SocialHelper : BrowserHelper
 
 
     public static SocialHelper MakeHelper(BaseBrowserHandler callingHandler, IWebDriver callingDriver,
-        TimelineHandler handler, Logger tlog)
+        TimelineHandler handler, Logger tlog, CancellationToken atoken)
     {
-        SocialHelper helper = new SocialHelperV1(callingHandler, callingDriver, "1.0");
+        SocialHelper helper = new SocialHelperV1(callingHandler, callingDriver, "1.0", atoken);
         return helper;
     }
 
@@ -257,12 +267,13 @@ public abstract partial class SocialHelper : BrowserHelper
     }
 
 
-    public void Init(BaseBrowserHandler callingHandler, IWebDriver currentDriver, string aversion)
+    public void Init(BaseBrowserHandler callingHandler, IWebDriver currentDriver, string aversion, CancellationToken atoken)
     {
         baseHandler = callingHandler;
         Driver = currentDriver;
         version = aversion;
         linuxHelper = new LinuxSupport(Log);
+        token = atoken;
     }
 
     private static bool CheckProbabilityVar(string name, int value)
@@ -296,12 +307,12 @@ public abstract partial class SocialHelper : BrowserHelper
         {
             baseHandler.MakeRequest(config);
         }
-        catch (ThreadAbortException)
+        catch (Exception e)
         {
-            throw; //pass up
-        }
-        catch (System.Exception e)
-        {
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+            {
+                 throw; //pass up
+            }
             Log.Trace(
                 $"Social:: Unable to parse site {site}, url may be malformed. Social browser action will not be executed.");
             Log.Error(e);
@@ -314,6 +325,7 @@ public abstract partial class SocialHelper : BrowserHelper
 
     public static void AttachFileWindows(string filename)
     {
+        // not supported
     }
 
     public void AttachFileLinux(string filename)
@@ -341,14 +353,15 @@ public abstract partial class SocialHelper : BrowserHelper
             if (filelist.Length > 0) return filelist[_random.Next(0, filelist.Length)];
             else return null;
         }
-        catch (ThreadAbortException)
+        catch (Exception e)
         {
-            throw; //pass up
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+            {
+                 throw; //pass up
+            }
+            //ignore any other errors
         }
-        catch
-        {
-        } //ignore any errors
-
+        
         return null;
     }
 
@@ -407,9 +420,13 @@ public abstract partial class SocialHelper : BrowserHelper
             }
             else return null;
         }
-        catch (ThreadAbortException)
+        catch (Exception e)
         {
-            throw; //pass up
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+            {
+                 throw; //pass up
+            }
+            //ignore any other errors
         }
 
         return null;
@@ -673,7 +690,7 @@ public abstract partial class SocialHelper : BrowserHelper
                     //determine what to do
                     //first go back to home site
                     GotoHomeSite(handler);
-                    Thread.Sleep(500);
+                    if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
 
                     var socialAction = GetNextAction();
 
@@ -714,16 +731,16 @@ public abstract partial class SocialHelper : BrowserHelper
         }
         catch (Exception e)
         {
-            if (e is ThreadAbortException || e is ThreadInterruptedException)
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
             {
-                throw;
+                 throw; //pass up
             }
-
             errorCount = errorThreshold + 1; // an exception at  this level needs a restart
             LastException = e; //save last exception so that it can be thrown up during restart
             Log.Trace($"WebSocial:: Error at top level of execute loop.");
             Log.Error(e);
-            Thread.Sleep(20000); // sleep to prevent tight error loop
+            // sleep to prevent tight error loop
+            if (token.WaitHandle.WaitOne(20000)) token.ThrowIfCancellationRequested();
         }
     }
 

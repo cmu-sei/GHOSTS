@@ -57,6 +57,10 @@ public class Curl(Timeline entireTimeline, TimelineHandler timelineHandler, Canc
         }
         catch (Exception e)
         {
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+            {
+                throw;
+            }
             _log.Error(e);
         }
 
@@ -69,9 +73,9 @@ public class Curl(Timeline entireTimeline, TimelineHandler timelineHandler, Canc
         {
             WorkingHours.Is(this.Handler);
 
-            if (timelineEvent.DelayBeforeActual > 0)
-                Thread.Sleep(timelineEvent.DelayBeforeActual);
-
+            if (timelineEvent.DelayBeforeActual > 0) {
+                if (Token.WaitHandle.WaitOne(timelineEvent.DelayBeforeActual)) Token.ThrowIfCancellationRequested();
+            }
             switch (timelineEvent.Command)
             {
                 default:
@@ -88,7 +92,7 @@ public class Curl(Timeline entireTimeline, TimelineHandler timelineHandler, Canc
             if (timelineEvent.DelayAfterActual <= 0) continue;
 
             _wait = timelineEvent.DelayAfterActual;
-            Thread.Sleep(timelineEvent.DelayAfterActual);
+            if (Token.WaitHandle.WaitOne(timelineEvent.DelayAfterActual)) Token.ThrowIfCancellationRequested();
         }
     }
 
@@ -105,6 +109,10 @@ public class Curl(Timeline entireTimeline, TimelineHandler timelineHandler, Canc
             }
             catch (Exception e)
             {
+                if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+                {
+                    throw;
+                }
                 _log.Debug(e);
             }
 
@@ -137,9 +145,13 @@ public class Curl(Timeline entireTimeline, TimelineHandler timelineHandler, Canc
             Report(new ReportItem { Handler = HandlerType.Curl.ToString(), Command = escapedArgs, Result = Result });
             DeepBrowse();
         }
-        catch (Exception exc)
+        catch (Exception e)
         {
-            _log.Debug(exc);
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+            {
+                throw;
+            }
+            _log.Debug(e);
         }
     }
 
@@ -207,12 +219,16 @@ public class Curl(Timeline entireTimeline, TimelineHandler timelineHandler, Canc
             }
             catch (Exception e)
             {
+                if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+                {
+                    throw;
+                }
                 _log.Error(e);
             }
 
             if (_wait > 0)
             {
-                Thread.Sleep(_wait);
+                if (Token.WaitHandle.WaitOne(_wait)) Token.ThrowIfCancellationRequested();
             }
         }
     }

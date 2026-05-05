@@ -25,9 +25,9 @@ public abstract class BrowserHelper
     /// scroll to ensure the element is in view
     /// </summary>
     /// <param name="targetElement"></param>
-    public void MoveToElementAndClick(IWebElement targetElement)
+    public void MoveToElementAndClick(IWebElement targetElement, CancellationToken token)
     {
-        BrowserHelperSupport.MoveToElementAndClick(Driver, targetElement);
+        BrowserHelperSupport.MoveToElementAndClick(Driver, targetElement, token);
     }
 
     public static List<string> GetRandomFiles(string targetDir, string pattern, int count, int maxSize)
@@ -53,12 +53,12 @@ public abstract class BrowserHelper
                             filteredFiles.Add(file);
                         }
                     }
-                    catch (ThreadAbortException)
-                    {
-                        throw; //pass up
-                    }
                     catch (Exception e)
                     {
+                        if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+                        {
+                            throw;
+                        }
                         Log.Error($"File access error: {e}");
                     }
                 }
@@ -81,12 +81,12 @@ public abstract class BrowserHelper
                 return filteredFiles;
             }
         }
-        catch (ThreadAbortException)
+        catch (Exception e)
         {
-            throw; //pass up
-        }
-        catch
-        {
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+            {
+                throw;
+            }
             //ignore others
         }
 
@@ -103,7 +103,7 @@ public class BrowserHelperSupport
         actions.MoveToElement(targetElement).Click().Perform();
     }
 
-    public static void MoveToElementAndContextMenu(IWebDriver Driver, IWebElement targetElement)
+    public static void MoveToElementAndContextMenu(IWebDriver Driver, IWebElement targetElement, CancellationToken token)
     {
         Actions actions;
 
@@ -112,7 +112,7 @@ public class BrowserHelperSupport
             IJavaScriptExecutor je = (IJavaScriptExecutor)Driver;
             //be safe and scroll to element
             je.ExecuteScript("arguments[0].scrollIntoView()", targetElement);
-            Thread.Sleep(500);
+            if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
         }
 
         actions = new Actions(Driver);
@@ -120,7 +120,7 @@ public class BrowserHelperSupport
     }
 
 
-    public static void MoveToElementAndClick(IWebDriver Driver, IWebElement targetElement)
+    public static void MoveToElementAndClick(IWebDriver Driver, IWebElement targetElement, CancellationToken token)
     {
         Actions actions;
 
@@ -129,38 +129,46 @@ public class BrowserHelperSupport
             IJavaScriptExecutor je = (IJavaScriptExecutor)Driver;
             //be safe and scroll to element
             je.ExecuteScript("arguments[0].scrollIntoView()", targetElement);
-            Thread.Sleep(500);
+            if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
         }
 
         actions = new Actions(Driver);
         actions.MoveToElement(targetElement).Click().Perform();
     }
 
-    public static void FirefoxHandleInsecureCertificate(IWebDriver Driver)
+    public static void FirefoxHandleInsecureCertificate(IWebDriver Driver, CancellationToken token)
     {
         //look for security override
         IWebElement targetElement;
         try
         {
-            Thread.Sleep(500);
+            if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
             targetElement = Driver.FindElement(By.Id("advancedButton"));
-            MoveToElementAndClick(Driver, targetElement); //click advanced
-            Thread.Sleep(500);
+            MoveToElementAndClick(Driver, targetElement, token); //click advanced
+            if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
         }
-        catch
+        catch (Exception e)
         {
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+            {
+                throw;
+            }
             return; //return if not present
         }
 
         try
         {
             targetElement = Driver.FindElement(By.Id("exceptionDialogButton"));
-            MoveToElementAndClick(Driver, targetElement); //accept risk and continue
-            Thread.Sleep(1000);
+            MoveToElementAndClick(Driver, targetElement, token); //accept risk and continue
+            if (token.WaitHandle.WaitOne(1000)) token.ThrowIfCancellationRequested();
             return;
         }
-        catch
+        catch (Exception e)
         {
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+            {
+                throw;
+            }
             //pass
         }
 
@@ -168,11 +176,15 @@ public class BrowserHelperSupport
         try
         {
             targetElement = Driver.FindElement(By.Id("advancedPanelReturnButton"));
-            MoveToElementAndClick(Driver, targetElement); //return, cannot continue
-            Thread.Sleep(1000);
+            MoveToElementAndClick(Driver, targetElement, token); //return, cannot continue
+            if (token.WaitHandle.WaitOne(1000)) token.ThrowIfCancellationRequested();
         }
-        catch
+        catch (Exception e)
         {
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+            {
+                throw;
+            }
             //pass
         }
     }

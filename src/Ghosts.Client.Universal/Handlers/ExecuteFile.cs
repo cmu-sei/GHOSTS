@@ -60,8 +60,9 @@ public class ExecuteFile(Timeline entireTimeline, TimelineHandler timelineHandle
         {
             WorkingHours.Is(this.Handler);
 
-            if (timelineEvent.DelayBeforeActual > 0)
-                Thread.Sleep(timelineEvent.DelayBeforeActual);
+            if (timelineEvent.DelayBeforeActual > 0) {
+                if (Token.WaitHandle.WaitOne(timelineEvent.DelayBeforeActual)) Token.ThrowIfCancellationRequested();
+            }
 
             switch (timelineEvent.Command)
             {
@@ -72,21 +73,21 @@ public class ExecuteFile(Timeline entireTimeline, TimelineHandler timelineHandle
                         {
                             //skipping this command
                             _log.Trace($"Execuation skipped due to execution probability");
-                            Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, jitterfactor));
+                            if (Token.WaitHandle.WaitOne(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, jitterfactor))) Token.ThrowIfCancellationRequested();
                             continue;
                         }
 
                         ProcessCommand(this.Handler, timelineEvent);
-
-                        Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, jitterfactor));
+                        if (Token.WaitHandle.WaitOne(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, jitterfactor))) Token.ThrowIfCancellationRequested();
                     }
                 default:
                     ProcessCommand(this.Handler, timelineEvent);
                     break;
             }
 
-            if (timelineEvent.DelayAfterActual > 0)
-                Thread.Sleep(timelineEvent.DelayAfterActual);
+            if (timelineEvent.DelayAfterActual > 0) {
+                if (Token.WaitHandle.WaitOne(timelineEvent.DelayAfterActual)) Token.ThrowIfCancellationRequested();
+            }
         }
 
         return Task.CompletedTask;
@@ -103,12 +104,12 @@ public class ExecuteFile(Timeline entireTimeline, TimelineHandler timelineHandle
                 _log.Trace($"Executing {info.Name}");
                 var process = Process.Start(info.FullName);
                 _log.Trace($"Waiting {execWaitTime} before stopping process {info.Name}");
-                Thread.Sleep(execWaitTime);
+                if (Token.WaitHandle.WaitOne(execWaitTime)) Token.ThrowIfCancellationRequested();
                 if (process != null)
                 {
                     _log.Trace($"Killing process: {info.Name}");
                     process.Kill();
-                    Thread.Sleep(10000);
+                    if (Token.WaitHandle.WaitOne(10000)) Token.ThrowIfCancellationRequested();
                     process.Close();
                     //this.Report(handler.HandlerType.ToString(), info.FullName, timelineEvent.TrackableId);
                     Report(new ReportItem

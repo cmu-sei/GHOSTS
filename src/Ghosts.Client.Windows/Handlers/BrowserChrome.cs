@@ -69,8 +69,12 @@ namespace Ghosts.Client.Handlers
                     {
                         Driver.Navigate().GoToUrl(handler.Initial);
                     }
-                    catch
+                    catch (Exception e)
                     {
+                        if (e is ThreadAbortException || e is ThreadInterruptedException)
+                        {
+                            throw e;
+                        }
                         //ignore
                     }
 
@@ -81,8 +85,12 @@ namespace Ghosts.Client.Handlers
                             this.UserAgentString = JS.ExecuteScript("return navigator.userAgent").ToString();
                         }
                     }
-                    catch
+                    catch (Exception e)
                     {
+                        if (e is ThreadAbortException || e is ThreadInterruptedException)
+                        {
+                            throw e;
+                        }
                         //ignore
                     }
 
@@ -131,8 +139,12 @@ namespace Ghosts.Client.Handlers
                 }
                 catch { }
 
-                ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.ChromeDriver);
-                ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.Chrome);
+                try
+                {
+                    ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.ChromeDriver);
+                    ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.Chrome);
+                }
+                catch { }
 
                 if (this.Restart)
                 {

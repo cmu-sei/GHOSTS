@@ -18,7 +18,14 @@ public partial class SshSupport : SshSftpSupport
         "txt", "py", "log", "c", "o", "jpg", "cs", "dll", "so", "zip", "gz", "jar"
     };
 
+    public CancellationToken token;
+
     public string uploadDirectory { get; set; } = null;
+
+    public SshSupport(CancellationToken atoken)
+    {
+        this.token = atoken;
+    }
 
     private string GetRandomDirectory(ShellStream client)
     {
@@ -126,8 +133,7 @@ public partial class SshSupport : SshSftpSupport
             {
                 break; // done
             }
-
-            Thread.Sleep(50);
+            if (token.WaitHandle.WaitOne(50)) token.ThrowIfCancellationRequested();
         }
 
         //at this point command timeout reached, this.CmdData has the output data.
@@ -135,7 +141,7 @@ public partial class SshSupport : SshSftpSupport
         if (!skiptimeout && TimeBetweenCommandsMin != 0 && TimeBetweenCommandsMax != 0 &&
             TimeBetweenCommandsMin < TimeBetweenCommandsMax)
         {
-            Thread.Sleep(_random.Next(TimeBetweenCommandsMin, TimeBetweenCommandsMax));
+            if (token.WaitHandle.WaitOne(_random.Next(TimeBetweenCommandsMin, TimeBetweenCommandsMax))) token.ThrowIfCancellationRequested();
         }
 
         return CmdData;
@@ -183,12 +189,12 @@ public abstract class SshSftpSupport
             if (filelist.Length > 0) return filelist[_random.Next(0, filelist.Length)];
             else return null;
         }
-        catch (ThreadAbortException)
+        catch (Exception e)
         {
-            throw; //pass up
-        }
-        catch
-        {
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+            {
+                throw;
+            }
             //ignore any errors
         }
 

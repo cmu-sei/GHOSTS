@@ -1,5 +1,3 @@
-// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
-
 using System;
 using System.IO;
 using System.Threading;
@@ -12,8 +10,8 @@ using Renci.SshNet;
 
 namespace Ghosts.Client.Universal.Handlers;
 
-public class Sftp(Timeline entireTimeline, TimelineHandler timelineHandler, CancellationToken cancellationToken)
-    : BaseHandler(entireTimeline, timelineHandler, cancellationToken)
+public class Sftp(Timeline timeline, TimelineHandler handler, CancellationToken token)
+: BaseHandler(timeline, handler, token)
 {
     private Credentials _currentCreds;
     private SftpSupport _currentSftpSupport;

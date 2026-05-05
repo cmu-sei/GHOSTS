@@ -101,6 +101,10 @@ namespace Ghosts.Client.Handlers
             if (postFileList.Length > 0) {
                 // get the file content
                 string postContent = File.ReadAllText(postFileList[0]);
+                if (stripEmojis)
+                {
+                    postContent = Regex.Replace(postContent, @"[^\u0000-\u007F]+", "");
+                }
                 var targetElement =  Driver.FindElement(By.XPath("//label[text()='Share what you are thinking here...']//following-sibling::textarea"));
                 targetElement.SendKeys(postContent);
                 Thread.Sleep(500);
@@ -214,6 +218,8 @@ namespace Ghosts.Client.Handlers
 
         public bool useUniqueName { get; set; } = true;
 
+        public bool stripEmojis { get; set; } = true;
+
         public string AttachmentWindowTitle = "Open"; //this is for chrome
 
         private void OutputHandler(object sendingProcess, DataReceivedEventArgs outLine)
@@ -244,6 +250,7 @@ namespace Ghosts.Client.Handlers
         public static SocialHelper MakeHelper(BaseBrowserHandler callingHandler, IWebDriver callingDriver, TimelineHandler handler, Logger tlog)
         {
             SocialHelper helper = new SocialHelperV1(callingHandler, callingDriver, "1.0");
+            helper.stripEmojis = handler.HandlerType == HandlerType.BrowserEdge;
             return helper;
         }
 
@@ -343,14 +350,16 @@ namespace Ghosts.Client.Handlers
                 return;
             }
             Winuser.SetForegroundWindow(winHandle);
+            Thread.Sleep(400);
             string s;
+            // The spaces are needed because SendWait tends to drop the first character or so
             if (Driver is OpenQA.Selenium.Firefox.FirefoxDriver)
             {
-                s = filename + "{TAB}{TAB}{ENTER}";
+                s = "     " + filename + "{TAB}{TAB}{ENTER}";
             }
             else
             {
-                s = filename + "{ENTER}";
+                s = "     " + filename + "{ENTER}";
             }
 
             System.Windows.Forms.SendKeys.SendWait(s);

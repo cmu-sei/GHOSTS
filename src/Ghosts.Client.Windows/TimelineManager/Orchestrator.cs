@@ -484,6 +484,12 @@ namespace Ghosts.Client.TimelineManager
                             _ = new BrowserFirefox(handler);
                         });
                         break;
+                    case HandlerType.BrowserEdge:
+                        t = new Thread(() =>
+                        {
+                            _ = new BrowserEdge(handler);
+                        });
+                        break;
                     case HandlerType.Watcher:
                         AddToThreadJobs = false; //do not add this to thread jobs to be stopped, thread only adds event handlers
                         t = new Thread(() =>

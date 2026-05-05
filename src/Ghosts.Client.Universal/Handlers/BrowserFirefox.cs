@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Ghosts.Client.Universal.Infrastructure;
+using Ghosts.Client.Universal.TimelineManager;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Code.Helpers;
@@ -55,38 +56,50 @@ public class BrowserFirefox(Timeline timeline, TimelineHandler handler, Cancella
         IWebElement targetElement;
         try
         {
-            Task.Delay(500);
+            if (Token.WaitHandle.WaitOne(500)) Token.ThrowIfCancellationRequested();
             targetElement = Driver.FindElement(By.Id("advancedButton"));
-            BrowserHelperSupport.MoveToElementAndClick(Driver, targetElement); //click advanced
-            Task.Delay(500);
+            BrowserHelperSupport.MoveToElementAndClick(Driver, targetElement, Token); //click advanced
+            if (Token.WaitHandle.WaitOne(500)) Token.ThrowIfCancellationRequested();
         }
-        catch
+        catch (Exception e)
         {
-            return; //return if not present
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+            {
+                throw;
+            }
+            // ignore
         }
-
+       
         try
         {
             targetElement = Driver.FindElement(By.Id("exceptionDialogButton"));
-            BrowserHelperSupport.MoveToElementAndClick(Driver, targetElement); //accept risk and continue
-            Task.Delay(1000);
+            BrowserHelperSupport.MoveToElementAndClick(Driver, targetElement, Token); //accept risk and continue
+            if (Token.WaitHandle.WaitOne(1000)) Token.ThrowIfCancellationRequested();
             return;
         }
-        catch
+        catch (Exception e)
         {
-            //pass
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+            {
+                throw;
+            }
+            // ignore
         }
 
         //look for return button
         try
         {
             targetElement = Driver.FindElement(By.Id("advancedPanelReturnButton"));
-            BrowserHelperSupport.MoveToElementAndClick(Driver, targetElement); //return, cannot continue
-            Task.Delay(1000);
+            BrowserHelperSupport.MoveToElementAndClick(Driver, targetElement, Token); //return, cannot continue
+             if (Token.WaitHandle.WaitOne(1000)) Token.ThrowIfCancellationRequested();
         }
-        catch
+        catch (Exception e)
         {
-            //pass
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+            {
+                throw;
+            }
+            // ignore
         }
     }
 
@@ -125,12 +138,17 @@ public class BrowserFirefox(Timeline timeline, TimelineHandler handler, Cancella
                     }
 
                     ExecuteEvents(this.Handler);
+                    Token.ThrowIfCancellationRequested();
                 }
             }
             else
             {
                 ExecuteEvents(this.Handler);
             }
+        }
+        catch (OperationCanceledException)
+        {
+            _log.Trace($"{GetType().Name} handler cancelled.");
         }
         catch (ThreadAbortException)
         {
@@ -154,7 +172,6 @@ public class BrowserFirefox(Timeline timeline, TimelineHandler handler, Cancella
             {
                 //pass
             }
-
             try
             {
                 Driver.Dispose();
@@ -163,24 +180,21 @@ public class BrowserFirefox(Timeline timeline, TimelineHandler handler, Cancella
             {
                 //pass
             }
-
-            KillBrowser();
-
-            if (Restart)
+            try 
             {
-                DoRestart();
+             KillBrowser();
+            } catch
+            {
+                
             }
+
+            
         }
 
         return Task.CompletedTask;
     }
 
-    public virtual void DoRestart()
-    {
-        Task.Delay(2000);
-        _ = new BrowserFirefox(this.Timeline, this.Handler, this.Token);
-    }
-
+   
     internal static IWebDriver GetDriver(TimelineHandler handler)
     {
         var path = GetInstallLocation();
@@ -309,7 +323,7 @@ public class BrowserFirefox(Timeline timeline, TimelineHandler handler, Cancella
         catch
         {
             _log.Trace(
-                "Driver could not be instantiated. Does the proper driver exist? Are you running as a user and not root? Sometimes running the driver directly will uncover the underlaying issue.");
+                "Firefox Driver could not be instantiated. Does the proper driver exist? Are you running as a user and not root? Sometimes running the driver directly will uncover the underlaying issue.");
             throw;
         }
 

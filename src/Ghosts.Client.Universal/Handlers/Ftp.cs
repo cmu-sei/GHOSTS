@@ -1,5 +1,3 @@
-// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
-
 using System;
 using System.IO;
 using System.Net;
@@ -244,3 +242,4 @@ namespace Ghosts.Client.Universal.Handlers
         }
     }
 }
+
