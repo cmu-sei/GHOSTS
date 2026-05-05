@@ -47,14 +47,14 @@ public class AnimationJobsController(IServiceProvider serviceProvider) : Control
     [HttpGet("workflows")]
     public async Task<IActionResult> Workflows(CancellationToken cancellationToken)
     {
-        var apiUrl = Environment.GetEnvironmentVariable("N8N_API_URL");
-        var apiKey = Environment.GetEnvironmentVariable("N8N_API_KEY");
+        var apiUrl = Infrastructure.N8nConfig.GetApiUrl();
+        var apiKey = Infrastructure.N8nConfig.GetApiKey();
 
         if (string.IsNullOrEmpty(apiUrl))
             throw new InvalidOperationException("N8N_API_URL environment variable is not set.");
 
         if (string.IsNullOrEmpty(apiKey))
-            throw new InvalidOperationException("N8N_API_KEY environment variable is not set.");
+            throw new InvalidOperationException("N8N_API_KEY is not set and no key file found. The n8n provisioner may not have completed yet.");
 
         _log.Info($"Fetching workflows from N8N at {apiUrl} with key {apiKey.Substring(0, 8)}...");
 

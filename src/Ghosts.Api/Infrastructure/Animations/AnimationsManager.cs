@@ -549,8 +549,8 @@ public class AnimationsManager(IHubContext<ActivityHub> activityHubContext, ISer
             WorkflowId = workflowId,
             WebhookUrl = webhookUrl,
             Schedule = schedule,
-            N8nApiUrl = Environment.GetEnvironmentVariable("N8N_API_URL"),
-            N8nApiKey = Environment.GetEnvironmentVariable("N8N_API_KEY")
+            N8nApiUrl = N8nConfig.GetApiUrl(),
+            N8nApiKey = N8nConfig.GetApiKey()
         };
 
         var thread = new Thread(() =>
