@@ -21,7 +21,7 @@
     {
       "parameters": {
         "method": "GET",
-        "url": "http://host.docker.internal:5000/api/npcs/list",
+        "url": "http://ghosts-api:5000/api/npcs/list",
         "authentication": "none",
         "options": {}
       },
@@ -56,7 +56,7 @@
     {
       "parameters": {
         "method": "GET",
-        "url": "=http://host.docker.internal:5000/api/npcs/{{ $json.id }}",
+        "url": "=http://ghosts-api:5000/api/npcs/{{ $json.id }}",
         "authentication": "none",
         "options": {}
       },
@@ -136,7 +136,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "=http://host.docker.internal:5000/api/npcs/{{ $json.npcId }}/activity?activityType=SocialMediaPost&detail={{ encodeURIComponent($json.tweetText) }}",
+        "url": "=http://ghosts-api:5000/api/npcs/{{ $json.npcId }}/activity?activityType=SocialMediaPost&detail={{ encodeURIComponent($json.tweetText) }}",
         "authentication": "none",
         "options": {}
       },

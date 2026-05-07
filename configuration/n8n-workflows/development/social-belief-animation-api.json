@@ -21,7 +21,7 @@
     {
       "parameters": {
         "method": "GET",
-        "url": "http://host.docker.internal:5000/api/npcs/list",
+        "url": "http://ghosts-api:5000/api/npcs/list",
         "authentication": "none",
         "options": {}
       },
@@ -56,7 +56,7 @@
     {
       "parameters": {
         "method": "GET",
-        "url": "=http://host.docker.internal:5000/api/npcs/{{ $json.id }}/beliefs",
+        "url": "=http://ghosts-api:5000/api/npcs/{{ $json.id }}/beliefs",
         "authentication": "none",
         "options": {}
       },
@@ -80,7 +80,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "=http://host.docker.internal:5000/api/npcs/{{ $json.npcId }}/beliefs",
+        "url": "=http://ghosts-api:5000/api/npcs/{{ $json.npcId }}/beliefs",
         "authentication": "none",
         "sendBody": true,
         "specifyBody": "json",
