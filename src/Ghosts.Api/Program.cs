@@ -152,6 +152,7 @@ public class Program
         builder.Services.AddSingleton<IBackgroundQueue, BackgroundQueue>();
         builder.Services.AddSingleton<IHostedService, QueueSyncService>();
         builder.Services.AddSingleton<IManageableHostedService, AnimationsManager>();
+        builder.Services.AddHostedService<ExecutionWorkflowScheduler>();
 
         // Configure controllers with JSON serialization and custom formatters
         builder.Services.AddControllers(options => { options.OutputFormatters.Add(new MarkdownOutputFormatter()); })

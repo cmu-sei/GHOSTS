@@ -8,17 +8,17 @@ services:
     ports:
       - "4200:80"
     environment:
-      # API_URL must be reachable by the browser, not by Docker — use the host's address
-      API_URL: ${WEB_API_URL:-http://host.docker.internal:5000/api}
-      N8N_API_URL: ${WEB_N8N_API_URL:-http://host.docker.internal:5678}
-      GRAFANA_URL: ${WEB_GRAFANA_URL:-http://host.docker.internal:3000}
+      # API_URL must be reachable by the browser, not by Docker — use localhost since ports are mapped to the host
+      API_URL: ${WEB_API_URL:-http://localhost:5000/api}
+      N8N_API_URL: ${WEB_N8N_API_URL:-http://localhost:5678}
+      GRAFANA_URL: ${WEB_GRAFANA_URL:-http://localhost:3000}
   ghosts-postgres:
     image: postgres:16.8
     container_name: ghosts-postgres
     environment:
       POSTGRES_DB: ghosts
       POSTGRES_USER: ghosts
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-scotty@1}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-Scotty@@1!}
     volumes:
       - ghosts-postgres-data:/var/lib/postgresql/data
     logging:
@@ -57,9 +57,33 @@ services:
     environment:
       - N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE=true
       - N8N_SECURE_COOKIE=false
+      - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=false
+      - N8N_DIAGNOSTICS_ENABLED=false
     volumes:
-      - ./n8n_data:/home/node/.n8n
+      - ghosts-n8n-data:/home/node/.n8n
+      - ../../configuration/n8n-workflows:/bootstrap/workflows:ro
+      - ../../configuration/n8n-bootstrap/credentials:/bootstrap/credentials:ro
     restart: unless-stopped
+
+  ghosts-n8n-provisioner:
+    image: docker.n8n.io/n8nio/n8n:latest
+    container_name: ghosts-n8n-provisioner
+    depends_on:
+      ghosts-n8n:
+        condition: service_started
+    entrypoint: ["/bin/sh", "/scripts/provision-n8n.sh"]
+    environment:
+      - N8N_HOST=ghosts-n8n
+      - N8N_OWNER_EMAIL=${N8N_OWNER_EMAIL:-admin@ghosts.local}
+      - N8N_OWNER_FIRST_NAME=${N8N_OWNER_FIRST_NAME:-GHOSTS}
+      - N8N_OWNER_LAST_NAME=${N8N_OWNER_LAST_NAME:-Admin}
+      - N8N_OWNER_PASSWORD=${N8N_OWNER_PASSWORD:-Ghosts@@1!}
+    volumes:
+      - ghosts-n8n-data:/home/node/.n8n
+      - ../../configuration/n8n-workflows:/bootstrap/workflows:ro
+      - ../../configuration/n8n-bootstrap/credentials:/bootstrap/credentials:ro
+      - ../../configuration/n8n-bootstrap/scripts:/scripts:ro
+    restart: "no"
 
   ghosts-grafana:
     image: grafana/grafana
@@ -85,4 +109,5 @@ services:
 
 volumes:
   ghosts-postgres-data:
+  ghosts-n8n-data:
   ghosts-grafana-data:

@@ -44,7 +44,7 @@
   </div>
   }
 
-    <mat-tab-group>
+    <mat-tab-group [selectedIndex]="selectedTabIndex" (selectedIndexChange)="onTabChanged($event)">
       <!-- Scenario Parameters Tab -->
       <mat-tab label="Scenario Parameters">
         <div class="content-card">
@@ -437,7 +437,7 @@
                 <th mat-header-cell *matHeaderCellDef>Assigned</th>
                 <td mat-cell *matCellDef="let element">
                   <mat-form-field class="select-field">
-                    <mat-select [(ngModel)]="element.assigned">
+                    <mat-select [(ngModel)]="element.assigned" (selectionChange)="onTimelineFieldChanged()">
                       <mat-option *ngFor="let role of cellRoles" [value]="role">{{ role }}</mat-option>
                     </mat-select>
                   </mat-form-field>
@@ -450,6 +450,24 @@
                 <td mat-cell *matCellDef="let element">
                   <mat-form-field class="table-input-field">
                     <input matInput type="text" [(ngModel)]="element.description" placeholder="Event description">
+                  </mat-form-field>
+                </td>
+              </ng-container>
+
+              <!-- Execution Type Column -->
+              <ng-container matColumnDef="executionType">
+                <th mat-header-cell *matHeaderCellDef>Execution</th>
+                <td mat-cell *matCellDef="let element">
+                  <mat-form-field class="select-field">
+                    <mat-select [(ngModel)]="element.executionType" (selectionChange)="onExecutionTypeChanged(element)">
+                      <mat-option *ngFor="let t of executionTypes" [value]="t.value">{{ t.label }}</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                  <mat-form-field *ngIf="element.executionType === 'workflow'" class="select-field" style="margin-top: 16px;">
+                    <mat-label>Workflow</mat-label>
+                    <mat-select [(ngModel)]="element.workflowId" (selectionChange)="onExecutionTypeChanged(element)">
+                      <mat-option *ngFor="let wf of availableWorkflows()" [value]="wf.id">{{ wf.name }}</mat-option>
+                    </mat-select>
                   </mat-form-field>
                 </td>
               </ng-container>
@@ -471,7 +489,7 @@
                 <th mat-header-cell *matHeaderCellDef>Status</th>
                 <td mat-cell *matCellDef="let element">
                   <mat-form-field class="select-field">
-                    <mat-select [(ngModel)]="element.status">
+                    <mat-select [(ngModel)]="element.status" (selectionChange)="onTimelineFieldChanged()">
                       <mat-option *ngFor="let status of eventStatuses" [value]="status">{{ status }}</mat-option>
                     </mat-select>
                   </mat-form-field>

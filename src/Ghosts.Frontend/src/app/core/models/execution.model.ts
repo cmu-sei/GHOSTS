@@ -73,6 +73,8 @@ export interface CreateExecutionEventRequest {
   severity?: string;
 }
 
+export type TriggerKind = 'PointInTime' | 'Scheduled' | 'Triggered';
+
 export interface ExecutionTimelineItem {
   id: number;
   executionId: number;
@@ -82,12 +84,18 @@ export interface ExecutionTimelineItem {
   assigned: string;
   description: string;
   status: TimelineItemStatus;
-  automationKind: 'Manual' | 'MachineUpdate';
+  automationKind: 'Manual' | 'Workflow' | 'MachineUpdate';
+  workflowId?: string;
   completedBy?: string;
   notes?: string;
   resultData: string;
   createdAt: string;
   completedAt?: string;
+  triggerKind: TriggerKind;
+  schedule?: string;
+  triggerCondition?: string;
+  lastFiredAt?: string;
+  fireCount: number;
 }
 
 export type TimelineItemStatus =

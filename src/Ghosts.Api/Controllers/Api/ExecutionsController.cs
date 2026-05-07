@@ -524,11 +524,17 @@ public class ExecutionsController : ControllerBase
             item.Description,
             item.Status,
             item.AutomationKind,
+            item.WorkflowId,
             item.CompletedBy,
             item.Notes,
             item.ResultData,
             item.CreatedAt,
-            item.CompletedAt
+            item.CompletedAt,
+            item.TriggerKind.ToString(),
+            item.Schedule,
+            item.TriggerCondition,
+            item.LastFiredAt,
+            item.FireCount
         );
     }
 }

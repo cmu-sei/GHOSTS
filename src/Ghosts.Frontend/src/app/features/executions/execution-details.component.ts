@@ -13,12 +13,14 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatChipsModule } from '@angular/material/chips';
 import { ExecutionService } from '../../core/services/execution.service';
 import { ExecutionHubService, ExecutionHubMessage } from '../../core/services/execution-hub.service';
+import { N8nWorkflowService } from '../../core/services/n8n-workflow.service';
 import {
   Execution,
   ExecutionEvent,
   ExecutionMetricSnapshot,
   ExecutionTimelineItem,
 } from '../../core/models/execution.model';
+import { N8nWorkflow } from '../../core/models';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -44,6 +46,7 @@ import { Subscription } from 'rxjs';
 export class ExecutionDetailsComponent implements OnInit, OnDestroy {
   private readonly executionService = inject(ExecutionService);
   private readonly executionHub = inject(ExecutionHubService);
+  private readonly n8nWorkflowService = inject(N8nWorkflowService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly snackBar = inject(MatSnackBar);
@@ -52,6 +55,7 @@ export class ExecutionDetailsComponent implements OnInit, OnDestroy {
   events = signal<ExecutionEvent[]>([]);
   metrics = signal<ExecutionMetricSnapshot[]>([]);
   timelineItems = signal<ExecutionTimelineItem[]>([]);
+  workflows = signal<N8nWorkflow[]>([]);
   loading = signal(false);
 
   // Manual completion dialog state
@@ -74,6 +78,7 @@ export class ExecutionDetailsComponent implements OnInit, OnDestroy {
       failed: items.filter(i => i.status === 'Failed').length,
       skipped: items.filter(i => i.status === 'Skipped').length,
       manual: items.filter(i => i.automationKind === 'Manual').length,
+      workflow: items.filter(i => i.automationKind === 'Workflow').length,
       automated: items.filter(i => i.automationKind === 'MachineUpdate').length,
     };
   });
@@ -84,6 +89,10 @@ export class ExecutionDetailsComponent implements OnInit, OnDestroy {
       this.loadAll();
       this.connectWebSocket();
     }
+    this.n8nWorkflowService.getActiveWorkflows().subscribe({
+      next: (wfs) => this.workflows.set(wfs),
+      error: () => this.workflows.set([]),
+    });
   }
 
   ngOnDestroy(): void {
@@ -365,5 +374,11 @@ export class ExecutionDetailsComponent implements OnInit, OnDestroy {
 
   isItemTerminal(status: string): boolean {
     return ['Completed', 'Failed', 'Skipped'].includes(status);
+  }
+
+  getWorkflowName(workflowId?: string): string {
+    if (!workflowId) return 'Workflow';
+    const wf = this.workflows().find(w => w.id === workflowId);
+    return wf ? wf.name : workflowId;
   }
 }

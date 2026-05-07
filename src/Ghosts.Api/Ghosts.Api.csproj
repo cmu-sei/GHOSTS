@@ -18,6 +18,7 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
+
   <ItemGroup>
     <PackageReference Include="ClosedXML" Version="0.105.0" />
     <PackageReference Include="DocumentFormat.OpenXml" Version="3.5.1" />
@@ -65,6 +66,7 @@
 
   <ItemGroup>
     <Content Remove="wwwroot\lib\fontawesome\svgs\**\*.svg" />
+    <Content Remove="wwwroot\flags\**\*.svg" />
   </ItemGroup>
 
   <ItemGroup>

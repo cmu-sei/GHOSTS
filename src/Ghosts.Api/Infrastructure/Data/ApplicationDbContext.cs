@@ -321,6 +321,21 @@ namespace Ghosts.Api.Infrastructure.Data
                 .Property(e => e.ObjectiveIds)
                 .HasColumnName("objective_ids");
 
+            modelBuilder.Entity<ScenarioTimelineEvent>()
+                .Property(e => e.TriggerKind)
+                .HasConversion<string>()
+                .HasDefaultValue(TriggerKind.PointInTime);
+
+            modelBuilder.Entity<ScenarioTimelineEvent>()
+                .Property(e => e.ExecutionType)
+                .HasConversion<string>()
+                .HasDefaultValue(ExecutionType.Manual);
+
+            modelBuilder.Entity<ExecutionTimelineItem>()
+                .Property(e => e.TriggerKind)
+                .HasConversion<string>()
+                .HasDefaultValue(TriggerKind.PointInTime);
+
             // ── Scenario Builder relationships ──
 
             // Scenario → Sources

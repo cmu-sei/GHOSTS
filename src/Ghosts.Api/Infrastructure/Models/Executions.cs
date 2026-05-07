@@ -214,12 +214,19 @@ public class ExecutionTimelineItem
     public string Assigned { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public string Status { get; set; } = "Pending"; // Pending, Queued, Deployed, Completed, Failed, Skipped
-    public string AutomationKind { get; set; } = "Manual"; // Manual, MachineUpdate
+    public string AutomationKind { get; set; } = "Manual"; // Manual, Workflow, MachineUpdate
+    public string? WorkflowId { get; set; }
     public string? CompletedBy { get; set; }
     public string? Notes { get; set; }
     public string ResultData { get; set; } = "{}";
     public DateTime CreatedAt { get; set; }
     public DateTime? CompletedAt { get; set; }
+
+    public TriggerKind TriggerKind { get; set; } = TriggerKind.PointInTime;
+    public string? Schedule { get; set; }
+    public string? TriggerCondition { get; set; }
+    public DateTime? LastFiredAt { get; set; }
+    public int FireCount { get; set; }
 
     public Execution Execution { get; set; } = null!;
 }
@@ -306,11 +313,17 @@ public record ExecutionTimelineItemDto(
     string Description,
     string Status,
     string AutomationKind,
+    string? WorkflowId,
     string? CompletedBy,
     string? Notes,
     string ResultData,
     DateTime CreatedAt,
-    DateTime? CompletedAt
+    DateTime? CompletedAt,
+    string TriggerKind,
+    string? Schedule,
+    string? TriggerCondition,
+    DateTime? LastFiredAt,
+    int FireCount
 );
 
 public record CompleteTimelineItemDto(

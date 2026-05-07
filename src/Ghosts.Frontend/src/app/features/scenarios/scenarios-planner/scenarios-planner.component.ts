@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -13,8 +13,8 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { ChangeDetectionStrategy } from '@angular/core';
-import { ScenarioService, ObjectiveService } from '../../../core/services';
-import { CreateScenario, ScenarioTimelineEvent, Scenario, Objective } from '../../../core/models';
+import { ScenarioService, ScenarioHubService, ObjectiveService, N8nWorkflowService } from '../../../core/services';
+import { CreateScenario, ScenarioTimelineEvent, Scenario, Objective, N8nWorkflow } from '../../../core/models';
 
 @Component({
   selector: 'app-scenarios-planner',
@@ -38,9 +38,11 @@ import { CreateScenario, ScenarioTimelineEvent, Scenario, Objective } from '../.
   templateUrl: './scenarios-planner.component.html',
   styleUrls: ['./scenarios-planner.component.scss']
 })
-export class ScenariosPlannerComponent implements OnInit {
+export class ScenariosPlannerComponent implements OnInit, OnDestroy {
   private readonly scenarioService = inject(ScenarioService);
+  private readonly scenarioHub = inject(ScenarioHubService);
   private readonly objectiveService = inject(ObjectiveService);
+  private readonly n8nWorkflowService = inject(N8nWorkflowService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
 
@@ -48,6 +50,9 @@ export class ScenariosPlannerComponent implements OnInit {
   protected isEditMode = false;
   protected loading = signal(false);
   protected builderStatus = signal<string>('None');
+  protected selectedTabIndex = 0;
+
+  private readonly tabSlugs = ['parameters', 'technical-environment', 'simulation-mechanics', 'timeline'];
 
   protected scenario: CreateScenario = {
     name: '',
@@ -106,8 +111,13 @@ export class ScenariosPlannerComponent implements OnInit {
 
   protected readonly cellRoles = ['None', 'White Cell', 'Red Team', 'Blue Team', 'Green Cell'];
   protected readonly eventStatuses = ['Pending', 'Active', 'Complete'];
-  protected readonly timelineColumns = ['drag', 'time', 'number', 'assigned', 'description', 'objective', 'status', 'actions'];
+  protected readonly executionTypes: {value: string; label: string}[] = [
+    { value: 'manual', label: 'Manual' },
+    { value: 'workflow', label: 'Workflow' }
+  ];
+  protected readonly timelineColumns = ['drag', 'time', 'number', 'assigned', 'description', 'executionType', 'objective', 'status', 'actions'];
   protected scenarioObjectives = signal<Objective[]>([]);
+  protected availableWorkflows = signal<N8nWorkflow[]>([]);
 
   protected readonly availablePlatforms = {
     websites: [
@@ -153,11 +163,37 @@ export class ScenariosPlannerComponent implements OnInit {
       if (id && id !== 'new') {
         this.scenarioId = +id;
         this.isEditMode = true;
+        this.scenarioHub.connect(this.scenarioId);
         this.loadScenario(this.scenarioId);
       } else {
         this.loadAllObjectives();
       }
+
+      const tab = params['tab'];
+      if (tab) {
+        const idx = this.tabSlugs.indexOf(tab);
+        if (idx >= 0) this.selectedTabIndex = idx;
+      }
     });
+    this.loadWorkflows();
+  }
+
+  ngOnDestroy(): void {
+    this.scenarioHub.disconnect();
+  }
+
+  private loadWorkflows(): void {
+    this.n8nWorkflowService.getActiveWorkflows().subscribe({
+      next: (workflows) => this.availableWorkflows.set(workflows),
+      error: () => this.availableWorkflows.set([])
+    });
+  }
+
+  protected onTabChanged(index: number): void {
+    this.selectedTabIndex = index;
+    const slug = this.tabSlugs[index] || this.tabSlugs[0];
+    const id = this.scenarioId ?? 'new';
+    this.router.navigate(['/scenarios', id, slug], { replaceUrl: true });
   }
 
   private loadAllObjectives(): void {
@@ -202,11 +238,13 @@ export class ScenariosPlannerComponent implements OnInit {
           } as any));
         }
 
-        // Ensure objectiveIds are always arrays
+        // Normalize timeline event fields for mat-select binding
         if (this.scenario.timeline?.events) {
           this.scenario.timeline.events = this.scenario.timeline.events.map(e => ({
             ...e,
-            objectiveIds: e.objectiveIds ?? []
+            objectiveIds: e.objectiveIds ?? [],
+            executionType: (e.executionType || 'manual').toLowerCase() as any,
+            workflowId: e.workflowId ?? undefined
           }));
         }
 
@@ -295,7 +333,8 @@ export class ScenariosPlannerComponent implements OnInit {
       assigned: 'White Cell',
       description: 'New event',
       status: 'Pending',
-      objectiveIds: []
+      objectiveIds: [],
+      executionType: 'manual'
     };
     this.scenario.timeline!.events = [...this.scenario.timeline!.events, newEvent];
   }
@@ -399,14 +438,23 @@ export class ScenariosPlannerComponent implements OnInit {
     }
   }
 
-  protected onObjectivesChanged(): void {
-    if (this.isEditMode && this.scenarioId) {
-      this.autoSaveScenario();
+  protected onExecutionTypeChanged(element: ScenarioTimelineEvent): void {
+    if (element.executionType !== 'workflow') {
+      element.workflowId = undefined;
     }
+    this.autoSaveScenario();
+  }
+
+  protected onObjectivesChanged(): void {
+    this.autoSaveScenario();
+  }
+
+  protected onTimelineFieldChanged(): void {
+    this.autoSaveScenario();
   }
 
   private autoSaveScenario(): void {
-    if (!this.scenarioId) return;
+    if (!this.isEditMode || !this.scenarioId) return;
     const scenarioToSave = { ...this.scenario };
     if (scenarioToSave.scenarioParameters) {
       scenarioToSave.scenarioParameters.threatActors = scenarioToSave.scenarioParameters.threatActors.map(actor => {
@@ -420,9 +468,7 @@ export class ScenariosPlannerComponent implements OnInit {
       });
     }
     scenarioToSave.gameMechanics = scenarioToSave.simulationMechanics;
-    this.scenarioService.updateScenario(this.scenarioId, scenarioToSave).subscribe({
-      error: (error) => console.error('Auto-save failed', error)
-    });
+    this.scenarioHub.updateScenario(this.scenarioId, scenarioToSave);
   }
 
   protected exportScenario(): void {

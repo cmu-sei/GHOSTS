@@ -166,7 +166,9 @@ namespace Ghosts.Api.Infrastructure.Services
 
             foreach (var evt in scenarioEvents)
             {
-                var automationKind = hasAssignments ? "MachineUpdate" : "Manual";
+                var automationKind = evt.ExecutionType == ExecutionType.Workflow
+                    ? "Workflow"
+                    : hasAssignments ? "MachineUpdate" : "Manual";
 
                 execution.TimelineItems.Add(new ExecutionTimelineItem
                 {
@@ -177,6 +179,10 @@ namespace Ghosts.Api.Infrastructure.Services
                     Description = evt.Description,
                     Status = "Pending",
                     AutomationKind = automationKind,
+                    WorkflowId = evt.WorkflowId,
+                    TriggerKind = evt.TriggerKind,
+                    Schedule = evt.Schedule,
+                    TriggerCondition = evt.TriggerCondition,
                     CreatedAt = DateTime.UtcNow
                 });
             }
@@ -327,6 +333,10 @@ namespace Ghosts.Api.Infrastructure.Services
                 {
                     item.Status = deployedCount > 0 ? "Deployed" : "Queued";
                 }
+                else if (item.AutomationKind == "Workflow" && item.Status == "Pending")
+                {
+                    item.Status = "Queued";
+                }
                 // Manual items stay Pending
             }
 
@@ -353,6 +363,7 @@ namespace Ghosts.Api.Infrastructure.Services
                     deployErrors,
                     timelineItemsTotal = timelineItems.Count,
                     automatedItems = timelineItems.Count(ti => ti.AutomationKind == "MachineUpdate"),
+                    workflowItems = timelineItems.Count(ti => ti.AutomationKind == "Workflow"),
                     manualItems = timelineItems.Count(ti => ti.AutomationKind == "Manual")
                 }),
                 Severity = deployErrors.Count > 0 ? "Warning" : "Info"
@@ -385,11 +396,17 @@ namespace Ghosts.Api.Infrastructure.Services
             int executionId,
             List<ScenarioTimelineEvent> scenarioEvents)
         {
-            var ghostsEvents = new List<TimelineEvent>();
+            var handlers = new List<TimelineHandler>();
 
-            foreach (var evt in scenarioEvents)
+            // Group events by trigger kind to produce appropriate handler configurations
+            var pointInTimeEvents = scenarioEvents.Where(e => e.TriggerKind == TriggerKind.PointInTime).ToList();
+            var scheduledEvents = scenarioEvents.Where(e => e.TriggerKind == TriggerKind.Scheduled).ToList();
+            var triggeredEvents = scenarioEvents.Where(e => e.TriggerKind == TriggerKind.Triggered).ToList();
+
+            // Point-in-time events: one-shot handler with delay-based ordering
+            if (pointInTimeEvents.Count > 0)
             {
-                ghostsEvents.Add(new TimelineEvent
+                var ghostsEvents = pointInTimeEvents.Select(evt => new TimelineEvent
                 {
                     Command = "npc-scenario-action",
                     CommandArgs = new List<object>
@@ -400,33 +417,91 @@ namespace Ghosts.Api.Infrastructure.Services
                     },
                     DelayBefore = ParseTimeOffsetMs(evt.Time),
                     DelayAfter = 0
-                });
+                }).ToList();
+
+                var handler = new TimelineHandler
+                {
+                    HandlerType = HandlerType.NpcSystem,
+                    Initial = $"scenario-execution:{executionId}:npc:{npcId}:point-in-time"
+                };
+                handler.TimeLineEvents.AddRange(ghostsEvents);
+                handlers.Add(handler);
             }
 
-            // Ensure at least one event
-            if (ghostsEvents.Count == 0)
+            // Scheduled events: looping handler with cron/interval schedule
+            foreach (var evt in scheduledEvents)
             {
-                ghostsEvents.Add(new TimelineEvent
+                var handler = new TimelineHandler
+                {
+                    HandlerType = HandlerType.NpcSystem,
+                    Initial = $"scenario-execution:{executionId}:npc:{npcId}:scheduled:{evt.Number}",
+                    Loop = true,
+                    ScheduleType = TimelineHandler.TimelineScheduleType.Cron,
+                    Schedule = evt.Schedule
+                };
+                handler.TimeLineEvents.Add(new TimelineEvent
+                {
+                    Command = "npc-scenario-action",
+                    CommandArgs = new List<object>
+                    {
+                        $"execution:{executionId}",
+                        $"event:{evt.Number}",
+                        evt.Description ?? string.Empty
+                    },
+                    DelayBefore = 0,
+                    DelayAfter = 0
+                });
+                handlers.Add(handler);
+            }
+
+            // Triggered events: handler with trigger condition in args (client evaluates)
+            foreach (var evt in triggeredEvents)
+            {
+                var handler = new TimelineHandler
+                {
+                    HandlerType = HandlerType.NpcSystem,
+                    Initial = $"scenario-execution:{executionId}:npc:{npcId}:triggered:{evt.Number}"
+                };
+                handler.HandlerArgs["triggerCondition"] = evt.TriggerCondition ?? string.Empty;
+                handler.TimeLineEvents.Add(new TimelineEvent
+                {
+                    Command = "npc-scenario-action",
+                    CommandArgs = new List<object>
+                    {
+                        $"execution:{executionId}",
+                        $"event:{evt.Number}",
+                        $"trigger:{evt.TriggerCondition}",
+                        evt.Description ?? string.Empty
+                    },
+                    DelayBefore = ParseTimeOffsetMs(evt.Time),
+                    DelayAfter = 0
+                });
+                handlers.Add(handler);
+            }
+
+            // Ensure at least one handler
+            if (handlers.Count == 0)
+            {
+                var handler = new TimelineHandler
+                {
+                    HandlerType = HandlerType.NpcSystem,
+                    Initial = $"scenario-execution:{executionId}:npc:{npcId}"
+                };
+                handler.TimeLineEvents.Add(new TimelineEvent
                 {
                     Command = "npc-scenario-action",
                     CommandArgs = new List<object> { $"execution:{executionId}", "event:1", "default" },
                     DelayBefore = 0,
                     DelayAfter = 60000
                 });
+                handlers.Add(handler);
             }
-
-            var handler = new TimelineHandler
-            {
-                HandlerType = HandlerType.NpcSystem,
-                Initial = $"scenario-execution:{executionId}:npc:{npcId}"
-            };
-            handler.TimeLineEvents.AddRange(ghostsEvents);
 
             return new Timeline
             {
                 Id = Guid.NewGuid(),
                 Status = Timeline.TimelineStatus.Run,
-                TimeLineHandlers = new List<TimelineHandler> { handler }
+                TimeLineHandlers = handlers
             };
         }
 

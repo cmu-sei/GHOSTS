@@ -86,7 +86,7 @@
             }
           </mat-chip-set>
           <div class="item-type-info small text-muted mt-1">
-            {{ itemCounts().automated }} automated &middot; {{ itemCounts().manual }} manual
+            {{ itemCounts().workflow }} workflow &middot; {{ itemCounts().automated }} automated &middot; {{ itemCounts().manual }} manual
           </div>
         </div>
 
@@ -134,9 +134,15 @@
                       }
                     </td>
                     <td class="py-3">
-                      <span class="badge" [ngClass]="item.automationKind === 'Manual' ? 'bg-info' : 'bg-primary'">
-                        {{ item.automationKind === 'Manual' ? 'Manual' : 'Auto' }}
+                      @if (item.automationKind === 'Workflow') {
+                      <span class="badge bg-success">
+                        <i class="fas fa-project-diagram"></i> {{ getWorkflowName(item.workflowId) }}
                       </span>
+                      } @else if (item.automationKind === 'MachineUpdate') {
+                      <span class="badge bg-primary">Auto</span>
+                      } @else {
+                      <span class="badge bg-info">Manual</span>
+                      }
                     </td>
                     <td class="py-3">
                       <span class="badge rounded-pill" [ngClass]="getItemStatusClass(item.status)">

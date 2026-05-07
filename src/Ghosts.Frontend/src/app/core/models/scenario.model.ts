@@ -90,6 +90,10 @@ export interface ScenarioTimeline {
   events: ScenarioTimelineEvent[];
 }
 
+export type TriggerKind = 'PointInTime' | 'Scheduled' | 'Triggered';
+
+export type ExecutionType = 'manual' | 'workflow';
+
 export interface ScenarioTimelineEvent {
   time: string;
   number: number;
@@ -97,6 +101,11 @@ export interface ScenarioTimelineEvent {
   description: string;
   status: string;
   objectiveIds?: number[];
+  triggerKind?: TriggerKind;
+  schedule?: string;
+  triggerCondition?: string;
+  executionType?: ExecutionType;
+  workflowId?: string;
 }
 
 export interface CreateScenario {

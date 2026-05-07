@@ -25,6 +25,9 @@ namespace Ghosts.Api.Infrastructure.Data
             // Ensure NPC tables have execution_id column for per-execution filtering
             await EnsureNpcExecutionIdColumns(context, logger);
 
+            // Ensure execution_timeline_items has workflow_id column
+            await EnsureExecutionTimelineWorkflowColumn(context, logger);
+
             // Import MITRE ATT&CK data if not already loaded
             await ImportMitreAttackData(context, logger, serviceProvider);
 
@@ -139,6 +142,36 @@ namespace Ghosts.Api.Infrastructure.Data
             catch (Exception ex)
             {
                 logger.LogWarning(ex, "Could not verify/migrate NPC execution_id columns");
+            }
+        }
+
+        private static async Task EnsureExecutionTimelineWorkflowColumn(ApplicationDbContext context, ILogger<DbInitializer> logger)
+        {
+            try
+            {
+                var connection = context.Database.GetDbConnection();
+                if (connection.State != System.Data.ConnectionState.Open)
+                    await connection.OpenAsync();
+
+                using var cmd = connection.CreateCommand();
+                cmd.CommandText = @"
+                    DO $$
+                    BEGIN
+                        IF NOT EXISTS (
+                            SELECT 1 FROM information_schema.columns
+                            WHERE table_name = 'execution_timeline_items' AND column_name = 'workflowid'
+                        ) THEN
+                            ALTER TABLE execution_timeline_items ADD COLUMN workflowid TEXT;
+                            RAISE NOTICE 'Added workflowid column to execution_timeline_items';
+                        END IF;
+                    END $$;
+                ";
+                await cmd.ExecuteNonQueryAsync();
+                logger.LogInformation("Verified execution_timeline_items.workflowid column exists");
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Could not verify/add workflowid column to execution_timeline_items");
             }
         }
 

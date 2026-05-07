@@ -1,0 +1,29 @@
+<Project>
+  <!-- Workaround: Docker overlayfs in devcontainers can report the same inode twice,
+       causing NETSDK1022 duplicate-item errors. Deduplicate before the SDK checks. -->
+  <Target Name="DeduplicateDefaultItems" BeforeTargets="CheckForDuplicateItems">
+    <RemoveDuplicates Inputs="@(Compile)">
+      <Output TaskParameter="Filtered" ItemName="_UniqueCompile" />
+    </RemoveDuplicates>
+    <ItemGroup>
+      <Compile Remove="@(Compile)" />
+      <Compile Include="@(_UniqueCompile)" />
+    </ItemGroup>
+
+    <RemoveDuplicates Inputs="@(Content)">
+      <Output TaskParameter="Filtered" ItemName="_UniqueContent" />
+    </RemoveDuplicates>
+    <ItemGroup>
+      <Content Remove="@(Content)" />
+      <Content Include="@(_UniqueContent)" />
+    </ItemGroup>
+
+    <RemoveDuplicates Inputs="@(EmbeddedResource)">
+      <Output TaskParameter="Filtered" ItemName="_UniqueEmbeddedResource" />
+    </RemoveDuplicates>
+    <ItemGroup>
+      <EmbeddedResource Remove="@(EmbeddedResource)" />
+      <EmbeddedResource Include="@(_UniqueEmbeddedResource)" />
+    </ItemGroup>
+  </Target>
+</Project>

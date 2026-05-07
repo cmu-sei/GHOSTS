@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
 
-var basePassword = "Ranger@@1!";
+var basePassword = "Scotty@@1!";
 var builder = DistributedApplication.CreateBuilder(args);
 
 var postgresUsername = builder.AddParameter("PostgresUsername", "ghosts", false);
@@ -8,7 +8,6 @@ var postgresPassword = builder.AddParameter("PostgresPassword", basePassword, fa
 
 var postgres = builder.AddPostgres("postgres", userName: postgresUsername, password: postgresPassword)
     .WithDataVolume()
-    .WithLifetime(ContainerLifetime.Persistent)
     .WithContainerName("ghosts-postgres")
     .WithPgAdmin(pgAdmin =>
     {
@@ -69,7 +68,6 @@ var n8n = builder.AddContainer("n8n", "docker.n8n.io/n8nio/n8n")
     .WithBindMount("n8n_data", "/home/node/.n8n", isReadOnly: false)
     .WithBindMount("../../configuration/n8n-workflows", "/bootstrap/workflows", isReadOnly: true)
     .WithBindMount("../../configuration/n8n-bootstrap/scripts", "/bootstrap/scripts", isReadOnly: true)
-    .WithLifetime(ContainerLifetime.Persistent)
     .WaitFor(postgres);
 
 // Provisioner sidecar: creates owner account and imports workflows on first boot
@@ -96,17 +94,12 @@ var n8nProvisioner = builder.AddContainer("n8n-provisioner", "docker.n8n.io/n8ni
 // Add service discovery so n8n can reach the API
 n8n.WithReference(api);
 
-// Wire API to reach n8n for workflow execution
-api.WithEnvironment(ctx =>
-    {
-        ctx.EnvironmentVariables["N8N_API_URL"] = n8n.GetEndpoint("http").Url + "/api/v1/workflows";
-    })
+api.WithEnvironment("N8N_API_URL", "http://localhost:5678/api/v1/workflows")
     .WithEnvironment("N8N_API_KEY_FILE", Path.GetFullPath("n8n_data/.api_key"));
 
 var grafana = builder.AddContainer("grafana", "grafana/grafana")
     .WithHttpEndpoint(port: 3000, targetPort: 3000, name: "http")
     .WithContainerName("grafana")
-    .WithLifetime(ContainerLifetime.Persistent)
     .WithBindMount("../../configuration/grafana/datasources", "/etc/grafana/provisioning/datasources", isReadOnly: true)
     .WithBindMount("../../configuration/grafana/dashboards", "/etc/grafana/provisioning/dashboards", isReadOnly: true)
     .WithVolume("grafana-data", "/var/lib/grafana")

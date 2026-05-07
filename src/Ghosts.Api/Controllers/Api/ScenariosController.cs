@@ -198,7 +198,12 @@ public class ScenariosController : ControllerBase
             scenario.ScenarioTimeline != null ? new TimelineDto(
                 scenario.ScenarioTimeline.ExerciseDuration,
                 scenario.ScenarioTimeline.ScenarioTimelineEvents.Select(e => new TimelineEventDto(e.Time, e.Number, e.Assigned, e.Description, e.Status,
-                    !string.IsNullOrEmpty(e.ObjectiveIds) ? JsonSerializer.Deserialize<List<int>>(e.ObjectiveIds) : new List<int>()
+                    !string.IsNullOrEmpty(e.ObjectiveIds) ? JsonSerializer.Deserialize<List<int>>(e.ObjectiveIds) : new List<int>(),
+                    e.TriggerKind.ToString(),
+                    e.Schedule,
+                    e.TriggerCondition,
+                    e.ExecutionType.ToString().ToLowerInvariant(),
+                    e.WorkflowId
                 )).ToList()
             ) : null,
             scenario.BuilderStatus ?? "None"

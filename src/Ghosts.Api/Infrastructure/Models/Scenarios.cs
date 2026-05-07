@@ -146,6 +146,19 @@ public class ScenarioTimeline
     public ICollection<ScenarioTimelineEvent> ScenarioTimelineEvents { get; set; } = new List<ScenarioTimelineEvent>();
 }
 
+public enum TriggerKind
+{
+    PointInTime,
+    Scheduled,
+    Triggered
+}
+
+public enum ExecutionType
+{
+    Manual,
+    Workflow
+}
+
 [Table("scenario_timeline_events")]
 public class ScenarioTimelineEvent
 {
@@ -157,6 +170,13 @@ public class ScenarioTimelineEvent
     public string Description { get; set; } = string.Empty;
     public string Status { get; set; } = "Pending"; // Pending, Active, Complete
     public string ObjectiveIds { get; set; } // JSON array of objective IDs, e.g. "[1,2,3]"
+
+    public TriggerKind TriggerKind { get; set; } = TriggerKind.PointInTime;
+    public string? Schedule { get; set; } // Cron expression or interval (e.g. "*/5 * * * *", "PT5M")
+    public string? TriggerCondition { get; set; } // Event name or expression (e.g. "OnDetect", "NpcCount > 50")
+
+    public ExecutionType ExecutionType { get; set; } = ExecutionType.Manual;
+    public string? WorkflowId { get; set; }
 
     public ScenarioTimeline Timeline { get; set; }
 }
@@ -251,5 +271,10 @@ public record TimelineEventDto(
     string Assigned,
     string Description,
     string Status,
-    List<int> ObjectiveIds = null
+    List<int> ObjectiveIds = null,
+    string TriggerKind = "PointInTime",
+    string? Schedule = null,
+    string? TriggerCondition = null,
+    string ExecutionType = "Manual",
+    string? WorkflowId = null
 );
