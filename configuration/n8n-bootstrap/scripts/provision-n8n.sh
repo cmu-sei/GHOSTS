@@ -4,30 +4,51 @@ set -e
 SENTINEL="/home/node/.n8n/.bootstrap_complete"
 WORKFLOW_DIR="/bootstrap/workflows"
 CREDENTIAL_DIR="/bootstrap/credentials"
-N8N_URL="http://n8n:5678"
+N8N_HOST="${N8N_HOST:-n8n}"
+N8N_URL="http://${N8N_HOST}:5678"
 
 echo "[provisioner] Starting n8n provisioning..."
 
-# If already provisioned, exit early
-if [ -f "$SENTINEL" ]; then
-  echo "[provisioner] Sentinel exists — already provisioned. Exiting."
-  exit 0
-fi
-
-# Wait for n8n to be reachable
-echo "[provisioner] Waiting for n8n to become reachable..."
+# Wait for n8n REST API to be fully ready (not just healthz)
+echo "[provisioner] Waiting for n8n REST API to become ready..."
 MAX_ATTEMPTS=60
 ATTEMPT=0
-until wget --spider -q "$N8N_URL/healthz" 2>/dev/null; do
+while true; do
   ATTEMPT=$((ATTEMPT + 1))
   if [ "$ATTEMPT" -ge "$MAX_ATTEMPTS" ]; then
-    echo "[provisioner] ERROR: n8n did not become reachable after $MAX_ATTEMPTS attempts."
+    echo "[provisioner] ERROR: n8n REST API did not become ready after $MAX_ATTEMPTS attempts."
     exit 1
   fi
-  echo "[provisioner] Attempt $ATTEMPT/$MAX_ATTEMPTS — waiting 5s..."
+  RESPONSE=$(wget -qO- "$N8N_URL/rest/settings" 2>/dev/null || true)
+  if echo "$RESPONSE" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{JSON.parse(d);process.exit(0)}catch{process.exit(1)}})" 2>/dev/null; then
+    break
+  fi
+  echo "[provisioner] Attempt $ATTEMPT/$MAX_ATTEMPTS — n8n not ready yet, waiting 5s..."
   sleep 5
 done
-echo "[provisioner] n8n is reachable."
+echo "[provisioner] n8n REST API is ready."
+
+# Check actual n8n state — if owner is already configured and sentinel exists, skip
+if [ -f "$SENTINEL" ]; then
+  SETUP_CHECK=$(node -e "
+    const http = require('http');
+    http.get('$N8N_URL/rest/settings', res => {
+      let body='';
+      res.on('data', c => body+=c);
+      res.on('end', () => {
+        const d = JSON.parse(body);
+        const show = d.data ? d.data.userManagement.showSetupOnFirstLoad : d.userManagement.showSetupOnFirstLoad;
+        console.log(show ? 'yes' : 'no');
+      });
+    });
+  " 2>/dev/null || echo "yes")
+  if [ "$SETUP_CHECK" = "no" ]; then
+    echo "[provisioner] Sentinel exists and owner is configured — already provisioned. Exiting."
+    exit 0
+  fi
+  echo "[provisioner] Sentinel exists but n8n needs setup (DB was recreated). Re-provisioning..."
+  rm -f "$SENTINEL"
+fi
 
 # Create owner account via REST API if not already set up
 if [ -n "$N8N_OWNER_EMAIL" ] && [ -n "$N8N_OWNER_PASSWORD" ]; then
@@ -56,7 +77,7 @@ if [ -n "$N8N_OWNER_EMAIL" ] && [ -n "$N8N_OWNER_PASSWORD" ]; then
         password: process.env.N8N_OWNER_PASSWORD
       });
       const req = http.request({
-        hostname: 'n8n', port: 5678, path: '/rest/owner/setup',
+        hostname: process.env.N8N_HOST || 'n8n', port: 5678, path: '/rest/owner/setup',
         method: 'POST',
         headers: {'Content-Type':'application/json','Content-Length':data.length}
       }, res => {
@@ -103,7 +124,7 @@ if [ -d "$WORKFLOW_DIR" ] && ls "$WORKFLOW_DIR"/*.json 1>/dev/null 2>&1; then
       password: process.env.N8N_OWNER_PASSWORD
     });
     const req = http.request({
-      hostname: 'n8n', port: 5678, path: '/rest/login',
+      hostname: process.env.N8N_HOST || 'n8n', port: 5678, path: '/rest/login',
       method: 'POST',
       headers: {'Content-Type':'application/json','Content-Length':data.length}
     }, res => {
@@ -131,7 +152,7 @@ if [ -d "$WORKFLOW_DIR" ] && ls "$WORKFLOW_DIR"/*.json 1>/dev/null 2>&1; then
       const data = JSON.stringify(wf);
       return new Promise((resolve, reject) => {
         const req = http.request({
-          hostname: 'n8n', port: 5678, path: '/rest/workflows',
+          hostname: process.env.N8N_HOST || 'n8n', port: 5678, path: '/rest/workflows',
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -183,7 +204,7 @@ if [ -n "$N8N_OWNER_EMAIL" ] && [ -n "$N8N_OWNER_PASSWORD" ]; then
       password: process.env.N8N_OWNER_PASSWORD
     });
     const req = http.request({
-      hostname: 'n8n', port: 5678, path: '/rest/login',
+      hostname: process.env.N8N_HOST || 'n8n', port: 5678, path: '/rest/login',
       method: 'POST',
       headers: {'Content-Type':'application/json','Content-Length':Buffer.byteLength(loginData)}
     }, res => {
@@ -202,7 +223,7 @@ if [ -n "$N8N_OWNER_EMAIL" ] && [ -n "$N8N_OWNER_PASSWORD" ]; then
         ]
       });
       const req2 = http.request({
-        hostname: 'n8n', port: 5678, path: '/rest/api-keys',
+        hostname: process.env.N8N_HOST || 'n8n', port: 5678, path: '/rest/api-keys',
         method: 'POST',
         headers: {'Content-Type':'application/json','Cookie':session,'Content-Length':Buffer.byteLength(keyData)}
       }, res2 => {
