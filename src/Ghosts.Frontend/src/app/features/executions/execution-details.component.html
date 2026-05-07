@@ -86,7 +86,8 @@
             }
           </mat-chip-set>
           <div class="item-type-info small text-muted mt-1">
-            {{ itemCounts().workflow }} workflow &middot; {{ itemCounts().automated }} automated &middot; {{ itemCounts().manual }} manual
+            {{ itemCounts().workflow }} workflow &middot; {{ itemCounts().automated }} automated &middot; {{
+            itemCounts().manual }} manual
           </div>
         </div>
 
@@ -118,8 +119,7 @@
                 <tbody>
                   @for (item of timelineItems(); track item.id) {
                   <tr [class.table-success]="item.status === 'Completed'"
-                      [class.table-danger]="item.status === 'Failed'"
-                      [class.table-secondary]="item.status === 'Skipped'">
+                    [class.table-danger]="item.status === 'Failed'" [class.table-secondary]="item.status === 'Skipped'">
                     <td class="px-3 py-3 fw-bold">{{ item.number }}</td>
                     <td class="py-3 text-nowrap">{{ item.time }}</td>
                     <td class="py-3">
@@ -157,8 +157,7 @@
                     </td>
                     <td class="py-3">
                       @if (canCompleteItem(item)) {
-                      <button mat-stroked-button color="primary" class="btn-sm"
-                              (click)="openCompletionDialog(item)">
+                      <button mat-stroked-button color="primary" class="btn-sm" (click)="openCompletionDialog(item)">
                         <i class="fas fa-check"></i> Complete
                       </button>
                       }
