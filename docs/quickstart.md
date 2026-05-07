@@ -73,7 +73,7 @@ The compose file uses these defaults, which can be overridden with a `.env` file
 | `WEB_N8N_API_URL` | `http://host.docker.internal:5678` | n8n URL used by the frontend container |
 | `N8N_API_URL` | `http://host.docker.internal:5678/api/v1/workflows` | n8n REST API URL used by the API container |
 | `N8N_API_KEY` | *(empty)* | n8n API key — **required** for workflow scheduling. Generate one in n8n: Settings > API > Create API Key. |
-| `POSTGRES_PASSWORD` | `scotty@1` | PostgreSQL password. **Change this** for any non-local deployment. |
+| `POSTGRES_PASSWORD` | set_me | PostgreSQL password. **Change this** for any non-local deployment. |
 
 ### Managing the Stack
 

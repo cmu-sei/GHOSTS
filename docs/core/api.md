@@ -73,31 +73,9 @@ Set these in a `.env` file alongside `docker-compose.yml` or directly in your co
 | `N8N_API_KEY` | *(empty)* | n8n API key — **required** for workflow scheduling. Generate in n8n: Settings > API > Create API Key. |
 | `WEB_API_URL` | `http://host.docker.internal:5000/api` | GHOSTS API URL served to the frontend container |
 | `WEB_N8N_API_URL` | `http://host.docker.internal:5678` | n8n base URL served to the frontend container |
-| `POSTGRES_PASSWORD` | `scotty@1` | PostgreSQL password. **Change this** for any non-local deployment. |
+| `POSTGRES_PASSWORD` | set_me | PostgreSQL password. **Change this** for any non-local deployment. |
 
 ### appsettings.json (Advanced)
-
-Key settings in `Ghosts.Api/appsettings.json`:
-
-```json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Host=ghosts-postgres;Port=5432;Database=ghosts;User Id=ghosts;Password=scotty@1;"
-  },
-  "ApplicationSettings": {
-    "OfflineAfterMinutes": 30,
-    "MatchMachinesBy": "name",
-    "AnimatorSettings": {
-      "Animations": {
-        "IsEnabled": true
-      }
-    }
-  },
-  "CorsPolicy": {
-    "Origins": ["http://localhost:4200"]
-  }
-}
-```
 
 Override values for production via environment variables or a mounted `appsettings.Production.json`.
 
