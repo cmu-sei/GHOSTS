@@ -8,7 +8,6 @@ var postgresPassword = builder.AddParameter("PostgresPassword", basePassword, fa
 
 var postgres = builder.AddPostgres("postgres", userName: postgresUsername, password: postgresPassword)
     .WithDataVolume()
-    .WithContainerName("ghosts-postgres")
     .WithPgAdmin(pgAdmin =>
     {
         pgAdmin.WithEndpoint("http", endpoint => endpoint.Port = 33000);
@@ -18,14 +17,7 @@ var db = postgres.AddDatabase("ghosts");
 var dbPandora = postgres.AddDatabase("pandora");
 
 var qdrant = builder.AddContainer("qdrant", "qdrant/qdrant")
-    .WithContainerName("qdrant")
     .WithHttpEndpoint(port: 6333, targetPort: 6333, name: "http");
-
-// Workaround: SkiaSharp.NativeAssets.Linux 3.x native lib references FreeType symbols
-// but doesn't declare libfreetype as a NEEDED dependency, so LD_PRELOAD is required on ARM64
-var freetypeLib = RuntimeInformation.OSArchitecture == Architecture.Arm64
-    ? "/lib/aarch64-linux-gnu/libfreetype.so.6"
-    : "";
 
 var facebook = builder.AddProject<Projects.Ghosts_Pandora>("facebook")
     .WaitFor(postgres)
@@ -33,7 +25,6 @@ var facebook = builder.AddProject<Projects.Ghosts_Pandora>("facebook")
     .WithEnvironment("DATABASE_PROVIDER", "PostgreSQL")
     .WithEnvironment("MODE_TYPE", "social")
     .WithEnvironment("DEFAULT_THEME", "facebook")
-    .WithEnvironment("LD_PRELOAD", freetypeLib)
     .WithExternalHttpEndpoints();
 
 var api = builder.AddProject<Projects.Ghosts_Api>("api")
@@ -51,7 +42,7 @@ var n8nOwnerPassword = builder.AddParameter("N8nOwnerPassword", basePassword, fa
 var n8n = builder.AddContainer("n8n", "docker.n8n.io/n8nio/n8n")
     .WithHttpEndpoint(port: 5678, targetPort: 5678, name: "http", isProxied: false)
     .WithEnvironment("DB_TYPE", "postgresdb")
-    .WithEnvironment("DB_POSTGRESDB_HOST", "ghosts-postgres")
+    .WithEnvironment("DB_POSTGRESDB_HOST", "postgres")
     .WithEnvironment("DB_POSTGRESDB_PORT", "5432")
     .WithEnvironment("DB_POSTGRESDB_DATABASE", "n8n")
     .WithEnvironment("DB_POSTGRESDB_USER", postgresUsername)
@@ -64,7 +55,6 @@ var n8n = builder.AddContainer("n8n", "docker.n8n.io/n8nio/n8n")
     .WithEnvironment("N8N_DIAGNOSTICS_ENABLED", "false")
     .WithEnvironment("N8N_PORT", "5678")
     .WithEnvironment("N8N_PROTOCOL", "http")
-    .WithContainerName("n8n")
     .WithBindMount("n8n_data", "/home/node/.n8n", isReadOnly: false)
     .WithBindMount("../../configuration/n8n-workflows", "/bootstrap/workflows", isReadOnly: true)
     .WithBindMount("../../configuration/n8n-bootstrap/scripts", "/bootstrap/scripts", isReadOnly: true)
@@ -73,7 +63,7 @@ var n8n = builder.AddContainer("n8n", "docker.n8n.io/n8nio/n8n")
 // Provisioner sidecar: creates owner account and imports workflows on first boot
 var n8nProvisioner = builder.AddContainer("n8n-provisioner", "docker.n8n.io/n8nio/n8n")
     .WithEnvironment("DB_TYPE", "postgresdb")
-    .WithEnvironment("DB_POSTGRESDB_HOST", "ghosts-postgres")
+    .WithEnvironment("DB_POSTGRESDB_HOST", "postgres")
     .WithEnvironment("DB_POSTGRESDB_PORT", "5432")
     .WithEnvironment("DB_POSTGRESDB_DATABASE", "n8n")
     .WithEnvironment("DB_POSTGRESDB_USER", postgresUsername)
@@ -99,7 +89,6 @@ api.WithEnvironment("N8N_API_URL", "http://localhost:5678/api/v1/workflows")
 
 var grafana = builder.AddContainer("grafana", "grafana/grafana")
     .WithHttpEndpoint(port: 3000, targetPort: 3000, name: "http")
-    .WithContainerName("grafana")
     .WithBindMount("../../configuration/grafana/datasources", "/etc/grafana/provisioning/datasources", isReadOnly: true)
     .WithBindMount("../../configuration/grafana/dashboards", "/etc/grafana/provisioning/dashboards", isReadOnly: true)
     .WithVolume("grafana-data", "/var/lib/grafana")
