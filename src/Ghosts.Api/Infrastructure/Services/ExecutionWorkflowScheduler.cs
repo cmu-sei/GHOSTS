@@ -139,8 +139,8 @@ public class ExecutionWorkflowScheduler : BackgroundService
 
         try
         {
-            var webhookUrl = await ResolveWebhookUrlAsync(item.WorkflowId!, ct);
-            if (webhookUrl == null)
+            var webhookInfo = await ResolveWebhookInfoAsync(item.WorkflowId!, ct);
+            if (webhookInfo == null)
             {
                 item.Status = "Failed";
                 item.CompletedAt = DateTime.UtcNow;
@@ -163,6 +163,8 @@ public class ExecutionWorkflowScheduler : BackgroundService
                 return;
             }
 
+            var webhookUrl = webhookInfo.Url;
+
             using var http = _httpClientFactory.CreateClient();
             http.DefaultRequestHeaders.Clear();
             http.DefaultRequestHeaders.Add("accept", "application/json");
@@ -180,7 +182,18 @@ public class ExecutionWorkflowScheduler : BackgroundService
                 System.Text.Encoding.UTF8,
                 "application/json");
 
-            var response = await http.PostAsync(webhookUrl, content, ct);
+            _log.Info($"[Execution {execution.Id}] Sending {webhookInfo.HttpMethod} to {webhookUrl}");
+
+            HttpResponseMessage response;
+            if (webhookInfo.HttpMethod == "POST")
+            {
+                response = await http.PostAsync(webhookUrl, content, ct);
+            }
+            else
+            {
+                response = await http.GetAsync(webhookUrl, ct);
+            }
+
             var statusCode = (int)response.StatusCode;
             var body = await response.Content.ReadAsStringAsync(ct);
 
@@ -221,7 +234,7 @@ public class ExecutionWorkflowScheduler : BackgroundService
                     Severity = "Warning"
                 });
 
-                _log.Warn($"[Execution {item.ExecutionId}] Workflow item #{item.Number} failed ({statusCode}): {preview}");
+                _log.Warn($"[Execution {item.ExecutionId}] Workflow item #{item.Number} failed: {webhookInfo.HttpMethod} {webhookUrl} returned {statusCode}: {preview}");
             }
 
             await context.SaveChangesAsync(ct);
@@ -257,23 +270,29 @@ public class ExecutionWorkflowScheduler : BackgroundService
     {
         _log.Info($"[Execution {item.ExecutionId}] Starting scheduled workflow item #{item.Number} (workflow {item.WorkflowId}, schedule: {item.Schedule})");
 
-        var webhookUrl = await ResolveWebhookUrlAsync(item.WorkflowId!, ct);
-        if (webhookUrl == null)
+        var webhookInfo = await ResolveWebhookInfoAsync(item.WorkflowId!, ct);
+        if (webhookInfo == null)
         {
             _log.Warn($"[Execution {item.ExecutionId}] Cannot start scheduled workflow item #{item.Number}: webhook not resolved");
             return;
         }
 
-        await _animationsManager.StartWorkflowJob(item.WorkflowId!, webhookUrl, item.Schedule!, ct);
+        _log.Info($"[Execution {item.ExecutionId}] Scheduled workflow item #{item.Number} will use {webhookInfo.HttpMethod} {webhookInfo.Url}");
+        await _animationsManager.StartWorkflowJob(item.WorkflowId!, webhookInfo.Url, item.Schedule!, ct);
     }
 
-    private async Task<string> ResolveWebhookUrlAsync(string workflowId, CancellationToken ct)
+    private record WebhookInfo(string Url, string HttpMethod);
+
+    private async Task<WebhookInfo> ResolveWebhookInfoAsync(string workflowId, CancellationToken ct)
     {
         var apiUrl = N8nConfig.GetApiUrl();
         var apiKey = N8nConfig.GetApiKey();
 
         if (string.IsNullOrEmpty(apiUrl) || string.IsNullOrEmpty(apiKey))
+        {
+            _log.Warn($"[Workflow {workflowId}] N8N_API_URL or N8N_API_KEY not configured");
             return null;
+        }
 
         try
         {
@@ -283,16 +302,23 @@ public class ExecutionWorkflowScheduler : BackgroundService
             http.DefaultRequestHeaders.Add("X-N8N-API-KEY", apiKey);
 
             var workflowApiUrl = $"{apiUrl.TrimEnd('/')}/{workflowId}";
+            _log.Debug($"[Workflow {workflowId}] Fetching workflow definition from {workflowApiUrl}");
             var response = await http.GetAsync(workflowApiUrl, ct);
 
             if (!response.IsSuccessStatusCode)
+            {
+                _log.Warn($"[Workflow {workflowId}] Failed to fetch workflow from n8n API ({(int)response.StatusCode})");
                 return null;
+            }
 
             await using var stream = await response.Content.ReadAsStreamAsync(ct);
             var workflow = await JsonSerializer.DeserializeAsync<JsonElement>(stream, cancellationToken: ct);
 
             if (workflow.TryGetProperty("active", out var activeProp) && !activeProp.GetBoolean())
+            {
+                _log.Warn($"[Workflow {workflowId}] Workflow is inactive in n8n");
                 return null;
+            }
 
             if (workflow.TryGetProperty("nodes", out var nodes))
             {
@@ -306,17 +332,27 @@ public class ExecutionWorkflowScheduler : BackgroundService
                     var path = pathProp.GetString()?.Trim().TrimStart('/');
                     if (string.IsNullOrEmpty(path)) continue;
 
+                    var httpMethod = "GET";
+                    if (parameters.TryGetProperty("httpMethod", out var methodProp))
+                    {
+                        httpMethod = methodProp.GetString()?.ToUpperInvariant() ?? "GET";
+                    }
+
                     var apiUri = new Uri(apiUrl);
                     var port = apiUri.IsDefaultPort ? string.Empty : $":{apiUri.Port}";
-                    return $"{apiUri.Scheme}://{apiUri.Host}{port}/webhook/{path}";
+                    var webhookUrl = $"{apiUri.Scheme}://{apiUri.Host}{port}/webhook/{path}";
+
+                    _log.Info($"[Workflow {workflowId}] Resolved webhook: {httpMethod} {webhookUrl}");
+                    return new WebhookInfo(webhookUrl, httpMethod);
                 }
             }
 
+            _log.Warn($"[Workflow {workflowId}] No webhook node found in workflow definition");
             return null;
         }
         catch (Exception ex)
         {
-            _log.Warn(ex, $"Failed to resolve webhook URL for workflow {workflowId}");
+            _log.Warn(ex, $"[Workflow {workflowId}] Failed to resolve webhook URL");
             return null;
         }
     }

@@ -176,10 +176,16 @@ public class Orchestrator
         var handlerType = Type.GetType(typeName);
 
         if (handlerType == null)
+        {
+            _log.Error($"Handler type '{type}' could not be resolved (looked for {typeName})");
             throw new NotSupportedException($"Handler type '{type}' not found.");
+        }
 
         if (!typeof(IHandler).IsAssignableFrom(handlerType))
+        {
+            _log.Error($"{handlerType.Name} does not implement IHandler — cannot execute");
             throw new InvalidOperationException($"{handlerType.Name} does not implement IHandler");
+        }
 
         var instance = (IHandler)Activator.CreateInstance(handlerType, timeline, handler, token);
         return instance?.Run();
@@ -329,13 +335,32 @@ public class Orchestrator
 
         try
         {
-            _log.Trace($"Attempting new thread for: {handler.HandlerType}");
+            _log.Info($"Starting handler {handler.HandlerType} for timeline {timeline.Id}");
             var task = RunHandler(handler.HandlerType, timeline, handler, cts.Token);
+
+            task.ContinueWith(t =>
+            {
+                if (t.IsFaulted)
+                {
+                    _log.Error($"Handler {handler.HandlerType} for timeline {timeline.Id} faulted: {t.Exception?.GetBaseException().Message}");
+                    _log.Debug(t.Exception?.GetBaseException());
+                }
+                else if (t.IsCanceled)
+                {
+                    _log.Info($"Handler {handler.HandlerType} for timeline {timeline.Id} was cancelled");
+                }
+                else
+                {
+                    _log.Info($"Handler {handler.HandlerType} for timeline {timeline.Id} completed");
+                }
+            }, TaskContinuationOptions.ExecuteSynchronously);
+
             Program.RunningTasks.TryAdd(Guid.NewGuid(), new TaskJob { TimelineId = timeline.Id, CancellationTokenSource = cts, Task = task});
         }
         catch (Exception e)
         {
-            _log.Error(e);
+            _log.Error($"Failed to launch handler {handler.HandlerType} for timeline {timeline.Id}: {e.Message}");
+            _log.Debug(e);
         }
 
         return Task.CompletedTask;
