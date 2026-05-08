@@ -65,115 +65,151 @@
       </ng-template>
       <div class="content-card">
         @if (timelineItems().length > 0) {
+        <h2 class="section-title">Execution Timeline</h2>
+
+        <!-- Progress bar -->
+        <div class="timeline-progress">
+          <div class="progress-bar-container">
+            <div class="progress-segment completed" [style.width.%]="progressPercent().completed"></div>
+            <div class="progress-segment failed" [style.width.%]="progressPercent().failed"></div>
+            <div class="progress-segment skipped" [style.width.%]="progressPercent().skipped"></div>
+            <div class="progress-segment active" [style.width.%]="progressPercent().active"></div>
+          </div>
+          <div class="progress-labels">
+            <span class="progress-label">{{ itemCounts().completed + itemCounts().failed + itemCounts().skipped }} of {{ itemCounts().total }} resolved</span>
+          </div>
+        </div>
+
         <!-- Summary chips -->
-        <div class="timeline-summary mb-3">
+        <div class="timeline-summary">
           <mat-chip-set>
-            <mat-chip>{{ itemCounts().total }} total</mat-chip>
+            <mat-chip>
+              <i class="fas fa-list-ol chip-icon"></i> {{ itemCounts().total }} total
+            </mat-chip>
             @if (itemCounts().pending > 0) {
-            <mat-chip class="chip-pending">{{ itemCounts().pending }} pending</mat-chip>
+            <mat-chip class="chip-pending">
+              <i class="fas fa-clock chip-icon"></i> {{ itemCounts().pending }} pending
+            </mat-chip>
             }
             @if (itemCounts().queued > 0) {
-            <mat-chip class="chip-queued">{{ itemCounts().queued }} queued/deployed</mat-chip>
+            <mat-chip class="chip-queued">
+              <i class="fas fa-bolt chip-icon"></i> {{ itemCounts().queued }} queued
+            </mat-chip>
             }
             @if (itemCounts().completed > 0) {
-            <mat-chip class="chip-completed">{{ itemCounts().completed }} completed</mat-chip>
+            <mat-chip class="chip-completed">
+              <i class="fas fa-check-circle chip-icon"></i> {{ itemCounts().completed }} completed
+            </mat-chip>
             }
             @if (itemCounts().failed > 0) {
-            <mat-chip class="chip-failed">{{ itemCounts().failed }} failed</mat-chip>
+            <mat-chip class="chip-failed">
+              <i class="fas fa-times-circle chip-icon"></i> {{ itemCounts().failed }} failed
+            </mat-chip>
             }
             @if (itemCounts().skipped > 0) {
-            <mat-chip class="chip-skipped">{{ itemCounts().skipped }} skipped</mat-chip>
+            <mat-chip class="chip-skipped">
+              <i class="fas fa-forward chip-icon"></i> {{ itemCounts().skipped }} skipped
+            </mat-chip>
             }
           </mat-chip-set>
-          <div class="item-type-info small text-muted mt-1">
-            {{ itemCounts().workflow }} workflow &middot; {{ itemCounts().automated }} automated &middot; {{
-            itemCounts().manual }} manual
+          <div class="item-type-breakdown">
+            <span class="type-pill workflow"><i class="fas fa-project-diagram"></i> {{ itemCounts().workflow }} workflow</span>
+            <span class="type-pill automated"><i class="fas fa-robot"></i> {{ itemCounts().automated }} automated</span>
+            <span class="type-pill manual"><i class="fas fa-hand-paper"></i> {{ itemCounts().manual }} manual</span>
           </div>
         </div>
 
         <!-- Warning for items that cannot be auto-deployed -->
         @if (exec.status === 'Running' && itemCounts().manual > 0) {
-        <div class="alert alert-warning d-flex align-items-center mb-3">
-          <i class="fas fa-exclamation-triangle me-2"></i>
+        <div class="manual-alert">
+          <i class="fas fa-exclamation-triangle"></i>
           <span>{{ itemCounts().manual }} item(s) require manual completion by an exercise admin.</span>
         </div>
         }
 
         <!-- Timeline items table -->
-        <div class="card">
-          <div class="card-body p-0">
-            <div class="table-responsive">
-              <table class="table table-hover mb-0">
-                <thead class="table-light">
-                  <tr>
-                    <th class="px-3 py-3">#</th>
-                    <th class="py-3">Time</th>
-                    <th class="py-3">Assigned</th>
-                    <th class="py-3">Description</th>
-                    <th class="py-3">Kind</th>
-                    <th class="py-3">Status</th>
-                    <th class="py-3">Completed By</th>
-                    <th class="py-3">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (item of timelineItems(); track item.id) {
-                  <tr [class.table-success]="item.status === 'Completed'"
-                    [class.table-danger]="item.status === 'Failed'" [class.table-secondary]="item.status === 'Skipped'">
-                    <td class="px-3 py-3 fw-bold">{{ item.number }}</td>
-                    <td class="py-3 text-nowrap">{{ item.time }}</td>
-                    <td class="py-3">
-                      <span class="badge bg-secondary">{{ item.assigned }}</span>
-                    </td>
-                    <td class="py-3">
-                      {{ item.description }}
-                      @if (item.notes) {
-                      <div class="small text-muted mt-1">
-                        <i class="fas fa-sticky-note"></i> {{ item.notes }}
-                      </div>
-                      }
-                    </td>
-                    <td class="py-3">
-                      @if (item.automationKind === 'Workflow') {
-                      <span class="badge bg-success">
-                        <i class="fas fa-project-diagram"></i> {{ getWorkflowName(item.workflowId) }}
-                      </span>
-                      } @else if (item.automationKind === 'MachineUpdate') {
-                      <span class="badge bg-primary">Auto</span>
-                      } @else {
-                      <span class="badge bg-info">Manual</span>
-                      }
-                    </td>
-                    <td class="py-3">
-                      <span class="badge rounded-pill" [ngClass]="getItemStatusClass(item.status)">
-                        {{ item.status }}
-                      </span>
-                    </td>
-                    <td class="py-3 small">
-                      @if (item.completedBy) {
-                      {{ item.completedBy }}
-                      <div class="text-muted">{{ formatDate(item.completedAt) }}</div>
-                      }
-                    </td>
-                    <td class="py-3">
-                      @if (canCompleteItem(item)) {
-                      <button mat-stroked-button color="primary" class="btn-sm" (click)="openCompletionDialog(item)">
-                        <i class="fas fa-check"></i> Complete
-                      </button>
-                      }
-                    </td>
-                  </tr>
+        <div class="timeline-table mat-elevation-z2">
+          <table>
+            <thead>
+              <tr>
+                <th class="col-number">#</th>
+                <th class="col-time">Time</th>
+                <th class="col-assigned">Assigned</th>
+                <th class="col-description">Description</th>
+                <th class="col-kind">Kind</th>
+                <th class="col-status">Status</th>
+                <th class="col-completed">Completed</th>
+                <th class="col-actions">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of timelineItems(); track item.id) {
+              <tr class="timeline-row" [class.row-completed]="item.status === 'Completed'"
+                [class.row-failed]="item.status === 'Failed'"
+                [class.row-skipped]="item.status === 'Skipped'"
+                [class.row-active]="item.status === 'Deployed' || item.status === 'Queued'">
+                <td class="col-number">
+                  <span class="item-number">{{ item.number }}</span>
+                </td>
+                <td class="col-time">
+                  <span class="time-badge">{{ item.time }}</span>
+                </td>
+                <td class="col-assigned">
+                  <span class="assigned-badge">{{ item.assigned }}</span>
+                </td>
+                <td class="col-description">
+                  <div class="description-text">{{ item.description }}</div>
+                  @if (item.notes) {
+                  <div class="description-notes">
+                    <i class="fas fa-sticky-note"></i> {{ item.notes }}
+                  </div>
                   }
-                </tbody>
-              </table>
-            </div>
-          </div>
+                </td>
+                <td class="col-kind">
+                  @if (item.automationKind === 'Workflow') {
+                  <span class="kind-badge workflow">
+                    <i class="fas fa-project-diagram"></i> {{ getWorkflowName(item.workflowId) }}
+                  </span>
+                  } @else if (item.automationKind === 'MachineUpdate') {
+                  <span class="kind-badge automated">
+                    <i class="fas fa-robot"></i> Auto
+                  </span>
+                  } @else {
+                  <span class="kind-badge manual">
+                    <i class="fas fa-hand-paper"></i> Manual
+                  </span>
+                  }
+                </td>
+                <td class="col-status">
+                  <span class="status-pill" [ngClass]="getItemStatusClass(item.status)">
+                    {{ item.status }}
+                  </span>
+                </td>
+                <td class="col-completed">
+                  @if (item.completedBy) {
+                  <div class="completed-info">
+                    <span class="completed-by">{{ item.completedBy }}</span>
+                    <span class="completed-date">{{ formatDate(item.completedAt) }}</span>
+                  </div>
+                  }
+                </td>
+                <td class="col-actions">
+                  @if (canCompleteItem(item)) {
+                  <button mat-raised-button color="primary" class="complete-btn" (click)="openCompletionDialog(item)">
+                    <i class="fas fa-check"></i> Complete
+                  </button>
+                  }
+                </td>
+              </tr>
+              }
+            </tbody>
+          </table>
         </div>
         } @else {
-        <div class="empty-state text-center py-5">
-          <i class="fas fa-tasks fa-3x text-muted mb-3"></i>
-          <h3 class="text-muted">No timeline items</h3>
-          <p class="text-muted">This scenario has no timeline events. Add events to the scenario timeline first.</p>
+        <div class="empty-state">
+          <i class="fas fa-tasks"></i>
+          <h3>No timeline items</h3>
+          <p>This scenario has no timeline events. Add events to the scenario timeline first.</p>
         </div>
         }
       </div>

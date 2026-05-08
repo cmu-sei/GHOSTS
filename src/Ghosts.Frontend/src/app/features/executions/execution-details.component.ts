@@ -83,6 +83,17 @@ export class ExecutionDetailsComponent implements OnInit, OnDestroy {
     };
   });
 
+  protected progressPercent = computed(() => {
+    const counts = this.itemCounts();
+    const total = counts.total || 1;
+    return {
+      completed: (counts.completed / total) * 100,
+      failed: (counts.failed / total) * 100,
+      skipped: (counts.skipped / total) * 100,
+      active: (counts.queued / total) * 100,
+    };
+  });
+
   ngOnInit(): void {
     this.executionId = Number(this.route.snapshot.paramMap.get('id'));
     if (this.executionId) {
