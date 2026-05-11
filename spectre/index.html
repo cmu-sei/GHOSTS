@@ -2031,7 +2031,7 @@
 <h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
 <p>SPECTRE installs alongside an existing GHOSTS installation as a separate docker container. With a few configuration changes, you should be up and running in minimal time.</p>
 <p>There are only two configuration settings, both contained within <code>appsettings.json</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">&quot;DefaultConnection&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Host=localhost;Port=5432;Database=preferences;User Id=ghosts;Password=scotty@1;Pooling=true;Command Timeout=9900&quot;</span><span class="p">,</span>
+<div class="highlight"><pre><span></span><code><span class="nt">&quot;DefaultConnection&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Host=localhost;Port=5432;Database=preferences;User Id=ghosts;Password=;Pooling=true;Command Timeout=9900&quot;</span><span class="p">,</span>
 <span class="nt">&quot;GhostsApiUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://localhost:5000&quot;</span>
 </code></pre></div>
 <p>The first setting is for your connection to a necessary Postgres database, which SPECTRE will use for its operations. It is fine to host this on the same machine or container that you might be using for GHOSTS itself. In this case, either use the same user as GHOSTS or create a new user for SPECTRE.</p>

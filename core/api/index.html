@@ -2445,31 +2445,12 @@ docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> 
 </tr>
 <tr>
 <td><code>POSTGRES_PASSWORD</code></td>
-<td><code>scotty@1</code></td>
+<td>set_me</td>
 <td>PostgreSQL password. <strong>Change this</strong> for any non-local deployment.</td>
 </tr>
 </tbody>
 </table>
 <h3 id="appsettingsjson-advanced">appsettings.json (Advanced)<a class="headerlink" href="#appsettingsjson-advanced" title="Permanent link">&para;</a></h3>
-<p>Key settings in <code>Ghosts.Api/appsettings.json</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;ConnectionStrings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;DefaultConnection&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Host=ghosts-postgres;Port=5432;Database=ghosts;User Id=ghosts;Password=scotty@1;&quot;</span>
-<span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;ApplicationSettings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;OfflineAfterMinutes&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">30</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;MatchMachinesBy&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;name&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;AnimatorSettings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;Animations&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;IsEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
-<span class="w">      </span><span class="p">}</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;CorsPolicy&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;Origins&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;http://localhost:4200&quot;</span><span class="p">]</span>
-<span class="w">  </span><span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div>
 <p>Override values for production via environment variables or a mounted <code>appsettings.Production.json</code>.</p>
 <hr />
 <h2 id="managing-the-stack">Managing the Stack<a class="headerlink" href="#managing-the-stack" title="Permanent link">&para;</a></h2>
