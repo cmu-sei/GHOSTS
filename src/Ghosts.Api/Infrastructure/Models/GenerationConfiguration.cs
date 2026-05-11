@@ -19,6 +19,8 @@ public class GenerationConfiguration
     public IList<EnclaveConfiguration> Enclaves { get; set; }
     // Optional scenario ID to associate generated NPCs with a specific scenario
     public int? ScenarioId { get; set; }
+    // Optional execution ID to associate generated NPCs with a specific execution run
+    public int? ExecutionId { get; set; }
 }
 
 public class EnclaveConfiguration

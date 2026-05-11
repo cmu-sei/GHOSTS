@@ -26,7 +26,7 @@ public class NpcInteraction
 
     public DateTime CreatedUtc { get; set; }
 
-    // Navigation property
+    // Navigation properties
     [ForeignKey("SocialConnectionId")]
     public virtual NpcSocialConnection SocialConnection { get; set; }
 

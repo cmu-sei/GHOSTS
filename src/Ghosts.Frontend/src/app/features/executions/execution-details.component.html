@@ -57,6 +57,164 @@
 
   <!-- Tabs -->
   <mat-tab-group>
+    <!-- Timeline Items Tab -->
+    <mat-tab>
+      <ng-template matTabLabel>
+        <i class="fas fa-tasks"></i>&nbsp;&nbsp; Timeline &nbsp;
+        <span class="badge bg-secondary ms-1">{{ timelineItems().length }}</span>
+      </ng-template>
+      <div class="content-card">
+        @if (timelineItems().length > 0) {
+        <h2 class="section-title">Execution Timeline</h2>
+
+        <!-- Progress bar -->
+        <div class="timeline-progress">
+          <div class="progress-bar-container">
+            <div class="progress-segment completed" [style.width.%]="progressPercent().completed"></div>
+            <div class="progress-segment failed" [style.width.%]="progressPercent().failed"></div>
+            <div class="progress-segment skipped" [style.width.%]="progressPercent().skipped"></div>
+            <div class="progress-segment active" [style.width.%]="progressPercent().active"></div>
+          </div>
+          <div class="progress-labels">
+            <span class="progress-label">{{ itemCounts().completed + itemCounts().failed + itemCounts().skipped }} of {{ itemCounts().total }} resolved</span>
+          </div>
+        </div>
+
+        <!-- Summary chips -->
+        <div class="timeline-summary">
+          <mat-chip-set>
+            <mat-chip>
+              <i class="fas fa-list-ol chip-icon"></i> {{ itemCounts().total }} total
+            </mat-chip>
+            @if (itemCounts().pending > 0) {
+            <mat-chip class="chip-pending">
+              <i class="fas fa-clock chip-icon"></i> {{ itemCounts().pending }} pending
+            </mat-chip>
+            }
+            @if (itemCounts().queued > 0) {
+            <mat-chip class="chip-queued">
+              <i class="fas fa-bolt chip-icon"></i> {{ itemCounts().queued }} queued
+            </mat-chip>
+            }
+            @if (itemCounts().completed > 0) {
+            <mat-chip class="chip-completed">
+              <i class="fas fa-check-circle chip-icon"></i> {{ itemCounts().completed }} completed
+            </mat-chip>
+            }
+            @if (itemCounts().failed > 0) {
+            <mat-chip class="chip-failed">
+              <i class="fas fa-times-circle chip-icon"></i> {{ itemCounts().failed }} failed
+            </mat-chip>
+            }
+            @if (itemCounts().skipped > 0) {
+            <mat-chip class="chip-skipped">
+              <i class="fas fa-forward chip-icon"></i> {{ itemCounts().skipped }} skipped
+            </mat-chip>
+            }
+          </mat-chip-set>
+          <div class="item-type-breakdown">
+            <span class="type-pill workflow"><i class="fas fa-project-diagram"></i> {{ itemCounts().workflow }} workflow</span>
+            <span class="type-pill automated"><i class="fas fa-robot"></i> {{ itemCounts().automated }} automated</span>
+            <span class="type-pill manual"><i class="fas fa-hand-paper"></i> {{ itemCounts().manual }} manual</span>
+          </div>
+        </div>
+
+        <!-- Warning for items that cannot be auto-deployed -->
+        @if (exec.status === 'Running' && itemCounts().manual > 0) {
+        <div class="manual-alert">
+          <i class="fas fa-exclamation-triangle"></i>
+          <span>{{ itemCounts().manual }} item(s) require manual completion by an exercise admin.</span>
+        </div>
+        }
+
+        <!-- Timeline items table -->
+        <div class="timeline-table mat-elevation-z2">
+          <table>
+            <thead>
+              <tr>
+                <th class="col-number">#</th>
+                <th class="col-time">Time</th>
+                <th class="col-assigned">Assigned</th>
+                <th class="col-description">Description</th>
+                <th class="col-kind">Kind</th>
+                <th class="col-status">Status</th>
+                <th class="col-completed">Completed</th>
+                <th class="col-actions">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of timelineItems(); track item.id) {
+              <tr class="timeline-row" [class.row-completed]="item.status === 'Completed'"
+                [class.row-failed]="item.status === 'Failed'"
+                [class.row-skipped]="item.status === 'Skipped'"
+                [class.row-active]="item.status === 'Deployed' || item.status === 'Queued'">
+                <td class="col-number">
+                  <span class="item-number">{{ item.number }}</span>
+                </td>
+                <td class="col-time">
+                  <span class="time-badge">{{ item.time }}</span>
+                </td>
+                <td class="col-assigned">
+                  <span class="assigned-badge">{{ item.assigned }}</span>
+                </td>
+                <td class="col-description">
+                  <div class="description-text">{{ item.description }}</div>
+                  @if (item.notes) {
+                  <div class="description-notes">
+                    <i class="fas fa-sticky-note"></i> {{ item.notes }}
+                  </div>
+                  }
+                </td>
+                <td class="col-kind">
+                  @if (item.automationKind === 'Workflow') {
+                  <span class="kind-badge workflow">
+                    <i class="fas fa-project-diagram"></i> {{ getWorkflowName(item.workflowId) }}
+                  </span>
+                  } @else if (item.automationKind === 'MachineUpdate') {
+                  <span class="kind-badge automated">
+                    <i class="fas fa-robot"></i> Auto
+                  </span>
+                  } @else {
+                  <span class="kind-badge manual">
+                    <i class="fas fa-hand-paper"></i> Manual
+                  </span>
+                  }
+                </td>
+                <td class="col-status">
+                  <span class="status-pill" [ngClass]="getItemStatusClass(item.status)">
+                    {{ item.status }}
+                  </span>
+                </td>
+                <td class="col-completed">
+                  @if (item.completedBy) {
+                  <div class="completed-info">
+                    <span class="completed-by">{{ item.completedBy }}</span>
+                    <span class="completed-date">{{ formatDate(item.completedAt) }}</span>
+                  </div>
+                  }
+                </td>
+                <td class="col-actions">
+                  @if (canCompleteItem(item)) {
+                  <button mat-raised-button color="primary" class="complete-btn" (click)="openCompletionDialog(item)">
+                    <i class="fas fa-check"></i> Complete
+                  </button>
+                  }
+                </td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        } @else {
+        <div class="empty-state">
+          <i class="fas fa-tasks"></i>
+          <h3>No timeline items</h3>
+          <p>This scenario has no timeline events. Add events to the scenario timeline first.</p>
+        </div>
+        }
+      </div>
+    </mat-tab>
+
     <!-- Overview Tab -->
     <mat-tab label="Overview">
       <ng-template matTabLabel>
@@ -152,7 +310,7 @@
     <!-- Events Tab -->
     <mat-tab>
       <ng-template matTabLabel>
-        <i class="fas fa-history"></i>&nbsp;&nbsp; Events &nbsp; (<span class="badge bg-secondary ms-1">{{
+        <i class="fas fa-history"></i>&nbsp;&nbsp; Events &nbsp;(<span class="badge bg-secondary ms-1">{{
           events().length
           }}</span>)
       </ng-template>
@@ -255,421 +413,46 @@
         </div>
       </div>
     </mat-tab>
-
-    <!-- Campaign Tab -->
-    <mat-tab label="Campaign">
-      <ng-template matTabLabel>
-        <i class="fas fa-bullhorn"></i>&nbsp;&nbsp; Campaign
-      </ng-template>
-      <div class="content-card">
-        <div class="row">
-          <div class="col-md-6">
-            <div class="card mb-3">
-              <div class="card-header">
-                <h5 class="card-title mb-0"><i class="fas fa-users"></i> Target Population Segments</h5>
-              </div>
-              <div class="card-body">
-                <div class="placeholder-content">
-                  <p class="text-muted mb-2">Configuration of target audience segments and demographics</p>
-                  <ul class="list-unstyled small">
-                    <li><i class="fas fa-check-circle text-muted"></i> Heavy Users (20%)</li>
-                    <li><i class="fas fa-check-circle text-muted"></i> Regular Users (50%)</li>
-                    <li><i class="fas fa-check-circle text-muted"></i> Casual Users (25%)</li>
-                    <li><i class="fas fa-check-circle text-muted"></i> Lurkers (5%)</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            <div class="card mb-3">
-              <div class="card-header">
-                <h5 class="card-title mb-0"><i class="fas fa-crosshairs"></i> Influencer Seeding Strategy</h5>
-              </div>
-              <div class="card-body">
-                <div class="placeholder-content">
-                  <p class="text-muted mb-0">Influencer targeting and seeding strategies</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-md-6">
-            <div class="card mb-3">
-              <div class="card-header">
-                <h5 class="card-title mb-0"><i class="fas fa-comment-dots"></i> Narrative Selection</h5>
-              </div>
-              <div class="card-body">
-                <div class="placeholder-content">
-                  <p class="text-muted mb-0">Primary and counter-narrative configurations</p>
-                </div>
-              </div>
-            </div>
-
-            <div class="card mb-3">
-              <div class="card-header">
-                <h5 class="card-title mb-0"><i class="fas fa-rocket"></i> Viral Threshold Goals</h5>
-              </div>
-              <div class="card-body">
-                <div class="placeholder-content">
-                  <p class="text-muted mb-0">Target virality thresholds and engagement goals</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </mat-tab>
-
-    <!-- Network Tab -->
-    <mat-tab label="Network">
-      <ng-template matTabLabel>
-        <i class="fas fa-project-diagram"></i>&nbsp;&nbsp; Network
-      </ng-template>
-      <div class="content-card">
-        <div class="row">
-          <div class="col-12 mb-3">
-            <div class="card">
-              <div class="card-header">
-                <h5 class="card-title mb-0"><i class="fas fa-project-diagram"></i> Network Visualization</h5>
-              </div>
-              <div class="card-body">
-                <div class="placeholder-content text-center py-5">
-                  <i class="fas fa-project-diagram fa-3x text-muted mb-3"></i>
-                  <p class="text-muted">Interactive network graph visualization will be displayed here</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-md-4">
-            <div class="card mb-3">
-              <div class="card-header">
-                <h5 class="card-title mb-0"><i class="fas fa-chart-bar"></i> Network Statistics</h5>
-              </div>
-              <div class="card-body">
-                <dl class="network-stats mb-0">
-                  <dt>Nodes:</dt>
-                  <dd><span class="text-muted">--</span></dd>
-                  <dt>Edges:</dt>
-                  <dd><span class="text-muted">--</span></dd>
-                  <dt>Density:</dt>
-                  <dd><span class="text-muted">--</span></dd>
-                  <dt>Avg Clustering:</dt>
-                  <dd><span class="text-muted">--</span></dd>
-                  <dt>Avg Path Length:</dt>
-                  <dd><span class="text-muted">--</span></dd>
-                </dl>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-md-4">
-            <div class="card mb-3">
-              <div class="card-header">
-                <h5 class="card-title mb-0"><i class="fas fa-chart-line"></i> Follower Distribution</h5>
-              </div>
-              <div class="card-body">
-                <div class="placeholder-content text-center py-4">
-                  <i class="fas fa-chart-area fa-2x text-muted mb-2"></i>
-                  <p class="text-muted small mb-0">Power-law distribution chart</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-md-4">
-            <div class="card mb-3">
-              <div class="card-header">
-                <h5 class="card-title mb-0"><i class="fas fa-users"></i> Community Structure</h5>
-              </div>
-              <div class="card-body">
-                <div class="placeholder-content text-center py-4">
-                  <i class="fas fa-sitemap fa-2x text-muted mb-2"></i>
-                  <p class="text-muted small mb-0">Detected communities and echo chambers</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </mat-tab>
-
-    <!-- Monitor Tab (Live Dashboard) -->
-    @if (exec.status === 'Running' || exec.status === 'Paused') {
-    <mat-tab>
-      <ng-template matTabLabel>
-        <i class="fas fa-desktop"></i>&nbsp;&nbsp; Monitor <span class="badge bg-success ms-1">LIVE</span>
-      </ng-template>
-      <div class="content-card">
-        <div class="alert alert-success d-flex align-items-center mb-4 py-3 px-4">
-          <i class="fas fa-broadcast-tower me-3 fa-lg"></i> &nbsp;
-          <strong class="d-block mb-1">Real-Time Monitoring Active</strong> &nbsp;
-          <span class="small text-success-emphasis">Updates every 5 seconds</span>
-        </div>
-        <br />
-        <div class="row g-3">
-          <div class="col-lg-8">
-            <div class="card h-100 mb-3">
-              <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="card-title mb-0"><i class="fas fa-stream"></i> Live Activity Feed</h5>
-                <button mat-stroked-button color="primary" disabled>
-                  <i class="fas fa-pause"></i> Pause
-                </button>
-              </div>
-              <div class="card-body activity-feed p-0">
-                <div class="placeholder-content text-center py-5">
-                  <i class="fas fa-comments fa-3x text-muted mb-3"></i>
-                  <p class="text-muted mb-0">Real-time NPC activity stream (posts, engagements, scrolls)</p>
-                </div>
-              </div>
-            </div>
-
-            <div class="card">
-              <div class="card-header">
-                <h5 class="card-title mb-0"><i class="fas fa-fire"></i> Viral Content Tracker</h5>
-              </div>
-              <div class="card-body">
-                <div class="placeholder-content text-center py-4">
-                  <i class="fas fa-chart-line fa-2x text-muted mb-2"></i>
-                  <p class="text-muted small mb-0">Currently trending content and viral cascades</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-lg-4">
-            <div class="card mb-3">
-              <div class="card-header">
-                <h5 class="card-title mb-0"><i class="fas fa-sliders-h"></i> Time Controls</h5>
-              </div>
-              <div class="card-body">
-                <div class="d-grid gap-2 mb-4">
-                  <button mat-raised-button color="primary" disabled>
-                    <i class="fas fa-play"></i> Resume
-                  </button>
-                  <button mat-stroked-button disabled>
-                    <i class="fas fa-step-forward"></i> Step Forward
-                  </button>
-                </div>
-                <div>
-                  <br />
-                  <label class="form-label fw-bold small mb-2">Time Acceleration &nbsp;</label>
-                  <select class="form-select form-select-sm" disabled>
-                    <option value="1">1x (Real-time)</option>
-                    <option value="10">10x</option>
-                    <option value="100">100x</option>
-                    <option value="1000">1000x</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            <div class="card mb-3">
-              <div class="card-header">
-                <h5 class="card-title mb-0"><i class="fas fa-hand-pointer"></i> Manual Intervention</h5>
-              </div>
-              <div class="card-body">
-                <div class="d-grid gap-2">
-                  <button mat-raised-button color="accent" disabled>
-                    <i class="fas fa-plus"></i> Inject Content
-                  </button>
-                  <button mat-stroked-button disabled>
-                    <i class="fas fa-bookmark"></i> Save Checkpoint
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div class="card">
-              <div class="card-header">
-                <h5 class="card-title mb-0"><i class="fas fa-heartbeat"></i> Network Health</h5>
-              </div>
-              <div class="card-body">
-                <dl class="network-stats mb-0">
-                  <dt>Density:</dt>
-                  <dd><span class="text-muted">--</span></dd>
-                  <dt>Clustering:</dt>
-                  <dd><span class="text-muted">--</span></dd>
-                  <dt>Path Length:</dt>
-                  <dd><span class="text-muted">--</span></dd>
-                  <dt>Active NPCs:</dt>
-                  <dd><span class="text-muted">--</span></dd>
-                </dl>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </mat-tab>
-    }
-
-    <!-- Operations Tab -->
-    <mat-tab label="Operations">
-      <ng-template matTabLabel>
-        <i class="fas fa-chess"></i>&nbsp;&nbsp; Operations
-      </ng-template>
-      <div class="content-card">
-        <div class="row">
-          <div class="col-md-6">
-            <div class="card mb-3">
-              <div class="card-header bg-danger bg-opacity-10">
-                <h5 class="card-title mb-0"><i class="fas fa-chess-knight"></i> Attack Narrative</h5>
-              </div>
-              <div class="card-body">
-                <div class="placeholder-content">
-                  <p class="text-muted mb-0">Attack narrative definition and targeting strategy</p>
-                </div>
-              </div>
-            </div>
-
-            <div class="card mb-3">
-              <div class="card-header bg-primary bg-opacity-10">
-                <h5 class="card-title mb-0"><i class="fas fa-shield-alt"></i> Defense Narrative</h5>
-              </div>
-              <div class="card-body">
-                <div class="placeholder-content">
-                  <p class="text-muted mb-0">Counter-narrative and defensive messaging strategy</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-md-6">
-            <div class="card mb-3">
-              <div class="card-header">
-                <h5 class="card-title mb-0"><i class="fas fa-calendar-alt"></i> Content Schedule</h5>
-              </div>
-              <div class="card-body">
-                <div class="placeholder-content text-center py-4">
-                  <i class="fas fa-calendar fa-2x text-muted mb-2"></i>
-                  <p class="text-muted small mb-0">Scheduled content releases and phasing timeline</p>
-                </div>
-              </div>
-            </div>
-
-            <div class="card mb-3">
-              <div class="card-header">
-                <h5 class="card-title mb-0"><i class="fas fa-flask"></i> A/B Testing Configuration</h5>
-              </div>
-              <div class="card-body">
-                <div class="placeholder-content">
-                  <p class="text-muted mb-0">Experimental groups and variant testing setup</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </mat-tab>
-
-    <!-- Reports Tab -->
-    @if (isTerminal(exec.status)) {
-    <mat-tab label="Reports">
-      <ng-template matTabLabel>
-        <i class="fas fa-file-alt"></i>&nbsp;&nbsp; Reports
-      </ng-template>
-      <div class="content-card">
-        <div class="alert alert-info d-flex align-items-center mb-3">
-          <i class="fas fa-file-alt me-2"></i>
-          <div>
-            <strong>Post-Execution Analysis</strong>
-            <span class="ms-2">Comprehensive reports for completed execution</span>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="col-md-6">
-            <div class="card mb-3">
-              <div class="card-header">
-                <h5 class="card-title mb-0"><i class="fas fa-chart-pie"></i> Campaign Effectiveness</h5>
-              </div>
-              <div class="card-body">
-                <div class="placeholder-content">
-                  <ul class="list-unstyled small mb-0">
-                    <li class="mb-2"><i class="fas fa-arrow-right text-primary me-2"></i> Target audience reach</li>
-                    <li class="mb-2"><i class="fas fa-arrow-right text-primary me-2"></i> Message retention</li>
-                    <li><i class="fas fa-arrow-right text-primary me-2"></i> Conversion rates</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            <div class="card mb-3">
-              <div class="card-header">
-                <h5 class="card-title mb-0"><i class="fas fa-brain"></i> Belief Shift Analysis</h5>
-              </div>
-              <div class="card-body">
-                <div class="placeholder-content">
-                  <ul class="list-unstyled small mb-0">
-                    <li class="mb-2"><i class="fas fa-arrow-right text-primary me-2"></i> Belief convergence</li>
-                    <li class="mb-2"><i class="fas fa-arrow-right text-primary me-2"></i> Polarization metrics</li>
-                    <li><i class="fas fa-arrow-right text-primary me-2"></i> Persuasion effectiveness</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-md-6">
-            <div class="card mb-3">
-              <div class="card-header">
-                <h5 class="card-title mb-0"><i class="fas fa-virus"></i> Information Spread Analysis</h5>
-              </div>
-              <div class="card-body">
-                <div class="placeholder-content">
-                  <ul class="list-unstyled small mb-0">
-                    <li class="mb-2"><i class="fas fa-arrow-right text-primary me-2"></i> Cascade depth/width</li>
-                    <li class="mb-2"><i class="fas fa-arrow-right text-primary me-2"></i> Structural virality</li>
-                    <li><i class="fas fa-arrow-right text-primary me-2"></i> R-value calculations</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            <div class="card mb-3">
-              <div class="card-header">
-                <h5 class="card-title mb-0"><i class="fas fa-crown"></i> Influencer Impact</h5>
-              </div>
-              <div class="card-body">
-                <div class="placeholder-content">
-                  <ul class="list-unstyled small mb-0">
-                    <li class="mb-2"><i class="fas fa-arrow-right text-primary me-2"></i> Top influencers</li>
-                    <li class="mb-2"><i class="fas fa-arrow-right text-primary me-2"></i> Amplification rates</li>
-                    <li><i class="fas fa-arrow-right text-primary me-2"></i> Centrality rankings</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-12">
-            <div class="card">
-              <div class="card-header">
-                <h5 class="card-title mb-0"><i class="fas fa-download"></i> Export Reports</h5>
-              </div>
-              <div class="card-body">
-                <div class="d-flex flex-wrap gap-2">
-                  <button mat-raised-button color="primary" disabled>
-                    <i class="fas fa-file-pdf"></i> Export PDF
-                  </button>
-                  <button mat-stroked-button disabled>
-                    <i class="fas fa-file-excel"></i> Export Excel
-                  </button>
-                  <button mat-stroked-button disabled>
-                    <i class="fas fa-file-code"></i> Export JSON
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </mat-tab>
-    }
   </mat-tab-group>
   } @else {
   <div class="alert alert-danger">
-    <i class="bi bi-exclamation-triangle"></i> Execution not found.
+    <i class="fas fa-exclamation-triangle"></i> Execution not found.
   </div>
   }
 </div>
+
+<!-- Manual Completion Dialog (overlay) -->
+@if (completionDialogOpen() && completionItem(); as item) {
+<div class="completion-overlay" (click)="closeCompletionDialog()">
+  <div class="completion-dialog" (click)="$event.stopPropagation()">
+    <h3>Complete Timeline Item #{{ item.number }}</h3>
+    <p class="text-muted mb-3">{{ item.description }}</p>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Status</mat-label>
+      <mat-select [(value)]="completionStatus">
+        <mat-option value="Completed">Completed</mat-option>
+        <mat-option value="Failed">Failed</mat-option>
+        <mat-option value="Skipped">Skipped</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Completed By</mat-label>
+      <input matInput [(ngModel)]="completionBy" placeholder="exercise-admin" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Notes (optional)</mat-label>
+      <textarea matInput [(ngModel)]="completionNotes" rows="3" placeholder="Add notes or evidence..."></textarea>
+    </mat-form-field>
+
+    <div class="dialog-actions">
+      <button mat-button (click)="closeCompletionDialog()">Cancel</button>
+      <button mat-raised-button color="primary" (click)="submitCompletion()">
+        <i class="fas fa-check"></i> Submit
+      </button>
+    </div>
+  </div>
+</div>
+}

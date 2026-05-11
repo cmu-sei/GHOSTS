@@ -9,3 +9,4 @@ export * from './relationship.model';
 export * from './social.model';
 export * from './scenario.model';
 export * from './n8n-workflow.model';
+export * from './objective.model';

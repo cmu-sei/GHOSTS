@@ -72,3 +72,42 @@ export interface CreateExecutionEventRequest {
   data?: string;
   severity?: string;
 }
+
+export type TriggerKind = 'PointInTime' | 'Scheduled' | 'Triggered';
+
+export interface ExecutionTimelineItem {
+  id: number;
+  executionId: number;
+  sourceTimelineEventId?: number;
+  time: string;
+  number: number;
+  assigned: string;
+  description: string;
+  status: TimelineItemStatus;
+  automationKind: 'Manual' | 'Workflow' | 'MachineUpdate';
+  workflowId?: string;
+  completedBy?: string;
+  notes?: string;
+  resultData: string;
+  createdAt: string;
+  completedAt?: string;
+  triggerKind: TriggerKind;
+  schedule?: string;
+  triggerCondition?: string;
+  lastFiredAt?: string;
+  fireCount: number;
+}
+
+export type TimelineItemStatus =
+  | 'Pending'
+  | 'Queued'
+  | 'Deployed'
+  | 'Completed'
+  | 'Failed'
+  | 'Skipped';
+
+export interface CompleteTimelineItemRequest {
+  status: 'Completed' | 'Failed' | 'Skipped';
+  notes?: string;
+  completedBy?: string;
+}

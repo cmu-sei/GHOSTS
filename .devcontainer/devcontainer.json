@@ -16,7 +16,10 @@
             "version": "3.12"
         },
         "ghcr.io/devcontainers/features/git:1": {},
-        "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+        "ghcr.io/devcontainers/features/docker-in-docker:2.16": {
+            "version": "29.4.1",
+            "moby": false
+        },
         "ghcr.io/devcontainers/features/aws-cli:1": {}
     },
     "mounts": [

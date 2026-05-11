@@ -14,11 +14,22 @@ COPY Ghosts.Api/config /app/dist/config
 CMD ["dotnet", "run"]
 
 # multi-stage target: prod
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS playwright
+WORKDIR /pw
+RUN dotnet tool install --global PowerShell && \
+    ~/.dotnet/tools/pwsh -Command "exit 0"
+
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS prod
 ARG commit
 ENV COMMIT=$commit
 COPY --from=dev /app/dist /app
 WORKDIR /app
+
+# Install Playwright Chromium browser and OS dependencies for headless URL fetching
+COPY --from=playwright /root/.dotnet/tools /root/.dotnet/tools
+ENV PATH="/root/.dotnet/tools:${PATH}"
+RUN pwsh playwright.ps1 install chromium --with-deps && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 LABEL "product"="GHOSTS API"
 LABEL "maintainer"="Dustin Updyke <ddupdyke[-@-]sei.cmu.edu>"

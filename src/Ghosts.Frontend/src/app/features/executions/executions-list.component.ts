@@ -78,6 +78,15 @@ export class ExecutionsListComponent implements OnInit {
     this.router.navigate(['/executions', id]);
   }
 
+  protected viewMap(id: number, event: Event): void {
+    event.stopPropagation();
+    this.router.navigate(['/executions', id, 'map']);
+  }
+
+  protected hasStarted(status: string): boolean {
+    return status === 'Running' || status === 'Paused' || status === 'Completed';
+  }
+
   protected deleteExecution(execution: ExecutionSummary, event: Event): void {
     event.stopPropagation();
 

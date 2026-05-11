@@ -35,7 +35,7 @@ public class NpcLearning
 
     public DateTime CreatedUtc { get; set; }
 
-    // Navigation property
+    // Navigation properties
     [ForeignKey("NpcId")]
     public virtual NpcRecord Npc { get; set; }
 

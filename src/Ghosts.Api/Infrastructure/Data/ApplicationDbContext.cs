@@ -77,6 +77,7 @@ namespace Ghosts.Api.Infrastructure.Data
         public DbSet<Execution> Executions { get; set; }
         public DbSet<ExecutionEvent> ExecutionEvents { get; set; }
         public DbSet<ExecutionMetricSnapshot> ExecutionMetricSnapshots { get; set; }
+        public DbSet<ExecutionTimelineItem> ExecutionTimelineItems { get; set; }
 
         // Scenario Builder tables
         public DbSet<ScenarioSource> ScenarioSources { get; set; }
@@ -86,6 +87,8 @@ namespace Ghosts.Api.Infrastructure.Data
         public DbSet<ScenarioEnrichment> ScenarioEnrichments { get; set; }
         public DbSet<ScenarioCompilation> ScenarioCompilations { get; set; }
         public DbSet<ScenarioNpcAssignment> ScenarioNpcAssignments { get; set; }
+
+        public DbSet<Objective> Objectives { get; set; }
 
         public DbSet<Hypothesis> Hypotheses { get; set; }
 
@@ -146,18 +149,20 @@ namespace Ghosts.Api.Infrastructure.Data
                 .HasForeignKey(n => n.ScenarioId)
                 .OnDelete(DeleteBehavior.SetNull);
 
+            // NPC-Execution relationship (optional, nullable foreign key)
+            modelBuilder.Entity<NpcRecord>()
+                .HasOne(n => n.Execution)
+                .WithMany()
+                .HasForeignKey(n => n.ExecutionId)
+                .OnDelete(DeleteBehavior.SetNull);
+
             // Indexes for NPC and Social Graph tables
             modelBuilder.Entity<NpcRecord>().HasIndex(n => n.CurrentStep);
             modelBuilder.Entity<NpcRecord>().HasIndex(n => n.ScenarioId);
+            modelBuilder.Entity<NpcRecord>().HasIndex(n => n.ExecutionId);
             modelBuilder.Entity<NpcSocialConnection>().HasIndex(c => new { c.NpcId, c.ConnectedNpcId });
             modelBuilder.Entity<NpcLearning>().HasIndex(l => new { l.NpcId, l.Topic, l.Step });
             modelBuilder.Entity<NpcBelief>().HasIndex(b => new { b.NpcId, b.Name, b.Step });
-            modelBuilder.Entity<NpcBelief>().HasIndex(b => b.ExecutionId);
-            modelBuilder.Entity<NpcBelief>()
-                .HasOne(b => b.Execution)
-                .WithMany()
-                .HasForeignKey(b => b.ExecutionId)
-                .OnDelete(DeleteBehavior.SetNull);
             modelBuilder.Entity<NpcPreference>().HasIndex(p => new { p.NpcId, p.Name, p.Step });
 
             modelBuilder.Entity<Hypothesis>().HasIndex(h => h.IsActive);
@@ -277,6 +282,12 @@ namespace Ghosts.Api.Infrastructure.Data
                 .HasForeignKey(ms => ms.ExecutionId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<Execution>()
+                .HasMany(e => e.TimelineItems)
+                .WithOne(ti => ti.Execution)
+                .HasForeignKey(ti => ti.ExecutionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             // Execution indexes for performance
             modelBuilder.Entity<Execution>().HasIndex(e => e.ScenarioId);
             modelBuilder.Entity<Execution>().HasIndex(e => e.Status);
@@ -284,6 +295,46 @@ namespace Ghosts.Api.Infrastructure.Data
             modelBuilder.Entity<Execution>().HasIndex(e => e.StartedAt);
             modelBuilder.Entity<ExecutionEvent>().HasIndex(ev => new { ev.ExecutionId, ev.Timestamp });
             modelBuilder.Entity<ExecutionMetricSnapshot>().HasIndex(ms => new { ms.ExecutionId, ms.Timestamp });
+            modelBuilder.Entity<ExecutionTimelineItem>().HasIndex(ti => new { ti.ExecutionId, ti.Number });
+            modelBuilder.Entity<ExecutionTimelineItem>().HasIndex(ti => ti.Status);
+
+            // ── Objectives relationships ──
+
+            modelBuilder.Entity<Scenario>()
+                .HasMany(s => s.Objectives)
+                .WithOne(o => o.Scenario)
+                .HasForeignKey(o => o.ScenarioId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<Objective>()
+                .HasMany(o => o.Children)
+                .WithOne(o => o.Parent)
+                .HasForeignKey(o => o.ParentId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Objective>().HasIndex(o => o.ScenarioId);
+            modelBuilder.Entity<Objective>().HasIndex(o => o.Status);
+            modelBuilder.Entity<Objective>().HasIndex(o => o.Type);
+            modelBuilder.Entity<Objective>().HasIndex(o => o.ParentId);
+
+            modelBuilder.Entity<ScenarioTimelineEvent>()
+                .Property(e => e.ObjectiveIds)
+                .HasColumnName("objective_ids");
+
+            modelBuilder.Entity<ScenarioTimelineEvent>()
+                .Property(e => e.TriggerKind)
+                .HasConversion<string>()
+                .HasDefaultValue(TriggerKind.PointInTime);
+
+            modelBuilder.Entity<ScenarioTimelineEvent>()
+                .Property(e => e.ExecutionType)
+                .HasConversion<string>()
+                .HasDefaultValue(ExecutionType.Manual);
+
+            modelBuilder.Entity<ExecutionTimelineItem>()
+                .Property(e => e.TriggerKind)
+                .HasConversion<string>()
+                .HasDefaultValue(TriggerKind.PointInTime);
 
             // ── Scenario Builder relationships ──
 

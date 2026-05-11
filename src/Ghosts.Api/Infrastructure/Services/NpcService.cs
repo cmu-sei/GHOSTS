@@ -359,12 +359,18 @@ public class NpcService(ApplicationDbContext context, IEvidenceProcessor evidenc
         };
         npc.Id = npc.NpcProfile.Id;
 
-        // Check if ScenarioId is provided in Attributes dictionary
-        if (npcProfile.Attributes != null &&
-            npcProfile.Attributes.TryGetValue("ScenarioId", out var scenarioIdStr) &&
-            int.TryParse(scenarioIdStr, out var scenarioId))
+        if (npcProfile.Attributes != null)
         {
-            npc.ScenarioId = scenarioId;
+            if (npcProfile.Attributes.TryGetValue("ScenarioId", out var scenarioIdStr) &&
+                int.TryParse(scenarioIdStr, out var scenarioId))
+            {
+                npc.ScenarioId = scenarioId;
+            }
+            if (npcProfile.Attributes.TryGetValue("ExecutionId", out var executionIdStr) &&
+                int.TryParse(executionIdStr, out var executionId))
+            {
+                npc.ExecutionId = executionId;
+            }
         }
 
         _context.Npcs.Add(npc);
@@ -409,6 +415,7 @@ public class NpcService(ApplicationDbContext context, IEvidenceProcessor evidenc
                         npc.Campaign = config.Campaign;
                         npc.Enclave = enclave.Name;
                         npc.ScenarioId = config.ScenarioId;
+                        npc.ExecutionId = config.ExecutionId;
 
                         _context.Npcs.Add(npc);
                         createdNpcs.Add(npc);

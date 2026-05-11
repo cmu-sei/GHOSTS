@@ -12,6 +12,7 @@ interface NavItem {
   icon: string;
   children?: NavItem[];
   target?: string;
+  rightAlign?: boolean;
 }
 
 @Component({
@@ -34,6 +35,9 @@ interface NavItem {
 
       <nav class="nav-links">
         @for (item of navItems(); track item.path || item.label) {
+          @if (item.rightAlign) {
+            <span class="nav-spacer"></span>
+          }
           @if (item.children && item.children.length > 0) {
             <div class="nav-item-group">
               <a
@@ -150,6 +154,10 @@ interface NavItem {
       display: none; /* Chrome, Safari, Edge */
     }
 
+    .nav-spacer {
+      flex: 1;
+    }
+
     .nav-item-group {
       display: flex;
       align-items: center;
@@ -247,12 +255,15 @@ interface NavItem {
 })
 export class NavigationComponent {
   protected readonly navItems = signal<NavItem[]>([
+    { label: 'Objectives', path: '/objectives', icon: 'fa-bullseye' },
     { label: 'Scenarios', path: '/scenarios', icon: 'fa-file-alt' },
     { label: 'Executions', path: '/executions', icon: 'fa-play' },
+    { label: 'Assessment', path: '/assessment', icon: 'fa-clipboard-check' },
     {
       label: 'NPCs',
       path: '/npcs',
       icon: 'fa-user',
+      rightAlign: true,
       children: [
         { label: 'Activities Overview', path: '/activities', icon: 'fa-list' },
         { label: 'Live Network', path: '/activities/dynamic', icon: 'fa-project-diagram', target: '_blank' },

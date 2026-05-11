@@ -1,0 +1,23 @@
+<div class="container-fluid">
+  <div class="page-header">
+    <div>
+      <h1>Assessment</h1>
+      <p class="subtitle">
+        Panels served by
+        <a [href]="grafanaUrl" target="_blank" rel="noopener">Grafana</a>
+      </p>
+    </div>
+  </div>
+
+  <div class="panel-grid">
+    @for (entry of panels; track entry.panel.panelId) {
+    <div class="panel-wrapper" [class.stat-panel]="entry.panel.height === '120px'">
+      <iframe
+        [src]="entry.url"
+        [style.height]="entry.panel.height"
+        frameborder="0"
+      ></iframe>
+    </div>
+    }
+  </div>
+</div>

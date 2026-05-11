@@ -330,6 +330,7 @@ output/
 *.vscode*
 
 .devcontainer/certs/*
+!.devcontainer/certs/readme.md
 .devcontainer/aws.env
 
 # Environment / secrets files — never commit credentials

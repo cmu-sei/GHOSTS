@@ -88,7 +88,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT AVG(b.posterior)::numeric(10,4) FROM npc_beliefs b WHERE b.step = (SELECT MAX(step) FROM npc_beliefs) AND b.name IN ($belief) AND b.npcid::text IN ($npc)",
+          "rawSql": "SELECT AVG(b.posterior)::numeric(10,4) FROM npc_beliefs b JOIN npcs n ON b.npcid = n.id WHERE b.step = (SELECT MAX(step) FROM npc_beliefs) AND b.name IN ($belief) AND b.npcid::text IN ($npc) AND (${execution:raw} = 0 OR n.executionid = ${execution:raw})",
           "refId": "A"
         }
       ],
@@ -150,7 +150,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(DISTINCT b.npcid) FROM npc_beliefs b WHERE $__timeFilter(b.createdutc) AND b.name IN ($belief) AND b.npcid::text IN ($npc)",
+          "rawSql": "SELECT COUNT(DISTINCT b.npcid) FROM npc_beliefs b JOIN npcs n ON b.npcid = n.id WHERE $__timeFilter(b.createdutc) AND b.name IN ($belief) AND b.npcid::text IN ($npc) AND (${execution:raw} = 0 OR n.executionid = ${execution:raw})",
           "refId": "A"
         }
       ],
@@ -212,7 +212,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(DISTINCT b.name) FROM npc_beliefs b WHERE $__timeFilter(b.createdutc) AND b.name IN ($belief) AND b.npcid::text IN ($npc)",
+          "rawSql": "SELECT COUNT(DISTINCT b.name) FROM npc_beliefs b JOIN npcs n ON b.npcid = n.id WHERE $__timeFilter(b.createdutc) AND b.name IN ($belief) AND b.npcid::text IN ($npc) AND (${execution:raw} = 0 OR n.executionid = ${execution:raw})",
           "refId": "A"
         }
       ],
@@ -283,7 +283,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT STDDEV(b.posterior)::numeric(10,4) FROM npc_beliefs b WHERE b.step = (SELECT MAX(step) FROM npc_beliefs) AND b.name IN ($belief) AND b.npcid::text IN ($npc)",
+          "rawSql": "SELECT STDDEV(b.posterior)::numeric(10,4) FROM npc_beliefs b JOIN npcs n ON b.npcid = n.id WHERE b.step = (SELECT MAX(step) FROM npc_beliefs) AND b.name IN ($belief) AND b.npcid::text IN ($npc) AND (${execution:raw} = 0 OR n.executionid = ${execution:raw})",
           "refId": "A"
         }
       ],
@@ -388,7 +388,7 @@
           "editorMode": "code",
           "format": "time_series",
           "rawQuery": true,
-          "rawSql": "SELECT\n  b.createdutc as time,\n  CONCAT_WS(' ', n.npcprofile->'name'->>'first', n.npcprofile->'name'->>'last') || ' — ' || b.name as metric,\n  b.posterior::numeric(10,4) as value\nFROM npc_beliefs b\nJOIN npcs n ON b.npcid = n.id\nWHERE $__timeFilter(b.createdutc)\n  AND b.name IN ($belief)\n  AND b.npcid::text IN ($npc)\nORDER BY time",
+          "rawSql": "SELECT\n  b.createdutc as time,\n  CONCAT_WS(' ', n.npcprofile->'name'->>'first', n.npcprofile->'name'->>'last') || ' \u2014 ' || b.name as metric,\n  b.posterior::numeric(10,4) as value\nFROM npc_beliefs b\nJOIN npcs n ON b.npcid = n.id\nWHERE $__timeFilter(b.createdutc)\n  AND b.name IN ($belief)\n  AND b.npcid::text IN ($npc)\n AND (${execution:raw} = 0 OR n.executionid = ${execution:raw})\nORDER BY time",
           "refId": "A"
         }
       ],
@@ -486,7 +486,7 @@
           "editorMode": "code",
           "format": "time_series",
           "rawQuery": true,
-          "rawSql": "SELECT\n  MIN(b.createdutc) as time,\n  b.name as metric,\n  AVG(b.posterior)::numeric(10,4) as value\nFROM npc_beliefs b\nWHERE $__timeFilter(b.createdutc)\n  AND b.name IN ($belief)\n  AND b.npcid::text IN ($npc)\nGROUP BY b.step, b.name\nORDER BY time",
+          "rawSql": "SELECT\n  MIN(b.createdutc) as time,\n  b.name as metric,\n  AVG(b.posterior)::numeric(10,4) as value\nFROM npc_beliefs b JOIN npcs n ON b.npcid = n.id\nWHERE $__timeFilter(b.createdutc)\n  AND b.name IN ($belief)\n  AND b.npcid::text IN ($npc)\n AND (${execution:raw} = 0 OR n.executionid = ${execution:raw})\nGROUP BY b.step, b.name\nORDER BY time",
           "refId": "A"
         }
       ],
@@ -611,7 +611,7 @@
           "editorMode": "code",
           "format": "time_series",
           "rawQuery": true,
-          "rawSql": "SELECT\n  MIN(b.createdutc) as time,\n  SUM(CASE WHEN b.posterior > 0.5 THEN 1 ELSE 0 END) as \"Believers\",\n  SUM(CASE WHEN b.posterior <= 0.5 THEN 1 ELSE 0 END) as \"Non-Believers\"\nFROM npc_beliefs b\nWHERE $__timeFilter(b.createdutc)\n  AND b.name IN ($belief)\n  AND b.npcid::text IN ($npc)\nGROUP BY b.step\nORDER BY time",
+          "rawSql": "SELECT\n  MIN(b.createdutc) as time,\n  SUM(CASE WHEN b.posterior > 0.5 THEN 1 ELSE 0 END) as \"Believers\",\n  SUM(CASE WHEN b.posterior <= 0.5 THEN 1 ELSE 0 END) as \"Non-Believers\"\nFROM npc_beliefs b JOIN npcs n ON b.npcid = n.id\nWHERE $__timeFilter(b.createdutc)\n  AND b.name IN ($belief)\n  AND b.npcid::text IN ($npc)\n AND (${execution:raw} = 0 OR n.executionid = ${execution:raw})\nGROUP BY b.step\nORDER BY time",
           "refId": "A"
         }
       ],
@@ -833,7 +833,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "WITH ranked AS (\n  SELECT\n    b.npcid,\n    b.name,\n    b.posterior,\n    b.step,\n    ROW_NUMBER() OVER (PARTITION BY b.npcid, b.name ORDER BY b.step ASC) as rn_first,\n    ROW_NUMBER() OVER (PARTITION BY b.npcid, b.name ORDER BY b.step DESC) as rn_last\n  FROM npc_beliefs b\n  WHERE $__timeFilter(b.createdutc)\n    AND b.name IN ($belief)\n    AND b.npcid::text IN ($npc)\n)\nSELECT\n  CONCAT_WS(' ', n.npcprofile->'name'->>'first', n.npcprofile->'name'->>'last') AS npc_name,\n  f.name AS belief,\n  f.posterior::numeric(10,4) AS initial_posterior,\n  l.posterior::numeric(10,4) AS current_posterior,\n  (l.posterior - f.posterior)::numeric(10,4) AS change,\n  l.step - f.step + 1 AS steps\nFROM ranked f\nJOIN ranked l ON f.npcid = l.npcid AND f.name = l.name AND l.rn_last = 1\nJOIN npcs n ON f.npcid = n.id\nWHERE f.rn_first = 1\nORDER BY current_posterior DESC",
+          "rawSql": "WITH ranked AS (\n  SELECT\n    b.npcid,\n    b.name,\n    b.posterior,\n    b.step,\n    ROW_NUMBER() OVER (PARTITION BY b.npcid, b.name ORDER BY b.step ASC) as rn_first,\n    ROW_NUMBER() OVER (PARTITION BY b.npcid, b.name ORDER BY b.step DESC) as rn_last\n  FROM npc_beliefs b\n  WHERE $__timeFilter(b.createdutc)\n    AND b.name IN ($belief)\n    AND b.npcid::text IN ($npc)\n)\nSELECT\n  CONCAT_WS(' ', n.npcprofile->'name'->>'first', n.npcprofile->'name'->>'last') AS npc_name,\n  f.name AS belief,\n  f.posterior::numeric(10,4) AS initial_posterior,\n  l.posterior::numeric(10,4) AS current_posterior,\n  (l.posterior - f.posterior)::numeric(10,4) AS change,\n  l.step - f.step + 1 AS steps\nFROM ranked f\nJOIN ranked l ON f.npcid = l.npcid AND f.name = l.name AND l.rn_last = 1\nJOIN npcs n ON f.npcid = n.id\nWHERE f.rn_first = 1\n AND (${execution:raw} = 0 OR n.executionid = ${execution:raw})\nORDER BY current_posterior DESC",
           "refId": "A"
         }
       ],
@@ -851,6 +851,31 @@
   ],
   "templating": {
     "list": [
+      {
+        "allValue": "0",
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "${DS_GHOSTS}"
+        },
+        "definition": "",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Execution",
+        "multi": false,
+        "name": "execution",
+        "options": [],
+        "query": "SELECT e.name || ' (' || to_char(e.createdat, 'YYYY-MM-DD') || ')' as __text, e.id::text as __value FROM executions e ORDER BY e.createdat DESC",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
       {
         "allValue": "",
         "current": {},

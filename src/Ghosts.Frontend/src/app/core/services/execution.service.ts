@@ -7,9 +7,11 @@ import {
   ExecutionSummary,
   ExecutionEvent,
   ExecutionMetricSnapshot,
+  ExecutionTimelineItem,
   CreateExecutionRequest,
   UpdateExecutionRequest,
   CreateExecutionEventRequest,
+  CompleteTimelineItemRequest,
 } from '../models/execution.model';
 
 @Injectable({
@@ -136,5 +138,23 @@ export class ExecutionService {
   // Set execution error
   setExecutionError(id: number, error: any): Observable<void> {
     return this.http.put<void>(`${this.apiUrl}/${id}/error`, error);
+  }
+
+  // Timeline items
+  getTimelineItems(executionId: number): Observable<ExecutionTimelineItem[]> {
+    return this.http.get<ExecutionTimelineItem[]>(
+      `${this.apiUrl}/${executionId}/timeline-items`
+    );
+  }
+
+  completeTimelineItem(
+    executionId: number,
+    itemId: number,
+    request: CompleteTimelineItemRequest
+  ): Observable<ExecutionTimelineItem> {
+    return this.http.post<ExecutionTimelineItem>(
+      `${this.apiUrl}/${executionId}/timeline-items/${itemId}/complete`,
+      request
+    );
   }
 }

@@ -46,6 +46,7 @@ public abstract class BaseHandler : IHandler
 
     public async Task Run()
     {
+        _log.Info($"{GetType().Name} executing for timeline {this.Timeline.Id} (loop={this.Handler.Loop})");
         try
         {
             if (this.Handler.Loop)
@@ -59,14 +60,18 @@ public abstract class BaseHandler : IHandler
             {
                 await RunOnce();
             }
+
+            _log.Info($"{GetType().Name} finished successfully for timeline {this.Timeline.Id}");
         }
         catch (OperationCanceledException)
         {
-            _log.Trace($"{GetType().Name} handler cancelled.");
+            _log.Info($"{GetType().Name} handler cancelled for timeline {this.Timeline.Id}");
         }
         catch (Exception e)
         {
-            _log.Error(e);
+            _log.Error($"{GetType().Name} failed for timeline {this.Timeline.Id}: {e.Message}");
+            _log.Debug(e);
+            throw;
         }
     }
 

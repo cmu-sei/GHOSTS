@@ -9,4 +9,6 @@ export * from './status.service';
 export * from './animation.service';
 export * from './relationship.service';
 export * from './scenario.service';
+export * from './scenario-hub.service';
 export * from './n8n-workflow.service';
+export * from './objective.service';

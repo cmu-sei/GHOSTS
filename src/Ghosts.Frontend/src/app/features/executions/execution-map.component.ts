@@ -212,6 +212,12 @@ export class ExecutionMapComponent implements OnInit, AfterViewInit, OnDestroy {
       // Re-render any data that arrived before the style was ready
       this.updateDeckLayers();
 
+      // Flush connection updates that arrived before the style was ready
+      if (this.pendingConnectionUpdate) {
+        this.pendingConnectionUpdate = false;
+        this.updateConnectionLines();
+      }
+
       // Globe auto-rotation
       this.startGlobeRotation();
     });
@@ -383,7 +389,10 @@ export class ExecutionMapComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private updateDeckLayers(): void {
-    if (!this.deckOverlay) return;
+    if (!this.deckOverlay) {
+      this.pendingConnectionUpdate = true;
+      return;
+    }
 
     const features = this.getFilteredFeatures();
     const showLabels = this.currentZoom >= 8;
@@ -508,8 +517,13 @@ export class ExecutionMapComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private connectionLayersAdded = false;
 
+  private pendingConnectionUpdate = false;
+
   private updateConnectionLines(): void {
-    if (!this.map || !this.map.isStyleLoaded()) return;
+    if (!this.map || !this.map.isStyleLoaded()) {
+      this.pendingConnectionUpdate = true;
+      return;
+    }
 
     let connections = this.showConnections()
       ? this.connectionFeatures.features
@@ -577,6 +591,8 @@ export class ExecutionMapComponent implements OnInit, AfterViewInit, OnDestroy {
     } else {
       this.map.addSource('connections-src', { type: 'geojson', data: geojson });
     }
+
+    this.map.triggerRepaint();
 
     // ── "Electric" multi-layer line stack ──
     // Matched to OpenGridWorks transmission/pipeline rendering:
@@ -709,8 +725,8 @@ export class ExecutionMapComponent implements OnInit, AfterViewInit, OnDestroy {
       this.startFlowAnimation();
     }
 
-    // Toggle visibility
-    const vis = this.showConnections() && connections.length > 0 ? 'visible' : 'none';
+    // Toggle visibility — only hide when user has explicitly turned connections off
+    const vis = this.showConnections() ? 'visible' : 'none';
     for (const layerId of ['connections-glow', 'connections-glow-inner', 'connections-core']) {
       this.map.setLayoutProperty(layerId, 'visibility', vis);
     }
@@ -1031,6 +1047,13 @@ export class ExecutionMapComponent implements OnInit, AfterViewInit, OnDestroy {
           next: (fc) => {
             this.allFeatures = fc;
             this.updateDeckLayers();
+          },
+        });
+        this.mapService.getConnections(id).subscribe({
+          next: (fc) => {
+            this.connectionFeatures = fc;
+            this.connectionCount.set(fc.features.length);
+            this.updateConnectionLines();
           },
         });
       }

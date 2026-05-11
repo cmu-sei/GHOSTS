@@ -1,2 +1,5 @@
 bin/
 obj/
+_db/
+Ghosts.Api/wwwroot/lib/fontawesome/svgs/
+Ghosts.Api/wwwroot/flags/

@@ -1,4 +1,5 @@
 {
   "apiUrl": "http://localhost:5000/api",
-  "n8nApiUrl": "http://localhost:5678"
+  "n8nApiUrl": "http://localhost:5678",
+  "grafanaUrl": "http://localhost:3000"
 }

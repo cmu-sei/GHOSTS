@@ -69,7 +69,7 @@ Now you need to tell Grafana where it will be getting its data.
 6. Under the "Authentication" section of the config, set
 
 -   username to "ghosts"
--   password to "scotty@1"
+-   password to
 -   TLS/SSL Mode to "disable"
 
 7. Leave everything else at its default and click the "Save and test" button at the bottom of the page

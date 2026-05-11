@@ -234,7 +234,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "=http://host.docker.internal:5000/activityHub",
+        "url": "=http://ghosts-api:5000/activityHub",
         "authentication": "none",
         "sendBody": true,
         "bodyParameters": {

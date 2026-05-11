@@ -122,6 +122,7 @@ public class Program
         builder.Services.AddScoped<ISurveyService, SurveyService>();
         builder.Services.AddScoped<INpcService, NpcService>();
         builder.Services.AddScoped<IScenarioService, ScenarioService>();
+        builder.Services.AddScoped<IObjectiveService, ObjectiveService>();
         builder.Services.AddScoped<DbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
         builder.Services.AddScoped<IExecutionService, ExecutionService>();
         builder.Services.AddScoped<IExecutionMapService, ExecutionMapService>();
@@ -151,6 +152,7 @@ public class Program
         builder.Services.AddSingleton<IBackgroundQueue, BackgroundQueue>();
         builder.Services.AddSingleton<IHostedService, QueueSyncService>();
         builder.Services.AddSingleton<IManageableHostedService, AnimationsManager>();
+        builder.Services.AddHostedService<ExecutionWorkflowScheduler>();
 
         // Configure controllers with JSON serialization and custom formatters
         builder.Services.AddControllers(options => { options.OutputFormatters.Add(new MarkdownOutputFormatter()); })
@@ -218,6 +220,8 @@ public class Program
         app.MapHub<ActivityHub>("/api/hubs/activities");
         app.MapHub<ScenarioBuilderHub>("/hubs/scenarioBuilder");
         app.MapHub<ScenarioBuilderHub>("/api/hubs/scenarioBuilder");
+        app.MapHub<ExecutionHub>("/hubs/execution");
+        app.MapHub<ExecutionHub>("/api/hubs/execution");
 
         // Configure Swagger
         app.UseSwagger();

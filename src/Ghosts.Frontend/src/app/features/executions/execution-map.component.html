@@ -85,6 +85,7 @@
         <div class="panel-scroll">
           <!-- Layer toggles -->
           @for (layer of layers(); track layer.layerId) {
+            @if (layer.featureType.toLowerCase() !== 'connection') {
             <label class="lyr-row">
               <span class="lyr-dot" [style.background]="getLayerColor(layer.featureType)"></span>
               <span class="lyr-name">{{ layer.label }}</span>
@@ -93,6 +94,7 @@
                 <span class="toggle-thumb"></span>
               </span>
             </label>
+            }
           }
           <label class="lyr-row">
             <span class="lyr-dot" style="background:#64748b"></span>

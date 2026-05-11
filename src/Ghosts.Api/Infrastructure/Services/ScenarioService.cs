@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Ghosts.Api.Infrastructure.Data;
@@ -259,7 +260,13 @@ namespace Ghosts.Api.Infrastructure.Services
                         Number = e.Number,
                         Assigned = e.Assigned,
                         Description = e.Description,
-                        Status = e.Status
+                        Status = e.Status,
+                        ObjectiveIds = e.ObjectiveIds?.Count > 0 ? JsonSerializer.Serialize(e.ObjectiveIds) : null,
+                        TriggerKind = Enum.TryParse<TriggerKind>(e.TriggerKind, true, out var tk) ? tk : TriggerKind.PointInTime,
+                        Schedule = e.Schedule,
+                        TriggerCondition = e.TriggerCondition,
+                        ExecutionType = Enum.TryParse<ExecutionType>(e.ExecutionType, true, out var et) ? et : ExecutionType.Manual,
+                        WorkflowId = e.WorkflowId
                     }).ToList();
                 }
                 else
@@ -363,7 +370,13 @@ namespace Ghosts.Api.Infrastructure.Services
                     Number = e.Number,
                     Assigned = e.Assigned,
                     Description = e.Description,
-                    Status = e.Status
+                    Status = e.Status,
+                    ObjectiveIds = e.ObjectiveIds?.Count > 0 ? JsonSerializer.Serialize(e.ObjectiveIds) : null,
+                    TriggerKind = Enum.TryParse<TriggerKind>(e.TriggerKind, true, out var tk) ? tk : TriggerKind.PointInTime,
+                    Schedule = e.Schedule,
+                    TriggerCondition = e.TriggerCondition,
+                    ExecutionType = Enum.TryParse<ExecutionType>(e.ExecutionType, true, out var et) ? et : ExecutionType.Manual,
+                    WorkflowId = e.WorkflowId
                 }).ToList()
             };
         }

@@ -11,7 +11,7 @@ DB_HOST = "localhost"
 DB_PORT = 40669
 DB_NAME = "ghosts"
 DB_USER = "ghosts"
-DB_PASS = "scotty@1"
+DB_PASS = "Scotty@@1!"
 
 # Configure these
 API_URL = "http://localhost:8800"

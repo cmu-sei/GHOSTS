@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Ghosts.Api.Infrastructure.Data;
 using Ghosts.Api.Infrastructure.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Playwright;
 using NLog;
 
 namespace Ghosts.Api.Infrastructure.Services
@@ -89,16 +90,10 @@ namespace Ghosts.Api.Infrastructure.Services
 
         public async Task<ScenarioSource> AddUrlAsync(int scenarioId, CreateScenarioSourceUrlDto dto, CancellationToken ct)
         {
-            // Fetch the page content from the URL
             var fetchedContent = string.Empty;
             try
             {
-                using var httpClient = new HttpClient();
-                httpClient.Timeout = TimeSpan.FromSeconds(30);
-                httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent",
-                    "Mozilla/5.0 (compatible; GHOSTS/ScenarioBuilder)");
-                var html = await httpClient.GetStringAsync(dto.Url, ct);
-                fetchedContent = StripHtml(html);
+                fetchedContent = await FetchUrlWithBrowserAsync(dto.Url, ct);
                 _log.Info($"Fetched {fetchedContent.Length} characters from URL: {dto.Url}");
             }
             catch (Exception ex)
@@ -135,6 +130,98 @@ namespace Ghosts.Api.Infrastructure.Services
 
             // Reload with chunks
             return await GetByIdAsync(source.Id, ct);
+        }
+
+        private static async Task<string> FetchUrlWithBrowserAsync(string url, CancellationToken ct)
+        {
+            try
+            {
+                using var playwright = await Playwright.CreateAsync();
+                await using var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
+                {
+                    Headless = true
+                });
+
+                var context = await browser.NewContextAsync(new BrowserNewContextOptions
+                {
+                    IgnoreHTTPSErrors = true
+                });
+                var page = await context.NewPageAsync();
+
+                await page.GotoAsync(url, new PageGotoOptions
+                {
+                    WaitUntil = WaitUntilState.NetworkIdle,
+                    Timeout = 30000
+                });
+
+                // Dismiss common consent/disclaimer modals by clicking visible buttons
+                var dismissSelectors = new[]
+                {
+                    "button:has-text('Accept')",
+                    "button:has-text('Agree')",
+                    "button:has-text('I Agree')",
+                    "button:has-text('I Accept')",
+                    "button:has-text('OK')",
+                    "button:has-text('Continue')",
+                    "button:has-text('Close')",
+                    "button:has-text('Acknowledge')",
+                    "input[type='submit'][value*='Accept' i]",
+                    "input[type='submit'][value*='Agree' i]",
+                    "input[type='button'][value*='Accept' i]",
+                    "input[type='button'][value*='Agree' i]",
+                    "a:has-text('Accept')",
+                    "a:has-text('I Agree')",
+                    "[class*='modal'] button",
+                    "[class*='dialog'] button",
+                    "[class*='consent'] button",
+                    "[class*='disclaimer'] button",
+                    "[role='dialog'] button"
+                };
+
+                foreach (var selector in dismissSelectors)
+                {
+                    try
+                    {
+                        var btn = page.Locator(selector).First;
+                        if (await btn.IsVisibleAsync())
+                        {
+                            await btn.ClickAsync(new LocatorClickOptions { Timeout = 2000 });
+                            _log.Info($"Dismissed modal element matching: {selector}");
+                            // Wait for navigation or content to load after click
+                            await page.WaitForLoadStateAsync(LoadState.NetworkIdle,
+                                new PageWaitForLoadStateOptions { Timeout = 10000 });
+                            break;
+                        }
+                    }
+                    catch
+                    {
+                        // Selector didn't match or wasn't clickable — try next
+                    }
+                }
+
+                var text = await page.InnerTextAsync("body");
+
+                // Collapse whitespace
+                text = Regex.Replace(text, @"[ \t]+", " ");
+                text = Regex.Replace(text, @"\n{3,}", "\n\n");
+
+                return text.Trim();
+            }
+            catch (PlaywrightException ex)
+            {
+                _log.Warn(ex, "Playwright unavailable, falling back to HttpClient");
+                return await FetchUrlWithHttpClientAsync(url, ct);
+            }
+        }
+
+        private static async Task<string> FetchUrlWithHttpClientAsync(string url, CancellationToken ct)
+        {
+            using var httpClient = new HttpClient();
+            httpClient.Timeout = TimeSpan.FromSeconds(30);
+            httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent",
+                "Mozilla/5.0 (compatible; GHOSTS/ScenarioBuilder)");
+            var html = await httpClient.GetStringAsync(url, ct);
+            return StripHtml(html);
         }
 
         private static string StripHtml(string html)

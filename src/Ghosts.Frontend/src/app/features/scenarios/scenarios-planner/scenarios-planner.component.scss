@@ -178,6 +178,7 @@
 
         .mat-mdc-cell {
           padding: 16px 8px;
+          vertical-align: top;
         }
 
         .drag-handle {
@@ -200,6 +201,10 @@
 
           ::ng-deep .mat-mdc-form-field-subscript-wrapper {
             display: none;
+          }
+
+          &.objectives-select {
+            min-width: 180px;
           }
         }
 

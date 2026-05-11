@@ -116,6 +116,11 @@
         View
       </button>
 
+      <button mat-button [disabled]="!hasStarted(execution.status)" (click)="viewMap(execution.id, $event)">
+        <i class="fas fa-map-marked-alt"></i>
+        Map
+      </button>
+
       @if (canStart(execution.status)) {
       <button mat-button color="accent" (click)="startExecution(execution.id, $event)">
         <i class="fas fa-play"></i>

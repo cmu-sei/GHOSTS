@@ -47,7 +47,7 @@ SPECTRE installs alongside an existing GHOSTS installation as a separate docker 
 There are only two configuration settings, both contained within `appsettings.json`:
 
 ```json
-"DefaultConnection": "Host=localhost;Port=5432;Database=preferences;User Id=ghosts;Password=scotty@1;Pooling=true;Command Timeout=9900",
+"DefaultConnection": "Host=localhost;Port=5432;Database=preferences;User Id=ghosts;Password=;Pooling=true;Command Timeout=9900",
 "GhostsApiUrl": "http://localhost:5000"
 ```
 
