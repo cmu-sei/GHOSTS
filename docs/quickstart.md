@@ -2,7 +2,7 @@
 
 ## Overview
 
-This guide covers deploying the GHOSTS API stack and connecting clients to it. No compilation required — all server-side components are available as pre-built Docker images.
+This guide covers deploying the GHOSTS API stack and connecting clients to it. The API and frontend images are built locally from source using Docker — no manual compilation or SDK installation is required beyond Docker itself.
 
 **New to GHOSTS?** Start with the API stack first, then connect one or more clients.
 
@@ -17,8 +17,8 @@ The GHOSTS API stack runs as five Docker containers:
 
 | Container | Image | Port | Purpose |
 |-----------|-------|------|---------|
-| `ghosts-frontend` | `dustinupdyke/ghosts-frontend` | 4200 | Angular 20 management UI |
-| `ghosts-api` | `dustinupdyke/ghosts` | 5000 | REST API + SignalR WebSocket |
+| `ghosts-frontend` | *(built from source)* | 4200 | Angular 20 management UI |
+| `ghosts-api` | *(built from source)* | 5000 | REST API + SignalR WebSocket |
 | `ghosts-postgres` | `postgres:16.8` | 5432 | PostgreSQL database |
 | `ghosts-n8n` | `docker.n8n.io/n8nio/n8n` | 5678 | Workflow automation |
 | `ghosts-grafana` | `grafana/grafana` | 3000 | Activity dashboards |
@@ -32,18 +32,30 @@ The GHOSTS API stack runs as five Docker containers:
 
 ### Installation
 
-**1. Download the Docker Compose file**
+**1. Clone the repository**
+
+The Docker Compose file builds the API and frontend images from source and mounts configuration files (Grafana dashboards, n8n workflows) from the repo, so you need the full repository:
 
 ```bash
-mkdir ghosts && cd ghosts
-curl -O https://raw.githubusercontent.com/cmu-sei/GHOSTS/master/src/Ghosts.Api/docker-compose.yml
+git clone https://github.com/cmu-sei/GHOSTS.git
+cd GHOSTS/src/Ghosts.Api
 ```
 
-**2. Start all containers**
+**2. Build and start all containers**
 
 ```bash
-docker compose up -d
+docker compose up -d --build
 ```
+
+The first run builds the API and frontend images locally — this may take a few minutes depending on your connection and hardware. Subsequent runs reuse cached layers.
+
+???+ tip "GitHub Codespaces / proxy environments"
+    If the build fails with SSL certificate errors (e.g., `PartialChain`), your environment uses a TLS-intercepting proxy whose CA is not trusted inside the build container. Fix this by building with host networking:
+
+    ```bash
+    docker compose build --network=host
+    docker compose up -d
+    ```
 
 **3. Verify the installation**
 
@@ -69,11 +81,11 @@ The compose file uses these defaults, which can be overridden with a `.env` file
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `WEB_API_URL` | `http://host.docker.internal:5000/api` | API URL used by the frontend container |
-| `WEB_N8N_API_URL` | `http://host.docker.internal:5678` | n8n URL used by the frontend container |
-| `N8N_API_URL` | `http://host.docker.internal:5678/api/v1/workflows` | n8n REST API URL used by the API container |
+| `WEB_API_URL` | `http://localhost:5000/api` | API URL used by the frontend (must be reachable by the browser) |
+| `WEB_N8N_API_URL` | `http://localhost:5678` | n8n URL used by the frontend (must be reachable by the browser) |
+| `N8N_API_URL` | `http://ghosts-n8n:5678/api/v1/workflows` | n8n REST API URL used by the API container (inter-container) |
 | `N8N_API_KEY` | *(empty)* | n8n API key — **required** for workflow scheduling. Generate one in n8n: Settings > API > Create API Key. |
-| `POSTGRES_PASSWORD` | set_me | PostgreSQL password. **Change this** for any non-local deployment. |
+| `POSTGRES_PASSWORD` | `Scotty@@1!` | PostgreSQL password. **Change this** for any non-local deployment. |
 
 ### Managing the Stack
 
@@ -81,8 +93,8 @@ The compose file uses these defaults, which can be overridden with a `.env` file
 # Stop all containers
 docker compose down
 
-# Pull latest images and restart
-docker compose pull && docker compose up -d
+# Pull latest source and rebuild
+git pull && docker compose up -d --build
 
 # View logs for the API
 docker compose logs -f ghosts-api
@@ -93,18 +105,17 @@ docker compose restart ghosts-api
 
 ### Data Persistence
 
-Data is stored in local directories alongside `docker-compose.yml`:
+Data is stored in named Docker volumes:
 
-- `./_db` — PostgreSQL data
-- `./_g` — Grafana configuration and dashboards
-- `./n8n_data` — n8n workflow definitions and credentials
+- `ghosts-postgres-data` — PostgreSQL data
+- `ghosts-grafana-data` — Grafana configuration and dashboards
+- `ghosts-n8n-data` — n8n workflow definitions and credentials
 
 These persist across `docker compose down` / `up` cycles. To reset the database:
 
 ```bash
-docker compose down
-rm -rf ./_db
-docker compose up -d
+docker compose down -v   # removes all named volumes
+docker compose up -d --build
 ```
 
 ---

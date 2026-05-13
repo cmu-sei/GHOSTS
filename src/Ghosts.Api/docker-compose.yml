@@ -1,17 +1,5 @@
 
 services:
-  ghosts-frontend:
-    build:
-      context: ../Ghosts.Frontend
-      dockerfile: Dockerfile
-    container_name: ghosts-frontend
-    ports:
-      - "4200:80"
-    environment:
-      # API_URL must be reachable by the browser, not by Docker — use localhost since ports are mapped to the host
-      API_URL: ${WEB_API_URL:-http://localhost:5000/api}
-      N8N_API_URL: ${WEB_N8N_API_URL:-http://localhost:5678}
-      GRAFANA_URL: ${WEB_GRAFANA_URL:-http://localhost:3000}
   ghosts-postgres:
     image: postgres:16.8
     container_name: ghosts-postgres
@@ -33,7 +21,18 @@ services:
       timeout: 5s
       retries: 10
     restart: unless-stopped
-
+  ghosts-frontend:
+    build:
+      context: ../Ghosts.Frontend
+      dockerfile: Dockerfile
+    container_name: ghosts-frontend
+    ports:
+      - "4200:80"
+    environment:
+      # API_URL must be reachable by the browser, not by Docker — use localhost since ports are mapped to the host
+      API_URL: ${WEB_API_URL:-http://host.docker.internal:5000/api}
+      N8N_API_URL: ${WEB_N8N_API_URL:-http://host.docker.internal:5678}
+      GRAFANA_URL: ${WEB_GRAFANA_URL:-http://host.docker.internal:3000}
   ghosts-api:
     build:
       context: ..
@@ -45,7 +44,7 @@ services:
     ports:
       - "5000:5000"
     environment:
-      N8N_API_URL: ${N8N_API_URL:-http://ghosts-n8n:5678/api/v1/workflows}
+      N8N_API_URL: ${N8N_API_URL:-http://host.docker.internal:5678/api/v1/workflows}
       N8N_API_KEY: ${N8N_API_KEY:-replace-me}
     restart: unless-stopped
 
