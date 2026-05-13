@@ -2218,7 +2218,7 @@
 
 <h1 id="quick-start">Quick Start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h1>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
-<p>This guide covers deploying the GHOSTS API stack and connecting clients to it. No compilation required — all server-side components are available as pre-built Docker images.</p>
+<p>This guide covers deploying the GHOSTS API stack and connecting clients to it. The API and frontend images are built locally from source using Docker — no manual compilation or SDK installation is required beyond Docker itself.</p>
 <p><strong>New to GHOSTS?</strong> Start with the API stack first, then connect one or more clients.</p>
 <details class="info" open="open">
 <summary>Stability</summary>
@@ -2239,13 +2239,13 @@
 <tbody>
 <tr>
 <td><code>ghosts-frontend</code></td>
-<td><code>dustinupdyke/ghosts-frontend</code></td>
+<td><em>(built from source)</em></td>
 <td>4200</td>
 <td>Angular 20 management UI</td>
 </tr>
 <tr>
 <td><code>ghosts-api</code></td>
-<td><code>dustinupdyke/ghosts</code></td>
+<td><em>(built from source)</em></td>
 <td>5000</td>
 <td>REST API + SignalR WebSocket</td>
 </tr>
@@ -2277,13 +2277,22 @@
 <li>Ports 3000, 4200, 5000, 5432, and 5678 available on the host</li>
 </ul>
 <h3 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h3>
-<p><strong>1. Download the Docker Compose file</strong></p>
-<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>ghosts<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>ghosts
-curl<span class="w"> </span>-O<span class="w"> </span>https://raw.githubusercontent.com/cmu-sei/GHOSTS/master/src/Ghosts.Api/docker-compose.yml
+<p><strong>1. Clone the repository</strong></p>
+<p>The Docker Compose file builds the API and frontend images from source and mounts configuration files (Grafana dashboards, n8n workflows) from the repo, so you need the full repository:</p>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/cmu-sei/GHOSTS.git
+<span class="nb">cd</span><span class="w"> </span>GHOSTS/src/Ghosts.Api
 </code></pre></div>
-<p><strong>2. Start all containers</strong></p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
+<p><strong>2. Build and start all containers</strong></p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d<span class="w"> </span>--build
 </code></pre></div>
+<p>The first run builds the API and frontend images locally — this may take a few minutes depending on your connection and hardware. Subsequent runs reuse cached layers.</p>
+<details class="tip" open="open">
+<summary>GitHub Codespaces / proxy environments</summary>
+<p>If the build fails with SSL certificate errors (e.g., <code>PartialChain</code>), your environment uses a TLS-intercepting proxy whose CA is not trusted inside the build container. Fix this by building with host networking:</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>build<span class="w"> </span>--network<span class="o">=</span>host
+docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
+</code></pre></div>
+</details>
 <p><strong>3. Verify the installation</strong></p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>ps<span class="w"> </span>-a
 </code></pre></div>
@@ -2338,18 +2347,18 @@ curl<span class="w"> </span>-O<span class="w"> </span>https://raw.githubusercont
 <tbody>
 <tr>
 <td><code>WEB_API_URL</code></td>
-<td><code>http://host.docker.internal:5000/api</code></td>
-<td>API URL used by the frontend container</td>
+<td><code>http://localhost:5000/api</code></td>
+<td>API URL used by the frontend (must be reachable by the browser)</td>
 </tr>
 <tr>
 <td><code>WEB_N8N_API_URL</code></td>
-<td><code>http://host.docker.internal:5678</code></td>
-<td>n8n URL used by the frontend container</td>
+<td><code>http://localhost:5678</code></td>
+<td>n8n URL used by the frontend (must be reachable by the browser)</td>
 </tr>
 <tr>
 <td><code>N8N_API_URL</code></td>
-<td><code>http://host.docker.internal:5678/api/v1/workflows</code></td>
-<td>n8n REST API URL used by the API container</td>
+<td><code>http://ghosts-n8n:5678/api/v1/workflows</code></td>
+<td>n8n REST API URL used by the API container (inter-container)</td>
 </tr>
 <tr>
 <td><code>N8N_API_KEY</code></td>
@@ -2358,7 +2367,7 @@ curl<span class="w"> </span>-O<span class="w"> </span>https://raw.githubusercont
 </tr>
 <tr>
 <td><code>POSTGRES_PASSWORD</code></td>
-<td>set_me</td>
+<td><code>Scotty@@1!</code></td>
 <td>PostgreSQL password. <strong>Change this</strong> for any non-local deployment.</td>
 </tr>
 </tbody>
@@ -2367,8 +2376,8 @@ curl<span class="w"> </span>-O<span class="w"> </span>https://raw.githubusercont
 <div class="highlight"><pre><span></span><code><span class="c1"># Stop all containers</span>
 docker<span class="w"> </span>compose<span class="w"> </span>down
 
-<span class="c1"># Pull latest images and restart</span>
-docker<span class="w"> </span>compose<span class="w"> </span>pull<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
+<span class="c1"># Pull latest source and rebuild</span>
+git<span class="w"> </span>pull<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d<span class="w"> </span>--build
 
 <span class="c1"># View logs for the API</span>
 docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>-f<span class="w"> </span>ghosts-api
@@ -2377,16 +2386,15 @@ docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"
 docker<span class="w"> </span>compose<span class="w"> </span>restart<span class="w"> </span>ghosts-api
 </code></pre></div>
 <h3 id="data-persistence">Data Persistence<a class="headerlink" href="#data-persistence" title="Permanent link">&para;</a></h3>
-<p>Data is stored in local directories alongside <code>docker-compose.yml</code>:</p>
+<p>Data is stored in named Docker volumes:</p>
 <ul>
-<li><code>./_db</code> — PostgreSQL data</li>
-<li><code>./_g</code> — Grafana configuration and dashboards</li>
-<li><code>./n8n_data</code> — n8n workflow definitions and credentials</li>
+<li><code>ghosts-postgres-data</code> — PostgreSQL data</li>
+<li><code>ghosts-grafana-data</code> — Grafana configuration and dashboards</li>
+<li><code>ghosts-n8n-data</code> — n8n workflow definitions and credentials</li>
 </ul>
 <p>These persist across <code>docker compose down</code> / <code>up</code> cycles. To reset the database:</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>down
-rm<span class="w"> </span>-rf<span class="w"> </span>./_db
-docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>down<span class="w"> </span>-v<span class="w">   </span><span class="c1"># removes all named volumes</span>
+docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d<span class="w"> </span>--build
 </code></pre></div>
 <hr />
 <h2 id="ghosts-clients"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 4a4 4 0 0 1 4 4 4 4 0 0 1-4 4 4 4 0 0 1-4-4 4 4 0 0 1 4-4m0 10c4.42 0 8 1.79 8 4v2H4v-2c0-2.21 3.58-4 8-4"/></svg></span> GHOSTS Clients<a class="headerlink" href="#ghosts-clients" title="Permanent link">&para;</a></h2>
