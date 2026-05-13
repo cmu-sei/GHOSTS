@@ -76,7 +76,10 @@ namespace Ghosts.Client.Universal.Health
             {
                 try
                 {
-                    var r = HealthManager.Check(config);
+                    // Block on the async Check() so we serialize the resolved
+                    // ResultHealth, not the Task wrapper. RunEx runs on its
+                    // own thread (no sync context), so GetResult is safe here.
+                    var r = HealthManager.Check(config).GetAwaiter().GetResult();
 
                     var o = JsonConvert.SerializeObject(r,
                         Formatting.None,
