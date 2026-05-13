@@ -175,7 +175,8 @@ namespace Ghosts.Api.Infrastructure.Services
                 foreach (var line in lines)
                     try
                     {
-                        var array = line.Split(Convert.ToChar("|"));
+                        // Cap at 3 so any '|' inside the JSON Result payload stays intact in array[2].
+                        var array = line.Split('|', 3);
 
                         var isReady = false;
                         var time = DateTime.UtcNow;
