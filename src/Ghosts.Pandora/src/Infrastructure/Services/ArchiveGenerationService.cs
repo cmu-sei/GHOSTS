@@ -1,6 +1,5 @@
 using System.IO.Compression;
 using SharpCompress.Common;
-using SharpCompress.Writers;
 using SharpCompress.Writers.Tar;
 
 namespace Ghosts.Pandora.Infrastructure.Services;
@@ -51,14 +50,14 @@ public class ArchiveGenerationService : IArchiveGenerationService
         _logger.LogInformation("Generating TAR archive with {FileCount} files", fileCount);
 
         using var memoryStream = new MemoryStream();
-        using (var writer = WriterFactory.Open(memoryStream, ArchiveType.Tar, new WriterOptions(CompressionType.None)))
+        using (var writer = new TarWriter(memoryStream, new TarWriterOptions(CompressionType.None, true)))
         {
             var files = CreateRandomFiles(fileCount);
 
             foreach (var (fileName, content) in files)
             {
                 using var fileStream = new MemoryStream(content);
-                writer.Write(fileName, fileStream);
+                writer.Write(fileName, fileStream, null);
                 _logger.LogDebug("Added {FileName} to TAR archive", fileName);
             }
         }
