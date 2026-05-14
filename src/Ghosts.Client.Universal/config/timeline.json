@@ -1,23 +1,86 @@
 {
+    "Status": "Run",
     "TimeLineHandlers": [
         {
-            "HandlerType": "Word",
+            "HandlerType": "Bash",
             "Initial": "",
             "UtcTimeOn": "00:00:00",
             "UtcTimeOff": "24:00:00",
-            "HandlerArgs": {
-                "workingset": {
-                    "max": 20,
-                    "max-age-in-hours": 72
-                }
-            },
             "Loop": true,
+            "HandlerArgs": {
+                "execution-probability": "100",
+                "delay-jitter": "10"
+            },
             "TimeLineEvents": [
                 {
-                    "Command": "create",
-                    "CommandArgs": [ "%homedrive%%homepath%\\Documents", "pdf", "pdf-vary-filenames", "save-array:['c:\\tmp','c:\\tmp\\path2','c:\\tmp\\path3']" ],
-                    "DelayAfter": 900000,
-                    "DelayBefore": 0
+                    "Command": "random",
+                    "CommandArgs": [
+                        "whoami",
+                        "hostname",
+                        "uname -a",
+                        "uptime",
+                        "df -h",
+                        "ls /tmp",
+                        "date",
+                        "cat /etc/os-release",
+                        "ps aux --sort=-%mem | head -5",
+                        "ip addr show | grep inet"
+                    ],
+                    "DelayAfter": 30000,
+                    "DelayBefore": 5000
+                }
+            ]
+        },
+        {
+            "HandlerType": "Curl",
+            "Initial": "",
+            "UtcTimeOn": "00:00:00",
+            "UtcTimeOff": "24:00:00",
+            "Loop": true,
+            "HandlerArgs": {
+                "stickiness": "50",
+                "stickiness-depth-min": "1",
+                "stickiness-depth-max": "3",
+                "delay-jitter": "20"
+            },
+            "TimeLineEvents": [
+                {
+                    "Command": "random",
+                    "CommandArgs": [
+                        "https://example.com",
+                        "https://httpbin.org/html",
+                        "https://httpbin.org/get",
+                        "https://www.wikipedia.org",
+                        "https://news.ycombinator.com"
+                    ],
+                    "DelayAfter": 45000,
+                    "DelayBefore": 3000
+                }
+            ]
+        },
+        {
+            "HandlerType": "Ssh",
+            "Initial": "",
+            "UtcTimeOn": "00:00:00",
+            "UtcTimeOff": "24:00:00",
+            "Loop": true,
+            "HandlerArgs": {
+                "Credentials": "{\"Credentials\":{\"linuxbox\":{\"Username\":\"admin\",\"Password\":\"YWRtaW4=\"}}}",
+                "delay-jitter": "15",
+                "CommandTimeout": "5000",
+                "TimeBetweenCommandsMin": "2000",
+                "TimeBetweenCommandsMax": "8000"
+            },
+            "TimeLineEvents": [
+                {
+                    "Command": "random",
+                    "CommandArgs": [
+                        "10.0.0.50|linuxbox|ls -la;whoami;pwd",
+                        "10.0.0.50|linuxbox|cat /etc/hostname;uptime",
+                        "10.0.0.50|linuxbox|df -h;free -m"
+                    ],
+                    "DelayAfter": 60000,
+                    "DelayBefore": 5000
                 }
             ]
         }

@@ -318,13 +318,13 @@ public class Orchestrator
 
     private void ThreadLaunch(Timeline timeline, TimelineHandler handler)
     {
-        // if (handler.ScheduleType == TimelineHandler.TimelineScheduleType.Cron)
-        // {
-        //     _log.Trace($"Attempting new cron job for: {handler.HandlerType}");
-        //     var s = new CronScheduling();
-        //     Program.Scheduler.ScheduleJob(s.GetJob(handler), s.GetTrigger(handler));
-        //     return;
-        // }
+        if (handler.ScheduleType == TimelineHandler.TimelineScheduleType.Cron)
+        {
+            _log.Trace($"Attempting new cron job for: {handler.HandlerType}");
+            var s = new CronScheduling();
+            Program.Scheduler.ScheduleJob(s.GetJob(handler), s.GetTrigger(handler));
+            return;
+        }
 
         _ = ThreadLaunchEx(timeline, handler);
     }
@@ -398,7 +398,7 @@ public class Orchestrator
             _log.Trace($"Stop file Watcher event raised: {e.FullPath} {e.Name} {e.ChangeType}");
             _log.Trace("Terminating existing tasks and exiting orchestrator");
             StopCommon();
-            //Program.Scheduler.Shutdown(); //shutdown Quartz
+            Program.Scheduler?.Shutdown().GetAwaiter().GetResult();
             _log.Trace("Quartz terminated");
             LogManager.Shutdown(); //shutdown all logging
             Thread.Sleep(10000);

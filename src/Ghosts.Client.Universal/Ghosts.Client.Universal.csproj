@@ -20,6 +20,7 @@
     <NoWarn>NU1701</NoWarn>
     <TargetFramework>net9.0</TargetFramework>
     <LangVersion>13</LangVersion>
+    <InternalsVisibleTo>Ghosts.Client.Universal.Tests</InternalsVisibleTo>
   </PropertyGroup>
 
   <ItemGroup>
@@ -29,6 +30,7 @@
     <PackageReference Include="FileHelpers" Version="3.5.2"/>
     <PackageReference Include="Selenium.Firefox.WebDriver" Version="0.27.0"/>
     <PackageReference Include="Selenium.WebDriver" Version="4.33.0"/>
+    <PackageReference Include="Quartz" Version="3.13.1"/>
     <PackageReference Include="SimpleTCP" Version="1.0.24"/>
     <PackageReference Include="System.Diagnostics.Process" Version="4.3.0"/>
     <PackageReference Include="SSH.NET" Version="2025.0.0"/>

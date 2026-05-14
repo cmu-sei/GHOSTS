@@ -14,6 +14,8 @@ using Ghosts.Client.Universal.TimelineManager;
 using Ghosts.Domain.Code;
 using Ghosts.Domain.Models;
 using NLog;
+using Quartz;
+using Quartz.Impl;
 
 namespace Ghosts.Client.Universal;
 
@@ -22,6 +24,7 @@ internal static class Program
     internal static ClientConfiguration Configuration { get; private set; }
     internal static ApplicationDetails.ConfigurationUrls ConfigurationUrls { get; set; }
     internal static bool IsDebug;
+    internal static IScheduler Scheduler;
     internal static ConcurrentDictionary<Guid, TaskJob> RunningTasks { get; } = new();
     private static readonly Logger _log = LogManager.GetCurrentClassLogger();
     public static CheckId CheckId { get; set; }
@@ -73,6 +76,10 @@ internal static class Program
             Console.ReadLine();
             return;
         }
+
+        var factory = new StdSchedulerFactory();
+        Scheduler = await factory.GetScheduler();
+        await Scheduler.Start();
 
         if (Configuration.Sockets.IsEnabled)
         {
@@ -143,5 +150,20 @@ internal static class Program
     {
         _log.Debug(
             $"Initiating {ApplicationDetails.Name} shutdown - Local: {DateTime.Now.TimeOfDay} UTC: {DateTime.UtcNow.TimeOfDay}");
+
+        foreach (var job in RunningTasks.Values)
+        {
+            try
+            {
+                if (job.CancellationTokenSource is { Token.CanBeCanceled: true })
+                    job.CancellationTokenSource.Cancel();
+            }
+            catch (Exception ex)
+            {
+                _log.Debug($"Error cancelling task: {ex.Message}");
+            }
+        }
+
+        Infrastructure.StartupTasks.CleanupProcesses();
     }
 }
