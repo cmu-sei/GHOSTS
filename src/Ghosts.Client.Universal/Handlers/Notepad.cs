@@ -1,495 +1,340 @@
-﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
+// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
 using System.Threading;
-using Ghosts.Domain;
 using System.Threading.Tasks;
+using Ghosts.Domain;
+using Ghosts.Domain.Code;
 
 namespace Ghosts.Client.Universal.Handlers;
 
 public class Notepad(Timeline entireTimeline, TimelineHandler timelineHandler, CancellationToken cancellationToken)
     : BaseHandler(entireTimeline, timelineHandler, cancellationToken)
 {
+    private int _jitterFactor;
+    private int _executionProbability = 100;
+    private int _creationProbability = 25;
+    private int _modificationProbability = 25;
+    private int _deletionProbability = 25;
+    private int _viewProbability = 25;
+    private string _inputDirectory;
+    private string _outputDirectory;
+    private int _paragraphsMin = 1;
+    private int _paragraphsMax = 10;
+
+    private static readonly string[] Words =
+    {
+        "the", "quick", "brown", "fox", "jumps", "over", "lazy", "dog",
+        "lorem", "ipsum", "dolor", "sit", "amet", "consectetur", "adipiscing",
+        "elit", "sed", "do", "eiusmod", "tempor", "incididunt", "ut", "labore",
+        "et", "dolore", "magna", "aliqua"
+    };
+
     protected override Task RunOnce()
     {
-        throw new NotImplementedException();
+        try
+        {
+            ParseHandlerArgs();
+
+            var probabilityList = new[] { _creationProbability, _modificationProbability, _deletionProbability, _viewProbability };
+            var actionList = new[] { "create", "modify", "delete", "view" };
+
+            foreach (var timelineEvent in Handler.TimeLineEvents)
+            {
+                Token.ThrowIfCancellationRequested();
+                WorkingHours.Is(Handler);
+
+                if (timelineEvent.DelayBeforeActual > 0)
+                    Thread.Sleep(timelineEvent.DelayBeforeActual);
+
+                if (_random.Next(0, 100) >= _executionProbability)
+                {
+                    _log.Trace("Notepad:: Action skipped due to execution probability.");
+                    if (timelineEvent.DelayAfterActual > 0)
+                        Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, _jitterFactor));
+                    continue;
+                }
+
+                var action = SelectActionFromProbabilities(probabilityList, actionList);
+                if (action == null)
+                {
+                    _log.Trace("Notepad:: No action this cycle.");
+                    if (timelineEvent.DelayAfterActual > 0)
+                        Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, _jitterFactor));
+                    continue;
+                }
+
+                // Fall back to create if there are no files for the chosen action
+                if ((action == "modify" || action == "view") && GetRandomFile(_inputDirectory) == null)
+                    action = "create";
+                if (action == "delete" && GetRandomFile(_outputDirectory) == null)
+                    action = "create";
+
+                switch (action)
+                {
+                    case "create":
+                        DoCreateAction();
+                        break;
+                    case "modify":
+                        DoModifyAction();
+                        break;
+                    case "delete":
+                        DoDeleteAction();
+                        break;
+                    case "view":
+                        DoViewAction();
+                        break;
+                }
+
+                Report(new ReportItem
+                {
+                    Handler = Handler.HandlerType.ToString(),
+                    Command = action,
+                    Arg = _outputDirectory,
+                    Trackable = timelineEvent.TrackableId
+                });
+
+                if (timelineEvent.DelayAfterActual > 0)
+                    Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, _jitterFactor));
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception e)
+        {
+            _log.Error(e);
+        }
+
+        return Task.CompletedTask;
     }
 
+    private void DoCreateAction()
+    {
+        try
+        {
+            var fileName = GenerateRandomFileName();
+            var filePath = Path.Combine(_outputDirectory, fileName);
+            var text = GenerateRandomText();
+            File.WriteAllText(filePath, text, Encoding.UTF8);
+            _log.Trace($"Notepad:: File {filePath} created.");
+        }
+        catch (Exception e)
+        {
+            _log.Trace("Notepad:: Error creating file.");
+            _log.Error(e);
+        }
+    }
 
-    // //include FindWindowEx
-    // [DllImport("user32.dll")]
-    // public static extern IntPtr FindWindowEx(IntPtr hwndParent, IntPtr hwndChildAfter, string lpszClass, string lpszWindow);
-    //
-    // //include SendMessage
-    // [DllImport("user32.dll")]
-    // public static extern int SendMessage(IntPtr hWnd, int uMsg, int wParam, string lParam);
-    //
-    // //this is a constant indicating the window that we want to send a text message
-    // const int WmSetText = 0X000C;
-    //
-    // public Process NotepadProcess;
-    //
-    // private int JitterFactor = 50;  //used with Jitter.JitterFactorDelay
-    // private int ExecutionProbability = 100;  //probability that an action is taken this cycle
-    // private int DeletionProbability = 0;
-    // private int ModificationProbability = 0;
-    // private int ViewProbability = 0;
-    // private int CreationProbability = 0;
-    // private string InputDirectory = null;
-    // private string OutputDirectory = null;
-    // private string TextGeneration = "random";
-    // private int ParagraphsMin = 1;
-    // private int ParagraphsMax = 10;
-    //
-    //
-    // public Notepad(TimelineHandler handler)
-    // {
-    //     try
-    //     {
-    //         base.Init(handler);
-    //         if (handler.Loop)
-    //         {
-    //             while (true)
-    //             {
-    //                 Ex(handler);
-    //             }
-    //         }
-    //         else
-    //         {
-    //             Ex(handler);
-    //         }
-    //     }
-    //     catch (ThreadAbortException)
-    //     {
-    //         CloseNotePad();
-    //
-    //     }
-    //     catch (Exception e)
-    //     {
-    //         _log.Error(e);
-    //     }
-    // }
-    //
-    // public void Ex(TimelineHandler handler)
-    // {
-    //     ParseHandlerArgs(handler);
-    //
-    //     int[] probabilityList = { ViewProbability, DeletionProbability, CreationProbability, ModificationProbability };
-    //     string[] actionList = { "view", "delete", "create", "modify" };
-    //
-    //     //arguments parsed. Enter loop that does not exit unless forced exit, which stops handler.
-    //     while (true)
-    //     {
-    //         //Currently,the only supported timeline command is random
-    //         //in which everything is done by probabilities.
-    //         //For 'random', CommandArgs is not used.
-    //
-    //         foreach (var timelineEvent in handler.TimeLineEvents)
-    //         {
-    //             WorkingHours.Is(handler);
-    //             if (timelineEvent.DelayBeforeActual > 0)
-    //                 Thread.Sleep(timelineEvent.DelayBeforeActual);
-    //             switch (timelineEvent.Command)
-    //             {
-    //                 case "random":
-    //
-    //                     if (ExecutionProbability < _random.Next(0, 101))
-    //                     {
-    //                         _log.Trace("Notepad:: Action skipped this due to execution probability.");
-    //                         continue;
-    //                     }
-    //                     //decided what to do in this activity cycle
-    //                     var action = SelectActionFromProbabilities(probabilityList, actionList);
-    //                     if (action == null)
-    //                     {
-    //                         _log.Trace("Notepad:: No action this cycle.");
-    //                     }
-    //                     else
-    //                     {
-    //                         var infile = GetRandomFile(InputDirectory, "*.txt");
-    //                         if ((action == "modify" || action == "view") && infile == null)
-    //                         {
-    //                             action = "create";  //no txt files to view or modify
-    //                         }
-    //                         var outfile = GetRandomFile(OutputDirectory, "*.txt");
-    //                         if (action == "delete" && outfile == null)
-    //                         {
-    //                             action = "create"; //no txt files to delete
-    //                         }
-    //                         if (timelineEvent.DelayBeforeActual > 0)
-    //                             Thread.Sleep(timelineEvent.DelayBeforeActual);
-    //
-    //                         switch (action)
-    //                         {
-    //                             case "create":
-    //                                 //create a file that does not exist, add content, save to new file name, open with Notepad
-    //                                 while (true)
-    //                                 {
-    //
-    //                                     outfile = Path.Combine(OutputDirectory, SshSftpSupport.RandomString(5, 15) + ".txt");
-    //                                     if (!File.Exists(outfile)) break;
-    //                                 }
-    //
-    //                                 DoCreateAction(outfile);
-    //                                 if (!StartNotePad(outfile)) return;
-    //                                 break;
-    //                             case "delete":
-    //                                 //delete random file
-    //                                 DoDeleteAction(outfile);
-    //                                 break;
-    //                             case "modify":
-    //                                 //open random existing file, replace content, save, open with notepad
-    //                                 DoModifyAction(outfile);
-    //                                 if (!StartNotePad(outfile)) return;
-    //                                 break;
-    //                             case "view":
-    //                                 if (!StartNotePad(infile)) return;
-    //                                 //open notepad with random existing file, nothing else to do.
-    //                                 break;
-    //
-    //                         }
-    //                         Report(new ReportItem { Handler = handler.HandlerType.ToString(), Command = action, Arg = "", Trackable = timelineEvent.TrackableId });
-    //                     }
-    //                     if (timelineEvent.DelayAfterActual > 0)
-    //                         Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, JitterFactor));
-    //                     CloseNotePad();  //closes notepad if it is open. New notepad will be opened on next cycle if needed
-    //
-    //                     break;
-    //             }
-    //
-    //         }
-    //     }
-    // }
-    // private void DoModifyAction(string outfile)
-    // {
-    //     try
-    //     {
-    //         string allText = "";
-    //         // Open the stream and read it back.
-    //         using (StreamReader sr = File.OpenText(outfile))
-    //         {
-    //             string s = "";
-    //             while ((s = sr.ReadLine()) != null)
-    //             {
-    //                 allText += s;
-    //             }
-    //         }
-    //
-    //         allText += GetRandomText(); // add text
-    //         //now write all text to file
-    //         using (FileStream fs = File.Create(outfile))
-    //         {
-    //
-    //             byte[] info = new UTF8Encoding(true).GetBytes(allText);
-    //             // Add some information to the file.
-    //             fs.Write(info, 0, info.Length);
-    //         }
-    //
-    //     }
-    //     catch (ThreadAbortException)
-    //     {
-    //         throw;  //pass up
-    //     }
-    //     catch (Exception e)
-    //     {
-    //         _log.Trace($"Notepad:: Error modifying file {outfile}");
-    //         _log.Trace(e);
-    //     }
-    //     return;
-    // }
-    //
-    //
-    //
-    // /// <summary>
-    // /// This creates the file on disk.
-    // /// </summary>
-    // /// <param name="outfile"></param>
-    // private void DoCreateAction(string outfile)
-    // {
-    //     try
-    //     {
-    //         // Create the file, or overwrite if the file exists.
-    //         using (FileStream fs = File.Create(outfile))
-    //         {
-    //             var newText = GetRandomText();
-    //             byte[] info = new UTF8Encoding(true).GetBytes(newText);
-    //             // Add some information to the file.
-    //             fs.Write(info, 0, info.Length);
-    //         }
-    //         _log.Trace($"Notepad::  File {outfile} created.");
-    //     }
-    //     catch (ThreadAbortException)
-    //     {
-    //         throw;  //pass up
-    //     }
-    //     catch (Exception e)
-    //     {
-    //         _log.Trace($"Notepad:: Error creating file {outfile}");
-    //         _log.Trace(e);
-    //     }
-    // }
-    //
-    //
-    // private string GetRandomText()
-    // {
-    //     var list = RandomText.GetDictionary.GetDictionaryList();
-    //     using (var rt = new RandomText(list))
-    //     {
-    //         var numberParagraphs = _random.Next(ParagraphsMin, ParagraphsMax + 1);
-    //         rt.AddContentParagraphs(numberParagraphs, 4, 10, 4, 15);
-    //         var formattedContent = rt.FormatContent(60, 90);
-    //         return formattedContent;
-    //     }
-    // }
-    //
-    //
-    // private void DoDeleteAction(string target)
-    // {
-    //
-    //     try
-    //     {
-    //         File.Delete(target);
-    //         _log.Trace($"Notepad:: Deleted file {target}");
-    //     }
-    //     catch (ThreadAbortException)
-    //     {
-    //         throw;  //pass up
-    //     }
-    //     catch (Exception e)
-    //     {
-    //         _log.Trace($"Notepad:: Error deleting file {target}");
-    //         _log.Trace(e);
-    //     }
-    //     return;
-    // }
-    //
-    // public string GetRandomFile(string targetDir, string pattern)
-    // {
-    //     try
-    //     {
-    //         string[] filelist = Directory.GetFiles(targetDir, pattern);
-    //         if (filelist.Length > 0) return filelist[_random.Next(0, filelist.Length)];
-    //         else return null;
-    //     }
-    //     catch (ThreadAbortException)
-    //     {
-    //         throw;  //pass up
-    //     }
-    //     catch { } //ignore any errors
-    //     return null;
-    // }
-    //
-    //
-    // private void ParseHandlerArgs(TimelineHandler handler)
-    // {
-    //     if (handler.HandlerArgs.ContainsKey("execution-probability"))
-    //     {
-    //         int.TryParse(handler.HandlerArgs["execution-probability"].ToString(), out ExecutionProbability);
-    //         if (!CheckProbabilityVar(handler.HandlerArgs["execution-probability"].ToString(), ExecutionProbability))
-    //         {
-    //             ExecutionProbability = 100;
-    //         }
-    //     }
-    //     if (handler.HandlerArgs.ContainsKey("deletion-probability"))
-    //     {
-    //         int.TryParse(handler.HandlerArgs["deletion-probability"].ToString(), out DeletionProbability);
-    //         if (!CheckProbabilityVar(handler.HandlerArgs["deletion-probability"].ToString(), DeletionProbability))
-    //         {
-    //             DeletionProbability = 0;
-    //         }
-    //     }
-    //     if (handler.HandlerArgs.ContainsKey("view-probability"))
-    //     {
-    //         int.TryParse(handler.HandlerArgs["view-probability"].ToString(), out ViewProbability);
-    //         if (!CheckProbabilityVar(handler.HandlerArgs["view-probability"].ToString(), ViewProbability))
-    //         {
-    //             ViewProbability = 0;
-    //         }
-    //     }
-    //     if (handler.HandlerArgs.ContainsKey("modification-probability"))
-    //     {
-    //         int.TryParse(handler.HandlerArgs["modification-probability"].ToString(), out ModificationProbability);
-    //         if (!CheckProbabilityVar(handler.HandlerArgs["modification-probability"].ToString(), ModificationProbability))
-    //         {
-    //             ModificationProbability = 0;
-    //         }
-    //     }
-    //     if (handler.HandlerArgs.ContainsKey("creation-probability"))
-    //     {
-    //         int.TryParse(handler.HandlerArgs["creation-probability"].ToString(), out CreationProbability);
-    //         if (!CheckProbabilityVar(handler.HandlerArgs["creation-probability"].ToString(), CreationProbability))
-    //         {
-    //             CreationProbability = 0;
-    //         }
-    //     }
-    //
-    //     if ((ViewProbability + DeletionProbability + ModificationProbability + CreationProbability) > 100)
-    //     {
-    //         _log.Trace($"Notepad:: The sum of the view/delete/create/modification probabilities is > 100 , using defaults.");
-    //         setProbabilityDefaults();
-    //
-    //     }
-    //
-    //     if ((ViewProbability + DeletionProbability + ModificationProbability + CreationProbability) == 0)
-    //     {
-    //         _log.Trace($"Notepad:: The sum of the view/delete/create/modification probabilities == 0 , using defaults.");
-    //         setProbabilityDefaults();
-    //     }
-    //
-    //     if (handler.HandlerArgs.ContainsKey("input-directory"))
-    //     {
-    //         string targetDir = handler.HandlerArgs["input-directory"].ToString();
-    //         targetDir = Environment.ExpandEnvironmentVariables(targetDir);
-    //         if (!Directory.Exists(targetDir))
-    //         {
-    //             _log.Trace($"Notepad:: input directory {targetDir} does not exist, using browser downloads directory.");
-    //         }
-    //         else
-    //         {
-    //             InputDirectory = targetDir;
-    //         }
-    //     }
-    //
-    //     if (InputDirectory == null)
-    //     {
-    //         InputDirectory = KnownFolders.GetDownloadFolderPath();
-    //     }
-    //
-    //     if (handler.HandlerArgs.ContainsKey("output-directory"))
-    //     {
-    //         string targetDir = handler.HandlerArgs["output-directory"].ToString();
-    //         targetDir = Environment.ExpandEnvironmentVariables(targetDir);
-    //         if (!Directory.Exists(targetDir))
-    //         {
-    //             _log.Trace($"Notepad:: output directory {targetDir} does not exist, using browser downloads directory.");
-    //         }
-    //         else
-    //         {
-    //             OutputDirectory = targetDir;
-    //         }
-    //     }
-    //
-    //     if (OutputDirectory == null)
-    //     {
-    //         OutputDirectory = KnownFolders.GetDownloadFolderPath();
-    //     }
-    //
-    //     if (handler.HandlerArgs.ContainsKey("text-generation"))
-    //     {
-    //         TextGeneration = handler.HandlerArgs["text-generation"].ToString();
-    //     }
-    //
-    //     if (handler.HandlerArgs.ContainsKey("min-paragraphs"))
-    //     {
-    //         int.TryParse(handler.HandlerArgs["min-paragraphs"].ToString(), out ParagraphsMin);
-    //         if (ParagraphsMin < 0)
-    //         {
-    //             ParagraphsMin = 1;
-    //         }
-    //     }
-    //
-    //     if (handler.HandlerArgs.ContainsKey("max-paragraphs"))
-    //     {
-    //         int.TryParse(handler.HandlerArgs["max-paragraphs"].ToString(), out ParagraphsMax);
-    //         if (ParagraphsMax < 0)
-    //         {
-    //             ParagraphsMax = 10;
-    //         }
-    //     }
-    //
-    //     if (ParagraphsMax < ParagraphsMin) ParagraphsMax = ParagraphsMin;
-    //
-    //     if (handler.HandlerArgs.ContainsKey("delay-jitter"))
-    //     {
-    //         JitterFactor = Jitter.JitterFactorParse(handler.HandlerArgs["delay-jitter"].ToString());
-    //         if (JitterFactor < 0) JitterFactor = 0;
-    //     }
-    // }
-    //
-    // private void setProbabilityDefaults()
-    // {
-    //     ViewProbability = 25;
-    //     DeletionProbability = 25;
-    //     CreationProbability = 25;
-    //     ModificationProbability = 25;
-    // }
-    //
-    // private void CloseNotePad()
-    // {
-    //     //do our best at cleaning this up
-    //     if (this.NotepadProcess == null || this.NotepadProcess.HasExited) return;
-    //     try
-    //     {
-    //         //close the running process
-    //         this.NotepadProcess.CloseMainWindow();
-    //         Thread.Sleep(1000);
-    //         if (!this.NotepadProcess.HasExited)
-    //         {
-    //             this.NotepadProcess.Kill();   //may have a dia_log window up
-    //             Thread.Sleep(1000);
-    //         }
-    //         this.NotepadProcess.Close();  //free resources
-    //         Thread.Sleep(1000);
-    //
-    //     }
-    //     catch (ThreadAbortException)
-    //     {
-    //         throw;  //pass up
-    //     }
-    //     catch
-    //     {
-    //
-    //     }
-    //     this.NotepadProcess = null;
-    // }
-    //
-    // private bool StartNotePad(string fname)
-    // {
-    //     if (this.NotepadProcess != null && !this.NotepadProcess.HasExited)
-    //     {
-    //         CloseNotePad();
-    //     }
-    //     try
-    //     {
-    //         if (fname == null)
-    //         {
-    //             this.NotepadProcess = Process.Start("notepad.exe");
-    //         }
-    //         else
-    //         {
-    //             this.NotepadProcess = Process.Start("notepad.exe", fname);
-    //         }
-    //         if (this.NotepadProcess == null)
-    //         {
-    //             _log.Trace("Notepad:: Unable to start Notepad process, handler exiting.");
-    //             return false;
-    //         }
-    //         Thread.Sleep(1000);
-    //     }
-    //     catch (ThreadAbortException)
-    //     {
-    //         throw;  //pass up
-    //     }
-    //     catch (Exception e)
-    //     {
-    //         _log.Trace("Notepad:: Unable to start Notepad process, handler exiting.");
-    //         _log.Trace(e);
-    //         return false;
-    //     }
-    //     return true;
-    // }
-    //
-    //
-    //
-    //
-    //
-    // public void Paste(string text)
-    // {
-    //     //getting notepad's textbox handle from the main window's handle
-    //     //the textbox is called 'Edit'
-    //     var notepadTextbox = FindWindowEx(NotepadProcess.MainWindowHandle, IntPtr.Zero, "Edit", null);
-    //     //sending the message to the textbox
-    //     Winuser.SetForegroundWindow(NotepadProcess.MainWindowHandle);
-    //     SendMessage(notepadTextbox, WmSetText, 0, text);
-    // }
+    private void DoModifyAction()
+    {
+        try
+        {
+            var filePath = GetRandomFile(_outputDirectory);
+            if (filePath == null) return;
+            var additionalText = GenerateRandomText();
+            File.AppendAllText(filePath, Environment.NewLine + additionalText, Encoding.UTF8);
+            _log.Trace($"Notepad:: File {filePath} modified.");
+        }
+        catch (Exception e)
+        {
+            _log.Trace("Notepad:: Error modifying file.");
+            _log.Error(e);
+        }
+    }
+
+    private void DoDeleteAction()
+    {
+        try
+        {
+            var filePath = GetRandomFile(_outputDirectory);
+            if (filePath == null) return;
+            File.Delete(filePath);
+            _log.Trace($"Notepad:: Deleted file {filePath}.");
+        }
+        catch (Exception e)
+        {
+            _log.Trace("Notepad:: Error deleting file.");
+            _log.Error(e);
+        }
+    }
+
+    private void DoViewAction()
+    {
+        try
+        {
+            var filePath = GetRandomFile(_inputDirectory);
+            if (filePath == null) return;
+            var content = File.ReadAllText(filePath, Encoding.UTF8);
+            _log.Trace($"Notepad:: Viewed file {filePath} ({content.Length} chars).");
+        }
+        catch (Exception e)
+        {
+            _log.Trace("Notepad:: Error viewing file.");
+            _log.Error(e);
+        }
+    }
+
+    private string GenerateRandomText()
+    {
+        var paragraphCount = _random.Next(_paragraphsMin, _paragraphsMax + 1);
+        var sb = new StringBuilder();
+        for (var p = 0; p < paragraphCount; p++)
+        {
+            if (p > 0) sb.AppendLine();
+            var sentenceCount = _random.Next(3, 8);
+            for (var s = 0; s < sentenceCount; s++)
+            {
+                var wordCount = _random.Next(5, 15);
+                var sentence = new StringBuilder();
+                for (var w = 0; w < wordCount; w++)
+                {
+                    if (w > 0) sentence.Append(' ');
+                    sentence.Append(Words[_random.Next(Words.Length)]);
+                }
+                sentence[0] = char.ToUpper(sentence[0]);
+                sentence.Append(". ");
+                sb.Append(sentence);
+            }
+            sb.AppendLine();
+        }
+        return sb.ToString();
+    }
+
+    private static string GenerateRandomFileName()
+    {
+        var length = _random.Next(8, 16);
+        const string chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+        var sb = new StringBuilder(length);
+        for (var i = 0; i < length; i++)
+            sb.Append(chars[_random.Next(chars.Length)]);
+        sb.Append(".txt");
+        return sb.ToString();
+    }
+
+    private static string GetRandomFile(string directory)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(directory) || !Directory.Exists(directory))
+                return null;
+            var files = Directory.GetFiles(directory, "*.txt");
+            if (files.Length == 0) return null;
+            return files[_random.Next(files.Length)];
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static string SelectActionFromProbabilities(int[] probabilityList, string[] actionList)
+    {
+        var choice = _random.Next(0, 101);
+        var startRange = 0;
+        var index = 0;
+
+        foreach (var probability in probabilityList)
+        {
+            if (probability > 0)
+            {
+                var endRange = startRange + probability;
+                if (choice >= startRange && choice <= endRange) return actionList[index];
+                startRange = endRange + 1;
+            }
+            index++;
+        }
+
+        return null;
+    }
+
+    private void ParseHandlerArgs()
+    {
+        if (Handler.HandlerArgs == null) return;
+
+        if (Handler.HandlerArgs.TryGetValue("execution-probability", out var ep))
+        {
+            if (int.TryParse(ep.ToString(), out var val) && val >= 0 && val <= 100)
+                _executionProbability = val;
+        }
+
+        if (Handler.HandlerArgs.TryGetValue("creation-probability", out var cp))
+        {
+            if (int.TryParse(cp.ToString(), out var val) && val >= 0 && val <= 100)
+                _creationProbability = val;
+        }
+
+        if (Handler.HandlerArgs.TryGetValue("modification-probability", out var mp))
+        {
+            if (int.TryParse(mp.ToString(), out var val) && val >= 0 && val <= 100)
+                _modificationProbability = val;
+        }
+
+        if (Handler.HandlerArgs.TryGetValue("deletion-probability", out var dp))
+        {
+            if (int.TryParse(dp.ToString(), out var val) && val >= 0 && val <= 100)
+                _deletionProbability = val;
+        }
+
+        if (Handler.HandlerArgs.TryGetValue("view-probability", out var vp))
+        {
+            if (int.TryParse(vp.ToString(), out var val) && val >= 0 && val <= 100)
+                _viewProbability = val;
+        }
+
+        var probSum = _creationProbability + _modificationProbability + _deletionProbability + _viewProbability;
+        if (probSum > 100 || probSum == 0)
+        {
+            _log.Trace("Notepad:: Probability sum invalid, resetting to defaults (25 each).");
+            _creationProbability = 25;
+            _modificationProbability = 25;
+            _deletionProbability = 25;
+            _viewProbability = 25;
+        }
+
+        _outputDirectory = Path.GetTempPath();
+        if (Handler.HandlerArgs.TryGetValue("output-directory", out var od))
+        {
+            var expanded = Environment.ExpandEnvironmentVariables(od.ToString());
+            if (!string.IsNullOrEmpty(expanded))
+                _outputDirectory = expanded;
+        }
+
+        _inputDirectory = Path.GetTempPath();
+        if (Handler.HandlerArgs.TryGetValue("input-directory", out var id))
+        {
+            var expanded = Environment.ExpandEnvironmentVariables(id.ToString());
+            if (!string.IsNullOrEmpty(expanded))
+                _inputDirectory = expanded;
+        }
+
+        if (!Directory.Exists(_outputDirectory))
+            Directory.CreateDirectory(_outputDirectory);
+        if (!Directory.Exists(_inputDirectory))
+            Directory.CreateDirectory(_inputDirectory);
+
+        if (Handler.HandlerArgs.TryGetValue("min-paragraphs", out var minP))
+        {
+            if (int.TryParse(minP.ToString(), out var val) && val > 0)
+                _paragraphsMin = val;
+        }
+
+        if (Handler.HandlerArgs.TryGetValue("max-paragraphs", out var maxP))
+        {
+            if (int.TryParse(maxP.ToString(), out var val) && val > 0)
+                _paragraphsMax = val;
+        }
+
+        if (_paragraphsMax < _paragraphsMin)
+            _paragraphsMax = _paragraphsMin;
+
+        if (Handler.HandlerArgs.TryGetValue("delay-jitter", out var dj))
+        {
+            _jitterFactor = Jitter.JitterFactorParse(dj.ToString());
+        }
+    }
 }

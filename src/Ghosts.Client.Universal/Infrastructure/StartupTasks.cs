@@ -1,9 +1,11 @@
-﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
+// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
+using Ghosts.Domain;
+using Ghosts.Domain.Code;
 using NLog;
 
 namespace Ghosts.Client.Universal.Infrastructure
@@ -21,16 +23,55 @@ namespace Ghosts.Client.Universal.Infrastructure
         {
             try
             {
-                var cleanupList = new List<string>
+                var cleanupList = new List<string>();
+
+                var timeline = TimelineBuilder.GetTimeline();
+                if (timeline?.TimeLineHandlers != null)
                 {
-                    //TODO: What processes are we managing?
-                };
+                    foreach (var handler in timeline.TimeLineHandlers)
+                    {
+                        switch (handler.HandlerType)
+                        {
+                            case HandlerType.BrowserChrome:
+                                cleanupList.Add(ProcessManager.ProcessNames.Chrome);
+                                cleanupList.Add(ProcessManager.ProcessNames.ChromeDriver);
+                                break;
+                            case HandlerType.BrowserFirefox:
+                                cleanupList.Add(ProcessManager.ProcessNames.Firefox);
+                                cleanupList.Add(ProcessManager.ProcessNames.GeckoDriver);
+                                break;
+                            case HandlerType.Word:
+                                cleanupList.Add(ProcessManager.ProcessNames.Word);
+                                break;
+                            case HandlerType.Excel:
+                                cleanupList.Add(ProcessManager.ProcessNames.Excel);
+                                break;
+                            case HandlerType.PowerPoint:
+                                cleanupList.Add(ProcessManager.ProcessNames.PowerPoint);
+                                break;
+                            case HandlerType.Outlook:
+                            case HandlerType.Outlookv2:
+                                cleanupList.Add(ProcessManager.ProcessNames.Outlook);
+                                break;
+                            case HandlerType.Command:
+                                cleanupList.Add(ProcessManager.ProcessNames.Command);
+                                break;
+                            case HandlerType.PowerShell:
+                                cleanupList.Add(ProcessManager.ProcessNames.PowerShell);
+                                break;
+                            case HandlerType.Curl:
+                                cleanupList.Add(ProcessManager.ProcessNames.Curl);
+                                break;
+                        }
+                    }
+                }
 
-                //need to kill any other instance of ghosts already running
-                var ghosts = Process.GetCurrentProcess();
-                cleanupList.Add(ghosts.ProcessName);
-
-                _log.Trace($"Got ghosts pid: {ghosts.Id}");
+                if (!Program.Configuration.AllowMultipleInstances)
+                {
+                    var ghosts = Process.GetCurrentProcess();
+                    cleanupList.Add(ghosts.ProcessName);
+                    _log.Trace($"Got ghosts pid: {ghosts.Id}");
+                }
 
                 foreach (var cleanupItem in cleanupList)
                 {
@@ -39,18 +80,7 @@ namespace Ghosts.Client.Universal.Infrastructure
                         new Thread(() =>
                         {
                             Thread.CurrentThread.IsBackground = true;
-                            foreach (var process in Process.GetProcessesByName(cleanupItem))
-                            {
-                                if (process.Id == ghosts.Id) continue;
-                                try
-                                {
-                                    process.Kill();
-                                }
-                                catch
-                                {
-                                    // ignored
-                                }
-                            }
+                            ProcessManager.KillProcessAndChildrenByName(cleanupItem);
                         }).Start();
                         _log.Trace($"Killing {cleanupItem}");
                     }

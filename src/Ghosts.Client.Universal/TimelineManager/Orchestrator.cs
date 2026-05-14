@@ -4,6 +4,7 @@ using Ghosts.Domain;
 using Microsoft.Win32;
 using NLog;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -211,63 +212,57 @@ public class Orchestrator
     // if supposed to be one excel running, and there is more than 2, then kill race condition
     private static void SafetyNet(object defaultTimeline)
     {
-        // var timeline = (Timeline)defaultTimeline;
-        // while (true)
-        // {
-        //     try
-        //     {
-        //         _log.Trace("SafetyNet loop beginning");
-        //
-        //         FileListing.FlushList();
-        //
-        //         var handlerCount = timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.Excel);
-        //         var pids = ProcessManager.GetPids(ProcessManager.ProcessNames.Excel).ToList();
-        //         if (pids.Count > handlerCount + 1)
-        //         {
-        //             _log.Trace($"SafetyNet excel handlers: {handlerCount} pids: {pids.Count} - killing");
-        //             ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.Excel);
-        //         }
-        //
-        //         handlerCount = timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.PowerPoint);
-        //         pids = ProcessManager.GetPids(ProcessManager.ProcessNames.PowerPoint).ToList();
-        //         if (pids.Count > handlerCount + 1)
-        //         {
-        //             _log.Trace($"SafetyNet powerpoint handlers: {handlerCount} pids: {pids.Count} - killing");
-        //             ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.PowerPoint);
-        //         }
-        //
-        //         handlerCount = timeline.TimeLineHandlers.Count(o => o.HandlerType == HandlerType.Word);
-        //         pids = ProcessManager.GetPids(ProcessManager.ProcessNames.Word).ToList();
-        //         if (pids.Count > handlerCount + 1)
-        //         {
-        //             _log.Trace($"SafetyNet word handlers: {handlerCount} pids: {pids.Count} - killing");
-        //             ProcessManager.KillProcessAndChildrenByName(ProcessManager.ProcessNames.Word);
-        //         }
-        //         _log.Trace("SafetyNet loop ending");
-        //     }
-        //     catch (Exception e)
-        //     {
-        //         _log.Trace($"SafetyNet exception: {e}");
-        //     }
-        //     finally
-        //     {
-        //         try
-        //         {
-        //             using var proc = Process.GetCurrentProcess();
-        //             var was = proc.PrivateMemorySize64 / (1024 * 1024);
-        //             Program.MinimizeFootprint();
-        //             Program.MinimizeMemory();
-        //             _log.Trace($"Minimized footprint and memory. Was: {was}. Current: {proc.PrivateMemorySize64 / (1024 * 1024)}");
-        //         }
-        //         catch (Exception e)
-        //         {
-        //             _log.Trace(e);
-        //         }
-        //
-        //
-        //         Thread.Sleep(300000); //clean up every 5 minutes
-        //     }
-        // }
+        var timeline = (Timeline)defaultTimeline;
+        while (true)
+        {
+            try
+            {
+                _log.Trace("SafetyNet loop beginning");
+
+                foreach (var handler in timeline.TimeLineHandlers)
+                {
+                    string processName = null;
+                    switch (handler.HandlerType)
+                    {
+                        case HandlerType.BrowserChrome:
+                            processName = "chrome";
+                            break;
+                        case HandlerType.BrowserFirefox:
+                            processName = "firefox";
+                            break;
+                        case HandlerType.Word:
+                            if (OperatingSystem.IsWindows()) processName = "WINWORD";
+                            break;
+                        case HandlerType.Excel:
+                            if (OperatingSystem.IsWindows()) processName = "EXCEL";
+                            break;
+                        case HandlerType.PowerPoint:
+                            if (OperatingSystem.IsWindows()) processName = "POWERPNT";
+                            break;
+                    }
+
+                    if (processName == null) continue;
+
+                    var handlerCount = timeline.TimeLineHandlers.Count(o => o.HandlerType == handler.HandlerType);
+                    var processCount = Process.GetProcessesByName(processName).Length;
+                    if (processCount > handlerCount + 1)
+                    {
+                        _log.Trace($"SafetyNet {handler.HandlerType} handlers: {handlerCount} processes: {processCount} - killing");
+                        ProcessManager.KillProcessAndChildrenByName(processName);
+                    }
+                }
+
+                _log.Trace("SafetyNet loop ending");
+            }
+            catch (Exception e)
+            {
+                _log.Trace($"SafetyNet exception: {e}");
+            }
+            finally
+            {
+                Thread.Sleep(300000); //clean up every 5 minutes
+            }
+        }
     }
 
     private void WhatsInstalled()
@@ -318,13 +313,13 @@ public class Orchestrator
 
     private void ThreadLaunch(Timeline timeline, TimelineHandler handler)
     {
-        // if (handler.ScheduleType == TimelineHandler.TimelineScheduleType.Cron)
-        // {
-        //     _log.Trace($"Attempting new cron job for: {handler.HandlerType}");
-        //     var s = new CronScheduling();
-        //     Program.Scheduler.ScheduleJob(s.GetJob(handler), s.GetTrigger(handler));
-        //     return;
-        // }
+        if (handler.ScheduleType == TimelineHandler.TimelineScheduleType.Cron)
+        {
+            _log.Trace($"Attempting new cron job for: {handler.HandlerType}");
+            var s = new CronScheduling();
+            Program.Scheduler.ScheduleJob(s.GetJob(handler), s.GetTrigger(handler));
+            return;
+        }
 
         _ = ThreadLaunchEx(timeline, handler);
     }
@@ -398,7 +393,7 @@ public class Orchestrator
             _log.Trace($"Stop file Watcher event raised: {e.FullPath} {e.Name} {e.ChangeType}");
             _log.Trace("Terminating existing tasks and exiting orchestrator");
             StopCommon();
-            //Program.Scheduler.Shutdown(); //shutdown Quartz
+            Program.Scheduler?.Shutdown().GetAwaiter().GetResult();
             _log.Trace("Quartz terminated");
             LogManager.Shutdown(); //shutdown all logging
             Thread.Sleep(10000);

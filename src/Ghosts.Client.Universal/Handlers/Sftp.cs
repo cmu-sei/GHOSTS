@@ -1,241 +1,214 @@
-﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
+// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Ghosts.Client.Universal.Infrastructure;
 using Ghosts.Domain;
+using Ghosts.Domain.Code;
+using Newtonsoft.Json;
+using Renci.SshNet;
 
 namespace Ghosts.Client.Universal.Handlers;
 
 public class Sftp(Timeline entireTimeline, TimelineHandler timelineHandler, CancellationToken cancellationToken)
     : BaseHandler(entireTimeline, timelineHandler, cancellationToken)
 {
-
-    // private readonly Credentials CurrentCreds = null;
-    // private readonly SftpSupport CurrentSftpSupport = null; //current SftpSupport for this object
-    // public int jitterfactor = 0;
+    private Credentials _currentCreds;
+    private SftpSupport _currentSftpSupport;
+    private int _jitterFactor;
 
     protected override Task RunOnce()
     {
-        throw new NotImplementedException();
+        try
+        {
+            _currentSftpSupport = new SftpSupport();
+            if (Handler.HandlerArgs != null)
+            {
+                if (Handler.HandlerArgs.TryGetValue("CredentialsFile", out var v1))
+                {
+                    try
+                    {
+                        _currentCreds = JsonConvert.DeserializeObject<Credentials>(File.ReadAllText(v1.ToString()));
+                    }
+                    catch (Exception e)
+                    {
+                        _log.Error(e);
+                    }
+                }
+
+                if (Handler.HandlerArgs.TryGetValue("Credentials", out var credentialsArg))
+                {
+                    try
+                    {
+                        _currentCreds = JsonConvert.DeserializeObject<Credentials>(credentialsArg.ToString());
+                    }
+                    catch (Exception e)
+                    {
+                        _log.Error(e);
+                    }
+                }
+
+                if (Handler.HandlerArgs.TryGetValue("TimeBetweenCommandsMax", out var v2))
+                {
+                    try
+                    {
+                        _currentSftpSupport.TimeBetweenCommandsMax = int.Parse(v2.ToString());
+                        if (_currentSftpSupport.TimeBetweenCommandsMax < 0)
+                            _currentSftpSupport.TimeBetweenCommandsMax = 0;
+                    }
+                    catch (Exception e)
+                    {
+                        _log.Error(e);
+                    }
+                }
+
+                if (Handler.HandlerArgs.TryGetValue("TimeBetweenCommandsMin", out var v3))
+                {
+                    try
+                    {
+                        _currentSftpSupport.TimeBetweenCommandsMin = int.Parse(v3.ToString());
+                        if (_currentSftpSupport.TimeBetweenCommandsMin < 0)
+                            _currentSftpSupport.TimeBetweenCommandsMin = 0;
+                    }
+                    catch (Exception e)
+                    {
+                        _log.Error(e);
+                    }
+                }
+
+                if (Handler.HandlerArgs.TryGetValue("UploadDirectory", out var v4))
+                {
+                    var targetDir = v4.ToString();
+                    targetDir = Environment.ExpandEnvironmentVariables(targetDir);
+                    if (!Directory.Exists(targetDir))
+                    {
+                        _log.Trace($"Sftp:: upload directory {targetDir} does not exist, using browser downloads directory.");
+                    }
+                    else
+                    {
+                        _currentSftpSupport.uploadDirectory = targetDir;
+                    }
+                }
+
+                _currentSftpSupport.uploadDirectory ??= KnownFolders.GetDownloadFolderPath();
+                _currentSftpSupport.downloadDirectory = KnownFolders.GetDownloadFolderPath();
+
+                if (Handler.HandlerArgs.TryGetValue("delay-jitter", out var value))
+                {
+                    _jitterFactor = Jitter.JitterFactorParse(value.ToString());
+                }
+            }
+
+            if (_currentCreds == null)
+            {
+                _log.Error("Sftp:: No credentials supplied, either CredentialsFile or Credentials must be supplied in handler args, exiting.");
+                return Task.CompletedTask;
+            }
+
+            Ex();
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception e)
+        {
+            _log.Error(e);
+        }
+
+        return Task.CompletedTask;
     }
 
-    // protected  async Task X()
-    // {
-    //     //     try
-    //     //     {
-    //     //         CurrentSftpSupport = new SftpSupport();
-    //     //         if (handler.HandlerArgs != null)
-    //     //         {
-    //     //             if (handler.HandlerArgs.TryGetValue("CredentialsFile", out var v1))
-    //     //             {
-    //     //                 try
-    //     //                 {
-    //     //                     CurrentCreds = JsonConvert.DeserializeObject<Credentials>(File.ReadAllText(v1.ToString()));
-    //     //                 }
-    //     //                 catch (ThreadAbortException)
-    //     //                 {
-    //     //                     throw; //pass up
-    //     //                 }
-    //     //                 catch (Exception e)
-    //     //                 {
-    //     //                     _log.Error(e);
-    //     //                 }
-    //     //             }
-    //     //
-    //     //             if (handler.HandlerArgs.TryGetValue("Credentials", out var credentials_arg))
-    //     //             {
-    //     //                 try
-    //     //                 {
-    //     //                     CurrentCreds = JsonConvert.DeserializeObject<Credentials>(credentials_arg.ToString());
-    //     //                 }
-    //     //                 catch (ThreadAbortException)
-    //     //                 {
-    //     //                     throw; //pass up
-    //     //                 }
-    //     //                 catch (Exception e)
-    //     //                 {
-    //     //                     _log.Error(e);
-    //     //                 }
-    //     //             }
-    //     //
-    //     //             if (handler.HandlerArgs.TryGetValue("TimeBetweenCommandsMax", out var v2))
-    //     //             {
-    //     //                 try
-    //     //                 {
-    //     //                     CurrentSftpSupport.TimeBetweenCommandsMax = int.Parse(v2.ToString());
-    //     //                     if (CurrentSftpSupport.TimeBetweenCommandsMax < 0)
-    //     //                         CurrentSftpSupport.TimeBetweenCommandsMax = 0;
-    //     //                 }
-    //     //                 catch (ThreadAbortException)
-    //     //                 {
-    //     //                     throw; //pass up
-    //     //                 }
-    //     //                 catch (Exception e)
-    //     //                 {
-    //     //                     _log.Error(e);
-    //     //                 }
-    //     //             }
-    //     //
-    //     //             if (handler.HandlerArgs.TryGetValue("TimeBetweenCommandsMin", out var v3))
-    //     //             {
-    //     //                 try
-    //     //                 {
-    //     //                     CurrentSftpSupport.TimeBetweenCommandsMin = int.Parse(v3.ToString());
-    //     //                     if (CurrentSftpSupport.TimeBetweenCommandsMin < 0)
-    //     //                         CurrentSftpSupport.TimeBetweenCommandsMin = 0;
-    //     //                 }
-    //     //                 catch (Exception e)
-    //     //                 {
-    //     //                     _log.Error(e);
-    //     //                 }
-    //     //             }
-    //     //
-    //     //             if (handler.HandlerArgs.TryGetValue("UploadDirectory", out var v4))
-    //     //             {
-    //     //                 var targetDir = v4.ToString();
-    //     //                 targetDir = Environment.ExpandEnvironmentVariables(targetDir);
-    //     //                 if (!Directory.Exists(targetDir))
-    //     //                 {
-    //     //                     _log.Trace(
-    //     //                         $"Sftp:: upload directory {targetDir} does not exist, using browser downloads directory.");
-    //     //                 }
-    //     //                 else
-    //     //                 {
-    //     //                     CurrentSftpSupport.uploadDirectory = targetDir;
-    //     //                 }
-    //     //             }
-    //     //
-    //     //             CurrentSftpSupport.uploadDirectory ??= KnownFolders.GetDownloadFolderPath();
-    //     //
-    //     //             CurrentSftpSupport.downloadDirectory = KnownFolders.GetDownloadFolderPath();
-    //     //
-    //     //             if (handler.HandlerArgs.TryGetValue("delay-jitter", out var value))
-    //     //             {
-    //     //                 jitterfactor = Jitter.JitterFactorParse(value.ToString());
-    //     //             }
-    //     //         }
-    //     //
-    //     //         if (CurrentCreds == null)
-    //     //         {
-    //     //             _log.Error(
-    //     //                 $"Sftp:: No credentials supplied, either CredentialsFile or Credentials must be supplied in handler args, exiting.");
-    //     //             return;
-    //     //         }
-    //     //
-    //     //         if (handler.Loop)
-    //     //         {
-    //     //             while (true)
-    //     //             {
-    //     //                 Ex(handler);
-    //     //             }
-    //     //         }
-    //     //         else
-    //     //         {
-    //     //             Ex(handler);
-    //     //         }
-    //     //     }
-    //     //     catch (ThreadAbortException)
-    //     //     {
-    //     //         _log.Trace("Sftp closing...");
-    //     //     }
-    //     //     catch (Exception e)
-    //     //     {
-    //     //         _log.Error(e);
-    //     //     }
-    //     // }
-    //     //
-    //     // public void Ex(TimelineHandler handler)
-    //     // {
-    //     //     foreach (var timelineEvent in handler.TimeLineEvents)
-    //     //     {
-    //     //         WorkingHours.Is(handler);
-    //     //
-    //     //         if (timelineEvent.DelayBeforeActual > 0)
-    //     //             Thread.Sleep(timelineEvent.DelayBeforeActual);
-    //     //
-    //     //         _log.Trace($"Sftp Command: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfter}");
-    //     //
-    //     //         switch (timelineEvent.Command)
-    //     //         {
-    //     //             case "random":
-    //     //                 var cmd = timelineEvent.CommandArgs[_random.Next(0, timelineEvent.CommandArgs.Count)];
-    //     //                 if (!string.IsNullOrEmpty(cmd.ToString()))
-    //     //                 {
-    //     //                     Command(handler, timelineEvent, cmd.ToString());
-    //     //                 }
-    //     //
-    //     //                 Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, jitterfactor));
-    //     //                 break;
-    //     //         }
-    //     //
-    //     //         if (timelineEvent.DelayAfterActual > 0)
-    //     //             Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, jitterfactor));
-    //     //         ;
-    //     //     }
-    //     // }
-    //     //
-    //     //
-    //     // public void Command(TimelineHandler handler, TimelineEvent timelineEvent, string command)
-    //     // {
-    //     //     var charSeparators = new char[] { '|' };
-    //     //     var cmdArgs = command.Split(charSeparators, 3, StringSplitOptions.None);
-    //     //     var hostIp = cmdArgs[0];
-    //     //     CurrentSftpSupport.HostIp = hostIp; //for trace output
-    //     //     var credKey = cmdArgs[1];
-    //     //     var sftpCmds = cmdArgs[2].Split(';');
-    //     //     var username = CurrentCreds.GetUsername(credKey);
-    //     //     var password = CurrentCreds.GetPassword(credKey);
-    //     //     _log.Trace("Beginning Sftp to host:  " + hostIp + " with command: " + command);
-    //     //
-    //     //     if (username != null && password != null)
-    //     //     {
-    //     //         //have IP, user/pass, try connecting
-    //     //         using (var client = new SftpClient(hostIp, username, password))
-    //     //         {
-    //     //             try
-    //     //             {
-    //     //                 client.Connect();
-    //     //             }
-    //     //             catch (Exception e)
-    //     //             {
-    //     //                 _log.Error(e);
-    //     //                 return; //unable to connect
-    //     //             }
-    //     //             //we are connected, execute the commands
-    //     //
-    //     //
-    //     //             foreach (var sftpCmd in sftpCmds)
-    //     //             {
-    //     //                 try
-    //     //                 {
-    //     //                     CurrentSftpSupport.RunSftpCommand(client, sftpCmd.Trim());
-    //     //                     if (CurrentSftpSupport.TimeBetweenCommandsMin != 0 &&
-    //     //                         CurrentSftpSupport.TimeBetweenCommandsMax != 0 &&
-    //     //                         CurrentSftpSupport.TimeBetweenCommandsMin < CurrentSftpSupport.TimeBetweenCommandsMax)
-    //     //                     {
-    //     //                         Thread.Sleep(_random.Next(CurrentSftpSupport.TimeBetweenCommandsMin,
-    //     //                             CurrentSftpSupport.TimeBetweenCommandsMax));
-    //     //                     }
-    //     //                 }
-    //     //                 catch (Exception e)
-    //     //                 {
-    //     //                     _log.Error(e); //some error occurred during this command, try the next one
-    //     //                 }
-    //     //             }
-    //     //
-    //     //             client.Disconnect();
-    //     //             client.Dispose();
-    //     //             Report(new ReportItem
-    //     //             {
-    //     //                 Handler = handler.HandlerType.ToString(),
-    //     //                 Command = hostIp,
-    //     //                 Arg = cmdArgs[2],
-    //     //                 Trackable = timelineEvent.TrackableId
-    //     //             });
-    //     //         }
-    //     //     }
-    //     // }
-    // }
+    private void Ex()
+    {
+        foreach (var timelineEvent in Handler.TimeLineEvents)
+        {
+            Token.ThrowIfCancellationRequested();
+            WorkingHours.Is(Handler);
+
+            if (timelineEvent.DelayBeforeActual > 0)
+                Thread.Sleep(timelineEvent.DelayBeforeActual);
+
+            _log.Trace($"Sftp Command: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfterActual}");
+
+            switch (timelineEvent.Command)
+            {
+                case "random":
+                    var cmd = timelineEvent.CommandArgs[_random.Next(0, timelineEvent.CommandArgs.Count)];
+                    if (!string.IsNullOrEmpty(cmd.ToString()))
+                    {
+                        ExecuteCommand(timelineEvent, cmd.ToString());
+                    }
+                    Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, _jitterFactor));
+                    break;
+            }
+
+            if (timelineEvent.DelayAfterActual > 0)
+                Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, _jitterFactor));
+        }
+    }
+
+    private void ExecuteCommand(TimelineEvent timelineEvent, string command)
+    {
+        var charSeparators = new char[] { '|' };
+        var cmdArgs = command.Split(charSeparators, 3, StringSplitOptions.None);
+        var hostIp = cmdArgs[0];
+        _currentSftpSupport.HostIp = hostIp;
+        var credKey = cmdArgs[1];
+        var sftpCmds = cmdArgs[2].Split(';');
+        var username = _currentCreds.GetUsername(credKey);
+        var password = _currentCreds.GetPassword(credKey);
+        _log.Trace("Beginning Sftp to host:  " + hostIp + " with command: " + command);
+
+        if (username != null && password != null)
+        {
+            using (var client = new SftpClient(hostIp, username, password))
+            {
+                try
+                {
+                    client.Connect();
+                }
+                catch (Exception e)
+                {
+                    _log.Error(e);
+                    return;
+                }
+
+                foreach (var sftpCmd in sftpCmds)
+                {
+                    Token.ThrowIfCancellationRequested();
+                    try
+                    {
+                        _currentSftpSupport.RunSftpCommand(client, sftpCmd.Trim());
+                        if (_currentSftpSupport.TimeBetweenCommandsMin != 0 &&
+                            _currentSftpSupport.TimeBetweenCommandsMax != 0 &&
+                            _currentSftpSupport.TimeBetweenCommandsMin < _currentSftpSupport.TimeBetweenCommandsMax)
+                        {
+                            Thread.Sleep(_random.Next(_currentSftpSupport.TimeBetweenCommandsMin,
+                                _currentSftpSupport.TimeBetweenCommandsMax));
+                        }
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        throw;
+                    }
+                    catch (Exception e)
+                    {
+                        _log.Error(e);
+                    }
+                }
+
+                client.Disconnect();
+                Report(new ReportItem
+                {
+                    Handler = Handler.HandlerType.ToString(),
+                    Command = hostIp,
+                    Arg = cmdArgs[2],
+                    Trackable = timelineEvent.TrackableId
+                });
+            }
+        }
+    }
 }
