@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, computed, inject, signal, NgZone } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -50,6 +50,7 @@ export class N8nWorkflowRunnerComponent implements OnInit, OnDestroy {
   private readonly fb = inject(FormBuilder);
   private readonly snackBar = inject(MatSnackBar);
   private readonly configService = inject(ConfigService);
+  private readonly zone = inject(NgZone);
   private connection?: signalR.HubConnection;
 
   protected readonly workflows = signal<N8nWorkflow[]>([]);
@@ -189,31 +190,44 @@ export class N8nWorkflowRunnerComponent implements OnInit, OnDestroy {
   }
 
   private connectHub(): void {
-    this.connection = new signalR.HubConnectionBuilder()
-      .withUrl(`${this.configService.apiUrl}/hubs/activities`)
-      .configureLogging(signalR.LogLevel.Warning)
-      .withAutomaticReconnect()
-      .build();
+    this.zone.runOutsideAngular(() => {
+      this.connection = new signalR.HubConnectionBuilder()
+        .withUrl(`${this.configService.apiUrl}/hubs/activities`, {
+          withCredentials: false
+        })
+        .configureLogging(signalR.LogLevel.Warning)
+        .withAutomaticReconnect()
+        .build();
 
-    this.connection.onreconnected(() => this.hubConnected.set(true));
-    this.connection.onclose(() => this.hubConnected.set(false));
+      this.connection.onreconnecting(() => {
+        this.zone.run(() => this.hubConnected.set(false));
+      });
+      this.connection.onreconnected(() => {
+        this.zone.run(() => this.hubConnected.set(true));
+      });
+      this.connection.onclose(() => {
+        this.zone.run(() => this.hubConnected.set(false));
+      });
 
-    this.connection.on('workflow-executed', (event: { workflowId: string; timestamp: string; success: boolean; statusCode?: number; error?: string }) => {
-      const workflowName = this.workflows().find(w => String(w.id) === String(event.workflowId))?.name ?? `Workflow ${event.workflowId}`;
-      const entry: WorkflowExecution = {
-        workflowId: event.workflowId,
-        workflowName,
-        timestamp: new Date(event.timestamp),
-        success: event.success,
-        statusCode: event.statusCode,
-        error: event.error
-      };
-      this.executions.update(current => [entry, ...current].slice(0, MAX_LOG_ENTRIES));
+      this.connection.on('workflow-executed', (event: { workflowId: string; timestamp: string; success: boolean; statusCode?: number; error?: string }) => {
+        this.zone.run(() => {
+          const workflowName = this.workflows().find(w => String(w.id) === String(event.workflowId))?.name ?? `Workflow ${event.workflowId}`;
+          const entry: WorkflowExecution = {
+            workflowId: event.workflowId,
+            workflowName,
+            timestamp: new Date(event.timestamp),
+            success: event.success,
+            statusCode: event.statusCode,
+            error: event.error
+          };
+          this.executions.update(current => [entry, ...current].slice(0, MAX_LOG_ENTRIES));
+        });
+      });
+
+      this.connection.start()
+        .then(() => this.zone.run(() => this.hubConnected.set(true)))
+        .catch(() => this.zone.run(() => this.hubConnected.set(false)));
     });
-
-    this.connection.start()
-      .then(() => this.hubConnected.set(true))
-      .catch(() => this.hubConnected.set(false));
   }
 
   private updateWorkflowRunningState(workflowId: string | number, isRunning: boolean): void {
