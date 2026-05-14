@@ -25,7 +25,41 @@ public class BrowserCrawl(Timeline entireTimeline, TimelineHandler timelineHandl
 
     protected override Task RunOnce()
     {
-        throw new NotImplementedException();
+        foreach (var timelineEvent in Handler.TimeLineEvents)
+        {
+            Token.ThrowIfCancellationRequested();
+            WorkingHours.Is(Handler);
+
+            if (timelineEvent.DelayBeforeActual > 0)
+                Thread.Sleep(timelineEvent.DelayBeforeActual);
+
+            switch (timelineEvent.Command)
+            {
+                case "crawl":
+                case "random":
+                default:
+                    var site = timelineEvent.CommandArgs[_random.Next(0, timelineEvent.CommandArgs.Count)].ToString();
+                    if (!string.IsNullOrEmpty(site))
+                    {
+                        try
+                        {
+                            Crawl(Handler, timelineEvent, site);
+                        }
+                        catch (Exception e)
+                        {
+                            _log.Error($"BrowserCrawl error for {site}: {e.Message}");
+                            _log.Debug(e);
+                        }
+                    }
+
+                    break;
+            }
+
+            if (timelineEvent.DelayAfterActual > 0)
+                Thread.Sleep(timelineEvent.DelayAfterActual);
+        }
+
+        return Task.CompletedTask;
     }
 
     internal Task Crawl(TimelineHandler handler, TimelineEvent timelineEvent, string site)

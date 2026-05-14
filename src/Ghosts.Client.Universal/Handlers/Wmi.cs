@@ -1,229 +1,229 @@
-﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
+// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
+using System.Diagnostics;
+using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Ghosts.Client.Universal.Infrastructure;
 using Ghosts.Domain;
+using Ghosts.Domain.Code;
+using Newtonsoft.Json;
 
 namespace Ghosts.Client.Universal.Handlers;
 
 public class Wmi(Timeline entireTimeline, TimelineHandler timelineHandler, CancellationToken cancellationToken)
     : BaseHandler(entireTimeline, timelineHandler, cancellationToken)
 {
+    private Credentials _currentCreds;
+    private int _jitterFactor;
+    private int _timeBetweenCommandsMax;
+    private int _timeBetweenCommandsMin;
+
     protected override Task RunOnce()
     {
-        throw new NotImplementedException();
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            _log.Trace("WMI:: WMI is not supported on this platform, skipping.");
+            return Task.CompletedTask;
+        }
+
+        try
+        {
+            if (Handler.HandlerArgs != null)
+            {
+                if (Handler.HandlerArgs.TryGetValue("CredentialsFile", out var credFileArg))
+                {
+                    try
+                    {
+                        _currentCreds = JsonConvert.DeserializeObject<Credentials>(File.ReadAllText(credFileArg.ToString()));
+                    }
+                    catch (Exception e)
+                    {
+                        _log.Error(e);
+                    }
+                }
+
+                if (Handler.HandlerArgs.TryGetValue("Credentials", out var credentialsArg))
+                {
+                    try
+                    {
+                        _currentCreds = JsonConvert.DeserializeObject<Credentials>(credentialsArg.ToString());
+                    }
+                    catch (Exception e)
+                    {
+                        _log.Error(e);
+                    }
+                }
+
+                if (Handler.HandlerArgs.TryGetValue("TimeBetweenCommandsMax", out var maxArg))
+                {
+                    try
+                    {
+                        _timeBetweenCommandsMax = int.Parse(maxArg.ToString());
+                        if (_timeBetweenCommandsMax < 0) _timeBetweenCommandsMax = 0;
+                    }
+                    catch (Exception e)
+                    {
+                        _log.Error(e);
+                    }
+                }
+
+                if (Handler.HandlerArgs.TryGetValue("TimeBetweenCommandsMin", out var minArg))
+                {
+                    try
+                    {
+                        _timeBetweenCommandsMin = int.Parse(minArg.ToString());
+                        if (_timeBetweenCommandsMin < 0) _timeBetweenCommandsMin = 0;
+                    }
+                    catch (Exception e)
+                    {
+                        _log.Error(e);
+                    }
+                }
+
+                if (Handler.HandlerArgs.TryGetValue("delay-jitter", out var jitterArg))
+                {
+                    _jitterFactor = Jitter.JitterFactorParse(jitterArg.ToString());
+                }
+            }
+
+            if (_currentCreds == null)
+            {
+                _log.Error("WMI:: No credentials supplied, either CredentialsFile or Credentials must be supplied in handler args, exiting.");
+                return Task.CompletedTask;
+            }
+
+            Ex();
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception e)
+        {
+            _log.Error(e);
+        }
+
+        return Task.CompletedTask;
     }
 
-    // private Credentials CurrentCreds = null;
-    // private WmiSupport CurrentWmiSupport = null; //current WmiSupport for this object
-    // public int jitterfactor = 0;
-    //
-    //
-    // public Wmi(TimelineHandler handler)
-    // {
-    //     try
-    //     {
-    //         base.Init(handler);
-    //         this.CurrentWmiSupport = new WmiSupport();
-    //         if (handler.HandlerArgs != null)
-    //         {
-    //             if (handler.HandlerArgs.ContainsKey("CredentialsFile"))
-    //             {
-    //                 try
-    //                 {
-    //                     this.CurrentCreds =
-    //                         JsonConvert.DeserializeObject<Credentials>(
-    //                             File.ReadAllText(handler.HandlerArgs["CredentialsFile"].ToString()));
-    //                 }
-    //                 catch (Exception e)
-    //                 {
-    //                     _log.Error(e);
-    //                 }
-    //             }
-    //
-    //             if (handler.HandlerArgs.ContainsKey("Credentials"))
-    //             {
-    //                 try
-    //                 {
-    //                     this.CurrentCreds =
-    //                         JsonConvert.DeserializeObject<Credentials>(
-    //                             handler.HandlerArgs["Credentials"].ToString());
-    //                 }
-    //                 catch (ThreadAbortException)
-    //                 {
-    //                     throw; //pass up
-    //                 }
-    //                 catch (Exception e)
-    //                 {
-    //                     _log.Error(e);
-    //                 }
-    //             }
-    //
-    //             if (handler.HandlerArgs.ContainsKey("TimeBetweenCommandsMax"))
-    //             {
-    //                 try
-    //                 {
-    //                     this.CurrentWmiSupport.TimeBetweenCommandsMax =
-    //                         Int32.Parse(handler.HandlerArgs["TimeBetweenCommandsMax"].ToString());
-    //                     if (this.CurrentWmiSupport.TimeBetweenCommandsMax < 0)
-    //                         this.CurrentWmiSupport.TimeBetweenCommandsMax = 0;
-    //                 }
-    //                 catch (Exception e)
-    //                 {
-    //                     _log.Error(e);
-    //                 }
-    //             }
-    //
-    //             if (handler.HandlerArgs.ContainsKey("TimeBetweenCommandsMin"))
-    //             {
-    //                 try
-    //                 {
-    //                     this.CurrentWmiSupport.TimeBetweenCommandsMin =
-    //                         Int32.Parse(handler.HandlerArgs["TimeBetweenCommandsMin"].ToString());
-    //                     if (this.CurrentWmiSupport.TimeBetweenCommandsMin < 0)
-    //                         this.CurrentWmiSupport.TimeBetweenCommandsMin = 0;
-    //                 }
-    //                 catch (Exception e)
-    //                 {
-    //                     _log.Error(e);
-    //                 }
-    //             }
-    //         }
-    //
-    //         if (this.CurrentCreds == null)
-    //         {
-    //             _log.Error(
-    //                 $"WMI:: No credentials supplied, either CredentialsFile or Credentials must be supplied in handler args, exiting.");
-    //             return;
-    //         }
-    //
-    //         if (handler.Loop)
-    //         {
-    //             while (true)
-    //             {
-    //                 Ex(handler);
-    //             }
-    //         }
-    //         else
-    //         {
-    //             Ex(handler);
-    //         }
-    //     }
-    //     catch (ThreadAbortException)
-    //     {
-    //         _log.Trace("Wmi closing...");
-    //     }
-    //     catch (Exception e)
-    //     {
-    //         _log.Error(e);
-    //     }
-    // }
-    //
-    // public void Ex(TimelineHandler handler)
-    // {
-    //     foreach (var timelineEvent in handler.TimeLineEvents)
-    //     {
-    //         WorkingHours.Is(handler);
-    //
-    //         if (timelineEvent.DelayBeforeActual > 0)
-    //             Thread.Sleep(timelineEvent.DelayBeforeActual);
-    //
-    //         _log.Trace(
-    //             $"Wmi Command: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfterActual}");
-    //
-    //         switch (timelineEvent.Command)
-    //         {
-    //             case "random":
-    //                 var cmd = timelineEvent.CommandArgs[_random.Next(0, timelineEvent.CommandArgs.Count)];
-    //                 if (!string.IsNullOrEmpty(cmd.ToString()))
-    //                 {
-    //                     this.Command(handler, timelineEvent, cmd.ToString());
-    //                 }
-    //
-    //                 Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, jitterfactor));
-    //                 break;
-    //         }
-    //
-    //         if (timelineEvent.DelayAfterActual > 0)
-    //             Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, jitterfactor));
-    //         ;
-    //     }
-    // }
-    //
-    //
-    // public void Command(TimelineHandler handler, TimelineEvent timelineEvent, string command)
-    // {
-    //     char[] charSeparators = new char[] { '|' };
-    //     var cmdArgs = command.Split(charSeparators, 3, StringSplitOptions.None);
-    //     var hostIp = cmdArgs[0];
-    //     var credKey = cmdArgs[1];
-    //     var WmiCmds = cmdArgs[2].Split(';');
-    //     var domain = this.CurrentCreds.GetDomain(credKey);
-    //     var username = this.CurrentCreds.GetUsername(credKey);
-    //     var password = this.CurrentCreds.GetPassword(credKey);
-    //     _log.Trace("Beginning Wmi to host:  " + hostIp + " with command: " + command);
-    //     if (domain == null)
-    //     {
-    //         domain = hostIp;
-    //     }
-    //
-    //     if (username != null && password != null && domain != null)
-    //     {
-    //         //have IP, user/pass, try connecting
-    //         this.CurrentWmiSupport.Init(hostIp, username, password, domain);
-    //         this.CurrentWmiSupport.HostIp = hostIp; //for trace output
-    //         var client = this.CurrentWmiSupport;
-    //         {
-    //             try
-    //             {
-    //                 client.Connect();
-    //             }
-    //             catch (ThreadAbortException)
-    //             {
-    //                 throw; //pass up
-    //             }
-    //             catch (Exception e)
-    //             {
-    //                 _log.Error(e);
-    //                 return; //unable to connect
-    //             }
-    //             //we are connected, execute the commands
-    //
-    //
-    //             foreach (var WmiCmd in WmiCmds)
-    //             {
-    //                 try
-    //                 {
-    //                     this.CurrentWmiSupport.RunWmiCommand(WmiCmd.Trim());
-    //                     if (this.CurrentWmiSupport.TimeBetweenCommandsMin != 0 &&
-    //                         this.CurrentWmiSupport.TimeBetweenCommandsMax != 0 &&
-    //                         this.CurrentWmiSupport.TimeBetweenCommandsMin <
-    //                         this.CurrentWmiSupport.TimeBetweenCommandsMax)
-    //                     {
-    //                         Thread.Sleep(_random.Next(this.CurrentWmiSupport.TimeBetweenCommandsMin,
-    //                             this.CurrentWmiSupport.TimeBetweenCommandsMax));
-    //                     }
-    //                 }
-    //                 catch (ThreadAbortException)
-    //                 {
-    //                     throw; //pass up
-    //                 }
-    //                 catch (Exception e)
-    //                 {
-    //                     _log.Error(e); //some error occurred during this command, try the next one
-    //                 }
-    //             }
-    //
-    //             client.Close();
-    //             Report(new ReportItem
-    //             {
-    //                 Handler = handler.HandlerType.ToString(),
-    //                 Command = hostIp,
-    //                 Arg = cmdArgs[2],
-    //                 Trackable = timelineEvent.TrackableId
-    //             });
-    //         }
-    //     }
-    // }
+    private void Ex()
+    {
+        foreach (var timelineEvent in Handler.TimeLineEvents)
+        {
+            Token.ThrowIfCancellationRequested();
+            WorkingHours.Is(Handler);
+
+            if (timelineEvent.DelayBeforeActual > 0)
+                Thread.Sleep(timelineEvent.DelayBeforeActual);
+
+            _log.Trace($"WMI Command: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfterActual}");
+
+            switch (timelineEvent.Command)
+            {
+                case "random":
+                    var cmd = timelineEvent.CommandArgs[_random.Next(0, timelineEvent.CommandArgs.Count)];
+                    if (!string.IsNullOrEmpty(cmd.ToString()))
+                    {
+                        ExecuteWmi(timelineEvent, cmd.ToString());
+                    }
+                    Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, _jitterFactor));
+                    break;
+            }
+
+            if (timelineEvent.DelayAfterActual > 0)
+                Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, _jitterFactor));
+        }
+    }
+
+    private void ExecuteWmi(TimelineEvent timelineEvent, string command)
+    {
+        var charSeparators = new char[] { '|' };
+        var cmdArgs = command.Split(charSeparators, 3, StringSplitOptions.None);
+        var hostIp = cmdArgs[0];
+        var credKey = cmdArgs[1];
+        var wmiCmds = cmdArgs[2].Split(';');
+        var domain = _currentCreds.GetDomain(credKey);
+        var username = _currentCreds.GetUsername(credKey);
+        var password = _currentCreds.GetPassword(credKey);
+
+        _log.Trace($"WMI:: Beginning WMI to host: {hostIp} with command: {command}");
+
+        if (domain == null)
+        {
+            domain = hostIp;
+        }
+
+        if (username == null || password == null)
+        {
+            _log.Error($"WMI:: Missing username or password for credential key '{credKey}', skipping.");
+            return;
+        }
+
+        foreach (var wmiCmd in wmiCmds)
+        {
+            Token.ThrowIfCancellationRequested();
+            try
+            {
+                RunWmicCommand(hostIp, domain, username, password, wmiCmd.Trim());
+
+                if (_timeBetweenCommandsMin > 0 && _timeBetweenCommandsMax > 0 &&
+                    _timeBetweenCommandsMin < _timeBetweenCommandsMax)
+                {
+                    Thread.Sleep(_random.Next(_timeBetweenCommandsMin, _timeBetweenCommandsMax));
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception e)
+            {
+                _log.Error(e);
+            }
+        }
+
+        Report(new ReportItem { Handler = Handler.HandlerType.ToString(), Command = hostIp, Arg = cmdArgs[2], Trackable = timelineEvent.TrackableId });
+    }
+
+    private void RunWmicCommand(string host, string domain, string username, string password, string wmiQuery)
+    {
+        var userArg = $"{domain}\\{username}";
+        var arguments = $"/node:{host} /user:{userArg} /password:{password} {wmiQuery}";
+
+        _log.Trace($"WMI:: Executing: wmic /node:{host} /user:{userArg} /password:*** {wmiQuery}");
+
+        var startInfo = new ProcessStartInfo
+        {
+            FileName = "wmic",
+            Arguments = arguments,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true
+        };
+
+        using var process = Process.Start(startInfo);
+        if (process == null)
+        {
+            _log.Error("WMI:: Failed to start wmic process.");
+            return;
+        }
+
+        var output = process.StandardOutput.ReadToEnd();
+        var error = process.StandardError.ReadToEnd();
+        process.WaitForExit();
+
+        if (!string.IsNullOrWhiteSpace(output))
+        {
+            _log.Trace($"WMI:: Output: {output.Trim()}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(error))
+        {
+            _log.Trace($"WMI:: Error output: {error.Trim()}");
+        }
+    }
 }
