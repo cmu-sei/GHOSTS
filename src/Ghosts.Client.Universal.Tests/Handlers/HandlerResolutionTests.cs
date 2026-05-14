@@ -56,6 +56,7 @@ public class HandlerResolutionTests
     [InlineData(HandlerType.Watcher)]
     [InlineData(HandlerType.Pidgin)]
     [InlineData(HandlerType.Wmi)]
+    [InlineData(HandlerType.Outlook)]
     [InlineData(HandlerType.Outlookv2)]
     [InlineData(HandlerType.Notepad)]
     [InlineData(HandlerType.NpcSystem)]

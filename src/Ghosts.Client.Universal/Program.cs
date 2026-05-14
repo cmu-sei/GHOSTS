@@ -143,6 +143,8 @@ internal static class Program
             _log.Trace("Handling disabled, continuing.");
         }
 
+        TempFiles.StartTempFileWatcher();
+
         await Task.Delay(Timeout.Infinite, CancellationToken.None);
     }
 
@@ -165,5 +167,6 @@ internal static class Program
         }
 
         Infrastructure.StartupTasks.CleanupProcesses();
+        Scheduler?.Shutdown().GetAwaiter().GetResult();
     }
 }
