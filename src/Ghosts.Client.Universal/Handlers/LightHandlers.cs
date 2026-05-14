@@ -134,7 +134,7 @@ public class LightHandlers
             {
                 foreach (var timelineEvent in this.Handler.TimeLineEvents)
                 {
-                    var path = GetSavePath(typeof(LightPowerPointHandler), this.Handler, timelineEvent, "pptx");
+                    var path = GetSavePath(typeof(LightPowerPointHandler), this.Handler, timelineEvent, "pptx", cancellationToken);
 
                     var list = RandomText.GetDictionary.GetDictionaryList();
                     using (var rt = new RandomText(list))

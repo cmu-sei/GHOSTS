@@ -9,7 +9,7 @@ using System.Net;
 using System.Threading.Tasks;
 using OpenQA.Selenium;
 
-namespace Ghosts.Client.Infrastructure;
+namespace Ghosts.Client.Universal.Infrastructure;
 
 public class FtpSupport : SshSftpSupport
 {

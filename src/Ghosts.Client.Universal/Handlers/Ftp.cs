@@ -144,7 +144,9 @@ namespace Ghosts.Client.Universal.Handlers
                 WorkingHours.Is(Handler);
 
                 if (timelineEvent.DelayBeforeActual > 0)
-                    Thread.Sleep(timelineEvent.DelayBeforeActual);
+                {
+                    if (Token.WaitHandle.WaitOne(timelineEvent.DelayBeforeActual)) Token.ThrowIfCancellationRequested();
+                }
 
                 _log.Trace($"Ftp Command: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfterActual}");
                 int[] probabilityList = { _currentFtpSupport.uploadProbability, _currentFtpSupport.downloadProbability, _currentFtpSupport.deletionProbability };
@@ -159,12 +161,14 @@ namespace Ghosts.Client.Universal.Handlers
                             var action = SelectActionFromProbabilities(probabilityList, actionList);
                             ExecuteCommand(timelineEvent, cmd.ToString(), action);
                         }
-                        Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, _jitterFactor));
+                        if (Token.WaitHandle.WaitOne(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, _jitterFactor))) Token.ThrowIfCancellationRequested();
                         break;
                 }
 
                 if (timelineEvent.DelayAfterActual > 0)
-                    Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, _jitterFactor));
+                {
+                    if (Token.WaitHandle.WaitOne(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, _jitterFactor))) Token.ThrowIfCancellationRequested();
+                }
             }
         }
 
@@ -211,35 +215,6 @@ namespace Ghosts.Client.Universal.Handlers
             }
         }
 
-        private static bool CheckProbabilityVar(string name, int value)
-        {
-            if (!(value >= 0 && value <= 100))
-            {
-                _log.Trace($"Variable {name} with value {value} must be an int between 0 and 100, setting to 0");
-                return false;
-            }
-            return true;
-        }
-
-        internal static string SelectActionFromProbabilities(int[] probabilityList, string[] actionList)
-        {
-            int choice = _random.Next(0, 101);
-            int endRange;
-            int startRange = 0;
-            int index = 0;
-            foreach (var probability in probabilityList)
-            {
-                if (probability > 0)
-                {
-                    endRange = startRange + probability;
-                    if (choice >= startRange && choice <= endRange) return actionList[index];
-                    else startRange = endRange + 1;
-                }
-                index++;
-            }
-
-            return null;
-        }
     }
 }
 
