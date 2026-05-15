@@ -203,7 +203,7 @@
             </tr>
           </thead>
           <tbody>
-            @for (entry of executions(); track entry.timestamp) {
+            @for (entry of executions(); track $index) {
             <tr [class.log-row-fail]="!entry.success">
               <td class="log-time">{{ entry.timestamp | date:'HH:mm:ss' }}</td>
               <td class="log-name">{{ entry.workflowName }}</td>

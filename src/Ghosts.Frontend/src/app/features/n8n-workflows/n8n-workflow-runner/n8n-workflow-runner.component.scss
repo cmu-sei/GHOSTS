@@ -314,9 +314,19 @@
       color: rgba(0, 0, 0, 0.3);
     }
 
-    .status-chip.log-fail {
-      background-color: rgba(244, 67, 54, 0.15);
-      color: #d32f2f;
+    .status-chip {
+      padding: 2px 8px;
+      border-radius: 999px;
+      background-color: rgba(56, 142, 60, 0.15);
+      color: #2e7d32;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+
+      &.log-fail {
+        background-color: rgba(244, 67, 54, 0.15);
+        color: #d32f2f;
+      }
     }
   }
 }

@@ -35,6 +35,7 @@ var facebook = builder.AddProject<Projects.Ghosts_Pandora>("facebook")
     .WithEnvironment("MODE_TYPE", "social")
     .WithEnvironment("DEFAULT_THEME", "facebook")
     .WithEnvironment("LD_PRELOAD", freetypeLib)
+    .WithHttpEndpoint(port: 8800, name: "http", isProxied: false)
     .WithExternalHttpEndpoints();
 
 var api = builder.AddProject<Projects.Ghosts_Api>("api")
