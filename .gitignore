@@ -343,3 +343,5 @@ output/
 .claude/settings.local.json
 src/apphost/n8n_data/*
 src/Ghosts.Api/config/AttackData/enterprise-attack.json
+src/certs/*
+!src/certs/readme.md

@@ -1,0 +1,21 @@
+# Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
+
+FROM mcr.microsoft.com/dotnet/sdk:10.0.101 AS dev
+
+COPY certs/*.crt /usr/local/share/ca-certificates/
+RUN update-ca-certificates
+
+COPY Ghosts.Client.Universal/. /app/Ghosts.Client.Universal
+COPY Ghosts.Domain/. /app/Ghosts.Domain
+
+WORKDIR /app/Ghosts.Client.Universal
+RUN dotnet publish -c Release -o /app/dist
+
+FROM mcr.microsoft.com/dotnet/runtime:10.0
+COPY --from=dev /app/dist /app
+WORKDIR /app
+
+LABEL "product"="GHOSTS Client Universal"
+LABEL "maintainer"="Dustin Updyke <ddupdyke[-@-]sei.cmu.edu>"
+
+CMD ["dotnet", "Ghosts.Client.Universal.dll"]

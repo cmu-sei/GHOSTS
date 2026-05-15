@@ -1,0 +1,67 @@
+{
+  "ApiRootUrl": "http://host.docker.internal:5000/api",
+  "Id": {
+    "IsEnabled": false,
+    "Format": "guestinfo",
+    "FormatKey": "",
+    "FormatValue": "",
+    "VMWareToolsLocation": ""
+  },
+  "HealthIsEnabled": false,
+  "HandlersIsEnabled": true,
+  "DisableStartup": false,
+  "AllowMultipleInstances": false,
+  "ChromeExtensions": null,
+  "OfficeDocsMaxAgeInHours": 0,
+  "EmailContent": null,
+  "Survey": {
+    "IsEnabled": false,
+    "IsSecure": false,
+    "Frequency": "once",
+    "OutputFormat": "indent",
+    "CycleSleepMinutes": 5
+  },
+  "ClientResults": {
+    "IsEnabled": true,
+    "IsSecure": false,
+    "CycleSleep": 60000
+  },
+  "ClientUpdates": {
+    "IsEnabled": true,
+    "CycleSleep": 60000
+  },
+  "Email": null,
+  "Content": {
+    "EmailContent": "",
+    "EmailReply": "",
+    "EmailDomain": "",
+    "EmailOutside": "",
+    "BlogContent": "",
+    "ChatMessages": null,
+    "GenericPostContent": null,
+    "BlogReply": "",
+    "FileNames": "",
+    "FirstNames": null,
+    "LastNames": null,
+    "EmailTargets": null,
+    "Dictionary": ""
+  },
+  "FirefoxInstallLocation": null,
+  "FirefoxMajorVersionMinimum": 0,
+  "EncodeHeaders": true,
+  "Listener": {
+    "Port": -1
+  },
+  "ResourceControl": {
+    "ManageProcesses": true,
+    "NagScreenResolver": false
+  },
+  "Timeline": {
+    "Location": "config/timeline.json"
+  },
+  "AwsCli": null,
+  "Sockets": {
+    "IsEnabled": true,
+    "Heartbeat": 50000
+  }
+}
