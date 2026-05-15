@@ -1,5 +1,3 @@
-// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
-
 using System;
 using System.IO;
 using System.Threading;
@@ -12,8 +10,8 @@ using Renci.SshNet;
 
 namespace Ghosts.Client.Universal.Handlers;
 
-public class Sftp(Timeline entireTimeline, TimelineHandler timelineHandler, CancellationToken cancellationToken)
-    : BaseHandler(entireTimeline, timelineHandler, cancellationToken)
+public class Sftp(Timeline timeline, TimelineHandler handler, CancellationToken token)
+: BaseHandler(timeline, handler, token)
 {
     private Credentials _currentCreds;
     private SftpSupport _currentSftpSupport;
@@ -128,8 +126,9 @@ public class Sftp(Timeline entireTimeline, TimelineHandler timelineHandler, Canc
             Token.ThrowIfCancellationRequested();
             WorkingHours.Is(Handler);
 
-            if (timelineEvent.DelayBeforeActual > 0)
-                Thread.Sleep(timelineEvent.DelayBeforeActual);
+            if (timelineEvent.DelayBeforeActual > 0){
+                if (Token.WaitHandle.WaitOne(timelineEvent.DelayBeforeActual)) Token.ThrowIfCancellationRequested();
+            }
 
             _log.Trace($"Sftp Command: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfterActual}");
 
@@ -141,12 +140,13 @@ public class Sftp(Timeline entireTimeline, TimelineHandler timelineHandler, Canc
                     {
                         ExecuteCommand(timelineEvent, cmd.ToString());
                     }
-                    Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, _jitterFactor));
+                    if (Token.WaitHandle.WaitOne(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, _jitterFactor))) Token.ThrowIfCancellationRequested();
                     break;
             }
 
-            if (timelineEvent.DelayAfterActual > 0)
-                Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, _jitterFactor));
+            if (timelineEvent.DelayAfterActual > 0) {
+                if (Token.WaitHandle.WaitOne(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, _jitterFactor))) Token.ThrowIfCancellationRequested();
+            }
         }
     }
 
@@ -186,8 +186,7 @@ public class Sftp(Timeline entireTimeline, TimelineHandler timelineHandler, Canc
                             _currentSftpSupport.TimeBetweenCommandsMax != 0 &&
                             _currentSftpSupport.TimeBetweenCommandsMin < _currentSftpSupport.TimeBetweenCommandsMax)
                         {
-                            Thread.Sleep(_random.Next(_currentSftpSupport.TimeBetweenCommandsMin,
-                                _currentSftpSupport.TimeBetweenCommandsMax));
+                            if (Token.WaitHandle.WaitOne(_random.Next(_currentSftpSupport.TimeBetweenCommandsMin, _currentSftpSupport.TimeBetweenCommandsMax))) Token.ThrowIfCancellationRequested();
                         }
                     }
                     catch (OperationCanceledException)

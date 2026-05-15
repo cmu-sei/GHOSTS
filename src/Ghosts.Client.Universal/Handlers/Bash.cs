@@ -33,8 +33,9 @@ public class Bash(Timeline timeline, TimelineHandler handler, CancellationToken 
         {
             WorkingHours.Is(this.Handler);
 
-            if (timelineEvent.DelayBeforeActual > 0)
-                Thread.Sleep(timelineEvent.DelayBeforeActual);
+            if (timelineEvent.DelayBeforeActual > 0) {
+                if (Token.WaitHandle.WaitOne(timelineEvent.DelayBeforeActual)) Token.ThrowIfCancellationRequested();
+            }
 
             _log.Trace($"Command line: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfterActual}");
 
@@ -47,7 +48,7 @@ public class Bash(Timeline timeline, TimelineHandler handler, CancellationToken 
                         {
                             //skipping this command
                             _log.Trace($"Command choice skipped due to execution probability");
-                            Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, _jitterFactor));
+                            if (Token.WaitHandle.WaitOne(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, _jitterFactor))) Token.ThrowIfCancellationRequested();
                             continue;
                         }
 
@@ -57,7 +58,7 @@ public class Bash(Timeline timeline, TimelineHandler handler, CancellationToken 
                             ProcessCommand(this.Handler.Initial, cmd.ToString());
                         }
 
-                        Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, _jitterFactor));
+                        if (Token.WaitHandle.WaitOne(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, _jitterFactor))) Token.ThrowIfCancellationRequested();
                     }
                 default:
 
@@ -71,8 +72,9 @@ public class Bash(Timeline timeline, TimelineHandler handler, CancellationToken 
                     break;
             }
 
-            if (timelineEvent.DelayAfterActual > 0)
-                Thread.Sleep(timelineEvent.DelayAfterActual);
+            if (timelineEvent.DelayAfterActual > 0) {
+                if (Token.WaitHandle.WaitOne(timelineEvent.DelayAfterActual)) Token.ThrowIfCancellationRequested();
+            }
         }
 
         return Task.CompletedTask;

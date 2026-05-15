@@ -27,22 +27,26 @@ namespace Ghosts.Client.Universal.Handlers;
 /// </summary>
 public class OutlookHelper2013 : OutlookHelper
 {
-    public OutlookHelper2013(BaseBrowserHandler callingHandler, IWebDriver callingDriver, string aversion)
+    public OutlookHelper2013(BaseBrowserHandler callingHandler, IWebDriver callingDriver, string aversion, CancellationToken atoken)
     {
-        base.Init(callingHandler, callingDriver, aversion);
+        base.Init(callingHandler, callingDriver, aversion, atoken);
     }
 }
 
 // This is used for Exchange Server 2016 also
 public class OutlookHelper2019 : OutlookHelper
 {
-    public OutlookHelper2019(BaseBrowserHandler callingHandler, IWebDriver callingDriver, string aversion)
+    public OutlookHelper2019(BaseBrowserHandler callingHandler, IWebDriver callingDriver, string aversion, CancellationToken atoken)
     {
-        base.Init(callingHandler, callingDriver, aversion);
+        base.Init(callingHandler, callingDriver, aversion, atoken);
         NewMailXpath = "//span[text()='New']//parent::span//parent::button";
-        ToRecipientsXpath = "//span[text()='To']//parent::button//following::div//child::input";
-        CcRecipientsXpath = "//span[text()='Cc']//parent::button//following::div//child::input";
-        SubjectXpath = "//input[@placeholder='Add a subject']";
+        //ToRecipientsXpath = "//span[text()='To']//parent::button//following::div//child::input";
+        ToRecipientsXpath = "//button[starts-with(@aria-label,'To button')]//following::div//child::input[@aria-label='To']";
+        //CcRecipientsXpath = "//span[text()='Cc']//parent::button//following::div//child::input";
+        CcRecipientsXpath = "//button[starts-with(@aria-label,'Cc button')]//following::div//child::input[@aria-label='Cc']";
+        //SubjectXpath = "//input[@placeholder='Add a subject']";
+        SubjectXpath = "//input[starts-with(@placeholder,'Add a subject')]";
+        //EdgeCCRecipientsXpath = "//buttton[starts-with(@arial-label, 'Cc button')]//following::div//child:input";
         EmailBodyXpath = "//div[@aria-label='Message body']";
         SendButtonXpath = "//button[@aria-label='Send']";
         InsertAttachmentXpath = "//button[@aria-label='Attach']";
@@ -71,6 +75,8 @@ public abstract class OutlookHelper : BrowserHelper
     public int attachmentsMaxSize = 10;
 
     public int saveAttachmentProbability = 0;
+
+    public CancellationToken token;
 
     private Credentials _credentials = null;
     private List<string> _domainEmailList = null;
@@ -235,16 +241,16 @@ public abstract class OutlookHelper : BrowserHelper
 
 
     public static OutlookHelper MakeHelper(BaseBrowserHandler callingHandler, IWebDriver callingDriver,
-        TimelineHandler handler, Logger tlog)
+        TimelineHandler handler, Logger tlog, CancellationToken atoken)
     {
         OutlookHelper helper = null;
         if (handler.HandlerArgs.TryGetValue("exchange-version", out var value))
         {
             var version = value.ToString();
             //this needs to be extended in the future
-            if (version == "2013") helper = new OutlookHelper2013(callingHandler, callingDriver, version);
+            if (version == "2013") helper = new OutlookHelper2013(callingHandler, callingDriver, version, atoken);
             else if (version == "2019" || version == "2016")
-                helper = new OutlookHelper2019(callingHandler, callingDriver, version);
+                helper = new OutlookHelper2019(callingHandler, callingDriver, version, atoken);
             if (helper == null)
             {
                 Log.Trace(
@@ -266,12 +272,13 @@ public abstract class OutlookHelper : BrowserHelper
     }
 
 
-    public void Init(BaseBrowserHandler callingHandler, IWebDriver currentDriver, string aversion)
+    public void Init(BaseBrowserHandler callingHandler, IWebDriver currentDriver, string aversion, CancellationToken atoken)
     {
         baseHandler = callingHandler;
         Driver = currentDriver;
         version = aversion;
         linuxHelper = new LinuxSupport(Log);
+        token = atoken;
     }
 
     private static bool CheckProbabilityVar(string name, int value)
@@ -306,13 +313,13 @@ public abstract class OutlookHelper : BrowserHelper
             if (targetElement != null)
             {
                 BrowserHelperSupport.ElementClick(Driver, targetElement);
-                Thread.Sleep(500);
+                if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
             }
         }
 
         catch (Exception e)
         {
-            if (e is ThreadAbortException || e is ThreadInterruptedException)
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
             {
                 throw;
             }
@@ -328,12 +335,12 @@ public abstract class OutlookHelper : BrowserHelper
             if (targetElement != null)
             {
                 BrowserHelperSupport.ElementClick(Driver, targetElement);
-                Thread.Sleep(500);
+                if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
             }
         }
         catch (Exception e)
         {
-            if (e is ThreadAbortException || e is ThreadInterruptedException)
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
             {
                 throw;
             }
@@ -377,7 +384,7 @@ public abstract class OutlookHelper : BrowserHelper
                 }
 
                 BrowserHelperSupport.ElementClick(Driver, emailListElements[0]);
-                Thread.Sleep(500);
+                if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
             }
             else
             {
@@ -402,14 +409,14 @@ public abstract class OutlookHelper : BrowserHelper
                     return false;
                 }
 
-                if (Driver is OpenQA.Selenium.Chrome.ChromeDriver)
+                if ((Driver is OpenQA.Selenium.Chrome.ChromeDriver) || (Driver is OpenQA.Selenium.Edge.EdgeDriver))
                 {
                     BrowserHelperSupport.ElementClick(Driver, targetElement); //needed for Chrome
-                    Thread.Sleep(300);
+                    if (token.WaitHandle.WaitOne(300)) token.ThrowIfCancellationRequested();
                 }
 
                 targetElement.SendKeys(emailReply.Reply);
-                Thread.Sleep(500);
+                if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
                 //switch back to parent frame
                 Driver.SwitchTo().DefaultContent();
                 //send the email
@@ -422,7 +429,7 @@ public abstract class OutlookHelper : BrowserHelper
                 }
 
                 BrowserHelperSupport.ElementClick(Driver, targetElement);
-                Thread.Sleep(500);
+                if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
             }
             else
             {
@@ -435,7 +442,7 @@ public abstract class OutlookHelper : BrowserHelper
                 }
 
                 targetElement.SendKeys(emailReply.Reply);
-                Thread.Sleep(500);
+                if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
                 targetElement = Driver.FindElement(By.XPath(EmailReplySendXpath));
                 if (targetElement == null)
                 {
@@ -445,7 +452,7 @@ public abstract class OutlookHelper : BrowserHelper
                 }
 
                 BrowserHelperSupport.ElementClick(Driver, targetElement);
-                Thread.Sleep(500);
+                if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
             }
 
             HandleAttachmentReminder(); //handle the attachment popup if present
@@ -456,7 +463,7 @@ public abstract class OutlookHelper : BrowserHelper
         }
         catch (Exception e)
         {
-            if (e is ThreadAbortException || e is ThreadInterruptedException)
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
             {
                 throw;
             }
@@ -472,8 +479,8 @@ public abstract class OutlookHelper : BrowserHelper
         if (emailElements != null && emailElements.Count > 0)
         {
             //select one of the first 5
-            BrowserHelperSupport.MoveToElementAndClick(Driver, emailElements[0]);
-            Thread.Sleep(500);
+            BrowserHelperSupport.MoveToElementAndClick(Driver, emailElements[0], token);
+            if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
             return true;
         }
 
@@ -490,7 +497,7 @@ public abstract class OutlookHelper : BrowserHelper
         }
         catch (Exception e)
         {
-            if (e is ThreadAbortException || e is ThreadInterruptedException)
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
             {
                 throw;
             }
@@ -512,7 +519,7 @@ public abstract class OutlookHelper : BrowserHelper
         }
         catch (Exception e)
         {
-            if (e is ThreadAbortException || e is ThreadInterruptedException)
+           if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
             {
                 throw;
             }
@@ -531,7 +538,7 @@ public abstract class OutlookHelper : BrowserHelper
         }
         catch (Exception e)
         {
-            if (e is ThreadAbortException || e is ThreadInterruptedException)
+           if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
             {
                 throw;
             }
@@ -546,7 +553,7 @@ public abstract class OutlookHelper : BrowserHelper
             if (targetElements != null && targetElements.Count > 0)
             {
                 //need to handle the certerror
-                BrowserHelperSupport.FirefoxHandleInsecureCertificate(Driver);
+                BrowserHelperSupport.FirefoxHandleInsecureCertificate(Driver, token);
             }
         }
 
@@ -561,7 +568,7 @@ public abstract class OutlookHelper : BrowserHelper
         }
 
         targetElement.SendKeys($"{domain}\\{user}");
-        Thread.Sleep(1000);
+        if (token.WaitHandle.WaitOne(1000)) token.ThrowIfCancellationRequested();
         targetElement = Driver.FindElement(By.XPath("//input[@id='password']"));
         if (targetElement == null)
         {
@@ -572,7 +579,7 @@ public abstract class OutlookHelper : BrowserHelper
         }
 
         targetElement.SendKeys(pw);
-        Thread.Sleep(1000);
+        if (token.WaitHandle.WaitOne(1000)) token.ThrowIfCancellationRequested();
         targetElement = Driver.FindElement(By.XPath("//div[@class='signinbutton']"));
         if (targetElement == null)
         {
@@ -583,7 +590,7 @@ public abstract class OutlookHelper : BrowserHelper
         }
 
         targetElement.Click();
-        Thread.Sleep(1000);
+        if (token.WaitHandle.WaitOne(100)) token.ThrowIfCancellationRequested();
         // check if the Language/Date setup page is displayed
         var optionElements = Driver.FindElements(By.XPath("//select[@name='tzid']//following::option"));
         if (optionElements != null && optionElements.Count > 0)
@@ -596,7 +603,7 @@ public abstract class OutlookHelper : BrowserHelper
                 if (avalue.Contains("Central Standard Time"))
                 {
                     te.Click();
-                    Thread.Sleep(500);
+                    if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
                     found = true;
                     break;
                 }
@@ -610,7 +617,7 @@ public abstract class OutlookHelper : BrowserHelper
                 {
                     Actions actions = new Actions(Driver);
                     actions.MoveToElement(targetElement).Click().Perform();
-                    Thread.Sleep(500);
+                    if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
                 }
             }
         }
@@ -635,8 +642,8 @@ public abstract class OutlookHelper : BrowserHelper
             return false;
         }
 
-        BrowserHelperSupport.MoveToElementAndClick(Driver, targetElement);
-        Thread.Sleep(500);
+        BrowserHelperSupport.MoveToElementAndClick(Driver, targetElement, token);
+        if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
         return true;
     }
 
@@ -662,13 +669,13 @@ public abstract class OutlookHelper : BrowserHelper
                             if (insertElement != null)
                             {
                                 BrowserHelperSupport.ElementClick(Driver, insertElement);
-                                Thread.Sleep(500);
+                                if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
                                 //now  click on the attachment choice
                                 insertElement = Driver.FindElement(By.XPath(InsertAttachmentXpath));
                                 if (insertElement != null)
                                 {
                                     BrowserHelperSupport.ElementClick(Driver, insertElement);
-                                    Thread.Sleep(500);
+                                    if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
                                     //filechoice window is open
                                     AttachFile(FileToAttach);
                                 }
@@ -680,7 +687,7 @@ public abstract class OutlookHelper : BrowserHelper
                             if (insertAttachmentElement != null)
                             {
                                 BrowserHelperSupport.ElementClick(Driver, insertAttachmentElement);
-                                Thread.Sleep(500);
+                                if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
                                 //filechoice window is open
                                 AttachFile(FileToAttach);
                             }
@@ -691,7 +698,7 @@ public abstract class OutlookHelper : BrowserHelper
         }
         catch (Exception e)
         {
-            if (e is ThreadAbortException || e is ThreadInterruptedException)
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
             {
                 throw;
             }
@@ -741,7 +748,7 @@ public abstract class OutlookHelper : BrowserHelper
             }
 
             BrowserHelperSupport.ElementClick(Driver, targetElement);
-            Thread.Sleep(500);
+            if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
 
             //new mail form should be displayed
 
@@ -758,14 +765,14 @@ public abstract class OutlookHelper : BrowserHelper
                 return false;
             }
 
-            if (Driver is OpenQA.Selenium.Chrome.ChromeDriver)
+            if ((Driver is OpenQA.Selenium.Chrome.ChromeDriver) || (Driver is OpenQA.Selenium.Edge.EdgeDriver))
             {
                 BrowserHelperSupport.ElementClick(Driver, targetElement); //needed for Chrome
-                Thread.Sleep(300);
+                if (token.WaitHandle.WaitOne(300)) token.ThrowIfCancellationRequested();
             }
 
             targetElement.SendKeys(ToRecipients);
-            Thread.Sleep(500);
+            if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
             Log.Trace($"WebOutlook:: Email To: field written");
 
             if (CcRecipients != null)
@@ -777,14 +784,14 @@ public abstract class OutlookHelper : BrowserHelper
                     return false;
                 }
 
-                if (Driver is OpenQA.Selenium.Chrome.ChromeDriver)
+                if ((Driver is OpenQA.Selenium.Chrome.ChromeDriver) || (Driver is OpenQA.Selenium.Edge.EdgeDriver))
                 {
                     BrowserHelperSupport.ElementClick(Driver, targetElement); //needed for Chrome
-                    Thread.Sleep(300);
+                    if (token.WaitHandle.WaitOne(300)) token.ThrowIfCancellationRequested();
                 }
 
                 targetElement.SendKeys(CcRecipients);
-                Thread.Sleep(500);
+                if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
                 Log.Trace($"WebOutlook:: Email Cc: field written");
             }
 
@@ -796,10 +803,10 @@ public abstract class OutlookHelper : BrowserHelper
                 return false;
             }
 
-            if (Driver is OpenQA.Selenium.Chrome.ChromeDriver)
+            if ((Driver is OpenQA.Selenium.Chrome.ChromeDriver) || (Driver is OpenQA.Selenium.Edge.EdgeDriver))
             {
                 BrowserHelperSupport.ElementClick(Driver, targetElement); //needed for Chrome
-                Thread.Sleep(300);
+                if (token.WaitHandle.WaitOne(300)) token.ThrowIfCancellationRequested();
             }
 
             if (string.IsNullOrEmpty(emailConfig.Subject))
@@ -814,7 +821,7 @@ public abstract class OutlookHelper : BrowserHelper
 
             Log.Trace($"WebOutlook:: Email subject created.");
 
-            Thread.Sleep(500);
+            if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
 
 
             if (emailConfig.Body != null)
@@ -829,17 +836,17 @@ public abstract class OutlookHelper : BrowserHelper
                     return false;
                 }
 
-                if (Driver is OpenQA.Selenium.Chrome.ChromeDriver)
+                if ((Driver is OpenQA.Selenium.Chrome.ChromeDriver) || (Driver is OpenQA.Selenium.Edge.EdgeDriver))
                 {
                     BrowserHelperSupport.ElementClick(Driver, targetElement); //needed for Chrome
-                    Thread.Sleep(300);
+                    if (token.WaitHandle.WaitOne(300)) token.ThrowIfCancellationRequested();
                 }
 
                 targetElement.SendKeys(emailConfig.Body);
-                Thread.Sleep(500);
+                if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
                 //switch back to parent frame
                 if (version == "2013") Driver.SwitchTo().DefaultContent();
-                Thread.Sleep(300);
+                if (token.WaitHandle.WaitOne(300)) token.ThrowIfCancellationRequested();
                 Log.Trace($"WebOutlook:: Email body created.");
             }
 
@@ -852,7 +859,7 @@ public abstract class OutlookHelper : BrowserHelper
             }
 
             BrowserHelperSupport.ElementClick(Driver, targetElement);
-            Thread.Sleep(500);
+            if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
             HandleAttachmentReminder(); //handle the attachment popup if present
             HandleSubjectReminder();
 
@@ -861,7 +868,7 @@ public abstract class OutlookHelper : BrowserHelper
         }
         catch (Exception e)
         {
-            if (e is ThreadAbortException || e is ThreadInterruptedException)
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
             {
                 throw;
             }
@@ -900,8 +907,8 @@ public abstract class OutlookHelper : BrowserHelper
             while (count < MaxToDelete)
             {
                 //select the first email
-                BrowserHelperSupport.MoveToElementAndClick(Driver, elementToDelete);
-                Thread.Sleep(200);
+                BrowserHelperSupport.MoveToElementAndClick(Driver, elementToDelete, token);
+                if (token.WaitHandle.WaitOne(200)) token.ThrowIfCancellationRequested();
 
                 var UseDeleteMenu = true;
                 if (version == "2013")
@@ -920,7 +927,7 @@ public abstract class OutlookHelper : BrowserHelper
                             if (DiscardElements != null && DiscardElements.Count > 0)
                             {
                                 BrowserHelperSupport.ElementClick(Driver, DiscardElements[0]);
-                                Thread.Sleep(500);
+                                if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
                             }
                         }
                     }
@@ -941,7 +948,7 @@ public abstract class OutlookHelper : BrowserHelper
 
                         // bring up the more actions menu
                         BrowserHelperSupport.ElementClick(Driver, targetElement);
-                        Thread.Sleep(200);
+                        if (token.WaitHandle.WaitOne(200)) token.ThrowIfCancellationRequested();
                         targetElement = Driver.FindElement(By.XPath(DeleteActionXpath));
                         if (targetElement == null)
                         {
@@ -952,7 +959,7 @@ public abstract class OutlookHelper : BrowserHelper
 
                         // delete the current email
                         BrowserHelperSupport.ElementClick(Driver, targetElement);
-                        Thread.Sleep(500);
+                        if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
                     }
                     else
                     {
@@ -967,7 +974,7 @@ public abstract class OutlookHelper : BrowserHelper
 
                         // delete the current email
                         BrowserHelperSupport.ElementClick(Driver, targetElement);
-                        Thread.Sleep(500);
+                        if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
                     }
                 }
 
@@ -993,8 +1000,8 @@ public abstract class OutlookHelper : BrowserHelper
         }
 
         //open folder context menu
-        BrowserHelperSupport.MoveToElementAndContextMenu(Driver, targetElement);
-        Thread.Sleep(500);
+        BrowserHelperSupport.MoveToElementAndContextMenu(Driver, targetElement, token);
+        if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
 
         // select empty folder choice
         targetElement = Driver.FindElement(By.XPath(EmptyFolderActionXpath));
@@ -1004,8 +1011,8 @@ public abstract class OutlookHelper : BrowserHelper
             return false;
         }
 
-        BrowserHelperSupport.MoveToElementAndClick(Driver, targetElement);
-        Thread.Sleep(1000);
+        BrowserHelperSupport.MoveToElementAndClick(Driver, targetElement, token);
+        if (token.WaitHandle.WaitOne(1000)) token.ThrowIfCancellationRequested();
 
 
         //click  OK button on popup
@@ -1020,12 +1027,12 @@ public abstract class OutlookHelper : BrowserHelper
         {
             try
             {
-                BrowserHelperSupport.MoveToElementAndClick(Driver, anElement);
-                Thread.Sleep(300);
+                BrowserHelperSupport.MoveToElementAndClick(Driver, anElement, token);
+                if (token.WaitHandle.WaitOne(300)) token.ThrowIfCancellationRequested();
             }
             catch (Exception e)
             {
-                if (e is ThreadAbortException || e is ThreadInterruptedException)
+                if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
                 {
                     throw;
                 }
@@ -1056,7 +1063,7 @@ public abstract class OutlookHelper : BrowserHelper
         }
         catch (Exception e)
         {
-            if (e is ThreadAbortException || e is ThreadInterruptedException)
+           if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
             {
                 throw;
             }
@@ -1078,12 +1085,12 @@ public abstract class OutlookHelper : BrowserHelper
             if (removeFilterElement != null)
             {
                 BrowserHelperSupport.ElementClick(Driver, removeFilterElement);
-                Thread.Sleep(300);
+                if (token.WaitHandle.WaitOne(300)) token.ThrowIfCancellationRequested();
             }
         }
         catch (Exception e)
         {
-            if (e is ThreadAbortException || e is ThreadInterruptedException)
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
             {
                 throw;
             }
@@ -1100,7 +1107,7 @@ public abstract class OutlookHelper : BrowserHelper
         }
         catch (Exception e)
         {
-            if (e is ThreadAbortException or ThreadInterruptedException)
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
             {
                 throw;
             }
@@ -1147,19 +1154,19 @@ public abstract class OutlookHelper : BrowserHelper
                 {
                     //click on the menu filter
                     BrowserHelperSupport.ElementClick(Driver, MenuFilter);
-                    Thread.Sleep(300);
+                    if (token.WaitHandle.WaitOne(300)) token.ThrowIfCancellationRequested();
                     //now select a menu item
                     var MenuItemXpath =
                         $"//div[@role='menu' and @iscontextmenu='1']//child::span[text()='{mailType}']//parent::div//parent::div//parent::button";
                     var MenuItemElement = Driver.FindElement(By.XPath(MenuItemXpath));
                     BrowserHelperSupport.ElementClick(Driver, MenuItemElement);
-                    Thread.Sleep(300);
+                    if (token.WaitHandle.WaitOne(300)) token.ThrowIfCancellationRequested();
                 }
             }
         }
         catch (Exception e)
         {
-            if (e is ThreadAbortException || e is ThreadInterruptedException)
+           if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
             {
                 throw;
             }
@@ -1225,8 +1232,13 @@ public abstract class OutlookHelper : BrowserHelper
                             if (count > 50) break;
                         }
                     }
-                    catch (Exception)
+                    catch (Exception e)
                     {
+                        if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+                        {
+                            throw;
+                        }
+
                         //ignore any exceptions
                     }
                 }
@@ -1262,21 +1274,21 @@ public abstract class OutlookHelper : BrowserHelper
             {
                 //bring up the menu
                 BrowserHelperSupport.ElementClick(Driver, targetElement);
-                Thread.Sleep(300);
+                if (token.WaitHandle.WaitOne(300)) token.ThrowIfCancellationRequested();
                 var MenuItemXpath =
                     $"//div[@role='menu' and @iscontextmenu='1']//child::span[text()='{action}']//parent::div//parent::button";
                 targetElement = Driver.FindElement(By.XPath(MenuItemXpath));
                 if (targetElement != null)
                 {
                     BrowserHelperSupport.ElementClick(Driver, targetElement);
-                    Thread.Sleep(300);
+                    if (token.WaitHandle.WaitOne(300)) token.ThrowIfCancellationRequested();
                     return true;
                 }
             }
         }
         catch (Exception e)
         {
-            if (e is ThreadAbortException || e is ThreadInterruptedException)
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
             {
                 throw;
             }
@@ -1303,7 +1315,7 @@ public abstract class OutlookHelper : BrowserHelper
                 }
                 catch (Exception e)
                 {
-                    if (e is ThreadAbortException || e is ThreadInterruptedException)
+                    if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
                     {
                         throw;
                     }
@@ -1313,13 +1325,13 @@ public abstract class OutlookHelper : BrowserHelper
                 if (targetElement != null)
                 {
                     BrowserHelperSupport.ElementClick(Driver, targetElement);
-                    Thread.Sleep(300);
+                    if (token.WaitHandle.WaitOne(300)) token.ThrowIfCancellationRequested();
                     return true;
                 }
             }
             catch (Exception e)
             {
-                if (e is ThreadAbortException || e is ThreadInterruptedException)
+                if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
                 {
                     throw;
                 }
@@ -1350,7 +1362,7 @@ public abstract class OutlookHelper : BrowserHelper
                 }
                 catch (Exception e)
                 {
-                    if (e is ThreadAbortException || e is ThreadInterruptedException)
+                    if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
                     {
                         throw;
                     }
@@ -1361,7 +1373,7 @@ public abstract class OutlookHelper : BrowserHelper
                 {
                     didDownload = true;
                     BrowserHelperSupport.ElementClick(Driver, targetElement);
-                    Thread.Sleep(300);
+                    if (token.WaitHandle.WaitOne(300)) token.ThrowIfCancellationRequested();
                     Log.Trace($"WebOutlook:: Attachments downloads successfull.");
                 }
 
@@ -1373,7 +1385,7 @@ public abstract class OutlookHelper : BrowserHelper
                     }
                     catch (Exception e)
                     {
-                        if (e is ThreadAbortException || e is ThreadInterruptedException)
+                        if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
                         {
                             throw;
                         }
@@ -1384,7 +1396,7 @@ public abstract class OutlookHelper : BrowserHelper
                     {
                         didDownload = true;
                         BrowserHelperSupport.ElementClick(Driver, targetElement);
-                        Thread.Sleep(300);
+                        if (token.WaitHandle.WaitOne(300)) token.ThrowIfCancellationRequested();
                         Log.Trace($"WebOutlook:: Single Attachment download successfull.");
                     }
                 }
@@ -1392,7 +1404,7 @@ public abstract class OutlookHelper : BrowserHelper
         }
         catch (Exception e)
         {
-            if (e is ThreadAbortException || e is ThreadInterruptedException)
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
             {
                 throw;
             }
@@ -1408,8 +1420,8 @@ public abstract class OutlookHelper : BrowserHelper
         if (emailElement != null)
         {
             //select this email
-            BrowserHelperSupport.MoveToElementAndClick(Driver, emailElement);
-            Thread.Sleep(500);
+            BrowserHelperSupport.MoveToElementAndClick(Driver, emailElement, token);
+            if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
             //this is an unread email that was just selected, mark as read
             if (MarkAsRead)
             {
@@ -1427,8 +1439,8 @@ public abstract class OutlookHelper : BrowserHelper
         if (emailElement != null)
         {
             //select this email
-            BrowserHelperSupport.MoveToElementAndClick(Driver, emailElement);
-            Thread.Sleep(500);
+            BrowserHelperSupport.MoveToElementAndClick(Driver, emailElement, token);
+            if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
             return true;
         }
 
@@ -1452,7 +1464,7 @@ public abstract class OutlookHelper : BrowserHelper
         }
         catch (Exception e)
         {
-            if (e is ThreadAbortException || e is ThreadInterruptedException)
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
             {
                 throw;
             }
@@ -1667,6 +1679,10 @@ public abstract class OutlookHelper : BrowserHelper
                         }
                         catch (System.Exception e)
                         {
+                            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+                            {
+                                throw;
+                            }
                             Log.Trace(
                                 $"WebOutlook:: Error parsing outlook credentials, outlook browser action will not be executed.");
                             baseHandler.OutlookAbort = true;
@@ -1685,6 +1701,10 @@ public abstract class OutlookHelper : BrowserHelper
                         }
                         catch (System.Exception e)
                         {
+                            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+                            {
+                                throw;
+                            }
                             Log.Trace(
                                 $"WebOutlook:: Error parsing outlook credentials file {credFname} , outlook browser action will not be executed.");
                             baseHandler.OutlookAbort = true;
@@ -1703,6 +1723,10 @@ public abstract class OutlookHelper : BrowserHelper
                         }
                         catch (System.Exception e)
                         {
+                            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+                            {
+                                throw;
+                            }
                             Log.Trace(
                                 $"WebOutlook:: Error parsing outlook credentials, outlook browser action will not be executed.");
                             baseHandler.OutlookAbort = true;
@@ -1786,7 +1810,7 @@ public abstract class OutlookHelper : BrowserHelper
                     {
                         //login failed, keep trying every 5 minutes in case it is a server startup problem
                         Log.Trace($"WebOutlook:: Login failed, sleeping and trying again.");
-                        Thread.Sleep(300 * 1000);
+                        if (token.WaitHandle.WaitOne(300 * 1000)) token.ThrowIfCancellationRequested();
                     }
 
                     //at this point we are logged in, files tab selected, ready for action
@@ -1880,7 +1904,7 @@ public abstract class OutlookHelper : BrowserHelper
         }
         catch (Exception e)
         {
-            if (e is ThreadAbortException || e is ThreadInterruptedException)
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
             {
                 throw;
             }

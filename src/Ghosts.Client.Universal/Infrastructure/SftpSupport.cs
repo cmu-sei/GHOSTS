@@ -38,12 +38,12 @@ namespace Ghosts.Client.Universal.Infrastructure
                     return normalFiles[_random.Next(0, normalFiles.Count)];
                 }
             }
-            catch (ThreadAbortException)
-            {
-                throw;  //pass up
-            }
             catch (Exception e)
             {
+                if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+                {
+                    throw;
+                }
                 Log.Error(e);
             }
             return null;
@@ -67,12 +67,12 @@ namespace Ghosts.Client.Universal.Infrastructure
                     return normalFiles[_random.Next(0, remoteFiles.Count)];
                 }
             }
-            catch (ThreadAbortException)
-            {
-                throw;  //pass up
-            }
             catch (Exception e)
             {
+                if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+                {
+                    throw;
+                }
                 Log.Error(e);
             }
             return null;
@@ -92,12 +92,12 @@ namespace Ghosts.Client.Universal.Infrastructure
                     if (f.IsDirectory && f.Name == targetdir) return f;
                 }
             }
-            catch (ThreadAbortException)
-            {
-                throw;  //pass up
-            }
             catch (Exception e)
             {
+                if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+                {
+                    throw;
+                }
                 Log.Error(e);
             }
             return null; //target directory does not exist
@@ -140,12 +140,12 @@ namespace Ghosts.Client.Universal.Infrastructure
                     fileStream.Close();
                 }
             }
-            catch (ThreadAbortException)
-            {
-                throw;  //pass up
-            }
             catch (Exception e)
             {
+                if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+                {
+                    throw;
+                }
                 Log.Error(e);
             }
         }
@@ -183,12 +183,12 @@ namespace Ghosts.Client.Universal.Infrastructure
                 client.DeleteFile(fileName);
                 Log.Trace($"Sftp:: Success, Deleted {fileName} on remote host {HostIp}.");
             }
-            catch (ThreadAbortException)
-            {
-                throw;  //pass up
-            }
             catch (Exception e)
             {
+                if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+                {
+                    throw;
+                }
                 Log.Error(e);
             }
         }
@@ -256,12 +256,12 @@ namespace Ghosts.Client.Universal.Infrastructure
                     //delete the file if exists locally
                     System.IO.File.Delete(localFilePath);
                 }
-                catch (ThreadAbortException)
-                {
-                    throw;  //pass up
-                }
                 catch (Exception e)
                 {
+                    if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+                    {
+                        throw;
+                    }
                     Log.Error(e);
                     return;
                 }
@@ -276,12 +276,12 @@ namespace Ghosts.Client.Universal.Infrastructure
                     fileStream.Close();
                 }
             }
-            catch (ThreadAbortException)
-            {
-                throw;  //pass up
-            }
             catch (Exception e)
             {
+                if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+                {
+                    throw;
+                }
                 Log.Error(e);
             }
         }
@@ -312,12 +312,12 @@ namespace Ghosts.Client.Universal.Infrastructure
                 client.ChangeDirectory(dirName);
                 Log.Trace($"Sftp:: Success, Changed to directory {dirName} on remote host {HostIp}.");
             }
-            catch (ThreadAbortException)
-            {
-                throw;  //pass up
-            }
             catch (Exception e)
             {
+                if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+                {
+                    throw;
+                }
                 Log.Error(e);
             }
 
@@ -350,12 +350,12 @@ namespace Ghosts.Client.Universal.Infrastructure
                     Log.Trace($"Sftp:: mkdir directory command skipped, as {dirName} already exists remote host {HostIp}.");
                 }
             }
-            catch (ThreadAbortException)
-            {
-                throw;  //pass up
-            }
             catch (Exception e)
             {
+                if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+                {
+                    throw;
+                }
                 Log.Error(e);
             }
 
@@ -384,12 +384,12 @@ namespace Ghosts.Client.Universal.Infrastructure
                 var remoteFiles = client.ListDirectory(dirName).OfType<SftpFile>().ToList();
                 Log.Trace($"Sftp:: Success, Found {remoteFiles.Count} in directory {dirName} on remote host {HostIp}.");
             }
-            catch (ThreadAbortException)
-            {
-                throw;  //pass up
-            }
             catch (Exception e)
             {
+                if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+                {
+                    throw;
+                }
                 Log.Error(e);
             }
 

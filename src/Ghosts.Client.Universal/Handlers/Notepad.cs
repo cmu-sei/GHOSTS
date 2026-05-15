@@ -232,26 +232,6 @@ public class Notepad(Timeline entireTimeline, TimelineHandler timelineHandler, C
         }
     }
 
-    private static string SelectActionFromProbabilities(int[] probabilityList, string[] actionList)
-    {
-        var choice = _random.Next(0, 101);
-        var startRange = 0;
-        var index = 0;
-
-        foreach (var probability in probabilityList)
-        {
-            if (probability > 0)
-            {
-                var endRange = startRange + probability;
-                if (choice >= startRange && choice <= endRange) return actionList[index];
-                startRange = endRange + 1;
-            }
-            index++;
-        }
-
-        return null;
-    }
-
     private void ParseHandlerArgs()
     {
         if (Handler.HandlerArgs == null) return;
