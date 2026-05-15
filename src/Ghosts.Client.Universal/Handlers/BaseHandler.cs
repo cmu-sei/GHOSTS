@@ -7,12 +7,14 @@ using Ghosts.Domain;
 using Ghosts.Domain.Code;
 using Newtonsoft.Json;
 using NLog;
+using OpenQA.Selenium.DevTools.V135.SystemInfo;
 
 namespace Ghosts.Client.Universal.Handlers;
 
 public interface IHandler
 {
-    Task Run();
+    //Task Run();
+    void Run();
 }
 
 public abstract class BaseHandler : IHandler
@@ -44,7 +46,10 @@ public abstract class BaseHandler : IHandler
         WorkingHours.Is(handler);
     }
 
-    public async Task Run()
+    
+    // Do not use await RunOnce() - not needed, as this is in a task already
+    // Also, will prevents re-running in a loop
+    public void Run()
     {
         _log.Info($"{GetType().Name} executing for timeline {this.Timeline.Id} (loop={this.Handler.Loop})");
         try
@@ -53,12 +58,12 @@ public abstract class BaseHandler : IHandler
             {
                 while (!this.Token.IsCancellationRequested)
                 {
-                    await RunOnce();
+                    RunOnce();
                 }
             }
             else
             {
-                await RunOnce();
+                RunOnce();
             }
 
             _log.Info($"{GetType().Name} finished successfully for timeline {this.Timeline.Id}");
@@ -96,5 +101,45 @@ public abstract class BaseHandler : IHandler
             });
 
         _timelineLog.Info($"TIMELINE|{DateTime.UtcNow:MM/dd/yyyy HH:mm:ss.fff}Z|{o}");
+    }
+
+    public bool CheckProbabilityVar(string name, int value)
+    {
+        if (!(value >= 0 && value <= 100))
+        {
+            _log.Trace($"Variable {name} with value {value} must be an int between 0 and 100, setting to 0");
+            return false;
+        }
+        return true;
+    }
+
+    /// <summary>
+    /// Select an action from a list of probabilities.
+    /// It is assumed that the list of probabilities adds up to <= 100.
+    /// Each probability is associated with a string name in action list
+    /// If the probabilities add up to less than 100, then null can be returned
+    /// which means that no action was chosen
+    /// </summary>
+    /// <param name="probabilityList"></param>
+    /// <param name="actionList"></param>
+    /// <returns></returns>
+    public static string SelectActionFromProbabilities(int[] probabilityList, string[] actionList)
+    {
+        int choice = _random.Next(0, 101);
+        int endRange;
+        int startRange = 0;
+        int index = 0;
+        foreach (var probability in probabilityList)
+        {
+            if (probability > 0)
+            {
+                endRange = startRange + probability;
+                if (choice >= startRange && choice <= endRange) return actionList[index];
+                else startRange = endRange + 1;
+            }
+            index++;
+        }
+
+        return null;
     }
 }

@@ -23,18 +23,19 @@ public class Clicks(Timeline entireTimeline, TimelineHandler timelineHandler, Ca
             {
                 WorkingHours.Is(handler);
 
-                if (timelineEvent.DelayBeforeActual > 0)
-                    Thread.Sleep(timelineEvent.DelayBeforeActual);
+                if (timelineEvent.DelayBeforeActual > 0) {
+                    if (Token.WaitHandle.WaitOne(timelineEvent.DelayBeforeActual)) Token.ThrowIfCancellationRequested();
+                }
 
                 var pos = GetCursorPosition();
                 DoLeftMouseClick(pos.X, pos.Y);
 
                 _log.Trace($"Click: {pos.X}:{pos.Y}");
-                Thread.Sleep(Jitter.Randomize(
+                if (Token.WaitHandle.WaitOne(Jitter.Randomize(
                     timelineEvent.CommandArgs[0],
                     timelineEvent.CommandArgs[1],
                     timelineEvent.CommandArgs[2]
-                ));
+                ))) Token.ThrowIfCancellationRequested();
                 Report(new ReportItem
                 {
                     Handler = handler.HandlerType.ToString(),
@@ -43,8 +44,9 @@ public class Clicks(Timeline entireTimeline, TimelineHandler timelineHandler, Ca
                     Result = $"{pos.X}:{pos.Y}"
                 });
 
-                if (timelineEvent.DelayAfterActual > 0)
-                    Thread.Sleep(timelineEvent.DelayAfterActual);
+                if (timelineEvent.DelayAfterActual > 0) {
+                    if (Token.WaitHandle.WaitOne(timelineEvent.DelayAfterActual)) Token.ThrowIfCancellationRequested();
+                }
             }
         }, this.Token);
     }

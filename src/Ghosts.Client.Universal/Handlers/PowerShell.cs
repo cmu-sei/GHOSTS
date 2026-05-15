@@ -34,8 +34,9 @@ public class PowerShell(Timeline entireTimeline, TimelineHandler timelineHandler
         {
             WorkingHours.Is(this.Handler);
 
-            if (timelineEvent.DelayBeforeActual > 0)
-                Thread.Sleep(timelineEvent.DelayBeforeActual);
+            if (timelineEvent.DelayBeforeActual > 0) {
+                if (Token.WaitHandle.WaitOne(timelineEvent.DelayBeforeActual)) Token.ThrowIfCancellationRequested();
+            }
 
             _log.Trace($"PowerShell: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfter}");
 
@@ -48,7 +49,7 @@ public class PowerShell(Timeline entireTimeline, TimelineHandler timelineHandler
                         {
                             //skipping this command
                             _log.Trace($"PowerShell Command choice skipped due to execution probability");
-                            Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, Jitterfactor));
+                            if (Token.WaitHandle.WaitOne(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, Jitterfactor))) Token.ThrowIfCancellationRequested();
                             continue;
                         }
 
@@ -57,8 +58,7 @@ public class PowerShell(Timeline entireTimeline, TimelineHandler timelineHandler
                         {
                             ProcessCommand(this.Handler, timelineEvent, cmd.ToString());
                         }
-
-                        Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, Jitterfactor));
+                        if (Token.WaitHandle.WaitOne(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, Jitterfactor))) Token.ThrowIfCancellationRequested();
                     }
                 default:
                     ProcessCommand(this.Handler, timelineEvent, timelineEvent.Command);
@@ -69,8 +69,9 @@ public class PowerShell(Timeline entireTimeline, TimelineHandler timelineHandler
                     break;
             }
 
-            if (timelineEvent.DelayAfterActual > 0)
-                Thread.Sleep(timelineEvent.DelayAfterActual);
+            if (timelineEvent.DelayAfterActual > 0) {
+                if (Token.WaitHandle.WaitOne(timelineEvent.DelayAfterActual)) Token.ThrowIfCancellationRequested();
+            }
         }
 
         return Task.CompletedTask;
@@ -89,7 +90,7 @@ public class PowerShell(Timeline entireTimeline, TimelineHandler timelineHandler
             }
         }
 
-        var results = ProcessCommand(command);
+        var results = ProcessCommand(command, Token);
         Report(new ReportItem
         {
             Handler = handler.HandlerType.ToString(),
@@ -99,7 +100,7 @@ public class PowerShell(Timeline entireTimeline, TimelineHandler timelineHandler
         });
     }
 
-    public static string ProcessCommand(string command)
+    public static string ProcessCommand(string command, CancellationToken token)
     {
         _log.Trace($"Spawning powershell.exe with command {command}");
         var processStartInfo = new ProcessStartInfo("powershell.exe")
@@ -109,7 +110,7 @@ public class PowerShell(Timeline entireTimeline, TimelineHandler timelineHandler
 
         using var process = Process.Start(processStartInfo);
         var outputString = string.Empty;
-        Thread.Sleep(1000);
+         if (token.WaitHandle.WaitOne(1000)) token.ThrowIfCancellationRequested();
 
         if (process != null)
         {

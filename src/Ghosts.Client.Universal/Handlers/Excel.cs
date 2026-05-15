@@ -21,7 +21,7 @@ public class ExcelHandler(Timeline entireTimeline, TimelineHandler timelineHandl
     {
         if (!OperatingSystem.IsWindows())
         {
-            _log.Info("Word handler automation is not currently supported on this OS");
+            _log.Info("Excel handler automation is not currently supported on this OS");
             return Task.CompletedTask;
         }
 
@@ -56,12 +56,14 @@ public class ExcelHandler(Timeline entireTimeline, TimelineHandler timelineHandl
                         {
                             _log.Trace(
                                 $"DelayBefore, Sleeping with jitterfactor of {jitterFactor}% {timelineEvent.DelayBeforeActual}");
-                            Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayBeforeActual, jitterFactor));
+                            if (Token.WaitHandle.WaitOne(Jitter.JitterFactorDelay(timelineEvent.DelayBeforeActual, jitterFactor))) Token.ThrowIfCancellationRequested();
                         }
                         else
                         {
                             _log.Trace($"DelayBefore, Sleeping {timelineEvent.DelayBeforeActual}");
-                            Thread.Sleep(timelineEvent.DelayBeforeActual);
+                            if (timelineEvent.DelayBeforeActual > 0) {
+                                if (Token.WaitHandle.WaitOne(timelineEvent.DelayBeforeActual)) Token.ThrowIfCancellationRequested();
+                            }
                         }
                     }
 
@@ -110,6 +112,10 @@ public class ExcelHandler(Timeline entireTimeline, TimelineHandler timelineHandl
                     }
                     catch (Exception e)
                     {
+                        if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+                        {
+                            throw;
+                        }
                         _log.Trace($"Could not minimize: {e}");
                     }
 
@@ -120,7 +126,7 @@ public class ExcelHandler(Timeline entireTimeline, TimelineHandler timelineHandl
                     }
 
                     _log.Trace($"Write sleep, Sleeping {writeSleep}");
-                    Thread.Sleep(writeSleep);
+                    if (Token.WaitHandle.WaitOne(writeSleep)) Token.ThrowIfCancellationRequested();
 
                     var rand = RandomFilename.Generate();
 
@@ -155,6 +161,10 @@ public class ExcelHandler(Timeline entireTimeline, TimelineHandler timelineHandl
                     }
                     catch (Exception e)
                     {
+                        if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+                        {
+                            throw;
+                        }
                         _log.Trace($"save-array exception: {e}");
                     }
 
@@ -185,6 +195,10 @@ public class ExcelHandler(Timeline entireTimeline, TimelineHandler timelineHandl
                     }
                     catch (Exception e)
                     {
+                        if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+                        {
+                            throw;
+                        }
                         _log.Error($"Excel file delete exception: {e}");
                     }
 
@@ -235,7 +249,7 @@ public class ExcelHandler(Timeline entireTimeline, TimelineHandler timelineHandl
                     {
                         //sleep and leave the app open
                         _log.Trace($"Sleep after for {timelineEvent.DelayAfterActual}");
-                        Thread.Sleep(timelineEvent.DelayAfterActual.GetSafeSleepTime(writeSleep));
+                        if (Token.WaitHandle.WaitOne(timelineEvent.DelayAfterActual.GetSafeSleepTime(writeSleep))) Token.ThrowIfCancellationRequested();
                     }
 
                     workSheet.Dispose();
@@ -249,8 +263,12 @@ public class ExcelHandler(Timeline entireTimeline, TimelineHandler timelineHandl
                     {
                         officeApplication.Dispose();
                     }
-                    catch
+                    catch (Exception e)
                     {
+                        if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+                        {
+                            throw;
+                        }
                         // ignore
                     }
 
@@ -258,8 +276,12 @@ public class ExcelHandler(Timeline entireTimeline, TimelineHandler timelineHandl
                     {
                         Marshal.ReleaseComObject(officeApplication);
                     }
-                    catch
+                    catch (Exception e)
                     {
+                        if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+                        {
+                            throw;
+                        }
                         // ignore
                     }
 
@@ -267,20 +289,25 @@ public class ExcelHandler(Timeline entireTimeline, TimelineHandler timelineHandl
                     {
                         Marshal.FinalReleaseComObject(officeApplication);
                     }
-                    catch
+                    catch (Exception e)
                     {
+                        if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+                        {
+                            throw;
+                        }
                         // ignore
                     }
 
                     GC.Collect();
                 }
-                catch (ThreadAbortException e)
-                {
-                    _log.Error(e);
-                    _log.Trace("Excel closing abnormally...");
-                }
                 catch (Exception e)
                 {
+                    if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+                    {
+                        _log.Error(e);
+                        _log.Trace("Excel closing abnormally...");
+                        throw;
+                    }
                     _log.Error($"Excel handler exception: {e}");
                 }
                 finally
@@ -290,22 +317,21 @@ public class ExcelHandler(Timeline entireTimeline, TimelineHandler timelineHandl
                         //sleep and leave the app open
                         _log.Trace($"Sleep after for {timelineEvent.DelayAfterActual} with jitter");
                         // Thread.Sleep(timelineEvent.DelayAfterActual - writeSleep);
-                        Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, jitterFactor));
+                         if (Token.WaitHandle.WaitOne(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, jitterFactor))) Token.ThrowIfCancellationRequested();
                     }
                     else
                     {
-                        Thread.Sleep(5000);
+                        if (Token.WaitHandle.WaitOne(5000)) Token.ThrowIfCancellationRequested();
                     }
                 }
             }
         }
-        catch (ThreadAbortException e)
-        {
-            _log.Error(e);
-        }
-
         catch (Exception e)
         {
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+            {
+                throw;
+            }
             _log.Error(e);
         }
 

@@ -11,9 +11,9 @@ namespace Ghosts.Client.Universal.Handlers;
 
 public class BlogHelperDrupal : BlogHelper
 {
-    public BlogHelperDrupal(BaseBrowserHandler callingHandler, IWebDriver callingDriver)
+    public BlogHelperDrupal(BaseBrowserHandler callingHandler, IWebDriver callingDriver, CancellationToken atoken)
     {
-        base.Init(callingHandler, callingDriver);
+        base.Init(callingHandler, callingDriver, atoken);
     }
 
     /// <summary>
@@ -41,12 +41,12 @@ public class BlogHelperDrupal : BlogHelper
             config = RequestConfiguration.Load(handler, target);
             baseHandler.MakeRequest(config);
         }
-        catch (ThreadAbortException)
-        {
-            throw; //pass up
-        }
         catch (System.Exception e)
         {
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+            {
+                 throw; //pass up
+            }
             Log.Trace(
                 $"Blog:: Unable to parse site {target}, url may be malformed. Blog browser action will not be executed.");
             Log.Error(e);
@@ -58,22 +58,22 @@ public class BlogHelperDrupal : BlogHelper
         {
             var targetElement = Driver.FindElement(By.CssSelector("input#edit-name.form-text.required"));
             targetElement.SendKeys(user);
-            Thread.Sleep(500);
+            if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
             targetElement = Driver.FindElement(By.CssSelector("input#edit-pass.form-text.required"));
             targetElement.SendKeys(pw);
-            Thread.Sleep(500);
+            if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
             targetElement = Driver.FindElement(By.CssSelector("input#edit-submit.form-submit"));
             actions = new Actions(Driver);
             actions.MoveToElement(targetElement).Click().Perform();
-            Thread.Sleep(500);
+            if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
             //check if login was successful
-        }
-        catch (ThreadAbortException)
-        {
-            throw; //pass up
         }
         catch (System.Exception e)
         {
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+            {
+                 throw; //pass up
+            }
             Log.Trace(
                 $"Blog:: Unable to login into site {target}, check username/password. Blog browser action will not be executed.");
             Log.Error(e);
@@ -89,12 +89,12 @@ public class BlogHelperDrupal : BlogHelper
                 $"Blog:: Unable to login into site {target}, check username/password. Blog browser action will not be executed.");
             return false;
         }
-        catch (ThreadAbortException)
+        catch (Exception e)
         {
-            throw; //pass up
-        }
-        catch
-        {
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+            {
+                 throw; //pass up
+            }
             //ignore
         }
 
@@ -112,17 +112,18 @@ public class BlogHelperDrupal : BlogHelper
                     Driver.FindElement(
                         By.CssSelector("textarea#edit-comment-body-und-0-value.text-full.form-textarea.required"));
                 targetElement.SendKeys(reply);
-                Thread.Sleep(1000);
+                if (token.WaitHandle.WaitOne(1000)) token.ThrowIfCancellationRequested();
                 targetElement = Driver.FindElement(By.CssSelector("input#edit-submit.form-submit"));
-                MoveToElementAndClick(targetElement);
+                MoveToElementAndClick(targetElement, token);
                 Log.Trace($"Blog:: Added reply to site {site}.");
             }
-            catch (ThreadAbortException)
+            catch (Exception e)
             {
-                throw; //pass up
-            }
-            catch
-            {
+                if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+                 {
+                    throw; //pass up
+                }
+                //ignore
                 return true;
             }
         }
@@ -148,12 +149,12 @@ public class BlogHelperDrupal : BlogHelper
             config = RequestConfiguration.Load(handler, target);
             baseHandler.MakeRequest(config);
         }
-        catch (ThreadAbortException)
-        {
-            throw; //pass up
-        }
         catch (System.Exception e)
         {
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+            {
+                    throw; //pass up
+            }
             Log.Trace($"Blog:: Unable to navigate to {target} while adding content.");
             Log.Error(e);
             return true; //dont abort handler  because of this
@@ -166,13 +167,17 @@ public class BlogHelperDrupal : BlogHelper
             targetElement.SendKeys(subject);
             targetElement = Driver.FindElement(By.CssSelector("textarea#edit-body-und-0-value"));
             targetElement.SendKeys(body);
-            Thread.Sleep(1000);
+            if (token.WaitHandle.WaitOne(1000)) token.ThrowIfCancellationRequested();
             targetElement = Driver.FindElement(By.CssSelector("input#edit-submit.form-submit"));
-            MoveToElementAndClick(targetElement);
+            MoveToElementAndClick(targetElement, token);
             Log.Trace($"Blog:: Added post to site {site}.");
         }
         catch (Exception e)
         {
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+            {
+                    throw; //pass up
+            }
             Log.Trace($"Blog:: Error while posting content to site {site}.");
             Log.Error(e);
         }
@@ -208,14 +213,14 @@ public class BlogHelperDrupal : BlogHelper
                             //click the Edit tab
                             actions = new Actions(Driver);
                             actions.MoveToElement(link).Click().Perform();
-                            Thread.Sleep(2000);
+                            if (token.WaitHandle.WaitOne(2000)) token.ThrowIfCancellationRequested();
                             //edit is in an overlay, that contains an iframe
                             var overlay = Driver.FindElement(By.Id("overlay-container"));
                             var iframe = overlay.FindElement(By.CssSelector("iframe.overlay-element.overlay-active"));
                             Driver.SwitchTo().Frame(iframe);
                             targetElement = Driver.FindElement(By.CssSelector("input#edit-delete.form-submit"));
-                            MoveToElementAndClick(targetElement);
-                            Thread.Sleep(1000);
+                            MoveToElementAndClick(targetElement, token);
+                            if (token.WaitHandle.WaitOne(1000)) token.ThrowIfCancellationRequested();
                             //another overlay pops up
                             overlay = Driver.FindElement(By.Id("overlay"));
                             //this overlay does not have an iframe
@@ -223,18 +228,18 @@ public class BlogHelperDrupal : BlogHelper
                             //press delete button
                             actions = new Actions(Driver);
                             actions.MoveToElement(targetElement).Click().Perform();
-                            Thread.Sleep(1000);
+                            if (token.WaitHandle.WaitOne(1000)) token.ThrowIfCancellationRequested();
                             Log.Trace($"Blog:: Deleted post from site {site}.");
                         }
                     }
                 }
             }
-            catch (ThreadAbortException)
+            catch (Exception e)
             {
-                throw; //pass up
-            }
-            catch
-            {
+                if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+                {
+                    throw; //pass up
+                }
                 return true;
             }
         }
@@ -259,14 +264,14 @@ public class BlogHelperDrupal : BlogHelper
         {
             config = RequestConfiguration.Load(handler, target);
             baseHandler.MakeRequest(config);
-            Thread.Sleep(1000);
-        }
-        catch (ThreadAbortException)
-        {
-            throw; //pass up
+            if (token.WaitHandle.WaitOne(1000)) token.ThrowIfCancellationRequested();
         }
         catch (System.Exception e)
         {
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+            {
+                throw; //pass up
+            }
             Log.Trace($"Blog:: Unable to navigate to {target} while browsing.");
             Log.Error(e);
             return true; //dont abort handler  because of this
@@ -293,16 +298,17 @@ public class BlogHelperDrupal : BlogHelper
                     config = RequestConfiguration.Load(handler, targetPage);
                     baseHandler.MakeRequest(config);
                     onTargetPage = true;
-                    Thread.Sleep(1000);
+                    if (token.WaitHandle.WaitOne(1000)) token.ThrowIfCancellationRequested();
                 }
             }
         }
-        catch (ThreadAbortException)
+        catch (Exception e)
         {
-            throw; //pass up
-        }
-        catch
-        {
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+            {
+                throw; //pass up
+            }
+            // ignore
         }
 
         if (!onTargetPage)
@@ -320,16 +326,16 @@ public class BlogHelperDrupal : BlogHelper
                         //pick a different page
                         actions = new Actions(Driver);
                         actions.MoveToElement(targetElements[pageNum]).Click().Perform();
-                        Thread.Sleep(1000);
+                        if (token.WaitHandle.WaitOne(1000)) token.ThrowIfCancellationRequested();
                     }
                 }
             }
-            catch (ThreadAbortException)
+            catch (Exception e)
             {
-                throw; //pass up
-            }
-            catch
-            {
+                if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+                {
+                    throw; //pass up
+                }
             }
         }
 
@@ -349,18 +355,18 @@ public class BlogHelperDrupal : BlogHelper
                     //string targetpost = header + site + href;
                     config = RequestConfiguration.Load(handler, href);
                     baseHandler.MakeRequest(config);
-                    Thread.Sleep(1000);
+                    if (token.WaitHandle.WaitOne(1000)) token.ThrowIfCancellationRequested();
                     Log.Trace($"Blog:: Browsed post on site {site}.");
                     return true;
                 }
             }
         }
-        catch (ThreadAbortException)
+        catch (Exception e)
         {
-            throw; //pass up
-        }
-        catch
-        {
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+            {
+                throw; //pass up
+            }
         }
 
         Log.Trace($"Blog:: No articles to browse on site {site}.");

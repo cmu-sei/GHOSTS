@@ -80,6 +80,7 @@ public class EmailContentManager
         try
         {
             var engine = new FileHelperEngine<EmailContent>();
+            _log.Info($"Loading email content file: {ClientConfigurationResolver.EmailContent}");
             Content = engine.ReadFile(ClientConfigurationResolver.EmailContent).ToList();
         }
         catch (Exception e)

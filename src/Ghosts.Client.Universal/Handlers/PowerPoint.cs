@@ -56,12 +56,12 @@ public class PowerPointHandler(Timeline entireTimeline, TimelineHandler timeline
                         {
                             _log.Trace(
                                 $"DelayBefore, Sleeping with jitterfactor of {jitterFactor}% {timelineEvent.DelayBeforeActual}");
-                            Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayBeforeActual, jitterFactor));
+                            if (Token.WaitHandle.WaitOne(Jitter.JitterFactorDelay(timelineEvent.DelayBeforeActual, jitterFactor))) Token.ThrowIfCancellationRequested();
                         }
                         else
                         {
                             _log.Trace($"DelayBefore, Sleeping {timelineEvent.DelayBeforeActual}");
-                            Thread.Sleep(timelineEvent.DelayBeforeActual);
+                            if (Token.WaitHandle.WaitOne(timelineEvent.DelayBeforeActual)) Token.ThrowIfCancellationRequested();
                         }
                     }
 
@@ -99,6 +99,10 @@ public class PowerPointHandler(Timeline entireTimeline, TimelineHandler timeline
                     }
                     catch (Exception e)
                     {
+                        if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+                        {
+                            throw;
+                        }
                         _log.Trace($"Could not minimize: {e}");
                     }
 
@@ -109,7 +113,7 @@ public class PowerPointHandler(Timeline entireTimeline, TimelineHandler timeline
                     }
 
                     _log.Trace($"Write sleep, Sleeping {writeSleep}");
-                    Thread.Sleep(writeSleep);
+                    if (Token.WaitHandle.WaitOne(writeSleep)) Token.ThrowIfCancellationRequested();
 
                     // add new slide
                     document.Slides.Add(1, 26); // PpSlideLayout.ppLayoutClipArtAndVerticalText
@@ -149,6 +153,10 @@ public class PowerPointHandler(Timeline entireTimeline, TimelineHandler timeline
                     }
                     catch (Exception e)
                     {
+                        if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+                        {
+                            throw;
+                        }
                         _log.Trace($"save-array exception: {e}");
                     }
 
@@ -179,10 +187,14 @@ public class PowerPointHandler(Timeline entireTimeline, TimelineHandler timeline
                     }
                     catch (Exception e)
                     {
+                        if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+                        {
+                            throw;
+                        }
                         _log.Debug(e);
                     }
 
-                    Thread.Sleep(5000);
+                    if (Token.WaitHandle.WaitOne(5000)) Token.ThrowIfCancellationRequested();
                     if (string.IsNullOrEmpty(document.Path))
                     {
                         document.SaveAs(path);
@@ -231,7 +243,7 @@ public class PowerPointHandler(Timeline entireTimeline, TimelineHandler timeline
                     {
                         //sleep and leave the app open
                         _log.Trace($"Sleep after for {timelineEvent.DelayAfterActual}");
-                        Thread.Sleep(timelineEvent.DelayAfterActual.GetSafeSleepTime(writeSleep));
+                        if (Token.WaitHandle.WaitOne(timelineEvent.DelayAfterActual.GetSafeSleepTime(writeSleep))) Token.ThrowIfCancellationRequested();
                     }
 
                     document.Dispose();
@@ -243,8 +255,12 @@ public class PowerPointHandler(Timeline entireTimeline, TimelineHandler timeline
                     {
                         officeApplication.Dispose();
                     }
-                    catch
+                    catch (Exception e)
                     {
+                        if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+                        {
+                            throw;
+                        }
                         // ignore
                     }
 
@@ -253,8 +269,12 @@ public class PowerPointHandler(Timeline entireTimeline, TimelineHandler timeline
                     {
                         Marshal.ReleaseComObject(officeApplication);
                     }
-                    catch
+                    catch (Exception e)
                     {
+                        if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+                        {
+                            throw;
+                        }
                         // ignore
                     }
 
@@ -262,18 +282,23 @@ public class PowerPointHandler(Timeline entireTimeline, TimelineHandler timeline
                     {
                         Marshal.FinalReleaseComObject(officeApplication);
                     }
-                    catch
+                    catch (Exception e)
                     {
+                        if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+                        {
+                            throw;
+                        }
                         // ignore
                     }
                 }
-                catch (ThreadAbortException e)
-                {
-                    _log.Error(e);
-                    _log.Trace("Powerpoint closing abnormally...");
-                }
                 catch (Exception e)
                 {
+                    if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+                    {
+                         _log.Error(e);
+                        _log.Trace("Powerpoint closing abnormally...");
+                        throw;
+                    }
                     _log.Debug(e);
                 }
                 finally
@@ -283,21 +308,22 @@ public class PowerPointHandler(Timeline entireTimeline, TimelineHandler timeline
                         //sleep and leave the app open
                         _log.Trace($"Sleep after for {timelineEvent.DelayAfterActual} with jitter");
                         // Thread.Sleep(timelineEvent.DelayAfterActual - writeSleep);
-                        Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, jitterFactor));
+                        if (Token.WaitHandle.WaitOne(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, jitterFactor))) Token.ThrowIfCancellationRequested();
+                        
                     }
                     else
                     {
-                        Thread.Sleep(5000);
+                        if (Token.WaitHandle.WaitOne(5000)) Token.ThrowIfCancellationRequested();
                     }
                 }
             }
         }
-        catch (ThreadAbortException e)
-        {
-            _log.Error(e);
-        }
         catch (Exception e)
         {
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+            {
+                throw;
+            }
             _log.Error(e);
         }
         finally

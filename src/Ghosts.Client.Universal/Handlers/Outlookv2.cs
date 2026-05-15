@@ -678,34 +678,6 @@ public class Outlookv2(Timeline timeline, TimelineHandler handler, CancellationT
         }
     }
 
-    private static bool CheckProbabilityVar(string name, int value)
-    {
-        if (value >= 0 && value <= 100) return true;
-        _log.Trace($"Outlookv2:: Variable {name} with value {value} must be an int between 0 and 100, setting to 0");
-        return false;
-    }
-
-    private static string SelectActionFromProbabilities(int[] probabilityList, string[] actionList)
-    {
-        var choice = _random.Next(0, 101);
-        var startRange = 0;
-        var index = 0;
-
-        foreach (var probability in probabilityList)
-        {
-            if (probability > 0)
-            {
-                var endRange = startRange + probability;
-                if (choice >= startRange && choice <= endRange) return actionList[index];
-                startRange = endRange + 1;
-            }
-
-            index++;
-        }
-
-        return null;
-    }
-
     private List<string> GetRandomFiles(string targetDir, string pattern, int count, int maxSize)
     {
         try

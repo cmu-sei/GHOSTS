@@ -225,6 +225,7 @@
     <Compile Include="Comms\CheckId.cs" />
     <Compile Include="Comms\Updates.cs" />
     <Compile Include="Handlers\BrowserChrome.cs" />
+	<Compile Include="Handlers\BrowserEdge.cs" />
     <Compile Include="Handlers\BrowserFirefox.cs" />
     <Compile Include="Handlers\Cmd.cs" />
     <Compile Include="Handlers\Excel.cs" />

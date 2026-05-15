@@ -1,5 +1,3 @@
-// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
-
 using System;
 using System.IO;
 using System.Threading;
@@ -10,11 +8,6 @@ using Ghosts.Domain.Code;
 using Newtonsoft.Json;
 using Renci.SshNet;
 
-/*
- * Used Package Renci.sshNet
- * Installed via packag manager
- * Install-Package SSH.NET
- */
 
 namespace Ghosts.Client.Universal.Handlers;
 
@@ -39,7 +32,7 @@ namespace Ghosts.Client.Universal.Handlers;
         {
             try
             {
-                _currentSshSupport = new SshSupport();
+                _currentSshSupport = new SshSupport(cancellationToken);
                 if (Handler.HandlerArgs != null)
                 {
                     if (Handler.HandlerArgs.TryGetValue("CredentialsFile", out var v1))
@@ -149,8 +142,9 @@ namespace Ghosts.Client.Universal.Handlers;
                 Token.ThrowIfCancellationRequested();
                 WorkingHours.Is(Handler);
 
-                if (timelineEvent.DelayBeforeActual > 0)
-                    Thread.Sleep(timelineEvent.DelayBeforeActual);
+                if (timelineEvent.DelayBeforeActual > 0) {
+                    if (Token.WaitHandle.WaitOne(timelineEvent.DelayBeforeActual)) Token.ThrowIfCancellationRequested();
+                }
 
                 _log.Trace($"SSH Command: {timelineEvent.Command} with delay after of {timelineEvent.DelayAfterActual}");
 
@@ -162,12 +156,13 @@ namespace Ghosts.Client.Universal.Handlers;
                         {
                             ExecuteCommand(timelineEvent, cmd.ToString());
                         }
-                        Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, _jitterFactor));
+                        if (Token.WaitHandle.WaitOne(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual,  _jitterFactor))) Token.ThrowIfCancellationRequested();
                         break;
                 }
 
-                if (timelineEvent.DelayAfterActual > 0)
-                    Thread.Sleep(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual, _jitterFactor));
+                if (timelineEvent.DelayAfterActual > 0) {
+                    if (Token.WaitHandle.WaitOne(Jitter.JitterFactorDelay(timelineEvent.DelayAfterActual,  _jitterFactor))) Token.ThrowIfCancellationRequested();
+                }
             }
         }
 

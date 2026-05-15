@@ -28,6 +28,7 @@ public class EmailContentManager
     public static void Check()
     {
         var emailContentManager = new EmailContentManager();
+        
         emailContentManager.LoadEmailFile();
         if (emailContentManager.Content.Count < 1)
         {
@@ -80,6 +81,7 @@ public class EmailContentManager
         try
         {
             var engine = new FileHelperEngine<EmailContent>();
+            _log.Info($"Loading email content file: {ClientConfigurationResolver.EmailContent}");
             this.Content = engine.ReadFile(ClientConfigurationResolver.EmailContent).ToList();
         }
         catch (Exception e)

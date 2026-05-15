@@ -185,6 +185,10 @@ public class BrowserCrawl(Timeline entireTimeline, TimelineHandler timelineHandl
         }
         catch (Exception e)
         {
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+            {
+                throw;
+            }
             _log.Trace(e);
         }
     }
@@ -263,6 +267,10 @@ public class BrowserCrawl(Timeline entireTimeline, TimelineHandler timelineHandl
         }
         catch (Exception e)
         {
+            if (e is ThreadAbortException || e is ThreadInterruptedException || e is OperationCanceledException)
+            {
+                throw;
+            }
             _log.Trace($"Requst error for {config.Uri}: {e.Message}");
         }
     }
