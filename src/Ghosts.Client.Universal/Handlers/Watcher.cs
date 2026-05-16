@@ -37,9 +37,9 @@ internal class Watcher(Timeline entireTimeline, TimelineHandler timelineHandler,
                 }
             }
 
-            while (!Token.IsCancellationRequested)
+            while (true)
             {
-                await Task.Delay(2000, Token);
+                if (Token.WaitHandle.WaitOne(2000)) Token.ThrowIfCancellationRequested();  //default
             }
         }
         catch (OperationCanceledException)
