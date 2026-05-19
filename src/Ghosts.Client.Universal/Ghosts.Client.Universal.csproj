@@ -33,7 +33,7 @@
     <PackageReference Include="Quartz" Version="3.13.1"/>
     <PackageReference Include="SimpleTCP" Version="1.0.24"/>
     <PackageReference Include="SSH.NET" Version="2025.0.0"/>
-    <PackageReference Include="MailKit" Version="4.12.0"/>
+    <PackageReference Include="MailKit" Version="4.16.0"/>
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.0"/>
   </ItemGroup>
 
