@@ -88,7 +88,7 @@ namespace Ghosts.Client.Universal.Health
                             NullValueHandling = NullValueHandling.Ignore
                         });
 
-                    _healthLog.Info($"HEALTH|{DateTime.UtcNow}|{o}");
+                    _healthLog.Info($"HEALTH|{DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss.fff", System.Globalization.CultureInfo.InvariantCulture)}Z}|{o}");
 
 
                     Thread.Sleep(config.Sleep);
