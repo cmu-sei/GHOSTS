@@ -100,7 +100,7 @@ public abstract class BaseHandler : IHandler
                 NullValueHandling = NullValueHandling.Ignore
             });
 
-        _timelineLog.Info($"TIMELINE|{DateTime.UtcNow:MM/dd/yyyy HH:mm:ss.fff}Z|{o}");
+        _timelineLog.Info($"TIMELINE|{DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss.fff", System.Globalization.CultureInfo.InvariantCulture)}Z|{o}");
     }
 
     public bool CheckProbabilityVar(string name, int value)

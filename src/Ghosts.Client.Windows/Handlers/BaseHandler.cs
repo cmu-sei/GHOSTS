@@ -41,7 +41,7 @@ namespace Ghosts.Client.Handlers
                     NullValueHandling = NullValueHandling.Ignore
                 });
 
-            _timelineLog.Info($"TIMELINE|{DateTime.UtcNow:MM/dd/yyyy HH:mm:ss.fff}Z|{o}");
+            _timelineLog.Info($"TIMELINE|{DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss.fff", System.Globalization.CultureInfo.InvariantCulture)}Z|{o}");
 
         }
 
@@ -50,7 +50,7 @@ namespace Ghosts.Client.Handlers
             if (payload != null)
             {
                 payload = payload.Replace(Environment.NewLine, string.Empty);
-                _timelineLog.Info($"WEBHOOKCREATE|{DateTime.UtcNow:MM/dd/yyyy hh:mm:ss tt}|{payload}");
+                _timelineLog.Info($"WEBHOOKCREATE|{DateTime.UtcNow.ToString("MM/dd/yyyy hh:mm:ss tt", System.Globalization.CultureInfo.InvariantCulture)}|{payload}");
             }
         }
 
