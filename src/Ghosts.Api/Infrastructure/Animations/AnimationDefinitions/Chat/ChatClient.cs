@@ -73,8 +73,8 @@ public class ChatClient
         try
         {
             var request = new HttpRequestMessage(HttpMethod.Post, url);
-            var content = new StringContent($"{{\"login_id\":\"{username}\",\"password\":\"{password}\"}}", null,
-                "application/json");
+            var payload = JsonSerializer.Serialize(new { login_id = username, password });
+            var content = new StringContent(payload, Encoding.UTF8, "application/json");
             request.Content = content;
             var response = await _client.SendAsync(request, _cancellationToken);
             response.EnsureSuccessStatusCode();
@@ -98,7 +98,7 @@ public class ChatClient
         }
         catch (Exception e)
         {
-            _log.Error($"Cannot login {username}:{password} with error {e.Message}|{e.StackTrace}");
+            _log.Error($"Cannot login {username} with error {e.Message}");
             throw;
         }
     }
@@ -526,9 +526,9 @@ public class ChatClient
         {
             _log.Trace($"Managing {username}...");
 
-            if (username.Contains("admin"))
+            if (string.Equals(username, _configuration.Chat.AdminUsername, StringComparison.OrdinalIgnoreCase))
             {
-                _log.Trace($"Skipping user {username}...");
+                _log.Trace("Skipping admin user");
                 return;
             }
 
@@ -539,7 +539,7 @@ public class ChatClient
             }
             catch (Exception e)
             {
-                _log.Warn($"Could not login {username}, {password} with: {e}");
+                _log.Warn($"Could not login {username}: {e.Message}");
                 return;
             }
 
