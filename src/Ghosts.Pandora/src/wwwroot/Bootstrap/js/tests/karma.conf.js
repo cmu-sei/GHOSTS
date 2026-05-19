@@ -1,8 +1,20 @@
 /* eslint-env node */
 
+const os = require('os')
 const path = require('path')
-const ip = require('ip')
 const { babel } = require('@rollup/plugin-babel')
+
+function getLocalIpAddress() {
+  const interfaces = os.networkInterfaces()
+  for (const name of Object.keys(interfaces)) {
+    for (const iface of interfaces[name]) {
+      if (iface.family === 'IPv4' && !iface.internal) {
+        return iface.address
+      }
+    }
+  }
+  return '127.0.0.1'
+}
 const istanbul = require('rollup-plugin-istanbul')
 const { nodeResolve } = require('@rollup/plugin-node-resolve')
 const replace = require('@rollup/plugin-replace')
@@ -102,7 +114,7 @@ const conf = {
 }
 
 if (browserStack) {
-  conf.hostname = ip.address()
+  conf.hostname = getLocalIpAddress()
   conf.browserStack = {
     username: env.BROWSER_STACK_USERNAME,
     accessKey: env.BROWSER_STACK_ACCESS_KEY,
@@ -156,7 +168,7 @@ if (browserStack) {
   }
 
   if (debug) {
-    conf.hostname = ip.address()
+    conf.hostname = getLocalIpAddress()
     plugins.push('karma-jasmine-html-reporter')
     reporters.push('kjhtml')
     conf.singleRun = false

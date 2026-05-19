@@ -195,9 +195,9 @@ public class Pidgin(Timeline timeline, TimelineHandler handler, CancellationToke
             WriteToStream(stream, startTls);
             var tlsResponse = ReadFromStream(stream);
 
-            if (!tlsResponse.Contains("proceed"))
+            if (!tlsResponse.Contains("<proceed", StringComparison.OrdinalIgnoreCase))
             {
-                _log.Error("Pidgin:: STARTTLS not supported or rejected by server.");
+                _log.Error("Pidgin:: STARTTLS not supported or rejected by server. Aborting connection (TLS required).");
                 return;
             }
 
@@ -219,9 +219,9 @@ public class Pidgin(Timeline timeline, TimelineHandler handler, CancellationToke
         WriteToStream(stream, authStanza);
         var authResponse = ReadFromStream(stream);
 
-        if (!authResponse.Contains("success"))
+        if (!authResponse.Contains("<success", StringComparison.OrdinalIgnoreCase))
         {
-            _log.Error($"Pidgin:: SASL authentication failed. Response: {authResponse}");
+            _log.Error("Pidgin:: SASL authentication failed.");
             return;
         }
 
