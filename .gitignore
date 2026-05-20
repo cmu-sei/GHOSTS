@@ -346,4 +346,7 @@ src/Ghosts.Api/config/AttackData/enterprise-attack.json
 src/certs/*
 !src/certs/readme.md
 .playwright-mcp/*
+.playwright/*
 services/*
+site/*
+site/
