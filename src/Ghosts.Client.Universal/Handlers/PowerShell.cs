@@ -2,6 +2,7 @@
 
 using System.Text.RegularExpressions;
 using System.Diagnostics;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Ghosts.Domain;
@@ -79,14 +80,17 @@ public class PowerShell(Timeline entireTimeline, TimelineHandler timelineHandler
 
     public void ProcessCommand(TimelineHandler handler, TimelineEvent timelineEvent, string command)
     {
-        var replacements = handler.HandlerArgs["replace"];
-
-        foreach (var replacement in JArray.FromObject(replacements))
+        if (handler.HandlerArgs.ContainsKey("replace")) 
         {
-            foreach (var o in replacement)
+            var replacements = handler.HandlerArgs["replace"];
+
+            foreach (var replacement in JArray.FromObject(replacements))
             {
-                command = Regex.Replace(command, "{" + ((JProperty)o).Name.ToString() + "}",
-                    ((Newtonsoft.Json.Linq.JArray)((JProperty)o).Value).PickRandom().ToString());
+                foreach (var o in replacement)
+                {
+                    command = Regex.Replace(command, "{" + ((JProperty)o).Name.ToString() + "}",
+                        ((Newtonsoft.Json.Linq.JArray)((JProperty)o).Value).PickRandom().ToString());
+                }
             }
         }
 
@@ -102,7 +106,11 @@ public class PowerShell(Timeline entireTimeline, TimelineHandler timelineHandler
 
     public static string ProcessCommand(string command, CancellationToken token)
     {
-        _log.Trace($"Spawning powershell.exe with command {command}");
+        var pshell = "powershell.exe";
+        if (OperatingSystem.IsLinux() || OperatingSystem.IsMacOS()) {
+            pshell = "pwsh";
+        }
+        _log.Trace($"Spawning {pshell} with command {command}");
         var processStartInfo = new ProcessStartInfo("powershell.exe")
         {
             RedirectStandardInput = true, RedirectStandardOutput = true, UseShellExecute = false
