@@ -6,6 +6,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Ghosts.Client.Infrastructure;
 using Ghosts.Client.Universal.Infrastructure;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
@@ -23,12 +24,6 @@ public class Wmi(Timeline entireTimeline, TimelineHandler timelineHandler, Cance
 
     protected override Task RunOnce()
     {
-        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        {
-            _log.Trace("WMI:: WMI is not supported on this platform, skipping.");
-            return Task.CompletedTask;
-        }
-
         try
         {
             if (Handler.HandlerArgs != null)
@@ -167,7 +162,12 @@ public class Wmi(Timeline entireTimeline, TimelineHandler timelineHandler, Cance
             Token.ThrowIfCancellationRequested();
             try
             {
-                RunWmicCommand(hostIp, domain, username, password, wmiCmd.Trim());
+                if (OperatingSystem.IsWindows()) {
+                    RunWmicCommand(hostIp, domain, username, password, wmiCmd.Trim());
+                } else
+                {
+                    RunWmiQueryCommand(hostIp, domain, username, password, wmiCmd.Trim());
+                }
 
                 if (_timeBetweenCommandsMin > 0 && _timeBetweenCommandsMax > 0 &&
                     _timeBetweenCommandsMin < _timeBetweenCommandsMax)
@@ -190,6 +190,7 @@ public class Wmi(Timeline entireTimeline, TimelineHandler timelineHandler, Cance
 
     private void RunWmicCommand(string host, string domain, string username, string password, string wmiQuery)
     {
+
         var userArg = $"{domain}\\{username}";
         var arguments = $"/node:{host} /user:{userArg} /password:{password} {wmiQuery}";
 
@@ -224,6 +225,126 @@ public class Wmi(Timeline entireTimeline, TimelineHandler timelineHandler, Cance
         if (!string.IsNullOrWhiteSpace(error))
         {
             _log.Trace($"WMI:: Error output: {error.Trim()}");
+        }
+    }
+
+    // This uses Python impacket/wmiquery.py , checks that wmiquery.py is on the path before executing
+    // The wmiQuery string can be one of the predefined strings used in Ghosts.Client.Windows wmiquery,
+    // or it can be a raw query string that is just passed directly to wmiquery.py
+
+    private void RunWmiQueryCommand(string host, string domain, string username, string password, string wmiQuery)
+    {
+
+        var exeName = "wmiquery.py";
+        var wmiqueryPath = FindExecutable($"{exeName}");
+        if (wmiqueryPath == null)
+        {
+            _log.Info("Python impacket/wmiquery.py must be installed on the path for Linux WMI queries; exiting.");
+            return;
+        }
+        
+        var wmiQueryNew = TranslateWmiQuery(wmiQuery);
+        var queryFileName = Path.GetTempFileName();
+        using (StreamWriter sw = new StreamWriter(queryFileName, false))
+        {
+            sw.WriteLine(wmiQueryNew);
+            sw.WriteLine("exit");
+        }
+        
+        var arguments = $"{domain}/{username}:{password}@{host} -f {queryFileName}";
+        
+
+        _log.Trace($"WMI:: Executing: {exeName} {domain}/{username}:***@{host} {wmiQuery}");
+
+        var startInfo = new ProcessStartInfo
+        {
+            FileName = $"{exeName}",
+            Arguments = arguments,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true
+        };
+
+        using var process = Process.Start(startInfo);
+        if (process == null)
+        {
+            _log.Error($"WMI:: Failed to start {exeName} process.");
+            return;
+        }
+
+        var output = process.StandardOutput.ReadToEnd();
+        var error = process.StandardError.ReadToEnd();
+        process.WaitForExit();
+        if (File.Exists(queryFileName))
+        {
+            File.Delete(queryFileName);
+        }
+
+        if (!string.IsNullOrWhiteSpace(output))
+        {
+            _log.Trace($"WMI:: Output: {output.Trim()}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(error))
+        {
+            _log.Trace($"WMI:: Error output: {error.Trim()}");
+        }
+    }
+
+    private string TranslateWmiQuery(string wmiQuery)
+    {
+        var newQuery = wmiQuery;
+
+        switch(wmiQuery.ToLower())
+        {
+            case "getoperatingsystem":
+                newQuery = "SELECT * FROM Win32_OperatingSystem";
+                break;
+            case "getbios":
+                newQuery = "SELECT * FROM Win32_BIOS";
+                break;
+            case "getprocessor":
+                newQuery = "SELECT * FROM Win32_Processor";
+                break;
+            case "getuserlist":
+                newQuery = "SELECT * FROM Win32_LoggedOnUser";
+                break;
+            case "getnetworkinfo":
+                newQuery = "SELECT * FROM Win32_NetworkAdapter";
+                break;
+            case "getprocesslist":
+                newQuery = "SELECT * FROM Win32_Process";
+                break;
+            case "getfileslist":
+                newQuery = "SELECT * FROM WIN32_Directory WHERE Name = 'C:\\\\Windows'";
+                break;
+        }
+        return newQuery;
+        
+    }
+
+    private static string FindExecutable(string name)
+    {
+        try
+        {
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = "which",
+                Arguments = name,
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                CreateNoWindow = true
+            };
+            using var proc = Process.Start(startInfo);
+            if (proc == null) return null;
+            var output = proc.StandardOutput.ReadToEnd().Trim();
+            proc.WaitForExit();
+            return proc.ExitCode == 0 && !string.IsNullOrEmpty(output) ? output : null;
+        }
+        catch
+        {
+            return null;
         }
     }
 }
