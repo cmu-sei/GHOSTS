@@ -846,7 +846,15 @@ public abstract class BaseBrowserHandler(Timeline timeline, TimelineHandler hand
                 case "POST":
                 case "PUT":
                 case "DELETE":
-                    Driver.Navigate().GoToUrl("about:blank");
+                    try
+                    {
+                        // Navigate to the root of the site so that we are not cross-origin, and cookies can be set correctly
+                        Driver.Navigate().GoToUrl(config.Uri.GetLeftPart(UriPartial.Authority));
+                    }
+                    catch
+                    {
+                        Driver.Navigate().GoToUrl("about:blank");
+                    }
                     var script = "var xhr = new XMLHttpRequest();";
                     script += $"xhr.open('{config.Method.ToUpperInvariant()}', '{config.Uri}', true);";
                     script += "xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');";

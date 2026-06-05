@@ -318,7 +318,10 @@ public class BrowserFirefox(Timeline timeline, TimelineHandler handler, Cancella
 
         try
         {
-            driver = new FirefoxDriver(options);
+            // Pin geckodriver to the application base directory (packaged by Selenium.WebDriver.GeckoDriver)
+            // so Selenium does not reach out to the network for a driver - required for air-gapped use.
+            var service = FirefoxDriverService.CreateDefaultService(AppDomain.CurrentDomain.BaseDirectory);
+            driver = new FirefoxDriver(service, options);
         }
         catch
         {
