@@ -349,7 +349,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Ghosts.Domain\ghosts.domain.csproj">
+    <ProjectReference Include="..\Ghosts.Domain\Ghosts.Domain.csproj">
       <Project>{3bcae63e-7914-4bd3-a751-bf69820ff1be}</Project>
       <Name>ghosts.domain</Name>
     </ProjectReference>
