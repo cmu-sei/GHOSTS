@@ -25,5 +25,7 @@ namespace Ghosts.Client.Universal.Infrastructure
         public static string BlogContent => ApplicationDetails.ConfigurationFiles.BlogContent(Program.Configuration.Content.BlogContent);
 
         public static string BlogReply => ApplicationDetails.ConfigurationFiles.BlogReply(Program.Configuration.Content.BlogReply);
+
+        public static string DatabaseContent => ApplicationDetails.ConfigurationFiles.DatabaseContent(Program.Configuration.Content.DatabaseContent);
     }
 }

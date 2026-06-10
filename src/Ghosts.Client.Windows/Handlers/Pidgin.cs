@@ -8,7 +8,6 @@ using System;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using Exception = System.Exception;
-using System.Windows.Interop;
 
 namespace Ghosts.Client.Handlers
 {
