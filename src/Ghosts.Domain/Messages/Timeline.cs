@@ -122,6 +122,7 @@ namespace Ghosts.Domain
         Bash = 40,
         Print = 45,
         BrowserEdge = 46,
+        Database = 47,
         Ssh = 100,
         Sftp = 101,
         Pidgin = 102,

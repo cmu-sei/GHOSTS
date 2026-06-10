@@ -376,6 +376,13 @@ namespace Ghosts.Client.TimelineManager
                         });
                         break;
 
+                    case HandlerType.Database:
+                        t = new Thread(() =>
+                        {
+                            _ = new Database(handler);
+                        });
+                        break;
+
                     case HandlerType.Wmi:
                         t = new Thread(() =>
                         {

@@ -1,0 +1,85 @@
+
+{
+  "Status": "Run",
+  "TimeLineHandlers": [
+    {
+      "HandlerType":  "Database",
+      "HandlerArgs": {
+        "delay-jitter": 50,
+        "insert-probability": 30,
+        "delete-probability": 20,
+        "query-probability": 50,
+        "query-limit": 30,
+        "max-rows": 100,
+        "port": 3306,
+        "DatabaseTargets": {
+           "Version": "1.0",
+             "Data": {
+               "164.236.110.15_s1-svr-db15": {
+                  "Username": "meredith.palmer",
+                  "Password": "UDQ1NXcwcmQh",
+                  "Databases": [
+                    {
+                      "Name": "AcmeInc",
+                      "Tables": [
+                        {
+                          "Name": "Employees",
+                          "Columns": [
+                            {
+                              "Name": "Name",
+                              "ContentHint": "name"
+                            },
+                            {
+                              "Name": "Title",
+                              "ContentHint": "title"
+                            },
+                            {
+                              "Name": "SSN",
+                              "ContentHint": "ssn"
+                            },
+                            {
+                              "Name": "LastPerformanceRating",
+                              "Range": "0,10"
+                            },
+                            {
+                              "Name": "RemoteWorkEnabled",
+                              "Choice": "yes,no,pending"
+                            },
+                            {
+                              "Name": "Phone",
+                              "ContentHint": "phone"
+                            },
+                            {
+                              "Name": "Street",
+                              "ContentHint": "street"
+                            },
+                            {
+                              "Name": "City",
+                              "ContentHint": "city"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+
+               }
+              }
+        }
+      },
+      "UtcTimeOn": "00:00:00",
+      "UtcTimeOff": "24:00:00",
+      "Loop": true,
+      "TimeLineEvents": [
+        {
+          "Command": "random",
+          "CommandArgs": [
+             "164.236.110.15|164.236.110.15_s1-svr-db15",
+          ],
+          "DelayAfter": 20000,
+          "DelayBefore": 0
+        }
+      ]
+    }
+  ]
+}
