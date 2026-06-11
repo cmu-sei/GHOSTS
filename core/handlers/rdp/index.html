@@ -2024,14 +2024,11 @@
 
 
 <h1 id="remote-desktop-protocol-rdp-configuration">Remote Desktop Protocol (RDP) Configuration<a class="headerlink" href="#remote-desktop-protocol-rdp-configuration" title="Permanent link">&para;</a></h1>
-<details class="info" open="open">
-<summary>Sample Configuration</summary>
-<p>The sample configuration below is also available in the [GHOSTS GitHub repository](<a href="https://github.com/cmu-sei/GHOSTS/blob/master/src/Ghosts.Client/Sample%20Timelines/clicks">https://github.com/cmu-sei/GHOSTS/blob/master/src/Ghosts.Client/Sample%20Timelines/clicks</a></p>
-</details>
+<p>The sample configuration below is also available in the [GHOSTS GitHub repository](<a href="https://github.com/cmu-sei/GHOSTS/blob/master/src/Ghosts.Client.Windows/Sample%20Timelines/Rdp.json">https://github.com/cmu-sei/GHOSTS/blob/master/src/Ghosts.Client.Windows/Sample%20Timelines/Rdp.json</a></p>
 <p>Each CommandArg is of the form shown below, if multiple CommandArgs are present a random one is chosen for execution on each cycle.</p>
 <ul>
 <li><code>targetIp</code>|<code>credkey</code>  The targetIP is the IP to use for the RDP connection</li>
-<li>The <code>credKey</code> is only used to retrieve the password of the matching record in the credentials file.</li>
+<li>The <code>credKey</code> is only used to retrieve the password of the matching record in the credentials file (or from the timeline-embedded credentials)</li>
 <li>The username (if supplied) is  used instead of the logged-in user (can also provide 'domain' keyword in credentials)</li>
 <li>The password is used if a password  prompt appears on RDP open</li>
 </ul>
@@ -2068,6 +2065,15 @@
 <span class="w">  </span><span class="p">]</span>
 <span class="p">}</span>
 </code></pre></div>
+<p>Note that the credentials can also be embedded directly in the timeline using <code>HandlerArgs[Credentials]</code> instead of an external file, see the SSH documentation for more details.</p>
+<p>Enabling RDP on the target host can be tricky.  The domain admin is an easy choice for username/password. </p>
+<p>If you wish to use some other user, then a simple approach is to add that user to the <code>Domain Admins</code> group on the domain controller.
+This has the requirement that the querying user be in the same domain as the target host.</p>
+<p>Also, the following powershell can be used to enable RDP connections on the target host:
+<div class="highlight"><pre><span></span><code>Set-ItemProperty -Path &#39;HKLM:\System\CurrentControlSet\Control\Terminal Server&#39; -name fDenyTSConnections -value 0 -erroraction SilentlyContinue
+Enable-NetFirewallRule -DisplayGroup &#39;Remote Desktop&#39;
+New-NetFirewallRule -DisplayName &quot;Allow RDP RPC&quot; -Direction Inbound -Action Allow -Protocol TCP -LocalPort 1-600,3389 -Profile Any
+</code></pre></div></p>
 
 
 

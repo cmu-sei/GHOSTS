@@ -2024,10 +2024,7 @@
 
 
 <h1 id="secure-file-transfer-protocol-sftp-configuration">Secure File Transfer Protocol (sFTP) Configuration<a class="headerlink" href="#secure-file-transfer-protocol-sftp-configuration" title="Permanent link">&para;</a></h1>
-<details class="info" open="open">
-<summary>Sample Configuration</summary>
-<p>The sample configuration below is also available in the [GHOSTS GitHub repository](<a href="https://github.com/cmu-sei/GHOSTS/blob/master/src/Ghosts.Client/Sample%20Timelines/clicks">https://github.com/cmu-sei/GHOSTS/blob/master/src/Ghosts.Client/Sample%20Timelines/clicks</a></p>
-</details>
+<p>The sample configuration below is also available in the [GHOSTS GitHub repository](<a href="https://github.com/cmu-sei/GHOSTS/blob/master/src/Ghosts.Client.Windows/Sample%20Timelines/Sftp.json">https://github.com/cmu-sei/GHOSTS/blob/master/src/Ghosts.Client.Windows/Sample%20Timelines/Sftp.json</a></p>
 <p>Each CommandArg is of the formation shown below, if multiple CommandArgs are present a random one is chosen for execution on each cycle.</p>
 <ul>
 <li>Credential handling is done in the same manner as the SSH handler, see that sample timeline for documentation</li>
@@ -2074,6 +2071,7 @@
 <span class="w">  </span><span class="p">]</span>
 <span class="p">}</span>
 </code></pre></div>
+<p>Note that the credentials can also be embedded directly in the timeline using <code>HandlerArgs[Credentials]</code> instead of using an external file, see the SSH documentation for more details.</p>
 
 
 

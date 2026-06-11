@@ -2024,11 +2024,8 @@
 
 
 <h1 id="windows-management-instrumentation-wmi-configuration">Windows Management Instrumentation (WMI) Configuration<a class="headerlink" href="#windows-management-instrumentation-wmi-configuration" title="Permanent link">&para;</a></h1>
-<details class="info" open="open">
-<summary>Sample Configuration</summary>
-<p>The sample configuration below is also available in the [GHOSTS GitHub repository](<a href="https://github.com/cmu-sei/GHOSTS/blob/master/src/Ghosts.Client/Sample%20Timelines/clicks">https://github.com/cmu-sei/GHOSTS/blob/master/src/Ghosts.Client/Sample%20Timelines/clicks</a></p>
-</details>
-<p>Each CommandArg is of the formation shown below, if multiple CommandArgs are present a random one is chosen for execution on each cycle.
+<p>The sample configuration below is also available in the [GHOSTS GitHub repository](<a href="https://github.com/cmu-sei/GHOSTS/blob/master/src/Ghosts.Client.Windows/Sample%20Timelines/Wmi.json">https://github.com/cmu-sei/GHOSTS/blob/master/src/Ghosts.Client.Windows/Sample%20Timelines/Wmi.json</a></p>
+<p>Each CommandArg is of the form shown below. If multiple CommandArgs are present then a random one is chosen for execution on each cycle.
 Credential handling is done in the same manner as the SSH handler, see that sample timeline for documentation.
 After the <code>cred_key</code> is a ';' delimited list of WMI commands that are executed in sequence during a cycle.</p>
 <p>Supported commands:</p>
@@ -2042,9 +2039,14 @@ After the <code>cred_key</code> is a ';' delimited list of WMI commands that are
 <li>GetProcessList</li>
 </ul>
 <p>The credentials file uses the same format as SFTP/SSH, but requires a 'domain' keyword in addition to 'username', 'password'
-For this to work, the target host needs to be configured to allow WMI
-The domain admin is the best choice for username/password
-The trusted hosts of the VM running GHOSTS must be set to include the IPs of any of the hosts being interrogated by WMI</p>
+For this to work, the target host needs to be configured to allow WMI. The domain admin is the best choice for username/password.
+If you wish to use some other user, then a simple approach is to add that user to the <code>Domain Admins</code> group on the domain controller.
+This has the requirement that the querying user be in the same domain as the target host.</p>
+<p>Also, on the target host for WMI, modify the firewall with:
+<div class="highlight"><pre><span></span><code>netsh advfirewall firewall set rule group=&quot;windows management instrumentation (wmi)&quot; new enable=yes
+netsh advfirewall firewall set rule group=&quot;RemoteAdministration&quot; new enable=yes
+</code></pre></div></p>
+<p>You may also need to set trusted hosts of the VM running GHOSTS to include the IPs of any of the hosts being interrogated by WMI.</p>
 <p>You can print the Trusted hosts if the current host by executing in Powershell:</p>
 <ul>
 <li>winrm g winrm/config/client</li>
@@ -2083,6 +2085,7 @@ The trusted hosts of the VM running GHOSTS must be set to include the IPs of any
 <span class="w">  </span><span class="p">]</span>
 <span class="p">}</span>
 </code></pre></div>
+<p>Note that the credentials can also be embedded directly in the timeline using <code>HandlerArgs[Credentials]</code> instead of using an external file, see the SSH documentation for more details.</p>
 
 
 
