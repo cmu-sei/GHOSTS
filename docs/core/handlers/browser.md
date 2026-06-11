@@ -2,8 +2,7 @@
 
 The browser handlers simulate realistic web browsing behavior using Firefox or Chrome. GHOSTS can control browser activities including page navigation, form interaction, file downloads, and more.
 
-???+ info "Sample Configurations"
-    Sample browser timelines are available in the [GHOSTS GitHub repository](https://github.com/cmu-sei/GHOSTS/tree/master/src/Ghosts.Client/Sample%20Timelines).
+Sample browser timelines are available in the [GHOSTS GitHub repository](https://github.com/cmu-sei/GHOSTS/tree/master/src/Ghosts.Client.Windows/Sample%20Timelines).
 
 ## Prerequisites
 
