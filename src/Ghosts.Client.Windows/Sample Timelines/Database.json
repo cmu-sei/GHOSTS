@@ -15,9 +15,9 @@
         "DatabaseTargets": {
            "Version": "1.0",
              "Data": {
-               "164.236.110.15_s1-svr-db15": {
-                  "Username": "meredith.palmer",
-                  "Password": "UDQ1NXcwcmQh",
+               "akeyvalue1": {
+                  "Username": "auser",
+                  "Password": "aBase64encodePassword",
                   "Databases": [
                     {
                       "Name": "AcmeInc",
@@ -74,7 +74,7 @@
         {
           "Command": "random",
           "CommandArgs": [
-             "164.236.110.15|164.236.110.15_s1-svr-db15",
+             "xx.xx.xx.xx|akeyvalue1",
           ],
           "DelayAfter": 20000,
           "DelayBefore": 0

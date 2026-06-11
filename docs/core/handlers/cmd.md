@@ -1,7 +1,6 @@
 # CMD Handler Configuration
 
-???+ info "Sample Configuration"
-    Sample command handler configurations are available in the [GHOSTS GitHub repository](https://github.com/cmu-sei/GHOSTS/tree/master/src/Ghosts.Client/Sample%20Timelines)
+Sample command handler configurations are available in the [GHOSTS GitHub repository](https://github.com/cmu-sei/GHOSTS/tree/master/src/Ghosts.Client.Windows/Sample%20Timelines)
 
 The CMD handler allows you to execute command-line operations as part of your NPC timeline. This can include running PowerShell scripts, batch files, or any command-line utilities available on the system.
 

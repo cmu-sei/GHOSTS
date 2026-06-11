@@ -1,7 +1,7 @@
 # File Watcher Configuration
 
-???+ info "Sample Configuration"
-    The sample configuration below is also available in the [GHOSTS GitHub repository](<https://github.com/cmu-sei/GHOSTS/blob/master/src/Ghosts.Client/Sample%20Timelines/clicks>
+
+The sample configuration below is also available in the [GHOSTS GitHub repository](<https://github.com/cmu-sei/GHOSTS/blob/master/src/Ghosts.Client.Windows/Sample%20Timelines/Watcher.json>
 
 The 'folder' command for Watcher is intended to monitor diskspace in a target folder. The CommandArgs are in key:value pairs:
 

@@ -1,7 +1,6 @@
 # Notepad Configuration
 
-???+ info "Sample Configuration"
-    The sample configuration below is also available in the [GHOSTS GitHub repository](<https://github.com/cmu-sei/GHOSTS/blob/master/src/Ghosts.Client/Sample%20Timelines/clicks>
+The sample configuration below is also available in the [GHOSTS GitHub repository](<https://github.com/cmu-sei/GHOSTS/blob/master/src/Ghosts.Client.Windows/Sample%20Timelines/Notepad.json>
 
 There is currently only one supported command (random) which uses probabilities to write text.
 

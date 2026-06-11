@@ -1,9 +1,8 @@
 # Windows Management Instrumentation (WMI) Configuration
 
-???+ info "Sample Configuration"
-    The sample configuration below is also available in the [GHOSTS GitHub repository](<https://github.com/cmu-sei/GHOSTS/blob/master/src/Ghosts.Client/Sample%20Timelines/clicks>
+The sample configuration below is also available in the [GHOSTS GitHub repository](<https://github.com/cmu-sei/GHOSTS/blob/master/src/Ghosts.Client.Windows/Sample%20Timelines/Wmi.json>
 
-Each CommandArg is of the formation shown below, if multiple CommandArgs are present a random one is chosen for execution on each cycle.
+Each CommandArg is of the form shown below. If multiple CommandArgs are present then a random one is chosen for execution on each cycle.
 Credential handling is done in the same manner as the SSH handler, see that sample timeline for documentation.
 After the `cred_key` is a ';' delimited list of WMI commands that are executed in sequence during a cycle.
 
@@ -18,9 +17,17 @@ Supported commands:
 - GetProcessList
 
 The credentials file uses the same format as SFTP/SSH, but requires a 'domain' keyword in addition to 'username', 'password'
-For this to work, the target host needs to be configured to allow WMI
-The domain admin is the best choice for username/password
-The trusted hosts of the VM running GHOSTS must be set to include the IPs of any of the hosts being interrogated by WMI
+For this to work, the target host needs to be configured to allow WMI. The domain admin is the best choice for username/password.
+If you wish to use some other user, then a simple approach is to add that user to the `Domain Admins` group on the domain controller.
+This has the requirement that the querying user be in the same domain as the target host.
+
+Also, on the target host for WMI, modify the firewall with:
+```
+netsh advfirewall firewall set rule group="windows management instrumentation (wmi)" new enable=yes
+netsh advfirewall firewall set rule group="RemoteAdministration" new enable=yes
+```
+
+You may also need to set trusted hosts of the VM running GHOSTS to include the IPs of any of the hosts being interrogated by WMI.
 
 You can print the Trusted hosts if the current host by executing in Powershell:
 
@@ -62,3 +69,5 @@ You can set Trusted Hosts to a wild card (trust all hosts) by executing in Power
   ]
 }
 ```
+
+Note that the credentials can also be embedded directly in the timeline using `HandlerArgs[Credentials]` instead of using an external file, see the SSH documentation for more details.

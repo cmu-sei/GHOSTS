@@ -1,13 +1,14 @@
 # Sharepoint Helper Configuration
 
-???+ info "Sample Configuration"
-    The sample configuration below is also available in the [GHOSTS GitHub repository](<https://github.com/cmu-sei/GHOSTS/blob/master/src/Ghosts.Client/Sample%20Timelines/clicks>
+
+The sample configuration below is also available in the [GHOSTS GitHub repository](<https://github.com/cmu-sei/GHOSTS/blob/master/src/Ghosts.Client.Windows/Sample%20Timelines/BrowserChromeSharepoint.json>
 
 The 'sharepoint' command for a browser handler allows download/deletion/upload from a sharepoint site.  
 
 The handlerArgs for the sharepoint command are:
     
 - "sharepoint-credentials-file": `json credentials file path`,  required, credentials file, see SSh.json sample handler for format
+- "sharepoint-credentials": embedded credentials instead of an external file, see documentation below.
 - "sharepoint-deletion-probability": <0-100 integer>, default  0
 - "sharepoint-upload-probability": <0-100 integer>, default 0
 - "sharepoint-download-probability": <0-100 integer>, default 0, sum of download+deletion+upload <= 100, download directory is browser download directory
@@ -64,3 +65,61 @@ A handler can only browse a single share point site. The username, password spec
   ]
 }
 ```
+
+Instead of using an external credentials file specified by the `HandlerArgs[sharepoint-credentials-file]` key, the credentials can be placed directly in the timeline using the `HandlerArgs[sharepoint-credentials]` key as shown below:
+
+```json
+{
+  "Status": "Run",
+  "TimeLineHandlers": [
+    {
+      "HandlerType": "BrowserChrome",
+      "HandlerArgs": {
+        "isheadless": "false",
+        "blockimages": "true",
+        "blockstyles": "true",
+        "blockflash": "true",
+        "blockscripts": "true",
+        "stickiness": 75,
+        "stickiness-depth-min": 5,
+        "stickiness-depth-max": 10000,
+        "incognito": "true",
+        "sharepoint-credentials": {
+          "Version": "1.0",
+          "Data": {
+            "credkey1": {"username":"user1","password":"pw1base64"},
+            "credkey2": {"username":"user2","password":"pw2base64"},
+              ....
+             "credkeyN": {"username":"userN","password":"pwNbase64"},
+          }
+        },
+        "sharepoint-deletion-probability": 15,
+        "sharepoint-upload-probability": 35,
+        "sharepoint-download-probability": 35,
+        "sharepoint-version": "2013",
+        "sharepoint-upload-directory": "C:\\ghosts_data\\uploads"
+
+      },
+      "Initial": "about:blank",
+      "UtcTimeOn": "00:00:00",
+      "UtcTimeOff": "24:00:00",
+      "Loop": "True",
+      "TimeLineEvents": [
+        {
+          "Command": "sharepoint",
+          "CommandArgs": [
+            "site:http://portal.sitea.com",
+            "credentialKey:credkey1"
+          ],
+          "DelayAfter": 60000,
+          "DelayBefore": 0
+        }
+      ]
+    }
+  ]
+}
+```
+
+Placing the credentials directly in the timeline is a better approach if the GhostsApi server is used to update the timeline as this makes the timeline self-contained.
+
+

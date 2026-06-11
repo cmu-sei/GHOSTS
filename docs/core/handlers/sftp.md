@@ -1,7 +1,6 @@
 # Secure File Transfer Protocol (sFTP) Configuration
 
-???+ info "Sample Configuration"
-    The sample configuration below is also available in the [GHOSTS GitHub repository](<https://github.com/cmu-sei/GHOSTS/blob/master/src/Ghosts.Client/Sample%20Timelines/clicks>
+The sample configuration below is also available in the [GHOSTS GitHub repository](<https://github.com/cmu-sei/GHOSTS/blob/master/src/Ghosts.Client.Windows/Sample%20Timelines/Sftp.json>
 
 Each CommandArg is of the formation shown below, if multiple CommandArgs are present a random one is chosen for execution on each cycle.
 
@@ -50,3 +49,5 @@ Supported commands:
   ]
 }
 ```
+
+Note that the credentials can also be embedded directly in the timeline using `HandlerArgs[Credentials]` instead of using an external file, see the SSH documentation for more details.
