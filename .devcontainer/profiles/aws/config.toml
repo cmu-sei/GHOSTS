@@ -1,0 +1,14 @@
+# Codex CLI configuration for Amazon Bedrock (commercial AWS Regions).
+# Authentication uses the AWS SDK credential chain — the
+# AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY credentials exported by this
+# profile's profile.env are picked up automatically.
+model_provider = "amazon-bedrock"
+model = "openai.gpt-5.5"
+sandbox_mode = "danger-full-access"
+
+# OpenAI models on Bedrock are region-specific and are not in us-east-1
+# (the AWS_REGION this profile uses for the Anthropic Claude models). Pin
+# Codex to us-east-2 here so only Codex targets the OpenAI Bedrock region,
+# leaving Claude Code / OpenCode / Pi on us-east-1.
+[model_providers.amazon-bedrock.aws]
+region = "us-east-2"

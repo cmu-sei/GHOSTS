@@ -1,0 +1,5 @@
+#!/bin/bash
+# Dev container initializeCommand dispatcher (POSIX hosts)
+# Paired with init.cmd — see devcontainer.json's initializeCommand.
+
+[ -f .devcontainer/devcontainer.env ] || bash .devcontainer/setup.sh

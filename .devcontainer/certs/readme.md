@@ -1,3 +1,8 @@
-# Devcontainer Certs
+# Custom Certificates
 
-Add any necessary certificates to this folder. They will be copied to the container and added to the trusted certificate store on startup. This is useful for development environments that require self-signed certificates or internal CA certificates.
+Place PEM-encoded root CA certificates in this folder with a `.crt` extension before
+rebuilding the dev container. The Dockerfile installs every `.crt` file here
+into the container's system trust store via `update-ca-certificates`; all other file
+types are ignored.
+
+If you rely on Zscaler (or another SSL inspection solution), copy the issued root certificate into this folder as `*.crt`, rebuild, and the container will trust outbound TLS through that proxy.

@@ -1,0 +1,9 @@
+{
+    "id": "opencode",
+    "version": "0.1.0",
+    "name": "OpenCode",
+    "description": "Installs the OpenCode CLI via the official installer script",
+    "installsAfter": [
+        "ghcr.io/devcontainers/features/common-utils"
+    ]
+}

@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 # Purple → neon green fade (GHOSTS)
 P1='\033[38;5;93m'    # deep purple
