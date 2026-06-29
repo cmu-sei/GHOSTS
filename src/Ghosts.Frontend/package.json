@@ -22,6 +22,7 @@
   },
   "private": true,
   "dependencies": {
+<<<<<<< HEAD
     "@angular/animations": "^22.0.4",
     "@angular/cdk": "^22.0.2",
     "@angular/common": "^22.0.4",
@@ -31,6 +32,17 @@
     "@angular/material": "^22.0.2",
     "@angular/platform-browser": "^22.0.4",
     "@angular/router": "^22.0.4",
+=======
+    "@angular/animations": "^22.0.2",
+    "@angular/cdk": "^22.0.2",
+    "@angular/common": "^22.0.2",
+    "@angular/compiler": "^20.3.25",
+    "@angular/core": "^22.0.2",
+    "@angular/forms": "^22.0.2",
+    "@angular/material": "^22.0.2",
+    "@angular/platform-browser": "^22.0.2",
+    "@angular/router": "^22.0.2",
+>>>>>>> 758848d0b274508518b7d62fe3da4b3ee9703dc7
     "@deck.gl/core": "^9.3.0",
     "@deck.gl/layers": "^9.3.0",
     "@deck.gl/mapbox": "^9.3.0",
@@ -45,9 +57,15 @@
     "zone.js": "~0.15.0"
   },
   "devDependencies": {
+<<<<<<< HEAD
     "@angular/build": "^22.0.4",
     "@angular/cli": "^22.0.4",
     "@angular/compiler-cli": "^22.0.4",
+=======
+    "@angular/build": "^22.0.3",
+    "@angular/cli": "^20.3.23",
+    "@angular/compiler-cli": "^20.3.18",
+>>>>>>> 758848d0b274508518b7d62fe3da4b3ee9703dc7
     "@types/jasmine": "~5.1.0",
     "jasmine-core": "~5.9.0",
     "karma": "~6.4.0",
