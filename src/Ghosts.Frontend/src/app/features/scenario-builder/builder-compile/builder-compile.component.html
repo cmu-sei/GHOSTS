@@ -57,8 +57,10 @@
             <mat-spinner diameter="20" style="display: inline-block; margin-right: 8px"></mat-spinner>
             Compiling...
             } @else {
-            <mat-icon>build</mat-icon>
-            Compile Scenario
+            <ng-container>
+              <mat-icon>build</mat-icon>
+              Compile Scenario
+            </ng-container>
             }
           </button>
         </form>
