@@ -22,15 +22,15 @@
   },
   "private": true,
   "dependencies": {
-    "@angular/animations": "^22.0.2",
+    "@angular/animations": "^22.0.4",
     "@angular/cdk": "^22.0.2",
-    "@angular/common": "^22.0.2",
-    "@angular/compiler": "^20.3.25",
-    "@angular/core": "^22.0.2",
-    "@angular/forms": "^22.0.2",
+    "@angular/common": "^22.0.4",
+    "@angular/compiler": "^22.0.4",
+    "@angular/core": "^22.0.4",
+    "@angular/forms": "^22.0.4",
     "@angular/material": "^22.0.2",
-    "@angular/platform-browser": "^22.0.2",
-    "@angular/router": "^22.0.2",
+    "@angular/platform-browser": "^22.0.4",
+    "@angular/router": "^22.0.4",
     "@deck.gl/core": "^9.3.0",
     "@deck.gl/layers": "^9.3.0",
     "@deck.gl/mapbox": "^9.3.0",
@@ -45,9 +45,9 @@
     "zone.js": "~0.15.0"
   },
   "devDependencies": {
-    "@angular/build": "^22.0.3",
-    "@angular/cli": "^20.3.23",
-    "@angular/compiler-cli": "^20.3.18",
+    "@angular/build": "^22.0.4",
+    "@angular/cli": "^22.0.4",
+    "@angular/compiler-cli": "^22.0.4",
     "@types/jasmine": "~5.1.0",
     "jasmine-core": "~5.9.0",
     "karma": "~6.4.0",
@@ -55,6 +55,6 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
-    "typescript": "~5.9.2"
+    "typescript": "~6.0.3"
   }
 }

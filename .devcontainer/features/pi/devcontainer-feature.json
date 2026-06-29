@@ -1,0 +1,9 @@
+{
+    "id": "pi",
+    "version": "0.1.0",
+    "name": "Pi Coding Agent",
+    "description": "Installs the Pi Coding Agent CLI via npm",
+    "installsAfter": [
+        "ghcr.io/devcontainers/features/node:1"
+    ]
+}

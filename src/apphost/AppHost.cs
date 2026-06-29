@@ -7,7 +7,7 @@ var postgresUsername = builder.AddParameter("PostgresUsername", "ghosts", false)
 var postgresPassword = builder.AddParameter("PostgresPassword", basePassword, false);
 
 var postgres = builder.AddPostgres("postgres", userName: postgresUsername, password: postgresPassword)
-    .WithDataVolume()
+    .WithDataVolume("ghosts-postgres18-data")
     .WithLifetime(ContainerLifetime.Persistent)
     .WithContainerName("ghosts-postgres")
     .WithPgAdmin(pgAdmin =>

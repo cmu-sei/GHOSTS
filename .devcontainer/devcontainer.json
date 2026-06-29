@@ -1,53 +1,87 @@
 {
-    "name": "ghosts development",
+    "name": "${localWorkspaceFolderBasename}",
     "build": {
         "dockerfile": "Dockerfile"
     },
-    "runArgs": [
-        "--name",
-        "ghosts-dev"
+    "mounts": [
+        {
+            "type": "volume",
+            "source": "${localWorkspaceFolderBasename}-data",
+            "target": "/home/vscode/.data"
+        },
+        {
+            "type": "volume",
+            "source": "${localWorkspaceFolderBasename}-microsoft",
+            "target": "/home/vscode/.microsoft"
+        }
     ],
     "features": {
         "ghcr.io/devcontainers/features/common-utils:2": {
             "configureZshAsDefaultShell": true
         },
         "ghcr.io/devcontainers/features/node:1": {},
+        "./features/claude": {},
+        "./features/opencode": {},
+        "./features/pi": {},
+        "./features/codex": {},
+        "ghcr.io/devcontainers-extra/features/tmux-apt-get:1": {},
+        "ghcr.io/devcontainers-extra/features/ripgrep:1": {},
         "ghcr.io/devcontainers/features/python:1": {
             "version": "3.12"
         },
-        "ghcr.io/devcontainers/features/git:1": {},
         "ghcr.io/devcontainers/features/docker-in-docker:2.16": {
             "version": "29.4.1",
             "moby": false
-        },
-        "ghcr.io/devcontainers/features/aws-cli:1": {}
+        }
     },
-    "mounts": [
-        "source=ghosts-dev-microsoft,target=/home/vscode/.microsoft,type=volume"
+    "containerEnv": {
+        "NODE_EXTRA_CA_CERTS": "/etc/ssl/certs/ca-certificates.crt",
+        "REQUESTS_CA_BUNDLE": "/etc/ssl/certs/ca-certificates.crt",
+        "PIP_CERT": "/etc/ssl/certs/ca-certificates.crt",
+        "SSL_CERT_FILE": "/etc/ssl/certs/ca-certificates.crt"
+    },
+    "remoteEnv": {
+        "LANG": "C.UTF-8",
+        "LC_ALL": "C.UTF-8",
+        "TERM": "xterm-256color"
+    },
+    "runArgs": [
+        "--name",
+        "${localWorkspaceFolderBasename}",
+        "--hostname",
+        "${localWorkspaceFolderBasename}",
+        "--env-file",
+        ".devcontainer/devcontainer.env",
+        "--env",
+        "SSH_AUTH_SOCK=/run/host-services/ssh-auth.sock"
     ],
+    "initializeCommand": [
+        ".devcontainer/init"
+    ],
+    "postCreateCommand": "bash -l .devcontainer/postcreate.sh",
+    "postStartCommand": "bash -l .devcontainer/poststart.sh",
     "customizations": {
         "vscode": {
             "extensions": [
+                "anthropic.claude-code",
                 "ms-dotnettools.csdevkit",
                 "ms-azuretools.vscode-docker",
                 "dbaeumer.vscode-eslint",
                 "esbenp.prettier-vscode",
                 "angular.ng-template",
                 "continue.continue",
-                "anthropic.claude-vscode",
                 "microsoft-aspire.aspire-vscode",
                 "pflannery.vscode-versionlens"
             ],
             "settings": {
+                "chat.disableAIFeatures": true,
                 "editor.formatOnSave": true,
                 "files.insertFinalNewline": true,
                 "files.eol": "\n",
                 "files.trimTrailingWhitespace": true,
                 "npm.packageManager": "npm",
-                "dotnet.defaultSolution": "src/ghosts.api.sln"
+                "dotnet.defaultSolution": "GHOSTS.sln"
             }
         }
-    },
-    "postCreateCommand": "bash -l .devcontainer/postcreate.sh",
-    "postStartCommand": "bash -l .devcontainer/poststart.sh"
+    }
 }
