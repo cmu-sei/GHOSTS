@@ -47,6 +47,7 @@ export class ScenariosPlannerComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
 
   protected scenarioId: number | null = null;
+  private loadedScenarioId: number | null = null;
   protected isEditMode = false;
   protected loading = signal(false);
   protected builderStatus = signal<string>('None');
@@ -164,8 +165,14 @@ export class ScenariosPlannerComponent implements OnInit, OnDestroy {
         this.scenarioId = +id;
         this.isEditMode = true;
         this.scenarioHub.connect(this.scenarioId);
-        this.loadScenario(this.scenarioId);
-      } else {
+        // Only (re)load when the scenario itself changes. A tab-only navigation
+        // re-fires this subscription, and reloading here would overwrite unsaved edits.
+        if (this.loadedScenarioId !== this.scenarioId) {
+          this.loadedScenarioId = this.scenarioId;
+          this.loadScenario(this.scenarioId);
+        }
+      } else if (this.loadedScenarioId === null) {
+        this.loadedScenarioId = -1;
         this.loadAllObjectives();
       }
 
@@ -190,6 +197,8 @@ export class ScenariosPlannerComponent implements OnInit, OnDestroy {
   }
 
   protected onTabChanged(index: number): void {
+    // Persist edits from the current tab before navigating away from it.
+    this.autoSaveScenario();
     this.selectedTabIndex = index;
     const slug = this.tabSlugs[index] || this.tabSlugs[0];
     const id = this.scenarioId ?? 'new';

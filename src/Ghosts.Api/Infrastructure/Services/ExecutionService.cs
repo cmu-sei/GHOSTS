@@ -37,6 +37,7 @@ namespace Ghosts.Api.Infrastructure.Services
         Task<List<ExecutionTimelineItem>> GetTimelineItemsAsync(int executionId, CancellationToken ct);
         Task<ExecutionTimelineItem> CompleteTimelineItemAsync(int executionId, int itemId, CompleteTimelineItemDto dto, CancellationToken ct);
         Task<ExecutionTimelineItem> ReportTimelineItemResultAsync(int executionId, int itemId, JsonElement resultData, CancellationToken ct);
+        Task<ExecutionTimelineItem> RecordScenarioActionAsync(int executionId, int eventNumber, string detail, CancellationToken ct);
     }
 
     /// <summary>
@@ -795,6 +796,50 @@ namespace Ghosts.Api.Infrastructure.Services
 
             await BroadcastExecutionUpdateAsync(executionId, "TimelineItemUpdate", new { itemId, status = "Completed" });
             await CheckAndAutoCompleteExecutionAsync(executionId, ct);
+
+            return item;
+        }
+
+        /// <summary>
+        /// Advances the execution timeline item matching a client-reported npc-scenario-action.
+        /// Point-in-time/triggered items complete on first report; scheduled (looping) items
+        /// record a fire and stay active so they can recur. Closes the loop so scenario events
+        /// reported by NPC clients drive execution progress instead of remaining metadata.
+        /// </summary>
+        public async Task<ExecutionTimelineItem> RecordScenarioActionAsync(int executionId, int eventNumber, string detail, CancellationToken ct)
+        {
+            var item = await ExecutionTimelineItems
+                .FirstOrDefaultAsync(ti => ti.ExecutionId == executionId && ti.Number == eventNumber, ct);
+            if (item == null)
+                throw new InvalidOperationException("Timeline item not found");
+
+            item.LastFiredAt = DateTime.UtcNow;
+            item.FireCount++;
+
+            // Scheduled items loop; everything else completes on the first reported action.
+            var completed = item.TriggerKind != TriggerKind.Scheduled;
+            if (completed)
+            {
+                item.Status = "Completed";
+                item.CompletedBy = "client-report";
+                item.CompletedAt = DateTime.UtcNow;
+            }
+
+            ExecutionEvents.Add(new ExecutionEvent
+            {
+                ExecutionId = executionId,
+                Timestamp = DateTime.UtcNow,
+                EventType = "ScenarioActionReported",
+                Description = $"Scenario action for timeline item #{item.Number} reported by client (fire #{item.FireCount})",
+                Data = JsonSerializer.Serialize(new { itemId = item.Id, eventNumber, detail, fireCount = item.FireCount, completed }),
+                Severity = "Info"
+            });
+
+            await _context.SaveChangesAsync(ct);
+
+            await BroadcastExecutionUpdateAsync(executionId, "TimelineItemUpdate", new { itemId = item.Id, status = item.Status });
+            if (completed)
+                await CheckAndAutoCompleteExecutionAsync(executionId, ct);
 
             return item;
         }
