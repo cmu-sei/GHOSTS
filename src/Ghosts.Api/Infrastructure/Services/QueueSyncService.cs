@@ -415,7 +415,15 @@ namespace Ghosts.Api.Infrastructure.Services
                 var executionService = scope.ServiceProvider.GetRequiredService<IExecutionService>();
                 await executionService.RecordScenarioActionAsync(executionId.Value, eventNumber.Value, commandArg, new CancellationToken());
             }
-            catch (Exception e)
+            catch (InvalidOperationException e)
+            {
+                _log.Trace($"Could not record scenario action for '{commandArg}': {e.Message}");
+            }
+            catch (FormatException e)
+            {
+                _log.Trace($"Could not record scenario action for '{commandArg}': {e.Message}");
+            }
+            catch (ArgumentException e)
             {
                 _log.Trace($"Could not record scenario action for '{commandArg}': {e.Message}");
             }
