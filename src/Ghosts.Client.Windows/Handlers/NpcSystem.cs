@@ -1,6 +1,8 @@
 ﻿// Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
+using System.Linq;
+using System.Threading;
 using Ghosts.Client.Infrastructure;
 using Ghosts.Client.TimelineManager;
 using Ghosts.Domain;
@@ -42,6 +44,20 @@ public class NpcSystem : BaseHandler
                         TimelineBuilder.SetLocalTimeline(t);
                     }
 
+                    break;
+                case "npc-scenario-action":
+                    // Scenario-driven event: honor its scheduled offset, then report so the
+                    // action is observable in the execution flow rather than silently dropped.
+                    if (timelineEvent.DelayBeforeActual > 0)
+                        Thread.Sleep(timelineEvent.DelayBeforeActual);
+
+                    Report(new ReportItem
+                    {
+                        Handler = HandlerType.NpcSystem.ToString(),
+                        Command = timelineEvent.Command,
+                        Arg = string.Join(",", timelineEvent.CommandArgs),
+                        Result = handler.Initial
+                    });
                     break;
             }
         }

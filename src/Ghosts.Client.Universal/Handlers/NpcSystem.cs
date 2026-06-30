@@ -45,6 +45,23 @@ public class NpcSystem(Timeline entireTimeline, TimelineHandler timelineHandler,
                     }
 
                     break;
+                case "npc-scenario-action":
+                    // Scenario-driven event: honor its scheduled offset, then report so the
+                    // action is observable in the execution flow rather than silently dropped.
+                    if (timelineEvent.DelayBeforeActual > 0)
+                    {
+                        if (this.Token.WaitHandle.WaitOne(timelineEvent.DelayBeforeActual))
+                            this.Token.ThrowIfCancellationRequested();
+                    }
+
+                    Report(new ReportItem
+                    {
+                        Handler = HandlerType.NpcSystem.ToString(),
+                        Command = timelineEvent.Command,
+                        Arg = string.Join(",", timelineEvent.CommandArgs),
+                        Result = this.Handler.Initial
+                    });
+                    break;
             }
         }
 
