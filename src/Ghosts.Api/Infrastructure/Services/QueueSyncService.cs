@@ -396,9 +396,8 @@ namespace Ghosts.Api.Infrastructure.Services
             {
                 int? executionId = null;
                 int? eventNumber = null;
-                foreach (var token in commandArg.Split(','))
+                foreach (var t in commandArg.Split(',').Select(token => token.Trim()))
                 {
-                    var t = token.Trim();
                     if (t.StartsWith("execution:", StringComparison.OrdinalIgnoreCase)
                         && int.TryParse(t["execution:".Length..], out var eid))
                         executionId = eid;
