@@ -350,3 +350,5 @@ src/certs/*
 services/*
 site/*
 site/
+.agents/*
+.codex/*
