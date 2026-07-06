@@ -312,6 +312,9 @@ public class Outlook : BaseHandler
             {
                 if (!folderItem.UnRead) continue;
 
+                // read the sender via Redemption to avoid Outlook's security prompt
+                var safeFolderItem = new SafeMailItem { Item = folderItem };
+
                 var emailReply = new EmailReplyManager();
                         
                 var replyMail = folderItem.Reply();
@@ -321,7 +324,7 @@ public class Outlook : BaseHandler
                     quoted.WriteLine(emailReply.Reply);
                     quoted.WriteLine("");
                     quoted.WriteLine("");
-                    quoted.WriteLine($"On {folderItem.SentOn:f}, {folderItem.SenderEmailAddress} wrote:");
+                    quoted.WriteLine($"On {folderItem.SentOn:f}, {safeFolderItem.SenderEmailAddress} wrote:");
                     using (var reader = new StringReader(folderItem.Body))
                     {
                         string line;
@@ -342,7 +345,7 @@ public class Outlook : BaseHandler
                     Item = replyMail
                 };
 
-                var r = rdoMail.Recipients.AddEx(folderItem.SenderEmailAddress);
+                var r = rdoMail.Recipients.AddEx(safeFolderItem.SenderEmailAddress);
                 r.Resolve();
                 rdoMail.Recipients.ResolveAll();
                 rdoMail.Send();
