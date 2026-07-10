@@ -141,8 +141,8 @@ public static class ProcessManager
         public static string Chrome => "chrome";
         public static string ChromeDriver => "chromedriver";
 
-        public static string MSEdge => "Microsoft Edge";
-        public static string MSEdgeDriver => "Microsoft Edge WebDriver (32 bit)";
+        public static string MSEdge => "msedge";
+        public static string MSEdgeDriver => "msedgedriver";
 
         public static string Command => "cmd";
         public static string PowerShell => "powershell";

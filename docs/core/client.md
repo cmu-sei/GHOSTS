@@ -26,7 +26,7 @@ GHOSTS on Windows (supporting Win7, 10, 11, and corresponding server versions) i
 - Run the executable at `c:\exercise\ghosts\ghosts.exe` to setup and start GHOSTS.
 
 ???+ info "Additional configuration required for web browsing"
-    For Firefox or Chrome web browsing, download the appropriate automation driver: [Geckodriver](https://github.com/mozilla/geckodriver/releases) for Firefox or [Chromedriver](https://chromedriver.chromium.org/downloads) for Chrome.
+    Geckodriver for Firefox is included. For Chrome or Edge web browsing, place a driver matching the installed browser version next to `ghosts.exe` (or on `PATH`): [Chromedriver](https://chromedriver.chromium.org/downloads) for Chrome or [msedgedriver](https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/) for Edge.
 
 ???+ info "Additional configuration required for email"
     Email functions require the [Redemption library](http://www.dimastr.com/redemption/home.htm) found in `/lib` this provides Outlook automation.

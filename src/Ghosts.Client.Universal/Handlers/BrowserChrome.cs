@@ -1,6 +1,7 @@
 // Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
 using System;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Ghosts.Client.Universal.Infrastructure;
@@ -233,7 +234,14 @@ namespace Ghosts.Client.Universal.Handlers;
             ChromeDriver driver;
             try
             {
-                driver = new ChromeDriver(options);
+                // Prefer a driver next to ghosts; otherwise Selenium Manager finds one (PATH, cache, or download)
+                var driverDir = AppDomain.CurrentDomain.BaseDirectory;
+                var driverFile = OperatingSystem.IsWindows() ? "chromedriver.exe" : "chromedriver";
+                var service = File.Exists(Path.Combine(driverDir, driverFile))
+                    ? ChromeDriverService.CreateDefaultService(driverDir)
+                    : ChromeDriverService.CreateDefaultService();
+                service.HideCommandPromptWindow = true;
+                driver = new ChromeDriver(service, options);
             }
             catch
             {

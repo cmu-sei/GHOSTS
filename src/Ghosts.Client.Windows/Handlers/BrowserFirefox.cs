@@ -330,7 +330,13 @@ namespace Ghosts.Client.Handlers
             options.SetPreference("geo.enabled", false);
             options.SetPreference("geo.prompt.testing", false);
             options.SetPreference("geo.prompt.testing.allow", false);
-            var driver = new FirefoxDriver(options);
+            // Prefer a driver next to ghosts.exe; otherwise Selenium Manager finds one (PATH, cache, or download)
+            var driverDir = AppDomain.CurrentDomain.BaseDirectory;
+            var service = File.Exists(Path.Combine(driverDir, "geckodriver.exe"))
+                ? FirefoxDriverService.CreateDefaultService(driverDir)
+                : FirefoxDriverService.CreateDefaultService();
+            service.HideCommandPromptWindow = true;
+            var driver = new FirefoxDriver(service, options);
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
             return driver;
         }

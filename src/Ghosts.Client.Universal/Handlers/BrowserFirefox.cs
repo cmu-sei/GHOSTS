@@ -318,9 +318,13 @@ public class BrowserFirefox(Timeline timeline, TimelineHandler handler, Cancella
 
         try
         {
-            // Pin geckodriver to the application base directory (packaged by Selenium.WebDriver.GeckoDriver)
-            // so Selenium does not reach out to the network for a driver - required for air-gapped use.
-            var service = FirefoxDriverService.CreateDefaultService(AppDomain.CurrentDomain.BaseDirectory);
+            // Prefer a driver next to ghosts; otherwise Selenium Manager finds one (PATH, cache, or download)
+            var driverDir = AppDomain.CurrentDomain.BaseDirectory;
+            var driverFile = OperatingSystem.IsWindows() ? "geckodriver.exe" : "geckodriver";
+            var service = File.Exists(Path.Combine(driverDir, driverFile))
+                ? FirefoxDriverService.CreateDefaultService(driverDir)
+                : FirefoxDriverService.CreateDefaultService();
+            service.HideCommandPromptWindow = true;
             driver = new FirefoxDriver(service, options);
         }
         catch

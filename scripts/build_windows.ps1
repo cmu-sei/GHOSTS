@@ -60,11 +60,9 @@ foreach ($p in $platforms) {
     $binPath = "..\src\Ghosts.Client.Windows\bin\$pathPrefix$configuration"
     
     $g = (Invoke-Expression "& '$binPath\geckodriver.exe' --version").split("(")[0]
-    $c = (Invoke-Expression "& '$binPath\chromedriver.exe' --version").split("(")[0]
 
     Write-Host "  $platformName build completed. Preparing package..." -ForegroundColor Green
     Write-Host "    $g" -ForegroundColor Green
-    Write-Host "    $c" -ForegroundColor Green
 
     if (-not [string]::IsNullOrWhiteSpace($config)) {
         Write-Host "  Copying external config for $binPath\config..." -ForegroundColor Green
