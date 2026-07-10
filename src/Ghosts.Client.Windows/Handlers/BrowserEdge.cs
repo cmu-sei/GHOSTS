@@ -294,7 +294,7 @@ namespace Ghosts.Client.Handlers
 
             var service = EdgeDriverService.CreateDefaultService(AppDomain.CurrentDomain.BaseDirectory);
             service.HideCommandPromptWindow = true;
-            var driver = new EdgeDriver(options);
+            var driver = new EdgeDriver(service, options);
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
             return driver;
         }
