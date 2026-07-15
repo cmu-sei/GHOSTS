@@ -24,8 +24,6 @@
         "./features/opencode": {},
         "./features/pi": {},
         "./features/codex": {},
-        "ghcr.io/devcontainers-extra/features/tmux-apt-get:1": {},
-        "ghcr.io/devcontainers-extra/features/ripgrep:1": {},
         "ghcr.io/devcontainers/features/python:1": {
             "version": "3.12"
         },

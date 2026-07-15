@@ -231,25 +231,6 @@ if [ ! -f "$HOME/.claude/claude.json" ]; then
 fi
 ln -sf "$HOME/.claude/claude.json" "$HOME/.claude.json"
 
-# --- tmux configuration ---
-cat > "$HOME/.tmux.conf" <<'EOF'
-# UTF-8 support (required for Pure prompt symbols)
-set -g default-terminal "tmux-256color"
-
-# Extended keys (CSI u / modifyOtherKeys) so pi coding agent works correctly
-set -s extended-keys on
-set -as terminal-features ',xterm-256color:extkeys'
-
-# Increase scrollback buffer
-set -g history-limit 50000
-
-# Enable mouse support
-set -g mouse on
-
-# Use Zsh as default shell inside tmux
-set -g default-shell /bin/zsh
-EOF
-
 # Show git dirty status in zsh prompt
 git config devcontainers-theme.show-dirty 1
 
