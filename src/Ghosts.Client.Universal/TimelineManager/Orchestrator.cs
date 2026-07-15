@@ -180,7 +180,9 @@ public class Orchestrator
 
     public static Task RunHandler(HandlerType type, Timeline timeline, TimelineHandler handler, CancellationToken token)
     {
-        var typeName = $"Ghosts.Client.Universal.Handlers.{type}";
+        // The HandlerType enum name does not always match the handler class name (e.g. Command -> Cmd).
+        var className = type == HandlerType.Command ? "Cmd" : type.ToString();
+        var typeName = $"Ghosts.Client.Universal.Handlers.{className}";
         var handlerType = Type.GetType(typeName);
 
         if (handlerType == null)
