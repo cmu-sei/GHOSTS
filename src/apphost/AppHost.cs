@@ -41,7 +41,9 @@ var facebook = builder.AddProject<Projects.Ghosts_Pandora>("facebook")
 var api = builder.AddProject<Projects.Ghosts_Api>("api")
     .WaitFor(postgres)
     .WithReference(db, "DefaultConnection")
-    .WithEnvironment("ConnectionStrings__Provider", "PostgreSQL");
+    .WithEnvironment("ConnectionStrings__Provider", "PostgreSQL")
+    .WithHttpEndpoint(port: 5000, name: "http", isProxied: false)
+    .WithExternalHttpEndpoints();
 
 // n8n uses a dedicated Postgres database for reproducible state
 var n8nDb = postgres.AddDatabase("n8n-db", "n8n");
