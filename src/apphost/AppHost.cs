@@ -119,21 +119,21 @@ var grafana = builder.AddContainer("grafana", "grafana/grafana")
     .WaitFor(postgres);
 
 // GHOSTS Universal Clients (built from source, demo/testing)
-var client1 = builder.AddDockerfile("ghosts-client-1", "../", "Dockerfile-client-universal")
+var client1 = builder.AddDockerfile("ghosts-client-1", "../../", "src/Dockerfile-client-universal")
     .WithContainerName("ghosts-client-1")
     .WithEnvironment("BASE_URL", "http://host.docker.internal:5000/api")
     .WithBindMount("../../configuration/clients/client-1/config", "/app/config", isReadOnly: false)
     .WithLifetime(ContainerLifetime.Persistent)
     .WaitFor(api);
 
-var client2 = builder.AddDockerfile("ghosts-client-2", "../", "Dockerfile-client-universal")
+var client2 = builder.AddDockerfile("ghosts-client-2", "../../", "src/Dockerfile-client-universal")
     .WithContainerName("ghosts-client-2")
     .WithEnvironment("BASE_URL", "http://host.docker.internal:5000/api")
     .WithBindMount("../../configuration/clients/client-2/config", "/app/config", isReadOnly: false)
     .WithLifetime(ContainerLifetime.Persistent)
     .WaitFor(api);
 
-var client3 = builder.AddDockerfile("ghosts-client-3", "../", "Dockerfile-client-universal")
+var client3 = builder.AddDockerfile("ghosts-client-3", "../../", "src/Dockerfile-client-universal")
     .WithContainerName("ghosts-client-3")
     .WithEnvironment("BASE_URL", "http://host.docker.internal:5000/api")
     .WithBindMount("../../configuration/clients/client-3/config", "/app/config", isReadOnly: false)

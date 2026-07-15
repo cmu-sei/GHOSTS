@@ -1,0 +1,25 @@
+# Build context for client images is the repo root (see src/apphost/AppHost.cs
+# AddDockerfile calls). Keep the context lean — only src/ sources and
+# .devcontainer/certs are COPYed by src/Dockerfile-client-universal.
+
+# Version control / tooling
+.git/
+.github/
+.vscode/
+.idea/
+
+# Node / frontend
+**/node_modules/
+**/dist/
+
+# .NET build output
+**/bin/
+**/obj/
+**/_db/
+
+# Docs and non-build assets
+docs/
+site/
+experimental/
+src/Ghosts.Api/wwwroot/lib/fontawesome/svgs/
+src/Ghosts.Api/wwwroot/flags/

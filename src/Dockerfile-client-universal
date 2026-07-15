@@ -2,11 +2,17 @@
 
 FROM mcr.microsoft.com/dotnet/sdk:10.0.101 AS dev
 
-COPY certs/*.crt /usr/local/share/ca-certificates/
-RUN update-ca-certificates
+# Custom Cert Support — single source of truth in .devcontainer/certs.
+# The dir always exists (readme.md is committed); .crt files are gitignored,
+# so tolerate an empty set and only update the trust store when certs are present.
+COPY .devcontainer/certs /usr/local/share/ca-certificates/custom/
+RUN find /usr/local/share/ca-certificates/custom -type f ! -name '*.crt' -delete \
+    && if find /usr/local/share/ca-certificates/custom -type f -name '*.crt' -print -quit | grep -q .; then \
+    update-ca-certificates; \
+    fi
 
-COPY Ghosts.Client.Universal/. /app/Ghosts.Client.Universal
-COPY Ghosts.Domain/. /app/Ghosts.Domain
+COPY src/Ghosts.Client.Universal/. /app/Ghosts.Client.Universal
+COPY src/Ghosts.Domain/. /app/Ghosts.Domain
 
 WORKDIR /app/Ghosts.Client.Universal
 RUN dotnet publish -c Release -o /app/dist
