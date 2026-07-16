@@ -28,11 +28,49 @@ GHOSTS is an NPC (or agent) orchestration framework that models and simulates re
 
 ## Quick Start
 
+There are two supported ways to get GHOSTS running: the **Dev Container** (best for contributors who want to build and debug the source) and **standard Docker Compose** (best for standing up the published stack quickly).
+
+### 1. Dev Container
+
+The repository ships a fully configured [Dev Container](.devcontainer/devcontainer.json) with the .NET 10 SDK, Node.js, Python, and Docker-in-Docker preinstalled, so you can build and run every component without setting up a local toolchain.
+
+**Prerequisites:** [Docker](https://www.docker.com/) and [VS Code](https://code.visualstudio.com/) with the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) (or any editor that supports the Dev Container spec).
+
+1. Clone the repository and open it in VS Code:
+   ```bash
+   git clone https://github.com/cmu-sei/GHOSTS.git
+   cd GHOSTS
+   code .
+   ```
+2. When prompted, choose **Reopen in Container** (or run **Dev Containers: Reopen in Container** from the command palette). The first build takes a few minutes while the image and features are provisioned.
+3. Once the container is ready, open a terminal (`` Ctrl-Shift-` ``) and start the stack. Because Docker-in-Docker is enabled, the same Compose stack runs from inside the container:
+   ```bash
+   cd src/Ghosts.Api
+   cp .env.example .env   # set POSTGRES_PASSWORD
+   docker compose up -d
+   ```
+   Alternatively, use the [.NET Aspire](https://learn.microsoft.com/dotnet/aspire/) host for local development orchestration:
+   ```bash
+   cd src/apphost
+   dotnet run
+   ```
+
+The services are published on the same ports as below and are forwarded to your host automatically.
+
+### 2. Standard Docker Compose
+
+If you only want to run the published stack (no source build required):
+
 ```bash
 mkdir ghosts && cd ghosts
 curl -O https://raw.githubusercontent.com/cmu-sei/GHOSTS/master/src/Ghosts.Api/docker-compose.yml
 docker compose up -d
 ```
+
+> **First run:** Copy `.env.example` to `.env` and set `POSTGRES_PASSWORD` before starting.
+> See [src/Ghosts.Api/.env.example](src/Ghosts.Api/.env.example) for all available variables.
+
+### Services
 
 | Service | URL | Notes |
 |---------|-----|-------|
@@ -41,9 +79,6 @@ docker compose up -d
 | Grafana | http://localhost:3000 | Activity dashboards |
 | n8n | http://localhost:5678 | Workflow automation |
 | PostgreSQL | localhost:5432 | Database |
-
-> **First run:** Copy `.env.example` to `.env` and set `POSTGRES_PASSWORD` before starting.
-> See [src/Ghosts.Api/.env.example](src/Ghosts.Api/.env.example) for all available variables.
 
 Then [install a client](https://cmu-sei.github.io/GHOSTS/quickstart/#ghosts-clients) on each machine you want to simulate and point it at `http://YOUR-API-HOST:5000/api`.
 
