@@ -1999,10 +1999,10 @@
 
 <h1 id="database-handler-configuration">Database Handler Configuration<a class="headerlink" href="#database-handler-configuration" title="Permanent link">&para;</a></h1>
 <p>The sample configuration below is also available in the [GHOSTS GitHub repository](<a href="https://github.com/cmu-sei/GHOSTS/blob/master/src/Ghosts.Client.Windows/Sample%20Timelines/Database.json">https://github.com/cmu-sei/GHOSTS/blob/master/src/Ghosts.Client.Windows/Sample%20Timelines/Database.json</a></p>
-<p>The database handler is used to perform insert, query, and delete operations to one or more MySql database servers. The configuration can be used specify a simplified schema with multiple databases, each with multiple tables, each table with multiple columns.</p>
+<p>The database handler is used to perform insert, query, and delete operations to one or more MySql or Microsoft SQL database servers. The configuration can be used specify a simplified schema with multiple databases, each with multiple tables, each table with multiple columns.</p>
 <p>When the handler is executed, a random database is chosen along with a random table from that database. This DB/Table is queried for row count, and if empty, 10 rows are generated as initial content.  If non-empty, either an insert operation (one row inserted), delete (first row is deleted), or query operation is performed (a maximum of <code>query-limit</code> rows are returned and written to the Ghosts log file).  The query starts at a random offset from within the rows.  If the <code>max-rows</code> parameter is non-zero then when this number of rows is reached a deletion operation is forced.</p>
 <p>A sample timeline is shown below:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<p><div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;Status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Run&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;TimeLineHandlers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="p">{</span>
@@ -2014,6 +2014,7 @@
 <span class="w">        </span><span class="nt">&quot;query-probability&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">50</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;query-limit&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">30</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;max-rows&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;ismssql&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;false&quot;</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;port&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3306</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;DatabaseTargets&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">           </span><span class="nt">&quot;Version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1.0&quot;</span><span class="p">,</span>
@@ -2087,6 +2088,8 @@
 <span class="w">  </span><span class="p">]</span>
 <span class="p">}</span>
 </code></pre></div>
+The <code>ismssql</code> parameter should be <code>"false"</code> to target a MySql server, and <code>"true"</code> to target a Microsoft SQL server. If the <code>port</code> parameter is missing, then it is set to the default MySql server port if <code>ismssql</code> is <code>"false"</code>,  and to the default Microsoft SQL Server port if <code>ismssql</code> is <code>"true"</code>.</p>
+<p>If the <code>ismssql</code> parameter is missing then it is assumed to be <code>"false"</code>.</p>
 <p>The <code>DatabaseTargets[Data]</code> entry in the <code>HandlerArgs</code> is a dictionary, with each key/value specifying a target MySQL database. The <code>Username</code>, <code>Password</code> specify the credentials used for database access, and the <code>Databases</code> entry is a list of simplified database schema that can be accessed. It is assumed that this schema exists on the MySql server and is assumed to have primary key named <code>id</code> as the first column that is an auto-incrementing integer.</p>
 <p>Each entry in <code>Tables</code> has a list of <code>Columns</code> that describe the column entries. Each table is assumed to be comprised entirely of either VARCHAR(255) string data or INT data.</p>
 <p>The <code>Column</code> entry can have a <code>ContentHint</code> with a string that identifies a category that is used from the default database corpus in Ghosts (a file named <code>database-content.csv</code>).  The supported <code>ContentHint</code> categories are:</p>
