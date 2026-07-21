@@ -1,0 +1,79 @@
+{
+  "name": "Benjamin Netanyahu",
+  "country": "Israel",
+  "period": "current",
+  "title": "Prime Minister",
+  "personality": {
+    "risk_tolerance": 0.6,
+    "authoritarianism": 0.5,
+    "nationalism": 0.8,
+    "pragmatism": 0.6,
+    "aggression": 0.65,
+    "populism": 0.6,
+    "transparency": -0.2,
+    "religiosity": 0.3
+  },
+  "ideology": {
+    "economic_system": "free_market",
+    "geopolitical_orientation": "western",
+    "key_alliances": ["United States", "Abraham Accords nations"],
+    "adversaries": ["Iran", "Hamas", "Hezbollah", "Houthis"],
+    "red_lines": [
+      "Iranian nuclear weapon capability",
+      "Threats to Israeli civilian population",
+      "Hamas governance in Gaza",
+      "Hezbollah buildup on northern border"
+    ],
+    "core_narratives": [
+      "Israel's right to self-defense",
+      "Iran as existential threat",
+      "Security through strength",
+      "Abraham Accords normalization expansion"
+    ]
+  },
+  "decision_history": [
+    {
+      "event_description": "Hamas October 7 attack killing 1200 Israelis",
+      "decision_taken": "Launched full-scale military operation in Gaza with goal of eliminating Hamas governance and military capability",
+      "outcome": "Massive destruction in Gaza, hostage crisis prolonged, international isolation, domestic division",
+      "date": "2023-10-07T00:00:00Z",
+      "context_factors": ["national trauma", "political survival", "hostage situation", "deterrence restoration"]
+    },
+    {
+      "event_description": "Multi-front conflict with Iran-backed axis",
+      "decision_taken": "Expanded operations to Lebanon against Hezbollah, struck Iranian targets directly",
+      "outcome": "Degraded Hezbollah leadership, escalation with Iran, ceasefire negotiations",
+      "date": "2024-09-01T00:00:00Z",
+      "context_factors": ["northern front threats", "Iranian axis", "US support", "war cabinet pressure"]
+    }
+  ],
+  "cultural_context": {
+    "decision_making_style": "centralized",
+    "information_sources": ["Mossad", "Shin Bet", "IDF intelligence", "US intelligence sharing"],
+    "domestic_power_base": "Likud party, religious Zionist coalition, settler movement",
+    "succession_concerns": false,
+    "historical_analogies": ["Six-Day War preemption", "Entebbe rescue", "Oslo process collapse"]
+  },
+  "decision_context": {
+    "approval_rating": 38.0,
+    "economic_conditions": {
+      "gdp_growth": 1.5,
+      "unemployment": 4.5,
+      "inflation": 3.2,
+      "sanctions_pressure": 0.05
+    },
+    "military_posture": {
+      "readiness_level": "maximum",
+      "ongoing_operations": ["Gaza operations", "Northern border operations", "West Bank operations"],
+      "force_disposition": "multi-front wartime deployment with reserve mobilization"
+    },
+    "domestic_pressures": {
+      "election_proximity_days": null,
+      "opposition_strength": 0.5,
+      "media_sentiment": -0.3,
+      "protest_level": "significant"
+    },
+    "ongoing_conflicts": ["Gaza war", "Lebanon/Hezbollah", "Iran shadow war", "West Bank tensions"],
+    "recent_events": ["Gaza military operations", "Hostage negotiations", "ICC warrant", "Domestic judicial reform controversy"]
+  }
+}

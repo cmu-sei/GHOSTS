@@ -1,0 +1,102 @@
+<form class="event-form" [formGroup]="form" (ngSubmit)="onSubmit()">
+  @if (leaders().length) {
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Actor</mat-label>
+        <mat-select (selectionChange)="onActorSelected($event.value)">
+          @for (group of leadersByPeriod(); track group.period) {
+            <mat-optgroup [label]="group.period">
+              @for (leader of group.leaders; track leader.id) {
+                <mat-option [value]="leader.id">{{ leader.name }} — {{ leader.country }}</mat-option>
+              }
+            </mat-optgroup>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Target</mat-label>
+        <mat-select (selectionChange)="onTargetSelected($event.value)">
+          @for (group of leadersByPeriod(); track group.period) {
+            <mat-optgroup [label]="group.period">
+              @for (leader of group.leaders; track leader.id) {
+                <mat-option [value]="leader.id">{{ leader.name }} — {{ leader.country }}</mat-option>
+              }
+            </mat-optgroup>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+  } @else {
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Actor</mat-label>
+        <input matInput formControlName="actor" placeholder="Country or entity performing action">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Target</mat-label>
+        <input matInput formControlName="target" placeholder="Country or entity affected">
+      </mat-form-field>
+    </div>
+  }
+
+  <div class="form-row">
+    <mat-form-field appearance="outline">
+      <mat-label>Event Type</mat-label>
+      <mat-select formControlName="event_type">
+        @for (type of eventTypes; track type) {
+          <mat-option [value]="type">{{ type }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Action Category</mat-label>
+      <mat-select formControlName="action_category">
+        @for (cat of actionCategories; track cat) {
+          <mat-option [value]="cat">{{ cat }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Description</mat-label>
+    <textarea matInput formControlName="description" rows="3"
+              placeholder="Describe the geopolitical event..."></textarea>
+  </mat-form-field>
+
+  <div class="severity-row">
+    <span class="severity-label">Severity</span>
+    <mat-slider min="0" max="1" step="0.05">
+      <input matSliderThumb formControlName="severity">
+    </mat-slider>
+    <span class="severity-value">{{ form.get('severity')?.value | number:'1.2-2' }}</span>
+  </div>
+
+  <div class="form-row">
+    <mat-form-field appearance="outline">
+      <mat-label>Reversibility</mat-label>
+      <mat-select formControlName="reversibility">
+        @for (opt of reversibilityOptions; track opt) {
+          <mat-option [value]="opt">{{ opt }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Visibility</mat-label>
+      <mat-select formControlName="visibility">
+        @for (opt of visibilityOptions; track opt) {
+          <mat-option [value]="opt">{{ opt }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid" class="submit-btn">
+    <mat-icon>send</mat-icon>
+    Run Prediction
+  </button>
+</form>

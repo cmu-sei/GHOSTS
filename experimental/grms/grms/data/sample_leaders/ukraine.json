@@ -1,0 +1,79 @@
+{
+  "name": "Volodymyr Zelenskyy",
+  "country": "Ukraine",
+  "period": "current",
+  "title": "President",
+  "personality": {
+    "risk_tolerance": 0.7,
+    "authoritarianism": 0.3,
+    "nationalism": 0.8,
+    "pragmatism": 0.6,
+    "aggression": 0.5,
+    "populism": 0.6,
+    "transparency": 0.5,
+    "religiosity": 0.2
+  },
+  "ideology": {
+    "economic_system": "free_market",
+    "geopolitical_orientation": "western",
+    "key_alliances": ["United States", "United Kingdom", "European Union", "Poland"],
+    "adversaries": ["Russia"],
+    "red_lines": [
+      "Territorial concessions without security guarantees",
+      "Forced neutrality without NATO-equivalent protection",
+      "Legitimization of Russian occupation",
+      "Abandonment by Western allies"
+    ],
+    "core_narratives": [
+      "Defending European democracy against Russian aggression",
+      "Ukrainian sovereignty and territorial integrity",
+      "Euro-Atlantic integration",
+      "Victory as the only path to lasting peace"
+    ]
+  },
+  "decision_history": [
+    {
+      "event_description": "Full-scale Russian invasion of Ukraine",
+      "decision_taken": "Remained in Kyiv, rallied international support, refused evacuation, led wartime government",
+      "outcome": "Galvanized national resistance, secured massive Western military aid, became symbol of democratic resistance",
+      "date": "2022-02-24T00:00:00Z",
+      "context_factors": ["national survival", "leadership symbolism", "Western alliance building"]
+    },
+    {
+      "event_description": "Pressure to negotiate amid war fatigue and shifting US politics",
+      "decision_taken": "Maintained position requiring full territorial restoration while engaging in diplomatic formats",
+      "outcome": "Preserved international support but facing growing pressure for compromise",
+      "date": "2025-03-01T00:00:00Z",
+      "context_factors": ["war fatigue", "US election impact", "European support", "military realities"]
+    }
+  ],
+  "cultural_context": {
+    "decision_making_style": "consultative_wartime",
+    "information_sources": ["military command", "intelligence services", "Western allies", "social media engagement"],
+    "domestic_power_base": "Broad wartime coalition, military loyalty, international legitimacy",
+    "succession_concerns": false,
+    "historical_analogies": ["Churchill wartime leadership", "Finnish Winter War"]
+  },
+  "decision_context": {
+    "approval_rating": 55.0,
+    "economic_conditions": {
+      "gdp_growth": 3.0,
+      "unemployment": 18.0,
+      "inflation": 12.0,
+      "sanctions_pressure": 0.0
+    },
+    "military_posture": {
+      "readiness_level": "maximum",
+      "ongoing_operations": ["Eastern front defense", "Southern operations", "Drone warfare campaign"],
+      "force_disposition": "full wartime mobilization defending eastern and southern fronts"
+    },
+    "domestic_pressures": {
+      "election_proximity_days": null,
+      "opposition_strength": 0.25,
+      "media_sentiment": 0.3,
+      "protest_level": "none"
+    },
+    "ongoing_conflicts": ["Russia-Ukraine war"],
+    "recent_events": ["Ongoing Russian offensive in east", "Western arms deliveries", "Peace negotiation pressure"]
+  }
+}

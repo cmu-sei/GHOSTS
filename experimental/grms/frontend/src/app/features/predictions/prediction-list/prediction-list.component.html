@@ -1,0 +1,106 @@
+<div class="prediction-list">
+  <div class="list-header">
+    <h1 class="page-title">Predictions</h1>
+    <button mat-flat-button color="primary" (click)="newPrediction()">
+      <mat-icon>add</mat-icon>
+      New Prediction
+    </button>
+  </div>
+
+  @if (loading()) {
+    <app-glass-card>
+      <div class="loading-state">
+        <mat-icon class="spin">autorenew</mat-icon>
+        <span>Loading predictions...</span>
+      </div>
+    </app-glass-card>
+  }
+
+  @if (!loading() && predictions().length === 0) {
+    <app-glass-card>
+      <div class="empty-state">
+        <mat-icon>science</mat-icon>
+        <h3>No predictions yet</h3>
+        <p>Run a prediction to see how leaders and populations respond to geopolitical events.</p>
+        <button mat-flat-button color="primary" (click)="newPrediction()">
+          <mat-icon>add</mat-icon>
+          Create First Prediction
+        </button>
+      </div>
+    </app-glass-card>
+  }
+
+  @if (!loading() && predictions().length > 0) {
+    <div class="predictions-grid">
+      @for (p of predictions(); track p.id) {
+        <app-glass-card class="prediction-card" (click)="viewPrediction(p)">
+          <div class="card-header">
+            <mat-icon class="type-icon">{{ getTypeIcon(p.prediction_type) }}</mat-icon>
+            <div class="card-title-area">
+              <span class="card-label">{{ p.label || p.event.description | slice:0:60 }}</span>
+              <span class="card-date">{{ p.historical_date || (p.created_at | date:'medium') }}</span>
+            </div>
+            <button mat-icon-button
+                    matTooltip="Delete prediction"
+                    (click)="deletePrediction(p, $event)">
+              <mat-icon>delete_outline</mat-icon>
+            </button>
+          </div>
+
+          <div class="card-meta">
+            <mat-chip-set>
+              <mat-chip>{{ p.prediction_type }}</mat-chip>
+              @if (p.leader_name) {
+                <mat-chip>{{ p.leader_name }}</mat-chip>
+              }
+              @if (p.country) {
+                <mat-chip>{{ p.country }}</mat-chip>
+              }
+              @if (p.llm_model) {
+                <mat-chip class="model-chip">
+                  <mat-icon>smart_toy</mat-icon>
+                  {{ p.llm_model }}
+                </mat-chip>
+              }
+            </mat-chip-set>
+          </div>
+
+          <div class="card-event">
+            <span class="event-actor">{{ p.event.structured.actor }}</span>
+            <mat-icon class="arrow-icon">arrow_forward</mat-icon>
+            <span class="event-target">{{ p.event.structured.target }}</span>
+            <span class="event-type-badge">{{ p.event.event_type }}</span>
+          </div>
+
+          @if (p.leader_response) {
+            <div class="card-result-summary">
+              <span class="escalation-chip" [class.high]="p.leader_response.escalation_risk > 0.7"
+                    [class.medium]="p.leader_response.escalation_risk > 0.4 && p.leader_response.escalation_risk <= 0.7">
+                Escalation: {{ p.leader_response.escalation_risk * 100 | number:'1.0-0' }}%
+              </span>
+              <span class="tone-chip">{{ p.leader_response.verbal_response.tone }}</span>
+            </div>
+          }
+
+          @if (p.score) {
+            <div class="card-score-summary">
+              <span class="score-chip" [class.good]="p.score.overall_score >= 0.7"
+                    [class.fair]="p.score.overall_score >= 0.4 && p.score.overall_score < 0.7"
+                    [class.poor]="p.score.overall_score < 0.4">
+                <mat-icon>fact_check</mat-icon>
+                Accuracy: {{ p.score.overall_score * 100 | number:'1.0-0' }}%
+              </span>
+            </div>
+          }
+
+          @if (p.cascade_responses.length) {
+            <div class="cascade-count">
+              <mat-icon>account_tree</mat-icon>
+              {{ p.cascade_responses.length }} cascade response{{ p.cascade_responses.length > 1 ? 's' : '' }}
+            </div>
+          }
+        </app-glass-card>
+      }
+    </div>
+  }
+</div>

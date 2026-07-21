@@ -1,0 +1,39 @@
+@use 'variables' as *;
+
+@mixin heading-1 {
+  font-size: 2rem;
+  font-weight: 600;
+  color: $text;
+  letter-spacing: -0.02em;
+}
+
+@mixin heading-2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: $text;
+  letter-spacing: -0.01em;
+}
+
+@mixin heading-3 {
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: $text;
+}
+
+@mixin body-text {
+  font-size: 0.875rem;
+  color: $text-dim;
+  line-height: 1.5;
+}
+
+@mixin caption {
+  font-size: 0.75rem;
+  color: $text-mute;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+@mixin mono {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.8125rem;
+}

@@ -1,0 +1,86 @@
+{
+  "name": "Emperor Hirohito",
+  "country": "Japan",
+  "period": "world war 2",
+  "title": "Emperor of Japan",
+  "personality": {
+    "risk_tolerance": 0.3,
+    "authoritarianism": 0.7,
+    "nationalism": 0.8,
+    "pragmatism": 0.4,
+    "aggression": 0.4,
+    "populism": 0.0,
+    "transparency": -0.9,
+    "religiosity": 0.9
+  },
+  "ideology": {
+    "economic_system": "state_directed",
+    "geopolitical_orientation": "expansionist",
+    "key_alliances": ["Germany", "Italy", "Thailand", "Manchukuo"],
+    "adversaries": ["United States", "United Kingdom", "China", "Soviet Union"],
+    "red_lines": [
+      "Threats to the Imperial institution (kokutai)",
+      "Loss of divine Emperor status",
+      "Subordination of Japan to Western powers",
+      "Communist revolution threatening the throne"
+    ],
+    "core_narratives": [
+      "Unbroken Imperial line from the Sun Goddess Amaterasu",
+      "Japan's divine destiny to lead Asia",
+      "Emperor as spiritual father of the Japanese nation",
+      "Sacred war for national survival"
+    ]
+  },
+  "decision_history": [
+    {
+      "event_description": "Imperial Conference debated war with the United States and Western powers",
+      "decision_taken": "Gave imperial sanction to war against United States, Britain, and Netherlands after military presented operational plans",
+      "outcome": "Pearl Harbor attack launched; initial six months of stunning Japanese victories",
+      "date": "1941-12-01T00:00:00Z",
+      "context_factors": ["oil embargo threatening national survival", "military presented war as only viable option", "Emperor questioned but ultimately sanctioned", "institutional pressure from Army and Navy"]
+    },
+    {
+      "event_description": "Japanese forces advancing in Philippines and Southeast Asia",
+      "decision_taken": "Personally pressed commanders for faster operations against Bataan and authorized expanded operations",
+      "outcome": "Fall of Bataan and Corregidor; Japanese control of Western Pacific consolidated",
+      "date": "1942-02-01T00:00:00Z",
+      "context_factors": ["desire for quick decisive victories", "active interest in operational details", "awarded honors to successful commanders", "divine authority lending weight to military demands"]
+    },
+    {
+      "event_description": "Mounting losses after Midway and Guadalcanal suggested war momentum shifting",
+      "decision_taken": "Authorized continued offensive operations and approved Three Alls policy in China despite deteriorating position",
+      "outcome": "Continued attrition of irreplaceable naval assets; brutal occupation policies in China",
+      "date": "1942-08-01T00:00:00Z",
+      "context_factors": ["institutional inability to accept defeat", "information filtered through military optimism", "divine status prevented open questioning", "no mechanism for strategic retreat in Japanese military culture"]
+    }
+  ],
+  "cultural_context": {
+    "decision_making_style": "hierarchical_consensus",
+    "information_sources": ["Imperial General Headquarters briefings", "Lord Keeper of the Privy Seal", "Prime Minister reports", "senior statesmen (jushin)"],
+    "domestic_power_base": "Divine imperial institution, Shinto religious establishment, military command structure, palace bureaucracy (Imperial Household Ministry)",
+    "succession_concerns": false,
+    "historical_analogies": ["Meiji Emperor's modernization", "Divine origin from Amaterasu", "Emperor Jimmu founding mythology"]
+  },
+  "decision_context": {
+    "approval_rating": 95.0,
+    "economic_conditions": {
+      "gdp_growth": -2.0,
+      "unemployment": 0.5,
+      "inflation": 8.0,
+      "sanctions_pressure": 0.9
+    },
+    "military_posture": {
+      "readiness_level": "mobilized",
+      "ongoing_operations": ["Pacific defense perimeter", "China occupation", "Southeast Asia garrison", "Burma offensive"],
+      "force_disposition": "overextended across vast Pacific perimeter with diminishing naval superiority"
+    },
+    "domestic_pressures": {
+      "election_proximity_days": null,
+      "opposition_strength": 0.0,
+      "media_sentiment": 0.9,
+      "protest_level": "none"
+    },
+    "ongoing_conflicts": ["Pacific War", "Second Sino-Japanese War", "Southeast Asian occupation"],
+    "recent_events": ["Midway defeat suppressed from public", "Guadalcanal attrition", "State-controlled media reporting victories"]
+  }
+}

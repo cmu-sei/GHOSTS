@@ -1,0 +1,38 @@
+// GRMS theme tokens — aligned to Ghosts.Frontend (light, green primary, violet links).
+// Variable names are preserved so existing feature styles recolor without edits.
+
+// Surfaces (formerly glass) — now flat, light Material surfaces.
+$glass: #ffffff;
+$glass-light: #fafafa;
+$glass-border: rgba(0, 0, 0, 0.12);
+$glass-hover: #f5f5f5;
+$blur: 0px;
+$radius: 12px;
+$radius-sm: 8px;
+$radius-lg: 16px;
+
+$text: rgba(0, 0, 0, 0.87);
+$text-dim: rgba(0, 0, 0, 0.6);
+$text-mute: rgba(0, 0, 0, 0.4);
+
+$accent: #2e7d32;
+$green: #2e7d32;
+$red: #c62828;
+$orange: #ef6c00;
+$purple: #8e24aa;
+$cyan: #00897b;
+
+$shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.08);
+$shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.15);
+$shadow-glow: 0 2px 8px rgba(46, 125, 50, 0.15);
+
+$transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+$transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+
+$bg-base: #f5f5f5;
+$bg-surface: #ffffff;
+$bg-elevated: #fafafa;
+
+$sidenav-width: 240px;
+$sidenav-collapsed: 64px;
+$toolbar-height: 64px;

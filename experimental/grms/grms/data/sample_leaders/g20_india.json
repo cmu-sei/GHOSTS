@@ -1,0 +1,79 @@
+{
+  "name": "Narendra Modi",
+  "country": "India",
+  "period": "current",
+  "title": "Prime Minister",
+  "personality": {
+    "risk_tolerance": 0.3,
+    "authoritarianism": 0.5,
+    "nationalism": 0.8,
+    "pragmatism": 0.7,
+    "aggression": 0.2,
+    "populism": 0.7,
+    "transparency": -0.2,
+    "religiosity": 0.6
+  },
+  "ideology": {
+    "economic_system": "mixed",
+    "geopolitical_orientation": "non_aligned",
+    "key_alliances": ["United States", "Japan", "Australia", "France", "Israel"],
+    "adversaries": ["China", "Pakistan"],
+    "red_lines": [
+      "Chinese incursions on Line of Actual Control",
+      "Pakistan-sponsored terrorism",
+      "Challenges to Kashmir sovereignty",
+      "Threats to Indian Ocean dominance"
+    ],
+    "core_narratives": [
+      "India as Vishwaguru (world teacher)",
+      "Make in India and self-reliant India (Atmanirbhar Bharat)",
+      "Strategic autonomy and multi-alignment",
+      "Digital India and development for all"
+    ]
+  },
+  "decision_history": [
+    {
+      "event_description": "US tariffs impacted Indian exports",
+      "decision_taken": "Pursued bilateral negotiations while diversifying trade partnerships, offered selective concessions",
+      "outcome": "Partial trade deal framework, maintained strategic relationship with US",
+      "date": "2025-04-15T00:00:00Z",
+      "context_factors": ["economic growth priority", "Quad alliance value", "domestic manufacturing goals"]
+    },
+    {
+      "event_description": "China-India border tensions continued in eastern Ladakh",
+      "decision_taken": "Maintained forward deployments, continued diplomatic engagement, accelerated infrastructure in border regions",
+      "outcome": "Partial disengagement at some points, continued standoff at others",
+      "date": "2024-09-01T00:00:00Z",
+      "context_factors": ["military modernization", "diplomatic channels open", "domestic pressure for firm stance"]
+    }
+  ],
+  "cultural_context": {
+    "decision_making_style": "advisory_council",
+    "information_sources": ["RAW intelligence", "bureaucratic apparatus", "party organization", "think tanks"],
+    "domestic_power_base": "Hindu middle class, business community, BJP party apparatus, rural poor",
+    "succession_concerns": false,
+    "historical_analogies": ["Non-Aligned Movement legacy", "1962 China war", "Economic liberalization of 1991"]
+  },
+  "decision_context": {
+    "approval_rating": 65.0,
+    "economic_conditions": {
+      "gdp_growth": 6.5,
+      "unemployment": 7.0,
+      "inflation": 4.8,
+      "sanctions_pressure": 0.0
+    },
+    "military_posture": {
+      "readiness_level": "elevated",
+      "ongoing_operations": ["LAC deployments", "Indian Ocean naval patrols", "Counter-terrorism operations"],
+      "force_disposition": "two-front capable with growing blue-water navy"
+    },
+    "domestic_pressures": {
+      "election_proximity_days": null,
+      "opposition_strength": 0.35,
+      "media_sentiment": 0.3,
+      "protest_level": "minor"
+    },
+    "ongoing_conflicts": ["China border standoff", "Pakistan cross-border terrorism"],
+    "recent_events": ["Quad summit participation", "Russian oil imports continued despite Western pressure"]
+  }
+}

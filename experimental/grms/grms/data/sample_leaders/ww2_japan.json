@@ -1,0 +1,86 @@
+{
+  "name": "Hideki Tojo",
+  "country": "Japan",
+  "period": "world war 2",
+  "title": "Prime Minister and Minister of War",
+  "personality": {
+    "risk_tolerance": 0.7,
+    "authoritarianism": 0.85,
+    "nationalism": 0.95,
+    "pragmatism": 0.1,
+    "aggression": 0.8,
+    "populism": 0.3,
+    "transparency": -0.8,
+    "religiosity": 0.7
+  },
+  "ideology": {
+    "economic_system": "state_directed",
+    "geopolitical_orientation": "expansionist",
+    "key_alliances": ["Germany", "Italy", "Thailand", "Manchukuo"],
+    "adversaries": ["United States", "United Kingdom", "China", "Soviet Union", "Netherlands"],
+    "red_lines": [
+      "American oil embargo and economic strangulation",
+      "Loss of conquered territories in Greater East Asia",
+      "Threats to the Emperor system (kokutai)",
+      "Western military presence in Asia-Pacific"
+    ],
+    "core_narratives": [
+      "Greater East Asia Co-Prosperity Sphere liberating Asia from Western colonialism",
+      "Bushido warrior spirit as national destiny",
+      "Japan's divine mission under the Emperor",
+      "Resource security through territorial expansion"
+    ]
+  },
+  "decision_history": [
+    {
+      "event_description": "US oil embargo and Hull Note threatening Japanese strategic position",
+      "decision_taken": "Recommended war against United States, Britain, and Netherlands to Cabinet and Emperor; authorized Pearl Harbor attack",
+      "outcome": "Spectacular initial victories across Pacific but awakened American industrial might",
+      "date": "1941-12-01T00:00:00Z",
+      "context_factors": ["oil reserves depleting within 18 months", "Hull Note interpreted as ultimatum", "confidence in initial strike capability", "gamble on American willingness to negotiate after losses"]
+    },
+    {
+      "event_description": "Japanese forces achieved rapid conquest across Southeast Asia and Pacific",
+      "decision_taken": "Ordered expansion to maximum defensive perimeter including Burma, Dutch East Indies, and Pacific islands",
+      "outcome": "Secured oil and rubber resources but created overextended defensive perimeter",
+      "date": "1942-02-15T00:00:00Z",
+      "context_factors": ["Fall of Singapore", "Dutch East Indies oil fields captured", "speed of victories exceeded expectations", "desire to establish fait accompli before US mobilization"]
+    },
+    {
+      "event_description": "Battle of Midway resulted in loss of four aircraft carriers",
+      "decision_taken": "Suppressed news of defeat domestically; shifted to defensive strategy while maintaining offensive rhetoric",
+      "outcome": "Strategic initiative permanently lost; began attritional island defense",
+      "date": "1942-06-07T00:00:00Z",
+      "context_factors": ["irreplaceable carrier losses", "trained pilot attrition", "information suppression from public", "refusal to acknowledge strategic implications"]
+    }
+  ],
+  "cultural_context": {
+    "decision_making_style": "hierarchical_consensus",
+    "information_sources": ["Imperial General Headquarters", "Army and Navy chiefs of staff", "Emperor's directives", "Kempeitai intelligence", "Cabinet advisors"],
+    "domestic_power_base": "Imperial Japanese Army (Control Faction), Emperor's confidence, Kempeitai military police, zaibatsu industrial combines",
+    "succession_concerns": true,
+    "historical_analogies": ["Russo-Japanese War 1905 victory", "Meiji Restoration modernization", "Samurai bushido tradition", "Divine Wind (kamikaze) mythology"]
+  },
+  "decision_context": {
+    "approval_rating": 65.0,
+    "economic_conditions": {
+      "gdp_growth": -2.0,
+      "unemployment": 0.5,
+      "inflation": 8.0,
+      "sanctions_pressure": 0.9
+    },
+    "military_posture": {
+      "readiness_level": "mobilized",
+      "ongoing_operations": ["Pacific island defense", "China occupation", "Burma campaign", "Southeast Asia garrison"],
+      "force_disposition": "navy-centric Pacific defense with army committed in China; resource logistics increasingly strained"
+    },
+    "domestic_pressures": {
+      "election_proximity_days": null,
+      "opposition_strength": 0.1,
+      "media_sentiment": 0.5,
+      "protest_level": "none"
+    },
+    "ongoing_conflicts": ["Pacific War vs United States", "China theater", "Burma campaign vs Britain", "Southeast Asia occupation"],
+    "recent_events": ["Midway defeat June 1942", "Guadalcanal attrition August 1942-February 1943", "Growing submarine threat to shipping"]
+  }
+}

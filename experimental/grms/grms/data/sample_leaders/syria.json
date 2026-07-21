@@ -1,0 +1,79 @@
+{
+  "name": "Ahmad al-Sharaa",
+  "country": "Syria",
+  "period": "current",
+  "title": "President",
+  "personality": {
+    "risk_tolerance": 0.6,
+    "authoritarianism": 0.5,
+    "nationalism": 0.7,
+    "pragmatism": 0.7,
+    "aggression": 0.4,
+    "populism": 0.5,
+    "transparency": 0.2,
+    "religiosity": 0.6
+  },
+  "ideology": {
+    "economic_system": "mixed_economy",
+    "geopolitical_orientation": "non_aligned",
+    "key_alliances": ["Turkey", "Qatar"],
+    "adversaries": ["Kurdish autonomous forces", "Iran-backed militias"],
+    "red_lines": [
+      "Kurdish separatism",
+      "Return of Assad loyalist power structures",
+      "Foreign military bases without consent",
+      "Sectarian fragmentation of territory"
+    ],
+    "core_narratives": [
+      "New Syria after Assad",
+      "National reconciliation and reconstruction",
+      "Islamic governance with pragmatic approach",
+      "Territorial integrity and sovereignty"
+    ]
+  },
+  "decision_history": [
+    {
+      "event_description": "Fall of Assad regime following HTS-led offensive",
+      "decision_taken": "Transitioned from militant leader to head of transitional government, dissolved HTS formally",
+      "outcome": "International cautious engagement, ongoing legitimacy challenges, fragile control over territory",
+      "date": "2024-12-08T00:00:00Z",
+      "context_factors": ["legitimacy building", "international recognition", "managing expectations"]
+    },
+    {
+      "event_description": "Need to establish governance over fractured territory",
+      "decision_taken": "Formed inclusive transitional government while maintaining security control, engaged with Western diplomats",
+      "outcome": "Partial sanctions relief, limited international recognition, ongoing internal power struggles",
+      "date": "2025-03-01T00:00:00Z",
+      "context_factors": ["reconstruction needs", "legitimacy", "Turkish support", "managing diverse factions"]
+    }
+  ],
+  "cultural_context": {
+    "decision_making_style": "pragmatic_authoritarian",
+    "information_sources": ["military intelligence", "tribal networks", "Turkish advisors", "local governance reports"],
+    "domestic_power_base": "Former HTS fighters, Sunni Arab majority, Turkish-backed forces",
+    "succession_concerns": false,
+    "historical_analogies": ["Post-revolution state building", "Libyan transition challenges"]
+  },
+  "decision_context": {
+    "approval_rating": 0.0,
+    "economic_conditions": {
+      "gdp_growth": -2.0,
+      "unemployment": 50.0,
+      "inflation": 80.0,
+      "sanctions_pressure": 0.6
+    },
+    "military_posture": {
+      "readiness_level": "high",
+      "ongoing_operations": ["Territorial consolidation", "Counter-ISIS", "Kurdish front"],
+      "force_disposition": "fragmented control with multiple armed factions"
+    },
+    "domestic_pressures": {
+      "election_proximity_days": null,
+      "opposition_strength": 0.6,
+      "media_sentiment": 0.0,
+      "protest_level": "moderate"
+    },
+    "ongoing_conflicts": ["Kurdish autonomy dispute", "ISIS remnants", "Israeli operations in south", "Factional rivalries"],
+    "recent_events": ["Transitional government formation", "International diplomatic outreach", "Reconstruction planning"]
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "name": "Claudia Sheinbaum",
+  "country": "Mexico",
+  "period": "current",
+  "title": "President",
+  "personality": {
+    "risk_tolerance": -0.1,
+    "authoritarianism": 0.2,
+    "nationalism": 0.5,
+    "pragmatism": 0.6,
+    "aggression": -0.2,
+    "populism": 0.5,
+    "transparency": 0.1,
+    "religiosity": -0.3
+  },
+  "ideology": {
+    "economic_system": "mixed",
+    "geopolitical_orientation": "non_aligned",
+    "key_alliances": ["Latin American nations", "European Union"],
+    "adversaries": [],
+    "red_lines": [
+      "US military operations on Mexican soil",
+      "Threats to Mexican sovereignty",
+      "Tariffs that destroy USMCA framework"
+    ],
+    "core_narratives": [
+      "Mexican sovereignty and dignity",
+      "Fourth Transformation continuation",
+      "Scientific approach to governance",
+      "Non-intervention and diplomatic solutions"
+    ]
+  },
+  "decision_history": [
+    {
+      "event_description": "US imposed 25% tariffs on Mexican goods and designated cartels as terrorist organizations",
+      "decision_taken": "Refused to accept cartel terrorist designation framing, negotiated migration enforcement commitments in exchange for tariff relief, maintained sovereignty rhetoric",
+      "outcome": "Partial tariff pauses tied to enforcement metrics, tense but functional relationship",
+      "date": "2025-03-04T00:00:00Z",
+      "context_factors": ["economic dependency on US trade", "sovereignty as core value", "migration as leverage point"]
+    },
+    {
+      "event_description": "Fentanyl and cartel violence continued as bilateral flashpoint",
+      "decision_taken": "Increased visible enforcement operations, expanded intelligence sharing, maintained that demand is US problem",
+      "outcome": "Some cooperation improvements, relationship remained strained",
+      "date": "2025-02-15T00:00:00Z",
+      "context_factors": ["US political pressure", "domestic security reality", "shared responsibility framing"]
+    }
+  ],
+  "cultural_context": {
+    "decision_making_style": "advisory_council",
+    "information_sources": ["CISEN intelligence", "cabinet technocrats", "MORENA party apparatus", "academic networks"],
+    "domestic_power_base": "MORENA party, urban poor, indigenous communities, public sector, progressive intellectuals",
+    "succession_concerns": false,
+    "historical_analogies": ["Cardenas nationalization era", "Non-intervention doctrine", "NAFTA transformation"]
+  },
+  "decision_context": {
+    "approval_rating": 58.0,
+    "economic_conditions": {
+      "gdp_growth": 1.8,
+      "unemployment": 2.8,
+      "inflation": 4.2,
+      "sanctions_pressure": 0.2
+    },
+    "military_posture": {
+      "readiness_level": "peacetime",
+      "ongoing_operations": ["Cartel enforcement operations", "National Guard deployments", "Migration management"],
+      "force_disposition": "internal security focused with limited external projection"
+    },
+    "domestic_pressures": {
+      "election_proximity_days": 1700,
+      "opposition_strength": 0.3,
+      "media_sentiment": 0.1,
+      "protest_level": "minor"
+    },
+    "ongoing_conflicts": ["Cartel violence", "US-Mexico trade tensions"],
+    "recent_events": ["US tariff negotiations", "Migration enforcement increase", "Energy sector reform"]
+  }
+}

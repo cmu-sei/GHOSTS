@@ -1,0 +1,70 @@
+/* Global styles — aligned to Ghosts.Frontend (light, green primary). */
+@use '@angular/material' as mat;
+@use './app/shared/styles/variables' as *;
+
+@include mat.core();
+
+// FontAwesome
+@import '@fortawesome/fontawesome-free/css/all.min.css';
+// Material Icons (local, no CDN)
+@import 'material-icons/iconfont/material-icons.css';
+
+$grms-theme: mat.define-theme((
+  color: (
+    theme-type: light,
+    primary: mat.$green-palette,
+    tertiary: mat.$violet-palette,
+  ),
+  density: (
+    scale: 0,
+  ),
+));
+
+@include mat.all-component-themes($grms-theme);
+
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  background: $bg-base;
+  color: $text;
+}
+
+// Ensure Material primary toolbars fall back to the GHOSTS green
+.mat-toolbar.mat-primary {
+  --mat-toolbar-container-background-color: #1b5e20;
+  --mat-toolbar-container-text-color: #ffffff;
+  color: #ffffff;
+}
+
+a,
+a:visited {
+  color: #8e24aa;
+  text-decoration-color: rgba(142, 36, 170, 0.4);
+}
+
+a:hover,
+a:focus,
+a:active {
+  color: #ab47bc;
+  text-decoration-color: rgba(171, 71, 188, 0.6);
+}
+
+::selection {
+  background-color: rgba(142, 36, 170, 0.25);
+  color: inherit;
+}
+
+// Icon button styling for FontAwesome icons in Material buttons
+button.icon-button {
+  min-width: 40px !important;
+  padding: 8px !important;
+  line-height: 24px !important;
+
+  i {
+    font-size: 20px;
+  }
+}

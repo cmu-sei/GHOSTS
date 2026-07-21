@@ -1,0 +1,39 @@
+@use 'variables' as *;
+@use 'glass' as *;
+
+.predictions-shell {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.shell-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+
+  button {
+    color: $text-dim;
+  }
+}
+
+.page-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: $text;
+  margin: 0;
+}
+
+.predictions-tabs {
+  ::ng-deep .mat-mdc-tab-header {
+    background: $glass;
+    border-radius: $radius;
+    border: 1px solid $glass-border;
+    margin-bottom: 24px;
+  }
+
+  ::ng-deep .mat-mdc-tab-body-wrapper {
+    min-height: 500px;
+  }
+}

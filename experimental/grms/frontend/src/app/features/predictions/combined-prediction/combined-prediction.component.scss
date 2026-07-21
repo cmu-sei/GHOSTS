@@ -1,0 +1,148 @@
+@use 'variables' as *;
+@use 'glass' as *;
+
+.combined-prediction {
+  display: grid;
+  grid-template-columns: 400px 1fr;
+  gap: 24px;
+  height: 100%;
+}
+
+.input-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.results-panel {
+  overflow-y: auto;
+}
+
+.section-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: $text;
+  margin: 0 0 16px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.full-width { width: 100%; }
+
+.loading-state {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: $text-dim;
+  .spin { animation: spin 1s linear infinite; }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.split-results {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.statement {
+  color: $text;
+  font-style: italic;
+  margin: 0 0 12px 0;
+  line-height: 1.5;
+}
+
+.badge-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.tone-badge, .audience-badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.tone-badge {
+  background: rgba(56, 189, 248, 0.15);
+  color: $accent;
+}
+
+.audience-badge {
+  background: rgba(167, 139, 250, 0.15);
+  color: $purple;
+}
+
+.actions-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.action-mini {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 10px;
+  background: rgba(15, 23, 42, 0.5);
+  border-radius: $radius-sm;
+  font-size: 0.8rem;
+
+  .action-type { color: $text-dim; text-transform: capitalize; }
+  .likelihood { color: $accent; font-family: 'JetBrains Mono', monospace; }
+}
+
+.gauge-row {
+  display: flex;
+  justify-content: center;
+  padding: 12px 0;
+}
+
+.sentiment-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.bar-item {
+  display: grid;
+  grid-template-columns: 60px 1fr 45px;
+  align-items: center;
+  gap: 8px;
+}
+
+.bar-label {
+  font-size: 0.75rem;
+  color: $text-mute;
+}
+
+.bar-track {
+  height: 8px;
+  background: rgba(100, 116, 139, 0.2);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width $transition;
+  &.green { background: $green; }
+  &.red { background: $red; }
+  &.neutral { background: $text-mute; }
+}
+
+.bar-value {
+  font-size: 0.75rem;
+  font-family: 'JetBrains Mono', monospace;
+  color: $text-dim;
+  text-align: right;
+}

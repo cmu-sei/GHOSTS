@@ -1,0 +1,47 @@
+/* Global reset + terminal base. */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+
+:root {
+  --bg: #050806;
+  --green: #33ff8a;
+  --green-dim: #1f9e57;
+  --amber: #ffb347;
+  --red: #ff5c6c;
+  --cyan: #54d0ff;
+  --purple: #b06cff;
+  --purple-dim: #7d4bd0;
+  --white-cell: #b8c4bd;
+  --font: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--green);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+::selection {
+  background: var(--green);
+  color: var(--bg);
+}
+
+/* Slim glowing scrollbars. */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--green-dim);
+  border-radius: 6px;
+}

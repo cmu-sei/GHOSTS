@@ -1,0 +1,132 @@
+{
+  "country": "Italy",
+  "total_population": 59000000,
+  "period": "current",
+  "segments": [
+    {
+      "name": "Northern industrial professionals",
+      "percentage": 0.25,
+      "demographics": {
+        "urbanization": 0.9,
+        "education_level": 0.75,
+        "median_age": 42,
+        "economic_class": "upper"
+      },
+      "disposition": {
+        "government_trust": 0.25,
+        "nationalism": 0.4,
+        "media_exposure": 0.8,
+        "social_media_activity": 0.7,
+        "protest_propensity": 0.35,
+        "compliance_baseline": 0.6,
+        "information_sources": ["social_media", "foreign_media"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.3,
+        "economic_sensitivity": 0.55,
+        "fatigue_rate": 0.12,
+        "amplification_factor": 0.55
+      }
+    },
+    {
+      "name": "Central Italy service workers",
+      "percentage": 0.25,
+      "demographics": {
+        "urbanization": 0.75,
+        "education_level": 0.5,
+        "median_age": 45,
+        "economic_class": "middle"
+      },
+      "disposition": {
+        "government_trust": 0.2,
+        "nationalism": 0.5,
+        "media_exposure": 0.7,
+        "social_media_activity": 0.6,
+        "protest_propensity": 0.4,
+        "compliance_baseline": 0.5,
+        "information_sources": ["state_tv", "social_media"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.35,
+        "economic_sensitivity": 0.75,
+        "fatigue_rate": 0.09,
+        "amplification_factor": 0.5
+      }
+    },
+    {
+      "name": "Southern Italy and Mezzogiorno",
+      "percentage": 0.25,
+      "demographics": {
+        "urbanization": 0.55,
+        "education_level": 0.35,
+        "median_age": 43,
+        "economic_class": "lower"
+      },
+      "disposition": {
+        "government_trust": 0.15,
+        "nationalism": 0.45,
+        "media_exposure": 0.6,
+        "social_media_activity": 0.55,
+        "protest_propensity": 0.4,
+        "compliance_baseline": 0.4,
+        "information_sources": ["social_media", "word_of_mouth"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.25,
+        "economic_sensitivity": 0.85,
+        "fatigue_rate": 0.08,
+        "amplification_factor": 0.5
+      }
+    },
+    {
+      "name": "Elderly and pensioner population",
+      "percentage": 0.15,
+      "demographics": {
+        "urbanization": 0.6,
+        "education_level": 0.4,
+        "median_age": 72,
+        "economic_class": "middle"
+      },
+      "disposition": {
+        "government_trust": 0.35,
+        "nationalism": 0.5,
+        "media_exposure": 0.7,
+        "social_media_activity": 0.2,
+        "protest_propensity": 0.15,
+        "compliance_baseline": 0.7,
+        "information_sources": ["state_tv", "word_of_mouth"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.4,
+        "economic_sensitivity": 0.6,
+        "fatigue_rate": 0.05,
+        "amplification_factor": 0.25
+      }
+    },
+    {
+      "name": "Young urban precariat",
+      "percentage": 0.10,
+      "demographics": {
+        "urbanization": 0.9,
+        "education_level": 0.7,
+        "median_age": 27,
+        "economic_class": "lower"
+      },
+      "disposition": {
+        "government_trust": 0.15,
+        "nationalism": 0.3,
+        "media_exposure": 0.85,
+        "social_media_activity": 0.9,
+        "protest_propensity": 0.55,
+        "compliance_baseline": 0.4,
+        "information_sources": ["social_media", "foreign_media"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.2,
+        "economic_sensitivity": 0.8,
+        "fatigue_rate": 0.14,
+        "amplification_factor": 0.7
+      }
+    }
+  ]
+}

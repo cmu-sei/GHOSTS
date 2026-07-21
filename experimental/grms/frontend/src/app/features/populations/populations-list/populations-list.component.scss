@@ -1,0 +1,243 @@
+@use 'variables' as *;
+@use 'glass' as *;
+
+:host {
+  display: block;
+  padding: 24px;
+}
+
+.populations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  .title-section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    .page-icon {
+      font-size: 28px;
+      width: 28px;
+      height: 28px;
+      color: $accent;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: $text;
+    }
+  }
+}
+
+.search-section {
+  .search-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    .search-field {
+      flex: 1;
+    }
+  }
+}
+
+.loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 40px;
+  color: $text-dim;
+
+  .spin {
+    animation: spin 1s linear infinite;
+  }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.error-state {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  color: $red;
+
+  mat-icon {
+    color: $red;
+  }
+}
+
+.period-accordion {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.period-panel {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 1px solid $glass-border;
+  border-radius: $radius !important;
+
+  ::ng-deep .mat-expansion-panel-body {
+    padding: 16px 0 0;
+  }
+}
+
+.period-section-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: $text;
+  text-transform: capitalize;
+}
+
+.period-count {
+  margin-left: 10px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: $accent;
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.population-card {
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    h3 {
+      margin: 0;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: $text;
+    }
+
+    .period-badge {
+      padding: 2px 8px;
+      border-radius: 8px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: $green;
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+
+      &.historical {
+        color: $orange;
+        background: rgba(245, 158, 11, 0.1);
+        border-color: rgba(245, 158, 11, 0.3);
+      }
+    }
+
+    .nav-icon {
+      color: $text-mute;
+      transition: color $transition, transform $transition;
+    }
+  }
+
+  &:hover .nav-icon {
+    color: $accent;
+    transform: translateX(4px);
+  }
+
+  .card-stats {
+    display: flex;
+    gap: 32px;
+
+    .stat {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+
+      .stat-value {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: $accent;
+        font-family: 'JetBrains Mono', monospace;
+      }
+
+      .stat-label {
+        font-size: 0.7rem;
+        color: $text-mute;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+    }
+  }
+
+  .segment-preview {
+    display: flex;
+    height: 8px;
+    border-radius: 4px;
+    overflow: hidden;
+    gap: 2px;
+
+    .segment-bar {
+      border-radius: 4px;
+      background: $accent;
+      opacity: 0.6;
+      transition: opacity $transition;
+
+      &:nth-child(1) { background: $accent; }
+      &:nth-child(2) { background: $green; }
+      &:nth-child(3) { background: $orange; }
+      &:nth-child(4) { background: $purple; }
+      &:nth-child(5) { background: $red; }
+      &:nth-child(n+6) { background: $cyan; }
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 60px 20px;
+  color: $text-mute;
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    opacity: 0.4;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.9rem;
+  }
+}

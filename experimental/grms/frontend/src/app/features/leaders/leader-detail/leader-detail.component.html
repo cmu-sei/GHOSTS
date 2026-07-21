@@ -1,0 +1,185 @@
+@if (loading()) {
+  <div class="loading-state">
+    <mat-icon class="spin">hourglass_empty</mat-icon>
+    <span>Loading leader profile...</span>
+  </div>
+} @else if (!leader() && isNew()) {
+  <div class="leader-detail">
+    <header class="detail-header">
+      <button mat-icon-button routerLink="/leaders" class="back-btn">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div class="header-info">
+        <h1 class="leader-name">Create New Leader</h1>
+        <span class="leader-meta">Define a new leader profile</span>
+      </div>
+    </header>
+
+    <div class="create-form">
+      <app-glass-card>
+        <h2 class="section-title">Basic Information</h2>
+        <div class="form-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Name</mat-label>
+            <input matInput [(ngModel)]="newName" placeholder="Leader name">
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Country</mat-label>
+            <input matInput [(ngModel)]="newCountry" placeholder="Country">
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Title</mat-label>
+            <input matInput [(ngModel)]="newTitle" placeholder="e.g. President, Prime Minister">
+          </mat-form-field>
+        </div>
+      </app-glass-card>
+
+      <app-glass-card>
+        <h2 class="section-title">Personality Dimensions</h2>
+        <div class="sliders-grid">
+          @for (dim of dimensions; track dim.key) {
+            <app-dimension-slider
+              [(value)]="newPersonality[dim.key]"
+              [lowLabel]="dim.low"
+              [highLabel]="dim.high"
+            />
+          }
+        </div>
+      </app-glass-card>
+
+      <button mat-flat-button color="primary" class="create-btn" (click)="createLeader()">
+        <mat-icon>add</mat-icon>
+        Create Leader
+      </button>
+    </div>
+  </div>
+} @else if (leader(); as l) {
+  <div class="leader-detail">
+    <header class="detail-header">
+      <button mat-icon-button routerLink="/leaders" class="back-btn">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div class="header-info">
+        <h1 class="leader-name">{{ l.country | countryFlag }} {{ l.name }}</h1>
+        <span class="leader-meta">{{ l.title }} &mdash; {{ l.country }}</span>
+      </div>
+      <button mat-flat-button class="predict-btn" (click)="navigateToPredictions()">
+        <mat-icon>psychology</mat-icon>
+        Run Prediction
+      </button>
+    </header>
+
+    <div class="content-grid">
+      <section class="personality-section">
+        <app-glass-card>
+          <h2 class="section-title">Personality Profile</h2>
+          <div class="radar-container">
+            <app-radar-chart [data]="getRadarData()" [size]="280" />
+          </div>
+        </app-glass-card>
+
+        <app-glass-card>
+          <h2 class="section-title">Dimensions</h2>
+          <div class="sliders-grid">
+            @for (dim of dimensions; track dim.key) {
+              <app-dimension-slider
+                [value]="l.personality[dim.key]"
+                [lowLabel]="dim.low"
+                [highLabel]="dim.high"
+                [disabled]="true"
+              />
+            }
+          </div>
+        </app-glass-card>
+      </section>
+
+      <section class="details-section">
+        <app-glass-card>
+          <h2 class="section-title">Ideology</h2>
+          <div class="ideology-content">
+            <div class="badge-row">
+              <span class="badge badge-economy">{{ l.ideology.economic_system }}</span>
+              <span class="badge badge-orientation">{{ l.ideology.geopolitical_orientation }}</span>
+            </div>
+
+            <div class="chip-group">
+              <span class="chip-label">Alliances</span>
+              <mat-chip-set>
+                @for (alliance of l.ideology.key_alliances; track alliance) {
+                  <mat-chip class="chip-green">{{ alliance | countryFlag }} {{ alliance }}</mat-chip>
+                }
+              </mat-chip-set>
+            </div>
+
+            <div class="chip-group">
+              <span class="chip-label">Adversaries</span>
+              <mat-chip-set>
+                @for (adversary of l.ideology.adversaries; track adversary) {
+                  <mat-chip class="chip-red">{{ adversary | countryFlag }} {{ adversary }}</mat-chip>
+                }
+              </mat-chip-set>
+            </div>
+
+            <div class="chip-group">
+              <span class="chip-label">Red Lines</span>
+              <mat-chip-set>
+                @for (line of l.ideology.red_lines; track line) {
+                  <mat-chip class="chip-orange">{{ line }}</mat-chip>
+                }
+              </mat-chip-set>
+            </div>
+          </div>
+        </app-glass-card>
+
+        <app-glass-card>
+          <h2 class="section-title">Context</h2>
+          <div class="context-grid">
+            <div class="context-item">
+              <span class="context-label">Approval Rating</span>
+              <span class="context-value accent">{{ l.decision_context.approval_rating.toFixed(0) }}%</span>
+            </div>
+            <div class="context-item">
+              <span class="context-label">GDP Growth</span>
+              <span class="context-value">{{ l.decision_context.economic_conditions.gdp_growth }}%</span>
+            </div>
+            <div class="context-item">
+              <span class="context-label">Unemployment</span>
+              <span class="context-value">{{ l.decision_context.economic_conditions.unemployment }}%</span>
+            </div>
+            <div class="context-item">
+              <span class="context-label">Inflation</span>
+              <span class="context-value">{{ l.decision_context.economic_conditions.inflation }}%</span>
+            </div>
+            <div class="context-item">
+              <span class="context-label">Sanctions Pressure</span>
+              <span class="context-value">{{ (l.decision_context.economic_conditions.sanctions_pressure * 100).toFixed(0) }}%</span>
+            </div>
+            <div class="context-item">
+              <span class="context-label">Military Readiness</span>
+              <span class="context-value">{{ l.decision_context.military_posture.readiness_level }}</span>
+            </div>
+          </div>
+        </app-glass-card>
+
+        <app-glass-card>
+          <h2 class="section-title">Decision History</h2>
+          <div class="timeline">
+            @for (decision of l.decision_history; track decision.date) {
+              <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <span class="timeline-date">{{ decision.date }}</span>
+                  <h4 class="timeline-event">{{ decision.event_description }}</h4>
+                  <p class="timeline-decision">{{ decision.decision_taken }}</p>
+                  <p class="timeline-outcome">{{ decision.outcome }}</p>
+                </div>
+              </div>
+            } @empty {
+              <span class="empty-text">No decision history available</span>
+            }
+          </div>
+        </app-glass-card>
+      </section>
+    </div>
+  </div>
+}

@@ -1,0 +1,132 @@
+{
+  "country": "Soviet Union",
+  "total_population": 188793000,
+  "period": "world war 2",
+  "segments": [
+    {
+      "name": "Urban industrial workers",
+      "percentage": 0.30,
+      "demographics": {
+        "urbanization": 0.95,
+        "education_level": 0.4,
+        "median_age": 30,
+        "economic_class": "lower"
+      },
+      "disposition": {
+        "government_trust": 0.6,
+        "nationalism": 0.6,
+        "media_exposure": 0.7,
+        "social_media_activity": 0.0,
+        "protest_propensity": 0.02,
+        "compliance_baseline": 0.9,
+        "information_sources": ["state_radio", "state_press", "party_meetings", "word_of_mouth"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.75,
+        "economic_sensitivity": 0.6,
+        "fatigue_rate": 0.07,
+        "amplification_factor": 0.3
+      }
+    },
+    {
+      "name": "Collective farm (kolkhoz) peasantry",
+      "percentage": 0.35,
+      "demographics": {
+        "urbanization": 0.05,
+        "education_level": 0.25,
+        "median_age": 35,
+        "economic_class": "lower"
+      },
+      "disposition": {
+        "government_trust": 0.35,
+        "nationalism": 0.5,
+        "media_exposure": 0.3,
+        "social_media_activity": 0.0,
+        "protest_propensity": 0.03,
+        "compliance_baseline": 0.85,
+        "information_sources": ["state_radio", "party_agitators", "word_of_mouth"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.6,
+        "economic_sensitivity": 0.5,
+        "fatigue_rate": 0.06,
+        "amplification_factor": 0.15
+      }
+    },
+    {
+      "name": "Communist Party members and officials",
+      "percentage": 0.05,
+      "demographics": {
+        "urbanization": 0.8,
+        "education_level": 0.7,
+        "median_age": 40,
+        "economic_class": "middle"
+      },
+      "disposition": {
+        "government_trust": 0.9,
+        "nationalism": 0.7,
+        "media_exposure": 0.95,
+        "social_media_activity": 0.0,
+        "protest_propensity": 0.0,
+        "compliance_baseline": 0.98,
+        "information_sources": ["party_channels", "state_radio", "state_press", "internal_briefings"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.9,
+        "economic_sensitivity": 0.2,
+        "fatigue_rate": 0.03,
+        "amplification_factor": 0.7
+      }
+    },
+    {
+      "name": "Military personnel and families",
+      "percentage": 0.15,
+      "demographics": {
+        "urbanization": 0.5,
+        "education_level": 0.45,
+        "median_age": 26,
+        "economic_class": "lower"
+      },
+      "disposition": {
+        "government_trust": 0.7,
+        "nationalism": 0.75,
+        "media_exposure": 0.5,
+        "social_media_activity": 0.0,
+        "protest_propensity": 0.0,
+        "compliance_baseline": 0.95,
+        "information_sources": ["military_channels", "state_radio", "political_commissars"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.85,
+        "economic_sensitivity": 0.3,
+        "fatigue_rate": 0.1,
+        "amplification_factor": 0.35
+      }
+    },
+    {
+      "name": "Non-Russian ethnic minorities",
+      "percentage": 0.15,
+      "demographics": {
+        "urbanization": 0.3,
+        "education_level": 0.3,
+        "median_age": 30,
+        "economic_class": "lower"
+      },
+      "disposition": {
+        "government_trust": 0.3,
+        "nationalism": 0.3,
+        "media_exposure": 0.35,
+        "social_media_activity": 0.0,
+        "protest_propensity": 0.05,
+        "compliance_baseline": 0.7,
+        "information_sources": ["state_radio", "word_of_mouth", "local_language_press"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.4,
+        "economic_sensitivity": 0.6,
+        "fatigue_rate": 0.08,
+        "amplification_factor": 0.2
+      }
+    }
+  ]
+}

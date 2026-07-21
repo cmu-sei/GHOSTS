@@ -355,5 +355,4 @@ site/
 **/.venv/
 .venv/*
 
-experimental/
 .devcontainer/devcontainer-lock.json

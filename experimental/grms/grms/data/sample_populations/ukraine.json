@@ -1,0 +1,132 @@
+{
+  "country": "Ukraine",
+  "total_population": 37000000,
+  "period": "current",
+  "segments": [
+    {
+      "name": "Kyiv metropolitan professionals",
+      "percentage": 0.20,
+      "demographics": {
+        "urbanization": 0.98,
+        "education_level": 0.8,
+        "median_age": 36,
+        "economic_class": "middle"
+      },
+      "disposition": {
+        "government_trust": 0.55,
+        "nationalism": 0.75,
+        "media_exposure": 0.9,
+        "social_media_activity": 0.85,
+        "protest_propensity": 0.4,
+        "compliance_baseline": 0.7,
+        "information_sources": ["social_media", "foreign_media"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.75,
+        "economic_sensitivity": 0.5,
+        "fatigue_rate": 0.12,
+        "amplification_factor": 0.65
+      }
+    },
+    {
+      "name": "Military and veterans",
+      "percentage": 0.15,
+      "demographics": {
+        "urbanization": 0.6,
+        "education_level": 0.55,
+        "median_age": 33,
+        "economic_class": "middle"
+      },
+      "disposition": {
+        "government_trust": 0.6,
+        "nationalism": 0.9,
+        "media_exposure": 0.6,
+        "social_media_activity": 0.5,
+        "protest_propensity": 0.2,
+        "compliance_baseline": 0.85,
+        "information_sources": ["internal_briefings", "social_media"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.9,
+        "economic_sensitivity": 0.3,
+        "fatigue_rate": 0.08,
+        "amplification_factor": 0.3
+      }
+    },
+    {
+      "name": "Western Ukraine population",
+      "percentage": 0.25,
+      "demographics": {
+        "urbanization": 0.55,
+        "education_level": 0.55,
+        "median_age": 38,
+        "economic_class": "middle"
+      },
+      "disposition": {
+        "government_trust": 0.5,
+        "nationalism": 0.85,
+        "media_exposure": 0.65,
+        "social_media_activity": 0.6,
+        "protest_propensity": 0.35,
+        "compliance_baseline": 0.65,
+        "information_sources": ["social_media", "state_tv"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.8,
+        "economic_sensitivity": 0.6,
+        "fatigue_rate": 0.07,
+        "amplification_factor": 0.5
+      }
+    },
+    {
+      "name": "Eastern and southern frontline communities",
+      "percentage": 0.20,
+      "demographics": {
+        "urbanization": 0.65,
+        "education_level": 0.45,
+        "median_age": 42,
+        "economic_class": "lower"
+      },
+      "disposition": {
+        "government_trust": 0.45,
+        "nationalism": 0.7,
+        "media_exposure": 0.5,
+        "social_media_activity": 0.45,
+        "protest_propensity": 0.15,
+        "compliance_baseline": 0.7,
+        "information_sources": ["word_of_mouth", "social_media"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.7,
+        "economic_sensitivity": 0.8,
+        "fatigue_rate": 0.15,
+        "amplification_factor": 0.4
+      }
+    },
+    {
+      "name": "Internally displaced persons",
+      "percentage": 0.20,
+      "demographics": {
+        "urbanization": 0.75,
+        "education_level": 0.5,
+        "median_age": 35,
+        "economic_class": "lower"
+      },
+      "disposition": {
+        "government_trust": 0.4,
+        "nationalism": 0.7,
+        "media_exposure": 0.7,
+        "social_media_activity": 0.65,
+        "protest_propensity": 0.25,
+        "compliance_baseline": 0.6,
+        "information_sources": ["social_media", "word_of_mouth"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.65,
+        "economic_sensitivity": 0.85,
+        "fatigue_rate": 0.18,
+        "amplification_factor": 0.55
+      }
+    }
+  ]
+}

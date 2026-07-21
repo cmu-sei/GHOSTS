@@ -1,0 +1,125 @@
+<div class="population-prediction">
+  <div class="input-panel">
+    <app-glass-card>
+      <h2 class="section-title">Country</h2>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Country</mat-label>
+        <input matInput placeholder="Enter country name" (input)="country.set($any($event.target).value)">
+      </mat-form-field>
+    </app-glass-card>
+
+    <app-glass-card>
+      <h2 class="section-title">Event Parameters</h2>
+      <app-event-form (submitEvent)="onPredict($event)" />
+
+    </app-glass-card>
+  </div>
+
+  <div class="results-panel">
+    @if (loading()) {
+      <app-glass-card>
+        <div class="loading-state">
+          <mat-icon class="spin">autorenew</mat-icon>
+          <span>Running prediction...</span>
+        </div>
+      </app-glass-card>
+    }
+
+    @if (result(); as r) {
+      <app-glass-card>
+        <h2 class="section-title">Overall Sentiment</h2>
+        <div class="sentiment-bars">
+          <div class="sentiment-row">
+            <span class="sentiment-label">Support</span>
+            <div class="bar-track">
+              <div class="bar-fill support" [style.width.%]="r.overall.support_leader * 100"></div>
+            </div>
+            <span class="sentiment-value">{{ r.overall.support_leader * 100 | number:'1.0-0' }}%</span>
+          </div>
+          <div class="sentiment-row">
+            <span class="sentiment-label">Oppose</span>
+            <div class="bar-track">
+              <div class="bar-fill oppose" [style.width.%]="r.overall.oppose_leader * 100"></div>
+            </div>
+            <span class="sentiment-value">{{ r.overall.oppose_leader * 100 | number:'1.0-0' }}%</span>
+          </div>
+          <div class="sentiment-row">
+            <span class="sentiment-label">Neutral</span>
+            <div class="bar-track">
+              <div class="bar-fill neutral" [style.width.%]="r.overall.neutral * 100"></div>
+            </div>
+            <span class="sentiment-value">{{ r.overall.neutral * 100 | number:'1.0-0' }}%</span>
+          </div>
+        </div>
+      </app-glass-card>
+
+      <app-glass-card>
+        <h2 class="section-title">Segment Breakdown</h2>
+        <div class="table-container">
+          <table mat-table [dataSource]="r.segment_responses" class="segment-table">
+            <ng-container matColumnDef="segment_name">
+              <th mat-header-cell *matHeaderCellDef>Segment</th>
+              <td mat-cell *matCellDef="let row">{{ row.segment_name }}</td>
+            </ng-container>
+            <ng-container matColumnDef="support">
+              <th mat-header-cell *matHeaderCellDef>Support</th>
+              <td mat-cell *matCellDef="let row">{{ row.support * 100 | number:'1.0-0' }}%</td>
+            </ng-container>
+            <ng-container matColumnDef="oppose">
+              <th mat-header-cell *matHeaderCellDef>Oppose</th>
+              <td mat-cell *matCellDef="let row">{{ row.oppose * 100 | number:'1.0-0' }}%</td>
+            </ng-container>
+            <ng-container matColumnDef="amplification">
+              <th mat-header-cell *matHeaderCellDef>Amplification</th>
+              <td mat-cell *matCellDef="let row">{{ row.amplification | number:'1.2-2' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="protest_propensity">
+              <th mat-header-cell *matHeaderCellDef>Protest</th>
+              <td mat-cell *matCellDef="let row">{{ row.protest_propensity * 100 | number:'1.0-0' }}%</td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          </table>
+        </div>
+      </app-glass-card>
+
+      <app-glass-card>
+        <h2 class="section-title">Information Spread</h2>
+        <div class="info-spread">
+          <div class="gauge-center">
+            <app-gauge [value]="r.information_spread.viral_probability" label="Viral Probability" [size]="120" />
+          </div>
+          <div class="spread-details">
+            <div class="detail-row">
+              <span class="detail-label">Dominant Narrative</span>
+              <p class="detail-value">{{ r.information_spread.dominant_narrative }}</p>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Time to Saturation</span>
+              <span class="detail-value highlight">{{ r.information_spread.time_to_saturation_hours }}h</span>
+            </div>
+          </div>
+        </div>
+      </app-glass-card>
+
+      <app-glass-card>
+        <h2 class="section-title">Trajectory</h2>
+        <div class="trajectory-grid">
+          <div class="trajectory-item">
+            <span class="trajectory-value">{{ r.trajectory.support_7d * 100 | number:'1.0-0' }}%</span>
+            <span class="trajectory-label">Support (7d)</span>
+          </div>
+          <div class="trajectory-item">
+            <span class="trajectory-value">{{ r.trajectory.support_30d * 100 | number:'1.0-0' }}%</span>
+            <span class="trajectory-label">Support (30d)</span>
+          </div>
+          <div class="trajectory-item">
+            <span class="trajectory-value">{{ r.trajectory.fatigue_onset_days }}d</span>
+            <span class="trajectory-label">Fatigue Onset</span>
+          </div>
+        </div>
+      </app-glass-card>
+    }
+  </div>
+</div>

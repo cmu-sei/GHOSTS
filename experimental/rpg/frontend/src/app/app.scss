@@ -1,0 +1,543 @@
+:host {
+  display: block;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ── CRT shell ───────────────────────────────────────────────── */
+.crt {
+  position: relative;
+  height: 100vh;
+  background: radial-gradient(ellipse at center, #07140d 0%, #050806 70%, #020402 100%);
+  overflow: hidden;
+}
+
+/* Faint moving scanlines + vignette for the CRT feel. */
+.scanlines {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 0px,
+    rgba(0, 0, 0, 0) 2px,
+    rgba(0, 0, 0, 0.18) 3px,
+    rgba(0, 0, 0, 0.18) 4px
+  );
+  mix-blend-mode: multiply;
+  animation: flicker 6s infinite;
+}
+
+@keyframes flicker {
+  0%, 97%, 100% { opacity: 1; }
+  98% { opacity: 0.85; }
+  99% { opacity: 0.95; }
+}
+
+/* ── Boot / start screen ─────────────────────────────────────── */
+.boot {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 0.4rem;
+  padding: 2rem;
+  // A soft purple glow blooming up from the bottom of the boot screen.
+  background: radial-gradient(
+    ellipse at 50% 120%,
+    rgba(176, 108, 255, 0.18) 0%,
+    rgba(176, 108, 255, 0.05) 35%,
+    transparent 65%
+  );
+}
+
+.logo {
+  // Green core with a purple halo.
+  color: var(--green);
+  text-shadow: 0 0 8px var(--green-dim), 0 0 22px var(--purple-dim);
+  font-size: 12px;
+  line-height: 1.1;
+  margin: 0 0 1rem;
+}
+
+.boot h1 {
+  font-size: 1.8rem;
+  letter-spacing: 0.3rem;
+  margin: 0;
+  text-shadow: 0 0 10px var(--green-dim);
+}
+
+.dim {
+  color: var(--purple);
+  font-size: 1rem;
+  letter-spacing: 0.1rem;
+  text-shadow: 0 0 8px var(--purple-dim);
+}
+
+.tagline {
+  color: var(--white-cell);
+  max-width: 38rem;
+  margin: 0.6rem 0 1.6rem;
+}
+
+.enter {
+  background: transparent;
+  color: var(--green);
+  border: 1px solid var(--green);
+  padding: 0.8rem 1.6rem;
+  font-family: var(--font);
+  font-size: 1rem;
+  letter-spacing: 0.15rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-shadow: 0 0 6px var(--green-dim);
+}
+
+.enter:hover:not(:disabled) {
+  background: var(--green);
+  color: var(--bg);
+  box-shadow: 0 0 20px var(--green-dim), 0 0 36px var(--purple-dim);
+}
+
+.enter:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+.enter.small {
+  font-size: 0.8rem;
+  padding: 0.5rem 1rem;
+  margin-top: 0.8rem;
+}
+
+/* ── Game layout: transcript + HUD ───────────────────────────── */
+.game {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  height: 100vh;
+  gap: 0;
+}
+
+.terminal {
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem 1.5rem 1rem;
+  min-height: 0;
+}
+
+.scrollback {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+  scroll-behavior: smooth;
+}
+
+/* DM beats — colored by cell. */
+.beat {
+  margin-bottom: 1.1rem;
+  border-left: 2px solid var(--green-dim);
+  padding-left: 0.9rem;
+  animation: fadein 0.3s ease;
+}
+
+@keyframes fadein {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+
+.beat-tag {
+  font-size: 0.72rem;
+  letter-spacing: 0.1rem;
+  margin-bottom: 0.25rem;
+  opacity: 0.85;
+}
+
+.beat-tag .time {
+  color: var(--green-dim);
+  margin-right: 0.6rem;
+}
+
+.beat-text {
+  margin: 0;
+  color: var(--green);
+}
+
+.beat.red {
+  border-left-color: var(--red);
+  .cell { color: var(--red); }
+  .beat-text { color: #ffd9dd; }
+}
+.beat.blue {
+  border-left-color: var(--cyan);
+  .cell { color: var(--cyan); }
+  .beat-text { color: #d6f2ff; }
+}
+.beat.white {
+  border-left-color: var(--white-cell);
+  .cell { color: var(--white-cell); }
+  .beat-text { color: #e6ece8; }
+}
+.beat.green {
+  border-left-color: var(--green);
+  .cell { color: var(--green); }
+}
+
+.player-line {
+  color: var(--amber);
+  margin-bottom: 1rem;
+  text-shadow: 0 0 5px rgba(255, 179, 71, 0.4);
+}
+
+.prompt {
+  color: var(--amber);
+  font-weight: 700;
+  margin-right: 0.4rem;
+}
+
+.notice-line {
+  color: var(--green-dim);
+  font-style: italic;
+  margin-bottom: 0.8rem;
+}
+
+.header-line {
+  color: var(--amber);
+  text-align: center;
+  letter-spacing: 0.2rem;
+  margin: 1rem 0;
+  text-shadow: 0 0 8px rgba(255, 179, 71, 0.5);
+}
+
+.system-line {
+  color: var(--green-dim);
+  margin-bottom: 0.6rem;
+}
+
+/* Thinking dots while the DM responds. */
+.thinking {
+  display: flex;
+  gap: 0.3rem;
+  padding: 0.4rem 0;
+}
+.thinking span {
+  width: 7px;
+  height: 7px;
+  background: var(--green);
+  border-radius: 50%;
+  animation: blink 1.2s infinite ease-in-out;
+}
+.thinking span:nth-child(2) { animation-delay: 0.2s; }
+.thinking span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes blink {
+  0%, 80%, 100% { opacity: 0.2; }
+  40% { opacity: 1; }
+}
+
+/* ── Options chips ───────────────────────────────────────────── */
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  padding: 0.8rem 0;
+}
+
+.chip {
+  background: rgba(51, 255, 138, 0.06);
+  color: var(--green);
+  border: 1px solid var(--green-dim);
+  padding: 0.45rem 0.9rem;
+  font-family: var(--font);
+  font-size: 0.9rem;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.12s ease;
+}
+.chip:hover {
+  background: var(--green);
+  color: var(--bg);
+  box-shadow: 0 0 12px var(--green-dim);
+}
+.chip .num {
+  display: inline-block;
+  margin-right: 0.5rem;
+  color: var(--amber);
+  font-weight: 700;
+}
+.chip:hover .num { color: var(--bg); }
+
+/* Intent-tinted chips: the decisive "contain" reads hot, recon cool. */
+.chip.intent-contain { border-color: var(--amber); color: var(--amber); background: rgba(255, 179, 71, 0.07); }
+.chip.intent-contain:hover { background: var(--amber); color: var(--bg); box-shadow: 0 0 12px rgba(255, 179, 71, 0.5); }
+.chip.intent-notify { border-color: var(--cyan); color: var(--cyan); background: rgba(84, 208, 255, 0.06); }
+.chip.intent-notify:hover { background: var(--cyan); color: var(--bg); box-shadow: 0 0 12px rgba(84, 208, 255, 0.5); }
+.chip.intent-wait { opacity: 0.75; }
+
+/* "Table it / next ticket" — pull the next queued ticket onto the board. */
+.chip.table-chip {
+  border-style: dashed;
+  border-color: var(--purple);
+  color: var(--purple);
+  background: rgba(176, 108, 255, 0.06);
+}
+.chip.table-chip:hover { background: var(--purple); color: var(--bg); box-shadow: 0 0 12px var(--purple-dim); }
+
+/* ── Worklist (tickets arrive one at a time; table to stack) ──── */
+.worklist { padding-top: 0.4rem; }
+.worklist-head {
+  color: var(--amber);
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.3rem 0;
+}
+.task {
+  border-left: 2px solid var(--green-dim);
+  padding-left: 0.7rem;
+  margin: 0.5rem 0;
+}
+.task-tag {
+  display: flex;
+  gap: 0.6rem;
+  align-items: baseline;
+  font-size: 0.78rem;
+}
+.task-num { color: var(--amber); font-weight: 700; letter-spacing: 0.06em; }
+.task-tag .time { color: var(--green-dim); }
+.task .options { padding: 0.35rem 0 0.2rem; }
+
+/* ── Command input ───────────────────────────────────────────── */
+.command-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-top: 1px solid var(--green-dim);
+  padding-top: 0.8rem;
+  margin-top: 0.4rem;
+}
+.command-row input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--green);
+  font-family: var(--font);
+  font-size: 1rem;
+  caret-color: var(--green);
+}
+.command-row input::placeholder {
+  color: var(--green-dim);
+  opacity: 0.6;
+}
+.command-row input:disabled { opacity: 0.4; }
+
+.send {
+  background: transparent;
+  border: 1px solid var(--green-dim);
+  color: var(--green);
+  font-family: var(--font);
+  padding: 0.4rem 0.9rem;
+  cursor: pointer;
+  letter-spacing: 0.1rem;
+  transition: all 0.12s ease;
+}
+.send:hover:not(:disabled) {
+  background: var(--green);
+  color: var(--bg);
+}
+.send:disabled { opacity: 0.3; cursor: default; }
+
+/* ── Scorecard ───────────────────────────────────────────────── */
+.scorecard {
+  display: flex;
+  align-items: center;
+  gap: 1.4rem;
+  border: 1px solid var(--green-dim);
+  padding: 1.2rem 1.4rem;
+  margin: 1rem 0;
+  border-radius: 4px;
+  background: rgba(51, 255, 138, 0.04);
+  flex-wrap: wrap;
+}
+.scorecard .grade {
+  font-size: 4rem;
+  font-weight: 700;
+  line-height: 1;
+  text-shadow: 0 0 16px currentColor;
+}
+.scorecard.outcome-win { border-color: var(--green); .grade, .outcome { color: var(--green); } }
+.scorecard.outcome-loss { border-color: var(--red); .grade, .outcome { color: var(--red); } }
+.scorecard.outcome-incomplete { border-color: var(--amber); .grade, .outcome { color: var(--amber); } }
+.scorecard .outcome {
+  font-size: 1.3rem;
+  letter-spacing: 0.2rem;
+  font-weight: 700;
+}
+.scorecard .score { color: var(--white-cell); margin: 0.2rem 0 0.5rem; }
+.scorecard ul { margin: 0; padding-left: 1.1rem; color: var(--green-dim); font-size: 0.85rem; }
+.scorecard .score-detail { flex: 1; min-width: 220px; }
+
+/* ── HUD rail ────────────────────────────────────────────────── */
+.hud {
+  border-left: 1px solid var(--green-dim);
+  background: rgba(0, 20, 10, 0.4);
+  display: flex;
+  flex-direction: column;
+  min-height: 0; /* let the scrolling body shrink within the grid row */
+}
+
+/* Exercise clock: fixed at the top of the rail, divider beneath it. */
+.hud-clock {
+  flex: 0 0 auto;
+  padding: 1.3rem 1.2rem 1.1rem;
+  border-bottom: 1px solid var(--green-dim);
+}
+.hud-clock .clock-value {
+  font-size: 2.1rem;
+  font-weight: 700;
+  line-height: 1.05;
+  color: var(--green);
+  text-shadow: 0 0 12px var(--green-dim);
+  margin: 0.15rem 0 0.35rem;
+}
+.hud-clock .clock-lunch { font-size: 0.82rem; color: var(--green); }
+.hud-clock .clock-lunch .dim { color: var(--green-dim); }
+.hud-clock .clock-tickets { font-size: 0.78rem; color: var(--green-dim); margin-top: 0.2rem; }
+.hud-clock.pressed .clock-value {
+  color: var(--amber);
+  text-shadow: 0 0 14px rgba(255, 179, 71, 0.55);
+}
+.hud-clock.pressed .clock-lunch { color: var(--amber); }
+
+.fuse-clock {
+  margin-top: 0.85rem;
+  padding: 0.55rem 0.6rem 0.6rem;
+  border: 1px solid rgba(255, 179, 71, 0.55);
+  background: rgba(255, 179, 71, 0.06);
+  box-shadow: inset 0 0 14px rgba(255, 179, 71, 0.05);
+}
+.fuse-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.6rem;
+}
+.fuse-label {
+  color: var(--amber);
+  font-size: 0.62rem;
+  letter-spacing: 0.12rem;
+}
+.fuse-value {
+  color: var(--amber);
+  font-weight: 700;
+  font-size: 1rem;
+  text-shadow: 0 0 10px rgba(255, 179, 71, 0.55);
+}
+.fuse-track {
+  height: 5px;
+  margin-top: 0.45rem;
+  border: 1px solid rgba(255, 179, 71, 0.45);
+  background: rgba(0, 0, 0, 0.35);
+}
+.fuse-fill {
+  height: 100%;
+  background: var(--amber);
+  box-shadow: 0 0 10px rgba(255, 179, 71, 0.6);
+  transition: width 0.25s linear;
+}
+.fuse-clock.critical {
+  border-color: var(--red);
+  background: rgba(255, 80, 96, 0.08);
+  animation: fuse-pulse 1s steps(2, end) infinite;
+}
+.fuse-clock.critical .fuse-label,
+.fuse-clock.critical .fuse-value {
+  color: var(--red);
+}
+.fuse-clock.critical .fuse-track {
+  border-color: rgba(255, 80, 96, 0.55);
+}
+.fuse-clock.critical .fuse-fill {
+  background: var(--red);
+  box-shadow: 0 0 12px rgba(255, 80, 96, 0.75);
+}
+
+@keyframes fuse-pulse {
+  0%, 100% { box-shadow: inset 0 0 14px rgba(255, 80, 96, 0.04); }
+  50% { box-shadow: inset 0 0 18px rgba(255, 80, 96, 0.18), 0 0 16px rgba(255, 80, 96, 0.24); }
+}
+
+/* Everything below the clock scrolls independently. */
+.hud-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 1.5rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.3rem;
+}
+
+.hud-block .label {
+  font-size: 0.68rem;
+  letter-spacing: 0.18rem;
+  color: var(--green-dim);
+  margin-bottom: 0.4rem;
+}
+.hud-block .value { color: var(--green); font-size: 0.92rem; }
+.hud-block .value.role { color: var(--cyan); }
+.hud-block.scenario .value { font-weight: 700; text-shadow: 0 0 6px var(--green-dim); }
+
+.objectives {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 0.85rem;
+}
+.objectives li {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+  color: var(--white-cell);
+}
+.objectives li.met { color: var(--green); }
+.objectives .box { flex-shrink: 0; }
+
+.tags {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.tag {
+  font-size: 0.78rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 3px;
+  border: 1px solid currentColor;
+}
+.tag.threat { color: var(--red); }
+.tag.flag { color: var(--amber); }
+
+.intel {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 0.8rem;
+  color: var(--green-dim);
+}
+.intel li {
+  margin-bottom: 0.45rem;
+  padding-left: 0.7rem;
+  border-left: 1px solid var(--green-dim);
+}
+
+/* ── Responsive: stack HUD under transcript on narrow screens ── */
+@media (max-width: 820px) {
+  .game { grid-template-columns: 1fr; }
+  .hud { border-left: none; border-top: 1px solid var(--green-dim); }
+}

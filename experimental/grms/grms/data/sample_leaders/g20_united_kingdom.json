@@ -1,0 +1,78 @@
+{
+  "name": "Keir Starmer",
+  "country": "United Kingdom",
+  "period": "current",
+  "title": "Prime Minister",
+  "personality": {
+    "risk_tolerance": -0.2,
+    "authoritarianism": -0.2,
+    "nationalism": 0.1,
+    "pragmatism": 0.7,
+    "aggression": -0.3,
+    "populism": -0.2,
+    "transparency": 0.3,
+    "religiosity": -0.3
+  },
+  "ideology": {
+    "economic_system": "mixed",
+    "geopolitical_orientation": "western",
+    "key_alliances": ["United States", "France", "Germany", "NATO", "Australia"],
+    "adversaries": ["Russia", "Iran"],
+    "red_lines": [
+      "Russian aggression against NATO allies",
+      "Threats to British overseas territories",
+      "Nuclear proliferation"
+    ],
+    "core_narratives": [
+      "Rebuilding public services after austerity",
+      "Economic growth through stability",
+      "Rules-based international order",
+      "Global Britain with European reset"
+    ]
+  },
+  "decision_history": [
+    {
+      "event_description": "US tariffs threatened UK manufacturing and steel exports",
+      "decision_taken": "Pursued bilateral trade negotiations, emphasized special relationship while seeking EU cooperation on response",
+      "outcome": "Partial exemptions negotiated, accelerated EU trade discussions",
+      "date": "2025-04-10T00:00:00Z",
+      "context_factors": ["post-Brexit trade vulnerability", "US special relationship", "EU rapprochement goals"]
+    },
+    {
+      "event_description": "Continued support for Ukraine required amid fiscal constraints",
+      "decision_taken": "Maintained military aid commitments, pushed for European burden-sharing, supported diplomatic track",
+      "outcome": "Sustained UK role as leading European supporter of Ukraine",
+      "date": "2025-03-01T00:00:00Z",
+      "context_factors": ["defense spending pressure", "NATO commitments", "public opinion support"]
+    }
+  ],
+  "cultural_context": {
+    "decision_making_style": "consensus",
+    "information_sources": ["MI6/GCHQ intelligence", "Civil Service briefings", "Cabinet committees", "parliamentary party"],
+    "domestic_power_base": "Labour Party coalition, trade unions, urban professionals, public sector workers",
+    "succession_concerns": false,
+    "historical_analogies": ["Post-war Attlee government", "Blair modernization", "Thatcher economic reform"]
+  },
+  "decision_context": {
+    "approval_rating": 35.0,
+    "economic_conditions": {
+      "gdp_growth": 1.1,
+      "unemployment": 4.4,
+      "inflation": 3.2,
+      "sanctions_pressure": 0.0
+    },
+    "military_posture": {
+      "readiness_level": "peacetime",
+      "ongoing_operations": ["Ukraine military assistance", "NATO enhanced forward presence"],
+      "force_disposition": "NATO-integrated with independent nuclear deterrent"
+    },
+    "domestic_pressures": {
+      "election_proximity_days": 1500,
+      "opposition_strength": 0.4,
+      "media_sentiment": -0.3,
+      "protest_level": "minor"
+    },
+    "ongoing_conflicts": ["Support for Ukraine"],
+    "recent_events": ["EU defense pact negotiations", "NHS reform announcements"]
+  }
+}

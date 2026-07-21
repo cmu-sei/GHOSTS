@@ -1,0 +1,118 @@
+CURRENT DECISION CONTEXT:
+- Approval rating: {{ context.approval_rating }}%
+- GDP growth: {{ context.economic_conditions.gdp_growth }}%
+- Unemployment: {{ context.economic_conditions.unemployment }}%
+- Inflation: {{ context.economic_conditions.inflation }}%
+- Sanctions pressure: {{ context.economic_conditions.sanctions_pressure }} (0-1 scale)
+- Military readiness: {{ context.military_posture.readiness_level }}
+- Ongoing operations: {{ context.military_posture.ongoing_operations | join(', ') or 'none' }}
+- Election proximity: {{ context.domestic_pressures.election_proximity_days or 'not applicable' }} days
+- Opposition strength: {{ context.domestic_pressures.opposition_strength }}
+- Media sentiment: {{ context.domestic_pressures.media_sentiment }}
+- Protest level: {{ context.domestic_pressures.protest_level }}
+- Ongoing conflicts: {{ context.ongoing_conflicts | join(', ') or 'none' }}
+
+{% if context.recent_events %}
+RECENT EVENTS IN THIS SCENARIO:
+{% for evt in context.recent_events %}
+- {{ evt }}
+{% endfor %}
+{% endif %}
+
+---
+
+EVENT TO RESPOND TO:
+Type: {{ event.event_type }}
+Severity: {{ event.severity }} (0=trivial, 1=existential)
+Actor: {{ event.structured.actor }}
+Target: {{ event.structured.target }}
+Category: {{ event.structured.action_category }}
+Reversibility: {{ event.structured.reversibility }}
+Visibility: {{ event.structured.visibility }}
+
+Description: {{ event.description }}
+
+---
+
+STRUCTURED ANALYSIS (from parametric cognitive model):
+A structured decision model analyzing this leader's profile across 6 cognitive layers
+(identity, personality, beliefs, motivations, context, history) suggests the following:
+
+Selected action: {{ cognitive_result.selected_action | replace('_', ' ') | upper }}
+Confidence: {{ "%.0f" | format(cognitive_result.confidence * 100) }}%
+Estimated escalation risk: {{ "%.2f" | format(cognitive_result.escalation_estimate) }}
+
+Action ranking:
+{% for action_score in cognitive_result.action_scores %}
+  {{ action_score.rank }}. {{ action_score.action | replace('_', ' ') }} (score: {{ "%.3f" | format(action_score.final_score) }})
+{% endfor %}
+
+Key drivers:
+{% for action_score in cognitive_result.action_scores[:1] %}
+{% for contrib in action_score.layer_contributions %}
+{% if contrib.weighted_contribution | abs > 0.02 %}
+  - {{ contrib.layer }} (w={{ "%.0f" | format(contrib.weight * 100) }}%): {{ contrib.rationale }}
+{% endif %}
+{% endfor %}
+{% endfor %}
+
+Consider whether you agree or disagree with this structured analysis. If you disagree,
+explain specifically which factors the parametric model missed or overweighted.
+
+---
+
+ESCALATION RISK CALIBRATION — you MUST use these anchors:
+- 0.0-0.2: Routine diplomatic friction, protests, minor sanctions
+- 0.2-0.4: Serious diplomatic incidents, troop movements, trade wars
+- 0.4-0.6: Military skirmishes, border incidents, proxy conflicts beginning
+- 0.6-0.75: Direct military strikes on military targets, limited invasion
+- 0.75-0.85: Large-scale invasion of sovereign territory, full military mobilization
+- 0.85-0.95: Mass civilian casualties, scorched earth, wars of annihilation, genocide, WMD threats
+- 0.95-1.0: Nuclear detonation, existential threat to a state, full-scale total war between major powers
+
+HARD RULES (violations will produce invalid output):
+1. Severity >= 1.0 with irreversible military action: escalation_risk MUST be >= 0.85
+2. Severity >= 0.8 with irreversible military action: escalation_risk MUST be >= 0.70
+3. Any event describing mass civilian killing, scorched earth, or genocide: escalation_risk MUST be >= 0.85
+4. Full-scale invasion of a major power: escalation_risk MUST be >= 0.80
+5. A nuclear missile targeting a city: escalation_risk MUST be >= 0.95
+6. EXCEPTION: If this leader is the TARGET of the event, they may de-escalate regardless.
+
+ACTION BREADTH GUIDANCE:
+Predict 2-4 actions for significant events. Single-action predictions should be rare.
+
+TONE SELECTION GUIDE:
+- "defiant": Assertive resistance — RESPONDING to aggression
+- "threatening": Aggressive warning — INITIATING escalation
+- "measured": Neutral, factual, restrained
+- "conciliatory": Yielding, peace-seeking, de-escalatory
+- "dismissive": Contemptuous, minimizing
+
+Respond with a JSON object matching this exact schema:
+{
+  "verbal_response": {
+    "statement": "What the leader would say publicly (1-3 sentences, in character)",
+    "tone": "defiant|measured|conciliatory|threatening|dismissive",
+    "audience": "domestic|international|adversary|military"
+  },
+  "actions": [
+    {
+      "action_type": "military|diplomatic|economic|information|internal",
+      "description": "Specific action taken",
+      "timeline": "immediate|hours|days|weeks",
+      "likelihood": 0.0-1.0,
+      "reversibility": "irreversible|escalatory|reversible"
+    }
+  ],
+  "reasoning": {
+    "personality_factors": ["personality.dimension=value suggests X", ...],
+    "historical_precedents": ["precedent: [date] event - they did Y", ...],
+    "contextual_drivers": ["approval_rating=X means...", ...],
+    "constraints": ["What limits this leader's options"],
+    "confidence": 0.0-1.0
+  },
+  "escalation_risk": 0.0-1.0,
+  "de_escalation_openings": ["Possible off-ramps or face-saving exits"]
+}
+
+Respond ONLY with valid JSON. No commentary outside the JSON.

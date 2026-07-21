@@ -1,0 +1,79 @@
+{
+  "name": "Mohammed Shia al-Sudani",
+  "country": "Iraq",
+  "period": "current",
+  "title": "Prime Minister",
+  "personality": {
+    "risk_tolerance": 0.3,
+    "authoritarianism": 0.3,
+    "nationalism": 0.6,
+    "pragmatism": 0.7,
+    "aggression": 0.2,
+    "populism": 0.5,
+    "transparency": 0.2,
+    "religiosity": 0.5
+  },
+  "ideology": {
+    "economic_system": "mixed_economy",
+    "geopolitical_orientation": "non_aligned",
+    "key_alliances": ["United States", "Iran", "Turkey", "Saudi Arabia"],
+    "adversaries": [],
+    "red_lines": [
+      "Violation of Iraqi sovereignty by foreign powers",
+      "Resurgence of ISIS territorial control",
+      "Kurdish independence declaration",
+      "Collapse of fragile sectarian balance"
+    ],
+    "core_narratives": [
+      "Iraqi sovereignty and territorial integrity",
+      "Balanced foreign relations",
+      "Economic reform and anti-corruption",
+      "National unity across sectarian lines"
+    ]
+  },
+  "decision_history": [
+    {
+      "event_description": "US strikes on Iran-backed militias on Iraqi soil",
+      "decision_taken": "Publicly condemned strikes as sovereignty violations while privately maintaining US military cooperation",
+      "outcome": "Preserved both Iranian and American relationships, domestic criticism from both sides",
+      "date": "2024-02-01T00:00:00Z",
+      "context_factors": ["sovereignty concerns", "balancing act between US and Iran", "domestic militia pressure"]
+    },
+    {
+      "event_description": "Pressure to expel US forces amid regional escalation",
+      "decision_taken": "Negotiated gradual drawdown timeline rather than immediate expulsion",
+      "outcome": "Maintained security cooperation while signaling sovereignty, satisfied neither extreme",
+      "date": "2024-09-01T00:00:00Z",
+      "context_factors": ["ISIS threat", "Iranian pressure", "economic dependency on US"]
+    }
+  ],
+  "cultural_context": {
+    "decision_making_style": "consensus_seeking",
+    "information_sources": ["cabinet advisors", "tribal leaders", "intelligence services", "Iranian and US interlocutors"],
+    "domestic_power_base": "Coordination Framework (Shia parliamentary bloc), technocratic base",
+    "succession_concerns": false,
+    "historical_analogies": ["Post-2003 balancing acts", "Sectarian conflict avoidance"]
+  },
+  "decision_context": {
+    "approval_rating": 42.0,
+    "economic_conditions": {
+      "gdp_growth": 3.5,
+      "unemployment": 14.0,
+      "inflation": 5.0,
+      "sanctions_pressure": 0.1
+    },
+    "military_posture": {
+      "readiness_level": "moderate",
+      "ongoing_operations": ["Counter-ISIS operations", "Border security"],
+      "force_disposition": "internal security focus with limited power projection"
+    },
+    "domestic_pressures": {
+      "election_proximity_days": null,
+      "opposition_strength": 0.5,
+      "media_sentiment": -0.1,
+      "protest_level": "minor"
+    },
+    "ongoing_conflicts": ["Iran-US tensions on Iraqi soil", "ISIS remnant operations", "Kurdistan budget disputes"],
+    "recent_events": ["US force drawdown negotiations", "Oil revenue management reforms", "Regional diplomatic outreach"]
+  }
+}

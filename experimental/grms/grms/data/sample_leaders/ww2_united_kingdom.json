@@ -1,0 +1,86 @@
+{
+  "name": "Winston Churchill",
+  "country": "United Kingdom",
+  "period": "world war 2",
+  "title": "Prime Minister and Minister of Defence",
+  "personality": {
+    "risk_tolerance": 0.6,
+    "authoritarianism": 0.3,
+    "nationalism": 0.7,
+    "pragmatism": 0.6,
+    "aggression": 0.5,
+    "populism": 0.4,
+    "transparency": 0.1,
+    "religiosity": -0.3
+  },
+  "ideology": {
+    "economic_system": "free_market",
+    "geopolitical_orientation": "western",
+    "key_alliances": ["United States", "Soviet Union", "Free France", "Commonwealth nations", "Poland (government in exile)"],
+    "adversaries": ["Germany", "Italy", "Japan", "Vichy France"],
+    "red_lines": [
+      "Negotiated peace or capitulation to Nazi Germany",
+      "Loss of British naval supremacy",
+      "Collapse of the British Empire",
+      "Soviet domination of all of post-war Europe"
+    ],
+    "core_narratives": [
+      "Defending civilization against Nazi tyranny",
+      "British resolve and the spirit of the Blitz",
+      "Alliance of democracies against totalitarianism",
+      "Preservation of the British Empire and Commonwealth"
+    ]
+  },
+  "decision_history": [
+    {
+      "event_description": "France fell and Britain stood alone against Nazi Germany",
+      "decision_taken": "Rejected Halifax's peace overtures, committed to fighting on regardless of odds",
+      "outcome": "Britain survived the Blitz and maintained resistance until allies joined the war",
+      "date": "1940-05-28T00:00:00Z",
+      "context_factors": ["Dunkirk evacuation", "French armistice", "RAF strength assessment", "belief in eventual American entry"]
+    },
+    {
+      "event_description": "Germany invaded the Soviet Union in Operation Barbarossa",
+      "decision_taken": "Immediately offered alliance and material support to Stalin despite lifelong anti-communism",
+      "outcome": "Grand Alliance formed; Eastern Front drained majority of German military strength",
+      "date": "1941-06-22T00:00:00Z",
+      "context_factors": ["enemy of my enemy logic", "need to relieve pressure on Britain", "pragmatism over ideology"]
+    },
+    {
+      "event_description": "Strategic bombing debate over how to strike back at Germany",
+      "decision_taken": "Authorized area bombing campaign targeting German industrial cities and civilian morale",
+      "outcome": "Massive destruction of German cities; controversial civilian casualties; debatable strategic impact",
+      "date": "1942-02-14T00:00:00Z",
+      "context_factors": ["limited options for striking Germany directly", "bomber offensive as second front substitute", "public desire for retaliation"]
+    }
+  ],
+  "cultural_context": {
+    "decision_making_style": "consultative_dominant",
+    "information_sources": ["Ultra/Bletchley Park intelligence", "military chiefs of staff", "War Cabinet", "personal correspondence with Roosevelt"],
+    "domestic_power_base": "Conservative Party (wartime coalition), military establishment, monarchy support, popular wartime mandate",
+    "succession_concerns": false,
+    "historical_analogies": ["Napoleonic Wars and British resistance", "Dunkirk as Gallipoli redeemed", "English-speaking peoples' shared destiny"]
+  },
+  "decision_context": {
+    "approval_rating": 78.0,
+    "economic_conditions": {
+      "gdp_growth": -2.0,
+      "unemployment": 1.0,
+      "inflation": 5.0,
+      "sanctions_pressure": 0.0
+    },
+    "military_posture": {
+      "readiness_level": "mobilized",
+      "ongoing_operations": ["Battle of the Atlantic", "North Africa campaign", "Strategic bombing of Germany", "Burma/Southeast Asia defense"],
+      "force_disposition": "defensive posture transitioning to offensive capability with American support"
+    },
+    "domestic_pressures": {
+      "election_proximity_days": null,
+      "opposition_strength": 0.1,
+      "media_sentiment": 0.6,
+      "protest_level": "none"
+    },
+    "ongoing_conflicts": ["World War II - all theaters", "Battle of the Atlantic", "Defense of Empire possessions in Asia"],
+    "recent_events": ["Fall of Singapore February 1942", "El Alamein victory October 1942", "Casablanca Conference January 1943"]
+  }
+}

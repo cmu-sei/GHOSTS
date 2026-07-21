@@ -1,0 +1,43 @@
+@use 'variables' as *;
+
+// Mixin names preserved for compatibility; styling is now flat light Material
+// surfaces to match Ghosts.Frontend (no glassmorphism / neon).
+
+@mixin glass-panel {
+  background: $glass;
+  border: 1px solid $glass-border;
+  border-radius: $radius;
+  box-shadow: $shadow;
+}
+
+@mixin glass-card {
+  @include glass-panel;
+  transition: transform $transition, box-shadow $transition, border-color $transition;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: $shadow-lg;
+    border-color: rgba(46, 125, 50, 0.3);
+  }
+}
+
+@mixin glass-input {
+  background: #ffffff;
+  border: 1px solid $glass-border;
+  border-radius: $radius-sm;
+  color: $text;
+  transition: border-color $transition;
+
+  &:focus {
+    border-color: $accent;
+    outline: none;
+  }
+}
+
+@mixin neon-glow($color: $accent) {
+  box-shadow: 0 1px 3px rgba($color, 0.2);
+}
+
+@mixin text-glow($color: $accent) {
+  text-shadow: none;
+}

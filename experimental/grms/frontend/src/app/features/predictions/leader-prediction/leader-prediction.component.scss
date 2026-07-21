@@ -1,0 +1,395 @@
+@use 'variables' as *;
+@use 'glass' as *;
+@use 'animations' as *;
+
+.leader-prediction {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  padding: 16px 0;
+}
+
+.input-panel, .results-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.section-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: $text;
+  margin-bottom: 16px;
+}
+
+.form-hint {
+  font-size: 0.8rem;
+  color: $text-dim;
+  margin-bottom: 12px;
+}
+
+.response-leader-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  mat-icon {
+    color: $accent;
+  }
+}
+
+.response-leader-name {
+  font-weight: 600;
+  font-size: 1rem;
+  color: $text;
+}
+
+.response-leader-country {
+  font-size: 0.85rem;
+  color: $text-dim;
+}
+
+.saved-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  font-size: 0.8rem;
+  color: $green;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    color: $green;
+  }
+}
+
+.full-width {
+  width: 100%;
+}
+
+.loading-state {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: $text-dim;
+  padding: 24px;
+  justify-content: center;
+
+  .spin {
+    animation: pulse 1.5s infinite;
+  }
+}
+
+.statement-text {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: $text;
+  margin-bottom: 12px;
+  font-style: italic;
+}
+
+.badge-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.tone-badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: white;
+  text-transform: uppercase;
+}
+
+.audience-badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: $text;
+  background: $glass-light;
+  border: 1px solid $glass-border;
+}
+
+.actions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.action-item {
+  padding: 12px;
+  background: $glass-light;
+  border-radius: $radius-sm;
+  border: 1px solid $glass-border;
+}
+
+.action-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+
+  mat-icon {
+    color: $accent;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  .action-type {
+    font-weight: 600;
+    color: $text;
+    text-transform: capitalize;
+  }
+}
+
+.timeline-badge {
+  padding: 2px 8px;
+  border-radius: 8px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: $accent;
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.reversibility-badge {
+  padding: 2px 8px;
+  border-radius: 8px;
+  font-size: 0.7rem;
+  font-weight: 500;
+
+  &.reversible {
+    color: $green;
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+  }
+
+  &.escalatory {
+    color: $orange;
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+  }
+
+  &.irreversible {
+    color: $red;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+  }
+}
+
+.action-desc {
+  font-size: 0.85rem;
+  color: $text-dim;
+  margin-bottom: 8px;
+}
+
+.likelihood-bar {
+  position: relative;
+  height: 6px;
+  background: rgba(100, 116, 139, 0.2);
+  border-radius: 3px;
+  overflow: visible;
+}
+
+.likelihood-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, $accent, $green);
+  transition: width $transition;
+}
+
+.likelihood-label {
+  position: absolute;
+  right: 0;
+  top: -18px;
+  font-size: 0.7rem;
+  color: $text-dim;
+}
+
+.reasoning-panel {
+  background: $glass !important;
+  border: 1px solid $glass-border;
+  color: $text;
+
+  .reasoning-section {
+    margin-bottom: 16px;
+
+    h4 {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: $accent;
+      margin-bottom: 8px;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+
+      li {
+        padding: 4px 0;
+        font-size: 0.85rem;
+        color: $text-dim;
+
+        &::before {
+          content: '\2022';
+          color: $accent;
+          margin-right: 8px;
+        }
+      }
+    }
+  }
+}
+
+.gauge-center {
+  display: flex;
+  justify-content: center;
+  padding: 16px 0;
+}
+
+mat-chip-set {
+  mat-chip {
+    font-size: 0.8rem;
+  }
+}
+
+.cascade-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  .section-title {
+    margin-bottom: 0;
+  }
+}
+
+.predict-all-btn {
+  font-size: 0.8rem;
+  color: $accent;
+  border-color: rgba(56, 189, 248, 0.3);
+}
+
+.cascade-subtitle {
+  font-size: 0.8rem;
+  color: $text-dim;
+  margin-bottom: 16px;
+}
+
+.cascade-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cascade-entry {
+  padding: 12px;
+  background: $glass-light;
+  border-radius: $radius-sm;
+  border: 1px solid $glass-border;
+}
+
+.cascade-entry-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cascade-leader-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.cascade-leader-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: $text;
+}
+
+.cascade-leader-country {
+  font-size: 0.75rem;
+  color: $text-dim;
+}
+
+.relationship-badge {
+  padding: 3px 8px;
+  border-radius: 8px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  text-transform: uppercase;
+
+  &.ally {
+    color: $cyan;
+    background: rgba(6, 182, 212, 0.1);
+    border: 1px solid rgba(6, 182, 212, 0.3);
+  }
+
+  &.adversary {
+    color: $orange;
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+  }
+}
+
+.cascade-spinner {
+  color: $accent;
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.cascade-result {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid $glass-border;
+}
+
+.cascade-statement {
+  font-size: 0.85rem;
+  color: $text;
+  font-style: italic;
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.cascade-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.cascade-escalation {
+  font-size: 0.75rem;
+  font-family: 'JetBrains Mono', monospace;
+  color: $text-dim;
+}
+
+.cascade-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cascade-action-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: $text-dim;
+  padding: 4px 8px;
+  background: rgba(100, 116, 139, 0.1);
+  border-radius: 6px;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    color: $accent;
+  }
+}

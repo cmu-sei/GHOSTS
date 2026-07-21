@@ -1,0 +1,79 @@
+{
+  "name": "Kim Jong Un",
+  "country": "North Korea",
+  "period": "current",
+  "title": "Supreme Leader",
+  "personality": {
+    "risk_tolerance": 0.7,
+    "authoritarianism": 0.95,
+    "nationalism": 0.95,
+    "pragmatism": 0.4,
+    "aggression": 0.75,
+    "populism": 0.3,
+    "transparency": -0.9,
+    "religiosity": -0.5
+  },
+  "ideology": {
+    "economic_system": "command_economy",
+    "geopolitical_orientation": "eastern",
+    "key_alliances": ["China", "Russia"],
+    "adversaries": ["United States", "South Korea", "Japan"],
+    "red_lines": [
+      "Regime survival threats",
+      "Joint US-South Korea military exercises",
+      "Sanctions targeting leadership luxury goods",
+      "Any attempt at forced denuclearization"
+    ],
+    "core_narratives": [
+      "Juche self-reliance",
+      "Nuclear deterrence as survival guarantee",
+      "US imperialist aggression narrative",
+      "Korean reunification under DPRK leadership"
+    ]
+  },
+  "decision_history": [
+    {
+      "event_description": "Continued ICBM and satellite launch testing despite international condemnation",
+      "decision_taken": "Accelerated missile development program with multiple test launches",
+      "outcome": "Enhanced deterrent capability, additional UN sanctions, strengthened ties with Russia",
+      "date": "2024-07-01T00:00:00Z",
+      "context_factors": ["regime survival", "deterrence credibility", "domestic legitimacy"]
+    },
+    {
+      "event_description": "Russia-Ukraine war created opportunity for arms trade",
+      "decision_taken": "Provided artillery ammunition and ballistic missiles to Russia in exchange for technology and economic support",
+      "outcome": "Strengthened Russia alliance, violated UN resolutions, gained satellite and military technology",
+      "date": "2024-01-01T00:00:00Z",
+      "context_factors": ["economic desperation", "geopolitical opportunity", "alliance building"]
+    }
+  ],
+  "cultural_context": {
+    "decision_making_style": "unilateral",
+    "information_sources": ["inner circle advisors", "intelligence services", "state media monitoring"],
+    "domestic_power_base": "Korean Workers Party, military leadership, security apparatus",
+    "succession_concerns": true,
+    "historical_analogies": ["Korean War resistance", "Libya denuclearization disaster"]
+  },
+  "decision_context": {
+    "approval_rating": 0.0,
+    "economic_conditions": {
+      "gdp_growth": -0.5,
+      "unemployment": 25.0,
+      "inflation": 15.0,
+      "sanctions_pressure": 0.9
+    },
+    "military_posture": {
+      "readiness_level": "high",
+      "ongoing_operations": ["Nuclear deterrent maintenance", "Border fortification"],
+      "force_disposition": "defensive posture with nuclear escalation capability"
+    },
+    "domestic_pressures": {
+      "election_proximity_days": null,
+      "opposition_strength": 0.0,
+      "media_sentiment": 0.0,
+      "protest_level": "none"
+    },
+    "ongoing_conflicts": ["Korean Peninsula standoff", "US-DPRK nuclear tensions"],
+    "recent_events": ["Arms supply to Russia", "Satellite launches", "Border wall construction with South Korea"]
+  }
+}

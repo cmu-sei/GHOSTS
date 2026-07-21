@@ -1,0 +1,476 @@
+<div class="cognitive-lab">
+  <!-- Left Panel: Layer Editor -->
+  <div class="panel panel-left">
+    <div class="panel-header">
+      <mat-icon>psychology</mat-icon>
+      <h2>Cognitive Layers</h2>
+      <button mat-icon-button class="help-toggle" (click)="showHelp.set(!showHelp())" [class.active]="showHelp()">
+        <mat-icon>help_outline</mat-icon>
+      </button>
+    </div>
+
+    @if (showHelp()) {
+      <div class="help-panel">
+        <p class="help-title">Cognitive Decision Engine</p>
+        <p>This lab lets you explore how a leader's decision emerges from six cognitive layers, each contributing to a final action score. Adjust any parameter and see the decision shift in real time.</p>
+        <ul>
+          <li><strong>Identity</strong> &mdash; role constraints and decision-making style. Heads of state with advisory councils resist unilateral extremes.</li>
+          <li><strong>Personality</strong> &mdash; 8 dimensions (risk tolerance, aggression, nationalism, etc.) that bias toward escalatory or restrained actions.</li>
+          <li><strong>Beliefs</strong> &mdash; Bayesian posteriors about the world (is the threat real? would military action work?). These amplify or suppress action options.</li>
+          <li><strong>Motivations</strong> &mdash; underlying drives (power, honor, independence, vengeance). Actions that satisfy core motivations score higher.</li>
+          <li><strong>Context</strong> &mdash; situational pressures (approval rating, military readiness, red line status). High approval + red line crossed = permission for strong action.</li>
+          <li><strong>History</strong> &mdash; past decisions create consistency biases. Leaders tend to repeat what worked before.</li>
+        </ul>
+        <p>The right panel shows layer weights (adjustable) and sensitivity analysis &mdash; how the decision changes as you sweep a single parameter across its range.</p>
+        <p class="help-note">This is a parametric model with no LLM dependency. It runs instantly and produces a fully auditable decision trace.</p>
+      </div>
+    }
+
+    <mat-accordion multi>
+      <!-- 1. Identity -->
+      <mat-expansion-panel expanded>
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <span class="layer-dot" style="background: #38bdf8"></span>
+            Identity
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+
+        <div class="layer-content">
+          <mat-form-field appearance="outline">
+            <mat-label>Role</mat-label>
+            <input matInput [ngModel]="identity().role" (ngModelChange)="updateIdentityField('role', $event)" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Decision Style</mat-label>
+            <mat-select [ngModel]="identity().decision_style" (ngModelChange)="updateIdentityField('decision_style', $event)">
+              @for (style of decisionStyles; track style) {
+                <mat-option [value]="style">{{ style | titlecase }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Power Base</mat-label>
+            <input matInput [ngModel]="identity().power_base" (ngModelChange)="updateIdentityField('power_base', $event)" />
+          </mat-form-field>
+        </div>
+      </mat-expansion-panel>
+
+      <!-- 2. Personality -->
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <span class="layer-dot" style="background: #a78bfa"></span>
+            Personality
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+
+        <div class="layer-content">
+          <app-dimension-slider
+            lowLabel="Cautious" highLabel="Reckless"
+            [min]="-1" [max]="1" [step]="0.05"
+            [value]="personality().risk_tolerance"
+            (valueChange)="updatePersonality('risk_tolerance', $event)"
+          />
+          <app-dimension-slider
+            lowLabel="Democratic" highLabel="Autocratic"
+            [min]="-1" [max]="1" [step]="0.05"
+            [value]="personality().authoritarianism"
+            (valueChange)="updatePersonality('authoritarianism', $event)"
+          />
+          <app-dimension-slider
+            lowLabel="Internationalist" highLabel="Nationalist"
+            [min]="-1" [max]="1" [step]="0.05"
+            [value]="personality().nationalism"
+            (valueChange)="updatePersonality('nationalism', $event)"
+          />
+          <app-dimension-slider
+            lowLabel="Ideological" highLabel="Pragmatic"
+            [min]="-1" [max]="1" [step]="0.05"
+            [value]="personality().pragmatism"
+            (valueChange)="updatePersonality('pragmatism', $event)"
+          />
+          <app-dimension-slider
+            lowLabel="Dovish" highLabel="Hawkish"
+            [min]="-1" [max]="1" [step]="0.05"
+            [value]="personality().aggression"
+            (valueChange)="updatePersonality('aggression', $event)"
+          />
+          <app-dimension-slider
+            lowLabel="Elitist" highLabel="Populist"
+            [min]="-1" [max]="1" [step]="0.05"
+            [value]="personality().populism"
+            (valueChange)="updatePersonality('populism', $event)"
+          />
+          <app-dimension-slider
+            lowLabel="Secretive" highLabel="Transparent"
+            [min]="-1" [max]="1" [step]="0.05"
+            [value]="personality().transparency"
+            (valueChange)="updatePersonality('transparency', $event)"
+          />
+          <app-dimension-slider
+            lowLabel="Secular" highLabel="Theocratic"
+            [min]="-1" [max]="1" [step]="0.05"
+            [value]="personality().religiosity"
+            (valueChange)="updatePersonality('religiosity', $event)"
+          />
+        </div>
+      </mat-expansion-panel>
+
+      <!-- 3. Beliefs -->
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <span class="layer-dot" style="background: #22c55e"></span>
+            Beliefs
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+
+        <div class="layer-content">
+          <div class="slider-row">
+            <label>Threat is Real</label>
+            <mat-slider [min]="0" [max]="1" [step]="0.05">
+              <input matSliderThumb [ngModel]="beliefs().threat_is_real" (ngModelChange)="updateBeliefs('threat_is_real', $event)" />
+            </mat-slider>
+            <span class="val">{{ beliefs().threat_is_real | number:'1.2-2' }}</span>
+          </div>
+          <div class="slider-row">
+            <label>Military Effective</label>
+            <mat-slider [min]="0" [max]="1" [step]="0.05">
+              <input matSliderThumb [ngModel]="beliefs().military_effective" (ngModelChange)="updateBeliefs('military_effective', $event)" />
+            </mat-slider>
+            <span class="val">{{ beliefs().military_effective | number:'1.2-2' }}</span>
+          </div>
+          <div class="slider-row">
+            <label>Diplomacy Effective</label>
+            <mat-slider [min]="0" [max]="1" [step]="0.05">
+              <input matSliderThumb [ngModel]="beliefs().diplomacy_effective" (ngModelChange)="updateBeliefs('diplomacy_effective', $event)" />
+            </mat-slider>
+            <span class="val">{{ beliefs().diplomacy_effective | number:'1.2-2' }}</span>
+          </div>
+          <div class="slider-row">
+            <label>Economy Stable</label>
+            <mat-slider [min]="0" [max]="1" [step]="0.05">
+              <input matSliderThumb [ngModel]="beliefs().economy_stable" (ngModelChange)="updateBeliefs('economy_stable', $event)" />
+            </mat-slider>
+            <span class="val">{{ beliefs().economy_stable | number:'1.2-2' }}</span>
+          </div>
+          <div class="slider-row">
+            <label>Allies Reliable</label>
+            <mat-slider [min]="0" [max]="1" [step]="0.05">
+              <input matSliderThumb [ngModel]="beliefs().allies_reliable" (ngModelChange)="updateBeliefs('allies_reliable', $event)" />
+            </mat-slider>
+            <span class="val">{{ beliefs().allies_reliable | number:'1.2-2' }}</span>
+          </div>
+        </div>
+      </mat-expansion-panel>
+
+      <!-- 4. Motivations -->
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <span class="layer-dot" style="background: #f59e0b"></span>
+            Motivations
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+
+        <div class="layer-content">
+          <div class="slider-row">
+            <label>Power</label>
+            <mat-slider [min]="-2" [max]="2" [step]="0.1">
+              <input matSliderThumb [ngModel]="motivations().power" (ngModelChange)="updateMotivations('power', $event)" />
+            </mat-slider>
+            <span class="val">{{ motivations().power | number:'1.1-1' }}</span>
+          </div>
+          <div class="slider-row">
+            <label>Security</label>
+            <mat-slider [min]="-2" [max]="2" [step]="0.1">
+              <input matSliderThumb [ngModel]="motivations().security" (ngModelChange)="updateMotivations('security', $event)" />
+            </mat-slider>
+            <span class="val">{{ motivations().security | number:'1.1-1' }}</span>
+          </div>
+          <div class="slider-row">
+            <label>Status</label>
+            <mat-slider [min]="-2" [max]="2" [step]="0.1">
+              <input matSliderThumb [ngModel]="motivations().status" (ngModelChange)="updateMotivations('status', $event)" />
+            </mat-slider>
+            <span class="val">{{ motivations().status | number:'1.1-1' }}</span>
+          </div>
+          <div class="slider-row">
+            <label>Independence</label>
+            <mat-slider [min]="-2" [max]="2" [step]="0.1">
+              <input matSliderThumb [ngModel]="motivations().independence" (ngModelChange)="updateMotivations('independence', $event)" />
+            </mat-slider>
+            <span class="val">{{ motivations().independence | number:'1.1-1' }}</span>
+          </div>
+          <div class="slider-row">
+            <label>Honor</label>
+            <mat-slider [min]="-2" [max]="2" [step]="0.1">
+              <input matSliderThumb [ngModel]="motivations().honor" (ngModelChange)="updateMotivations('honor', $event)" />
+            </mat-slider>
+            <span class="val">{{ motivations().honor | number:'1.1-1' }}</span>
+          </div>
+          <div class="slider-row">
+            <label>Order</label>
+            <mat-slider [min]="-2" [max]="2" [step]="0.1">
+              <input matSliderThumb [ngModel]="motivations().order" (ngModelChange)="updateMotivations('order', $event)" />
+            </mat-slider>
+            <span class="val">{{ motivations().order | number:'1.1-1' }}</span>
+          </div>
+          <div class="slider-row">
+            <label>Vengeance</label>
+            <mat-slider [min]="-2" [max]="2" [step]="0.1">
+              <input matSliderThumb [ngModel]="motivations().vengeance" (ngModelChange)="updateMotivations('vengeance', $event)" />
+            </mat-slider>
+            <span class="val">{{ motivations().vengeance | number:'1.1-1' }}</span>
+          </div>
+          <div class="slider-row">
+            <label>Idealism</label>
+            <mat-slider [min]="-2" [max]="2" [step]="0.1">
+              <input matSliderThumb [ngModel]="motivations().idealism" (ngModelChange)="updateMotivations('idealism', $event)" />
+            </mat-slider>
+            <span class="val">{{ motivations().idealism | number:'1.1-1' }}</span>
+          </div>
+        </div>
+      </mat-expansion-panel>
+
+      <!-- 5. Context -->
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <span class="layer-dot" style="background: #ef4444"></span>
+            Context
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+
+        <div class="layer-content">
+          <div class="slider-row">
+            <label>Approval Rating</label>
+            <mat-slider [min]="0" [max]="100" [step]="1">
+              <input matSliderThumb [ngModel]="context().approval_rating" (ngModelChange)="updateContext('approval_rating', $event)" />
+            </mat-slider>
+            <span class="val">{{ context().approval_rating }}%</span>
+          </div>
+          <div class="slider-row">
+            <label>Military Readiness</label>
+            <mat-slider [min]="0" [max]="1" [step]="0.05">
+              <input matSliderThumb [ngModel]="context().military_readiness" (ngModelChange)="updateContext('military_readiness', $event)" />
+            </mat-slider>
+            <span class="val">{{ context().military_readiness | number:'1.2-2' }}</span>
+          </div>
+          <div class="slider-row">
+            <label>Economic Strength</label>
+            <mat-slider [min]="0" [max]="1" [step]="0.05">
+              <input matSliderThumb [ngModel]="context().economic_strength" (ngModelChange)="updateContext('economic_strength', $event)" />
+            </mat-slider>
+            <span class="val">{{ context().economic_strength | number:'1.2-2' }}</span>
+          </div>
+          <div class="slider-row">
+            <label>Alliance Support</label>
+            <mat-slider [min]="0" [max]="1" [step]="0.05">
+              <input matSliderThumb [ngModel]="context().alliance_support" (ngModelChange)="updateContext('alliance_support', $event)" />
+            </mat-slider>
+            <span class="val">{{ context().alliance_support | number:'1.2-2' }}</span>
+          </div>
+          <div class="toggle-row">
+            <label>Red Line Triggered</label>
+            <mat-slide-toggle
+              [ngModel]="context().red_line_triggered"
+              (ngModelChange)="updateContext('red_line_triggered', $event)"
+            />
+          </div>
+          <div class="slider-row">
+            <label>Time Pressure</label>
+            <mat-slider [min]="0" [max]="1" [step]="0.05">
+              <input matSliderThumb [ngModel]="context().time_pressure" (ngModelChange)="updateContext('time_pressure', $event)" />
+            </mat-slider>
+            <span class="val">{{ context().time_pressure | number:'1.2-2' }}</span>
+          </div>
+        </div>
+      </mat-expansion-panel>
+
+      <!-- 6. History -->
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <span class="layer-dot" style="background: #06b6d4"></span>
+            History
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+
+        <div class="layer-content">
+          <div class="history-list">
+            @for (entry of history().past_decisions; track $index) {
+              <div class="history-entry">
+                <span class="history-action">{{ actionLabels[entry.action] || entry.action }}</span>
+                <span class="history-outcome" [class.positive]="entry.outcome_positive" [class.negative]="!entry.outcome_positive">
+                  {{ entry.outcome_positive ? 'Success' : 'Failure' }}
+                </span>
+                <button mat-icon-button (click)="removeHistoryEntry($index)">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+            }
+          </div>
+
+          <div class="history-add">
+            <mat-form-field appearance="outline">
+              <mat-label>Action</mat-label>
+              <mat-select [ngModel]="newHistoryAction()" (ngModelChange)="newHistoryAction.set($event)">
+                <mat-option value="military_strike">Military Strike</mat-option>
+                <mat-option value="diplomatic_protest">Diplomatic Protest</mat-option>
+                <mat-option value="economic_sanctions">Economic Sanctions</mat-option>
+                <mat-option value="covert_action">Covert Action</mat-option>
+                <mat-option value="no_response">No Response</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-slide-toggle [ngModel]="newHistoryOutcome()" (ngModelChange)="newHistoryOutcome.set($event)">
+              Positive
+            </mat-slide-toggle>
+            <button mat-flat-button color="primary" (click)="addHistoryEntry()">
+              <mat-icon>add</mat-icon> Add
+            </button>
+          </div>
+        </div>
+      </mat-expansion-panel>
+    </mat-accordion>
+  </div>
+
+  <!-- Center Panel: Results -->
+  <div class="panel panel-center">
+    <div class="panel-header">
+      <mat-icon>analytics</mat-icon>
+      <h2>Decision Output</h2>
+      <span class="selected-badge">{{ actionLabels[selectedAction()] }}</span>
+    </div>
+
+    <!-- Action Ranking -->
+    <app-glass-card>
+      <h3 class="section-title">Action Ranking</h3>
+      <div class="action-bars">
+        @for (action of result().actions; track action.action) {
+          <div class="action-bar-row" [class.selected]="action.action === selectedAction()">
+            <span class="action-label">{{ actionLabels[action.action] }}</span>
+            <div class="bar-container">
+              <div
+                class="bar-fill"
+                [style.width.%]="action.total_score * 100"
+                [style.background]="actionColors[action.action]"
+                [class.glow]="action.action === selectedAction()"
+              ></div>
+            </div>
+            <span class="action-score">{{ (action.total_score * 100) | number:'1.0-0' }}</span>
+          </div>
+        }
+      </div>
+    </app-glass-card>
+
+    <!-- Layer Contribution Breakdown -->
+    <app-glass-card>
+      <h3 class="section-title">Layer Contributions - {{ actionLabels[selectedAction()] }}</h3>
+      @if (selectedActionScores(); as scores) {
+        <div class="stacked-bar-container">
+          <div class="stacked-bar">
+            @for (contribution of scores.layer_contributions; track $index) {
+              <div
+                class="stacked-segment"
+                [style.flex-grow]="Math.abs(contribution)"
+                [style.background]="layerColors[$index]"
+                [matTooltip]="layerNames[$index] + ': ' + (contribution * 100).toFixed(1)"
+              ></div>
+            }
+          </div>
+          <div class="layer-legend">
+            @for (name of layerNames; track name) {
+              <div class="legend-item">
+                <span class="legend-dot" [style.background]="layerColors[$index]"></span>
+                <span class="legend-label">{{ name }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </app-glass-card>
+
+    <!-- Interaction Effects -->
+    @if (result().interaction_effects.length > 0) {
+      <div class="interaction-grid">
+        @for (effect of result().interaction_effects; track effect.name) {
+          <div class="interaction-card" [class.positive]="effect.magnitude > 0" [class.negative]="effect.magnitude < 0">
+            <div class="interaction-name">{{ effect.name }}</div>
+            <div class="interaction-magnitude">
+              {{ effect.magnitude > 0 ? '+' : '' }}{{ (effect.magnitude * 100) | number:'1.0-0' }}%
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Right Panel: Analysis -->
+  <div class="panel panel-right">
+    <div class="panel-header">
+      <mat-icon>tune</mat-icon>
+      <h2>Analysis</h2>
+    </div>
+
+    <!-- Confidence Gauge -->
+    <app-glass-card>
+      <div class="confidence-section">
+        <app-gauge [value]="result().confidence" label="Confidence" [size]="120" color="#38bdf8" />
+      </div>
+    </app-glass-card>
+
+    <!-- Layer Weights -->
+    <app-glass-card>
+      <h3 class="section-title">Layer Weights</h3>
+      <div class="weights-editor">
+        @for (name of layerNames; track name) {
+          <div class="weight-row">
+            <span class="weight-label" [style.color]="layerColors[$index]">{{ name }}</span>
+            <mat-slider [min]="0" [max]="1" [step]="0.01">
+              <input matSliderThumb [ngModel]="layerWeights()[$index]" (ngModelChange)="updateWeight($index, $event)" />
+            </mat-slider>
+            <span class="weight-value">{{ layerWeights()[$index] | number:'1.2-2' }}</span>
+          </div>
+        }
+        <button mat-stroked-button class="normalize-btn" (click)="normalizeWeights()">
+          <mat-icon>balance</mat-icon> Normalize
+        </button>
+      </div>
+    </app-glass-card>
+
+    <!-- Sensitivity Analysis -->
+    <app-glass-card>
+      <h3 class="section-title">Sensitivity</h3>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Parameter</mat-label>
+        <mat-select [ngModel]="sensitivityParam()" (ngModelChange)="sensitivityParam.set($event)">
+          @for (param of sensitivityParams; track param.path) {
+            <mat-option [value]="param.path">{{ param.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <div class="sensitivity-chart">
+        @for (point of sensitivityData(); track point.parameter_value) {
+          <div class="sensitivity-column">
+            <div class="sensitivity-bars">
+              @for (score of point.action_scores; track score.action) {
+                <div
+                  class="sensitivity-bar-segment"
+                  [style.height.%]="(score.score / getMaxSensitivityScore()) * 100"
+                  [style.background]="actionColors[score.action]"
+                  [matTooltip]="actionLabels[score.action] + ': ' + (score.score * 100).toFixed(0)"
+                ></div>
+              }
+            </div>
+            <span class="sensitivity-label">{{ point.parameter_value | number:'1.1-1' }}</span>
+          </div>
+        }
+      </div>
+    </app-glass-card>
+  </div>
+</div>

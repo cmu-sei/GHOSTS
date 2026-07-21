@@ -1,0 +1,78 @@
+{
+  "name": "Emmanuel Macron",
+  "country": "France",
+  "period": "current",
+  "title": "President",
+  "personality": {
+    "risk_tolerance": 0.5,
+    "authoritarianism": 0.2,
+    "nationalism": 0.3,
+    "pragmatism": 0.6,
+    "aggression": 0.2,
+    "populism": -0.2,
+    "transparency": 0.1,
+    "religiosity": -0.4
+  },
+  "ideology": {
+    "economic_system": "mixed",
+    "geopolitical_orientation": "western",
+    "key_alliances": ["Germany", "European Union", "United States", "NATO"],
+    "adversaries": ["Russia"],
+    "red_lines": [
+      "Russian military victory in Ukraine",
+      "Threats to French nuclear deterrent credibility",
+      "Undermining of European strategic autonomy"
+    ],
+    "core_narratives": [
+      "European strategic autonomy",
+      "France as a balancing power",
+      "Pro-European integration",
+      "Modernization of French economy"
+    ]
+  },
+  "decision_history": [
+    {
+      "event_description": "Proposed sending European troops to Ukraine as ceasefire monitors",
+      "decision_taken": "Publicly floated European ground presence, pushed allies to consider all options including troops on ground",
+      "outcome": "Shifted Overton window on European defense, mixed allied response",
+      "date": "2025-02-15T00:00:00Z",
+      "context_factors": ["European defense credibility", "US reliability concerns", "French military capability"]
+    },
+    {
+      "event_description": "US tariffs hit European exports",
+      "decision_taken": "Led EU coordinated response, proposed retaliatory measures while maintaining dialogue",
+      "outcome": "EU presented united front, some targeted countermeasures implemented",
+      "date": "2025-04-05T00:00:00Z",
+      "context_factors": ["EU unity priority", "French agricultural interests", "transatlantic relationship management"]
+    }
+  ],
+  "cultural_context": {
+    "decision_making_style": "unilateral",
+    "information_sources": ["DGSE intelligence", "Elysee advisors", "EU institutional contacts", "diplomatic corps"],
+    "domestic_power_base": "Centrist coalition, business community, pro-European urban professionals",
+    "succession_concerns": true,
+    "historical_analogies": ["De Gaulle strategic independence", "Mitterrand European project", "French grande nation"]
+  },
+  "decision_context": {
+    "approval_rating": 28.0,
+    "economic_conditions": {
+      "gdp_growth": 0.9,
+      "unemployment": 7.3,
+      "inflation": 2.5,
+      "sanctions_pressure": 0.0
+    },
+    "military_posture": {
+      "readiness_level": "elevated",
+      "ongoing_operations": ["Sahel presence (reduced)", "Ukraine military aid", "Indo-Pacific deployments"],
+      "force_disposition": "independent nuclear deterrent with expeditionary capability"
+    },
+    "domestic_pressures": {
+      "election_proximity_days": 700,
+      "opposition_strength": 0.7,
+      "media_sentiment": -0.4,
+      "protest_level": "minor"
+    },
+    "ongoing_conflicts": ["Support for Ukraine", "Sahel instability"],
+    "recent_events": ["European defense autonomy push", "Pension reform aftermath"]
+  }
+}

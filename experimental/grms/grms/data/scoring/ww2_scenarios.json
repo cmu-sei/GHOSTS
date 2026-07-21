@@ -1,0 +1,2579 @@
+[
+  {
+    "id": "ww2-munich-agreement",
+    "label": "Munich Agreement - Chamberlain appeases Hitler (September 1938)",
+    "leader": {
+      "name": "Neville Chamberlain",
+      "country": "United Kingdom",
+      "title": "Prime Minister",
+      "period": "world war 2",
+      "personality": {
+        "risk_tolerance": -0.7,
+        "authoritarianism": -0.3,
+        "nationalism": 0.2,
+        "pragmatism": 0.6,
+        "aggression": -0.8,
+        "populism": -0.2,
+        "transparency": 0.3,
+        "religiosity": 0.2
+      },
+      "ideology": {
+        "economic_system": "free_market",
+        "geopolitical_orientation": "western",
+        "key_alliances": [
+          "France"
+        ],
+        "adversaries": [],
+        "red_lines": [
+          "Direct attack on British territory"
+        ],
+        "core_narratives": [
+          "Peace in our time",
+          "Avoiding another Great War"
+        ]
+      },
+      "decision_history": [
+        {
+          "event_description": "German remilitarization of Rhineland",
+          "decision_taken": "No military response; diplomatic protest only",
+          "outcome": "Germany emboldened",
+          "date": "1936-03-07",
+          "context_factors": [
+            "War weariness",
+            "Military unpreparedness"
+          ]
+        }
+      ],
+      "cultural_context": {
+        "decision_making_style": "advisory_council",
+        "information_sources": [
+          "Foreign Office",
+          "Cabinet"
+        ],
+        "domestic_power_base": "Conservative Party",
+        "succession_concerns": false,
+        "historical_analogies": [
+          "World War I devastation"
+        ]
+      },
+      "decision_context": {
+        "approval_rating": 60.0,
+        "economic_conditions": {
+          "gdp_growth": 1.5,
+          "unemployment": 12.0,
+          "inflation": 2.0,
+          "sanctions_pressure": 0.0
+        },
+        "military_posture": {
+          "readiness_level": "peacetime",
+          "ongoing_operations": [],
+          "force_disposition": "Rearmament underway but incomplete"
+        },
+        "domestic_pressures": {
+          "election_proximity_days": 600,
+          "opposition_strength": 0.3,
+          "media_sentiment": -0.2,
+          "protest_level": "none"
+        },
+        "ongoing_conflicts": [],
+        "recent_events": [
+          "German annexation of Austria",
+          "Hitler threatening military action over Sudetenland"
+        ]
+      }
+    },
+    "event": {
+      "event_type": "diplomatic",
+      "severity": 0.6,
+      "description": "Hitler demands the Sudetenland region of Czechoslovakia be ceded to Germany, threatening military invasion if refused. Chamberlain flies to Munich to negotiate directly with Hitler, Mussolini, and Daladier \u2014 without Czechoslovakia present.",
+      "structured": {
+        "actor": "Germany",
+        "target": "Czechoslovakia",
+        "action_category": "diplomatic",
+        "reversibility": "escalatory",
+        "visibility": "public"
+      }
+    },
+    "known_outcome": {
+      "escalation_risk": 0.35,
+      "action_types": [
+        "diplomatic"
+      ],
+      "tone": "conciliatory",
+      "description": "Chamberlain ceded the Sudetenland. Short-term de-escalation but emboldened Hitler."
+    },
+    "historical_date": "1938-09-30"
+  },
+  {
+    "id": "ww2-molotov-ribbentrop",
+    "label": "Nazi-Soviet Non-Aggression Pact (August 1939)",
+    "leader": {
+      "name": "Joseph Stalin",
+      "country": "Soviet Union",
+      "title": "General Secretary",
+      "period": "world war 2",
+      "personality": {
+        "risk_tolerance": 0.3,
+        "authoritarianism": 1.0,
+        "nationalism": 0.6,
+        "pragmatism": 0.7,
+        "aggression": 0.5,
+        "populism": 0.4,
+        "transparency": -1.0,
+        "religiosity": -0.8
+      },
+      "ideology": {
+        "economic_system": "state_directed",
+        "geopolitical_orientation": "eastern",
+        "key_alliances": [],
+        "adversaries": [
+          "Germany (ideologically)",
+          "Japan"
+        ],
+        "red_lines": [
+          "Two-front war"
+        ],
+        "core_narratives": [
+          "Buy time for rearmament",
+          "Capitalist powers will destroy each other"
+        ]
+      },
+      "decision_history": [
+        {
+          "event_description": "Failed negotiations with Britain and France",
+          "decision_taken": "Sought alternative security arrangement",
+          "outcome": "Western powers refused meaningful military commitment",
+          "date": "1939-08-01",
+          "context_factors": [
+            "Western distrust of Soviets",
+            "Munich excluded USSR"
+          ]
+        }
+      ],
+      "cultural_context": {
+        "decision_making_style": "unilateral",
+        "information_sources": [
+          "Molotov",
+          "NKVD intelligence"
+        ],
+        "domestic_power_base": "Communist Party",
+        "succession_concerns": false,
+        "historical_analogies": [
+          "Brest-Litovsk pragmatism"
+        ]
+      },
+      "decision_context": {
+        "approval_rating": 78.0,
+        "economic_conditions": {
+          "gdp_growth": 5.0,
+          "unemployment": 0.5,
+          "inflation": 3.0,
+          "sanctions_pressure": 0.1
+        },
+        "military_posture": {
+          "readiness_level": "elevated",
+          "ongoing_operations": [
+            "Khalkhin Gol (fighting Japan in Mongolia)"
+          ],
+          "force_disposition": "Purged officer corps, rebuilding"
+        },
+        "domestic_pressures": {
+          "election_proximity_days": null,
+          "opposition_strength": 0.0,
+          "media_sentiment": 0.7,
+          "protest_level": "none"
+        },
+        "ongoing_conflicts": [
+          "Border war with Japan at Khalkhin Gol"
+        ],
+        "recent_events": [
+          "Germany pressuring Poland",
+          "War in Europe imminent",
+          "Western powers refusing Soviet alliance proposals"
+        ]
+      }
+    },
+    "event": {
+      "event_type": "diplomatic",
+      "severity": 0.4,
+      "description": "Germany proposes a non-aggression pact with secret protocols dividing Eastern Europe into spheres of influence. Stalin would gain eastern Poland, Baltic states, and Bessarabia. Germany gets free hand against western Poland.",
+      "structured": {
+        "actor": "Germany",
+        "target": "Soviet Union",
+        "action_category": "diplomatic",
+        "reversibility": "reversible",
+        "visibility": "public"
+      }
+    },
+    "known_outcome": {
+      "escalation_risk": 0.55,
+      "action_types": [
+        "diplomatic",
+        "economic"
+      ],
+      "tone": "measured",
+      "description": "Pact signed. Shocked the world. Enabled German invasion of Poland days later. Short-term de-escalation between Germany and USSR but enabled the wider war. Cynical realpolitik."
+    },
+    "historical_date": "1939-08-23"
+  },
+  {
+    "id": "ww2-britain-declares-war",
+    "label": "Britain declares war on Germany after Poland invasion (September 1939)",
+    "leader": {
+      "name": "Neville Chamberlain",
+      "country": "United Kingdom",
+      "title": "Prime Minister",
+      "period": "world war 2",
+      "personality": {
+        "risk_tolerance": -0.7,
+        "authoritarianism": -0.3,
+        "nationalism": 0.2,
+        "pragmatism": 0.6,
+        "aggression": -0.8,
+        "populism": -0.2,
+        "transparency": 0.3,
+        "religiosity": 0.2
+      },
+      "ideology": {
+        "economic_system": "free_market",
+        "geopolitical_orientation": "western",
+        "key_alliances": [
+          "France",
+          "Poland"
+        ],
+        "adversaries": [
+          "Germany"
+        ],
+        "red_lines": [
+          "Violation of Polish guarantee"
+        ],
+        "core_narratives": [
+          "Collective security",
+          "Honoring commitments"
+        ]
+      },
+      "decision_history": [
+        {
+          "event_description": "Munich Agreement",
+          "decision_taken": "Ceded Sudetenland to avoid war",
+          "outcome": "Hitler invaded rest of Czechoslovakia anyway",
+          "date": "1938-09-30",
+          "context_factors": [
+            "Appeasement failure"
+          ]
+        },
+        {
+          "event_description": "Guarantee to Poland",
+          "decision_taken": "Pledged to defend Polish independence",
+          "outcome": "Drew red line that Hitler crossed",
+          "date": "1939-03-31",
+          "context_factors": [
+            "End of appeasement",
+            "Public pressure"
+          ]
+        }
+      ],
+      "cultural_context": {
+        "decision_making_style": "advisory_council",
+        "information_sources": [
+          "Foreign Office",
+          "Cabinet",
+          "Parliament"
+        ],
+        "domestic_power_base": "Conservative Party, Parliament",
+        "succession_concerns": true,
+        "historical_analogies": [
+          "1914 mobilization",
+          "Belgian neutrality violation"
+        ]
+      },
+      "decision_context": {
+        "approval_rating": 55.0,
+        "economic_conditions": {
+          "gdp_growth": 1.0,
+          "unemployment": 10.0,
+          "inflation": 2.5,
+          "sanctions_pressure": 0.0
+        },
+        "military_posture": {
+          "readiness_level": "elevated",
+          "ongoing_operations": [],
+          "force_disposition": "Mobilization begun but incomplete"
+        },
+        "domestic_pressures": {
+          "election_proximity_days": 400,
+          "opposition_strength": 0.4,
+          "media_sentiment": -0.4,
+          "protest_level": "none"
+        },
+        "ongoing_conflicts": [],
+        "recent_events": [
+          "Germany invaded Poland September 1",
+          "British ultimatum delivered and ignored"
+        ]
+      }
+    },
+    "event": {
+      "event_type": "military_action",
+      "severity": 0.9,
+      "description": "Germany has invaded Poland in violation of the British guarantee. The British ultimatum demanding withdrawal has been ignored. Parliament and public demand action. Britain must decide whether to declare war.",
+      "structured": {
+        "actor": "Germany",
+        "target": "Poland",
+        "action_category": "military",
+        "reversibility": "irreversible",
+        "visibility": "public"
+      }
+    },
+    "known_outcome": {
+      "escalation_risk": 0.88,
+      "action_types": [
+        "diplomatic",
+        "military"
+      ],
+      "tone": "measured",
+      "description": "Chamberlain declared war with heavy heart. 'Everything I have worked for has crashed into ruins.' Phoney War followed \u2014 escalation in commitment but not immediate combat."
+    },
+    "historical_date": "1939-09-03"
+  },
+  {
+    "id": "ww2-soviet-finland-winter-war",
+    "label": "Soviet invasion of Finland - Winter War (November 1939)",
+    "leader": {
+      "name": "Joseph Stalin",
+      "country": "Soviet Union",
+      "title": "General Secretary",
+      "period": "world war 2",
+      "personality": {
+        "risk_tolerance": 0.3,
+        "authoritarianism": 1.0,
+        "nationalism": 0.6,
+        "pragmatism": 0.7,
+        "aggression": 0.5,
+        "populism": 0.4,
+        "transparency": -1.0,
+        "religiosity": -0.8
+      },
+      "ideology": {
+        "economic_system": "state_directed",
+        "geopolitical_orientation": "eastern",
+        "key_alliances": [
+          "Germany (Molotov-Ribbentrop)"
+        ],
+        "adversaries": [
+          "Finland"
+        ],
+        "red_lines": [
+          "Border security near Leningrad"
+        ],
+        "core_narratives": [
+          "Buffer zone security",
+          "Socialist expansion"
+        ]
+      },
+      "decision_history": [
+        {
+          "event_description": "Occupation of Eastern Poland",
+          "decision_taken": "Invaded Poland from east per Molotov-Ribbentrop secret protocol",
+          "outcome": "Absorbed eastern Poland with no Western response",
+          "date": "1939-09-17",
+          "context_factors": [
+            "Pact with Germany",
+            "Buffer zone expansion"
+          ]
+        }
+      ],
+      "cultural_context": {
+        "decision_making_style": "unilateral",
+        "information_sources": [
+          "NKVD",
+          "Red Army (purged leadership)"
+        ],
+        "domestic_power_base": "Communist Party, NKVD",
+        "succession_concerns": false,
+        "historical_analogies": [
+          "Russian imperial border security"
+        ]
+      },
+      "decision_context": {
+        "approval_rating": 80.0,
+        "economic_conditions": {
+          "gdp_growth": 5.0,
+          "unemployment": 0.5,
+          "inflation": 3.0,
+          "sanctions_pressure": 0.1
+        },
+        "military_posture": {
+          "readiness_level": "elevated",
+          "ongoing_operations": [
+            "Occupation of Eastern Poland",
+            "Baltic states pressure"
+          ],
+          "force_disposition": "Massive numerical superiority over Finland"
+        },
+        "domestic_pressures": {
+          "election_proximity_days": null,
+          "opposition_strength": 0.0,
+          "media_sentiment": 0.7,
+          "protest_level": "none"
+        },
+        "ongoing_conflicts": [],
+        "recent_events": [
+          "Finland refused territorial exchange",
+          "Molotov-Ribbentrop Pact in force",
+          "Western powers distracted by war with Germany"
+        ]
+      }
+    },
+    "event": {
+      "event_type": "military_action",
+      "severity": 0.7,
+      "description": "Soviet Union invades Finland with 600,000 troops after Finland refuses to cede territory near Leningrad. Stalin expects quick victory over small nation. Fabricates border incident as pretext.",
+      "structured": {
+        "actor": "Soviet Union",
+        "target": "Finland",
+        "action_category": "military",
+        "reversibility": "irreversible",
+        "visibility": "public"
+      }
+    },
+    "known_outcome": {
+      "escalation_risk": 0.6,
+      "action_types": [
+        "military",
+        "diplomatic",
+        "information"
+      ],
+      "tone": "threatening",
+      "description": "Finland fought heroically, inflicting massive Soviet casualties. USSR expelled from League of Nations. Eventually won through attrition. Contained conflict \u2014 did not spread to wider war."
+    },
+    "historical_date": "1939-11-30"
+  },
+  {
+    "id": "ww2-fall-of-france",
+    "label": "Fall of France - German invasion through Low Countries (May 1940)",
+    "leader": {
+      "name": "Adolf Hitler",
+      "country": "Germany",
+      "title": "F\u00fchrer and Chancellor",
+      "period": "world war 2",
+      "personality": {
+        "risk_tolerance": 0.9,
+        "authoritarianism": 1.0,
+        "nationalism": 1.0,
+        "pragmatism": -0.5,
+        "aggression": 0.95,
+        "populism": 0.7,
+        "transparency": -0.8,
+        "religiosity": -0.3
+      },
+      "ideology": {
+        "economic_system": "state_directed",
+        "geopolitical_orientation": "eastern",
+        "key_alliances": [
+          "Italy",
+          "Japan"
+        ],
+        "adversaries": [
+          "France",
+          "United Kingdom",
+          "Soviet Union"
+        ],
+        "red_lines": [
+          "Encirclement of Germany",
+          "Threat to German expansion"
+        ],
+        "core_narratives": [
+          "Lebensraum",
+          "Racial superiority",
+          "Revision of Versailles"
+        ]
+      },
+      "decision_history": [
+        {
+          "event_description": "Remilitarization of the Rhineland",
+          "decision_taken": "Ordered troops into demilitarized zone despite military advisors' objections",
+          "outcome": "No Allied response; emboldened further expansion",
+          "date": "1936-03-07",
+          "context_factors": [
+            "Allied passivity",
+            "Domestic political consolidation"
+          ]
+        },
+        {
+          "event_description": "Invasion of Poland",
+          "decision_taken": "Full-scale military invasion with Blitzkrieg tactics",
+          "outcome": "Poland conquered in weeks; triggered war declarations from UK and France",
+          "date": "1939-09-01",
+          "context_factors": [
+            "Molotov-Ribbentrop Pact",
+            "Military readiness"
+          ]
+        }
+      ],
+      "cultural_context": {
+        "decision_making_style": "unilateral",
+        "information_sources": [
+          "Military intelligence",
+          "Personal intuition"
+        ],
+        "domestic_power_base": "Nazi Party, Wehrmacht",
+        "succession_concerns": false,
+        "historical_analogies": [
+          "Franco-Prussian War",
+          "Schlieffen Plan"
+        ]
+      },
+      "decision_context": {
+        "approval_rating": 85.0,
+        "economic_conditions": {
+          "gdp_growth": 8.0,
+          "unemployment": 2.0,
+          "inflation": 3.5,
+          "sanctions_pressure": 0.3
+        },
+        "military_posture": {
+          "readiness_level": "mobilized",
+          "ongoing_operations": [
+            "Occupation of Poland",
+            "Norwegian Campaign"
+          ],
+          "force_disposition": "Western Front concentrated"
+        },
+        "domestic_pressures": {
+          "election_proximity_days": null,
+          "opposition_strength": 0.05,
+          "media_sentiment": 0.9,
+          "protest_level": "none"
+        },
+        "ongoing_conflicts": [
+          "War with United Kingdom",
+          "War with France (Phoney War phase)"
+        ],
+        "recent_events": [
+          "Successful conquest of Poland",
+          "Norwegian campaign underway"
+        ]
+      }
+    },
+    "event": {
+      "event_type": "military_action",
+      "severity": 1.0,
+      "description": "Germany invades France through the Low Countries (Belgium, Netherlands, Luxembourg), bypassing the Maginot Line with armored divisions. Blitzkrieg tactics overwhelm defenders, with Panzer divisions reaching the English Channel within days.",
+      "structured": {
+        "actor": "Germany",
+        "target": "France",
+        "action_category": "military",
+        "reversibility": "irreversible",
+        "visibility": "public"
+      }
+    },
+    "known_outcome": {
+      "escalation_risk": 0.92,
+      "action_types": [
+        "military",
+        "diplomatic",
+        "information"
+      ],
+      "tone": "defiant",
+      "description": "France fell within 6 weeks. Total war in Western Europe."
+    },
+    "historical_date": "1940-05-10"
+  },
+  {
+    "id": "ww2-dunkirk-halt-order",
+    "label": "Hitler's Halt Order at Dunkirk (May 1940)",
+    "leader": {
+      "name": "Adolf Hitler",
+      "country": "Germany",
+      "title": "F\u00fchrer and Chancellor",
+      "period": "world war 2",
+      "personality": {
+        "risk_tolerance": 0.9,
+        "authoritarianism": 1.0,
+        "nationalism": 1.0,
+        "pragmatism": -0.5,
+        "aggression": 0.95,
+        "populism": 0.7,
+        "transparency": -0.8,
+        "religiosity": -0.3
+      },
+      "ideology": {
+        "economic_system": "state_directed",
+        "geopolitical_orientation": "eastern",
+        "key_alliances": [
+          "Italy",
+          "Japan"
+        ],
+        "adversaries": [
+          "United Kingdom",
+          "France"
+        ],
+        "red_lines": [],
+        "core_narratives": [
+          "Military genius"
+        ]
+      },
+      "decision_history": [
+        {
+          "event_description": "Ardennes breakthrough",
+          "decision_taken": "Approved risky plan to attack through Ardennes",
+          "outcome": "Spectacular success; Allied armies split",
+          "date": "1940-05-10",
+          "context_factors": [
+            "Element of surprise"
+          ]
+        }
+      ],
+      "cultural_context": {
+        "decision_making_style": "unilateral",
+        "information_sources": [
+          "G\u00f6ring's assurances about Luftwaffe",
+          "Rundstedt's overextension concerns"
+        ],
+        "domestic_power_base": "Nazi Party, Wehrmacht",
+        "succession_concerns": false,
+        "historical_analogies": [
+          "WWI Flanders attrition"
+        ]
+      },
+      "decision_context": {
+        "approval_rating": 90.0,
+        "economic_conditions": {
+          "gdp_growth": 7.0,
+          "unemployment": 1.5,
+          "inflation": 3.0,
+          "sanctions_pressure": 0.3
+        },
+        "military_posture": {
+          "readiness_level": "mobilized",
+          "ongoing_operations": [
+            "Fall Gelb - invasion of France"
+          ],
+          "force_disposition": "Panzer divisions at Dunkirk perimeter"
+        },
+        "domestic_pressures": {
+          "election_proximity_days": null,
+          "opposition_strength": 0.03,
+          "media_sentiment": 0.95,
+          "protest_level": "none"
+        },
+        "ongoing_conflicts": [
+          "Battle of France"
+        ],
+        "recent_events": [
+          "400,000 Allied troops trapped at Dunkirk",
+          "G\u00f6ring claims Luftwaffe can finish them"
+        ]
+      }
+    },
+    "event": {
+      "event_type": "military_action",
+      "severity": 0.5,
+      "description": "German Panzer divisions have trapped 400,000 Allied troops at Dunkirk. G\u00f6ring requests Luftwaffe handle destruction. Rundstedt advises halt to rest overextended tanks. Decision point: press ground attack or pause.",
+      "structured": {
+        "actor": "Germany",
+        "target": "United Kingdom",
+        "action_category": "military",
+        "reversibility": "reversible",
+        "visibility": "public"
+      }
+    },
+    "known_outcome": {
+      "escalation_risk": 0.55,
+      "action_types": [
+        "military",
+        "information"
+      ],
+      "tone": "measured",
+      "description": "Hitler halted Panzers for 3 days. Allowed Dunkirk evacuation of 338,000 troops. Tactical pause within ongoing escalation."
+    },
+    "historical_date": "1940-05-24"
+  },
+  {
+    "id": "ww2-italy-enters-war",
+    "label": "Mussolini declares war on France and Britain (June 1940)",
+    "leader": {
+      "name": "Benito Mussolini",
+      "country": "Italy",
+      "title": "Duce",
+      "period": "world war 2",
+      "personality": {
+        "risk_tolerance": 0.6,
+        "authoritarianism": 0.9,
+        "nationalism": 0.9,
+        "pragmatism": -0.4,
+        "aggression": 0.7,
+        "populism": 0.8,
+        "transparency": -0.5,
+        "religiosity": -0.1
+      },
+      "ideology": {
+        "economic_system": "state_directed",
+        "geopolitical_orientation": "eastern",
+        "key_alliances": [
+          "Germany"
+        ],
+        "adversaries": [
+          "France",
+          "United Kingdom"
+        ],
+        "red_lines": [
+          "Italian exclusion from Mediterranean dominance"
+        ],
+        "core_narratives": [
+          "New Roman Empire",
+          "Mare Nostrum",
+          "National greatness"
+        ]
+      },
+      "decision_history": [
+        {
+          "event_description": "Invasion of Ethiopia",
+          "decision_taken": "Full-scale colonial war including poison gas",
+          "outcome": "Conquered Ethiopia; international condemnation",
+          "date": "1935-10-03",
+          "context_factors": [
+            "Imperial ambition",
+            "Weak League of Nations response"
+          ]
+        },
+        {
+          "event_description": "Pact of Steel with Germany",
+          "decision_taken": "Formal military alliance with Nazi Germany",
+          "outcome": "Bound Italy to German military adventures",
+          "date": "1939-05-22",
+          "context_factors": [
+            "Fear of German power",
+            "Shared ideology"
+          ]
+        }
+      ],
+      "cultural_context": {
+        "decision_making_style": "unilateral",
+        "information_sources": [
+          "Military chiefs (often ignored)",
+          "Personal calculation"
+        ],
+        "domestic_power_base": "Fascist Party, King (nominally)",
+        "succession_concerns": false,
+        "historical_analogies": [
+          "Roman Empire expansion"
+        ]
+      },
+      "decision_context": {
+        "approval_rating": 65.0,
+        "economic_conditions": {
+          "gdp_growth": 2.0,
+          "unemployment": 8.0,
+          "inflation": 5.0,
+          "sanctions_pressure": 0.1
+        },
+        "military_posture": {
+          "readiness_level": "elevated",
+          "ongoing_operations": [],
+          "force_disposition": "Military poorly equipped but large in numbers"
+        },
+        "domestic_pressures": {
+          "election_proximity_days": null,
+          "opposition_strength": 0.1,
+          "media_sentiment": 0.5,
+          "protest_level": "none"
+        },
+        "ongoing_conflicts": [],
+        "recent_events": [
+          "Germany conquering France rapidly",
+          "France near collapse",
+          "War appears nearly won"
+        ]
+      }
+    },
+    "event": {
+      "event_type": "military_action",
+      "severity": 0.7,
+      "description": "France is collapsing under German assault. Mussolini sees opportunity to grab territory with minimal risk \u2014 'a few thousand dead to sit at the peace table.' Italy declares war on France and Britain, attacking southern France.",
+      "structured": {
+        "actor": "Italy",
+        "target": "France",
+        "action_category": "military",
+        "reversibility": "irreversible",
+        "visibility": "public"
+      }
+    },
+    "known_outcome": {
+      "escalation_risk": 0.7,
+      "action_types": [
+        "military",
+        "diplomatic"
+      ],
+      "tone": "defiant",
+      "description": "Italy entered the war. Achieved little militarily against France. Opened Mediterranean theater. Eventually led to Italy's destruction."
+    },
+    "historical_date": "1940-06-10"
+  },
+  {
+    "id": "ww2-battle-of-britain",
+    "label": "Hitler orders bombing of British cities - The Blitz (September 1940)",
+    "leader": {
+      "name": "Adolf Hitler",
+      "country": "Germany",
+      "title": "F\u00fchrer and Chancellor",
+      "period": "world war 2",
+      "personality": {
+        "risk_tolerance": 0.9,
+        "authoritarianism": 1.0,
+        "nationalism": 1.0,
+        "pragmatism": -0.5,
+        "aggression": 0.95,
+        "populism": 0.7,
+        "transparency": -0.8,
+        "religiosity": -0.3
+      },
+      "ideology": {
+        "economic_system": "state_directed",
+        "geopolitical_orientation": "eastern",
+        "key_alliances": [
+          "Italy",
+          "Japan"
+        ],
+        "adversaries": [
+          "United Kingdom"
+        ],
+        "red_lines": [
+          "British refusal to negotiate peace"
+        ],
+        "core_narratives": [
+          "German air superiority",
+          "Breaking British morale"
+        ]
+      },
+      "decision_history": [
+        {
+          "event_description": "Fall of France",
+          "decision_taken": "Blitzkrieg invasion",
+          "outcome": "Total success in 6 weeks",
+          "date": "1940-05-10",
+          "context_factors": [
+            "Military superiority"
+          ]
+        }
+      ],
+      "cultural_context": {
+        "decision_making_style": "unilateral",
+        "information_sources": [
+          "G\u00f6ring's Luftwaffe reports (often inflated)",
+          "Personal intuition"
+        ],
+        "domestic_power_base": "Nazi Party",
+        "succession_concerns": false,
+        "historical_analogies": [
+          "WWI British blockade (retribution)"
+        ]
+      },
+      "decision_context": {
+        "approval_rating": 88.0,
+        "economic_conditions": {
+          "gdp_growth": 6.0,
+          "unemployment": 1.0,
+          "inflation": 3.5,
+          "sanctions_pressure": 0.3
+        },
+        "military_posture": {
+          "readiness_level": "mobilized",
+          "ongoing_operations": [
+            "Air campaign against Britain",
+            "U-boat warfare"
+          ],
+          "force_disposition": "Luftwaffe committed, invasion barges assembled"
+        },
+        "domestic_pressures": {
+          "election_proximity_days": null,
+          "opposition_strength": 0.03,
+          "media_sentiment": 0.9,
+          "protest_level": "none"
+        },
+        "ongoing_conflicts": [
+          "War with United Kingdom"
+        ],
+        "recent_events": [
+          "RAF proving resilient in daylight battles",
+          "British bombed Berlin (small raid)",
+          "Invasion deadline approaching"
+        ]
+      }
+    },
+    "event": {
+      "event_type": "military_action",
+      "severity": 0.8,
+      "description": "Hitler shifts Luftwaffe targeting from RAF airfields to London and British cities. Mass bombing of civilian areas begins \u2014 the Blitz. Goal is to terrorize the British population into demanding peace negotiations.",
+      "structured": {
+        "actor": "Germany",
+        "target": "United Kingdom",
+        "action_category": "military",
+        "reversibility": "irreversible",
+        "visibility": "public"
+      }
+    },
+    "known_outcome": {
+      "escalation_risk": 0.78,
+      "action_types": [
+        "military",
+        "information"
+      ],
+      "tone": "threatening",
+      "description": "The Blitz killed 43,000 civilians but failed to break British morale. Actually relieved pressure on RAF airfields. Invasion postponed indefinitely. Escalatory in targeting civilians but strategically a mistake."
+    },
+    "historical_date": "1940-09-07"
+  },
+  {
+    "id": "ww2-us-lend-lease",
+    "label": "Roosevelt's Lend-Lease Act (March 1941)",
+    "leader": {
+      "name": "Franklin D. Roosevelt",
+      "country": "United States",
+      "title": "President",
+      "period": "world war 2",
+      "personality": {
+        "risk_tolerance": 0.3,
+        "authoritarianism": -0.3,
+        "nationalism": 0.3,
+        "pragmatism": 0.8,
+        "aggression": 0.1,
+        "populism": 0.4,
+        "transparency": -0.2,
+        "religiosity": 0.2
+      },
+      "ideology": {
+        "economic_system": "mixed",
+        "geopolitical_orientation": "western",
+        "key_alliances": [
+          "United Kingdom",
+          "France"
+        ],
+        "adversaries": [
+          "Germany",
+          "Japan"
+        ],
+        "red_lines": [
+          "Hemispheric defense",
+          "Freedom of the seas"
+        ],
+        "core_narratives": [
+          "Arsenal of Democracy",
+          "Four Freedoms"
+        ]
+      },
+      "decision_history": [
+        {
+          "event_description": "Neutrality Acts",
+          "decision_taken": "Signed neutrality legislation to keep US out of European wars",
+          "outcome": "Constrained US response options as war approached",
+          "date": "1937-05-01",
+          "context_factors": [
+            "Isolationist public opinion",
+            "Great Depression priorities"
+          ]
+        },
+        {
+          "event_description": "Cash and Carry provision",
+          "decision_taken": "Modified neutrality to allow arms sales to belligerents who could pay cash and transport themselves",
+          "outcome": "De facto aid to Britain due to Royal Navy control of Atlantic",
+          "date": "1939-11-04",
+          "context_factors": [
+            "Aiding Allies without entering war"
+          ]
+        }
+      ],
+      "cultural_context": {
+        "decision_making_style": "advisory_council",
+        "information_sources": [
+          "State Department",
+          "Military advisors",
+          "Churchill correspondence"
+        ],
+        "domestic_power_base": "Democratic Party, labor unions, interventionist wing",
+        "succession_concerns": false,
+        "historical_analogies": [
+          "WWI entry",
+          "Monroe Doctrine"
+        ]
+      },
+      "decision_context": {
+        "approval_rating": 65.0,
+        "economic_conditions": {
+          "gdp_growth": 8.0,
+          "unemployment": 15.0,
+          "inflation": 2.0,
+          "sanctions_pressure": 0.0
+        },
+        "military_posture": {
+          "readiness_level": "peacetime",
+          "ongoing_operations": [],
+          "force_disposition": "Rearmament begun, peacetime draft enacted"
+        },
+        "domestic_pressures": {
+          "election_proximity_days": 1400,
+          "opposition_strength": 0.5,
+          "media_sentiment": 0.0,
+          "protest_level": "minor"
+        },
+        "ongoing_conflicts": [],
+        "recent_events": [
+          "Britain running out of cash to buy arms",
+          "Battle of Britain won but UK battered",
+          "Strong isolationist opposition in Congress"
+        ]
+      }
+    },
+    "event": {
+      "event_type": "economic",
+      "severity": 0.5,
+      "description": "Britain is running out of dollars to purchase American arms. Churchill has written urgently requesting continued supply. Roosevelt proposes lending military equipment to nations whose defense is vital to US security \u2014 effectively ending neutrality without declaring war.",
+      "structured": {
+        "actor": "United States",
+        "target": "United Kingdom",
+        "action_category": "economic",
+        "reversibility": "escalatory",
+        "visibility": "public"
+      }
+    },
+    "known_outcome": {
+      "escalation_risk": 0.45,
+      "action_types": [
+        "economic",
+        "diplomatic",
+        "information"
+      ],
+      "tone": "measured",
+      "description": "Lend-Lease passed. Made US the 'Arsenal of Democracy.' Escalatory step toward belligerency but not war itself. Germany viewed it as unneutral act."
+    },
+    "historical_date": "1941-03-11"
+  },
+  {
+    "id": "ww2-barbarossa",
+    "label": "Operation Barbarossa - German invasion of Soviet Union (June 1941)",
+    "leader": {
+      "name": "Adolf Hitler",
+      "country": "Germany",
+      "title": "F\u00fchrer and Chancellor",
+      "period": "world war 2",
+      "personality": {
+        "risk_tolerance": 0.9,
+        "authoritarianism": 1.0,
+        "nationalism": 1.0,
+        "pragmatism": -0.5,
+        "aggression": 0.95,
+        "populism": 0.7,
+        "transparency": -0.8,
+        "religiosity": -0.3
+      },
+      "ideology": {
+        "economic_system": "state_directed",
+        "geopolitical_orientation": "eastern",
+        "key_alliances": [
+          "Italy",
+          "Japan",
+          "Romania",
+          "Hungary",
+          "Finland"
+        ],
+        "adversaries": [
+          "Soviet Union",
+          "United Kingdom"
+        ],
+        "red_lines": [
+          "Communist threat",
+          "Encirclement"
+        ],
+        "core_narratives": [
+          "Lebensraum in the East",
+          "Destruction of Bolshevism",
+          "Racial war of annihilation"
+        ]
+      },
+      "decision_history": [
+        {
+          "event_description": "Fall of France",
+          "decision_taken": "Blitzkrieg through Low Countries",
+          "outcome": "France fell in 6 weeks",
+          "date": "1940-05-10",
+          "context_factors": [
+            "Military superiority",
+            "Element of surprise"
+          ]
+        }
+      ],
+      "cultural_context": {
+        "decision_making_style": "unilateral",
+        "information_sources": [
+          "Military intelligence (often disregarded)",
+          "Personal conviction"
+        ],
+        "domestic_power_base": "Nazi Party, Wehrmacht",
+        "succession_concerns": false,
+        "historical_analogies": [
+          "Napoleon's invasion of Russia (dismissed as irrelevant)"
+        ]
+      },
+      "decision_context": {
+        "approval_rating": 88.0,
+        "economic_conditions": {
+          "gdp_growth": 6.0,
+          "unemployment": 1.0,
+          "inflation": 4.0,
+          "sanctions_pressure": 0.4
+        },
+        "military_posture": {
+          "readiness_level": "mobilized",
+          "ongoing_operations": [
+            "Occupation of Western Europe",
+            "North Africa campaign"
+          ],
+          "force_disposition": "3.8 million troops on Eastern border"
+        },
+        "domestic_pressures": {
+          "election_proximity_days": null,
+          "opposition_strength": 0.03,
+          "media_sentiment": 0.95,
+          "protest_level": "none"
+        },
+        "ongoing_conflicts": [
+          "War with United Kingdom",
+          "North Africa"
+        ],
+        "recent_events": [
+          "Conquest of Yugoslavia and Greece",
+          "Molotov-Ribbentrop Pact still nominally in force"
+        ]
+      }
+    },
+    "event": {
+      "event_type": "military_action",
+      "severity": 1.0,
+      "description": "Germany launches Operation Barbarossa with 3.8 million troops attacking the Soviet Union across a 2,900 km front, violating the non-aggression pact. Scorched earth tactics employed, mass executions of civilians and POWs from day one. Hitler orders war of annihilation.",
+      "structured": {
+        "actor": "Germany",
+        "target": "Soviet Union",
+        "action_category": "military",
+        "reversibility": "irreversible",
+        "visibility": "public"
+      }
+    },
+    "known_outcome": {
+      "escalation_risk": 0.97,
+      "action_types": [
+        "military",
+        "information",
+        "economic"
+      ],
+      "tone": "threatening",
+      "description": "Largest land invasion in history. War of annihilation on Eastern Front. Ultimately destroyed Nazi Germany."
+    },
+    "historical_date": "1941-06-22"
+  },
+  {
+    "id": "ww2-stalin-response-barbarossa",
+    "label": "Stalin's response to Operation Barbarossa (June 1941)",
+    "leader": {
+      "name": "Joseph Stalin",
+      "country": "Soviet Union",
+      "title": "General Secretary",
+      "period": "world war 2",
+      "personality": {
+        "risk_tolerance": 0.3,
+        "authoritarianism": 1.0,
+        "nationalism": 0.6,
+        "pragmatism": 0.7,
+        "aggression": 0.5,
+        "populism": 0.4,
+        "transparency": -1.0,
+        "religiosity": -0.8
+      },
+      "ideology": {
+        "economic_system": "state_directed",
+        "geopolitical_orientation": "eastern",
+        "key_alliances": [],
+        "adversaries": [
+          "Germany",
+          "Japan"
+        ],
+        "red_lines": [
+          "Invasion of Soviet territory"
+        ],
+        "core_narratives": [
+          "Defense of the Motherland",
+          "Socialist state survival"
+        ]
+      },
+      "decision_history": [
+        {
+          "event_description": "Winter War with Finland",
+          "decision_taken": "Full-scale invasion over border dispute",
+          "outcome": "Pyrrhic victory; exposed military weakness",
+          "date": "1939-11-30",
+          "context_factors": [
+            "Buffer zone security",
+            "Overconfidence"
+          ]
+        },
+        {
+          "event_description": "Molotov-Ribbentrop Pact",
+          "decision_taken": "Non-aggression pact with Nazi Germany, secret division of Eastern Europe",
+          "outcome": "Bought time but created false sense of security",
+          "date": "1939-08-23",
+          "context_factors": [
+            "Buying time for rearmament",
+            "Distrust of Western allies"
+          ]
+        }
+      ],
+      "cultural_context": {
+        "decision_making_style": "unilateral",
+        "information_sources": [
+          "NKVD intelligence (often suppressed)",
+          "Politburo (rubber stamp)"
+        ],
+        "domestic_power_base": "Communist Party, NKVD, military",
+        "succession_concerns": false,
+        "historical_analogies": [
+          "Napoleon's 1812 invasion"
+        ]
+      },
+      "decision_context": {
+        "approval_rating": 75.0,
+        "economic_conditions": {
+          "gdp_growth": 4.0,
+          "unemployment": 0.5,
+          "inflation": 3.0,
+          "sanctions_pressure": 0.2
+        },
+        "military_posture": {
+          "readiness_level": "peacetime",
+          "ongoing_operations": [],
+          "force_disposition": "Officer corps decimated by purges, forces not on alert"
+        },
+        "domestic_pressures": {
+          "election_proximity_days": null,
+          "opposition_strength": 0.0,
+          "media_sentiment": 0.8,
+          "protest_level": "none"
+        },
+        "ongoing_conflicts": [],
+        "recent_events": [
+          "Multiple intelligence warnings of German attack dismissed by Stalin",
+          "German reconnaissance flights over Soviet territory increasing"
+        ]
+      }
+    },
+    "event": {
+      "event_type": "military_action",
+      "severity": 1.0,
+      "description": "3.8 million German troops have crossed the Soviet border at dawn. Luftwaffe has destroyed much of the Soviet air force on the ground. Border armies are being encircled and destroyed. This is a war of annihilation targeting the Soviet state itself.",
+      "structured": {
+        "actor": "Germany",
+        "target": "Soviet Union",
+        "action_category": "military",
+        "reversibility": "irreversible",
+        "visibility": "public"
+      }
+    },
+    "known_outcome": {
+      "escalation_risk": 0.95,
+      "action_types": [
+        "military",
+        "information",
+        "internal"
+      ],
+      "tone": "defiant",
+      "description": "Stalin was paralyzed for days, then rallied. Total mobilization ordered. 'The enemy will be defeated. Victory will be ours.' Great Patriotic War began \u2014 existential struggle."
+    },
+    "historical_date": "1941-06-22"
+  },
+  {
+    "id": "ww2-atlantic-charter",
+    "label": "Roosevelt and Churchill sign Atlantic Charter (August 1941)",
+    "leader": {
+      "name": "Franklin D. Roosevelt",
+      "country": "United States",
+      "title": "President",
+      "period": "world war 2",
+      "personality": {
+        "risk_tolerance": 0.3,
+        "authoritarianism": -0.3,
+        "nationalism": 0.3,
+        "pragmatism": 0.8,
+        "aggression": 0.1,
+        "populism": 0.4,
+        "transparency": -0.2,
+        "religiosity": 0.2
+      },
+      "ideology": {
+        "economic_system": "mixed",
+        "geopolitical_orientation": "western",
+        "key_alliances": [
+          "United Kingdom"
+        ],
+        "adversaries": [
+          "Germany",
+          "Japan"
+        ],
+        "red_lines": [
+          "Freedom of the seas",
+          "Self-determination"
+        ],
+        "core_narratives": [
+          "Four Freedoms",
+          "Post-war collective security"
+        ]
+      },
+      "decision_history": [
+        {
+          "event_description": "Lend-Lease Act",
+          "decision_taken": "Massive material aid to Britain",
+          "outcome": "US became Arsenal of Democracy, further from neutrality",
+          "date": "1941-03-11",
+          "context_factors": [
+            "British survival at stake"
+          ]
+        }
+      ],
+      "cultural_context": {
+        "decision_making_style": "advisory_council",
+        "information_sources": [
+          "State Department",
+          "Military advisors",
+          "Churchill"
+        ],
+        "domestic_power_base": "Democratic Party",
+        "succession_concerns": false,
+        "historical_analogies": [
+          "Wilson's Fourteen Points"
+        ]
+      },
+      "decision_context": {
+        "approval_rating": 68.0,
+        "economic_conditions": {
+          "gdp_growth": 12.0,
+          "unemployment": 10.0,
+          "inflation": 3.0,
+          "sanctions_pressure": 0.0
+        },
+        "military_posture": {
+          "readiness_level": "elevated",
+          "ongoing_operations": [
+            "Atlantic convoy escorts",
+            "Iceland occupation"
+          ],
+          "force_disposition": "Rapid military buildup"
+        },
+        "domestic_pressures": {
+          "election_proximity_days": 1200,
+          "opposition_strength": 0.45,
+          "media_sentiment": 0.1,
+          "protest_level": "none"
+        },
+        "ongoing_conflicts": [],
+        "recent_events": [
+          "Germany invaded Soviet Union",
+          "US-Japan tensions escalating",
+          "US Navy escorting convoys"
+        ]
+      }
+    },
+    "event": {
+      "event_type": "diplomatic",
+      "severity": 0.3,
+      "description": "Roosevelt and Churchill meet secretly at sea to issue a joint declaration of war aims and post-war vision \u2014 despite the US not being at war. Establishes shared principles: no territorial aggrandizement, self-determination, freedom of seas.",
+      "structured": {
+        "actor": "United States",
+        "target": "Germany",
+        "action_category": "diplomatic",
+        "reversibility": "reversible",
+        "visibility": "public"
+      }
+    },
+    "known_outcome": {
+      "escalation_risk": 0.3,
+      "action_types": [
+        "diplomatic",
+        "information"
+      ],
+      "tone": "measured",
+      "description": "Diplomatic signaling. Made US-UK alignment public. Not a direct escalation but set post-war framework. Germany and Japan took note."
+    },
+    "historical_date": "1941-08-14"
+  },
+  {
+    "id": "ww2-pearl-harbor",
+    "label": "Japanese attack on Pearl Harbor (December 1941)",
+    "leader": {
+      "name": "Hideki Tojo",
+      "country": "Japan",
+      "title": "Prime Minister",
+      "period": "world war 2",
+      "personality": {
+        "risk_tolerance": 0.7,
+        "authoritarianism": 0.8,
+        "nationalism": 0.95,
+        "pragmatism": -0.3,
+        "aggression": 0.8,
+        "populism": 0.3,
+        "transparency": -0.7,
+        "religiosity": 0.4
+      },
+      "ideology": {
+        "economic_system": "state_directed",
+        "geopolitical_orientation": "eastern",
+        "key_alliances": [
+          "Germany",
+          "Italy"
+        ],
+        "adversaries": [
+          "United States",
+          "United Kingdom",
+          "China"
+        ],
+        "red_lines": [
+          "Oil embargo threatening Japanese survival"
+        ],
+        "core_narratives": [
+          "Greater East Asia Co-Prosperity Sphere",
+          "Liberation of Asia from Western colonialism"
+        ]
+      },
+      "decision_history": [
+        {
+          "event_description": "Occupation of French Indochina",
+          "decision_taken": "Military occupation of Vichy French territory",
+          "outcome": "Triggered US oil and steel embargo",
+          "date": "1941-07-28",
+          "context_factors": [
+            "Resource acquisition",
+            "Strategic positioning"
+          ]
+        }
+      ],
+      "cultural_context": {
+        "decision_making_style": "advisory_council",
+        "information_sources": [
+          "Imperial military intelligence",
+          "Naval General Staff"
+        ],
+        "domestic_power_base": "Military establishment, Imperial institution",
+        "succession_concerns": false,
+        "historical_analogies": [
+          "Russo-Japanese War surprise attack on Port Arthur"
+        ]
+      },
+      "decision_context": {
+        "approval_rating": 70.0,
+        "economic_conditions": {
+          "gdp_growth": 2.0,
+          "unemployment": 3.0,
+          "inflation": 5.0,
+          "sanctions_pressure": 0.9
+        },
+        "military_posture": {
+          "readiness_level": "mobilized",
+          "ongoing_operations": [
+            "Second Sino-Japanese War"
+          ],
+          "force_disposition": "Combined Fleet at full readiness"
+        },
+        "domestic_pressures": {
+          "election_proximity_days": null,
+          "opposition_strength": 0.1,
+          "media_sentiment": 0.7,
+          "protest_level": "none"
+        },
+        "ongoing_conflicts": [
+          "Second Sino-Japanese War"
+        ],
+        "recent_events": [
+          "US oil embargo in effect",
+          "Negotiations with US stalled",
+          "Imperial Conference authorized war"
+        ]
+      }
+    },
+    "event": {
+      "event_type": "military_action",
+      "severity": 0.95,
+      "description": "Japan launches a surprise carrier-based air attack on the US Pacific Fleet at Pearl Harbor, Hawaii, destroying battleships and aircraft. Simultaneously attacks Philippines, Malaya, and other Pacific territories.",
+      "structured": {
+        "actor": "Japan",
+        "target": "United States",
+        "action_category": "military",
+        "reversibility": "irreversible",
+        "visibility": "public"
+      }
+    },
+    "known_outcome": {
+      "escalation_risk": 0.98,
+      "action_types": [
+        "military",
+        "diplomatic",
+        "information"
+      ],
+      "tone": "defiant",
+      "description": "US declared war next day. Full Pacific War erupted. Unified American resolve and industrial mobilization."
+    },
+    "historical_date": "1941-12-07"
+  },
+  {
+    "id": "ww2-doolittle-raid",
+    "label": "Doolittle Raid on Tokyo (April 1942)",
+    "leader": {
+      "name": "Franklin D. Roosevelt",
+      "country": "United States",
+      "title": "President",
+      "period": "world war 2",
+      "personality": {
+        "risk_tolerance": 0.3,
+        "authoritarianism": -0.3,
+        "nationalism": 0.3,
+        "pragmatism": 0.8,
+        "aggression": 0.1,
+        "populism": 0.4,
+        "transparency": -0.2,
+        "religiosity": 0.2
+      },
+      "ideology": {
+        "economic_system": "mixed",
+        "geopolitical_orientation": "western",
+        "key_alliances": [
+          "United Kingdom",
+          "Soviet Union",
+          "China"
+        ],
+        "adversaries": [
+          "Japan",
+          "Germany",
+          "Italy"
+        ],
+        "red_lines": [
+          "Attack on US territory"
+        ],
+        "core_narratives": [
+          "Unconditional surrender",
+          "Total victory"
+        ]
+      },
+      "decision_history": [
+        {
+          "event_description": "Declaration of war on Japan",
+          "decision_taken": "Requested Congress declare war after Pearl Harbor",
+          "outcome": "Unanimous war declaration, national unity",
+          "date": "1941-12-08",
+          "context_factors": [
+            "Pearl Harbor attack",
+            "Public outrage"
+          ]
+        }
+      ],
+      "cultural_context": {
+        "decision_making_style": "advisory_council",
+        "information_sources": [
+          "Joint Chiefs",
+          "Intelligence services"
+        ],
+        "domestic_power_base": "Wartime unity coalition",
+        "succession_concerns": false,
+        "historical_analogies": [
+          "Naval raids"
+        ]
+      },
+      "decision_context": {
+        "approval_rating": 80.0,
+        "economic_conditions": {
+          "gdp_growth": 15.0,
+          "unemployment": 5.0,
+          "inflation": 5.0,
+          "sanctions_pressure": 0.0
+        },
+        "military_posture": {
+          "readiness_level": "mobilized",
+          "ongoing_operations": [
+            "Pacific defense",
+            "Atlantic convoy war"
+          ],
+          "force_disposition": "Building up but still on defensive in Pacific"
+        },
+        "domestic_pressures": {
+          "election_proximity_days": 900,
+          "opposition_strength": 0.1,
+          "media_sentiment": 0.5,
+          "protest_level": "none"
+        },
+        "ongoing_conflicts": [
+          "Pacific War",
+          "Atlantic War"
+        ],
+        "recent_events": [
+          "Losing Philippines",
+          "Japanese conquering Southeast Asia rapidly",
+          "American morale needs boost"
+        ]
+      }
+    },
+    "event": {
+      "event_type": "military_action",
+      "severity": 0.4,
+      "description": "US launches 16 B-25 bombers from carrier USS Hornet to bomb Tokyo and other Japanese cities. Militarily minor damage but first strike on Japanese homeland. Primarily a morale and propaganda operation.",
+      "structured": {
+        "actor": "United States",
+        "target": "Japan",
+        "action_category": "military",
+        "reversibility": "irreversible",
+        "visibility": "public"
+      }
+    },
+    "known_outcome": {
+      "escalation_risk": 0.5,
+      "action_types": [
+        "military",
+        "information"
+      ],
+      "tone": "defiant",
+      "description": "Minor military impact but massive morale boost for US. Shocked Japan into Midway operation. Moderate escalation \u2014 war was already total but demonstrated US offensive reach."
+    },
+    "historical_date": "1942-04-18"
+  },
+  {
+    "id": "ww2-stalingrad-no-retreat",
+    "label": "Stalin's Order No. 227 - Not One Step Back (July 1942)",
+    "leader": {
+      "name": "Joseph Stalin",
+      "country": "Soviet Union",
+      "title": "General Secretary",
+      "period": "world war 2",
+      "personality": {
+        "risk_tolerance": 0.3,
+        "authoritarianism": 1.0,
+        "nationalism": 0.6,
+        "pragmatism": 0.7,
+        "aggression": 0.5,
+        "populism": 0.4,
+        "transparency": -1.0,
+        "religiosity": -0.8
+      },
+      "ideology": {
+        "economic_system": "state_directed",
+        "geopolitical_orientation": "eastern",
+        "key_alliances": [
+          "United Kingdom",
+          "United States"
+        ],
+        "adversaries": [
+          "Germany"
+        ],
+        "red_lines": [
+          "Loss of Stalingrad",
+          "Collapse of Southern front"
+        ],
+        "core_narratives": [
+          "Defense of the Motherland",
+          "Victory or death"
+        ]
+      },
+      "decision_history": [
+        {
+          "event_description": "Initial response to Barbarossa",
+          "decision_taken": "No retreat orders, then strategic withdrawal",
+          "outcome": "Massive losses but bought time for Moscow defense",
+          "date": "1941-06-22",
+          "context_factors": [
+            "Shock",
+            "Military disorganization"
+          ]
+        }
+      ],
+      "cultural_context": {
+        "decision_making_style": "unilateral",
+        "information_sources": [
+          "STAVKA",
+          "Front commanders"
+        ],
+        "domestic_power_base": "Communist Party, NKVD, military",
+        "succession_concerns": false,
+        "historical_analogies": [
+          "Kutuzov's stand against Napoleon"
+        ]
+      },
+      "decision_context": {
+        "approval_rating": 70.0,
+        "economic_conditions": {
+          "gdp_growth": -20.0,
+          "unemployment": 0.0,
+          "inflation": 15.0,
+          "sanctions_pressure": 0.0
+        },
+        "military_posture": {
+          "readiness_level": "mobilized",
+          "ongoing_operations": [
+            "Defense of Southern Russia",
+            "Partisan warfare"
+          ],
+          "force_disposition": "Southern front collapsing, Germans driving toward Stalingrad and Caucasus oil"
+        },
+        "domestic_pressures": {
+          "election_proximity_days": null,
+          "opposition_strength": 0.0,
+          "media_sentiment": -0.3,
+          "protest_level": "none"
+        },
+        "ongoing_conflicts": [
+          "Great Patriotic War - existential"
+        ],
+        "recent_events": [
+          "Germans advancing rapidly in south",
+          "Kharkov offensive disaster",
+          "Millions of Soviet troops lost"
+        ]
+      }
+    },
+    "event": {
+      "event_type": "military_action",
+      "severity": 0.85,
+      "description": "German forces are advancing rapidly toward Stalingrad and the Caucasus oil fields. The Southern front is collapsing. If Stalingrad falls, the Volga supply line is cut and Caucasus oil lost. The situation is desperate.",
+      "structured": {
+        "actor": "Germany",
+        "target": "Soviet Union",
+        "action_category": "military",
+        "reversibility": "irreversible",
+        "visibility": "public"
+      }
+    },
+    "known_outcome": {
+      "escalation_risk": 0.88,
+      "action_types": [
+        "military",
+        "internal",
+        "information"
+      ],
+      "tone": "threatening",
+      "description": "Stalin issued Order 227: 'Not one step back.' Blocking detachments authorized to shoot retreaters. Total commitment \u2014 Stalingrad became a death trap for both sides."
+    },
+    "historical_date": "1942-07-28"
+  },
+  {
+    "id": "ww2-north-africa-torch",
+    "label": "Operation Torch - Allied invasion of North Africa (November 1942)",
+    "leader": {
+      "name": "Franklin D. Roosevelt",
+      "country": "United States",
+      "title": "President",
+      "period": "world war 2",
+      "personality": {
+        "risk_tolerance": 0.3,
+        "authoritarianism": -0.3,
+        "nationalism": 0.3,
+        "pragmatism": 0.8,
+        "aggression": 0.1,
+        "populism": 0.4,
+        "transparency": -0.2,
+        "religiosity": 0.2
+      },
+      "ideology": {
+        "economic_system": "mixed",
+        "geopolitical_orientation": "western",
+        "key_alliances": [
+          "United Kingdom",
+          "Soviet Union",
+          "Free France"
+        ],
+        "adversaries": [
+          "Germany",
+          "Italy"
+        ],
+        "red_lines": [],
+        "core_narratives": [
+          "Europe First strategy",
+          "Coalition warfare"
+        ]
+      },
+      "decision_history": [
+        {
+          "event_description": "Entry into war",
+          "decision_taken": "Germany First strategy agreed with Churchill",
+          "outcome": "Prioritized European theater over Pacific",
+          "date": "1941-12-22",
+          "context_factors": [
+            "Germany as primary threat",
+            "Coalition requirements"
+          ]
+        }
+      ],
+      "cultural_context": {
+        "decision_making_style": "advisory_council",
+        "information_sources": [
+          "Joint Chiefs",
+          "British coordination"
+        ],
+        "domestic_power_base": "Wartime coalition",
+        "succession_concerns": false,
+        "historical_analogies": [
+          "WWI American Expeditionary Force"
+        ]
+      },
+      "decision_context": {
+        "approval_rating": 75.0,
+        "economic_conditions": {
+          "gdp_growth": 15.0,
+          "unemployment": 5.0,
+          "inflation": 6.0,
+          "sanctions_pressure": 0.0
+        },
+        "military_posture": {
+          "readiness_level": "mobilized",
+          "ongoing_operations": [
+            "Pacific campaigns",
+            "Atlantic convoy battle",
+            "Strategic bombing buildup"
+          ],
+          "force_disposition": "Large forces available, need combat experience"
+        },
+        "domestic_pressures": {
+          "election_proximity_days": 700,
+          "opposition_strength": 0.2,
+          "media_sentiment": 0.4,
+          "protest_level": "none"
+        },
+        "ongoing_conflicts": [
+          "World War II - all theaters"
+        ],
+        "recent_events": [
+          "Stalingrad battle raging",
+          "El Alamein victory",
+          "Stalin demanding Second Front"
+        ]
+      }
+    },
+    "event": {
+      "event_type": "military_action",
+      "severity": 0.65,
+      "description": "Allied forces land in French North Africa (Morocco, Algeria) with 107,000 troops. Facing Vichy French forces initially, with the goal of trapping Rommel's Afrika Korps between two Allied armies.",
+      "structured": {
+        "actor": "United States",
+        "target": "Germany",
+        "action_category": "military",
+        "reversibility": "irreversible",
+        "visibility": "public"
+      }
+    },
+    "known_outcome": {
+      "escalation_risk": 0.6,
+      "action_types": [
+        "military",
+        "diplomatic"
+      ],
+      "tone": "defiant",
+      "description": "Vichy French resistance collapsed quickly. Allies secured North Africa by May 1943. First major US ground operation in European theater. Moderate escalation within existing total war."
+    },
+    "historical_date": "1942-11-08"
+  },
+  {
+    "id": "ww2-unconditional-surrender",
+    "label": "Casablanca Declaration - Unconditional Surrender demand (January 1943)",
+    "leader": {
+      "name": "Franklin D. Roosevelt",
+      "country": "United States",
+      "title": "President",
+      "period": "world war 2",
+      "personality": {
+        "risk_tolerance": 0.3,
+        "authoritarianism": -0.3,
+        "nationalism": 0.3,
+        "pragmatism": 0.8,
+        "aggression": 0.1,
+        "populism": 0.4,
+        "transparency": -0.2,
+        "religiosity": 0.2
+      },
+      "ideology": {
+        "economic_system": "mixed",
+        "geopolitical_orientation": "western",
+        "key_alliances": [
+          "United Kingdom",
+          "Soviet Union"
+        ],
+        "adversaries": [
+          "Germany",
+          "Japan",
+          "Italy"
+        ],
+        "red_lines": [
+          "No negotiated peace with fascism"
+        ],
+        "core_narratives": [
+          "Unconditional surrender",
+          "No repeat of 1918 armistice"
+        ]
+      },
+      "decision_history": [
+        {
+          "event_description": "Atlantic Charter",
+          "decision_taken": "Joint war aims declaration with Churchill",
+          "outcome": "Established post-war vision",
+          "date": "1941-08-14",
+          "context_factors": [
+            "Allied unity"
+          ]
+        }
+      ],
+      "cultural_context": {
+        "decision_making_style": "advisory_council",
+        "information_sources": [
+          "Joint Chiefs",
+          "Churchill",
+          "State Department"
+        ],
+        "domestic_power_base": "Wartime coalition",
+        "succession_concerns": false,
+        "historical_analogies": [
+          "WWI 'stab in the back' myth",
+          "Grant's unconditional surrender at Fort Donelson"
+        ]
+      },
+      "decision_context": {
+        "approval_rating": 78.0,
+        "economic_conditions": {
+          "gdp_growth": 14.0,
+          "unemployment": 4.0,
+          "inflation": 5.0,
+          "sanctions_pressure": 0.0
+        },
+        "military_posture": {
+          "readiness_level": "mobilized",
+          "ongoing_operations": [
+            "North Africa campaign",
+            "Pacific campaigns",
+            "Strategic bombing"
+          ],
+          "force_disposition": "Full war production"
+        },
+        "domestic_pressures": {
+          "election_proximity_days": 650,
+          "opposition_strength": 0.15,
+          "media_sentiment": 0.5,
+          "protest_level": "none"
+        },
+        "ongoing_conflicts": [
+          "World War II"
+        ],
+        "recent_events": [
+          "Stalingrad turning point",
+          "North Africa campaign progressing",
+          "Need to reassure Stalin no separate peace"
+        ]
+      }
+    },
+    "event": {
+      "event_type": "diplomatic",
+      "severity": 0.5,
+      "description": "At the Casablanca Conference, Roosevelt announces that the Allies will accept nothing less than unconditional surrender from Germany, Italy, and Japan. No negotiations, no armistice \u2014 total defeat required.",
+      "structured": {
+        "actor": "United States",
+        "target": "Germany",
+        "action_category": "diplomatic",
+        "reversibility": "escalatory",
+        "visibility": "public"
+      }
+    },
+    "known_outcome": {
+      "escalation_risk": 0.65,
+      "action_types": [
+        "diplomatic",
+        "information"
+      ],
+      "tone": "defiant",
+      "description": "Closed off all negotiated exits. May have stiffened Axis resistance. Reassured Stalin. Eliminated possibility of separate peace. Moderate-high escalation \u2014 locked in total war commitment."
+    },
+    "historical_date": "1943-01-24"
+  },
+  {
+    "id": "ww2-kursk",
+    "label": "Battle of Kursk - German last major offensive in East (July 1943)",
+    "leader": {
+      "name": "Adolf Hitler",
+      "country": "Germany",
+      "title": "F\u00fchrer and Chancellor",
+      "period": "world war 2",
+      "personality": {
+        "risk_tolerance": 0.9,
+        "authoritarianism": 1.0,
+        "nationalism": 1.0,
+        "pragmatism": -0.5,
+        "aggression": 0.95,
+        "populism": 0.7,
+        "transparency": -0.8,
+        "religiosity": -0.3
+      },
+      "ideology": {
+        "economic_system": "state_directed",
+        "geopolitical_orientation": "eastern",
+        "key_alliances": [
+          "Italy",
+          "Japan"
+        ],
+        "adversaries": [
+          "Soviet Union",
+          "United Kingdom",
+          "United States"
+        ],
+        "red_lines": [],
+        "core_narratives": [
+          "German military superiority",
+          "Wonder weapons"
+        ]
+      },
+      "decision_history": [
+        {
+          "event_description": "Stalingrad",
+          "decision_taken": "Refused to allow 6th Army to break out",
+          "outcome": "Entire army destroyed or captured. 300,000 casualties.",
+          "date": "1943-02-02",
+          "context_factors": [
+            "Refused retreat on principle",
+            "G\u00f6ring's airlift promises"
+          ]
+        }
+      ],
+      "cultural_context": {
+        "decision_making_style": "unilateral",
+        "information_sources": [
+          "OKW (often overruled)",
+          "Personal intuition"
+        ],
+        "domestic_power_base": "Nazi Party (eroding military trust)",
+        "succession_concerns": false,
+        "historical_analogies": []
+      },
+      "decision_context": {
+        "approval_rating": 72.0,
+        "economic_conditions": {
+          "gdp_growth": 2.0,
+          "unemployment": 0.5,
+          "inflation": 6.0,
+          "sanctions_pressure": 0.5
+        },
+        "military_posture": {
+          "readiness_level": "mobilized",
+          "ongoing_operations": [
+            "Eastern Front defensive",
+            "Mediterranean defense",
+            "Atlantic Wall construction"
+          ],
+          "force_disposition": "Concentrated Panzer reserves for Kursk offensive"
+        },
+        "domestic_pressures": {
+          "election_proximity_days": null,
+          "opposition_strength": 0.1,
+          "media_sentiment": 0.4,
+          "protest_level": "none"
+        },
+        "ongoing_conflicts": [
+          "Eastern Front",
+          "Mediterranean",
+          "Strategic bombing"
+        ],
+        "recent_events": [
+          "Stalingrad disaster",
+          "North Africa lost",
+          "Allied bombing intensifying",
+          "Need a victory to restore initiative"
+        ]
+      }
+    },
+    "event": {
+      "event_type": "military_action",
+      "severity": 0.8,
+      "description": "Germany launches Operation Citadel \u2014 a massive pincer attack on the Kursk salient with 900,000 troops, 2,700 tanks, and 2,000 aircraft. Last attempt to regain strategic initiative on Eastern Front. Soviets know it's coming.",
+      "structured": {
+        "actor": "Germany",
+        "target": "Soviet Union",
+        "action_category": "military",
+        "reversibility": "irreversible",
+        "visibility": "public"
+      }
+    },
+    "known_outcome": {
+      "escalation_risk": 0.75,
+      "action_types": [
+        "military"
+      ],
+      "tone": "defiant",
+      "description": "Largest tank battle in history. German offensive blunted within a week. Soviets counterattacked. Germany permanently lost initiative in the East. High intensity but within existing total war \u2014 escalation was continuing commitment, not new threshold."
+    },
+    "historical_date": "1943-07-05"
+  },
+  {
+    "id": "ww2-d-day",
+    "label": "D-Day - Allied invasion of Normandy (June 1944)",
+    "leader": {
+      "name": "Winston Churchill",
+      "country": "United Kingdom",
+      "title": "Prime Minister",
+      "period": "world war 2",
+      "personality": {
+        "risk_tolerance": 0.6,
+        "authoritarianism": 0.2,
+        "nationalism": 0.7,
+        "pragmatism": 0.5,
+        "aggression": 0.5,
+        "populism": 0.5,
+        "transparency": 0.3,
+        "religiosity": 0.1
+      },
+      "ideology": {
+        "economic_system": "mixed",
+        "geopolitical_orientation": "western",
+        "key_alliances": [
+          "United States",
+          "Soviet Union",
+          "Free France"
+        ],
+        "adversaries": [
+          "Germany"
+        ],
+        "red_lines": [
+          "Survival of Britain",
+          "Liberation of Europe"
+        ],
+        "core_narratives": [
+          "We shall never surrender",
+          "Victory at all costs"
+        ]
+      },
+      "decision_history": [
+        {
+          "event_description": "North Africa campaign",
+          "decision_taken": "Peripheral strategy attacking through Mediterranean",
+          "outcome": "Cleared North Africa, invaded Sicily and Italy",
+          "date": "1942-10-23",
+          "context_factors": [
+            "Avoiding premature cross-Channel attack"
+          ]
+        }
+      ],
+      "cultural_context": {
+        "decision_making_style": "advisory_council",
+        "information_sources": [
+          "Military chiefs",
+          "Ultra intelligence",
+          "Allied coordination"
+        ],
+        "domestic_power_base": "War coalition, Parliament",
+        "succession_concerns": false,
+        "historical_analogies": [
+          "Gallipoli (cautionary)",
+          "Napoleonic coalition warfare"
+        ]
+      },
+      "decision_context": {
+        "approval_rating": 78.0,
+        "economic_conditions": {
+          "gdp_growth": 3.0,
+          "unemployment": 1.0,
+          "inflation": 4.0,
+          "sanctions_pressure": 0.0
+        },
+        "military_posture": {
+          "readiness_level": "mobilized",
+          "ongoing_operations": [
+            "Italian campaign",
+            "Strategic bombing",
+            "Atlantic battle"
+          ],
+          "force_disposition": "Massive force assembled in southern England"
+        },
+        "domestic_pressures": {
+          "election_proximity_days": 300,
+          "opposition_strength": 0.2,
+          "media_sentiment": 0.6,
+          "protest_level": "none"
+        },
+        "ongoing_conflicts": [
+          "World War II - all theaters"
+        ],
+        "recent_events": [
+          "Soviet offensives succeeding in East",
+          "Italy knocked out of war",
+          "Strategic bombing intensifying"
+        ]
+      }
+    },
+    "event": {
+      "event_type": "military_action",
+      "severity": 0.9,
+      "description": "Allies launch the largest amphibious invasion in history across the English Channel into Normandy. 156,000 troops, 5,000 ships, 11,000 aircraft. The liberation of Western Europe begins.",
+      "structured": {
+        "actor": "United Kingdom",
+        "target": "Germany",
+        "action_category": "military",
+        "reversibility": "irreversible",
+        "visibility": "public"
+      }
+    },
+    "known_outcome": {
+      "escalation_risk": 0.82,
+      "action_types": [
+        "military",
+        "information",
+        "diplomatic"
+      ],
+      "tone": "defiant",
+      "description": "Successful landing. Opened Western Front Germany could not sustain. War already at maximum intensity \u2014 D-Day was decisive but within existing total war framework."
+    },
+    "historical_date": "1944-06-06"
+  },
+  {
+    "id": "ww2-dresden-bombing",
+    "label": "Allied firebombing of Dresden (February 1945)",
+    "leader": {
+      "name": "Winston Churchill",
+      "country": "United Kingdom",
+      "title": "Prime Minister",
+      "period": "world war 2",
+      "personality": {
+        "risk_tolerance": 0.6,
+        "authoritarianism": 0.2,
+        "nationalism": 0.7,
+        "pragmatism": 0.5,
+        "aggression": 0.5,
+        "populism": 0.5,
+        "transparency": 0.3,
+        "religiosity": 0.1
+      },
+      "ideology": {
+        "economic_system": "mixed",
+        "geopolitical_orientation": "western",
+        "key_alliances": [
+          "United States",
+          "Soviet Union"
+        ],
+        "adversaries": [
+          "Germany"
+        ],
+        "red_lines": [],
+        "core_narratives": [
+          "Total victory",
+          "Strategic bombing works"
+        ]
+      },
+      "decision_history": [
+        {
+          "event_description": "Area bombing directive",
+          "decision_taken": "Approved Bomber Command targeting of German cities",
+          "outcome": "Massive destruction of German cities, civilian casualties",
+          "date": "1942-02-14",
+          "context_factors": [
+            "Inability to hit precision targets at night",
+            "Desire to break German morale"
+          ]
+        }
+      ],
+      "cultural_context": {
+        "decision_making_style": "advisory_council",
+        "information_sources": [
+          "Bomber Command",
+          "Air Ministry",
+          "Harris"
+        ],
+        "domestic_power_base": "War coalition",
+        "succession_concerns": false,
+        "historical_analogies": [
+          "The Blitz on London (retribution)"
+        ]
+      },
+      "decision_context": {
+        "approval_rating": 75.0,
+        "economic_conditions": {
+          "gdp_growth": 2.0,
+          "unemployment": 1.0,
+          "inflation": 4.0,
+          "sanctions_pressure": 0.0
+        },
+        "military_posture": {
+          "readiness_level": "mobilized",
+          "ongoing_operations": [
+            "Western Front advance",
+            "Strategic bombing campaign",
+            "Burma campaign"
+          ],
+          "force_disposition": "Total air superiority over Germany"
+        },
+        "domestic_pressures": {
+          "election_proximity_days": 150,
+          "opposition_strength": 0.2,
+          "media_sentiment": 0.5,
+          "protest_level": "none"
+        },
+        "ongoing_conflicts": [
+          "World War II - final phase"
+        ],
+        "recent_events": [
+          "Soviets requested bombing of Eastern German cities to aid advance",
+          "War clearly won but not over",
+          "V-2 rockets still hitting London"
+        ]
+      }
+    },
+    "event": {
+      "event_type": "military_action",
+      "severity": 0.85,
+      "description": "RAF and USAAF launch massive firebombing raids on Dresden, creating a firestorm that destroys the city center and kills approximately 25,000 civilians. City is a cultural center with questionable military value at this stage of the war.",
+      "structured": {
+        "actor": "United Kingdom",
+        "target": "Germany",
+        "action_category": "military",
+        "reversibility": "irreversible",
+        "visibility": "public"
+      }
+    },
+    "known_outcome": {
+      "escalation_risk": 0.7,
+      "action_types": [
+        "military",
+        "information"
+      ],
+      "tone": "defiant",
+      "description": "Massive destruction. Controversial even at the time \u2014 Churchill later distanced himself. Did not change war's outcome. Escalation in brutality within already-total war. Became symbol of strategic bombing's moral limits."
+    },
+    "historical_date": "1945-02-13"
+  },
+  {
+    "id": "ww2-hiroshima",
+    "label": "US drops atomic bomb on Hiroshima (August 1945)",
+    "leader": {
+      "name": "Harry S. Truman",
+      "country": "United States",
+      "title": "President",
+      "period": "world war 2",
+      "personality": {
+        "risk_tolerance": 0.4,
+        "authoritarianism": -0.2,
+        "nationalism": 0.5,
+        "pragmatism": 0.8,
+        "aggression": 0.3,
+        "populism": 0.3,
+        "transparency": 0.2,
+        "religiosity": 0.3
+      },
+      "ideology": {
+        "economic_system": "mixed",
+        "geopolitical_orientation": "western",
+        "key_alliances": [
+          "United Kingdom",
+          "Soviet Union"
+        ],
+        "adversaries": [
+          "Japan"
+        ],
+        "red_lines": [
+          "Unacceptable American casualties in invasion"
+        ],
+        "core_narratives": [
+          "End the war quickly",
+          "Save American lives"
+        ]
+      },
+      "decision_history": [
+        {
+          "event_description": "Potsdam Declaration",
+          "decision_taken": "Demanded unconditional surrender with warning of 'prompt and utter destruction'",
+          "outcome": "Japan rejected the ultimatum",
+          "date": "1945-07-26",
+          "context_factors": [
+            "Atomic bomb successfully tested",
+            "Soviet entry into Pacific War imminent"
+          ]
+        }
+      ],
+      "cultural_context": {
+        "decision_making_style": "advisory_council",
+        "information_sources": [
+          "Military advisors",
+          "Manhattan Project scientists",
+          "Intelligence on Japanese resolve"
+        ],
+        "domestic_power_base": "Democratic Party, wartime establishment",
+        "succession_concerns": false,
+        "historical_analogies": [
+          "Firebombing campaigns",
+          "Iwo Jima and Okinawa casualties"
+        ]
+      },
+      "decision_context": {
+        "approval_rating": 85.0,
+        "economic_conditions": {
+          "gdp_growth": -1.0,
+          "unemployment": 2.0,
+          "inflation": 3.0,
+          "sanctions_pressure": 0.0
+        },
+        "military_posture": {
+          "readiness_level": "mobilized",
+          "ongoing_operations": [
+            "Pacific island-hopping complete",
+            "Strategic bombing of Japan",
+            "Planning Operation Downfall"
+          ],
+          "force_disposition": "Preparing for invasion of Japan mainland"
+        },
+        "domestic_pressures": {
+          "election_proximity_days": 1100,
+          "opposition_strength": 0.1,
+          "media_sentiment": 0.7,
+          "protest_level": "none"
+        },
+        "ongoing_conflicts": [
+          "Pacific War"
+        ],
+        "recent_events": [
+          "Germany surrendered",
+          "Trinity test successful",
+          "Japan rejected Potsdam Declaration",
+          "Casualty estimates for invasion: 500k-1M"
+        ]
+      }
+    },
+    "event": {
+      "event_type": "military_action",
+      "severity": 1.0,
+      "description": "The United States drops an atomic bomb on Hiroshima, destroying the city and killing approximately 80,000 people instantly (140,000 by year end). First use of nuclear weapons in warfare. A second bomb is prepared for Nagasaki.",
+      "structured": {
+        "actor": "United States",
+        "target": "Japan",
+        "action_category": "military",
+        "reversibility": "irreversible",
+        "visibility": "public"
+      }
+    },
+    "known_outcome": {
+      "escalation_risk": 0.97,
+      "action_types": [
+        "military",
+        "information",
+        "diplomatic"
+      ],
+      "tone": "threatening",
+      "description": "Unprecedented weapon. Japan surrendered after second bomb on Nagasaki and Soviet declaration of war. Maximum escalation \u2014 introduced nuclear age. The war ended but the world changed forever."
+    },
+    "historical_date": "1945-08-06"
+  },
+  {
+    "id": "ww2-japan-surrender-debate",
+    "label": "Japan's Supreme War Council debates surrender (August 1945)",
+    "leader": {
+      "name": "Hirohito",
+      "country": "Japan",
+      "title": "Emperor",
+      "period": "world war 2",
+      "personality": {
+        "risk_tolerance": -0.5,
+        "authoritarianism": 0.3,
+        "nationalism": 0.5,
+        "pragmatism": 0.6,
+        "aggression": -0.5,
+        "populism": -0.5,
+        "transparency": -0.8,
+        "religiosity": 0.7
+      },
+      "ideology": {
+        "economic_system": "state_directed",
+        "geopolitical_orientation": "eastern",
+        "key_alliances": [],
+        "adversaries": [
+          "United States",
+          "Soviet Union",
+          "United Kingdom"
+        ],
+        "red_lines": [
+          "Preservation of imperial institution"
+        ],
+        "core_narratives": [
+          "Kokutai (national polity)",
+          "Imperial dignity"
+        ]
+      },
+      "decision_history": [
+        {
+          "event_description": "Approved war against United States",
+          "decision_taken": "Endorsed military's decision for war",
+          "outcome": "Pearl Harbor and Pacific War",
+          "date": "1941-12-01",
+          "context_factors": [
+            "Constitutional role limited",
+            "Military dominated government"
+          ]
+        }
+      ],
+      "cultural_context": {
+        "decision_making_style": "consensus",
+        "information_sources": [
+          "Supreme War Council",
+          "Imperial advisors"
+        ],
+        "domestic_power_base": "Imperial institution",
+        "succession_concerns": true,
+        "historical_analogies": [
+          "Meiji Restoration adaptability"
+        ]
+      },
+      "decision_context": {
+        "approval_rating": 60.0,
+        "economic_conditions": {
+          "gdp_growth": -30.0,
+          "unemployment": 5.0,
+          "inflation": 50.0,
+          "sanctions_pressure": 1.0
+        },
+        "military_posture": {
+          "readiness_level": "mobilized",
+          "ongoing_operations": [
+            "Homeland defense preparations"
+          ],
+          "force_disposition": "Navy destroyed, air force reduced to kamikazes, army intact but isolated"
+        },
+        "domestic_pressures": {
+          "election_proximity_days": null,
+          "opposition_strength": 0.4,
+          "media_sentiment": -0.8,
+          "protest_level": "none"
+        },
+        "ongoing_conflicts": [
+          "Pacific War - losing on all fronts"
+        ],
+        "recent_events": [
+          "Hiroshima atomic bomb",
+          "Nagasaki atomic bomb",
+          "Soviet Union declared war and invaded Manchuria",
+          "Firebombing destroying cities"
+        ]
+      }
+    },
+    "event": {
+      "event_type": "military_action",
+      "severity": 1.0,
+      "description": "Two atomic bombs have been dropped on Japanese cities. The Soviet Union has declared war and is sweeping through Manchuria. The Supreme War Council is deadlocked 3-3 on surrender. The Emperor must break the tie.",
+      "structured": {
+        "actor": "United States",
+        "target": "Japan",
+        "action_category": "military",
+        "reversibility": "irreversible",
+        "visibility": "public"
+      }
+    },
+    "known_outcome": {
+      "escalation_risk": 0.4,
+      "action_types": [
+        "diplomatic",
+        "internal"
+      ],
+      "tone": "conciliatory",
+      "description": "Hirohito broke precedent to order surrender: 'endure the unendurable.' De-escalation at maximum crisis point. Military coup attempt failed. Surrender broadcast August 15."
+    },
+    "historical_date": "1945-08-14"
+  }
+]

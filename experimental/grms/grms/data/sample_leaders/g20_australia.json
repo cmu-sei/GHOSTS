@@ -1,0 +1,78 @@
+{
+  "name": "Anthony Albanese",
+  "country": "Australia",
+  "period": "current",
+  "title": "Prime Minister",
+  "personality": {
+    "risk_tolerance": -0.1,
+    "authoritarianism": -0.3,
+    "nationalism": 0.2,
+    "pragmatism": 0.7,
+    "aggression": -0.2,
+    "populism": 0.3,
+    "transparency": 0.3,
+    "religiosity": -0.3
+  },
+  "ideology": {
+    "economic_system": "mixed",
+    "geopolitical_orientation": "western",
+    "key_alliances": ["United States", "United Kingdom", "Japan", "India", "AUKUS", "Five Eyes"],
+    "adversaries": ["China"],
+    "red_lines": [
+      "Chinese military expansion in Pacific Islands",
+      "Threats to Australian sea lanes",
+      "Coercion of Pacific Island nations"
+    ],
+    "core_narratives": [
+      "AUKUS and Indo-Pacific security",
+      "Stabilized China relationship with guardrails",
+      "Climate action and energy transition",
+      "Pacific family leadership"
+    ]
+  },
+  "decision_history": [
+    {
+      "event_description": "Balanced AUKUS submarine program with stabilized China trade relationship",
+      "decision_taken": "Continued AUKUS nuclear submarine acquisition while normalizing trade with China, lifted most trade restrictions bilaterally",
+      "outcome": "Improved trade with China while maintaining security architecture",
+      "date": "2025-01-15T00:00:00Z",
+      "context_factors": ["economic dependency on China trade", "security dependency on US", "dual-track strategy"]
+    },
+    {
+      "event_description": "US tariffs created pressure on alliance dynamics",
+      "decision_taken": "Maintained AUKUS commitment while negotiating trade exemptions, positioned as bridge between US and regional partners",
+      "outcome": "Alliance maintained, some trade concessions achieved",
+      "date": "2025-04-10T00:00:00Z",
+      "context_factors": ["alliance value", "regional positioning", "economic exposure"]
+    }
+  ],
+  "cultural_context": {
+    "decision_making_style": "consensus",
+    "information_sources": ["ASIS/ASD intelligence", "Five Eyes sharing", "cabinet national security committee", "diplomatic corps"],
+    "domestic_power_base": "Labor Party, trade unions, suburban middle class, multicultural communities",
+    "succession_concerns": false,
+    "historical_analogies": ["ANZUS alliance foundation", "Hawke-Keating economic reform", "Whitlam era independence"]
+  },
+  "decision_context": {
+    "approval_rating": 40.0,
+    "economic_conditions": {
+      "gdp_growth": 1.8,
+      "unemployment": 4.1,
+      "inflation": 3.5,
+      "sanctions_pressure": 0.0
+    },
+    "military_posture": {
+      "readiness_level": "peacetime",
+      "ongoing_operations": ["Indo-Pacific maritime patrols", "Pacific Islands engagement"],
+      "force_disposition": "maritime-focused with AUKUS submarine transition underway"
+    },
+    "domestic_pressures": {
+      "election_proximity_days": 200,
+      "opposition_strength": 0.5,
+      "media_sentiment": -0.2,
+      "protest_level": "none"
+    },
+    "ongoing_conflicts": ["South China Sea tensions"],
+    "recent_events": ["AUKUS submarine milestone", "China trade normalization", "Pacific Islands forum"]
+  }
+}

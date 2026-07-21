@@ -1,0 +1,166 @@
+<div class="population-detail">
+  @if (loading()) {
+    <div class="loading-state">
+      <mat-icon class="spin">sync</mat-icon>
+      <span>Loading population data...</span>
+    </div>
+  }
+
+  @if (error(); as errorMsg) {
+    <app-glass-card>
+      <div class="error-state">
+        <mat-icon>error_outline</mat-icon>
+        <span>{{ errorMsg }}</span>
+      </div>
+    </app-glass-card>
+  }
+
+  @if (population(); as pop) {
+    <!-- Header -->
+    <div class="detail-header">
+      <button mat-icon-button (click)="goBack()">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div class="header-info">
+        <h1>{{ pop.country | countryFlag }} {{ pop.country }}</h1>
+        <span class="pop-total">{{ pop.total_population | number }} people</span>
+      </div>
+      <button mat-flat-button color="primary" (click)="goToPredictions()">
+        <mat-icon>psychology</mat-icon>
+        Run Prediction
+      </button>
+    </div>
+
+    <!-- Segment Visualization -->
+    <app-glass-card>
+      <h3 class="section-title">Population Segments</h3>
+      <div class="segment-bar-container">
+        <div class="stacked-bar">
+          @for (segment of pop.segments; track segment.name) {
+            <div
+              class="segment-fill"
+              [style.flex-grow]="segment.percentage"
+              [style.background]="getSegmentColor($index)"
+              [matTooltip]="segment.name + ': ' + segment.percentage + '%'"
+            ></div>
+          }
+        </div>
+        <div class="segment-legend">
+          @for (segment of pop.segments; track segment.name) {
+            <div class="legend-item">
+              <span class="legend-dot" [style.background]="getSegmentColor($index)"></span>
+              <span class="legend-name">{{ segment.name }}</span>
+              <span class="legend-pct">{{ segment.percentage }}%</span>
+            </div>
+          }
+        </div>
+      </div>
+    </app-glass-card>
+
+    <!-- Segment Details -->
+    <mat-accordion multi>
+      @for (segment of pop.segments; track segment.name) {
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <span class="segment-dot" [style.background]="getSegmentColor($index)"></span>
+              {{ segment.name }}
+              <span class="segment-pct">{{ segment.percentage }}%</span>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+
+          <div class="segment-details">
+            <!-- Demographics -->
+            <div class="detail-section">
+              <h4>Demographics</h4>
+              <div class="detail-grid">
+                <div class="detail-item">
+                  <span class="detail-label">Urbanization</span>
+                  <span class="detail-value">{{ segment.demographics.urbanization | number:'1.0-0' }}%</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Education Level</span>
+                  <span class="detail-value">{{ segment.demographics.education_level | number:'1.2-2' }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Median Age</span>
+                  <span class="detail-value">{{ segment.demographics.median_age }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Economic Class</span>
+                  <span class="detail-value">{{ segment.demographics.economic_class }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Disposition -->
+            <div class="detail-section">
+              <h4>Disposition</h4>
+              <div class="detail-grid">
+                <div class="detail-item">
+                  <span class="detail-label">Govt Trust</span>
+                  <div class="mini-bar">
+                    <div class="mini-fill" [style.width.%]="segment.disposition.government_trust * 100"></div>
+                  </div>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Nationalism</span>
+                  <div class="mini-bar">
+                    <div class="mini-fill" [style.width.%]="segment.disposition.nationalism * 100"></div>
+                  </div>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Media Exposure</span>
+                  <div class="mini-bar">
+                    <div class="mini-fill" [style.width.%]="segment.disposition.media_exposure * 100"></div>
+                  </div>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Social Media</span>
+                  <div class="mini-bar">
+                    <div class="mini-fill" [style.width.%]="segment.disposition.social_media_activity * 100"></div>
+                  </div>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Protest Propensity</span>
+                  <div class="mini-bar">
+                    <div class="mini-fill" [style.width.%]="segment.disposition.protest_propensity * 100"></div>
+                  </div>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Compliance</span>
+                  <div class="mini-bar">
+                    <div class="mini-fill" [style.width.%]="segment.disposition.compliance_baseline * 100"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Response Parameters -->
+            <div class="detail-section">
+              <h4>Response Parameters</h4>
+              <div class="detail-grid">
+                <div class="detail-item">
+                  <span class="detail-label">Rally Coefficient</span>
+                  <span class="detail-value">{{ segment.response_params.rally_around_flag_coefficient | number:'1.2-2' }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Economic Sensitivity</span>
+                  <span class="detail-value">{{ segment.response_params.economic_sensitivity | number:'1.2-2' }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Fatigue Rate</span>
+                  <span class="detail-value">{{ segment.response_params.fatigue_rate | number:'1.3-3' }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Amplification</span>
+                  <span class="detail-value">{{ segment.response_params.amplification_factor | number:'1.2-2' }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </mat-expansion-panel>
+      }
+    </mat-accordion>
+  }
+</div>

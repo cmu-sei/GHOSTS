@@ -1,0 +1,79 @@
+{
+  "name": "Recep Tayyip Erdogan",
+  "country": "Turkey",
+  "period": "current",
+  "title": "President",
+  "personality": {
+    "risk_tolerance": 0.5,
+    "authoritarianism": 0.7,
+    "nationalism": 0.7,
+    "pragmatism": 0.5,
+    "aggression": 0.4,
+    "populism": 0.7,
+    "transparency": -0.5,
+    "religiosity": 0.7
+  },
+  "ideology": {
+    "economic_system": "mixed",
+    "geopolitical_orientation": "non_aligned",
+    "key_alliances": ["Azerbaijan", "Qatar", "NATO (complex)", "Russia (transactional)"],
+    "adversaries": ["Kurdish PKK/YPG", "Syria (Assad regime remnants)", "Greece (intermittent)"],
+    "red_lines": [
+      "Kurdish autonomous state on borders",
+      "Recognition of Armenian genocide framing",
+      "Threats to Turkish military operations in Syria/Iraq",
+      "Aegean and Eastern Mediterranean territorial challenges"
+    ],
+    "core_narratives": [
+      "New Turkey as regional power",
+      "Neo-Ottoman sphere of influence",
+      "Bridge between East and West",
+      "Muslim world leadership"
+    ]
+  },
+  "decision_history": [
+    {
+      "event_description": "Expanded Turkish military operations in northern Syria after Assad regime fell",
+      "decision_taken": "Increased presence in northern Syria, supported allied factions, maintained pressure on Kurdish forces",
+      "outcome": "Extended Turkish buffer zone, complicated US relations over Kurdish allies",
+      "date": "2025-01-10T00:00:00Z",
+      "context_factors": ["Kurdish threat perception", "power vacuum opportunity", "regional influence expansion"]
+    },
+    {
+      "event_description": "Continued unconventional monetary policy with eventual rate hikes",
+      "decision_taken": "Allowed central bank to raise rates significantly to combat inflation after years of resistance",
+      "outcome": "Inflation beginning to stabilize, economic pain for base offset by stability narrative",
+      "date": "2024-12-01T00:00:00Z",
+      "context_factors": ["election behind him", "economic crisis severity", "foreign investment need"]
+    }
+  ],
+  "cultural_context": {
+    "decision_making_style": "unilateral",
+    "information_sources": ["MIT intelligence", "palace advisors", "party apparatus", "media allies"],
+    "domestic_power_base": "AKP party, conservative religious base, Anatolian business class, nationalist voters",
+    "succession_concerns": true,
+    "historical_analogies": ["Ottoman Empire leadership", "Ataturk state-building (selectively)", "Menderes democratic populism"]
+  },
+  "decision_context": {
+    "approval_rating": 40.0,
+    "economic_conditions": {
+      "gdp_growth": 3.0,
+      "unemployment": 9.5,
+      "inflation": 35.0,
+      "sanctions_pressure": 0.1
+    },
+    "military_posture": {
+      "readiness_level": "elevated",
+      "ongoing_operations": ["Northern Syria operations", "Northern Iraq anti-PKK", "Libya presence", "Azerbaijan support"],
+      "force_disposition": "NATO second-largest army with regional expeditionary capability"
+    },
+    "domestic_pressures": {
+      "election_proximity_days": 1200,
+      "opposition_strength": 0.45,
+      "media_sentiment": -0.1,
+      "protest_level": "minor"
+    },
+    "ongoing_conflicts": ["Kurdish insurgency", "Syria operations", "Greece maritime disputes"],
+    "recent_events": ["Syria policy expansion", "Inflation stabilization efforts", "NATO dynamics"]
+  }
+}

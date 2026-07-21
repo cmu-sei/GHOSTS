@@ -1,0 +1,172 @@
+@use 'variables' as *;
+@use 'glass' as *;
+
+.dashboard {
+  padding: 32px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.dashboard-header {
+  margin-bottom: 32px;
+
+  .title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: $text;
+    margin: 0 0 4px;
+    letter-spacing: -0.02em;
+  }
+
+  .subtitle {
+    font-size: 0.875rem;
+    color: $text-dim;
+    margin: 0;
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.stat-icon {
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
+
+  &.cyan {
+    color: $accent;
+  }
+
+  &.green {
+    color: $green;
+  }
+
+  &.orange {
+    color: $orange;
+  }
+
+  &.red {
+    color: $red;
+  }
+}
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: $text;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: $text-mute;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.status-healthy {
+  color: $green;
+  text-transform: capitalize;
+}
+
+.status-unhealthy {
+  color: $red;
+  text-transform: capitalize;
+}
+
+.section-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: $text-dim;
+  margin: 0 0 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.quick-actions {
+  margin-bottom: 40px;
+}
+
+.actions-row {
+  display: flex;
+  gap: 16px;
+}
+
+.glass-btn {
+  @include glass-panel;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  color: $text;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: transform $transition, box-shadow $transition, border-color $transition;
+  background: $glass !important;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: $shadow-lg;
+    border-color: rgba(56, 189, 248, 0.3);
+  }
+
+  mat-icon {
+    color: $accent;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.system-info {
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+
+  .info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .info-label {
+    font-size: 0.75rem;
+    color: $text-mute;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .info-value {
+    font-size: 1rem;
+    color: $accent;
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+@media (max-width: 768px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .actions-row {
+    flex-direction: column;
+  }
+}

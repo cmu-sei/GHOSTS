@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="1.6" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="64" height="64" rx="12" fill="#050806"/>
+  <g filter="url(#glow)" fill="none" stroke="#33ff8a" stroke-width="3"
+     stroke-linejoin="round" stroke-linecap="round">
+    <!-- Ghost body: domed head, wavy skirt -->
+    <path d="M16 40
+             V27
+             a16 16 0 0 1 32 0
+             V40
+             l-5.3 5 -5.3 -5 -5.4 5 -5.3 -5 -5.4 5 Z"/>
+    <!-- Eyes -->
+    <circle cx="26" cy="27" r="3.2" fill="#33ff8a" stroke="none"/>
+    <circle cx="38" cy="27" r="3.2" fill="#33ff8a" stroke="none"/>
+  </g>
+</svg>

@@ -1,0 +1,78 @@
+{
+  "name": "Mark Carney",
+  "country": "Canada",
+  "period": "current",
+  "title": "Prime Minister",
+  "personality": {
+    "risk_tolerance": 0.1,
+    "authoritarianism": -0.3,
+    "nationalism": 0.3,
+    "pragmatism": 0.8,
+    "aggression": -0.1,
+    "populism": 0.2,
+    "transparency": 0.4,
+    "religiosity": -0.2
+  },
+  "ideology": {
+    "economic_system": "mixed",
+    "geopolitical_orientation": "western",
+    "key_alliances": ["United States", "United Kingdom", "NATO", "European Union", "Five Eyes"],
+    "adversaries": ["Russia", "China"],
+    "red_lines": [
+      "US threats to Canadian sovereignty",
+      "Arctic territorial disputes",
+      "Trade deals that undermine Canadian industry"
+    ],
+    "core_narratives": [
+      "Canadian economic sovereignty and diversification",
+      "Middle power multilateral leadership",
+      "Climate action with economic transition",
+      "Standing firm against US pressure while maintaining alliance"
+    ]
+  },
+  "decision_history": [
+    {
+      "event_description": "US imposed 25% tariffs on Canadian goods and Trump made provocative comments about Canada as 51st state",
+      "decision_taken": "Imposed retaliatory tariffs on US goods, rallied domestic unity, accelerated trade diversification with EU and Indo-Pacific",
+      "outcome": "Strong domestic approval, strained US relationship, accelerated non-US trade deals",
+      "date": "2025-03-20T00:00:00Z",
+      "context_factors": ["sovereignty narrative", "domestic unity opportunity", "economic diversification need"]
+    },
+    {
+      "event_description": "Won snap election on platform of economic sovereignty",
+      "decision_taken": "Called election framing ballot as choice about Canadian sovereignty, leveraged anti-US tariff sentiment",
+      "outcome": "Liberal majority government, strong mandate for economic independence agenda",
+      "date": "2025-04-28T00:00:00Z",
+      "context_factors": ["Trump tariff crisis", "public anger at US", "economic expertise credentials"]
+    }
+  ],
+  "cultural_context": {
+    "decision_making_style": "consensus",
+    "information_sources": ["CSIS intelligence", "Bank of Canada expertise", "cabinet", "Five Eyes sharing"],
+    "domestic_power_base": "Liberal Party, urban professionals, central Canada, climate-conscious voters",
+    "succession_concerns": false,
+    "historical_analogies": ["Trudeau Sr. National Energy Program", "NAFTA negotiations", "Macdonald national policy"]
+  },
+  "decision_context": {
+    "approval_rating": 52.0,
+    "economic_conditions": {
+      "gdp_growth": 1.5,
+      "unemployment": 6.5,
+      "inflation": 3.0,
+      "sanctions_pressure": 0.1
+    },
+    "military_posture": {
+      "readiness_level": "peacetime",
+      "ongoing_operations": ["NATO Latvia deployment", "NORAD", "Arctic sovereignty patrols"],
+      "force_disposition": "NATO-integrated with Arctic focus"
+    },
+    "domestic_pressures": {
+      "election_proximity_days": 1400,
+      "opposition_strength": 0.35,
+      "media_sentiment": 0.2,
+      "protest_level": "none"
+    },
+    "ongoing_conflicts": ["US-Canada trade war"],
+    "recent_events": ["Retaliatory tariffs on US", "EU trade acceleration", "Election victory"]
+  }
+}

@@ -1,0 +1,132 @@
+{
+  "country": "United Kingdom",
+  "total_population": 47760000,
+  "period": "world war 2",
+  "segments": [
+    {
+      "name": "Urban working class and factory workers",
+      "percentage": 0.40,
+      "demographics": {
+        "urbanization": 0.95,
+        "education_level": 0.4,
+        "median_age": 35,
+        "economic_class": "lower"
+      },
+      "disposition": {
+        "government_trust": 0.6,
+        "nationalism": 0.6,
+        "media_exposure": 0.7,
+        "social_media_activity": 0.0,
+        "protest_propensity": 0.15,
+        "compliance_baseline": 0.75,
+        "information_sources": ["bbc_radio", "newspapers", "word_of_mouth"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.7,
+        "economic_sensitivity": 0.7,
+        "fatigue_rate": 0.07,
+        "amplification_factor": 0.4
+      }
+    },
+    {
+      "name": "Middle class professionals and civil servants",
+      "percentage": 0.20,
+      "demographics": {
+        "urbanization": 0.8,
+        "education_level": 0.7,
+        "median_age": 40,
+        "economic_class": "middle"
+      },
+      "disposition": {
+        "government_trust": 0.7,
+        "nationalism": 0.6,
+        "media_exposure": 0.85,
+        "social_media_activity": 0.0,
+        "protest_propensity": 0.1,
+        "compliance_baseline": 0.8,
+        "information_sources": ["bbc_radio", "newspapers", "government_notices"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.6,
+        "economic_sensitivity": 0.5,
+        "fatigue_rate": 0.06,
+        "amplification_factor": 0.5
+      }
+    },
+    {
+      "name": "Rural and agricultural communities",
+      "percentage": 0.15,
+      "demographics": {
+        "urbanization": 0.1,
+        "education_level": 0.35,
+        "median_age": 42,
+        "economic_class": "lower"
+      },
+      "disposition": {
+        "government_trust": 0.6,
+        "nationalism": 0.55,
+        "media_exposure": 0.5,
+        "social_media_activity": 0.0,
+        "protest_propensity": 0.05,
+        "compliance_baseline": 0.8,
+        "information_sources": ["bbc_radio", "word_of_mouth", "local_press"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.55,
+        "economic_sensitivity": 0.5,
+        "fatigue_rate": 0.05,
+        "amplification_factor": 0.2
+      }
+    },
+    {
+      "name": "Upper class and establishment",
+      "percentage": 0.05,
+      "demographics": {
+        "urbanization": 0.6,
+        "education_level": 0.9,
+        "median_age": 48,
+        "economic_class": "upper"
+      },
+      "disposition": {
+        "government_trust": 0.75,
+        "nationalism": 0.7,
+        "media_exposure": 0.9,
+        "social_media_activity": 0.0,
+        "protest_propensity": 0.05,
+        "compliance_baseline": 0.85,
+        "information_sources": ["newspapers", "bbc_radio", "government_contacts"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.65,
+        "economic_sensitivity": 0.3,
+        "fatigue_rate": 0.04,
+        "amplification_factor": 0.6
+      }
+    },
+    {
+      "name": "Military personnel and families",
+      "percentage": 0.20,
+      "demographics": {
+        "urbanization": 0.6,
+        "education_level": 0.5,
+        "median_age": 28,
+        "economic_class": "middle"
+      },
+      "disposition": {
+        "government_trust": 0.75,
+        "nationalism": 0.75,
+        "media_exposure": 0.5,
+        "social_media_activity": 0.0,
+        "protest_propensity": 0.02,
+        "compliance_baseline": 0.9,
+        "information_sources": ["military_channels", "bbc_radio", "word_of_mouth"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.8,
+        "economic_sensitivity": 0.4,
+        "fatigue_rate": 0.09,
+        "amplification_factor": 0.35
+      }
+    }
+  ]
+}

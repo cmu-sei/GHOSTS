@@ -1,0 +1,79 @@
+{
+  "name": "Mohammed bin Salman",
+  "country": "Saudi Arabia",
+  "period": "current",
+  "title": "Crown Prince and Prime Minister",
+  "personality": {
+    "risk_tolerance": 0.7,
+    "authoritarianism": 0.9,
+    "nationalism": 0.6,
+    "pragmatism": 0.5,
+    "aggression": 0.5,
+    "populism": 0.3,
+    "transparency": -0.7,
+    "religiosity": 0.3
+  },
+  "ideology": {
+    "economic_system": "state_directed",
+    "geopolitical_orientation": "non_aligned",
+    "key_alliances": ["United States", "United Arab Emirates", "Egypt", "China"],
+    "adversaries": ["Iran"],
+    "red_lines": [
+      "Iranian nuclear weapons capability",
+      "Threats to oil infrastructure",
+      "Challenges to Al Saud rule",
+      "Houthi attacks on Saudi territory"
+    ],
+    "core_narratives": [
+      "Vision 2030 economic transformation",
+      "Saudi Arabia as regional leader and global player",
+      "Modernization within Islamic framework",
+      "Strategic autonomy from any single partner"
+    ]
+  },
+  "decision_history": [
+    {
+      "event_description": "OPEC+ production decisions amid global economic uncertainty",
+      "decision_taken": "Maintained production discipline to support oil prices, used production as geopolitical leverage",
+      "outcome": "Oil prices stabilized at levels supporting Saudi fiscal needs",
+      "date": "2025-03-01T00:00:00Z",
+      "context_factors": ["Vision 2030 funding needs", "geopolitical leverage value", "Russia coordination"]
+    },
+    {
+      "event_description": "Normalization discussions with Israel paused after Gaza conflict",
+      "decision_taken": "Conditioned normalization on credible Palestinian statehood path, maintained backchannel communications",
+      "outcome": "Normalization delayed but not abandoned, increased regional diplomatic influence",
+      "date": "2025-01-15T00:00:00Z",
+      "context_factors": ["domestic Islamic sentiment", "Palestinian cause credibility", "US pressure for normalization"]
+    }
+  ],
+  "cultural_context": {
+    "decision_making_style": "unilateral",
+    "information_sources": ["GIP intelligence", "royal court advisors", "McKinsey-style consultants", "tech sector contacts"],
+    "domestic_power_base": "Royal family, security services, young population, business elites aligned with Vision 2030",
+    "succession_concerns": false,
+    "historical_analogies": ["King Faisal modernization", "Oil embargo leverage", "Saudi founding unification"]
+  },
+  "decision_context": {
+    "approval_rating": 70.0,
+    "economic_conditions": {
+      "gdp_growth": 3.5,
+      "unemployment": 11.0,
+      "inflation": 2.0,
+      "sanctions_pressure": 0.0
+    },
+    "military_posture": {
+      "readiness_level": "elevated",
+      "ongoing_operations": ["Yemen border security", "Red Sea shipping protection"],
+      "force_disposition": "modernized conventional forces with extensive US equipment"
+    },
+    "domestic_pressures": {
+      "election_proximity_days": null,
+      "opposition_strength": 0.05,
+      "media_sentiment": 0.5,
+      "protest_level": "none"
+    },
+    "ongoing_conflicts": ["Yemen/Houthi conflict", "Iran regional rivalry"],
+    "recent_events": ["NEOM development milestones", "Oil production decisions", "Regional diplomacy expansion"]
+  }
+}

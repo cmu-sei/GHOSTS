@@ -1,0 +1,132 @@
+{
+  "country": "United Kingdom",
+  "total_population": 67000000,
+  "period": "current",
+  "segments": [
+    {
+      "name": "London financial and professional class",
+      "percentage": 0.20,
+      "demographics": {
+        "urbanization": 0.98,
+        "education_level": 0.85,
+        "median_age": 36,
+        "economic_class": "upper"
+      },
+      "disposition": {
+        "government_trust": 0.35,
+        "nationalism": 0.3,
+        "media_exposure": 0.9,
+        "social_media_activity": 0.75,
+        "protest_propensity": 0.3,
+        "compliance_baseline": 0.65,
+        "information_sources": ["foreign_media", "social_media"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.25,
+        "economic_sensitivity": 0.45,
+        "fatigue_rate": 0.12,
+        "amplification_factor": 0.6
+      }
+    },
+    {
+      "name": "Suburban and home counties middle class",
+      "percentage": 0.25,
+      "demographics": {
+        "urbanization": 0.75,
+        "education_level": 0.6,
+        "median_age": 45,
+        "economic_class": "middle"
+      },
+      "disposition": {
+        "government_trust": 0.4,
+        "nationalism": 0.55,
+        "media_exposure": 0.75,
+        "social_media_activity": 0.55,
+        "protest_propensity": 0.2,
+        "compliance_baseline": 0.7,
+        "information_sources": ["state_tv", "social_media"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.45,
+        "economic_sensitivity": 0.6,
+        "fatigue_rate": 0.08,
+        "amplification_factor": 0.4
+      }
+    },
+    {
+      "name": "Northern industrial working class",
+      "percentage": 0.25,
+      "demographics": {
+        "urbanization": 0.8,
+        "education_level": 0.4,
+        "median_age": 42,
+        "economic_class": "lower"
+      },
+      "disposition": {
+        "government_trust": 0.25,
+        "nationalism": 0.6,
+        "media_exposure": 0.65,
+        "social_media_activity": 0.55,
+        "protest_propensity": 0.4,
+        "compliance_baseline": 0.55,
+        "information_sources": ["social_media", "state_tv"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.45,
+        "economic_sensitivity": 0.8,
+        "fatigue_rate": 0.09,
+        "amplification_factor": 0.55
+      }
+    },
+    {
+      "name": "Multicultural urban communities",
+      "percentage": 0.15,
+      "demographics": {
+        "urbanization": 0.9,
+        "education_level": 0.45,
+        "median_age": 32,
+        "economic_class": "lower"
+      },
+      "disposition": {
+        "government_trust": 0.25,
+        "nationalism": 0.2,
+        "media_exposure": 0.6,
+        "social_media_activity": 0.65,
+        "protest_propensity": 0.4,
+        "compliance_baseline": 0.5,
+        "information_sources": ["social_media", "word_of_mouth", "foreign_media"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.15,
+        "economic_sensitivity": 0.8,
+        "fatigue_rate": 0.1,
+        "amplification_factor": 0.55
+      }
+    },
+    {
+      "name": "Scottish and Welsh national communities",
+      "percentage": 0.15,
+      "demographics": {
+        "urbanization": 0.65,
+        "education_level": 0.55,
+        "median_age": 43,
+        "economic_class": "middle"
+      },
+      "disposition": {
+        "government_trust": 0.3,
+        "nationalism": 0.5,
+        "media_exposure": 0.7,
+        "social_media_activity": 0.55,
+        "protest_propensity": 0.35,
+        "compliance_baseline": 0.6,
+        "information_sources": ["state_tv", "social_media"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.3,
+        "economic_sensitivity": 0.65,
+        "fatigue_rate": 0.09,
+        "amplification_factor": 0.5
+      }
+    }
+  ]
+}

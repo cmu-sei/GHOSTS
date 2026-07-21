@@ -1,0 +1,132 @@
+{
+  "country": "France",
+  "total_population": 41680000,
+  "period": "world war 2",
+  "segments": [
+    {
+      "name": "Urban working class (occupied zone)",
+      "percentage": 0.25,
+      "demographics": {
+        "urbanization": 0.9,
+        "education_level": 0.45,
+        "median_age": 35,
+        "economic_class": "lower"
+      },
+      "disposition": {
+        "government_trust": 0.2,
+        "nationalism": 0.6,
+        "media_exposure": 0.5,
+        "social_media_activity": 0.0,
+        "protest_propensity": 0.2,
+        "compliance_baseline": 0.5,
+        "information_sources": ["bbc_french_service", "underground_press", "word_of_mouth"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.6,
+        "economic_sensitivity": 0.8,
+        "fatigue_rate": 0.1,
+        "amplification_factor": 0.45
+      }
+    },
+    {
+      "name": "Rural population (Vichy zone)",
+      "percentage": 0.30,
+      "demographics": {
+        "urbanization": 0.1,
+        "education_level": 0.3,
+        "median_age": 40,
+        "economic_class": "lower"
+      },
+      "disposition": {
+        "government_trust": 0.45,
+        "nationalism": 0.5,
+        "media_exposure": 0.35,
+        "social_media_activity": 0.0,
+        "protest_propensity": 0.08,
+        "compliance_baseline": 0.7,
+        "information_sources": ["vichy_radio", "church", "word_of_mouth", "bbc_french_service"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.45,
+        "economic_sensitivity": 0.6,
+        "fatigue_rate": 0.07,
+        "amplification_factor": 0.2
+      }
+    },
+    {
+      "name": "Resistance-sympathetic population",
+      "percentage": 0.10,
+      "demographics": {
+        "urbanization": 0.7,
+        "education_level": 0.6,
+        "median_age": 32,
+        "economic_class": "middle"
+      },
+      "disposition": {
+        "government_trust": 0.05,
+        "nationalism": 0.85,
+        "media_exposure": 0.6,
+        "social_media_activity": 0.0,
+        "protest_propensity": 0.7,
+        "compliance_baseline": 0.2,
+        "information_sources": ["bbc_french_service", "underground_press", "resistance_networks"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.9,
+        "economic_sensitivity": 0.3,
+        "fatigue_rate": 0.05,
+        "amplification_factor": 0.8
+      }
+    },
+    {
+      "name": "Vichy-aligned establishment",
+      "percentage": 0.10,
+      "demographics": {
+        "urbanization": 0.6,
+        "education_level": 0.7,
+        "median_age": 50,
+        "economic_class": "upper"
+      },
+      "disposition": {
+        "government_trust": 0.7,
+        "nationalism": 0.3,
+        "media_exposure": 0.8,
+        "social_media_activity": 0.0,
+        "protest_propensity": 0.0,
+        "compliance_baseline": 0.9,
+        "information_sources": ["vichy_radio", "vichy_press", "government_contacts"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.2,
+        "economic_sensitivity": 0.3,
+        "fatigue_rate": 0.04,
+        "amplification_factor": 0.5
+      }
+    },
+    {
+      "name": "Middle class attentistes (wait-and-see)",
+      "percentage": 0.25,
+      "demographics": {
+        "urbanization": 0.65,
+        "education_level": 0.6,
+        "median_age": 42,
+        "economic_class": "middle"
+      },
+      "disposition": {
+        "government_trust": 0.3,
+        "nationalism": 0.5,
+        "media_exposure": 0.65,
+        "social_media_activity": 0.0,
+        "protest_propensity": 0.05,
+        "compliance_baseline": 0.7,
+        "information_sources": ["vichy_radio", "bbc_french_service", "newspapers", "word_of_mouth"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.4,
+        "economic_sensitivity": 0.6,
+        "fatigue_rate": 0.08,
+        "amplification_factor": 0.35
+      }
+    }
+  ]
+}

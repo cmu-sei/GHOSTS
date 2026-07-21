@@ -1,0 +1,29 @@
+[project]
+name = "ghosts-rpg"
+version = "0.2.0"
+description = "GHOSTS RPG — Scenario Player (Zork Mode): a Zork-style web game for cyber/cogwar mission rehearsal, built on GHOSTS scenarios."
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.110",
+    "uvicorn[standard]>=0.27",
+    "httpx>=0.27",
+    "pydantic>=2.6",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+]
+
+[project.scripts]
+ghosts-rpg = "ghosts_rpg.app:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

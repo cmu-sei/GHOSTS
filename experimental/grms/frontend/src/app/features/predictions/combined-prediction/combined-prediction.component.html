@@ -1,0 +1,93 @@
+<div class="combined-prediction">
+  <div class="input-panel">
+    <app-glass-card>
+      <h2 class="section-title">Population Country</h2>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Country (Population)</mat-label>
+        <input matInput (input)="country.set($any($event.target).value)" placeholder="e.g. Northland">
+      </mat-form-field>
+    </app-glass-card>
+
+    <app-glass-card>
+      <h2 class="section-title">Event Parameters</h2>
+      <app-event-form
+        [leaders]="leaders()"
+        (submitEvent)="onPredict($event)" />
+    </app-glass-card>
+  </div>
+
+  <div class="results-panel">
+    @if (loading()) {
+      <app-glass-card>
+        <div class="loading-state">
+          <mat-icon class="spin">autorenew</mat-icon>
+          <span>Running combined prediction...</span>
+        </div>
+      </app-glass-card>
+    }
+
+    @if (result(); as r) {
+      <div class="split-results">
+        <div class="leader-side">
+          <app-glass-card>
+            <h2 class="section-title">
+              <mat-icon>person</mat-icon>
+              Leader Response
+            </h2>
+            <p class="statement">{{ r.leader.verbal_response.statement }}</p>
+            <div class="badge-row">
+              <span class="tone-badge">{{ r.leader.verbal_response.tone }}</span>
+              <span class="audience-badge">{{ r.leader.verbal_response.audience }}</span>
+            </div>
+            <div class="actions-summary">
+              @for (action of r.leader.actions; track action.description) {
+                <div class="action-mini">
+                  <span class="action-type">{{ action.action_type }}</span>
+                  <span class="likelihood">{{ action.likelihood * 100 | number:'1.0-0' }}%</span>
+                </div>
+              }
+            </div>
+            <div class="gauge-row">
+              <app-gauge [value]="r.leader.escalation_risk" label="Escalation" [size]="100" />
+            </div>
+          </app-glass-card>
+        </div>
+
+        <div class="population-side">
+          <app-glass-card>
+            <h2 class="section-title">
+              <mat-icon>groups</mat-icon>
+              Population Response
+            </h2>
+            <div class="sentiment-bars">
+              <div class="bar-item">
+                <span class="bar-label">Support</span>
+                <div class="bar-track">
+                  <div class="bar-fill green" [style.width.%]="r.population.overall.support_leader * 100"></div>
+                </div>
+                <span class="bar-value">{{ r.population.overall.support_leader * 100 | number:'1.0-0' }}%</span>
+              </div>
+              <div class="bar-item">
+                <span class="bar-label">Oppose</span>
+                <div class="bar-track">
+                  <div class="bar-fill red" [style.width.%]="r.population.overall.oppose_leader * 100"></div>
+                </div>
+                <span class="bar-value">{{ r.population.overall.oppose_leader * 100 | number:'1.0-0' }}%</span>
+              </div>
+              <div class="bar-item">
+                <span class="bar-label">Neutral</span>
+                <div class="bar-track">
+                  <div class="bar-fill neutral" [style.width.%]="r.population.overall.neutral * 100"></div>
+                </div>
+                <span class="bar-value">{{ r.population.overall.neutral * 100 | number:'1.0-0' }}%</span>
+              </div>
+            </div>
+            <div class="gauge-row">
+              <app-gauge [value]="r.population.overall.protest_likelihood" label="Protest Risk" [size]="100" />
+            </div>
+          </app-glass-card>
+        </div>
+      </div>
+    }
+  </div>
+</div>

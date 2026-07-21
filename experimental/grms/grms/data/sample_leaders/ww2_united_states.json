@@ -1,0 +1,86 @@
+{
+  "name": "Franklin D. Roosevelt",
+  "country": "United States",
+  "period": "world war 2",
+  "title": "President",
+  "personality": {
+    "risk_tolerance": 0.3,
+    "authoritarianism": 0.2,
+    "nationalism": 0.4,
+    "pragmatism": 0.8,
+    "aggression": 0.2,
+    "populism": 0.5,
+    "transparency": 0.1,
+    "religiosity": 0.2
+  },
+  "ideology": {
+    "economic_system": "mixed_market",
+    "geopolitical_orientation": "western",
+    "key_alliances": ["United Kingdom", "Soviet Union", "China", "Free France", "Commonwealth nations"],
+    "adversaries": ["Germany", "Japan", "Italy"],
+    "red_lines": [
+      "Axis domination of Europe or Asia-Pacific",
+      "Threats to Western Hemisphere security",
+      "Disruption of Atlantic shipping lanes",
+      "Unconditional surrender not achieved from Axis powers"
+    ],
+    "core_narratives": [
+      "Arsenal of democracy defending the Four Freedoms",
+      "United Nations as framework for lasting peace",
+      "America's industrial might as decisive war factor",
+      "Self-determination of peoples against fascist tyranny"
+    ]
+  },
+  "decision_history": [
+    {
+      "event_description": "Japan attacked Pearl Harbor destroying much of the Pacific Fleet",
+      "decision_taken": "Requested and obtained congressional declaration of war; adopted Europe First strategy despite Pacific attack",
+      "outcome": "Full American mobilization; Europe First ensured Germany's defeat took priority",
+      "date": "1941-12-08T00:00:00Z",
+      "context_factors": ["public outrage over Pearl Harbor", "assessment that Germany was greater long-term threat", "Churchill's advocacy for Europe First", "industrial mobilization planning"]
+    },
+    {
+      "event_description": "Need to decide between immediate cross-Channel invasion or peripheral strategy",
+      "decision_taken": "Approved Operation Torch - invasion of French North Africa as compromise with British strategy",
+      "outcome": "Axis expelled from North Africa by May 1943; delayed cross-Channel attack to 1944",
+      "date": "1942-07-25T00:00:00Z",
+      "context_factors": ["British insistence troops not ready for France", "need for American troops to see combat in 1942", "Vichy French North Africa as softer target", "Soviet pressure for second front"]
+    },
+    {
+      "event_description": "Casablanca Conference with Churchill to set Allied war strategy",
+      "decision_taken": "Announced unconditional surrender policy for all Axis powers",
+      "outcome": "Eliminated possibility of negotiated peace; unified Allied war aims but may have stiffened Axis resistance",
+      "date": "1943-01-24T00:00:00Z",
+      "context_factors": ["desire to reassure Stalin of Western commitment", "prevent repeat of 1918 stab-in-the-back myth", "domestic political clarity"]
+    }
+  ],
+  "cultural_context": {
+    "decision_making_style": "consultative",
+    "information_sources": ["Joint Chiefs of Staff", "OSS intelligence", "State Department", "brain trust advisors", "fireside chat public feedback"],
+    "domestic_power_base": "New Deal coalition (labor unions, urban voters, farmers, Southern Democrats), Democratic Party majority in Congress",
+    "succession_concerns": false,
+    "historical_analogies": ["Wilson's failed peace after WW1", "Monroe Doctrine hemispheric security", "American industrial revolution capacity"]
+  },
+  "decision_context": {
+    "approval_rating": 77.0,
+    "economic_conditions": {
+      "gdp_growth": 18.0,
+      "unemployment": 4.7,
+      "inflation": 5.0,
+      "sanctions_pressure": 0.0
+    },
+    "military_posture": {
+      "readiness_level": "mobilizing",
+      "ongoing_operations": ["Pacific island campaign", "North Africa campaign", "Atlantic convoy escort", "Strategic bombing build-up in Britain"],
+      "force_disposition": "massive industrial mobilization; force projection building across both oceans"
+    },
+    "domestic_pressures": {
+      "election_proximity_days": 700,
+      "opposition_strength": 0.3,
+      "media_sentiment": 0.5,
+      "protest_level": "low"
+    },
+    "ongoing_conflicts": ["World War II - Pacific theater", "World War II - European/Mediterranean theater", "Battle of the Atlantic"],
+    "recent_events": ["Pearl Harbor attack December 1941", "Midway victory June 1942", "Operation Torch November 1942", "Casablanca Conference January 1943"]
+  }
+}

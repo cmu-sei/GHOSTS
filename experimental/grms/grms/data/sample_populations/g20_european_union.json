@@ -1,0 +1,132 @@
+{
+  "country": "European Union",
+  "total_population": 448000000,
+  "period": "current",
+  "segments": [
+    {
+      "name": "Western European urban professionals",
+      "percentage": 0.25,
+      "demographics": {
+        "urbanization": 0.95,
+        "education_level": 0.8,
+        "median_age": 40,
+        "economic_class": "upper"
+      },
+      "disposition": {
+        "government_trust": 0.5,
+        "nationalism": 0.3,
+        "media_exposure": 0.85,
+        "social_media_activity": 0.7,
+        "protest_propensity": 0.3,
+        "compliance_baseline": 0.7,
+        "information_sources": ["foreign_media", "social_media"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.3,
+        "economic_sensitivity": 0.5,
+        "fatigue_rate": 0.11,
+        "amplification_factor": 0.5
+      }
+    },
+    {
+      "name": "Industrial and manufacturing workers",
+      "percentage": 0.25,
+      "demographics": {
+        "urbanization": 0.7,
+        "education_level": 0.5,
+        "median_age": 44,
+        "economic_class": "middle"
+      },
+      "disposition": {
+        "government_trust": 0.4,
+        "nationalism": 0.45,
+        "media_exposure": 0.65,
+        "social_media_activity": 0.5,
+        "protest_propensity": 0.35,
+        "compliance_baseline": 0.65,
+        "information_sources": ["state_tv", "social_media"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.35,
+        "economic_sensitivity": 0.7,
+        "fatigue_rate": 0.08,
+        "amplification_factor": 0.4
+      }
+    },
+    {
+      "name": "Eastern European transition economies",
+      "percentage": 0.20,
+      "demographics": {
+        "urbanization": 0.6,
+        "education_level": 0.55,
+        "median_age": 42,
+        "economic_class": "middle"
+      },
+      "disposition": {
+        "government_trust": 0.3,
+        "nationalism": 0.6,
+        "media_exposure": 0.6,
+        "social_media_activity": 0.55,
+        "protest_propensity": 0.35,
+        "compliance_baseline": 0.55,
+        "information_sources": ["social_media", "state_tv"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.4,
+        "economic_sensitivity": 0.75,
+        "fatigue_rate": 0.09,
+        "amplification_factor": 0.5
+      }
+    },
+    {
+      "name": "Mediterranean service and tourism sector",
+      "percentage": 0.15,
+      "demographics": {
+        "urbanization": 0.7,
+        "education_level": 0.45,
+        "median_age": 40,
+        "economic_class": "lower"
+      },
+      "disposition": {
+        "government_trust": 0.25,
+        "nationalism": 0.45,
+        "media_exposure": 0.6,
+        "social_media_activity": 0.6,
+        "protest_propensity": 0.4,
+        "compliance_baseline": 0.5,
+        "information_sources": ["social_media", "state_tv"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.3,
+        "economic_sensitivity": 0.8,
+        "fatigue_rate": 0.1,
+        "amplification_factor": 0.5
+      }
+    },
+    {
+      "name": "EU institutional and policy community",
+      "percentage": 0.15,
+      "demographics": {
+        "urbanization": 0.95,
+        "education_level": 0.9,
+        "median_age": 42,
+        "economic_class": "upper"
+      },
+      "disposition": {
+        "government_trust": 0.65,
+        "nationalism": 0.2,
+        "media_exposure": 0.85,
+        "social_media_activity": 0.6,
+        "protest_propensity": 0.1,
+        "compliance_baseline": 0.8,
+        "information_sources": ["internal_briefings", "foreign_media"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.35,
+        "economic_sensitivity": 0.4,
+        "fatigue_rate": 0.07,
+        "amplification_factor": 0.35
+      }
+    }
+  ]
+}

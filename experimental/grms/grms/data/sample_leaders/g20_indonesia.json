@@ -1,0 +1,78 @@
+{
+  "name": "Prabowo Subianto",
+  "country": "Indonesia",
+  "period": "current",
+  "title": "President",
+  "personality": {
+    "risk_tolerance": 0.3,
+    "authoritarianism": 0.4,
+    "nationalism": 0.7,
+    "pragmatism": 0.5,
+    "aggression": 0.3,
+    "populism": 0.5,
+    "transparency": -0.3,
+    "religiosity": 0.2
+  },
+  "ideology": {
+    "economic_system": "mixed",
+    "geopolitical_orientation": "non_aligned",
+    "key_alliances": ["ASEAN", "China", "United States", "Middle Eastern states"],
+    "adversaries": [],
+    "red_lines": [
+      "Challenges to Indonesian territorial integrity",
+      "South China Sea encroachment on Indonesian EEZ",
+      "External interference in domestic affairs"
+    ],
+    "core_narratives": [
+      "Indonesia as major global power",
+      "Non-aligned but strong military",
+      "Economic self-sufficiency and food security",
+      "ASEAN centrality in regional architecture"
+    ]
+  },
+  "decision_history": [
+    {
+      "event_description": "Navigated US-China rivalry while maintaining non-aligned position",
+      "decision_taken": "Accepted investment from both US and China, maintained defense cooperation with multiple partners, resisted pressure to choose sides",
+      "outcome": "Maintained strategic flexibility, attracted investment from both blocs",
+      "date": "2025-03-01T00:00:00Z",
+      "context_factors": ["non-aligned tradition", "economic development priority", "ASEAN leadership role"]
+    },
+    {
+      "event_description": "South China Sea tensions near Natuna Islands",
+      "decision_taken": "Strengthened naval presence near Natuna, renamed waters to North Natuna Sea, maintained diplomatic engagement with China",
+      "outcome": "Asserted sovereignty without escalation",
+      "date": "2025-01-20T00:00:00Z",
+      "context_factors": ["territorial integrity", "fisheries resources", "China relationship management"]
+    }
+  ],
+  "cultural_context": {
+    "decision_making_style": "advisory_council",
+    "information_sources": ["BIN intelligence", "military establishment", "cabinet advisors", "business leaders"],
+    "domestic_power_base": "Military establishment, Gerindra party, nationalist base, rural voters",
+    "succession_concerns": false,
+    "historical_analogies": ["Suharto era strong leadership", "Sukarno non-alignment", "New Order economic development"]
+  },
+  "decision_context": {
+    "approval_rating": 60.0,
+    "economic_conditions": {
+      "gdp_growth": 5.0,
+      "unemployment": 5.3,
+      "inflation": 3.0,
+      "sanctions_pressure": 0.0
+    },
+    "military_posture": {
+      "readiness_level": "peacetime",
+      "ongoing_operations": ["Natuna Sea patrols", "Counter-terrorism", "Papua security operations"],
+      "force_disposition": "archipelagic defense with modernization underway"
+    },
+    "domestic_pressures": {
+      "election_proximity_days": 1600,
+      "opposition_strength": 0.25,
+      "media_sentiment": 0.2,
+      "protest_level": "none"
+    },
+    "ongoing_conflicts": ["Papua separatism", "South China Sea tensions"],
+    "recent_events": ["Military modernization program", "Free meal program launch", "ASEAN chairmanship"]
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "name": "Vladimir Putin",
+  "country": "Russia",
+  "period": "current",
+  "title": "President",
+  "personality": {
+    "risk_tolerance": 0.5,
+    "authoritarianism": 0.9,
+    "nationalism": 0.9,
+    "pragmatism": 0.4,
+    "aggression": 0.7,
+    "populism": 0.4,
+    "transparency": -0.9,
+    "religiosity": 0.3
+  },
+  "ideology": {
+    "economic_system": "state_directed",
+    "geopolitical_orientation": "eastern",
+    "key_alliances": ["China", "India", "Iran", "North Korea", "Belarus"],
+    "adversaries": ["United States", "NATO", "European Union", "Ukraine"],
+    "red_lines": [
+      "NATO expansion to former Soviet states",
+      "Threats to Crimea or annexed territories",
+      "Regime change operations targeting Russia",
+      "Western weapons enabling strikes on Russian territory"
+    ],
+    "core_narratives": [
+      "Russia as a great power civilization-state",
+      "NATO encirclement and Western aggression",
+      "Multipolar world order",
+      "Protection of Russian-speaking populations abroad"
+    ]
+  },
+  "decision_history": [
+    {
+      "event_description": "Continued war in Ukraine entering fourth year",
+      "decision_taken": "Maintained offensive operations, expanded military-industrial production, deepened partnerships with China, Iran, and North Korea for materiel",
+      "outcome": "Grinding attritional conflict, significant economic adaptation to sanctions",
+      "date": "2025-02-24T00:00:00Z",
+      "context_factors": ["sunk cost commitment", "domestic war economy", "no acceptable off-ramp perceived"]
+    },
+    {
+      "event_description": "Western sanctions regime intensified",
+      "decision_taken": "Pivoted energy exports to India and China, expanded BRICS cooperation, developed alternative payment systems",
+      "outcome": "Economic contraction moderated, ruble stabilized through capital controls",
+      "date": "2024-06-01T00:00:00Z",
+      "context_factors": ["energy leverage", "Asian demand", "sanctions adaptation"]
+    }
+  ],
+  "cultural_context": {
+    "decision_making_style": "unilateral",
+    "information_sources": ["FSB/SVR intelligence", "Security Council inner circle", "military briefings"],
+    "domestic_power_base": "security services (siloviki), military-industrial complex, state media apparatus",
+    "succession_concerns": true,
+    "historical_analogies": ["Great Patriotic War", "Soviet superpower era", "Post-Soviet chaos of the 1990s"]
+  },
+  "decision_context": {
+    "approval_rating": 75.0,
+    "economic_conditions": {
+      "gdp_growth": 1.0,
+      "unemployment": 2.8,
+      "inflation": 9.5,
+      "sanctions_pressure": 0.8
+    },
+    "military_posture": {
+      "readiness_level": "mobilized",
+      "ongoing_operations": ["Ukraine offensive operations", "Syria presence", "Arctic militarization"],
+      "force_disposition": "wartime footing with strategic nuclear deterrent on alert"
+    },
+    "domestic_pressures": {
+      "election_proximity_days": null,
+      "opposition_strength": 0.05,
+      "media_sentiment": 0.5,
+      "protest_level": "none"
+    },
+    "ongoing_conflicts": ["War in Ukraine", "Hybrid conflict with NATO"],
+    "recent_events": ["Continued Ukraine offensive", "BRICS summit hosting", "Deepened China-Russia military cooperation"]
+  }
+}

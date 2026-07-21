@@ -1,0 +1,78 @@
+{
+  "name": "Luiz Inacio Lula da Silva",
+  "country": "Brazil",
+  "period": "current",
+  "title": "President",
+  "personality": {
+    "risk_tolerance": 0.2,
+    "authoritarianism": 0.0,
+    "nationalism": 0.4,
+    "pragmatism": 0.7,
+    "aggression": -0.2,
+    "populism": 0.7,
+    "transparency": 0.1,
+    "religiosity": 0.1
+  },
+  "ideology": {
+    "economic_system": "mixed",
+    "geopolitical_orientation": "non_aligned",
+    "key_alliances": ["Argentina", "China", "BRICS nations", "African Union"],
+    "adversaries": [],
+    "red_lines": [
+      "Foreign interference in Amazon sovereignty",
+      "Threats to Brazilian democratic institutions",
+      "Economic sanctions targeting Brazil"
+    ],
+    "core_narratives": [
+      "Global South solidarity and representation",
+      "Multipolar world order",
+      "Social inclusion and poverty reduction",
+      "Environmental sovereignty over the Amazon"
+    ]
+  },
+  "decision_history": [
+    {
+      "event_description": "BRICS expansion and de-dollarization discussions",
+      "decision_taken": "Hosted BRICS discussions on alternative payment mechanisms, advocated for expanded membership while maintaining Western economic relationships",
+      "outcome": "BRICS influence expanded, maintained bridges to both West and East",
+      "date": "2025-02-01T00:00:00Z",
+      "context_factors": ["trade diversification", "Global South leadership aspirations", "US relationship management"]
+    },
+    {
+      "event_description": "Ukraine conflict mediation attempts",
+      "decision_taken": "Positioned Brazil as neutral mediator, refused to condemn Russia directly while calling for peace",
+      "outcome": "Limited mediation progress, maintained relationships with both sides",
+      "date": "2024-11-01T00:00:00Z",
+      "context_factors": ["non-aligned tradition", "BRICS solidarity", "fertilizer dependency on Russia"]
+    }
+  ],
+  "cultural_context": {
+    "decision_making_style": "consensus",
+    "information_sources": ["ABIN intelligence", "party apparatus", "social movements", "trade unions"],
+    "domestic_power_base": "Workers Party (PT), trade unions, urban poor, progressive middle class, Nordeste region",
+    "succession_concerns": true,
+    "historical_analogies": ["Lula first term social programs", "Vargas era state development", "Non-aligned movement"]
+  },
+  "decision_context": {
+    "approval_rating": 42.0,
+    "economic_conditions": {
+      "gdp_growth": 2.5,
+      "unemployment": 6.8,
+      "inflation": 4.5,
+      "sanctions_pressure": 0.0
+    },
+    "military_posture": {
+      "readiness_level": "peacetime",
+      "ongoing_operations": ["Amazon surveillance", "Border security"],
+      "force_disposition": "regional defense with peacekeeping capability"
+    },
+    "domestic_pressures": {
+      "election_proximity_days": 550,
+      "opposition_strength": 0.5,
+      "media_sentiment": -0.1,
+      "protest_level": "minor"
+    },
+    "ongoing_conflicts": [],
+    "recent_events": ["BRICS presidency term", "Amazon deforestation reduction progress"]
+  }
+}

@@ -1,0 +1,132 @@
+{
+  "country": "Iraq",
+  "total_population": 44000000,
+  "period": "current",
+  "segments": [
+    {
+      "name": "Baghdad urban professionals",
+      "percentage": 0.15,
+      "demographics": {
+        "urbanization": 0.95,
+        "education_level": 0.7,
+        "median_age": 32,
+        "economic_class": "middle"
+      },
+      "disposition": {
+        "government_trust": 0.25,
+        "nationalism": 0.5,
+        "media_exposure": 0.85,
+        "social_media_activity": 0.8,
+        "protest_propensity": 0.5,
+        "compliance_baseline": 0.45,
+        "information_sources": ["social_media", "foreign_media"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.3,
+        "economic_sensitivity": 0.65,
+        "fatigue_rate": 0.12,
+        "amplification_factor": 0.65
+      }
+    },
+    {
+      "name": "Shia majority population",
+      "percentage": 0.35,
+      "demographics": {
+        "urbanization": 0.6,
+        "education_level": 0.4,
+        "median_age": 28,
+        "economic_class": "lower"
+      },
+      "disposition": {
+        "government_trust": 0.4,
+        "nationalism": 0.5,
+        "media_exposure": 0.6,
+        "social_media_activity": 0.5,
+        "protest_propensity": 0.45,
+        "compliance_baseline": 0.5,
+        "information_sources": ["religious_leaders", "social_media"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.45,
+        "economic_sensitivity": 0.75,
+        "fatigue_rate": 0.08,
+        "amplification_factor": 0.5
+      }
+    },
+    {
+      "name": "Sunni Arab population",
+      "percentage": 0.20,
+      "demographics": {
+        "urbanization": 0.55,
+        "education_level": 0.4,
+        "median_age": 26,
+        "economic_class": "lower"
+      },
+      "disposition": {
+        "government_trust": 0.2,
+        "nationalism": 0.55,
+        "media_exposure": 0.55,
+        "social_media_activity": 0.5,
+        "protest_propensity": 0.4,
+        "compliance_baseline": 0.4,
+        "information_sources": ["social_media", "word_of_mouth", "religious_leaders"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.35,
+        "economic_sensitivity": 0.8,
+        "fatigue_rate": 0.07,
+        "amplification_factor": 0.55
+      }
+    },
+    {
+      "name": "Kurdish population",
+      "percentage": 0.18,
+      "demographics": {
+        "urbanization": 0.6,
+        "education_level": 0.5,
+        "median_age": 27,
+        "economic_class": "middle"
+      },
+      "disposition": {
+        "government_trust": 0.2,
+        "nationalism": 0.3,
+        "media_exposure": 0.7,
+        "social_media_activity": 0.65,
+        "protest_propensity": 0.45,
+        "compliance_baseline": 0.4,
+        "information_sources": ["social_media", "foreign_media"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.2,
+        "economic_sensitivity": 0.6,
+        "fatigue_rate": 0.1,
+        "amplification_factor": 0.6
+      }
+    },
+    {
+      "name": "Security forces and militia-affiliated",
+      "percentage": 0.12,
+      "demographics": {
+        "urbanization": 0.65,
+        "education_level": 0.35,
+        "median_age": 30,
+        "economic_class": "middle"
+      },
+      "disposition": {
+        "government_trust": 0.6,
+        "nationalism": 0.65,
+        "media_exposure": 0.5,
+        "social_media_activity": 0.35,
+        "protest_propensity": 0.05,
+        "compliance_baseline": 0.85,
+        "information_sources": ["internal_briefings", "state_tv"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.7,
+        "economic_sensitivity": 0.4,
+        "fatigue_rate": 0.04,
+        "amplification_factor": 0.25
+      }
+    }
+  ]
+}

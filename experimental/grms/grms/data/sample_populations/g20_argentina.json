@@ -1,0 +1,132 @@
+{
+  "country": "Argentina",
+  "total_population": 46000000,
+  "period": "current",
+  "segments": [
+    {
+      "name": "Buenos Aires professional class",
+      "percentage": 0.20,
+      "demographics": {
+        "urbanization": 0.98,
+        "education_level": 0.8,
+        "median_age": 37,
+        "economic_class": "upper"
+      },
+      "disposition": {
+        "government_trust": 0.2,
+        "nationalism": 0.45,
+        "media_exposure": 0.85,
+        "social_media_activity": 0.8,
+        "protest_propensity": 0.55,
+        "compliance_baseline": 0.45,
+        "information_sources": ["social_media", "foreign_media"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.3,
+        "economic_sensitivity": 0.6,
+        "fatigue_rate": 0.13,
+        "amplification_factor": 0.65
+      }
+    },
+    {
+      "name": "Urban working class and unions",
+      "percentage": 0.30,
+      "demographics": {
+        "urbanization": 0.9,
+        "education_level": 0.4,
+        "median_age": 38,
+        "economic_class": "lower"
+      },
+      "disposition": {
+        "government_trust": 0.3,
+        "nationalism": 0.55,
+        "media_exposure": 0.6,
+        "social_media_activity": 0.6,
+        "protest_propensity": 0.7,
+        "compliance_baseline": 0.4,
+        "information_sources": ["social_media", "state_tv", "word_of_mouth"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.4,
+        "economic_sensitivity": 0.9,
+        "fatigue_rate": 0.08,
+        "amplification_factor": 0.6
+      }
+    },
+    {
+      "name": "Pampas agricultural sector",
+      "percentage": 0.20,
+      "demographics": {
+        "urbanization": 0.2,
+        "education_level": 0.4,
+        "median_age": 42,
+        "economic_class": "middle"
+      },
+      "disposition": {
+        "government_trust": 0.2,
+        "nationalism": 0.5,
+        "media_exposure": 0.5,
+        "social_media_activity": 0.4,
+        "protest_propensity": 0.45,
+        "compliance_baseline": 0.5,
+        "information_sources": ["state_tv", "word_of_mouth"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.35,
+        "economic_sensitivity": 0.8,
+        "fatigue_rate": 0.07,
+        "amplification_factor": 0.4
+      }
+    },
+    {
+      "name": "Middle class public sector employees",
+      "percentage": 0.20,
+      "demographics": {
+        "urbanization": 0.8,
+        "education_level": 0.6,
+        "median_age": 40,
+        "economic_class": "middle"
+      },
+      "disposition": {
+        "government_trust": 0.35,
+        "nationalism": 0.5,
+        "media_exposure": 0.7,
+        "social_media_activity": 0.6,
+        "protest_propensity": 0.5,
+        "compliance_baseline": 0.55,
+        "information_sources": ["state_tv", "social_media"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.4,
+        "economic_sensitivity": 0.75,
+        "fatigue_rate": 0.09,
+        "amplification_factor": 0.5
+      }
+    },
+    {
+      "name": "Youth and student movements",
+      "percentage": 0.10,
+      "demographics": {
+        "urbanization": 0.9,
+        "education_level": 0.7,
+        "median_age": 23,
+        "economic_class": "lower"
+      },
+      "disposition": {
+        "government_trust": 0.15,
+        "nationalism": 0.4,
+        "media_exposure": 0.8,
+        "social_media_activity": 0.9,
+        "protest_propensity": 0.75,
+        "compliance_baseline": 0.35,
+        "information_sources": ["social_media", "foreign_media"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.2,
+        "economic_sensitivity": 0.7,
+        "fatigue_rate": 0.15,
+        "amplification_factor": 0.8
+      }
+    }
+  ]
+}

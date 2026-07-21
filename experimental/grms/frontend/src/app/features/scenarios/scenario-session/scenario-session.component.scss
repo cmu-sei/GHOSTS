@@ -1,0 +1,357 @@
+@use 'variables' as *;
+@use 'glass' as *;
+@use 'animations' as *;
+
+.scenario-session {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  grid-template-rows: 1fr auto;
+  gap: 0;
+  height: calc(100vh - $toolbar-height);
+  overflow: hidden;
+}
+
+// Sidebar
+.sidebar {
+  grid-row: 1 / 3;
+  padding: 20px 16px;
+  background: $glass;
+  border-right: 1px solid $glass-border;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sidebar-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: $text;
+  margin-bottom: 0;
+}
+
+.help-toggle {
+  width: 28px;
+  height: 28px;
+  line-height: 28px;
+  color: $text-mute;
+  transition: color $transition-fast;
+
+  &.active {
+    color: $accent;
+  }
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.help-panel {
+  padding: 12px;
+  border-radius: $radius-sm;
+  background: rgba(56, 189, 248, 0.05);
+  border: 1px solid rgba(56, 189, 248, 0.15);
+  animation: fadeIn 0.2s ease-out;
+
+  .help-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: $accent;
+    margin: 0 0 6px;
+  }
+
+  p {
+    font-size: 0.75rem;
+    color: $text-dim;
+    line-height: 1.5;
+    margin: 0 0 8px;
+  }
+
+  ul {
+    margin: 0 0 8px;
+    padding-left: 16px;
+
+    li {
+      font-size: 0.75rem;
+      color: $text-dim;
+      line-height: 1.6;
+      margin-bottom: 4px;
+
+      strong {
+        color: $text;
+      }
+    }
+  }
+
+  .help-note {
+    font-size: 0.7rem;
+    color: $text-mute;
+    font-style: italic;
+    margin-bottom: 0;
+  }
+}
+
+.full-width {
+  width: 100%;
+}
+
+.connect-btn {
+  width: 100%;
+  background: $green !important;
+  color: white !important;
+  font-weight: 600;
+}
+
+.disconnect-btn {
+  width: 100%;
+  background: $red !important;
+  color: white !important;
+  font-weight: 600;
+}
+
+.connection-state {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: $radius-sm;
+  background: $glass-light;
+  border: 1px solid $glass-border;
+
+  .state-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: $text-mute;
+  }
+
+  .state-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: $text-dim;
+    text-transform: capitalize;
+  }
+
+  &.connected {
+    border-color: rgba(34, 197, 94, 0.4);
+    .state-dot { background: $green; box-shadow: 0 0 6px $green; }
+    .state-label { color: $green; }
+  }
+
+  &.connecting {
+    border-color: rgba(245, 158, 11, 0.4);
+    .state-dot { background: $orange; animation: pulse 1.5s infinite; }
+    .state-label { color: $orange; }
+  }
+
+  &.error {
+    border-color: rgba(239, 68, 68, 0.4);
+    .state-dot { background: $red; }
+    .state-label { color: $red; }
+  }
+
+  &.disconnected {
+    .state-dot { background: $text-mute; }
+  }
+}
+
+// Timeline Area
+.timeline-area {
+  grid-column: 2;
+  grid-row: 1;
+  padding: 20px 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.timeline-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: $text;
+  margin-bottom: 16px;
+  flex-shrink: 0;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  color: $text-mute;
+  text-align: center;
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+  }
+
+  p {
+    font-size: 0.9rem;
+    max-width: 320px;
+  }
+}
+
+.timeline-entries {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+}
+
+.timeline-entry {
+  animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) both,
+             slideInLeft 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.entry-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.entry-time {
+  font-size: 0.75rem;
+  color: $text-mute;
+  font-family: monospace;
+}
+
+.severity-badge {
+  padding: 3px 10px;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: white;
+  text-transform: uppercase;
+}
+
+.entry-description {
+  font-size: 0.9rem;
+  color: $text;
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.response-section {
+  padding: 12px;
+  border-radius: $radius-sm;
+  border: 1px solid $glass-border;
+  margin-top: 10px;
+
+  &.leader-response {
+    background: rgba(56, 189, 248, 0.05);
+    border-color: rgba(56, 189, 248, 0.2);
+  }
+
+  &.population-response {
+    background: rgba(34, 197, 94, 0.05);
+    border-color: rgba(34, 197, 94, 0.2);
+  }
+}
+
+.response-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: $text;
+  margin-bottom: 8px;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    color: $accent;
+  }
+}
+
+.response-statement {
+  font-size: 0.85rem;
+  color: $text-dim;
+  font-style: italic;
+  margin-bottom: 8px;
+}
+
+.actions-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.action-chip {
+  padding: 3px 8px;
+  border-radius: 8px;
+  font-size: 0.7rem;
+  background: $glass-light;
+  border: 1px solid $glass-border;
+  color: $text-dim;
+}
+
+.sentiment-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sentiment-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sentiment-label {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: $text-mute;
+  width: 50px;
+  flex-shrink: 0;
+}
+
+.bar-track {
+  flex: 1;
+  height: 6px;
+  background: rgba(100, 116, 139, 0.2);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width $transition;
+
+  &.support { background: $green; }
+  &.oppose { background: $red; }
+  &.neutral { background: $text-mute; }
+}
+
+.sentiment-value {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: $text;
+  width: 32px;
+  text-align: right;
+}
+
+// Bottom Event Composer
+.event-composer {
+  grid-column: 2;
+  grid-row: 2;
+  padding: 12px 24px 16px;
+  border-top: 1px solid $glass-border;
+  background: $glass;
+}
