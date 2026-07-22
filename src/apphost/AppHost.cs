@@ -3,6 +3,14 @@ using System.Runtime.InteropServices;
 var basePassword = "Scotty@@1!";
 var builder = DistributedApplication.CreateBuilder(args);
 
+// Inner DinD containers (n8n, clients, etc.) resolve host.docker.internal to the
+// devcontainer, NOT the Mac. Ollama runs on the Mac — one hop further out — so map a
+// dedicated `host.ollama` name to Docker Desktop's host-gateway IP and hand it to the
+// n8n container explicitly (host-gateway from the inner daemon would be the
+// devcontainer, so it must be a concrete IP). Override Ollama:HostIp if Docker
+// Desktop's gateway differs (curl-test candidates: 192.168.65.254, then 192.168.65.2).
+var ollamaHostIp = builder.Configuration["Ollama:HostIp"] ?? "192.168.65.254";
+
 var postgresUsername = builder.AddParameter("PostgresUsername", "ghosts", false);
 var postgresPassword = builder.AddParameter("PostgresPassword", basePassword, false);
 
@@ -42,7 +50,16 @@ var api = builder.AddProject<Projects.Ghosts_Api>("api")
     .WaitFor(postgres)
     .WithReference(db, "DefaultConnection")
     .WithEnvironment("ConnectionStrings__Provider", "PostgreSQL")
+    .WithEnvironment("ASPNETCORE_URLS", "http://0.0.0.0:5000")
     .WithHttpEndpoint(port: 5000, name: "http", isProxied: false)
+    .WithExternalHttpEndpoints();
+
+var mcp = builder.AddDockerfile("mcp", "../../", "src/tools/ghosts.tools.mcp/Dockerfile")
+    .WaitFor(api)
+    .WithContainerName("mcp")
+    .WithEnvironment("GHOSTS_API_BASE_URL", "http://host.docker.internal:5000")
+    .WithContainerRuntimeArgs("--add-host", "host.docker.internal:host-gateway")
+    .WithHttpEndpoint(port: 5055, targetPort: 5055, name: "http", isProxied: false)
     .WithExternalHttpEndpoints();
 
 // n8n uses a dedicated Postgres database for reproducible state
@@ -69,10 +86,15 @@ var n8n = builder.AddContainer("n8n", "docker.n8n.io/n8nio/n8n")
     .WithEnvironment("N8N_PORT", "5678")
     .WithEnvironment("N8N_PROTOCOL", "http")
     .WithContainerName("n8n")
+    // Reach the Mac's Ollama from inside this inner DinD container. host.docker.internal
+    // points at the devcontainer, so map host.ollama -> Docker Desktop's host-gateway IP.
+    // In the n8n UI, set the Ollama credential Base URL to http://host.ollama:11434.
+    .WithContainerRuntimeArgs("--add-host", $"host.ollama:{ollamaHostIp}")
     .WithBindMount("n8n_data", "/home/node/.n8n", isReadOnly: false)
     .WithBindMount("../../configuration/n8n-workflows", "/bootstrap/workflows", isReadOnly: true)
     .WithBindMount("../../configuration/n8n-bootstrap/scripts", "/bootstrap/scripts", isReadOnly: true)
     .WithLifetime(ContainerLifetime.Persistent)
+    .WaitFor(mcp)
     .WaitFor(postgres);
 
 // Provisioner sidecar: creates owner account and imports workflows on first boot

@@ -78,7 +78,17 @@
                 "files.eol": "\n",
                 "files.trimTrailingWhitespace": true,
                 "npm.packageManager": "npm",
-                "dotnet.defaultSolution": "GHOSTS.sln"
+                "dotnet.defaultSolution": "GHOSTS.sln",
+                "remote.portsAttributes": {
+                    "11434": {
+                        "label": "ollama (host — do not forward)",
+                        "onAutoForward": "ignore"
+                    },
+                    "11435": {
+                        "label": "ollama (host — do not forward)",
+                        "onAutoForward": "ignore"
+                    }
+                }
             }
         }
     }
