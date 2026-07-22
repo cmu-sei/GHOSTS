@@ -2,7 +2,7 @@
 
 Mirrors GHOSTS conventions: OLLAMA_HOST / OLLAMA_MODEL match the API's
 OllamaConnectorService. No model reachable -> the DM uses its deterministic
-offline fallback (see DESIGN.md D2)."""
+offline fallback."""
 
 from __future__ import annotations
 

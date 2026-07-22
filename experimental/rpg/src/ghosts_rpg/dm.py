@@ -6,11 +6,9 @@ The computer plays everyone but the player. The DM:
   - parses the player's choice (an offered action OR free text) into ONE Proposal
     against a specific open task.
 
-The DM only *proposes*; the engine validates and decides branches. When an Ollama
-model is configured the DM proposes a scenario-specific action menu through it
-(each action still validated against legal effects); with no model present a
-deterministic scenario-derived menu keeps the game fully playable offline
-(DESIGN.md D2/D3).
+When an Ollama model is configured the DM proposes a scenario-specific action menu
+through it; with no model present a deterministic scenario-derived menu keeps the
+game fully playable offline.
 """
 
 from __future__ import annotations
@@ -24,7 +22,11 @@ from .models import TimelineEvent
 
 # Intent keyword maps for the offline free-text parser.
 _INVESTIGATE = ("investigat", "look", "examine", "analy", "triage", "inspect", "recon", "check", "scope", "confirm", "review", "read")
-_CONTAIN = ("contain", "quarantin", "block", "isolat", "remediat", "reset", "respond", "defend", "stop", "kill", "disable", "close", "resolve", "handle", "fix", "clear", "ship", "deliver", "approve", "sign")
+_CONTAIN = (
+    "contain", "quarantin", "block", "isolat", "remediat", "reset", "respond",
+    "defend", "stop", "kill", "disable", "close", "resolve", "handle", "fix",
+    "clear", "ship", "deliver", "approve", "sign", "publish",
+)
 _NOTIFY = ("notif", "warn", "alert", "tell", "email", "message", "inform", "escalat", "call", "ping", "loop in")
 _WAIT = ("wait", "watch", "hold", "stand", "nothing", "ignore", "monitor", "observe", "defer", "punt", "skip", "later")
 
@@ -80,7 +82,7 @@ class DungeonMaster:
             return None
         sc = self.engine.bundle.scenario
         system = (
-            "You are the Dungeon Master of a cyber-defense exercise. Narrate vividly "
+            "You are the Dungeon Master of an umpired staff exercise. Narrate vividly "
             "in second person, 2-4 sentences. Do NOT offer choices or ask questions; "
             "the engine handles options. Stay strictly faithful to the facts given."
         )
@@ -117,8 +119,8 @@ class DungeonMaster:
             return None
         sc = self.engine.bundle.scenario
         system = (
-            "You propose the concrete actions a Blue Team analyst could take on ONE "
-            "task in a cyber-defense exercise. Return ONLY a JSON array of 3-5 objects, "
+            "You propose concrete actions the player could take on ONE task in an "
+            "umpired staff exercise. Return ONLY a JSON array of 3-5 objects, "
             'each {"label": "<short imperative action>", "intent": "<one of: '
             'investigate, contain, notify, wait>"}. "investigate" = gather info without '
             'committing; "contain" = the decisive action that resolves the task; '
@@ -162,9 +164,15 @@ class DungeonMaster:
         Labels are phrased like staff-exercise products, but keep the same intents
         so terse commands and existing saved sessions still work.
         """
+        mechanics = self.engine.bundle.scenario.game_mechanics
+        decisive = (
+            mechanics.decisive_action_label
+            if mechanics
+            else "issue containment order"
+        )
         return [
             Action(label="draft estimate", intent="investigate"),
-            Action(label="issue containment order", intent="contain"),
+            Action(label=decisive, intent="contain"),
             Action(label="send coordination order", intent="notify"),
             Action(label="accept risk and defer", intent="wait"),
         ]
@@ -251,13 +259,15 @@ class DungeonMaster:
         # If this is the ticket that owns the containment fuse, triage exposes the
         # urgency — this is how a player learns which ticket is the one that bites.
         if self.engine.containment_deadline is not None and self.engine.flags_owned_by(event):
-            return (
-                f"This is the one that bites: it will detonate at the "
-                f"{self.engine.containment_deadline}m mark if you don't contain it. Handle this ticket first."
+            mechanics = self.engine.bundle.scenario.game_mechanics
+            warning = mechanics.deadline_warning if mechanics else (
+                "This is the one that bites: it will detonate at the {deadline}m "
+                "mark if you don't contain it. Handle this ticket first."
             )
+            return warning.format(deadline=self.engine.containment_deadline)
         actors = self.engine.bundle.scenario.scenario_parameters
         if actors and actors.threat_actors:
             a = actors.threat_actors[0]
             ttps = ", ".join(a.ttps) if a.ttps else "unknown TTPs"
-            return f"{a.name} ({a.type}) is behind this — known for {ttps}."
+            return f"{a.name} ({a.type}) is the opposing actor — known for {ttps}."
         return "You triage the alert and confirm it is a real threat, not noise."

@@ -46,6 +46,10 @@ A game loads one `ScenarioBundle`, from either:
   `/builder/graph`, `/objectives?scenarioId=`). Set `GHOSTS_API_URL` and POST
   `/api/games` with `{"scenarioId": N}`.
 
+The web front page loads player-facing fixtures from `GET /api/fixtures`. The
+bundled catalog currently includes **SOC Morning** and **OPERATION OVERLORD**;
+`phishing-drill` remains an unlisted engine regression fixture.
+
 ## DM brain
 
 Narration uses Ollama (`OLLAMA_HOST` / `OLLAMA_MODEL`, mirroring the GHOSTS API). With

@@ -62,18 +62,18 @@ def review(engine: Engine) -> Aar:
     if engine.state.is_complete:
         if detonated:
             highlights.append(
-                f"The threat detonated at the {engine.containment_deadline}m mark — you didn't contain it in time."
+                f"The decision deadline expired at the {engine.containment_deadline}m mark."
             )
         else:
             highlights.append(
-                "Contained the threat before it spread — no lateral movement."
+                "Secured the scenario's favorable branch."
                 if contained
-                else "Containment was missed; the adversary moved laterally."
+                else "Missed the decisive condition; the unfavorable branch fired."
             )
             highlights.append(
-                f"Cleared the worklist in {spent}m of your {budget}m morning — you made lunch."
+                f"Cleared the worklist in {spent}m of the {budget}m exercise window."
                 if made_lunch
-                else f"Spent {spent}m against a {budget}m morning — you worked through lunch."
+                else f"Used the full {budget}m exercise window."
             )
         if engine.state.assumptions:
             highlights.append(

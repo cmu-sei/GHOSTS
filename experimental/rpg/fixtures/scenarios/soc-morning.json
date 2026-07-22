@@ -1,5 +1,12 @@
 {
   "_comment": "RPG worklist fixture v0.2. Demonstrates parallel open tasks + the lunch clock + the containment fuse. Steps 3,4,5 are all Blue Team, so they open together as a 3-item worklist the player clears in ANY order; each action burns minutes off the 45-minute morning (durationHours 0.75). The ransomware ticket (step 4) has a 30-minute fuse (containmentDeadlineMinutes): if flag 'ransomware-contained' is NOT set by the time the clock passes 30m, the threat detonates mid-worklist, forcing Red Team step 7 (encryption spreads) and a hard LOSS. Contain in time and step 6 fires (stalls) -> WIN. The tight budget means you can't afford to spend decisive actions on the phishing/VPN noise first; triage the ransomware ticket and handle it. camelCase mirrors live Ghosts.Api JSON.",
+  "catalog": {
+    "listed": true,
+    "sortOrder": 1,
+    "era": "Modern",
+    "theater": "Meridian Logistics SOC",
+    "estimatedMinutes": 10
+  },
 
   "scenario": {
     "id": 2,

@@ -11,20 +11,21 @@
   "private": true,
   "packageManager": "npm@11.16.0",
   "dependencies": {
-    "@angular/common": "^22.0.0",
-    "@angular/compiler": "^22.0.0",
-    "@angular/core": "^22.0.0",
-    "@angular/forms": "^22.0.0",
-    "@angular/platform-browser": "^22.0.0",
-    "@angular/router": "^22.0.0",
+    "@angular/common": "22.0.4",
+    "@angular/compiler": "22.0.4",
+    "@angular/core": "22.0.4",
+    "@angular/forms": "22.0.4",
+    "@angular/platform-browser": "22.0.4",
+    "@angular/router": "22.0.4",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },
   "devDependencies": {
-    "@angular/build": "^22.0.4",
-    "@angular/cli": "^22.0.4",
-    "@angular/compiler-cli": "^22.0.0",
+    "@angular/build": "22.0.4",
+    "@angular/cli": "22.0.4",
+    "@angular/compiler-cli": "22.0.4",
+    "@playwright/test": "^1.61.1",
     "prettier": "^3.8.1",
-    "typescript": "~6.0.2"
+    "typescript": "~6.0.3"
   }
 }

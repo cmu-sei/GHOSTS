@@ -107,6 +107,7 @@ class ScenarioParameters(_ApiModel):
     threat_actors: list[ThreatActor] = Field(default_factory=list, alias="threatActors")
     injects: list[Inject] = Field(default_factory=list)
     user_pools: list[UserPool] = Field(default_factory=list, alias="userPools")
+    player_role: str = Field(default="Blue Team (SOC Analyst)", alias="playerRole")
     objectives: str = ""
     political_context: str = Field(default="", alias="politicalContext")
     rules_of_engagement: str = Field(default="", alias="rulesOfEngagement")
@@ -125,6 +126,22 @@ class GameMechanics(_ApiModel):
     # detonates and forces the loss branch. None => no deadline (threat waits).
     containment_deadline_minutes: Optional[int] = Field(
         default=None, alias="containmentDeadlineMinutes"
+    )
+    window_label: str = Field(default="to lunch", alias="windowLabel")
+    deadline_label: str = Field(default="CONTAINMENT FUSE", alias="deadlineLabel")
+    decisive_action_label: str = Field(
+        default="issue containment order", alias="decisiveActionLabel"
+    )
+    deadline_warning: str = Field(
+        default=(
+            "This is the one that bites: it will detonate at the {deadline}m mark "
+            "if you don't contain it. Handle this ticket first."
+        ),
+        alias="deadlineWarning",
+    )
+    deadline_failure_message: str = Field(
+        default="The clock ran out on the threat — it detonated before you contained it.",
+        alias="deadlineFailureMessage",
     )
 
 
@@ -193,6 +210,14 @@ class Scenario(_ApiModel):
     timeline: Optional[Timeline] = None
 
 
+class ScenarioCatalog(_ApiModel):
+    listed: bool = False
+    sort_order: int = Field(default=0, alias="sortOrder")
+    era: str = ""
+    theater: str = ""
+    estimated_minutes: int = Field(default=0, alias="estimatedMinutes")
+
+
 class ScenarioBundle(BaseModel):
     """The three GETs the loader consumes, assembled into one object.
 
@@ -204,6 +229,7 @@ class ScenarioBundle(BaseModel):
     scenario: Scenario
     graph: Graph = Field(default_factory=Graph)
     objectives: list[Objective] = Field(default_factory=list)
+    catalog: Optional[ScenarioCatalog] = None
 
 
 # ──────────────────────────────────────────────

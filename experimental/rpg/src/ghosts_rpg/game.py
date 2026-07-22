@@ -135,7 +135,13 @@ class Game:
         """The containment fuse blew: narrate the detonation, then play the forced
         loss branch through to the next worklist (or the end)."""
         event = self.engine.detonate()
-        notices = notices + ["The clock ran out on the threat — it detonated before you contained it."]
+        mechanics = self.bundle.scenario.game_mechanics
+        failure = (
+            mechanics.deadline_failure_message
+            if mechanics
+            else "The clock ran out on the threat — it detonated before you contained it."
+        )
+        notices = notices + [failure]
         if event is None:
             return self._frame(notices=notices, complete=True)
         return self._play_to_worklist(notices=notices)
@@ -263,11 +269,16 @@ class Game:
             for o in self.bundle.objectives
         ]
         actors = sc.scenario_parameters.threat_actors if sc.scenario_parameters else []
+        mechanics = sc.game_mechanics
         return {
             "scenario": sc.name,
             "step": open_tasks[0].number if open_tasks else None,
             "time": open_tasks[0].time if open_tasks else None,
-            "role": "Blue Team (SOC Analyst)",
+            "role": (
+                sc.scenario_parameters.player_role
+                if sc.scenario_parameters
+                else "Blue Team (SOC Analyst)"
+            ),
             "objectives": objs,
             "flags": sorted(st.flags),
             "knowledge": list(st.knowledge),
@@ -280,15 +291,21 @@ class Game:
             "queuedTasks": len(open_tasks) - len(revealed),
             "minutesLeft": self.engine.minutes_left,
             "lunchMinutes": self.engine.lunch_minutes,
+            "windowLabel": mechanics.window_label if mechanics else "to lunch",
             "containmentFuseMinutes": self.engine.containment_deadline,
             "containmentFuseMinutesLeft": self._containment_fuse_minutes_left(),
             "containmentContained": self.engine.is_contained,
+            "deadlineLabel": (
+                mechanics.deadline_label if mechanics else "CONTAINMENT FUSE"
+            ),
         }
 
     def _constraints(self) -> list[str]:
         constraints: list[str] = []
         if self.engine.containment_deadline is not None:
-            constraints.append(f"Containment fuse: {self.engine.containment_deadline}m")
+            mechanics = self.bundle.scenario.game_mechanics
+            label = mechanics.deadline_label if mechanics else "Containment fuse"
+            constraints.append(f"{label.title()}: {self.engine.containment_deadline}m")
         if self.engine.known_flags:
             constraints.append("Steering flags: " + ", ".join(sorted(self.engine.known_flags)))
         constraints.append(f"Exercise window: {self.engine.lunch_minutes}m")

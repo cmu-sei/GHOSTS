@@ -35,15 +35,31 @@ app.add_middleware(
 
 @app.get("/health")
 def health() -> dict:
-    return {"status": "ok", "version": __version__}
+    settings = Settings.from_env()
+    return {
+        "status": "ok",
+        "version": __version__,
+        "llm": {
+            "enabled": bool(settings.ollama_model),
+            "host": settings.ollama_host,
+            "model": settings.ollama_model or None,
+        },
+    }
 
 
 @app.get("/api/fixtures")
 def list_fixtures() -> dict:
-    """List bundled scenario fixtures available to load offline."""
+    """List player-facing bundled scenarios available to load offline."""
     if not FIXTURES_DIR.is_dir():
         return {"fixtures": []}
-    return {"fixtures": sorted(p.stem for p in FIXTURES_DIR.glob("*.json"))}
+    fixtures = []
+    for path in FIXTURES_DIR.glob("*.json"):
+        bundle = load_bundle_file(path)
+        if bundle.catalog is None or not bundle.catalog.listed:
+            continue
+        fixtures.append(_catalog_entry(path.stem, bundle))
+    fixtures.sort(key=lambda item: (item["sortOrder"], item["name"]))
+    return {"fixtures": fixtures}
 
 
 @app.get("/api/fixtures/{name}")
@@ -130,6 +146,22 @@ def _summary(bundle) -> dict:
         "playerTurns": sum(1 for e in events if e.is_player_turn),
         "objectives": len(bundle.objectives),
         "cast": len(bundle.graph.nodes),
+    }
+
+
+def _catalog_entry(fixture: str, bundle) -> dict:
+    summary = _summary(bundle)
+    catalog = bundle.catalog
+    return {
+        "fixture": fixture,
+        "sortOrder": catalog.sort_order,
+        "name": bundle.scenario.name,
+        "description": bundle.scenario.description,
+        "era": catalog.era,
+        "theater": catalog.theater,
+        "estimatedMinutes": catalog.estimated_minutes,
+        "events": summary["events"],
+        "objectives": summary["objectives"],
     }
 
 

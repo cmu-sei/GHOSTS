@@ -12,7 +12,14 @@ import {
 import { FormsModule } from '@angular/forms';
 import { LowerCasePipe } from '@angular/common';
 import { RpgApiService } from './rpg-api.service';
-import { Frame, GameResponse, Hud, Task, TaskAction } from './rpg.models';
+import {
+  FixtureSummary,
+  Frame,
+  GameResponse,
+  Hud,
+  Task,
+  TaskAction,
+} from './rpg.models';
 
 // One line in the terminal scrollback.
 interface Line {
@@ -40,6 +47,10 @@ export class App implements OnDestroy {
   readonly command = signal('');
   readonly busy = signal(false);
   readonly started = signal(false);
+  readonly fixtures = signal<FixtureSummary[]>([]);
+  readonly selectedFixture = signal<string | null>(null);
+  readonly catalogLoading = signal(true);
+  readonly catalogError = signal(false);
   // The in-game scenario clock (e.g. "T+40m") — non-linear; it jumps between steps.
   // Held separately so it stays on the last-known time while the computer plays.
   readonly gameTime = signal<string | null>(null);
@@ -49,6 +60,8 @@ export class App implements OnDestroy {
   private readonly scroller = viewChild<ElementRef<HTMLDivElement>>('scroller');
 
   constructor() {
+    this.loadCatalog();
+
     // Auto-scroll the transcript to the bottom whenever lines change.
     effect(() => {
       this.lines();
@@ -99,11 +112,33 @@ export class App implements OnDestroy {
   });
 
   // ── lifecycle ──
+  loadCatalog(): void {
+    this.catalogLoading.set(true);
+    this.catalogError.set(false);
+    this.api.listFixtures().subscribe({
+      next: ({ fixtures }) => {
+        this.fixtures.set(fixtures);
+        this.catalogLoading.set(false);
+      },
+      error: (e) => {
+        this.catalogLoading.set(false);
+        this.catalogError.set(true);
+        console.error(e);
+      },
+    });
+  }
+
+  selectScenario(fixture: string): void {
+    if (!this.busy()) this.selectedFixture.set(fixture);
+  }
+
   begin(): void {
+    const fixture = this.selectedFixture();
+    if (!fixture) return;
     this.busy.set(true);
     this.started.set(true);
     this.lines.set([{ kind: 'system', text: 'Connecting to the exercise…' }]);
-    this.api.newGame('soc-morning').subscribe({
+    this.api.newGame(fixture).subscribe({
       next: (r) => this.absorb(r, true),
       error: (e) => this.fail(e),
     });
@@ -139,12 +174,21 @@ export class App implements OnDestroy {
   }
 
   restart(): void {
+    this.resetGame();
+    this.begin();
+  }
+
+  chooseScenario(): void {
+    this.resetGame();
+    this.selectedFixture.set(null);
+  }
+
+  private resetGame(): void {
     this.frame.set(null);
     this.gameId.set(null);
     this.lines.set([]);
     this.gameTime.set(null);
     this.started.set(false);
-    this.begin();
   }
 
   ngOnDestroy(): void {

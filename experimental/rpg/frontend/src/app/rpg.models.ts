@@ -30,9 +30,11 @@ export interface Hud {
   queuedTasks: number;
   minutesLeft: number;
   lunchMinutes: number;
+  windowLabel: string;
   containmentFuseMinutes: number | null;
   containmentFuseMinutesLeft: number | null;
   containmentContained: boolean;
+  deadlineLabel: string;
 }
 
 export interface TaskAction {
@@ -75,6 +77,18 @@ export interface GameResponse {
   frame: Frame;
 }
 
+export interface FixtureSummary {
+  fixture: string;
+  sortOrder: number;
+  name: string;
+  description: string;
+  era: string;
+  theater: string;
+  estimatedMinutes: number;
+  events: number;
+  objectives: number;
+}
+
 export interface FixtureList {
-  fixtures: string[];
+  fixtures: FixtureSummary[];
 }

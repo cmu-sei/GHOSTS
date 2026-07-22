@@ -12,10 +12,58 @@
  ░▒▓███▀▒░▓█▒░██▓░ ████▓▒░▒██████▒▒  ▒██▒ ░ ▒██████▒▒
       </pre>
       <h1>SCENARIO PLAYER <span class="dim">// GHOSTS RPG</span></h1>
-      <p class="tagline">An umpired cyber-defense staff exercise. You hold the Blue Team seat.<br />
-        Exercise control plays everyone else — including the adversary.</p>
-      <button class="enter" (click)="begin()" [disabled]="busy()">
-        {{ busy() ? 'BOOTING…' : '▶ ENTER THE EXERCISE' }}
+      <p class="tagline">Umpired staff exercises. You hold the decision seat.<br />
+        Exercise control plays every other cell — including the adversary.</p>
+
+      <section class="scenario-catalog" aria-labelledby="catalog-title">
+        <div class="catalog-head">
+          <h2 id="catalog-title">AVAILABLE SCENARIOS</h2>
+          <span>{{ fixtures().length.toString().padStart(2, '0') }} ONLINE</span>
+        </div>
+
+        @if (catalogLoading()) {
+          <div class="catalog-status">QUERYING SCENARIO CATALOG…</div>
+        } @else if (catalogError()) {
+          <div class="catalog-status error">
+            CATALOG LINK FAILED
+            <button type="button" (click)="loadCatalog()">RETRY</button>
+          </div>
+        } @else {
+          <div class="scenario-list">
+            @for (scenario of fixtures(); track scenario.fixture; let i = $index) {
+              <button
+                type="button"
+                class="scenario-option"
+                [class.selected]="selectedFixture() === scenario.fixture"
+                [attr.aria-pressed]="selectedFixture() === scenario.fixture"
+                (click)="selectScenario(scenario.fixture)"
+              >
+                <span class="scenario-index">{{ (i + 1).toString().padStart(2, '0') }}</span>
+                <span class="scenario-copy">
+                  <span class="scenario-era">{{ scenario.era }} // {{ scenario.theater }}</span>
+                  <strong>{{ scenario.name }}</strong>
+                  <span class="scenario-description">{{ scenario.description }}</span>
+                  <span class="scenario-meta">
+                    {{ scenario.estimatedMinutes }} MIN ·
+                    {{ scenario.events }} EVENTS ·
+                    {{ scenario.objectives }} OBJECTIVES
+                  </span>
+                </span>
+                <span class="selection-mark" aria-hidden="true">
+                  {{ selectedFixture() === scenario.fixture ? '■' : '□' }}
+                </span>
+              </button>
+            }
+          </div>
+        }
+      </section>
+
+      <button
+        class="enter"
+        (click)="begin()"
+        [disabled]="busy() || !selectedFixture()"
+      >
+        {{ busy() ? 'BOOTING…' : '▶ START SELECTED SCENARIO' }}
       </button>
     </div>
   }
@@ -69,7 +117,10 @@
                 }
               </ul>
             </div>
-            <button class="enter small" (click)="restart()">▶ RUN IT AGAIN</button>
+            <div class="score-actions">
+              <button class="enter small" (click)="restart()">▶ RUN IT AGAIN</button>
+              <button class="enter small secondary" (click)="chooseScenario()">CHOOSE SCENARIO</button>
+            </div>
           </div>
         }
 
@@ -114,7 +165,6 @@
               name="command"
               autocomplete="off"
               autofocus
-              [disabled]="!awaiting()"
               [placeholder]="awaiting() ? 'submit an estimate/order, or pick an option above…' : 'exercise control is adjudicating…'"
             />
             <button type="submit" class="send" [disabled]="!awaiting()">SEND</button>
@@ -127,17 +177,17 @@
         <aside class="hud">
           <!-- In-game scenario clock, fixed at the top of the rail. Non-linear:
                the exercise time jumps between steps. Goes 'pressed' amber when the
-               lunch clock is running low. -->
+               scenario window is running low. -->
           <div class="hud-clock" [class.pressed]="h.minutesLeft <= h.lunchMinutes / 3">
             <div class="label">EXERCISE TIME</div>
             <div class="clock-value">{{ gameTime() ?? h.time }}</div>
             <div class="clock-lunch">
-              {{ h.minutesLeft }}m to lunch <span class="dim">/ {{ h.lunchMinutes }}m</span>
+              {{ h.minutesLeft }}m {{ h.windowLabel }} <span class="dim">/ {{ h.lunchMinutes }}m</span>
             </div>
             @if (fuseSecondsLeft() !== null) {
               <div class="fuse-clock" [class.critical]="fusePressed()">
                 <div class="fuse-row">
-                  <span class="fuse-label">CONTAINMENT FUSE</span>
+                  <span class="fuse-label">{{ h.deadlineLabel }}</span>
                   <span class="fuse-value">T-{{ fuseClock() }}</span>
                 </div>
                 <div class="fuse-track">

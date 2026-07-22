@@ -3,7 +3,7 @@
 Mirrors GHOSTS' OllamaConnectorService: POST {host}/api/generate, streaming NDJSON,
 env OLLAMA_HOST / OLLAMA_MODEL. When no model is configured (or the host is
 unreachable), `generate` returns None so the DM falls back to its templated path.
-The whole game stays playable with no model present (DESIGN.md D2)."""
+The whole game stays playable with no model present."""
 
 from __future__ import annotations
 
@@ -32,7 +32,8 @@ class OllamaClient:
         if system:
             payload["system"] = system
         try:
-            with httpx.Client(timeout=60.0) as client:
+            timeout = httpx.Timeout(60.0, connect=2.0)
+            with httpx.Client(timeout=timeout) as client:
                 resp = client.post(url, json=payload)
                 resp.raise_for_status()
                 out: list[str] = []
