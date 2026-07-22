@@ -10,6 +10,10 @@
   },
   "private": true,
   "packageManager": "npm@11.16.0",
+  "overrides": {
+    "@hono/node-server": "2.0.11",
+    "esbuild": "0.28.1"
+  },
   "dependencies": {
     "@angular/common": "22.0.4",
     "@angular/compiler": "22.0.4",
@@ -21,7 +25,7 @@
     "tslib": "^2.3.0"
   },
   "devDependencies": {
-    "@angular/build": "22.0.4",
+    "@angular/build": "22.0.7",
     "@angular/cli": "22.0.4",
     "@angular/compiler-cli": "22.0.4",
     "@playwright/test": "^1.61.1",

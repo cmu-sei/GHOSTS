@@ -21,6 +21,10 @@
     ]
   },
   "private": true,
+  "overrides": {
+    "@hono/node-server": "2.0.11",
+    "esbuild": "0.28.1"
+  },
   "dependencies": {
     "@angular/animations": "22.0.4",
     "@angular/cdk": "22.0.4",
@@ -40,7 +44,7 @@
     "zone.js": "~0.15.0"
   },
   "devDependencies": {
-    "@angular/build": "22.0.4",
+    "@angular/build": "22.0.7",
     "@angular/cli": "22.0.4",
     "@angular/compiler-cli": "22.0.4",
     "@types/jasmine": "~5.1.0",
