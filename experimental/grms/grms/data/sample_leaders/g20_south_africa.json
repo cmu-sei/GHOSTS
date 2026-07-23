@@ -1,0 +1,78 @@
+{
+  "name": "Cyril Ramaphosa",
+  "country": "South Africa",
+  "period": "current",
+  "title": "President",
+  "personality": {
+    "risk_tolerance": -0.2,
+    "authoritarianism": -0.1,
+    "nationalism": 0.3,
+    "pragmatism": 0.7,
+    "aggression": -0.4,
+    "populism": 0.2,
+    "transparency": 0.0,
+    "religiosity": 0.1
+  },
+  "ideology": {
+    "economic_system": "mixed",
+    "geopolitical_orientation": "non_aligned",
+    "key_alliances": ["BRICS nations", "African Union", "Global South"],
+    "adversaries": [],
+    "red_lines": [
+      "Neo-colonial interference in African affairs",
+      "Threats to ANC governance",
+      "Economic isolation through sanctions"
+    ],
+    "core_narratives": [
+      "African Renaissance and continental leadership",
+      "Non-aligned multilateralism",
+      "Post-apartheid transformation continuation",
+      "Global South solidarity and BRICS"
+    ]
+  },
+  "decision_history": [
+    {
+      "event_description": "ICJ case against Israel for genocide in Gaza",
+      "decision_taken": "South Africa brought and pursued ICJ case, maintained strong pro-Palestinian position",
+      "outcome": "ICJ interim measures issued, raised SA's Global South profile, strained Western relations",
+      "date": "2025-01-15T00:00:00Z",
+      "context_factors": ["anti-apartheid moral authority", "ANC-Palestine historical ties", "Global South leadership"]
+    },
+    {
+      "event_description": "Formed Government of National Unity after 2024 election",
+      "decision_taken": "Coalition with DA and other parties after ANC lost majority, pragmatic power-sharing arrangement",
+      "outcome": "Stable but constrained governance, market confidence improved",
+      "date": "2024-06-15T00:00:00Z",
+      "context_factors": ["electoral mandate loss", "governance continuity need", "economic stability priority"]
+    }
+  ],
+  "cultural_context": {
+    "decision_making_style": "consensus",
+    "information_sources": ["SSA intelligence", "ANC national executive", "coalition partners", "business leaders"],
+    "domestic_power_base": "ANC (diminished), GNU coalition, organized labor (COSATU), business community",
+    "succession_concerns": true,
+    "historical_analogies": ["Mandela reconciliation", "Anti-apartheid solidarity with Palestine", "Non-Aligned Movement"]
+  },
+  "decision_context": {
+    "approval_rating": 38.0,
+    "economic_conditions": {
+      "gdp_growth": 1.2,
+      "unemployment": 32.0,
+      "inflation": 4.5,
+      "sanctions_pressure": 0.05
+    },
+    "military_posture": {
+      "readiness_level": "peacetime",
+      "ongoing_operations": ["DRC peacekeeping (SADC)", "Mozambique insurgency support"],
+      "force_disposition": "limited conventional capability, peacekeeping focus"
+    },
+    "domestic_pressures": {
+      "election_proximity_days": 1500,
+      "opposition_strength": 0.55,
+      "media_sentiment": -0.2,
+      "protest_level": "major"
+    },
+    "ongoing_conflicts": ["Load-shedding energy crisis", "Service delivery protests"],
+    "recent_events": ["ICJ case continuation", "GNU coalition management", "Infrastructure investment push"]
+  }
+}

@@ -1,0 +1,8 @@
+[project]
+name = "grms"
+version = "0.1.0"
+description = "Geopolitical Response Modeling Service for GHOSTS"
+requires-python = ">=3.12"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

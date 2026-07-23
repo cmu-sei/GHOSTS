@@ -1,0 +1,195 @@
+@use 'variables' as *;
+@use 'glass' as *;
+@use 'animations' as *;
+
+.population-prediction {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  padding: 16px 0;
+}
+
+.input-panel, .results-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.section-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: $text;
+  margin-bottom: 16px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.loading-state {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: $text-dim;
+  padding: 24px;
+  justify-content: center;
+
+  .spin {
+    animation: pulse 1.5s infinite;
+  }
+}
+
+.sentiment-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sentiment-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sentiment-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: $text-dim;
+  width: 60px;
+  flex-shrink: 0;
+}
+
+.bar-track {
+  flex: 1;
+  height: 8px;
+  background: rgba(100, 116, 139, 0.2);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width $transition;
+
+  &.support {
+    background: $green;
+  }
+
+  &.oppose {
+    background: $red;
+  }
+
+  &.neutral {
+    background: $text-mute;
+  }
+}
+
+.sentiment-value {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: $text;
+  width: 40px;
+  text-align: right;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+.segment-table {
+  width: 100%;
+  background: transparent !important;
+
+  th {
+    color: $text-dim !important;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: transparent !important;
+    border-bottom-color: $glass-border !important;
+  }
+
+  td {
+    color: $text !important;
+    font-size: 0.85rem;
+    background: transparent !important;
+    border-bottom-color: $glass-border !important;
+  }
+
+  tr {
+    background: transparent !important;
+  }
+}
+
+.info-spread {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.gauge-center {
+  display: flex;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.spread-details {
+  flex: 1;
+}
+
+.detail-row {
+  margin-bottom: 12px;
+}
+
+.detail-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: $text-mute;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.detail-value {
+  font-size: 0.9rem;
+  color: $text;
+
+  &.highlight {
+    color: $accent;
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+}
+
+.trajectory-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  text-align: center;
+}
+
+.trajectory-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px;
+  background: $glass-light;
+  border-radius: $radius-sm;
+  border: 1px solid $glass-border;
+}
+
+.trajectory-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: $accent;
+}
+
+.trajectory-label {
+  font-size: 0.7rem;
+  color: $text-mute;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}

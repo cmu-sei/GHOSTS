@@ -1,0 +1,79 @@
+{
+  "name": "Lai Ching-te",
+  "country": "Taiwan",
+  "period": "current",
+  "title": "President",
+  "personality": {
+    "risk_tolerance": 0.4,
+    "authoritarianism": 0.1,
+    "nationalism": 0.7,
+    "pragmatism": 0.65,
+    "aggression": 0.2,
+    "populism": 0.4,
+    "transparency": 0.5,
+    "religiosity": 0.1
+  },
+  "ideology": {
+    "economic_system": "free_market",
+    "geopolitical_orientation": "western",
+    "key_alliances": ["United States", "Japan", "Australia"],
+    "adversaries": ["China"],
+    "red_lines": [
+      "Military invasion or blockade by China",
+      "Forced unification",
+      "Diplomatic isolation cutting off all international relationships",
+      "Economic coercion threatening semiconductor industry"
+    ],
+    "core_narratives": [
+      "Taiwan as a sovereign democracy",
+      "Status quo maintenance across the strait",
+      "Deepening ties with like-minded democracies",
+      "Technological leadership and economic resilience"
+    ]
+  },
+  "decision_history": [
+    {
+      "event_description": "Inauguration amid heightened cross-strait tensions and PLA military exercises",
+      "decision_taken": "Delivered measured inaugural speech emphasizing peace while asserting Taiwan's sovereignty as Republic of China",
+      "outcome": "China conducted military exercises, US reaffirmed support, regional tension managed",
+      "date": "2024-05-20T00:00:00Z",
+      "context_factors": ["cross-strait stability", "US relationship", "domestic mandate"]
+    },
+    {
+      "event_description": "Continued Chinese military pressure with regular incursions into Taiwan ADIZ",
+      "decision_taken": "Increased defense spending, deepened military cooperation with US and Japan, pursued asymmetric defense strategy",
+      "outcome": "Enhanced deterrence posture, strengthened US-Taiwan defense ties",
+      "date": "2025-01-01T00:00:00Z",
+      "context_factors": ["deterrence", "alliance building", "domestic security concerns"]
+    }
+  ],
+  "cultural_context": {
+    "decision_making_style": "consultative_democratic",
+    "information_sources": ["intelligence services", "cabinet", "legislative allies", "US security briefings"],
+    "domestic_power_base": "DPP supporters, younger generation, southern Taiwan, Taiwanese identity voters",
+    "succession_concerns": false,
+    "historical_analogies": ["1996 Taiwan Strait Crisis", "Ukraine invasion lessons"]
+  },
+  "decision_context": {
+    "approval_rating": 42.0,
+    "economic_conditions": {
+      "gdp_growth": 3.5,
+      "unemployment": 3.4,
+      "inflation": 2.1,
+      "sanctions_pressure": 0.1
+    },
+    "military_posture": {
+      "readiness_level": "elevated",
+      "ongoing_operations": ["ADIZ monitoring", "Reserve force modernization"],
+      "force_disposition": "asymmetric defense with focus on anti-invasion capability"
+    },
+    "domestic_pressures": {
+      "election_proximity_days": null,
+      "opposition_strength": 0.55,
+      "media_sentiment": 0.0,
+      "protest_level": "minor"
+    },
+    "ongoing_conflicts": ["Cross-strait tensions", "Chinese economic coercion"],
+    "recent_events": ["Defense budget increase", "US arms sales", "Chinese military exercises near Taiwan"]
+  }
+}

@@ -1,0 +1,196 @@
+@use 'variables' as *;
+@use 'glass' as *;
+
+.leaders-list {
+  padding: 32px;
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  min-height: calc(100vh - 120px);
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+  gap: 24px;
+
+  .title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: $text;
+    margin: 0;
+    letter-spacing: -0.02em;
+  }
+}
+
+.search-field {
+  width: 300px;
+
+  ::ng-deep {
+    .mat-mdc-text-field-wrapper {
+      @include glass-input;
+    }
+
+    .mat-mdc-form-field-subscript-wrapper {
+      display: none;
+    }
+
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+      border-color: $glass-border !important;
+    }
+
+    input {
+      color: $text !important;
+    }
+
+    mat-icon {
+      color: $text-mute;
+    }
+  }
+}
+
+.period-accordion {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.period-panel {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 1px solid $glass-border;
+  border-radius: $radius !important;
+
+  ::ng-deep .mat-expansion-panel-body {
+    padding: 16px 0 0;
+  }
+}
+
+.period-section-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: $text;
+  text-transform: capitalize;
+}
+
+.period-count {
+  margin-left: 10px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: $accent;
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.leaders-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.leader-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.leader-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.leader-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.leader-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: $text;
+  margin: 0;
+}
+
+.leader-country {
+  font-size: 0.85rem;
+  color: $accent;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.leader-title {
+  font-size: 0.8rem;
+  color: $text-mute;
+}
+
+.leader-period {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 2px 8px;
+  border-radius: 8px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  width: fit-content;
+
+  &.period-current {
+    color: $green;
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+  }
+
+  &.period-historical {
+    color: $orange;
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+  }
+}
+
+.leader-radar {
+  flex-shrink: 0;
+  width: 120px;
+  height: 120px;
+}
+
+.loading-state,
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 64px 0;
+  color: $text-mute;
+  font-size: 0.9rem;
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    opacity: 0.5;
+  }
+}
+
+.spin {
+  animation: spin 1.5s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.create-fab {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  background: $accent !important;
+  color: $bg-base !important;
+  @include neon-glow($accent);
+}

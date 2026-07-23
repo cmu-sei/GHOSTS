@@ -1,0 +1,106 @@
+<div class="populations-list">
+  <div class="page-header">
+    <div class="title-section">
+      <mat-icon class="page-icon">groups</mat-icon>
+      <h1>Populations</h1>
+    </div>
+    <button mat-flat-button color="primary" (click)="openCreateDialog()">
+      <mat-icon>add</mat-icon>
+      New Population
+    </button>
+  </div>
+
+  <div class="search-section">
+    <app-glass-card>
+      <div class="search-bar">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Filter by country</mat-label>
+          <input
+            matInput
+            [ngModel]="searchQuery()"
+            (ngModelChange)="searchQuery.set($event)"
+            placeholder="Type to filter..."
+          />
+          <mat-icon matPrefix>filter_list</mat-icon>
+        </mat-form-field>
+      </div>
+    </app-glass-card>
+  </div>
+
+  @if (loading()) {
+    <div class="loading-state">
+      <mat-icon class="spin">sync</mat-icon>
+      <span>Loading populations...</span>
+    </div>
+  }
+
+  @if (error(); as errorMsg) {
+    <app-glass-card>
+      <div class="error-state">
+        <mat-icon>error_outline</mat-icon>
+        <span>{{ errorMsg }}</span>
+      </div>
+    </app-glass-card>
+  }
+
+  @if (!loading() && filteredPopulations().length > 0) {
+    <mat-accordion multi class="period-accordion">
+      @for (group of populationsByPeriod(); track group.period) {
+        <mat-expansion-panel [expanded]="true" class="period-panel">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <span class="period-section-title">{{ group.label }}</span>
+              <span class="period-count">{{ group.populations.length }}</span>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+
+          <div class="results-grid">
+            @for (pop of group.populations; track pop.country) {
+              <app-glass-card [hoverable]="true">
+                <div class="population-card" (click)="viewDetail(pop.country)">
+                  <div class="card-header">
+                    <h3>{{ pop.country | countryFlag }} {{ pop.country }}</h3>
+                    <mat-icon class="nav-icon">arrow_forward</mat-icon>
+                  </div>
+                  <div class="card-stats">
+                    <div class="stat">
+                      <span class="stat-value">{{ pop.total_population | number }}</span>
+                      <span class="stat-label">Total Population</span>
+                    </div>
+                    <div class="stat">
+                      <span class="stat-value">{{ pop.segments.length }}</span>
+                      <span class="stat-label">Segments</span>
+                    </div>
+                  </div>
+                  <div class="segment-preview">
+                    @for (segment of pop.segments; track segment.name) {
+                      <div
+                        class="segment-bar"
+                        [style.flex-grow]="segment.percentage"
+                        [matTooltip]="segment.name + ': ' + (segment.percentage * 100).toFixed(0) + '%'"
+                      ></div>
+                    }
+                  </div>
+                </div>
+              </app-glass-card>
+            }
+          </div>
+        </mat-expansion-panel>
+      }
+    </mat-accordion>
+  }
+
+  @if (!loading() && !error() && filteredPopulations().length === 0 && searchQuery()) {
+    <div class="empty-state">
+      <mat-icon>search_off</mat-icon>
+      <p>No populations match "{{ searchQuery() }}"</p>
+    </div>
+  }
+
+  @if (!loading() && !error() && populations().length === 0) {
+    <div class="empty-state">
+      <mat-icon>public</mat-icon>
+      <p>No population profiles loaded yet</p>
+    </div>
+  }
+</div>

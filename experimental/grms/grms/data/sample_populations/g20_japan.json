@@ -1,0 +1,132 @@
+{
+  "country": "Japan",
+  "total_population": 125000000,
+  "period": "current",
+  "segments": [
+    {
+      "name": "Tokyo metropolitan professionals",
+      "percentage": 0.25,
+      "demographics": {
+        "urbanization": 0.98,
+        "education_level": 0.85,
+        "median_age": 40,
+        "economic_class": "upper"
+      },
+      "disposition": {
+        "government_trust": 0.45,
+        "nationalism": 0.45,
+        "media_exposure": 0.9,
+        "social_media_activity": 0.7,
+        "protest_propensity": 0.1,
+        "compliance_baseline": 0.85,
+        "information_sources": ["social_media", "state_tv"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.4,
+        "economic_sensitivity": 0.55,
+        "fatigue_rate": 0.1,
+        "amplification_factor": 0.45
+      }
+    },
+    {
+      "name": "Corporate salaryman class",
+      "percentage": 0.30,
+      "demographics": {
+        "urbanization": 0.85,
+        "education_level": 0.7,
+        "median_age": 45,
+        "economic_class": "middle"
+      },
+      "disposition": {
+        "government_trust": 0.5,
+        "nationalism": 0.5,
+        "media_exposure": 0.75,
+        "social_media_activity": 0.5,
+        "protest_propensity": 0.05,
+        "compliance_baseline": 0.9,
+        "information_sources": ["state_tv", "social_media"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.5,
+        "economic_sensitivity": 0.65,
+        "fatigue_rate": 0.06,
+        "amplification_factor": 0.35
+      }
+    },
+    {
+      "name": "Elderly and retired population",
+      "percentage": 0.25,
+      "demographics": {
+        "urbanization": 0.6,
+        "education_level": 0.55,
+        "median_age": 72,
+        "economic_class": "middle"
+      },
+      "disposition": {
+        "government_trust": 0.6,
+        "nationalism": 0.55,
+        "media_exposure": 0.7,
+        "social_media_activity": 0.2,
+        "protest_propensity": 0.05,
+        "compliance_baseline": 0.9,
+        "information_sources": ["state_tv", "word_of_mouth"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.55,
+        "economic_sensitivity": 0.5,
+        "fatigue_rate": 0.04,
+        "amplification_factor": 0.2
+      }
+    },
+    {
+      "name": "Young precariat and part-time workers",
+      "percentage": 0.15,
+      "demographics": {
+        "urbanization": 0.9,
+        "education_level": 0.65,
+        "median_age": 28,
+        "economic_class": "lower"
+      },
+      "disposition": {
+        "government_trust": 0.3,
+        "nationalism": 0.35,
+        "media_exposure": 0.85,
+        "social_media_activity": 0.85,
+        "protest_propensity": 0.15,
+        "compliance_baseline": 0.7,
+        "information_sources": ["social_media", "foreign_media"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.25,
+        "economic_sensitivity": 0.75,
+        "fatigue_rate": 0.14,
+        "amplification_factor": 0.6
+      }
+    },
+    {
+      "name": "Rural and agricultural communities",
+      "percentage": 0.05,
+      "demographics": {
+        "urbanization": 0.15,
+        "education_level": 0.4,
+        "median_age": 60,
+        "economic_class": "lower"
+      },
+      "disposition": {
+        "government_trust": 0.55,
+        "nationalism": 0.5,
+        "media_exposure": 0.45,
+        "social_media_activity": 0.15,
+        "protest_propensity": 0.05,
+        "compliance_baseline": 0.85,
+        "information_sources": ["state_tv", "word_of_mouth"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.45,
+        "economic_sensitivity": 0.7,
+        "fatigue_rate": 0.04,
+        "amplification_factor": 0.2
+      }
+    }
+  ]
+}

@@ -1,0 +1,85 @@
+{
+  "name": "Paul Reynaud",
+  "country": "France",
+  "period": "world war 2",
+  "title": "President of the Council of Ministers",
+  "personality": {
+    "risk_tolerance": 0.3,
+    "authoritarianism": -0.2,
+    "nationalism": 0.6,
+    "pragmatism": 0.7,
+    "aggression": 0.1,
+    "populism": -0.1,
+    "transparency": 0.2,
+    "religiosity": 0.1
+  },
+  "ideology": {
+    "economic_system": "free_market",
+    "geopolitical_orientation": "western",
+    "key_alliances": ["United Kingdom", "Poland"],
+    "adversaries": ["Germany", "Italy"],
+    "red_lines": [
+      "German occupation of French metropolitan territory",
+      "Violation of French sovereignty",
+      "Breaking the Franco-British alliance"
+    ],
+    "core_narratives": [
+      "France as defender of European civilization against fascism",
+      "Franco-British solidarity as cornerstone of resistance",
+      "Modernization of French military and economy",
+      "Resistance to appeasement of dictators"
+    ]
+  },
+  "decision_history": [
+    {
+      "event_description": "Germany invaded Poland, triggering mutual defense obligations",
+      "decision_taken": "Supported declaration of war on Germany alongside Britain, as Finance Minister advocated aggressive economic warfare",
+      "outcome": "France entered war but adopted defensive posture behind Maginot Line during Phoney War",
+      "date": "1939-09-03T00:00:00Z",
+      "context_factors": ["treaty obligations to Poland", "French military doctrine favored defense", "public war-weariness from WW1", "believed blockade could weaken Germany"]
+    },
+    {
+      "event_description": "German forces broke through at Sedan and rapidly advanced across France",
+      "decision_taken": "Replaced General Gamelin with Weygand, recalled Petain as advisor, appealed desperately to Churchill for more fighter squadrons",
+      "outcome": "Military situation continued to deteriorate; cabinet split between fighting on and seeking armistice",
+      "date": "1940-05-18T00:00:00Z",
+      "context_factors": ["French army collapsing", "Dunkirk evacuation ongoing", "defeatist faction growing in cabinet", "Petain and Weygand favoring armistice"]
+    },
+    {
+      "event_description": "Paris fell and military collapse became irreversible",
+      "decision_taken": "Proposed Franco-British Union to Churchill as desperate measure to keep France in the war; cabinet rejected it; resigned rather than sign armistice",
+      "outcome": "Replaced by Petain who immediately sought armistice; Reynaud imprisoned by Vichy, later deported to Germany",
+      "date": "1940-06-16T00:00:00Z",
+      "context_factors": ["cabinet majority favored armistice", "military commanders declared further resistance futile", "refused to personally authorize surrender", "chose resignation over capitulation"]
+    }
+  ],
+  "cultural_context": {
+    "decision_making_style": "advisory_council",
+    "information_sources": ["military high command briefings", "British government communications", "intelligence services", "parliamentary allies"],
+    "domestic_power_base": "center-right parliamentary coalition, financial and business establishment, pro-British political faction",
+    "succession_concerns": true,
+    "historical_analogies": ["Clemenceau's resolve in 1918", "French Revolution's levee en masse", "1870 Franco-Prussian War disaster"]
+  },
+  "decision_context": {
+    "approval_rating": 45.0,
+    "economic_conditions": {
+      "gdp_growth": -2.5,
+      "unemployment": 4.0,
+      "inflation": 8.0,
+      "sanctions_pressure": 0.0
+    },
+    "military_posture": {
+      "readiness_level": "mobilized",
+      "ongoing_operations": ["Defense of metropolitan France", "Maginot Line garrison", "Naval operations in Mediterranean"],
+      "force_disposition": "5 million mobilized but outmaneuvered; strongest army in Europe on paper but doctrinally obsolete"
+    },
+    "domestic_pressures": {
+      "election_proximity_days": null,
+      "opposition_strength": 0.6,
+      "media_sentiment": -0.3,
+      "protest_level": "minor"
+    },
+    "ongoing_conflicts": ["War with Germany", "Italian threat in Mediterranean"],
+    "recent_events": ["German breakthrough at Sedan", "Evacuation of Dunkirk", "Fall of Paris imminent"]
+  }
+}

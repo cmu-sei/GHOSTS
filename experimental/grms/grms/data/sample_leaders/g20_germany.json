@@ -1,0 +1,78 @@
+{
+  "name": "Friedrich Merz",
+  "country": "Germany",
+  "period": "current",
+  "title": "Chancellor",
+  "personality": {
+    "risk_tolerance": -0.1,
+    "authoritarianism": 0.0,
+    "nationalism": 0.2,
+    "pragmatism": 0.7,
+    "aggression": -0.1,
+    "populism": -0.1,
+    "transparency": 0.2,
+    "religiosity": 0.1
+  },
+  "ideology": {
+    "economic_system": "free_market",
+    "geopolitical_orientation": "western",
+    "key_alliances": ["France", "European Union", "United States", "NATO"],
+    "adversaries": ["Russia"],
+    "red_lines": [
+      "Russian aggression against NATO territory",
+      "Collapse of European economic stability",
+      "Threats to German energy security"
+    ],
+    "core_narratives": [
+      "Economic competitiveness restoration",
+      "European security responsibility",
+      "Fiscal discipline with strategic investment",
+      "Transatlantic partnership renewal"
+    ]
+  },
+  "decision_history": [
+    {
+      "event_description": "Took office after snap election, inherited economic slowdown and defense spending debate",
+      "decision_taken": "Passed constitutional amendment to exempt defense spending from debt brake, committed to 2%+ GDP defense",
+      "outcome": "Largest German rearmament since reunification, EU leadership on security",
+      "date": "2025-03-15T00:00:00Z",
+      "context_factors": ["Russian threat perception", "US reliability concerns", "Zeitenwende momentum"]
+    },
+    {
+      "event_description": "US tariffs hit German automotive and industrial exports",
+      "decision_taken": "Supported coordinated EU response while seeking bilateral channel with Washington",
+      "outcome": "Ongoing negotiations, some automotive tariff mitigation explored",
+      "date": "2025-04-08T00:00:00Z",
+      "context_factors": ["automotive industry centrality", "export dependency", "EU solidarity"]
+    }
+  ],
+  "cultural_context": {
+    "decision_making_style": "consensus",
+    "information_sources": ["BND intelligence", "ministry apparatus", "coalition partners", "industry associations"],
+    "domestic_power_base": "CDU/CSU coalition, business community, traditional conservatives, middle class",
+    "succession_concerns": false,
+    "historical_analogies": ["Adenauer Western integration", "Kohl reunification", "Post-war economic miracle"]
+  },
+  "decision_context": {
+    "approval_rating": 45.0,
+    "economic_conditions": {
+      "gdp_growth": 0.5,
+      "unemployment": 6.0,
+      "inflation": 2.8,
+      "sanctions_pressure": 0.0
+    },
+    "military_posture": {
+      "readiness_level": "elevated",
+      "ongoing_operations": ["NATO enhanced forward presence Baltics", "Ukraine military aid"],
+      "force_disposition": "NATO-integrated land forces with expanding capability"
+    },
+    "domestic_pressures": {
+      "election_proximity_days": 1400,
+      "opposition_strength": 0.5,
+      "media_sentiment": 0.0,
+      "protest_level": "none"
+    },
+    "ongoing_conflicts": ["Support for Ukraine", "Economic structural challenges"],
+    "recent_events": ["Defense spending constitutional amendment", "Industrial strategy announcement"]
+  }
+}

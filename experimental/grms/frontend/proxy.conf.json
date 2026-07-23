@@ -1,0 +1,15 @@
+{
+  "/api": {
+    "target": "http://localhost:8090",
+    "secure": false
+  },
+  "/health": {
+    "target": "http://localhost:8090",
+    "secure": false
+  },
+  "/ws": {
+    "target": "ws://localhost:8090",
+    "secure": false,
+    "ws": true
+  }
+}

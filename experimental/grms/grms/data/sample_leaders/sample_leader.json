@@ -1,0 +1,77 @@
+{
+  "name": "Fictional Leader Alpha",
+  "country": "Northland",
+  "period": "current",
+  "title": "President",
+  "personality": {
+    "risk_tolerance": 0.3,
+    "authoritarianism": 0.5,
+    "nationalism": 0.7,
+    "pragmatism": 0.2,
+    "aggression": 0.4,
+    "populism": 0.6,
+    "transparency": -0.3,
+    "religiosity": 0.1
+  },
+  "ideology": {
+    "economic_system": "state_directed",
+    "geopolitical_orientation": "non_aligned",
+    "key_alliances": ["Eastland", "Southmark"],
+    "adversaries": ["Westria"],
+    "red_lines": [
+      "Foreign military bases near border",
+      "Sanctions targeting energy exports",
+      "Support for separatist movements"
+    ],
+    "core_narratives": [
+      "National sovereignty above all",
+      "Economic independence from Western institutions",
+      "Historical greatness restoration"
+    ]
+  },
+  "decision_history": [
+    {
+      "event_description": "Westria imposed trade sanctions on energy sector",
+      "decision_taken": "Redirected exports to Eastland, announced retaliatory tariffs, public address framing sanctions as economic warfare",
+      "outcome": "Short-term economic pain but strengthened domestic narrative of external threat",
+      "date": "2022-03-15T00:00:00Z",
+      "context_factors": ["high approval", "energy leverage", "Eastland willing buyer"]
+    },
+    {
+      "event_description": "Neighboring state Borderland announced NATO membership application",
+      "decision_taken": "Increased military exercises near border, diplomatic threats of consequences, economic pressure on Borderland",
+      "outcome": "Delayed but did not prevent application; escalated regional tension",
+      "date": "2023-06-01T00:00:00Z",
+      "context_factors": ["red line proximity", "military readiness high", "domestic support for strong response"]
+    }
+  ],
+  "cultural_context": {
+    "decision_making_style": "advisory_council",
+    "information_sources": ["military intelligence", "inner circle advisors", "state media feedback"],
+    "domestic_power_base": "security services and energy oligarchs",
+    "succession_concerns": false,
+    "historical_analogies": ["Cold War containment", "Historical territorial integrity"]
+  },
+  "decision_context": {
+    "approval_rating": 68.0,
+    "economic_conditions": {
+      "gdp_growth": 1.2,
+      "unemployment": 5.5,
+      "inflation": 8.0,
+      "sanctions_pressure": 0.4
+    },
+    "military_posture": {
+      "readiness_level": "elevated",
+      "ongoing_operations": ["border patrol reinforcement"],
+      "force_disposition": "defensive posture with rapid deployment capability"
+    },
+    "domestic_pressures": {
+      "election_proximity_days": null,
+      "opposition_strength": 0.2,
+      "media_sentiment": 0.3,
+      "protest_level": "none"
+    },
+    "ongoing_conflicts": ["trade dispute with Westria"],
+    "recent_events": ["Westria conducted naval exercises in neutral waters"]
+  }
+}

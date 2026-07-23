@@ -1,0 +1,78 @@
+{
+  "name": "Lee Jae-myung",
+  "country": "South Korea",
+  "period": "current",
+  "title": "President",
+  "personality": {
+    "risk_tolerance": 0.2,
+    "authoritarianism": -0.1,
+    "nationalism": 0.3,
+    "pragmatism": 0.6,
+    "aggression": -0.1,
+    "populism": 0.5,
+    "transparency": 0.2,
+    "religiosity": -0.2
+  },
+  "ideology": {
+    "economic_system": "mixed",
+    "geopolitical_orientation": "western",
+    "key_alliances": ["United States", "Japan", "NATO partners"],
+    "adversaries": ["North Korea"],
+    "red_lines": [
+      "North Korean nuclear or missile attacks",
+      "Chinese economic coercion",
+      "Japanese historical revisionism on colonial era"
+    ],
+    "core_narratives": [
+      "Korean Peninsula peace through engagement",
+      "Economic fairness and chaebol reform",
+      "Balanced diplomacy between US and China",
+      "Technology and semiconductor leadership"
+    ]
+  },
+  "decision_history": [
+    {
+      "event_description": "Elected president after constitutional crisis and Yoon impeachment",
+      "decision_taken": "Won snap election on platform of democratic restoration and economic reform",
+      "outcome": "Strong initial mandate, reset of foreign policy approach",
+      "date": "2025-06-03T00:00:00Z",
+      "context_factors": ["post-martial law crisis", "democratic restoration narrative", "public desire for stability"]
+    },
+    {
+      "event_description": "US tariffs and pressure on semiconductor exports to China",
+      "decision_taken": "Navigated between US security demands and China market access, sought exemptions for Korean chipmakers",
+      "outcome": "Partial accommodations achieved, maintained both relationships",
+      "date": "2025-05-01T00:00:00Z",
+      "context_factors": ["semiconductor industry centrality", "US alliance", "China market dependency"]
+    }
+  ],
+  "cultural_context": {
+    "decision_making_style": "advisory_council",
+    "information_sources": ["NIS intelligence", "Blue House advisors", "party leadership", "chaebol engagement"],
+    "domestic_power_base": "Democratic Party, labor unions, youth voters, progressive civil society",
+    "succession_concerns": false,
+    "historical_analogies": ["Sunshine Policy engagement", "1997 IMF crisis reform", "Democratization movement"]
+  },
+  "decision_context": {
+    "approval_rating": 55.0,
+    "economic_conditions": {
+      "gdp_growth": 2.0,
+      "unemployment": 3.5,
+      "inflation": 2.8,
+      "sanctions_pressure": 0.0
+    },
+    "military_posture": {
+      "readiness_level": "elevated",
+      "ongoing_operations": ["North Korea deterrence", "US-ROK combined readiness"],
+      "force_disposition": "peninsula defense with advanced missile defense systems"
+    },
+    "domestic_pressures": {
+      "election_proximity_days": 1700,
+      "opposition_strength": 0.45,
+      "media_sentiment": 0.2,
+      "protest_level": "none"
+    },
+    "ongoing_conflicts": ["North Korea nuclear threat", "Japan historical disputes"],
+    "recent_events": ["Presidential election victory", "Democratic restoration", "US alliance reaffirmation"]
+  }
+}

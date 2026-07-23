@@ -1,0 +1,132 @@
+{
+  "country": "Saudi Arabia",
+  "total_population": 36000000,
+  "period": "current",
+  "segments": [
+    {
+      "name": "Riyadh and Jeddah business elite",
+      "percentage": 0.15,
+      "demographics": {
+        "urbanization": 0.98,
+        "education_level": 0.8,
+        "median_age": 35,
+        "economic_class": "upper"
+      },
+      "disposition": {
+        "government_trust": 0.75,
+        "nationalism": 0.7,
+        "media_exposure": 0.85,
+        "social_media_activity": 0.7,
+        "protest_propensity": 0.05,
+        "compliance_baseline": 0.85,
+        "information_sources": ["state_tv", "social_media"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.7,
+        "economic_sensitivity": 0.4,
+        "fatigue_rate": 0.08,
+        "amplification_factor": 0.4
+      }
+    },
+    {
+      "name": "Urban Saudi middle class",
+      "percentage": 0.30,
+      "demographics": {
+        "urbanization": 0.9,
+        "education_level": 0.6,
+        "median_age": 30,
+        "economic_class": "middle"
+      },
+      "disposition": {
+        "government_trust": 0.7,
+        "nationalism": 0.75,
+        "media_exposure": 0.75,
+        "social_media_activity": 0.8,
+        "protest_propensity": 0.05,
+        "compliance_baseline": 0.85,
+        "information_sources": ["social_media", "state_tv"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.7,
+        "economic_sensitivity": 0.55,
+        "fatigue_rate": 0.06,
+        "amplification_factor": 0.45
+      }
+    },
+    {
+      "name": "Young Saudi digital generation",
+      "percentage": 0.20,
+      "demographics": {
+        "urbanization": 0.9,
+        "education_level": 0.7,
+        "median_age": 23,
+        "economic_class": "middle"
+      },
+      "disposition": {
+        "government_trust": 0.6,
+        "nationalism": 0.65,
+        "media_exposure": 0.9,
+        "social_media_activity": 0.95,
+        "protest_propensity": 0.08,
+        "compliance_baseline": 0.75,
+        "information_sources": ["social_media", "foreign_media"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.55,
+        "economic_sensitivity": 0.5,
+        "fatigue_rate": 0.12,
+        "amplification_factor": 0.6
+      }
+    },
+    {
+      "name": "Expatriate worker population",
+      "percentage": 0.25,
+      "demographics": {
+        "urbanization": 0.85,
+        "education_level": 0.4,
+        "median_age": 34,
+        "economic_class": "lower"
+      },
+      "disposition": {
+        "government_trust": 0.4,
+        "nationalism": 0.15,
+        "media_exposure": 0.5,
+        "social_media_activity": 0.6,
+        "protest_propensity": 0.03,
+        "compliance_baseline": 0.9,
+        "information_sources": ["social_media", "word_of_mouth", "foreign_media"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.1,
+        "economic_sensitivity": 0.9,
+        "fatigue_rate": 0.05,
+        "amplification_factor": 0.2
+      }
+    },
+    {
+      "name": "Traditional tribal and rural communities",
+      "percentage": 0.10,
+      "demographics": {
+        "urbanization": 0.3,
+        "education_level": 0.3,
+        "median_age": 40,
+        "economic_class": "middle"
+      },
+      "disposition": {
+        "government_trust": 0.75,
+        "nationalism": 0.7,
+        "media_exposure": 0.4,
+        "social_media_activity": 0.3,
+        "protest_propensity": 0.03,
+        "compliance_baseline": 0.9,
+        "information_sources": ["state_tv", "word_of_mouth"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.75,
+        "economic_sensitivity": 0.5,
+        "fatigue_rate": 0.04,
+        "amplification_factor": 0.2
+      }
+    }
+  ]
+}

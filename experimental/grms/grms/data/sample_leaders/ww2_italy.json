@@ -1,0 +1,86 @@
+{
+  "name": "Benito Mussolini",
+  "country": "Italy",
+  "period": "world war 2",
+  "title": "Duce and Head of Government",
+  "personality": {
+    "risk_tolerance": 0.6,
+    "authoritarianism": 0.9,
+    "nationalism": 0.9,
+    "pragmatism": -0.2,
+    "aggression": 0.7,
+    "populism": 0.8,
+    "transparency": -0.7,
+    "religiosity": -0.1
+  },
+  "ideology": {
+    "economic_system": "corporatist",
+    "geopolitical_orientation": "expansionist",
+    "key_alliances": ["Germany", "Japan"],
+    "adversaries": ["United Kingdom", "United States", "Soviet Union", "Free France", "Greece"],
+    "red_lines": [
+      "Italian territorial losses in Africa or Mediterranean",
+      "German domination of Italian foreign policy",
+      "Challenges to Fascist Party supremacy domestically",
+      "Loss of Mare Nostrum (Mediterranean) status"
+    ],
+    "core_narratives": [
+      "Revival of the Roman Empire and Mediterranean dominance",
+      "Fascism as the superior third way between capitalism and communism",
+      "Italian martial glory and national rebirth",
+      "Mare Nostrum - the Mediterranean as Italy's sea"
+    ]
+  },
+  "decision_history": [
+    {
+      "event_description": "France defeated and Britain appearing weakened in summer 1940",
+      "decision_taken": "Declared war on France and Britain expecting German victory to deliver spoils",
+      "outcome": "Italian military proved catastrophically unprepared; humiliating defeats in Greece and North Africa",
+      "date": "1940-06-10T00:00:00Z",
+      "context_factors": ["belief in imminent German victory", "desire for territorial spoils", "overestimation of Italian military capability", "fear of being left out of new European order"]
+    },
+    {
+      "event_description": "Italian invasion of Greece stalled and was pushed back into Albania",
+      "decision_taken": "Launched invasion of Greece without consulting Germany, seeking independent military prestige",
+      "outcome": "Greek counterattack humiliated Italy; required German intervention; delayed Barbarossa",
+      "date": "1940-10-28T00:00:00Z",
+      "context_factors": ["jealousy of German successes", "desire to prove Italian military prowess independently", "poor intelligence on Greek capabilities", "prestige over planning"]
+    },
+    {
+      "event_description": "Allied invasion of Sicily and bombing of Rome in July 1943",
+      "decision_taken": "Failed to mount effective defense; Grand Council of Fascism voted to remove him from power",
+      "outcome": "Arrested by King Victor Emmanuel III; Fascist regime collapsed; Italy sought armistice",
+      "date": "1943-07-25T00:00:00Z",
+      "context_factors": ["complete military collapse in North Africa", "Allied invasion of Sicily", "loss of confidence from own Grand Council", "war-weariness of Italian population"]
+    }
+  ],
+  "cultural_context": {
+    "decision_making_style": "unilateral",
+    "information_sources": ["Fascist Party reports", "military command (often misleading)", "personal propaganda apparatus", "OVRA secret police"],
+    "domestic_power_base": "Fascist Party, industrialists, Lateran Pact with Vatican, military officer corps (wavering), King Victor Emmanuel III (conditional)",
+    "succession_concerns": true,
+    "historical_analogies": ["Roman Empire restoration", "Risorgimento national unification", "Caesar and Augustus as models"]
+  },
+  "decision_context": {
+    "approval_rating": 40.0,
+    "economic_conditions": {
+      "gdp_growth": -8.0,
+      "unemployment": 3.0,
+      "inflation": 15.0,
+      "sanctions_pressure": 0.5
+    },
+    "military_posture": {
+      "readiness_level": "overstretched",
+      "ongoing_operations": ["North Africa (losing)", "Eastern Front contribution", "Balkans occupation", "Mediterranean naval defense"],
+      "force_disposition": "poorly equipped forces spread across multiple theaters; dependent on German support"
+    },
+    "domestic_pressures": {
+      "election_proximity_days": null,
+      "opposition_strength": 0.4,
+      "media_sentiment": -0.2,
+      "protest_level": "moderate"
+    },
+    "ongoing_conflicts": ["North African campaign", "Eastern Front contingent", "Balkans occupation", "Defense of Italian mainland"],
+    "recent_events": ["Loss of Libya to Allies", "Italian defeats requiring German rescue", "Industrial strikes in northern Italy March 1943", "Allied bombing of Italian cities"]
+  }
+}

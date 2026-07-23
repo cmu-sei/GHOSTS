@@ -1,0 +1,78 @@
+{
+  "name": "Javier Milei",
+  "country": "Argentina",
+  "period": "current",
+  "title": "President",
+  "personality": {
+    "risk_tolerance": 0.8,
+    "authoritarianism": 0.3,
+    "nationalism": 0.3,
+    "pragmatism": 0.3,
+    "aggression": 0.4,
+    "populism": 0.9,
+    "transparency": 0.2,
+    "religiosity": 0.2
+  },
+  "ideology": {
+    "economic_system": "free_market",
+    "geopolitical_orientation": "western",
+    "key_alliances": ["United States", "Israel", "Italy"],
+    "adversaries": ["China (ideological)", "Venezuela", "Cuba"],
+    "red_lines": [
+      "Return to Peronist economic policies",
+      "Socialist/communist influence in region",
+      "Threats to economic liberalization program"
+    ],
+    "core_narratives": [
+      "Libertarian economic revolution",
+      "Chainsaw to the state (motosierra)",
+      "Anti-caste politics against political establishment",
+      "Western civilization alignment against socialism"
+    ]
+  },
+  "decision_history": [
+    {
+      "event_description": "Implemented radical fiscal austerity and dollarization preparation",
+      "decision_taken": "Massive spending cuts, deregulation, currency devaluation, eliminated ministries, removed price controls",
+      "outcome": "Achieved fiscal surplus, severe short-term recession, inflation beginning to fall",
+      "date": "2025-01-01T00:00:00Z",
+      "context_factors": ["economic crisis mandate", "libertarian ideology", "IMF relationship"]
+    },
+    {
+      "event_description": "Aligned strongly with US under Trump on foreign policy",
+      "decision_taken": "Withdrew from BRICS, aligned with US positions, strengthened bilateral ties with Washington and Israel",
+      "outcome": "Strong US support, isolated from Latin American left-wing governments",
+      "date": "2025-02-01T00:00:00Z",
+      "context_factors": ["ideological alignment with Trump", "need for US financial support", "anti-China positioning"]
+    }
+  ],
+  "cultural_context": {
+    "decision_making_style": "unilateral",
+    "information_sources": ["economic advisors", "social media feedback", "libertarian think tanks", "US policy contacts"],
+    "domestic_power_base": "La Libertad Avanza party, young voters, anti-establishment sentiment, business sector",
+    "succession_concerns": false,
+    "historical_analogies": ["Menem-era liberalization", "Thatcher revolution", "1989 hyperinflation crisis"]
+  },
+  "decision_context": {
+    "approval_rating": 45.0,
+    "economic_conditions": {
+      "gdp_growth": -1.5,
+      "unemployment": 8.0,
+      "inflation": 60.0,
+      "sanctions_pressure": 0.0
+    },
+    "military_posture": {
+      "readiness_level": "peacetime",
+      "ongoing_operations": [],
+      "force_disposition": "minimal conventional capability, Western-aligned"
+    },
+    "domestic_pressures": {
+      "election_proximity_days": 600,
+      "opposition_strength": 0.5,
+      "media_sentiment": -0.1,
+      "protest_level": "major"
+    },
+    "ongoing_conflicts": [],
+    "recent_events": ["Fiscal surplus achieved", "IMF new program agreement", "BRICS withdrawal"]
+  }
+}

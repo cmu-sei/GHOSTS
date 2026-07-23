@@ -1,0 +1,78 @@
+{
+  "name": "Ursula von der Leyen",
+  "country": "European Union",
+  "period": "current",
+  "title": "President of the European Commission",
+  "personality": {
+    "risk_tolerance": 0.1,
+    "authoritarianism": 0.1,
+    "nationalism": -0.2,
+    "pragmatism": 0.7,
+    "aggression": -0.1,
+    "populism": -0.3,
+    "transparency": 0.2,
+    "religiosity": 0.1
+  },
+  "ideology": {
+    "economic_system": "mixed",
+    "geopolitical_orientation": "western",
+    "key_alliances": ["United States", "NATO", "G7 partners"],
+    "adversaries": ["Russia"],
+    "red_lines": [
+      "Russian military aggression against EU/NATO members",
+      "Undermining of EU institutional authority",
+      "Threats to single market integrity"
+    ],
+    "core_narratives": [
+      "Geopolitical Commission",
+      "European Green Deal and climate leadership",
+      "Strategic autonomy and de-risking from China",
+      "Defending rules-based international order"
+    ]
+  },
+  "decision_history": [
+    {
+      "event_description": "Coordinated EU response to US tariffs",
+      "decision_taken": "Assembled united EU trade response, proposed targeted countermeasures while keeping dialogue open",
+      "outcome": "EU presented united front, demonstrated trade policy coordination capability",
+      "date": "2025-04-07T00:00:00Z",
+      "context_factors": ["single market leverage", "member state unity challenge", "transatlantic relationship"]
+    },
+    {
+      "event_description": "European defense spending and Ukraine support under US pressure",
+      "decision_taken": "Proposed European Defense Industrial Strategy, pushed for increased joint procurement and defense spending",
+      "outcome": "Accelerated European defense integration, reduced dependency on US",
+      "date": "2025-03-10T00:00:00Z",
+      "context_factors": ["US reliability concerns", "Russian threat", "defense industrial base gaps"]
+    }
+  ],
+  "cultural_context": {
+    "decision_making_style": "consensus",
+    "information_sources": ["EU Intelligence and Situation Centre", "Commission services", "member state inputs", "European External Action Service"],
+    "domestic_power_base": "European Parliament majority, Franco-German axis, Commission bureaucracy",
+    "succession_concerns": false,
+    "historical_analogies": ["Delors Commission integration", "Monnet method gradualism", "EU response to 2008 crisis"]
+  },
+  "decision_context": {
+    "approval_rating": 45.0,
+    "economic_conditions": {
+      "gdp_growth": 1.0,
+      "unemployment": 6.0,
+      "inflation": 2.5,
+      "sanctions_pressure": 0.0
+    },
+    "military_posture": {
+      "readiness_level": "peacetime",
+      "ongoing_operations": ["Ukraine military aid coordination", "CSDP missions"],
+      "force_disposition": "coordinating body for 27 national militaries"
+    },
+    "domestic_pressures": {
+      "election_proximity_days": 1800,
+      "opposition_strength": 0.4,
+      "media_sentiment": 0.0,
+      "protest_level": "none"
+    },
+    "ongoing_conflicts": ["Russia-Ukraine support coordination", "US tariff response"],
+    "recent_events": ["EU defense strategy launch", "Trade countermeasures against US", "Enlargement progress"]
+  }
+}

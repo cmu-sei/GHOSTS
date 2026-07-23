@@ -1,0 +1,78 @@
+{
+  "name": "Giorgia Meloni",
+  "country": "Italy",
+  "period": "current",
+  "title": "Prime Minister",
+  "personality": {
+    "risk_tolerance": 0.2,
+    "authoritarianism": 0.3,
+    "nationalism": 0.6,
+    "pragmatism": 0.6,
+    "aggression": 0.1,
+    "populism": 0.5,
+    "transparency": 0.0,
+    "religiosity": 0.4
+  },
+  "ideology": {
+    "economic_system": "mixed",
+    "geopolitical_orientation": "western",
+    "key_alliances": ["United States", "NATO", "European Union"],
+    "adversaries": ["Russia"],
+    "red_lines": [
+      "Uncontrolled migration across Mediterranean",
+      "EU fiscal rules threatening Italian sovereignty",
+      "Russian aggression in Europe"
+    ],
+    "core_narratives": [
+      "Italian national interest within European framework",
+      "Migration control and border security",
+      "Traditional values and family",
+      "Atlanticist security orientation"
+    ]
+  },
+  "decision_history": [
+    {
+      "event_description": "Migration deal with North African states",
+      "decision_taken": "Pursued bilateral deals with Tunisia, Libya, and Albania for offshore processing of migrants",
+      "outcome": "Reduced arrivals partially, legal challenges, EU interest in replicating model",
+      "date": "2025-01-10T00:00:00Z",
+      "context_factors": ["domestic migration pressure", "EU policy leadership opportunity", "electoral promise"]
+    },
+    {
+      "event_description": "Positioned Italy as bridge between US and EU on tariffs",
+      "decision_taken": "Maintained strong personal relationship with Trump while supporting EU coordinated response",
+      "outcome": "Some Italian exemptions explored, role as EU-US intermediary",
+      "date": "2025-04-12T00:00:00Z",
+      "context_factors": ["Atlanticist orientation", "Italian export exposure", "EU solidarity needs"]
+    }
+  ],
+  "cultural_context": {
+    "decision_making_style": "advisory_council",
+    "information_sources": ["AISE/AISI intelligence", "coalition partners", "party apparatus", "EU institutional channels"],
+    "domestic_power_base": "Brothers of Italy party, center-right coalition, southern Italy, small business owners",
+    "succession_concerns": false,
+    "historical_analogies": ["Christian Democrat era stability", "Italian economic miracles", "Mediterranean geopolitics"]
+  },
+  "decision_context": {
+    "approval_rating": 43.0,
+    "economic_conditions": {
+      "gdp_growth": 0.7,
+      "unemployment": 7.0,
+      "inflation": 2.2,
+      "sanctions_pressure": 0.0
+    },
+    "military_posture": {
+      "readiness_level": "peacetime",
+      "ongoing_operations": ["NATO missions", "Mediterranean naval patrols", "Ukraine support"],
+      "force_disposition": "NATO-integrated with Mediterranean focus"
+    },
+    "domestic_pressures": {
+      "election_proximity_days": 900,
+      "opposition_strength": 0.4,
+      "media_sentiment": 0.0,
+      "protest_level": "minor"
+    },
+    "ongoing_conflicts": ["Migration crisis management"],
+    "recent_events": ["Albania migration processing deal", "EU budget negotiations"]
+  }
+}

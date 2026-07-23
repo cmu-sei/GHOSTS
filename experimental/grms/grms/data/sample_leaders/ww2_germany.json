@@ -1,0 +1,86 @@
+{
+  "name": "Adolf Hitler",
+  "country": "Germany",
+  "period": "world war 2",
+  "title": "Fuhrer and Reich Chancellor",
+  "personality": {
+    "risk_tolerance": 0.8,
+    "authoritarianism": 1.0,
+    "nationalism": 1.0,
+    "pragmatism": -0.3,
+    "aggression": 0.95,
+    "populism": 0.8,
+    "transparency": -0.9,
+    "religiosity": -0.2
+  },
+  "ideology": {
+    "economic_system": "state_directed",
+    "geopolitical_orientation": "expansionist",
+    "key_alliances": ["Italy", "Japan", "Romania", "Hungary", "Bulgaria", "Finland"],
+    "adversaries": ["Soviet Union", "United Kingdom", "United States", "France"],
+    "red_lines": [
+      "Any challenge to absolute personal authority",
+      "Territorial concessions or retreat from conquered lands",
+      "Threats to racial ideology and Lebensraum objectives",
+      "Independent military decision-making by generals"
+    ],
+    "core_narratives": [
+      "Lebensraum and eastward expansion for the German Volk",
+      "Racial supremacy and elimination of perceived racial enemies",
+      "Reversal of Versailles Treaty humiliation",
+      "Germany as master of a new European order"
+    ]
+  },
+  "decision_history": [
+    {
+      "event_description": "Decision to invade the Soviet Union despite ongoing war with Britain",
+      "decision_taken": "Launched Operation Barbarossa with 3.8 million troops along a 2,900 km front",
+      "outcome": "Initial rapid advances but failed to capture Moscow before winter; war became attritional",
+      "date": "1941-06-22T00:00:00Z",
+      "context_factors": ["ideological hatred of Bolshevism", "belief in quick victory", "desire for eastern resources", "underestimation of Soviet capacity"]
+    },
+    {
+      "event_description": "Japan attacked Pearl Harbor, bringing the United States into the war",
+      "decision_taken": "Declared war on the United States despite no treaty obligation to do so",
+      "outcome": "Created a two-front global war against the world's largest industrial power",
+      "date": "1941-12-11T00:00:00Z",
+      "context_factors": ["Tripartite Pact solidarity", "contempt for American military capability", "belief war with US was inevitable"]
+    },
+    {
+      "event_description": "Soviet counteroffensive surrounded German 6th Army at Stalingrad",
+      "decision_taken": "Refused permission for breakout or retreat, demanded the army fight to the last man",
+      "outcome": "Complete destruction of 6th Army; 91,000 captured; turning point of the Eastern Front",
+      "date": "1942-11-23T00:00:00Z",
+      "context_factors": ["refusal to accept tactical retreat", "symbolic importance of city name", "distrust of generals", "increasingly detached from battlefield reality"]
+    }
+  ],
+  "cultural_context": {
+    "decision_making_style": "unilateral",
+    "information_sources": ["OKW military briefings", "Propaganda Ministry reports", "personal intuition", "inner circle sycophants"],
+    "domestic_power_base": "Nazi Party apparatus, SS, Gestapo, propaganda machine, industrialists, Wehrmacht officer corps (diminishing loyalty)",
+    "succession_concerns": false,
+    "historical_analogies": ["Frederick the Great's miraculous survival", "Napoleonic empire-building", "Versailles diktat reversal"]
+  },
+  "decision_context": {
+    "approval_rating": 70.0,
+    "economic_conditions": {
+      "gdp_growth": -1.5,
+      "unemployment": 0.5,
+      "inflation": 3.0,
+      "sanctions_pressure": 0.7
+    },
+    "military_posture": {
+      "readiness_level": "mobilized",
+      "ongoing_operations": ["Eastern Front vs Soviet Union", "North Africa campaign", "Atlantic U-boat war", "Occupation of Western Europe"],
+      "force_disposition": "multi-front offensive war with strategic overextension increasing from 1942"
+    },
+    "domestic_pressures": {
+      "election_proximity_days": null,
+      "opposition_strength": 0.05,
+      "media_sentiment": 0.7,
+      "protest_level": "none"
+    },
+    "ongoing_conflicts": ["World War II - Eastern Front", "World War II - Western/Mediterranean theaters", "Atlantic naval warfare"],
+    "recent_events": ["Failure to capture Moscow winter 1941", "Stalingrad encirclement 1942", "Allied bombing of German cities intensifying"]
+  }
+}

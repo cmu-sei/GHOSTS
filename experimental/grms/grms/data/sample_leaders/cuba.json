@@ -1,0 +1,79 @@
+{
+  "name": "Miguel Diaz-Canel",
+  "country": "Cuba",
+  "period": "current",
+  "title": "President",
+  "personality": {
+    "risk_tolerance": 0.3,
+    "authoritarianism": 0.7,
+    "nationalism": 0.7,
+    "pragmatism": 0.5,
+    "aggression": 0.2,
+    "populism": 0.5,
+    "transparency": -0.4,
+    "religiosity": 0.0
+  },
+  "ideology": {
+    "economic_system": "command_economy",
+    "geopolitical_orientation": "non_aligned",
+    "key_alliances": ["Russia", "China", "Venezuela", "Mexico"],
+    "adversaries": ["United States"],
+    "red_lines": [
+      "Regime change operations",
+      "Tightening of US embargo",
+      "Loss of Cuban Communist Party control",
+      "Foreign-backed civil unrest"
+    ],
+    "core_narratives": [
+      "Revolution continuity",
+      "Resistance to US imperialism and blockade",
+      "Socialist achievements in healthcare and education",
+      "National sovereignty and self-determination"
+    ]
+  },
+  "decision_history": [
+    {
+      "event_description": "Unprecedented mass protests in 2021 driven by economic crisis",
+      "decision_taken": "Combination of internet shutdowns, arrests of protest leaders, and limited economic concessions (private SME legalization)",
+      "outcome": "Protests suppressed, emigration wave accelerated, some economic opening",
+      "date": "2021-07-11T00:00:00Z",
+      "context_factors": ["economic crisis", "regime survival", "COVID impact", "social media mobilization"]
+    },
+    {
+      "event_description": "Severe energy crisis and economic deterioration",
+      "decision_taken": "Sought emergency fuel supplies from Russia and Mexico, allowed expanded private sector",
+      "outcome": "Partial crisis management, continued emigration, growing dependency on external support",
+      "date": "2024-10-01T00:00:00Z",
+      "context_factors": ["infrastructure collapse", "fuel shortages", "public frustration"]
+    }
+  ],
+  "cultural_context": {
+    "decision_making_style": "consultative_within_party",
+    "information_sources": ["Communist Party apparatus", "security services", "Raul Castro advisory role"],
+    "domestic_power_base": "Communist Party, military enterprises (GAESA), older revolutionary generation",
+    "succession_concerns": false,
+    "historical_analogies": ["Special Period survival (1990s)", "Bay of Pigs resistance"]
+  },
+  "decision_context": {
+    "approval_rating": 25.0,
+    "economic_conditions": {
+      "gdp_growth": -1.0,
+      "unemployment": 3.0,
+      "inflation": 30.0,
+      "sanctions_pressure": 0.85
+    },
+    "military_posture": {
+      "readiness_level": "low",
+      "ongoing_operations": ["Internal security"],
+      "force_disposition": "minimal external capability, focused on internal stability"
+    },
+    "domestic_pressures": {
+      "election_proximity_days": null,
+      "opposition_strength": 0.3,
+      "media_sentiment": -0.4,
+      "protest_level": "low"
+    },
+    "ongoing_conflicts": ["US embargo standoff", "Domestic economic crisis"],
+    "recent_events": ["Energy crisis management", "Continued emigration wave", "Russian and Chinese economic support"]
+  }
+}

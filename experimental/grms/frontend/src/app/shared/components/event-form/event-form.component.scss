@@ -1,0 +1,47 @@
+@use 'variables' as *;
+
+.event-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.severity-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+
+  .severity-label {
+    font-size: 0.8rem;
+    color: $text-dim;
+    min-width: 60px;
+  }
+
+  mat-slider {
+    flex: 1;
+  }
+
+  .severity-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    color: $accent;
+    min-width: 36px;
+    text-align: right;
+  }
+}
+
+.submit-btn {
+  align-self: flex-end;
+  margin-top: 8px;
+}

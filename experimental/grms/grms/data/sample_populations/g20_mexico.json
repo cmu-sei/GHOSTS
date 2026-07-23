@@ -1,0 +1,132 @@
+{
+  "country": "Mexico",
+  "total_population": 130000000,
+  "period": "current",
+  "segments": [
+    {
+      "name": "Mexico City professional class",
+      "percentage": 0.15,
+      "demographics": {
+        "urbanization": 0.98,
+        "education_level": 0.75,
+        "median_age": 35,
+        "economic_class": "upper"
+      },
+      "disposition": {
+        "government_trust": 0.25,
+        "nationalism": 0.5,
+        "media_exposure": 0.85,
+        "social_media_activity": 0.8,
+        "protest_propensity": 0.4,
+        "compliance_baseline": 0.55,
+        "information_sources": ["social_media", "foreign_media"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.35,
+        "economic_sensitivity": 0.5,
+        "fatigue_rate": 0.12,
+        "amplification_factor": 0.6
+      }
+    },
+    {
+      "name": "Urban working class and informal economy",
+      "percentage": 0.30,
+      "demographics": {
+        "urbanization": 0.85,
+        "education_level": 0.35,
+        "median_age": 32,
+        "economic_class": "lower"
+      },
+      "disposition": {
+        "government_trust": 0.2,
+        "nationalism": 0.5,
+        "media_exposure": 0.6,
+        "social_media_activity": 0.6,
+        "protest_propensity": 0.4,
+        "compliance_baseline": 0.45,
+        "information_sources": ["social_media", "word_of_mouth"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.35,
+        "economic_sensitivity": 0.85,
+        "fatigue_rate": 0.09,
+        "amplification_factor": 0.5
+      }
+    },
+    {
+      "name": "Rural indigenous and agricultural communities",
+      "percentage": 0.25,
+      "demographics": {
+        "urbanization": 0.15,
+        "education_level": 0.2,
+        "median_age": 30,
+        "economic_class": "lower"
+      },
+      "disposition": {
+        "government_trust": 0.15,
+        "nationalism": 0.4,
+        "media_exposure": 0.3,
+        "social_media_activity": 0.25,
+        "protest_propensity": 0.4,
+        "compliance_baseline": 0.45,
+        "information_sources": ["word_of_mouth", "state_tv"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.25,
+        "economic_sensitivity": 0.9,
+        "fatigue_rate": 0.06,
+        "amplification_factor": 0.3
+      }
+    },
+    {
+      "name": "Northern border and maquila workers",
+      "percentage": 0.15,
+      "demographics": {
+        "urbanization": 0.8,
+        "education_level": 0.4,
+        "median_age": 30,
+        "economic_class": "lower"
+      },
+      "disposition": {
+        "government_trust": 0.2,
+        "nationalism": 0.45,
+        "media_exposure": 0.6,
+        "social_media_activity": 0.55,
+        "protest_propensity": 0.3,
+        "compliance_baseline": 0.5,
+        "information_sources": ["social_media", "foreign_media", "word_of_mouth"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.3,
+        "economic_sensitivity": 0.85,
+        "fatigue_rate": 0.1,
+        "amplification_factor": 0.45
+      }
+    },
+    {
+      "name": "Middle class business and government sector",
+      "percentage": 0.15,
+      "demographics": {
+        "urbanization": 0.85,
+        "education_level": 0.65,
+        "median_age": 40,
+        "economic_class": "middle"
+      },
+      "disposition": {
+        "government_trust": 0.35,
+        "nationalism": 0.55,
+        "media_exposure": 0.75,
+        "social_media_activity": 0.65,
+        "protest_propensity": 0.3,
+        "compliance_baseline": 0.6,
+        "information_sources": ["state_tv", "social_media"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.4,
+        "economic_sensitivity": 0.65,
+        "fatigue_rate": 0.09,
+        "amplification_factor": 0.45
+      }
+    }
+  ]
+}

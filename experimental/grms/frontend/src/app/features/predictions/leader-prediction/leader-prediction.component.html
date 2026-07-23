@@ -1,0 +1,201 @@
+<div class="leader-prediction">
+  <div class="input-panel">
+    <app-glass-card>
+      <h2 class="section-title">Event Parameters</h2>
+      <p class="form-hint">Pick who acts and who gets acted upon — the target's leader response is predicted.</p>
+      <app-event-form
+        [leaders]="leaders()"
+        (submitEvent)="onPredict($event)" />
+    </app-glass-card>
+  </div>
+
+  <div class="results-panel">
+    @if (loading()) {
+      <app-glass-card>
+        <div class="loading-state">
+          <mat-icon class="spin">autorenew</mat-icon>
+          <span>Running prediction...</span>
+        </div>
+      </app-glass-card>
+    }
+
+    @if (result(); as r) {
+      @if (targetLeader(); as tl) {
+        <app-glass-card>
+          <div class="response-leader-header">
+            <mat-icon>person</mat-icon>
+            <span class="response-leader-name">{{ tl.name }}</span>
+            <span class="response-leader-country">{{ tl.country }}</span>
+            @if (saved()) {
+              <span class="saved-badge">
+                <mat-icon>check_circle</mat-icon>
+                Saved
+              </span>
+            }
+          </div>
+        </app-glass-card>
+      }
+
+      <app-glass-card>
+        <h2 class="section-title">Verbal Response</h2>
+        <p class="statement-text">{{ r.verbal_response.statement }}</p>
+        <div class="badge-row">
+          <span class="tone-badge" [style.background]="getToneColor(r.verbal_response.tone)">
+            {{ r.verbal_response.tone }}
+          </span>
+          <span class="audience-badge">{{ r.verbal_response.audience }}</span>
+        </div>
+      </app-glass-card>
+
+      <app-glass-card>
+        <h2 class="section-title">Actions</h2>
+        <div class="actions-list">
+          @for (action of r.actions; track action.description) {
+            <div class="action-item">
+              <div class="action-header">
+                <mat-icon>{{ getActionIcon(action.action_type) }}</mat-icon>
+                <span class="action-type">{{ action.action_type }}</span>
+                <span class="timeline-badge">{{ action.timeline }}</span>
+                <span class="reversibility-badge" [class]="action.reversibility">
+                  {{ action.reversibility }}
+                </span>
+              </div>
+              <p class="action-desc">{{ action.description }}</p>
+              <div class="likelihood-bar">
+                <div class="likelihood-fill" [style.width.%]="action.likelihood * 100"></div>
+                <span class="likelihood-label">{{ action.likelihood * 100 | number:'1.0-0' }}%</span>
+              </div>
+            </div>
+          }
+        </div>
+      </app-glass-card>
+
+      <mat-accordion>
+        <mat-expansion-panel class="reasoning-panel">
+          <mat-expansion-panel-header>
+            <mat-panel-title>Reasoning</mat-panel-title>
+          </mat-expansion-panel-header>
+
+          <div class="reasoning-section">
+            <h4>Personality Factors</h4>
+            <ul>
+              @for (factor of r.reasoning.personality_factors; track factor) {
+                <li>{{ factor }}</li>
+              }
+            </ul>
+          </div>
+
+          <div class="reasoning-section">
+            <h4>Historical Precedents</h4>
+            <ul>
+              @for (precedent of r.reasoning.historical_precedents; track precedent) {
+                <li>{{ precedent }}</li>
+              }
+            </ul>
+          </div>
+
+          <div class="reasoning-section">
+            <h4>Contextual Drivers</h4>
+            <ul>
+              @for (driver of r.reasoning.contextual_drivers; track driver) {
+                <li>{{ driver }}</li>
+              }
+            </ul>
+          </div>
+
+          <div class="reasoning-section">
+            <h4>Constraints</h4>
+            <ul>
+              @for (constraint of r.reasoning.constraints; track constraint) {
+                <li>{{ constraint }}</li>
+              }
+            </ul>
+          </div>
+        </mat-expansion-panel>
+      </mat-accordion>
+
+      <app-glass-card>
+        <h2 class="section-title">Escalation Risk</h2>
+        <div class="gauge-center">
+          <app-gauge [value]="r.escalation_risk" label="Escalation Risk" [size]="160" />
+        </div>
+      </app-glass-card>
+
+      <app-glass-card>
+        <h2 class="section-title">De-escalation Openings</h2>
+        <mat-chip-set>
+          @for (opening of r.de_escalation_openings; track opening) {
+            <mat-chip highlighted>{{ opening }}</mat-chip>
+          }
+        </mat-chip-set>
+      </app-glass-card>
+
+      @if (cascadeEntries().length) {
+        <app-glass-card>
+          <div class="cascade-header">
+            <h2 class="section-title">Alliance Cascade</h2>
+            <button mat-stroked-button (click)="predictAllCascade()" class="predict-all-btn">
+              <mat-icon>play_arrow</mat-icon>
+              Predict All
+            </button>
+          </div>
+          <p class="cascade-subtitle">These leaders may react based on their alliances</p>
+
+          <div class="cascade-list">
+            @for (entry of cascadeEntries(); track entry.leader.id) {
+              <div class="cascade-entry">
+                <div class="cascade-entry-header">
+                  <div class="cascade-leader-info">
+                    <span class="cascade-leader-name">{{ entry.leader.name }}</span>
+                    <span class="cascade-leader-country">{{ entry.leader.country }}</span>
+                  </div>
+                  <span class="relationship-badge" [class]="entry.relationship">
+                    @if (entry.relationship === 'ally') {
+                      ally of target
+                    } @else {
+                      adversary of actor
+                    }
+                  </span>
+                  @if (!entry.result && !entry.loading) {
+                    <button mat-icon-button
+                            matTooltip="Predict this leader's response"
+                            (click)="predictCascade(entry)">
+                      <mat-icon>play_circle</mat-icon>
+                    </button>
+                  }
+                  @if (entry.loading) {
+                    <mat-icon class="spin cascade-spinner">autorenew</mat-icon>
+                  }
+                </div>
+
+                @if (entry.result; as cr) {
+                  <div class="cascade-result">
+                    <p class="cascade-statement">{{ cr.verbal_response.statement }}</p>
+                    <div class="cascade-meta">
+                      <span class="tone-badge" [style.background]="getToneColor(cr.verbal_response.tone)">
+                        {{ cr.verbal_response.tone }}
+                      </span>
+                      <span class="cascade-escalation">
+                        Escalation: {{ cr.escalation_risk * 100 | number:'1.0-0' }}%
+                      </span>
+                    </div>
+                    @if (cr.actions.length) {
+                      <div class="cascade-actions">
+                        @for (action of cr.actions.slice(0, 2); track action.description) {
+                          <span class="cascade-action-chip">
+                            <mat-icon>{{ getActionIcon(action.action_type) }}</mat-icon>
+                            {{ action.description | slice:0:60 }}{{ action.description.length > 60 ? '...' : '' }}
+                          </span>
+                        }
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </app-glass-card>
+      }
+    }
+  </div>
+</div>

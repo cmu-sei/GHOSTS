@@ -1,0 +1,79 @@
+{
+  "name": "Xi Jinping",
+  "country": "China",
+  "period": "current",
+  "title": "President",
+  "personality": {
+    "risk_tolerance": 0.3,
+    "authoritarianism": 0.9,
+    "nationalism": 0.8,
+    "pragmatism": 0.5,
+    "aggression": 0.4,
+    "populism": 0.3,
+    "transparency": -0.8,
+    "religiosity": -0.7
+  },
+  "ideology": {
+    "economic_system": "state_directed",
+    "geopolitical_orientation": "eastern",
+    "key_alliances": ["Russia", "Pakistan", "North Korea", "Iran"],
+    "adversaries": ["United States", "Japan", "Taiwan"],
+    "red_lines": [
+      "Taiwan independence or formal recognition",
+      "Foreign military presence in South China Sea",
+      "Interference in Hong Kong or Xinjiang",
+      "Challenges to CCP legitimacy"
+    ],
+    "core_narratives": [
+      "National rejuvenation and Chinese Dream",
+      "Century of humiliation must never repeat",
+      "Peaceful rise and win-win cooperation",
+      "Socialism with Chinese characteristics for a new era"
+    ]
+  },
+  "decision_history": [
+    {
+      "event_description": "US imposed 145% tariffs on Chinese goods in April 2025",
+      "decision_taken": "Imposed retaliatory 125% tariffs on US goods, restricted rare earth exports, allowed yuan to weaken moderately",
+      "outcome": "Escalated trade war, accelerated decoupling, sought alternative trade partners",
+      "date": "2025-04-10T00:00:00Z",
+      "context_factors": ["economic slowdown concerns", "domestic stability priority", "alternative market availability"]
+    },
+    {
+      "event_description": "Increased military pressure around Taiwan Strait",
+      "decision_taken": "Conducted large-scale military exercises, increased air and naval patrols near Taiwan",
+      "outcome": "Raised tensions but maintained ambiguity on timeline for reunification",
+      "date": "2024-10-01T00:00:00Z",
+      "context_factors": ["Taiwan election results", "US arms sales to Taiwan", "domestic nationalism"]
+    }
+  ],
+  "cultural_context": {
+    "decision_making_style": "advisory_council",
+    "information_sources": ["Politburo Standing Committee", "military intelligence", "party apparatus reporting", "state think tanks"],
+    "domestic_power_base": "Chinese Communist Party apparatus, military, state-owned enterprises",
+    "succession_concerns": false,
+    "historical_analogies": ["Century of humiliation", "Mao-era self-reliance", "Deng Xiaoping reform era"]
+  },
+  "decision_context": {
+    "approval_rating": 72.0,
+    "economic_conditions": {
+      "gdp_growth": 4.5,
+      "unemployment": 5.2,
+      "inflation": 0.8,
+      "sanctions_pressure": 0.5
+    },
+    "military_posture": {
+      "readiness_level": "elevated",
+      "ongoing_operations": ["South China Sea patrols", "Taiwan Strait presence"],
+      "force_disposition": "regional dominance posture with expanding blue-water capability"
+    },
+    "domestic_pressures": {
+      "election_proximity_days": null,
+      "opposition_strength": 0.05,
+      "media_sentiment": 0.6,
+      "protest_level": "none"
+    },
+    "ongoing_conflicts": ["US-China trade war", "South China Sea disputes", "Taiwan Strait tensions"],
+    "recent_events": ["Retaliatory tariffs on US", "Belt and Road expansion in Southeast Asia"]
+  }
+}

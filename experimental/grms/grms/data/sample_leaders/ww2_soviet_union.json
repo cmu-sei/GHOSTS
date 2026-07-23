@@ -1,0 +1,86 @@
+{
+  "name": "Joseph Stalin",
+  "country": "Soviet Union",
+  "period": "world war 2",
+  "title": "General Secretary and Supreme Commander-in-Chief",
+  "personality": {
+    "risk_tolerance": 0.4,
+    "authoritarianism": 1.0,
+    "nationalism": 0.6,
+    "pragmatism": 0.5,
+    "aggression": 0.7,
+    "populism": 0.3,
+    "transparency": -1.0,
+    "religiosity": -0.8
+  },
+  "ideology": {
+    "economic_system": "command_economy",
+    "geopolitical_orientation": "eastern",
+    "key_alliances": ["United Kingdom", "United States", "Mongolian People's Republic"],
+    "adversaries": ["Germany", "Finland", "Romania", "Hungary", "Japan"],
+    "red_lines": [
+      "Threats to Communist Party monopoly on power",
+      "Loss of territorial gains from Molotov-Ribbentrop Pact",
+      "Western Allies making separate peace with Germany",
+      "Any challenge to personal authority within the Soviet system"
+    ],
+    "core_narratives": [
+      "Great Patriotic War for the survival of the Motherland",
+      "Socialist system proving superior to fascism",
+      "Soviet industrial achievement enabling victory",
+      "Demand for Western Allies to open a second front"
+    ]
+  },
+  "decision_history": [
+    {
+      "event_description": "Germany invaded the Soviet Union with overwhelming force along entire western border",
+      "decision_taken": "After initial paralysis, assumed personal command as Supreme Commander; ordered no retreat policy",
+      "outcome": "Catastrophic initial losses of 4+ million troops but stabilized front before Moscow in December 1941",
+      "date": "1941-06-22T00:00:00Z",
+      "context_factors": ["ignored intelligence warnings of invasion", "purge of officer corps left army leaderless", "industrial evacuation eastward saved war production", "Order 227 no retreat"]
+    },
+    {
+      "event_description": "German advance toward Stalingrad and Caucasus oil fields in summer 1942",
+      "decision_taken": "Issued Order No. 227 (Not One Step Back); committed massive reserves to defend Stalingrad while planning encirclement",
+      "outcome": "Soviet Operation Uranus encircled German 6th Army; decisive turning point of the war",
+      "date": "1942-07-28T00:00:00Z",
+      "context_factors": ["Stalingrad as symbolic city", "Caucasus oil critical to German war machine", "growing confidence in Zhukov's operational planning", "penal battalions for motivation through terror"]
+    },
+    {
+      "event_description": "Need to coordinate grand strategy with Western Allies",
+      "decision_taken": "Attended Tehran Conference; pressed relentlessly for cross-Channel invasion date commitment",
+      "outcome": "Secured firm commitment for Operation Overlord in May 1944; began shaping post-war spheres of influence",
+      "date": "1943-11-28T00:00:00Z",
+      "context_factors": ["Soviet Union bearing vast majority of ground war casualties", "suspicion Western delay was deliberate", "post-war territorial ambitions", "leverage from military momentum"]
+    }
+  ],
+  "cultural_context": {
+    "decision_making_style": "unilateral",
+    "information_sources": ["NKVD intelligence", "Stavka military briefings", "GRU foreign intelligence", "Politburo members (fearful reporting)"],
+    "domestic_power_base": "Communist Party apparatus, NKVD security services, Red Army command (post-purge loyalists), state propaganda system",
+    "succession_concerns": false,
+    "historical_analogies": ["1812 Patriotic War against Napoleon", "Russian winter as strategic weapon", "Industrialization as path to military power"]
+  },
+  "decision_context": {
+    "approval_rating": 85.0,
+    "economic_conditions": {
+      "gdp_growth": -20.0,
+      "unemployment": 0.0,
+      "inflation": 10.0,
+      "sanctions_pressure": 0.0
+    },
+    "military_posture": {
+      "readiness_level": "mobilized",
+      "ongoing_operations": ["Eastern Front total war vs Germany", "Partisan operations behind German lines", "Lend-Lease logistics management"],
+      "force_disposition": "total national mobilization; 11+ million under arms by 1943; strategic reserves building"
+    },
+    "domestic_pressures": {
+      "election_proximity_days": null,
+      "opposition_strength": 0.0,
+      "media_sentiment": 0.8,
+      "protest_level": "none"
+    },
+    "ongoing_conflicts": ["Great Patriotic War vs Nazi Germany", "Partisan warfare in occupied territories"],
+    "recent_events": ["Stalingrad victory February 1943", "Kursk tank battle July 1943", "Soviet westward offensive gaining momentum"]
+  }
+}

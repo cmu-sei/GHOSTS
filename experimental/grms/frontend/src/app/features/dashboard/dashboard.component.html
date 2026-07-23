@@ -1,0 +1,84 @@
+<div class="dashboard">
+  <header class="dashboard-header">
+    <h1 class="title">GHOSTS GRMS (Geopolitical Response Modeling Service) Command Center</h1>
+    <p class="subtitle">{{ currentDateTime() }}</p>
+  </header>
+
+  <section class="stats-grid">
+    <app-glass-card [hoverable]="true">
+      <div class="stat-card">
+        <mat-icon class="stat-icon cyan">person</mat-icon>
+        <div class="stat-info">
+          <span class="stat-value">{{ leaderCount() }}</span>
+          <span class="stat-label">Leaders</span>
+        </div>
+      </div>
+    </app-glass-card>
+
+    <app-glass-card [hoverable]="true">
+      <div class="stat-card">
+        <mat-icon class="stat-icon green">groups</mat-icon>
+        <div class="stat-info">
+          <span class="stat-value">{{ populationCount() }}</span>
+          <span class="stat-label">Populations</span>
+        </div>
+      </div>
+    </app-glass-card>
+
+    <app-glass-card [hoverable]="true">
+      <div class="stat-card">
+        <mat-icon class="stat-icon orange">psychology</mat-icon>
+        <div class="stat-info">
+          <span class="stat-value">{{ predictionsRun() }}</span>
+          <span class="stat-label">Predictions Run</span>
+        </div>
+      </div>
+    </app-glass-card>
+
+    <app-glass-card [hoverable]="true">
+      <div class="stat-card">
+        <mat-icon class="stat-icon" [class.green]="systemStatus() === 'healthy'"
+          [class.red]="systemStatus() === 'unhealthy'">monitor_heart</mat-icon>
+        <div class="stat-info">
+          <span class="stat-value" [class.status-healthy]="systemStatus() === 'healthy'"
+            [class.status-unhealthy]="systemStatus() === 'unhealthy'">{{ systemStatus() }}</span>
+          <span class="stat-label">System Status</span>
+        </div>
+      </div>
+    </app-glass-card>
+  </section>
+
+  <section class="quick-actions">
+    <h2 class="section-title">Quick Actions</h2>
+    <div class="actions-row">
+      <button mat-flat-button class="glass-btn" routerLink="/leaders">
+        <mat-icon>person</mat-icon>
+        Leaders
+      </button>
+      <button mat-flat-button class="glass-btn" routerLink="/predictions">
+        <mat-icon>psychology</mat-icon>
+        Predictions
+      </button>
+      <button mat-flat-button class="glass-btn" routerLink="/cognitive-lab">
+        <mat-icon>science</mat-icon>
+        Cognitive Lab
+      </button>
+    </div>
+  </section>
+
+  <section class="system-info">
+    <h2 class="section-title">System Info</h2>
+    <app-glass-card>
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">LLM Backend</span>
+          <span class="info-value">{{ llmBackend() }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Model</span>
+          <span class="info-value">{{ llmModel() }}</span>
+        </div>
+      </div>
+    </app-glass-card>
+  </section>
+</div>

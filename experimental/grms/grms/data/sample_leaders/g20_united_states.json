@@ -1,0 +1,78 @@
+{
+  "name": "Donald Trump",
+  "country": "United States",
+  "period": "current",
+  "title": "President",
+  "personality": {
+    "risk_tolerance": 0.7,
+    "authoritarianism": 0.6,
+    "nationalism": 0.9,
+    "pragmatism": 0.4,
+    "aggression": 0.6,
+    "populism": 0.9,
+    "transparency": -0.3,
+    "religiosity": 0.2
+  },
+  "ideology": {
+    "economic_system": "free_market",
+    "geopolitical_orientation": "western",
+    "key_alliances": ["Israel", "Saudi Arabia", "United Kingdom"],
+    "adversaries": ["China", "Iran"],
+    "red_lines": [
+      "Trade imbalances perceived as unfair to US",
+      "Immigration from southern border",
+      "Nuclear proliferation by adversaries"
+    ],
+    "core_narratives": [
+      "America First",
+      "Restoring national greatness",
+      "Unfair trade deals harming American workers",
+      "Strong borders and sovereignty"
+    ]
+  },
+  "decision_history": [
+    {
+      "event_description": "Imposed sweeping tariffs on Chinese imports and global trading partners",
+      "decision_taken": "Enacted broad tariff regime including 145% on Chinese goods, 25% on many other nations, framing as reciprocal trade policy",
+      "outcome": "Significant market volatility, trade tensions, some bilateral negotiations initiated",
+      "date": "2025-04-02T00:00:00Z",
+      "context_factors": ["campaign promise fulfillment", "trade deficit concerns", "domestic manufacturing agenda"]
+    },
+    {
+      "event_description": "Withdrew from Paris Climate Agreement again upon taking office",
+      "decision_taken": "Signed executive order withdrawing US from Paris Agreement, rolled back environmental regulations",
+      "outcome": "International criticism, energy sector deregulation accelerated",
+      "date": "2025-01-20T00:00:00Z",
+      "context_factors": ["energy independence priority", "deregulation agenda", "fossil fuel industry support"]
+    }
+  ],
+  "cultural_context": {
+    "decision_making_style": "unilateral",
+    "information_sources": ["cable news", "inner circle advisors", "social media feedback", "business leaders"],
+    "domestic_power_base": "Republican base, rural voters, evangelical Christians, working class whites",
+    "succession_concerns": false,
+    "historical_analogies": ["Reagan economic boom", "Andrew Jackson populism"]
+  },
+  "decision_context": {
+    "approval_rating": 47.0,
+    "economic_conditions": {
+      "gdp_growth": 2.3,
+      "unemployment": 4.2,
+      "inflation": 3.5,
+      "sanctions_pressure": 0.0
+    },
+    "military_posture": {
+      "readiness_level": "elevated",
+      "ongoing_operations": ["Indo-Pacific presence", "Middle East deployments"],
+      "force_disposition": "global power projection with focus on Indo-Pacific"
+    },
+    "domestic_pressures": {
+      "election_proximity_days": null,
+      "opposition_strength": 0.45,
+      "media_sentiment": -0.2,
+      "protest_level": "minor"
+    },
+    "ongoing_conflicts": ["US-China trade war", "Iran nuclear tensions"],
+    "recent_events": ["Tariff regime implementation", "Immigration enforcement expansion"]
+  }
+}

@@ -1,0 +1,277 @@
+{
+  "_comment": "RPG worklist fixture v0.2. Demonstrates parallel open tasks + the lunch clock + the containment fuse. Steps 3,4,5 are all Blue Team, so they open together as a 3-item worklist the player clears in ANY order; each action burns minutes off the 45-minute morning (durationHours 0.75). The ransomware ticket (step 4) has a 30-minute fuse (containmentDeadlineMinutes): if flag 'ransomware-contained' is NOT set by the time the clock passes 30m, the threat detonates mid-worklist, forcing Red Team step 7 (encryption spreads) and a hard LOSS. Contain in time and step 6 fires (stalls) -> WIN. The tight budget means you can't afford to spend decisive actions on the phishing/VPN noise first; triage the ransomware ticket and handle it. camelCase mirrors live Ghosts.Api JSON.",
+  "catalog": {
+    "listed": true,
+    "sortOrder": 1,
+    "era": "Modern",
+    "theater": "Meridian Logistics SOC",
+    "estimatedMinutes": 10
+  },
+
+  "scenario": {
+    "id": 2,
+    "name": "SOC Morning: Clear the Queue by Lunch",
+    "description": "You are the on-shift Blue Team analyst at Meridian Logistics. It's Monday and three tickets are already stacked in your queue: a phishing report, an EDR ransomware alert, and a VPN account lockout from a traveling exec. They're all open at once — you decide the order. The ransomware alert is the one that bites if you dawdle. Clear the queue before it turns into a bad day, and try to make lunch.",
+    "createdAt": "2026-07-01T00:00:00Z",
+    "updatedAt": "2026-07-01T00:00:00Z",
+    "builderStatus": "Compiled",
+    "scenarioParameters": {
+      "nations": [
+        { "name": "Meridian Logistics (Home)", "alignment": "friendly" },
+        { "name": "Cinder Wolf Group", "alignment": "adversary" }
+      ],
+      "threatActors": [
+        {
+          "name": "Cinder Wolf",
+          "type": "ransomware",
+          "capability": 4,
+          "ttps": ["T1566.001", "T1486", "T1021.001", "T1078"]
+        }
+      ],
+      "injects": [
+        { "trigger": "T+0m", "title": "Three tickets already open in the SOC queue" }
+      ],
+      "userPools": [
+        { "role": "Finance Staff", "count": 12 },
+        { "role": "Traveling Executive", "count": 1 },
+        { "role": "SOC Analyst", "count": 1 }
+      ],
+      "objectives": "Clear the morning queue: triage every ticket and contain the ransomware alert before it spreads.",
+      "politicalContext": "Routine Monday. Leadership expects the SOC to clear day-to-day tickets without escalation unless something is actively spreading.",
+      "rulesOfEngagement": "Blue Team may investigate, quarantine, block, reset accounts, and notify users. Escalate to IR lead only if a host is confirmed encrypting.",
+      "victoryConditions": "WIN: the ransomware alert is contained before it encrypts a second host (objective 2 met). LOSS: encryption spreads across the file share."
+    },
+    "technicalEnvironment": {
+      "networkTopology": "Flat /24 corporate LAN, finance VLAN, perimeter firewall with default-allow egress, split-tunnel VPN.",
+      "services": "Microsoft 365 mail, on-prem file server (FS01), domain controller (DC01), VPN concentrator.",
+      "assets": "FIN-WS-04 (finance workstation), FS01 (file server), DC01 (domain controller), VPN-GW",
+      "defenses": ["Email gateway with URL rewriting", "EDR on workstations", "SIEM with 15-min alert SLA", "MFA on VPN"],
+      "vulnerabilities": [
+        { "asset": "FIN-WS-04", "cve": "CVE-2023-23397", "severity": "high" }
+      ]
+    },
+    "gameMechanics": {
+      "timelineType": "turn-based",
+      "durationHours": 0.75,
+      "containmentDeadlineMinutes": 30,
+      "adjudicationType": "automated",
+      "escalationLadder": "Inbox -> Endpoint -> Identity -> Lateral",
+      "branchingLogic": "Containing the ransomware ticket (step 4) sets flag 'ransomware-contained'. If it isn't set by the 30m containment fuse, the threat detonates immediately and locks the loss branch. Red Team step 6 fires if contained (threat stalls); step 7 fires if !contained (encryption spreads).",
+      "telemetry": {
+        "collectLogs": true,
+        "collectNetwork": true,
+        "collectEndpoint": true,
+        "collectChat": false
+      },
+      "performanceMetrics": "time-to-triage, time-to-contain, tickets-cleared, made-lunch"
+    },
+    "timeline": {
+      "exerciseDuration": 90,
+      "events": [
+        {
+          "time": "T+0m",
+          "number": 1,
+          "assigned": "White Cell",
+          "description": "Exercise start. Monday, 08:30. You take the on-shift SOC analyst seat at Meridian Logistics. The queue is not empty — three tickets are already waiting, and the clock to lunch is running.",
+          "status": "Pending",
+          "objectiveIds": [],
+          "triggerKind": "PointInTime",
+          "schedule": null,
+          "triggerCondition": null,
+          "executionType": "manual",
+          "workflowId": null
+        },
+        {
+          "time": "T+2m",
+          "number": 2,
+          "assigned": "White Cell",
+          "description": "Your queue populates. Ticket #1: a finance clerk reports a suspicious payroll email. Ticket #2: EDR flagged a possible ransomware precursor on FIN-WS-04 (a service creating shadow-copy deletions). Ticket #3: a traveling exec is locked out of the VPN. All three are yours.",
+          "status": "Pending",
+          "objectiveIds": [],
+          "triggerKind": "PointInTime",
+          "schedule": null,
+          "triggerCondition": null,
+          "executionType": "manual",
+          "workflowId": null
+        },
+        {
+          "time": "T+5m",
+          "number": 3,
+          "assigned": "Blue Team",
+          "description": "TICKET #1 — Phishing report. A finance clerk forwarded an email impersonating the payroll provider, carrying a link to a lookalike Microsoft 365 login. Twelve staff received it; two have opened it. What do you do about this one?",
+          "status": "Pending",
+          "objectiveIds": [1],
+          "triggerKind": "PointInTime",
+          "schedule": null,
+          "triggerCondition": null,
+          "executionType": "manual",
+          "workflowId": null
+        },
+        {
+          "time": "T+5m",
+          "number": 4,
+          "assigned": "Blue Team",
+          "description": "TICKET #2 — Ransomware precursor. EDR shows a process on FIN-WS-04 deleting volume shadow copies (T1486 precursor). This is the one that spreads if you leave it. What do you do about this one?",
+          "status": "Pending",
+          "objectiveIds": [1, 2],
+          "triggerKind": "PointInTime",
+          "schedule": null,
+          "triggerCondition": null,
+          "executionType": "manual",
+          "workflowId": null
+        },
+        {
+          "time": "T+5m",
+          "number": 5,
+          "assigned": "Blue Team",
+          "description": "TICKET #3 — VPN lockout. A traveling executive is locked out of the VPN after repeated MFA prompts. Could be a fat-fingered password on the road, could be someone spraying their account. What do you do about this one?",
+          "status": "Pending",
+          "objectiveIds": [],
+          "triggerKind": "PointInTime",
+          "schedule": null,
+          "triggerCondition": null,
+          "executionType": "manual",
+          "workflowId": null
+        },
+        {
+          "time": "T+40m",
+          "number": 6,
+          "assigned": "Red Team",
+          "description": "The shadow-copy deletion was killed and FIN-WS-04 isolated before encryption began. Cinder Wolf's payload never detonates on the share. The precursor stalls out on a single quarantined host.",
+          "status": "Pending",
+          "objectiveIds": [2],
+          "triggerKind": "Triggered",
+          "schedule": null,
+          "triggerCondition": "flag:ransomware-contained",
+          "executionType": "manual",
+          "workflowId": null
+        },
+        {
+          "time": "T+40m",
+          "number": 7,
+          "assigned": "Red Team",
+          "description": "The precursor ran unchecked. Cinder Wolf's payload detonates on FIN-WS-04, reaches FS01 over SMB, and begins encrypting the finance file share (T1486). The morning just became an incident.",
+          "status": "Pending",
+          "objectiveIds": [],
+          "triggerKind": "Triggered",
+          "schedule": null,
+          "triggerCondition": "!ransomware-contained",
+          "executionType": "manual",
+          "workflowId": null
+        },
+        {
+          "time": "T+45m",
+          "number": 8,
+          "assigned": "Blue Team",
+          "description": "Situation update, late morning. Either the queue is clear and you're eyeing lunch, or you're chasing an encrypting host. Decide your last action of the morning: confirm scope, isolate the affected host, or stand the team down.",
+          "status": "Pending",
+          "objectiveIds": [2],
+          "triggerKind": "PointInTime",
+          "schedule": null,
+          "triggerCondition": null,
+          "executionType": "manual",
+          "workflowId": null
+        },
+        {
+          "time": "T+60m",
+          "number": 9,
+          "assigned": "White Cell",
+          "description": "The white cell calls end-of-morning and begins the after-action review. Lunch is on the table — the question is whether you got to it.",
+          "status": "Pending",
+          "objectiveIds": [],
+          "triggerKind": "PointInTime",
+          "schedule": null,
+          "triggerCondition": null,
+          "executionType": "manual",
+          "workflowId": null
+        }
+      ]
+    }
+  },
+
+  "graph": {
+    "nodes": [
+      {
+        "id": "11111111-1111-1111-1111-111111111111",
+        "name": "Cinder Wolf",
+        "entityType": "ThreatActor",
+        "description": "Ransomware crew. Opens with phishing, deletes shadow copies, then encrypts file shares.",
+        "properties": "{\"type\":\"ransomware\",\"capability\":4}",
+        "externalId": "G-CINDER",
+        "isReviewed": true
+      },
+      {
+        "id": "22222222-2222-2222-2222-222222222222",
+        "name": "Dana Okafor",
+        "entityType": "Person",
+        "description": "Finance clerk at Meridian. Reported the phishing email; works on FIN-WS-04.",
+        "properties": "{\"role\":\"Finance Staff\"}",
+        "externalId": "",
+        "isReviewed": true
+      },
+      {
+        "id": "33333333-3333-3333-3333-333333333333",
+        "name": "FIN-WS-04",
+        "entityType": "System",
+        "description": "Finance workstation. Patient zero for the ransomware precursor.",
+        "properties": "{\"os\":\"Windows 11\"}",
+        "externalId": "",
+        "isReviewed": true
+      },
+      {
+        "id": "44444444-4444-4444-4444-444444444444",
+        "name": "FS01",
+        "entityType": "System",
+        "description": "On-prem file server. Encryption target over SMB.",
+        "properties": "{\"os\":\"Windows Server 2019\"}",
+        "externalId": "",
+        "isReviewed": true
+      }
+    ],
+    "edges": [
+      {
+        "id": "aaaaaaaa-0000-0000-0000-000000000001",
+        "sourceEntityId": "11111111-1111-1111-1111-111111111111",
+        "targetEntityId": "22222222-2222-2222-2222-222222222222",
+        "edgeType": "Targets",
+        "label": "phishes"
+      },
+      {
+        "id": "aaaaaaaa-0000-0000-0000-000000000002",
+        "sourceEntityId": "33333333-3333-3333-3333-333333333333",
+        "targetEntityId": "44444444-4444-4444-4444-444444444444",
+        "edgeType": "CommunicatesWith",
+        "label": "SMB to"
+      }
+    ]
+  },
+
+  "objectives": [
+    {
+      "id": 1,
+      "scenarioId": 2,
+      "name": "Triage the morning queue",
+      "description": "Investigate the open tickets and identify which is the real, spreading threat rather than noise.",
+      "type": "MET",
+      "status": "Active",
+      "score": "U",
+      "priority": 2,
+      "successCriteria": "Player investigates the tickets before acting blindly.",
+      "assigned": "Blue Team",
+      "sortOrder": 1
+    },
+    {
+      "id": 2,
+      "scenarioId": 2,
+      "name": "Contain the ransomware before it spreads",
+      "description": "Kill the shadow-copy deletion and isolate FIN-WS-04 before Cinder Wolf's payload encrypts the file share.",
+      "type": "MET",
+      "status": "Active",
+      "score": "U",
+      "priority": 1,
+      "successCriteria": "The 'ransomware-contained' flag is set on ticket #2, steering the timeline onto the stalled branch.",
+      "assigned": "Blue Team",
+      "sortOrder": 2
+    }
+  ]
+}

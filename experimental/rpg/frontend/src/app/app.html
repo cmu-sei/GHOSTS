@@ -1,0 +1,298 @@
+<div class="crt">
+  <div class="scanlines"></div>
+
+  <!-- ░░ START SCREEN ░░ -->
+  @if (!started()) {
+    <div class="boot">
+      <pre class="logo">
+   ▄████  ██░ ██  ▒█████    ██████ ▄▄▄█████▓  ██████
+  ██▒ ▀█▒▓██░ ██▒▒██▒  ██▒▒██    ▒ ▓  ██▒ ▓▒▒██    ▒
+ ▒██░▄▄▄░▒██▀▀██░▒██░  ██▒░ ▓██▄   ▒ ▓██░ ▒░░ ▓██▄
+ ░▓█  ██▓░▓█ ░██ ▒██   ██░  ▒   ██▒░ ▓██▓ ░   ▒   ██▒
+ ░▒▓███▀▒░▓█▒░██▓░ ████▓▒░▒██████▒▒  ▒██▒ ░ ▒██████▒▒
+      </pre>
+      <h1>SCENARIO PLAYER <span class="dim">// GHOSTS RPG</span></h1>
+      <p class="tagline">Umpired staff exercises. You hold the decision seat.<br />
+        Exercise control plays every other cell — including the adversary.</p>
+
+      <section class="scenario-catalog" aria-labelledby="catalog-title">
+        <div class="catalog-head">
+          <h2 id="catalog-title">AVAILABLE SCENARIOS</h2>
+          <span>{{ fixtures().length.toString().padStart(2, '0') }} ONLINE</span>
+        </div>
+
+        @if (catalogLoading()) {
+          <div class="catalog-status">QUERYING SCENARIO CATALOG…</div>
+        } @else if (catalogError()) {
+          <div class="catalog-status error">
+            CATALOG LINK FAILED
+            <button type="button" (click)="loadCatalog()">RETRY</button>
+          </div>
+        } @else {
+          <div class="scenario-list">
+            @for (scenario of fixtures(); track scenario.fixture; let i = $index) {
+              <button
+                type="button"
+                class="scenario-option"
+                [class.selected]="selectedFixture() === scenario.fixture"
+                [attr.aria-pressed]="selectedFixture() === scenario.fixture"
+                (click)="selectScenario(scenario.fixture)"
+              >
+                <span class="scenario-index">{{ (i + 1).toString().padStart(2, '0') }}</span>
+                <span class="scenario-copy">
+                  <span class="scenario-era">{{ scenario.era }} // {{ scenario.theater }}</span>
+                  <strong>{{ scenario.name }}</strong>
+                  <span class="scenario-description">{{ scenario.description }}</span>
+                  <span class="scenario-meta">
+                    {{ scenario.estimatedMinutes }} MIN ·
+                    {{ scenario.events }} EVENTS ·
+                    {{ scenario.objectives }} OBJECTIVES
+                  </span>
+                </span>
+                <span class="selection-mark" aria-hidden="true">
+                  {{ selectedFixture() === scenario.fixture ? '■' : '□' }}
+                </span>
+              </button>
+            }
+          </div>
+        }
+      </section>
+
+      <button
+        class="enter"
+        (click)="begin()"
+        [disabled]="busy() || !selectedFixture()"
+      >
+        {{ busy() ? 'BOOTING…' : '▶ START SELECTED SCENARIO' }}
+      </button>
+    </div>
+  }
+
+  <!-- ░░ GAME ░░ -->
+  @if (started()) {
+    <div class="game">
+      <!-- Transcript -->
+      <main class="terminal">
+        <div class="scrollback" #scroller>
+          @for (line of lines(); track $index) {
+            @switch (line.kind) {
+              @case ('dm') {
+                <div class="beat {{ cellClass(line.cell) }}">
+                  <div class="beat-tag">
+                    <span class="time">{{ line.time }}</span>
+                    <span class="cell">{{ line.cell }}</span>
+                  </div>
+                  <p class="beat-text">{{ line.text }}</p>
+                </div>
+              }
+              @case ('player') {
+                <div class="player-line"><span class="prompt">&gt;</span> {{ line.text }}</div>
+              }
+              @case ('notice') {
+                <div class="notice-line">» {{ line.text }}</div>
+              }
+              @case ('header') {
+                <div class="header-line">══════ {{ line.text }} ══════</div>
+              }
+              @default {
+                <div class="system-line">{{ line.text }}</div>
+              }
+            }
+          }
+          @if (busy()) {
+            <div class="thinking"><span></span><span></span><span></span></div>
+          }
+        </div>
+
+        <!-- Scorecard on completion -->
+        @if (complete() && frame()?.aar; as aar) {
+          <div class="scorecard outcome-{{ aar.outcome | lowercase }}">
+            <div class="grade">{{ aar.grade }}</div>
+            <div class="score-detail">
+              <div class="outcome">{{ aar.outcome }}</div>
+              <div class="score">{{ aar.score }}/100 · {{ aar.objectives_met }}/{{ aar.objectives_total }} objectives</div>
+              <ul>
+                @for (h of aar.highlights; track $index) {
+                  <li>{{ h }}</li>
+                }
+              </ul>
+            </div>
+            <div class="score-actions">
+              <button class="enter small" (click)="restart()">▶ RUN IT AGAIN</button>
+              <button class="enter small secondary" (click)="chooseScenario()">CHOOSE SCENARIO</button>
+            </div>
+          </div>
+        }
+
+        <!-- Worklist (tickets arrive one at a time; table to stack) + input -->
+        @if (awaiting() && !complete()) {
+          <div class="worklist">
+            @if (tasks().length > 1) {
+              <div class="worklist-head">
+                {{ tasks().length }} issues on your board — submit orders in any order
+              </div>
+            }
+            @for (t of tasks(); track t.step; let last = $last) {
+              <div class="task">
+                <div class="task-tag">
+                  <span class="task-num">TASK {{ t.step }}</span>
+                  <span class="time">{{ t.time }}</span>
+                </div>
+                <div class="options">
+                  @for (a of t.actions; track a.label) {
+                    <button class="chip intent-{{ a.intent }}" (click)="choose(t, a)">
+                      {{ a.label }}
+                    </button>
+                  }
+                  @if (last && canTable()) {
+                    <button class="chip table-chip" (click)="table()">
+                      ⇥ table it · next ticket ({{ hud()?.queuedTasks }} waiting)
+                    </button>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        @if (!complete()) {
+          <form class="command-row" (submit)="$event.preventDefault(); submit()">
+            <span class="prompt">&gt;</span>
+            <input
+              type="text"
+              [ngModel]="command()"
+              (ngModelChange)="command.set($event)"
+              name="command"
+              autocomplete="off"
+              autofocus
+              [placeholder]="awaiting() ? 'submit an estimate/order, or pick an option above…' : 'exercise control is adjudicating…'"
+            />
+            <button type="submit" class="send" [disabled]="!awaiting()">SEND</button>
+          </form>
+        }
+      </main>
+
+      <!-- HUD -->
+      @if (hud(); as h) {
+        <aside class="hud">
+          <!-- In-game scenario clock, fixed at the top of the rail. Non-linear:
+               the exercise time jumps between steps. Goes 'pressed' amber when the
+               scenario window is running low. -->
+          <div class="hud-clock" [class.pressed]="h.minutesLeft <= h.lunchMinutes / 3">
+            <div class="label">EXERCISE TIME</div>
+            <div class="clock-value">{{ gameTime() ?? h.time }}</div>
+            <div class="clock-lunch">
+              {{ h.minutesLeft }}m {{ h.windowLabel }} <span class="dim">/ {{ h.lunchMinutes }}m</span>
+            </div>
+            @if (fuseSecondsLeft() !== null) {
+              <div class="fuse-clock" [class.critical]="fusePressed()">
+                <div class="fuse-row">
+                  <span class="fuse-label">{{ h.deadlineLabel }}</span>
+                  <span class="fuse-value">T-{{ fuseClock() }}</span>
+                </div>
+                <div class="fuse-track">
+                  <div class="fuse-fill" [style.width.%]="fusePercent()"></div>
+                </div>
+              </div>
+            }
+            @if (h.openTasks) {
+              <div class="clock-tickets">
+                {{ h.openTasks }} open ticket{{ h.openTasks === 1 ? '' : 's' }}
+                @if (h.queuedTasks) {
+                  <span class="dim">· {{ h.queuedTasks }} still queued</span>
+                }
+              </div>
+            }
+          </div>
+
+          <div class="hud-scroll">
+          <div class="hud-block scenario">
+            <div class="label">SCENARIO</div>
+            <div class="value">{{ h.scenario }}</div>
+          </div>
+
+          <div class="hud-block">
+            <div class="label">YOUR ROLE</div>
+            <div class="value role">{{ h.role }}</div>
+          </div>
+
+          @if (h.constraints.length) {
+            <div class="hud-block">
+              <div class="label">CONSTRAINTS</div>
+              <ul class="intel">
+                @for (c of h.constraints; track c) {
+                  <li>{{ c }}</li>
+                }
+              </ul>
+            </div>
+          }
+
+          <div class="hud-block">
+            <div class="label">OBJECTIVES</div>
+            <ul class="objectives">
+              @for (o of h.objectives; track o.id) {
+                <li [class.met]="o.met">
+                  <span class="box">{{ o.met ? '☑' : '☐' }}</span>{{ o.name }}
+                </li>
+              }
+            </ul>
+          </div>
+
+          <div class="hud-block">
+            <div class="label">THREATS</div>
+            <ul class="tags">
+              @for (t of h.threats; track t) {
+                <li class="tag threat">{{ t }}</li>
+              }
+            </ul>
+          </div>
+
+          @if (h.flags.length) {
+            <div class="hud-block">
+              <div class="label">STATUS FLAGS</div>
+              <ul class="tags">
+                @for (fl of h.flags; track fl) {
+                  <li class="tag flag">{{ fl }}</li>
+                }
+              </ul>
+            </div>
+          }
+
+          @if (h.knowledge.length) {
+            <div class="hud-block">
+              <div class="label">INTEL GATHERED</div>
+              <ul class="intel">
+                @for (k of h.knowledge; track $index) {
+                  <li>{{ k }}</li>
+                }
+              </ul>
+            </div>
+          }
+
+          @if (h.assumptions.length) {
+            <div class="hud-block">
+              <div class="label">ASSUMPTIONS</div>
+              <ul class="intel">
+                @for (a of h.assumptions; track $index) {
+                  <li>{{ a }}</li>
+                }
+              </ul>
+            </div>
+          }
+
+          @if (h.umpireFindings.length) {
+            <div class="hud-block">
+              <div class="label">UMPIRE FINDINGS</div>
+              <ul class="intel">
+                @for (f of h.umpireFindings; track $index) {
+                  <li>{{ f }}</li>
+                }
+              </ul>
+            </div>
+          }
+          </div>
+        </aside>
+      }
+    </div>
+  }
+</div>

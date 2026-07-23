@@ -1,0 +1,132 @@
+{
+  "country": "South Africa",
+  "total_population": 60000000,
+  "period": "current",
+  "segments": [
+    {
+      "name": "Urban professional and business class",
+      "percentage": 0.15,
+      "demographics": {
+        "urbanization": 0.95,
+        "education_level": 0.8,
+        "median_age": 38,
+        "economic_class": "upper"
+      },
+      "disposition": {
+        "government_trust": 0.25,
+        "nationalism": 0.4,
+        "media_exposure": 0.85,
+        "social_media_activity": 0.75,
+        "protest_propensity": 0.3,
+        "compliance_baseline": 0.6,
+        "information_sources": ["social_media", "foreign_media"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.3,
+        "economic_sensitivity": 0.5,
+        "fatigue_rate": 0.12,
+        "amplification_factor": 0.55
+      }
+    },
+    {
+      "name": "Township and urban poor",
+      "percentage": 0.35,
+      "demographics": {
+        "urbanization": 0.85,
+        "education_level": 0.3,
+        "median_age": 28,
+        "economic_class": "lower"
+      },
+      "disposition": {
+        "government_trust": 0.2,
+        "nationalism": 0.45,
+        "media_exposure": 0.5,
+        "social_media_activity": 0.55,
+        "protest_propensity": 0.65,
+        "compliance_baseline": 0.35,
+        "information_sources": ["social_media", "word_of_mouth"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.25,
+        "economic_sensitivity": 0.9,
+        "fatigue_rate": 0.08,
+        "amplification_factor": 0.6
+      }
+    },
+    {
+      "name": "Rural communities and subsistence farmers",
+      "percentage": 0.20,
+      "demographics": {
+        "urbanization": 0.1,
+        "education_level": 0.2,
+        "median_age": 32,
+        "economic_class": "lower"
+      },
+      "disposition": {
+        "government_trust": 0.35,
+        "nationalism": 0.45,
+        "media_exposure": 0.3,
+        "social_media_activity": 0.2,
+        "protest_propensity": 0.3,
+        "compliance_baseline": 0.55,
+        "information_sources": ["word_of_mouth", "state_tv"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.35,
+        "economic_sensitivity": 0.85,
+        "fatigue_rate": 0.06,
+        "amplification_factor": 0.3
+      }
+    },
+    {
+      "name": "Emerging black middle class",
+      "percentage": 0.20,
+      "demographics": {
+        "urbanization": 0.8,
+        "education_level": 0.55,
+        "median_age": 34,
+        "economic_class": "middle"
+      },
+      "disposition": {
+        "government_trust": 0.35,
+        "nationalism": 0.5,
+        "media_exposure": 0.7,
+        "social_media_activity": 0.7,
+        "protest_propensity": 0.4,
+        "compliance_baseline": 0.55,
+        "information_sources": ["social_media", "state_tv"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.4,
+        "economic_sensitivity": 0.75,
+        "fatigue_rate": 0.1,
+        "amplification_factor": 0.55
+      }
+    },
+    {
+      "name": "Mining and industrial workers",
+      "percentage": 0.10,
+      "demographics": {
+        "urbanization": 0.7,
+        "education_level": 0.3,
+        "median_age": 35,
+        "economic_class": "lower"
+      },
+      "disposition": {
+        "government_trust": 0.2,
+        "nationalism": 0.4,
+        "media_exposure": 0.45,
+        "social_media_activity": 0.4,
+        "protest_propensity": 0.6,
+        "compliance_baseline": 0.4,
+        "information_sources": ["word_of_mouth", "social_media"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.25,
+        "economic_sensitivity": 0.9,
+        "fatigue_rate": 0.08,
+        "amplification_factor": 0.55
+      }
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "name": "grms-frontend",
+  "version": "0.0.0",
+  "scripts": {
+    "ng": "ng",
+    "start": "node start.js",
+    "build": "ng build",
+    "watch": "ng build --watch --configuration development",
+    "test": "ng test"
+  },
+  "prettier": {
+    "printWidth": 100,
+    "singleQuote": true,
+    "overrides": [
+      {
+        "files": "*.html",
+        "options": {
+          "parser": "angular"
+        }
+      }
+    ]
+  },
+  "private": true,
+  "overrides": {
+    "@hono/node-server": "2.0.11",
+    "esbuild": "0.28.1"
+  },
+  "dependencies": {
+    "@angular/animations": "22.0.4",
+    "@angular/cdk": "22.0.4",
+    "@angular/common": "22.0.4",
+    "@angular/compiler": "22.0.4",
+    "@angular/core": "22.0.4",
+    "@angular/forms": "22.0.4",
+    "@angular/material": "22.0.4",
+    "@angular/platform-browser": "22.0.4",
+    "@angular/router": "22.0.4",
+    "@fortawesome/fontawesome-free": "^7.2.0",
+    "@types/d3": "^7.4.3",
+    "d3": "^7.9.0",
+    "material-icons": "^1.13.14",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0",
+    "zone.js": "~0.15.0"
+  },
+  "devDependencies": {
+    "@angular/build": "22.0.7",
+    "@angular/cli": "22.0.4",
+    "@angular/compiler-cli": "22.0.4",
+    "@types/jasmine": "~5.1.0",
+    "jasmine-core": "~5.9.0",
+    "karma": "~6.4.0",
+    "karma-chrome-launcher": "~3.2.0",
+    "karma-coverage": "~2.2.0",
+    "karma-jasmine": "~5.1.0",
+    "karma-jasmine-html-reporter": "~2.1.0",
+    "typescript": "~6.0.3"
+  }
+}

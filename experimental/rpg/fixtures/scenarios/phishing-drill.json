@@ -1,0 +1,302 @@
+{
+  "_comment": "RPG test scenario export v0.2. Bundles the 3 GETs the loader consumes: scenario (GET /api/scenarios/{id}), graph (GET /api/scenarios/{id}/builder/graph), objectives (GET /api/objectives?scenarioId={id}). camelCase to mirror the live Ghosts.Api JSON. The Assigned field drives the flip-flop; TriggerCondition on events #5/#6 forks on the 'contained' flag the player sets at step #4.",
+
+  "scenario": {
+    "id": 1,
+    "name": "Phishing Drill: First Contact",
+    "description": "A small SOC-defense rehearsal. You are the on-shift Blue Team analyst at Meridian Logistics. An adversary opens with a spear-phishing campaign against the finance team. How fast you detect and contain it decides whether the intrusion stops at the inbox or turns into hands-on-keyboard lateral movement.",
+    "createdAt": "2026-06-30T00:00:00Z",
+    "updatedAt": "2026-06-30T00:00:00Z",
+    "builderStatus": "Compiled",
+    "scenarioParameters": {
+      "nations": [
+        { "name": "Meridian Logistics (Home)", "alignment": "friendly" },
+        { "name": "Crimson Tide Group", "alignment": "adversary" }
+      ],
+      "threatActors": [
+        {
+          "name": "Crimson Tide",
+          "type": "criminal",
+          "capability": 3,
+          "ttps": ["T1566.001", "T1078", "T1021.001"]
+        }
+      ],
+      "injects": [
+        { "trigger": "T+10m", "title": "Suspicious email alert reaches the SOC queue" }
+      ],
+      "userPools": [
+        { "role": "Finance Staff", "count": 12 },
+        { "role": "SOC Analyst", "count": 1 }
+      ],
+      "objectives": "Detect and contain a spear-phishing intrusion before it becomes lateral movement.",
+      "politicalContext": "Routine business operations. No heightened alert posture. Leadership expects the SOC to handle day-to-day threats without escalation unless containment fails.",
+      "rulesOfEngagement": "Blue Team may investigate, quarantine, block, and notify users. No offensive action. Escalate to IR lead only if hosts are confirmed compromised.",
+      "victoryConditions": "WIN: the phishing campaign is contained before the adversary obtains valid credentials (objective 2 met). LOSS: the adversary moves laterally to a second host."
+    },
+    "technicalEnvironment": {
+      "networkTopology": "Flat /24 corporate LAN, single VLAN for finance, perimeter firewall with default-allow egress.",
+      "services": "Microsoft 365 mail, on-prem file server (FS01), domain controller (DC01).",
+      "assets": "FIN-WS-04 (finance workstation), FS01 (file server), DC01 (domain controller)",
+      "defenses": ["Email gateway with URL rewriting", "EDR on workstations", "SIEM with 15-min alert SLA"],
+      "vulnerabilities": [
+        { "asset": "FIN-WS-04", "cve": "CVE-2023-23397", "severity": "high" }
+      ]
+    },
+    "gameMechanics": {
+      "timelineType": "turn-based",
+      "durationHours": 1,
+      "adjudicationType": "automated",
+      "escalationLadder": "Inbox -> Endpoint -> Identity -> Lateral",
+      "branchingLogic": "Player containment at step 4 sets flag 'contained'. Red Team step 5 forks: contained -> blocked-retry path; not contained -> credential-theft path.",
+      "telemetry": {
+        "collectLogs": true,
+        "collectNetwork": true,
+        "collectEndpoint": true,
+        "collectChat": false
+      },
+      "performanceMetrics": "time-to-detect, time-to-contain, lateral-movement-prevented"
+    },
+    "timeline": {
+      "exerciseDuration": 60,
+      "events": [
+        {
+          "time": "T+0m",
+          "number": 1,
+          "assigned": "White Cell",
+          "description": "Exercise start. It is a quiet Tuesday morning shift. The SIEM dashboard is green. You hold the on-shift SOC analyst seat at Meridian Logistics, responsible for the finance VLAN.",
+          "status": "Pending",
+          "objectiveIds": [],
+          "triggerKind": "PointInTime",
+          "schedule": null,
+          "triggerCondition": null,
+          "executionType": "manual",
+          "workflowId": null
+        },
+        {
+          "time": "T+5m",
+          "number": 2,
+          "assigned": "Red Team",
+          "description": "Crimson Tide sends a spear-phishing email to twelve finance staff. It impersonates the company's payroll provider and carries a link to a credential-harvesting page styled like the Microsoft 365 login.",
+          "status": "Pending",
+          "objectiveIds": [],
+          "triggerKind": "PointInTime",
+          "schedule": null,
+          "triggerCondition": null,
+          "executionType": "manual",
+          "workflowId": null
+        },
+        {
+          "time": "T+10m",
+          "number": 3,
+          "assigned": "White Cell",
+          "description": "The email gateway fires a low-confidence alert into your SOC queue: 'Possible credential phishing - external sender, lookalike domain payroll-meridian[.]com, 12 recipients.' Two recipients have already opened the message.",
+          "status": "Pending",
+          "objectiveIds": [1],
+          "triggerKind": "PointInTime",
+          "schedule": null,
+          "triggerCondition": null,
+          "executionType": "manual",
+          "workflowId": null
+        },
+        {
+          "time": "T+12m",
+          "number": 4,
+          "assigned": "Blue Team",
+          "description": "Your move. The alert is in your queue and the clock is running. What do you do? You can investigate the message and the lookalike domain, quarantine the email from all inboxes, block the malicious domain at the gateway, notify finance staff, or wait and watch.",
+          "status": "Pending",
+          "objectiveIds": [1, 2],
+          "triggerKind": "PointInTime",
+          "schedule": null,
+          "triggerCondition": null,
+          "executionType": "manual",
+          "workflowId": null
+        },
+        {
+          "time": "T+15m",
+          "number": 5,
+          "assigned": "Red Team",
+          "description": "Containment held. By the time Crimson Tide's harvesting page would have collected a password, the email is gone from every inbox and the domain is blocked. The adversary probes for another way in and finds the door shut. The campaign stalls at the inbox.",
+          "status": "Pending",
+          "objectiveIds": [2],
+          "triggerKind": "Triggered",
+          "schedule": null,
+          "triggerCondition": "flag:contained",
+          "executionType": "manual",
+          "workflowId": null
+        },
+        {
+          "time": "T+15m",
+          "number": 6,
+          "assigned": "Red Team",
+          "description": "No containment came. A finance clerk on FIN-WS-04 enters their M365 password into the harvesting page. Crimson Tide now holds valid credentials (T1078) and authenticates to the file server FS01 over SMB, moving laterally off the first host. The intrusion is now hands-on-keyboard.",
+          "status": "Pending",
+          "objectiveIds": [],
+          "triggerKind": "Triggered",
+          "schedule": null,
+          "triggerCondition": "!contained",
+          "executionType": "manual",
+          "workflowId": null
+        },
+        {
+          "time": "T+20m",
+          "number": 7,
+          "assigned": "Blue Team",
+          "description": "Situation update. Either you stopped this at the inbox or you are now chasing an adversary on the network. Assess what you know and decide your next action: confirm scope, isolate the affected host, reset exposed credentials, or stand the team down.",
+          "status": "Pending",
+          "objectiveIds": [2],
+          "triggerKind": "PointInTime",
+          "schedule": null,
+          "triggerCondition": null,
+          "executionType": "manual",
+          "workflowId": null
+        },
+        {
+          "time": "T+30m",
+          "number": 8,
+          "assigned": "White Cell",
+          "description": "Exercise complete. The white cell calls end-of-scenario and begins the after-action review.",
+          "status": "Pending",
+          "objectiveIds": [],
+          "triggerKind": "PointInTime",
+          "schedule": null,
+          "triggerCondition": null,
+          "executionType": "manual",
+          "workflowId": null
+        }
+      ]
+    }
+  },
+
+  "graph": {
+    "nodes": [
+      {
+        "id": "11111111-1111-1111-1111-111111111111",
+        "name": "Crimson Tide",
+        "entityType": "ThreatActor",
+        "description": "Financially motivated criminal crew. Opens with credential phishing, pivots on valid accounts.",
+        "properties": "{\"type\":\"criminal\",\"capability\":3}",
+        "confidence": 1.0,
+        "origin": "Operator",
+        "sourceId": null,
+        "npcId": null,
+        "externalId": "G-CRIMSON",
+        "isReviewed": true,
+        "createdAt": "2026-06-30T00:00:00Z"
+      },
+      {
+        "id": "22222222-2222-2222-2222-222222222222",
+        "name": "Dana Okafor",
+        "entityType": "Person",
+        "description": "Finance clerk at Meridian. First to open the phishing email; works on FIN-WS-04.",
+        "properties": "{\"role\":\"Finance Staff\"}",
+        "confidence": 1.0,
+        "origin": "Operator",
+        "sourceId": null,
+        "npcId": null,
+        "externalId": "",
+        "isReviewed": true,
+        "createdAt": "2026-06-30T00:00:00Z"
+      },
+      {
+        "id": "33333333-3333-3333-3333-333333333333",
+        "name": "FIN-WS-04",
+        "entityType": "System",
+        "description": "Finance workstation. Patient zero if credentials are harvested.",
+        "properties": "{\"os\":\"Windows 11\"}",
+        "confidence": 1.0,
+        "origin": "Operator",
+        "sourceId": null,
+        "npcId": null,
+        "externalId": "",
+        "isReviewed": true,
+        "createdAt": "2026-06-30T00:00:00Z"
+      },
+      {
+        "id": "44444444-4444-4444-4444-444444444444",
+        "name": "FS01",
+        "entityType": "System",
+        "description": "On-prem file server. Lateral-movement target over SMB.",
+        "properties": "{\"os\":\"Windows Server 2019\"}",
+        "confidence": 1.0,
+        "origin": "Operator",
+        "sourceId": null,
+        "npcId": null,
+        "externalId": "",
+        "isReviewed": true,
+        "createdAt": "2026-06-30T00:00:00Z"
+      }
+    ],
+    "edges": [
+      {
+        "id": "aaaaaaaa-0000-0000-0000-000000000001",
+        "sourceEntityId": "11111111-1111-1111-1111-111111111111",
+        "targetEntityId": "22222222-2222-2222-2222-222222222222",
+        "edgeType": "Targets",
+        "label": "spear-phishes",
+        "weight": 1.0,
+        "confidence": 1.0,
+        "origin": "Operator",
+        "isReviewed": true
+      },
+      {
+        "id": "aaaaaaaa-0000-0000-0000-000000000002",
+        "sourceEntityId": "22222222-2222-2222-2222-222222222222",
+        "targetEntityId": "33333333-3333-3333-3333-333333333333",
+        "edgeType": "Accesses",
+        "label": "works on",
+        "weight": 1.0,
+        "confidence": 1.0,
+        "origin": "Operator",
+        "isReviewed": true
+      },
+      {
+        "id": "aaaaaaaa-0000-0000-0000-000000000003",
+        "sourceEntityId": "33333333-3333-3333-3333-333333333333",
+        "targetEntityId": "44444444-4444-4444-4444-444444444444",
+        "edgeType": "CommunicatesWith",
+        "label": "SMB to",
+        "weight": 1.0,
+        "confidence": 1.0,
+        "origin": "Operator",
+        "isReviewed": true
+      }
+    ]
+  },
+
+  "objectives": [
+    {
+      "id": 1,
+      "parentId": null,
+      "scenarioId": 1,
+      "name": "Detect the phishing campaign",
+      "description": "Recognize the inbound spear-phishing campaign from the SIEM alert and triage it as a real threat rather than noise.",
+      "type": "MET",
+      "status": "Active",
+      "score": "U",
+      "priority": 1,
+      "successCriteria": "Player investigates the alert / lookalike domain before acting blindly.",
+      "assigned": "Blue Team",
+      "sortOrder": 1,
+      "createdAt": "2026-06-30T00:00:00Z",
+      "updatedAt": "2026-06-30T00:00:00Z",
+      "children": []
+    },
+    {
+      "id": 2,
+      "parentId": null,
+      "scenarioId": 1,
+      "name": "Contain before lateral movement",
+      "description": "Quarantine the email and/or block the malicious domain before the adversary obtains valid credentials and pivots to a second host.",
+      "type": "MET",
+      "status": "Active",
+      "score": "U",
+      "priority": 1,
+      "successCriteria": "The 'contained' flag is set at step 4, steering the timeline onto the blocked-retry branch.",
+      "assigned": "Blue Team",
+      "sortOrder": 2,
+      "createdAt": "2026-06-30T00:00:00Z",
+      "updatedAt": "2026-06-30T00:00:00Z",
+      "children": []
+    }
+  ]
+}

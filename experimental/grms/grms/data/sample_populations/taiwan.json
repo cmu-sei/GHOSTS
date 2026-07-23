@@ -1,0 +1,132 @@
+{
+  "country": "Taiwan",
+  "total_population": 23500000,
+  "period": "current",
+  "segments": [
+    {
+      "name": "Taipei metropolitan professionals",
+      "percentage": 0.25,
+      "demographics": {
+        "urbanization": 0.98,
+        "education_level": 0.85,
+        "median_age": 38,
+        "economic_class": "upper"
+      },
+      "disposition": {
+        "government_trust": 0.55,
+        "nationalism": 0.6,
+        "media_exposure": 0.9,
+        "social_media_activity": 0.85,
+        "protest_propensity": 0.35,
+        "compliance_baseline": 0.7,
+        "information_sources": ["social_media", "foreign_media"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.5,
+        "economic_sensitivity": 0.5,
+        "fatigue_rate": 0.1,
+        "amplification_factor": 0.6
+      }
+    },
+    {
+      "name": "Tech industry workers",
+      "percentage": 0.20,
+      "demographics": {
+        "urbanization": 0.9,
+        "education_level": 0.9,
+        "median_age": 34,
+        "economic_class": "upper"
+      },
+      "disposition": {
+        "government_trust": 0.5,
+        "nationalism": 0.55,
+        "media_exposure": 0.85,
+        "social_media_activity": 0.8,
+        "protest_propensity": 0.2,
+        "compliance_baseline": 0.7,
+        "information_sources": ["social_media", "foreign_media"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.45,
+        "economic_sensitivity": 0.45,
+        "fatigue_rate": 0.12,
+        "amplification_factor": 0.55
+      }
+    },
+    {
+      "name": "Southern and central working class",
+      "percentage": 0.25,
+      "demographics": {
+        "urbanization": 0.7,
+        "education_level": 0.5,
+        "median_age": 45,
+        "economic_class": "middle"
+      },
+      "disposition": {
+        "government_trust": 0.45,
+        "nationalism": 0.7,
+        "media_exposure": 0.7,
+        "social_media_activity": 0.55,
+        "protest_propensity": 0.3,
+        "compliance_baseline": 0.65,
+        "information_sources": ["state_tv", "social_media"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.6,
+        "economic_sensitivity": 0.7,
+        "fatigue_rate": 0.08,
+        "amplification_factor": 0.45
+      }
+    },
+    {
+      "name": "Military and reservist community",
+      "percentage": 0.10,
+      "demographics": {
+        "urbanization": 0.65,
+        "education_level": 0.55,
+        "median_age": 35,
+        "economic_class": "middle"
+      },
+      "disposition": {
+        "government_trust": 0.7,
+        "nationalism": 0.8,
+        "media_exposure": 0.6,
+        "social_media_activity": 0.4,
+        "protest_propensity": 0.05,
+        "compliance_baseline": 0.9,
+        "information_sources": ["internal_briefings", "state_tv"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.8,
+        "economic_sensitivity": 0.35,
+        "fatigue_rate": 0.04,
+        "amplification_factor": 0.25
+      }
+    },
+    {
+      "name": "Youth and students",
+      "percentage": 0.20,
+      "demographics": {
+        "urbanization": 0.85,
+        "education_level": 0.75,
+        "median_age": 22,
+        "economic_class": "middle"
+      },
+      "disposition": {
+        "government_trust": 0.4,
+        "nationalism": 0.65,
+        "media_exposure": 0.95,
+        "social_media_activity": 0.95,
+        "protest_propensity": 0.5,
+        "compliance_baseline": 0.55,
+        "information_sources": ["social_media", "foreign_media"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.5,
+        "economic_sensitivity": 0.5,
+        "fatigue_rate": 0.14,
+        "amplification_factor": 0.75
+      }
+    }
+  ]
+}

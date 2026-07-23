@@ -1,0 +1,79 @@
+{
+  "name": "Shigeru Ishiba",
+  "country": "Japan",
+  "period": "current",
+  "title": "Prime Minister",
+  "personality": {
+    "risk_tolerance": 0.1,
+    "authoritarianism": 0.1,
+    "nationalism": 0.4,
+    "pragmatism": 0.6,
+    "aggression": 0.0,
+    "populism": 0.2,
+    "transparency": 0.2,
+    "religiosity": -0.2
+  },
+  "ideology": {
+    "economic_system": "mixed",
+    "geopolitical_orientation": "western",
+    "key_alliances": ["United States", "Australia", "India", "South Korea", "Philippines"],
+    "adversaries": ["China", "North Korea", "Russia"],
+    "red_lines": [
+      "Chinese military action against Taiwan",
+      "North Korean nuclear strikes capability",
+      "Threats to Japanese territorial waters (Senkaku Islands)",
+      "Russian military activity near Hokkaido"
+    ],
+    "core_narratives": [
+      "Free and open Indo-Pacific",
+      "Alliance modernization with the US",
+      "Constitutional normalization of defense",
+      "Economic security and supply chain resilience"
+    ]
+  },
+  "decision_history": [
+    {
+      "event_description": "US tariffs impacted Japanese automotive exports significantly",
+      "decision_taken": "Engaged in intensive bilateral negotiations, offered concessions on market access while protecting key industries",
+      "outcome": "Ongoing trade friction, alliance relationship stressed but maintained",
+      "date": "2025-04-05T00:00:00Z",
+      "context_factors": ["alliance dependency", "automotive industry importance", "China alternative concern"]
+    },
+    {
+      "event_description": "Proposed Asian NATO concept for regional security",
+      "decision_taken": "Advocated for multilateral security framework in Asia, deepened Quad cooperation and bilateral defense ties",
+      "outcome": "Concept discussed but not formalized; bilateral defense ties strengthened",
+      "date": "2025-01-15T00:00:00Z",
+      "context_factors": ["China threat perception", "US alliance evolution", "regional coalition building"]
+    }
+  ],
+  "cultural_context": {
+    "decision_making_style": "consensus",
+    "information_sources": ["cabinet intelligence", "ministry of defense", "US intelligence sharing", "diplomatic corps"],
+    "domestic_power_base": "LDP party factions, rural constituencies, defense establishment",
+    "succession_concerns": true,
+    "historical_analogies": ["Post-war pacifism evolution", "Plaza Accord trade pressure", "Yoshida doctrine"]
+  },
+  "decision_context": {
+    "approval_rating": 32.0,
+    "economic_conditions": {
+      "gdp_growth": 1.2,
+      "unemployment": 2.5,
+      "inflation": 2.8,
+      "sanctions_pressure": 0.0
+    },
+    "military_posture": {
+      "readiness_level": "elevated",
+      "ongoing_operations": ["East China Sea patrols", "Counter-North Korea surveillance"],
+      "force_disposition": "defensive posture with counterstrike capability development"
+    },
+    "domestic_pressures": {
+      "election_proximity_days": 800,
+      "opposition_strength": 0.4,
+      "media_sentiment": -0.2,
+      "protest_level": "none"
+    },
+    "ongoing_conflicts": ["China tensions over Senkaku/Taiwan", "North Korea missile threats"],
+    "recent_events": ["Defense budget increase to 2% GDP", "US-Japan alliance deepening"]
+  }
+}

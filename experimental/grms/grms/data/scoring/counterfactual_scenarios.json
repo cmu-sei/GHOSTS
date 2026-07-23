@@ -1,0 +1,348 @@
+[
+  {
+    "id": "counterfactual-munich-agreement",
+    "label": "Munich Agreement - Chamberlain appeases Hitler (September 1938)",
+    "leader": {
+      "name": "Neville Chamberlain",
+      "country": "United Kingdom",
+      "title": "Prime Minister",
+      "period": "world war 2",
+      "personality": {
+        "risk_tolerance": -0.7,
+        "authoritarianism": -0.3,
+        "nationalism": 0.2,
+        "pragmatism": 0.6,
+        "aggression": 0.7,
+        "populism": -0.2,
+        "transparency": 0.3,
+        "religiosity": 0.2
+      },
+      "ideology": {
+        "economic_system": "free_market",
+        "geopolitical_orientation": "western",
+        "key_alliances": [
+          "France"
+        ],
+        "adversaries": [],
+        "red_lines": [
+          "Direct attack on British territory"
+        ],
+        "core_narratives": [
+          "Peace in our time",
+          "Avoiding another Great War"
+        ]
+      },
+      "decision_history": [
+        {
+          "event_description": "German remilitarization of Rhineland",
+          "decision_taken": "No military response; diplomatic protest only",
+          "outcome": "Germany emboldened",
+          "date": "1936-03-07",
+          "context_factors": [
+            "War weariness",
+            "Military unpreparedness"
+          ]
+        }
+      ],
+      "cultural_context": {
+        "decision_making_style": "advisory_council",
+        "information_sources": [
+          "Foreign Office",
+          "Cabinet"
+        ],
+        "domestic_power_base": "Conservative Party",
+        "succession_concerns": false,
+        "historical_analogies": [
+          "World War I devastation"
+        ]
+      },
+      "decision_context": {
+        "approval_rating": 60.0,
+        "economic_conditions": {
+          "gdp_growth": 1.5,
+          "unemployment": 12.0,
+          "inflation": 2.0,
+          "sanctions_pressure": 0.0
+        },
+        "military_posture": {
+          "readiness_level": "peacetime",
+          "ongoing_operations": [],
+          "force_disposition": "Rearmament underway but incomplete"
+        },
+        "domestic_pressures": {
+          "election_proximity_days": 600,
+          "opposition_strength": 0.3,
+          "media_sentiment": -0.2,
+          "protest_level": "none"
+        },
+        "ongoing_conflicts": [],
+        "recent_events": [
+          "German annexation of Austria",
+          "Hitler threatening military action over Sudetenland"
+        ]
+      }
+    },
+    "event": {
+      "event_type": "diplomatic",
+      "severity": 0.6,
+      "description": "Hitler demands the Sudetenland region of Czechoslovakia be ceded to Germany, threatening military invasion if refused. Chamberlain flies to Munich to negotiate directly with Hitler, Mussolini, and Daladier — without Czechoslovakia present.",
+      "structured": {
+        "actor": "Germany",
+        "target": "Czechoslovakia",
+        "action_category": "diplomatic",
+        "reversibility": "escalatory",
+        "visibility": "public"
+      }
+    },
+    "known_outcome": {
+      "escalation_risk": 0.35,
+      "action_types": [
+        "diplomatic"
+      ],
+      "tone": "conciliatory",
+      "description": "Chamberlain ceded the Sudetenland. Short-term de-escalation but emboldened Hitler.",
+      "counterfactual_note": "aggression flipped from -0.8 to +0.7",
+      "expected_escalation_direction": "higher",
+      "expected_tone_shift": "from conciliatory toward defiant/threatening"
+    },
+    "historical_date": "1938-09-30"
+  },
+  {
+    "id": "counterfactual-molotov-ribbentrop",
+    "label": "Nazi-Soviet Non-Aggression Pact (August 1939)",
+    "leader": {
+      "name": "Joseph Stalin",
+      "country": "Soviet Union",
+      "title": "General Secretary",
+      "period": "world war 2",
+      "personality": {
+        "risk_tolerance": 0.3,
+        "authoritarianism": 1.0,
+        "nationalism": 0.6,
+        "pragmatism": -0.7,
+        "aggression": 0.5,
+        "populism": 0.4,
+        "transparency": -1.0,
+        "religiosity": -0.8
+      },
+      "ideology": {
+        "economic_system": "state_directed",
+        "geopolitical_orientation": "eastern",
+        "key_alliances": [],
+        "adversaries": [
+          "Germany (ideologically)",
+          "Japan"
+        ],
+        "red_lines": [
+          "Two-front war"
+        ],
+        "core_narratives": [
+          "Buy time for rearmament",
+          "Capitalist powers will destroy each other"
+        ]
+      },
+      "decision_history": [
+        {
+          "event_description": "Failed negotiations with Britain and France",
+          "decision_taken": "Sought alternative security arrangement",
+          "outcome": "Western powers refused meaningful military commitment",
+          "date": "1939-08-01",
+          "context_factors": [
+            "Western distrust of Soviets",
+            "Munich excluded USSR"
+          ]
+        }
+      ],
+      "cultural_context": {
+        "decision_making_style": "unilateral",
+        "information_sources": [
+          "Molotov",
+          "NKVD intelligence"
+        ],
+        "domestic_power_base": "Communist Party",
+        "succession_concerns": false,
+        "historical_analogies": [
+          "Brest-Litovsk pragmatism"
+        ]
+      },
+      "decision_context": {
+        "approval_rating": 78.0,
+        "economic_conditions": {
+          "gdp_growth": 5.0,
+          "unemployment": 0.5,
+          "inflation": 3.0,
+          "sanctions_pressure": 0.1
+        },
+        "military_posture": {
+          "readiness_level": "elevated",
+          "ongoing_operations": [
+            "Khalkhin Gol (fighting Japan in Mongolia)"
+          ],
+          "force_disposition": "Purged officer corps, rebuilding"
+        },
+        "domestic_pressures": {
+          "election_proximity_days": null,
+          "opposition_strength": 0.0,
+          "media_sentiment": 0.7,
+          "protest_level": "none"
+        },
+        "ongoing_conflicts": [
+          "Border war with Japan at Khalkhin Gol"
+        ],
+        "recent_events": [
+          "Germany pressuring Poland",
+          "War in Europe imminent",
+          "Western powers refusing Soviet alliance proposals"
+        ]
+      }
+    },
+    "event": {
+      "event_type": "diplomatic",
+      "severity": 0.4,
+      "description": "Germany proposes a non-aggression pact with secret protocols dividing Eastern Europe into spheres of influence. Stalin would gain eastern Poland, Baltic states, and Bessarabia. Germany gets free hand against western Poland.",
+      "structured": {
+        "actor": "Germany",
+        "target": "Soviet Union",
+        "action_category": "diplomatic",
+        "reversibility": "reversible",
+        "visibility": "public"
+      }
+    },
+    "known_outcome": {
+      "escalation_risk": 0.55,
+      "action_types": [
+        "diplomatic",
+        "economic"
+      ],
+      "tone": "measured",
+      "description": "Pact signed. Shocked the world. Enabled German invasion of Poland days later. Short-term de-escalation between Germany and USSR but enabled the wider war. Cynical realpolitik.",
+      "counterfactual_note": "pragmatism flipped from 0.7 to -0.7",
+      "expected_escalation_direction": "higher",
+      "expected_tone_shift": "from measured toward defiant"
+    },
+    "historical_date": "1939-08-23"
+  },
+  {
+    "id": "counterfactual-britain-declares-war",
+    "label": "Britain declares war on Germany after Poland invasion (September 1939)",
+    "leader": {
+      "name": "Neville Chamberlain",
+      "country": "United Kingdom",
+      "title": "Prime Minister",
+      "period": "world war 2",
+      "personality": {
+        "risk_tolerance": 0.7,
+        "authoritarianism": -0.3,
+        "nationalism": 0.2,
+        "pragmatism": 0.6,
+        "aggression": -0.8,
+        "populism": -0.2,
+        "transparency": 0.3,
+        "religiosity": 0.2
+      },
+      "ideology": {
+        "economic_system": "free_market",
+        "geopolitical_orientation": "western",
+        "key_alliances": [
+          "France",
+          "Poland"
+        ],
+        "adversaries": [
+          "Germany"
+        ],
+        "red_lines": [
+          "Violation of Polish guarantee"
+        ],
+        "core_narratives": [
+          "Collective security",
+          "Honoring commitments"
+        ]
+      },
+      "decision_history": [
+        {
+          "event_description": "Munich Agreement",
+          "decision_taken": "Ceded Sudetenland to avoid war",
+          "outcome": "Hitler invaded rest of Czechoslovakia anyway",
+          "date": "1938-09-30",
+          "context_factors": [
+            "Appeasement failure"
+          ]
+        },
+        {
+          "event_description": "Guarantee to Poland",
+          "decision_taken": "Pledged to defend Polish independence",
+          "outcome": "Drew red line that Hitler crossed",
+          "date": "1939-03-31",
+          "context_factors": [
+            "End of appeasement",
+            "Public pressure"
+          ]
+        }
+      ],
+      "cultural_context": {
+        "decision_making_style": "advisory_council",
+        "information_sources": [
+          "Foreign Office",
+          "Cabinet",
+          "Parliament"
+        ],
+        "domestic_power_base": "Conservative Party, Parliament",
+        "succession_concerns": true,
+        "historical_analogies": [
+          "1914 mobilization",
+          "Belgian neutrality violation"
+        ]
+      },
+      "decision_context": {
+        "approval_rating": 55.0,
+        "economic_conditions": {
+          "gdp_growth": 1.0,
+          "unemployment": 10.0,
+          "inflation": 2.5,
+          "sanctions_pressure": 0.0
+        },
+        "military_posture": {
+          "readiness_level": "elevated",
+          "ongoing_operations": [],
+          "force_disposition": "Mobilization begun but incomplete"
+        },
+        "domestic_pressures": {
+          "election_proximity_days": 400,
+          "opposition_strength": 0.4,
+          "media_sentiment": -0.4,
+          "protest_level": "none"
+        },
+        "ongoing_conflicts": [],
+        "recent_events": [
+          "Germany invaded Poland September 1",
+          "British ultimatum delivered and ignored"
+        ]
+      }
+    },
+    "event": {
+      "event_type": "military_action",
+      "severity": 0.9,
+      "description": "Germany has invaded Poland in violation of the British guarantee. The British ultimatum demanding withdrawal has been ignored. Parliament and public demand action. Britain must decide whether to declare war.",
+      "structured": {
+        "actor": "Germany",
+        "target": "Poland",
+        "action_category": "military",
+        "reversibility": "irreversible",
+        "visibility": "public"
+      }
+    },
+    "known_outcome": {
+      "escalation_risk": 0.88,
+      "action_types": [
+        "diplomatic",
+        "military"
+      ],
+      "tone": "measured",
+      "description": "Chamberlain declared war with heavy heart. 'Everything I have worked for has crashed into ruins.' Phoney War followed — escalation in commitment but not immediate combat.",
+      "counterfactual_note": "risk_tolerance flipped from -0.7 to +0.7",
+      "expected_escalation_direction": "higher",
+      "expected_tone_shift": "from measured toward threatening"
+    },
+    "historical_date": "1939-09-03"
+  }
+]

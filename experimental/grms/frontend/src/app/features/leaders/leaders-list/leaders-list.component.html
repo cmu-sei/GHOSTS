@@ -1,0 +1,57 @@
+<div class="leaders-list">
+  <header class="page-header">
+    <h1 class="title">Leaders</h1>
+    <mat-form-field class="search-field" appearance="outline">
+      <mat-icon matPrefix>search</mat-icon>
+      <input matInput placeholder="Search leaders..." [ngModel]="searchQuery()" (ngModelChange)="onSearchChange($event)" />
+    </mat-form-field>
+  </header>
+
+  @if (loading()) {
+    <div class="loading-state">
+      <mat-icon class="spin">hourglass_empty</mat-icon>
+      <span>Loading leaders...</span>
+    </div>
+  } @else {
+    <mat-accordion multi class="period-accordion">
+      @for (group of leadersByPeriod(); track group.period) {
+        <mat-expansion-panel [expanded]="true" class="period-panel">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <span class="period-section-title">{{ group.label }}</span>
+              <span class="period-count">{{ group.leaders.length }}</span>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+
+          <div class="leaders-grid">
+            @for (leader of group.leaders; track leader.id) {
+              <a class="leader-link" [routerLink]="['/leaders', leader.id]">
+                <app-glass-card [hoverable]="true">
+                  <div class="leader-card">
+                    <div class="leader-info">
+                      <h3 class="leader-name">{{ leader.country | countryFlag }} {{ leader.name }}</h3>
+                      <span class="leader-country">{{ leader.country }}</span>
+                      <span class="leader-title">{{ leader.title }}</span>
+                    </div>
+                    <div class="leader-radar">
+                      <app-radar-chart [data]="getRadarData(leader)" [size]="120" />
+                    </div>
+                  </div>
+                </app-glass-card>
+              </a>
+            }
+          </div>
+        </mat-expansion-panel>
+      } @empty {
+        <div class="empty-state">
+          <mat-icon>person_off</mat-icon>
+          <span>No leaders found</span>
+        </div>
+      }
+    </mat-accordion>
+  }
+
+  <button mat-fab class="create-fab" routerLink="/leaders/new" color="primary">
+    <mat-icon>add</mat-icon>
+  </button>
+</div>

@@ -1,0 +1,132 @@
+{
+  "country": "Japan",
+  "total_population": 71380000,
+  "period": "world war 2",
+  "segments": [
+    {
+      "name": "Urban industrial and factory workers",
+      "percentage": 0.30,
+      "demographics": {
+        "urbanization": 0.95,
+        "education_level": 0.5,
+        "median_age": 30,
+        "economic_class": "lower"
+      },
+      "disposition": {
+        "government_trust": 0.7,
+        "nationalism": 0.75,
+        "media_exposure": 0.75,
+        "social_media_activity": 0.0,
+        "protest_propensity": 0.02,
+        "compliance_baseline": 0.92,
+        "information_sources": ["state_radio", "state_press", "neighborhood_associations"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.8,
+        "economic_sensitivity": 0.6,
+        "fatigue_rate": 0.06,
+        "amplification_factor": 0.35
+      }
+    },
+    {
+      "name": "Rural agricultural population",
+      "percentage": 0.35,
+      "demographics": {
+        "urbanization": 0.05,
+        "education_level": 0.35,
+        "median_age": 38,
+        "economic_class": "lower"
+      },
+      "disposition": {
+        "government_trust": 0.65,
+        "nationalism": 0.7,
+        "media_exposure": 0.4,
+        "social_media_activity": 0.0,
+        "protest_propensity": 0.01,
+        "compliance_baseline": 0.9,
+        "information_sources": ["state_radio", "village_leaders", "word_of_mouth"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.7,
+        "economic_sensitivity": 0.55,
+        "fatigue_rate": 0.05,
+        "amplification_factor": 0.2
+      }
+    },
+    {
+      "name": "Military officer class and zaibatsu elites",
+      "percentage": 0.05,
+      "demographics": {
+        "urbanization": 0.8,
+        "education_level": 0.85,
+        "median_age": 45,
+        "economic_class": "upper"
+      },
+      "disposition": {
+        "government_trust": 0.85,
+        "nationalism": 0.9,
+        "media_exposure": 0.9,
+        "social_media_activity": 0.0,
+        "protest_propensity": 0.0,
+        "compliance_baseline": 0.95,
+        "information_sources": ["government_briefings", "military_channels", "state_press"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.9,
+        "economic_sensitivity": 0.2,
+        "fatigue_rate": 0.03,
+        "amplification_factor": 0.7
+      }
+    },
+    {
+      "name": "Military servicemembers and families",
+      "percentage": 0.20,
+      "demographics": {
+        "urbanization": 0.4,
+        "education_level": 0.5,
+        "median_age": 25,
+        "economic_class": "lower"
+      },
+      "disposition": {
+        "government_trust": 0.85,
+        "nationalism": 0.9,
+        "media_exposure": 0.5,
+        "social_media_activity": 0.0,
+        "protest_propensity": 0.0,
+        "compliance_baseline": 0.98,
+        "information_sources": ["military_channels", "state_radio", "imperial_edicts"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.95,
+        "economic_sensitivity": 0.2,
+        "fatigue_rate": 0.08,
+        "amplification_factor": 0.4
+      }
+    },
+    {
+      "name": "Educated urban middle class",
+      "percentage": 0.10,
+      "demographics": {
+        "urbanization": 0.9,
+        "education_level": 0.75,
+        "median_age": 38,
+        "economic_class": "middle"
+      },
+      "disposition": {
+        "government_trust": 0.6,
+        "nationalism": 0.65,
+        "media_exposure": 0.8,
+        "social_media_activity": 0.0,
+        "protest_propensity": 0.03,
+        "compliance_baseline": 0.85,
+        "information_sources": ["state_press", "state_radio", "word_of_mouth"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.65,
+        "economic_sensitivity": 0.5,
+        "fatigue_rate": 0.08,
+        "amplification_factor": 0.45
+      }
+    }
+  ]
+}

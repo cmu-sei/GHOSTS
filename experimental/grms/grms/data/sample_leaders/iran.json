@@ -1,0 +1,79 @@
+{
+  "name": "Ali Khamenei",
+  "country": "Iran",
+  "period": "current",
+  "title": "Supreme Leader",
+  "personality": {
+    "risk_tolerance": 0.5,
+    "authoritarianism": 0.85,
+    "nationalism": 0.8,
+    "pragmatism": 0.5,
+    "aggression": 0.55,
+    "populism": 0.3,
+    "transparency": -0.7,
+    "religiosity": 0.95
+  },
+  "ideology": {
+    "economic_system": "state_controlled",
+    "geopolitical_orientation": "non_aligned",
+    "key_alliances": ["Russia", "China", "Syria", "Hezbollah", "Houthis"],
+    "adversaries": ["United States", "Israel", "Saudi Arabia"],
+    "red_lines": [
+      "Direct military attack on Iranian territory",
+      "Regime change operations",
+      "Nuclear program dismantlement without sanctions relief",
+      "Assassination of senior leadership"
+    ],
+    "core_narratives": [
+      "Resistance axis against Western imperialism",
+      "Islamic Revolution export",
+      "Palestinian liberation",
+      "Strategic patience and asymmetric deterrence"
+    ]
+  },
+  "decision_history": [
+    {
+      "event_description": "Israeli strikes on Iranian proxies and direct attacks on Iranian soil",
+      "decision_taken": "Launched unprecedented direct missile and drone attack on Israel in April 2024, followed by measured response to subsequent Israeli strikes",
+      "outcome": "Demonstrated willingness to escalate directly, managed to avoid full-scale war",
+      "date": "2024-04-13T00:00:00Z",
+      "context_factors": ["deterrence credibility", "proxy losses", "red line enforcement"]
+    },
+    {
+      "event_description": "Nuclear program advancement amid collapsed JCPOA",
+      "decision_taken": "Continued uranium enrichment to near-weapons grade (60%+) while maintaining ambiguity about weaponization",
+      "outcome": "Enhanced leverage, increased international pressure, maintained breakout capability",
+      "date": "2024-06-01T00:00:00Z",
+      "context_factors": ["deterrence", "negotiating leverage", "regime survival insurance"]
+    }
+  ],
+  "cultural_context": {
+    "decision_making_style": "consultative_authoritarian",
+    "information_sources": ["IRGC intelligence", "clerical networks", "Supreme National Security Council"],
+    "domestic_power_base": "Revolutionary Guard, Basij militia, conservative clergy, rural poor",
+    "succession_concerns": true,
+    "historical_analogies": ["1979 Revolution resistance", "Iran-Iraq War endurance"]
+  },
+  "decision_context": {
+    "approval_rating": 30.0,
+    "economic_conditions": {
+      "gdp_growth": 1.5,
+      "unemployment": 9.5,
+      "inflation": 40.0,
+      "sanctions_pressure": 0.8
+    },
+    "military_posture": {
+      "readiness_level": "elevated",
+      "ongoing_operations": ["Proxy support network", "Nuclear program", "Gulf maritime presence"],
+      "force_disposition": "asymmetric warfare capability with regional proxy network"
+    },
+    "domestic_pressures": {
+      "election_proximity_days": null,
+      "opposition_strength": 0.4,
+      "media_sentiment": -0.5,
+      "protest_level": "moderate"
+    },
+    "ongoing_conflicts": ["Shadow war with Israel", "Proxy conflicts in Yemen/Iraq/Syria", "Nuclear standoff with West"],
+    "recent_events": ["Direct military exchange with Israel", "Continued nuclear enrichment", "Domestic protest suppression"]
+  }
+}

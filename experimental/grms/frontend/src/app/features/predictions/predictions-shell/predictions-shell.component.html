@@ -1,0 +1,20 @@
+<div class="predictions-shell">
+  <div class="shell-header">
+    <button mat-icon-button (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h1 class="page-title">New Prediction</h1>
+  </div>
+
+  <mat-tab-group animationDuration="200ms" class="predictions-tabs">
+    <mat-tab label="Leader Prediction">
+      <app-leader-prediction />
+    </mat-tab>
+    <mat-tab label="Population Prediction">
+      <app-population-prediction />
+    </mat-tab>
+    <mat-tab label="Combined Prediction">
+      <app-combined-prediction />
+    </mat-tab>
+  </mat-tab-group>
+</div>

@@ -1,0 +1,582 @@
+[
+  {
+    "id": "obscured-munich-agreement",
+    "label": "Thornfield Accord - Premier Westford concedes to Centraland's demands (September 1938)",
+    "leader": {
+      "name": "Premier Aldric Westford",
+      "country": "Westisle",
+      "title": "Prime Minister",
+      "period": "great power conflict",
+      "personality": {
+        "risk_tolerance": -0.7,
+        "authoritarianism": -0.3,
+        "nationalism": 0.2,
+        "pragmatism": 0.6,
+        "aggression": -0.8,
+        "populism": -0.2,
+        "transparency": 0.3,
+        "religiosity": 0.2
+      },
+      "ideology": {
+        "economic_system": "free_market",
+        "geopolitical_orientation": "western",
+        "key_alliances": [
+          "Gallia"
+        ],
+        "adversaries": [],
+        "red_lines": [
+          "Direct attack on Westisle territory"
+        ],
+        "core_narratives": [
+          "Stability in our era",
+          "Avoiding another devastating war"
+        ]
+      },
+      "decision_history": [
+        {
+          "event_description": "Centraland remilitarization of a demilitarized border zone",
+          "decision_taken": "No military response; diplomatic protest only",
+          "outcome": "Centraland emboldened",
+          "date": "1936-03-07",
+          "context_factors": [
+            "War weariness",
+            "Military unpreparedness"
+          ]
+        }
+      ],
+      "cultural_context": {
+        "decision_making_style": "advisory_council",
+        "information_sources": [
+          "Foreign Office",
+          "Cabinet"
+        ],
+        "domestic_power_base": "Conservative Party",
+        "succession_concerns": false,
+        "historical_analogies": [
+          "Previous great war devastation"
+        ]
+      },
+      "decision_context": {
+        "approval_rating": 60.0,
+        "economic_conditions": {
+          "gdp_growth": 1.5,
+          "unemployment": 12.0,
+          "inflation": 2.0,
+          "sanctions_pressure": 0.0
+        },
+        "military_posture": {
+          "readiness_level": "peacetime",
+          "ongoing_operations": [],
+          "force_disposition": "Rearmament underway but incomplete"
+        },
+        "domestic_pressures": {
+          "election_proximity_days": 600,
+          "opposition_strength": 0.3,
+          "media_sentiment": -0.2,
+          "protest_level": "none"
+        },
+        "ongoing_conflicts": [],
+        "recent_events": [
+          "Centraland annexation of a neighboring state",
+          "Chancellor Starkhelm threatening military action over a border region"
+        ]
+      }
+    },
+    "event": {
+      "event_type": "diplomatic",
+      "severity": 0.6,
+      "description": "Chancellor Starkhelm demands a border region of Bordermark be ceded to Centraland, threatening military invasion if refused. Premier Westford travels to a summit to negotiate directly with Starkhelm and other leaders — without Bordermark present.",
+      "structured": {
+        "actor": "Centraland",
+        "target": "Bordermark",
+        "action_category": "diplomatic",
+        "reversibility": "escalatory",
+        "visibility": "public"
+      }
+    },
+    "known_outcome": {
+      "escalation_risk": 0.35,
+      "action_types": [
+        "diplomatic"
+      ],
+      "tone": "conciliatory",
+      "description": "The leader ceded the disputed region. Short-term de-escalation but emboldened the aggressor."
+    },
+    "historical_date": "1938-09-30"
+  },
+  {
+    "id": "obscured-molotov-ribbentrop",
+    "label": "Eastmark-Centraland Non-Aggression Pact (August 1939)",
+    "leader": {
+      "name": "Chairman Volkov Irenov",
+      "country": "Eastmark",
+      "title": "General Secretary",
+      "period": "great power conflict",
+      "personality": {
+        "risk_tolerance": 0.3,
+        "authoritarianism": 1.0,
+        "nationalism": 0.6,
+        "pragmatism": 0.7,
+        "aggression": 0.5,
+        "populism": 0.4,
+        "transparency": -1.0,
+        "religiosity": -0.8
+      },
+      "ideology": {
+        "economic_system": "state_directed",
+        "geopolitical_orientation": "eastern",
+        "key_alliances": [],
+        "adversaries": [
+          "Centraland (ideologically)",
+          "Farshore"
+        ],
+        "red_lines": [
+          "Two-front war"
+        ],
+        "core_narratives": [
+          "Buy time for rearmament",
+          "Western powers will destroy each other"
+        ]
+      },
+      "decision_history": [
+        {
+          "event_description": "Failed negotiations with Westisle and Gallia",
+          "decision_taken": "Sought alternative security arrangement",
+          "outcome": "Western powers refused meaningful military commitment",
+          "date": "1939-08-01",
+          "context_factors": [
+            "Western distrust of Eastmark",
+            "Previous summit excluded Eastmark"
+          ]
+        }
+      ],
+      "cultural_context": {
+        "decision_making_style": "unilateral",
+        "information_sources": [
+          "Foreign Minister",
+          "State intelligence"
+        ],
+        "domestic_power_base": "Ruling Party",
+        "succession_concerns": false,
+        "historical_analogies": [
+          "Historical pragmatic treaty-making"
+        ]
+      },
+      "decision_context": {
+        "approval_rating": 78.0,
+        "economic_conditions": {
+          "gdp_growth": 5.0,
+          "unemployment": 0.5,
+          "inflation": 3.0,
+          "sanctions_pressure": 0.1
+        },
+        "military_posture": {
+          "readiness_level": "elevated",
+          "ongoing_operations": [
+            "Border conflict with Farshore in a contested territory"
+          ],
+          "force_disposition": "Purged officer corps, rebuilding"
+        },
+        "domestic_pressures": {
+          "election_proximity_days": null,
+          "opposition_strength": 0.0,
+          "media_sentiment": 0.7,
+          "protest_level": "none"
+        },
+        "ongoing_conflicts": [
+          "Border war with Farshore"
+        ],
+        "recent_events": [
+          "Centraland pressuring Midplain",
+          "War in the continent imminent",
+          "Western powers refusing Eastmark alliance proposals"
+        ]
+      }
+    },
+    "event": {
+      "event_type": "diplomatic",
+      "severity": 0.4,
+      "description": "Centraland proposes a non-aggression pact with secret protocols dividing a region into spheres of influence. Chairman Irenov would gain eastern Midplain, coastal states, and a border province. Centraland gets free hand against western Midplain.",
+      "structured": {
+        "actor": "Centraland",
+        "target": "Eastmark",
+        "action_category": "diplomatic",
+        "reversibility": "reversible",
+        "visibility": "public"
+      }
+    },
+    "known_outcome": {
+      "escalation_risk": 0.55,
+      "action_types": [
+        "diplomatic",
+        "economic"
+      ],
+      "tone": "measured",
+      "description": "Pact signed. Shocked observers. Enabled Centraland's invasion of Midplain days later. Short-term de-escalation between Centraland and Eastmark but enabled the wider war. Cynical realpolitik."
+    },
+    "historical_date": "1939-08-23"
+  },
+  {
+    "id": "obscured-britain-declares-war",
+    "label": "Westisle declares war on Centraland after Midplain invasion (September 1939)",
+    "leader": {
+      "name": "Premier Aldric Westford",
+      "country": "Westisle",
+      "title": "Prime Minister",
+      "period": "great power conflict",
+      "personality": {
+        "risk_tolerance": -0.7,
+        "authoritarianism": -0.3,
+        "nationalism": 0.2,
+        "pragmatism": 0.6,
+        "aggression": -0.8,
+        "populism": -0.2,
+        "transparency": 0.3,
+        "religiosity": 0.2
+      },
+      "ideology": {
+        "economic_system": "free_market",
+        "geopolitical_orientation": "western",
+        "key_alliances": [
+          "Gallia",
+          "Midplain"
+        ],
+        "adversaries": [
+          "Centraland"
+        ],
+        "red_lines": [
+          "Violation of Midplain guarantee"
+        ],
+        "core_narratives": [
+          "Collective security",
+          "Honoring commitments"
+        ]
+      },
+      "decision_history": [
+        {
+          "event_description": "Thornfield Accord",
+          "decision_taken": "Ceded disputed territory to avoid war",
+          "outcome": "Centraland invaded the rest of the target state anyway",
+          "date": "1938-09-30",
+          "context_factors": [
+            "Appeasement failure"
+          ]
+        },
+        {
+          "event_description": "Guarantee to Midplain",
+          "decision_taken": "Pledged to defend Midplain's independence",
+          "outcome": "Drew red line that Centraland crossed",
+          "date": "1939-03-31",
+          "context_factors": [
+            "End of appeasement",
+            "Public pressure"
+          ]
+        }
+      ],
+      "cultural_context": {
+        "decision_making_style": "advisory_council",
+        "information_sources": [
+          "Foreign Office",
+          "Cabinet",
+          "Parliament"
+        ],
+        "domestic_power_base": "Conservative Party, Parliament",
+        "succession_concerns": true,
+        "historical_analogies": [
+          "Previous mobilization crisis",
+          "Neutrality violation"
+        ]
+      },
+      "decision_context": {
+        "approval_rating": 55.0,
+        "economic_conditions": {
+          "gdp_growth": 1.0,
+          "unemployment": 10.0,
+          "inflation": 2.5,
+          "sanctions_pressure": 0.0
+        },
+        "military_posture": {
+          "readiness_level": "elevated",
+          "ongoing_operations": [],
+          "force_disposition": "Mobilization begun but incomplete"
+        },
+        "domestic_pressures": {
+          "election_proximity_days": 400,
+          "opposition_strength": 0.4,
+          "media_sentiment": -0.4,
+          "protest_level": "none"
+        },
+        "ongoing_conflicts": [],
+        "recent_events": [
+          "Centraland invaded Midplain",
+          "Westisle ultimatum delivered and ignored"
+        ]
+      }
+    },
+    "event": {
+      "event_type": "military_action",
+      "severity": 0.9,
+      "description": "Centraland has invaded Midplain in violation of the Westisle guarantee. The Westisle ultimatum demanding withdrawal has been ignored. Parliament and public demand action. Westisle must decide whether to declare war.",
+      "structured": {
+        "actor": "Centraland",
+        "target": "Midplain",
+        "action_category": "military",
+        "reversibility": "irreversible",
+        "visibility": "public"
+      }
+    },
+    "known_outcome": {
+      "escalation_risk": 0.88,
+      "action_types": [
+        "diplomatic",
+        "military"
+      ],
+      "tone": "measured",
+      "description": "War declared reluctantly. Escalation in commitment but not immediate combat followed."
+    },
+    "historical_date": "1939-09-03"
+  },
+  {
+    "id": "obscured-soviet-finland-winter-war",
+    "label": "Eastmark invasion of Northhaven - Winter Conflict (November 1939)",
+    "leader": {
+      "name": "Chairman Volkov Irenov",
+      "country": "Eastmark",
+      "title": "General Secretary",
+      "period": "great power conflict",
+      "personality": {
+        "risk_tolerance": 0.3,
+        "authoritarianism": 1.0,
+        "nationalism": 0.6,
+        "pragmatism": 0.7,
+        "aggression": 0.5,
+        "populism": 0.4,
+        "transparency": -1.0,
+        "religiosity": -0.8
+      },
+      "ideology": {
+        "economic_system": "state_directed",
+        "geopolitical_orientation": "eastern",
+        "key_alliances": [
+          "Centraland (non-aggression pact)"
+        ],
+        "adversaries": [
+          "Northhaven"
+        ],
+        "red_lines": [
+          "Border security near major city"
+        ],
+        "core_narratives": [
+          "Buffer zone security",
+          "Ideological expansion"
+        ]
+      },
+      "decision_history": [
+        {
+          "event_description": "Occupation of eastern Midplain",
+          "decision_taken": "Invaded Midplain from east per secret protocol",
+          "outcome": "Absorbed eastern Midplain with no Western response",
+          "date": "1939-09-17",
+          "context_factors": [
+            "Pact with Centraland",
+            "Buffer zone expansion"
+          ]
+        }
+      ],
+      "cultural_context": {
+        "decision_making_style": "unilateral",
+        "information_sources": [
+          "State security services",
+          "Military command (purged leadership)"
+        ],
+        "domestic_power_base": "Ruling Party, Security Services",
+        "succession_concerns": false,
+        "historical_analogies": [
+          "Imperial border security precedents"
+        ]
+      },
+      "decision_context": {
+        "approval_rating": 80.0,
+        "economic_conditions": {
+          "gdp_growth": 5.0,
+          "unemployment": 0.5,
+          "inflation": 3.0,
+          "sanctions_pressure": 0.1
+        },
+        "military_posture": {
+          "readiness_level": "elevated",
+          "ongoing_operations": [
+            "Occupation of eastern Midplain",
+            "Coastal states pressure"
+          ],
+          "force_disposition": "Massive numerical superiority over Northhaven"
+        },
+        "domestic_pressures": {
+          "election_proximity_days": null,
+          "opposition_strength": 0.0,
+          "media_sentiment": 0.7,
+          "protest_level": "none"
+        },
+        "ongoing_conflicts": [],
+        "recent_events": [
+          "Northhaven refused territorial exchange",
+          "Non-aggression pact with Centraland in force",
+          "Western powers distracted by war with Centraland"
+        ]
+      }
+    },
+    "event": {
+      "event_type": "military_action",
+      "severity": 0.7,
+      "description": "Eastmark invades Northhaven with 600,000 troops after Northhaven refuses to cede territory near a key city. Chairman Irenov expects quick victory over the small nation. A border incident is fabricated as pretext.",
+      "structured": {
+        "actor": "Eastmark",
+        "target": "Northhaven",
+        "action_category": "military",
+        "reversibility": "irreversible",
+        "visibility": "public"
+      }
+    },
+    "known_outcome": {
+      "escalation_risk": 0.6,
+      "action_types": [
+        "military",
+        "diplomatic",
+        "information"
+      ],
+      "tone": "threatening",
+      "description": "Northhaven resisted fiercely, inflicting massive casualties. Eastmark was expelled from the international body. Eventually won through attrition. Contained conflict — did not spread to wider war."
+    },
+    "historical_date": "1939-11-30"
+  },
+  {
+    "id": "obscured-fall-of-france",
+    "label": "Fall of Gallia - Centraland invasion through Low Countries (May 1940)",
+    "leader": {
+      "name": "Chancellor Brennan Starkhelm",
+      "country": "Centraland",
+      "title": "Supreme Chancellor",
+      "period": "great power conflict",
+      "personality": {
+        "risk_tolerance": 0.9,
+        "authoritarianism": 1.0,
+        "nationalism": 1.0,
+        "pragmatism": -0.5,
+        "aggression": 0.95,
+        "populism": 0.7,
+        "transparency": -0.8,
+        "religiosity": -0.3
+      },
+      "ideology": {
+        "economic_system": "state_directed",
+        "geopolitical_orientation": "eastern",
+        "key_alliances": [
+          "Southmarch",
+          "Farshore"
+        ],
+        "adversaries": [
+          "Gallia",
+          "Westisle",
+          "Eastmark"
+        ],
+        "red_lines": [
+          "Encirclement of Centraland",
+          "Threat to Centraland expansion"
+        ],
+        "core_narratives": [
+          "Living space",
+          "National superiority",
+          "Revision of prior treaties"
+        ]
+      },
+      "decision_history": [
+        {
+          "event_description": "Remilitarization of a border zone",
+          "decision_taken": "Ordered troops into demilitarized zone despite military advisors' objections",
+          "outcome": "No response from opposing powers; emboldened further expansion",
+          "date": "1936-03-07",
+          "context_factors": [
+            "Opposing powers' passivity",
+            "Domestic political consolidation"
+          ]
+        },
+        {
+          "event_description": "Invasion of Midplain",
+          "decision_taken": "Full-scale military invasion with rapid-strike tactics",
+          "outcome": "Midplain conquered in weeks; triggered war declarations from Westisle and Gallia",
+          "date": "1939-09-01",
+          "context_factors": [
+            "Non-aggression pact with Eastmark",
+            "Military readiness"
+          ]
+        }
+      ],
+      "cultural_context": {
+        "decision_making_style": "unilateral",
+        "information_sources": [
+          "Military intelligence",
+          "Personal intuition"
+        ],
+        "domestic_power_base": "Ruling Party, Military",
+        "succession_concerns": false,
+        "historical_analogies": [
+          "Previous rapid wars of conquest"
+        ]
+      },
+      "decision_context": {
+        "approval_rating": 85.0,
+        "economic_conditions": {
+          "gdp_growth": 8.0,
+          "unemployment": 2.0,
+          "inflation": 3.5,
+          "sanctions_pressure": 0.3
+        },
+        "military_posture": {
+          "readiness_level": "mobilized",
+          "ongoing_operations": [
+            "Occupation of Midplain",
+            "Northern Campaign"
+          ],
+          "force_disposition": "Western Front concentrated"
+        },
+        "domestic_pressures": {
+          "election_proximity_days": null,
+          "opposition_strength": 0.05,
+          "media_sentiment": 0.9,
+          "protest_level": "none"
+        },
+        "ongoing_conflicts": [
+          "War with Westisle",
+          "War with Gallia (static phase)"
+        ],
+        "recent_events": [
+          "Successful conquest of Midplain",
+          "Northern campaign underway"
+        ]
+      }
+    },
+    "event": {
+      "event_type": "military_action",
+      "severity": 1.0,
+      "description": "Centraland invades Gallia through the Low Countries, bypassing the fortified border line with armored divisions. Rapid-strike tactics overwhelm defenders, with armored divisions reaching the coast within days.",
+      "structured": {
+        "actor": "Centraland",
+        "target": "Gallia",
+        "action_category": "military",
+        "reversibility": "irreversible",
+        "visibility": "public"
+      }
+    },
+    "known_outcome": {
+      "escalation_risk": 0.92,
+      "action_types": [
+        "military",
+        "diplomatic",
+        "information"
+      ],
+      "tone": "defiant",
+      "description": "Gallia fell within 6 weeks. Total war in the western theater."
+    },
+    "historical_date": "1940-05-10"
+  }
+]

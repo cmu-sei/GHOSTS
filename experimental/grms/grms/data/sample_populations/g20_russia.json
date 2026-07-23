@@ -1,0 +1,132 @@
+{
+  "country": "Russia",
+  "total_population": 144000000,
+  "period": "current",
+  "segments": [
+    {
+      "name": "Moscow and St Petersburg elite",
+      "percentage": 0.15,
+      "demographics": {
+        "urbanization": 0.98,
+        "education_level": 0.8,
+        "median_age": 38,
+        "economic_class": "upper"
+      },
+      "disposition": {
+        "government_trust": 0.55,
+        "nationalism": 0.6,
+        "media_exposure": 0.9,
+        "social_media_activity": 0.75,
+        "protest_propensity": 0.25,
+        "compliance_baseline": 0.6,
+        "information_sources": ["social_media", "foreign_media"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.4,
+        "economic_sensitivity": 0.5,
+        "fatigue_rate": 0.12,
+        "amplification_factor": 0.6
+      }
+    },
+    {
+      "name": "Provincial urban workers",
+      "percentage": 0.30,
+      "demographics": {
+        "urbanization": 0.8,
+        "education_level": 0.5,
+        "median_age": 40,
+        "economic_class": "middle"
+      },
+      "disposition": {
+        "government_trust": 0.6,
+        "nationalism": 0.75,
+        "media_exposure": 0.7,
+        "social_media_activity": 0.5,
+        "protest_propensity": 0.15,
+        "compliance_baseline": 0.75,
+        "information_sources": ["state_tv", "social_media"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.65,
+        "economic_sensitivity": 0.7,
+        "fatigue_rate": 0.07,
+        "amplification_factor": 0.4
+      }
+    },
+    {
+      "name": "Rural and small-town population",
+      "percentage": 0.25,
+      "demographics": {
+        "urbanization": 0.2,
+        "education_level": 0.35,
+        "median_age": 48,
+        "economic_class": "lower"
+      },
+      "disposition": {
+        "government_trust": 0.65,
+        "nationalism": 0.7,
+        "media_exposure": 0.5,
+        "social_media_activity": 0.25,
+        "protest_propensity": 0.08,
+        "compliance_baseline": 0.8,
+        "information_sources": ["state_tv", "word_of_mouth"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.7,
+        "economic_sensitivity": 0.75,
+        "fatigue_rate": 0.05,
+        "amplification_factor": 0.25
+      }
+    },
+    {
+      "name": "Security and military apparatus",
+      "percentage": 0.15,
+      "demographics": {
+        "urbanization": 0.7,
+        "education_level": 0.55,
+        "median_age": 38,
+        "economic_class": "middle"
+      },
+      "disposition": {
+        "government_trust": 0.85,
+        "nationalism": 0.9,
+        "media_exposure": 0.6,
+        "social_media_activity": 0.2,
+        "protest_propensity": 0.03,
+        "compliance_baseline": 0.95,
+        "information_sources": ["internal_briefings", "state_tv"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.85,
+        "economic_sensitivity": 0.35,
+        "fatigue_rate": 0.03,
+        "amplification_factor": 0.2
+      }
+    },
+    {
+      "name": "Young digital natives",
+      "percentage": 0.15,
+      "demographics": {
+        "urbanization": 0.85,
+        "education_level": 0.7,
+        "median_age": 24,
+        "economic_class": "middle"
+      },
+      "disposition": {
+        "government_trust": 0.3,
+        "nationalism": 0.45,
+        "media_exposure": 0.9,
+        "social_media_activity": 0.9,
+        "protest_propensity": 0.35,
+        "compliance_baseline": 0.5,
+        "information_sources": ["social_media", "foreign_media"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.25,
+        "economic_sensitivity": 0.6,
+        "fatigue_rate": 0.15,
+        "amplification_factor": 0.75
+      }
+    }
+  ]
+}

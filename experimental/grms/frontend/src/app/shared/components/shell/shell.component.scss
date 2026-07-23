@@ -1,0 +1,107 @@
+@use 'variables' as *;
+
+.ghosts-toolbar.mat-toolbar.mat-primary {
+  --mat-toolbar-container-background-color: #1b5e20;
+  --mat-toolbar-container-text-color: #ffffff;
+  --mat-toolbar-standard-height: 64px;
+  background-image: linear-gradient(90deg, #2e7d32, #2e7d32, #1b5e20);
+  background-color: #1b5e20;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.logo {
+  height: 32px;
+  width: 32px;
+  filter: brightness(0) invert(1);
+}
+
+.app-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 20px;
+  font-weight: 300;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: inherit;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 0.9;
+  }
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  overflow-x: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.nav-spacer {
+  flex: 1;
+}
+
+.nav-link {
+  color: rgba(255, 255, 255, 0.87) !important;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 300 !important;
+
+  mat-icon {
+    margin-right: 6px;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    vertical-align: middle;
+  }
+
+  &.active {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    color: #ffffff !important;
+  }
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+  }
+}
+
+.main-content {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 64px);
+  height: calc(100vh - 64px);
+  overflow-y: auto;
+  background: $bg-base;
+}
+
+.content-wrapper {
+  flex: 1;
+  padding: 20px;
+}
+
+@media (max-width: 1024px) {
+  .nav-link {
+    font-size: 13px;
+    padding: 0 8px;
+
+    span {
+      display: none;
+    }
+
+    mat-icon {
+      margin-right: 0;
+    }
+  }
+}

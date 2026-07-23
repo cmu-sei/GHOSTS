@@ -1,0 +1,157 @@
+{
+  "country": "Israel",
+  "total_population": 9900000,
+  "period": "current",
+  "segments": [
+    {
+      "name": "Tel Aviv secular professionals",
+      "percentage": 0.25,
+      "demographics": {
+        "urbanization": 0.98,
+        "education_level": 0.85,
+        "median_age": 36,
+        "economic_class": "upper"
+      },
+      "disposition": {
+        "government_trust": 0.35,
+        "nationalism": 0.55,
+        "media_exposure": 0.9,
+        "social_media_activity": 0.85,
+        "protest_propensity": 0.5,
+        "compliance_baseline": 0.6,
+        "information_sources": ["social_media", "foreign_media"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.55,
+        "economic_sensitivity": 0.5,
+        "fatigue_rate": 0.12,
+        "amplification_factor": 0.65
+      }
+    },
+    {
+      "name": "Religious nationalist settlers",
+      "percentage": 0.15,
+      "demographics": {
+        "urbanization": 0.6,
+        "education_level": 0.6,
+        "median_age": 30,
+        "economic_class": "middle"
+      },
+      "disposition": {
+        "government_trust": 0.7,
+        "nationalism": 0.95,
+        "media_exposure": 0.6,
+        "social_media_activity": 0.6,
+        "protest_propensity": 0.3,
+        "compliance_baseline": 0.55,
+        "information_sources": ["religious_leaders", "social_media"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.9,
+        "economic_sensitivity": 0.3,
+        "fatigue_rate": 0.04,
+        "amplification_factor": 0.4
+      }
+    },
+    {
+      "name": "Security and military sector",
+      "percentage": 0.15,
+      "demographics": {
+        "urbanization": 0.7,
+        "education_level": 0.65,
+        "median_age": 32,
+        "economic_class": "middle"
+      },
+      "disposition": {
+        "government_trust": 0.65,
+        "nationalism": 0.8,
+        "media_exposure": 0.6,
+        "social_media_activity": 0.4,
+        "protest_propensity": 0.1,
+        "compliance_baseline": 0.9,
+        "information_sources": ["internal_briefings", "state_tv"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.85,
+        "economic_sensitivity": 0.3,
+        "fatigue_rate": 0.05,
+        "amplification_factor": 0.2
+      }
+    },
+    {
+      "name": "Ultra-Orthodox communities",
+      "percentage": 0.15,
+      "demographics": {
+        "urbanization": 0.85,
+        "education_level": 0.5,
+        "median_age": 25,
+        "economic_class": "lower"
+      },
+      "disposition": {
+        "government_trust": 0.6,
+        "nationalism": 0.6,
+        "media_exposure": 0.3,
+        "social_media_activity": 0.15,
+        "protest_propensity": 0.25,
+        "compliance_baseline": 0.6,
+        "information_sources": ["religious_leaders", "word_of_mouth"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.5,
+        "economic_sensitivity": 0.7,
+        "fatigue_rate": 0.05,
+        "amplification_factor": 0.2
+      }
+    },
+    {
+      "name": "Arab-Israeli population",
+      "percentage": 0.20,
+      "demographics": {
+        "urbanization": 0.7,
+        "education_level": 0.55,
+        "median_age": 28,
+        "economic_class": "middle"
+      },
+      "disposition": {
+        "government_trust": 0.2,
+        "nationalism": 0.2,
+        "media_exposure": 0.7,
+        "social_media_activity": 0.7,
+        "protest_propensity": 0.4,
+        "compliance_baseline": 0.5,
+        "information_sources": ["social_media", "foreign_media"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.1,
+        "economic_sensitivity": 0.7,
+        "fatigue_rate": 0.1,
+        "amplification_factor": 0.6
+      }
+    },
+    {
+      "name": "Suburban mainstream middle class",
+      "percentage": 0.10,
+      "demographics": {
+        "urbanization": 0.8,
+        "education_level": 0.7,
+        "median_age": 40,
+        "economic_class": "middle"
+      },
+      "disposition": {
+        "government_trust": 0.4,
+        "nationalism": 0.65,
+        "media_exposure": 0.75,
+        "social_media_activity": 0.65,
+        "protest_propensity": 0.35,
+        "compliance_baseline": 0.65,
+        "information_sources": ["social_media", "state_tv"]
+      },
+      "response_params": {
+        "rally_around_flag_coefficient": 0.6,
+        "economic_sensitivity": 0.6,
+        "fatigue_rate": 0.1,
+        "amplification_factor": 0.5
+      }
+    }
+  ]
+}

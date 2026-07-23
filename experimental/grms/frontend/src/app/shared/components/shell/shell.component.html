@@ -1,0 +1,26 @@
+<mat-toolbar color="primary" class="ghosts-toolbar mat-elevation-z4">
+  <a [routerLink]="'/'" class="app-title">
+    <img src="ghosts.png" alt="GHOSTS" class="logo" />
+    GRMS
+  </a>
+
+  <nav class="nav-links">
+    @for (item of navItems; track item.path) {
+    <a mat-button [routerLink]="item.path" routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: item.path === '/' }" class="nav-link">
+      <mat-icon>{{ item.icon }}</mat-icon>
+      <span>{{ item.label }}</span>
+    </a>
+    }
+
+    <span class="nav-spacer"></span>
+    <app-status-badge />
+  </nav>
+</mat-toolbar>
+
+<div class="main-content">
+  <div class="content-wrapper">
+    <router-outlet />
+  </div>
+  <app-footer />
+</div>
