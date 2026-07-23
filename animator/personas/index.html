@@ -1,0 +1,3771 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="GHOSTS is a framework for simulating human behaviors on a network.">
+      
+      
+        <meta name="author" content="GHOSTS Team">
+      
+      
+      
+        <link rel="prev" href="../">
+      
+      
+        <link rel="next" href="../jobs/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/img/ghosts_new.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>NPC Persona Reference - GHOSTS Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+  
+
+
+  
+  
+
+<script id="__analytics">function __md_analytics(){function e(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],e("js",new Date),e("config","G-QXR9QHNERH"),document.addEventListener("DOMContentLoaded",(function(){document.forms.search&&document.forms.search.query.addEventListener("blur",(function(){this.value&&e("event","search",{search_term:this.value})}));document$.subscribe((function(){var t=document.forms.feedback;if(void 0!==t)for(var a of t.querySelectorAll("[type=submit]"))a.addEventListener("click",(function(a){a.preventDefault();var n=document.location.pathname,d=this.getAttribute("data-md-value");e("event","feedback",{page:n,data:d}),t.firstElementChild.disabled=!0;var r=t.querySelector(".md-feedback__note [data-md-value='"+d+"']");r&&(r.hidden=!1)})),t.hidden=!1})),location$.subscribe((function(t){e("config","G-QXR9QHNERH",{page_path:t.pathname})}))}));var t=document.createElement("script");t.async=!0,t.src="https://www.googletagmanager.com/gtag/js?id=G-QXR9QHNERH",document.getElementById("__analytics").insertAdjacentElement("afterEnd",t)}</script>
+  
+    <script>"undefined"!=typeof __md_analytics&&__md_analytics()</script>
+  
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="purple" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#npc-persona-reference" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="GHOSTS Documentation" class="md-header__button md-logo" aria-label="GHOSTS Documentation" data-md-component="logo">
+      
+  <img src="../../assets/img/ghosts_new.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            GHOSTS Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              NPC Persona Reference
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="purple" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="purple" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/cmu-sei/GHOSTS" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    cmu-sei/GHOSTS
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../new/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  What's New
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../quickstart/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Quick Start
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../core/client/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Client
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../core/api/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  API
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../core/ui/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Frontend UI
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Animator & Workflows
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../content/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Content Servers
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="GHOSTS Documentation" class="md-nav__button md-logo" aria-label="GHOSTS Documentation" data-md-component="logo">
+      
+  <img src="../../assets/img/ghosts_new.png" alt="logo">
+
+    </a>
+    GHOSTS Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/cmu-sei/GHOSTS" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    cmu-sei/GHOSTS
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../new/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    What's New
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Client
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Client
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core/client/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GHOSTS Client Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core/lite/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GHOSTS LITE
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Client Handlers
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Client Handlers
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core/handlers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Basic Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core/handlers/clicks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Clicks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core/handlers/cmd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cmd
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core/handlers/notepad/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Notepad
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core/handlers/npc_system/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NPCSystem
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3_6" id="__nav_4_3_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Office
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_3_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Office
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core/handlers/excel/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Excel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core/handlers/outlook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Outlook
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core/handlers/powerpoint/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PowerPoint
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core/handlers/word/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Word
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core/handlers/pidgin/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pidgin
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core/handlers/print/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Print
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core/handlers/rdp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    RDP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core/handlers/reboot/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reboot
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core/handlers/sftp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sftp
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core/handlers/ssh/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ssh
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core/handlers/watcher/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Watcher
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core/handlers/browser/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Web Browsers (Firefox|Chrome)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3_15" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3_15" id="__nav_4_3_15_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Web Browser Helper Functions
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_3_15_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3_15">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Web Browser Helper Functions
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core/handlers/blog_helper/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Blogs/Drupal
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core/handlers/sharepoint_helper/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sharepoint
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core/handlers/wmi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Wmi
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core/api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GHOSTS API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_2" id="__nav_5_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capabilities
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Capabilities
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core/api/timelines/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Managing Timelines
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core/grafana/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Grafana
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend UI
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Frontend UI
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core/ui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GHOSTS Frontend
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Animator & Workflows
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_7" id="__nav_7_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Animator & Workflows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NPC Persona Reference
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NPC Persona Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#the-persona-at-a-glance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The persona at a glance
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#identity-contact" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Identity &amp; contact
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Identity &amp; contact">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#name" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Name
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#addresses" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Addresses
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#health" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Health
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#family-relationships" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Family &amp; relationships
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#education" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Education
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#employment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Employment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#military-rank-unit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Military rank &amp; unit
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#finances" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Finances
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mental-health" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mental health
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#motivations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Motivations
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#foreign-travel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Foreign travel
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#insider-threat" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Insider threat
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#accounts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Accounts
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#workstation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Workstation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#preferences-attributes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Preferences &amp; attributes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#enum-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Enum reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#full-example-persona-json" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Full example persona (JSON)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-persona-values-in-scenarios" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using persona values in scenarios
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Using persona values in scenarios">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#content-generation-draws-from-the-profile" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Content generation draws from the profile
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#retrieving-personas-via-the-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Retrieving personas via the API
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../jobs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Animation Workflows
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../run/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Running Workflows
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../content/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Content Servers
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_8" id="__nav_8_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Content Servers
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../content/pandora/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pandora
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="npc-persona-reference">NPC Persona Reference<a class="headerlink" href="#npc-persona-reference" title="Permanent link">&para;</a></h1>
+<p>Every NPC that Animator generates is backed by a single rich object called an <strong><code>NpcProfile</code></strong>. This is the persona: the full portfolio of who the NPC is — their name and face, where they live, who's in their family, where they went to school, where they work, what they're paid, what motivates them, what they're worried about, and the digital accounts they leave behind.</p>
+<p>This page is the field-by-field map of that object. Use it when you are authoring a scenario and want to know <strong>exactly which values you can pull from an NPC</strong> — to seed content, drive relationships, build an insider-threat storyline, or template realistic documents and messages.</p>
+<details class="tip" open="open">
+<summary>How to read this page</summary>
+<ul>
+<li>Every value below is a <strong>real property on the <code>NpcProfile</code> model</strong> (<a href="https://github.com/cmu-sei/GHOSTS/blob/master/src/Ghosts.Animator/Models/NpcProfile.cs"><code>src/Ghosts.Animator/Models/NpcProfile.cs</code></a>). If it's documented here, you can reference it.</li>
+<li>The persona is stored as JSON (<code>jsonb</code> in Postgres) and returned as JSON from the API, so the field names below are the JSON keys you'll actually see.</li>
+<li>Nested objects (like <code>Name</code>, <code>Employment</code>, <code>InsiderThreat</code>) are expanded in their own sections.</li>
+<li>Fields that are <strong>enums</strong> serialize as their string name (e.g. <code>"Male"</code>, <code>"Bachelors"</code>), not their number.</li>
+</ul>
+</details>
+<hr />
+<h2 id="the-persona-at-a-glance">The persona at a glance<a class="headerlink" href="#the-persona-at-a-glance" title="Permanent link">&para;</a></h2>
+<p>An <code>NpcProfile</code> groups its data into these areas. Jump to any section for the full field list.</p>
+<table>
+<thead>
+<tr>
+<th>Area</th>
+<th>What it holds</th>
+<th>Section</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 4a4 4 0 0 1 4 4 4 4 0 0 1-4 4 4 4 0 0 1-4-4 4 4 0 0 1 4-4m0 10c4.42 0 8 1.79 8 4v2H4v-2c0-2.21 3.58-4 8-4"/></svg></span> <strong>Identity</strong></td>
+<td>Name, sex, birthdate, email, phones, password, photo, ID card</td>
+<td><a href="#identity-contact">Identity &amp; contact</a></td>
+</tr>
+<tr>
+<td><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 11.5A2.5 2.5 0 0 1 9.5 9 2.5 2.5 0 0 1 12 6.5 2.5 2.5 0 0 1 14.5 9a2.5 2.5 0 0 1-2.5 2.5M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7"/></svg></span> <strong>Location</strong></td>
+<td>One or more home/mailing addresses</td>
+<td><a href="#addresses">Addresses</a></td>
+</tr>
+<tr>
+<td><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M7 2c1.78 0 2.67 2.16 1.42 3.42C7.16 6.67 5 5.78 5 4a2 2 0 0 1 2-2M5.5 7h3a2 2 0 0 1 2 2v5.5H9V22H5v-7.5H3.5V9a2 2 0 0 1 2-2M21 8h-6v2h6m0 1h-3v2h3m0-11h-6v2h6m0 1h-3v2h3m0 7h-6v2h6m0 4h-6v2h6m0-5h-3v2h3"/></svg></span> <strong>Physical &amp; health</strong></td>
+<td>Height, weight, blood type, meals, medical conditions, prescriptions</td>
+<td><a href="#health">Health</a></td>
+</tr>
+<tr>
+<td><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 5.5A3.5 3.5 0 0 1 15.5 9a3.5 3.5 0 0 1-3.5 3.5A3.5 3.5 0 0 1 8.5 9 3.5 3.5 0 0 1 12 5.5M5 8c.56 0 1.08.15 1.53.42-.15 1.43.27 2.85 1.13 3.96C7.16 13.34 6.16 14 5 14a3 3 0 0 1-3-3 3 3 0 0 1 3-3m14 0a3 3 0 0 1 3 3 3 3 0 0 1-3 3c-1.16 0-2.16-.66-2.66-1.62a5.54 5.54 0 0 0 1.13-3.96c.45-.27.97-.42 1.53-.42M5.5 18.25c0-2.07 2.91-3.75 6.5-3.75s6.5 1.68 6.5 3.75V20h-13zM0 20v-1.5c0-1.39 1.89-2.56 4.45-2.9-.59.68-.95 1.62-.95 2.65V20zm24 0h-3.5v-1.75c0-1.03-.36-1.97-.95-2.65 2.56.34 4.45 1.51 4.45 2.9z"/></svg></span> <strong>Family &amp; relationships</strong></td>
+<td>Household members and links to other NPCs</td>
+<td><a href="#family-relationships">Family &amp; relationships</a></td>
+</tr>
+<tr>
+<td><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 3 1 9l11 6 9-4.91V17h2V9M5 13.18v4L12 21l7-3.82v-4L12 17z"/></svg></span> <strong>Education</strong></td>
+<td>Degrees, majors, and schools</td>
+<td><a href="#education">Education</a></td>
+</tr>
+<tr>
+<td><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 2h4a2 2 0 0 1 2 2v2h4a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8c0-1.11.89-2 2-2h4V4c0-1.11.89-2 2-2m4 4V4h-4v2z"/></svg></span> <strong>Employment</strong></td>
+<td>Full job history — companies, titles, salary, managers</td>
+<td><a href="#employment">Employment</a></td>
+</tr>
+<tr>
+<td><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 2H4v2l5.81 4.36a7.004 7.004 0 0 0-4.46 8.84 6.996 6.996 0 0 0 8.84 4.46 7 7 0 0 0 0-13.3L20 4zm-5.06 17.5L12 17.78 9.06 19.5l.78-3.33-2.59-2.24 3.41-.29L12 10.5l1.34 3.14 3.41.29-2.59 2.24z"/></svg></span> <strong>Military</strong></td>
+<td>Branch, rank, pay grade, MOS, and unit hierarchy</td>
+<td><a href="#military-rank-unit">Military rank &amp; unit</a></td>
+</tr>
+<tr>
+<td><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v12H3zm9 3a3 3 0 0 1 3 3 3 3 0 0 1-3 3 3 3 0 0 1-3-3 3 3 0 0 1 3-3M7 8a2 2 0 0 1-2 2v4a2 2 0 0 1 2 2h10a2 2 0 0 1 2-2v-4a2 2 0 0 1-2-2z"/></svg></span> <strong>Finances</strong></td>
+<td>Net worth, debt, credit cards</td>
+<td><a href="#finances">Finances</a></td>
+</tr>
+<tr>
+<td><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21.33 12.91c.09 1.55-.62 3.04-1.89 3.95l.77 1.49c.23.45.26.98.06 1.45-.19.47-.58.84-1.06 1l-.79.25a1.687 1.687 0 0 1-1.86-.55L14.44 18c-.89-.15-1.73-.53-2.44-1.1-.5.15-1 .23-1.5.23-.88 0-1.76-.27-2.5-.79-.53.16-1.07.23-1.62.22-.79.01-1.57-.15-2.3-.45a4.1 4.1 0 0 1-2.43-3.61c-.08-.72.04-1.45.35-2.11-.29-.75-.32-1.57-.07-2.33C2.3 7.11 3 6.32 3.87 5.82c.58-1.69 2.21-2.82 4-2.7 1.6-1.5 4.05-1.66 5.83-.37.42-.11.86-.17 1.3-.17 1.36-.03 2.65.57 3.5 1.64 2.04.53 3.5 2.35 3.58 4.47.05 1.11-.25 2.2-.86 3.13.07.36.11.72.11 1.09m-5-1.41c.57.07 1.02.5 1.02 1.07a1 1 0 0 1-1 1h-.63c-.32.9-.88 1.69-1.62 2.29.25.09.51.14.77.21 5.13-.07 4.53-3.2 4.53-3.25a2.59 2.59 0 0 0-2.69-2.49 1 1 0 0 1-1-1 1 1 0 0 1 1-1c1.23.03 2.41.49 3.33 1.3.05-.29.08-.59.08-.89-.06-1.24-.62-2.32-2.87-2.53-1.25-2.96-4.4-1.32-4.4-.4-.03.23.21.72.25.75a1 1 0 0 1 1 1c0 .55-.45 1-1 1-.53-.02-1.03-.22-1.43-.56-.48.31-1.03.5-1.6.56-.57.05-1.04-.35-1.07-.9a.97.97 0 0 1 .88-1.1c.16-.02.94-.14.94-.77 0-.66.25-1.29.68-1.79-.92-.25-1.91.08-2.91 1.29C6.75 5 6 5.25 5.45 7.2 4.5 7.67 4 8 3.78 9c1.08-.22 2.19-.13 3.22.25.5.19.78.75.59 1.29-.19.52-.77.78-1.29.59-.73-.32-1.55-.34-2.3-.06-.32.27-.32.83-.32 1.27 0 .74.37 1.43 1 1.83.53.27 1.12.41 1.71.4q-.225-.39-.39-.81a1.038 1.038 0 0 1 1.96-.68c.4 1.14 1.42 1.92 2.62 2.05 1.37-.07 2.59-.88 3.19-2.13.23-1.38 1.34-1.5 2.56-1.5m2 7.47-.62-1.3-.71.16 1 1.25zm-4.65-8.61a1 1 0 0 0-.91-1.03c-.71-.04-1.4.2-1.93.67-.57.58-.87 1.38-.84 2.19a1 1 0 0 0 1 1c.57 0 1-.45 1-1 0-.27.07-.54.23-.76.12-.1.27-.15.43-.15.55.03 1.02-.38 1.02-.92"/></svg></span> <strong>Mind &amp; motivation</strong></td>
+<td>Performance/personality scores and Reiss-style motivations</td>
+<td><a href="#mental-health">Mental health</a> · <a href="#motivations">Motivations</a></td>
+</tr>
+<tr>
+<td><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.56 3.91c.59.59.59 1.54 0 2.12l-3.89 3.89 2.12 9.19-1.41 1.42-3.88-7.43L9.6 17l.36 2.47-1.07 1.06-1.76-3.18-3.19-1.77L5 14.5l2.5.37L11.37 11 3.94 7.09l1.42-1.41 9.19 2.12 3.89-3.89c.56-.58 1.56-.58 2.12 0"/></svg></span> <strong>Foreign travel</strong></td>
+<td>Trips abroad with dates and destinations</td>
+<td><a href="#foreign-travel">Foreign travel</a></td>
+</tr>
+<tr>
+<td><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 1 3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5M11 7h2v6h-2m0 2h2v2h-2"/></svg></span> <strong>Insider threat</strong></td>
+<td>CDSE-aligned risk indicators and related events</td>
+<td><a href="#insider-threat">Insider threat</a></td>
+</tr>
+<tr>
+<td><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M11 10v2H9v2H7v-2H5.8c-.4 1.2-1.5 2-2.8 2-1.7 0-3-1.3-3-3s1.3-3 3-3c1.3 0 2.4.8 2.8 2zm-8 0c-.6 0-1 .4-1 1s.4 1 1 1 1-.4 1-1-.4-1-1-1m13 4c2.7 0 8 1.3 8 4v2H8v-2c0-2.7 5.3-4 8-4m0-2c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4"/></svg></span> <strong>Digital footprint</strong></td>
+<td>Online accounts, credentials, and the workstation they use</td>
+<td><a href="#accounts">Accounts</a> · <a href="#workstation">Workstation</a></td>
+</tr>
+<tr>
+<td><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 17v2h6v-2zM3 5v2h10V5zm10 16v-2h8v-2h-8v-2h-2v6zM7 9v2H3v2h4v2h2V9zm14 4v-2H11v2zm-6-4h2V7h4V5h-4V3h-2z"/></svg></span> <strong>Preferences &amp; attributes</strong></td>
+<td>Scored preferences and free-form key/value metadata</td>
+<td><a href="#preferences-attributes">Preferences &amp; attributes</a></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="identity-contact">Identity &amp; contact<a class="headerlink" href="#identity-contact" title="Permanent link">&para;</a></h2>
+<p>The core "who is this person" fields live at the top level of the profile.</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Example</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Id</code></td>
+<td>GUID</td>
+<td><code>"e6f1…"</code></td>
+<td>Unique NPC id. Referenced by <code>Relationships</code> and <code>Manager</code> fields on other NPCs.</td>
+</tr>
+<tr>
+<td><code>Name</code></td>
+<td><a href="#name"><code>NameProfile</code></a></td>
+<td>see below</td>
+<td>Structured name.</td>
+</tr>
+<tr>
+<td><code>Email</code></td>
+<td>string</td>
+<td><code>"jane.doe@brigade.mil"</code></td>
+<td>Primary email. Employment records can carry their own work email too.</td>
+</tr>
+<tr>
+<td><code>Password</code></td>
+<td>string</td>
+<td><code>"Sp1derM@n!"</code></td>
+<td>Generated primary password.</td>
+</tr>
+<tr>
+<td><code>HomePhone</code></td>
+<td>string</td>
+<td><code>"(703) 555-0143"</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>CellPhone</code></td>
+<td>string</td>
+<td><code>"(703) 555-0197"</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>BiologicalSex</code></td>
+<td>enum</td>
+<td><code>"Male"</code></td>
+<td><code>Female</code> or <code>Male</code>. See <a href="#enum-reference">enums</a>.</td>
+</tr>
+<tr>
+<td><code>Birthdate</code></td>
+<td>date-time</td>
+<td><code>"1989-04-12T00:00:00"</code></td>
+<td>Drives age; the content engine will even post a birthday tweet on the day.</td>
+</tr>
+<tr>
+<td><code>CAC</code></td>
+<td>string</td>
+<td><code>"1234567890"</code></td>
+<td>Common Access Card identifier (military ID).</td>
+</tr>
+<tr>
+<td><code>PhotoLink</code></td>
+<td>string (URL)</td>
+<td><code>"https://…/face.jpg"</code></td>
+<td>Generated headshot for the NPC.</td>
+</tr>
+<tr>
+<td><code>Created</code></td>
+<td>date-time</td>
+<td><code>"2026-07-23T14:02:00Z"</code></td>
+<td>When the persona was generated (UTC).</td>
+</tr>
+</tbody>
+</table>
+<h3 id="name">Name<a class="headerlink" href="#name" title="Permanent link">&para;</a></h3>
+<p><code>NpcProfile.Name</code> — a structured <code>NameProfile</code>. Used everywhere a person's name appears.</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Prefix</code></td>
+<td>string</td>
+<td><code>"Ms."</code></td>
+</tr>
+<tr>
+<td><code>First</code></td>
+<td>string</td>
+<td><code>"Jane"</code></td>
+</tr>
+<tr>
+<td><code>Middle</code></td>
+<td>string</td>
+<td><code>"Marie"</code></td>
+</tr>
+<tr>
+<td><code>Last</code></td>
+<td>string</td>
+<td><code>"Doe"</code></td>
+</tr>
+<tr>
+<td><code>Suffix</code></td>
+<td>string</td>
+<td><code>"Jr."</code></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code>NameProfile.ToString()</code> renders a clean display name from whatever parts are present (e.g. <code>"Jane Marie Doe"</code>), so you can use the whole object where a single name string is expected.</p>
+</div>
+<hr />
+<h2 id="addresses">Addresses<a class="headerlink" href="#addresses" title="Permanent link">&para;</a></h2>
+<p><code>NpcProfile.Address</code> is a <strong>list</strong> of <code>AddressProfile</code> — an NPC can have more than one (home, mailing, etc.).</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AddressType</code></td>
+<td>string</td>
+<td><code>"Home"</code></td>
+</tr>
+<tr>
+<td><code>Name</code></td>
+<td>string</td>
+<td><code>"Jane Doe"</code></td>
+</tr>
+<tr>
+<td><code>Address1</code></td>
+<td>string</td>
+<td><code>"1600 Defense Blvd"</code></td>
+</tr>
+<tr>
+<td><code>Address2</code></td>
+<td>string</td>
+<td><code>"Apt 4B"</code></td>
+</tr>
+<tr>
+<td><code>City</code></td>
+<td>string</td>
+<td><code>"Arlington"</code></td>
+</tr>
+<tr>
+<td><code>State</code></td>
+<td>string</td>
+<td><code>"VA"</code></td>
+</tr>
+<tr>
+<td><code>PostalCode</code></td>
+<td>string</td>
+<td><code>"22202"</code></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition info">
+<p class="admonition-title">International addresses</p>
+<p>Foreign travel and military-unit locations use a separate <code>InternationalAddressProfile</code> shape with lowercase JSON keys: <code>country</code>, <code>geonameid</code>, <code>name</code> (the city), and <code>subcountry</code>.</p>
+</div>
+<hr />
+<h2 id="health">Health<a class="headerlink" href="#health" title="Permanent link">&para;</a></h2>
+<p><code>NpcProfile.Health</code> — a <code>HealthProfile</code> covering physical characteristics and medical background.</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Example</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Height</code></td>
+<td>int</td>
+<td><code>68</code></td>
+<td>Inches.</td>
+</tr>
+<tr>
+<td><code>Weight</code></td>
+<td>int</td>
+<td><code>160</code></td>
+<td>Pounds.</td>
+</tr>
+<tr>
+<td><code>BloodType</code></td>
+<td>string</td>
+<td><code>"O+"</code></td>
+<td>Free-form string.</td>
+</tr>
+<tr>
+<td><code>PreferredMeal</code></td>
+<td>string</td>
+<td><code>"Pad Thai"</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>MedicalConditions</code></td>
+<td>list of <code>MedicalCondition</code></td>
+<td>see below</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong><code>MedicalCondition</code></strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Name</code></td>
+<td>string</td>
+<td><code>"Hypertension"</code></td>
+</tr>
+<tr>
+<td><code>Prescriptions</code></td>
+<td>list of <code>Prescription</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong><code>Prescription</code></strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Name</code></td>
+<td>string</td>
+<td><code>"Lisinopril"</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="family-relationships">Family &amp; relationships<a class="headerlink" href="#family-relationships" title="Permanent link">&para;</a></h2>
+<p>There are two distinct concepts here:</p>
+<p><strong><code>NpcProfile.Family</code></strong> — the household. A <code>FamilyProfile</code> with a <code>Members</code> list.</p>
+<p>Each member (<code>FamilyProfile.Person</code>):</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Name</code></td>
+<td><a href="#name"><code>NameProfile</code></a></td>
+<td><code>"John Doe"</code></td>
+</tr>
+<tr>
+<td><code>Relationship</code></td>
+<td>string</td>
+<td><code>"Father"</code>, <code>"Spouse"</code>, <code>"Daughter"</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong><code>NpcProfile.Relationships</code></strong> — links to <strong>other NPCs</strong> in the same cohort (used by the social graph). Each <code>RelationshipProfile</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Example</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Id</code></td>
+<td>int</td>
+<td><code>3</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>With</code></td>
+<td>GUID</td>
+<td><code>"e6f1…"</code></td>
+<td>The <code>Id</code> of another NPC.</td>
+</tr>
+<tr>
+<td><code>Type</code></td>
+<td>string</td>
+<td><code>"Colleague"</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition tip">
+<p class="admonition-title">Building social scenarios</p>
+<p>Use <code>Family.Members</code> for offline, personal storylines (a spouse, a sick parent) and <code>Relationships[].With</code> to traverse the professional/social network between NPCs.</p>
+</div>
+<hr />
+<h2 id="education">Education<a class="headerlink" href="#education" title="Permanent link">&para;</a></h2>
+<p><code>NpcProfile.Education</code> — an <code>EducationProfile</code> with a <code>Degrees</code> list. Each <code>Degree</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Example</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Level</code></td>
+<td>enum</td>
+<td><code>"Bachelors"</code></td>
+<td>See <a href="#enum-reference"><code>DegreeLevel</code></a>.</td>
+</tr>
+<tr>
+<td><code>DegreeType</code></td>
+<td>string</td>
+<td><code>"BS"</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Major</code></td>
+<td>string</td>
+<td><code>"Computer Science"</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>School</code></td>
+<td>object</td>
+<td>see below</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong><code>School</code></strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Name</code></td>
+<td>string</td>
+<td><code>"Virginia Tech"</code></td>
+</tr>
+<tr>
+<td><code>Location</code></td>
+<td>string</td>
+<td><code>"Blacksburg, VA"</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="employment">Employment<a class="headerlink" href="#employment" title="Permanent link">&para;</a></h2>
+<p><code>NpcProfile.Employment</code> — an <code>EmploymentProfile</code> holding an <code>EmploymentRecords</code> list. This is a <strong>full job history</strong>, so an NPC can have several records ordered over time.</p>
+<p>Each <code>EmploymentRecord</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Example</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Company</code></td>
+<td>string</td>
+<td><code>"Acme Defense"</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>StartDate</code></td>
+<td>date-time</td>
+<td><code>"2018-06-01T00:00:00"</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>EndDate</code></td>
+<td>date-time?</td>
+<td><code>null</code></td>
+<td><code>null</code> means current job.</td>
+</tr>
+<tr>
+<td><code>Department</code></td>
+<td>string</td>
+<td><code>"IT"</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Organization</code></td>
+<td>string</td>
+<td><code>"Network Operations"</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>JobTitle</code></td>
+<td>string</td>
+<td><code>"Systems Administrator"</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Level</code></td>
+<td>int</td>
+<td><code>3</code></td>
+<td>Seniority level.</td>
+</tr>
+<tr>
+<td><code>Salary</code></td>
+<td>double</td>
+<td><code>92000</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Manager</code></td>
+<td>GUID</td>
+<td><code>"e6f1…"</code></td>
+<td><code>Id</code> of the NPC who is this person's manager.</td>
+</tr>
+<tr>
+<td><code>EmailSuffix</code></td>
+<td>string</td>
+<td><code>"@acme.com"</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Email</code></td>
+<td>string</td>
+<td><code>"jdoe@acme.com"</code></td>
+<td>Work email.</td>
+</tr>
+<tr>
+<td><code>Address</code></td>
+<td><a href="#addresses"><code>AddressProfile</code></a></td>
+<td></td>
+<td>Work address.</td>
+</tr>
+<tr>
+<td><code>Phone</code></td>
+<td>string</td>
+<td><code>"(703) 555-0110"</code></td>
+<td>Work phone.</td>
+</tr>
+<tr>
+<td><code>EmploymentStatus</code></td>
+<td>enum</td>
+<td><code>"FullTime"</code></td>
+<td>See <a href="#enum-reference"><code>EmploymentStatuses</code></a>.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="military-rank-unit">Military rank &amp; unit<a class="headerlink" href="#military-rank-unit" title="Permanent link">&para;</a></h2>
+<p>For military personas, rank and unit are populated. <code>NpcProfile.Rank</code> is a <code>Rank</code> object:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Example</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Branch</code></td>
+<td>enum</td>
+<td><code>"USARMY"</code></td>
+<td>See <a href="#enum-reference"><code>MilitaryBranch</code></a>.</td>
+</tr>
+<tr>
+<td><code>Pay</code></td>
+<td>string</td>
+<td><code>"E-5"</code></td>
+<td>Pay grade.</td>
+</tr>
+<tr>
+<td><code>Name</code></td>
+<td>string</td>
+<td><code>"Sergeant"</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Abbr</code></td>
+<td>string</td>
+<td><code>"SGT"</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Classification</code></td>
+<td>string</td>
+<td><code>"Enlisted"</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Billet</code></td>
+<td>string</td>
+<td><code>"Squad Leader"</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>MOS</code></td>
+<td>string</td>
+<td><code>"25B"</code></td>
+<td>Military Occupational Specialty.</td>
+</tr>
+<tr>
+<td><code>MOSID</code></td>
+<td>string</td>
+<td><code>"Information Technology Specialist"</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Probability</code></td>
+<td>double</td>
+<td><code>0.14</code></td>
+<td>Weighting used during generation.</td>
+</tr>
+</tbody>
+</table>
+<p><code>NpcProfile.Unit</code> is a <code>MilitaryUnit</code> that can nest arbitrarily deep:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Country</code></td>
+<td>string</td>
+<td></td>
+</tr>
+<tr>
+<td><code>Address</code></td>
+<td><a href="#addresses"><code>AddressProfile</code></a></td>
+<td>Unit location.</td>
+</tr>
+<tr>
+<td><code>Sub</code></td>
+<td>list of <code>Unit</code></td>
+<td>Sub-units, each with <code>Name</code>, <code>Type</code>, <code>Nick</code>, <code>HQ</code>, and its own nested <code>Sub</code>.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="finances">Finances<a class="headerlink" href="#finances" title="Permanent link">&para;</a></h2>
+<p><code>NpcProfile.Finances</code> — a <code>FinancialProfile</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>NetWorth</code></td>
+<td>double</td>
+<td><code>145000</code></td>
+</tr>
+<tr>
+<td><code>TotalDebt</code></td>
+<td>double</td>
+<td><code>38000</code></td>
+</tr>
+<tr>
+<td><code>CreditCards</code></td>
+<td>list of <code>CreditCard</code></td>
+<td>see below</td>
+</tr>
+</tbody>
+</table>
+<p><strong><code>CreditCard</code></strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Number</code></td>
+<td>string</td>
+<td><code>"4111 1111 1111 1111"</code></td>
+</tr>
+<tr>
+<td><code>Type</code></td>
+<td>string</td>
+<td><code>"Visa"</code></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition tip">
+<p class="admonition-title">Financial stress</p>
+<p>A high <code>TotalDebt</code> relative to <code>NetWorth</code> pairs naturally with the <a href="#insider-threat">insider-threat</a> <code>FinancialConsiderations</code> indicators for building a financially-motivated risk storyline.</p>
+</div>
+<hr />
+<h2 id="mental-health">Mental health<a class="headerlink" href="#mental-health" title="Permanent link">&para;</a></h2>
+<p><code>NpcProfile.MentalHealth</code> — a <code>MentalHealthProfile</code>. Every field is an integer <strong>score</strong> you can threshold on. These drive personality, performance, and how "on edge" an NPC is.</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>InterpersonalSkills</code></td>
+<td>int</td>
+<td>Emotional intelligence / getting along with others.</td>
+</tr>
+<tr>
+<td><code>AdherenceToPolicy</code></td>
+<td>int</td>
+<td>How closely they follow the rules.</td>
+</tr>
+<tr>
+<td><code>EnthusiasmAndAttitude</code></td>
+<td>int</td>
+<td>Positivity and drive.</td>
+</tr>
+<tr>
+<td><code>OpenToFeedback</code></td>
+<td>int</td>
+<td>Receptiveness to criticism.</td>
+</tr>
+<tr>
+<td><code>GeneralPerformance</code></td>
+<td>int</td>
+<td>Day-to-day performance.</td>
+</tr>
+<tr>
+<td><code>OverallPerformance</code></td>
+<td>int</td>
+<td>Aggregate performance.</td>
+</tr>
+<tr>
+<td><code>IQ</code></td>
+<td>int</td>
+<td>Intelligence score.</td>
+</tr>
+<tr>
+<td><code>SpideySense</code></td>
+<td>int</td>
+<td>Instinct for detecting something off.</td>
+</tr>
+<tr>
+<td><code>SenseSomethingIsWrongQuotient</code></td>
+<td>int</td>
+<td>Suspicion level.</td>
+</tr>
+<tr>
+<td><code>HappyQuotient</code></td>
+<td>int</td>
+<td>Baseline happiness.</td>
+</tr>
+<tr>
+<td><code>MelancholyQuotient</code></td>
+<td>int</td>
+<td>Baseline sadness.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="motivations">Motivations<a class="headerlink" href="#motivations" title="Permanent link">&para;</a></h2>
+<p><code>NpcProfile.MotivationalProfile</code> implements the <a href="https://www.reissmotivationprofile.com/">Reiss Motivational Profile</a> — 16 basic desires. Each is a <strong>double</strong> (roughly <code>-2</code> to <code>2</code>) expressing how strongly, relative to the population, the NPC is driven by that desire. This is the primary input to the <a href="../jobs/#decision-making-framework">animation decision-making framework</a>.</p>
+<table>
+<thead>
+<tr>
+<th>Desire</th>
+<th>Desire</th>
+<th>Desire</th>
+<th>Desire</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Acceptance</code></td>
+<td><code>Beauty</code></td>
+<td><code>Curiosity</code></td>
+<td><code>Eating</code></td>
+</tr>
+<tr>
+<td><code>Family</code></td>
+<td><code>Honor</code></td>
+<td><code>Idealism</code></td>
+<td><code>Independence</code></td>
+</tr>
+<tr>
+<td><code>Order</code></td>
+<td><code>PhysicalActivity</code></td>
+<td><code>Power</code></td>
+<td><code>Saving</code></td>
+</tr>
+<tr>
+<td><code>SocialContact</code></td>
+<td><code>Status</code></td>
+<td><code>Tranquility</code></td>
+<td><code>Vengeance</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="foreign-travel">Foreign travel<a class="headerlink" href="#foreign-travel" title="Permanent link">&para;</a></h2>
+<p><code>NpcProfile.ForeignTravel</code> — a <code>ForeignTravelProfile</code> with a <code>Trips</code> list. Each <code>Trip</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Code</code></td>
+<td>string</td>
+<td><code>"DEU"</code></td>
+</tr>
+<tr>
+<td><code>Country</code></td>
+<td>string</td>
+<td><code>"Germany"</code></td>
+</tr>
+<tr>
+<td><code>Destination</code></td>
+<td>string</td>
+<td><code>"Berlin"</code></td>
+</tr>
+<tr>
+<td><code>ArriveDestination</code></td>
+<td>date-time</td>
+<td><code>"2024-08-02T00:00:00"</code></td>
+</tr>
+<tr>
+<td><code>DepartDestination</code></td>
+<td>date-time</td>
+<td><code>"2024-08-16T00:00:00"</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="insider-threat">Insider threat<a class="headerlink" href="#insider-threat" title="Permanent link">&para;</a></h2>
+<p><code>NpcProfile.InsiderThreat</code> is an <code>InsiderThreatProfile</code> structured around <strong>CDSE (Center for Development of Security Excellence) Insider Threat Potential Indicators</strong>. It's the richest area for security-training scenarios.</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>IsBackgroundCheckStatusClear</code></td>
+<td>bool</td>
+<td>Did their background check come back clean?</td>
+</tr>
+<tr>
+<td><code>Access</code></td>
+<td><code>AccessProfile</code></td>
+<td>Access-related indicators (expanded below).</td>
+</tr>
+<tr>
+<td><code>CriminalViolentOrAbusiveConduct</code></td>
+<td>indicator profile</td>
+<td></td>
+</tr>
+<tr>
+<td><code>FinancialConsiderations</code></td>
+<td>indicator profile</td>
+<td>Pairs with <a href="#finances">Finances</a>.</td>
+</tr>
+<tr>
+<td><code>ForeignConsiderations</code></td>
+<td>indicator profile</td>
+<td>Pairs with <a href="#foreign-travel">Foreign travel</a>.</td>
+</tr>
+<tr>
+<td><code>JudgementCharacterAndPsychologicalConditions</code></td>
+<td>indicator profile</td>
+<td></td>
+</tr>
+<tr>
+<td><code>ProfessionalLifecycleAndPerformance</code></td>
+<td>indicator profile</td>
+<td>Pairs with <a href="#employment">Employment</a>.</td>
+</tr>
+<tr>
+<td><code>SecurityAndComplianceIncidents</code></td>
+<td>indicator profile</td>
+<td></td>
+</tr>
+<tr>
+<td><code>SubstanceAbuseAndAddictiveBehaviors</code></td>
+<td>indicator profile</td>
+<td></td>
+</tr>
+<tr>
+<td><code>TechnicalActivity</code></td>
+<td>indicator profile</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Every indicator profile</strong> shares the same base shape (<code>InsiderThreatBaseProfile</code>):</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Id</code></td>
+<td>int</td>
+<td></td>
+</tr>
+<tr>
+<td><code>RelatedEvents</code></td>
+<td>list of <code>RelatedEvent</code></td>
+<td>The concrete incidents behind the indicator.</td>
+</tr>
+</tbody>
+</table>
+<p><strong><code>RelatedEvent</code></strong> — a single observable event:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Id</code></td>
+<td>int</td>
+<td><code>1</code></td>
+</tr>
+<tr>
+<td><code>Description</code></td>
+<td>string</td>
+<td><code>"Attempted access to a restricted share"</code></td>
+</tr>
+<tr>
+<td><code>CorrectiveAction</code></td>
+<td>string</td>
+<td><code>"Access revoked; counseled"</code></td>
+</tr>
+<tr>
+<td><code>ReportedBy</code></td>
+<td>string</td>
+<td><code>"SOC Analyst"</code></td>
+</tr>
+<tr>
+<td><code>Reported</code></td>
+<td>date-time</td>
+<td><code>"2025-02-10T00:00:00"</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong><code>Access</code></strong> additionally carries:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>SecurityClearance</code></td>
+<td>string</td>
+<td><code>"Secret"</code></td>
+</tr>
+<tr>
+<td><code>PhysicalAccess</code></td>
+<td>string</td>
+<td><code>"Building A, Floors 1–3"</code></td>
+</tr>
+<tr>
+<td><code>SystemsAccess</code></td>
+<td>string</td>
+<td><code>"Domain admin"</code></td>
+</tr>
+<tr>
+<td><code>IsDoDSystemsPrivilegedUser</code></td>
+<td>bool?</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>ExplosivesAccess</code></td>
+<td>string</td>
+<td></td>
+</tr>
+<tr>
+<td><code>CBRNAccess</code></td>
+<td>string</td>
+<td>Chemical/Biological/Radiological/Nuclear.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="accounts">Accounts<a class="headerlink" href="#accounts" title="Permanent link">&para;</a></h2>
+<p><code>NpcProfile.Accounts</code> is a list of online accounts (social media, services, etc.). Each <code>Account</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Id</code></td>
+<td>int</td>
+<td><code>1</code></td>
+</tr>
+<tr>
+<td><code>Url</code></td>
+<td>string</td>
+<td><code>"https://twitter.com/janedoe"</code></td>
+</tr>
+<tr>
+<td><code>Username</code></td>
+<td>string</td>
+<td><code>"janedoe"</code></td>
+</tr>
+<tr>
+<td><code>Password</code></td>
+<td>string</td>
+<td><code>"hunter2"</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="workstation">Workstation<a class="headerlink" href="#workstation" title="Permanent link">&para;</a></h2>
+<p><code>NpcProfile.Workstation</code> — the <code>MachineProfile</code> for the computer this NPC uses.</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Name</code></td>
+<td>string</td>
+<td><code>"WKS-OPS-014"</code></td>
+</tr>
+<tr>
+<td><code>Domain</code></td>
+<td>string</td>
+<td><code>"BRIGADE"</code></td>
+</tr>
+<tr>
+<td><code>Username</code></td>
+<td>string</td>
+<td><code>"jdoe"</code></td>
+</tr>
+<tr>
+<td><code>Password</code></td>
+<td>string</td>
+<td><code>"P@ssw0rd!"</code></td>
+</tr>
+<tr>
+<td><code>IPAddress</code></td>
+<td>string</td>
+<td><code>"10.1.4.14"</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="preferences-attributes">Preferences &amp; attributes<a class="headerlink" href="#preferences-attributes" title="Permanent link">&para;</a></h2>
+<p><strong><code>NpcProfile.Preferences</code></strong> — a list of scored, named preferences you define and the animation engine can evolve. Each <code>Preference</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Id</code></td>
+<td>int</td>
+<td><code>1</code></td>
+</tr>
+<tr>
+<td><code>Name</code></td>
+<td>string</td>
+<td><code>"Coffee"</code></td>
+</tr>
+<tr>
+<td><code>Score</code></td>
+<td>int</td>
+<td><code>78</code></td>
+</tr>
+<tr>
+<td><code>Meta</code></td>
+<td>string</td>
+<td><code>"prefers cold brew"</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong><code>NpcProfile.Attributes</code></strong> — a free-form <code>string → string</code> dictionary for any extra metadata you want to carry on the persona.</p>
+<hr />
+<h2 id="enum-reference">Enum reference<a class="headerlink" href="#enum-reference" title="Permanent link">&para;</a></h2>
+<p>Enums serialize to their <strong>string name</strong> in JSON.</p>
+<table>
+<thead>
+<tr>
+<th>Enum</th>
+<th>Values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>BiologicalSex</code></td>
+<td><code>Female</code>, <code>Male</code></td>
+</tr>
+<tr>
+<td><code>DegreeLevel</code></td>
+<td><code>GED</code>, <code>HSDiploma</code>, <code>Associates</code>, <code>Bachelors</code>, <code>Masters</code>, <code>Doctorate</code>, <code>Professional</code>, <code>None</code></td>
+</tr>
+<tr>
+<td><code>EmploymentStatuses</code></td>
+<td><code>FullTime</code>, <code>PartTime</code>, <code>Suspended</code>, <code>Temporary</code>, <code>Resigned</code>, <code>Terminated</code></td>
+</tr>
+<tr>
+<td><code>MilitaryBranch</code></td>
+<td><code>USAF</code>, <code>USARMY</code>, <code>USCG</code>, <code>USMC</code>, <code>USN</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="full-example-persona-json">Full example persona (JSON)<a class="headerlink" href="#full-example-persona-json" title="Permanent link">&para;</a></h2>
+<p>A trimmed but representative persona as returned by the API. Optional/empty collections are omitted for brevity.</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;Id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;e6f1a3c2-9d4b-4f2a-8b1e-2c7d9f0a1b23&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;Name&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;Prefix&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Ms.&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;First&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jane&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;Middle&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Marie&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;Last&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Doe&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;Suffix&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="w"> </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;Email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jane.doe@brigade.mil&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;Password&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Sp1derM@n!&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;HomePhone&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;(703) 555-0143&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;CellPhone&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;(703) 555-0197&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;BiologicalSex&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Female&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;Birthdate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1989-04-12T00:00:00&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;CAC&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1234567890&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;PhotoLink&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://ghosts.example/faces/e6f1a3c2.jpg&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;Created&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-07-23T14:02:00Z&quot;</span><span class="p">,</span>
+
+<span class="w">  </span><span class="nt">&quot;Address&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;AddressType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Home&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;Name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jane Doe&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;Address1&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1600 Defense Blvd&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;Address2&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Apt 4B&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;City&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Arlington&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;State&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;VA&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;PostalCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;22202&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="p">],</span>
+
+<span class="w">  </span><span class="nt">&quot;Health&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;Height&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">66</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;Weight&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">150</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;BloodType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;O+&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;PreferredMeal&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Pad Thai&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;MedicalConditions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;Name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Hypertension&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;Prescriptions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;Name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Lisinopril&quot;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="w">  </span><span class="p">},</span>
+
+<span class="w">  </span><span class="nt">&quot;Family&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;Members&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;Name&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;First&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;John&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;Last&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Doe&quot;</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="nt">&quot;Relationship&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Spouse&quot;</span><span class="w"> </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;Name&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;First&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Emma&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;Last&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Doe&quot;</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="nt">&quot;Relationship&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Daughter&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;Relationships&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;Id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;With&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;a1b2c3d4-0000-0000-0000-000000000001&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;Type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Colleague&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="p">],</span>
+
+<span class="w">  </span><span class="nt">&quot;Education&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;Degrees&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;Level&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Bachelors&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;DegreeType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;BS&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;Major&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Computer Science&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;School&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;Name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Virginia Tech&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;Location&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Blacksburg, VA&quot;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="w">  </span><span class="p">},</span>
+
+<span class="w">  </span><span class="nt">&quot;Employment&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;EmploymentRecords&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;Company&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Acme Defense&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;StartDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2018-06-01T00:00:00&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;EndDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;Department&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;IT&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;Organization&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Network Operations&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;JobTitle&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Systems Administrator&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;Level&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;Salary&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">92000</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;Manager&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;a1b2c3d4-0000-0000-0000-000000000009&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;Email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jdoe@acme.com&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;EmailSuffix&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;@acme.com&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;Phone&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;(703) 555-0110&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;EmploymentStatus&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;FullTime&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="w">  </span><span class="p">},</span>
+
+<span class="w">  </span><span class="nt">&quot;Rank&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;Branch&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;USARMY&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;Pay&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;E-5&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;Name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Sergeant&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;Abbr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SGT&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;Classification&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Enlisted&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;Billet&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Squad Leader&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;MOS&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;25B&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;MOSID&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Information Technology Specialist&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;Probability&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.14</span><span class="w"> </span><span class="p">},</span>
+
+<span class="w">  </span><span class="nt">&quot;Finances&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;NetWorth&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">145000</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;TotalDebt&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">38000</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;CreditCards&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;Number&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;4111 1111 1111 1111&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;Type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Visa&quot;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">]</span>
+<span class="w">  </span><span class="p">},</span>
+
+<span class="w">  </span><span class="nt">&quot;MentalHealth&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;InterpersonalSkills&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">72</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;AdherenceToPolicy&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">60</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;EnthusiasmAndAttitude&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">80</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;OpenToFeedback&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">55</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;GeneralPerformance&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">78</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;OverallPerformance&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">76</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;IQ&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">118</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;SpideySense&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">40</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;SenseSomethingIsWrongQuotient&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">35</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;HappyQuotient&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">65</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;MelancholyQuotient&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">30</span>
+<span class="w">  </span><span class="p">},</span>
+
+<span class="w">  </span><span class="nt">&quot;MotivationalProfile&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;Acceptance&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.3</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;Beauty&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">-0.1</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;Curiosity&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1.2</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;Eating&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;Family&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1.5</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;Honor&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.8</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;Idealism&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.4</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;Independence&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.9</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;Order&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1.1</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;PhysicalActivity&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">-0.2</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;Power&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.1</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;Saving&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.6</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;SocialContact&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.7</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;Status&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.2</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;Tranquility&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">-0.4</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;Vengeance&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">-0.9</span>
+<span class="w">  </span><span class="p">},</span>
+
+<span class="w">  </span><span class="nt">&quot;ForeignTravel&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;Trips&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;Code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;DEU&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;Country&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Germany&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;Destination&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Berlin&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;ArriveDestination&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-08-02T00:00:00&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;DepartDestination&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-08-16T00:00:00&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="w">  </span><span class="p">},</span>
+
+<span class="w">  </span><span class="nt">&quot;InsiderThreat&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;IsBackgroundCheckStatusClear&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;Access&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;Id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;SecurityClearance&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Secret&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;PhysicalAccess&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Building A, Floors 1-3&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;SystemsAccess&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Domain admin&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;IsDoDSystemsPrivilegedUser&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;RelatedEvents&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;FinancialConsiderations&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;Id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;RelatedEvents&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;Id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;Description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Reported gambling debt&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;CorrectiveAction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Referred to EAP&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;ReportedBy&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Supervisor&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;Reported&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-02-10T00:00:00&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">      </span><span class="p">]</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">},</span>
+
+<span class="w">  </span><span class="nt">&quot;Accounts&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;Id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;Url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://twitter.com/janedoe&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;Username&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;janedoe&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;Password&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;hunter2&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="p">],</span>
+
+<span class="w">  </span><span class="nt">&quot;Workstation&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;Name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;WKS-OPS-014&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;Domain&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;BRIGADE&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;Username&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jdoe&quot;</span><span class="p">,</span>
+<span class="w">                   </span><span class="nt">&quot;Password&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;P@ssw0rd!&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;IPAddress&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;10.1.4.14&quot;</span><span class="w"> </span><span class="p">},</span>
+
+<span class="w">  </span><span class="nt">&quot;Preferences&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;Id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;Name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Coffee&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;Score&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">78</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;Meta&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;prefers cold brew&quot;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;Attributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;Hobby&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Rock climbing&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;FavoriteColor&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;green&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<hr />
+<h2 id="using-persona-values-in-scenarios">Using persona values in scenarios<a class="headerlink" href="#using-persona-values-in-scenarios" title="Permanent link">&para;</a></h2>
+<p>Persona values aren't just for display — they actively drive what an NPC does and says.</p>
+<h3 id="content-generation-draws-from-the-profile">Content generation draws from the profile<a class="headerlink" href="#content-generation-draws-from-the-profile" title="Permanent link">&para;</a></h3>
+<p>When the API generates social content for an NPC (the built-in native formatter, or an LLM formatter), it reaches into the profile for realistic, self-consistent details. For example, the native formatter can produce a post about the NPC's <strong>address</strong>, <strong>family</strong> member, <strong>employment</strong>, <strong>education</strong>, or an <strong>account</strong> — and on the NPC's <code>Birthdate</code>, it posts a birthday message automatically.</p>
+<p>This is exactly the leakage the <a href="../jobs/">animation model</a> is designed to explore: an NPC discloses a true detail about themselves, and other agents — or an adversary — can observe and infer from it.</p>
+<div class="admonition warning">
+<p class="admonition-title">Sensitive fields are stripped for some content flows</p>
+<p>Certain generation paths deliberately null out sensitive fields (e.g. <code>Rank</code>, <code>CAC</code>, <code>Unit</code>) before handing the profile to a content engine, so those values don't leak into generated text. Keep this in mind when deciding which fields to build a scenario around.</p>
+</div>
+<h3 id="retrieving-personas-via-the-api">Retrieving personas via the API<a class="headerlink" href="#retrieving-personas-via-the-api" title="Permanent link">&para;</a></h3>
+<p>Fetch generated NPCs (and their full profiles) to template documents, seed emails, or wire up a scenario:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># List NPCs</span>
+curl<span class="w"> </span>http://localhost:5000/api/npcs
+
+<span class="c1"># Generate NPCs, then read back their personas</span>
+curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:5000/api/npcsgenerate/one
+</code></pre></div>
+<p>See the <a href="../">Animator overview</a> for generation options (campaign, enclave, team, rank distribution) and the Swagger docs at <code>http://localhost:5000/swagger</code> for the complete API surface.</p>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2017 Carnegie Mellon University. All rights reserved.
+
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/cmu-sei/GHOSTS/issues/new?template=question.md" target="_blank" rel="noopener" title="Ask a Question" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2m-7 12h-2v-2h2zm1.8-5c-.3.4-.7.6-1.1.8-.3.2-.4.3-.5.5-.2.2-.2.4-.2.7h-2c0-.5.1-.8.3-1.1.2-.2.6-.5 1.1-.8.3-.1.5-.3.6-.5s.2-.5.2-.7c0-.3-.1-.5-.3-.7s-.5-.3-.8-.3-.5.1-.7.2q-.3.15-.3.6h-2c.1-.7.4-1.3.9-1.7s1.2-.5 2.1-.5 1.7.2 2.2.6.8 1 .8 1.7q.15.6-.3 1.2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://github.com/cmu-sei/GHOSTS/issues/new?template=bug_report.md" target="_blank" rel="noopener" title="Report a Problem" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M192 96c0-53 43-96 96-96s96 43 96 96v3.6c0 15.7-12.7 28.4-28.4 28.4H220.5c-15.7 0-28.4-12.7-28.4-28.4V96zm345.6 12.8c10.6 14.1 7.7 34.2-6.4 44.8l-97.8 73.3c5.3 8.9 9.3 18.7 11.8 29.1H544c17.7 0 32 14.3 32 32s-14.3 32-32 32h-96v32c0 2.6-.1 5.3-.2 7.9l83.4 62.5c14.1 10.6 17 30.7 6.4 44.8s-30.7 17-44.8 6.4l-63.1-47.3c-23.2 44.2-66.5 76.2-117.7 83.9V280c0-13.3-10.7-24-24-24s-24 10.7-24 24v230.2c-51.2-7.7-94.5-39.7-117.7-83.9l-63.1 47.3c-14.1 10.6-34.2 7.7-44.8-6.4s-7.7-34.2 6.4-44.8l83.4-62.5c-.1-2.6-.2-5.2-.2-7.9v-32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32h98.8c2.5-10.4 6.5-20.2 11.8-29.1l-97.8-73.3c-14.1-10.6-17-30.7-6.4-44.8s30.7-17 44.8-6.4L192 184c12.3-5.1 25.8-8 40-8h112c14.2 0 27.7 2.8 40 8l108.8-81.6c14.1-10.6 34.2-7.7 44.8 6.4"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://github.com/cmu-sei/GHOSTS/issues/new?template=feature_request.md" target="_blank" rel="noopener" title="Request a Feature" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 6a6 6 0 0 1 6 6c0 2.22-1.21 4.16-3 5.2V19a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1v-1.8c-1.79-1.04-3-2.98-3-5.2a6 6 0 0 1 6-6m2 15v1a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1v-1zm6-10h3v2h-3zM1 11h3v2H1zM13 1v3h-2V1zM4.92 3.5l2.13 2.14-1.42 1.41L3.5 4.93zm12.03 2.13 2.12-2.13 1.43 1.43-2.13 2.12z"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://github.com/cmu-sei/GHOSTS/discussions" target="_blank" rel="noopener" title="SSVC Community Discussions" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M76.2 258.7c6.1-15.2 4-32.6-5.6-45.9C56.1 192.7 48 169.1 48 144c0-66.8 60.5-128 144-128s144 61.2 144 128-60.5 128-144 128c-15.9 0-31.1-2.3-45.3-6.5-10.3-3.1-21.4-2.5-31.4 1.5l-50.4 20.2 11.4-28.5zM0 144c0 35.8 11.6 69.1 31.7 96.8L1.9 315.2c-1.3 3.2-1.9 6.6-1.9 10C0 340 12 352 26.8 352c3.4 0 6.8-.7 10-1.9l96.3-38.5c18.6 5.5 38.4 8.4 58.9 8.4 106 0 192-78.8 192-176S298-32 192-32 0 46.8 0 144m384 368c20.6 0 40.3-3 58.9-8.4l96.3 38.5c3.2 1.3 6.6 1.9 10 1.9 14.8 0 26.8-12 26.8-26.8 0-3.4-.7-6.8-1.9-10l-29.7-74.4c20-27.8 31.7-61.1 31.7-96.8 0-82.4-61.7-151.5-145-170.7-1.6 16.3-5.1 31.9-10.1 46.9 63.9 14.8 107.2 67.3 107.2 123.9 0 25.1-8.1 48.7-22.6 68.8-9.6 13.3-11.7 30.6-5.6 45.9l11.4 28.5-50.4-20.2c-10-4-21.1-4.5-31.4-1.5-14.2 4.2-29.4 6.5-45.3 6.5-72.2 0-127.1-45.7-140.7-101.2-15.6 3.2-31.7 5-48.1 5.2 16.4 81.9 94.7 144 188.8 144z"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://github.com/cmu-sei/GHOSTS" target="_blank" rel="noopener" title="cmu-sei/GHOSTS on Github" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="mailto:info@sei.cmu.edu?subject=GHOSTS%20Feedback" target="_blank" rel="noopener" title="Email GHOSTS Team" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M61.4 64C27.5 64 0 91.5 0 125.4c0 .9 0 1.7.1 2.6H0v256c0 35.3 28.7 64 64 64h384c35.3 0 64-28.7 64-64V128h-.1c0-.9.1-1.7.1-2.6 0-33.9-27.5-61.4-61.4-61.4zM464 192.3V384c0 8.8-7.2 16-16 16H64c-8.8 0-16-7.2-16-16V192.3l154.8 117.4c31.4 23.9 74.9 23.9 106.4 0zM48 125.4c0-7.4 6-13.4 13.4-13.4h389.2c7.4 0 13.4 6 13.4 13.4 0 4.2-2 8.2-5.3 10.7L280.2 271.5c-14.3 10.8-34.1 10.8-48.4 0L53.3 136.1c-3.3-2.5-5.3-6.5-5.3-10.7"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://www.sei.cmu.edu/" target="_blank" rel="noopener" title="Software Engineering Institute" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M277.8 8.6c-12.3-11.4-31.3-11.4-43.5 0l-224 208c-9.6 9-12.8 22.9-8 35.1S18.8 272 32 272h16v176c0 35.3 28.7 64 64 64h288c35.3 0 64-28.7 64-64V272h16c13.2 0 25-8.1 29.8-20.3s1.6-26.2-8-35.1zM240 320h32c26.5 0 48 21.5 48 48v96H192v-96c0-26.5 21.5-48 48-48"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.indexes", "toc.integrate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

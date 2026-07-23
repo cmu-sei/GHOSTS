@@ -16,14 +16,14 @@
         <link rel="prev" href="../core/ui/">
       
       
-        <link rel="next" href="jobs/">
+        <link rel="next" href="personas/">
       
       
         
       
       
       <link rel="icon" href="../assets/img/ghosts_new.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -31,7 +31,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -1764,6 +1764,8 @@
       
         
       
+        
+      
     
     
     
@@ -1819,6 +1821,34 @@
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="personas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NPC Persona Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
               
             
               
@@ -2165,7 +2195,7 @@
 </code></pre></div>
 <p>See the Swagger documentation at <code>http://localhost:5000/swagger</code> for complete API details.</p>
 <h2 id="npc-data-fields">NPC Data Fields<a class="headerlink" href="#npc-data-fields" title="Permanent link">&para;</a></h2>
-<p>Animator generates extensive data for each NPC. Key fields include:</p>
+<p>Animator generates extensive data for each NPC. Key categories include:</p>
 <table>
 <thead>
 <tr>
@@ -2176,46 +2206,50 @@
 <tbody>
 <tr>
 <td><strong>Identity</strong></td>
-<td>First name, last name, middle name, gender, date of birth, SSN</td>
+<td>First/middle/last name, biological sex, date of birth, email, phones, CAC, photo</td>
 </tr>
 <tr>
 <td><strong>Contact</strong></td>
-<td>Email, phone, address, city, state, ZIP, country</td>
+<td>Address(es): street, city, state, postal code</td>
 </tr>
 <tr>
 <td><strong>Employment</strong></td>
-<td>Employer, job title, department, salary, hire date, employee ID</td>
+<td>Full job history: employer, job title, department, salary, dates, manager</td>
 </tr>
 <tr>
 <td><strong>Financial</strong></td>
-<td>Bank name, account number, routing number, credit score, assets</td>
+<td>Net worth, total debt, credit cards</td>
 </tr>
 <tr>
 <td><strong>Education</strong></td>
-<td>Degrees, institutions, graduation dates, major/minor</td>
+<td>Degrees, degree level, major, school</td>
 </tr>
 <tr>
 <td><strong>Family</strong></td>
-<td>Spouse, children, parents, siblings (with details for each)</td>
+<td>Household members (spouse, children, parents) and links to other NPCs</td>
 </tr>
 <tr>
 <td><strong>Background</strong></td>
-<td>Military service, criminal record, security clearance level</td>
+<td>Military branch, rank, pay grade, MOS, unit hierarchy, foreign travel</td>
 </tr>
 <tr>
 <td><strong>Digital</strong></td>
-<td>Social media accounts, online presence, browsing habits</td>
+<td>Online accounts and credentials, assigned workstation</td>
 </tr>
 <tr>
 <td><strong>Psychological</strong></td>
-<td>Personality traits, insider threat indicators, vulnerabilities</td>
+<td>Mental-health scores, Reiss motivations, insider-threat indicators</td>
 </tr>
 <tr>
 <td><strong>Metadata</strong></td>
-<td>Campaign, enclave, team, assigned machine</td>
+<td>Campaign, enclave, team, assigned machine, scored preferences, attributes</td>
 </tr>
 </tbody>
 </table>
+<div class="admonition tip">
+<p class="admonition-title">Full field-by-field reference</p>
+<p>For the complete, authoritative list of every value on a persona — with types, enums, nested objects, and a full JSON example you can reference in scenarios — see the <a href="personas/"><strong>NPC Persona Reference</strong></a>.</p>
+</div>
 <div class="footnote">
 <hr />
 <ol>
@@ -2347,7 +2381,7 @@
       <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.indexes", "toc.integrate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
       
     
   </body>
