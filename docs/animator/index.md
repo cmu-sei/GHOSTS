@@ -180,20 +180,23 @@ See the Swagger documentation at `http://localhost:5000/swagger` for complete AP
 
 ## NPC Data Fields
 
-Animator generates extensive data for each NPC. Key fields include:
+Animator generates extensive data for each NPC. Key categories include:
 
 | Category | Fields |
 |----------|--------|
-| **Identity** | First name, last name, middle name, gender, date of birth, SSN |
-| **Contact** | Email, phone, address, city, state, ZIP, country |
-| **Employment** | Employer, job title, department, salary, hire date, employee ID |
-| **Financial** | Bank name, account number, routing number, credit score, assets |
-| **Education** | Degrees, institutions, graduation dates, major/minor |
-| **Family** | Spouse, children, parents, siblings (with details for each) |
-| **Background** | Military service, criminal record, security clearance level |
-| **Digital** | Social media accounts, online presence, browsing habits |
-| **Psychological** | Personality traits, insider threat indicators, vulnerabilities |
-| **Metadata** | Campaign, enclave, team, assigned machine |
+| **Identity** | First/middle/last name, biological sex, date of birth, email, phones, CAC, photo |
+| **Contact** | Address(es): street, city, state, postal code |
+| **Employment** | Full job history: employer, job title, department, salary, dates, manager |
+| **Financial** | Net worth, total debt, credit cards |
+| **Education** | Degrees, degree level, major, school |
+| **Family** | Household members (spouse, children, parents) and links to other NPCs |
+| **Background** | Military branch, rank, pay grade, MOS, unit hierarchy, foreign travel |
+| **Digital** | Online accounts and credentials, assigned workstation |
+| **Psychological** | Mental-health scores, Reiss motivations, insider-threat indicators |
+| **Metadata** | Campaign, enclave, team, assigned machine, scored preferences, attributes |
+
+!!! tip "Full field-by-field reference"
+    For the complete, authoritative list of every value on a persona — with types, enums, nested objects, and a full JSON example you can reference in scenarios — see the [**NPC Persona Reference**](personas.md).
 
 [^1]: The GHOSTS development team highly recommends Nick Bilton's book *American Kingpin* for insight into the early days of the dark web.
 [^2]: A key developer from the Animator team went on to a position in the SEI's AI division. AI models need data. You connect the dots.

@@ -126,6 +126,7 @@ nav:
       - core/ui.md
   - Animator & Workflows:
       - animator/index.md
+      - NPC Persona Reference: animator/personas.md
       - Animation Workflows: animator/jobs.md
       - Running Workflows: animator/run.md
   - Content Servers:
