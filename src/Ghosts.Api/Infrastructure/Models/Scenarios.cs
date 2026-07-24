@@ -46,6 +46,43 @@ public class ScenarioParameters
     public ICollection<ThreatActor> ThreatActors { get; set; } = new List<ThreatActor>();
     public ICollection<Inject> Injects { get; set; } = new List<Inject>();
     public ICollection<UserPool> UserPools { get; set; } = new List<UserPool>();
+    public ICollection<ScenarioWorkflowBinding> WorkflowBindings { get; set; } = new List<ScenarioWorkflowBinding>();
+}
+
+/// <summary>
+/// Binds an n8n animation workflow to a scenario so a run automatically schedules it.
+/// Referenced by stable webhook path (e.g. "beliefs") rather than the n8n workflow id,
+/// which REST import can reassign. Resolved to the live workflow/webhook at fire time.
+/// </summary>
+[Table("scenario_workflow_bindings")]
+public class ScenarioWorkflowBinding
+{
+    public int Id { get; set; }
+    public int ScenarioParametersId { get; set; }
+
+    /// <summary>Stable reference to the n8n workflow — its webhook path (e.g. "beliefs", "social_graph").</summary>
+    public string WorkflowRef { get; set; } = string.Empty;
+
+    /// <summary>Human-friendly label for the bound workflow (e.g. "GHOSTS Belief").</summary>
+    public string DisplayName { get; set; } = string.Empty;
+
+    /// <summary>Cron schedule the workflow fires on during a run.</summary>
+    public string Cron { get; set; } = string.Empty;
+
+    public bool Enabled { get; set; } = true;
+
+    public ScenarioParameters ScenarioParameters { get; set; }
+
+    /// <summary>
+    /// The default animation workflow set seeded onto new scenarios so a run comes alive
+    /// out of the box. Referenced by webhook path; edit here to change the shipped defaults.
+    /// </summary>
+    public static IReadOnlyList<ScenarioWorkflowBinding> Defaults() => new List<ScenarioWorkflowBinding>
+    {
+        new() { WorkflowRef = "beliefs",      DisplayName = "GHOSTS Belief",              Cron = "*/15 * * * *", Enabled = true },
+        new() { WorkflowRef = "social_graph", DisplayName = "GHOSTS Social Graph",        Cron = "*/30 * * * *", Enabled = true },
+        new() { WorkflowRef = "super-looper",  DisplayName = "GHOSTS Post to Social Media", Cron = "*/10 * * * *", Enabled = true }
+    };
 }
 
 public class Nation
@@ -222,7 +259,8 @@ public record ScenarioParametersDto(
     string Objectives,
     string PoliticalContext,
     string RulesOfEngagement,
-    string VictoryConditions
+    string VictoryConditions,
+    List<ScenarioWorkflowBindingDto> WorkflowBindings = null
 );
 
 public record NationDto(string Name, string Alignment);
@@ -232,6 +270,8 @@ public record ThreatActorDto(string Name, string Type, int Capability, List<stri
 public record InjectDto(string Trigger, string Title);
 
 public record UserPoolDto(string Role, int Count);
+
+public record ScenarioWorkflowBindingDto(string WorkflowRef, string DisplayName, string Cron, bool Enabled);
 
 public record TechnicalEnvironmentDto(
     string NetworkTopology,

@@ -172,7 +172,9 @@ public class ScenariosController : ControllerBase
                 scenario.ScenarioParameters.Objectives,
                 scenario.ScenarioParameters.PoliticalContext,
                 scenario.ScenarioParameters.RulesOfEngagement,
-                scenario.ScenarioParameters.VictoryConditions
+                scenario.ScenarioParameters.VictoryConditions,
+                scenario.ScenarioParameters.WorkflowBindings.Select(wb => new ScenarioWorkflowBindingDto(
+                    wb.WorkflowRef, wb.DisplayName, wb.Cron, wb.Enabled)).ToList()
             ) : null,
             scenario.TechnicalEnvironment != null ? new TechnicalEnvironmentDto(
                 scenario.TechnicalEnvironment.NetworkTopology,

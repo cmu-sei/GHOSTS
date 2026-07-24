@@ -38,6 +38,8 @@ namespace Ghosts.Api.Infrastructure.Services
                     .ThenInclude(sp => sp.Injects)
                 .Include(s => s.ScenarioParameters)
                     .ThenInclude(sp => sp.UserPools)
+                .Include(s => s.ScenarioParameters)
+                    .ThenInclude(sp => sp.WorkflowBindings)
                 .Include(s => s.TechnicalEnvironment)
                     .ThenInclude(te => te.Vulnerabilities)
                 .Include(s => s.GameMechanics)
@@ -58,6 +60,8 @@ namespace Ghosts.Api.Infrastructure.Services
                     .ThenInclude(sp => sp.Injects)
                 .Include(s => s.ScenarioParameters)
                     .ThenInclude(sp => sp.UserPools)
+                .Include(s => s.ScenarioParameters)
+                    .ThenInclude(sp => sp.WorkflowBindings)
                 .Include(s => s.TechnicalEnvironment)
                     .ThenInclude(te => te.Vulnerabilities)
                 .Include(s => s.GameMechanics)
@@ -130,6 +134,8 @@ namespace Ghosts.Api.Infrastructure.Services
                     .ThenInclude(sp => sp.Injects)
                 .Include(s => s.ScenarioParameters)
                     .ThenInclude(sp => sp.UserPools)
+                .Include(s => s.ScenarioParameters)
+                    .ThenInclude(sp => sp.WorkflowBindings)
                 .Include(s => s.TechnicalEnvironment)
                     .ThenInclude(te => te.Vulnerabilities)
                 .Include(s => s.GameMechanics)
@@ -192,6 +198,14 @@ namespace Ghosts.Api.Infrastructure.Services
                         Role = up.Role,
                         Count = up.Count
                     }).ToList();
+
+                    // Only replace workflow bindings when the client explicitly supplies them,
+                    // so an older client omitting the field doesn't wipe seeded defaults.
+                    if (dto.ScenarioParameters.WorkflowBindings != null)
+                    {
+                        _context.ScenarioWorkflowBindings.RemoveRange(scenario.ScenarioParameters.WorkflowBindings);
+                        scenario.ScenarioParameters.WorkflowBindings = MapWorkflowBindings(dto.ScenarioParameters.WorkflowBindings);
+                    }
                 }
                 else
                 {
@@ -321,8 +335,36 @@ namespace Ghosts.Api.Infrastructure.Services
                     Ttps = string.Join(",", ta.Ttps)
                 }).ToList(),
                 Injects = dto.Injects.Select(i => new Inject { Trigger = i.Trigger, Title = i.Title }).ToList(),
-                UserPools = dto.UserPools.Select(up => new UserPool { Role = up.Role, Count = up.Count }).ToList()
+                UserPools = dto.UserPools.Select(up => new UserPool { Role = up.Role, Count = up.Count }).ToList(),
+                WorkflowBindings = MapWorkflowBindings(dto.WorkflowBindings)
             };
+        }
+
+        /// <summary>
+        /// Maps binding DTOs to entities, or seeds the default animation workflow set when none
+        /// are supplied — so a new scenario's runs come alive out of the box while staying overridable.
+        /// </summary>
+        private static List<ScenarioWorkflowBinding> MapWorkflowBindings(List<ScenarioWorkflowBindingDto> dtos)
+        {
+            if (dtos == null)
+            {
+                return ScenarioWorkflowBinding.Defaults()
+                    .Select(d => new ScenarioWorkflowBinding
+                    {
+                        WorkflowRef = d.WorkflowRef,
+                        DisplayName = d.DisplayName,
+                        Cron = d.Cron,
+                        Enabled = d.Enabled
+                    }).ToList();
+            }
+
+            return dtos.Select(b => new ScenarioWorkflowBinding
+            {
+                WorkflowRef = b.WorkflowRef,
+                DisplayName = b.DisplayName,
+                Cron = b.Cron,
+                Enabled = b.Enabled
+            }).ToList();
         }
 
         private static TechnicalEnvironment MapTechnicalEnvironment(TechnicalEnvironmentDto dto)
