@@ -103,6 +103,7 @@ namespace Ghosts.Api.Infrastructure.Models
 
         public void UpdateFromCheckIn(Machine checkIn)
         {
+            Status = StatusType.Active;
             Name = checkIn.Name;
             FQDN = checkIn.FQDN;
             Domain = checkIn.Domain;
