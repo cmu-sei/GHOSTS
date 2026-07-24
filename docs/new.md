@@ -1,5 +1,20 @@
 # What's New in GHOSTS 9
 
+## Version 9.1
+
+### Automatic NPC pools and default workflows on execution
+
+Creating an execution now brings a scenario to life automatically:
+
+- **NPC pools** — each `UserPool` (role + count) defined on the scenario generates that many execution-scoped NPCs when the execution is created. They are grouped by `Campaign` = scenario name, `Enclave` = run name, and `Team` = pool role. Pool NPCs exist as a population regardless of whether they are assigned to a machine (they may live in "greyspace").
+- **Default n8n workflows** — scenarios are seeded with a default set of animation workflow bindings (Belief, Social Graph, Post to Social Media). When an execution starts, these are scheduled on their cron and fired via n8n. Bindings are editable per scenario, referenced by stable webhook path, and the referenced workflows are activated in n8n automatically if inactive.
+
+### Database is recreated on upgrade
+
+> **Breaking:** GHOSTS uses `EnsureCreated()` and does not run EF migrations. The 9.1 schema adds a `scenarioworkflowbindings` table, so **an existing 9.0 database must be dropped and recreated** — it will not be altered in place. There is no automatic migration path.
+
+To upgrade, delete the `ghosts` database (or its Postgres volume) and restart the API; it recreates the schema and re-seeds on startup. Back up any data you need first.
+
 ## Version 9.0
 
 ### Angular 20 Frontend

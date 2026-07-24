@@ -54,7 +54,6 @@ public class ScenarioParameters
 /// Referenced by stable webhook path (e.g. "beliefs") rather than the n8n workflow id,
 /// which REST import can reassign. Resolved to the live workflow/webhook at fire time.
 /// </summary>
-[Table("scenario_workflow_bindings")]
 public class ScenarioWorkflowBinding
 {
     public int Id { get; set; }
