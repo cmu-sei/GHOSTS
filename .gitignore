@@ -356,3 +356,4 @@ site/
 .venv/*
 
 .devcontainer/devcontainer-lock.json
+src/Ghosts.Frontend/package-lock.json
