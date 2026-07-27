@@ -316,6 +316,11 @@
   .cell { color: var(--white-cell); }
   .beat-text { color: #e6ece8; }
 }
+.beat.amber {
+  border-left-color: var(--amber);
+  .cell { color: var(--amber); }
+  .beat-text { color: #ffe6c2; }
+}
 .beat.green {
   border-left-color: var(--green);
   .cell { color: var(--green); }
@@ -339,6 +344,14 @@
   margin-bottom: 0.8rem;
 }
 
+/* The umpire's ruling on the player's move: odds band → outcome tier + critique. */
+.ruling-line {
+  color: var(--amber);
+  margin-bottom: 0.8rem;
+  letter-spacing: 0.03rem;
+  text-shadow: 0 0 8px rgba(255, 179, 71, 0.4);
+}
+
 .header-line {
   color: var(--amber);
   text-align: center;
@@ -353,10 +366,19 @@
 }
 
 /* Thinking dots while the DM responds. */
+.thinking-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.4rem 0;
+}
+.thinking-label {
+  color: var(--green-dim);
+  font-size: 0.85rem;
+}
 .thinking {
   display: flex;
   gap: 0.3rem;
-  padding: 0.4rem 0;
 }
 .thinking span {
   width: 7px;
@@ -372,78 +394,6 @@
   0%, 80%, 100% { opacity: 0.2; }
   40% { opacity: 1; }
 }
-
-/* ── Options chips ───────────────────────────────────────────── */
-.options {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-  padding: 0.8rem 0;
-}
-
-.chip {
-  background: rgba(51, 255, 138, 0.06);
-  color: var(--green);
-  border: 1px solid var(--green-dim);
-  padding: 0.45rem 0.9rem;
-  font-family: var(--font);
-  font-size: 0.9rem;
-  cursor: pointer;
-  border-radius: 3px;
-  transition: all 0.12s ease;
-}
-.chip:hover {
-  background: var(--green);
-  color: var(--bg);
-  box-shadow: 0 0 12px var(--green-dim);
-}
-.chip .num {
-  display: inline-block;
-  margin-right: 0.5rem;
-  color: var(--amber);
-  font-weight: 700;
-}
-.chip:hover .num { color: var(--bg); }
-
-/* Intent-tinted chips: the decisive "contain" reads hot, recon cool. */
-.chip.intent-contain { border-color: var(--amber); color: var(--amber); background: rgba(255, 179, 71, 0.07); }
-.chip.intent-contain:hover { background: var(--amber); color: var(--bg); box-shadow: 0 0 12px rgba(255, 179, 71, 0.5); }
-.chip.intent-notify { border-color: var(--cyan); color: var(--cyan); background: rgba(84, 208, 255, 0.06); }
-.chip.intent-notify:hover { background: var(--cyan); color: var(--bg); box-shadow: 0 0 12px rgba(84, 208, 255, 0.5); }
-.chip.intent-wait { opacity: 0.75; }
-
-/* "Table it / next ticket" — pull the next queued ticket onto the board. */
-.chip.table-chip {
-  border-style: dashed;
-  border-color: var(--purple);
-  color: var(--purple);
-  background: rgba(176, 108, 255, 0.06);
-}
-.chip.table-chip:hover { background: var(--purple); color: var(--bg); box-shadow: 0 0 12px var(--purple-dim); }
-
-/* ── Worklist (tickets arrive one at a time; table to stack) ──── */
-.worklist { padding-top: 0.4rem; }
-.worklist-head {
-  color: var(--amber);
-  font-size: 0.8rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  padding: 0.3rem 0;
-}
-.task {
-  border-left: 2px solid var(--green-dim);
-  padding-left: 0.7rem;
-  margin: 0.5rem 0;
-}
-.task-tag {
-  display: flex;
-  gap: 0.6rem;
-  align-items: baseline;
-  font-size: 0.78rem;
-}
-.task-num { color: var(--amber); font-weight: 700; letter-spacing: 0.06em; }
-.task-tag .time { color: var(--green-dim); }
-.task .options { padding: 0.35rem 0 0.2rem; }
 
 /* ── Command input ───────────────────────────────────────────── */
 .command-row {
@@ -485,6 +435,38 @@
   color: var(--bg);
 }
 .send:disabled { opacity: 0.3; cursor: default; }
+
+/* Action + rationale order form (two stacked fields + the adjudicate button). */
+.command-row.order {
+  flex-wrap: wrap;
+}
+.command-row.order .order-field {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1 1 100%;
+}
+.command-row.order .order-field input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--green);
+  font-family: var(--font);
+  font-size: 1rem;
+  caret-color: var(--green);
+}
+.command-row.order .order-field input::placeholder {
+  color: var(--green-dim);
+  opacity: 0.6;
+}
+.command-row.order .order-field input:disabled { opacity: 0.4; }
+.command-row.order .order-field .prompt.dim {
+  color: var(--green-dim);
+  font-size: 0.8rem;
+  min-width: 4.2rem;
+}
+.command-row.order .send { margin-left: auto; }
 
 /* ── Scorecard ───────────────────────────────────────────────── */
 .scorecard {
@@ -548,30 +530,12 @@
 }
 .hud-clock.pressed .clock-lunch { color: var(--amber); }
 
-.fuse-clock {
-  margin-top: 0.85rem;
-  padding: 0.55rem 0.6rem 0.6rem;
-  border: 1px solid rgba(255, 179, 71, 0.55);
-  background: rgba(255, 179, 71, 0.06);
-  box-shadow: inset 0 0 14px rgba(255, 179, 71, 0.05);
+/* Adversary pressure gauge — red variant of the clock block. */
+.hud-clock.opfor .clock-value { color: var(--red); text-shadow: 0 0 12px rgba(255, 80, 96, 0.5); }
+.hud-clock.opfor.pressed .clock-value {
+  animation: fuse-pulse 1s steps(2, end) infinite;
 }
-.fuse-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 0.6rem;
-}
-.fuse-label {
-  color: var(--amber);
-  font-size: 0.62rem;
-  letter-spacing: 0.12rem;
-}
-.fuse-value {
-  color: var(--amber);
-  font-weight: 700;
-  font-size: 1rem;
-  text-shadow: 0 0 10px rgba(255, 179, 71, 0.55);
-}
+
 .fuse-track {
   height: 5px;
   margin-top: 0.45rem;
@@ -584,19 +548,7 @@
   box-shadow: 0 0 10px rgba(255, 179, 71, 0.6);
   transition: width 0.25s linear;
 }
-.fuse-clock.critical {
-  border-color: var(--red);
-  background: rgba(255, 80, 96, 0.08);
-  animation: fuse-pulse 1s steps(2, end) infinite;
-}
-.fuse-clock.critical .fuse-label,
-.fuse-clock.critical .fuse-value {
-  color: var(--red);
-}
-.fuse-clock.critical .fuse-track {
-  border-color: rgba(255, 80, 96, 0.55);
-}
-.fuse-clock.critical .fuse-fill {
+.fuse-fill.red {
   background: var(--red);
   box-shadow: 0 0 12px rgba(255, 80, 96, 0.75);
 }

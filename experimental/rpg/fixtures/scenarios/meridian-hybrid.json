@@ -1,0 +1,142 @@
+{
+  "_comment": "Kriegspiel Mode fixture v1. Hybrid cyber + cognitive scenario. The author supplies PIECES, not a fixed timeline: a kickoff situation, the player's mandate/objectives, OPFOR's objective + playbook (what it COULD do, gated by preconditions), a mutable world, and scheduled triggers (the clock's teeth). What actually happens is composed at runtime by the OPFOR agent + the judge. Fog is 'partial': the player perceives emitted indicators, never ground-truth flags. Meridian Logistics is targeted by Cinder Wolf, who couples a network intrusion with an influence campaign to force a ransom by eroding public and board confidence.",
+
+  "catalog": {
+    "listed": true,
+    "sortOrder": 1,
+    "era": "Modern",
+    "theater": "Meridian Logistics — Hybrid",
+    "estimatedMinutes": 20
+  },
+
+  "scenario": {
+    "id": 10,
+    "name": "Meridian Under Pressure: Hybrid Intrusion",
+    "description": "You are the incident commander at Meridian Logistics. An adversary is inside your network AND running an influence campaign to break your board's nerve. Deny them their objective before the clock — and the narrative — runs away from you.",
+    "situation": "0900. You take the incident commander's seat at Meridian Logistics. Overnight, your SOC flagged anomalous authentication on the finance segment, and your comms team noticed a small but coordinated cluster of social posts alleging Meridian mishandles customer shipping data. Nothing is confirmed. The board meets at end of day and will ask two questions: is our data safe, and is our name safe. You have both to protect, and you cannot yet prove either is under attack.",
+
+    "player": {
+      "role": "Incident Commander, Meridian Logistics",
+      "mandate": "Protect Meridian's data (deny the intrusion) and Meridian's reputation (deny the influence campaign). You direct both the SOC and the comms cell. You may investigate, contain, isolate, reset credentials, preserve evidence, brief the board, issue public statements, coordinate with the platform/press, and prebunk or debunk claims.",
+      "roe": "You may act inside Meridian's own estate freely. External statements must be truthful and coordinated with legal. No offensive action against the adversary's infrastructure ('hack back' is out of bounds)."
+    },
+
+    "opfor": {
+      "name": "Cinder Wolf",
+      "objective": "Force Meridian to pay by (a) establishing the ability to encrypt the finance file share and (b) convincing the board and public that Meridian has already lost control of customer data. Cyber pressure and narrative pressure reinforce each other.",
+      "winThreshold": 5,
+      "playbook": [
+        {
+          "id": "harvest-creds",
+          "domain": "cyber",
+          "description": "Phish finance staff and harvest a valid credential to deepen access.",
+          "preconds": "!creds-reset",
+          "setFlags": ["has-foothold"],
+          "progress": 1,
+          "indicators": ["Impossible-travel sign-in flagged on a finance account", "A finance clerk reports a odd 'password expiry' email"]
+        },
+        {
+          "id": "spread-lateral",
+          "domain": "cyber",
+          "description": "Use the foothold to move laterally toward the file server FS01.",
+          "preconds": "flag:has-foothold && !host-isolated",
+          "setFlags": ["near-fileshare"],
+          "progress": 1,
+          "indicators": ["SMB authentication spikes from FIN-WS-04 to FS01", "EDR notes lateral tooling on a finance workstation"]
+        },
+        {
+          "id": "stage-ransom",
+          "domain": "cyber",
+          "description": "Stage the encryptor on FS01, ready to detonate — the decisive cyber threat.",
+          "preconds": "flag:near-fileshare && !host-isolated",
+          "setFlags": ["ransom-staged"],
+          "progress": 2,
+          "indicators": ["Shadow-copy deletion attempts observed on FS01", "A new service was created on the file server overnight"]
+        },
+        {
+          "id": "seed-narrative",
+          "domain": "cognitive",
+          "description": "Amplify the 'Meridian leaks customer data' claim through a coordinated inauthentic cluster.",
+          "preconds": "!narrative-countered",
+          "setFlags": ["narrative-seeded"],
+          "progress": 1,
+          "indicators": ["#MeridianLeaks appears with unnatural posting velocity", "Several near-identical accounts push the same screenshot"]
+        },
+        {
+          "id": "leak-lure",
+          "domain": "cognitive",
+          "description": "Publish a partial (real or fabricated) 'data sample' to make the leak claim credible.",
+          "preconds": "flag:narrative-seeded && !narrative-countered",
+          "setFlags": ["leak-published"],
+          "progress": 2,
+          "indicators": ["A paste site hosts a file labelled 'Meridian customer export'", "A reporter emails asking Meridian to confirm a breach"]
+        }
+      ]
+    },
+
+    "world": {
+      "assets": ["FIN-WS-04 (finance workstation)", "FS01 (finance file server)", "DC01 (domain controller)", "Meridian corporate comms channels"],
+      "facts": {
+        "board_meeting": "End of day; board will ask if data and reputation are secure.",
+        "soc_status": "Anomalous auth flagged on the finance segment; not yet triaged.",
+        "comms_status": "A small coordinated cluster is alleging data mishandling."
+      },
+      "flags": [],
+      "narrativeEnv": {
+        "platforms": "Public microblog platform + a paste site are the adversary's amplification surface.",
+        "audience": "Board, customers, trade press."
+      }
+    },
+
+    "triggers": [
+      {
+        "id": "press-deadline",
+        "when": "clock>=40",
+        "inject": "A trade reporter sets a 30-minute deadline for comment on the alleged data leak.",
+        "indicators": ["Press deadline: comment requested on the leak allegation"]
+      },
+      {
+        "id": "board-checkin",
+        "when": "clock>=70",
+        "inject": "The board chair asks for an interim read: are our data and our name safe?",
+        "indicators": ["Board chair requests an interim assessment"]
+      }
+    ],
+
+    "clock": {
+      "windowMinutes": 90,
+      "tickMinutes": 12,
+      "label": "to the board meeting"
+    },
+
+    "fog": {
+      "default": "partial"
+    },
+
+    "objectives": [
+      {
+        "id": 1,
+        "name": "Establish the picture",
+        "description": "Determine whether the authentication anomaly and the social claims are a real, coordinated attack rather than noise.",
+        "successCriteria": "Player investigates/correlates the cyber and cognitive indicators before committing to a public position.",
+        "priority": 2
+      },
+      {
+        "id": 2,
+        "name": "Deny the intrusion",
+        "description": "Stop the adversary reaching and staging ransomware on the finance file share.",
+        "successCriteria": "The foothold is cut (credentials reset AND the affected host isolated) before the encryptor is staged on FS01.",
+        "metWhen": "flag:creds-reset && flag:host-isolated",
+        "priority": 1
+      },
+      {
+        "id": 3,
+        "name": "Deny the narrative",
+        "description": "Prevent the influence campaign from convincing the board and public that Meridian has lost control of customer data.",
+        "successCriteria": "Player counters the narrative truthfully (prebunk/debunk + coordinated statement) before the leak lure lands.",
+        "metWhen": "flag:narrative-countered",
+        "priority": 1
+      }
+    ]
+  }
+}

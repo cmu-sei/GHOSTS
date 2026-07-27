@@ -1,9 +1,14 @@
-"""Ollama client with a deterministic offline fallback.
+"""LLM clients for the judge/OPFOR brain, with a deterministic offline fallback.
 
-Mirrors GHOSTS' OllamaConnectorService: POST {host}/api/generate, streaming NDJSON,
-env OLLAMA_HOST / OLLAMA_MODEL. When no model is configured (or the host is
-unreachable), `generate` returns None so the DM falls back to its templated path.
-The whole game stays playable with no model present."""
+Two providers, selected by Settings.llm_provider:
+  - "ollama"  (default): POST {host}/api/generate, streaming NDJSON. Mirrors
+    GHOSTS' OllamaConnectorService (env OLLAMA_HOST / OLLAMA_MODEL).
+  - "bedrock": AWS Bedrock Anthropic Messages API via boto3.
+
+Both expose the same contract the judge/OPFOR rely on — `enabled` and
+`generate(prompt, system) -> str | None`. When the backend is unconfigured or
+unreachable, `generate` returns None so the game falls back to its templated
+path and stays playable with no model present."""
 
 from __future__ import annotations
 
@@ -32,7 +37,7 @@ class OllamaClient:
         if system:
             payload["system"] = system
         try:
-            timeout = httpx.Timeout(60.0, connect=2.0)
+            timeout = httpx.Timeout(self.settings.ollama_timeout, connect=2.0)
             with httpx.Client(timeout=timeout) as client:
                 resp = client.post(url, json=payload)
                 resp.raise_for_status()
@@ -51,3 +56,64 @@ class OllamaClient:
                 return text or None
         except (httpx.HTTPError, OSError):
             return None
+
+
+class BedrockClient:
+    """AWS Bedrock via the Anthropic Messages API (boto3 bedrock-runtime).
+
+    Credentials/region come from the standard AWS environment (AWS_REGION,
+    AWS_ACCESS_KEY_ID, ...). boto3 is imported lazily so the Ollama path never
+    depends on it."""
+
+    def __init__(self, settings: Optional[Settings] = None):
+        self.settings = settings or Settings.from_env()
+        self._client = None  # lazy boto3 bedrock-runtime client
+
+    @property
+    def enabled(self) -> bool:
+        return bool(self.settings.bedrock_model)
+
+    def _runtime(self):
+        if self._client is None:
+            import boto3  # lazy: only needed for the bedrock provider
+
+            self._client = boto3.client(
+                "bedrock-runtime", region_name=self.settings.bedrock_region
+            )
+        return self._client
+
+    def generate(self, prompt: str, system: Optional[str] = None) -> Optional[str]:
+        """Return generated text, or None if disabled/unreachable (=> use fallback)."""
+        if not self.enabled:
+            return None
+        body = {
+            "anthropic_version": "bedrock-2023-05-31",
+            "max_tokens": self.settings.bedrock_max_tokens,
+            "messages": [{"role": "user", "content": prompt}],
+        }
+        if system:
+            body["system"] = system
+        try:
+            resp = self._runtime().invoke_model(
+                modelId=self.settings.bedrock_model,
+                body=json.dumps(body),
+            )
+            payload = json.loads(resp["body"].read())
+            parts = [
+                block.get("text", "")
+                for block in payload.get("content", [])
+                if block.get("type") == "text"
+            ]
+            text = "".join(parts).strip()
+            return text or None
+        except Exception:
+            # Any boto/credential/throttling error => offline fallback.
+            return None
+
+
+def make_llm(settings: Optional[Settings] = None):
+    """Build the LLM client for the configured provider (default: Ollama)."""
+    settings = settings or Settings.from_env()
+    if settings.llm_provider == "bedrock":
+        return BedrockClient(settings)
+    return OllamaClient(settings)

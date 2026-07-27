@@ -1,52 +1,35 @@
-// Mirrors the FastAPI Frame/Beat/AAR/HUD payloads (snake_case as the API returns).
+// Mirrors the FastAPI Frame/Beat/AAR/HUD payloads for Kriegspiel Mode.
 
 export interface Beat {
-  step_number: number;
-  cell: string;
-  time: string;
+  turn: number;
+  speaker: string; // Judge | Signals | Control | Player
   text: string;
 }
 
 export interface Objective {
   id: number;
   name: string;
+  status: string; // Active | Achieved | Failed
   met: boolean;
 }
 
 export interface Hud {
   scenario: string;
-  step: number | null;
-  time: string | null;
   role: string;
+  mandate: string;
   objectives: Objective[];
-  flags: string[];
-  knowledge: string[];
-  umpireFindings: string[];
-  assumptions: string[];
-  constraints: string[];
-  threats: string[];
-  openTasks: number;
-  shownTasks: number;
-  queuedTasks: number;
+  indicators: string[];
+  turn: number;
   minutesLeft: number;
-  lunchMinutes: number;
-  windowLabel: string;
-  containmentFuseMinutes: number | null;
-  containmentFuseMinutesLeft: number | null;
-  containmentContained: boolean;
-  deadlineLabel: string;
-}
-
-export interface TaskAction {
-  label: string;
-  intent: string; // investigate | contain | notify | wait
-}
-
-export interface Task {
-  step: number;
-  time: string;
-  prompt: string;
-  actions: TaskAction[];
+  windowMinutes: number;
+  clockLabel: string;
+  opforName: string;
+  opforProgress: number;
+  opforThreshold: number;
+  threats: string[];
+  // Present only when fog is 'off' (training/debug).
+  flags?: string[];
+  facts?: Record<string, string>;
 }
 
 export interface Aar {
@@ -56,20 +39,22 @@ export interface Aar {
   objectives_met: number;
   objectives_total: number;
   minutes_spent: number;
-  lunch_minutes: number;
-  made_lunch: boolean;
+  window_minutes: number;
+  opfor_progress: number;
+  opfor_threshold: number;
   highlights: string[];
 }
 
 export interface Frame {
   beats: Beat[];
-  tasks: Task[];
   awaiting_player: boolean;
+  band: string | null; // odds band the judge assigned this turn
+  critique: string;
+  tier: string | null; // resolved outcome tier
   notices: string[];
   is_complete: boolean;
   aar: Aar | null;
   hud: Hud;
-  can_table: boolean;
 }
 
 export interface GameResponse {
@@ -85,7 +70,6 @@ export interface FixtureSummary {
   era: string;
   theater: string;
   estimatedMinutes: number;
-  events: number;
   objectives: number;
 }
 
