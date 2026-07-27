@@ -1,7 +1,9 @@
 """Deterministic after-action review.
 
-Derives win/loss and a grade from canonical engine state — objective statuses plus
-the branch the timeline actually took. Not LLM-judged (DESIGN.md §6 step 6)."""
+Derives the grade from canonical engine state — the outcome the engine already set
+(WIN/LOSS/INCOMPLETE), objective coverage, whether OPFOR was denied, and the clock.
+Not LLM-judged. The debrief surfaces the odds/roll history so the player can see how
+the umpire read each of their moves."""
 
 from __future__ import annotations
 
@@ -12,86 +14,73 @@ from .engine import Engine
 
 @dataclass
 class Aar:
-    outcome: str  # "WIN" | "LOSS" | "INCOMPLETE"
+    outcome: str  # WIN | LOSS | INCOMPLETE
     grade: str  # A/B/C/D/F
     score: int  # 0-100
     objectives_met: int
     objectives_total: int
     minutes_spent: int = 0
-    lunch_minutes: int = 0
-    made_lunch: bool = True
+    window_minutes: int = 0
+    opfor_progress: int = 0
+    opfor_threshold: int = 0
     highlights: list[str] = field(default_factory=list)
 
 
 def review(engine: Engine) -> Aar:
-    objs = engine.bundle.objectives
+    sc = engine.scenario
+    objs = sc.objectives
     total = len(objs)
     met = sum(1 for o in objs if engine.state.objective_status.get(o.id) == "Achieved")
 
-    # WIN = the player steered onto every favorable branch, i.e. set every steering
-    # flag the scenario tracks (phishing: 'contained'; soc-morning: 'ransomware-
-    # contained'). Data-driven so each scenario defines its own containment.
-    contained = bool(engine.known_flags) and engine.known_flags <= engine.state.flags
-    outcome = "INCOMPLETE"
-    if engine.state.is_complete:
-        outcome = "WIN" if contained else "LOSS"
+    outcome = engine.state.outcome or ("WIN" if engine.objectives_met else "INCOMPLETE")
 
-    # The lunch clock: clearing the worklist before the window runs out earns the
-    # urgency bonus; working through lunch costs it. A detonation forfeits lunch
-    # outright — you're now working an incident, not eating.
-    spent = engine.state.minutes_spent
-    budget = engine.lunch_minutes
-    made_lunch = spent <= budget and not engine.state.detonated
-
-    # A detonation is a hard failure: the threat encrypted the share before you
-    # contained it. Whatever triage you did doesn't redeem the outcome — cap it in
-    # the F range and don't award the made-lunch bonus for a morning you lost.
-    detonated = engine.state.detonated
+    # Score: objective coverage is the bulk; deny OPFOR for the win bonus; finishing
+    # inside the clock earns a tempo bonus. A LOSS caps in the F range regardless of
+    # coverage — the adversary achieved their aim.
     coverage = (met / total) if total else 0.0
-    if detonated:
-        score = round(coverage * 25)  # partial triage credit only, F-range ceiling
+    denied = not engine.opfor_won
+    made_window = engine.minutes_left > 0
+    if outcome == "LOSS":
+        score = round(coverage * 30)  # partial credit only
     else:
-        score = round(coverage * 65 + (15 if contained else 0) + (10 if engine.state.is_complete else 0) + (10 if made_lunch else 0))
+        score = round(
+            coverage * 60
+            + (25 if denied and outcome == "WIN" else 0)
+            + (15 if made_window and outcome == "WIN" else 0)
+        )
     score = max(0, min(100, score))
-    grade = _grade(score)
 
     highlights: list[str] = []
     for o in objs:
         done = engine.state.objective_status.get(o.id) == "Achieved"
-        highlights.append(f"[{'x' if done else ' '}] {o.name}")
-    if engine.state.is_complete:
-        if detonated:
-            highlights.append(
-                f"The decision deadline expired at the {engine.containment_deadline}m mark."
-            )
-        else:
-            highlights.append(
-                "Secured the scenario's favorable branch."
-                if contained
-                else "Missed the decisive condition; the unfavorable branch fired."
-            )
-            highlights.append(
-                f"Cleared the worklist in {spent}m of the {budget}m exercise window."
-                if made_lunch
-                else f"Used the full {budget}m exercise window."
-            )
-        if engine.state.assumptions:
-            highlights.append(
-                "Assumptions tested: " + "; ".join(engine.state.assumptions[:3])
-            )
-        if engine.state.umpire_findings:
-            highlights.append(
-                "Schlussbesprechung: " + " | ".join(engine.state.umpire_findings[-3:])
-            )
+        failed = engine.state.objective_status.get(o.id) == "Failed"
+        mark = "x" if done else "!" if failed else " "
+        highlights.append(f"[{mark}] {o.name}")
+
+    if sc.opfor.win_threshold > 0:
+        highlights.append(
+            f"{sc.opfor.name or 'OPFOR'} progress: "
+            f"{engine.state.opfor_progress}/{sc.opfor.win_threshold}"
+            + (" — objective achieved." if engine.opfor_won else " — denied.")
+        )
+    highlights.append(
+        f"Closed in {engine.state.clock_minutes}m of the {engine.window_minutes}m window."
+    )
+
+    # Schlussbesprechung: how the umpire read the player's decisions.
+    for r in engine.state.rulings[-4:]:
+        highlights.append(f"T{r.turn} [{r.band}→{r.tier}] {r.action}: {r.critique}")
+
     return Aar(
         outcome=outcome,
-        grade=grade,
+        grade=_grade(score),
         score=score,
         objectives_met=met,
         objectives_total=total,
-        minutes_spent=spent,
-        lunch_minutes=budget,
-        made_lunch=made_lunch,
+        minutes_spent=engine.state.clock_minutes,
+        window_minutes=engine.window_minutes,
+        opfor_progress=engine.state.opfor_progress,
+        opfor_threshold=sc.opfor.win_threshold,
         highlights=highlights,
     )
 

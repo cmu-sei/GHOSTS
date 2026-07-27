@@ -1,52 +1,44 @@
-"""The authoritative game engine.
+"""The authoritative world-state engine.
 
-Pure state machine over a ScenarioBundle + GameState. It owns:
+Pure state machine over a ScenarioBundle + WorldState. No fixed timeline: the
+engine holds mutable ground truth and answers three questions each turn —
 
-- the step pointer (walk timeline events in Number order),
-- the condition grammar (flag:x / !x / objective:N / &&),
-- forward branch selection (lowest-Number later step whose condition holds),
-- validation of proposed effects against the loaded scenario.
+  - what could happen next  -> available_moves() / pending_triggers()
+  - resolve the odds        -> roll(band) (hidden, seeded)
+  - apply what happened      -> apply_deltas() (validated here)
 
-The Dungeon Master (dm.py) may only *propose* effects; the engine decides what is
-legal and which branch fires. The engine never narrates and never calls the DM —
-control flow is its own. Branching is engine-evaluated, never LLM-chosen.
+The judge (judge.py) and OPFOR (opfor.py) only *propose* deltas and choices; the
+engine decides what is legal, advances the clock, fires triggers, and computes the
+end condition. Branch selection is engine-evaluated, never LLM-chosen.
 """
 
 from __future__ import annotations
 
+import hashlib
 from dataclasses import dataclass, field
-from enum import Enum
 from typing import Optional
 
-from .models import GameState, ScenarioBundle, TimelineEvent
-
-
-class EffectKind(str, Enum):
-    SET_FLAG = "setFlag"
-    COMPLETE_OBJECTIVE = "completeObjective"
-    ADD_KNOWLEDGE = "addKnowledge"
-    ADD_INVENTORY = "addInventory"
-    ADVANCE = "advanceStep"
-
-
-@dataclass
-class Effect:
-    kind: EffectKind
-    value: str | int = ""
+from .models import (
+    OddsBand,
+    OutcomeTier,
+    PlaybookMove,
+    ScenarioBundle,
+    Trigger,
+    WorldState,
+)
 
 
 @dataclass
-class Proposal:
-    """One player action, decomposed into atomic effects the engine validates.
+class Deltas:
+    """A validated set of state changes proposed by the judge or a move/trigger.
 
-    The DM produces this; the engine adjudicates. `resolves_task` tells the
-    orchestration whether this action clears the targeted worklist task (recon is
-    "soft" and leaves the task open). `minutes` is what the action costs the lunch
-    clock."""
+    The engine applies only the parts that reference things the scenario tracks."""
 
-    action_label: str
-    effects: list[Effect] = field(default_factory=list)
-    resolves_task: bool = False
+    set_flags: list[str] = field(default_factory=list)
+    set_facts: dict[str, str] = field(default_factory=dict)
+    complete_objectives: list[int] = field(default_factory=list)
+    fail_objectives: list[int] = field(default_factory=list)
+    opfor_progress: int = 0
     minutes: int = 0
 
 
@@ -55,37 +47,62 @@ class ApplyResult:
     messages: list[str] = field(default_factory=list)
     applied: int = 0
 
-    @property
-    def any_applied(self) -> bool:
-        return self.applied > 0
+
+# The odds -> outcome-tier distribution. Each band maps to cumulative thresholds on
+# a 0.0-1.0 roll: (success_max, partial_max, failure_max); above failure_max is a
+# backfire. A stronger band shifts probability mass toward success.
+_BANDS: dict[OddsBand, tuple[float, float, float]] = {
+    OddsBand.LIKELY: (0.70, 0.90, 0.98),
+    OddsBand.EVEN: (0.45, 0.75, 0.93),
+    OddsBand.UNLIKELY: (0.20, 0.50, 0.85),
+    OddsBand.LONGSHOT: (0.08, 0.30, 0.75),
+}
 
 
 class Engine:
-    def __init__(self, bundle: ScenarioBundle, state: Optional[GameState] = None):
+    def __init__(self, bundle: ScenarioBundle, state: Optional[WorldState] = None):
         self.bundle = bundle
-        self.state = state or GameState()
-        self.events: list[TimelineEvent] = sorted(
-            (bundle.scenario.timeline.events if bundle.scenario.timeline else []),
-            key=lambda e: e.number,
-        )
-        self._by_num = {e.number: e for e in self.events}
+        self.scenario = bundle.scenario
+        self.state = state or WorldState()
+        self._triggers = {t.id: t for t in self.scenario.triggers}
+        self._objectives = {o.id: o for o in self.scenario.objectives}
         self.known_flags = self._collect_known_flags()
-        # The lunch clock: the exercise window in minutes. The player is racing to
-        # clear the worklist before this runs out (DESIGN: priority + urgency).
-        mech = bundle.scenario.game_mechanics
-        self.lunch_minutes = max(1, int(round((mech.duration_hours if mech else 1.0) * 60)))
-        # The fuse: minutes on the lunch clock by which the steering flag(s) must be
-        # set or the threat detonates onto the loss branch. None => no deadline.
-        self.containment_deadline = mech.containment_deadline_minutes if mech else None
-        # Seed objective statuses from the scenario.
-        if not self.state.objective_status:
-            self.state.objective_status = {o.id: o.status for o in bundle.objectives}
+        # Flags OPFOR sets through its own playbook — the adversary's ground truth.
+        # The judge (adjudicating the player's move) must never set these; OPFOR
+        # earns its own progress via precondition-gated moves.
+        self.opfor_flags = {f for m in self.scenario.opfor.playbook for f in m.set_flags}
+        # Flags the judge may set as a consequence of the player's action.
+        self.defender_flags = self.known_flags - self.opfor_flags
 
-    # ── condition grammar ──────────────────────────────────────────────
+    # ── lifecycle ────────────────────────────────────────────────────────
+
+    def start(self) -> None:
+        """Seed world state from the authored spec."""
+        w = self.scenario.world
+        if not self.state.flags:
+            self.state.flags = set(w.flags)
+        if not self.state.facts:
+            self.state.facts = dict(w.facts)
+        if not self.state.objective_status:
+            self.state.objective_status = {o.id: "Active" for o in self.scenario.objectives}
+
+    @property
+    def window_minutes(self) -> int:
+        return max(1, self.scenario.clock.window_minutes)
+
+    @property
+    def tick_minutes(self) -> int:
+        return max(0, self.scenario.clock.tick_minutes)
+
+    @property
+    def minutes_left(self) -> int:
+        return max(0, self.window_minutes - self.state.clock_minutes)
+
+    # ── condition grammar (flag:x / !x / objective:N / clock>=N joined by &&) ──
 
     def evaluate_condition(self, condition: Optional[str]) -> bool:
-        """flag:x / !x / objective:N joined by &&. Empty => open (no gate).
-        An unparseable term gates the step (returns False) — never silently open."""
+        """Empty => always true. An unparseable term gates the condition (False),
+        never silently opens it."""
         if condition is None or not condition.strip():
             return True
         for raw in condition.split("&&"):
@@ -105,263 +122,178 @@ class Engine:
             try:
                 oid = int(term[len("objective:"):].strip())
             except ValueError:
-                return False  # unparseable -> gated
+                return False
             return self.state.objective_status.get(oid) == "Achieved"
+        if term.startswith("clock>="):
+            try:
+                threshold = int(term[len("clock>="):].strip())
+            except ValueError:
+                return False
+            return self.state.clock_minutes >= threshold
         return False  # unknown term -> gated
 
-    # ── step pointer / branch selection ────────────────────────────────
+    # ── what could happen next ──────────────────────────────────────────
 
-    def start(self) -> None:
-        first = self._eligible_after(0)
-        if first is None:
-            self.state.is_complete = True
-        else:
-            self.state.current_step = first.number
-
-    def current_event(self) -> Optional[TimelineEvent]:
-        if self.state.is_complete:
-            return None
-        return self._by_num.get(self.state.current_step)
-
-    def advance(self) -> Optional[TimelineEvent]:
-        """Select the next eligible step. Branch events whose condition is false
-        are skipped permanently (we only ever look forward)."""
-        nxt = self._eligible_after(self.state.current_step)
-        if nxt is None:
-            self.state.is_complete = True
-            return None
-        self.state.current_step = nxt.number
-        return nxt
-
-    def _eligible_after(self, cursor: int) -> Optional[TimelineEvent]:
-        candidates = [
-            e
-            for e in self.events
-            if e.number > cursor and self.evaluate_condition(e.trigger_condition)
+    def available_moves(self) -> list[PlaybookMove]:
+        """OPFOR's live menu: playbook moves whose preconditions hold and that have
+        not already been played."""
+        return [
+            m
+            for m in self.scenario.opfor.playbook
+            if m.id not in self.state.opfor_moves_played
+            and self.evaluate_condition(m.preconds)
         ]
-        return min(candidates, key=lambda e: e.number) if candidates else None
 
-    # ── worklist (parallel open tasks) ─────────────────────────────────
+    def pending_triggers(self) -> list[Trigger]:
+        """Triggers whose condition now holds and that have not yet fired."""
+        return [
+            t
+            for t in self.scenario.triggers
+            if t.id not in self.state.fired_triggers and self.evaluate_condition(t.when)
+        ]
 
-    def open_worklist(self) -> list[TimelineEvent]:
-        """The set of Blue-Team tasks open right now, cleared in any order.
+    # ── resolve the odds (hidden, seeded) ───────────────────────────────
 
-        Starting at the current step, this is the maximal contiguous run of
-        eligible Blue-Team events (skipping any whose TriggerCondition is unmet),
-        minus the ones already resolved this worklist. When the current step is a
-        computer-owned event the worklist is empty (the DM is still playing)."""
-        cur = self.current_event()
-        if cur is None or not cur.is_player_turn:
-            return []
-        tasks: list[TimelineEvent] = []
-        for e in self.events:
-            if e.number < cur.number:
-                continue
-            if not self.evaluate_condition(e.trigger_condition):
-                continue
-            if not e.is_player_turn:
-                break  # a computer beat ends the run of open player tasks
-            if e.number not in self.state.cleared_steps:
-                tasks.append(e)
-        return tasks
+    def roll(self, band: OddsBand) -> OutcomeTier:
+        """Resolve a band into an outcome tier with a hidden, deterministic roll.
 
-    def clear_task(self, step_number: int) -> None:
-        self.state.cleared_steps.add(step_number)
+        Seeded on the turn number + band so a session replays identically and tests
+        are stable, while the player cannot see or predict the result."""
+        thresholds = _BANDS.get(band, _BANDS[OddsBand.EVEN])
+        r = self._seeded_roll(f"{self.state.turn}:{band.value}")
+        success_max, partial_max, failure_max = thresholds
+        if r <= success_max:
+            return OutcomeTier.SUCCESS
+        if r <= partial_max:
+            return OutcomeTier.PARTIAL
+        if r <= failure_max:
+            return OutcomeTier.FAILURE
+        return OutcomeTier.BACKFIRE
 
-    # ── revealed tickets (tickets arrive one at a time) ────────────────
+    def _seeded_roll(self, salt: str) -> float:
+        """A deterministic float in [0,1). Date/random are unavailable and would
+        break replay anyway; a hash of state gives stable per-turn variety."""
+        digest = hashlib.sha256(f"{self.scenario.id}:{salt}".encode()).hexdigest()
+        return int(digest[:8], 16) / 0xFFFFFFFF
 
-    def revealed_worklist(self) -> list[TimelineEvent]:
-        """The open tasks currently *surfaced* to the player, in order.
+    # ── apply what happened (validation lives here) ─────────────────────
 
-        Tickets arrive one at a time: by default only the first open task is
-        revealed. Tabling reveals the next one without clearing the current, and
-        resolving a task auto-reveals the next — so the player can stack up to the
-        whole worklist, but doesn't start with it. The full open worklist stays
-        authoritative for the fuse, branch advance, and flag ownership."""
-        open_tasks = self.open_worklist()
-        if not open_tasks:
-            return []
-        revealed = [e for e in open_tasks if e.number in self.state.revealed_steps]
-        if not revealed:  # always surface at least the first open ticket
-            first = open_tasks[0]
-            self.state.revealed_steps.add(first.number)
-            revealed = [first]
-        return revealed
-
-    def reveal_next(self) -> Optional[TimelineEvent]:
-        """Surface the next open ticket not yet revealed ('table' the current one).
-        Returns the newly revealed task, or None if every open ticket is showing."""
-        self.revealed_worklist()  # ensure the first ticket is seeded
-        for e in self.open_worklist():
-            if e.number not in self.state.revealed_steps:
-                self.state.revealed_steps.add(e.number)
-                return e
-        return None
-
-    def has_unrevealed_tasks(self) -> bool:
-        return any(e.number not in self.state.revealed_steps for e in self.open_worklist())
-
-    def spend_time(self, minutes: int) -> None:
-        """Burn minutes off the lunch clock (clamped at the window)."""
-        if minutes <= 0:
-            return
-        self.state.minutes_spent = min(self.lunch_minutes, self.state.minutes_spent + minutes)
-
-    @property
-    def minutes_left(self) -> int:
-        return max(0, self.lunch_minutes - self.state.minutes_spent)
-
-    # ── the containment fuse ────────────────────────────────────────────
-
-    @property
-    def is_contained(self) -> bool:
-        """True once every steering flag the scenario tracks is set — the same
-        'contained' test scoring uses to award the win."""
-        return bool(self.known_flags) and self.known_flags <= self.state.flags
-
-    def fuse_blown(self) -> bool:
-        """The deadline has passed with the threat still un-contained. A no-op when
-        the scenario sets no deadline, once already contained, or once detonated."""
-        return (
-            self.containment_deadline is not None
-            and not self.state.detonated
-            and not self.is_contained
-            and self.state.minutes_spent >= self.containment_deadline
-        )
-
-    def detonate(self) -> Optional[TimelineEvent]:
-        """The fuse blew: the threat detonates. Abandon the open worklist, lock the
-        loss branch, and jump the step pointer onto the first computer event past the
-        worklist run — which, with the steering flag unset, is the loss branch."""
-        self.state.detonated = True
-        # Walk to the end of the current contiguous Blue-Team worklist run so we
-        # advance past every abandoned ticket, not just the current one.
-        last_blue = self.state.current_step
-        for e in self.events:
-            if e.number < self.state.current_step:
-                continue
-            if not self.evaluate_condition(e.trigger_condition):
-                continue
-            if not e.is_player_turn:
-                break
-            last_blue = e.number
-        self.state.cleared_steps.clear()
-        self.state.revealed_steps.clear()
-        nxt = self._eligible_after(last_blue)
-        if nxt is None:
-            self.state.is_complete = True
-            return None
-        self.state.current_step = nxt.number
-        return nxt
-
-    def out_of_time(self) -> bool:
-        """The lunch clock is exhausted — the morning is over regardless of the queue."""
-        return self.minutes_left <= 0
-
-    def advance_past_worklist(self) -> Optional[TimelineEvent]:
-        """Called once the open worklist is empty: jump the step pointer past the
-        last cleared task onto the next eligible (computer) event, then reset the
-        per-worklist cleared set."""
-        last = max(self.state.cleared_steps) if self.state.cleared_steps else self.state.current_step
-        self.state.cleared_steps.clear()
-        self.state.revealed_steps.clear()
-        nxt = self._eligible_after(last)
-        if nxt is None:
-            self.state.is_complete = True
-            return None
-        self.state.current_step = nxt.number
-        return nxt
-
-    def flags_owned_by(self, event: TimelineEvent) -> list[str]:
-        """The forward branch flags this specific task is responsible for setting.
-
-        With several tasks open at once, a decisive action on one task must not
-        satisfy another task's branch. A task owns a forward flag when the flag's
-        name appears in the success criteria/description of an objective the task
-        references — the data's own link between a task and the branch it steers."""
-        candidates = self.positive_flags_ahead()
-        if not candidates:
-            return []
-        # A lone open task has no sibling to conflict with — it owns the branch.
-        if len(self.open_worklist()) <= 1:
-            return candidates
-        by_id = {o.id: o for o in self.bundle.objectives}
-        text = " ".join(
-            f"{o.name} {o.description} {o.success_criteria}".lower()
-            for oid in event.objective_ids
-            if (o := by_id.get(oid))
-        )
-        return [f for f in candidates if f.lower() in text]
-
-    def positive_flags_ahead(self) -> list[str]:
-        """Flags referenced positively (flag:x) on the computer branch run that
-        follows the current worklist. A decisive player action sets these to steer
-        the timeline onto the favorable branch; doing nothing falls to the !x branch.
-
-        Sibling player tasks in the open worklist are skipped; collection stops at
-        the next player turn after that branch run."""
-        out: list[str] = []
-        seen_computer = False
-        for e in self.events:
-            if e.number <= self.state.current_step:
-                continue
-            if e.is_player_turn:
-                if seen_computer:
-                    break
-                continue  # another open worklist task — not a branch event
-            seen_computer = True
-            for raw in (e.trigger_condition or "").split("&&"):
-                term = raw.strip()
-                if term.startswith("flag:"):
-                    flag = term[len("flag:"):].strip()
-                    if flag and flag not in out:
-                        out.append(flag)
-        return out
-
-    # ── effect application (validation lives here) ──────────────────────
-
-    def apply(self, proposal: Proposal) -> ApplyResult:
+    def apply_deltas(self, deltas: Deltas) -> ApplyResult:
         result = ApplyResult()
-        for eff in proposal.effects:
-            ok, msg = self._apply_effect(eff)
-            if ok:
+        for flag in deltas.set_flags:
+            if flag and flag not in self.state.flags:
+                self.state.flags.add(flag)
                 result.applied += 1
-            if msg:
-                result.messages.append(msg)
+        for key, value in deltas.set_facts.items():
+            self.state.facts[key] = value
+            result.applied += 1
+        for oid in deltas.complete_objectives:
+            if oid in self.state.objective_status and self.state.objective_status[oid] != "Achieved":
+                self.state.objective_status[oid] = "Achieved"
+                result.applied += 1
+            elif oid not in self.state.objective_status:
+                result.messages.append(f"No effect: objective {oid} is not in this scenario.")
+        for oid in deltas.fail_objectives:
+            if oid in self.state.objective_status and self.state.objective_status[oid] != "Achieved":
+                self.state.objective_status[oid] = "Failed"
+                result.applied += 1
+        if deltas.opfor_progress:
+            self.state.opfor_progress = max(0, self.state.opfor_progress + deltas.opfor_progress)
+            result.applied += 1
         return result
 
-    def _apply_effect(self, eff: Effect) -> tuple[bool, str]:
-        if eff.kind is EffectKind.SET_FLAG:
-            flag = str(eff.value)
-            if flag not in self.known_flags:
-                return False, f"No effect: '{flag}' isn't something this scenario tracks."
-            self.state.flags.add(flag)
-            return True, ""
-        if eff.kind is EffectKind.COMPLETE_OBJECTIVE:
-            try:
-                oid = int(eff.value)
-            except (TypeError, ValueError):
-                return False, "No effect: unknown objective."
-            if oid not in self.state.objective_status:
-                return False, "No effect: unknown objective."
-            self.state.objective_status[oid] = "Achieved"
-            return True, ""
-        if eff.kind is EffectKind.ADD_KNOWLEDGE:
-            self.state.knowledge.append(str(eff.value))
-            return True, ""
-        if eff.kind is EffectKind.ADD_INVENTORY:
-            self.state.inventory.append(str(eff.value))
-            return True, ""
-        if eff.kind is EffectKind.ADVANCE:
-            return True, ""
-        return False, "No effect."
+    def apply_move(self, move: PlaybookMove) -> None:
+        """Apply an OPFOR move's authored deltas to ground truth and log it."""
+        self.apply_deltas(
+            Deltas(
+                set_flags=list(move.set_flags),
+                set_facts=dict(move.set_facts),
+                opfor_progress=move.progress,
+            )
+        )
+        self.state.opfor_moves_played.append(move.id)
 
-    # ── helpers ─────────────────────────────────────────────────────────
+    def fire_trigger(self, trigger: Trigger) -> None:
+        self.apply_deltas(
+            Deltas(set_flags=list(trigger.set_flags), set_facts=dict(trigger.set_facts))
+        )
+        self.state.fired_triggers.add(trigger.id)
+
+    # ── clock + objectives ──────────────────────────────────────────────
+
+    def tick(self, minutes: int) -> None:
+        """Advance the clock (clamped at the window)."""
+        if minutes <= 0:
+            return
+        self.state.clock_minutes = min(self.window_minutes, self.state.clock_minutes + minutes)
+
+    def apply_auto_objectives(self) -> list[int]:
+        """Mark any objective whose met_when condition now holds. Returns newly met
+        objective ids so the caller can narrate them."""
+        newly: list[int] = []
+        for o in self.scenario.objectives:
+            if not o.met_when:
+                continue
+            if self.state.objective_status.get(o.id) == "Achieved":
+                continue
+            if self.evaluate_condition(o.met_when):
+                self.state.objective_status[o.id] = "Achieved"
+                newly.append(o.id)
+        return newly
+
+    # ── end condition ────────────────────────────────────────────────────
+
+    @property
+    def opfor_won(self) -> bool:
+        threshold = self.scenario.opfor.win_threshold
+        return threshold > 0 and self.state.opfor_progress >= threshold
+
+    @property
+    def objectives_met(self) -> bool:
+        objs = self.scenario.objectives
+        return bool(objs) and all(
+            self.state.objective_status.get(o.id) == "Achieved" for o in objs
+        )
+
+    def check_end(self) -> bool:
+        """Set is_complete + outcome when the game is over. Idempotent.
+
+        Ends when OPFOR wins (LOSS), the player meets every objective (WIN), or the
+        clock runs out (WIN if objectives met, else LOSS if OPFOR made progress,
+        else INCOMPLETE)."""
+        if self.state.is_complete:
+            return True
+        if self.opfor_won:
+            self.state.is_complete = True
+            self.state.outcome = "LOSS"
+        elif self.objectives_met:
+            self.state.is_complete = True
+            self.state.outcome = "WIN"
+        elif self.minutes_left <= 0:
+            self.state.is_complete = True
+            if self.objectives_met:
+                self.state.outcome = "WIN"
+            elif self.state.opfor_progress > 0:
+                self.state.outcome = "LOSS"
+            else:
+                self.state.outcome = "INCOMPLETE"
+        return self.state.is_complete
+
+    # ── helpers ───────────────────────────────────────────────────────────
 
     def _collect_known_flags(self) -> set[str]:
-        flags: set[str] = set()
-        for e in self.events:
-            for raw in (e.trigger_condition or "").split("&&"):
+        """Every flag name the scenario references — used to validate proposed
+        deltas so the judge can't invent state the scenario doesn't track."""
+        flags: set[str] = set(self.scenario.world.flags)
+        conditions = [t.when for t in self.scenario.triggers]
+        conditions += [m.preconds for m in self.scenario.opfor.playbook]
+        conditions += [o.met_when for o in self.scenario.objectives]
+        for m in self.scenario.opfor.playbook:
+            flags.update(m.set_flags)
+        for t in self.scenario.triggers:
+            flags.update(t.set_flags)
+        for cond in conditions:
+            for raw in (cond or "").split("&&"):
                 term = raw.strip()
                 if term.startswith("flag:"):
                     flags.add(term[len("flag:"):].strip())

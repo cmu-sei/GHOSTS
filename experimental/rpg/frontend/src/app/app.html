@@ -12,8 +12,8 @@
  ░▒▓███▀▒░▓█▒░██▓░ ████▓▒░▒██████▒▒  ▒██▒ ░ ▒██████▒▒
       </pre>
       <h1>SCENARIO PLAYER <span class="dim">// GHOSTS RPG</span></h1>
-      <p class="tagline">Umpired staff exercises. You hold the decision seat.<br />
-        Exercise control plays every other cell — including the adversary.</p>
+      <p class="tagline">Umpired wargames in the Kriegspiel tradition. You hold the decision seat.<br />
+        An umpire judges your reasoning; a thinking adversary plays against you.</p>
 
       <section class="scenario-catalog" aria-labelledby="catalog-title">
         <div class="catalog-head">
@@ -45,7 +45,6 @@
                   <span class="scenario-description">{{ scenario.description }}</span>
                   <span class="scenario-meta">
                     {{ scenario.estimatedMinutes }} MIN ·
-                    {{ scenario.events }} EVENTS ·
                     {{ scenario.objectives }} OBJECTIVES
                   </span>
                 </span>
@@ -76,17 +75,19 @@
         <div class="scrollback" #scroller>
           @for (line of lines(); track $index) {
             @switch (line.kind) {
-              @case ('dm') {
-                <div class="beat {{ cellClass(line.cell) }}">
+              @case ('beat') {
+                <div class="beat {{ speakerClass(line.speaker) }}">
                   <div class="beat-tag">
-                    <span class="time">{{ line.time }}</span>
-                    <span class="cell">{{ line.cell }}</span>
+                    <span class="cell">{{ line.speaker }}</span>
                   </div>
                   <p class="beat-text">{{ line.text }}</p>
                 </div>
               }
               @case ('player') {
                 <div class="player-line"><span class="prompt">&gt;</span> {{ line.text }}</div>
+              }
+              @case ('ruling') {
+                <div class="ruling-line">⚖ {{ line.text }}</div>
               }
               @case ('notice') {
                 <div class="notice-line">» {{ line.text }}</div>
@@ -100,7 +101,10 @@
             }
           }
           @if (busy()) {
-            <div class="thinking"><span></span><span></span><span></span></div>
+            <div class="thinking-row">
+              <div class="thinking"><span></span><span></span><span></span></div>
+              <span class="thinking-label">the umpire and adversary are deliberating… {{ elapsed() }}s</span>
+            </div>
           }
         </div>
 
@@ -124,50 +128,34 @@
           </div>
         }
 
-        <!-- Worklist (tickets arrive one at a time; table to stack) + input -->
-        @if (awaiting() && !complete()) {
-          <div class="worklist">
-            @if (tasks().length > 1) {
-              <div class="worklist-head">
-                {{ tasks().length }} issues on your board — submit orders in any order
-              </div>
-            }
-            @for (t of tasks(); track t.step; let last = $last) {
-              <div class="task">
-                <div class="task-tag">
-                  <span class="task-num">TASK {{ t.step }}</span>
-                  <span class="time">{{ t.time }}</span>
-                </div>
-                <div class="options">
-                  @for (a of t.actions; track a.label) {
-                    <button class="chip intent-{{ a.intent }}" (click)="choose(t, a)">
-                      {{ a.label }}
-                    </button>
-                  }
-                  @if (last && canTable()) {
-                    <button class="chip table-chip" (click)="table()">
-                      ⇥ table it · next ticket ({{ hud()?.queuedTasks }} waiting)
-                    </button>
-                  }
-                </div>
-              </div>
-            }
-          </div>
-        }
-
+        <!-- Action + rationale: the matrix-game half. Your reasoning moves the odds. -->
         @if (!complete()) {
-          <form class="command-row" (submit)="$event.preventDefault(); submit()">
-            <span class="prompt">&gt;</span>
-            <input
-              type="text"
-              [ngModel]="command()"
-              (ngModelChange)="command.set($event)"
-              name="command"
-              autocomplete="off"
-              autofocus
-              [placeholder]="awaiting() ? 'submit an estimate/order, or pick an option above…' : 'exercise control is adjudicating…'"
-            />
-            <button type="submit" class="send" [disabled]="!awaiting()">SEND</button>
+          <form class="command-row order" (submit)="$event.preventDefault(); submit()">
+            <div class="order-field">
+              <span class="prompt">&gt;</span>
+              <input
+                type="text"
+                [ngModel]="action()"
+                (ngModelChange)="action.set($event)"
+                name="action"
+                autocomplete="off"
+                autofocus
+                [placeholder]="awaiting() ? 'state your action…' : 'the umpire is adjudicating…'"
+              />
+            </div>
+            <div class="order-field rationale">
+              <span class="prompt dim">because</span>
+              <input
+                type="text"
+                [ngModel]="rationale()"
+                (ngModelChange)="rationale.set($event)"
+                name="rationale"
+                autocomplete="off"
+                [disabled]="!awaiting()"
+                placeholder="your rationale — a sound argument earns better odds (optional)"
+              />
+            </div>
+            <button type="submit" class="send" [disabled]="!awaiting()">ADJUDICATE</button>
           </form>
         }
       </main>
@@ -175,35 +163,29 @@
       <!-- HUD -->
       @if (hud(); as h) {
         <aside class="hud">
-          <!-- In-game scenario clock, fixed at the top of the rail. Non-linear:
-               the exercise time jumps between steps. Goes 'pressed' amber when the
-               scenario window is running low. -->
-          <div class="hud-clock" [class.pressed]="h.minutesLeft <= h.lunchMinutes / 3">
-            <div class="label">EXERCISE TIME</div>
-            <div class="clock-value">{{ gameTime() ?? h.time }}</div>
+          <!-- Exercise clock, fixed at the top of the rail. Goes 'pressed' amber
+               when the window is running low. -->
+          <div class="hud-clock" [class.pressed]="h.minutesLeft <= h.windowMinutes / 3">
+            <div class="label">EXERCISE CLOCK</div>
+            <div class="clock-value">{{ h.minutesLeft }}m</div>
             <div class="clock-lunch">
-              {{ h.minutesLeft }}m {{ h.windowLabel }} <span class="dim">/ {{ h.lunchMinutes }}m</span>
+              {{ h.clockLabel }} <span class="dim">/ {{ h.windowMinutes }}m</span>
             </div>
-            @if (fuseSecondsLeft() !== null) {
-              <div class="fuse-clock" [class.critical]="fusePressed()">
-                <div class="fuse-row">
-                  <span class="fuse-label">{{ h.deadlineLabel }}</span>
-                  <span class="fuse-value">T-{{ fuseClock() }}</span>
-                </div>
-                <div class="fuse-track">
-                  <div class="fuse-fill" [style.width.%]="fusePercent()"></div>
-                </div>
-              </div>
-            }
-            @if (h.openTasks) {
-              <div class="clock-tickets">
-                {{ h.openTasks }} open ticket{{ h.openTasks === 1 ? '' : 's' }}
-                @if (h.queuedTasks) {
-                  <span class="dim">· {{ h.queuedTasks }} still queued</span>
-                }
-              </div>
-            }
+            <div class="fuse-track">
+              <div class="fuse-fill" [style.width.%]="clockPercent()"></div>
+            </div>
           </div>
+
+          <!-- Adversary pressure: how close OPFOR is to its objective. -->
+          @if (h.opforThreshold) {
+            <div class="hud-clock opfor" [class.pressed]="opforPercent() >= 60">
+              <div class="label">{{ h.opforName }} PRESSURE</div>
+              <div class="clock-value">{{ h.opforProgress }}/{{ h.opforThreshold }}</div>
+              <div class="fuse-track">
+                <div class="fuse-fill red" [style.width.%]="opforPercent()"></div>
+              </div>
+            </div>
+          }
 
           <div class="hud-scroll">
           <div class="hud-block scenario">
@@ -216,14 +198,10 @@
             <div class="value role">{{ h.role }}</div>
           </div>
 
-          @if (h.constraints.length) {
+          @if (h.mandate) {
             <div class="hud-block">
-              <div class="label">CONSTRAINTS</div>
-              <ul class="intel">
-                @for (c of h.constraints; track c) {
-                  <li>{{ c }}</li>
-                }
-              </ul>
+              <div class="label">MANDATE</div>
+              <div class="value">{{ h.mandate }}</div>
             </div>
           }
 
@@ -231,15 +209,15 @@
             <div class="label">OBJECTIVES</div>
             <ul class="objectives">
               @for (o of h.objectives; track o.id) {
-                <li [class.met]="o.met">
-                  <span class="box">{{ o.met ? '☑' : '☐' }}</span>{{ o.name }}
+                <li [class.met]="o.met" [class.failed]="o.status === 'Failed'">
+                  <span class="box">{{ o.met ? '☑' : o.status === 'Failed' ? '☒' : '☐' }}</span>{{ o.name }}
                 </li>
               }
             </ul>
           </div>
 
           <div class="hud-block">
-            <div class="label">THREATS</div>
+            <div class="label">ADVERSARY</div>
             <ul class="tags">
               @for (t of h.threats; track t) {
                 <li class="tag threat">{{ t }}</li>
@@ -247,45 +225,23 @@
             </ul>
           </div>
 
-          @if (h.flags.length) {
+          @if (h.indicators.length) {
             <div class="hud-block">
-              <div class="label">STATUS FLAGS</div>
+              <div class="label">INDICATORS (YOUR PICTURE)</div>
+              <ul class="intel">
+                @for (ind of h.indicators; track $index) {
+                  <li>{{ ind }}</li>
+                }
+              </ul>
+            </div>
+          }
+
+          @if (h.flags?.length) {
+            <div class="hud-block">
+              <div class="label">GROUND TRUTH (DEBUG)</div>
               <ul class="tags">
                 @for (fl of h.flags; track fl) {
                   <li class="tag flag">{{ fl }}</li>
-                }
-              </ul>
-            </div>
-          }
-
-          @if (h.knowledge.length) {
-            <div class="hud-block">
-              <div class="label">INTEL GATHERED</div>
-              <ul class="intel">
-                @for (k of h.knowledge; track $index) {
-                  <li>{{ k }}</li>
-                }
-              </ul>
-            </div>
-          }
-
-          @if (h.assumptions.length) {
-            <div class="hud-block">
-              <div class="label">ASSUMPTIONS</div>
-              <ul class="intel">
-                @for (a of h.assumptions; track $index) {
-                  <li>{{ a }}</li>
-                }
-              </ul>
-            </div>
-          }
-
-          @if (h.umpireFindings.length) {
-            <div class="hud-block">
-              <div class="label">UMPIRE FINDINGS</div>
-              <ul class="intel">
-                @for (f of h.umpireFindings; track $index) {
-                  <li>{{ f }}</li>
                 }
               </ul>
             </div>

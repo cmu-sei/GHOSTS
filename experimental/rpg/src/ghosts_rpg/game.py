@@ -1,10 +1,19 @@
-"""Game orchestration — the worklist turn loop.
+"""Game orchestration — the Kriegspiel turn loop.
 
-Drives engine + DM: auto-plays computer-owned steps (Red/White/Green), stops at a
-Blue Team *worklist* (one or more open tasks the player clears in any order, each
-burning minutes off the lunch clock), applies validated player proposals, and lets
-the engine pick the forward branch once the worklist is empty. Returns a structured
-frame the UI (terminal or Angular) renders.
+One player turn:
+
+  1. player submits action + rationale
+  2. judge.assess         -> odds band + critique          (matrix-game half)
+  3. engine.roll          -> hidden outcome tier
+  4. judge.resolve        -> narration + proposed deltas    (free-Kriegspiel half)
+  5. engine.apply_deltas  -> validated state change
+  6. opfor.choose/apply   -> the adversary reacts, mutating ground truth
+  7. fog.visible          -> the player perceives only emitted indicators
+  8. engine.tick + triggers + auto-objectives
+  9. engine.check_end     -> AAR when the game is over
+
+Returns a Frame the UI (terminal or Angular) renders. The engine is authoritative
+for all state; the judge and OPFOR only propose.
 """
 
 from __future__ import annotations
@@ -12,307 +21,215 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass, field
 from typing import Optional
 
-from .control import Leitung
-from .dm import DungeonMaster, Task
 from .engine import Engine
-from .models import ScenarioBundle, TranscriptEntry
+from .fog import reveals_ground_truth, visible_indicators
+from .judge import Judge
+from .llm import make_llm
+from .models import ScenarioBundle, TranscriptEntry, TurnRecord
+from .opfor import Opfor
 from .scoring import Aar, review
 
 
 @dataclass
 class Beat:
-    """One narrated event (a computer turn the DM played, or the player's situation)."""
+    """One narrated line. `speaker` drives colour in the UI."""
 
-    step_number: int
-    cell: str
-    time: str
+    turn: int
+    speaker: str  # Judge | OPFOR | Control | Player
     text: str
 
 
 @dataclass
 class Frame:
-    """What changed since the last interaction, plus the current worklist."""
+    """What changed since the last interaction, plus the current picture."""
 
     beats: list[Beat] = field(default_factory=list)
-    tasks: list[dict] = field(default_factory=list)  # revealed worklist tasks + their action menus
     awaiting_player: bool = False
-    notices: list[str] = field(default_factory=list)  # "No effect: ..." etc.
+    band: Optional[str] = None  # odds band the judge assigned this turn
+    critique: str = ""  # judge's one-line critique of the player's reasoning
+    tier: Optional[str] = None  # resolved outcome tier this turn
+    notices: list[str] = field(default_factory=list)
     is_complete: bool = False
     aar: Optional[dict] = None
     hud: dict = field(default_factory=dict)
-    can_table: bool = False  # an un-revealed ticket is queued behind the current one
 
 
 class Game:
     def __init__(self, bundle: ScenarioBundle, llm=None):
         self.bundle = bundle
         self.engine = Engine(bundle)
-        self.dm = DungeonMaster(self.engine, llm=llm)
-        self.control = Leitung(self.dm)
+        llm = llm or make_llm()
+        self.judge = Judge(self.engine, llm=llm)
+        self.opfor = Opfor(self.engine, llm=llm)
+        self.llm = llm
 
     # ── lifecycle ────────────────────────────────────────────────────────
 
     def start(self) -> Frame:
         self.engine.start()
-        return self._play_to_worklist()
+        sc = self.bundle.scenario
+        beats = [Beat(0, "Control", sc.situation or sc.description)]
+        self._record("Control", sc.situation or sc.description)
+        # Any trigger/objective already true at T+0 fires before the first player move.
+        beats += self._resolve_world()
+        if self.engine.check_end():
+            return self._frame(beats=beats, complete=True)
+        return self._frame(beats=beats, awaiting=True)
 
-    # Phrases that mean "set this ticket aside and show me the next one" — table it.
-    _TABLE = ("table it", "table this", "table", "next ticket", "next", "set aside",
-              "come back", "another ticket", "show another", "queue")
+    def act(self, action: str, rationale: str = "") -> Frame:
+        if self.engine.state.is_complete:
+            return self._frame(notices=["The exercise is over."], complete=True)
+        action = action.strip()
+        if not action:
+            return self._frame(awaiting=True, notices=["State an action to adjudicate."])
 
-    def act(self, player_input: str) -> Frame:
-        if not self.engine.open_worklist():
-            return self._frame(notices=["The exercise is not waiting on you right now."])
-        # The player acts only on tickets currently surfaced to them.
-        tasks = self.engine.revealed_worklist()
+        self.engine.state.turn += 1
+        turn = self.engine.state.turn
+        self._record("Player", f"{action}" + (f" — because {rationale}" if rationale else ""))
 
-        # "Table it": reveal the next queued ticket without clearing the current one,
-        # so the player can stack tickets open. Costs no time — it's just triage.
-        if self._is_table_command(player_input):
-            revealed = self.engine.reveal_next()
-            if revealed is None:
-                return self._frame(awaiting=True, notices=["Every open ticket is already on your board."])
-            beat = self._reveal_beat(revealed)
-            return self._frame(beats=[beat], awaiting=True,
-                               notices=["Ticket set aside — pulling up the next one."])
+        # Phase A: assess -> band. Phase B: hidden roll -> tier -> narration + deltas.
+        assessment = self.judge.assess(action, rationale)
+        tier = self.engine.roll(assessment.band)
+        narration, deltas = self.judge.resolve(action, tier)
+        result = self.engine.apply_deltas(deltas)
+        self.engine.tick(deltas.minutes)
 
-        target, cleaned = self._resolve_target(player_input, tasks)
-        if target is None:
-            if len(tasks) == 1:
-                # They named a queued ticket that isn't on the board yet.
-                notice = ("That ticket isn't in front of you yet. Say 'next' to pull "
-                          "up the next one, or act on the current ticket.")
-            else:
-                notice = (f"You have {len(tasks)} tickets in front of you — say which one "
-                          f"(e.g. 'task {tasks[0].number}: investigate').")
-            return self._frame(awaiting=True, notices=[notice])
-
-        ruling = self.control.adjudicate(cleaned, target)
-        proposal = ruling.proposal
-        self.engine.state.transcript.append(
-            TranscriptEntry(step_number=target.number, cell=target.assigned, speaker="Player", text=player_input)
-        )
-        result = self.engine.apply(proposal)
-        self.engine.spend_time(proposal.minutes)
-        notices = list(ruling.findings) + list(result.messages)
-        # Only flag truly unrecognized input (a no-op that neither acts nor resolves
-        # the task). "wait" is a legitimate choice that resolves a task with no effects.
-        if not proposal.effects and not proposal.resolves_task:
-            notices.append(f'No effect: "{player_input.strip()}" did nothing here. Try investigate, handle, notify, or defer.')
-
-        beats: list[Beat] = []
-        if proposal.resolves_task:
-            self.engine.clear_task(target.number)
-            self.engine.state.revealed_steps.discard(target.number)
-            # Resolving a ticket flows to the next queued one automatically: seed the
-            # revealed set (surfaces the next open ticket if none is showing) and
-            # narrate whatever just came onto the board.
-            before = set(self.engine.state.revealed_steps)
-            for e in self.engine.revealed_worklist():
-                if e.number not in before:
-                    beats.append(self._reveal_beat(e))
-
-        # The fuse takes priority: if the clock just passed the containment deadline
-        # with the threat still un-contained, it detonates now — abandoning any tasks
-        # still open — and the timeline jumps onto the loss branch.
-        if self.engine.fuse_blown():
-            return self._detonate(notices=notices)
-
-        # The lunch clock is a hard ceiling: if it's exhausted, the morning ends here
-        # regardless of what's still open.
-        if self.engine.out_of_time():
-            self.engine.state.is_complete = True
-            return self._frame(notices=notices + ["Out of time — the morning is over."], complete=True)
-
-        if proposal.resolves_task and not self.engine.open_worklist():
-            self.engine.advance_past_worklist()
-            return self._play_to_worklist(notices=notices)
-        # Task still open (recon / no-op), or other tasks remain: re-present worklist,
-        # including any newly surfaced ticket from resolving the last one.
-        return self._frame(beats=beats, awaiting=True, notices=notices)
-
-    def _detonate(self, notices: list[str]) -> Frame:
-        """The containment fuse blew: narrate the detonation, then play the forced
-        loss branch through to the next worklist (or the end)."""
-        event = self.engine.detonate()
-        mechanics = self.bundle.scenario.game_mechanics
-        failure = (
-            mechanics.deadline_failure_message
-            if mechanics
-            else "The clock ran out on the threat — it detonated before you contained it."
-        )
-        notices = notices + [failure]
-        if event is None:
-            return self._frame(notices=notices, complete=True)
-        return self._play_to_worklist(notices=notices)
-
-    def _is_table_command(self, player_input: str) -> bool:
-        """True when the input means 'table this / show me the next ticket'. Matches a
-        table phrase as a whole word/phrase so it can't hijack a real action (e.g.
-        'remove', 'restore') that merely contains one of the fragments."""
-        import re
-
-        text = player_input.strip().lower()
-        return any(re.search(rf"\b{re.escape(k)}\b", text) for k in self._TABLE)
-
-    def _reveal_beat(self, event) -> Beat:
-        """Narrate a newly surfaced ticket into the transcript and return its beat."""
-        text = self.dm.narrate(event)
-        self.engine.state.transcript.append(
-            TranscriptEntry(step_number=event.number, cell="Blue Team", speaker="DM", text=text)
-        )
-        return Beat(event.number, "Blue Team", event.time, text)
-
-    def _resolve_target(self, player_input: str, tasks) -> tuple[Optional[object], str]:
-        """Pick which revealed task the input targets, and strip any 'task N:' prefix.
-
-        A single revealed task needs no disambiguation. With several revealed, the
-        input must name one by number ('task 7 ...' / '#7 ...' / a leading '7'); if
-        it does not, we also accept it when only one task offers a matching action."""
-        by_num = {e.number: e for e in tasks}
-        num, cleaned = self._extract_task_number(player_input)
-
-        if len(tasks) == 1:
-            # A number naming a ticket that's real but not yet on the board means the
-            # player is reaching for a queued ticket — tell them to table to it.
-            if num is not None and num != tasks[0].number and self.engine._by_num.get(num):
-                return None, player_input
-            return tasks[0], cleaned if num == tasks[0].number else player_input
-
-        if num is not None and num in by_num:
-            return by_num[num], cleaned
-
-        # No explicit number: accept only if exactly one task recognizes the action.
-        matches = [e for e in tasks if self.dm.interpret(player_input, e).resolves_task
-                   or self.dm.interpret(player_input, e).effects]
-        if len(matches) == 1:
-            return matches[0], player_input
-        return None, player_input
-
-    @staticmethod
-    def _extract_task_number(text: str) -> tuple[Optional[int], str]:
-        """Parse a leading task selector: 'task 7: x' / '#7 x' / '7 x' -> (7, 'x')."""
-        import re
-
-        m = re.match(r"\s*(?:task\s*|#)?(\d+)\s*[:.\-)]?\s*(.*)", text, re.IGNORECASE | re.DOTALL)
-        if not m:
-            return None, text
-        num = int(m.group(1))
-        rest = m.group(2).strip()
-        return num, (rest or text)
-
-    # ── internal turn loop ─────────────────────────────────────────────
-
-    def _play_to_worklist(self, notices: Optional[list[str]] = None) -> Frame:
-        """Narrate every computer-owned step until a player worklist opens or the end."""
-        beats: list[Beat] = []
-        while True:
-            event = self.engine.current_event()
-            if event is None:  # exhausted -> complete
-                break
-            if event.is_player_turn:
-                # Surface the revealed ticket(s) — one at a time by default — into the
-                # transcript, then present. More arrive as the player tables/resolves.
-                turn = self.dm.worklist()
-                for t in turn.tasks:
-                    beats.append(Beat(t.step_number, "Blue Team", t.time, t.prompt))
-                    self.engine.state.transcript.append(
-                        TranscriptEntry(step_number=t.step_number, cell="Blue Team", speaker="DM", text=t.prompt)
-                    )
-                return self._frame(beats=beats, awaiting=True, notices=notices)
-            text = self.dm.narrate(event)
-            beats.append(Beat(event.number, event.assigned, event.time, text))
-            self.engine.state.transcript.append(
-                TranscriptEntry(step_number=event.number, cell=event.assigned, speaker="DM", text=text)
+        beats = [Beat(turn, "Judge", narration)]
+        self._record("Judge", narration)
+        self.engine.state.rulings.append(
+            TurnRecord(
+                turn=turn,
+                action=action,
+                rationale=rationale,
+                band=assessment.band.value,
+                tier=tier.value,
+                critique=assessment.critique,
             )
-            self.engine.advance()
-        return self._frame(beats=beats, notices=notices, complete=True)
+        )
 
-    # ── frame assembly ──────────────────────────────────────────────────
+        notices = list(result.messages)
 
-    def _frame(self, beats=None, awaiting=False, notices=None, complete=False) -> Frame:
+        # The adversary reacts, then the world resolves (triggers, auto-objectives),
+        # then we check for the end.
+        if not self.engine.check_end():
+            beats += self._opfor_turn()
+        if not self.engine.state.is_complete:
+            beats += self._resolve_world()
+        complete = self.engine.check_end()
+        return self._frame(
+            beats=beats,
+            awaiting=not complete,
+            band=assessment.band.value,
+            critique=assessment.critique,
+            tier=tier.value,
+            notices=notices,
+            complete=complete,
+        )
+
+    # ── the adversary's turn ─────────────────────────────────────────────
+
+    def _opfor_turn(self) -> list[Beat]:
+        move = self.opfor.choose()
+        if move is None:
+            return []
+        self.engine.apply_move(move)
+        seen = visible_indicators(self.bundle.scenario, move.indicators)
+        for ind in seen:
+            if ind not in self.engine.state.indicators_seen:
+                self.engine.state.indicators_seen.append(ind)
+        if not seen:
+            return []  # OPFOR acted, but nothing surfaced to the player (fog)
+        # The adversary is hidden: the player never sees OPFOR's move, only what
+        # their own sensors pick up. Surface it as neutral intelligence, not as
+        # the enemy speaking.
+        text = "New indicators: " + "; ".join(seen)
+        self._record("Signals", text)
+        return [Beat(self.engine.state.turn, "Signals", text)]
+
+    # ── scheduled world resolution (triggers + auto-objectives) ──────────
+
+    def _resolve_world(self) -> list[Beat]:
+        beats: list[Beat] = []
+        for trigger in self.engine.pending_triggers():
+            self.engine.fire_trigger(trigger)
+            seen = visible_indicators(self.bundle.scenario, trigger.indicators)
+            for ind in seen:
+                if ind not in self.engine.state.indicators_seen:
+                    self.engine.state.indicators_seen.append(ind)
+            text = trigger.inject
+            if seen:
+                text = f"{text} ({'; '.join(seen)})" if text else "; ".join(seen)
+            if text:
+                self._record("Control", text)
+                beats.append(Beat(self.engine.state.turn, "Control", text))
+        for oid in self.engine.apply_auto_objectives():
+            obj = next((o for o in self.bundle.scenario.objectives if o.id == oid), None)
+            if obj:
+                text = f"Objective met: {obj.name}."
+                self._record("Control", text)
+                beats.append(Beat(self.engine.state.turn, "Control", text))
+        return beats
+
+    # ── bookkeeping ───────────────────────────────────────────────────────
+
+    def _record(self, speaker: str, text: str) -> None:
+        self.engine.state.transcript.append(
+            TranscriptEntry(turn=self.engine.state.turn, speaker=speaker, text=text)
+        )
+
+    def _frame(
+        self,
+        beats=None,
+        awaiting=False,
+        band=None,
+        critique="",
+        tier=None,
+        notices=None,
+        complete=False,
+    ) -> Frame:
         complete = complete or self.engine.state.is_complete
         aar: Aar | None = review(self.engine) if complete else None
         return Frame(
             beats=beats or [],
-            tasks=self._worklist_dicts() if awaiting else [],
-            awaiting_player=awaiting,
+            awaiting_player=awaiting and not complete,
+            band=band,
+            critique=critique,
+            tier=tier,
             notices=notices or [],
             is_complete=complete,
             aar=asdict(aar) if aar else None,
             hud=self.hud(),
-            can_table=awaiting and self.engine.has_unrevealed_tasks(),
         )
-
-    def _worklist_dicts(self) -> list[dict]:
-        return [
-            {
-                "step": t.step_number,
-                "time": t.time,
-                "prompt": t.prompt,
-                "actions": [{"label": a.label, "intent": a.intent} for a in t.actions],
-            }
-            for t in self.dm.worklist().tasks
-        ]
 
     def hud(self) -> dict:
         sc = self.bundle.scenario
         st = self.engine.state
-        open_tasks = self.engine.open_worklist()
-        revealed = self.engine.revealed_worklist() if open_tasks else []
         objs = [
             {
                 "id": o.id,
                 "name": o.name,
+                "status": st.objective_status.get(o.id, "Active"),
                 "met": st.objective_status.get(o.id) == "Achieved",
             }
-            for o in self.bundle.objectives
+            for o in sc.objectives
         ]
-        actors = sc.scenario_parameters.threat_actors if sc.scenario_parameters else []
-        mechanics = sc.game_mechanics
-        return {
+        hud = {
             "scenario": sc.name,
-            "step": open_tasks[0].number if open_tasks else None,
-            "time": open_tasks[0].time if open_tasks else None,
-            "role": (
-                sc.scenario_parameters.player_role
-                if sc.scenario_parameters
-                else "Blue Team (SOC Analyst)"
-            ),
+            "role": sc.player.role,
+            "mandate": sc.player.mandate,
             "objectives": objs,
-            "flags": sorted(st.flags),
-            "knowledge": list(st.knowledge),
-            "umpireFindings": list(st.umpire_findings[-6:]),
-            "assumptions": list(st.assumptions),
-            "constraints": self._constraints(),
-            "threats": [a.name for a in actors],
-            "openTasks": len(open_tasks),
-            "shownTasks": len(revealed),
-            "queuedTasks": len(open_tasks) - len(revealed),
+            "indicators": list(st.indicators_seen),
+            "turn": st.turn,
             "minutesLeft": self.engine.minutes_left,
-            "lunchMinutes": self.engine.lunch_minutes,
-            "windowLabel": mechanics.window_label if mechanics else "to lunch",
-            "containmentFuseMinutes": self.engine.containment_deadline,
-            "containmentFuseMinutesLeft": self._containment_fuse_minutes_left(),
-            "containmentContained": self.engine.is_contained,
-            "deadlineLabel": (
-                mechanics.deadline_label if mechanics else "CONTAINMENT FUSE"
-            ),
+            "windowMinutes": self.engine.window_minutes,
+            "clockLabel": sc.clock.label,
+            "opforName": sc.opfor.name,
+            "opforProgress": st.opfor_progress,
+            "opforThreshold": sc.opfor.win_threshold,
+            "threats": [sc.opfor.name] if sc.opfor.name else [],
         }
-
-    def _constraints(self) -> list[str]:
-        constraints: list[str] = []
-        if self.engine.containment_deadline is not None:
-            mechanics = self.bundle.scenario.game_mechanics
-            label = mechanics.deadline_label if mechanics else "Containment fuse"
-            constraints.append(f"{label.title()}: {self.engine.containment_deadline}m")
-        if self.engine.known_flags:
-            constraints.append("Steering flags: " + ", ".join(sorted(self.engine.known_flags)))
-        constraints.append(f"Exercise window: {self.engine.lunch_minutes}m")
-        return constraints
-
-    def _containment_fuse_minutes_left(self) -> Optional[int]:
-        deadline = self.engine.containment_deadline
-        if deadline is None or self.engine.is_contained or self.engine.state.detonated:
-            return None
-        return max(0, deadline - self.engine.state.minutes_spent)
+        # Under fog, ground truth stays hidden; training/debug scenarios may show it.
+        if reveals_ground_truth(sc):
+            hud["flags"] = sorted(st.flags)
+            hud["facts"] = dict(st.facts)
+        return hud
