@@ -101,6 +101,21 @@ namespace Ghosts.Api.Infrastructure.Models
                    !string.IsNullOrEmpty(CurrentUsername);
         }
 
+        public void UpdateFromCheckIn(Machine checkIn)
+        {
+            Name = checkIn.Name;
+            FQDN = checkIn.FQDN;
+            Domain = checkIn.Domain;
+            Host = checkIn.Host;
+            ResolvedHost = checkIn.ResolvedHost;
+            HostIp = checkIn.HostIp;
+            IPAddress = checkIn.IPAddress;
+            CurrentUsername = checkIn.CurrentUsername;
+            ClientVersion = checkIn.ClientVersion;
+            StatusUp = checkIn.StatusUp;
+            LastReportedUtc = DateTime.UtcNow;
+        }
+
         [NotMapped]
         public bool HadId { get; set; }
 

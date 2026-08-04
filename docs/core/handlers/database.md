@@ -2,7 +2,7 @@
 
 The sample configuration below is also available in the [GHOSTS GitHub repository](<https://github.com/cmu-sei/GHOSTS/blob/master/src/Ghosts.Client.Windows/Sample%20Timelines/Database.json>
 
-The database handler is used to perform insert, query, and delete operations to one or more MySql database servers. The configuration can be used specify a simplified schema with multiple databases, each with multiple tables, each table with multiple columns.
+The database handler is used to perform insert, query, and delete operations to one or more MySql or Microsoft SQL database servers. The configuration can be used specify a simplified schema with multiple databases, each with multiple tables, each table with multiple columns.
 
 When the handler is executed, a random database is chosen along with a random table from that database. This DB/Table is queried for row count, and if empty, 10 rows are generated as initial content.  If non-empty, either an insert operation (one row inserted), delete (first row is deleted), or query operation is performed (a maximum of `query-limit` rows are returned and written to the Ghosts log file).  The query starts at a random offset from within the rows.  If the `max-rows` parameter is non-zero then when this number of rows is reached a deletion operation is forced.
 
@@ -21,6 +21,7 @@ A sample timeline is shown below:
         "query-probability": 50,
         "query-limit": 30,
         "max-rows": 100,
+        "ismssql": "false",
         "port": 3306,
         "DatabaseTargets": {
            "Version": "1.0",
@@ -94,6 +95,9 @@ A sample timeline is shown below:
   ]
 }
 ```
+The `ismssql` parameter should be `"false"` to target a MySql server, and `"true"` to target a Microsoft SQL server. If the `port` parameter is missing, then it is set to the default MySql server port if `ismssql` is `"false"`,  and to the default Microsoft SQL Server port if `ismssql` is `"true"`.
+
+If the `ismssql` parameter is missing then it is assumed to be `"false"`.
 
 The `DatabaseTargets[Data]` entry in the `HandlerArgs` is a dictionary, with each key/value specifying a target MySQL database. The `Username`, `Password` specify the credentials used for database access, and the `Databases` entry is a list of simplified database schema that can be accessed. It is assumed that this schema exists on the MySql server and is assumed to have primary key named `id` as the first column that is an auto-incrementing integer.
 

@@ -86,13 +86,9 @@ namespace Ghosts.Api.Infrastructure.Services
             {
                 machineResponse.Machine = m;
 
-                // if new version, update that info
-                if (!m.ClientVersion.Equals(httpHeadersMachine.ClientVersion))
-                {
-                    m.ClientVersion = httpHeadersMachine.ClientVersion;
-                    _context.Entry(m).State = EntityState.Modified;
-                    await _context.SaveChangesAsync(ct);
-                }
+                m.UpdateFromCheckIn(httpHeadersMachine);
+                _context.Entry(m).State = EntityState.Modified;
+                await _context.SaveChangesAsync(ct);
             }
 
             return machineResponse;

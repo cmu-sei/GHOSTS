@@ -4,8 +4,10 @@ using System;
 using System.Threading;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
+using Ghosts.Domain.Code.Helpers;
 using Newtonsoft.Json;
 using MySql.Data.MySqlClient;
+using Microsoft.Data.SqlClient;
 using System.Collections.Generic;
 using System.Text;
 using Ghosts.Client.Infrastructure;
@@ -25,6 +27,7 @@ public class Database : BaseHandler
 
     private int _maxRows = 0;
     private int _port = 3306;
+    private bool _isMsSql = false;
 
     private DatabaseContentManager contentManager;
     
@@ -75,6 +78,11 @@ public class Database : BaseHandler
                     }
                 }
 
+                if (handler.HandlerArgs.ContainsKeyWithOption("ismssql", "true"))
+                {
+                    _isMsSql = true;
+                }
+
                 if (handler.HandlerArgs.TryGetValue("port", out var portArg))
                 {
                     try
@@ -85,6 +93,14 @@ public class Database : BaseHandler
                     catch (Exception e)
                     {
                         Log.Error(e);
+                    }
+                }
+                else
+                {
+                    // port not specified
+                    if (_isMsSql)
+                    {
+                        _port = 1433;  // set default port for Microsoft SQL Server
                     }
                 }
 
@@ -235,10 +251,19 @@ public class Database : BaseHandler
             return;
         }
         var table = database.Tables[_random.Next(0,database.Tables.Count )];
+        
+        string connstring;
 
-        var connstring = $"Server={hostIp};Port={_port};Database={database.Name};User ID={username};Password={password}";
+        if (_isMsSql) {
+            connstring = $"Server={hostIp},{_port};Database={database.Name};User ID={username};Password={password};TrustServerCertificate=True";
+            Log.Trace($"Database:: Beginning MSSQL Database operation to host: {hostIp} with command: {command}");
+        } else
+        {
+            connstring = $"Server={hostIp};Port={_port};Database={database.Name};User ID={username};Password={password}";
+            Log.Trace($"Database:: Beginning MySQL Database operation to host: {hostIp} with command: {command}");
+        }
 
-         Log.Trace($"Database:: Beginning Database operation to host: {hostIp} with command: {command}");
+         
 
     
         try
@@ -249,7 +274,16 @@ public class Database : BaseHandler
             if (rowCount == 0)
             {
                 // DB is empty. Initialize with 10 new records
-                InsertRow(connstring, table, hostIp, 10);
+                if (_isMsSql)
+                {
+                    for (int i = 0; i < 10; i++)
+                    {
+                        // For MS SQL insert one row at a time
+                        InsertRow(connstring, table, hostIp, 1); 
+                    }
+                    
+                }
+                else InsertRow(connstring, table, hostIp, 10);
             } else if (_maxRows > 0 && rowCount > _maxRows)
             {
                 // above max rows, do some deletion
@@ -264,7 +298,8 @@ public class Database : BaseHandler
                 InsertRow(connstring, table, hostIp, 1);
             } else if (action == "query")
             {
-                QueryTable(connstring, table, hostIp, rowCount);
+                if (_isMsSql) MsSqlQueryTable(connstring, table, hostIp, rowCount);
+                else QueryTable(connstring, table, hostIp, rowCount);
             } else if (action == "delete")
             {
                 DeleteRow(connstring, table, hostIp);
@@ -354,6 +389,47 @@ public class Database : BaseHandler
         return rowContent;
     }
 
+    private void MsSqlQueryTable(string connstring, DatabaseTable table, string hostIp, int rowCount)
+    {
+
+        string query = $"SELECT * FROM {table.Name}";
+        if (_queryLimit != 0)
+        {
+            if (rowCount < 2*_queryLimit)
+            {
+                query = $"{query} ORDER BY id ASC OFFSET 0 ROWS FETCH NEXT {_queryLimit} ROWS ONLY";
+            } else
+            {
+                // use offset
+                int offset = _random.Next(0, rowCount-_queryLimit);
+                query = $"{query} ORDER BY id ASC OFFSET {offset} ROWS FETCH NEXT {_queryLimit} ROWS ONLY";
+            }
+        }
+        query = query + ";";
+        using (SqlConnection connection = new SqlConnection(connstring))
+        {
+            connection.Open();
+            Log.Trace($"Database:: Successfully opened connection to host: {hostIp}.");
+            using (SqlCommand cmd = new SqlCommand(query, connection))
+            {
+                using (var reader = cmd.ExecuteReader()) {
+                    Log.Trace($"Database:: Reading query result");
+                    while (reader.Read()) {
+                        var rString = "";
+                        foreach (Dictionary<string, string> column in table.Columns) {
+                            var cName = column["Name"];
+                            var value = reader[cName];
+                            if (rString == "") rString = $"Database::>  {cName}: {value}";
+                                else rString += $"\t{cName}: {value}";
+                        }
+                        Log.Trace($"{rString}");
+                    }
+                }
+                Log.Trace($"Database:: Successful database operation query to host: {hostIp}.");
+            }
+        }
+    }
+
     private void QueryTable(string connstring, DatabaseTable table, string hostIp, int rowCount)
     {
         string query = $"SELECT * FROM {table.Name}";
@@ -402,7 +478,13 @@ public class Database : BaseHandler
     /// <param name="hostIp"></param>
     private void DeleteRow(string connstring, DatabaseTable table, string hostIp)
     {
-        string query = $"SELECT id FROM {table.Name} LIMIT 0,1;";
+        string query;
+        if (_isMsSql)
+        {
+            query = $"SELECT TOP 1 id FROM {table.Name} ORDER BY id;";
+        } else {
+            query = $"SELECT id FROM {table.Name} LIMIT 0,1;";
+        }
         int idVal = ExecuteScalarQueryInt(connstring, query, hostIp, "idquery");
         query = $"DELETE FROM {table.Name} WHERE id = {idVal};";
         ExecuteScalarQuery(connstring, query, hostIp, "idquery");
@@ -436,16 +518,30 @@ public class Database : BaseHandler
 
     private void ExecuteScalarQuery(string connstring, string query, string hostIp, string operation)
     {
-        // any error is caught by the caller
-        using (MySqlConnection connection = new MySqlConnection(connstring))
+         // any error is caught by the caller
+        if (_isMsSql)
         {
-            connection.Open();
-            Log.Trace($"Database:: Successfully opened connection to host: {hostIp}.");
-            using (MySqlCommand cmd = new MySqlCommand(query, connection))
+            using (SqlConnection connection = new SqlConnection(connstring))
             {
-                cmd.ExecuteScalar();
+                connection.Open();
+                Log.Trace($"Database:: Successfully opened connection to host: {hostIp}.");
+                using (SqlCommand cmd = new SqlCommand(query, connection))
+                {
+                    cmd.ExecuteScalar();
+                }
+                Log.Trace($"Database:: Successful database operation {operation} to host: {hostIp}.");
             }
-            Log.Trace($"Database:: Successful database operation {operation} to host: {hostIp}.");
+        } else {
+            using (MySqlConnection connection = new MySqlConnection(connstring))
+            {
+                connection.Open();
+                Log.Trace($"Database:: Successfully opened connection to host: {hostIp}.");
+                using (MySqlCommand cmd = new MySqlCommand(query, connection))
+                {
+                    cmd.ExecuteScalar();
+                }
+                Log.Trace($"Database:: Successful database operation {operation} to host: {hostIp}.");
+            }
         }
     }
 
@@ -453,15 +549,30 @@ public class Database : BaseHandler
     {
         // any error is caught by the caller
         int rval;
-        using (MySqlConnection connection = new MySqlConnection(connstring))
+        if (_isMsSql)
         {
-            connection.Open();
-            Log.Trace($"Database:: Successfully opened connection to host: {hostIp}.");
-            using (MySqlCommand cmd = new MySqlCommand(query, connection))
+            using (SqlConnection connection = new SqlConnection(connstring))
             {
-                rval = Convert.ToInt32(cmd.ExecuteScalar());
+                connection.Open();
+                Log.Trace($"Database:: Successfully opened connection to host: {hostIp}.");
+                using (SqlCommand cmd = new SqlCommand(query, connection))
+                {
+                    rval = Convert.ToInt32(cmd.ExecuteScalar());
+                }
+                Log.Trace($"Database:: Successful database operation {operation} to host: {hostIp}.");
             }
-            Log.Trace($"Database:: Successful database operation {operation} to host: {hostIp}.");
+            
+        } else {
+            using (MySqlConnection connection = new MySqlConnection(connstring))
+            {
+                connection.Open();
+                Log.Trace($"Database:: Successfully opened connection to host: {hostIp}.");
+                using (MySqlCommand cmd = new MySqlCommand(query, connection))
+                {
+                    rval = Convert.ToInt32(cmd.ExecuteScalar());
+                }
+                Log.Trace($"Database:: Successful database operation {operation} to host: {hostIp}.");
+            }
         }
         return rval;
     }
