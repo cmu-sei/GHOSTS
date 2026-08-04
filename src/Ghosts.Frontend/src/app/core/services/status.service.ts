@@ -20,7 +20,7 @@ export class StatusService {
   getStatus(): Observable<ApiStatus> {
     // Cache for 60 seconds to match API behavior
     if (!this.statusCache$) {
-      this.statusCache$ = this.http.get<ApiStatus>(`${this.apiUrl}/test`).pipe(
+      this.statusCache$ = this.http.get<ApiStatus>(`${this.apiUrl}/server`).pipe(
         shareReplay({ bufferSize: 1, refCount: true })
       );
 

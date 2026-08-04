@@ -5,8 +5,8 @@
     <AssemblyName>ghosts.api</AssemblyName>
     <RootNamespace>Ghosts.Api</RootNamespace>
 
-    <AssemblyVersion>9.2.0.0</AssemblyVersion>
-    <FileVersion>9.2.0.0</FileVersion>
+    <AssemblyVersion>9.3.0.0</AssemblyVersion>
+    <FileVersion>9.3.0.0</FileVersion>
 
     <Authors>GHOSTS Development Team for CERT &gt; Software Engineering Institute &gt; Carnegie Mellon University</Authors>
     <Company>Carnegie Mellon University</Company>
@@ -28,7 +28,6 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="10.0.0" />
     <PackageReference Include="Microsoft.Playwright" Version="1.59.0" />
     <PackageReference Include="NLog" Version="6.0.6" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
