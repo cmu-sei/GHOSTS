@@ -20,7 +20,7 @@ public class MachineTests
             HostIp = "192.0.2.10",
             CurrentUsername = "user-a",
             ClientVersion = "9.0.0",
-            Status = StatusType.Active,
+            Status = StatusType.Deleted,
             StatusUp = Machine.UpDownStatus.Down,
             LastReportedUtc = lastReported
         };
@@ -41,6 +41,7 @@ public class MachineTests
 
         Assert.Equal("user-b", machine.CurrentUsername);
         Assert.Equal("9.3.0", machine.ClientVersion);
+        Assert.Equal(StatusType.Active, machine.Status);
         Assert.Equal(Machine.UpDownStatus.Up, machine.StatusUp);
         Assert.Equal("::ffff:192.0.2.10", machine.IPAddress);
         Assert.True(machine.LastReportedUtc > lastReported);
