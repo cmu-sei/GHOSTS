@@ -52,7 +52,12 @@ var api = builder.AddProject<Projects.Ghosts_Api>("api")
     .WithEnvironment("ConnectionStrings__Provider", "PostgreSQL")
     .WithEnvironment("ASPNETCORE_URLS", "http://0.0.0.0:5000")
     .WithHttpEndpoint(port: 5000, name: "http", isProxied: false)
-    .WithExternalHttpEndpoints();
+    .WithExternalHttpEndpoints()
+    .WithUrlForEndpoint("http", url =>
+    {
+        url.DisplayText = "API (Swagger)";
+        url.Url = "http://localhost:5000/swagger";
+    });
 
 var mcp = builder.AddDockerfile("mcp", "../../", "src/tools/ghosts.tools.mcp/Dockerfile")
     .WaitFor(api)
