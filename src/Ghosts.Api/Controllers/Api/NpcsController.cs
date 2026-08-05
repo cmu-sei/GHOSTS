@@ -207,9 +207,15 @@ public class NpcsController(
     {
         var result = await service.CreateConnection(id, request.ConnectedNpcId,
             request.Name, request.Distance, request.RelationshipStatus);
+        var connectionName = request.Name;
+        if (string.IsNullOrWhiteSpace(connectionName))
+        {
+            var connectedNpc = await service.GetById(request.ConnectedNpcId);
+            connectionName = connectedNpc?.NpcProfile?.Name?.ToString();
+        }
         await activityHubContext.Clients.All.SendAsync("show",
             "1", id.ToString(), "relationship",
-            $"new connection with {request.Name}",
+            $"new connection with {connectionName}",
             DateTime.Now.ToString(CultureInfo.InvariantCulture));
         return Ok(result);
     }
