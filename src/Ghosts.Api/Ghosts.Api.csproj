@@ -64,11 +64,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Remove="wwwroot\lib\fontawesome\svgs\**\*.svg" />
-    <Content Remove="wwwroot\flags\**\*.svg" />
-  </ItemGroup>
-
-  <ItemGroup>
     <_ContentIncludedByDefault Remove="Areas\Animator\config\address_international_cities.json" />
     <_ContentIncludedByDefault Remove="Areas\Animator\config\bmi.json" />
     <_ContentIncludedByDefault Remove="Areas\Animator\config\chat.json" />
@@ -114,30 +109,6 @@
     <_ContentIncludedByDefault Remove="Areas\Animator\config\us_population_data.json" />
     <_ContentIncludedByDefault Remove="output\socialgraph\social_graph.json" />
     <_ContentIncludedByDefault Remove="_output\socialgraph\social_graph.json" />
-    <_ContentIncludedByDefault Remove="Areas\Animator\Views\ViewActivities\detail.cshtml" />
-    <_ContentIncludedByDefault Remove="Areas\Animator\Views\ViewActivities\Index.cshtml" />
-    <_ContentIncludedByDefault Remove="Areas\Animator\Views\ViewRelationships\Index.cshtml" />
-    <_ContentIncludedByDefault Remove="Areas\Animator\Views\ViewRelationships\Profile.cshtml" />
-    <_ContentIncludedByDefault Remove="Areas\Animator\Views\ViewSocial\Detail.cshtml" />
-    <_ContentIncludedByDefault Remove="Areas\Animator\Views\ViewSocial\Index.cshtml" />
-    <_ContentIncludedByDefault Remove="Areas\Animator\Views\ViewSocial\Interactions.cshtml" />
-    <_ContentIncludedByDefault Remove="Areas\Animator\Views\Home\Index.cshtml" />
-    <_ContentIncludedByDefault Remove="Areas\Animator\Views\_ViewStart.cshtml" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <AdditionalFiles Include="Views\Animations\Index.cshtml" />
-    <AdditionalFiles Include="Views\Animations\Started.cshtml" />
-    <AdditionalFiles Include="Views\Home\Index.cshtml" />
-    <AdditionalFiles Include="Views\Shared\_Layout.cshtml" />
-    <AdditionalFiles Include="Views\ViewActivities\detail.cshtml" />
-    <AdditionalFiles Include="Views\ViewActivities\Index.cshtml" />
-    <AdditionalFiles Include="Views\ViewRelationships\Index.cshtml" />
-    <AdditionalFiles Include="Views\ViewRelationships\Profile.cshtml" />
-    <AdditionalFiles Include="Views\ViewSocial\Detail.cshtml" />
-    <AdditionalFiles Include="Views\ViewSocial\Index.cshtml" />
-    <AdditionalFiles Include="Views\ViewSocial\Interactions.cshtml" />
-    <AdditionalFiles Include="Views\_ViewStart.cshtml" />
   </ItemGroup>
 
   <ItemGroup>
