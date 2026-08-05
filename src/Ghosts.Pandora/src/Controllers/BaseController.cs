@@ -18,7 +18,7 @@ public class BaseController : Controller
 
         if (string.IsNullOrWhiteSpace(theme))
         {
-            theme = "default";
+            theme = DefaultTheme();
         }
 
         ViewBag.Theme = theme;
@@ -43,7 +43,7 @@ public class BaseController : Controller
         var theme = ThemeRead();
         if (string.IsNullOrWhiteSpace(theme))
         {
-            theme = "default";
+            theme = DefaultTheme();
         }
 
         ViewBag.Theme = theme;
@@ -120,5 +120,11 @@ public class BaseController : Controller
     internal string ThemeRead()
     {
         return CookieRead("theme");
+    }
+
+    internal string DefaultTheme()
+    {
+        var defaultTheme = HttpContext?.RequestServices.GetService<Infrastructure.ApplicationConfiguration>()?.Mode.DefaultTheme;
+        return string.IsNullOrWhiteSpace(defaultTheme) ? "default" : defaultTheme;
     }
 }

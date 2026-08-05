@@ -24,8 +24,9 @@ public class ThemeViewLocationExpander : IViewLocationExpander
         }
         else
         {
-            // fall back to cookie if available
-            theme = cookieTheme ?? "default";
+            // fall back to cookie, then to the configured default theme
+            var defaultTheme = http.RequestServices.GetService<ApplicationConfiguration>()?.Mode.DefaultTheme;
+            theme = cookieTheme ?? (string.IsNullOrWhiteSpace(defaultTheme) ? "default" : defaultTheme);
         }
 
         // normalize view name
