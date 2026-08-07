@@ -43,7 +43,8 @@
         "Dictionary": ""
     },
     "ResourceControl": {
-        "ManageProcesses": true
+        "ManageProcesses": true,
+        "ManageBrowserProcesses": false
     },
     "HealthIsEnabled": false,
     "HandlersIsEnabled": true,
