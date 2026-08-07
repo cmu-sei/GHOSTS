@@ -225,6 +225,7 @@ public class Orchestrator
     private static void SafetyNet(object defaultTimeline)
     {
         var timeline = (Timeline)defaultTimeline;
+        var manageBrowsers = Program.Configuration?.ResourceControl?.ManageBrowserProcesses == true;
         while (true)
         {
             try
@@ -236,11 +237,13 @@ public class Orchestrator
                     string processName = null;
                     switch (handler.HandlerType)
                     {
+                        // Chrome/Firefox are only managed when explicitly opted-in: deployments legitimately run
+                        // multiple concurrent browser processes across handler threads (see issue #689).
                         case HandlerType.BrowserChrome:
-                            processName = "chrome";
+                            if (manageBrowsers) processName = "chrome";
                             break;
                         case HandlerType.BrowserFirefox:
-                            processName = "firefox";
+                            if (manageBrowsers) processName = "firefox";
                             break;
                         case HandlerType.Word:
                             if (OperatingSystem.IsWindows()) processName = "WINWORD";
