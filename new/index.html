@@ -539,6 +539,45 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#version-91" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Version 9.1
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Version 9.1">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#automatic-npc-pools-and-default-workflows-on-execution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Automatic NPC pools and default workflows on execution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#database-is-recreated-on-upgrade" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Database is recreated on upgrade
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#version-90" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2175,6 +2214,18 @@
 
 
 <h1 id="whats-new-in-ghosts-9">What's New in GHOSTS 9<a class="headerlink" href="#whats-new-in-ghosts-9" title="Permanent link">&para;</a></h1>
+<h2 id="version-91">Version 9.1<a class="headerlink" href="#version-91" title="Permanent link">&para;</a></h2>
+<h3 id="automatic-npc-pools-and-default-workflows-on-execution">Automatic NPC pools and default workflows on execution<a class="headerlink" href="#automatic-npc-pools-and-default-workflows-on-execution" title="Permanent link">&para;</a></h3>
+<p>Creating an execution now brings a scenario to life automatically:</p>
+<ul>
+<li><strong>NPC pools</strong> — each <code>UserPool</code> (role + count) defined on the scenario generates that many execution-scoped NPCs when the execution is created. They are grouped by <code>Campaign</code> = scenario name, <code>Enclave</code> = run name, and <code>Team</code> = pool role. Pool NPCs exist as a population regardless of whether they are assigned to a machine (they may live in "greyspace").</li>
+<li><strong>Default n8n workflows</strong> — scenarios are seeded with a default set of animation workflow bindings (Belief, Social Graph, Post to Social Media). When an execution starts, these are scheduled on their cron and fired via n8n. Bindings are editable per scenario, referenced by stable webhook path, and the referenced workflows are activated in n8n automatically if inactive.</li>
+</ul>
+<h3 id="database-is-recreated-on-upgrade">Database is recreated on upgrade<a class="headerlink" href="#database-is-recreated-on-upgrade" title="Permanent link">&para;</a></h3>
+<blockquote>
+<p><strong>Breaking:</strong> GHOSTS uses <code>EnsureCreated()</code> and does not run EF migrations. The 9.1 schema adds a <code>scenarioworkflowbindings</code> table, so <strong>an existing 9.0 database must be dropped and recreated</strong> — it will not be altered in place. There is no automatic migration path.</p>
+</blockquote>
+<p>To upgrade, delete the <code>ghosts</code> database (or its Postgres volume) and restart the API; it recreates the schema and re-seeds on startup. Back up any data you need first.</p>
 <h2 id="version-90">Version 9.0<a class="headerlink" href="#version-90" title="Permanent link">&para;</a></h2>
 <h3 id="angular-20-frontend">Angular 20 Frontend<a class="headerlink" href="#angular-20-frontend" title="Permanent link">&para;</a></h3>
 <p>The previous Next.js UI has been replaced by a full Angular 20 management application (<code>src/Ghosts.Frontend</code>). It is served at port 4200 (or port 80 inside the Docker container) and covers:</p>
