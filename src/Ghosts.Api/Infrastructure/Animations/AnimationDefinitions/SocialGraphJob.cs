@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -118,8 +117,9 @@ public class SocialGraphJob
                 {
                     var learning = new NpcLearning(npc.Id, target.ConnectedNpcId, npc.Id, topic, npc.CurrentStep, 1);
                     npc.Knowledge.Add(learning);
-                    await _hub.Clients.All.SendAsync("show", npc.CurrentStep, target.ConnectedNpcId, "knowledge",
-                        $"learned more about {topic} (1)", DateTime.Now.ToString(CultureInfo.InvariantCulture), _token);
+                    await _hub.Show(npc.CurrentStep, target.ConnectedNpcId.ToString(), "knowledge",
+                        new { action = $"learned more about {topic} (1)", reasoning = "", handler = "SocialGraph" },
+                        npc.ExecutionId, _token);
 
                     if (learning.FromNpcId == npc.Id) continue; // can't improve the relationship with oneself (philosophically true?
                     var connection = npc.Connections.FirstOrDefault(c => c.ConnectedNpcId == learning.FromNpcId);
@@ -131,9 +131,16 @@ public class SocialGraphJob
                         connection.UpdatedUtc = DateTime.UtcNow;
                         await Task.Delay(1500, _token);
                         var direction = change > 0 ? "improved" : "declined";
-                        await _hub.Clients.All.SendAsync("show", npc.CurrentStep, target.ConnectedNpcId, "relationship",
-                            $"{npc.NpcProfile.Name} {direction} relationship with {target.Name} (now {connection.RelationshipStatus:F2})",
-                            DateTime.Now.ToString(CultureInfo.InvariantCulture), _token);
+                        await _hub.Show(npc.CurrentStep, target.ConnectedNpcId.ToString(), "relationship",
+                            new
+                            {
+                                action = $"{npc.NpcProfile.Name} {direction} relationship with {target.Name} (now {connection.RelationshipStatus:F2})",
+                                reasoning = "",
+                                handler = "SocialGraph",
+                                source = npc.Id.ToString(),
+                                target = target.ConnectedNpcId.ToString()
+                            },
+                            npc.ExecutionId, _token);
                     }
                     else
                     {
@@ -149,9 +156,16 @@ public class SocialGraphJob
                             };
                             npc.Connections.Add(newConn);
                             await Task.Delay(1500, _token);
-                            await _hub.Clients.All.SendAsync("show", npc.CurrentStep, target.ConnectedNpcId, "relationship",
-                                $"{npc.NpcProfile.Name} improved relationship with {target.Name}",
-                                DateTime.Now.ToString(CultureInfo.InvariantCulture), _token);
+                            await _hub.Show(npc.CurrentStep, target.ConnectedNpcId.ToString(), "relationship",
+                                new
+                                {
+                                    action = $"{npc.NpcProfile.Name} improved relationship with {target.Name}",
+                                    reasoning = "",
+                                    handler = "SocialGraph",
+                                    source = npc.Id.ToString(),
+                                    target = target.ConnectedNpcId.ToString()
+                                },
+                                npc.ExecutionId, _token);
                         }
                     }
                 }

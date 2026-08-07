@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Threading;
@@ -211,13 +210,12 @@ namespace Ghosts.Api.Infrastructure.Animations.AnimationDefinitions
                 }
 
                 //post to hub
-                await _activityHubContext.Clients.All.SendAsync("show",
-                    "1",
+                await _activityHubContext.Show(
+                    agent.CurrentStep,
                     agent.Id.ToString(),
                     "social",
-                    tweetText,
-                    DateTime.Now.ToString(CultureInfo.InvariantCulture),
-                    cancellationToken: _cancellationToken);
+                    new { action = tweetText, reasoning = "", handler = "SocialSharing" },
+                    agent.ExecutionId, _cancellationToken);
             }
 
             await _context.NpcActivities.AddRangeAsync(activities, _cancellationToken);

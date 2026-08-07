@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Npc, CreateNpcRequest, GenerateNpcRequest } from '../models';
+import { Npc, CreateNpcRequest, GenerateNpcRequest, NpcSocialConnection } from '../models';
 import { ConfigService } from './config.service';
 
 @Injectable({
@@ -21,6 +21,10 @@ export class NpcService {
 
   getNpc(id: string): Observable<Npc> {
     return this.http.get<Npc>(`${this.apiUrl}/${id}`);
+  }
+
+  getAllConnections(): Observable<NpcSocialConnection[]> {
+    return this.http.get<NpcSocialConnection[]>(`${this.apiUrl}/connections`);
   }
 
   createNpc(request: CreateNpcRequest): Observable<Npc> {

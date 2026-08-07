@@ -4,6 +4,7 @@ import * as d3 from 'd3';
 import * as signalR from '@microsoft/signalr';
 import { NpcService } from '../../../core/services/npc.service';
 import { ConfigService } from '../../../core/services/config.service';
+import { NpcSocialConnection } from '../../../core/models';
 
 interface NetworkNode extends d3.SimulationNodeDatum {
   id: string;
@@ -66,23 +67,47 @@ export class ActivitiesDynamicComponent implements OnInit, OnDestroy {
             image: `${this.configService.apiUrl}/npcs/${npc.id}/photo`
           }));
 
-        // Create initial links (sequential connections)
-        this.links = [];
-        for (let i = 1; i < this.nodes.length; i++) {
-          this.links.push({
-            source: this.nodes[i - 1].id,
-            target: this.nodes[i].id,
-            strength: 1
-          });
-        }
-
-        this.initializeVisualization();
-        this.initializeSignalR();
+        // Build edges from real NPC relationships; fall back to none if the call fails
+        this.npcService.getAllConnections().subscribe({
+          next: (connections) => {
+            this.links = this.buildLinks(connections);
+            this.initializeVisualization();
+            this.initializeSignalR();
+          },
+          error: (err) => {
+            console.error('Failed to load connections:', err);
+            this.links = [];
+            this.initializeVisualization();
+            this.initializeSignalR();
+          }
+        });
       },
       error: (err) => {
         console.error('Failed to load NPCs:', err);
       }
     });
+  }
+
+  private buildLinks(connections: NpcSocialConnection[]): NetworkLink[] {
+    const nodeIds = new Set(this.nodes.map(n => n.id));
+    // Collapse to a single edge per unordered pair; connections are reported in
+    // both directions (and often repeatedly), which produced a dense hairball.
+    const byPair = new Map<string, NetworkLink>();
+    for (const c of connections) {
+      // Only link NPCs that are both present as nodes
+      if (!c.npcId || !nodeIds.has(c.npcId) || !nodeIds.has(c.connectedNpcId)) continue;
+      if (c.npcId === c.connectedNpcId) continue;
+      const key = [c.npcId, c.connectedNpcId].sort().join('|');
+      // Map relationship quality (-1..1) to a positive, visible stroke width
+      const strength = Math.max(0.5, (c.relationshipStatus + 1) * 1.5);
+      const existing = byPair.get(key);
+      if (existing) {
+        existing.strength = Math.max(existing.strength, strength);
+      } else {
+        byPair.set(key, { source: c.npcId, target: c.connectedNpcId, strength });
+      }
+    }
+    return [...byPair.values()];
   }
 
   private formatNpcName(name: any): string {
@@ -128,19 +153,33 @@ export class ActivitiesDynamicComponent implements OnInit, OnDestroy {
 
     const tooltip = d3.select('#tooltip');
 
+    // Seed initial positions on a phyllotaxis spiral so nodes start spread out
+    // instead of stacked at the origin (which causes the initial clump).
+    const cx = width / 2;
+    const cy = height / 2;
+    const spread = Math.min(width, height) / 2 - 60;
+    this.nodes.forEach((n, i) => {
+      const angle = i * 2.399963229728653; // golden angle in radians
+      const radius = spread * Math.sqrt((i + 0.5) / this.nodes.length);
+      n.x = cx + radius * Math.cos(angle);
+      n.y = cy + radius * Math.sin(angle);
+    });
+
     this.simulation = d3.forceSimulation(this.nodes)
-      .force('link', d3.forceLink<NetworkNode, NetworkLink>(this.links).id(d => d.id).distance(150))
-      .force('charge', d3.forceManyBody().strength(-300))
-      .force('center', d3.forceCenter(width / 2, height / 2));
+      .force('link', d3.forceLink<NetworkNode, NetworkLink>(this.links).id(d => d.id).distance(220).strength(0.15))
+      .force('charge', d3.forceManyBody().strength(-900))
+      .force('collide', d3.forceCollide(34))
+      .force('x', d3.forceX(cx).strength(0.02))
+      .force('y', d3.forceY(cy).strength(0.02));
 
     this.linkLayer = svgElement.append('g');
     const link = this.linkLayer
-      .attr('stroke', '#999')
-      .attr('stroke-opacity', 0.6)
+      .attr('stroke', '#cbd5e1')
+      .attr('stroke-opacity', 0.35)
       .selectAll('line')
       .data(this.links)
       .join('line')
-      .attr('stroke-width', d => d.strength);
+      .attr('stroke-width', d => Math.min(1.5, d.strength * 0.5));
 
     this.nodeLayer = svgElement.append('g');
     const node = this.nodeLayer
@@ -227,8 +266,8 @@ export class ActivitiesDynamicComponent implements OnInit, OnDestroy {
       .withAutomaticReconnect()
       .build();
 
-    this.connection.on('show', (eventId: string, npcId: string, type: string, message: any, time: string) => {
-      this.handleSignalRUpdate(eventId, npcId, type, message, time);
+    this.connection.on('show', (eventId: string, npcId: string, type: string, message: any, time: string, executionId?: number | null) => {
+      this.handleSignalRUpdate(eventId, npcId, type, message, time, executionId);
     });
 
     this.connection.start()
@@ -236,15 +275,17 @@ export class ActivitiesDynamicComponent implements OnInit, OnDestroy {
       .catch(err => console.error('SignalR connection error:', err));
   }
 
-  private handleSignalRUpdate(eventId: string, npcId: string, type: string, message: any, time: string): void {
+  private handleSignalRUpdate(eventId: string, npcId: string, type: string, message: any, time: string, executionId?: number | null): void {
     const n1 = this.nodes.find(x => x.id === npcId);
     const npcName = n1?.name || npcId;
-    this.logUpdate(type, `${type} event from ${npcName}: ${typeof message === 'string' ? message : JSON.stringify(message)}`);
+    const summary = this.summarizeMessage(message);
+    const runTag = executionId != null ? ` [run ${executionId}]` : '';
+    this.logUpdate(type, `${type} event from ${npcName}${runTag}: ${summary}`);
 
     if (type === 'chat' || type === 'relationship') this.updateMood('happy', 1);
     if (type === 'belief' || type === 'activity-other') this.updateMood('sad', -1);
 
-    if (type === 'relationship' && typeof message === 'string' && message.includes('improved relationship')) {
+    if (type === 'relationship') {
       this.handleRelationshipImprovement(message);
     }
 
@@ -263,31 +304,47 @@ export class ActivitiesDynamicComponent implements OnInit, OnDestroy {
     this.showMessageBubble(n, type, message);
   }
 
-  private handleRelationshipImprovement(message: string): void {
-    const parts = message.match(/(.+?) improved relationship with (.+)/);
-    if (parts && parts.length === 3) {
-      const from = this.nodes.find(n => n.name === parts[1]);
-      const to = this.nodes.find(n => n.name === parts[2]);
-      if (from && to && this.linkLayer) {
-        const tempLine = this.linkLayer.append('line')
-          .attr('x1', from.x!)
-          .attr('y1', from.y!)
-          .attr('x2', to.x!)
-          .attr('y2', to.y!)
-          .attr('stroke', 'silver')
-          .attr('stroke-width', 1)
-          .attr('stroke-dasharray', '4,4')
-          .attr('opacity', 0.6)
-          .style('filter', 'url(#pulse-glow)');
+  /** Renders a plain-text summary of a show message, whether string or structured object. */
+  private summarizeMessage(message: any): string {
+    if (typeof message !== 'object' || message === null) return `${message}`;
+    if (message.handler && message.action) return `Used ${message.handler} to ${message.action}`;
+    if (message.action) return message.action;
+    return JSON.stringify(message);
+  }
 
-        tempLine.transition().duration(1000)
-          .attr('stroke', 'aliceblue')
-          .attr('stroke-width', 2);
+  private handleRelationshipImprovement(message: any): void {
+    // Prefer structured source/target ids; fall back to parsing a legacy string message by name
+    let from = this.nodes.find(n => n.id === message?.source);
+    let to = this.nodes.find(n => n.id === message?.target);
 
-        tempLine.transition().delay(29000).duration(1000)
-          .style('opacity', 0)
-          .remove();
-      }
+    if (!from || !to) {
+      const text = typeof message === 'string' ? message : message?.action;
+      if (typeof text !== 'string' || !text.includes('improved relationship')) return;
+      const parts = text.match(/(.+?) improved relationship with (.+)/);
+      if (!parts || parts.length !== 3) return;
+      from = this.nodes.find(n => n.name === parts[1]);
+      to = this.nodes.find(n => n.name === parts[2]);
+    }
+
+    if (from && to && this.linkLayer) {
+      const tempLine = this.linkLayer.append('line')
+        .attr('x1', from.x!)
+        .attr('y1', from.y!)
+        .attr('x2', to.x!)
+        .attr('y2', to.y!)
+        .attr('stroke', 'silver')
+        .attr('stroke-width', 1)
+        .attr('stroke-dasharray', '4,4')
+        .attr('opacity', 0.6)
+        .style('filter', 'url(#pulse-glow)');
+
+      tempLine.transition().duration(1000)
+        .attr('stroke', 'aliceblue')
+        .attr('stroke-width', 2);
+
+      tempLine.transition().delay(29000).duration(1000)
+        .style('opacity', 0)
+        .remove();
     }
   }
 

@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Threading;
 using Ghosts.Api.Hubs;
@@ -151,12 +150,17 @@ public class SocialBeliefJob
         npcWithData.Beliefs.Add(newBelief);
 
         //post to hub
-        _activityHubContext.Clients.All.SendAsync("show",
+        _activityHubContext.Show(
             newBelief.Step,
             newBelief.ToNpcId.ToString(),
             "belief",
-            $"{npcWithData.NpcProfile.Name} has updated posterior of {Math.Round(newBelief.Posterior, 2)} in {newBelief.Name}",
-            DateTime.Now.ToString(CultureInfo.InvariantCulture), cancellationToken: _cancellationToken);
+            new
+            {
+                action = $"{npcWithData.NpcProfile.Name} has updated posterior of {Math.Round(newBelief.Posterior, 2)} in {newBelief.Name}",
+                reasoning = "",
+                handler = "SocialBelief"
+            },
+            npcWithData.ExecutionId, _cancellationToken);
 
         // EF Core will track changes automatically - just save
         var affectedRows = _context.SaveChanges();

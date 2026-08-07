@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -686,12 +685,12 @@ public class ChatClient
 
 
                         //post to hub
-                        await _activityHubContext.Clients.All.SendAsync("show",
+                        await _activityHubContext.Show(
                             1,
-                            npcId,
+                            npcId.ToString(),
                             "chat",
-                            message,
-                            DateTime.Now.ToString(CultureInfo.InvariantCulture), _cancellationToken
+                            new { action = message, reasoning = "", handler = "Chat" },
+                            null, _cancellationToken
                         );
                     }
                     else

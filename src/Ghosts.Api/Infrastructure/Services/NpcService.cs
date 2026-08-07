@@ -27,6 +27,7 @@ public interface INpcService
     public Task<IEnumerable<NpcPreference>> GetPreferences(Guid id);
     public Task<NpcPreference> CreatePreference(Guid id, Guid toNpcId, Guid fromNpcId, string name, long step, decimal weight, decimal strength);
     public Task<IEnumerable<NpcSocialConnection>> GetConnections(Guid id);
+    public Task<IEnumerable<NpcSocialConnection>> GetAllConnections();
     public Task<NpcSocialConnection> CreateConnection(Guid id, Guid connectedNpcId, string name, string distance, decimal relationshipStatus);
     public Task<IEnumerable<NpcLearning>> GetKnowledge(Guid id);
     public Task<NpcLearning> CreateKnowledge(Guid id, Guid toNpcId, Guid fromNpcId, string topic, long step, int value);
@@ -220,6 +221,17 @@ public class NpcService(ApplicationDbContext context, IEvidenceProcessor evidenc
     {
         return await _context.NpcSocialConnections
             .Where(x => x.NpcId == id)
+            .OrderByDescending(x => x.UpdatedUtc)
+            .ToListAsync();
+    }
+
+    /// <summary>
+    /// Gets all social connections across all NPCs, so edges can be built in one call
+    /// </summary>
+    /// <returns>Collection of NpcSocialConnection records</returns>
+    public async Task<IEnumerable<NpcSocialConnection>> GetAllConnections()
+    {
+        return await _context.NpcSocialConnections
             .OrderByDescending(x => x.UpdatedUtc)
             .ToListAsync();
     }

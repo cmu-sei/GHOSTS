@@ -56,6 +56,7 @@ export interface NpcSocialGraph {
 export interface NpcSocialConnection {
   id: string;
   socialGraphId: string;
+  npcId?: string;
   connectedNpcId: string;
   name: string;
   distance?: string;
