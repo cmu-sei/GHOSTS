@@ -1,0 +1,7 @@
+bin/
+obj/
+**/bin/
+**/obj/
+.idea/
+.claude/
+.DS_Store
