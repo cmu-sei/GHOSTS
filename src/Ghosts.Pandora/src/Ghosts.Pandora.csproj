@@ -27,6 +27,7 @@
 
     <!-- Manually include content items that EnableDefaultContentItems would have included -->
     <ItemGroup>
+        <Content Include="appsettings*.json" CopyToOutputDirectory="PreserveNewest"/>
         <Content Include="wwwroot\**"/>
         <Content Include="**\*.cshtml"/>
         <Content Include="**\*.css" Exclude="**\*.cshtml.css"/>
