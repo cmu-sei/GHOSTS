@@ -1,7 +1,7 @@
-"""FastAPI scaffold for the RPG service.
+"""FastAPI scaffold for the RPG service — Kriegspiel Mode.
 
-Slice 1: health + a load probe so we can confirm the loader wiring end to end.
-The turn loop, DM, and game endpoints arrive in later slices (see DESIGN.md §6)."""
+Serves the scenario catalog and the game turn loop: start a game from a fixture,
+then submit action+rationale turns and get back frames the Angular UI renders."""
 
 from __future__ import annotations
 
@@ -16,8 +16,8 @@ from pydantic import BaseModel
 from . import __version__
 from .config import Settings
 from .game import Game
-from .llm import OllamaClient
-from .loader import load_bundle_file, load_from_api
+from .llm import make_llm
+from .loader import load_bundle_file
 from .session import STORE
 
 FIXTURES_DIR = Path(__file__).resolve().parents[2] / "fixtures" / "scenarios"
@@ -36,13 +36,19 @@ app.add_middleware(
 @app.get("/health")
 def health() -> dict:
     settings = Settings.from_env()
+    llm = make_llm(settings)
+    if settings.llm_provider == "bedrock":
+        endpoint, model = f"bedrock:{settings.bedrock_region}", settings.bedrock_model
+    else:
+        endpoint, model = settings.ollama_host, settings.ollama_model
     return {
         "status": "ok",
         "version": __version__,
         "llm": {
-            "enabled": bool(settings.ollama_model),
-            "host": settings.ollama_host,
-            "model": settings.ollama_model or None,
+            "provider": settings.llm_provider,
+            "enabled": llm.enabled,
+            "host": endpoint,
+            "model": model or None,
         },
     }
 
@@ -72,47 +78,32 @@ def load_fixture(name: str) -> dict:
     return _summary(bundle)
 
 
-@app.get("/api/scenarios/{scenario_id}/summary")
-def load_scenario_summary(scenario_id: int) -> dict:
-    """Load a live scenario from the GHOSTS API and return a thin summary."""
-    try:
-        bundle = load_from_api(scenario_id, Settings.from_env())
-    except Exception as exc:  # surface the upstream failure to the caller
-        raise HTTPException(status_code=502, detail=f"load failed: {exc}") from exc
-    return _summary(bundle)
-
-
 # ── game endpoints ──────────────────────────────────────────────────────
 
 
 class NewGameDto(BaseModel):
     fixture: str | None = None
-    scenarioId: int | None = None
 
 
 class ActDto(BaseModel):
-    input: str
+    action: str
+    rationale: str = ""
 
 
 def _new_game_bundle(dto: NewGameDto):
-    if dto.fixture:
-        path = FIXTURES_DIR / f"{dto.fixture}.json"
-        if not path.is_file():
-            raise HTTPException(status_code=404, detail=f"fixture '{dto.fixture}' not found")
-        return load_bundle_file(path)
-    if dto.scenarioId is not None:
-        try:
-            return load_from_api(dto.scenarioId, Settings.from_env())
-        except Exception as exc:
-            raise HTTPException(status_code=502, detail=f"load failed: {exc}") from exc
-    raise HTTPException(status_code=400, detail="provide 'fixture' or 'scenarioId'")
+    if not dto.fixture:
+        raise HTTPException(status_code=400, detail="provide 'fixture'")
+    path = FIXTURES_DIR / f"{dto.fixture}.json"
+    if not path.is_file():
+        raise HTTPException(status_code=404, detail=f"fixture '{dto.fixture}' not found")
+    return load_bundle_file(path)
 
 
 @app.post("/api/games")
 def new_game(dto: NewGameDto) -> dict:
-    """Start a game from a fixture or a live scenario; returns the first frame."""
+    """Start a game from a fixture; returns the first frame."""
     bundle = _new_game_bundle(dto)
-    game = Game(bundle, llm=OllamaClient(Settings.from_env()))
+    game = Game(bundle, llm=make_llm(Settings.from_env()))
     gid = STORE.create(game)
     frame = game.start()
     return {"gameId": gid, "frame": asdict(frame)}
@@ -120,11 +111,11 @@ def new_game(dto: NewGameDto) -> dict:
 
 @app.post("/api/games/{game_id}/act")
 def act(game_id: str, dto: ActDto) -> dict:
-    """Submit an option or free text; returns the resulting frame."""
+    """Submit an action + rationale; returns the resulting frame."""
     game = STORE.get(game_id)
     if game is None:
         raise HTTPException(status_code=404, detail="game not found")
-    return {"gameId": game_id, "frame": asdict(game.act(dto.input))}
+    return {"gameId": game_id, "frame": asdict(game.act(dto.action, dto.rationale))}
 
 
 @app.get("/api/games/{game_id}")
@@ -138,14 +129,12 @@ def game_state(game_id: str) -> dict:
 
 def _summary(bundle) -> dict:
     sc = bundle.scenario
-    events = sc.timeline.events if sc.timeline else []
     return {
         "id": sc.id,
         "name": sc.name,
-        "events": len(events),
-        "playerTurns": sum(1 for e in events if e.is_player_turn),
-        "objectives": len(bundle.objectives),
-        "cast": len(bundle.graph.nodes),
+        "objectives": len(sc.objectives),
+        "opforMoves": len(sc.opfor.playbook),
+        "triggers": len(sc.triggers),
     }
 
 
@@ -160,7 +149,6 @@ def _catalog_entry(fixture: str, bundle) -> dict:
         "era": catalog.era,
         "theater": catalog.theater,
         "estimatedMinutes": catalog.estimated_minutes,
-        "events": summary["events"],
         "objectives": summary["objectives"],
     }
 

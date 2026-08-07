@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
@@ -34,8 +35,9 @@ public class ExecutionWorkflowScheduler : BackgroundService
 
     private static readonly TimeSpan PollInterval = TimeSpan.FromSeconds(10);
 
-    // Track which scheduled workflow items have been handed off to AnimationsManager
-    private readonly ConcurrentDictionary<int, bool> _scheduledItemsStarted = new();
+    // Track scheduled workflow items handed off to AnimationsManager: item id → job key,
+    // so a job can be stopped when its execution ends.
+    private readonly ConcurrentDictionary<int, string> _scheduledItemsStarted = new();
 
     public ExecutionWorkflowScheduler(
         IServiceScopeFactory scopeFactory,
@@ -79,9 +81,13 @@ public class ExecutionWorkflowScheduler : BackgroundService
             .Where(e => e.Status == ExecutionStatus.Running && e.StartedAt != null)
             .ToListAsync(ct);
 
-        if (runningExecutions.Count == 0) return;
-
         var executionIds = runningExecutions.Select(e => e.Id).ToList();
+
+        // Stop scheduled workflow jobs whose execution is no longer running so a
+        // finished/paused/cancelled run doesn't keep poking n8n.
+        await StopJobsForEndedExecutionsAsync(context, executionIds, ct);
+
+        if (runningExecutions.Count == 0) return;
 
         var pendingWorkflowItems = await context.Set<ExecutionTimelineItem>()
             .Where(ti => executionIds.Contains(ti.ExecutionId)
@@ -115,7 +121,7 @@ public class ExecutionWorkflowScheduler : BackgroundService
                     if (elapsed.TotalMilliseconds >= offsetMs)
                     {
                         await StartScheduledWorkflowItemAsync(item, ct);
-                        _scheduledItemsStarted.TryAdd(item.Id, true);
+                        _scheduledItemsStarted.TryAdd(item.Id, WorkflowJobKey(item));
                     }
                 }
             }
@@ -139,6 +145,7 @@ public class ExecutionWorkflowScheduler : BackgroundService
 
         try
         {
+            await EnsureWorkflowActiveAsync(item.WorkflowId!, ct);
             var webhookInfo = await ResolveWebhookInfoAsync(item.WorkflowId!, ct);
             if (webhookInfo == null)
             {
@@ -270,6 +277,7 @@ public class ExecutionWorkflowScheduler : BackgroundService
     {
         _log.Info($"[Execution {item.ExecutionId}] Starting scheduled workflow item #{item.Number} (workflow {item.WorkflowId}, schedule: {item.Schedule})");
 
+        await EnsureWorkflowActiveAsync(item.WorkflowId!, ct);
         var webhookInfo = await ResolveWebhookInfoAsync(item.WorkflowId!, ct);
         if (webhookInfo == null)
         {
@@ -278,19 +286,119 @@ public class ExecutionWorkflowScheduler : BackgroundService
         }
 
         _log.Info($"[Execution {item.ExecutionId}] Scheduled workflow item #{item.Number} will use {webhookInfo.HttpMethod} {webhookInfo.Url}");
-        await _animationsManager.StartWorkflowJob(item.WorkflowId!, webhookInfo.Url, item.Schedule!, ct);
+        await _animationsManager.StartWorkflowJob(item.WorkflowId!, webhookInfo.Url, item.Schedule!, ct, WorkflowJobKey(item));
+    }
+
+    /// <summary>Per-execution job key so concurrent runs of the same workflow don't collide.</summary>
+    private static string WorkflowJobKey(ExecutionTimelineItem item) => $"exec-{item.ExecutionId}-item-{item.Id}";
+
+    /// <summary>
+    /// Stops scheduled workflow jobs for items whose execution is no longer running, and
+    /// forgets them so they can be re-scheduled if the execution resumes.
+    /// </summary>
+    private async Task StopJobsForEndedExecutionsAsync(ApplicationDbContext context, List<int> runningExecutionIds, CancellationToken ct)
+    {
+        if (_scheduledItemsStarted.IsEmpty) return;
+
+        var startedItemIds = _scheduledItemsStarted.Keys.ToList();
+        var itemExecutions = await context.Set<ExecutionTimelineItem>()
+            .Where(ti => startedItemIds.Contains(ti.Id))
+            .Select(ti => new { ti.Id, ti.ExecutionId })
+            .ToListAsync(ct);
+
+        foreach (var itemId in startedItemIds)
+        {
+            var mapping = itemExecutions.FirstOrDefault(x => x.Id == itemId);
+            // Stop if the item is gone (deleted) or its execution is no longer running.
+            var stillRunning = mapping != null && runningExecutionIds.Contains(mapping.ExecutionId);
+            if (stillRunning) continue;
+
+            if (_scheduledItemsStarted.TryRemove(itemId, out var jobKey))
+            {
+                await _animationsManager.StopWorkflowJob(jobKey);
+                _log.Info($"Stopped scheduled workflow job {jobKey} (execution ended)");
+            }
+        }
     }
 
     private record WebhookInfo(string Url, string HttpMethod);
 
-    private async Task<WebhookInfo> ResolveWebhookInfoAsync(string workflowId, CancellationToken ct)
+    /// <summary>
+    /// Ensures the referenced workflow is active in n8n, activating it via the API if not
+    /// (the provisioned key carries the workflow:activate scope). Default workflows are
+    /// imported inactive, so without this their webhooks 404 and the item fails. Accepts an
+    /// n8n id or a stable webhook ref/name. Best-effort: logs and returns on any failure.
+    /// </summary>
+    private async Task EnsureWorkflowActiveAsync(string workflowIdOrRef, CancellationToken ct)
+    {
+        var apiUrl = N8nConfig.GetApiUrl();
+        var apiKey = N8nConfig.GetApiKey();
+        if (string.IsNullOrEmpty(apiUrl) || string.IsNullOrEmpty(apiKey)) return;
+
+        try
+        {
+            using var http = _httpClientFactory.CreateClient();
+            http.DefaultRequestHeaders.Clear();
+            http.DefaultRequestHeaders.Add("accept", "application/json");
+            http.DefaultRequestHeaders.Add("X-N8N-API-KEY", apiKey);
+
+            // Resolve the live workflow (id, active state) from an id or a ref.
+            string id = null;
+            var isActive = false;
+
+            var directUrl = $"{apiUrl.TrimEnd('/')}/{workflowIdOrRef}";
+            var direct = await http.GetAsync(directUrl, ct);
+            if (direct.IsSuccessStatusCode)
+            {
+                await using var s = await direct.Content.ReadAsStreamAsync(ct);
+                var wf = await JsonSerializer.DeserializeAsync<JsonElement>(s, cancellationToken: ct);
+                id = wf.TryGetProperty("id", out var idp) ? idp.GetString() : workflowIdOrRef;
+                isActive = wf.TryGetProperty("active", out var ap) && ap.GetBoolean();
+            }
+            else
+            {
+                var listResp = await http.GetAsync(apiUrl, ct);
+                if (!listResp.IsSuccessStatusCode) return;
+                await using var ls = await listResp.Content.ReadAsStreamAsync(ct);
+                var list = await JsonSerializer.DeserializeAsync<JsonElement>(ls, cancellationToken: ct);
+                if (!list.TryGetProperty("data", out var data)) return;
+                foreach (var wf in data.EnumerateArray())
+                {
+                    if (!WorkflowMatchesRef(wf, workflowIdOrRef)) continue;
+                    id = wf.TryGetProperty("id", out var idp) ? idp.GetString() : null;
+                    isActive = wf.TryGetProperty("active", out var ap) && ap.GetBoolean();
+                    break;
+                }
+            }
+
+            if (id == null || isActive) return;
+
+            var activateResp = await http.PostAsync($"{apiUrl.TrimEnd('/')}/{id}/activate", null, ct);
+            if (activateResp.IsSuccessStatusCode)
+                _log.Info($"[Workflow {workflowIdOrRef}] Activated in n8n (id {id})");
+            else
+                _log.Warn($"[Workflow {workflowIdOrRef}] Activate failed ({(int)activateResp.StatusCode})");
+        }
+        catch (Exception ex)
+        {
+            _log.Warn(ex, $"[Workflow {workflowIdOrRef}] Failed to ensure workflow active");
+        }
+    }
+
+    /// <summary>
+    /// Resolves an item's WorkflowId to a live webhook. The value is either a real n8n
+    /// workflow id (hand-authored timeline events) or a stable webhook ref such as "beliefs"
+    /// (default scenario bindings, since REST import can reassign the n8n id). Tries a direct
+    /// id fetch first, then falls back to listing workflows and matching by webhook path or name.
+    /// </summary>
+    private async Task<WebhookInfo> ResolveWebhookInfoAsync(string workflowIdOrRef, CancellationToken ct)
     {
         var apiUrl = N8nConfig.GetApiUrl();
         var apiKey = N8nConfig.GetApiKey();
 
         if (string.IsNullOrEmpty(apiUrl) || string.IsNullOrEmpty(apiKey))
         {
-            _log.Warn($"[Workflow {workflowId}] N8N_API_URL or N8N_API_KEY not configured");
+            _log.Warn($"[Workflow {workflowIdOrRef}] N8N_API_URL or N8N_API_KEY not configured");
             return null;
         }
 
@@ -301,60 +409,105 @@ public class ExecutionWorkflowScheduler : BackgroundService
             http.DefaultRequestHeaders.Add("accept", "application/json");
             http.DefaultRequestHeaders.Add("X-N8N-API-KEY", apiKey);
 
-            var workflowApiUrl = $"{apiUrl.TrimEnd('/')}/{workflowId}";
-            _log.Debug($"[Workflow {workflowId}] Fetching workflow definition from {workflowApiUrl}");
-            var response = await http.GetAsync(workflowApiUrl, ct);
-
-            if (!response.IsSuccessStatusCode)
+            // 1. Try treating the value as a real n8n workflow id.
+            var directUrl = $"{apiUrl.TrimEnd('/')}/{workflowIdOrRef}";
+            var response = await http.GetAsync(directUrl, ct);
+            if (response.IsSuccessStatusCode)
             {
-                _log.Warn($"[Workflow {workflowId}] Failed to fetch workflow from n8n API ({(int)response.StatusCode})");
+                await using var stream = await response.Content.ReadAsStreamAsync(ct);
+                var workflow = await JsonSerializer.DeserializeAsync<JsonElement>(stream, cancellationToken: ct);
+                return ExtractWebhookInfo(workflow, apiUrl, workflowIdOrRef);
+            }
+
+            // 2. Fall back: list workflows and match by webhook path or name.
+            _log.Debug($"[Workflow {workflowIdOrRef}] Direct fetch failed ({(int)response.StatusCode}); matching by webhook ref");
+            var listResp = await http.GetAsync(apiUrl, ct);
+            if (!listResp.IsSuccessStatusCode)
+            {
+                _log.Warn($"[Workflow {workflowIdOrRef}] Failed to list workflows from n8n API ({(int)listResp.StatusCode})");
                 return null;
             }
 
-            await using var stream = await response.Content.ReadAsStreamAsync(ct);
-            var workflow = await JsonSerializer.DeserializeAsync<JsonElement>(stream, cancellationToken: ct);
+            await using var listStream = await listResp.Content.ReadAsStreamAsync(ct);
+            var list = await JsonSerializer.DeserializeAsync<JsonElement>(listStream, cancellationToken: ct);
+            if (!list.TryGetProperty("data", out var data)) return null;
 
-            if (workflow.TryGetProperty("active", out var activeProp) && !activeProp.GetBoolean())
+            foreach (var wf in data.EnumerateArray())
             {
-                _log.Warn($"[Workflow {workflowId}] Workflow is inactive in n8n");
-                return null;
-            }
-
-            if (workflow.TryGetProperty("nodes", out var nodes))
-            {
-                foreach (var node in nodes.EnumerateArray())
+                if (WorkflowMatchesRef(wf, workflowIdOrRef))
                 {
-                    if (!node.TryGetProperty("type", out var typeProp)) continue;
-                    if (typeProp.GetString() != "n8n-nodes-base.webhook") continue;
-                    if (!node.TryGetProperty("parameters", out var parameters)) continue;
-                    if (!parameters.TryGetProperty("path", out var pathProp)) continue;
-
-                    var path = pathProp.GetString()?.Trim().TrimStart('/');
-                    if (string.IsNullOrEmpty(path)) continue;
-
-                    var httpMethod = "GET";
-                    if (parameters.TryGetProperty("httpMethod", out var methodProp))
-                    {
-                        httpMethod = methodProp.GetString()?.ToUpperInvariant() ?? "GET";
-                    }
-
-                    var apiUri = new Uri(apiUrl);
-                    var port = apiUri.IsDefaultPort ? string.Empty : $":{apiUri.Port}";
-                    var webhookUrl = $"{apiUri.Scheme}://{apiUri.Host}{port}/webhook/{path}";
-
-                    _log.Info($"[Workflow {workflowId}] Resolved webhook: {httpMethod} {webhookUrl}");
-                    return new WebhookInfo(webhookUrl, httpMethod);
+                    var info = ExtractWebhookInfo(wf, apiUrl, workflowIdOrRef);
+                    if (info != null) return info;
                 }
             }
 
-            _log.Warn($"[Workflow {workflowId}] No webhook node found in workflow definition");
+            _log.Warn($"[Workflow {workflowIdOrRef}] No active workflow found matching ref");
             return null;
         }
         catch (Exception ex)
         {
-            _log.Warn(ex, $"[Workflow {workflowId}] Failed to resolve webhook URL");
+            _log.Warn(ex, $"[Workflow {workflowIdOrRef}] Failed to resolve webhook URL");
             return null;
         }
+    }
+
+    /// <summary>True if the workflow's name or a webhook node's path equals the ref.</summary>
+    private static bool WorkflowMatchesRef(JsonElement workflow, string workflowRef)
+    {
+        if (workflow.TryGetProperty("name", out var nameProp)
+            && string.Equals(nameProp.GetString(), workflowRef, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if (!workflow.TryGetProperty("nodes", out var nodes)) return false;
+        foreach (var node in nodes.EnumerateArray())
+        {
+            if (!node.TryGetProperty("type", out var typeProp) || typeProp.GetString() != "n8n-nodes-base.webhook") continue;
+            if (!node.TryGetProperty("parameters", out var parameters) || !parameters.TryGetProperty("path", out var pathProp)) continue;
+            var path = pathProp.GetString()?.Trim().TrimStart('/');
+            if (string.Equals(path, workflowRef.Trim().TrimStart('/'), StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+        return false;
+    }
+
+    /// <summary>Extracts a webhook URL + method from a workflow definition, or null if inactive / no webhook.</summary>
+    private static WebhookInfo ExtractWebhookInfo(JsonElement workflow, string apiUrl, string label)
+    {
+        if (workflow.TryGetProperty("active", out var activeProp) && !activeProp.GetBoolean())
+        {
+            _log.Warn($"[Workflow {label}] Workflow is inactive in n8n");
+            return null;
+        }
+
+        if (workflow.TryGetProperty("nodes", out var nodes))
+        {
+            foreach (var node in nodes.EnumerateArray())
+            {
+                if (!node.TryGetProperty("type", out var typeProp)) continue;
+                if (typeProp.GetString() != "n8n-nodes-base.webhook") continue;
+                if (!node.TryGetProperty("parameters", out var parameters)) continue;
+                if (!parameters.TryGetProperty("path", out var pathProp)) continue;
+
+                var path = pathProp.GetString()?.Trim().TrimStart('/');
+                if (string.IsNullOrEmpty(path)) continue;
+
+                var httpMethod = "GET";
+                if (parameters.TryGetProperty("httpMethod", out var methodProp))
+                {
+                    httpMethod = methodProp.GetString()?.ToUpperInvariant() ?? "GET";
+                }
+
+                var apiUri = new Uri(apiUrl);
+                var port = apiUri.IsDefaultPort ? string.Empty : $":{apiUri.Port}";
+                var webhookUrl = $"{apiUri.Scheme}://{apiUri.Host}{port}/webhook/{path}";
+
+                _log.Info($"[Workflow {label}] Resolved webhook: {httpMethod} {webhookUrl}");
+                return new WebhookInfo(webhookUrl, httpMethod);
+            }
+        }
+
+        _log.Warn($"[Workflow {label}] No webhook node found in workflow definition");
+        return null;
     }
 
     private async Task BroadcastTimelineItemUpdateAsync(int executionId, int itemId, string status)
@@ -416,7 +569,8 @@ public class ExecutionWorkflowScheduler : BackgroundService
         // Stop any scheduled workflow jobs that were started for execution items
         foreach (var itemId in _scheduledItemsStarted.Keys)
         {
-            _scheduledItemsStarted.TryRemove(itemId, out _);
+            if (_scheduledItemsStarted.TryRemove(itemId, out var jobKey))
+                await _animationsManager.StopWorkflowJob(jobKey);
         }
 
         await base.StopAsync(cancellationToken);

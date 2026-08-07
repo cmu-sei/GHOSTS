@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -100,12 +99,12 @@ public class FullAutonomyJob
             Thread.Sleep(500);
 
             // post to hub
-            await _activityHubContext.Clients.All.SendAsync("show",
-                "1",
+            await _activityHubContext.Show(
+                agent.CurrentStep,
                 agent.Id.ToString(),
                 "social",
-                nextAction,
-                DateTime.Now.ToString(CultureInfo.InvariantCulture)
+                new { action = nextAction, reasoning = "", handler = "FullAutonomy" },
+                agent.ExecutionId
             );
         }
 

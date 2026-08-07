@@ -145,6 +145,8 @@ if [ -d "$WORKFLOW_DIR" ] && ls "$WORKFLOW_DIR"/*.json 1>/dev/null 2>&1; then
     const dir = '$WORKFLOW_DIR';
     const cookie = '$SESSION';
 
+    // Import inactive to avoid webhook/FK registration issues, then activate
+    // in a separate pass below once the workflow exists.
     async function importWorkflow(filePath) {
       const wf = JSON.parse(fs.readFileSync(filePath, 'utf8'));
       const name = wf.name || path.basename(filePath, '.json');
@@ -165,7 +167,9 @@ if [ -d "$WORKFLOW_DIR" ] && ls "$WORKFLOW_DIR"/*.json 1>/dev/null 2>&1; then
           res.on('end', () => {
             if (res.statusCode === 200) {
               console.log('  Imported: ' + name);
-              resolve();
+              let created;
+              try { const d = JSON.parse(body).data; created = { id: d.id, versionId: d.versionId }; } catch (e) {}
+              resolve(created);
             } else if (res.statusCode === 409) {
               console.log('  Exists:   ' + name + ' (skipped)');
               resolve();
@@ -181,12 +185,51 @@ if [ -d "$WORKFLOW_DIR" ] && ls "$WORKFLOW_DIR"/*.json 1>/dev/null 2>&1; then
       });
     }
 
+    function activateWorkflow(id, versionId, name) {
+      const data = JSON.stringify({ versionId });
+      return new Promise((resolve) => {
+        const req = http.request({
+          hostname: process.env.N8N_HOST || 'n8n', port: 5678,
+          path: '/rest/workflows/' + id + '/activate',
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Content-Length': Buffer.byteLength(data),
+            'Cookie': cookie
+          }
+        }, res => {
+          let body = '';
+          res.on('data', c => body += c);
+          res.on('end', () => {
+            if (res.statusCode >= 200 && res.statusCode < 300) {
+              console.log('  Activated: ' + name);
+            } else {
+              console.error('  Activate FAILED: ' + name + ' (' + res.statusCode + ')');
+              console.error('            ' + body.substring(0, 200));
+            }
+            resolve();
+          });
+        });
+        req.write(data);
+        req.end();
+      });
+    }
+
     (async () => {
       const files = fs.readdirSync(dir).filter(f => f.endsWith('.json'));
+      const imported = [];
       for (const f of files) {
-        await importWorkflow(path.join(dir, f));
+        const created = await importWorkflow(path.join(dir, f));
+        if (created && created.id) imported.push({ id: created.id, versionId: created.versionId, name: path.basename(f, '.json') });
       }
       console.log('Done: ' + files.length + ' workflows processed.');
+
+      if (imported.length) {
+        console.log('Activating ' + imported.length + ' workflows...');
+        for (const wf of imported) {
+          await activateWorkflow(wf.id, wf.versionId, wf.name);
+        }
+      }
     })().catch(e => { console.error(e.message); process.exit(1); });
   "
   echo "[provisioner] Workflow import complete."

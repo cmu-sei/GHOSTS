@@ -157,20 +157,16 @@ public class Program
         // Configure controllers with JSON serialization and custom formatters
         builder.Services.AddControllers(options => { options.OutputFormatters.Add(new MarkdownOutputFormatter()); })
             .AddJsonOptions(options =>
-                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
-
-        builder.Services.AddMvc().AddNewtonsoftJson(options =>
-        {
-            options.SerializerSettings.Converters.Add(new TimeSpanConverter());
-            options.SerializerSettings.Converters.Add(new StringEnumConverter());
-            options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-        });
+                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()))
+            .AddNewtonsoftJson(options =>
+            {
+                options.SerializerSettings.Converters.Add(new TimeSpanConverter());
+                options.SerializerSettings.Converters.Add(new StringEnumConverter());
+                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            });
 
         // Add SignalR
         builder.Services.AddSignalR();
-
-        // Add MVC with Razor runtime compilation
-        builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
 
         // Configure routing
         builder.Services.AddRouting(options => options.LowercaseUrls = true);
@@ -200,19 +196,11 @@ public class Program
             app.UseDeveloperExceptionPage();
         }
 
-        app.UseStaticFiles();
         app.UseRouting();
         app.UseCors("default");
 
         // Configure endpoints
-        app.MapControllerRoute(
-            name: "areas",
-            pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}"
-        );
-
-        app.MapControllerRoute(
-            name: "default",
-            pattern: "{controller=Home}/{action=Index}/{id?}");
+        app.MapControllers();
 
         app.MapHub<ClientHub>("/clientHub");
         app.MapHub<ClientHub>("/api/clientHub");

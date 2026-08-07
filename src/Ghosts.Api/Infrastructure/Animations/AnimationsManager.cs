@@ -30,9 +30,9 @@ public interface IManageableHostedService : IHostedService
     Task StartJob(AnimationConfiguration config, CancellationToken cancellationToken);
     Task StopJob(string jobId);
 
-    Task StartWorkflowJob(string workflowId, string webhookUrl, string schedule, CancellationToken cancellationToken);
-    Task StopWorkflowJob(string workflowId);
-    bool IsWorkflowRunning(string workflowId);
+    Task StartWorkflowJob(string workflowId, string webhookUrl, string schedule, CancellationToken cancellationToken, string jobKey = null);
+    Task StopWorkflowJob(string jobKey);
+    bool IsWorkflowRunning(string jobKey);
 
     IEnumerable<JobInfo> GetRunningJobs();
 
@@ -532,14 +532,17 @@ public class AnimationsManager(IHubContext<ActivityHub> activityHubContext, ISer
         }
     }
 
-    public Task StartWorkflowJob(string workflowId, string webhookUrl, string schedule, CancellationToken cancellationToken)
+    public Task StartWorkflowJob(string workflowId, string webhookUrl, string schedule, CancellationToken cancellationToken, string jobKey = null)
     {
-        _log.Info($"Starting workflow job for workflow {workflowId} with schedule {schedule}");
+        // jobKey distinguishes concurrent runs of the same workflow (e.g. per-execution);
+        // defaults to workflowId to preserve the standalone workflow-runner behavior.
+        jobKey ??= workflowId;
+        _log.Info($"Starting workflow job {jobKey} for workflow {workflowId} with schedule {schedule}");
 
         // Check if already running
-        if (_workflowJobs.ContainsKey(workflowId))
+        if (_workflowJobs.ContainsKey(jobKey))
         {
-            _log.Warn($"Workflow {workflowId} is already running");
+            _log.Warn($"Workflow job {jobKey} is already running");
             return Task.CompletedTask;
         }
 
@@ -559,42 +562,42 @@ public class AnimationsManager(IHubContext<ActivityHub> activityHubContext, ISer
             _ = new AnimationDefinitions.WorkflowJob(config, _activityHubContext, _httpClientFactory, cts.Token);
         });
 
-        _workflowJobs.TryAdd(workflowId, (thread, cts));
-        AddJob($"WORKFLOW_{workflowId}");
+        _workflowJobs.TryAdd(jobKey, (thread, cts));
+        AddJob($"WORKFLOW_{jobKey}");
         thread.Start();
 
         return Task.CompletedTask;
     }
 
-    public Task StopWorkflowJob(string workflowId)
+    public Task StopWorkflowJob(string jobKey)
     {
-        _log.Info($"Stopping workflow job {workflowId}");
+        _log.Info($"Stopping workflow job {jobKey}");
 
-        if (_workflowJobs.TryRemove(workflowId, out var jobInfo))
+        if (_workflowJobs.TryRemove(jobKey, out var jobInfo))
         {
             try
             {
                 jobInfo.cts.Cancel();
                 jobInfo.thread?.Join(TimeSpan.FromSeconds(5)); // Wait up to 5 seconds for graceful shutdown
                 jobInfo.cts.Dispose();
-                RemoveJob($"WORKFLOW_{workflowId}");
-                _log.Info($"Workflow job {workflowId} stopped successfully");
+                RemoveJob($"WORKFLOW_{jobKey}");
+                _log.Info($"Workflow job {jobKey} stopped successfully");
             }
             catch (Exception ex)
             {
-                _log.Error(ex, $"Error stopping workflow job {workflowId}");
+                _log.Error(ex, $"Error stopping workflow job {jobKey}");
             }
         }
         else
         {
-            _log.Warn($"Workflow job {workflowId} not found");
+            _log.Warn($"Workflow job {jobKey} not found");
         }
 
         return Task.CompletedTask;
     }
 
-    public bool IsWorkflowRunning(string workflowId)
+    public bool IsWorkflowRunning(string jobKey)
     {
-        return _workflowJobs.ContainsKey(workflowId);
+        return _workflowJobs.ContainsKey(jobKey);
     }
 }

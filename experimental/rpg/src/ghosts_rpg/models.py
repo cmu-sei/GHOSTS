@@ -1,15 +1,20 @@
-"""Domain models for the RPG.
+"""Domain models for Kriegspiel Mode.
 
 Two layers:
 
-1. The *scenario* model — a faithful, read-only in-memory mirror of what the GHOSTS
-   API returns from the three GETs the loader consumes (scenario, graph, objectives).
-   Field aliases mirror the live camelCase JSON so the same model parses a live API
-   response or a bundled fixture export interchangeably.
+1. The *scenario* model — a read-only authored spec (situation, player mandate,
+   OPFOR objective + playbook, mutable world facts, scheduled triggers, clock, and
+   fog policy). The author supplies the *pieces* an exercise is made of, not a fixed
+   sequence of events: the loop composes what actually happens at runtime.
 
-2. The *game* model — mutable runtime state the engine owns (step pointer, flags,
-   objective statuses, knowledge/inventory, transcript). The DM never mutates this
-   directly; it only proposes effects the engine validates and applies.
+2. The *world* model — mutable runtime state the engine owns (facts, flags, the
+   clock, objective statuses, OPFOR progress, what the player has perceived, and the
+   transcript). The judge and OPFOR agents only *propose* deltas; the engine
+   validates and applies them.
+
+The old timeline-walker models (Timeline/TimelineEvent/GameMechanics/...) are gone:
+this loop has no fixed event list. See the un-loaded fixtures under fixtures/ for the
+prior worklist format.
 """
 
 from __future__ import annotations
@@ -20,194 +25,136 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
 
 
-# ──────────────────────────────────────────────
-# Shared config: parse camelCase JSON, allow access by python name too.
-# ──────────────────────────────────────────────
-
-
 class _ApiModel(BaseModel):
+    """Parse camelCase JSON, allow access by python name, ignore unknown keys."""
+
     model_config = ConfigDict(populate_by_name=True, extra="ignore")
 
 
 # ──────────────────────────────────────────────
-# The flip-flop: who owns a timeline event.
+# Adjudication vocabulary
 # ──────────────────────────────────────────────
 
 
-class Cell(str, Enum):
-    """The `Assigned` field on a timeline event. Blue Team = the player's turn;
-    every other cell is played by the computer (the Dungeon Master)."""
+class OddsBand(str, Enum):
+    """How likely the judge thinks the player's move is to work, given their
+    rationale against world state and doctrine. The matrix-game half: a strong,
+    plausible argument earns a better band."""
 
-    BLUE = "Blue Team"
-    RED = "Red Team"
-    WHITE = "White Cell"
-    GREEN = "Green Cell"
+    LIKELY = "Likely"
+    EVEN = "Even"
+    UNLIKELY = "Unlikely"
+    LONGSHOT = "Longshot"
+
+
+class OutcomeTier(str, Enum):
+    """What the hidden roll returns once resolved against the band."""
+
+    SUCCESS = "Success"
+    PARTIAL = "Partial"
+    FAILURE = "Failure"
+    BACKFIRE = "Backfire"
 
 
 # ──────────────────────────────────────────────
-# Scenario model (read-only mirror of the GHOSTS API)
+# Scenario spec (read-only, authored)
 # ──────────────────────────────────────────────
 
 
-class TimelineEvent(_ApiModel):
-    number: int
-    time: str = ""
-    assigned: str = ""
-    description: str = ""
-    status: str = "Pending"
-    objective_ids: list[int] = Field(default_factory=list, alias="objectiveIds")
-    trigger_kind: str = Field(default="PointInTime", alias="triggerKind")
-    schedule: Optional[str] = None
-    trigger_condition: Optional[str] = Field(default=None, alias="triggerCondition")
-    execution_type: str = Field(default="manual", alias="executionType")
-    workflow_id: Optional[str] = Field(default=None, alias="workflowId")
-
-    @property
-    def cell(self) -> Optional[Cell]:
-        """Parsed `Assigned` cell, or None if it is an unrecognized value."""
-        try:
-            return Cell(self.assigned)
-        except ValueError:
-            return None
-
-    @property
-    def is_player_turn(self) -> bool:
-        return self.cell is Cell.BLUE
-
-
-class Timeline(_ApiModel):
-    exercise_duration: int = Field(default=0, alias="exerciseDuration")
-    events: list[TimelineEvent] = Field(default_factory=list)
-
-
-class Nation(_ApiModel):
-    name: str = ""
-    alignment: str = ""
-
-
-class ThreatActor(_ApiModel):
-    name: str = ""
-    type: str = ""
-    capability: int = 0
-    ttps: list[str] = Field(default_factory=list)
-
-
-class Inject(_ApiModel):
-    trigger: str = ""
-    title: str = ""
-
-
-class UserPool(_ApiModel):
+class PlayerSpec(_ApiModel):
     role: str = ""
-    count: int = 0
+    mandate: str = ""
+    roe: str = ""  # rules of engagement / constraints the judge holds the player to
 
 
-class ScenarioParameters(_ApiModel):
-    nations: list[Nation] = Field(default_factory=list)
-    threat_actors: list[ThreatActor] = Field(default_factory=list, alias="threatActors")
-    injects: list[Inject] = Field(default_factory=list)
-    user_pools: list[UserPool] = Field(default_factory=list, alias="userPools")
-    player_role: str = Field(default="Blue Team (SOC Analyst)", alias="playerRole")
-    objectives: str = ""
-    political_context: str = Field(default="", alias="politicalContext")
-    rules_of_engagement: str = Field(default="", alias="rulesOfEngagement")
-    victory_conditions: str = Field(default="", alias="victoryConditions")
+class ScenarioObjective(_ApiModel):
+    """A player objective, scored met/failed against authored criteria."""
 
-
-class GameMechanics(_ApiModel):
-    """The subset of scenario game mechanics the RPG uses to pace the day.
-
-    `duration_hours` sets the lunch clock: the player is trying to clear the
-    worklist before the exercise window (their morning) runs out."""
-
-    timeline_type: str = Field(default="turn-based", alias="timelineType")
-    duration_hours: float = Field(default=1.0, alias="durationHours")
-    # The fuse: minutes on the lunch clock after which an un-contained threat
-    # detonates and forces the loss branch. None => no deadline (threat waits).
-    containment_deadline_minutes: Optional[int] = Field(
-        default=None, alias="containmentDeadlineMinutes"
-    )
-    window_label: str = Field(default="to lunch", alias="windowLabel")
-    deadline_label: str = Field(default="CONTAINMENT FUSE", alias="deadlineLabel")
-    decisive_action_label: str = Field(
-        default="issue containment order", alias="decisiveActionLabel"
-    )
-    deadline_warning: str = Field(
-        default=(
-            "This is the one that bites: it will detonate at the {deadline}m mark "
-            "if you don't contain it. Handle this ticket first."
-        ),
-        alias="deadlineWarning",
-    )
-    deadline_failure_message: str = Field(
-        default="The clock ran out on the threat — it detonated before you contained it.",
-        alias="deadlineFailureMessage",
-    )
-
-
-class Vulnerability(_ApiModel):
-    asset: str = ""
-    cve: str = ""
-    severity: str = ""
-
-
-class TechnicalEnvironment(_ApiModel):
-    network_topology: str = Field(default="", alias="networkTopology")
-    services: str = ""
-    assets: str = ""
-    defenses: list[str] = Field(default_factory=list)
-    vulnerabilities: list[Vulnerability] = Field(default_factory=list)
-
-
-class Entity(_ApiModel):
-    id: str
-    name: str = ""
-    entity_type: str = Field(default="Custom", alias="entityType")
-    description: str = ""
-    properties: str = "{}"
-    external_id: str = Field(default="", alias="externalId")
-
-
-class Edge(_ApiModel):
-    id: str
-    source_entity_id: str = Field(alias="sourceEntityId")
-    target_entity_id: str = Field(alias="targetEntityId")
-    edge_type: str = Field(default="Custom", alias="edgeType")
-    label: str = ""
-
-
-class Graph(_ApiModel):
-    nodes: list[Entity] = Field(default_factory=list)
-    edges: list[Edge] = Field(default_factory=list)
-
-
-class Objective(_ApiModel):
     id: int
-    scenario_id: Optional[int] = Field(default=None, alias="scenarioId")
     name: str = ""
     description: str = ""
-    type: str = "MET"
-    status: str = "Draft"
-    score: str = "U"
-    priority: int = 1
     success_criteria: str = Field(default="", alias="successCriteria")
-    assigned: str = ""
-    sort_order: int = Field(default=0, alias="sortOrder")
+    # Optional gate: an objective auto-marks Achieved when this condition holds
+    # (same grammar as triggers). Empty => only the judge can complete it.
+    met_when: str = Field(default="", alias="metWhen")
+    priority: int = 1
+
+
+class PlaybookMove(_ApiModel):
+    """One thing OPFOR *could* do. The set of moves whose preconditions currently
+    hold is OPFOR's live menu; the OPFOR agent picks one each turn."""
+
+    id: str
+    domain: str = "cyber"  # cyber | cognitive | hybrid
+    description: str = ""
+    # Preconditions on world flags, same grammar as triggers (flag:x / !x /
+    # objective:N / clock>=N joined by &&). Empty => always available.
+    preconds: str = ""
+    # Deltas this move applies to ground-truth world state when OPFOR plays it.
+    set_flags: list[str] = Field(default_factory=list, alias="setFlags")
+    set_facts: dict[str, str] = Field(default_factory=dict, alias="setFacts")
+    # Advances OPFOR toward its objective by this many points (win threshold below).
+    progress: int = 0
+    # Observable signatures this move emits. The fog filter decides which the player
+    # actually perceives.
+    indicators: list[str] = Field(default_factory=list)
+
+
+class OpforSpec(_ApiModel):
+    name: str = ""
+    objective: str = ""
+    # OPFOR wins when accumulated move progress reaches this. 0 => never (player can
+    # only win/lose on their own objectives + the clock).
+    win_threshold: int = Field(default=0, alias="winThreshold")
+    playbook: list[PlaybookMove] = Field(default_factory=list)
+
+
+class Trigger(_ApiModel):
+    """A scheduled/conditional inject — the clock's teeth. Fires once when `when`
+    holds; applies its deltas to ground-truth state and emits indicators."""
+
+    id: str
+    when: str = ""  # condition grammar (flag:x / !x / objective:N / clock>=N && ...)
+    inject: str = ""
+    set_flags: list[str] = Field(default_factory=list, alias="setFlags")
+    set_facts: dict[str, str] = Field(default_factory=dict, alias="setFacts")
+    indicators: list[str] = Field(default_factory=list)
+
+
+class ClockSpec(_ApiModel):
+    window_minutes: int = Field(default=60, alias="windowMinutes")
+    tick_minutes: int = Field(default=10, alias="tickMinutes")
+    label: str = "exercise window"
+
+
+class FogSpec(_ApiModel):
+    # partial: player sees emitted indicators, never ground-truth flags/facts.
+    # full: player sees nothing OPFOR does until an indicator surfaces it (strict).
+    # off: player sees ground truth (training/debug).
+    default: str = "partial"
+
+
+class WorldSpec(_ApiModel):
+    """Authored initial ground truth. `facts` and `flags` seed WorldState."""
+
+    assets: list[str] = Field(default_factory=list)
+    facts: dict[str, str] = Field(default_factory=dict)
+    flags: list[str] = Field(default_factory=list)
+    narrative_env: dict[str, str] = Field(default_factory=dict, alias="narrativeEnv")
 
 
 class Scenario(_ApiModel):
-    id: int
+    id: int = 0
     name: str = ""
     description: str = ""
-    builder_status: str = Field(default="None", alias="builderStatus")
-    scenario_parameters: Optional[ScenarioParameters] = Field(
-        default=None, alias="scenarioParameters"
-    )
-    technical_environment: Optional[TechnicalEnvironment] = Field(
-        default=None, alias="technicalEnvironment"
-    )
-    game_mechanics: Optional[GameMechanics] = Field(default=None, alias="gameMechanics")
-    timeline: Optional[Timeline] = None
+    situation: str = ""  # the kickoff briefing shown at T+0
+    player: PlayerSpec = Field(default_factory=PlayerSpec)
+    opfor: OpforSpec = Field(default_factory=OpforSpec)
+    world: WorldSpec = Field(default_factory=WorldSpec)
+    triggers: list[Trigger] = Field(default_factory=list)
+    clock: ClockSpec = Field(default_factory=ClockSpec)
+    fog: FogSpec = Field(default_factory=FogSpec)
+    objectives: list[ScenarioObjective] = Field(default_factory=list)
 
 
 class ScenarioCatalog(_ApiModel):
@@ -219,76 +166,59 @@ class ScenarioCatalog(_ApiModel):
 
 
 class ScenarioBundle(BaseModel):
-    """The three GETs the loader consumes, assembled into one object.
-
-    A fixture export is exactly this shape on disk; a live load assembles it from
-    three separate API calls. Everything downstream depends only on this."""
+    """A loadable scenario. A fixture file is exactly this shape on disk."""
 
     model_config = ConfigDict(populate_by_name=True, extra="ignore")
 
     scenario: Scenario
-    graph: Graph = Field(default_factory=Graph)
-    objectives: list[Objective] = Field(default_factory=list)
     catalog: Optional[ScenarioCatalog] = None
 
 
 # ──────────────────────────────────────────────
-# Game model (mutable runtime state owned by the engine)
+# World model (mutable runtime state owned by the engine)
 # ──────────────────────────────────────────────
 
 
 class TranscriptEntry(BaseModel):
-    """One resolved turn of the game — canonical, engine-owned record."""
+    """One recorded beat of the game — canonical, engine-owned."""
 
-    step_number: int
-    cell: str
-    speaker: str  # "DM" or "Player"
+    turn: int
+    speaker: str  # "Judge" | "Player" | "Signals" | "Control"
     text: str
 
 
-class StaffProduct(BaseModel):
-    """A Blue-Team staff product submitted to exercise control.
+class TurnRecord(BaseModel):
+    """The adjudication trace for one player turn — feeds the AAR debrief."""
 
-    Short commands still work, but a richer submission can use staff-style
-    sections such as Priority, Plan, Assumptions, Information Requests, and Risk.
-    The controller parses these fields and adjudicates them against scenario
-    constraints before the engine applies effects.
-    """
-
-    raw_text: str
-    priority: str = ""
-    intent: str = ""
-    plan: str = ""
-    assumptions: list[str] = Field(default_factory=list)
-    information_requests: list[str] = Field(default_factory=list)
-    risk_acceptance: str = ""
-    is_structured: bool = False
+    turn: int
+    action: str
+    rationale: str
+    band: str
+    tier: str
+    critique: str = ""
 
 
-class GameState(BaseModel):
-    """Mutable runtime state. The engine is the only writer."""
+class WorldState(BaseModel):
+    """Mutable ground truth. The engine is the only writer."""
 
-    current_step: int = 0  # Number of the current/next event; 0 = not started
+    turn: int = 0
+    clock_minutes: int = 0
     flags: set[str] = Field(default_factory=set)
+    facts: dict[str, str] = Field(default_factory=dict)
     objective_status: dict[int, str] = Field(default_factory=dict)
-    knowledge: list[str] = Field(default_factory=list)
-    inventory: list[str] = Field(default_factory=list)
-    transcript: list[TranscriptEntry] = Field(default_factory=list)
-    umpire_findings: list[str] = Field(default_factory=list)
-    assumptions: list[str] = Field(default_factory=list)
-    is_complete: bool = False
 
-    # Worklist + lunch clock. The player clears open Blue-Team tasks in any order;
-    # each action burns minutes off the exercise window. cleared_steps holds the
-    # Numbers of Blue-Team events already resolved in the current worklist.
-    cleared_steps: set[int] = Field(default_factory=set)
-    minutes_spent: int = 0
-    # Which open Blue-Team tasks are currently *surfaced* to the player. Tickets
-    # arrive one at a time: only the first open task is revealed by default;
-    # tabling a ticket reveals the next while keeping the current one open, and
-    # resolving one auto-reveals the next. Reset each worklist.
-    revealed_steps: set[int] = Field(default_factory=set)
-    # Set once the containment fuse blows (deadline passed with the steering flag
-    # unset): the threat detonated, the loss branch is locked, late containment is
-    # refused.
-    detonated: bool = False
+    # OPFOR progress toward win_threshold, and which playbook moves it has spent.
+    opfor_progress: int = 0
+    opfor_moves_played: list[str] = Field(default_factory=list)
+
+    # Triggers already fired (by id) so each fires at most once.
+    fired_triggers: set[str] = Field(default_factory=set)
+
+    # What the player has perceived (fog-filtered) — their working picture.
+    indicators_seen: list[str] = Field(default_factory=list)
+
+    transcript: list[TranscriptEntry] = Field(default_factory=list)
+    rulings: list[TurnRecord] = Field(default_factory=list)
+
+    is_complete: bool = False
+    outcome: str = ""  # "" until complete, then WIN | LOSS | INCOMPLETE

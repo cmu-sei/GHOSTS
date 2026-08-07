@@ -1,0 +1,4 @@
+{
+  "defaultProvider": "amazon-bedrock",
+  "defaultModel": "us.anthropic.claude-sonnet-5"
+}

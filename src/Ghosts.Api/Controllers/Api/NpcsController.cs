@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -155,9 +154,8 @@ public class NpcsController(
     public async Task<ActionResult<NpcActivity>> NpcCreateActivity(Guid id, string activityType, string detail)
     {
         var result = await service.CreateActivity(id, activityType, detail);
-        await activityHubContext.Clients.All.SendAsync("show",
-            "1", id.ToString(), activityType ?? "activity", detail ?? "",
-            DateTime.Now.ToString(CultureInfo.InvariantCulture));
+        await activityHubContext.Show(1, id.ToString(), activityType ?? "activity",
+            new { action = detail ?? "", reasoning = "", handler = "" });
         return Ok(result);
     }
 
@@ -183,10 +181,8 @@ public class NpcsController(
     {
         var result = await service.CreatePreference(id, request.ToNpcId, request.FromNpcId,
             request.Name, request.Step, request.Weight, request.Strength);
-        await activityHubContext.Clients.All.SendAsync("show",
-            request.Step, id.ToString(), "preference",
-            $"preference updated: {request.Name}",
-            DateTime.Now.ToString(CultureInfo.InvariantCulture));
+        await activityHubContext.Show(request.Step, id.ToString(), "preference",
+            new { action = $"preference updated: {request.Name}", reasoning = "", handler = "" });
         return Ok(result);
     }
 
@@ -199,6 +195,19 @@ public class NpcsController(
         return Ok(await service.GetConnections(id));
     }
 
+    /// <summary>
+    /// Returns all social connections across all NPCs, so a graph can build edges in one call
+    /// </summary>
+    /// <returns>IEnumerable&lt;NpcSocialConnection&gt;</returns>
+    [ProducesResponseType(typeof(ActionResult<IEnumerable<NpcSocialConnection>>), (int)HttpStatusCode.OK)]
+    [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(ActionResult<IEnumerable<NpcSocialConnection>>))]
+    [SwaggerOperation("NpcsGetAllConnections")]
+    [HttpGet("connections")]
+    public async Task<ActionResult<IEnumerable<NpcSocialConnection>>> NpcsGetAllConnections()
+    {
+        return Ok(await service.GetAllConnections());
+    }
+
     [ProducesResponseType(typeof(ActionResult<NpcSocialConnection>), (int)HttpStatusCode.OK)]
     [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(ActionResult<NpcSocialConnection>))]
     [SwaggerOperation("NpcsCreateConnectionById")]
@@ -207,10 +216,21 @@ public class NpcsController(
     {
         var result = await service.CreateConnection(id, request.ConnectedNpcId,
             request.Name, request.Distance, request.RelationshipStatus);
-        await activityHubContext.Clients.All.SendAsync("show",
-            "1", id.ToString(), "relationship",
-            $"new connection with {request.Name}",
-            DateTime.Now.ToString(CultureInfo.InvariantCulture));
+        var connectionName = request.Name;
+        if (string.IsNullOrWhiteSpace(connectionName))
+        {
+            var connectedNpc = await service.GetById(request.ConnectedNpcId);
+            connectionName = connectedNpc?.NpcProfile?.Name?.ToString();
+        }
+        await activityHubContext.Show(1, id.ToString(), "relationship",
+            new
+            {
+                action = $"new connection with {connectionName}",
+                reasoning = "",
+                handler = "",
+                source = id.ToString(),
+                target = request.ConnectedNpcId.ToString()
+            });
         return Ok(result);
     }
 
@@ -242,10 +262,8 @@ public class NpcsController(
     {
         var result = await service.CreateKnowledge(id, request.ToNpcId, request.FromNpcId,
             request.Topic, request.Step, request.Value);
-        await activityHubContext.Clients.All.SendAsync("show",
-            request.Step, id.ToString(), "knowledge",
-            $"learned more about {request.Topic} ({request.Value})",
-            DateTime.Now.ToString(CultureInfo.InvariantCulture));
+        await activityHubContext.Show(request.Step, id.ToString(), "knowledge",
+            new { action = $"learned more about {request.Topic} ({request.Value})", reasoning = "", handler = "" });
         return Ok(result);
     }
 
@@ -277,10 +295,8 @@ public class NpcsController(
     {
         var result = await service.CreateBelief(id, request.ToNpcId, request.FromNpcId,
             request.Name, request.Step, request.Likelihood, request.Posterior);
-        await activityHubContext.Clients.All.SendAsync("show",
-            request.Step, id.ToString(), "belief",
-            $"updated posterior of {Math.Round(request.Posterior, 2)} in {request.Name}",
-            DateTime.Now.ToString(CultureInfo.InvariantCulture));
+        await activityHubContext.Show(request.Step, id.ToString(), "belief",
+            new { action = $"updated posterior of {Math.Round(request.Posterior, 2)} in {request.Name}", reasoning = "", handler = "" });
         return Ok(result);
     }
 
@@ -497,13 +513,8 @@ public class NpcsController(
     private async Task ProcessUnhandledAction(NpcRecord npc, AiModels.ActionRequest actionRequest, CancellationToken ct)
     {
         actionRequest.Sentiment ??= "neutral";
-        await activityHubContext.Clients.All.SendAsync("show",
-            "1",
-            npc.Id,
-            "activity-other",
-            actionRequest,
-            DateTime.Now.ToString(CultureInfo.InvariantCulture),
-            cancellationToken: ct);
+        await activityHubContext.Show(npc.CurrentStep, npc.Id.ToString(), "activity-other",
+            actionRequest, npc.ExecutionId, ct);
     }
 
     private async Task ProcessHandledAction(NpcRecord npc, AiModels.ActionRequest actionRequest, CancellationToken ct)
@@ -514,13 +525,8 @@ public class NpcsController(
         if (machineUpdate != null)
         {
             actionRequest.Sentiment ??= "neutral";
-            await activityHubContext.Clients.All.SendAsync("show",
-                "1",
-                npc.Id,
-                "activity",
-                actionRequest,
-                DateTime.Now.ToString(CultureInfo.InvariantCulture),
-                cancellationToken: ct);
+            await activityHubContext.Show(npc.CurrentStep, npc.Id.ToString(), "activity",
+                actionRequest, npc.ExecutionId, ct);
         }
     }
 }

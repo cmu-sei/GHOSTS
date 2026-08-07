@@ -5,8 +5,8 @@
     <AssemblyName>ghosts.api</AssemblyName>
     <RootNamespace>Ghosts.Api</RootNamespace>
 
-    <AssemblyVersion>9.0.0.0</AssemblyVersion>
-    <FileVersion>9.2.2.0</FileVersion>
+    <AssemblyVersion>9.3.0.0</AssemblyVersion>
+    <FileVersion>9.3.0.0</FileVersion>
 
     <Authors>GHOSTS Development Team for CERT &gt; Software Engineering Institute &gt; Carnegie Mellon University</Authors>
     <Company>Carnegie Mellon University</Company>
@@ -28,7 +28,6 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="10.0.0" />
     <PackageReference Include="Microsoft.Playwright" Version="1.59.0" />
     <PackageReference Include="NLog" Version="6.0.6" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
@@ -62,11 +61,6 @@
     <None Include=".env" Condition="Exists('.env')">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Remove="wwwroot\lib\fontawesome\svgs\**\*.svg" />
-    <Content Remove="wwwroot\flags\**\*.svg" />
   </ItemGroup>
 
   <ItemGroup>
@@ -115,30 +109,6 @@
     <_ContentIncludedByDefault Remove="Areas\Animator\config\us_population_data.json" />
     <_ContentIncludedByDefault Remove="output\socialgraph\social_graph.json" />
     <_ContentIncludedByDefault Remove="_output\socialgraph\social_graph.json" />
-    <_ContentIncludedByDefault Remove="Areas\Animator\Views\ViewActivities\detail.cshtml" />
-    <_ContentIncludedByDefault Remove="Areas\Animator\Views\ViewActivities\Index.cshtml" />
-    <_ContentIncludedByDefault Remove="Areas\Animator\Views\ViewRelationships\Index.cshtml" />
-    <_ContentIncludedByDefault Remove="Areas\Animator\Views\ViewRelationships\Profile.cshtml" />
-    <_ContentIncludedByDefault Remove="Areas\Animator\Views\ViewSocial\Detail.cshtml" />
-    <_ContentIncludedByDefault Remove="Areas\Animator\Views\ViewSocial\Index.cshtml" />
-    <_ContentIncludedByDefault Remove="Areas\Animator\Views\ViewSocial\Interactions.cshtml" />
-    <_ContentIncludedByDefault Remove="Areas\Animator\Views\Home\Index.cshtml" />
-    <_ContentIncludedByDefault Remove="Areas\Animator\Views\_ViewStart.cshtml" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <AdditionalFiles Include="Views\Animations\Index.cshtml" />
-    <AdditionalFiles Include="Views\Animations\Started.cshtml" />
-    <AdditionalFiles Include="Views\Home\Index.cshtml" />
-    <AdditionalFiles Include="Views\Shared\_Layout.cshtml" />
-    <AdditionalFiles Include="Views\ViewActivities\detail.cshtml" />
-    <AdditionalFiles Include="Views\ViewActivities\Index.cshtml" />
-    <AdditionalFiles Include="Views\ViewRelationships\Index.cshtml" />
-    <AdditionalFiles Include="Views\ViewRelationships\Profile.cshtml" />
-    <AdditionalFiles Include="Views\ViewSocial\Detail.cshtml" />
-    <AdditionalFiles Include="Views\ViewSocial\Index.cshtml" />
-    <AdditionalFiles Include="Views\ViewSocial\Interactions.cshtml" />
-    <AdditionalFiles Include="Views\_ViewStart.cshtml" />
   </ItemGroup>
 
   <ItemGroup>

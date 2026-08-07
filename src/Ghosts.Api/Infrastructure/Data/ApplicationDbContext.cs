@@ -68,6 +68,7 @@ namespace Ghosts.Api.Infrastructure.Data
         public DbSet<ThreatActor> ThreatActors { get; set; }
         public DbSet<Inject> Injects { get; set; }
         public DbSet<UserPool> UserPools { get; set; }
+        public DbSet<ScenarioWorkflowBinding> ScenarioWorkflowBindings { get; set; }
         public DbSet<TechnicalEnvironment> TechnicalEnvironments { get; set; }
         public DbSet<Vulnerability> Vulnerabilities { get; set; }
         public DbSet<GameMechanics> GameMechanics { get; set; }
@@ -247,6 +248,12 @@ namespace Ghosts.Api.Infrastructure.Data
                 .HasMany(sp => sp.UserPools)
                 .WithOne(up => up.ScenarioParameters)
                 .HasForeignKey(up => up.ScenarioParametersId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ScenarioParameters>()
+                .HasMany(sp => sp.WorkflowBindings)
+                .WithOne(wb => wb.ScenarioParameters)
+                .HasForeignKey(wb => wb.ScenarioParametersId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             // TechnicalEnvironment relationships

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Ghosts.Animator;
 using Ghosts.Api.Hubs;
 using Ghosts.Api.Infrastructure.Models;
 using Ghosts.Api.Infrastructure.Services.ClientServices;
@@ -61,6 +62,9 @@ namespace Ghosts.Api.Infrastructure.Services
         private DbSet<ScenarioNpcAssignment> ScenarioNpcAssignments => _context.Set<ScenarioNpcAssignment>();
         private DbSet<ScenarioTimelineEvent> ScenarioTimelineEvents => _context.Set<ScenarioTimelineEvent>();
         private DbSet<MachineUpdate> MachineUpdates => _context.Set<MachineUpdate>();
+        private DbSet<ScenarioParameters> ScenarioParameters => _context.Set<ScenarioParameters>();
+        private DbSet<NpcRecord> Npcs => _context.Set<NpcRecord>();
+        private DbSet<ScenarioWorkflowBinding> ScenarioWorkflowBindings => _context.Set<ScenarioWorkflowBinding>();
 
         public async Task<List<ExecutionSummaryDto>> GetAllAsync(int? scenarioId, CancellationToken ct)
         {
@@ -188,6 +192,31 @@ namespace Ghosts.Api.Infrastructure.Services
                 });
             }
 
+            // ── Snapshot default workflow bindings as scheduled Workflow items ──
+            // These animate the run's NPC population (beliefs, social graph, posting, …)
+            // on their cron without any hand-authored timeline event.
+            var bindings = await ScenarioWorkflowBindings
+                .Where(wb => wb.ScenarioParameters.ScenarioId == dto.ScenarioId && wb.Enabled)
+                .ToListAsync(ct);
+
+            var nextNumber = scenarioEvents.Count > 0 ? scenarioEvents.Max(e => e.Number) + 1 : 1;
+            foreach (var binding in bindings)
+            {
+                execution.TimelineItems.Add(new ExecutionTimelineItem
+                {
+                    Time = "T+0m",
+                    Number = nextNumber++,
+                    Assigned = "White Cell",
+                    Description = $"Animation workflow: {binding.DisplayName}",
+                    Status = "Pending",
+                    AutomationKind = "Workflow",
+                    WorkflowId = binding.WorkflowRef,
+                    TriggerKind = TriggerKind.Scheduled,
+                    Schedule = binding.Cron,
+                    CreatedAt = DateTime.UtcNow
+                });
+            }
+
             var operation = await _context.SaveChangesAsync(ct);
             if (operation < 1)
             {
@@ -197,7 +226,74 @@ namespace Ghosts.Api.Infrastructure.Services
 
             _log.Info($"Created execution: {execution.Id} - {execution.Name} for scenario {dto.ScenarioId} with {scenarioEvents.Count} timeline items");
 
+            // ── Generate NPC pools from the scenario's UserPools for this run ──
+            await GenerateUserPoolNpcsAsync(execution, scenario.Name, ct);
+
             return await GetByIdAsync(execution.Id, ct);
+        }
+
+        /// <summary>
+        /// Generates an execution-scoped population of NPCs for each UserPool(Role, Count)
+        /// defined on the scenario. NPCs are grouped so each run has its own set:
+        /// Campaign = scenario name, Enclave = execution run name, Team = pool role.
+        /// These are separate from the compiler's Person-entity NPCs (scenario-scoped only).
+        /// </summary>
+        private async Task GenerateUserPoolNpcsAsync(Execution execution, string scenarioName, CancellationToken ct)
+        {
+            var pools = await ScenarioParameters
+                .Where(sp => sp.ScenarioId == execution.ScenarioId)
+                .SelectMany(sp => sp.UserPools)
+                .ToListAsync(ct);
+
+            if (pools.Count == 0) return;
+
+            var totalCreated = 0;
+            foreach (var pool in pools.Where(p => p.Count > 0))
+            {
+                var created = 0;
+                for (var i = 0; i < pool.Count; i++)
+                {
+                    try
+                    {
+                        var npc = NpcRecord.TransformToNpc(Npc.Generate(MilitaryUnits.GetServiceBranch()));
+                        npc.Id = npc.NpcProfile.Id;
+                        npc.CreatedUtc = DateTime.UtcNow;
+                        npc.ScenarioId = execution.ScenarioId;
+                        npc.ExecutionId = execution.Id;
+                        npc.Campaign = scenarioName;
+                        npc.Enclave = execution.Name;
+                        npc.Team = pool.Role;
+
+                        Npcs.Add(npc);
+                        created++;
+                    }
+                    catch (Exception ex)
+                    {
+                        _log.Warn(ex, $"[Execution {execution.Id}] Failed to generate pool NPC {i + 1}/{pool.Count} for role '{pool.Role}'");
+                    }
+                }
+
+                totalCreated += created;
+                _log.Info($"[Execution {execution.Id}] Generated {created}/{pool.Count} NPCs for pool '{pool.Role}'");
+            }
+
+            if (totalCreated == 0) return;
+
+            ExecutionEvents.Add(new ExecutionEvent
+            {
+                ExecutionId = execution.Id,
+                Timestamp = DateTime.UtcNow,
+                EventType = "UserPoolsGenerated",
+                Description = $"Generated {totalCreated} NPC(s) across {pools.Count(p => p.Count > 0)} user pool(s)",
+                Data = JsonSerializer.Serialize(new
+                {
+                    pools = pools.Select(p => new { role = p.Role, count = p.Count })
+                }),
+                Severity = "Info"
+            });
+
+            await _context.SaveChangesAsync(ct);
+            _log.Info($"[Execution {execution.Id}] Generated {totalCreated} pool NPC(s) total");
         }
 
         public async Task<Execution> UpdateAsync(int id, UpdateExecutionDto dto, CancellationToken ct)

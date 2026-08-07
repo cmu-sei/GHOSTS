@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -276,13 +275,12 @@ namespace Ghosts.Api.Infrastructure.Services
         {
             await _context.HistoryTimeline.AddAsync(historyTimeline, ct);
 
-            await activityHubContext.Clients.All.SendAsync("show",
-                "1",
-                id,
+            await activityHubContext.Show(
+                1,
+                id.ToString(),
                 "activity",
-                historyTimeline.ToActivityPlainText(),
-                DateTime.Now.ToString(CultureInfo.InvariantCulture),
-                cancellationToken: ct);
+                new { action = historyTimeline.ToActivityPlainText(), reasoning = "", handler = "MachineUpdate" },
+                null, ct);
         }
 
 

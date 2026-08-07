@@ -134,6 +134,27 @@ if [ -f "$DEVENV" ]; then
                 "${PI_PATHS[@]}" > "$HOME/.pi/agent/models.json"
         fi
 
+        # --- Pi Coding Agent settings (default provider/model) ---
+        # Without this, pi falls back to its built-in "google" provider and a
+        # bare model id, which then fails against the ambient CLAUDE_CODE_USE_BEDROCK
+        # env because Bedrock requires a region-prefixed inference profile id.
+        # The aws profile pins amazon-bedrock + a us.-prefixed model. Later
+        # configured profiles override earlier ones (shallow merge).
+        PI_SETTINGS_FILES=()
+        for profile in "${CONFIGURED[@]}"; do
+            if [ -f "$PROFILES_DIR/$profile/pi.settings.json" ]; then
+                PI_SETTINGS_FILES+=("$profile")
+            fi
+        done
+
+        if [ ${#PI_SETTINGS_FILES[@]} -ge 1 ]; then
+            mkdir -p "$HOME/.pi/agent"
+            PI_SETTINGS_PATHS=()
+            for p in "${PI_SETTINGS_FILES[@]}"; do PI_SETTINGS_PATHS+=("$PROFILES_DIR/$p/pi.settings.json"); done
+            jq -s 'reduce .[] as $s ({}; . * $s)' \
+                "${PI_SETTINGS_PATHS[@]}" > "$HOME/.pi/agent/settings.json"
+        fi
+
         # --- Codex CLI config ---
         # Codex reads ~/.codex/config.toml. Only the aws profile ships one: it
         # targets OpenAI GPT-5.5 via Codex's built-in amazon-bedrock provider

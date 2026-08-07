@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
 using Ghosts.Api.Hubs;
@@ -35,9 +34,9 @@ namespace Ghosts.Api.Infrastructure.Services
             var npc = await context.Npcs.FirstOrDefaultAsync(x=>x.MachineId == machineUpdate.MachineId, ct);
             if (npc != null)
             {
-                await hub.Clients.All.SendAsync("show", 1, npc.Id, "activity",
-                    machineUpdate.ToActivityPlainText(),
-                    DateTime.Now.ToString(CultureInfo.InvariantCulture), CancellationToken.None);
+                await hub.Show(1, npc.Id.ToString(), "activity",
+                    new { action = machineUpdate.ToActivityPlainText(), reasoning = "", handler = "MachineUpdate" },
+                    npc.ExecutionId, CancellationToken.None);
             }
 
             await context.SaveChangesAsync(ct);

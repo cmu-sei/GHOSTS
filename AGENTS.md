@@ -40,6 +40,13 @@ Core components:
 - SignalR is used for real-time client/server communication.
 - Do not assume authentication is built in; deployment may rely on an auth proxy.
 
+## Development
+- Simplicity, concision, and readability matter much more than flexibility, abstractions, hypothetical reuse, etc.
+- Avoid over-engineering or adding unnecessary features.
+- Define clear success criteria.
+- If something is unclear or confusing, stop and ask questions. Never assume.
+- Edit only what you must. Don't needlessly alter adjacent code.
+
 ## Verification
 
 Before finishing:

@@ -22,8 +22,8 @@ export class RpgApiService {
     return this.http.post<GameResponse>(`${API}/api/games`, { fixture });
   }
 
-  act(gameId: string, input: string): Observable<GameResponse> {
-    return this.http.post<GameResponse>(`${API}/api/games/${gameId}/act`, { input });
+  act(gameId: string, action: string, rationale: string): Observable<GameResponse> {
+    return this.http.post<GameResponse>(`${API}/api/games/${gameId}/act`, { action, rationale });
   }
 
   private normalizeFixture(fixture: FixtureSummary | string): FixtureSummary {
@@ -36,7 +36,6 @@ export class RpgApiService {
       era: 'LOCAL',
       theater: 'OFFLINE',
       estimatedMinutes: 0,
-      events: 0,
       objectives: 0,
     };
   }
