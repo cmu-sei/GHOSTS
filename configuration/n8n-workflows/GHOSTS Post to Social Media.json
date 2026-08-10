@@ -99,7 +99,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "http://host.docker.internal:8800",
+        "url": "http://ghosts-pandora:5000",
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
@@ -130,7 +130,7 @@
             },
             {
               "name": "Origin",
-              "value": "http://host.docker.internal:8800"
+              "value": "http://ghosts-pandora:5000"
             },
             {
               "name": "Pragma",
@@ -138,7 +138,7 @@
             },
             {
               "name": "Referer",
-              "value": "http://host.docker.internal:8800/?theme=facebook"
+              "value": "http://ghosts-pandora:5000/?theme=facebook"
             },
             {
               "name": "Sec-Fetch-Dest",
