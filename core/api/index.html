@@ -2455,7 +2455,7 @@ docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> 
 <tbody>
 <tr>
 <td><code>N8N_API_URL</code></td>
-<td><code>http://host.docker.internal:5678/api/v1/workflows</code></td>
+<td><code>http://ghosts-n8n:5678/api/v1/workflows</code></td>
 <td>n8n REST API endpoint (used by the API to list and validate workflows)</td>
 </tr>
 <tr>
@@ -2465,13 +2465,13 @@ docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> 
 </tr>
 <tr>
 <td><code>WEB_API_URL</code></td>
-<td><code>http://host.docker.internal:5000/api</code></td>
-<td>GHOSTS API URL served to the frontend container</td>
+<td><code>http://localhost:5000/api</code></td>
+<td>GHOSTS API URL served to the frontend (must be reachable by the browser)</td>
 </tr>
 <tr>
 <td><code>WEB_N8N_API_URL</code></td>
-<td><code>http://host.docker.internal:5678</code></td>
-<td>n8n base URL served to the frontend container</td>
+<td><code>http://localhost:5678</code></td>
+<td>n8n base URL served to the frontend (must be reachable by the browser)</td>
 </tr>
 <tr>
 <td><code>POSTGRES_PASSWORD</code></td>
