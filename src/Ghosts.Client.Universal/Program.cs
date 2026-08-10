@@ -21,7 +21,7 @@ namespace Ghosts.Client.Universal;
 
 internal static class Program
 {
-    internal static ClientConfiguration Configuration { get; private set; }
+    internal static ClientConfiguration Configuration { get; set; }
     internal static ApplicationDetails.ConfigurationUrls ConfigurationUrls { get; set; }
     internal static bool IsDebug;
     internal static IScheduler Scheduler;

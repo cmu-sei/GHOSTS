@@ -1,5 +1,6 @@
 // Copyright 2017 Carnegie Mellon University. All Rights Reserved. See LICENSE.md file for terms.
 
+using System.Collections.Generic;
 using CommandLine;
 
 namespace Ghosts.Client.Universal.Infrastructure
@@ -23,5 +24,20 @@ namespace Ghosts.Client.Universal.Infrastructure
 
         [Option('i', "information", Default = false, HelpText = "GHOSTS client id information")]
         public bool Information { get; set; }
+
+        [Option("handle", HelpText = "Run a single handler action and exit (e.g. --handle browserfirefox). Does not start the agent.")]
+        public string Handle { get; set; }
+
+        [Option("command", HelpText = "The handler command/verb to run with --handle (e.g. browse, random)")]
+        public string Command { get; set; }
+
+        [Option("arg", HelpText = "A command argument for --handle. Repeat for multiple args.")]
+        public IEnumerable<string> Args { get; set; }
+
+        [Option("handler-arg", HelpText = "A handler option as key=value for --handle. Repeat for multiple.")]
+        public IEnumerable<string> HandlerArgs { get; set; }
+
+        [Option("json", Default = false, HelpText = "With --handle, emit the result as JSON to stdout")]
+        public bool Json { get; set; }
     }
 }
