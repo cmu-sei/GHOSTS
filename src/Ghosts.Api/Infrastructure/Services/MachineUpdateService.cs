@@ -117,7 +117,8 @@ public class MachineUpdateService(
         if (machineUpdate != null)
             return machineUpdate;
 
-        model.Update.Id = Guid.NewGuid();
+        if (model.Update.Id == Guid.Empty)
+            model.Update.Id = Guid.NewGuid();
 
         context.MachineUpdates.Add(model);
         await context.SaveChangesAsync(ct);
