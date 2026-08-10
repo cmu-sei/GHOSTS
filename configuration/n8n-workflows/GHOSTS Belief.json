@@ -23,7 +23,7 @@
     },
     {
       "parameters": {
-        "url": "http://host.docker.internal:5000/api/npcs/list",
+        "url": "http://ghosts-api:5000/api/npcs/list",
         "options": {}
       },
       "id": "48501b3a-05f9-4067-bf55-d859110a13a9",
@@ -64,7 +64,7 @@
     },
     {
       "parameters": {
-        "url": "=http://host.docker.internal:5000/api/npcs/{{ $json.id }}/beliefs",
+        "url": "=http://ghosts-api:5000/api/npcs/{{ $json.id }}/beliefs",
         "options": {}
       },
       "id": "5736842c-326f-47a1-920a-8b4a53d67e2e",
@@ -94,7 +94,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "=http://host.docker.internal:5000/api/npcs/{{ $json.npcId }}/beliefs",
+        "url": "=http://ghosts-api:5000/api/npcs/{{ $json.npcId }}/beliefs",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={\n  \"toNpcId\": \"{{ $json.npcId }}\",\n  \"fromNpcId\": \"{{ $json.npcId }}\",\n  \"name\": \"{{ $json.name }}\",\n  \"step\": {{ $json.step }},\n  \"likelihood\": {{ $json.likelihood }},\n  \"posterior\": {{ $json.posterior }}\n}",

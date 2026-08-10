@@ -40,8 +40,10 @@ Before importing these workflows, you need to:
    If you don't have Ollama, the workflows will use fallback content generation.
 
 4. **Update URLs in Workflows (if needed)**
-   The workflows use `host.docker.internal` by default to reach services on the Docker host.
-   - GHOSTS API: `http://host.docker.internal:5000`
+   The workflows reach the GHOSTS API by its container name `ghosts-api`, which resolves
+   both under Docker Compose (same network) and under Aspire (host alias). Services that
+   run on the Docker host rather than as GHOSTS containers still use `host.docker.internal`.
+   - GHOSTS API: `http://ghosts-api:5000`
    - Socializer: `http://host.docker.internal:5555/`
    - Ollama: `http://host.docker.internal:11434/api/generate`
 

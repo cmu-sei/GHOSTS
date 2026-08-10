@@ -23,7 +23,7 @@
     },
     {
       "parameters": {
-        "url": "http://host.docker.internal:5000/api/npcs/list",
+        "url": "http://ghosts-api:5000/api/npcs/list",
         "options": {}
       },
       "id": "bdf0bc40-8254-4442-a16d-8860d6dd183c",
@@ -64,7 +64,7 @@
     },
     {
       "parameters": {
-        "url": "=http://host.docker.internal:5000/api/npcs/{{ $json.id }}/connections",
+        "url": "=http://ghosts-api:5000/api/npcs/{{ $json.id }}/connections",
         "options": {}
       },
       "id": "abdac659-73cb-47ec-9df4-d0c5aa10574f",
@@ -111,7 +111,7 @@
     },
     {
       "parameters": {
-        "url": "http://host.docker.internal:5000/api/npcs/list",
+        "url": "http://ghosts-api:5000/api/npcs/list",
         "options": {}
       },
       "id": "92fcb08f-16f0-4983-a0b2-594bb7f93f6e",
@@ -140,7 +140,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "=http://host.docker.internal:5000/api/npcs/{{ $json.npcId }}/connections",
+        "url": "=http://ghosts-api:5000/api/npcs/{{ $json.npcId }}/connections",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={\n  \"connectedNpcId\": \"{{ $json.connectedNpcId }}\",\n  \"name\": \"{{ $json.name }}\",\n  \"distance\": \"\",\n  \"relationshipStatus\": 0.0\n}",
@@ -172,7 +172,7 @@
     },
     {
       "parameters": {
-        "url": "=http://host.docker.internal:5000/api/npcs/{{ $json.id }}/knowledge",
+        "url": "=http://ghosts-api:5000/api/npcs/{{ $json.id }}/knowledge",
         "options": {}
       },
       "id": "6ce5eab2-c9ed-4089-8e0d-29bc924fb21f",
@@ -202,7 +202,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "=http://host.docker.internal:5000/api/npcs/{{ $('Set Id').first().json.id }}/knowledge",
+        "url": "=http://ghosts-api:5000/api/npcs/{{ $('Set Id').first().json.id }}/knowledge",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={\n  \"toNpcId\": \"{{ $json.npcId }}\",\n  \"fromNpcId\": \"{{ $json.fromNpcId }}\",\n  \"topic\": \"{{ $json.topic }}\",\n  \"step\": {{ $json.step }},\n  \"value\": {{ $json.value }}\n}",
