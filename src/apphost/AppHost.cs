@@ -95,6 +95,10 @@ var n8n = builder.AddContainer("n8n", "docker.n8n.io/n8nio/n8n")
     // points at the devcontainer, so map host.ollama -> Docker Desktop's host-gateway IP.
     // In the n8n UI, set the Ollama credential Base URL to http://host.ollama:11434.
     .WithContainerRuntimeArgs("--add-host", $"host.ollama:{ollamaHostIp}")
+    // Workflow JSONs call the API as http://ghosts-api:5000 so a single set of files works
+    // under both Compose (where ghosts-api is a service on the same network) and Aspire.
+    // Here the API is a devcontainer project, so alias ghosts-api to the host-gateway.
+    .WithContainerRuntimeArgs("--add-host", "ghosts-api:host-gateway")
     .WithBindMount("n8n_data", "/home/node/.n8n", isReadOnly: false)
     .WithBindMount("../../configuration/n8n-workflows", "/bootstrap/workflows", isReadOnly: true)
     .WithBindMount("../../configuration/n8n-bootstrap/scripts", "/bootstrap/scripts", isReadOnly: true)
@@ -123,8 +127,9 @@ var n8nProvisioner = builder.AddContainer("n8n-provisioner", "docker.n8n.io/n8ni
     .WithBindMount("../../configuration/n8n-bootstrap/scripts", "/bootstrap/scripts", isReadOnly: true)
     .WaitFor(n8n);
 
-// n8n workflows reach the API via host.docker.internal (configured in workflow nodes),
-// not via Aspire service discovery, so no WithReference needed here.
+// n8n workflows reach the API as http://ghosts-api:5000 (configured in workflow nodes),
+// resolved via the ghosts-api host alias added to the n8n container above — not via
+// Aspire service discovery, so no WithReference needed here.
 
 // Wire API to reach n8n for workflow execution — use host.docker.internal since
 // the API project runs inside a devcontainer and n8n exposes port 5678 on the host

@@ -69,10 +69,10 @@ Set these in a `.env` file alongside `docker-compose.yml` or directly in your co
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `N8N_API_URL` | `http://host.docker.internal:5678/api/v1/workflows` | n8n REST API endpoint (used by the API to list and validate workflows) |
+| `N8N_API_URL` | `http://ghosts-n8n:5678/api/v1/workflows` | n8n REST API endpoint (used by the API to list and validate workflows) |
 | `N8N_API_KEY` | *(empty)* | n8n API key — **required** for workflow scheduling. Generate in n8n: Settings > API > Create API Key. |
-| `WEB_API_URL` | `http://host.docker.internal:5000/api` | GHOSTS API URL served to the frontend container |
-| `WEB_N8N_API_URL` | `http://host.docker.internal:5678` | n8n base URL served to the frontend container |
+| `WEB_API_URL` | `http://localhost:5000/api` | GHOSTS API URL served to the frontend (must be reachable by the browser) |
+| `WEB_N8N_API_URL` | `http://localhost:5678` | n8n base URL served to the frontend (must be reachable by the browser) |
 | `POSTGRES_PASSWORD` | set_me | PostgreSQL password. **Change this** for any non-local deployment. |
 
 ### appsettings.json (Advanced)

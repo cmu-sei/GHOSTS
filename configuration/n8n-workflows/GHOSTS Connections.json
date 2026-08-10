@@ -33,7 +33,7 @@
     },
     {
       "parameters": {
-        "url": "http://host.docker.internal:5000/api/npcs/list",
+        "url": "http://ghosts-api:5000/api/npcs/list",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
@@ -59,7 +59,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "=http://host.docker.internal:5000/api/npcs/{{ $('Loop Over Items').item.json.id }}/connections",
+        "url": "=http://ghosts-api:5000/api/npcs/{{ $('Loop Over Items').item.json.id }}/connections",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
