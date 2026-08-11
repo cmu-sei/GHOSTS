@@ -364,6 +364,9 @@ public class NpcService(ApplicationDbContext context, IEvidenceProcessor evidenc
 
     public async Task<NpcRecord> CreateOne(NpcProfile npcProfile)
     {
+        if (string.IsNullOrEmpty(npcProfile.PhotoLink))
+            npcProfile.PhotoLink = PhysicalCharacteristics.GetPhotoUrl(npcProfile.BiologicalSex);
+
         var npc = new NpcRecord
         {
             NpcProfile = npcProfile,

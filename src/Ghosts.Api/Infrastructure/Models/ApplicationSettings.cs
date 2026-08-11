@@ -12,6 +12,11 @@ public class ApplicationSettings
     public int NotificationsQueueSyncDelayInSeconds { get; set; }
     public int ListenerPort { get; set; }
 
+    /// <summary>
+    /// How many random NPCs to generate when the database has none. 0 to skip.
+    /// </summary>
+    public int SeedNpcCount { get; set; }
+
     public AnimatorSettingsDetail AnimatorSettings { get; set; }
     public GroupingOptions Grouping { get; set; }
 

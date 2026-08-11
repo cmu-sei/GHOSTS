@@ -8,11 +8,13 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { DatePipe } from '@angular/common';
 import { Npc, Scenario } from '../../../core/models';
 import { NpcService, ScenarioService } from '../../../core/services';
 import { ConfigService } from '../../../core/services/config.service';
 import { GenerateNpcsDialogComponent } from '../generate-npcs-dialog/generate-npcs-dialog.component';
+import { NpcChatDialogComponent } from '../npc-chat-dialog/npc-chat-dialog.component';
 import { NpcJsonDialogComponent } from '../npc-json-dialog/npc-json-dialog.component';
 import { SearchBarComponent } from '../../../shared/components/search-bar/search-bar.component';
 
@@ -26,6 +28,7 @@ import { SearchBarComponent } from '../../../shared/components/search-bar/search
     MatMenuModule,
     MatDialogModule,
     MatSnackBarModule,
+    MatTooltipModule,
     DatePipe,
     SearchBarComponent
   ],
@@ -114,11 +117,23 @@ import { SearchBarComponent } from '../../../shared/components/search-bar/search
               <button
                 mat-button
                 class="icon-button"
+                (click)="openChat(npc)"
+                [attr.aria-label]="'Chat with or about ' + getNpcName(npc)"
+                matTooltip="Chat with or about this NPC">
+                <i class="fas fa-comments"></i>
+              </button>
+              <button
+                mat-button
+                class="icon-button"
                 [matMenuTriggerFor]="actionsMenu"
                 aria-label="NPC actions">
                 <i class="fas fa-ellipsis-v"></i>
               </button>
               <mat-menu #actionsMenu="matMenu">
+                <button mat-menu-item (click)="openChat(npc)">
+                  <i class="fas fa-comments"></i>
+                  <span>Chat</span>
+                </button>
                 <button mat-menu-item (click)="viewDetails(npc)">
                   <i class="fas fa-user"></i>
                   <span>View Details</span>
@@ -329,6 +344,22 @@ export class NpcsListComponent implements OnInit {
 
   protected viewDetails(npc: Npc): void {
     this.router.navigate(['/npcs', npc.id]);
+  }
+
+  protected openChat(npc: Npc): void {
+    const name = this.getNpcName(npc);
+    this.dialog.open(NpcChatDialogComponent, {
+      width: '960px',
+      maxWidth: '95vw',
+      data: {
+        npcId: npc.id,
+        npcName: name,
+        firstName: npc.npcProfile?.name?.first || name,
+        photoUrl: this.getNpcPhotoUrl(npc.id)
+      },
+      autoFocus: false,
+      restoreFocus: false
+    });
   }
 
   protected viewJson(npc: Npc): void {

@@ -25,10 +25,16 @@ public class ContentCreationService
     public ContentCreationService(ApplicationSettings.AnimatorSettingsDetail.ContentEngineSettings configuration)
     {
         _configuration = configuration;
-        _configuration.Host = Environment.GetEnvironmentVariable("OLLAMA_HOST") ??
-                              configuration.Host;
-        _configuration.Model = Environment.GetEnvironmentVariable("OLLAMA_MODEL") ??
-                               configuration.Model;
+
+        // OLLAMA_HOST/OLLAMA_MODEL only speak for Ollama. Applied to every source they replaced a
+        // configured Bedrock model id with an Ollama model name and every call failed.
+        if (_configuration.Source.Equals("ollama", StringComparison.CurrentCultureIgnoreCase))
+        {
+            _configuration.Host = Environment.GetEnvironmentVariable("OLLAMA_HOST") ??
+                                  configuration.Host;
+            _configuration.Model = Environment.GetEnvironmentVariable("OLLAMA_MODEL") ??
+                                   configuration.Model;
+        }
 
         if (_configuration.Source.Equals("openai", StringComparison.CurrentCultureIgnoreCase) && _openAiFormatterService.IsReady)
         {

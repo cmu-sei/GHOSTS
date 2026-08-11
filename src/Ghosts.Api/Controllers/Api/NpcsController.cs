@@ -214,14 +214,17 @@ public class NpcsController(
     [HttpPost("{id:guid}/connections")]
     public async Task<ActionResult<NpcSocialConnection>> NpcCreateConnection(Guid id, [FromBody] CreateConnectionRequest request)
     {
-        var result = await service.CreateConnection(id, request.ConnectedNpcId,
-            request.Name, request.Distance, request.RelationshipStatus);
+        // Callers post connections without a name (the n8n social graph workflows send ""), so resolve
+        // the connected NPC's own name instead of storing a blank the social graph cannot display.
         var connectionName = request.Name;
         if (string.IsNullOrWhiteSpace(connectionName))
         {
             var connectedNpc = await service.GetById(request.ConnectedNpcId);
-            connectionName = connectedNpc?.NpcProfile?.Name?.ToString();
+            connectionName = connectedNpc?.NpcProfile?.Name?.ToString() ?? string.Empty;
         }
+
+        var result = await service.CreateConnection(id, request.ConnectedNpcId,
+            connectionName, request.Distance, request.RelationshipStatus);
         await activityHubContext.Show(1, id.ToString(), "relationship",
             new
             {
