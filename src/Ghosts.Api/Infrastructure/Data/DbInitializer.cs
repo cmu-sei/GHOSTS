@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using Ghosts.Animator;
 using Ghosts.Api.Infrastructure.Models;
 using Ghosts.Api.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
@@ -31,8 +32,14 @@ namespace Ghosts.Api.Infrastructure.Data
             // Import MITRE ATT&CK data if not already loaded
             await ImportMitreAttackData(context, logger, serviceProvider);
 
-            // Seed all exercise data from config/SeedData/seed.json (scenarios, objectives, NPCs, etc.)
+            // Seed all exercise data from config/SeedData/seed.json (scenarios, objectives, machines, etc.)
             await SeedFromJson(context, logger);
+
+            // NPCs are not seeded — generate random ones when there are none
+            await GenerateNpcsIfEmpty(context, logger);
+
+            // Give any NPC that has no avatar one
+            await EnsureNpcPhotos(context, logger);
 
             // Ensure the map_features table exists (EnsureCreated is a no-op for existing DBs)
             await EnsureMapFeaturesTableExists(context, logger);
@@ -175,6 +182,35 @@ namespace Ghosts.Api.Infrastructure.Data
             }
         }
 
+        private static async Task EnsureNpcPhotos(ApplicationDbContext context, ILogger<DbInitializer> logger)
+        {
+            try
+            {
+                var npcs = await context.Npcs.ToListAsync();
+                var updated = 0;
+                foreach (var npc in npcs.Where(x => x.NpcProfile != null && string.IsNullOrEmpty(x.NpcProfile.PhotoLink)))
+                {
+                    var photoLink = PhysicalCharacteristics.GetPhotoUrl(npc.NpcProfile.BiologicalSex);
+                    if (string.IsNullOrEmpty(photoLink)) continue;
+
+                    npc.NpcProfile.PhotoLink = photoLink;
+                    // jsonb column — EF does not track changes made inside the object
+                    context.Entry(npc).Property(x => x.NpcProfile).IsModified = true;
+                    updated++;
+                }
+
+                if (updated > 0)
+                {
+                    await context.SaveChangesAsync();
+                    logger.LogInformation("Assigned avatars to {Count} NPCs that had none", updated);
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Could not assign avatars to NPCs missing one");
+            }
+        }
+
         private static async Task ImportMitreAttackData(ApplicationDbContext context, ILogger<DbInitializer> logger, IServiceProvider serviceProvider)
         {
             try
@@ -220,10 +256,9 @@ namespace Ghosts.Api.Infrastructure.Data
                 return;
             }
 
-            var alreadySeeded = await context.Scenarios.AnyAsync() || await context.Npcs.AnyAsync();
-            if (alreadySeeded)
+            if (await context.Scenarios.AnyAsync())
             {
-                logger.LogInformation("Database already has scenario/NPC data — skipping seed");
+                logger.LogInformation("Database already has scenario data — skipping seed");
                 return;
             }
 
@@ -235,7 +270,8 @@ namespace Ghosts.Api.Infrastructure.Data
                 var opts = new JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = true,
-                    NumberHandling = JsonNumberHandling.AllowReadingFromString
+                    NumberHandling = JsonNumberHandling.AllowReadingFromString,
+                    Converters = { new JsonStringEnumConverter() }
                 };
                 var seed = JsonSerializer.Deserialize<SeedFile>(json, opts);
                 if (seed == null) return;
@@ -381,25 +417,6 @@ namespace Ghosts.Api.Infrastructure.Data
                     logger.LogInformation("Seeded {Count} machines", seed.Machines.Count);
                 }
 
-                // --- NPCs ---
-                if (seed.Npcs?.Count > 0)
-                {
-                    foreach (var n in seed.Npcs)
-                    {
-                        context.Npcs.Add(new NpcRecord
-                        {
-                            Id = Guid.Parse(n.Id),
-                            Campaign = n.Campaign,
-                            Enclave = n.Enclave,
-                            Team = n.Team,
-                            CreatedUtc = now.AddDays(-2),
-                            NpcProfile = n.NpcProfile
-                        });
-                    }
-                    await context.SaveChangesAsync();
-                    logger.LogInformation("Seeded {Count} NPCs", seed.Npcs.Count);
-                }
-
                 // --- Timeline History ---
                 if (seed.TimelineHistory?.Count > 0)
                 {
@@ -454,125 +471,57 @@ namespace Ghosts.Api.Infrastructure.Data
                     logger.LogInformation("Seeded {Count} machine history records", seed.MachineHistory.Count);
                 }
 
-                // --- Social Connections ---
-                if (seed.SocialConnections?.Count > 0)
-                {
-                    foreach (var c in seed.SocialConnections)
-                    {
-                        context.NpcSocialConnections.Add(new NpcSocialConnection
-                        {
-                            Id = c.Id,
-                            NpcId = Guid.Parse(c.NpcId),
-                            ConnectedNpcId = Guid.Parse(c.ConnectedNpcId),
-                            Name = c.Name,
-                            Distance = c.Distance,
-                            RelationshipStatus = c.RelationshipStatus,
-                            CreatedUtc = now.AddHours(c.OffsetHours),
-                            UpdatedUtc = now.AddHours(c.OffsetHours)
-                        });
-                    }
-                    await context.SaveChangesAsync();
-                    logger.LogInformation("Seeded {Count} social connections", seed.SocialConnections.Count);
-                }
-
-                // --- Interactions ---
-                if (seed.Interactions?.Count > 0)
-                {
-                    foreach (var i in seed.Interactions)
-                    {
-                        context.NpcInteractions.Add(new NpcInteraction
-                        {
-                            SocialConnectionId = i.SocialConnectionId,
-                            Step = i.Step,
-                            Value = i.Value,
-                            CreatedUtc = now.AddHours(i.OffsetHours)
-                        });
-                    }
-                    await context.SaveChangesAsync();
-                    logger.LogInformation("Seeded {Count} interactions", seed.Interactions.Count);
-                }
-
-                // --- Activities ---
-                if (seed.Activities?.Count > 0)
-                {
-                    foreach (var a in seed.Activities)
-                    {
-                        context.NpcActivities.Add(new NpcActivity
-                        {
-                            NpcId = Guid.Parse(a.NpcId),
-                            ActivityType = (NpcActivity.ActivityTypes)a.ActivityType,
-                            Detail = a.Detail,
-                            CreatedUtc = now.AddHours(a.OffsetHours)
-                        });
-                    }
-                    await context.SaveChangesAsync();
-                    logger.LogInformation("Seeded {Count} activities", seed.Activities.Count);
-                }
-
-                // --- Beliefs ---
-                if (seed.Beliefs?.Count > 0)
-                {
-                    foreach (var b in seed.Beliefs)
-                    {
-                        context.NpcBeliefs.Add(new NpcBelief
-                        {
-                            NpcId = Guid.Parse(b.NpcId),
-                            ToNpcId = Guid.Parse(b.ToNpcId),
-                            FromNpcId = Guid.Parse(b.FromNpcId),
-                            Name = b.Name,
-                            Step = b.Step,
-                            Likelihood = b.Likelihood,
-                            Posterior = b.Posterior,
-                            CreatedUtc = now.AddHours(b.OffsetHours)
-                        });
-                    }
-                    await context.SaveChangesAsync();
-                    logger.LogInformation("Seeded {Count} beliefs", seed.Beliefs.Count);
-                }
-
-                // --- Learning ---
-                if (seed.Learning?.Count > 0)
-                {
-                    foreach (var l in seed.Learning)
-                    {
-                        context.NpcLearning.Add(new NpcLearning(
-                            Guid.Parse(l.NpcId),
-                            Guid.Parse(l.ToNpcId),
-                            Guid.Parse(l.FromNpcId),
-                            l.Topic,
-                            l.Step,
-                            l.Value
-                        ) { CreatedUtc = now.AddHours(l.OffsetHours) });
-                    }
-                    await context.SaveChangesAsync();
-                    logger.LogInformation("Seeded {Count} learning records", seed.Learning.Count);
-                }
-
-                // --- Preferences ---
-                if (seed.Preferences?.Count > 0)
-                {
-                    foreach (var p in seed.Preferences)
-                    {
-                        context.NpcPreferences.Add(new NpcPreference(
-                            0,
-                            Guid.Parse(p.NpcId),
-                            Guid.Parse(p.ToNpcId),
-                            Guid.Parse(p.FromNpcId),
-                            p.Name,
-                            p.Step,
-                            p.Weight,
-                            p.Strength
-                        ) { CreatedUtc = now.AddHours(p.OffsetHours) });
-                    }
-                    await context.SaveChangesAsync();
-                    logger.LogInformation("Seeded {Count} preferences", seed.Preferences.Count);
-                }
-
                 logger.LogInformation("Seed data loaded successfully");
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, "Failed to load seed data from {Path}", seedPath);
+            }
+        }
+
+        // ===== Random NPCs =====
+
+        /// <summary>
+        /// NPCs are not seeded from a file — on an empty database, generate a batch of random ones
+        /// so there is something to look at. Set ApplicationSettings:SeedNpcCount to 0 to skip.
+        /// </summary>
+        private static async Task GenerateNpcsIfEmpty(ApplicationDbContext context, ILogger<DbInitializer> logger)
+        {
+            var count = Program.ApplicationSettings?.SeedNpcCount ?? 0;
+            if (count < 1)
+            {
+                logger.LogInformation("SeedNpcCount is {Count} — not generating any NPCs", count);
+                return;
+            }
+
+            if (await context.Npcs.AnyAsync())
+            {
+                logger.LogInformation("Database already has NPCs — skipping NPC generation");
+                return;
+            }
+
+            var generated = 0;
+            for (var i = 0; i < count; i++)
+            {
+                try
+                {
+                    var npc = NpcRecord.TransformToNpc(Npc.Generate(MilitaryUnits.GetServiceBranch()));
+                    npc.Id = npc.NpcProfile.Id;
+                    npc.CreatedUtc = DateTime.UtcNow;
+                    context.Npcs.Add(npc);
+                    generated++;
+                }
+                catch (Exception ex)
+                {
+                    // generation reads from config/, so keep whatever generated cleanly
+                    logger.LogWarning(ex, "Could not generate NPC {Number} of {Count}", i + 1, count);
+                }
+            }
+
+            if (generated > 0)
+            {
+                await context.SaveChangesAsync();
+                logger.LogInformation("Generated {Count} random NPCs", generated);
             }
         }
 
@@ -583,16 +532,9 @@ namespace Ghosts.Api.Infrastructure.Data
             public List<SeedScenario> Scenarios { get; set; }
             public List<SeedObjective> Objectives { get; set; }
             public List<SeedMachine> Machines { get; set; }
-            public List<SeedNpc> Npcs { get; set; }
             public List<SeedTimelineHistory> TimelineHistory { get; set; }
             public List<SeedHealthHistory> HealthHistory { get; set; }
             public List<SeedMachineHistory> MachineHistory { get; set; }
-            public List<SeedSocialConnection> SocialConnections { get; set; }
-            public List<SeedInteraction> Interactions { get; set; }
-            public List<SeedActivity> Activities { get; set; }
-            public List<SeedBelief> Beliefs { get; set; }
-            public List<SeedLearning> Learning { get; set; }
-            public List<SeedPreference> Preferences { get; set; }
         }
 
         private class SeedScenario
@@ -686,15 +628,6 @@ namespace Ghosts.Api.Infrastructure.Data
             public int StatusUp { get; set; }
         }
 
-        private class SeedNpc
-        {
-            public string Id { get; set; }
-            public string Campaign { get; set; }
-            public string Enclave { get; set; }
-            public string Team { get; set; }
-            public Ghosts.Animator.Models.NpcProfile NpcProfile { get; set; }
-        }
-
         private class SeedTimelineHistory
         {
             public string MachineId { get; set; }
@@ -722,67 +655,6 @@ namespace Ghosts.Api.Infrastructure.Data
             public double OffsetHours { get; set; }
         }
 
-        private class SeedSocialConnection
-        {
-            public string Id { get; set; }
-            public string NpcId { get; set; }
-            public string ConnectedNpcId { get; set; }
-            public string Name { get; set; }
-            public string Distance { get; set; }
-            public decimal RelationshipStatus { get; set; }
-            public double OffsetHours { get; set; }
-        }
-
-        private class SeedInteraction
-        {
-            public string SocialConnectionId { get; set; }
-            public long Step { get; set; }
-            public int Value { get; set; }
-            public double OffsetHours { get; set; }
-        }
-
-        private class SeedActivity
-        {
-            public string NpcId { get; set; }
-            public int ActivityType { get; set; }
-            public string Detail { get; set; }
-            public double OffsetHours { get; set; }
-        }
-
-        private class SeedBelief
-        {
-            public string NpcId { get; set; }
-            public string ToNpcId { get; set; }
-            public string FromNpcId { get; set; }
-            public string Name { get; set; }
-            public long Step { get; set; }
-            public decimal Likelihood { get; set; }
-            public decimal Posterior { get; set; }
-            public double OffsetHours { get; set; }
-        }
-
-        private class SeedLearning
-        {
-            public string NpcId { get; set; }
-            public string ToNpcId { get; set; }
-            public string FromNpcId { get; set; }
-            public string Topic { get; set; }
-            public long Step { get; set; }
-            public int Value { get; set; }
-            public double OffsetHours { get; set; }
-        }
-
-        private class SeedPreference
-        {
-            public string NpcId { get; set; }
-            public string ToNpcId { get; set; }
-            public string FromNpcId { get; set; }
-            public string Name { get; set; }
-            public long Step { get; set; }
-            public decimal Weight { get; set; }
-            public decimal Strength { get; set; }
-            public double OffsetHours { get; set; }
-        }
         // ===== Map Feature Table Creation =====
 
         private static async Task EnsureMapFeaturesTableExists(ApplicationDbContext context, ILogger<DbInitializer> logger)
