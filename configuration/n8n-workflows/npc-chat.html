@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>GHOSTS NPC Chat</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- n8n Chat styles -->
+    <link href="https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css" rel="stylesheet" />
+
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: #020617;
+            color: #e2e8f0;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            padding: 0.75rem 1.5rem;
+            background: #020617;
+            border-bottom: 1px solid #1f2937;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        header code {
+            color: #94a3b8;
+            font-size: 0.8rem;
+        }
+
+        main {
+            flex: 1;
+            min-height: 0;
+        }
+
+        #chat {
+            height: 100%;
+        }
+
+        .setup {
+            padding: 2rem 1.5rem;
+            max-width: 46rem;
+            line-height: 1.6;
+        }
+
+        .setup code {
+            background: #0f172a;
+            padding: 0.15rem 0.4rem;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>GHOSTS NPC Chat</h1>
+        <code id="who"></code>
+    </header>
+
+    <main id="chat"></main>
+
+    <script type="module">
+        import { createChat } from "https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js";
+
+        // Both the NPC to talk to and the n8n host come off the querystring, because this
+        // page is static and cannot be templated. n8n's default port is the fallback.
+        const params = new URLSearchParams(location.search);
+        const npcId = (params.get("npcId") || "").trim();
+        const n8nUrl = (params.get("n8n") || "http://localhost:5678").replace(/\/+$/, "");
+
+        const GUID_RE = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+
+        if (!GUID_RE.test(npcId)) {
+            document.getElementById("chat").innerHTML = `
+                <div class="setup">
+                    <p>${npcId ? `<code>${npcId}</code> is not a valid NPC id.` : "No NPC id was given."}</p>
+                    <p>Open this page with the NPC's GUID in the querystring:</p>
+                    <p><code>npc-chat.html?npcId=&lt;guid&gt;</code></p>
+                    <p>
+                        Get an id from the GHOSTS UI, or from
+                        <code>GET /api/npcs</code>.
+                        If n8n is not on <code>http://localhost:5678</code>, add
+                        <code>&amp;n8n=http://your-n8n:5678</code>.
+                    </p>
+                </div>`;
+        } else {
+            document.getElementById("who").textContent = npcId;
+
+            createChat({
+                target: "#chat",
+                webhookUrl: `${n8nUrl}/webhook/ghosts-npc-chat/chat`,
+
+                // Resolve NPC reads metadata.npcId, and Globals makes it the npcId for
+                // the rest of the execution, including the MCP tool calls.
+                metadata: { npcId },
+
+                mode: "fullscreen",
+                showWelcomeScreen: false,
+                initialMessages: [],
+            });
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,293 @@
+{
+  "name": "GHOSTS NPC Chat",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "mode": "webhook",
+        "options": {
+          "allowedOrigins": "*",
+          "loadPreviousSession": "memory"
+        }
+      },
+      "id": "02db258d-1a78-4b05-8b0b-8f07ca0fefc0",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "position": [
+        480,
+        -112
+      ],
+      "webhookId": "ghosts-npc-chat",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "jsCode": "// Resolve which NPC to talk to. The chat page (npc-chat.html) passes the NPC id\n// as metadata.npcId (pulled from the ?npcId= querystring), which is the normal path.\n// As a convenience for the built-in n8n test window - which cannot send metadata -\n// we also accept a GUID typed inline in the message, e.g. \"npcId: <guid> hello\".\n\nconst trigger = $input.first().json;\nconst meta = trigger.metadata || {};\nlet npcId = (meta.npcId || '').toString().trim();\nlet userMessage = (trigger.chatInput || '').toString();\n\nconst GUID_RE = /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/;\n\nif (!npcId) {\n  const m = userMessage.match(GUID_RE);\n  if (m) {\n    npcId = m[0];\n    userMessage = userMessage.replace(/npc\\s*id\\s*[:=]?/i, '').replace(m[0], '').trim();\n  }\n}\n\nif (!npcId) {\n  throw new Error('No NPC id provided. Open the chat with ?npcId=<guid>, or include an NPC GUID in your first message (e.g. \"npcId: <guid> hello\").');\n}\nif (!GUID_RE.test(npcId)) {\n  throw new Error(`\"${npcId}\" is not a valid NPC GUID.`);\n}\n\nreturn [{ json: { npcId, userMessage, sessionId: trigger.sessionId } }];\n"
+      },
+      "id": "55daf5c9-cd10-4ca2-a2f2-197fdfc514ff",
+      "name": "Resolve NPC",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        704,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=http://ghosts-api:5000/api/npcs/{{ $json.npcId }}",
+        "options": {}
+      },
+      "id": "b6d8b8d7-6bd7-42a1-a591-7ef627cc1a2a",
+      "name": "Get NPC",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        928,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build a system prompt that puts the LLM \"in character\" as this specific NPC.\n// The GHOSTS API returns an NpcRecord with a nested NpcProfile. Casing can be\n// camelCase or PascalCase depending on serializer, so we look up defensively.\nfunction pick(obj, ...keys) {\n  if (!obj || typeof obj !== 'object') return undefined;\n  for (const k of keys) {\n    if (obj[k] !== undefined && obj[k] !== null) return obj[k];\n    const lc = k.charAt(0).toLowerCase() + k.slice(1);\n    if (obj[lc] !== undefined && obj[lc] !== null) return obj[lc];\n  }\n  return undefined;\n}\n\nconst record = $input.first().json;\nconst p = pick(record, 'NpcProfile') || record;\n\nif (!p || (typeof p === 'object' && !pick(p, 'Name'))) {\n  throw new Error('No NPC persona returned from the GHOSTS API for this id. Check the NPC exists and that Get NPC succeeded.');\n}\n\nconst name = pick(p, 'Name') || {};\nconst full = [pick(name, 'First'), pick(name, 'Middle'), pick(name, 'Last')].filter(Boolean).join(' ').trim() || 'this person';\n\nconst emp = pick(p, 'Employment') || {};\nconst edu = pick(p, 'Education') || {};\nconst rank = pick(p, 'Rank') || {};\nconst unit = pick(p, 'Unit') || {};\nconst mental = pick(p, 'MentalHealth') || {};\nconst motiv = pick(p, 'MotivationalProfile') || {};\nconst addrList = pick(p, 'Address') || [];\nconst addr = Array.isArray(addrList) ? (addrList[0] || {}) : {};\n\nconst lines = [];\nlines.push(`You are ${full}. You must stay fully in character as this person for the entire conversation. Never say or imply that you are an AI, a language model, or a bot. Answer in the first person, in a natural, conversational voice consistent with the background below.`);\nlines.push('');\nlines.push('# Who you are');\n\nconst sex = pick(p, 'BiologicalSex');\nif (sex) lines.push(`- Sex: ${sex}`);\nconst bday = pick(p, 'Birthdate');\nif (bday) lines.push(`- Born: ${bday}`);\nif (pick(addr, 'City') || pick(addr, 'State')) lines.push(`- Lives in: ${[pick(addr, 'City'), pick(addr, 'State'), pick(addr, 'Country')].filter(Boolean).join(', ')}`);\n\nconst jobTitle = pick(emp, 'CurrentJob') || pick(emp, 'Occupation') || pick(emp, 'Title');\nconst company = pick(emp, 'Company') || pick(emp, 'Employer');\nif (jobTitle || company) lines.push(`- Job: ${[jobTitle, company && `at ${company}`].filter(Boolean).join(' ')}`);\n\nconst rankName = pick(rank, 'Name') || pick(rank, 'Abbr');\nconst unitName = pick(unit, 'Name') || pick(unit, 'Nick');\nif (rankName || unitName) lines.push(`- Military: ${[rankName, unitName && `(${unitName})`].filter(Boolean).join(' ')}`);\n\nconst degree = pick(edu, 'Degrees') || pick(edu, 'Degree') || pick(edu, 'School');\nif (degree) lines.push(`- Education: ${typeof degree === 'string' ? degree : JSON.stringify(degree)}`);\n\nconst traits = [];\nfor (const k of ['IQ', 'HappyQuotient', 'InterpersonalSkills', 'AdverseChildhoodExperiencesScore', 'DemonstratedIntegrity']) {\n  const v = pick(mental, k);\n  if (v !== undefined) traits.push(`${k}: ${v}`);\n}\nif (traits.length) {\n  lines.push('');\n  lines.push('# Temperament');\n  lines.push('- ' + traits.join(', '));\n}\n\nconst motivText = pick(motiv, 'Work') || pick(motiv, 'Description') || pick(motiv, 'Values');\nif (motivText) {\n  lines.push('');\n  lines.push('# What motivates you');\n  lines.push('- ' + (typeof motivText === 'string' ? motivText : JSON.stringify(motivText)));\n}\n\nconst attrs = pick(p, 'Attributes');\nif (attrs && typeof attrs === 'object') {\n  const entries = Object.entries(attrs).slice(0, 8);\n  if (entries.length) {\n    lines.push('');\n    lines.push('# Other details');\n    for (const [k, v] of entries) lines.push(`- ${k}: ${v}`);\n  }\n}\n\n// The globals node is the one place the NPC id is set for this execution, so tools\n// downstream (the GHOSTS MCP server) and this prompt agree on who is talking.\nconst npcId = pick(record, 'Id') || $('Globals').first().json.npcId;\n\nlines.push('');\nlines.push('# Tools');\nlines.push(`- Your GHOSTS NPC id is ${npcId}. Whenever a tool asks for an npcId, use exactly that value.`);\nlines.push('- The GHOSTS tools are how you check on yourself: your own record, your workstation, and browsing a site. Read your machine id off your own record when a tool needs one.');\nlines.push('- Use a tool only when the answer depends on live state. Never mention the tools, ids, or the GHOSTS system to the person you are talking to.');\n\nlines.push('');\nlines.push('Keep replies concise and in character. If asked something this person could not plausibly know, respond as they realistically would.');\n\nreturn [{ json: {\n  systemMessage: lines.join('\\n'),\n  npcId,\n  npcName: full\n} }];\n"
+      },
+      "id": "3294e366-7c61-403c-afb7-48537856565a",
+      "name": "Build Persona",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1152,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Globals').first().json.userMessage }}",
+        "options": {
+          "systemMessage": "={{ $json.systemMessage }}"
+        }
+      },
+      "id": "b3e9884e-8677-44be-b938-bd12cf43ef4d",
+      "name": "NPC AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        1408,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "model": "gemma4:31b",
+        "options": {}
+      },
+      "id": "30d5a7d8-a220-4f1d-bd97-75f4788dd8de",
+      "name": "Ollama Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        1328,
+        288
+      ],
+      "credentials": {
+        "ollamaApi": {
+          "id": "mtUpraWiZrXqvmNH",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Globals').first().json.npcId }}-{{ $('Globals').first().json.sessionId }}",
+        "contextWindowLength": 30
+      },
+      "id": "db461fb5-1cd5-459d-93b4-ff9104bac4e0",
+      "name": "Conversation Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        1504,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## GHOSTS NPC Chat\n**Talk to a specific NPC by ID - persona is loaded from the GHOSTS API, live state comes from the GHOSTS MCP server.**\n\n### How to use\nOpen `npc-chat.html` (it ships next to this workflow in `configuration/n8n-workflows/`) with the NPC id in the querystring:\n\n`npc-chat.html?npcId=<guid>`\n\nIf n8n is not on `http://localhost:5678`, add `&n8n=http://your-n8n:5678`.\n\nThe embedded chat widget sends `metadata.npcId` on every message. *Resolve NPC* reads it, *Globals* sets `npcId` for the rest of the execution, *Get NPC* fetches the persona from `http://ghosts-api:5000/api/npcs/{id}`, *Build Persona* turns it into an in-character system prompt that carries the id, and the *NPC AI Agent* replies with per-conversation memory.\n\n### The npcId global\nEverything downstream reads `$('Globals').first().json.npcId` rather than re-deriving the id. The persona prompt hands the same value to the agent, so *MCP Client* tool calls (`npc_get_by_id`, `machine_get_by_id`, `browser_timeline_send`) act on the NPC actually being chatted with.\n\n### Testing in the built-in chat window\nThat window can't send metadata, so type the GUID in your first message: `npcId: <guid> hello`.\n\n### Before running\n- **Activate this workflow** so `/webhook/ghosts-npc-chat/chat` exists.\n- Attach an **Ollama** credential to *Ollama Chat Model* (base URL e.g. `http://host.ollama:11434`), and make sure the model it names is pulled.\n- *MCP Client* points at the GHOSTS MCP server on `http://host.docker.internal:5055/mcp`.",
+        "height": 420,
+        "width": 460,
+        "color": 4
+      },
+      "id": "0e335bf3-55db-4eff-ab57-f0b6eb25aa69",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -96,
+        -32
+      ]
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        496,
+        96
+      ],
+      "id": "8c5ba859-4f43-4d88-82b1-8ffebe3a2fdf",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "endpointUrl": "http://host.docker.internal:5055/mcp",
+        "serverTransport": "httpStreamable",
+        "authentication": "none",
+        "include": "all",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.2,
+      "position": [
+        1696,
+        384
+      ],
+      "id": "fb30b538-61be-48f7-98c9-75eaea4c5a15",
+      "name": "MCP Client"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8f0f0ae0-3f4a-4a6f-9d1e-6a1b6f4c2f01",
+              "name": "npcId",
+              "value": "={{ $json.npcId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        928,
+        -208
+      ],
+      "id": "0016cd63-170c-431c-96ec-5e8ed2d3fbf9",
+      "name": "Globals"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Resolve NPC",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resolve NPC": {
+      "main": [
+        [
+          {
+            "node": "Globals",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get NPC": {
+      "main": [
+        [
+          {
+            "node": "Build Persona",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Persona": {
+      "main": [
+        [
+          {
+            "node": "NPC AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "NPC AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Conversation Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "NPC AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "When chat message received",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MCP Client": {
+      "ai_tool": [
+        [
+          {
+            "node": "NPC AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Globals": {
+      "main": [
+        [
+          {
+            "node": "Get NPC",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "id": "SR5crzuzHQKBae1C",
+  "tags": []
+}

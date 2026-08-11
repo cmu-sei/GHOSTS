@@ -99,6 +99,12 @@ var n8n = builder.AddContainer("n8n", "docker.n8n.io/n8nio/n8n")
     // under both Compose (where ghosts-api is a service on the same network) and Aspire.
     // Here the API is a devcontainer project, so alias ghosts-api to the host-gateway.
     .WithContainerRuntimeArgs("--add-host", "ghosts-api:host-gateway")
+    // Custom root CAs (TLS inspection) must be trusted inside the container too, or
+    // workflow HTTPS calls fail with "unable to get local issuer certificate". The
+    // wrapper entrypoint bundles /opt/ghosts-certs into NODE_EXTRA_CA_CERTS.
+    .WithEntrypoint("tini")
+    .WithArgs("--", "/bin/sh", "/bootstrap/scripts/n8n-entrypoint.sh")
+    .WithBindMount("../../.devcontainer/certs", "/opt/ghosts-certs", isReadOnly: true)
     .WithBindMount("n8n_data", "/home/node/.n8n", isReadOnly: false)
     .WithBindMount("../../configuration/n8n-workflows", "/bootstrap/workflows", isReadOnly: true)
     .WithBindMount("../../configuration/n8n-bootstrap/scripts", "/bootstrap/scripts", isReadOnly: true)
