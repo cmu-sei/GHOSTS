@@ -30,11 +30,12 @@ If your deployment uses an auth proxy, set `GHOSTS_API_TOKEN` to send a bearer t
 
 ## Tools
 
-- `GetGhostsApiBaseUrl`
-- `CheckGhostsApiAsync`
-- `ListMachinesAsync`
-- `GetMachineAsync`
-- `ListNpcsAsync`
-- `ListScenariosAsync`
-- `BuildBrowserTimelineJson`
-- `SendBrowserTimelineAsync`
+- `api_get_base_url`
+- `api_check_connection`
+- `machine_list`
+- `machine_get_by_id`
+- `npc_list`
+- `npc_get_by_id`
+- `scenario_list`
+- `browser_timeline_build`
+- `browser_timeline_send`
