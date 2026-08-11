@@ -58,10 +58,16 @@ services:
       - N8N_SECURE_COOKIE=false
       - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=false
       - N8N_DIAGNOSTICS_ENABLED=false
+    # Wrapper entrypoint bundles any custom root CAs mounted at /opt/ghosts-certs into
+    # NODE_EXTRA_CA_CERTS, so workflow HTTPS calls through TLS inspection don't fail
+    # with "unable to get local issuer certificate".
+    entrypoint: ["tini", "--", "/bin/sh", "/bootstrap/scripts/n8n-entrypoint.sh"]
     volumes:
       - ghosts-n8n-data:/home/node/.n8n
       - ../../configuration/n8n-workflows:/bootstrap/workflows:ro
       - ../../configuration/n8n-bootstrap/credentials:/bootstrap/credentials:ro
+      - ../../configuration/n8n-bootstrap/scripts:/bootstrap/scripts:ro
+      - ../../.devcontainer/certs:/opt/ghosts-certs:ro
     restart: unless-stopped
 
   ghosts-n8n-provisioner:
