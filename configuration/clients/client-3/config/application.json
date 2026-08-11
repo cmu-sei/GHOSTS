@@ -55,7 +55,8 @@
   },
   "ResourceControl": {
     "ManageProcesses": true,
-    "NagScreenResolver": false
+    "NagScreenResolver": false,
+    "ManageBrowserProcesses": false
   },
   "Timeline": {
     "Location": "config/timeline.json"
