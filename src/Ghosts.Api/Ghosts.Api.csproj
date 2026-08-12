@@ -5,8 +5,8 @@
     <AssemblyName>ghosts.api</AssemblyName>
     <RootNamespace>Ghosts.Api</RootNamespace>
 
-    <AssemblyVersion>9.3.0.0</AssemblyVersion>
-    <FileVersion>9.3.0.0</FileVersion>
+    <AssemblyVersion>9.4.0.0</AssemblyVersion>
+    <FileVersion>9.4.0.0</FileVersion>
 
     <Authors>GHOSTS Development Team for CERT &gt; Software Engineering Institute &gt; Carnegie Mellon University</Authors>
     <Company>Carnegie Mellon University</Company>
@@ -20,28 +20,30 @@
 
 
   <ItemGroup>
-    <PackageReference Include="ClosedXML" Version="0.105.0" />
+    <PackageReference Include="ClosedXML" Version="0.105.1" />
     <PackageReference Include="DocumentFormat.OpenXml" Version="3.5.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="10.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.0">
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="10.0.11" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.11" />
+    <!-- Pinned so Npgsql does not pull an older Relational than EntityFrameworkCore -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.11" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.11">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Playwright" Version="1.59.0" />
-    <PackageReference Include="NLog" Version="6.0.6" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Playwright" Version="1.62.0" />
+    <PackageReference Include="NLog" Version="6.1.4" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.Design" Version="1.1.1" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="10.0.1" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" Version="10.0.1" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="10.0.1" />
-    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="10.0.1" />
-    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="10.0.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="10.2.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" Version="10.2.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="10.2.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="10.2.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="10.2.3" />
     <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="10.0.1" />
     <PackageReference Include="Faker.Net" Version="2.0.163" />
-    <PackageReference Include="AutoMapper" Version="16.1.1" />
+    <PackageReference Include="AutoMapper" Version="16.2.0" />
     <PackageReference Include="FileHelpers" Version="3.5.2" />
-    <PackageReference Include="RestSharp" Version="113.0.0" />
+    <PackageReference Include="RestSharp" Version="114.0.0" />
     <PackageReference Include="Betalgo.OpenAI" Version="8.7.2" />
     <PackageReference Include="AWSSDK.BedrockRuntime" Version="3.7.402.14" />
     <PackageReference Include="UglyToad.PdfPig" Version="1.7.0-custom-5" />

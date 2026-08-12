@@ -11,10 +11,10 @@
         <!-- Disable automatic wwwroot content inclusion to prevent duplicates -->
         <EnableDefaultContentItems>false</EnableDefaultContentItems>
 
-        <ReleaseVersion>9.0.0</ReleaseVersion>
-        <Version>9.0.0</Version>
-        <AssemblyVersion>9.0.0</AssemblyVersion>
-        <FileVersion>9.0.0</FileVersion>
+        <ReleaseVersion>9.4.0</ReleaseVersion>
+        <Version>9.4.0</Version>
+        <AssemblyVersion>9.4.0</AssemblyVersion>
+        <FileVersion>9.4.0</FileVersion>
         <SynchReleaseVersion>false</SynchReleaseVersion>
 
         <Authors>GHOSTS Development Team @ Carnegie Mellon University</Authors>

@@ -11,6 +11,7 @@ using Amazon;
 using Amazon.BedrockRuntime;
 using Amazon.BedrockRuntime.Model;
 using Amazon.Runtime;
+using Ghosts.Api.Infrastructure.Extensions;
 using NLog;
 
 namespace Ghosts.Api.Infrastructure.ContentServices.Bedrock;
@@ -63,7 +64,7 @@ public class BedrockChatService(string region, string configuredModel) : IChatSe
         // so both have to be caught or the raw AWS exception escapes as an unhandled 500
         catch (Exception ex) when (ex is AmazonClientException or AmazonServiceException)
         {
-            _log.Error($"Bedrock chat failed in {region} with model {model}: {ex.Message}");
+            _log.Error($"Bedrock chat failed in {region} with model {model.ToSafeLogValue()}: {ex.Message.ToSafeLogValue()}");
             throw new InvalidOperationException($"Bedrock ({region}, {model}): {ex.Message}");
         }
 
@@ -71,7 +72,7 @@ public class BedrockChatService(string region, string configuredModel) : IChatSe
         var text = response.Output?.Message?.Content?.FirstOrDefault(c => c.Text != null)?.Text;
         if (text == null)
         {
-            _log.Error($"Bedrock chat returned no text for model {model}, stop reason {response.StopReason}");
+            _log.Error($"Bedrock chat returned no text for model {model.ToSafeLogValue()}, stop reason {response.StopReason}");
             throw new InvalidOperationException($"Bedrock ({region}, {model}) returned an unexpected response.");
         }
 

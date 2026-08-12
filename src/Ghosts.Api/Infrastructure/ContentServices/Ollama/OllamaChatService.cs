@@ -9,6 +9,7 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Ghosts.Api.Infrastructure.Extensions;
 using NLog;
 
 namespace Ghosts.Api.Infrastructure.ContentServices.Ollama;
@@ -69,7 +70,7 @@ public class OllamaChatService(string host, IHttpClientFactory httpClientFactory
 
         if (failure != null)
         {
-            _log.Error($"Ollama chat failed on {_host} with model {model}: {failure}");
+            _log.Error($"Ollama chat failed on {_host} with model {model.ToSafeLogValue()}: {failure.ToSafeLogValue()}");
             throw new InvalidOperationException($"Ollama ({_host}, {model}): {failure}");
         }
 
@@ -81,7 +82,7 @@ public class OllamaChatService(string host, IHttpClientFactory httpClientFactory
         }
         catch (Exception ex) when (ex is KeyNotFoundException or InvalidOperationException or JsonException)
         {
-            _log.Error($"Ollama chat response was malformed: {body}");
+            _log.Error($"Ollama chat response was malformed: {body.ToSafeLogValue()}");
             throw new InvalidOperationException($"Ollama ({_host}, {model}) returned an unexpected response.");
         }
     }

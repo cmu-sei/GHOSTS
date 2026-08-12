@@ -269,6 +269,11 @@ public class NpcChatService(
             raw = await chat.Chat(model, system, new[] { new ChatTurn("user", Truncate(message)) },
                 ToolSchema, temperature: 0, maxTokens: 80, ct);
         }
+        // A caller who gave up is not a routing failure, so it must not be swallowed below
+        catch (OperationCanceledException) when (ct.IsCancellationRequested)
+        {
+            throw;
+        }
         catch (Exception ex)
         {
             // A routing failure should not take down the conversation - fall through to a plain reply
@@ -421,6 +426,10 @@ public class NpcChatService(
                 maxTokens: 120,
                 ct));
         }
+        catch (OperationCanceledException) when (ct.IsCancellationRequested)
+        {
+            throw;
+        }
         catch (Exception ex)
         {
             _log.Warn($"NPC chat could not write a post for {npc.Id}: {ex.Message}");
@@ -480,18 +489,23 @@ public class NpcChatService(
             var client = httpClientFactory.CreateClient();
             client.Timeout = TimeSpan.FromSeconds(20);
 
-            var form = new FormUrlEncodedContent(new[]
+            using var form = new FormUrlEncodedContent(new[]
             {
                 new KeyValuePair<string, string>("user", username),
                 new KeyValuePair<string, string>("message", text)
             });
 
-            var response = await client.PostAsync($"{host}/?theme={theme}", form, ct);
+            using var response = await client.PostAsync($"{host}/?theme={theme}", form, ct);
             if (response.IsSuccessStatusCode)
                 return $"published to {host}/?theme={theme}";
 
             _log.Warn($"NPC chat could not publish to {host} ({theme}): {(int)response.StatusCode}");
             return $"social site returned {(int)response.StatusCode}, recorded in NPC history only";
+        }
+        // An HttpClient timeout also arrives as a cancellation, so only a caller's own token rethrows
+        catch (OperationCanceledException) when (ct.IsCancellationRequested)
+        {
+            throw;
         }
         catch (Exception ex)
         {
