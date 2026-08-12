@@ -12,6 +12,10 @@ on:
     types: [published]
   workflow_dispatch:
 
+concurrency:
+  group: api-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   docker:
     name: Docker Build & Push
@@ -21,6 +25,9 @@ jobs:
       packages: write
     steps:
       - uses: actions/checkout@v4
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Docker metadata
         id: meta
@@ -43,6 +50,8 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push
+        id: push
+        continue-on-error: true
         uses: docker/build-push-action@v6
         with:
           context: ./src
@@ -50,3 +59,24 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          provenance: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # GHCR secondary rate limits ask callers to wait a few minutes and retry
+      - name: Wait out GHCR rate limit
+        if: steps.push.outcome == 'failure'
+        run: sleep 180
+
+      - name: Build and push (retry)
+        if: steps.push.outcome == 'failure'
+        uses: docker/build-push-action@v6
+        with:
+          context: ./src
+          file: ./src/Dockerfile-api
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          provenance: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
