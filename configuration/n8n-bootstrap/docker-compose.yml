@@ -36,10 +36,16 @@ services:
       GENERIC_TIMEZONE: ${GENERIC_TIMEZONE:-UTC}
     ports:
       - "5678:5678"
+    # Wrapper entrypoint bundles any custom root CAs mounted at /opt/ghosts-certs into
+    # NODE_EXTRA_CA_CERTS, so workflow HTTPS calls through TLS inspection don't fail
+    # with "unable to get local issuer certificate".
+    entrypoint: ["tini", "--", "/bin/sh", "/bootstrap/scripts/n8n-entrypoint.sh"]
     volumes:
       - n8n-data:/home/node/.n8n
       - ../n8n-workflows:/bootstrap/workflows:ro
       - ./credentials:/bootstrap/credentials:ro
+      - ./scripts:/bootstrap/scripts:ro
+      - ../../.devcontainer/certs:/opt/ghosts-certs:ro
     healthcheck:
       test: ["CMD-SHELL", "wget --spider -q http://localhost:5678/healthz && test -f /home/node/.n8n/.bootstrap_complete"]
       interval: 10s

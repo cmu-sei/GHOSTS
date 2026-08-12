@@ -14,14 +14,14 @@ public sealed class GhostsTools
         WriteIndented = true
     };
 
-    [McpServerTool(ReadOnly = true, OpenWorld = false)]
+    [McpServerTool(Name = "api_get_base_url", ReadOnly = true, OpenWorld = false)]
     [Description("Returns the configured GHOSTS API base URL used by this MCP server.")]
     public static string GetGhostsApiBaseUrl()
     {
         return GhostsApiClient.BaseUrl;
     }
 
-    [McpServerTool(ReadOnly = true, OpenWorld = true)]
+    [McpServerTool(Name = "api_check_connection", ReadOnly = true, OpenWorld = true)]
     [Description("Actively checks the live GHOSTS API connection and returns the result.")]
     public static async Task<string> CheckGhostsApiAsync(CancellationToken ct)
     {
@@ -46,7 +46,7 @@ public sealed class GhostsTools
         }
     }
 
-    [McpServerTool(Name = "ListMachinesAsync", ReadOnly = true, OpenWorld = true)]
+    [McpServerTool(Name = "machine_list", ReadOnly = true, OpenWorld = true)]
     [Description("Fetches and returns the actual current list of GHOSTS machines now. Use this when the user asks to list, show, count, or inspect machines; return the tool result, not example code.")]
     public static async Task<string> ListMachinesAsync(
         [Description("Maximum number of machines to return.")] int take = 25,
@@ -55,7 +55,7 @@ public sealed class GhostsTools
         return await GetJsonAsync("/api/machines/list", take, ct);
     }
 
-    [McpServerTool(ReadOnly = true, OpenWorld = true)]
+    [McpServerTool(Name = "machine_get_by_id", ReadOnly = true, OpenWorld = true)]
     [Description("Fetches and returns one GHOSTS machine record now, including recent history when available.")]
     public static async Task<string> GetMachineAsync(
         [Description("GHOSTS machine GUID.")] Guid machineId,
@@ -64,7 +64,7 @@ public sealed class GhostsTools
         return await GetJsonAsync($"/api/machines/{machineId}", null, ct);
     }
 
-    [McpServerTool(ReadOnly = true, OpenWorld = true)]
+    [McpServerTool(Name = "npc_list", ReadOnly = true, OpenWorld = true)]
     [Description("Fetches and returns the current list of generated GHOSTS NPC IDs and names now.")]
     public static async Task<string> ListNpcsAsync(
         [Description("Maximum number of NPCs to return.")] int take = 25,
@@ -73,7 +73,16 @@ public sealed class GhostsTools
         return await GetJsonAsync("/api/npcs/list", take, ct);
     }
 
-    [McpServerTool(ReadOnly = true, OpenWorld = true)]
+    [McpServerTool(Name = "npc_get_by_id", ReadOnly = true, OpenWorld = true)]
+    [Description("Fetches and returns one GHOSTS NPC record now, including its full persona profile.")]
+    public static async Task<string> GetNpcAsync(
+        [Description("GHOSTS NPC GUID.")] Guid npcId,
+        CancellationToken ct = default)
+    {
+        return await GetJsonAsync($"/api/npcs/{npcId}", null, ct);
+    }
+
+    [McpServerTool(Name = "scenario_list", ReadOnly = true, OpenWorld = true)]
     [Description("Fetches and returns the current list of GHOSTS scenarios now.")]
     public static async Task<string> ListScenariosAsync(
         [Description("Maximum number of scenarios to return.")] int take = 25,
@@ -82,7 +91,7 @@ public sealed class GhostsTools
         return await GetJsonAsync("/api/scenarios", take, ct);
     }
 
-    [McpServerTool(ReadOnly = true, OpenWorld = false)]
+    [McpServerTool(Name = "browser_timeline_build", ReadOnly = true, OpenWorld = false)]
     [Description("Builds a browser timeline JSON payload without sending it to GHOSTS.")]
     public static string BuildBrowserTimelineJson(
         [Description("URL the client should browse to.")] string url,
@@ -94,7 +103,7 @@ public sealed class GhostsTools
         return JsonSerializer.Serialize(timeline, JsonOptions);
     }
 
-    [McpServerTool(Destructive = false, Idempotent = false, OpenWorld = true)]
+    [McpServerTool(Name = "browser_timeline_send", Destructive = false, Idempotent = false, OpenWorld = true)]
     [Description("Immediately sends a browser timeline update to a GHOSTS machine and returns the API response.")]
     public static async Task<string> SendBrowserTimelineAsync(
         [Description("GHOSTS machine GUID that should receive the timeline.")] Guid machineId,

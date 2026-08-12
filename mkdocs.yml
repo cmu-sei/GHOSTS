@@ -94,6 +94,7 @@ nav:
   - Client:
       - core/client.md
       - core/lite.md
+      - Running a Single Handler: core/handle-cli.md
       - Client Handlers:
           - Basic Configuration: core/handlers.md
           - Clicks: core/handlers/clicks.md

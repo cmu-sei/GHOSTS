@@ -28,7 +28,7 @@
     <PackageReference Include="HtmlAgilityPack" Version="1.12.4"/>
     <PackageReference Include="MySqlConnector" Version="2.5.0"/>
     <PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.2"/>
-    <PackageReference Include="NLog" Version="6.0.6"/>
+    <PackageReference Include="NLog" Version="6.1.4"/>
     <PackageReference Include="FileHelpers" Version="3.5.2"/>
     <PackageReference Include="Selenium.Firefox.WebDriver" Version="0.27.0"/>
     <PackageReference Include="Selenium.WebDriver" Version="4.33.0"/>

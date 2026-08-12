@@ -504,9 +504,17 @@ export class ActivitiesDynamicComponent implements OnInit, OnDestroy {
     if (consoleDiv) {
       const entry = document.createElement('div');
       const time = new Date().toLocaleTimeString();
-      const msgText = typeof message === 'object' && message !== null
-        ? `Used ${(message as any).handler} to ${(message as any).action} because ${(message as any).reasoning}`
-        : message;
+      let msgText: string;
+      if (typeof message === 'object' && message !== null) {
+        const m = message as any;
+        const parts: string[] = [];
+        if (m.handler) parts.push(`Used ${m.handler} to`);
+        if (m.action) parts.push(m.action);
+        if (m.reasoning) parts.push(`because ${m.reasoning}`);
+        msgText = parts.join(' ');
+      } else {
+        msgText = message;
+      }
       entry.textContent = `[${time}] ${emoji} ${msgText}`;
       consoleDiv.appendChild(entry);
       consoleDiv.scrollTop = consoleDiv.scrollHeight;

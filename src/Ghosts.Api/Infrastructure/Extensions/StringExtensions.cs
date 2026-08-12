@@ -71,6 +71,16 @@ namespace Ghosts.Api.Infrastructure.Extensions
             return string.IsNullOrEmpty(email) ? string.Empty : username;
         }
 
+        /// <summary>
+        /// Removes line breaks so a caller-supplied value cannot forge additional log entries (CWE-117).
+        /// </summary>
+        public static string ToSafeLogValue(this string input)
+        {
+            if (string.IsNullOrEmpty(input)) return input;
+
+            return input.Replace("\r", " ").Replace("\n", " ");
+        }
+
         public static bool ShouldSend(this string message, IEnumerable<string> list)
         {
             return !string.IsNullOrEmpty(message) &&

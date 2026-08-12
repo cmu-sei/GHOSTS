@@ -89,6 +89,12 @@ For operators who need a known API key at first boot (e.g., CI/CD):
 
 The `N8N_ENCRYPTION_KEY` is used to encrypt all stored credentials. If you change or lose this key, all saved credentials become permanently unreadable. Treat it like a database master password.
 
+## Custom Certificates (TLS Inspection)
+
+Behind Zscaler or another SSL-inspecting proxy, workflow nodes making outbound HTTPS calls fail with `unable to get local issuer certificate` unless the inspecting root CA is trusted inside the container.
+
+Drop the PEM-encoded root CAs into `.devcontainer/certs/*.crt` (the same folder the devcontainer build uses). All n8n deployments — this Compose file, `src/Ghosts.Api/docker-compose.yml`, and the Aspire AppHost — mount that folder read-only at `/opt/ghosts-certs` and run `scripts/n8n-entrypoint.sh`, which concatenates the certs into a bundle and points `NODE_EXTRA_CA_CERTS` at it before starting n8n. With no `.crt` files present, the container starts normally with the default trust store.
+
 ## Bcrypt Hash Escaping in `.env`
 
 Bcrypt hashes contain `$` characters. In `.env` files consumed by Docker Compose, each `$` must be escaped as `$$`:

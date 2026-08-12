@@ -1,6 +1,6 @@
 {
   "name": "Ghosts.Frontend",
-  "version": "9.3.0",
+  "version": "9.4.0",
   "scripts": {
     "ng": "ng",
     "start": "node start.js",
@@ -35,26 +35,26 @@
     "@deck.gl/layers": "^9.3.0",
     "@deck.gl/mapbox": "^9.3.0",
     "@fortawesome/fontawesome-free": "^7.1.0",
-    "@microsoft/signalr": "^9.0.6",
+    "@microsoft/signalr": "^10.0.11",
     "@types/d3": "^7.4.3",
     "d3": "^7.9.0",
     "maplibre-gl": "^5.23.0",
     "material-icons": "^1.13.14",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
-    "zone.js": "~0.15.0"
+    "zone.js": "~0.16.2"
   },
   "devDependencies": {
     "@angular/build": "^22.0.4",
     "@angular/cli": "^22.0.4",
     "@angular/compiler-cli": "^22.0.4",
-    "@types/jasmine": "~5.1.0",
-    "jasmine-core": "~5.9.0",
+    "@types/jasmine": "~6.0.0",
+    "jasmine-core": "~6.3.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
-    "karma-jasmine-html-reporter": "~2.1.0",
+    "karma-jasmine-html-reporter": "~2.2.0",
     "typescript": "~6.0.3"
   }
 }

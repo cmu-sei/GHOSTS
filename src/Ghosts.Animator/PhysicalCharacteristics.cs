@@ -473,27 +473,30 @@ namespace Ghosts.Animator
 
         public static string GetPhotoUrl()
         {
-            var dir = "config/photos/";
             if (Npc.NpcProfile != null)
             {
-                dir += Npc.NpcProfile.BiologicalSex.ToString().ToLower();
-            }
-            else
-            {
-                dir += GetBiologicalSex().ToString().ToLower();
+                return GetPhotoUrl(Npc.NpcProfile.BiologicalSex);
             }
 
-            var file = Directory.GetFiles(dir, "*", SearchOption.AllDirectories).RandomElement();
-
-            return file;
+            return GetPhotoUrl(GetBiologicalSex());
         }
 
         public static string GetPhotoUrl(BiologicalSex sex)
         {
             var dir = $"config/photos/{sex.ToString().ToLower()}";
-            var file = Directory.GetFiles(dir, "*", SearchOption.AllDirectories).RandomElement();
+            if (!Directory.Exists(dir))
+            {
+                return null;
+            }
+
+            // only actual images — the photo folders can also hold non-image files such as .DS_Store
+            var file = Directory.GetFiles(dir, "*", SearchOption.AllDirectories)
+                .Where(x => PhotoExtensions.Contains(Path.GetExtension(x).ToLower()))
+                .RandomElement();
             return file;
         }
+
+        private static readonly HashSet<string> PhotoExtensions = new HashSet<string> { ".jpg", ".jpeg", ".png" };
 
         /*
          //Old GetWeight function

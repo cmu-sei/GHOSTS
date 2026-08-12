@@ -2,6 +2,7 @@ export * from './machine.model';
 export * from './machine-group.model';
 export * from './timeline.model';
 export * from './npc.model';
+export * from './npc-chat.model';
 export * from './activity.model';
 export * from './status.model';
 export * from './animation.model';

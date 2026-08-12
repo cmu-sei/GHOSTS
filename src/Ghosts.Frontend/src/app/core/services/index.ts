@@ -4,6 +4,7 @@ export * from './machine-group.service';
 export * from './timeline.service';
 export * from './timeline-local.service';
 export * from './npc.service';
+export * from './npc-chat.service';
 export * from './activity.service';
 export * from './status.service';
 export * from './animation.service';
