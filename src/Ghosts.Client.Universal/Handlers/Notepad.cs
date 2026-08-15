@@ -6,6 +6,7 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Ghosts.Client.Universal.Infrastructure;
 using Ghosts.Domain;
 using Ghosts.Domain.Code;
 
@@ -276,7 +277,7 @@ public class Notepad(Timeline entireTimeline, TimelineHandler timelineHandler, C
             _viewProbability = 25;
         }
 
-        _outputDirectory = Path.GetTempPath();
+        _outputDirectory = TempFiles.GetGhostsTempPath();
         if (Handler.HandlerArgs.TryGetValue("output-directory", out var od))
         {
             var expanded = Environment.ExpandEnvironmentVariables(od.ToString());
@@ -284,7 +285,7 @@ public class Notepad(Timeline entireTimeline, TimelineHandler timelineHandler, C
                 _outputDirectory = expanded;
         }
 
-        _inputDirectory = Path.GetTempPath();
+        _inputDirectory = TempFiles.GetGhostsTempPath();
         if (Handler.HandlerArgs.TryGetValue("input-directory", out var id))
         {
             var expanded = Environment.ExpandEnvironmentVariables(id.ToString());

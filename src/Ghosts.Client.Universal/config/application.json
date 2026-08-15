@@ -46,6 +46,12 @@
         "ManageProcesses": true,
         "ManageBrowserProcesses": false
     },
+    "TempFiles": {
+        "IsEnabled": false,
+        "CycleSleepMinutes": 5,
+        "MinimumAgeInMinutes": 60,
+        "Path": ""
+    },
     "HealthIsEnabled": false,
     "HandlersIsEnabled": true,
     "DisableStartup": false,

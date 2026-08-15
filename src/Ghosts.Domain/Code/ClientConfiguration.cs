@@ -74,6 +74,8 @@ namespace Ghosts.Domain.Code
 
         public ResourceControlSettings ResourceControl { get; set; }
 
+        public TempFilesSettings TempFiles { get; set; }
+
         public TimelineConf Timeline { get; set; }
 
         public AwsCliSettings AwsCli { get; set; }
@@ -225,6 +227,40 @@ namespace Ghosts.Domain.Code
             {
                 ManageProcesses = true;
                 ManageBrowserProcesses = false;
+            }
+        }
+
+        public class TempFilesSettings
+        {
+            /// <summary>
+            /// Should the client periodically delete the temp artifacts it leaves behind?
+            /// </summary>
+            public bool IsEnabled { get; set; }
+
+            /// <summary>
+            /// Minutes between cleanup cycles
+            /// </summary>
+            public int CycleSleepMinutes { get; set; }
+
+            /// <summary>
+            /// Files and folders modified more recently than this are left alone, so that in-use
+            /// browser profiles and open handler files survive a cleanup cycle
+            /// </summary>
+            public int MinimumAgeInMinutes { get; set; }
+
+            /// <summary>
+            /// Folder to clean. Empty (the default) means the ghosts-owned subfolder of the system
+            /// temp path. Pointing this at a shared location such as /tmp deletes files belonging to
+            /// other users and services, and on Linux is not recoverable (see issue #698).
+            /// </summary>
+            public string Path { get; set; }
+
+            public TempFilesSettings()
+            {
+                IsEnabled = true;
+                CycleSleepMinutes = 5;
+                MinimumAgeInMinutes = 60;
+                Path = "";
             }
         }
     }

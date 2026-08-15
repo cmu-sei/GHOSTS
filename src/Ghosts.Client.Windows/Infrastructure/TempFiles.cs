@@ -13,6 +13,13 @@ public class TempFiles
 
     public static void StartTempFileWatcher()
     {
+        if (Program.Configuration != null && Program.Configuration.TempFiles != null &&
+            !Program.Configuration.TempFiles.IsEnabled)
+        {
+            _log.Trace("Temp file cleanup disabled, continuing.");
+            return;
+        }
+
         try
         {
             var t = new Thread(TempFileWatcher)
