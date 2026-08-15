@@ -46,6 +46,9 @@
     "ManageProcesses": true,
     "NagScreenResolver": false
   },
+  "TempFiles": {
+    "IsEnabled": false
+  },
   "HealthIsEnabled": false,
   "HandlersIsEnabled": true,
   "DisableStartup": false,
