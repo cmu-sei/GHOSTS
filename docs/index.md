@@ -43,6 +43,8 @@ Since its inception, GHOSTS has expanded to include features like:
 
 These features, initially separate, have now been fully integrated into the GHOSTS framework.
 
+Ten years of that work is collected in the report [_A Decade of GHOSTS in the Machine: From Cyber Range Realism to Cognitive Mission Rehearsal_](https://www.sei.cmu.edu/library/a-decade-of-ghosts-in-the-machine-from-cyber-range-realism-to-cognitive-mission-rehearsal/), which traces the framework's growth from host-based activity generation into a platform for modeling human, organizational, and machine behavior across the cyber, social, and cognitive layers. It also describes the principle that guides the project — **sufficient realism**: GHOSTS does not attempt to perfectly replicate human behavior, but to generate believable activity at a fidelity appropriate to training, experimentation, assessment, and mission rehearsal.[^3]
+
 ## :material-bug: Reporting Bugs
 
 Found a bug? Please report it through the [GHOSTS issue tracker](https://github.com/cmu-sei/ghosts/issues). Include detailed steps for reproducing the issue and any relevant error messages.
@@ -60,3 +62,4 @@ Copyright 2018 Carnegie Mellon University. See the [LICENSE.md](https://github.c
 
 [^1]: This framework is built on earlier work from SEI’s technical report [_R-EACTR: A Framework for Designing Realistic Cyber Warfare Exercises_](https://resources.sei.cmu.edu/library/asset-view.cfm?assetid=505224), which outlines the principles behind realistic cyberwarfare simulations.
 [^2]: A [GHOSTS video presentation](https://resources.sei.cmu.edu/library/asset-view.cfm?assetid=735300) from FloCon 2021 provides a general overview of the framework.
+[^3]: Updyke, D., Yarger, J., & Podnar, T. (2026). _A Decade of GHOSTS in the Machine: From Cyber Range Realism to Cognitive Mission Rehearsal_. Software Engineering Institute, Carnegie Mellon University. [https://doi.org/10.1184/R1/32983628](https://doi.org/10.1184/R1/32983628). The report also documents the engineering lessons of maintaining GHOSTS as open source research software — modularity, dependency management, documentation, observability, sensible defaults, and shared ownership.
