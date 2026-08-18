@@ -2088,94 +2088,94 @@
 <h1 id="outlook-configuration">Outlook Configuration<a class="headerlink" href="#outlook-configuration" title="Permanent link">&para;</a></h1>
 <p>The sample configuration below is also available in the [GHOSTS GitHub repository](<a href="https://github.com/cmu-sei/GHOSTS/blob/master/src/Ghosts.Client.Windows/Sample%20Timelines/Outlook.json">https://github.com/cmu-sei/GHOSTS/blob/master/src/Ghosts.Client.Windows/Sample%20Timelines/Outlook.json</a></p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;TimeLineHandlers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="nt">"TimeLineHandlers"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">        </span><span class="p">{</span>
-<span class="w">            </span><span class="nt">&quot;HandlerType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Outlook&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">&quot;Initial&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">&quot;UtcTimeOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;00:00:00&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">&quot;UtcTimeOff&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;24:00:00&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">&quot;Loop&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;True&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">&quot;TimeLineEvents&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="nt">"HandlerType"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Outlook"</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">"Initial"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">"UtcTimeOn"</span><span class="p">:</span><span class="w"> </span><span class="s2">"00:00:00"</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">"UtcTimeOff"</span><span class="p">:</span><span class="w"> </span><span class="s2">"24:00:00"</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">"Loop"</span><span class="p">:</span><span class="w"> </span><span class="s2">"True"</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">"TimeLineEvents"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">                </span><span class="p">{</span>
-<span class="w">                    </span><span class="nt">&quot;Command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;create&quot;</span><span class="p">,</span>
-<span class="w">                    </span><span class="nt">&quot;CommandArgs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">                        </span><span class="s2">&quot;CurrentUser&quot;</span><span class="p">,</span>
-<span class="w">                        </span><span class="s2">&quot;Random|Other:string ToEmailAddress - comma separate multiples&quot;</span><span class="p">,</span>
-<span class="w">                        </span><span class="s2">&quot;Random|Other:string CcEmailAddress - comma separate multiples&quot;</span><span class="p">,</span>
-<span class="w">                        </span><span class="s2">&quot;Random|Other:string BccEmailAddress - comma separate multiples&quot;</span><span class="p">,</span>
-<span class="w">                        </span><span class="s2">&quot;Random|Other:string Subject&quot;</span><span class="p">,</span>
-<span class="w">                        </span><span class="s2">&quot;Random|Other:string Body&quot;</span><span class="p">,</span>
-<span class="w">                        </span><span class="s2">&quot;PlainText|RTF|HTML enum BodyType&quot;</span><span class="p">,</span>
-<span class="w">                        </span><span class="s2">&quot;string Attachments - comma separate multiples&quot;</span>
+<span class="w">                    </span><span class="nt">"Command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"create"</span><span class="p">,</span>
+<span class="w">                    </span><span class="nt">"CommandArgs"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                        </span><span class="s2">"CurrentUser"</span><span class="p">,</span>
+<span class="w">                        </span><span class="s2">"Random|Other:string ToEmailAddress - comma separate multiples"</span><span class="p">,</span>
+<span class="w">                        </span><span class="s2">"Random|Other:string CcEmailAddress - comma separate multiples"</span><span class="p">,</span>
+<span class="w">                        </span><span class="s2">"Random|Other:string BccEmailAddress - comma separate multiples"</span><span class="p">,</span>
+<span class="w">                        </span><span class="s2">"Random|Other:string Subject"</span><span class="p">,</span>
+<span class="w">                        </span><span class="s2">"Random|Other:string Body"</span><span class="p">,</span>
+<span class="w">                        </span><span class="s2">"PlainText|RTF|HTML enum BodyType"</span><span class="p">,</span>
+<span class="w">                        </span><span class="s2">"string Attachments - comma separate multiples"</span>
 <span class="w">                    </span><span class="p">],</span>
-<span class="w">                    </span><span class="nt">&quot;DelayAfter&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">900000</span><span class="p">,</span>
-<span class="w">                    </span><span class="nt">&quot;DelayBefore&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">                    </span><span class="nt">"DelayAfter"</span><span class="p">:</span><span class="w"> </span><span class="mi">900000</span><span class="p">,</span>
+<span class="w">                    </span><span class="nt">"DelayBefore"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
 <span class="w">                </span><span class="p">},</span>
 <span class="w">              </span><span class="p">{</span>
-<span class="w">                </span><span class="nt">&quot;Command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;reply&quot;</span><span class="p">,</span>
-<span class="w">                </span><span class="nt">&quot;CommandArgs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">                  </span><span class="s2">&quot;CurrentUser&quot;</span><span class="p">,</span>
-<span class="w">                  </span><span class="s2">&quot;All - reply to all&quot;</span><span class="p">,</span>
-<span class="w">                  </span><span class="s2">&quot;All&quot;</span><span class="p">,</span>
-<span class="w">                  </span><span class="s2">&quot;All&quot;</span><span class="p">,</span>
-<span class="w">                  </span><span class="s2">&quot;Parent - format is &#39;RE: &lt;original message/&gt;&#39;&quot;</span><span class="p">,</span>
-<span class="w">                  </span><span class="s2">&quot;Random+Parent - format is reply then original message&quot;</span><span class="p">,</span>
-<span class="w">                  </span><span class="s2">&quot;Parent - format of original message&quot;</span><span class="p">,</span>
-<span class="w">                  </span><span class="s2">&quot;&quot;</span>
+<span class="w">                </span><span class="nt">"Command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"reply"</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">"CommandArgs"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                  </span><span class="s2">"CurrentUser"</span><span class="p">,</span>
+<span class="w">                  </span><span class="s2">"All - reply to all"</span><span class="p">,</span>
+<span class="w">                  </span><span class="s2">"All"</span><span class="p">,</span>
+<span class="w">                  </span><span class="s2">"All"</span><span class="p">,</span>
+<span class="w">                  </span><span class="s2">"Parent - format is 'RE: &lt;original message/&gt;'"</span><span class="p">,</span>
+<span class="w">                  </span><span class="s2">"Random+Parent - format is reply then original message"</span><span class="p">,</span>
+<span class="w">                  </span><span class="s2">"Parent - format of original message"</span><span class="p">,</span>
+<span class="w">                  </span><span class="s2">""</span>
 <span class="w">                </span><span class="p">],</span>
-<span class="w">                </span><span class="nt">&quot;DelayAfter&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">900000</span><span class="p">,</span>
-<span class="w">                </span><span class="nt">&quot;DelayBefore&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">                </span><span class="nt">"DelayAfter"</span><span class="p">:</span><span class="w"> </span><span class="mi">900000</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">"DelayBefore"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
 <span class="w">              </span><span class="p">},</span>
 <span class="w">              </span><span class="p">{</span>
-<span class="w">                </span><span class="nt">&quot;Command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;clickrandomlink&quot;</span><span class="p">,</span>
-<span class="w">                </span><span class="nt">&quot;CommandArgs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
-<span class="w">                </span><span class="nt">&quot;DelayAfter&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">900000</span><span class="p">,</span>
-<span class="w">                </span><span class="nt">&quot;DelayBefore&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">                </span><span class="nt">"Command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"clickrandomlink"</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">"CommandArgs"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">                </span><span class="nt">"DelayAfter"</span><span class="p">:</span><span class="w"> </span><span class="mi">900000</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">"DelayBefore"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
 <span class="w">              </span><span class="p">}</span>
 <span class="w">            </span><span class="p">]</span>
 <span class="w">        </span><span class="p">},</span>
 <span class="w">        </span><span class="p">{</span>
-<span class="w">            </span><span class="nt">&quot;HandlerType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Outlook&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">&quot;Initial&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">&quot;UtcTimeOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;00:00:00&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">&quot;UtcTimeOff&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;24:00:00&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">&quot;Loop&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;True&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">&quot;TimeLineEvents&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="nt">"HandlerType"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Outlook"</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">"Initial"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">"UtcTimeOn"</span><span class="p">:</span><span class="w"> </span><span class="s2">"00:00:00"</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">"UtcTimeOff"</span><span class="p">:</span><span class="w"> </span><span class="s2">"24:00:00"</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">"Loop"</span><span class="p">:</span><span class="w"> </span><span class="s2">"True"</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">"TimeLineEvents"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">                </span><span class="p">{</span>
-<span class="w">                    </span><span class="nt">&quot;Command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;create&quot;</span><span class="p">,</span>
-<span class="w">                    </span><span class="nt">&quot;CommandArgs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">                        </span><span class="s2">&quot;CurrentUser&quot;</span><span class="p">,</span>
-<span class="w">                        </span><span class="s2">&quot;random&quot;</span><span class="p">,</span>
-<span class="w">                        </span><span class="s2">&quot;random&quot;</span><span class="p">,</span>
-<span class="w">                        </span><span class="s2">&quot;random&quot;</span><span class="p">,</span>
-<span class="w">                        </span><span class="s2">&quot;Random&quot;</span><span class="p">,</span>
-<span class="w">                        </span><span class="s2">&quot;Random&quot;</span><span class="p">,</span>
-<span class="w">                        </span><span class="s2">&quot;PlainText&quot;</span><span class="p">,</span>
-<span class="w">                        </span><span class="s2">&quot;&quot;</span>
+<span class="w">                    </span><span class="nt">"Command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"create"</span><span class="p">,</span>
+<span class="w">                    </span><span class="nt">"CommandArgs"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                        </span><span class="s2">"CurrentUser"</span><span class="p">,</span>
+<span class="w">                        </span><span class="s2">"random"</span><span class="p">,</span>
+<span class="w">                        </span><span class="s2">"random"</span><span class="p">,</span>
+<span class="w">                        </span><span class="s2">"random"</span><span class="p">,</span>
+<span class="w">                        </span><span class="s2">"Random"</span><span class="p">,</span>
+<span class="w">                        </span><span class="s2">"Random"</span><span class="p">,</span>
+<span class="w">                        </span><span class="s2">"PlainText"</span><span class="p">,</span>
+<span class="w">                        </span><span class="s2">""</span>
 <span class="w">                    </span><span class="p">],</span>
-<span class="w">                    </span><span class="nt">&quot;DelayAfter&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">900000</span><span class="p">,</span>
-<span class="w">                    </span><span class="nt">&quot;DelayBefore&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">                    </span><span class="nt">"DelayAfter"</span><span class="p">:</span><span class="w"> </span><span class="mi">900000</span><span class="p">,</span>
+<span class="w">                    </span><span class="nt">"DelayBefore"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
 <span class="w">                </span><span class="p">},</span>
 <span class="w">              </span><span class="p">{</span>
-<span class="w">                </span><span class="nt">&quot;Command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;reply&quot;</span><span class="p">,</span>
-<span class="w">                </span><span class="nt">&quot;CommandArgs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">                  </span><span class="s2">&quot;CurrentUser&quot;</span><span class="p">,</span>
-<span class="w">                  </span><span class="s2">&quot;All&quot;</span><span class="p">,</span>
-<span class="w">                  </span><span class="s2">&quot;All&quot;</span><span class="p">,</span>
-<span class="w">                  </span><span class="s2">&quot;All&quot;</span><span class="p">,</span>
-<span class="w">                  </span><span class="s2">&quot;Parent&quot;</span><span class="p">,</span>
-<span class="w">                  </span><span class="s2">&quot;Parent+Random&quot;</span><span class="p">,</span>
-<span class="w">                  </span><span class="s2">&quot;Parent&quot;</span><span class="p">,</span>
-<span class="w">                  </span><span class="s2">&quot;&quot;</span>
+<span class="w">                </span><span class="nt">"Command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"reply"</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">"CommandArgs"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                  </span><span class="s2">"CurrentUser"</span><span class="p">,</span>
+<span class="w">                  </span><span class="s2">"All"</span><span class="p">,</span>
+<span class="w">                  </span><span class="s2">"All"</span><span class="p">,</span>
+<span class="w">                  </span><span class="s2">"All"</span><span class="p">,</span>
+<span class="w">                  </span><span class="s2">"Parent"</span><span class="p">,</span>
+<span class="w">                  </span><span class="s2">"Parent+Random"</span><span class="p">,</span>
+<span class="w">                  </span><span class="s2">"Parent"</span><span class="p">,</span>
+<span class="w">                  </span><span class="s2">""</span>
 <span class="w">                </span><span class="p">],</span>
-<span class="w">                </span><span class="nt">&quot;DelayAfter&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">900000</span><span class="p">,</span>
-<span class="w">                </span><span class="nt">&quot;DelayBefore&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">                </span><span class="nt">"DelayAfter"</span><span class="p">:</span><span class="w"> </span><span class="mi">900000</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">"DelayBefore"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
 <span class="w">              </span><span class="p">},</span>
 <span class="w">              </span><span class="p">{</span>
-<span class="w">                </span><span class="nt">&quot;Command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;clickrandomlink&quot;</span><span class="p">,</span>
-<span class="w">                </span><span class="nt">&quot;CommandArgs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
-<span class="w">                </span><span class="nt">&quot;DelayAfter&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">900000</span><span class="p">,</span>
-<span class="w">                </span><span class="nt">&quot;DelayBefore&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">                </span><span class="nt">"Command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"clickrandomlink"</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">"CommandArgs"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">                </span><span class="nt">"DelayAfter"</span><span class="p">:</span><span class="w"> </span><span class="mi">900000</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">"DelayBefore"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
 <span class="w">              </span><span class="p">}</span>
 <span class="w">            </span><span class="p">]</span>
 <span class="w">        </span><span class="p">}</span>

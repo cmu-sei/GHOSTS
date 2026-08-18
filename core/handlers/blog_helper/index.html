@@ -2108,54 +2108,54 @@
 <p>Under drupal, it assumed that all users have the capabilty to delete all blogs, even other user's blogs.</p>
 <p>Default content in config directory is blog-content.csv, default reply content is blog-reply.csv</p>
 <p>This content can be overridden in <code>application.{json|yaml}</code> by the 'BlogContent', 'BlogReply' fields.</p>
-<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nt">&quot;Content&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;EmailContent&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;EmailReply&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;EmailDomain&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;EmailOutside&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;BlogContent&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;BlogReply&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;FileNames&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;Dictionary&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nt">"Content"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"EmailContent"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"EmailReply"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"EmailDomain"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"EmailOutside"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"BlogContent"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"BlogReply"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"FileNames"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"Dictionary"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span>
 <span class="w">    </span><span class="p">},</span>
 </code></pre></div>
 <p>The timeline configuration looks like this:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;Status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Run&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;TimeLineHandlers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="nt">"Status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Run"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"TimeLineHandlers"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;HandlerType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;BrowserChrome&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;HandlerArgs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;isheadless&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;false&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;blockimages&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;true&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;blockstyles&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;true&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;blockflash&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;true&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;blockscripts&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;true&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;stickiness&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">75</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;stickiness-depth-min&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;stickiness-depth-max&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10000</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;incognito&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;true&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;blog-credentials-file&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;c:\\ghosts_data\\blog_creds.json&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;blog-deletion-probability&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;blog-upload-probability&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;blog-browse-probability&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;blog-reply-probability&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;blog-version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;drupal&quot;</span>
+<span class="w">      </span><span class="nt">"HandlerType"</span><span class="p">:</span><span class="w"> </span><span class="s2">"BrowserChrome"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"HandlerArgs"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">"isheadless"</span><span class="p">:</span><span class="w"> </span><span class="s2">"false"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"blockimages"</span><span class="p">:</span><span class="w"> </span><span class="s2">"true"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"blockstyles"</span><span class="p">:</span><span class="w"> </span><span class="s2">"true"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"blockflash"</span><span class="p">:</span><span class="w"> </span><span class="s2">"true"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"blockscripts"</span><span class="p">:</span><span class="w"> </span><span class="s2">"true"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"stickiness"</span><span class="p">:</span><span class="w"> </span><span class="mi">75</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"stickiness-depth-min"</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"stickiness-depth-max"</span><span class="p">:</span><span class="w"> </span><span class="mi">10000</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"incognito"</span><span class="p">:</span><span class="w"> </span><span class="s2">"true"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"blog-credentials-file"</span><span class="p">:</span><span class="w"> </span><span class="s2">"c:\\ghosts_data\\blog_creds.json"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"blog-deletion-probability"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"blog-upload-probability"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"blog-browse-probability"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"blog-reply-probability"</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"blog-version"</span><span class="p">:</span><span class="w"> </span><span class="s2">"drupal"</span>
 
 <span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;Initial&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;about:blank&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;UtcTimeOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;00:00:00&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;UtcTimeOff&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;24:00:00&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;Loop&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;True&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;TimeLineEvents&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="nt">"Initial"</span><span class="p">:</span><span class="w"> </span><span class="s2">"about:blank"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"UtcTimeOn"</span><span class="p">:</span><span class="w"> </span><span class="s2">"00:00:00"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"UtcTimeOff"</span><span class="p">:</span><span class="w"> </span><span class="s2">"24:00:00"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"Loop"</span><span class="p">:</span><span class="w"> </span><span class="s2">"True"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"TimeLineEvents"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">        </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;Command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;blog&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;CommandArgs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">            </span><span class="s2">&quot;site:http://www.netexhsv.com:8080&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="s2">&quot;credentialKey:credkey1&quot;</span>
+<span class="w">          </span><span class="nt">"Command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"blog"</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"CommandArgs"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="s2">"site:http://www.netexhsv.com:8080"</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">"credentialKey:credkey1"</span>
 <span class="w">          </span><span class="p">],</span>
-<span class="w">          </span><span class="nt">&quot;DelayAfter&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10000</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;DelayBefore&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">          </span><span class="nt">"DelayAfter"</span><span class="p">:</span><span class="w"> </span><span class="mi">10000</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"DelayBefore"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
 <span class="w">        </span><span class="p">}</span>
 <span class="w">      </span><span class="p">]</span>
 <span class="w">    </span><span class="p">}</span>
@@ -2164,49 +2164,49 @@
 </code></pre></div>
 <p>Instead of using an external credentials file specified by the <code>HandlerArgs[blog-credentials-file]</code> key, the credentials can be placed directly in the timeline using the <code>HandlerArgs[blog-credentials]</code> key as shown below:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;Status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Run&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;TimeLineHandlers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="nt">"Status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Run"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"TimeLineHandlers"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;HandlerType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;BrowserChrome&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;HandlerArgs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;isheadless&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;false&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;blockimages&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;true&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;blockstyles&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;true&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;blockflash&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;true&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;blockscripts&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;true&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;stickiness&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">75</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;stickiness-depth-min&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;stickiness-depth-max&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10000</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;incognito&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;true&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;blog-credentials&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;Version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1.0&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;Data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="nt">&quot;credkey1&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;username&quot;</span><span class="p">:</span><span class="s2">&quot;user1&quot;</span><span class="p">,</span><span class="nt">&quot;password&quot;</span><span class="p">:</span><span class="s2">&quot;pw1base64&quot;</span><span class="p">},</span>
-<span class="w">            </span><span class="nt">&quot;credkey2&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;username&quot;</span><span class="p">:</span><span class="s2">&quot;user2&quot;</span><span class="p">,</span><span class="nt">&quot;password&quot;</span><span class="p">:</span><span class="s2">&quot;pw2base64&quot;</span><span class="p">},</span>
+<span class="w">      </span><span class="nt">"HandlerType"</span><span class="p">:</span><span class="w"> </span><span class="s2">"BrowserChrome"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"HandlerArgs"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">"isheadless"</span><span class="p">:</span><span class="w"> </span><span class="s2">"false"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"blockimages"</span><span class="p">:</span><span class="w"> </span><span class="s2">"true"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"blockstyles"</span><span class="p">:</span><span class="w"> </span><span class="s2">"true"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"blockflash"</span><span class="p">:</span><span class="w"> </span><span class="s2">"true"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"blockscripts"</span><span class="p">:</span><span class="w"> </span><span class="s2">"true"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"stickiness"</span><span class="p">:</span><span class="w"> </span><span class="mi">75</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"stickiness-depth-min"</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"stickiness-depth-max"</span><span class="p">:</span><span class="w"> </span><span class="mi">10000</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"incognito"</span><span class="p">:</span><span class="w"> </span><span class="s2">"true"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"blog-credentials"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">"Version"</span><span class="p">:</span><span class="w"> </span><span class="s2">"1.0"</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"Data"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">"credkey1"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"username"</span><span class="p">:</span><span class="s2">"user1"</span><span class="p">,</span><span class="nt">"password"</span><span class="p">:</span><span class="s2">"pw1base64"</span><span class="p">},</span>
+<span class="w">            </span><span class="nt">"credkey2"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"username"</span><span class="p">:</span><span class="s2">"user2"</span><span class="p">,</span><span class="nt">"password"</span><span class="p">:</span><span class="s2">"pw2base64"</span><span class="p">},</span>
 <span class="w">              </span><span class="err">....</span>
-<span class="w">             </span><span class="nt">&quot;credkeyN&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;username&quot;</span><span class="p">:</span><span class="s2">&quot;userN&quot;</span><span class="p">,</span><span class="nt">&quot;password&quot;</span><span class="p">:</span><span class="s2">&quot;pwNbase64&quot;</span><span class="p">},</span>
+<span class="w">             </span><span class="nt">"credkeyN"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"username"</span><span class="p">:</span><span class="s2">"userN"</span><span class="p">,</span><span class="nt">"password"</span><span class="p">:</span><span class="s2">"pwNbase64"</span><span class="p">},</span>
 <span class="w">          </span><span class="p">}</span>
 <span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="nt">&quot;blog-deletion-probability&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;blog-upload-probability&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;blog-browse-probability&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;blog-reply-probability&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;blog-version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;drupal&quot;</span>
+<span class="w">        </span><span class="nt">"blog-deletion-probability"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"blog-upload-probability"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"blog-browse-probability"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"blog-reply-probability"</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"blog-version"</span><span class="p">:</span><span class="w"> </span><span class="s2">"drupal"</span>
 
 <span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;Initial&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;about:blank&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;UtcTimeOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;00:00:00&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;UtcTimeOff&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;24:00:00&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;Loop&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;True&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;TimeLineEvents&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="nt">"Initial"</span><span class="p">:</span><span class="w"> </span><span class="s2">"about:blank"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"UtcTimeOn"</span><span class="p">:</span><span class="w"> </span><span class="s2">"00:00:00"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"UtcTimeOff"</span><span class="p">:</span><span class="w"> </span><span class="s2">"24:00:00"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"Loop"</span><span class="p">:</span><span class="w"> </span><span class="s2">"True"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"TimeLineEvents"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">        </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;Command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;blog&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;CommandArgs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">            </span><span class="s2">&quot;site:http://www.netexhsv.com:8080&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="s2">&quot;credentialKey:credkey1&quot;</span>
+<span class="w">          </span><span class="nt">"Command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"blog"</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"CommandArgs"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="s2">"site:http://www.netexhsv.com:8080"</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">"credentialKey:credkey1"</span>
 <span class="w">          </span><span class="p">],</span>
-<span class="w">          </span><span class="nt">&quot;DelayAfter&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10000</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;DelayBefore&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">          </span><span class="nt">"DelayAfter"</span><span class="p">:</span><span class="w"> </span><span class="mi">10000</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"DelayBefore"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
 <span class="w">        </span><span class="p">}</span>
 <span class="w">      </span><span class="p">]</span>
 <span class="w">    </span><span class="p">}</span>

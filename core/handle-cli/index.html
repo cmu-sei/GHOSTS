@@ -2232,29 +2232,29 @@
 <p>The values map directly onto a single timeline event: <code>--command</code> becomes the event's <code>Command</code>, each <code>--arg</code> is appended to <code>CommandArgs</code>, and each <code>--handler-arg</code> is added to the handler's <code>HandlerArgs</code>. The action is run once (<code>Loop</code> is <code>false</code>), and working-hours gating is disabled so it runs immediately.</p>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
 <p>Run a shell command:</p>
-<div class="highlight"><pre><span></span><code>dotnet<span class="w"> </span>ghosts.client.universal.dll<span class="w"> </span>--handle<span class="w"> </span>bash<span class="w"> </span>--command<span class="w"> </span><span class="s2">&quot;whoami&quot;</span>
+<div class="highlight"><pre><span></span><code>dotnet<span class="w"> </span>ghosts.client.universal.dll<span class="w"> </span>--handle<span class="w"> </span>bash<span class="w"> </span>--command<span class="w"> </span><span class="s2">"whoami"</span>
 </code></pre></div>
 <p>Browse a URL with Firefox (headless — see <a href="#browsers">below</a>):</p>
-<div class="highlight"><pre><span></span><code>dotnet<span class="w"> </span>ghosts.client.universal.dll<span class="w"> </span>--handle<span class="w"> </span>browserfirefox<span class="w"> </span>--command<span class="w"> </span>browse<span class="w"> </span>--arg<span class="w"> </span><span class="s2">&quot;https://example.com&quot;</span>
+<div class="highlight"><pre><span></span><code>dotnet<span class="w"> </span>ghosts.client.universal.dll<span class="w"> </span>--handle<span class="w"> </span>browserfirefox<span class="w"> </span>--command<span class="w"> </span>browse<span class="w"> </span>--arg<span class="w"> </span><span class="s2">"https://example.com"</span>
 </code></pre></div>
 <p>Pass multiple arguments and a handler option:</p>
-<div class="highlight"><pre><span></span><code>dotnet<span class="w"> </span>ghosts.client.universal.dll<span class="w"> </span>--handle<span class="w"> </span>bash<span class="w"> </span>--command<span class="w"> </span><span class="s2">&quot;echo one&quot;</span><span class="w"> </span>--arg<span class="w"> </span><span class="s2">&quot;echo two&quot;</span><span class="w"> </span>--handler-arg<span class="w"> </span>execution-probability<span class="o">=</span><span class="m">100</span>
+<div class="highlight"><pre><span></span><code>dotnet<span class="w"> </span>ghosts.client.universal.dll<span class="w"> </span>--handle<span class="w"> </span>bash<span class="w"> </span>--command<span class="w"> </span><span class="s2">"echo one"</span><span class="w"> </span>--arg<span class="w"> </span><span class="s2">"echo two"</span><span class="w"> </span>--handler-arg<span class="w"> </span>execution-probability<span class="o">=</span><span class="m">100</span>
 </code></pre></div>
 <h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">&para;</a></h2>
 <p>By default, each result is printed to stdout in human-readable form, with the banner and logs alongside it.</p>
 <p>With <code>--json</code>, stdout carries <strong>only</strong> the JSON result — the banner and all console logging are redirected to stderr — so the output can be consumed by another program:</p>
-<div class="highlight"><pre><span></span><code>dotnet<span class="w"> </span>ghosts.client.universal.dll<span class="w"> </span>--handle<span class="w"> </span>bash<span class="w"> </span>--command<span class="w"> </span><span class="s2">&quot;echo hello&quot;</span><span class="w"> </span>--json<span class="w"> </span><span class="m">2</span>&gt;/dev/null
+<div class="highlight"><pre><span></span><code>dotnet<span class="w"> </span>ghosts.client.universal.dll<span class="w"> </span>--handle<span class="w"> </span>bash<span class="w"> </span>--command<span class="w"> </span><span class="s2">"echo hello"</span><span class="w"> </span>--json<span class="w"> </span><span class="m">2</span>&gt;/dev/null
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;handler&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Bash&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;echo hello&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;success&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;results&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="nt">"handler"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Bash"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"echo hello"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"success"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"error"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"results"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;Handler&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Command&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;Command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;echo hello&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;Result&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;hello\n&quot;</span>
+<span class="w">      </span><span class="nt">"Handler"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Command"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"Command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"echo hello"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"Result"</span><span class="p">:</span><span class="w"> </span><span class="s2">"hello\n"</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">]</span>
 <span class="p">}</span>

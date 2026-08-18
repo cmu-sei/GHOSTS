@@ -2103,8 +2103,8 @@ For this to work, the target host needs to be configured to allow WMI. The domai
 If you wish to use some other user, then a simple approach is to add that user to the <code>Domain Admins</code> group on the domain controller.
 This has the requirement that the querying user be in the same domain as the target host.</p>
 <p>Also, on the target host for WMI, modify the firewall with:
-<div class="highlight"><pre><span></span><code>netsh advfirewall firewall set rule group=&quot;windows management instrumentation (wmi)&quot; new enable=yes
-netsh advfirewall firewall set rule group=&quot;RemoteAdministration&quot; new enable=yes
+<div class="highlight"><pre><span></span><code>netsh advfirewall firewall set rule group="windows management instrumentation (wmi)" new enable=yes
+netsh advfirewall firewall set rule group="RemoteAdministration" new enable=yes
 </code></pre></div></p>
 <p>You may also need to set trusted hosts of the VM running GHOSTS to include the IPs of any of the hosts being interrogated by WMI.</p>
 <p>You can print the Trusted hosts if the current host by executing in Powershell:</p>
@@ -2116,28 +2116,28 @@ netsh advfirewall firewall set rule group=&quot;RemoteAdministration&quot; new e
 <li>winrm s winrm/config/client '@{TrustedHosts="*"}'</li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;Status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Run&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;TimeLineHandlers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="nt">"Status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Run"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"TimeLineHandlers"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;HandlerType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Wmi&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;HandlerArgs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;TimeBetweenCommandsMax&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5000</span><span class="p">,</span><span class="w"> </span><span class="c1">//max,min between individual WMI commands</span>
-<span class="w">        </span><span class="nt">&quot;TimeBetweenCommandsMin&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1000</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;CredentialsFile&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;path to credentials&gt;&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">//required, file path to a JSON file containing the WMI credentials</span>
-<span class="w">        </span><span class="nt">&quot;delay-jitter&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="c1">//optional, default =0, range 0 to 50, if specified, DelayAfter varied by delay-%jitter*delay to delay+%jitter*delay</span>
+<span class="w">      </span><span class="nt">"HandlerType"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Wmi"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"HandlerArgs"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">"TimeBetweenCommandsMax"</span><span class="p">:</span><span class="w"> </span><span class="mi">5000</span><span class="p">,</span><span class="w"> </span><span class="c1">//max,min between individual WMI commands</span>
+<span class="w">        </span><span class="nt">"TimeBetweenCommandsMin"</span><span class="p">:</span><span class="w"> </span><span class="mi">1000</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"CredentialsFile"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;path to credentials&gt;"</span><span class="p">,</span><span class="w"> </span><span class="c1">//required, file path to a JSON file containing the WMI credentials</span>
+<span class="w">        </span><span class="nt">"delay-jitter"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="c1">//optional, default =0, range 0 to 50, if specified, DelayAfter varied by delay-%jitter*delay to delay+%jitter*delay</span>
 <span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;Initial&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;UtcTimeOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;00:00:00&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;UtcTimeOff&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;24:00:00&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;Loop&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;True&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;TimeLineEvents&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="nt">"Initial"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"UtcTimeOn"</span><span class="p">:</span><span class="w"> </span><span class="s2">"00:00:00"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"UtcTimeOff"</span><span class="p">:</span><span class="w"> </span><span class="s2">"24:00:00"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"Loop"</span><span class="p">:</span><span class="w"> </span><span class="s2">"True"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"TimeLineEvents"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">        </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;Command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;random&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;CommandArgs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">            </span><span class="s2">&quot;&lt;someIp&gt;|&lt;credKey&gt;|&lt;a_cmd&gt;;&lt;a_cmd&gt;;&lt;a_cmd&gt;....;&lt;a_cmd&gt;&quot;</span>
+<span class="w">          </span><span class="nt">"Command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"random"</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"CommandArgs"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="s2">"&lt;someIp&gt;|&lt;credKey&gt;|&lt;a_cmd&gt;;&lt;a_cmd&gt;;&lt;a_cmd&gt;....;&lt;a_cmd&gt;"</span>
 <span class="w">          </span><span class="p">],</span>
-<span class="w">          </span><span class="nt">&quot;DelayAfter&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">20000</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;DelayBefore&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">          </span><span class="nt">"DelayAfter"</span><span class="p">:</span><span class="w"> </span><span class="mi">20000</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"DelayBefore"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
 <span class="w">        </span><span class="p">}</span>
 <span class="w">      </span><span class="p">]</span>
 <span class="w">    </span><span class="p">}</span>

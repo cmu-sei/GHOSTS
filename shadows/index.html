@@ -2143,33 +2143,33 @@ docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </sp
 <h2 id="step-4-configuring-the-docker-compose-file">Step 4 &mdash; Configuring the Docker Compose File<a class="headerlink" href="#step-4-configuring-the-docker-compose-file" title="Permanent link">&para;</a></h2>
 <p>Rather than building the containers individually, you can add them to a docker compose file to run everything you need for simulations with GHOSTS all at once.</p>
 <p>You can create a new docker-compose file for starting just these two containers using the following configuration, or you can add the two service configurations to the existing docker-compose.yml file you downloaded as part of <a href="./installing-the-api.md">installing the GHOSTS API</a>.</p>
-<div class="highlight"><pre><span></span><code># Filename: docker-compose.yml
-services:
-    ollama:
-        image: ollama/ollama:latest
-        container_name: ollama
-        ports:
-            - &quot;11434:11434&quot;
-        command: serve
-        networks:
-            - ghosts-network
+<div class="highlight"><pre><span></span><code><span class="c1"># Filename: docker-compose.yml</span>
+<span class="nt">services</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">ollama</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ollama/ollama:latest</span>
+<span class="w">        </span><span class="nt">container_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ollama</span>
+<span class="w">        </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"11434:11434"</span>
+<span class="w">        </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">serve</span>
+<span class="w">        </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghosts-network</span>
 
-    shadows:
-        image: dustinupdyke/ghosts-shadows
-        container_name: shadows
-        ports:
-            - &quot;5900:5900&quot;
-            - &quot;7860:7860&quot;
-        environment:
-            - GHOSTS_OLLAMA_URL=http://ollama:11434
-        networks:
-            - ghosts-network
-        depends_on:
-            - ollama
+<span class="w">    </span><span class="nt">shadows</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dustinupdyke/ghosts-shadows</span>
+<span class="w">        </span><span class="nt">container_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">shadows</span>
+<span class="w">        </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"5900:5900"</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"7860:7860"</span>
+<span class="w">        </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GHOSTS_OLLAMA_URL=http://ollama:11434</span>
+<span class="w">        </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghosts-network</span>
+<span class="w">        </span><span class="nt">depends_on</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ollama</span>
 
-networks:
-    ghosts-network:
-        driver: bridge
+<span class="nt">networks</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">ghosts-network</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bridge</span>
 </code></pre></div>
 <p>Note, you will need to delete the existing containers you created in steps 1 and 2 in order to use the same names with docker-compose.</p>
 <div class="highlight"><pre><span></span><code>docker rm ollama

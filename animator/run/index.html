@@ -2170,91 +2170,91 @@
 <li>The <code>appsettings.json</code> file points to Animator-specific configuration, which by default is in <code>./config/config.json</code>:</li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="w">  </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;ApplicationDatabaseSettings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;ConnectionString&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;mongodb://ghosts-mongo:32770&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;DatabaseName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AnimatorDb&quot;</span>
+<span class="w">    </span><span class="nt">"ApplicationDatabaseSettings"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"ConnectionString"</span><span class="p">:</span><span class="w"> </span><span class="s2">"mongodb://ghosts-mongo:32770"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"DatabaseName"</span><span class="p">:</span><span class="w"> </span><span class="s2">"AnimatorDb"</span>
 <span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">&quot;ApplicationSettings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;GhostsApiUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://localhost:52388/&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">//the root url of the Ghosts API</span>
-<span class="w">      </span><span class="nt">&quot;Proxy&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;Animations&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;IsEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="c1">//if false, then all animations are disbled</span>
-<span class="w">        </span><span class="nt">&quot;SocialGraph&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;IsEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="c1">//if false, just this animation is disabled</span>
-<span class="w">          </span><span class="nt">&quot;IsMultiThreaded&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="c1">//helpful to set to false for debugging purposes</span>
-<span class="w">          </span><span class="nt">&quot;IsInteracting&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="c1">//means new agent interactions are being generated</span>
-<span class="w">          </span><span class="nt">&quot;MaximumSteps&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4000</span><span class="p">,</span><span class="w"> </span><span class="c1">//max steps to execute</span>
-<span class="w">          </span><span class="nt">&quot;TurnLength&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">9000</span><span class="p">,</span><span class="w"> </span><span class="c1">//ms per step</span>
-<span class="w">          </span><span class="nt">&quot;ChanceOfKnowledgeTransfer&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.3</span><span class="p">,</span><span class="w"> </span><span class="c1">//chance that an agent will share knowledge with another agent</span>
-<span class="w">          </span><span class="nt">&quot;Decay&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="nt">&quot;StepsTo&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="c1">//min steps to execute before an agent begins forgetting things</span>
-<span class="w">            </span><span class="nt">&quot;ChanceOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.05</span>
+<span class="w">    </span><span class="nt">"ApplicationSettings"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"GhostsApiUrl"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://localhost:52388/"</span><span class="p">,</span><span class="w"> </span><span class="c1">//the root url of the Ghosts API</span>
+<span class="w">      </span><span class="nt">"Proxy"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"Animations"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">"IsEnabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="c1">//if false, then all animations are disbled</span>
+<span class="w">        </span><span class="nt">"SocialGraph"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">"IsEnabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="c1">//if false, just this animation is disabled</span>
+<span class="w">          </span><span class="nt">"IsMultiThreaded"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="c1">//helpful to set to false for debugging purposes</span>
+<span class="w">          </span><span class="nt">"IsInteracting"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="c1">//means new agent interactions are being generated</span>
+<span class="w">          </span><span class="nt">"MaximumSteps"</span><span class="p">:</span><span class="w"> </span><span class="mi">4000</span><span class="p">,</span><span class="w"> </span><span class="c1">//max steps to execute</span>
+<span class="w">          </span><span class="nt">"TurnLength"</span><span class="p">:</span><span class="w"> </span><span class="mi">9000</span><span class="p">,</span><span class="w"> </span><span class="c1">//ms per step</span>
+<span class="w">          </span><span class="nt">"ChanceOfKnowledgeTransfer"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.3</span><span class="p">,</span><span class="w"> </span><span class="c1">//chance that an agent will share knowledge with another agent</span>
+<span class="w">          </span><span class="nt">"Decay"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">"StepsTo"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="c1">//min steps to execute before an agent begins forgetting things</span>
+<span class="w">            </span><span class="nt">"ChanceOf"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.05</span>
 <span class="w">          </span><span class="p">}</span>
 <span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="nt">&quot;SocialBelief&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;IsEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;IsMultiThreaded&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;IsInteracting&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;MaximumSteps&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">300</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;TurnLength&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">9000</span>
+<span class="w">        </span><span class="nt">"SocialBelief"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">"IsEnabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"IsMultiThreaded"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"IsInteracting"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"MaximumSteps"</span><span class="p">:</span><span class="w"> </span><span class="mi">300</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"TurnLength"</span><span class="p">:</span><span class="w"> </span><span class="mi">9000</span>
 <span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="nt">&quot;SocialSharing&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;IsEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;IsMultiThreaded&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;IsInteracting&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;IsSendingTimelinesToGhostsApi&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;IsSendingTimelinesDirectToSocializer&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;PostUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://localhost:8000&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;MaximumSteps&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;TurnLength&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">9000</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;ContentEngine&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="nt">&quot;Source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ollama&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">&quot;Host&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://localhost:11434&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">&quot;Model&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;chat&quot;</span>
+<span class="w">        </span><span class="nt">"SocialSharing"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">"IsEnabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"IsMultiThreaded"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"IsInteracting"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"IsSendingTimelinesToGhostsApi"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"IsSendingTimelinesDirectToSocializer"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"PostUrl"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://localhost:8000"</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"MaximumSteps"</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"TurnLength"</span><span class="p">:</span><span class="w"> </span><span class="mi">9000</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"ContentEngine"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">"Source"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ollama"</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">"Host"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://localhost:11434"</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">"Model"</span><span class="p">:</span><span class="w"> </span><span class="s2">"chat"</span>
 <span class="w">          </span><span class="p">}</span>
 <span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="nt">&quot;Chat&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;IsEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;IsMultiThreaded&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;IsInteracting&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;MaximumSteps&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">300</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;TurnLength&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">9000</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;IsSendingTimelinesToGhostsApi&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;PostUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://localhost:8065&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;ContentEngine&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="nt">&quot;Source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ollama&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">&quot;Host&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://localhost:11434&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">&quot;Model&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;chat&quot;</span>
+<span class="w">        </span><span class="nt">"Chat"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">"IsEnabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"IsMultiThreaded"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"IsInteracting"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"MaximumSteps"</span><span class="p">:</span><span class="w"> </span><span class="mi">300</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"TurnLength"</span><span class="p">:</span><span class="w"> </span><span class="mi">9000</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"IsSendingTimelinesToGhostsApi"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"PostUrl"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://localhost:8065"</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"ContentEngine"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">"Source"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ollama"</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">"Host"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://localhost:11434"</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">"Model"</span><span class="p">:</span><span class="w"> </span><span class="s2">"chat"</span>
 <span class="w">          </span><span class="p">}</span>
 <span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="nt">&quot;FullAutonomy&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;IsEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;IsMultiThreaded&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;IsInteracting&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;IsSendingTimelinesToGhostsApi&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;MaximumSteps&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10000</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;TurnLength&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">9000</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;ContentEngine&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="nt">&quot;Source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ollama&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">&quot;Host&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://localhost:11434&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">&quot;Model&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;activity&quot;</span>
+<span class="w">        </span><span class="nt">"FullAutonomy"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">"IsEnabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"IsMultiThreaded"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"IsInteracting"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"IsSendingTimelinesToGhostsApi"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"MaximumSteps"</span><span class="p">:</span><span class="w"> </span><span class="mi">10000</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"TurnLength"</span><span class="p">:</span><span class="w"> </span><span class="mi">9000</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"ContentEngine"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">"Source"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ollama"</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">"Host"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://localhost:11434"</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">"Model"</span><span class="p">:</span><span class="w"> </span><span class="s2">"activity"</span>
 <span class="w">          </span><span class="p">}</span>
 <span class="w">        </span><span class="p">}</span>
 <span class="w">      </span><span class="p">}</span>
 <span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">&quot;AllowedHosts&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;*&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;ClientSettings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"AllowedHosts"</span><span class="p">:</span><span class="w"> </span><span class="s2">"*"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"ClientSettings"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">&quot;CorsPolicy&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;Origins&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="s2">&quot;http://localhost:4200&quot;</span>
+<span class="w">    </span><span class="nt">"CorsPolicy"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"Origins"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">"http://localhost:4200"</span>
 <span class="w">      </span><span class="p">],</span>
-<span class="w">      </span><span class="nt">&quot;Methods&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
-<span class="w">      </span><span class="nt">&quot;Headers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
-<span class="w">      </span><span class="nt">&quot;AllowAnyOrigin&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;AllowAnyMethod&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;AllowAnyHeader&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;SupportsCredentials&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">      </span><span class="nt">"Methods"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">      </span><span class="nt">"Headers"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">      </span><span class="nt">"AllowAnyOrigin"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"AllowAnyMethod"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"AllowAnyHeader"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"SupportsCredentials"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">}</span>
 <span class="w">  </span><span class="err">...</span>

@@ -2101,29 +2101,29 @@
 <li>mkdir [randomname] - make a random directory in cwd on remote host. Can specify absolute/relative path instead of [randomname]</li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;Status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Run&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;TimeLineHandlers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="nt">"Status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Run"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"TimeLineHandlers"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;HandlerType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Sftp&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;HandlerArgs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;TimeBetweenCommandsMax&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5000</span><span class="p">,</span><span class="w"> </span><span class="c1">//max,min between individual SFTP commands</span>
-<span class="w">        </span><span class="nt">&quot;TimeBetweenCommandsMin&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1000</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;CredentialsFile&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;path to credentials&gt;&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">//required, file path to a JSON file containing the SSH credentials</span>
-<span class="w">        </span><span class="nt">&quot;UploadDirectory&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;path to uploads directory&gt;&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">//optional, directory that contains files for upload, it not specified user Downloads directory is used</span>
-<span class="w">        </span><span class="nt">&quot;delay-jitter&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="c1">//optional, default =0, range 0 to 50, if specified, DelayAfter varied by delay-%jitter*delay to delay+%jitter*delay</span>
+<span class="w">      </span><span class="nt">"HandlerType"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Sftp"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"HandlerArgs"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">"TimeBetweenCommandsMax"</span><span class="p">:</span><span class="w"> </span><span class="mi">5000</span><span class="p">,</span><span class="w"> </span><span class="c1">//max,min between individual SFTP commands</span>
+<span class="w">        </span><span class="nt">"TimeBetweenCommandsMin"</span><span class="p">:</span><span class="w"> </span><span class="mi">1000</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"CredentialsFile"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;path to credentials&gt;"</span><span class="p">,</span><span class="w"> </span><span class="c1">//required, file path to a JSON file containing the SSH credentials</span>
+<span class="w">        </span><span class="nt">"UploadDirectory"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;path to uploads directory&gt;"</span><span class="p">,</span><span class="w"> </span><span class="c1">//optional, directory that contains files for upload, it not specified user Downloads directory is used</span>
+<span class="w">        </span><span class="nt">"delay-jitter"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="c1">//optional, default =0, range 0 to 50, if specified, DelayAfter varied by delay-%jitter*delay to delay+%jitter*delay</span>
 <span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;Initial&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;UtcTimeOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;00:00:00&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;UtcTimeOff&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;24:00:00&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;Loop&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;True&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;TimeLineEvents&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="nt">"Initial"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"UtcTimeOn"</span><span class="p">:</span><span class="w"> </span><span class="s2">"00:00:00"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"UtcTimeOff"</span><span class="p">:</span><span class="w"> </span><span class="s2">"24:00:00"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"Loop"</span><span class="p">:</span><span class="w"> </span><span class="s2">"True"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"TimeLineEvents"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">        </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;Command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;random&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;CommandArgs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">            </span><span class="s2">&quot;&lt;someIp&gt;|&lt;credKey&gt;|&lt;a_cmd&gt;;&lt;a_cmd&gt;;&lt;a_cmd&gt;....;&lt;a_cmd&gt;&quot;</span>
+<span class="w">          </span><span class="nt">"Command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"random"</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"CommandArgs"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="s2">"&lt;someIp&gt;|&lt;credKey&gt;|&lt;a_cmd&gt;;&lt;a_cmd&gt;;&lt;a_cmd&gt;....;&lt;a_cmd&gt;"</span>
 <span class="w">          </span><span class="p">],</span>
-<span class="w">          </span><span class="nt">&quot;DelayAfter&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">20000</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;DelayBefore&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">          </span><span class="nt">"DelayAfter"</span><span class="p">:</span><span class="w"> </span><span class="mi">20000</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"DelayBefore"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
 <span class="w">        </span><span class="p">}</span>
 <span class="w">      </span><span class="p">]</span>
 <span class="w">    </span><span class="p">}</span><span class="w"> </span>

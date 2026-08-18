@@ -2191,24 +2191,24 @@
 <p>The CMD handler allows you to execute command-line operations as part of your NPC timeline. This can include running PowerShell scripts, batch files, or any command-line utilities available on the system.</p>
 <h2 id="basic-configuration-format">Basic Configuration Format<a class="headerlink" href="#basic-configuration-format" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;TimeLineHandlers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="nt">"TimeLineHandlers"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">        </span><span class="p">{</span>
-<span class="w">            </span><span class="nt">&quot;HandlerType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Command&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">&quot;Initial&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">&quot;UtcTimeOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;00:00:00&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">&quot;UtcTimeOff&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;24:00:00&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">&quot;Loop&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">&quot;TimeLineEvents&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="nt">"HandlerType"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Command"</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">"Initial"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">"UtcTimeOn"</span><span class="p">:</span><span class="w"> </span><span class="s2">"00:00:00"</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">"UtcTimeOff"</span><span class="p">:</span><span class="w"> </span><span class="s2">"24:00:00"</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">"Loop"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">"TimeLineEvents"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">                </span><span class="p">{</span>
-<span class="w">                    </span><span class="nt">&quot;Command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cd %homedrive%%homepath%\\Downloads&quot;</span><span class="p">,</span>
-<span class="w">                    </span><span class="nt">&quot;CommandArgs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">                        </span><span class="s2">&quot;powershell expand-archive -Path italian_breakfast.zip -destinationpath x&quot;</span><span class="p">,</span>
-<span class="w">                        </span><span class="s2">&quot;cd x&quot;</span><span class="p">,</span>
-<span class="w">                        </span><span class="s2">&quot;dir&quot;</span>
+<span class="w">                    </span><span class="nt">"Command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"cd %homedrive%%homepath%\\Downloads"</span><span class="p">,</span>
+<span class="w">                    </span><span class="nt">"CommandArgs"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                        </span><span class="s2">"powershell expand-archive -Path italian_breakfast.zip -destinationpath x"</span><span class="p">,</span>
+<span class="w">                        </span><span class="s2">"cd x"</span><span class="p">,</span>
+<span class="w">                        </span><span class="s2">"dir"</span>
 <span class="w">                    </span><span class="p">],</span>
-<span class="w">                    </span><span class="nt">&quot;TrackableId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;guid id from trackables table/&gt;&quot;</span><span class="p">,</span>
-<span class="w">                    </span><span class="nt">&quot;DelayAfter&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span>
-<span class="w">                    </span><span class="nt">&quot;DelayBefore&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10000</span>
+<span class="w">                    </span><span class="nt">"TrackableId"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;guid id from trackables table/&gt;"</span><span class="p">,</span>
+<span class="w">                    </span><span class="nt">"DelayAfter"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span>
+<span class="w">                    </span><span class="nt">"DelayBefore"</span><span class="p">:</span><span class="w"> </span><span class="mi">10000</span>
 <span class="w">                </span><span class="p">}</span>
 <span class="w">            </span><span class="p">]</span>
 <span class="w">        </span><span class="p">}</span>
@@ -2227,14 +2227,14 @@
 <h2 id="command-window-behavior">Command Window Behavior<a class="headerlink" href="#command-window-behavior" title="Permanent link">&para;</a></h2>
 <p>By default, the command window closes after execution. To keep it open, use the <code>/k</code> flag:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;Command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cmd /k cd %homedrive%%homepath%\\Downloads&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;CommandArgs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="s2">&quot;powershell expand-archive -Path italian_breakfast.zip -destinationpath x&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;cd x&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;dir&quot;</span>
+<span class="w">    </span><span class="nt">"Command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"cmd /k cd %homedrive%%homepath%\\Downloads"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"CommandArgs"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">"powershell expand-archive -Path italian_breakfast.zip -destinationpath x"</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">"cd x"</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">"dir"</span>
 <span class="w">    </span><span class="p">],</span>
-<span class="w">    </span><span class="nt">&quot;DelayAfter&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;DelayBefore&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10000</span>
+<span class="w">    </span><span class="nt">"DelayAfter"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"DelayBefore"</span><span class="p">:</span><span class="w"> </span><span class="mi">10000</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>The <code>/k</code> flag keeps the command window open after executing the commands, allowing for more realistic simulation of user behavior.</p>
@@ -2250,26 +2250,26 @@
 <h2 id="common-use-cases">Common Use Cases<a class="headerlink" href="#common-use-cases" title="Permanent link">&para;</a></h2>
 <p><strong>Execute a PowerShell Script:</strong>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;Command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;powershell&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;CommandArgs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="s2">&quot;-ExecutionPolicy Bypass&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;-File C:\\scripts\\my-script.ps1&quot;</span>
+<span class="w">    </span><span class="nt">"Command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"powershell"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"CommandArgs"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">"-ExecutionPolicy Bypass"</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">"-File C:\\scripts\\my-script.ps1"</span>
 <span class="w">    </span><span class="p">]</span>
 <span class="p">}</span>
 </code></pre></div></p>
 <p><strong>Run System Utilities:</strong>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;Command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ipconfig&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;CommandArgs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;/all&quot;</span><span class="p">]</span>
+<span class="w">    </span><span class="nt">"Command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ipconfig"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"CommandArgs"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"/all"</span><span class="p">]</span>
 <span class="p">}</span>
 </code></pre></div></p>
 <p><strong>File Operations:</strong>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;Command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;xcopy&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;CommandArgs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="s2">&quot;%HOMEDRIVE%%HOMEPATH%\\Documents\\*.txt&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;%HOMEDRIVE%%HOMEPATH%\\Backup\\&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;/Y&quot;</span>
+<span class="w">    </span><span class="nt">"Command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"xcopy"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"CommandArgs"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">"%HOMEDRIVE%%HOMEPATH%\\Documents\\*.txt"</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">"%HOMEDRIVE%%HOMEPATH%\\Backup\\"</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">"/Y"</span>
 <span class="w">    </span><span class="p">]</span>
 <span class="p">}</span>
 </code></pre></div></p>

@@ -2088,25 +2088,25 @@
 <h1 id="powerpoint-configuration">PowerPoint Configuration<a class="headerlink" href="#powerpoint-configuration" title="Permanent link">&para;</a></h1>
 <p>The sample configuration below is also available in the [GHOSTS GitHub repository](<a href="https://github.com/cmu-sei/GHOSTS/blob/master/src/Ghosts.Client.Windows/Sample%20Timelines/PowerPoint.json">https://github.com/cmu-sei/GHOSTS/blob/master/src/Ghosts.Client.Windows/Sample%20Timelines/PowerPoint.json</a></p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;TimeLineHandlers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="nt">"TimeLineHandlers"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">      </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;HandlerType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;PowerPoint&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;Initial&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;UtcTimeOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;00:00:00&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;UtcTimeOff&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;24:00:00&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;HandlerArgs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;workingset&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="nt">&quot;max&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">&quot;max-age-in-hours&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">72</span>
+<span class="w">        </span><span class="nt">"HandlerType"</span><span class="p">:</span><span class="w"> </span><span class="s2">"PowerPoint"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"Initial"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"UtcTimeOn"</span><span class="p">:</span><span class="w"> </span><span class="s2">"00:00:00"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"UtcTimeOff"</span><span class="p">:</span><span class="w"> </span><span class="s2">"24:00:00"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"HandlerArgs"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">"workingset"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">"max"</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">"max-age-in-hours"</span><span class="p">:</span><span class="w"> </span><span class="mi">72</span>
 <span class="w">          </span><span class="p">}</span>
 <span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="nt">&quot;Loop&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;TimeLineEvents&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="nt">"Loop"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"TimeLineEvents"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">          </span><span class="p">{</span>
-<span class="w">            </span><span class="nt">&quot;Command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;create&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">&quot;CommandArgs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">&quot;%homedrive%%homepath%\\Documents&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;pdf&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;pdf-vary-filenames&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;save-array:[&#39;c:\\tmp&#39;,&#39;c:\\tmp\\path2&#39;,&#39;c:\\tmp\\path3&#39;]&quot;</span><span class="w"> </span><span class="p">],</span>
-<span class="w">            </span><span class="nt">&quot;DelayAfter&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">900000</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">&quot;DelayBefore&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">            </span><span class="nt">"Command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"create"</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">"CommandArgs"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"%homedrive%%homepath%\\Documents"</span><span class="p">,</span><span class="w"> </span><span class="s2">"pdf"</span><span class="p">,</span><span class="w"> </span><span class="s2">"pdf-vary-filenames"</span><span class="p">,</span><span class="w"> </span><span class="s2">"save-array:['c:\\tmp','c:\\tmp\\path2','c:\\tmp\\path3']"</span><span class="w"> </span><span class="p">],</span>
+<span class="w">            </span><span class="nt">"DelayAfter"</span><span class="p">:</span><span class="w"> </span><span class="mi">900000</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">"DelayBefore"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
 <span class="w">          </span><span class="p">}</span>
 <span class="w">        </span><span class="p">]</span>
 <span class="w">      </span><span class="p">}</span>

@@ -2360,19 +2360,19 @@
 <h2 id="handler-arguments">Handler Arguments<a class="headerlink" href="#handler-arguments" title="Permanent link">&para;</a></h2>
 <p>Browser handlers support various arguments to control browser behavior and resource usage:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;TimeLineHandlers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="nt">"TimeLineHandlers"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;HandlerType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;BrowserFirefox&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;HandlerArgs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;isheadless&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;false&quot;</span><span class="p">,</span><span class="w">         </span><span class="c1">// Run without visible browser window (saves resources)</span>
-<span class="w">        </span><span class="nt">&quot;blockimages&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;true&quot;</span><span class="p">,</span><span class="w">         </span><span class="c1">// Block images from loading</span>
-<span class="w">        </span><span class="nt">&quot;blockstyles&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;true&quot;</span><span class="p">,</span><span class="w">         </span><span class="c1">// Block CSS stylesheets from loading</span>
-<span class="w">        </span><span class="nt">&quot;blockflash&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;true&quot;</span><span class="p">,</span><span class="w">          </span><span class="c1">// Block Flash content from loading</span>
-<span class="w">        </span><span class="nt">&quot;blockscripts&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;true&quot;</span><span class="p">,</span><span class="w">        </span><span class="c1">// Block JavaScript from executing</span>
-<span class="w">        </span><span class="nt">&quot;stickiness&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">75</span><span class="p">,</span><span class="w">              </span><span class="c1">// 75% chance of staying on same site (0-100)</span>
-<span class="w">        </span><span class="nt">&quot;stickiness-depth-min&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w">     </span><span class="c1">// Minimum links to click on a sticky site</span>
-<span class="w">        </span><span class="nt">&quot;stickiness-depth-max&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w">    </span><span class="c1">// Maximum links to click on a sticky site</span>
-<span class="w">        </span><span class="nt">&quot;incognito&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;true&quot;</span><span class="w">            </span><span class="c1">// Run in incognito/private mode</span>
+<span class="w">      </span><span class="nt">"HandlerType"</span><span class="p">:</span><span class="w"> </span><span class="s2">"BrowserFirefox"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"HandlerArgs"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">"isheadless"</span><span class="p">:</span><span class="w"> </span><span class="s2">"false"</span><span class="p">,</span><span class="w">         </span><span class="c1">// Run without visible browser window (saves resources)</span>
+<span class="w">        </span><span class="nt">"blockimages"</span><span class="p">:</span><span class="w"> </span><span class="s2">"true"</span><span class="p">,</span><span class="w">         </span><span class="c1">// Block images from loading</span>
+<span class="w">        </span><span class="nt">"blockstyles"</span><span class="p">:</span><span class="w"> </span><span class="s2">"true"</span><span class="p">,</span><span class="w">         </span><span class="c1">// Block CSS stylesheets from loading</span>
+<span class="w">        </span><span class="nt">"blockflash"</span><span class="p">:</span><span class="w"> </span><span class="s2">"true"</span><span class="p">,</span><span class="w">          </span><span class="c1">// Block Flash content from loading</span>
+<span class="w">        </span><span class="nt">"blockscripts"</span><span class="p">:</span><span class="w"> </span><span class="s2">"true"</span><span class="p">,</span><span class="w">        </span><span class="c1">// Block JavaScript from executing</span>
+<span class="w">        </span><span class="nt">"stickiness"</span><span class="p">:</span><span class="w"> </span><span class="mi">75</span><span class="p">,</span><span class="w">              </span><span class="c1">// 75% chance of staying on same site (0-100)</span>
+<span class="w">        </span><span class="nt">"stickiness-depth-min"</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w">     </span><span class="c1">// Minimum links to click on a sticky site</span>
+<span class="w">        </span><span class="nt">"stickiness-depth-max"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w">    </span><span class="c1">// Maximum links to click on a sticky site</span>
+<span class="w">        </span><span class="nt">"incognito"</span><span class="p">:</span><span class="w"> </span><span class="s2">"true"</span><span class="w">            </span><span class="c1">// Run in incognito/private mode</span>
 <span class="w">      </span><span class="p">}</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">]</span>
@@ -2451,43 +2451,43 @@
 <h3 id="core-commands">Core Commands<a class="headerlink" href="#core-commands" title="Permanent link">&para;</a></h3>
 <p><strong><code>random</code></strong> - Randomly select and visit URLs from a list</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;Command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;random&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;CommandArgs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">    </span><span class="s2">&quot;https://www.cmu.edu&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s2">&quot;https://sei.cmu.edu&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s2">&quot;https://www.example.com&quot;</span>
+<span class="w">  </span><span class="nt">"Command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"random"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"CommandArgs"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">"https://www.cmu.edu"</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">"https://sei.cmu.edu"</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">"https://www.example.com"</span>
 <span class="w">  </span><span class="p">],</span>
-<span class="w">  </span><span class="nt">&quot;DelayAfter&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">30000</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;DelayBefore&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5000</span>
+<span class="w">  </span><span class="nt">"DelayAfter"</span><span class="p">:</span><span class="w"> </span><span class="mi">30000</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"DelayBefore"</span><span class="p">:</span><span class="w"> </span><span class="mi">5000</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>When <code>Loop: true</code> and stickiness is configured, the browser will randomly navigate between sites while occasionally "sticking" to one site and following internal links.</p>
 <p><strong><code>randomalt</code></strong> - Like <code>random</code> but includes POST requests in addition to GET requests. Useful for simulating form submissions.</p>
 <p><strong><code>browse</code></strong> - Navigate to a specific URL</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;Command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;browse&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;CommandArgs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;https://www.example.com/page&quot;</span><span class="p">],</span>
-<span class="w">  </span><span class="nt">&quot;DelayAfter&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10000</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;DelayBefore&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">  </span><span class="nt">"Command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"browse"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"CommandArgs"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"https://www.example.com/page"</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">"DelayAfter"</span><span class="p">:</span><span class="w"> </span><span class="mi">10000</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"DelayBefore"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
 <span class="p">}</span>
 </code></pre></div>
 <h3 id="specialized-commands">Specialized Commands<a class="headerlink" href="#specialized-commands" title="Permanent link">&para;</a></h3>
 <p><strong><code>download</code></strong> - Download a file from a specified element</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;Command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;download&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;CommandArgs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;//a[contains(@class, &#39;download-button&#39;)]&quot;</span><span class="p">],</span>
-<span class="w">  </span><span class="nt">&quot;TrackableId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;550e8400-e29b-41d4-a716-446655440000&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;DelayAfter&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;DelayBefore&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">  </span><span class="nt">"Command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"download"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"CommandArgs"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"//a[contains(@class, 'download-button')]"</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">"TrackableId"</span><span class="p">:</span><span class="w"> </span><span class="s2">"550e8400-e29b-41d4-a716-446655440000"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"DelayAfter"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"DelayBefore"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>The CommandArg is an XPath selector for the download link element.</p>
 <p><strong><code>upload</code></strong> - Upload a file through a web form</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;Command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;upload&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;CommandArgs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;/path/to/file.pdf&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;//input[@type=&#39;file&#39;]&quot;</span><span class="p">],</span>
-<span class="w">  </span><span class="nt">&quot;DelayAfter&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5000</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;DelayBefore&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1000</span>
+<span class="w">  </span><span class="nt">"Command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"upload"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"CommandArgs"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"/path/to/file.pdf"</span><span class="p">,</span><span class="w"> </span><span class="s2">"//input[@type='file']"</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">"DelayAfter"</span><span class="p">:</span><span class="w"> </span><span class="mi">5000</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"DelayBefore"</span><span class="p">:</span><span class="w"> </span><span class="mi">1000</span>
 <span class="p">}</span>
 </code></pre></div>
 <p><strong><code>outlook</code></strong> - Interact with Outlook Web Access (OWA)</p>
@@ -2501,14 +2501,14 @@
 <h3 id="element-interaction-commands">Element Interaction Commands<a class="headerlink" href="#element-interaction-commands" title="Permanent link">&para;</a></h3>
 <p><strong><code>click</code></strong> - Click an element by XPath</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;Command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;click&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;CommandArgs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;//button[@id=&#39;submit&#39;]&quot;</span><span class="p">]</span>
+<span class="w">  </span><span class="nt">"Command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"click"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"CommandArgs"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"//button[@id='submit']"</span><span class="p">]</span>
 <span class="p">}</span>
 </code></pre></div>
 <p><strong><code>click.by.id</code></strong> - Click element by ID</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;Command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;click.by.id&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;CommandArgs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;submit-button&quot;</span><span class="p">]</span>
+<span class="w">  </span><span class="nt">"Command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"click.by.id"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"CommandArgs"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"submit-button"</span><span class="p">]</span>
 <span class="p">}</span>
 </code></pre></div>
 <p><strong><code>click.by.name</code></strong> - Click element by name attribute</p>
@@ -2516,21 +2516,21 @@
 <p><strong><code>click.by.cssselector</code></strong> - Click element by CSS selector</p>
 <p><strong><code>type</code></strong> - Type text into an element (by XPath)</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;Command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;type&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;CommandArgs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;//input[@name=&#39;search&#39;]&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;ghosts framework&quot;</span><span class="p">]</span>
+<span class="w">  </span><span class="nt">"Command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"type"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"CommandArgs"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"//input[@name='search']"</span><span class="p">,</span><span class="w"> </span><span class="s2">"ghosts framework"</span><span class="p">]</span>
 <span class="p">}</span>
 </code></pre></div>
 <p><strong><code>typebyid</code></strong> - Type text into element by ID</p>
 <p><strong><code>js.executescript</code></strong> - Execute JavaScript in the browser context</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;Command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;js.executescript&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;CommandArgs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;window.scrollTo(0, document.body.scrollHeight);&quot;</span><span class="p">]</span>
+<span class="w">  </span><span class="nt">"Command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"js.executescript"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"CommandArgs"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"window.scrollTo(0, document.body.scrollHeight);"</span><span class="p">]</span>
 <span class="p">}</span>
 </code></pre></div>
 <p><strong><code>manage.window.size</code></strong> - Set browser window dimensions</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;Command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;manage.window.size&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;CommandArgs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;1920&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;1080&quot;</span><span class="p">]</span>
+<span class="w">  </span><span class="nt">"Command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"manage.window.size"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"CommandArgs"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"1920"</span><span class="p">,</span><span class="w"> </span><span class="s2">"1080"</span><span class="p">]</span>
 <span class="p">}</span>
 </code></pre></div>
 <h2 id="dynamic-url-variables">Dynamic URL Variables<a class="headerlink" href="#dynamic-url-variables" title="Permanent link">&para;</a></h2>
@@ -2577,20 +2577,20 @@
 <h3 id="custom-url-variables">Custom URL Variables<a class="headerlink" href="#custom-url-variables" title="Permanent link">&para;</a></h3>
 <p>Define custom variable replacements in your handler configuration:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;HandlerType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;BrowserChrome&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;HandlerArgs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;url-replace&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">      </span><span class="p">{</span><span class="nt">&quot;verb&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;order&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;enable&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;engage&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;deploy&quot;</span><span class="p">]},</span>
-<span class="w">      </span><span class="p">{</span><span class="nt">&quot;group&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;operations&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;logistics&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;medical&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;admin&quot;</span><span class="p">]},</span>
-<span class="w">      </span><span class="p">{</span><span class="nt">&quot;org&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;army&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;command&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;brigade&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;battalion&quot;</span><span class="p">]},</span>
-<span class="w">      </span><span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;document&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;doc&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;files&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;vault&quot;</span><span class="p">]}</span>
+<span class="w">  </span><span class="nt">"HandlerType"</span><span class="p">:</span><span class="w"> </span><span class="s2">"BrowserChrome"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"HandlerArgs"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"url-replace"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span><span class="nt">"verb"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"order"</span><span class="p">,</span><span class="w"> </span><span class="s2">"enable"</span><span class="p">,</span><span class="w"> </span><span class="s2">"engage"</span><span class="p">,</span><span class="w"> </span><span class="s2">"deploy"</span><span class="p">]},</span>
+<span class="w">      </span><span class="p">{</span><span class="nt">"group"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"operations"</span><span class="p">,</span><span class="w"> </span><span class="s2">"logistics"</span><span class="p">,</span><span class="w"> </span><span class="s2">"medical"</span><span class="p">,</span><span class="w"> </span><span class="s2">"admin"</span><span class="p">]},</span>
+<span class="w">      </span><span class="p">{</span><span class="nt">"org"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"army"</span><span class="p">,</span><span class="w"> </span><span class="s2">"command"</span><span class="p">,</span><span class="w"> </span><span class="s2">"brigade"</span><span class="p">,</span><span class="w"> </span><span class="s2">"battalion"</span><span class="p">]},</span>
+<span class="w">      </span><span class="p">{</span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"document"</span><span class="p">,</span><span class="w"> </span><span class="s2">"doc"</span><span class="p">,</span><span class="w"> </span><span class="s2">"files"</span><span class="p">,</span><span class="w"> </span><span class="s2">"vault"</span><span class="p">]}</span>
 <span class="w">    </span><span class="p">]</span>
 <span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;TimeLineEvents&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="nt">"TimeLineEvents"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;Command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;browse&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;CommandArgs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="s2">&quot;https://portal.mil/{org}/{group}/{verb}/{type}/{uuid}/v_{n}?id={c}&amp;date={now}&quot;</span>
+<span class="w">      </span><span class="nt">"Command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"browse"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"CommandArgs"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">"https://portal.mil/{org}/{group}/{verb}/{type}/{uuid}/v_{n}?id={c}&amp;date={now}"</span>
 <span class="w">      </span><span class="p">]</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">]</span>
@@ -2603,36 +2603,36 @@
 <h2 id="complete-example-configuration">Complete Example Configuration<a class="headerlink" href="#complete-example-configuration" title="Permanent link">&para;</a></h2>
 <p>Here's a comprehensive browser handler configuration demonstrating key features:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;TimeLineHandlers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="nt">"TimeLineHandlers"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;HandlerType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;BrowserChrome&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;Initial&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://www.google.com&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;UtcTimeOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;00:00:00&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;UtcTimeOff&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;24:00:00&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;Loop&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;HandlerArgs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;isheadless&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;false&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;blockimages&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;true&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;blockstyles&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;true&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;stickiness&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">60</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;stickiness-depth-min&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;stickiness-depth-max&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;url-replace&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">          </span><span class="p">{</span><span class="nt">&quot;category&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;news&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;sports&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;tech&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;weather&quot;</span><span class="p">]},</span>
-<span class="w">          </span><span class="p">{</span><span class="nt">&quot;action&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;view&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;read&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;search&quot;</span><span class="p">]}</span>
+<span class="w">      </span><span class="nt">"HandlerType"</span><span class="p">:</span><span class="w"> </span><span class="s2">"BrowserChrome"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"Initial"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://www.google.com"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"UtcTimeOn"</span><span class="p">:</span><span class="w"> </span><span class="s2">"00:00:00"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"UtcTimeOff"</span><span class="p">:</span><span class="w"> </span><span class="s2">"24:00:00"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"Loop"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"HandlerArgs"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">"isheadless"</span><span class="p">:</span><span class="w"> </span><span class="s2">"false"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"blockimages"</span><span class="p">:</span><span class="w"> </span><span class="s2">"true"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"blockstyles"</span><span class="p">:</span><span class="w"> </span><span class="s2">"true"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"stickiness"</span><span class="p">:</span><span class="w"> </span><span class="mi">60</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"stickiness-depth-min"</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"stickiness-depth-max"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"url-replace"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="p">{</span><span class="nt">"category"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"news"</span><span class="p">,</span><span class="w"> </span><span class="s2">"sports"</span><span class="p">,</span><span class="w"> </span><span class="s2">"tech"</span><span class="p">,</span><span class="w"> </span><span class="s2">"weather"</span><span class="p">]},</span>
+<span class="w">          </span><span class="p">{</span><span class="nt">"action"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"view"</span><span class="p">,</span><span class="w"> </span><span class="s2">"read"</span><span class="p">,</span><span class="w"> </span><span class="s2">"search"</span><span class="p">]}</span>
 <span class="w">        </span><span class="p">]</span>
 <span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;TimeLineEvents&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="nt">"TimeLineEvents"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">        </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;Command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;random&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;CommandArgs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">            </span><span class="s2">&quot;https://www.cmu.edu&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="s2">&quot;https://www.github.com&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="s2">&quot;https://news.ycombinator.com&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="s2">&quot;https://www.example.com/{category}/{action}?id={n}&quot;</span>
+<span class="w">          </span><span class="nt">"Command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"random"</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"CommandArgs"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="s2">"https://www.cmu.edu"</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">"https://www.github.com"</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">"https://news.ycombinator.com"</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">"https://www.example.com/{category}/{action}?id={n}"</span>
 <span class="w">          </span><span class="p">],</span>
-<span class="w">          </span><span class="nt">&quot;DelayAfter&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">45000</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;DelayBefore&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5000</span>
+<span class="w">          </span><span class="nt">"DelayAfter"</span><span class="p">:</span><span class="w"> </span><span class="mi">45000</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"DelayBefore"</span><span class="p">:</span><span class="w"> </span><span class="mi">5000</span>
 <span class="w">        </span><span class="p">}</span>
 <span class="w">      </span><span class="p">]</span>
 <span class="w">    </span><span class="p">}</span>
@@ -2660,19 +2660,19 @@ google-chrome<span class="w"> </span>--version
 <h3 id="element-not-found-errors">"Element Not Found" Errors<a class="headerlink" href="#element-not-found-errors" title="Permanent link">&para;</a></h3>
 <p><strong>Increase Delays</strong>: Web pages may need time to load before elements are clickable:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;Command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;browse&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;CommandArgs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;https://example.com&quot;</span><span class="p">],</span>
-<span class="w">  </span><span class="nt">&quot;DelayAfter&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5000</span>
+<span class="w">  </span><span class="nt">"Command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"browse"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"CommandArgs"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"https://example.com"</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">"DelayAfter"</span><span class="p">:</span><span class="w"> </span><span class="mi">5000</span>
 <span class="p">}</span>
 </code></pre></div>
 <h3 id="high-cpumemory-usage">High CPU/Memory Usage<a class="headerlink" href="#high-cpumemory-usage" title="Permanent link">&para;</a></h3>
 <p><strong>Enable Headless and Blocking</strong>:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;HandlerArgs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;isheadless&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;true&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;blockimages&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;true&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;blockstyles&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;true&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;blockscripts&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;true&quot;</span>
+<span class="w">  </span><span class="nt">"HandlerArgs"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"isheadless"</span><span class="p">:</span><span class="w"> </span><span class="s2">"true"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"blockimages"</span><span class="p">:</span><span class="w"> </span><span class="s2">"true"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"blockstyles"</span><span class="p">:</span><span class="w"> </span><span class="s2">"true"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"blockscripts"</span><span class="p">:</span><span class="w"> </span><span class="s2">"true"</span>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>

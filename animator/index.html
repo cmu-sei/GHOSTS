@@ -2212,13 +2212,13 @@
 <h2 id="generating-npcs-via-api">Generating NPCs via API<a class="headerlink" href="#generating-npcs-via-api" title="Permanent link">&para;</a></h2>
 <p><strong>Generate NPCs programmatically:</strong></p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:5000/api/npcs/generate<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{</span>
-<span class="s1">    &quot;count&quot;: 50,</span>
-<span class="s1">    &quot;campaign&quot;: &quot;Exercise 2024&quot;,</span>
-<span class="s1">    &quot;enclave&quot;: &quot;Brigade HQ&quot;,</span>
-<span class="s1">    &quot;team&quot;: &quot;Operations&quot;</span>
-<span class="s1">  }&#39;</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Content-Type: application/json"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s1">'{</span>
+<span class="s1">    "count": 50,</span>
+<span class="s1">    "campaign": "Exercise 2024",</span>
+<span class="s1">    "enclave": "Brigade HQ",</span>
+<span class="s1">    "team": "Operations"</span>
+<span class="s1">  }'</span>
 </code></pre></div>
 <p><strong>Retrieve NPCs:</strong></p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>http://localhost:5000/api/npcs

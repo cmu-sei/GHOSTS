@@ -2063,63 +2063,63 @@
 <p>When the handler is executed, a random database is chosen along with a random table from that database. This DB/Table is queried for row count, and if empty, 10 rows are generated as initial content.  If non-empty, either an insert operation (one row inserted), delete (first row is deleted), or query operation is performed (a maximum of <code>query-limit</code> rows are returned and written to the Ghosts log file).  The query starts at a random offset from within the rows.  If the <code>max-rows</code> parameter is non-zero then when this number of rows is reached a deletion operation is forced.</p>
 <p>A sample timeline is shown below:</p>
 <p><div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;Status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Run&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;TimeLineHandlers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="nt">"Status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Run"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"TimeLineHandlers"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;HandlerType&quot;</span><span class="p">:</span><span class="w">  </span><span class="s2">&quot;Database&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;HandlerArgs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;delay-jitter&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">50</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;insert-probability&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">30</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;delete-probability&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;query-probability&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">50</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;query-limit&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">30</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;max-rows&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;ismssql&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;false&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;port&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3306</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;DatabaseTargets&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">           </span><span class="nt">&quot;Version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1.0&quot;</span><span class="p">,</span>
-<span class="w">             </span><span class="nt">&quot;Data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">               </span><span class="nt">&quot;&lt;db_key1&gt;&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">                  </span><span class="nt">&quot;Username&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;a_user&quot;</span><span class="p">,</span>
-<span class="w">                  </span><span class="nt">&quot;Password&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;Base64 Encoded Password&gt;&quot;</span><span class="p">,</span>
-<span class="w">                  </span><span class="nt">&quot;Databases&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="nt">"HandlerType"</span><span class="p">:</span><span class="w">  </span><span class="s2">"Database"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"HandlerArgs"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">"delay-jitter"</span><span class="p">:</span><span class="w"> </span><span class="mi">50</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"insert-probability"</span><span class="p">:</span><span class="w"> </span><span class="mi">30</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"delete-probability"</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"query-probability"</span><span class="p">:</span><span class="w"> </span><span class="mi">50</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"query-limit"</span><span class="p">:</span><span class="w"> </span><span class="mi">30</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"max-rows"</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"ismssql"</span><span class="p">:</span><span class="w"> </span><span class="s2">"false"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"port"</span><span class="p">:</span><span class="w"> </span><span class="mi">3306</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"DatabaseTargets"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">           </span><span class="nt">"Version"</span><span class="p">:</span><span class="w"> </span><span class="s2">"1.0"</span><span class="p">,</span>
+<span class="w">             </span><span class="nt">"Data"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">               </span><span class="nt">"&lt;db_key1&gt;"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                  </span><span class="nt">"Username"</span><span class="p">:</span><span class="w"> </span><span class="s2">"a_user"</span><span class="p">,</span>
+<span class="w">                  </span><span class="nt">"Password"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;Base64 Encoded Password&gt;"</span><span class="p">,</span>
+<span class="w">                  </span><span class="nt">"Databases"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">                    </span><span class="p">{</span>
-<span class="w">                      </span><span class="nt">&quot;Name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AcmeInc&quot;</span><span class="p">,</span>
-<span class="w">                      </span><span class="nt">&quot;Tables&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                      </span><span class="nt">"Name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"AcmeInc"</span><span class="p">,</span>
+<span class="w">                      </span><span class="nt">"Tables"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">                        </span><span class="p">{</span>
-<span class="w">                          </span><span class="nt">&quot;Name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Employees&quot;</span><span class="p">,</span>
-<span class="w">                          </span><span class="nt">&quot;Columns&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                          </span><span class="nt">"Name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Employees"</span><span class="p">,</span>
+<span class="w">                          </span><span class="nt">"Columns"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">                            </span><span class="p">{</span>
-<span class="w">                              </span><span class="nt">&quot;Name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Name&quot;</span><span class="p">,</span>
-<span class="w">                              </span><span class="nt">&quot;ContentHint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;name&quot;</span>
+<span class="w">                              </span><span class="nt">"Name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Name"</span><span class="p">,</span>
+<span class="w">                              </span><span class="nt">"ContentHint"</span><span class="p">:</span><span class="w"> </span><span class="s2">"name"</span>
 <span class="w">                            </span><span class="p">},</span>
 <span class="w">                            </span><span class="p">{</span>
-<span class="w">                              </span><span class="nt">&quot;Name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Title&quot;</span><span class="p">,</span>
-<span class="w">                              </span><span class="nt">&quot;ContentHint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;title&quot;</span>
+<span class="w">                              </span><span class="nt">"Name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Title"</span><span class="p">,</span>
+<span class="w">                              </span><span class="nt">"ContentHint"</span><span class="p">:</span><span class="w"> </span><span class="s2">"title"</span>
 <span class="w">                            </span><span class="p">},</span>
 <span class="w">                            </span><span class="p">{</span>
-<span class="w">                              </span><span class="nt">&quot;Name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SSN&quot;</span><span class="p">,</span>
-<span class="w">                              </span><span class="nt">&quot;ContentHint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ssn&quot;</span>
+<span class="w">                              </span><span class="nt">"Name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"SSN"</span><span class="p">,</span>
+<span class="w">                              </span><span class="nt">"ContentHint"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ssn"</span>
 <span class="w">                            </span><span class="p">},</span>
 <span class="w">                            </span><span class="p">{</span>
-<span class="w">                              </span><span class="nt">&quot;Name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;LastPerformanceRating&quot;</span><span class="p">,</span>
-<span class="w">                              </span><span class="nt">&quot;Range&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0,10&quot;</span>
+<span class="w">                              </span><span class="nt">"Name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"LastPerformanceRating"</span><span class="p">,</span>
+<span class="w">                              </span><span class="nt">"Range"</span><span class="p">:</span><span class="w"> </span><span class="s2">"0,10"</span>
 <span class="w">                            </span><span class="p">},</span>
 <span class="w">                            </span><span class="p">{</span>
-<span class="w">                              </span><span class="nt">&quot;Name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RemoteWorkEnabled&quot;</span><span class="p">,</span>
-<span class="w">                              </span><span class="nt">&quot;Choice&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;yes,no,pending&quot;</span>
+<span class="w">                              </span><span class="nt">"Name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"RemoteWorkEnabled"</span><span class="p">,</span>
+<span class="w">                              </span><span class="nt">"Choice"</span><span class="p">:</span><span class="w"> </span><span class="s2">"yes,no,pending"</span>
 <span class="w">                            </span><span class="p">},</span>
 <span class="w">                            </span><span class="p">{</span>
-<span class="w">                              </span><span class="nt">&quot;Name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Phone&quot;</span><span class="p">,</span>
-<span class="w">                              </span><span class="nt">&quot;ContentHint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;phone&quot;</span>
+<span class="w">                              </span><span class="nt">"Name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Phone"</span><span class="p">,</span>
+<span class="w">                              </span><span class="nt">"ContentHint"</span><span class="p">:</span><span class="w"> </span><span class="s2">"phone"</span>
 <span class="w">                            </span><span class="p">},</span>
 <span class="w">                            </span><span class="p">{</span>
-<span class="w">                              </span><span class="nt">&quot;Name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Street&quot;</span><span class="p">,</span>
-<span class="w">                              </span><span class="nt">&quot;ContentHint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;street&quot;</span>
+<span class="w">                              </span><span class="nt">"Name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Street"</span><span class="p">,</span>
+<span class="w">                              </span><span class="nt">"ContentHint"</span><span class="p">:</span><span class="w"> </span><span class="s2">"street"</span>
 <span class="w">                            </span><span class="p">},</span>
 <span class="w">                            </span><span class="p">{</span>
-<span class="w">                              </span><span class="nt">&quot;Name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;City&quot;</span><span class="p">,</span>
-<span class="w">                              </span><span class="nt">&quot;ContentHint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;city&quot;</span>
+<span class="w">                              </span><span class="nt">"Name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"City"</span><span class="p">,</span>
+<span class="w">                              </span><span class="nt">"ContentHint"</span><span class="p">:</span><span class="w"> </span><span class="s2">"city"</span>
 <span class="w">                            </span><span class="p">}</span>
 <span class="w">                          </span><span class="p">]</span>
 <span class="w">                        </span><span class="p">}</span>
@@ -2131,17 +2131,17 @@
 <span class="w">              </span><span class="p">}</span>
 <span class="w">        </span><span class="p">}</span>
 <span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;UtcTimeOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;00:00:00&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;UtcTimeOff&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;24:00:00&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;Loop&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;TimeLineEvents&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="nt">"UtcTimeOn"</span><span class="p">:</span><span class="w"> </span><span class="s2">"00:00:00"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"UtcTimeOff"</span><span class="p">:</span><span class="w"> </span><span class="s2">"24:00:00"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"Loop"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"TimeLineEvents"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">        </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;Command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;random&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;CommandArgs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">             </span><span class="s2">&quot;&lt;IP_of_target_db_key1&gt;|&lt;db_key1&gt;&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"Command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"random"</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"CommandArgs"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">             </span><span class="s2">"&lt;IP_of_target_db_key1&gt;|&lt;db_key1&gt;"</span><span class="p">,</span>
 <span class="w">          </span><span class="p">],</span>
-<span class="w">          </span><span class="nt">&quot;DelayAfter&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">20000</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;DelayBefore&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">          </span><span class="nt">"DelayAfter"</span><span class="p">:</span><span class="w"> </span><span class="mi">20000</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"DelayBefore"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
 <span class="w">        </span><span class="p">}</span>
 <span class="w">      </span><span class="p">]</span>
 <span class="w">    </span><span class="p">}</span>

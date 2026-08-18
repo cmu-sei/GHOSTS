@@ -2546,23 +2546,23 @@ tail<span class="w"> </span>-f<span class="w"> </span>logs/clientupdates.log
 <p>Here's a basic timeline configuration for GHOSTS LITE:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">TimeLineHandlers</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">HandlerType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LiteHttp</span>
-<span class="w">    </span><span class="nt">Initial</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
-<span class="w">    </span><span class="nt">UtcTimeOn</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;00:00:00&quot;</span>
-<span class="w">    </span><span class="nt">UtcTimeOff</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;24:00:00&quot;</span>
+<span class="w">    </span><span class="nt">Initial</span><span class="p">:</span><span class="w"> </span><span class="s">""</span>
+<span class="w">    </span><span class="nt">UtcTimeOn</span><span class="p">:</span><span class="w"> </span><span class="s">"00:00:00"</span>
+<span class="w">    </span><span class="nt">UtcTimeOff</span><span class="p">:</span><span class="w"> </span><span class="s">"24:00:00"</span>
 <span class="w">    </span><span class="nt">Loop</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">    </span><span class="nt">TimeLineEvents</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Command</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">random</span>
 <span class="w">        </span><span class="nt">CommandArgs</span><span class="p">:</span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;https://www.example.com&quot;</span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;https://www.google.com&quot;</span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;https://www.github.com&quot;</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"https://www.example.com"</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"https://www.google.com"</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"https://www.github.com"</span>
 <span class="w">        </span><span class="nt">DelayAfter</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30000</span>
 <span class="w">        </span><span class="nt">DelayBefore</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5000</span>
 </code></pre></div>
 <h2 id="running-as-a-service">Running as a Service<a class="headerlink" href="#running-as-a-service" title="Permanent link">&para;</a></h2>
 <h3 id="windows-service">Windows Service<a class="headerlink" href="#windows-service" title="Permanent link">&para;</a></h3>
 <p>Use <a href="https://nssm.cc/">NSSM (Non-Sucking Service Manager)</a> to run GHOSTS LITE as a Windows service:</p>
-<div class="highlight"><pre><span></span><code>nssm<span class="w"> </span>install<span class="w"> </span>GhostsLite<span class="w"> </span><span class="s2">&quot;C:\Program Files\dotnet\dotnet.exe&quot;</span><span class="w"> </span><span class="s2">&quot;C:\exercise\ghosts-lite\Ghosts.Client.Lite.dll&quot;</span>
+<div class="highlight"><pre><span></span><code>nssm<span class="w"> </span>install<span class="w"> </span>GhostsLite<span class="w"> </span><span class="s2">"C:\Program Files\dotnet\dotnet.exe"</span><span class="w"> </span><span class="s2">"C:\exercise\ghosts-lite\Ghosts.Client.Lite.dll"</span>
 nssm<span class="w"> </span>start<span class="w"> </span>GhostsLite
 </code></pre></div>
 <h3 id="linux-service">Linux Service<a class="headerlink" href="#linux-service" title="Permanent link">&para;</a></h3>

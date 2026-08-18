@@ -2601,56 +2601,56 @@
 <h3 id="application-configuration">Application configuration<a class="headerlink" href="#application-configuration" title="Permanent link">&para;</a></h3>
 <p>Adjust the API URLs in <code>application.json</code> to point to your server:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;ApiRootUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://localhost:5000/api&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;Sockets&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;IsEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;Heartbeat&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">50000</span>
+<span class="w">  </span><span class="nt">"ApiRootUrl"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://localhost:5000/api"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"Sockets"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"IsEnabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"Heartbeat"</span><span class="p">:</span><span class="w"> </span><span class="mi">50000</span>
 <span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;Id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;IsEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;Format&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;guestlocal&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;FormatKey&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;guestinfo.id&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;FormatValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;$formatkeyvalue$-$machinename$&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;VMWareToolsLocation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;C:\\progra~1\\VMware\\VMware Tools\\vmtoolsd.exe&quot;</span>
+<span class="w">  </span><span class="nt">"Id"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"IsEnabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"Format"</span><span class="p">:</span><span class="w"> </span><span class="s2">"guestlocal"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"FormatKey"</span><span class="p">:</span><span class="w"> </span><span class="s2">"guestinfo.id"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"FormatValue"</span><span class="p">:</span><span class="w"> </span><span class="s2">"$formatkeyvalue$-$machinename$"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"VMWareToolsLocation"</span><span class="p">:</span><span class="w"> </span><span class="s2">"C:\\progra~1\\VMware\\VMware Tools\\vmtoolsd.exe"</span>
 <span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;AllowMultipleInstances&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;EncodeHeaders&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;ClientResults&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;IsEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;IsSecure&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;CycleSleep&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">300000</span>
+<span class="w">  </span><span class="nt">"AllowMultipleInstances"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"EncodeHeaders"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"ClientResults"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"IsEnabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"IsSecure"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"CycleSleep"</span><span class="p">:</span><span class="w"> </span><span class="mi">300000</span>
 <span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;ClientUpdates&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;IsEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;CycleSleep&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">300000</span>
+<span class="w">  </span><span class="nt">"ClientUpdates"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"IsEnabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"CycleSleep"</span><span class="p">:</span><span class="w"> </span><span class="mi">300000</span>
 <span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;Survey&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;IsEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;IsSecure&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;Frequency&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;once&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;CycleSleepMinutes&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;OutputFormat&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;indent&quot;</span>
+<span class="w">  </span><span class="nt">"Survey"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"IsEnabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"IsSecure"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"Frequency"</span><span class="p">:</span><span class="w"> </span><span class="s2">"once"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"CycleSleepMinutes"</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"OutputFormat"</span><span class="p">:</span><span class="w"> </span><span class="s2">"indent"</span>
 <span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;Timeline&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;Location&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;config/timeline.json&quot;</span>
+<span class="w">  </span><span class="nt">"Timeline"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"Location"</span><span class="p">:</span><span class="w"> </span><span class="s2">"config/timeline.json"</span>
 <span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;Content&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;EmailsMax&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;EmailContent&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;EmailReply&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;EmailDomain&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;EmailOutside&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;BlogContent&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;BlogReply&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;FileNames&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;Dictionary&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span>
+<span class="w">  </span><span class="nt">"Content"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"EmailsMax"</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"EmailContent"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"EmailReply"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"EmailDomain"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"EmailOutside"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"BlogContent"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"BlogReply"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"FileNames"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"Dictionary"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span>
 <span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;ResourceControl&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;ManageProcesses&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">  </span><span class="nt">"ResourceControl"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"ManageProcesses"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
 <span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;HealthIsEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;HandlersIsEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;DisableStartup&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
+<span class="w">  </span><span class="nt">"HealthIsEnabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"HandlersIsEnabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"DisableStartup"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>or if you prefer using <code>application.yaml</code></p>
@@ -2663,7 +2663,7 @@
 <span class="w">  </span><span class="nt">IsEnabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">  </span><span class="nt">Format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">guestlocal</span>
 <span class="w">  </span><span class="nt">FormatKey</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">guestinfo.id</span>
-<span class="w">  </span><span class="nt">FormatValue</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;$formatkeyvalue$-$machinename$&quot;</span>
+<span class="w">  </span><span class="nt">FormatValue</span><span class="p">:</span><span class="w"> </span><span class="s">"$formatkeyvalue$-$machinename$"</span>
 <span class="w">  </span><span class="nt">VMWareToolsLocation</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">C:\progra~1\VMware\VMware Tools\vmtoolsd.exe</span>
 <span class="nt">AllowMultipleInstances</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
 <span class="nt">EncodeHeaders</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
@@ -2683,14 +2683,14 @@
 <span class="nt">Timeline</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">Location</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">config/timeline.yaml</span>
 <span class="nt">Content</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">EmailContent</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;&#39;</span>
-<span class="w">  </span><span class="nt">EmailReply</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;&#39;</span>
-<span class="w">  </span><span class="nt">EmailDomain</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;&#39;</span>
-<span class="w">  </span><span class="nt">EmailOutside</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;&#39;</span>
-<span class="w">  </span><span class="nt">BlogContent</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;&#39;</span>
-<span class="w">  </span><span class="nt">BlogReply</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;&#39;</span>
-<span class="w">  </span><span class="nt">FileNames</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;&#39;</span>
-<span class="w">  </span><span class="nt">Dictionary</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;&#39;</span>
+<span class="w">  </span><span class="nt">EmailContent</span><span class="p">:</span><span class="w"> </span><span class="s">''</span>
+<span class="w">  </span><span class="nt">EmailReply</span><span class="p">:</span><span class="w"> </span><span class="s">''</span>
+<span class="w">  </span><span class="nt">EmailDomain</span><span class="p">:</span><span class="w"> </span><span class="s">''</span>
+<span class="w">  </span><span class="nt">EmailOutside</span><span class="p">:</span><span class="w"> </span><span class="s">''</span>
+<span class="w">  </span><span class="nt">BlogContent</span><span class="p">:</span><span class="w"> </span><span class="s">''</span>
+<span class="w">  </span><span class="nt">BlogReply</span><span class="p">:</span><span class="w"> </span><span class="s">''</span>
+<span class="w">  </span><span class="nt">FileNames</span><span class="p">:</span><span class="w"> </span><span class="s">''</span>
+<span class="w">  </span><span class="nt">Dictionary</span><span class="p">:</span><span class="w"> </span><span class="s">''</span>
 <span class="nt">ResourceControl</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">ManageProcesses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="nt">HealthIsEnabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
@@ -2729,20 +2729,20 @@
 <p>When configuring the browser handlers (Chrome or Firefox), an initial value is required. This could be "about:blank" if you don’t want to load a page immediately or an actual URL. Both HTTP and HTTPS are supported.</p>
 <h5 id="example-configuration-for-chrome">Example Configuration for Chrome:<a class="headerlink" href="#example-configuration-for-chrome" title="Permanent link">&para;</a></h5>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">   </span><span class="nt">&quot;HandlerType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;BrowserChrome&quot;</span><span class="p">,</span>
-<span class="w">   </span><span class="nt">&quot;Initial&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://google.com&quot;</span><span class="p">,</span>
-<span class="w">   </span><span class="nt">&quot;UtcTimeOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;00:00:00&quot;</span><span class="p">,</span>
-<span class="w">   </span><span class="nt">&quot;UtcTimeOff&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;24:00:00&quot;</span><span class="p">,</span>
-<span class="w">   </span><span class="nt">&quot;Loop&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">   </span><span class="nt">&quot;TimeLineEvents&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">   </span><span class="nt">"HandlerType"</span><span class="p">:</span><span class="w"> </span><span class="s2">"BrowserChrome"</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">"Initial"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://google.com"</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">"UtcTimeOn"</span><span class="p">:</span><span class="w"> </span><span class="s2">"00:00:00"</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">"UtcTimeOff"</span><span class="p">:</span><span class="w"> </span><span class="s2">"24:00:00"</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">"Loop"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">"TimeLineEvents"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">      </span><span class="p">{</span>
-<span class="w">         </span><span class="nt">&quot;Command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;random&quot;</span><span class="p">,</span>
-<span class="w">         </span><span class="nt">&quot;CommandArgs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">            </span><span class="s2">&quot;http://google.com&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="s2">&quot;http://facebook.com&quot;</span>
+<span class="w">         </span><span class="nt">"Command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"random"</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">"CommandArgs"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="s2">"http://google.com"</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">"http://facebook.com"</span>
 <span class="w">         </span><span class="p">],</span>
-<span class="w">         </span><span class="nt">&quot;DelayAfter&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1000</span><span class="p">,</span>
-<span class="w">         </span><span class="nt">&quot;DelayBefore&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">         </span><span class="nt">"DelayAfter"</span><span class="p">:</span><span class="w"> </span><span class="mi">1000</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">"DelayBefore"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
 <span class="w">      </span><span class="p">}</span>
 <span class="w">   </span><span class="p">]</span>
 <span class="p">}</span>
@@ -2750,17 +2750,17 @@
 <h4 id="document-creation">Document Creation<a class="headerlink" href="#document-creation" title="Permanent link">&para;</a></h4>
 <p>You can also configure GHOSTS to create documents in Word, Excel, or PowerPoint. Here’s an example for Word:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">   </span><span class="nt">&quot;HandlerType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Word&quot;</span><span class="p">,</span>
-<span class="w">   </span><span class="nt">&quot;Initial&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-<span class="w">   </span><span class="nt">&quot;UtcTimeOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;00:00:00&quot;</span><span class="p">,</span>
-<span class="w">   </span><span class="nt">&quot;UtcTimeOff&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;24:00:00&quot;</span><span class="p">,</span>
-<span class="w">   </span><span class="nt">&quot;Loop&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">   </span><span class="nt">&quot;TimeLineEvents&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">   </span><span class="nt">"HandlerType"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Word"</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">"Initial"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">"UtcTimeOn"</span><span class="p">:</span><span class="w"> </span><span class="s2">"00:00:00"</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">"UtcTimeOff"</span><span class="p">:</span><span class="w"> </span><span class="s2">"24:00:00"</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">"Loop"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">"TimeLineEvents"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">      </span><span class="p">{</span>
-<span class="w">         </span><span class="nt">&quot;Command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;create&quot;</span><span class="p">,</span>
-<span class="w">         </span><span class="nt">&quot;CommandArgs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">&quot;%homedrive%%homepath%\\Documents&quot;</span><span class="w"> </span><span class="p">],</span>
-<span class="w">         </span><span class="nt">&quot;DelayAfter&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">900000</span><span class="p">,</span>
-<span class="w">         </span><span class="nt">&quot;DelayBefore&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">         </span><span class="nt">"Command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"create"</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">"CommandArgs"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"%homedrive%%homepath%\\Documents"</span><span class="w"> </span><span class="p">],</span>
+<span class="w">         </span><span class="nt">"DelayAfter"</span><span class="p">:</span><span class="w"> </span><span class="mi">900000</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">"DelayBefore"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
 <span class="w">      </span><span class="p">}</span>
 <span class="w">   </span><span class="p">]</span>
 <span class="p">}</span>
@@ -2768,26 +2768,26 @@
 <h3 id="trackables">Trackables<a class="headerlink" href="#trackables" title="Permanent link">&para;</a></h3>
 <p>If you need to track the outcome of a specific timeline event (such as verifying that a client machine performed an action), you can use the <strong><code>TrackableId</code></strong>. Here's an example of tracking a file download:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;TimeLineHandlers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="nt">"TimeLineHandlers"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">        </span><span class="p">{</span>
-<span class="w">            </span><span class="nt">&quot;HandlerType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;BrowserChrome&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">&quot;Initial&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;about:blank&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">&quot;UtcTimeOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;00:00:00&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">&quot;UtcTimeOff&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;24:00:00&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">&quot;Loop&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">&quot;TimeLineEvents&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="nt">"HandlerType"</span><span class="p">:</span><span class="w"> </span><span class="s2">"BrowserChrome"</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">"Initial"</span><span class="p">:</span><span class="w"> </span><span class="s2">"about:blank"</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">"UtcTimeOn"</span><span class="p">:</span><span class="w"> </span><span class="s2">"00:00:00"</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">"UtcTimeOff"</span><span class="p">:</span><span class="w"> </span><span class="s2">"24:00:00"</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">"Loop"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">"TimeLineEvents"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">                </span><span class="p">{</span>
-<span class="w">                    </span><span class="nt">&quot;Command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;browse&quot;</span><span class="p">,</span>
-<span class="w">                    </span><span class="nt">&quot;CommandArgs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">&quot;https://dl.dafont.com/dl/?f=italian_breakfast&quot;</span><span class="w"> </span><span class="p">],</span>
-<span class="w">                    </span><span class="nt">&quot;DelayAfter&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
-<span class="w">                    </span><span class="nt">&quot;DelayBefore&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">                    </span><span class="nt">"Command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"browse"</span><span class="p">,</span>
+<span class="w">                    </span><span class="nt">"CommandArgs"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"https://dl.dafont.com/dl/?f=italian_breakfast"</span><span class="w"> </span><span class="p">],</span>
+<span class="w">                    </span><span class="nt">"DelayAfter"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">                    </span><span class="nt">"DelayBefore"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
 <span class="w">                </span><span class="p">},</span>
 <span class="w">                </span><span class="p">{</span>
-<span class="w">                    </span><span class="nt">&quot;Command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;download&quot;</span><span class="p">,</span>
-<span class="w">                    </span><span class="nt">&quot;CommandArgs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">&quot;//a[contains(@class, &#39;dlbutton&#39;)]&quot;</span><span class="w"> </span><span class="p">],</span>
-<span class="w">                    </span><span class="nt">&quot;TrackableId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;guid id from trackables table/&gt;&quot;</span><span class="p">,</span>
-<span class="w">                    </span><span class="nt">&quot;DelayAfter&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
-<span class="w">                    </span><span class="nt">&quot;DelayBefore&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">                    </span><span class="nt">"Command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"download"</span><span class="p">,</span>
+<span class="w">                    </span><span class="nt">"CommandArgs"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"//a[contains(@class, 'dlbutton')]"</span><span class="w"> </span><span class="p">],</span>
+<span class="w">                    </span><span class="nt">"TrackableId"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;guid id from trackables table/&gt;"</span><span class="p">,</span>
+<span class="w">                    </span><span class="nt">"DelayAfter"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">                    </span><span class="nt">"DelayBefore"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
 <span class="w">                </span><span class="p">}</span>
 <span class="w">            </span><span class="p">]</span>
 <span class="w">        </span><span class="p">}</span>
@@ -2806,10 +2806,10 @@
 <li><strong>Startup</strong>: Is the <code>ghosts.exe</code> set to execute automatically when the machine restarts?</li>
 <li><strong>NLog Configuration</strong>: Does the <code>nlog.config</code> contain these lines?</li>
 </ul>
-<div class="highlight"><pre><span></span><code><span class="nt">&lt;AutoLoadExtensions</span><span class="err">=&quot;true&quot;</span><span class="nt">/&gt;</span>
-<span class="nt">&lt;internalLogToConsole</span><span class="err">=&quot;true&quot;</span><span class="nt">/&gt;</span>
-<span class="nt">&lt;internalLogFile</span><span class="err">=&quot;logs/nlog-internal.log&quot;</span><span class="nt">/&gt;</span>
-<span class="nt">&lt;internalLogLevel</span><span class="err">=&quot;Error&quot;</span><span class="nt">/&gt;</span>
+<div class="highlight"><pre><span></span><code><span class="nt">&lt;AutoLoadExtensions</span><span class="err">="true"</span><span class="nt">/&gt;</span>
+<span class="nt">&lt;internalLogToConsole</span><span class="err">="true"</span><span class="nt">/&gt;</span>
+<span class="nt">&lt;internalLogFile</span><span class="err">="logs/nlog-internal.log"</span><span class="nt">/&gt;</span>
+<span class="nt">&lt;internalLogLevel</span><span class="err">="Error"</span><span class="nt">/&gt;</span>
 </code></pre></div>
 <ul>
 <li>Ensure the <code>internalLogFile="logs/nlog-internal.log"</code> exists.</li>
