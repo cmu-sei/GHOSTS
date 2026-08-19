@@ -120,6 +120,11 @@ namespace Ghosts.Domain.Code
             public static string Timeline
             {
                 get {
+                    var configuredPath = ClientConfigurationLoader.Config?.Timeline?.Location;
+                    if (!string.IsNullOrWhiteSpace(configuredPath) &&
+                        !configuredPath.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                        return GetPath(configuredPath);
+
                     var baseName = Clean(InstallPath + "timeline");
                     string[] extensions = {".yaml", ".yml", ".json"};
                     foreach (var ext in extensions) {
