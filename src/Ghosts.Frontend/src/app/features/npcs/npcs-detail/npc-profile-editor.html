@@ -1,0 +1,779 @@
+<form class="editor" [formGroup]="form" (ngSubmit)="onSubmit()">
+  <mat-tab-group>
+    <!-- Home Tab -->
+    <mat-tab label="Home">
+      <div class="tab-content">
+        <div class="section">
+          <h3>Name</h3>
+          <div class="edit-grid" formGroupName="name">
+            <mat-form-field appearance="fill">
+              <mat-label>Prefix</mat-label>
+              <input matInput formControlName="prefix">
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>First Name</mat-label>
+              <input matInput formControlName="first">
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>Middle Name</mat-label>
+              <input matInput formControlName="middle">
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>Last Name</mat-label>
+              <input matInput formControlName="last">
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>Suffix</mat-label>
+              <input matInput formControlName="suffix">
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>Identity & Contact</h3>
+          <div class="edit-grid">
+            <mat-form-field appearance="fill">
+              <mat-label>Biological Sex</mat-label>
+              <mat-select formControlName="biologicalSex">
+                @for (sex of biologicalSexes; track sex) {
+                <mat-option [value]="sex">{{ sex }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>Birthdate</mat-label>
+              <input matInput type="date" formControlName="birthdate">
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>Primary Email</mat-label>
+              <input matInput formControlName="email">
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>Password</mat-label>
+              <input matInput formControlName="password">
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>Home Phone</mat-label>
+              <input matInput formControlName="homePhone">
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>Cell Phone</mat-label>
+              <input matInput formControlName="cellPhone">
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>CAC / DoD ID</mat-label>
+              <input matInput formControlName="cac">
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>Physical</h3>
+          <div class="edit-grid" formGroupName="health">
+            <mat-form-field appearance="fill">
+              <mat-label>Height (in)</mat-label>
+              <input matInput type="number" formControlName="height">
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>Weight (lbs)</mat-label>
+              <input matInput type="number" formControlName="weight">
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>Blood Type</mat-label>
+              <input matInput formControlName="bloodType">
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>Preferred Meal</mat-label>
+              <input matInput formControlName="preferredMeal">
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-header">
+            <h3>Addresses</h3>
+            <button mat-stroked-button type="button" (click)="addAddress()">
+              <i class="fas fa-plus"></i> Add Address
+            </button>
+          </div>
+          <div formArrayName="address">
+            @for (item of array('address').controls; track $index) {
+            <div class="edit-block" [formGroupName]="$index">
+              <div class="edit-grid">
+                <mat-form-field appearance="fill">
+                  <mat-label>Type</mat-label>
+                  <input matInput formControlName="addressType">
+                </mat-form-field>
+                <mat-form-field appearance="fill">
+                  <mat-label>Name</mat-label>
+                  <input matInput formControlName="name">
+                </mat-form-field>
+                <mat-form-field appearance="fill">
+                  <mat-label>Address 1</mat-label>
+                  <input matInput formControlName="address1">
+                </mat-form-field>
+                <mat-form-field appearance="fill">
+                  <mat-label>Address 2</mat-label>
+                  <input matInput formControlName="address2">
+                </mat-form-field>
+                <mat-form-field appearance="fill">
+                  <mat-label>City</mat-label>
+                  <input matInput formControlName="city">
+                </mat-form-field>
+                <mat-form-field appearance="fill">
+                  <mat-label>State</mat-label>
+                  <input matInput formControlName="state">
+                </mat-form-field>
+                <mat-form-field appearance="fill">
+                  <mat-label>Postal Code</mat-label>
+                  <input matInput formControlName="postalCode">
+                </mat-form-field>
+              </div>
+              <button mat-button color="warn" type="button" (click)="removeAt('address', $index)">
+                <i class="fas fa-trash"></i> Remove
+              </button>
+            </div>
+            }
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>Default Workstation</h3>
+          <div class="edit-grid" formGroupName="workstation">
+            <mat-form-field appearance="fill">
+              <mat-label>Name</mat-label>
+              <input matInput formControlName="name">
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>IP Address</mat-label>
+              <input matInput formControlName="ipAddress">
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>Username</mat-label>
+              <input matInput formControlName="username">
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>Password</mat-label>
+              <input matInput formControlName="password">
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>Domain</mat-label>
+              <input matInput formControlName="domain">
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-header">
+            <h3>Accounts</h3>
+            <button mat-stroked-button type="button" (click)="addAccount()">
+              <i class="fas fa-plus"></i> Add Account
+            </button>
+          </div>
+          <div formArrayName="accounts">
+            @for (item of array('accounts').controls; track $index) {
+            <div class="edit-row" [formGroupName]="$index">
+              <mat-form-field appearance="fill">
+                <mat-label>URL</mat-label>
+                <input matInput formControlName="url">
+              </mat-form-field>
+              <mat-form-field appearance="fill">
+                <mat-label>Username</mat-label>
+                <input matInput formControlName="username">
+              </mat-form-field>
+              <mat-form-field appearance="fill">
+                <mat-label>Password</mat-label>
+                <input matInput formControlName="password">
+              </mat-form-field>
+              <button mat-icon-button type="button" matTooltip="Remove" (click)="removeAt('accounts', $index)">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+            }
+          </div>
+        </div>
+      </div>
+    </mat-tab>
+
+    <!-- Education & Career Tab -->
+    <mat-tab label="Education & Career">
+      <div class="tab-content">
+        <div class="section" formGroupName="education">
+          <div class="section-header">
+            <h3>Education</h3>
+            <button mat-stroked-button type="button" (click)="addDegree()">
+              <i class="fas fa-plus"></i> Add Degree
+            </button>
+          </div>
+          <div formArrayName="degrees">
+            @for (item of array('education.degrees').controls; track $index) {
+            <div class="edit-block" [formGroupName]="$index">
+              <div class="edit-grid">
+                <mat-form-field appearance="fill">
+                  <mat-label>Level</mat-label>
+                  <mat-select formControlName="level">
+                    @for (level of degreeLevels; track level) {
+                    <mat-option [value]="level">{{ level }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+                <mat-form-field appearance="fill">
+                  <mat-label>Degree Type</mat-label>
+                  <input matInput formControlName="degreeType">
+                </mat-form-field>
+                <mat-form-field appearance="fill">
+                  <mat-label>Major</mat-label>
+                  <input matInput formControlName="major">
+                </mat-form-field>
+              </div>
+              <div class="edit-grid" formGroupName="school">
+                <mat-form-field appearance="fill">
+                  <mat-label>School</mat-label>
+                  <input matInput formControlName="name">
+                </mat-form-field>
+                <mat-form-field appearance="fill">
+                  <mat-label>School Location</mat-label>
+                  <input matInput formControlName="location">
+                </mat-form-field>
+              </div>
+              <button mat-button color="warn" type="button" (click)="removeAt('education.degrees', $index)">
+                <i class="fas fa-trash"></i> Remove
+              </button>
+            </div>
+            }
+          </div>
+        </div>
+
+        <div class="section" formGroupName="employment">
+          <div class="section-header">
+            <h3>Employment</h3>
+            <button mat-stroked-button type="button" (click)="addJob()">
+              <i class="fas fa-plus"></i> Add Job
+            </button>
+          </div>
+          <p class="hint">The first record is treated as the current job - leave its end date empty.</p>
+          <div formArrayName="employmentRecords">
+            @for (item of array('employment.employmentRecords').controls; track $index) {
+            <div class="edit-block" [formGroupName]="$index">
+              <div class="edit-grid">
+                <mat-form-field appearance="fill">
+                  <mat-label>Job Title</mat-label>
+                  <input matInput formControlName="jobTitle">
+                </mat-form-field>
+                <mat-form-field appearance="fill">
+                  <mat-label>Company</mat-label>
+                  <input matInput formControlName="company">
+                </mat-form-field>
+                <mat-form-field appearance="fill">
+                  <mat-label>Department</mat-label>
+                  <input matInput formControlName="department">
+                </mat-form-field>
+                <mat-form-field appearance="fill">
+                  <mat-label>Organization</mat-label>
+                  <input matInput formControlName="organization">
+                </mat-form-field>
+                <mat-form-field appearance="fill">
+                  <mat-label>Start Date</mat-label>
+                  <input matInput type="date" formControlName="startDate">
+                </mat-form-field>
+                <mat-form-field appearance="fill">
+                  <mat-label>End Date</mat-label>
+                  <input matInput type="date" formControlName="endDate">
+                </mat-form-field>
+                <mat-form-field appearance="fill">
+                  <mat-label>Status</mat-label>
+                  <mat-select formControlName="employmentStatus">
+                    @for (status of employmentStatuses; track status) {
+                    <mat-option [value]="status">{{ status }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+                <mat-form-field appearance="fill">
+                  <mat-label>Level</mat-label>
+                  <input matInput type="number" formControlName="level">
+                </mat-form-field>
+                <mat-form-field appearance="fill">
+                  <mat-label>Salary</mat-label>
+                  <input matInput type="number" formControlName="salary">
+                </mat-form-field>
+                <mat-form-field appearance="fill">
+                  <mat-label>Work Email</mat-label>
+                  <input matInput formControlName="email">
+                </mat-form-field>
+                <mat-form-field appearance="fill">
+                  <mat-label>Email Suffix</mat-label>
+                  <input matInput formControlName="emailSuffix">
+                </mat-form-field>
+                <mat-form-field appearance="fill">
+                  <mat-label>Phone</mat-label>
+                  <input matInput formControlName="phone">
+                </mat-form-field>
+              </div>
+              <div class="edit-grid" formGroupName="address">
+                <mat-form-field appearance="fill">
+                  <mat-label>Work Address</mat-label>
+                  <input matInput formControlName="address1">
+                </mat-form-field>
+                <mat-form-field appearance="fill">
+                  <mat-label>City</mat-label>
+                  <input matInput formControlName="city">
+                </mat-form-field>
+                <mat-form-field appearance="fill">
+                  <mat-label>State</mat-label>
+                  <input matInput formControlName="state">
+                </mat-form-field>
+                <mat-form-field appearance="fill">
+                  <mat-label>Postal Code</mat-label>
+                  <input matInput formControlName="postalCode">
+                </mat-form-field>
+              </div>
+              <button mat-button color="warn" type="button"
+                      (click)="removeAt('employment.employmentRecords', $index)">
+                <i class="fas fa-trash"></i> Remove
+              </button>
+            </div>
+            }
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>Military Service</h3>
+          <div class="edit-grid">
+            <mat-form-field appearance="fill">
+              <mat-label>Unit Country</mat-label>
+              <input matInput formControlName="unitCountry">
+            </mat-form-field>
+          </div>
+          <div class="edit-grid" formGroupName="rank">
+            <mat-form-field appearance="fill">
+              <mat-label>Branch</mat-label>
+              <input matInput formControlName="branch">
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>Classification</mat-label>
+              <input matInput formControlName="classification">
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>Rank</mat-label>
+              <input matInput formControlName="name">
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>Abbreviation</mat-label>
+              <input matInput formControlName="abbr">
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>Pay Grade</mat-label>
+              <input matInput formControlName="pay">
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>Billet</mat-label>
+              <input matInput formControlName="billet">
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>MOS</mat-label>
+              <input matInput formControlName="mos">
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>MOS ID</mat-label>
+              <input matInput formControlName="mosid">
+            </mat-form-field>
+          </div>
+        </div>
+      </div>
+    </mat-tab>
+
+    <!-- Financial & Travel Tab -->
+    <mat-tab label="Financial & Travel">
+      <div class="tab-content">
+        <div class="section" formGroupName="finances">
+          <h3>Finances</h3>
+          <div class="edit-grid">
+            <mat-form-field appearance="fill">
+              <mat-label>Net Worth</mat-label>
+              <input matInput type="number" formControlName="netWorth">
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>Total Debt</mat-label>
+              <input matInput type="number" formControlName="totalDebt">
+            </mat-form-field>
+          </div>
+          <div class="section-header">
+            <h4>Credit Cards</h4>
+            <button mat-stroked-button type="button" (click)="addCreditCard()">
+              <i class="fas fa-plus"></i> Add Card
+            </button>
+          </div>
+          <div formArrayName="creditCards">
+            @for (item of array('finances.creditCards').controls; track $index) {
+            <div class="edit-row" [formGroupName]="$index">
+              <mat-form-field appearance="fill">
+                <mat-label>Number</mat-label>
+                <input matInput formControlName="number">
+              </mat-form-field>
+              <mat-form-field appearance="fill">
+                <mat-label>Type</mat-label>
+                <input matInput formControlName="type">
+              </mat-form-field>
+              <button mat-icon-button type="button" matTooltip="Remove"
+                      (click)="removeAt('finances.creditCards', $index)">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+            }
+          </div>
+        </div>
+
+        <div class="section" formGroupName="foreignTravel">
+          <div class="section-header">
+            <h3>Foreign Travel</h3>
+            <button mat-stroked-button type="button" (click)="addTrip()">
+              <i class="fas fa-plus"></i> Add Trip
+            </button>
+          </div>
+          <div formArrayName="trips">
+            @for (item of array('foreignTravel.trips').controls; track $index) {
+            <div class="edit-row" [formGroupName]="$index">
+              <mat-form-field appearance="fill">
+                <mat-label>Destination</mat-label>
+                <input matInput formControlName="destination">
+              </mat-form-field>
+              <mat-form-field appearance="fill">
+                <mat-label>Country</mat-label>
+                <input matInput formControlName="country">
+              </mat-form-field>
+              <mat-form-field appearance="fill">
+                <mat-label>Code</mat-label>
+                <input matInput formControlName="code">
+              </mat-form-field>
+              <mat-form-field appearance="fill">
+                <mat-label>Arrived</mat-label>
+                <input matInput type="date" formControlName="arriveDestination">
+              </mat-form-field>
+              <mat-form-field appearance="fill">
+                <mat-label>Departed</mat-label>
+                <input matInput type="date" formControlName="departDestination">
+              </mat-form-field>
+              <button mat-icon-button type="button" matTooltip="Remove"
+                      (click)="removeAt('foreignTravel.trips', $index)">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+            }
+          </div>
+        </div>
+
+        <div class="section" formGroupName="health">
+          <div class="section-header">
+            <h3>Medical Conditions</h3>
+            <button mat-stroked-button type="button" (click)="addMedicalCondition()">
+              <i class="fas fa-plus"></i> Add Condition
+            </button>
+          </div>
+          <div formArrayName="medicalConditions">
+            @for (condition of array('health.medicalConditions').controls; track $index; let ci = $index) {
+            <div class="edit-block" [formGroupName]="ci">
+              <div class="edit-row">
+                <mat-form-field appearance="fill">
+                  <mat-label>Condition</mat-label>
+                  <input matInput formControlName="name">
+                </mat-form-field>
+                <button mat-stroked-button type="button" (click)="addPrescription(ci)">
+                  <i class="fas fa-plus"></i> Add Prescription
+                </button>
+                <button mat-icon-button type="button" matTooltip="Remove condition"
+                        (click)="removeAt('health.medicalConditions', ci)">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+              <div formArrayName="prescriptions">
+                @for (prescription of prescriptions(ci).controls; track $index; let pi = $index) {
+                <div class="edit-row indented" [formGroupName]="pi">
+                  <mat-form-field appearance="fill">
+                    <mat-label>Prescription</mat-label>
+                    <input matInput formControlName="name">
+                  </mat-form-field>
+                  <button mat-icon-button type="button" matTooltip="Remove prescription"
+                          (click)="prescriptions(ci).removeAt(pi)">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+                }
+              </div>
+            </div>
+            }
+          </div>
+        </div>
+      </div>
+    </mat-tab>
+
+    <!-- Attributes & Psychology Tab -->
+    <mat-tab label="Attributes & Psychology">
+      <div class="tab-content">
+        <div class="section">
+          <div class="section-header">
+            <h3>Personality Attributes</h3>
+            <button mat-stroked-button type="button" (click)="addAttribute()">
+              <i class="fas fa-plus"></i> Add Attribute
+            </button>
+          </div>
+          <div formArrayName="attributes">
+            @for (item of array('attributes').controls; track $index) {
+            <div class="edit-row" [formGroupName]="$index">
+              <mat-form-field appearance="fill">
+                <mat-label>Name</mat-label>
+                <input matInput formControlName="key">
+              </mat-form-field>
+              <mat-form-field appearance="fill">
+                <mat-label>Value</mat-label>
+                <input matInput formControlName="value">
+              </mat-form-field>
+              <button mat-icon-button type="button" matTooltip="Remove"
+                      (click)="removeAt('attributes', $index)">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+            }
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-header">
+            <h3>Interests</h3>
+            <button mat-stroked-button type="button" (click)="addPreference()">
+              <i class="fas fa-plus"></i> Add Interest
+            </button>
+          </div>
+          <p class="hint">Chat personas talk about the highest scoring of these.</p>
+          <div formArrayName="preferences">
+            @for (item of array('preferences').controls; track $index) {
+            <div class="edit-row" [formGroupName]="$index">
+              <mat-form-field appearance="fill">
+                <mat-label>Topic</mat-label>
+                <input matInput formControlName="name">
+              </mat-form-field>
+              <mat-form-field appearance="fill">
+                <mat-label>Score</mat-label>
+                <input matInput type="number" formControlName="score">
+              </mat-form-field>
+              <mat-form-field appearance="fill">
+                <mat-label>Meta</mat-label>
+                <input matInput formControlName="meta">
+              </mat-form-field>
+              <button mat-icon-button type="button" matTooltip="Remove"
+                      (click)="removeAt('preferences', $index)">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+            }
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>Mental Health & Performance</h3>
+          <div class="edit-grid" formGroupName="mentalHealth">
+            @for (key of mentalHealthKeys; track key) {
+            <mat-form-field appearance="fill">
+              <mat-label>{{ labelForKey(key) }}</mat-label>
+              <input matInput type="number" [formControlName]="key">
+            </mat-form-field>
+            }
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>Motivations</h3>
+          <p class="hint">Scored from -2 (avoids) to 2 (driven by).</p>
+          <div class="edit-grid" formGroupName="motivationalProfile">
+            @for (key of motivationKeys; track key) {
+            <mat-form-field appearance="fill">
+              <mat-label>{{ labelForKey(key) }}</mat-label>
+              <input matInput type="number" step="0.01" [formControlName]="key">
+            </mat-form-field>
+            }
+          </div>
+        </div>
+
+        <div class="section" formGroupName="career">
+          <h3>Career Profile</h3>
+          <div class="edit-grid">
+            <mat-form-field appearance="fill">
+              <mat-label>Work Ethic</mat-label>
+              <input matInput type="number" formControlName="workEthic">
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>Team Value</mat-label>
+              <input matInput type="number" formControlName="teamValue">
+            </mat-form-field>
+          </div>
+
+          <div class="section-header">
+            <h4>Strengths</h4>
+            <button mat-stroked-button type="button" (click)="addTrait('career.strengths')">
+              <i class="fas fa-plus"></i> Add Strength
+            </button>
+          </div>
+          <div formArrayName="strengths">
+            @for (item of array('career.strengths').controls; track $index) {
+            <div class="edit-row" [formGroupName]="$index">
+              <mat-form-field appearance="fill">
+                <mat-label>Strength</mat-label>
+                <input matInput formControlName="name">
+              </mat-form-field>
+              <button mat-icon-button type="button" matTooltip="Remove"
+                      (click)="removeAt('career.strengths', $index)">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+            }
+          </div>
+
+          <div class="section-header">
+            <h4>Weaknesses</h4>
+            <button mat-stroked-button type="button" (click)="addTrait('career.weaknesses')">
+              <i class="fas fa-plus"></i> Add Weakness
+            </button>
+          </div>
+          <div formArrayName="weaknesses">
+            @for (item of array('career.weaknesses').controls; track $index) {
+            <div class="edit-row" [formGroupName]="$index">
+              <mat-form-field appearance="fill">
+                <mat-label>Weakness</mat-label>
+                <input matInput formControlName="name">
+              </mat-form-field>
+              <button mat-icon-button type="button" matTooltip="Remove"
+                      (click)="removeAt('career.weaknesses', $index)">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+            }
+          </div>
+        </div>
+      </div>
+    </mat-tab>
+
+    <!-- Relationships Tab -->
+    <mat-tab label="Relationships">
+      <div class="tab-content">
+        <div class="section" formGroupName="family">
+          <div class="section-header">
+            <h3>Family</h3>
+            <button mat-stroked-button type="button" (click)="addFamilyMember()">
+              <i class="fas fa-plus"></i> Add Family Member
+            </button>
+          </div>
+          <div formArrayName="members">
+            @for (item of array('family.members').controls; track $index) {
+            <div class="edit-row" [formGroupName]="$index">
+              <mat-form-field appearance="fill">
+                <mat-label>Relationship</mat-label>
+                <input matInput formControlName="relationship">
+              </mat-form-field>
+              <ng-container formGroupName="name">
+                <mat-form-field appearance="fill">
+                  <mat-label>First Name</mat-label>
+                  <input matInput formControlName="first">
+                </mat-form-field>
+                <mat-form-field appearance="fill">
+                  <mat-label>Middle Name</mat-label>
+                  <input matInput formControlName="middle">
+                </mat-form-field>
+                <mat-form-field appearance="fill">
+                  <mat-label>Last Name</mat-label>
+                  <input matInput formControlName="last">
+                </mat-form-field>
+              </ng-container>
+              <button mat-icon-button type="button" matTooltip="Remove"
+                      (click)="removeAt('family.members', $index)">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+            }
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-header">
+            <h3>Extended Relationships</h3>
+            <button mat-stroked-button type="button" (click)="addRelationship()">
+              <i class="fas fa-plus"></i> Add Relationship
+            </button>
+          </div>
+          <p class="hint">Saving also adds these to the NPC's social graph connections.</p>
+          <div formArrayName="relationships">
+            @for (item of array('relationships').controls; track $index) {
+            <div class="edit-row" [formGroupName]="$index">
+              <mat-form-field appearance="fill" class="wide">
+                <mat-label>With</mat-label>
+                <mat-select formControlName="with">
+                  @for (option of npcOptions; track option.id) {
+                  <mat-option [value]="option.id">{{ option.name }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+              <mat-form-field appearance="fill">
+                <mat-label>Type</mat-label>
+                <input matInput formControlName="type" [matTooltip]="'e.g. ' + relationshipTypes.join(', ')">
+              </mat-form-field>
+              <button mat-icon-button type="button" matTooltip="Remove"
+                      (click)="removeAt('relationships', $index)">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+            }
+          </div>
+        </div>
+      </div>
+    </mat-tab>
+
+    <!-- Insider Threat Tab -->
+    <mat-tab label="Insider Threat">
+      <div class="tab-content">
+        <div class="section" formGroupName="insiderThreat">
+          <h3>Access & Clearance</h3>
+          <div class="edit-grid" formGroupName="access">
+            <mat-form-field appearance="fill">
+              <mat-label>Security Clearance</mat-label>
+              <input matInput formControlName="securityClearance">
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>Systems Access</mat-label>
+              <input matInput formControlName="systemsAccess">
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>Physical Access</mat-label>
+              <input matInput formControlName="physicalAccess">
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>Explosives Access</mat-label>
+              <input matInput formControlName="explosivesAccess">
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>CBRN Access</mat-label>
+              <input matInput formControlName="cbrnAccess">
+            </mat-form-field>
+          </div>
+          <div class="checkboxes" formGroupName="access">
+            <mat-checkbox formControlName="isDoDSystemsPrivilegedUser">
+              DoD Systems Privileged User
+            </mat-checkbox>
+          </div>
+          <div class="checkboxes">
+            <mat-checkbox formControlName="isBackgroundCheckStatusClear">
+              Background Check Clear
+            </mat-checkbox>
+          </div>
+        </div>
+        <p class="hint">Reported insider threat events are recorded by animations and are not edited here.</p>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+
+  <div class="editor-actions">
+    <button mat-raised-button color="primary" type="submit" [disabled]="saving">
+      <i class="fas fa-save"></i> Save Profile
+    </button>
+    <button mat-button type="button" [disabled]="saving" (click)="cancelled.emit()">
+      Cancel
+    </button>
+  </div>
+</form>

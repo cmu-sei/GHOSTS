@@ -51,24 +51,33 @@ export interface Name {
 
 export interface Address {
   addressType?: string;
-  streetAddress?: string;
+  name?: string;
+  address1?: string;
+  address2?: string;
   city?: string;
   state?: string;
   postalCode?: string;
-  country?: string;
 }
 
 export interface Preference {
+  id?: number;
+  score?: number;
   name?: string;
-  value?: string;
+  meta?: string;
 }
 
 export interface MilitaryUnit {
+  country?: string;
+  address?: Address;
+  sub?: Unit[];
+}
+
+export interface Unit {
   name?: string;
   type?: string;
   nick?: string;
   hq?: string;
-  sub?: MilitaryUnit[];
+  sub?: Unit[];
 }
 
 export interface Rank {
@@ -79,6 +88,7 @@ export interface Rank {
   pay?: string;
   billet?: string;
   mos?: string;
+  mosid?: string;
 }
 
 export interface HealthProfile {
@@ -182,6 +192,7 @@ export interface Trip {
 }
 
 export interface RelationshipProfile {
+  id?: number;
   with?: string;
   type?: string;
 }
@@ -189,25 +200,43 @@ export interface RelationshipProfile {
 export interface CareerProfile {
   workEthic?: number;
   teamValue?: number;
-  strengths?: string[];
-  weaknesses?: string[];
+  strengths?: NamedTrait[];
+  weaknesses?: NamedTrait[];
+}
+
+export interface NamedTrait {
+  name?: string;
 }
 
 export interface InsiderThreatProfile {
   access?: AccessProfile;
+  criminalViolentOrAbusiveConduct?: InsiderThreatCategory;
+  financialConsiderations?: InsiderThreatCategory;
+  foreignConsiderations?: InsiderThreatCategory;
+  judgementCharacterAndPsychologicalConditions?: InsiderThreatCategory;
+  professionalLifecycleAndPerformance?: InsiderThreatCategory;
+  securityAndComplianceIncidents?: InsiderThreatCategory;
+  substanceAbuseAndAddictiveBehaviors?: InsiderThreatCategory;
+  technicalActivity?: InsiderThreatCategory;
   isBackgroundCheckStatusClear?: boolean;
-  events?: InsiderThreatEvent[];
 }
 
-export interface AccessProfile {
+export interface InsiderThreatCategory {
+  id?: number;
+  relatedEvents?: InsiderThreatEvent[];
+}
+
+export interface AccessProfile extends InsiderThreatCategory {
   explosivesAccess?: string;
   systemsAccess?: string;
   cbrnAccess?: string;
   physicalAccess?: string;
   securityClearance?: string;
+  isDoDSystemsPrivilegedUser?: boolean;
 }
 
 export interface InsiderThreatEvent {
+  id?: number;
   description?: string;
   correctiveAction?: string;
   reportedBy?: string;
@@ -215,12 +244,29 @@ export interface InsiderThreatEvent {
 }
 
 export interface Account {
+  id?: number;
   username?: string;
+  password?: string;
   url?: string;
 }
 
 export interface MotivationalProfile {
-  // Add properties as needed
+  acceptance?: number;
+  beauty?: number;
+  curiosity?: number;
+  eating?: number;
+  family?: number;
+  honor?: number;
+  idealism?: number;
+  independence?: number;
+  order?: number;
+  physicalActivity?: number;
+  power?: number;
+  saving?: number;
+  socialContact?: number;
+  status?: number;
+  tranquility?: number;
+  vengeance?: number;
 }
 
 export interface MachineProfile {

@@ -12,7 +12,7 @@ namespace Ghosts.Animator
         public static IEnumerable<FamilyProfile.Person> GetMembers()
         {
             var list = new List<FamilyProfile.Person>();
-            for (var i = 0; i < AnimatorRandom.Rand.Next(0, 5); i++)
+            for (var i = 0; i < AnimatorRandom.Rand.Next(1, 5); i++)
             {
                 list.Add(GetMember());
             }

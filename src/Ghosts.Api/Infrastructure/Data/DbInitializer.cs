@@ -500,7 +500,7 @@ namespace Ghosts.Api.Infrastructure.Data
                 return;
             }
 
-            var generated = 0;
+            var generated = new List<NpcRecord>();
             for (var i = 0; i < count; i++)
             {
                 try
@@ -509,7 +509,7 @@ namespace Ghosts.Api.Infrastructure.Data
                     npc.Id = npc.NpcProfile.Id;
                     npc.CreatedUtc = DateTime.UtcNow;
                     context.Npcs.Add(npc);
-                    generated++;
+                    generated.Add(npc);
                 }
                 catch (Exception ex)
                 {
@@ -518,10 +518,11 @@ namespace Ghosts.Api.Infrastructure.Data
                 }
             }
 
-            if (generated > 0)
+            if (generated.Count > 0)
             {
+                NpcCohortLinker.Link(context, generated);
                 await context.SaveChangesAsync();
-                logger.LogInformation("Generated {Count} random NPCs", generated);
+                logger.LogInformation("Generated {Count} random NPCs", generated.Count);
             }
         }
 

@@ -250,7 +250,7 @@ namespace Ghosts.Api.Infrastructure.Services
             var totalCreated = 0;
             foreach (var pool in pools.Where(p => p.Count > 0))
             {
-                var created = 0;
+                var created = new List<NpcRecord>();
                 for (var i = 0; i < pool.Count; i++)
                 {
                     try
@@ -265,7 +265,7 @@ namespace Ghosts.Api.Infrastructure.Services
                         npc.Team = pool.Role;
 
                         Npcs.Add(npc);
-                        created++;
+                        created.Add(npc);
                     }
                     catch (Exception ex)
                     {
@@ -273,8 +273,10 @@ namespace Ghosts.Api.Infrastructure.Services
                     }
                 }
 
-                totalCreated += created;
-                _log.Info($"[Execution {execution.Id}] Generated {created}/{pool.Count} NPCs for pool '{pool.Role}'");
+                NpcCohortLinker.Link(_context, created);
+
+                totalCreated += created.Count;
+                _log.Info($"[Execution {execution.Id}] Generated {created.Count}/{pool.Count} NPCs for pool '{pool.Role}'");
             }
 
             if (totalCreated == 0) return;

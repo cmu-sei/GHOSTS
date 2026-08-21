@@ -12,10 +12,14 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   SocialGraphSummary,
   ConnectionSummary,
+  InsiderThreatEvent,
   Npc,
+  NpcNameId,
+  NpcProfile,
   Scenario
 } from '../../../core/models';
 import { RelationshipService, NpcService, ConfigService, ScenarioService } from '../../../core/services';
+import { MOTIVATION_KEYS, NpcProfileEditor, labelForKey } from './npc-profile-editor';
 
 @Component({
   selector: 'app-npcs-detail',
@@ -27,7 +31,8 @@ import { RelationshipService, NpcService, ConfigService, ScenarioService } from 
     MatProgressSpinnerModule,
     MatTooltipModule,
     MatExpansionModule,
-    MatTabsModule
+    MatTabsModule,
+    NpcProfileEditor
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './npcs-detail.html',
@@ -50,15 +55,27 @@ export class NpcsDetail implements OnInit {
   protected readonly npcGraph = signal<SocialGraphSummary | null>(null);
   protected readonly connections = signal<ConnectionSummary[]>([]);
   protected readonly scenarios = signal<Scenario[]>([]);
+  protected readonly npcOptions = signal<NpcNameId[]>([]);
   protected readonly loading = signal(true);
   protected readonly loadingConnections = signal(false);
+  protected readonly editing = signal(false);
+  protected readonly saving = signal(false);
   protected readonly error = signal<string | null>(null);
+
+  protected readonly motivationKeys = MOTIVATION_KEYS;
+  protected readonly labelForKey = labelForKey;
 
   ngOnInit(): void {
     // Load scenarios for display
     this.scenarioService.getScenarios().subscribe({
       next: (scenarios) => this.scenarios.set(scenarios),
       error: (err) => console.error('Failed to load scenarios', err)
+    });
+
+    // names for the relationship picker, and to show relationships as names rather than ids
+    this.npcService.getNpcList().subscribe({
+      next: (list) => this.npcOptions.set(list),
+      error: (err) => console.error('Failed to load NPC list', err)
     });
 
     this.route.paramMap
@@ -125,6 +142,51 @@ export class NpcsDetail implements OnInit {
 
   protected goBack(): void {
     this.router.navigate(['/npcs']);
+  }
+
+  protected startEdit(): void {
+    this.editing.set(true);
+  }
+
+  protected cancelEdit(): void {
+    this.editing.set(false);
+  }
+
+  protected saveProfile(profile: NpcProfile): void {
+    const npc = this.npc();
+    if (!npc?.id) return;
+
+    this.saving.set(true);
+    this.npcService.updateNpcProfile(npc.id, profile).subscribe({
+      next: (updated) => {
+        this.npc.set(updated);
+        this.saving.set(false);
+        this.editing.set(false);
+        // relationship edits change the social graph, so pull the connections again
+        const graph = this.npcGraph();
+        if (graph) this.loadConnections(graph.id);
+      },
+      error: (err) => {
+        this.saving.set(false);
+        this.error.set(err.message || 'Failed to save NPC profile');
+      }
+    });
+  }
+
+  /** every insider threat category keeps its own event list, the screen shows them together */
+  protected getInsiderThreatEvents(): InsiderThreatEvent[] {
+    const insiderThreat = this.npc()?.npcProfile?.insiderThreat;
+    if (!insiderThreat) return [];
+
+    return Object.values(insiderThreat)
+      .filter((category): category is { relatedEvents?: InsiderThreatEvent[] } =>
+        !!category && typeof category === 'object')
+      .flatMap(category => category.relatedEvents ?? []);
+  }
+
+  protected getRelationshipName(npcId?: string): string {
+    if (!npcId) return 'Unknown';
+    return this.npcOptions().find(x => x.id === npcId)?.name ?? npcId;
   }
 
   protected getConnectionScoreClass(score: number): string {

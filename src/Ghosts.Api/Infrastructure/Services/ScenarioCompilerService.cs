@@ -403,7 +403,7 @@ namespace Ghosts.Api.Infrastructure.Services
                 .Where(e => e.EntityType == "Person" && e.NpcId == null)
                 .ToList();
 
-            var npcCount = 0;
+            var created = new List<NpcRecord>();
 
             foreach (var entity in personEntities)
             {
@@ -432,7 +432,7 @@ namespace Ghosts.Api.Infrastructure.Services
 
                     // Link entity to NPC
                     entity.NpcId = npcRecord.Id;
-                    npcCount++;
+                    created.Add(npcRecord);
 
                     _log.Debug($"Generated NPC {npcRecord.Id} for entity {entity.Name}");
                 }
@@ -442,10 +442,12 @@ namespace Ghosts.Api.Infrastructure.Services
                 }
             }
 
+            NpcCohortLinker.Link(_context, created);
+
             await _context.SaveChangesAsync(ct);
 
-            _log.Info($"Generated {npcCount} NPCs for scenario {scenario.Id}");
-            return npcCount;
+            _log.Info($"Generated {created.Count} NPCs for scenario {scenario.Id}");
+            return created.Count;
         }
 
         private async Task<int> GenerateTimelineEventsAsync(Scenario scenario, CancellationToken ct)
