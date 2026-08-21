@@ -59,7 +59,7 @@ namespace Ghosts.Animator
         private static IEnumerable<string> GetList(string[] options)
         {
             var list = new List<string>();
-            for (var i = 0; i < AnimatorRandom.Rand.Next(0, 12); i++)
+            for (var i = 0; i < AnimatorRandom.Rand.Next(1, 12); i++)
             {
                 list.Add(options.RandomElement());
             }

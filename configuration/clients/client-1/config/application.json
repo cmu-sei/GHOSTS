@@ -58,6 +58,7 @@
     "NagScreenResolver": false,
     "ManageBrowserProcesses": false
   },
+  "TempFiles": null,
   "Timeline": {
     "Location": "config/timeline.json"
   },

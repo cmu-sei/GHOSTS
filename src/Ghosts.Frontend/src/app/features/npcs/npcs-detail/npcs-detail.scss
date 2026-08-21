@@ -9,6 +9,11 @@
     font-size: 24px;
     font-weight: 500;
   }
+
+  .header-actions {
+    display: flex;
+    gap: 8px;
+  }
 }
 
 .loading,

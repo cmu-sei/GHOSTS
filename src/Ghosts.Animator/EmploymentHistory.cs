@@ -16,7 +16,8 @@ namespace Ghosts.Animator
         {
             var o = new EmploymentProfile();
 
-            var numberOfJobs = AnimatorRandom.Rand.Next(0, 8);
+            //at least one, because the first record is the npc's current job
+            var numberOfJobs = AnimatorRandom.Rand.Next(1, 8);
 
             for (var i = 0; i < numberOfJobs; i++)
             {

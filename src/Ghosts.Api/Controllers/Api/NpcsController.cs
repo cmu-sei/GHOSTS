@@ -100,6 +100,24 @@ public class NpcsController(
     }
 
     /// <summary>
+    /// Replaces the profile of an existing NPC. Relationships posted here are mirrored into the
+    /// NPC's social connections.
+    /// </summary>
+    /// <param name="id">The NPC ID</param>
+    /// <param name="npc">The complete replacement profile</param>
+    /// <returns>NpcRecord</returns>
+    [ProducesResponseType(typeof(ActionResult<NpcRecord>), (int)HttpStatusCode.OK)]
+    [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(ActionResult<NpcRecord>))]
+    [SwaggerOperation("NpcsUpdateById")]
+    [HttpPut("{id:guid}")]
+    public async Task<ActionResult<NpcRecord>> NpcsUpdateById(Guid id, [FromBody] NpcProfile npc)
+    {
+        var result = await service.UpdateProfile(id, npc);
+        if (result == null) return NotFound();
+        return Ok(result);
+    }
+
+    /// <summary>
     /// Returns name and Id for all NPCs in the system (caution, could return a large amount of data)
     /// </summary>
     /// <returns>IEnumerable&lt;NpcNameId&gt;</returns>

@@ -36,6 +36,7 @@ public interface INpcService
     public Task<IEnumerable<NpcRecord>> Create(GenerationConfiguration config, CancellationToken ct);
     public Task<NpcRecord> CreateOne();
     Task<NpcRecord> CreateOne(NpcProfile npc);
+    public Task<NpcRecord> UpdateProfile(Guid id, NpcProfile npc);
     public Task DeleteById(Guid id);
     public Task<IEnumerable<string>> GetKeys(string key);
     public Task SyncWithMachineUsernames();
@@ -393,6 +394,70 @@ public class NpcService(ApplicationDbContext context, IEvidenceProcessor evidenc
         return npc;
     }
 
+    public async Task<NpcRecord> UpdateProfile(Guid id, NpcProfile npcProfile)
+    {
+        var npc = await _context.Npcs
+            .Include(n => n.Connections)
+            .FirstOrDefaultAsync(x => x.Id == id);
+        if (npc == null) return null;
+
+        // the whole profile is replaced, so carry over the fields the caller does not own
+        npcProfile.Id = id;
+        if (npc.NpcProfile != null)
+        {
+            npcProfile.Created = npc.NpcProfile.Created;
+            if (string.IsNullOrEmpty(npcProfile.PhotoLink))
+                npcProfile.PhotoLink = npc.NpcProfile.PhotoLink;
+        }
+
+        var previous = (npc.NpcProfile?.Relationships ?? new List<RelationshipProfile>())
+            .Select(x => x.With).ToHashSet();
+        npc.NpcProfile = npcProfile;
+
+        // the profile is a jsonb column, so it is not always seen as changed on its own
+        _context.Entry(npc).Property(x => x.NpcProfile).IsModified = true;
+
+        await SyncConnectionsToRelationships(npc, previous);
+
+        await _context.SaveChangesAsync();
+        return npc;
+    }
+
+    /// <summary>
+    /// Relationships on the profile are mirrored in the social graph. Only edges this profile used to
+    /// claim are removed - connections made elsewhere (animations, n8n workflows) are left alone.
+    /// </summary>
+    private async Task SyncConnectionsToRelationships(NpcRecord npc, ISet<Guid> previous)
+    {
+        var current = (npc.NpcProfile.Relationships ?? new List<RelationshipProfile>())
+            .Select(x => x.With).Where(x => x != Guid.Empty).ToHashSet();
+        var existing = npc.Connections?.ToList() ?? new List<NpcSocialConnection>();
+
+        foreach (var connection in existing.Where(x =>
+                     previous.Contains(x.ConnectedNpcId) && !current.Contains(x.ConnectedNpcId)))
+        {
+            _context.NpcSocialConnections.Remove(connection);
+        }
+
+        foreach (var with in current.Where(x => existing.All(c => c.ConnectedNpcId != x)))
+        {
+            var connected = await _context.Npcs.FirstOrDefaultAsync(x => x.Id == with);
+            if (connected == null) continue;
+
+            _context.NpcSocialConnections.Add(new NpcSocialConnection
+            {
+                Id = Guid.NewGuid().ToString(),
+                NpcId = npc.Id,
+                ConnectedNpcId = with,
+                Name = connected.NpcProfile?.Name?.ToString() ?? string.Empty,
+                Distance = "1",
+                RelationshipStatus = 0,
+                CreatedUtc = DateTime.UtcNow,
+                UpdatedUtc = DateTime.UtcNow
+            });
+        }
+    }
+
     public async Task<IEnumerable<NpcRecord>> Create(GenerationConfiguration config, CancellationToken ct)
     {
         var t = new Stopwatch();
@@ -411,6 +476,7 @@ public class NpcService(ApplicationDbContext context, IEvidenceProcessor evidenc
                     team.Npcs.Number = 25;
                 }
 
+                var teamNpcs = new List<NpcRecord>();
                 var successfulCount = 0;
                 var attempts = 0;
                 const int maxAttemptsPerNpc = 5;
@@ -434,6 +500,7 @@ public class NpcService(ApplicationDbContext context, IEvidenceProcessor evidenc
 
                         _context.Npcs.Add(npc);
                         createdNpcs.Add(npc);
+                        teamNpcs.Add(npc);
                         successfulCount++;
                         attempts = 0; // Reset attempts counter after success
                         _log.Trace($"NPC {successfulCount}/{team.Npcs.Number} generated in {t.ElapsedMilliseconds - last} ms");
@@ -452,6 +519,8 @@ public class NpcService(ApplicationDbContext context, IEvidenceProcessor evidenc
                         }
                     }
                 }
+
+                NpcCohortLinker.Link(_context, teamNpcs);
             }
         }
 

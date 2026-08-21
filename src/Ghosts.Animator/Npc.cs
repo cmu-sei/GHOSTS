@@ -84,6 +84,9 @@ namespace Ghosts.Animator
 
             NpcProfile.PhotoLink = PhysicalCharacteristics.GetPhotoUrl(NpcProfile.BiologicalSex);
 
+            //10 digit DoD id number, as printed on a common access card
+            NpcProfile.CAC = $"{AnimatorRandom.Rand.Next(100000, 999999)}{AnimatorRandom.Rand.Next(1000, 9999)}";
+
             NpcProfile.Attributes = AttributesService.GetAttributes();
 
             NpcProfile.MotivationalProfile = MotivationalProfile.GetNew();
@@ -103,6 +106,10 @@ namespace Ghosts.Animator
                 }
 
                 NpcProfile.Preferences = preferences;
+            }
+            else
+            {
+                NpcProfile.Preferences = PreferenceService.GetPreferences();
             }
 
             return NpcProfile;

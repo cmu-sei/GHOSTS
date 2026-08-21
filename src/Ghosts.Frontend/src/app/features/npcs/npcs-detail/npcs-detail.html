@@ -1,9 +1,17 @@
 <div class="page-header">
   <h1>NPC Details</h1>
-  <button mat-raised-button (click)="goBack()">
-    <i class="fas fa-arrow-left"></i>
-    Back to NPCs
-  </button>
+  <div class="header-actions">
+    @if (npc() && !editing()) {
+    <button mat-raised-button color="primary" (click)="startEdit()">
+      <i class="fas fa-pen"></i>
+      Edit Profile
+    </button>
+    }
+    <button mat-raised-button (click)="goBack()">
+      <i class="fas fa-arrow-left"></i>
+      Back to NPCs
+    </button>
+  </div>
 </div>
 
 @if (loading()) {
@@ -58,6 +66,14 @@
     </mat-card-header>
 
     <mat-card-content>
+      @if (editing()) {
+      <app-npc-profile-editor
+        [profile]="npc()!.npcProfile ?? {}"
+        [npcOptions]="npcOptions()"
+        [saving]="saving()"
+        (save)="saveProfile($event)"
+        (cancelled)="cancelEdit()"></app-npc-profile-editor>
+      } @else {
       <mat-tab-group>
         <!-- Home Tab -->
         <mat-tab label="Home">
@@ -136,8 +152,11 @@
                 @if (addr.addressType) {
                 <div><strong>{{ addr.addressType }}</strong></div>
                 }
-                @if (addr.streetAddress) {
-                <div>{{ addr.streetAddress }}</div>
+                @if (addr.address1) {
+                <div>{{ addr.address1 }}</div>
+                }
+                @if (addr.address2) {
+                <div>{{ addr.address2 }}</div>
                 }
                 <div>
                   @if (addr.city) {
@@ -150,9 +169,6 @@
                   <span> {{ addr.postalCode }}</span>
                   }
                 </div>
-                @if (addr.country) {
-                <div>{{ addr.country }}</div>
-                }
               </div>
               }
             </div>
@@ -377,6 +393,31 @@
             </div>
             }
 
+            @if (npc()?.npcProfile?.preferences && npc()!.npcProfile!.preferences!.length > 0) {
+            <div class="section">
+              <h3>Interests</h3>
+              <div class="tags">
+                @for (preference of npc()!.npcProfile!.preferences; track $index) {
+                <span class="tag" matTooltip="Score">{{ preference.name }} ({{ preference.score }})</span>
+                }
+              </div>
+            </div>
+            }
+
+            @if (npc()?.npcProfile?.motivationalProfile) {
+            <div class="section">
+              <h3>Motivations</h3>
+              <div class="info-grid">
+                @for (key of motivationKeys; track key) {
+                <div class="info-item">
+                  <label>{{ labelForKey(key) }}</label>
+                  <div class="value">{{ $any(npc()!.npcProfile!.motivationalProfile)[key] | number:'1.0-2' }}</div>
+                </div>
+                }
+              </div>
+            </div>
+            }
+
             @if (npc()?.npcProfile?.mentalHealth) {
             <div class="section">
               <h3>Mental Health & Performance</h3>
@@ -460,8 +501,8 @@
               <div style="margin-top: 16px;">
                 <label>Strengths</label>
                 <div class="tags">
-                  @for (strength of npc()!.npcProfile!.career!.strengths; track strength) {
-                  <span class="tag">{{ strength }}</span>
+                  @for (strength of npc()!.npcProfile!.career!.strengths; track $index) {
+                  <span class="tag">{{ strength.name }}</span>
                   }
                 </div>
               </div>
@@ -470,8 +511,8 @@
               <div style="margin-top: 16px;">
                 <label>Weaknesses</label>
                 <div class="tags">
-                  @for (weakness of npc()!.npcProfile!.career!.weaknesses; track weakness) {
-                  <span class="tag">{{ weakness }}</span>
+                  @for (weakness of npc()!.npcProfile!.career!.weaknesses; track $index) {
+                  <span class="tag">{{ weakness.name }}</span>
                   }
                 </div>
               </div>
@@ -505,7 +546,7 @@
                 @for (rel of npc()!.npcProfile!.relationships; track $index) {
                 <div class="list-item">
                   <h4>{{ rel.type }}</h4>
-                  <p>{{ rel.with }}</p>
+                  <p class="clickable" (click)="navigateToNpc(rel.with!)">{{ getRelationshipName(rel.with) }}</p>
                 </div>
                 }
               </div>
@@ -561,11 +602,11 @@
             </div>
             }
 
-            @if (npc()?.npcProfile?.insiderThreat?.events && npc()!.npcProfile!.insiderThreat!.events!.length > 0) {
+            @if (getInsiderThreatEvents().length > 0) {
             <div class="section">
               <h3>Insider Threat Events</h3>
               <div class="list-items">
-                @for (event of npc()!.npcProfile!.insiderThreat!.events; track $index) {
+                @for (event of getInsiderThreatEvents(); track $index) {
                 <div class="list-item">
                   <h4>{{ event.description }}</h4>
                   @if (event.reportedBy || event.reported) {
@@ -591,6 +632,7 @@
           </div>
         </mat-tab>
       </mat-tab-group>
+      }
     </mat-card-content>
   </mat-card>
 
