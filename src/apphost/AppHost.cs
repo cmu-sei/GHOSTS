@@ -156,6 +156,28 @@ var grafana = builder.AddContainer("grafana", "grafana/grafana")
     .WithEnvironment("GF_SECURITY_X_FRAME_OPTIONS", "")
     .WaitFor(postgres);
 
+// Baserow: low-code database that n8n workflows read/write via its REST API. The
+// all-in-one image bundles its own Postgres/Redis, so it needs no shared-postgres wiring.
+// Published on 8090, not 80: VS Code Dev Containers can't auto-forward privileged host
+// ports, and BASEROW_PUBLIC_URL must match whatever URL the browser actually uses or
+// Baserow builds broken signup/API links against the wrong host:port.
+var baserow = builder.AddContainer("baserow", "baserow/baserow")
+    .WithContainerName("baserow")
+    .WithHttpEndpoint(port: 8090, targetPort: 80, name: "http", isProxied: false)
+    .WithEnvironment("BASEROW_PUBLIC_URL", "http://localhost:8090")
+    // n8n reaches Baserow by container name on Aspire's network (http://baserow, port 80
+    // internally). Without this, Caddy's host matcher and Django's ALLOWED_HOSTS only
+    // recognize BASEROW_PUBLIC_URL's host (localhost:8090), so /api/* requests with
+    // Host: baserow fall through to the frontend and 404 instead of hitting the backend.
+    .WithEnvironment("BASEROW_EXTRA_PUBLIC_URLS", "http://baserow")
+    .WithVolume("baserow-data", "/baserow/data")
+    .WithLifetime(ContainerLifetime.Persistent)
+    .WithUrlForEndpoint("http", url =>
+    {
+        url.DisplayText = "Baserow";
+        url.Url = "http://localhost:8090/";
+    });
+
 // GHOSTS Universal Clients (built from source, demo/testing)
 var client1 = builder.AddDockerfile("ghosts-client-1", "../../", "src/Dockerfile-client-universal")
     .WithContainerName("ghosts-client-1")
