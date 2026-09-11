@@ -13,7 +13,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Subscription, interval, Subject } from 'rxjs';
 import { debounceTime, switchMap } from 'rxjs/operators';
-import maplibregl from 'maplibre-gl';
+import * as maplibregl from 'maplibre-gl';
 import { MapboxOverlay } from '@deck.gl/mapbox';
 import { ScatterplotLayer, TextLayer } from '@deck.gl/layers';
 
