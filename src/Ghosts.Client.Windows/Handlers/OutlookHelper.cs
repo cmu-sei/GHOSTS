@@ -203,54 +203,6 @@ namespace Ghosts.Client.Handlers
             return OsName.Contains("Windows");
         }
 
-        public void AttachFileWindows(string filename)
-        {
-            IntPtr winHandle = Winuser.FindWindow(null, AttachmentWindowTitle);
-            if (winHandle == IntPtr.Zero)
-            {
-                Log.Trace($"WebOutlook:: Unable to find '{AttachmentWindowTitle}' window to upload file attachment.");
-                return;
-            }
-            Winuser.SetForegroundWindow(winHandle);
-            string s;
-            if (Driver is OpenQA.Selenium.Firefox.FirefoxDriver)
-            {
-                s = filename + "{TAB}{TAB}{ENTER}";
-            }
-            else
-            {
-                s = filename + "{ENTER}";
-            }
-
-            System.Windows.Forms.SendKeys.SendWait(s);
-            Thread.Sleep(200);
-            winHandle = Winuser.FindWindow(null, AttachmentWindowTitle);
-            if (winHandle == IntPtr.Zero)
-            {
-                return;
-            }
-            // the window is still open. Grr. try closing it.
-            Winuser.SetForegroundWindow(winHandle);
-            System.Windows.Forms.SendKeys.SendWait("%{F4}");
-        }
-
-        public void AttachFileLinux(string filename)
-        {
-            string cmd = $"xdotool search -name '{AttachmentWindowTitle}' windowfocus type '{filename}' ";
-            ExecuteBashCommand(cmd);
-            Thread.Sleep(500);
-            cmd = $"xdotool search -name '{AttachmentWindowTitle}' windowfocus key KP_Enter";
-            ExecuteBashCommand(cmd);
-            Thread.Sleep(300);
-            return;
-        }
-
-        public void AttachFile(string filename)
-        {
-            if (isWindowsOs()) AttachFileWindows(filename);
-            else AttachFileLinux(filename);
-        }
-
 
         public static OutlookHelper MakeHelper(BaseBrowserHandler callingHandler, IWebDriver callingDriver, TimelineHandler handler, Logger tlog)
         {
@@ -630,10 +582,8 @@ namespace Ghosts.Client.Handlers
                                     insertElement = Driver.FindElement(By.XPath(InsertAttachmentXpath));
                                     if (insertElement != null)
                                     {
-                                        BrowserHelperSupport.ElementClick(Driver, insertElement);
+                                        insertElement.SendKeys(FileToAttach);
                                         Thread.Sleep(500);
-                                        //filechoice window is open
-                                        AttachFile(FileToAttach);
                                     }
                                 }
                             }
@@ -642,10 +592,8 @@ namespace Ghosts.Client.Handlers
                                 var insertAttachmentElement = Driver.FindElement(By.XPath(InsertAttachmentXpath));
                                 if (insertAttachmentElement != null)
                                 {
-                                    BrowserHelperSupport.ElementClick(Driver, insertAttachmentElement);
+                                    insertAttachmentElement.SendKeys(FileToAttach);
                                     Thread.Sleep(500);
-                                    //filechoice window is open
-                                    AttachFile(FileToAttach);
                                 }
                             }
                         }

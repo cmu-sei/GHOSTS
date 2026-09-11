@@ -191,54 +191,6 @@ public abstract class OutlookHelper : BrowserHelper
         return OsName.Contains("Windows");
     }
 
-    public static void AttachFileWindows(string filename)
-    {
-        //IntPtr winHandle = Winuser.FindWindow(null, AttachmentWindowTitle);
-        //if (winHandle == IntPtr.Zero)
-        //{
-        //    Log.Trace($"WebOutlook:: Unable to find '{AttachmentWindowTitle}' window to upload file attachment.");
-        //    return;
-        //}
-        //Winuser.SetForegroundWindow(winHandle);
-        //string s;
-        //if (Driver is OpenQA.Selenium.Firefox.FirefoxDriver)
-        //{
-        //    s = filename + "{TAB}{TAB}{ENTER}";
-        //}
-        //else
-        //{
-        //    s = filename + "{ENTER}";
-        //}
-
-        //System.Windows.Forms.SendKeys.SendWait(s);
-        //Thread.Sleep(200);
-        //winHandle = Winuser.FindWindow(null, AttachmentWindowTitle);
-        //if (winHandle == IntPtr.Zero)
-        //{
-        //    return;
-        //}
-        // the window is still open. Grr. try closing it.
-        //Winuser.SetForegroundWindow(winHandle);
-        //System.Windows.Forms.SendKeys.SendWait("%{F4}");
-    }
-
-
-    public void AttachFileLinux(string filename)
-    {
-        var status = linuxHelper.AttachFileUsingThread("WebOutlook", filename, AttachmentWindowTitle, 30, 2);
-        if (!status)
-        {
-            //force a restart
-            errorCount = errorThreshold + 1;
-        }
-    }
-
-    public void AttachFile(string filename)
-    {
-        if (isWindowsOs()) AttachFileWindows(filename);
-        else AttachFileLinux(filename);
-    }
-
 
     public static OutlookHelper MakeHelper(BaseBrowserHandler callingHandler, IWebDriver callingDriver,
         TimelineHandler handler, Logger tlog, CancellationToken atoken)
@@ -674,10 +626,8 @@ public abstract class OutlookHelper : BrowserHelper
                                 insertElement = Driver.FindElement(By.XPath(InsertAttachmentXpath));
                                 if (insertElement != null)
                                 {
-                                    BrowserHelperSupport.ElementClick(Driver, insertElement);
+                                    insertElement.SendKeys(FileToAttach);
                                     if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
-                                    //filechoice window is open
-                                    AttachFile(FileToAttach);
                                 }
                             }
                         }
@@ -686,10 +636,8 @@ public abstract class OutlookHelper : BrowserHelper
                             var insertAttachmentElement = Driver.FindElement(By.XPath(InsertAttachmentXpath));
                             if (insertAttachmentElement != null)
                             {
-                                BrowserHelperSupport.ElementClick(Driver, insertAttachmentElement);
+                                insertAttachmentElement.SendKeys(FileToAttach);
                                 if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
-                                //filechoice window is open
-                                AttachFile(FileToAttach);
                             }
                         }
                     }

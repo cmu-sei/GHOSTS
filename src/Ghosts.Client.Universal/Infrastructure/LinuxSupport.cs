@@ -145,46 +145,5 @@ namespace Ghosts.Client.Universal.Infrastructure
             Log = aLog;
         }
 
-        public bool AttachFileUsingThread(string id, string filename, string windowTitle, int timeoutSeconds,
-            int retries)
-        {
-            // Use a thread in case the xdotool execution hangs
-
-            runner ??= new BashExecute(Log);
-            runner.id = id;
-            runner.windowTitle = windowTitle;
-            runner.filename = filename;
-            var count = 0;
-            while (count < retries + 1)
-            {
-                Thread t = new Thread(new ThreadStart(runner.AttachFile));
-                t.Start();
-                var totalTime = 0;
-                while (totalTime < timeoutSeconds)
-                {
-                    Thread.Sleep(10000);
-                    if (!t.IsAlive) break;
-                    totalTime += 10;
-                }
-
-                if (t.IsAlive)
-                {
-                    t.Join();
-                    Thread.Sleep(5000);
-                    retries += 1;
-                }
-                else
-                {
-                    break;
-                }
-            }
-
-            if (runner.GetNeedRestart())
-            {
-                return false;
-            }
-
-            return (count < retries + 1);
-        }
     }
 }

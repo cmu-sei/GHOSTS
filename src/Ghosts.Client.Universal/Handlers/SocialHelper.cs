@@ -165,10 +165,7 @@ public class SocialHelperV1 : SocialHelper
                         "//label[text()='Share what you are thinking here...']//following-sibling::input[@type='file']"));
                     if (targetElement != null)
                     {
-                        BrowserHelperSupport.ElementClick(Driver, targetElement);
-                        if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
-                        //filechoice window is open
-                        AttachFile(imageFile);
+                        targetElement.SendKeys(imageFile);
                         if (token.WaitHandle.WaitOne(500)) token.ThrowIfCancellationRequested();
                     }
                 }
@@ -321,29 +318,6 @@ public abstract partial class SocialHelper : BrowserHelper
 
         return true;
     }
-
-
-    public static void AttachFileWindows(string filename)
-    {
-        // not supported
-    }
-
-    public void AttachFileLinux(string filename)
-    {
-        var status = linuxHelper.AttachFileUsingThread("Social", filename, AttachmentWindowTitle, 30, 2);
-        if (!status)
-        {
-            //force a restart
-            errorCount = errorThreshold + 1;
-        }
-    }
-
-    public void AttachFile(string filename)
-    {
-        if (isWindowsOs()) AttachFileWindows(filename);
-        else AttachFileLinux(filename);
-    }
-
 
     public string GetUploadFile()
     {
